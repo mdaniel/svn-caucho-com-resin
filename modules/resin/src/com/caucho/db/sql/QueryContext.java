@@ -542,8 +542,8 @@ public class QueryContext {
 
     _isLocked = false;
 
-    if (_thread != Thread.currentThread())
-      throw new IllegalStateException();
+    if (_thread != null && _thread != Thread.currentThread())
+      throw new IllegalStateException(String.valueOf(_thread) + " current " + Thread.currentThread());
 
     int len = _blockLocks.length;
 

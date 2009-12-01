@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.mysql;
 
+import com.caucho.quercus.lib.db.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -42,7 +43,9 @@ import javax.sql.*;
 /**
  * Special Quercus Mysql connection.
  */
-public class MysqlResultImpl extends AbstractResultSet {
+public class MysqlResultImpl extends AbstractResultSet
+  implements QuercusResultSet
+{
   private static final Logger log
     = Logger.getLogger(MysqlResultImpl.class.getName());
   private static final L10N L = new L10N(MysqlResultImpl.class);
@@ -214,7 +217,7 @@ public class MysqlResultImpl extends AbstractResultSet {
     return column.getRowLength();
   }
 
-  public void getString(int columnIndex, byte []buffer, int offset, int length)
+  public void getString(int columnIndex, byte []buffer, int offset)
     throws SQLException
   {
     if (columnIndex < 1 || _columnCount < columnIndex)
@@ -226,9 +229,9 @@ public class MysqlResultImpl extends AbstractResultSet {
     int columnOffset = column.getRowOffset();
     int columnLength = column.getRowLength();
 
-    assert(length == columnLength);
+    // assert(length == columnLength);
 
-    _resultData.readAll(columnOffset, buffer, offset, length);
+    _resultData.readAll(columnOffset, buffer, offset, columnLength);
   }
 
   public String toString()

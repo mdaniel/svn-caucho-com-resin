@@ -43,151 +43,159 @@ import com.caucho.quercus.lib.db.QuercusConnection;
  /**
   * Special Quercus Mysql connection.
   */
- public class MysqlConnectionImpl implements QuercusConnection {
-   private static final Logger log
-     = Logger.getLogger(MysqlConnectionImpl.class.getName());
-   private static final L10N L = new L10N(MysqlConnectionImpl.class);
+public class MysqlConnectionImpl implements QuercusConnection {
+  private static final Logger log
+    = Logger.getLogger(MysqlConnectionImpl.class.getName());
+  private static final L10N L = new L10N(MysqlConnectionImpl.class);
 
-   private static final int CLIENT_LONG_PASSWORD = 1;
-   private static final int CLIENT_FOUND_ROWS = 2;
-   private static final int CLIENT_LONG_FLAG = 4;
-   private static final int CLIENT_CONNECT_WITH_DB = 8;
-   private static final int CLIENT_COMPRESS = 32;
-   private static final int CLIENT_PROTOCOL_41 = 512;
-   private static final int CLIENT_SSL = 2048;
-   private static final int CLIENT_SECURE_CONNECTION = 32768;
-   private static final int CLIENT_MULTI_STATEMENTS = 65536;
-   private static final int CLIENT_MULTI_RESULTS = 131072;
+  private static final int CLIENT_LONG_PASSWORD = 1;
+  private static final int CLIENT_FOUND_ROWS = 2;
+  private static final int CLIENT_LONG_FLAG = 4;
+  private static final int CLIENT_CONNECT_WITH_DB = 8;
+  private static final int CLIENT_COMPRESS = 32;
+  private static final int CLIENT_PROTOCOL_41 = 512;
+  private static final int CLIENT_SSL = 2048;
+  private static final int CLIENT_SECURE_CONNECTION = 32768;
+  private static final int CLIENT_MULTI_STATEMENTS = 65536;
+  private static final int CLIENT_MULTI_RESULTS = 131072;
 
-   private static final int UTF8_MB3 = 33;
+  private static final int UTF8_MB3 = 33;
 
-   private static final int COM_QUERY = 0x03;
+  private static final int COM_QUERY = 0x03;
 
-   private QuercusMysqlDriver _driver;
+  private QuercusMysqlDriver _driver;
 
-   private String _host;
-   private int _port;
-   private String _database;
+  private String _host;
+  private int _port;
+  private String _database;
 
-   private Socket _s;
-   private MysqlReader _in;
-   private MysqlWriter _out;
+  private Socket _s;
+  private MysqlReader _in;
+  private MysqlWriter _out;
 
-   private int _serverCapabilities;
-   private int _serverLanguage;
-   private byte []_scrambleBuf = new byte[8 + 13];
-   private byte []_errorState = new byte[5];
+  private int _serverCapabilities;
+  private int _serverLanguage;
+  private byte []_scrambleBuf = new byte[8 + 13];
+  private byte []_errorState = new byte[5];
 
-   private String _catalog;
+  private String _catalog;
 
-   MysqlConnectionImpl(QuercusMysqlDriver driver,
-                       String url,
-                       Properties info)
-     throws SQLException
-   {
-     if (driver == null)
-       throw new NullPointerException();
+  private State _state = State.IDLE;
 
-     _driver = driver;
+  enum State {
+    IDLE,
+    FIELD_HEADER,
+    FIELD_DATA,
+  };
 
-     _host = driver.getHost();
-     _port = driver.getPort();
-     _database = driver.getDatabase();
-     _catalog = _database;
+  MysqlConnectionImpl(QuercusMysqlDriver driver,
+                      String url,
+                      Properties info)
+    throws SQLException
+  {
+    if (driver == null)
+      throw new NullPointerException();
 
-     connect();
-   }
+    _driver = driver;
 
-   private void connect()
-     throws SQLException
-   {
-     Socket s = null;
+    _host = driver.getHost();
+    _port = driver.getPort();
+    _database = driver.getDatabase();
+    _catalog = _database;
 
-     try {
-       s = new Socket(_host, _port);
+    connect();
+  }
 
-       InputStream is = s.getInputStream();
-       OutputStream os = s.getOutputStream();
+  private void connect()
+    throws SQLException
+  {
+    Socket s = null;
 
-       ReadStream in = Vfs.openRead(is);
-       WriteStream out = Vfs.openWrite(os);
+    try {
+      s = new Socket(_host, _port);
 
-       MysqlReader reader = new MysqlReader(this, in);
-       MysqlWriter writer = new MysqlWriter(this, out);
+      InputStream is = s.getInputStream();
+      OutputStream os = s.getOutputStream();
 
-       readHandshakeInit(reader);
+      ReadStream in = Vfs.openRead(is);
+      WriteStream out = Vfs.openWrite(os);
 
-       String user = "ferg";
-       String password = "";
+      MysqlReader reader = new MysqlReader(this, in);
+      MysqlWriter writer = new MysqlWriter(this, out);
 
-       writeClientAuth(writer, user, password, _database);
+      readHandshakeInit(reader);
 
-       readOk(reader);
+      String user = "ferg";
+      String password = "";
 
-       _s = s;
-       _in = reader;
-       _out = writer;
+      writeClientAuth(writer, user, password, _database);
 
-       s = null;
-     } catch (IOException e) {
-       throw new SQLTransientConnectionException(L.l("{0}:{1} is not an accessible host",
-                                                     _host, _port));
-     } finally {
-       if (s != null) {
-         try {
-           s.close();
-         } catch (Exception e) {
-           log.log(Level.FINEST, e.toString(), e);
-         }
-       }
-     }
-   }
+      readOk(reader);
 
-   /**
-    * JDBC api to create a new statement.  Any SQL exception thrown here
-    * will make the connection invalid, i.e. it can't be put back into
-    * the pool.
-    *
-    * @return a new JDBC statement.
-    */
-   public Statement createStatement()
-     throws SQLException
-   {
-     return new MysqlStatementImpl(this);
-   }
+      _s = s;
+      _in = reader;
+      _out = writer;
 
-   public Statement createStatement(int resultSetType, int resultSetConcurrency)
-     throws SQLException
-   {
-     return createStatement();
-   }
+      s = null;
+    } catch (IOException e) {
+      throw new SQLTransientConnectionException(L.l("{0}:{1} is not an accessible host",
+                                                    _host, _port));
+    } finally {
+      if (s != null) {
+        try {
+          s.close();
+        } catch (Exception e) {
+          log.log(Level.FINEST, e.toString(), e);
+        }
+      }
+    }
+  }
 
-   public String getCatalog()
-     throws SQLException
-   {
-     return _catalog;
-   }
+  /**
+   * JDBC api to create a new statement.  Any SQL exception thrown here
+   * will make the connection invalid, i.e. it can't be put back into
+   * the pool.
+   *
+   * @return a new JDBC statement.
+   */
+  public Statement createStatement()
+    throws SQLException
+  {
+    return new MysqlStatementImpl(this);
+  }
 
-   /**
-    * Sets the JDBC catalog.
-    */
-   public void setCatalog(String catalog)
-     throws SQLException
-   {
-     if (_catalog == catalog || _catalog != null && _catalog.equals(catalog))
-       return;
+  public Statement createStatement(int resultSetType, int resultSetConcurrency)
+    throws SQLException
+  {
+    return createStatement();
+  }
 
-     _catalog = catalog;
+  public String getCatalog()
+    throws SQLException
+  {
+    return _catalog;
+  }
 
-     if (catalog == null)
-       return;
+  /**
+   * Sets the JDBC catalog.
+   */
+  public void setCatalog(String catalog)
+    throws SQLException
+  {
+    if (_catalog == catalog || _catalog != null && _catalog.equals(catalog))
+      return;
 
-     try {
-       writeQuery("use " + catalog);
-       readOk(_in);
-     } catch (IOException e) {
-       throw new SQLException(e);
-     }
+    _catalog = catalog;
+
+    if (catalog == null)
+      return;
+
+    try {
+      writeQuery("use " + catalog);
+      readOk(_in);
+    } catch (IOException e) {
+      throw new SQLException(e);
+    }
   }
 
   /**
@@ -327,6 +335,9 @@ import com.caucho.quercus.lib.db.QuercusConnection;
         int warningCount = in.readShort();
         String message = in.readTailString();
       }
+      else if (fieldCount == 0xfe) {
+        result.setResultSet(false);
+      }
       else {
         result.setResultSet(true);
 
@@ -410,11 +421,38 @@ import com.caucho.quercus.lib.db.QuercusConnection;
     int statusFlags = in.readShort();
 
     result.setRowAvailable(true);
+    _state = State.FIELD_DATA;
+  }
+
+  private void skipRowData()
+    throws SQLException
+  {
+    if (_state != State.FIELD_DATA)
+      return;
+
+    try {
+      MysqlReader in = _in;
+      
+      while (true) {
+        in.readPacket();
+
+        int count = in.readByte();
+
+        if (count == 0xfe || count < 0) { // EOF
+          _state = State.IDLE;
+          return;
+        }
+      }
+    } catch (IOException e) {
+      throw new SQLException(e);
+    }
   }
 
   boolean readRow(MysqlResultImpl result)
     throws SQLException
   {
+    assert(_state == State.FIELD_DATA);
+    
     try {
       MysqlReader in = _in;
 
@@ -423,6 +461,7 @@ import com.caucho.quercus.lib.db.QuercusConnection;
       int count = in.readByte();
 
       if (count == 0xfe || count < 0) { // EOF
+        _state = State.IDLE;
         return false;
       }
 
@@ -540,6 +579,9 @@ import com.caucho.quercus.lib.db.QuercusConnection;
   void writeQuery(String query)
     throws SQLException
   {
+    if (_state != State.IDLE)
+      skipRowData();
+    
     if (log.isLoggable(Level.FINER))
       log.finer(this + " query '" + query + "'");
 
@@ -618,7 +660,7 @@ import com.caucho.quercus.lib.db.QuercusConnection;
   }
 
   public CallableStatement prepareCall(String sql, int resultSetType,
-               int resultSetConcurrency)
+                                       int resultSetConcurrency)
     throws SQLException
   {
     throw new UnsupportedOperationException(getClass().getName());

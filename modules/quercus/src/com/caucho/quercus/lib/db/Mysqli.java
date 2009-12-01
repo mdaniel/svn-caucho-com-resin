@@ -66,8 +66,7 @@ public class Mysqli extends JdbcConnectionResource {
   private static final Logger log = Logger.getLogger(Mysqli.class.getName());
   private static final L10N L = new L10N(Mysqli.class);
 
-  protected static final String DRIVER
-    = "com.mysql.jdbc.Driver";
+  protected static final String DRIVER = "com.mysql.jdbc.Driver";
 
   // Because _checkedDriverVersion is static, it affects spy output
   // for various qa's.  If running them individually, there is an
@@ -204,7 +203,10 @@ public class Mysqli extends JdbcConnectionResource {
       }
 
       if (driver == null || driver.equals("")) {
-        driver = DRIVER;
+        if (env.getIniBoolean("quercus-mysql-driver"))
+          driver = "com.caucho.quercus.mysql.QuercusMysqlDriver";
+        else
+          driver = DRIVER;
       }
 
       if (url == null || url.equals("")) {

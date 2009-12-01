@@ -101,6 +101,11 @@ public class QuercusMysqlDriver implements Driver
 
   private void parseUrl(String url)
   {
+    if (url.startsWith("jdbc:mysql://")) {
+      parseUrlCompat(url);
+      return;
+    }
+    
     int p = url.indexOf(':');
     String scheme = url.substring(0, p);
 
@@ -122,6 +127,40 @@ public class QuercusMysqlDriver implements Driver
     else {
       _port = Integer.parseInt(url.substring(q + 1, r));
       _database = url.substring(r + 1);
+    }
+  }
+
+  private void parseUrlCompat(String url)
+  {
+    if (! url.startsWith("jdbc:mysql://")) {
+      throw new IllegalArgumentException(L.l("'{0}' is an illegal mysql scheme",
+                                             url));
+    }
+    
+    int p = url.indexOf("://");
+
+    int q = url.indexOf(':', p + 3);
+    int r = url.indexOf('/', q + 1);
+
+    if (q < 0)
+      throw new IllegalArgumentException(L.l("'{0}' is an illegal mysql URL",
+                                             url));
+
+    _host = url.substring(p + 3, q);
+
+    if (r < 0)
+      _port = Integer.parseInt(url.substring(q + 1));
+    else {
+      _port = Integer.parseInt(url.substring(q + 1, r));
+      _database = url.substring(r + 1);
+
+      p = _database.indexOf('?');
+      if (p == 0) {
+        _database = null;
+      }
+      else if (p > 0) {
+        _database = _database.substring(0, p);
+      }
     }
   }
 
