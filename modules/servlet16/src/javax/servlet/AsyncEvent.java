@@ -69,12 +69,22 @@ public class AsyncEvent {
     _throwable = throwable;
   }
 
-  public ServletRequest getRequest()
+  public AsyncContext getContext()
+  {
+    return _context;
+  }
+
+  public Throwable getThrowable()
+  {
+    return _throwable;
+  }
+
+  public ServletRequest getSuppliedRequest()
   {
     return _request;
   }
 
-  public ServletResponse getResponse()
+  public ServletResponse getSuppliedResponse()
   {
     return _response;
   }

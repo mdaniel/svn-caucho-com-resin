@@ -27,30 +27,24 @@
  * @author Alex Rojkov
  */
 
-package javax.servlet;
+package javax.servlet.annotation;
 
-import java.util.EnumSet;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import javax.servlet.annotation.ServletSecurity.EmptyRoleSemantic;
+import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
 
 /**
- * @Since Servlet 3.0
+ * @since Servlet 3.0
  */
-public interface FilterRegistration
-  extends Registration
-{
-  public void addMappingForServletNames(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... servletNames);
+@Documented
+@Retention(RetentionPolicy.RUNTIME)
+public @interface HttpConstraint {
 
-  public Iterable<String> getServletNameMappings();
+  EmptyRoleSemantic value() default EmptyRoleSemantic.PERMIT;
 
-  public void addMappingForUrlPatterns(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... urlPatterns);
+  TransportGuarantee transportGuarantee() default TransportGuarantee.NONE;
 
-  public Iterable<String> getUrlPatternMappings();
-
-  interface Dynamic
-    extends FilterRegistration, Registration.Dynamic
-  {
-  }
+  String[] rolesAllowed() default {};
 }

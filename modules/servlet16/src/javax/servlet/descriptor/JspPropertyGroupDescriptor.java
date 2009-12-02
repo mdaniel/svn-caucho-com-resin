@@ -20,37 +20,44 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Alex Rojkov
  */
 
-package javax.servlet;
+package javax.servlet.descriptor;
 
-import java.util.EnumSet;
+import java.util.Collection;
 
 /**
  * @Since Servlet 3.0
  */
-public interface FilterRegistration
-  extends Registration
-{
-  public void addMappingForServletNames(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... servletNames);
+public interface JspPropertyGroupDescriptor {
 
-  public Iterable<String> getServletNameMappings();
+  public Collection<String> getUrlPatterns();
 
-  public void addMappingForUrlPatterns(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... urlPatterns);
+  public String getElIgnored();
 
-  public Iterable<String> getUrlPatternMappings();
+  public String getPageEncoding();
 
-  interface Dynamic
-    extends FilterRegistration, Registration.Dynamic
-  {
-  }
+  public String getScriptingInvalid();
+
+  public String getIsXml();
+
+  public Collection<String> getIncludePreludes();
+
+  public Collection<String> getIncludeCodas();
+
+  public String getDeferredSyntaxAllowedAsLiteral();
+
+  public String getTrimDirectiveWhitespaces();
+
+  public String getDefaultContentType();
+
+  public String getBuffer();
+
+  public String getErrorOnUndeclaredNamespace();
 }
+

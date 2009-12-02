@@ -29,11 +29,9 @@
 
 package javax.servlet;
 
+import javax.servlet.descriptor.JspConfigDescriptor;
 import java.io.InputStream;
-import java.util.Enumeration;
-import java.util.EnumSet;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 /**
  * ServletContexts encapsulate applications.  Applications are generalized
@@ -116,9 +114,22 @@ public interface ServletContext {
   public int getMajorVersion();
 
   /**
+   *
+   * @return major version of the spec the app is based on
+   * @Since Servlet 3.0
+   */
+  public int getEffectiveMajorVersion();
+
+  /**
    * Returns the minor version of the servlet API.
    */
   public int getMinorVersion();
+
+  /**
+   * @return minor version of the spec the app is based on
+   * @Since Servlet 3.0
+   */
+  public int getEffectiveMinorVersion();
 
   /**
    * Returns the value of an initialization parameter from the configuration
@@ -278,7 +289,7 @@ public interface ServletContext {
    * Returns the resource as a stream.  In general, the
    * RequestDispatcher routines are more useful.
    *
-   * @param uri path relative to the application root.
+   * @param path path relative to the application root.
    * @return InputStream to the resource.
    */
   public InputStream getResourceAsStream(String path);
@@ -387,7 +398,7 @@ public interface ServletContext {
    * Returns servlet registrations
    * @return
    */
-  public Map<String, ServletRegistration> getServletRegistrations();
+  public Map<String, ? extends ServletRegistration> getServletRegistrations();
 
   /**
    * Adds a dynamic filter registration using className
@@ -438,5 +449,20 @@ public interface ServletContext {
    * Returns filter registrations
    * @return
    */
-  public Map<String, FilterRegistration> getFilterRegistrations();
+  public Map<String, ? extends FilterRegistration> getFilterRegistrations();
+
+  public void addListener(String className);
+
+  public <T extends EventListener> void addListener(T t);
+
+  public void addListener(Class <? extends EventListener> listenerClass);
+
+  public <T extends EventListener> T createListener(Class<T> listenerClass)
+    throws ServletException;
+
+  public JspConfigDescriptor getJspConfigDescriptor();
+
+  public ClassLoader getClassLoader();
+
+  public void declareRoles(String... roleNames);
 }

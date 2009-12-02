@@ -26,31 +26,48 @@
  *
  * @author Alex Rojkov
  */
-
 package javax.servlet;
 
-import java.util.EnumSet;
+import javax.servlet.annotation.MultipartConfig;
 
 /**
- * @Since Servlet 3.0
+ * @since Servlet 3.0
  */
-public interface FilterRegistration
-  extends Registration
-{
-  public void addMappingForServletNames(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... servletNames);
+public class MultipartConfigElement {
 
-  public Iterable<String> getServletNameMappings();
-
-  public void addMappingForUrlPatterns(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... urlPatterns);
-
-  public Iterable<String> getUrlPatternMappings();
-
-  interface Dynamic
-    extends FilterRegistration, Registration.Dynamic
+  public MultipartConfigElement(String location)
   {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public MultipartConfigElement(String location, long maxFileSize,
+                                long maxRequestSize, int fileSizeThreshold)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public MultipartConfigElement(MultipartConfig config)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public String getLocation()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public long getMaxFileSize()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public long getMaxRequestSize()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public int getFileSizeThreshold()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

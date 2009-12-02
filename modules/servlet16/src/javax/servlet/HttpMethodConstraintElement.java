@@ -29,28 +29,21 @@
 
 package javax.servlet;
 
-import java.util.EnumSet;
+public class HttpMethodConstraintElement extends HttpConstraintElement {
 
-/**
- * @Since Servlet 3.0
- */
-public interface FilterRegistration
-  extends Registration
-{
-  public void addMappingForServletNames(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... servletNames);
-
-  public Iterable<String> getServletNameMappings();
-
-  public void addMappingForUrlPatterns(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
-    String... urlPatterns);
-
-  public Iterable<String> getUrlPatternMappings();
-
-  interface Dynamic
-    extends FilterRegistration, Registration.Dynamic
+  public HttpMethodConstraintElement(String methodName)
   {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public HttpMethodConstraintElement(String methodName,
+                                     HttpConstraintElement constraint)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public String getMethodName()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }
