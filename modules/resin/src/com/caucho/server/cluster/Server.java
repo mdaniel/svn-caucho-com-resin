@@ -1848,7 +1848,7 @@ public class Server extends ProtocolDispatchServer
 
     if (_keepaliveSelectEnable) {
       try {
-        Class cl = Class.forName("com.caucho.server.port.JniSelectManager");
+        Class cl = Class.forName("com.caucho.server.connection.JniSelectManager");
         Method method = cl.getMethod("create", new Class[0]);
 
         initSelectManager((AbstractSelectManager) method.invoke(null, null));
