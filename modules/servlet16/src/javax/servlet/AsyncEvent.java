@@ -69,7 +69,7 @@ public class AsyncEvent {
     _throwable = throwable;
   }
 
-  public AsyncContext getContext()
+  public AsyncContext getAsyncContext()
   {
     return _context;
   }

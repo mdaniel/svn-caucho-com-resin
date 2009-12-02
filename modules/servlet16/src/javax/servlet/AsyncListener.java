@@ -47,8 +47,8 @@ public interface AsyncListener
     throws IOException;
 
   public void onError(AsyncEvent event)
-    throws Exception;
+    throws IOException;
 
   public void onStartAsync(AsyncEvent event)
-    throws Exception;
+    throws IOException;
 }
