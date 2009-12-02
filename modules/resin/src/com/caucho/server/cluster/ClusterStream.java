@@ -550,6 +550,11 @@ public class ClusterStream implements ActorStream {
 
     _requestStartTime = _requestTimeProbe.start();
   }
+  
+  public boolean isClosed()
+  {
+    return _is == null;
+  }
 
   public void close()
   {

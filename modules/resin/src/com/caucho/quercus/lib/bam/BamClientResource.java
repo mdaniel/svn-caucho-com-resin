@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib.bam;
 
-import com.caucho.bam.hmtp.HmtpClient;
+import com.caucho.hmtp.HmtpClient;
 import com.caucho.quercus.env.EnvCleanup;
 import com.caucho.util.L10N;
 

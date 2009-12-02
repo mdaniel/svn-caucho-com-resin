@@ -56,15 +56,13 @@ public class HempConnectionImpl extends SimpleActorClient
   
   private ActorStream _brokerFilter;
   // private HmtpAgentStream _agentFilter;
-  
-  private ActorStream _brokerStream;
   // private HmtpAgentStream _agentStream;
   
   private Actor _resource;
 
   HempConnectionImpl(HempBroker broker,
 		     String jid,
-		     ActorStream actorStream)
+		     ActorStream clientStream)
   {
     _broker = broker;
     _jid = jid;
@@ -72,13 +70,10 @@ public class HempConnectionImpl extends SimpleActorClient
     //_handler = new HempConnectionActorStream(this);
     //setActorStream(_handler);
 
-    _brokerStream = broker.getBrokerStream();
+    setLinkStream(broker.getBrokerStream());
     // _actorStream = _handler;
     
-    if (actorStream == null)
-      actorStream = new SimpleActorStream();
-    
-    setActorStream(actorStream);
+    setClientStream(clientStream);
     
     String uid = jid;
     int p = uid.indexOf('/');
@@ -87,12 +82,14 @@ public class HempConnectionImpl extends SimpleActorClient
 
     _resource = broker.findParentActor(uid);
 
+    /*
     if (_resource != null) {
       _brokerFilter = _resource.getBrokerFilter(_broker);
-      _brokerStream = _brokerFilter;
+      _linkStream = _brokerFilter;
       
       // _actorFilter = _resource.getActorFilter(_handler);
     }
+    */
   }
 
   /**
@@ -107,12 +104,7 @@ public class HempConnectionImpl extends SimpleActorClient
   {
     return _handler;
   }
-  
-  public ActorStream getBrokerStream()
-  {
-    return _brokerStream;
-  }
-
+ 
   @Override
   protected void finalize()
     throws Throwable

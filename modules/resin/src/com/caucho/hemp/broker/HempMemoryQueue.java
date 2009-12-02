@@ -499,7 +499,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
   public boolean isClosed()
   {
-    return _isClosed || _broker.isClosed();
+    return _isClosed || _brokerStream.isClosed();
   }
 
   @Override

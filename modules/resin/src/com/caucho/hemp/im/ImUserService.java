@@ -71,13 +71,11 @@ public class ImUserService extends SimpleActor
   /**
    * Creates an inbound filter
    */
-  @Override
-  public ActorStream getBrokerFilter(ActorStream stream)
+   public ActorStream getFilter(ActorStream stream)
   {
     return new ImBrokerFilter(stream, this);
   }
 
-  @Override
   public void onChildStart(String jid)
   {
     if (log.isLoggable(Level.FINER))
@@ -92,7 +90,6 @@ public class ImUserService extends SimpleActor
     }
   }
 
-  @Override
   public void onChildStop(String jid)
   {
     if (log.isLoggable(Level.FINER))
@@ -113,7 +110,7 @@ public class ImUserService extends SimpleActor
 
     for (String jid : jids) {
       // XXX: is the "to" correct?
-      getBrokerStream().message(jid, from, value);
+      getLinkStream().message(jid, from, value);
     }
   }
   
@@ -127,10 +124,10 @@ public class ImUserService extends SimpleActor
       DiscoInfoQuery info = new DiscoInfoQuery(getDiscoIdentity(),
 					       getDiscoFeatures());
       
-      getBrokerStream().queryResult(id, from, to, info);
+      getLinkStream().queryResult(id, from, to, info);
     }
     else if (query instanceof RosterQuery) {
-      getBrokerStream().queryResult(id, from, to, new RosterQuery(getRoster()));
+      getLinkStream().queryResult(id, from, to, new RosterQuery(getRoster()));
     }
   }
   
@@ -156,7 +153,7 @@ public class ImUserService extends SimpleActor
     String []jids = _jids;
 
     for (String jid : jids) {
-      getBrokerStream().presence(jid, from, data);
+      getLinkStream().presence(jid, from, data);
     }
   }
 
@@ -169,7 +166,7 @@ public class ImUserService extends SimpleActor
     String []jids = _jids;
 
     for (String jid : jids) {
-      getBrokerStream().presenceProbe(jid, from, data);
+      getLinkStream().presenceProbe(jid, from, data);
     }
   }
 
@@ -183,7 +180,7 @@ public class ImUserService extends SimpleActor
     String []jids = _jids;
 
     for (String jid : jids) {
-      getBrokerStream().presenceUnavailable(jid, from, data);
+      getLinkStream().presenceUnavailable(jid, from, data);
     }
   }
 
@@ -197,18 +194,18 @@ public class ImUserService extends SimpleActor
 
       if ("from".equals(subscription)
 	  || "both".equals(subscription)) {
-	getBrokerStream().presence(item.getJid(), getJid(), data);
+	getLinkStream().presence(item.getJid(), getJid(), data);
       }
       
       if ("to".equals(subscription)
 	  || "both".equals(subscription)) {
-	getBrokerStream().presenceProbe(item.getJid(), getJid(), data);
+	getLinkStream().presenceProbe(item.getJid(), getJid(), data);
       }
     }
     
     for (String jid : _jids) {
       if (! jid.equals(from)) {
-	getBrokerStream().presence(jid, from, data);
+	getLinkStream().presence(jid, from, data);
       }
     }
   }
@@ -227,7 +224,7 @@ public class ImUserService extends SimpleActor
     String []jids = _jids;
 
     if (jids.length > 0) {
-      getBrokerStream().presenceSubscribe(jids[0], from, data);
+      getLinkStream().presenceSubscribe(jids[0], from, data);
     }
     else {
       log.fine(this + " onPresenceSubscribe to=" + to);
@@ -244,7 +241,7 @@ public class ImUserService extends SimpleActor
       String []jids = _jids;
 
       if (jids.length > 0) {
-	getBrokerStream().presenceSubscribed(jids[0], from, data);
+	getLinkStream().presenceSubscribed(jids[0], from, data);
       }
     }
   }
@@ -284,7 +281,7 @@ public class ImUserService extends SimpleActor
     
     querySetResources(roster);
 
-    getBrokerStream().queryResult(id, from, to, null);
+    getLinkStream().queryResult(id, from, to, null);
 
     return true;
   }

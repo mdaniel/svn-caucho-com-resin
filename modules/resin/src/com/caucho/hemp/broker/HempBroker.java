@@ -29,43 +29,39 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.ActorManager;
-import com.caucho.bam.Broker;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessBean;
+
+import com.caucho.bam.Actor;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
-import com.caucho.bam.Actor;
-import com.caucho.bam.AbstractActor;
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.NotAuthorizedException;
-import com.caucho.config.inject.BeanStartupEvent;
-import com.caucho.config.inject.CauchoBean;
+import com.caucho.bam.Broker;
+import com.caucho.bam.BrokerListener;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.hemp.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.remote.BamService;
-import com.caucho.security.*;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
-import com.caucho.hemp.BamServiceBinding;
-
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.*;
-import java.lang.annotation.Annotation;
-import java.security.Principal;
-import java.lang.ref.*;
-import java.io.Serializable;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Extension;
-import javax.enterprise.inject.spi.ProcessBean;
+import com.caucho.util.Alarm;
+import com.caucho.util.Base64;
+import com.caucho.util.L10N;
 
 /**
  * Broker
@@ -86,29 +82,25 @@ public class HempBroker
   private HempBrokerManager _manager;
   private DomainManager _domainManager;
 
-  // actors
+  // actors and clients
   private final
     ConcurrentHashMap<String,WeakReference<ActorStream>> _actorStreamMap
     = new ConcurrentHashMap<String,WeakReference<ActorStream>>();
 
-  private final HashMap<String,Actor> _actorMap
-    = new HashMap<String,Actor>();
+  // permanent registered actors
+  private final HashMap<String,ActorStream> _actorMap
+    = new HashMap<String,ActorStream>();
 
-  private final Map<String,WeakReference<Actor>> _actorCache
-    = Collections.synchronizedMap(new HashMap<String,WeakReference<Actor>>());
-
-  private String _serverId;
+  private final Map<String,WeakReference<ActorStream>> _actorCache
+    = Collections.synchronizedMap(new HashMap<String,WeakReference<ActorStream>>());
 
   private String _domain = "localhost";
   private String _managerJid = "localhost";
-  private HempDomainService _domainService;
 
   private ArrayList<String> _aliasList = new ArrayList<String>();
 
-  private ActorManager []_actorManagerList = new ActorManager[0];
-
-  private ArrayList<ActorStartup> _pendingActors
-    = new ArrayList<ActorStartup>();
+  private BrokerListener []_actorManagerList
+    = new BrokerListener[0];
 
   private volatile boolean _isClosed;
 
@@ -121,12 +113,10 @@ public class HempBroker
                                           this));
     }
 
-    _serverId = server.getServerId();
+    server.getServerId();
 
     _manager = HempBrokerManager.getCurrent();
     _domainManager = DomainManager.getCurrent();
-
-    _domainService = new HempDomainService(this, "");
 
     if (_localBroker.getLevel() == null)
       _localBroker.set(this);
@@ -143,15 +133,13 @@ public class HempBroker
                                           this));
     }
 
-    _serverId = server.getServerId();
+    server.getServerId();
 
     _manager = HempBrokerManager.getCurrent();
     _domainManager = DomainManager.getCurrent();
 
     _domain = domain;
     _managerJid = domain;
-
-    _domainService = new HempDomainService(this, domain);
 
     if (_localBroker.getLevel() == null)
       _localBroker.set(this);
@@ -186,14 +174,6 @@ public class HempBroker
     return this;
   }
 
-  /**
-   * Returns the domain service
-   */
-  public Actor getDomainService()
-  {
-    return _domainService;
-  }
-
   //
   // configuration
   //
@@ -201,10 +181,10 @@ public class HempBroker
   /**
    * Adds a broker implementation, e.g. the IM broker.
    */
-  public void addActorManager(ActorManager actorManager)
+  public void addBrokerListener(BrokerListener actorManager)
   {
-    ActorManager []actorManagerList
-      = new ActorManager[_actorManagerList.length + 1];
+    BrokerListener []actorManagerList
+      = new BrokerListener[_actorManagerList.length + 1];
 
     System.arraycopy(_actorManagerList, 0, actorManagerList, 0,
                      _actorManagerList.length);
@@ -219,41 +199,18 @@ public class HempBroker
   /**
    * Creates a session
    */
-  public ActorClient getConnection(String uid,
-                                   String resourceId)
-  {
-    return getConnection(null, uid, resourceId);
-  }
-
-  /**
-   * Creates a session
-   */
-  public ActorClient getConnection(ActorStream actorStream,
-                                   String uid,
-                                   String resourceId)
+  public String createClient(ActorStream clientStream,
+                             String uid, 
+                             String resourceId)
   {
     String jid = generateJid(uid, resourceId);
 
-    HempConnectionImpl conn = new HempConnectionImpl(this, jid, actorStream);
-
-    actorStream = conn.getActorStream();
-
-    _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
+    _actorStreamMap.put(jid, new WeakReference<ActorStream>(clientStream));
 
     if (log.isLoggable(Level.FINE))
-      log.fine(conn + " created");
+      log.fine(clientStream + " " + jid + " created");
 
-    int p = jid.indexOf('/');
-    if (p > 0) {
-      String owner = jid.substring(0, p);
-
-      Actor resource = findParentActor(owner);
-
-      if (resource != null)
-        resource.onChildStart(jid);
-    }
-
-    return conn;
+    return jid;
   }
 
   protected String generateJid(String uid, String resource)
@@ -281,19 +238,18 @@ public class HempBroker
   /**
    * Registers a actor
    */
-  public void addActor(Actor actor)
+  public void addActor(ActorStream actor)
   {
     String jid = actor.getJid();
 
     synchronized (_actorMap) {
-      Actor oldActor = _actorMap.get(jid);
+      ActorStream oldActor = _actorMap.get(jid);
 
       if (oldActor != null)
         throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
                                             jid));
 
       _actorMap.put(jid, actor);
-      _actorCache.put(jid, new WeakReference<Actor>(actor));
     }
 
     synchronized (_actorStreamMap) {
@@ -303,8 +259,7 @@ public class HempBroker
         throw new IllegalStateException(L.l("duplicated jid='{0}' is not allowed",
                                             jid));
 
-      ActorStream actorStream = actor.getActorStream();
-      _actorStreamMap.put(jid, new WeakReference<ActorStream>(actorStream));
+      _actorStreamMap.put(jid, new WeakReference<ActorStream>(actor));
     }
 
     if (log.isLoggable(Level.FINE))
@@ -314,15 +269,13 @@ public class HempBroker
   /**
    * Removes a actor
    */
-  public void removeActor(Actor actor)
+  public void removeActor(ActorStream actor)
   {
     String jid = actor.getJid();
 
     synchronized (_actorMap) {
       _actorMap.remove(jid);
     }
-
-    _actorCache.remove(jid);
 
     synchronized (_actorStreamMap) {
       _actorStreamMap.remove(jid);
@@ -434,8 +387,8 @@ public class HempBroker
    * Presence subscribed
    */
   public void presenceSubscribed(String to,
-                                     String from,
-                                     Serializable data)
+                                 String from,
+                                 Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -453,8 +406,8 @@ public class HempBroker
    * Presence unsubscribe
    */
   public void presenceUnsubscribe(String to,
-                                      String from,
-                                      Serializable data)
+                                  String from,
+                                  Serializable data)
   {
     ActorStream stream = findActorStream(to);
 
@@ -512,8 +465,6 @@ public class HempBroker
    */
   public void message(String to, String from, Serializable value)
   {
-    Alarm.yieldIfTest();
-
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
@@ -532,8 +483,6 @@ public class HempBroker
                                Serializable value,
                                ActorError error)
   {
-    Alarm.yieldIfTest();
-
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
@@ -550,8 +499,6 @@ public class HempBroker
   public void queryGet(long id, String to, String from,
                               Serializable payload)
   {
-    Alarm.yieldIfTest();
-
     ActorStream stream = findActorStream(to);
 
     if (stream != null) {
@@ -590,8 +537,6 @@ public class HempBroker
                        String from,
                        Serializable payload)
   {
-    Alarm.yieldIfTest();
-
     ActorStream stream = findActorStream(to);
 
     if (stream == null) {
@@ -619,8 +564,6 @@ public class HempBroker
    */
   public void queryResult(long id, String to, String from, Serializable value)
   {
-    Alarm.yieldIfTest();
-
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
@@ -639,8 +582,6 @@ public class HempBroker
                          Serializable payload,
                          ActorError error)
   {
-    Alarm.yieldIfTest();
-
     ActorStream stream = findActorStream(to);
 
     if (stream != null)
@@ -682,8 +623,10 @@ public class HempBroker
       }
     }
     else {
+      /*
       if (! actor.startChild(jid))
         return null;
+        */
 
       ref = _actorStreamMap.get(jid);
 
@@ -713,6 +656,8 @@ public class HempBroker
 
   protected Actor findParentActor(String jid)
   {
+    return null;
+    /*
     if (jid == null)
       return null;
 
@@ -731,12 +676,6 @@ public class HempBroker
     if (jid.indexOf('/') < 0 && jid.indexOf('@') < 0) {
       Broker broker = _manager.findBroker(jid);
       Actor actor = null;
-
-      if (broker instanceof HempBroker) {
-        HempBroker hempBroker = (HempBroker) broker;
-
-        actor = hempBroker.getDomainService();
-      }
 
       if (actor != null) {
         ref = _actorCache.get(jid);
@@ -764,6 +703,7 @@ public class HempBroker
     }
     else
       return null;
+      */
   }
 
   protected ActorStream findDomain(String domain)
@@ -775,14 +715,6 @@ public class HempBroker
       return getBrokerStream();
 
     Broker broker = _manager.findBroker(domain);
-
-    if (broker instanceof HempBroker) {
-      HempBroker hempBroker = (HempBroker) broker;
-
-      Actor actor = hempBroker.getDomainService();
-
-      return actor.getActorStream();
-    }
 
     if (broker == this)
       return null;
@@ -797,9 +729,11 @@ public class HempBroker
 
   protected boolean startActorFromManager(String jid)
   {
-    for (ActorManager manager : _actorManagerList) {
+    for (BrokerListener manager : _actorManagerList) {
+      /*
       if (manager.startActor(jid))
         return true;
+        */
     }
 
     return false;
@@ -816,6 +750,7 @@ public class HempBroker
 
       Actor actor = findParentActor(owner);
 
+      /*
       if (actor != null) {
         try {
           actor.onChildStop(jid);
@@ -823,6 +758,7 @@ public class HempBroker
           log.log(Level.FINE, e.toString(), e);
         }
       }
+      */
     }
 
     _actorCache.remove(jid);
@@ -868,7 +804,7 @@ public class HempBroker
 
     Actor actor = (Actor) beanManager.getReference(bean);
 
-    actor.setBrokerStream(this);
+    actor.setLinkStream(this);
 
     String jid = bamService.name();
 
@@ -886,12 +822,12 @@ public class HempBroker
 
     // queue
     if (threadMax > 0) {
-      bamActor = new MemoryQueueServiceFilter(bamActor,
-                                              this,
-                                              threadMax);
+      ActorStream actorStream = bamActor.getActorStream();
+      actorStream = new HempMemoryQueue(null, this, actorStream);
+      bamActor.setActorStream(actorStream);
     }
 
-    addActor(bamActor);
+    addActor(bamActor.getActorStream());
 
     Environment.addCloseListener(new ActorClose(bamActor));
   }
@@ -1008,7 +944,7 @@ public class HempBroker
 
     public void close()
     {
-      removeActor(_actor);
+      removeActor(_actor.getActorStream());
     }
   }
 }

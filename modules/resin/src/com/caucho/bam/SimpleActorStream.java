@@ -54,20 +54,26 @@ import java.io.Serializable;
  */
 public class SimpleActorStream implements ActorStream
 {
-  private static final Logger log
-    = Logger.getLogger(SimpleActorStream.class.getName());
-
   private final Skeleton _skeleton;
 
   private String _jid;
-  private ActorStream _brokerStream;
-  private ActorClient _client;
-
-  private Broker _broker;
+  private ActorStream _linkStream;
+  private final ActorClient _linkClient;
 
   public SimpleActorStream()
   {
     _skeleton = Skeleton.getSkeleton(getClass());
+    
+    _linkClient = new SimpleActorClient();
+    _linkClient.setClientStream(this);
+  }
+
+  public SimpleActorStream(ActorClient client)
+  {
+    _skeleton = Skeleton.getSkeleton(getClass());
+    
+    _linkClient = client;
+    _linkClient.setClientStream(this);
   }
 
   /**
@@ -89,28 +95,11 @@ public class SimpleActorStream implements ActorStream
   }
 
   /**
-   * Returns the ActorClient for convenient message calls.
+   * Returns the ActorClient to the link for convenient message calls.
    */
-  public ActorClient getActorClient()
+  public ActorClient getLinkClient()
   {
-    return _client;
-  }
-
-  /**
-   * Returns the ActorClient for convenient message calls.
-   */
-  public void setActorClient(ActorClient client)
-  {
-    _client = client;
-  }
-
-  /**
-   * Returns the stream to the broker for query results or errors, or
-   * low-level messaging.
-   */
-  public ActorStream getBrokerStream()
-  {
-    return _brokerStream;
+    return _linkClient;
   }
 
   /**
@@ -119,16 +108,17 @@ public class SimpleActorStream implements ActorStream
    */
   public ActorStream getLinkStream()
   {
-    return _brokerStream;
+    return _linkStream;
   }
 
   /**
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
    */
-  public void setBrokerStream(ActorStream brokerStream)
+  public void setLinkStream(ActorStream linkStream)
   {
-    _brokerStream = brokerStream;
+    _linkStream = linkStream;
+    _linkClient.setLinkStream(linkStream);
   }
 
   //
@@ -207,7 +197,7 @@ public class SimpleActorStream implements ActorStream
                        String from,
                        Serializable payload)
   {
-    _skeleton.queryGet(this, id, to, from, payload);
+    _skeleton.queryGet(this, getLinkStream(), id, to, from, payload);
   }
 
   /**
@@ -234,7 +224,7 @@ public class SimpleActorStream implements ActorStream
                        String from,
                        Serializable payload)
   {
-    _skeleton.querySet(this, id, to, from, payload);
+    _skeleton.querySet(this, getLinkStream(), id, to, from, payload);
   }
 
   /**
@@ -257,12 +247,6 @@ public class SimpleActorStream implements ActorStream
                           String from,
                           Serializable payload)
   {
-    ActorClient client = _client;
-
-    if (client != null && client.onQueryResult(id, to, from, payload)) {
-      return;
-    }
-
     _skeleton.queryResult(this, id, to, from, payload);
   }
 
@@ -288,12 +272,6 @@ public class SimpleActorStream implements ActorStream
                          Serializable payload,
                          ActorError error)
   {
-    ActorClient client = _client;
-
-    if (client != null && client.onQueryError(id, to, from, payload, error)) {
-      return;
-    }
-
     _skeleton.queryError(this, id, to, from, payload, error);
   }
 
@@ -392,7 +370,7 @@ public class SimpleActorStream implements ActorStream
                                 String from,
                                 Serializable payload)
   {
-    _skeleton.presenceSubscribe(this, to, from, payload);
+    _skeleton.presenceSubscribe(this, getLinkStream(), to, from, payload);
   }
 
   /**
@@ -441,7 +419,7 @@ public class SimpleActorStream implements ActorStream
                                   String from,
                                   Serializable payload)
   {
-    _skeleton.presenceUnsubscribe(this, to, from, payload);
+    _skeleton.presenceUnsubscribe(this, getLinkStream(), to, from, payload);
   }
 
   /**
@@ -500,6 +478,11 @@ public class SimpleActorStream implements ActorStream
   protected Skeleton getSkeleton()
   {
     return _skeleton;
+  }
+  
+  public boolean isClosed()
+  {
+    return false;
   }
 
   /**

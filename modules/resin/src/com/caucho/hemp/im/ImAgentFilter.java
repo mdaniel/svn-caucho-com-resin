@@ -29,7 +29,7 @@
 
 package com.caucho.hemp.im;
 
-import com.caucho.bam.AbstractFilter;
+import com.caucho.bam.AbstractActorStreamFilter;
 import com.caucho.bam.ActorStream;
 import java.util.*;
 import java.util.logging.*;
@@ -38,14 +38,21 @@ import java.util.logging.*;
 /**
  * Filter on outbound requests (needed to support privacy)
  */
-public class ImAgentFilter extends AbstractFilter
+public class ImAgentFilter extends AbstractActorStreamFilter
 {
+  private ActorStream _next;
   private ImUserService _resource;
   
   public ImAgentFilter(ActorStream next, ImUserService resource)
   {
-    super(next);
+    _next = next;
 
     _resource = resource;
+  }
+
+  @Override
+  protected ActorStream getNext()
+  {
+    return _next;
   }
 }

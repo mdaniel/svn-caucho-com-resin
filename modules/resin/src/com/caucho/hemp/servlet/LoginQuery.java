@@ -29,7 +29,8 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.hmtp.AuthQuery;
+import com.caucho.hmtp.AuthQuery;
+
 import java.io.Serializable;
 
 /**

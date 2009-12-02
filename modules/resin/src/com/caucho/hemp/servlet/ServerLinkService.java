@@ -35,11 +35,11 @@ import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
 
-import com.caucho.bam.hmtp.AuthQuery;
-import com.caucho.bam.hmtp.AuthResult;
-import com.caucho.bam.hmtp.GetPublicKeyQuery;
-import com.caucho.bam.hmtp.EncryptedObject;
-import com.caucho.bam.hmtp.SelfEncryptedCredentials;
+import com.caucho.hmtp.AuthQuery;
+import com.caucho.hmtp.AuthResult;
+import com.caucho.hmtp.EncryptedObject;
+import com.caucho.hmtp.GetPublicKeyQuery;
+import com.caucho.hmtp.SelfEncryptedCredentials;
 
 import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.security.SecurityException;
@@ -74,7 +74,7 @@ public class ServerLinkService extends SimpleActor {
     
     // the agent stream serves as its own broker because there's no
     // routing involved
-    setBrokerStream(agentStream);
+    setLinkStream(agentStream);
   }
 
   //
@@ -87,7 +87,7 @@ public class ServerLinkService extends SimpleActor {
   {
     GetPublicKeyQuery result = _linkManager.getPublicKey();
 
-    getBrokerStream().queryResult(id, from, to, result);
+    getLinkStream().queryResult(id, from, to, result);
   }
 
   @QuerySet
@@ -134,7 +134,7 @@ public class ServerLinkService extends SimpleActor {
       } catch (SecurityException e) {
 	log.log(Level.FINE, e.toString(), e);
 	
-	getBrokerStream().queryError(id, from, to, query,
+	getLinkStream().queryError(id, from, to, query,
 				     new ActorError(ActorError.TYPE_AUTH,
 						    ActorError.FORBIDDEN,
 						    e.getMessage()));
@@ -142,7 +142,7 @@ public class ServerLinkService extends SimpleActor {
       }
     }
     else if (_isRequireEncryptedPassword) {
-      getBrokerStream().queryError(id, from, to, query,
+      getLinkStream().queryError(id, from, to, query,
 				   new ActorError(ActorError.TYPE_AUTH,
 						ActorError.FORBIDDEN,
 						"passwords must be encrypted"));
@@ -155,9 +155,9 @@ public class ServerLinkService extends SimpleActor {
 				ipAddress);
 
     if (jid != null)
-      getBrokerStream().queryResult(id, from, to, new AuthResult(jid));
+      getLinkStream().queryResult(id, from, to, new AuthResult(jid));
     else
-      getBrokerStream().queryError(id, from, to, query,
+      getLinkStream().queryError(id, from, to, query,
 				   new ActorError(ActorError.TYPE_AUTH,
 						ActorError.FORBIDDEN));
 

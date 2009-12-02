@@ -29,31 +29,32 @@
 
 package com.caucho.hemp.servlet;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.ActorException;
 import com.caucho.bam.Broker;
 import com.caucho.bam.NotAuthorizedException;
-import com.caucho.bam.hmtp.HmtpPacketType;
-import com.caucho.bam.hmtp.FromLinkStream;
 import com.caucho.hemp.broker.HempBroker;
-import com.caucho.hemp.*;
-import com.caucho.hessian.io.*;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.Hessian2StreamingInput;
+import com.caucho.hessian.io.HessianDebugInputStream;
+import com.caucho.hmtp.FromLinkStream;
 import com.caucho.security.Authenticator;
-import com.caucho.security.PasswordCredentials;
 import com.caucho.security.BasicPrincipal;
+import com.caucho.security.PasswordCredentials;
 import com.caucho.security.SelfEncryptedCookie;
-import com.caucho.server.connection.*;
 import com.caucho.server.cluster.Server;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.servlet.DuplexListener;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-import java.io.*;
-import java.security.*;
-import java.util.logging.*;
-import javax.servlet.*;
 
 
 /**
@@ -67,8 +68,8 @@ public class ServerFromLinkStream extends FromLinkStream
     = Logger.getLogger(ServerFromLinkStream.class.getName());
   
   private HempBroker _broker;
-  private ActorStream _toBroker;
-  private ActorClient _conn;
+  private ActorStream _brokerStream;
+  private ActorClient _client;
 
   private Authenticator _auth;
   private boolean _isAuthenticationRequired;
@@ -79,7 +80,6 @@ public class ServerFromLinkStream extends FromLinkStream
   private ActorStream _linkStream;
   private ServerLinkService _linkService;
   private ActorStream _linkServiceStream;
-  private AuthBrokerStream _authHandler;
 
   private String _jid;
 
@@ -105,7 +105,6 @@ public class ServerFromLinkStream extends FromLinkStream
     _in = new Hessian2StreamingInput(is);
 
     _linkStream = new ServerToLinkStream(getJid(), os);
-    // _authHandler = new AuthBrokerStream(getJid(), _agentStream);
     _linkService = new ServerLinkService(this, _linkStream, linkManager);
     
     _linkServiceStream = new ServerLinkFilter(_linkService.getActorStream(),
@@ -120,14 +119,10 @@ public class ServerFromLinkStream extends FromLinkStream
   @Override
   protected ActorStream getStream(String to)
   {
-    ActorStream stream;
-
     if (to == null)
       return _linkServiceStream;
-    else if (_conn != null)
-      return _toBroker;
     else
-      return _authHandler;
+      return _brokerStream;
   }
 
   @Override
@@ -204,12 +199,9 @@ public class ServerFromLinkStream extends FromLinkStream
 					   credentials));
     }
     
-    _conn = _broker.getConnection(_linkStream, uid, null);
-
-    _jid = _conn.getJid();
-    
-    _toBroker = _conn.getBrokerStream();
-
+    _brokerStream = _broker.getBrokerStream();
+    _jid = _broker.createClient(_linkStream, uid, null);
+ 
     return _jid;
   }
   
@@ -220,7 +212,7 @@ public class ServerFromLinkStream extends FromLinkStream
 		      String from,
 		      Serializable value)
   {
-    _toBroker.message(to, _jid, value);
+    _brokerStream.message(to, _jid, value);
   }
   
   /**
@@ -231,7 +223,7 @@ public class ServerFromLinkStream extends FromLinkStream
 			       Serializable value,
 			       ActorError error)
   {
-    _toBroker.messageError(to, _jid, value, error);
+    _brokerStream.messageError(to, _jid, value, error);
   }
   
   /**
@@ -245,7 +237,7 @@ public class ServerFromLinkStream extends FromLinkStream
 		       String from,
 		       Serializable payload)
   {
-    _toBroker.queryGet(id, to, _jid, payload);
+    _brokerStream.queryGet(id, to, _jid, payload);
   }
   
   /**
@@ -259,7 +251,7 @@ public class ServerFromLinkStream extends FromLinkStream
 		       String from,
 		       Serializable payload)
   {
-    _toBroker.querySet(id, to, _jid, payload);
+    _brokerStream.querySet(id, to, _jid, payload);
   }
   
   /**
@@ -272,7 +264,7 @@ public class ServerFromLinkStream extends FromLinkStream
 			      String from,
 			      Serializable value)
   {
-    _toBroker.queryResult(id, to, _jid, value);
+    _brokerStream.queryResult(id, to, _jid, value);
   }
   
   /**
@@ -286,7 +278,7 @@ public class ServerFromLinkStream extends FromLinkStream
 			     Serializable value,
 			     ActorError error)
   {
-    _toBroker.queryError(id, to, _jid, value, error);
+    _brokerStream.queryError(id, to, _jid, value, error);
   }
   
   /**
@@ -300,7 +292,7 @@ public class ServerFromLinkStream extends FromLinkStream
 			   Serializable data)
 
   {
-    _toBroker.presence(to, _jid, data);
+    _brokerStream.presence(to, _jid, data);
   }
   
   /**
@@ -313,7 +305,7 @@ public class ServerFromLinkStream extends FromLinkStream
 				      String from,
 				      Serializable data)
   {
-    _toBroker.presenceUnavailable(to, _jid, data);
+    _brokerStream.presenceUnavailable(to, _jid, data);
   }
   
   /**
@@ -323,7 +315,7 @@ public class ServerFromLinkStream extends FromLinkStream
 			      String from,
 			      Serializable data)
   {
-    _toBroker.presenceProbe(to, _jid, data);
+    _brokerStream.presenceProbe(to, _jid, data);
   }
   
   /**
@@ -333,7 +325,7 @@ public class ServerFromLinkStream extends FromLinkStream
 				    String from,
 				    Serializable data)
   {
-    _toBroker.presenceSubscribe(to, _jid, data);
+    _brokerStream.presenceSubscribe(to, _jid, data);
   }
   
   /**
@@ -343,7 +335,7 @@ public class ServerFromLinkStream extends FromLinkStream
 				     String from,
 				     Serializable data)
   {
-    _toBroker.presenceSubscribed(to, _jid, data);
+    _brokerStream.presenceSubscribed(to, _jid, data);
   }
   
   /**
@@ -353,7 +345,7 @@ public class ServerFromLinkStream extends FromLinkStream
 				      String from,
 				      Serializable data)
   {
-    _toBroker.presenceUnsubscribe(to, _jid, data);
+    _brokerStream.presenceUnsubscribe(to, _jid, data);
   }
   
   /**
@@ -363,7 +355,7 @@ public class ServerFromLinkStream extends FromLinkStream
 				       String from,
 				       Serializable data)
   {
-    _toBroker.presenceUnsubscribed(to, _jid, data);
+    _brokerStream.presenceUnsubscribed(to, _jid, data);
   }
   
   /**
@@ -374,7 +366,7 @@ public class ServerFromLinkStream extends FromLinkStream
 			      Serializable data,
 			      ActorError error)
   {
-    _toBroker.presenceError(to, _jid, data, error);
+    _brokerStream.presenceError(to, _jid, data, error);
   }
 
   public void close()
@@ -397,6 +389,6 @@ public class ServerFromLinkStream extends FromLinkStream
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _conn + "]";
+    return getClass().getSimpleName() + "[" + _client + "]";
   }
 }

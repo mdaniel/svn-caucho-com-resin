@@ -179,7 +179,7 @@ class HempConnectionAgentStream implements ActorStream
     ActorStream handler = _agentStream;
 
     if (handler == null) {
-      _conn.onQueryResult(id, to, from, value);
+      // _conn.onQueryResult(id, to, from, value);
       
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " sendQueryResult (no handler) to=" + to + " from=" + from);
@@ -201,7 +201,7 @@ class HempConnectionAgentStream implements ActorStream
     ActorStream handler = _agentStream;
 
     if (handler == null) {
-      _conn.onQueryError(id, to, from, query, error);
+      // _conn.onQueryError(id, to, from, query, error);
       
       if (log.isLoggable(Level.FINE))
 	log.fine(this + " sendQueryError (no handler) to=" + to + " from=" + from);
@@ -356,6 +356,11 @@ class HempConnectionAgentStream implements ActorStream
     }
     
     handler.presenceError(to, from, data, error);
+  }
+  
+  public boolean isClosed()
+  {
+    return false;
   }
 
   /**

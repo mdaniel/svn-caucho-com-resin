@@ -255,6 +255,11 @@ public interface ActorStream
 			    String from,
 			    Serializable payload,
 			    ActorError error);
+  
+  /**
+   * Tests if the stream is closed.
+   */
+  public boolean isClosed();
 
   /**
    * Closes the stream

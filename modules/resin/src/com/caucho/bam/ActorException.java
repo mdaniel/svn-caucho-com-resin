@@ -33,6 +33,8 @@ package com.caucho.bam;
  * General BAM exception
  */
 public class ActorException extends RuntimeException {
+  private static final long serialVersionUID = 3780153710540081318L;
+
   public ActorException()
   {
   }

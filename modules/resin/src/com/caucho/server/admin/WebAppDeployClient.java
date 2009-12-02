@@ -29,8 +29,8 @@
 package com.caucho.server.admin;
 
 import com.caucho.bam.*;
-import com.caucho.bam.hmtp.HmtpClient;
 import com.caucho.git.*;
+import com.caucho.hmtp.HmtpClient;
 import com.caucho.server.resin.*;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;

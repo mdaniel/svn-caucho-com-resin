@@ -33,6 +33,7 @@ import com.caucho.bam.ActorStream;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.Broker;
+import com.caucho.bam.SimpleActorClient;
 import com.caucho.server.connection.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -159,11 +160,8 @@ public class XmppBrokerStream
     
     _uid = uid + _broker.getJid();
     
-    _conn = _broker.getConnection(_toClient, _uid, password);
-
-    _jid = _conn.getJid();
-    
-    _toBroker = _conn.getBrokerStream();
+    _toBroker = _broker.getBrokerStream();
+    _jid = _broker.createClient(_toClient, uid, resource);
 
     return _jid;
   }
@@ -172,15 +170,9 @@ public class XmppBrokerStream
   {
     String password = null;
     
-    _conn = _broker.getConnection(_toClient, _uid, resource);
-
-    _jid = _conn.getJid();
-    
-    _toBroker = _conn.getBrokerStream();
-    
-    _reader.setJid(_jid);
-    _reader.setHandler(_toBroker);
-    
+    _toBroker = _broker.getBrokerStream();
+    _jid = _broker.createClient(_toClient, jid, resource);
+     
     return _jid;
   }
 
@@ -367,6 +359,11 @@ public class XmppBrokerStream
 			      ActorError error)
   {
     _toBroker.presenceError(to, _jid, data, error);
+  }
+  
+  public boolean isClosed()
+  {
+    return _in == null;
   }
 
   public void close()

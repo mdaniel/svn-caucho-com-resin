@@ -29,29 +29,23 @@
 
 package com.caucho.log.handler;
 
-import com.caucho.bam.ActorClient;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.*;
-import com.caucho.hemp.broker.HempBroker;
-import com.caucho.log.*;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import java.io.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.Logger;
-import java.util.logging.LogRecord;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+
+import javax.annotation.PostConstruct;
+
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.SimpleActorClient;
+import com.caucho.config.ConfigException;
+import com.caucho.hemp.broker.HempBroker;
+import com.caucho.util.L10N;
 
 /**
  * Sends formatted messages to HMTP target
  */
 public class HmtpHandler extends Handler {
-  private static final Logger log
-    = Logger.getLogger(HmtpHandler.class.getName());
   private static final L10N L = new L10N(HmtpHandler.class);
 
   private String _to;
@@ -77,11 +71,11 @@ public class HmtpHandler extends Handler {
     throws ConfigException
   {
     if (_to == null)
-      throw new ConfigException(L.l("HmppHandler needs a 'to' attribute"));
+      throw new ConfigException(L.l("BamHandler needs a 'to' attribute"));
 
     HempBroker broker = HempBroker.getCurrent();
     
-    _conn = broker.getConnection("log@localhost", null);
+    _conn = new SimpleActorClient(broker, "log@localhost", null);
   }
 
   /**

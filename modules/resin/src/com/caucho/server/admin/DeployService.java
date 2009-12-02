@@ -95,11 +95,6 @@ public class DeployService extends SimpleActor
     return _server.getAdminBroker();
   }
 
-  public ActorStream getBrokerStream()
-  {
-    return getBroker().getBrokerStream();
-  }
-
   @PostConstruct
   public void init()
   {
@@ -113,6 +108,7 @@ public class DeployService extends SimpleActor
 
     _repository = new RepositoryManager();
 
+    setLinkStream(getBroker().getBrokerStream());
     getBroker().addActor(this);
   }
 
@@ -132,7 +128,7 @@ public class DeployService extends SimpleActor
     DeployCommitListQuery resultList
       = new DeployCommitListQuery(uncommittedList);
 
-    getBrokerStream().queryResult(id, from, to, resultList);
+    getLinkStream().queryResult(id, from, to, resultList);
 
     return true;
   }
@@ -151,7 +147,7 @@ public class DeployService extends SimpleActor
     if (entry == null) {
       log.fine(this + " copyError dst='" + query.getTag() + "' src='" + query.getSourceTag() + "'");
 
-      getBrokerStream().queryError(id, from, to, query,
+      getLinkStream().queryError(id, from, to, query,
                                    new ActorError(ActorError.TYPE_CANCEL,
                                                   ActorError.ITEM_NOT_FOUND,
                                                   "unknown tag"));
@@ -164,7 +160,7 @@ public class DeployService extends SimpleActor
       = _repository.setTag(tag, entry.getRoot(), query.getUser(),
                            query.getMessage(), query.getVersion());
 
-    getBrokerStream().queryResult(id, from, to, result);
+    getLinkStream().queryResult(id, from, to, result);
   }
 
   @QuerySet
@@ -177,7 +173,7 @@ public class DeployService extends SimpleActor
                                            query.getUser(),
                                            query.getMessage());
 
-    getBrokerStream().queryResult(id, from, to, result);
+    getLinkStream().queryResult(id, from, to, result);
   }
 
   @QuerySet
@@ -195,11 +191,11 @@ public class DeployService extends SimpleActor
 
       _repository.writeRawGitFile(sha1, is);
 
-      getBrokerStream().queryResult(id, from, to, true);
+      getLinkStream().queryResult(id, from, to, true);
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
-      getBrokerStream().queryResult(id, from, to, false);
+      getLinkStream().queryResult(id, from, to, false);
     } finally {
       IoUtil.close(is);
     }
@@ -217,7 +213,7 @@ public class DeployService extends SimpleActor
       = _repository.setTag(tag, hex, query.getUser(),
                            query.getMessage(), query.getVersion());
 
-    getBrokerStream().queryResult(id, from, to, String.valueOf(result));
+    getLinkStream().queryResult(id, from, to, String.valueOf(result));
 
     return true;
   }
@@ -240,7 +236,7 @@ public class DeployService extends SimpleActor
         tags.add(new TagResult(tag, entry.getValue().getRoot()));
     }
 
-    getBrokerStream()
+    getLinkStream()
       .queryResult(id, from, to, tags.toArray(new TagResult[tags.size()]));
 
     return true;
@@ -259,7 +255,7 @@ public class DeployService extends SimpleActor
 
     log.fine(this + " deploy '" + query.getTag() + "' -> " + status);
 
-    getBrokerStream().queryResult(id, from, to, true);
+    getLinkStream().queryResult(id, from, to, true);
 
     return true;
   }
@@ -324,7 +320,7 @@ public class DeployService extends SimpleActor
 
     log.fine(this + " start '" + query.getTag() + "' -> " + status);
 
-    getBrokerStream().queryResult(id, from, to, true);
+    getLinkStream().queryResult(id, from, to, true);
 
     return true;
   }
@@ -360,7 +356,7 @@ public class DeployService extends SimpleActor
 
     log.fine(this + " stop '" + query.getTag() + "' -> " + status);
 
-    getBrokerStream().queryResult(id, from, to, true);
+    getLinkStream().queryResult(id, from, to, true);
 
     return true;
   }
@@ -396,7 +392,7 @@ public class DeployService extends SimpleActor
 
     log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
 
-    getBrokerStream().queryResult(id, from, to, true);
+    getLinkStream().queryResult(id, from, to, true);
 
     return true;
   }
@@ -444,7 +440,7 @@ public class DeployService extends SimpleActor
 
     log.fine(this + " undeploy '" + query.getTag() + "' -> " + status);
 
-    getBrokerStream().queryResult(id, from, to, true);
+    getLinkStream().queryResult(id, from, to, true);
 
     return true;
   }
@@ -497,7 +493,7 @@ public class DeployService extends SimpleActor
         if (log.isLoggable(Level.FINE))
           log.fine(this + " sendAddFileQuery '" + tag + "' is an unknown DeployController");
 
-        getBrokerStream().queryResult(id, from, to, "no-deploy: " + tag);
+        getLinkStream().queryResult(id, from, to, "no-deploy: " + tag);
 
         return true;
       }
@@ -512,13 +508,13 @@ public class DeployService extends SimpleActor
 
       _repository.expandToPath(path, hex);
 
-      getBrokerStream().queryResult(id, from, to, "ok");
+      getLinkStream().queryResult(id, from, to, "ok");
 
       return true;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 
-      getBrokerStream().queryResult(id, from, to, "fail");
+      getLinkStream().queryResult(id, from, to, "fail");
 
       return true;
     }
@@ -557,7 +553,7 @@ public class DeployService extends SimpleActor
       }
     }
 
-    getBrokerStream()
+    getLinkStream()
       .queryResult(id, from, to, apps.toArray(new WebAppQuery[apps.size()]));
 
     return true;
@@ -589,7 +585,7 @@ public class DeployService extends SimpleActor
       }
     }
 
-    getBrokerStream()
+    getLinkStream()
       .queryResult(id, from, to, tags.toArray(new TagQuery[tags.size()]));
 
     return true;
@@ -616,7 +612,7 @@ public class DeployService extends SimpleActor
       hosts.add(q);
     }
 
-    getBrokerStream()
+    getLinkStream()
       .queryResult(id, from, to, hosts.toArray(new HostQuery[hosts.size()]));
 
     return true;
@@ -638,7 +634,7 @@ public class DeployService extends SimpleActor
 
     StatusQuery result = new StatusQuery(tag, state, errorMessage);
 
-    getBrokerStream().queryResult(id, from, to, result);
+    getLinkStream().queryResult(id, from, to, result);
 
     return true;
   }

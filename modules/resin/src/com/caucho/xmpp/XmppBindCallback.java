@@ -29,19 +29,11 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.*;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import com.caucho.xmpp.im.XmppRosterQueryMarshal;
+import java.io.Serializable;
+
+import com.caucho.bam.AbstractActorStream;
+import com.caucho.bam.ActorStream;
 import com.caucho.xmpp.im.ImBindQuery;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
 
 /**
  * Protocol handler from the TCP/XMPP stream forwarding to the broker
@@ -60,7 +52,8 @@ public class XmppBindCallback extends AbstractActorStream
     throw new UnsupportedOperationException();
   }
 
-  public ActorStream getBrokerStream()
+  @Override
+  public ActorStream getLinkStream()
   {
     return _xmppBroker;
   }

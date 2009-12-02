@@ -28,18 +28,23 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.bam.*;
-import com.caucho.bam.hmtp.HmtpClient;
-import com.caucho.git.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-import com.caucho.vfs.*;
-
-import java.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.Broker;
+import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.bam.ServiceUnavailableException;
+import com.caucho.git.GitCommitJar;
+import com.caucho.git.GitCommitTree;
+import com.caucho.hmtp.HmtpClient;
+import com.caucho.server.cluster.Server;
+import com.caucho.util.L10N;
+import com.caucho.vfs.InputStreamSource;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.StreamSource;
 
 /**
  * Deploy Client API
@@ -47,39 +52,34 @@ import java.util.logging.Logger;
 public class DeployClient
 {
   private static final L10N L = new L10N(DeployClient.class);
-  private static final Logger log 
-    = Logger.getLogger(DeployClient.class.getName());
-
   public static final String USER_ATTRIBUTE = "user";
   public static final String MESSAGE_ATTRIBUTE = "message";
   public static final String VERSION_ATTRIBUTE = "version";
 
   private Broker _broker;
-  private ActorClient _conn;
+  private ActorClient _bamClient;
   private String _deployJid;
   
   public DeployClient()
   {
-    Resin resin = Resin.getCurrent();
+    Server server = Server.getCurrent();
 
-    if (resin == null)
+    if (server == null)
       throw new IllegalStateException(L.l("DeployClient was not called in a Resin context. For external clients, use the DeployClient constructor with host,port arguments."));
     
-    _broker = resin.getManagement().getAdminBroker();
-    _conn = _broker.getConnection("admin", null);
+    _bamClient = server.createAdminClient(getClass().getSimpleName());
 
     _deployJid = "deploy@resin.caucho";
   }
 
   public DeployClient(String serverId)
   {
-    Resin resin = Resin.getCurrent();
+    Server server = Server.getCurrent();
 
-    if (resin == null)
+    if (server == null)
       throw new IllegalStateException(L.l("DeployClient was not called in a Resin context. For external clients, use the DeployClient constructor with host,port arguments."));
-
-    _broker = resin.getManagement().getAdminBroker();
-    _conn = _broker.getConnection("admin", null);
+    
+    _bamClient = server.createAdminClient(getClass().getSimpleName());
 
     _deployJid = "deploy@" + serverId + ".resin.caucho";
   }
@@ -95,7 +95,7 @@ public class DeployClient
 
       client.connect(userName, password);
 
-      _conn = client;
+      _bamClient = client;
     
       _deployJid = "deploy@resin.caucho";
     } catch (RemoteConnectionFailedException e) {
@@ -272,7 +272,7 @@ public class DeployClient
     HashMap<String,String> attributeCopy;
 
     if (attributes != null)
-      attributeCopy = (HashMap<String,String>) attributes.clone();
+      attributeCopy = new HashMap<String,String>(attributes);
     else
       attributeCopy = new HashMap<String,String>();
 
@@ -408,7 +408,7 @@ public class DeployClient
   protected Serializable queryGet(Serializable query)
   {
     try {
-      return (Serializable) _conn.queryGet(_deployJid, query);
+      return (Serializable) _bamClient.queryGet(_deployJid, query);
     } catch (ServiceUnavailableException e) {
       throw new ServiceUnavailableException("Deploy service is not available, possibly because the resin.xml is missing a <resin:DeployService> tag\n  " + e.getMessage(),
 					    e);
@@ -417,7 +417,7 @@ public class DeployClient
 
   protected Serializable querySet(Serializable query)
   {
-    return (Serializable) _conn.querySet(_deployJid, query);
+    return (Serializable) _bamClient.querySet(_deployJid, query);
   }
 
   @Override
@@ -426,7 +426,7 @@ public class DeployClient
     if (_broker != null)
       return getClass().getSimpleName() + "[" + _deployJid + "]";
     else
-      return getClass().getSimpleName() + "[" + _conn + "]";
+      return getClass().getSimpleName() + "[" + _bamClient + "]";
   }
 }
 

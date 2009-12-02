@@ -30,10 +30,10 @@
 package com.caucho.hemp.servlet;
 
 import com.caucho.bam.QuerySet;
-import com.caucho.bam.hmtp.AuthQuery;
-import com.caucho.bam.hmtp.AuthResult;
-import com.caucho.bam.hmtp.GetPublicKeyQuery;
 import com.caucho.hessian.io.*;
+import com.caucho.hmtp.AuthQuery;
+import com.caucho.hmtp.AuthResult;
+import com.caucho.hmtp.GetPublicKeyQuery;
 import com.caucho.security.Authenticator;
 import com.caucho.util.Hex;
 

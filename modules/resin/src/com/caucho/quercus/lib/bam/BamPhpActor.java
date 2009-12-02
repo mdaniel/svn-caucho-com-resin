@@ -131,7 +131,7 @@ public class BamPhpActor extends SimpleActor {
       throw ConfigException.create(e);
     }
   }
-
+/*
   @Override
   public boolean startChild(String jid)
   {
@@ -140,7 +140,7 @@ public class BamPhpActor extends SimpleActor {
 
     return hasChild(jid);
   }
-
+*/
   boolean hasChild(String jid)
   {
     synchronized(_children) {

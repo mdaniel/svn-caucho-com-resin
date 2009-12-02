@@ -63,7 +63,7 @@ public class HmuxBamStream extends AbstractActorStream {
   }
   
   @Override
-  public ActorStream getBrokerStream()
+  public ActorStream getLinkStream()
   {
     throw new UnsupportedOperationException();
   }
@@ -144,6 +144,11 @@ public class HmuxBamStream extends AbstractActorStream {
     } catch (IOException e) {
       throw new ActorException(e);
     }
+  }
+  
+  public boolean isClosed()
+  {
+    return _request == null;
   }
 
   public void close()

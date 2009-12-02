@@ -30,11 +30,11 @@
 package com.caucho.bam;
 
 import java.io.Serializable;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.*;
-import java.util.concurrent.locks.*;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.concurrent.locks.LockSupport;
 
-import com.caucho.util.*;
+import com.caucho.util.Alarm;
 
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
@@ -44,16 +44,26 @@ public class SimpleActorClient implements ActorClient {
   private String _jid;
 
   private ActorStream _actorStream;
-  private ActorStream _brokerStream;
+  private ActorStream _linkStream;
+  private ActorStream _clientStream;
 
-  private final QueryMap _queryMap = new QueryMap();
-
-  private final AtomicLong _qId = new AtomicLong();
+  private final QueryManager _queryManager = new QueryManager();
 
   private long _timeout = 10000L;
 
   protected SimpleActorClient()
   {
+    _actorStream = new QueryFilterStream();
+  }
+  
+  public SimpleActorClient(Broker broker, 
+                           String uid, 
+                           String resource)
+  {
+    this();
+    
+    _linkStream = broker.getBrokerStream();
+    _jid = broker.createClient(_actorStream, uid, resource);
   }
 
   /**
@@ -71,12 +81,24 @@ public class SimpleActorClient implements ActorClient {
   /**
    * Registers a callback {@link com.caucho.bam.ActorStream} with the client
    */
+  public void setClientStream(ActorStream clientStream)
+  {
+    _clientStream = clientStream;
+  }
+
+  /**
+   * Returns the registered callback {@link com.caucho.bam.ActorStream}.
+   */
+  public ActorStream getClientStream()
+  {
+    return _clientStream;
+  }
+
+  /**
+   * Sets the stream to the client
+   */
   public void setActorStream(ActorStream actorStream)
   {
-    if (actorStream instanceof SimpleActorStream) {
-      ((SimpleActorStream) actorStream).setActorClient(this);
-    }
-
     _actorStream = actorStream;
   }
 
@@ -89,19 +111,19 @@ public class SimpleActorClient implements ActorClient {
   }
 
   /**
-   * Returns the underlying, low-level stream to the broker
+   * The underlying, low-level stream to the link
    */
-  public ActorStream getBrokerStream()
+  public ActorStream getLinkStream()
   {
-    return _brokerStream;
+    return _linkStream;
   }
 
-  public void setBrokerStream(ActorStream brokerStream)
+  /**
+   * The underlying, low-level stream to the link
+   */
+  public void setLinkStream(ActorStream linkStream)
   {
-    if (_actorStream instanceof SimpleActorStream)
-      ((SimpleActorStream) _actorStream).setBrokerStream(brokerStream);
-
-    _brokerStream = brokerStream;
+    _linkStream = linkStream;
   }
 
   //
@@ -117,12 +139,12 @@ public class SimpleActorClient implements ActorClient {
    */
   public void message(String to, Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send a message because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send a message because the link is closed.");
 
-    stream.message(to, getJid(), payload);
+    linkStream.message(to, getJid(), payload);
   }
 
   //
@@ -147,18 +169,19 @@ public class SimpleActorClient implements ActorClient {
   public Serializable queryGet(String to,
                                Serializable payload)
   {
-    WaitQueryCallback callback = new WaitQueryCallback();
+    ActorStream linkStream = getLinkStream();
 
-    queryGet(to, payload, callback);
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    if (! callback.waitFor(_timeout)) {
-      throw new TimeoutException(this + " queryGet timeout " + payload
-                                 + " {to:" + to + "}");
-    }
-    else if (callback.getError() != null)
-      throw callback.getError().createException();
-    else
-      return callback.getResult();
+    long id = _queryManager.generateQueryId();
+    
+    QueryFuture future
+      = _queryManager.addQueryFuture(id, to, getJid(), payload, _timeout);
+
+    linkStream.queryGet(id, to, getJid(), payload);
+
+    return future.get();
   }
 
   /**
@@ -180,18 +203,19 @@ public class SimpleActorClient implements ActorClient {
                                Serializable payload,
                                long timeout)
   {
-    WaitQueryCallback callback = new WaitQueryCallback();
+    ActorStream linkStream = getLinkStream();
 
-    queryGet(to, payload, callback);
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    if (! callback.waitFor(timeout)) {
-      throw new TimeoutException(this + " queryGet timeout " + payload
-                                 + " {to:" + to + "}");
-    }
-    else if (callback.getError() != null)
-      throw callback.getError().createException();
-    else
-      return callback.getResult();
+    long id = _queryManager.generateQueryId();
+    
+    QueryFuture future
+      = _queryManager.addQueryFuture(id, to, getJid(), payload, timeout);
+
+    linkStream.queryGet(id, to, getJid(), payload);
+
+    return future.get();
   }
 
 
@@ -215,16 +239,16 @@ public class SimpleActorClient implements ActorClient {
                        Serializable payload,
                        QueryCallback callback)
   {
-    long id = _qId.incrementAndGet();
+    ActorStream linkStream = getLinkStream();
 
-    _queryMap.add(id, callback);
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    ActorStream stream = getBrokerStream();
+    long id = _queryManager.generateQueryId();
+    
+    _queryManager.addQueryCallback(id, callback);
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send a queryGet because the client is closed.");
-
-    stream.queryGet(id, to, getJid(), payload);
+    linkStream.queryGet(id, to, getJid(), payload);
   }
 
   /**
@@ -245,18 +269,19 @@ public class SimpleActorClient implements ActorClient {
   public Serializable querySet(String to,
                                Serializable payload)
   {
-    WaitQueryCallback callback = new WaitQueryCallback();
+    ActorStream linkStream = getLinkStream();
 
-    querySet(to, payload, callback);
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    if (! callback.waitFor(_timeout)) {
-      throw new TimeoutException(this + " querySet timeout " + payload
-                                 + " {to:" + to + "}");
-    }
-    else if (callback.getError() != null)
-      throw callback.getError().createException();
-    else
-      return callback.getResult();
+    long id = _queryManager.generateQueryId();
+    
+    QueryFuture future
+      = _queryManager.addQueryFuture(id, to, getJid(), payload, _timeout);
+
+    linkStream.querySet(id, to, getJid(), payload);
+
+    return future.get();
   }
 
   /**
@@ -278,18 +303,19 @@ public class SimpleActorClient implements ActorClient {
                                Serializable payload,
                                long timeout)
   {
-    WaitQueryCallback callback = new WaitQueryCallback();
+    ActorStream linkStream = getLinkStream();
 
-    querySet(to, payload, callback);
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    if (! callback.waitFor(timeout)) {
-      throw new TimeoutException(this + " querySet timeout " + payload
-                                 + " {to:" + to + "}");
-    }
-    else if (callback.getError() != null)
-      throw callback.getError().createException();
-    else
-      return callback.getResult();
+    long id = _queryManager.generateQueryId();
+    
+    QueryFuture future
+      = _queryManager.addQueryFuture(id, to, getJid(), payload, timeout);
+
+    linkStream.querySet(id, to, getJid(), payload);
+
+    return future.get();
   }
 
 
@@ -313,16 +339,16 @@ public class SimpleActorClient implements ActorClient {
                        Serializable payload,
                        QueryCallback callback)
   {
-    long id = _qId.incrementAndGet();
+    ActorStream linkStream = getLinkStream();
 
-    _queryMap.add(id, callback);
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send a query because the link is closed.");
 
-    ActorStream stream = getBrokerStream();
+    long id = _queryManager.generateQueryId();
+    
+    _queryManager.addQueryCallback(id, callback);
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send a querySet because the client is closed.");
-
-    stream.querySet(id, to, getJid(), payload);
+    linkStream.querySet(id, to, getJid(), payload);
   }
 
   //
@@ -339,12 +365,12 @@ public class SimpleActorClient implements ActorClient {
   public void presence(String to,
                        Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presence because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presence because the link is closed.");
 
-    stream.presence(to, getJid(), payload);
+    linkStream.presence(to, getJid(), payload);
   }
 
   /**
@@ -357,12 +383,12 @@ public class SimpleActorClient implements ActorClient {
   public void presenceUnavailable(String to,
                                   Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presenceUnavailable because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presenceUnavailable because the link is closed.");
 
-    stream.presenceUnavailable(to, getJid(), payload);
+    linkStream.presenceUnavailable(to, getJid(), payload);
   }
 
   /**
@@ -375,12 +401,12 @@ public class SimpleActorClient implements ActorClient {
   public void presenceProbe(String to,
                             Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presenceProbe because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presenceProbe because the link is closed.");
 
-    stream.presenceProbe(to, getJid(), payload);
+    linkStream.presenceProbe(to, getJid(), payload);
   }
 
   /**
@@ -392,12 +418,12 @@ public class SimpleActorClient implements ActorClient {
   public void presenceSubscribe(String to,
                                 Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presenceSubscribe because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presenceSubscribe because the link is closed.");
 
-    stream.presenceSubscribe(to, getJid(), payload);
+    linkStream.presenceSubscribe(to, getJid(), payload);
   }
 
   /**
@@ -409,12 +435,12 @@ public class SimpleActorClient implements ActorClient {
   public void presenceSubscribed(String to,
                                  Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presenceSubscribed because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presenceSubscribed because the link is closed.");
 
-    stream.presenceSubscribed(to, getJid(), payload);
+    linkStream.presenceSubscribed(to, getJid(), payload);
   }
 
   /**
@@ -426,12 +452,12 @@ public class SimpleActorClient implements ActorClient {
   public void presenceUnsubscribe(String to,
                                   Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presenceUnsubscribe because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presenceUnsubscribe because the link is closed.");
 
-    stream.presenceUnsubscribe(to, getJid(), payload);
+    linkStream.presenceUnsubscribe(to, getJid(), payload);
   }
 
   /**
@@ -443,12 +469,12 @@ public class SimpleActorClient implements ActorClient {
   public void presenceUnsubscribed(String to,
                                    Serializable payload)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presenceUnsubscribed because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presenceUnsubscribed because the link is closed.");
 
-    stream.presenceUnsubscribed(to, getJid(), payload);
+    linkStream.presenceUnsubscribed(to, getJid(), payload);
   }
 
   /**
@@ -462,57 +488,12 @@ public class SimpleActorClient implements ActorClient {
                             Serializable payload,
                             ActorError error)
   {
-    ActorStream stream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (stream == null)
-      throw new IllegalStateException(this + " can't send presenceError because the client is closed.");
+    if (linkStream == null)
+      throw new IllegalStateException(this + " can't send presenceError because the link is closed.");
 
-    stream.presenceError(to, getJid(), payload, error);
-  }
-
-  //
-  // callbacks and low-level routines
-  //
-
-  /**
-   * Callback from the ActorStream to handle a queryResult.  Returns true
-   * if the client has a pending query, false otherwise.
-   */
-  public final boolean onQueryResult(long id,
-                                     String to,
-                                     String from,
-                                     Serializable payload)
-  {
-    QueryItem item = _queryMap.remove(id);
-
-    if (item != null) {
-      item.onQueryResult(to, from, payload);
-
-      return true;
-    }
-    else
-      return false;
-  }
-
-  /**
-   * Callback from the ActorStream to handle a queryResult.  Returns true
-   * if the client has a pending query, false otherwise.
-   */
-  public final boolean onQueryError(long id,
-                                    String to,
-                                    String from,
-                                    Serializable payload,
-                                    ActorError error)
-  {
-    QueryItem item = _queryMap.remove(id);
-
-    if (item != null) {
-      item.onQueryError(to, from, payload, error);
-
-      return true;
-    }
-    else
-      return false;
+    linkStream.presenceError(to, getJid(), payload, error);
   }
 
   //
@@ -540,152 +521,46 @@ public class SimpleActorClient implements ActorClient {
   {
     return getClass().getSimpleName() + "[" + getJid() + "]";
   }
-
-  static final class QueryMap {
-    private final QueryItem []_entries = new QueryItem[128];
-    private final int _mask = _entries.length - 1;
-
-    void add(long id, QueryCallback callback)
+  
+  final class QueryFilterStream
+    extends AbstractActorStreamFilter {
+    @Override
+    protected ActorStream getNext()
     {
-      int hash = (int) (id & _mask);
-
-      synchronized (_entries) {
-        _entries[hash] = new QueryItem(id, callback, _entries[hash]);
+      ActorStream clientStream = getClientStream();
+      
+      if (clientStream == null) {
+        clientStream = new SimpleActorStream();
       }
-    }
-
-    QueryItem remove(long id)
-    {
-      int hash = (int) (id & _mask);
-
-      synchronized (_entries) {
-        QueryItem prev = null;
-
-        for (QueryItem ptr = _entries[hash];
-             ptr != null;
-             ptr = ptr.getNext()) {
-          if (id == ptr.getId()) {
-            if (prev != null)
-              prev.setNext(ptr.getNext());
-            else
-              _entries[hash] = ptr.getNext();
-
-            return ptr;
-          }
-
-          prev = ptr;
-        }
-
-        return null;
-      }
-    }
-  }
-
-  static final class QueryItem {
-    private final long _id;
-    private final QueryCallback _callback;
-
-    private QueryItem _next;
-
-    QueryItem(long id, QueryCallback callback, QueryItem next)
-    {
-      _id = id;
-      _callback = callback;
-      _next = next;
-    }
-
-    final long getId()
-    {
-      return _id;
-    }
-
-    final QueryItem getNext()
-    {
-      return _next;
-    }
-
-    final void setNext(QueryItem next)
-    {
-      _next = next;
-    }
-
-    void onQueryResult(String to, String from, Serializable value)
-    {
-      if (_callback != null)
-        _callback.onQueryResult(to, from, value);
-    }
-
-    void onQueryError(String to,
-                      String from,
-                      Serializable value,
-                      ActorError error)
-    {
-      if (_callback != null)
-        _callback.onQueryError(to, from, value, error);
+      
+      return clientStream;
     }
 
     @Override
-    public String toString()
+    public void queryResult(long id,
+                            String to,
+                            String from,
+                            Serializable payload)
     {
-      return getClass().getSimpleName() + "[" + _id + "," + _callback + "]";
-    }
-  }
-
-  static final class WaitQueryCallback implements QueryCallback {
-    private volatile Serializable _result;
-    private volatile ActorError _error;
-    private final AtomicBoolean _isResult = new AtomicBoolean();
-    private volatile Thread _thread;
-
-    public Serializable getResult()
-    {
-      return _result;
-    }
-
-    public ActorError getError()
-    {
-      return _error;
-    }
-
-    boolean waitFor(long timeout)
-    {
-      _thread = Thread.currentThread();
-      long now = Alarm.getCurrentTimeActual();
-      long expires = now + timeout;
-
-      while (! _isResult.get() && Alarm.getCurrentTimeActual() < expires) {
-        try {
-          Thread.interrupted();
-          LockSupport.parkUntil(expires);
-        } catch (Exception e) {
-        }
+      if (_queryManager.onQueryResult(id, to, from, payload)) {
+        return;
       }
-
-      _thread = null;
-
-      return _isResult.get();
+      
+      super.queryResult(id, to, from, payload);
     }
 
-    public void onQueryResult(String fromJid, String toJid,
-                              Serializable payload)
+    @Override
+    public void queryError(long id,
+                           String to,
+                           String from,
+                           Serializable payload,
+                           ActorError error)
     {
-      _result = payload;
-      _isResult.set(true);
-
-      Thread thread = _thread;
-      if (thread != null)
-        LockSupport.unpark(thread);
-    }
-
-    public void onQueryError(String fromJid, String toJid,
-                             Serializable payload, ActorError error)
-    {
-      _error = error;
-      _isResult.set(true);
-
-      Thread thread = _thread;
-      if (thread != null)
-        LockSupport.unpark(thread);
+      if (_queryManager.onQueryError(id, to, from, payload, error)) {
+        return;
+      }
+      
+      super.queryError(id, to, from, payload, error);
     }
   }
 }

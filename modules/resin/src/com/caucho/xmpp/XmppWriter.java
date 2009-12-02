@@ -29,25 +29,17 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.xmpp.im.Text;
-import com.caucho.xmpp.im.ImPresence;
-import com.caucho.xmpp.im.ImMessage;
-import com.caucho.bam.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
 import java.io.Serializable;
-import java.util.*;
-import java.util.logging.*;
-import javax.xml.stream.*;
+
+import com.caucho.bam.AbstractActorStream;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 
 /**
  * xmpp client to broker
  */
 public class XmppWriter extends AbstractActorStream
 {
-  private static final Logger log
-    = Logger.getLogger(XmppWriter.class.getName());
-
   private XmppWriterImpl _out;
 
   XmppWriter(XmppWriterImpl out)
@@ -55,7 +47,8 @@ public class XmppWriter extends AbstractActorStream
     _out = out;
   }
 
-  public ActorStream getBrokerStream()
+  @Override
+  public ActorStream getLinkStream()
   {
     return null;
   }

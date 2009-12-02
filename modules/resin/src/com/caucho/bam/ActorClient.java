@@ -31,8 +31,6 @@ package com.caucho.bam;
 
 import java.io.Serializable;
 
-import com.caucho.util.*;
-
 /**
  * ActorClient is a convenience API for sending messages to other Actors,
  * which always using the actor's JID as the "from" parameter.
@@ -64,12 +62,27 @@ public interface ActorClient {
   /**
    * Registers a callback {@link com.caucho.bam.ActorStream} with the client
    */
-  public void setActorStream(ActorStream handler);
+  public void setClientStream(ActorStream clientStream);
 
   /**
    * Returns the registered callback {@link com.caucho.bam.ActorStream}.
    */
+  public ActorStream getClientStream();
+  
+  /**
+   * Returns the stream to this client.
+   */
   public ActorStream getActorStream();
+
+  /**
+   * The ActorStream to the link.
+   */
+  public ActorStream getLinkStream();
+
+  /**
+   * Sets the ActorStream to the link.
+   */
+  public void setLinkStream(ActorStream linkStream);
 
   //
   // message handling
@@ -284,32 +297,4 @@ public interface ActorClient {
   public void presenceError(String to,
                             Serializable payload,
                             ActorError error);
-
-  //
-  // callbacks and low-level routines
-  //
-
-  /**
-   * Returns the underlying ActorStream to the broker.
-   */
-  public ActorStream getBrokerStream();
-
-  /**
-   * Callback from the ActorStream to handle a queryResult.  Returns true
-   * if the client has a pending query, false otherwise.
-   */
-  public boolean onQueryResult(long id,
-                               String to,
-                               String from,
-                               Serializable payload);
-
-  /**
-   * Callback from the ActorStream to handle a queryResult.  Returns true
-   * if the client has a pending query, false otherwise.
-   */
-  public boolean onQueryError(long id,
-                              String to,
-                              String from,
-                              Serializable payload,
-                              ActorError error);
 }

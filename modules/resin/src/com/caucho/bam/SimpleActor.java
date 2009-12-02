@@ -29,25 +29,17 @@
 
 package com.caucho.bam;
 
-import java.util.logging.*;
-import java.util.concurrent.atomic.*;
-
-import java.io.Serializable;
-
 /**
  * Base class for implementing an Agent.
  */
 public class SimpleActor extends SimpleActorStream
   implements Actor
 {
-  private static final Logger log
-    = Logger.getLogger(SimpleActor.class.getName());
-
-  private ActorStream _actorStream = this;
+  private ActorStream _actorStream;
 
   public SimpleActor()
   {
-    setActorClient(new ProxyActorClient(this));
+    setActorStream(this);
   }
   
   //
@@ -73,95 +65,5 @@ public class SimpleActor extends SimpleActorStream
   public void setActorStream(ActorStream actorStream)
   {
     _actorStream = actorStream;
-  }
-
-  //
-  // Actor children
-  //
-
-  /**
-   * Requests that a client actor with the given jid be started.
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   */
-  public boolean startChild(String jid)
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " startChild(" + jid + ")");
-    
-    return false;
-  }
-
-  /**
-   * Requests that a client actor with the given jid be stopped.
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   * 
-   * @jid the jid of the child actor logging in.
-   */
-  public boolean stopChild(String jid)
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " stopChild(" + jid + ")");
-    
-    return false;
-  }
-
-  /**
-   * Called when a a child actor logs in
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   * 
-   * @jid the jid of the child actor logging in.
-   */
-  public void onChildStart(String jid)
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " onChildStart(" + jid + ")");
-  }
-
-  /**
-   * Called when a child actor logs out
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   * 
-   * @jid the jid of the child actor logging in.
-   */
-  public void onChildStop(String jid)
-  {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " onChildStop(" + jid + ")");
-  }
-
-  //
-  // Filter API
-  //
-
-  /**
-   * Creates an outbound filter.
-   */
-  public ActorStream getActorFilter(ActorStream stream)
-  {
-    return stream;
-  }
-
-  /**
-   * Creates an inbound filter
-   */
-  public ActorStream getBrokerFilter(ActorStream stream)
-  {
-    return stream;
-  }
-
-  /**
-   * Closes the actor stream.
-   */
-  @Override
-  public void close()
-  {
   }
 }

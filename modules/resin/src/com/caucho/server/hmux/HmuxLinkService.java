@@ -29,34 +29,31 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.bam.Broker;
+import java.security.Key;
+import java.util.logging.Logger;
+
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
-import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.ActorStream;
+import com.caucho.bam.Broker;
+import com.caucho.bam.NotAuthorizedException;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
-
-import com.caucho.bam.hmtp.AuthQuery;
-import com.caucho.bam.hmtp.AuthResult;
-import com.caucho.bam.hmtp.GetPublicKeyQuery;
-import com.caucho.bam.hmtp.EncryptedObject;
-import com.caucho.bam.hmtp.SelfEncryptedCredentials;
-
+import com.caucho.bam.SimpleActorClient;
+import com.caucho.hemp.servlet.ServerLinkManager;
+import com.caucho.hmtp.AuthQuery;
+import com.caucho.hmtp.AuthResult;
+import com.caucho.hmtp.EncryptedObject;
+import com.caucho.hmtp.GetPublicKeyQuery;
+import com.caucho.hmtp.SelfEncryptedCredentials;
 import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.DynamicServerQuery;
 import com.caucho.server.cluster.DynamicServerResult;
-import com.caucho.hemp.broker.HempBroker;
-import com.caucho.hemp.servlet.ServerLinkManager;
-import com.caucho.util.L10N;
+import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
-
-import java.util.logging.*;
-
-import java.security.Key;
+import com.caucho.util.L10N;
 
 /**
  * The HmuxLinkService is low-level link
@@ -84,7 +81,7 @@ public class HmuxLinkService extends SimpleActor {
     
     // the agent stream serves as its own broker because there's no
     // routing involved
-    setBrokerStream(new HmuxBamStream(request));
+    setLinkStream(new HmuxBamStream(request));
   }
 
   //
@@ -97,7 +94,7 @@ public class HmuxLinkService extends SimpleActor {
   {
     GetPublicKeyQuery result = _linkManager.getPublicKey();
 
-    getBrokerStream().queryResult(id, from, to, result);
+    getLinkStream().queryResult(id, from, to, result);
   }
 
   @QuerySet
@@ -132,7 +129,7 @@ public class HmuxLinkService extends SimpleActor {
       if (Math.abs(creationDate - now) > 3 * 3600 * 1000) {
 	log.warning(this + " expired credentials date");
 
-	getBrokerStream().queryError(id, from, to, query,
+	getLinkStream().queryError(id, from, to, query,
 				     new ActorError(ActorError.TYPE_AUTH,
 						    ActorError.FORBIDDEN,
 						    "expired credentials"));
@@ -140,7 +137,7 @@ public class HmuxLinkService extends SimpleActor {
       }
     }
     else {
-      getBrokerStream().queryError(id, from, to, query,
+      getLinkStream().queryError(id, from, to, query,
 				   new ActorError(ActorError.TYPE_AUTH,
 						ActorError.FORBIDDEN,
 						"passwords must be encrypted"));
@@ -148,7 +145,7 @@ public class HmuxLinkService extends SimpleActor {
     }
 
     if (! (credentials instanceof String)) {
-      getBrokerStream().queryError(id, from, to, query,
+      getLinkStream().queryError(id, from, to, query,
 				   new ActorError(ActorError.TYPE_AUTH,
 						  ActorError.FORBIDDEN,
 						  "unknown credentials: " + credentials));
@@ -166,13 +163,11 @@ public class HmuxLinkService extends SimpleActor {
       throw new NotAuthorizedException(L.l("admin.resin login forbidden because the authentication cookies do not match"));
     }
     
-    Broker broker = _server.getAdminBroker();
-    
-    _adminConn = broker.getConnection("admin.resin", cookie);
+    _adminConn = _server.createAdminClient("admin.resin");
 
     _request.setHmtpAdminConnection(_adminConn);
 
-    getBrokerStream().queryResult(id, from, to,
+    getLinkStream().queryResult(id, from, to,
 				  new AuthResult(_adminConn.getJid()));
   }
 
@@ -190,26 +185,24 @@ public class HmuxLinkService extends SimpleActor {
 				  clusterServer.getAddress(),
 				  clusterServer.getPort());
 
-      getBrokerStream().queryResult(id, from, to, result);
+      getLinkStream().queryResult(id, from, to, result);
     }
     else 
-      getBrokerStream().queryResult(id, from, to, null);
+      getLinkStream().queryResult(id, from, to, null);
   }
 
   public ActorStream getBrokerStream(boolean isAdmin)
   {
     if (_adminConn == null) {
-      Broker broker = _server.getAdminBroker();
-
       String cookie = _server.getAdminCookie();
 
       if (cookie != null)
 	throw new NotAuthorizedException(L.l("'{0}' anonymous login is not allowed in this server",
 						cookie));
     
-      _adminConn = broker.getConnection("admin.resin", null);
+      _adminConn = _server.createAdminClient("admin.resin");
     }
 
-    return _adminConn.getBrokerStream();
+    return _adminConn.getActorStream();
   }
 }

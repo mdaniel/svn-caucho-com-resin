@@ -29,13 +29,14 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.ActorError;
-import com.caucho.vfs.*;
-import java.io.*;
-import java.util.logging.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import com.caucho.hessian.io.*;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Handles callbacks for a xmpp service
@@ -389,6 +390,11 @@ public class XmppAgentStream implements ActorStream
       
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+  
+  public boolean isClosed()
+  {
+    return false;
   }
 
   /**

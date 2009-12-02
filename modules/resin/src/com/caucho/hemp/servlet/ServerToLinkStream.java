@@ -29,12 +29,12 @@
 
 package com.caucho.hemp.servlet;
 
-import com.caucho.bam.hmtp.HmtpPacketType;
-import com.caucho.bam.hmtp.ToLinkStream;
 import java.io.*;
 import java.util.logging.*;
 
 import com.caucho.hessian.io.*;
+import com.caucho.hmtp.HmtpPacketType;
+import com.caucho.hmtp.ToLinkStream;
 
 /**
  * Handles callbacks for a hmtp service

@@ -38,6 +38,8 @@ import java.util.HashMap;
  * The errors are defined in RFC-3920, XMPP
  */
 public class ActorError implements Serializable {
+  private static final long serialVersionUID = -2645943317009708218L;
+
   /**
    * Retry after providing credentials
    */
@@ -236,6 +238,7 @@ public class ActorError implements Serializable {
   /**
    * zero-arg constructor for Hessian
    */
+  @SuppressWarnings("unused")
   private ActorError()
   {
     this.type = null;

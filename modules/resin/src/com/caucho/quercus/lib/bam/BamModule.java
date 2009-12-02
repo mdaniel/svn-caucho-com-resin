@@ -32,8 +32,9 @@ package com.caucho.quercus.lib.bam;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.SimpleActorClient;
 import com.caucho.hemp.broker.HempBroker;
-import com.caucho.bam.hmtp.HmtpClient;
+import com.caucho.hmtp.HmtpClient;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
@@ -107,7 +108,7 @@ public class BamModule extends AbstractQuercusModule
       if (resource.indexOf('/') == 0)
         resource = resource.substring(1);
 
-      connection = broker.getConnection(jid, resource);
+      connection = new SimpleActorClient(broker, jid, resource);
       env.addCleanup(new BamConnectionResource(connection));
       env.setSpecialValue("_quercus_bam_connection", connection);
     }
@@ -130,11 +131,11 @@ public class BamModule extends AbstractQuercusModule
     BamPhpActor actor = getActor(env);
 
     if (actor != null)
-      return actor.getBrokerStream();
+      return actor.getLinkStream();
 
     ActorClient connection = getActorClient(env);
 
-    return connection.getBrokerStream();
+    return connection.getLinkStream();
   }
 
   private static String getJid(Env env)

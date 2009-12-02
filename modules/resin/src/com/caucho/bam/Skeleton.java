@@ -29,23 +29,24 @@
 
 package com.caucho.bam;
 
-import com.caucho.config.*;
-import com.caucho.util.*;
-
 import java.io.Serializable;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import java.lang.annotation.Annotation;
 import java.lang.ref.SoftReference;
-import java.util.*;
-import java.util.logging.*;
-import javax.annotation.*;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.WeakHashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.util.L10N;
 
 /**
  * The Skeleton introspects and dispatches messages for a
  * {@link com.caucho.bam.SimpleActor}
  * or {@link com.caucho.bam.SimpleActorStream}.
  */
-class Skeleton<S extends SimpleActorStream>
+class Skeleton<S>
 {
   private static final L10N L = new L10N(Skeleton.class);
   private static final Logger log
@@ -54,36 +55,36 @@ class Skeleton<S extends SimpleActorStream>
   private final static WeakHashMap<Class, SoftReference<Skeleton>> _skeletonRefMap
     = new WeakHashMap<Class, SoftReference<Skeleton>>();
 
-  private Class _cl;
+  private Class<?> _cl;
 
-  private final HashMap<Class, Method> _messageHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _messageErrorHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _queryGetHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _querySetHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _queryResultHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _queryErrorHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceProbeHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceSubscribeHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceSubscribedHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceUnsubscribeHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceUnsubscribedHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceUnavailableHandlers
-    = new HashMap<Class, Method>();
-  private final HashMap<Class, Method> _presenceErrorHandlers
-    = new HashMap<Class, Method>();
+  private final HashMap<Class<?>, Method> _messageHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _messageErrorHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _queryGetHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _querySetHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _queryResultHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _queryErrorHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceProbeHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceSubscribeHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceSubscribedHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceUnsubscribeHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceUnsubscribedHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceUnavailableHandlers
+    = new HashMap<Class<?>, Method>();
+  private final HashMap<Class<?>, Method> _presenceErrorHandlers
+    = new HashMap<Class<?>, Method>();
 
   private Skeleton(Class<S> cl)
   {
@@ -97,7 +98,7 @@ class Skeleton<S extends SimpleActorStream>
   /**
    * Dispatches a message to the actorStream.
    */
-  public void message(S actorStream,
+  public void message(S actor,
                       String to,
                       String from,
                       Serializable payload)
@@ -111,12 +112,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " message " + payload
+        log.finest(actor + " message " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -132,13 +133,13 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " message ignored " + payload
+        log.fine(actor + " message ignored " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void messageError(S actorStream,
+  public void messageError(S actor,
                            String to,
                            String from,
                            Serializable payload,
@@ -153,12 +154,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " messageError " + error + " " + payload
+        log.finest(actor + " messageError " + error + " " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload, error);
+        handler.invoke(actor, to, from, payload, error);
       }
       catch (RuntimeException e) {
         throw e;
@@ -174,13 +175,14 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " messageError ignored " + error + " " + payload
+        log.fine(actor + " messageError ignored " + error + " " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void queryGet(S actorStream,
+  public void queryGet(S actor,
+                       ActorStream linkStream,
                        long id,
                        String to,
                        String from,
@@ -196,12 +198,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " queryGet " + payload
+        log.finest(actor + " queryGet " + payload
                    + " {id: " + id + ", from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, id, to, from, payload);
+        handler.invoke(actor, id, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -217,23 +219,24 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " queryGet not implemented for " + payload
+        log.fine(actor + " queryGet not implemented for " + payload
                  + " {id: " + id + ", from: " + from + " to: " + to + "}");
       }
 
       String msg;
-      msg = (actorStream + ": queryGet is not implemented for this payload:\n"
+      msg = (actor + ": queryGet is not implemented for this payload:\n"
              + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
 
       ActorError error = new ActorError(ActorError.TYPE_CANCEL,
                                         ActorError.FEATURE_NOT_IMPLEMENTED,
                                         msg);
 
-      actorStream.getBrokerStream().queryError(id, from, to, payload, error);
+      linkStream.queryError(id, from, to, payload, error);
     }
   }
 
-  public void querySet(S actorStream,
+  public void querySet(S actor,
+                       ActorStream linkStream,
                        long id,
                        String to,
                        String from,
@@ -248,12 +251,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " querySet " + payload
+        log.finest(actor + " querySet " + payload
                    + " {id: " + id + ", from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, id, to, from, payload);
+        handler.invoke(actor, id, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -269,23 +272,23 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " querySet not implemented for " + payload
+        log.fine(actor + " querySet not implemented for " + payload
                  + " {id: " + id + ", from: " + from + " to: " + to + "}");
       }
 
       String msg;
-      msg = (actorStream + ": querySet is not implemented for this payload:\n"
+      msg = (actor + ": querySet is not implemented for this payload:\n"
              + "  " + payload + " {id:" + id + ", from:" + from + ", to:" + to + "}");
 
       ActorError error = new ActorError(ActorError.TYPE_CANCEL,
                                         ActorError.FEATURE_NOT_IMPLEMENTED,
                                         msg);
 
-      actorStream.getBrokerStream().queryError(id, from, to, payload, error);
+      linkStream.queryError(id, from, to, payload, error);
     }
   }
 
-  public void queryResult(S actorStream,
+  public void queryResult(S actor,
                           long id,
                           String to,
                           String from,
@@ -300,12 +303,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " queryResult " + payload
+        log.finest(actor + " queryResult " + payload
                    + " {id: " + id + ", from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, id, to, from, payload);
+        handler.invoke(actor, id, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -321,13 +324,13 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " queryResult ignored " + payload
+        log.fine(actor + " queryResult ignored " + payload
                  + " {id: " + id + ", from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void queryError(S actorStream,
+  public void queryError(S actor,
                          long id,
                          String to,
                          String from,
@@ -343,12 +346,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " queryError " + error + " " + payload
+        log.finest(actor + " queryError " + error + " " + payload
                    + " {id: " + id + ", from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, id, to, from, payload, error);
+        handler.invoke(actor, id, to, from, payload, error);
       }
       catch (RuntimeException e) {
         throw e;
@@ -364,13 +367,13 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " queryError ignored " + error + " " + payload
+        log.fine(actor + " queryError ignored " + error + " " + payload
                  + " {id: " + id + ", from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void presence(S actorStream,
+  public void presence(S actor,
                        String to,
                        String from,
                        Serializable payload)
@@ -384,12 +387,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presence " + payload
+        log.finest(actor + " presence " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -405,13 +408,13 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " presence ignored " + payload
+        log.fine(actor + " presence ignored " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void presenceProbe(S actorStream,
+  public void presenceProbe(S actor,
                             String to,
                             String from,
                             Serializable payload)
@@ -425,12 +428,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presenceProbe " + payload
+        log.finest(actor + " presenceProbe " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -446,13 +449,14 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " presenceProbe ignored " + payload
+        log.fine(actor + " presenceProbe ignored " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void presenceSubscribe(S actorStream,
+  public void presenceSubscribe(S actor,
+                                ActorStream linkStream,
                                 String to,
                                 String from,
                                 Serializable payload)
@@ -466,12 +470,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presenceSubscribe " + payload
+        log.finest(actor + " presenceSubscribe " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -487,23 +491,23 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " presenceSubscribe not implemented " + payload
+        log.fine(actor + " presenceSubscribe not implemented " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
 
       String msg;
-      msg = (actorStream + " presenceSubscribe does not implement the payload.\n"
+      msg = (actor + " presenceSubscribe does not implement the payload.\n"
              + payload + " {from:" + from + ", to:" + to + "}");
 
       ActorError error = new ActorError(ActorError.TYPE_CANCEL,
                                         ActorError.FEATURE_NOT_IMPLEMENTED,
                                         msg);
 
-      actorStream.getBrokerStream().presenceError(from, to, payload, error);
+      linkStream.presenceError(from, to, payload, error);
     }
   }
 
-  public void presenceSubscribed(S actorStream,
+  public void presenceSubscribed(S actor,
                                  String to,
                                  String from,
                                  Serializable payload)
@@ -517,12 +521,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presenceSubscribed " + payload
+        log.finest(actor + " presenceSubscribed " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -538,13 +542,14 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " presenceSubscribed ignored " + payload
+        log.fine(actor + " presenceSubscribed ignored " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void presenceUnsubscribe(S actorStream,
+  public void presenceUnsubscribe(S actor,
+                                  ActorStream linkStream,
                                   String to,
                                   String from,
                                   Serializable payload)
@@ -558,12 +563,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presenceUnsubscribe " + payload
+        log.finest(actor + " presenceUnsubscribe " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -579,23 +584,23 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " presenceUnsubscribe not implemented " + payload
+        log.fine(actor + " presenceUnsubscribe not implemented " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
 
       String msg;
-      msg = (actorStream + " presenceUnsubscribe does not implement the payload.\n"
+      msg = (actor + " presenceUnsubscribe does not implement the payload.\n"
              + payload + " {from:" + from + ", to:" + to + "}");
 
       ActorError error = new ActorError(ActorError.TYPE_CANCEL,
                                         ActorError.FEATURE_NOT_IMPLEMENTED,
                                         msg);
 
-      actorStream.getBrokerStream().presenceError(from, to, payload, error);
+      linkStream.presenceError(from, to, payload, error);
     }
   }
 
-  public void presenceUnsubscribed(S actorStream,
+  public void presenceUnsubscribed(S actor,
                                    String to,
                                    String from,
                                    Serializable payload)
@@ -609,12 +614,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presenceUnsubscribed " + payload
+        log.finest(actor + " presenceUnsubscribed " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -630,13 +635,13 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " presenceUnsubscribed ignored " + payload
+        log.fine(actor + " presenceUnsubscribed ignored " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void presenceUnavailable(S actorStream,
+  public void presenceUnavailable(S actor,
                                   String to,
                                   String from,
                                   Serializable payload)
@@ -650,12 +655,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presenceUnavailable " + payload
+        log.finest(actor + " presenceUnavailable " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload);
+        handler.invoke(actor, to, from, payload);
       }
       catch (RuntimeException e) {
         throw e;
@@ -671,13 +676,13 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream + " presenceUnavailable ignored " + payload
+        log.fine(actor + " presenceUnavailable ignored " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
     }
   }
 
-  public void presenceError(S actorStream,
+  public void presenceError(S actor,
                             String to,
                             String from,
                             Serializable payload,
@@ -692,12 +697,12 @@ class Skeleton<S extends SimpleActorStream>
 
     if (handler != null) {
       if (log.isLoggable(Level.FINEST)) {
-        log.finest(actorStream + " presenceError " + error + " " + payload
+        log.finest(actor + " presenceError " + error + " " + payload
                    + " {from:" + from + ", to:" + to + "}");
       }
 
       try {
-        handler.invoke(actorStream, to, from, payload, error);
+        handler.invoke(actor, to, from, payload, error);
       }
       catch (RuntimeException e) {
         throw e;
@@ -713,7 +718,7 @@ class Skeleton<S extends SimpleActorStream>
     }
     else {
       if (log.isLoggable(Level.FINE)) {
-        log.fine(actorStream
+        log.fine(actor
                  + " presenceError ignored " + error + " " + payload
                  + " {from: " + from + " to: " + to + "}");
       }
@@ -724,7 +729,7 @@ class Skeleton<S extends SimpleActorStream>
   // introspection
   //
 
-  protected void introspect(Class cl)
+  protected void introspect(Class<?> cl)
   {
     if (cl == null)
       return;
@@ -736,7 +741,7 @@ class Skeleton<S extends SimpleActorStream>
     for (int i = 0; i < methods.length; i++) {
       Method method = methods[i];
 
-      Class payloadType = getPayloadType(Message.class, method);
+      Class<?> payloadType = getPayloadType(Message.class, method);
 
       if (payloadType != null) {
         log.finest(L.l("{0} @Message {1} method={2}",
@@ -908,9 +913,10 @@ class Skeleton<S extends SimpleActorStream>
     }
   }
 
-  private Class getPayloadType(Class annotationType, Method method)
+  private Class<?> getPayloadType(Class<? extends Annotation> annotationType, 
+                                  Method method)
   {
-    Class []paramTypes = method.getParameterTypes();
+    Class<?> []paramTypes = method.getParameterTypes();
 
     if (paramTypes.length < 3)
       return null;
@@ -921,12 +927,13 @@ class Skeleton<S extends SimpleActorStream>
       return null;
   }
 
-  private Class getQueryPayloadType(Class annotationType, Method method)
+  private Class<?> getQueryPayloadType(Class<? extends Annotation> annotationType, 
+                                       Method method)
   {
     if (! method.isAnnotationPresent(annotationType))
       return null;
 
-    Class []paramTypes = method.getParameterTypes();
+    Class<?> []paramTypes = method.getParameterTypes();
 
     if (paramTypes.length != 4
         || ! long.class.equals(paramTypes[0])
@@ -948,12 +955,12 @@ class Skeleton<S extends SimpleActorStream>
     return paramTypes[3];
   }
 
-  private Class getQueryErrorPayloadType(Class annotationType, Method method)
+  private Class<?> getQueryErrorPayloadType(Class<? extends Annotation> annotationType, Method method)
   {
     if (! method.isAnnotationPresent(annotationType))
       return null;
 
-    Class []paramTypes = method.getParameterTypes();
+    Class<?> []paramTypes = method.getParameterTypes();
 
     if (paramTypes.length != 5
         || ! long.class.equals(paramTypes[0])
@@ -976,12 +983,14 @@ class Skeleton<S extends SimpleActorStream>
     return paramTypes[3];
   }
 
-  public static Skeleton getSkeleton(Class cl)
+  @SuppressWarnings("unchecked")
+  public static Skeleton<? extends SimpleActorStream>
+  getSkeleton(Class<? extends SimpleActorStream> cl)
   {
     synchronized(_skeletonRefMap) {
       SoftReference<Skeleton> skeletonRef = _skeletonRefMap.get(cl);
 
-      Skeleton skeleton = null;
+      Skeleton<? extends SimpleActorStream> skeleton = null;
 
       if (skeletonRef != null)
         skeleton = skeletonRef.get();

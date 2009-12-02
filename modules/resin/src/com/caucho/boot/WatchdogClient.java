@@ -31,10 +31,10 @@ package com.caucho.boot;
 
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.bam.hmtp.HmtpClient;
-import com.caucho.bam.hmtp.SelfEncryptedCredentials;
 import com.caucho.config.*;
 import com.caucho.config.program.*;
+import com.caucho.hmtp.HmtpClient;
+import com.caucho.hmtp.SelfEncryptedCredentials;
 import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.server.util.*;
 import com.caucho.util.*;

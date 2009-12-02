@@ -30,8 +30,8 @@
 package com.caucho.bam;
 
 import java.io.Serializable;
-import java.util.*;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The abstract implementation of an {@link com.caucho.bam.ActorStream}
@@ -54,9 +54,9 @@ abstract public class AbstractActorStream implements ActorStream
   abstract public String getJid();
 
   /**
-   * Returns the stream to the broker.
+   * Returns the stream to the link.
    */
-  abstract public ActorStream getBrokerStream();
+  abstract public ActorStream getLinkStream();
 
   //
   // Unidirectional messages
@@ -79,6 +79,19 @@ abstract public class AbstractActorStream implements ActorStream
       log.finer(this + " message ignored " + payload
 		+ " {from:" + from + ", to:" + to + "}");
     }
+
+    String msg;
+    msg = (this + ": message is not implemented by this actor.\n"
+           + payload + " {from:" + from + ", to:" + to + "}");
+
+    ActorError error = new ActorError(ActorError.TYPE_CANCEL,
+                                      ActorError.FEATURE_NOT_IMPLEMENTED,
+                                      msg);
+
+    ActorStream linkStream = getLinkStream();
+
+    if (linkStream != null)
+      linkStream.messageError(from, to, payload, error);
   }
   
   /**
@@ -138,12 +151,12 @@ abstract public class AbstractActorStream implements ActorStream
 				      ActorError.FEATURE_NOT_IMPLEMENTED,
 				      msg);
 
-    ActorStream brokerStream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (brokerStream == null)
+    if (linkStream == null)
       throw new IllegalStateException(this + " brokerStream is missing and required to send an error for a QueryGet");
     
-    brokerStream.queryError(id, from, to, payload, error);
+    linkStream.queryError(id, from, to, payload, error);
   }
   
   /**
@@ -180,12 +193,12 @@ abstract public class AbstractActorStream implements ActorStream
 				      msg);
 
 
-    ActorStream brokerStream = getBrokerStream();
+    ActorStream linkStream = getLinkStream();
 
-    if (brokerStream == null)
+    if (linkStream == null)
       throw new IllegalStateException(this + " brokerStream is missing and required to send an error for a QueryGet");
     
-    brokerStream.queryError(id, from, to, payload, error);
+    linkStream.queryError(id, from, to, payload, error);
   }
   
   /**
@@ -315,7 +328,7 @@ abstract public class AbstractActorStream implements ActorStream
 				      ActorError.FEATURE_NOT_IMPLEMENTED,
 				      msg);
 
-    getBrokerStream().presenceError(from, to, payload, error);
+    getLinkStream().presenceError(from, to, payload, error);
   }
 
   /**
@@ -362,7 +375,7 @@ abstract public class AbstractActorStream implements ActorStream
 				      ActorError.FEATURE_NOT_IMPLEMENTED,
 				      msg);
 
-    getBrokerStream().presenceError(from, to, payload, error);
+    getLinkStream().presenceError(from, to, payload, error);
   }
 
   /**
@@ -402,6 +415,14 @@ abstract public class AbstractActorStream implements ActorStream
       log.finer(this + " presenceError ignored " + error + " "+ payload
 		+ " {from:" + from + ", to:" + to + "}");
     }
+  }
+  
+  /**
+   * Tests if the stream is closed.
+   */
+  public boolean isClosed()
+  {
+    return false;
   }
 
   /**

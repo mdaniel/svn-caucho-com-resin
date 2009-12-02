@@ -31,8 +31,7 @@ package com.caucho.bam;
 
 /**
  * A BAM Actor sends and receives messages as the core class in a
- * service-oriented architecture.  The Actor API is used only by the
- * {@link com.caucho.bam.Broker} and is implemented by the Actor developer.
+ * service-oriented architecture.
  *
  * <h2>Core API</h2>
  *
@@ -47,25 +46,9 @@ package com.caucho.bam;
  * Most developers will extend from {@link com.caucho.bam.SimpleActor}
  * instead of implementing Actor directly.  SimpleActor adds an
  * annotation-based message dispatching system to simplify Actor development.
- *
- * <h2>Child Actors</h2>
- *
- * Some specialized Actors will manage child Actors.  For example, an
- * instant messaging application has a parent Actor: harry@caucho.com and
- * children Actors for each login: harry@caucho.com/phone or
- * harry@caucho.com/browser.  The child section of the Actor API manages
- * these child Actors.
- *
- * <h2>Filters</h2>
- *
- * The filter API is a specialized API needed to support some IM protocols.
  */
 public interface Actor
 {
-  //
-  // basic Actor API
-  //
-
   /**
    * Returns the actor's jid, so the {@link com.caucho.bam.Broker} can
    * deliver messages to this actor.
@@ -79,79 +62,22 @@ public interface Actor
   public void setJid(String jid);
 
   /**
-   * Sets the stream to the link during registration
+   * The stream to send messages to the link.
    */
-  public void setBrokerStream(ActorStream linkStream);
+  public ActorStream getLinkStream();
 
   /**
-   * Returns the custom {@link com.caucho.bam.ActorStream} to the
-   * {@link com.caucho.bam.Broker}, so the Broker can send messages to
-   * the agent.
-   *
-   * Developers will customize the ActorStream to receive messages from
-   * the Broker.
+   * The stream to send messages to the link.
+   */
+  public void setLinkStream(ActorStream linkStream);
+
+  /**
+   * The stream to send messages to the actor.
    */
   public ActorStream getActorStream();
 
-  //
-  // child actor management
-  //
-
   /**
-   * Requests that a client actor with the given jid be started.
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   *
-   * @param jid the requested jid for a new child
-   *
-   * @return true if the child is started, false if not
+   * The stream to send messages to the actor.
    */
-  public boolean startChild(String jid);
-
-  /**
-   * Requests that a client actor with the given jid be stopped
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   *
-   * @param jid the requested jid for a new child
-   *
-   * @return true if the child is stopped, false if not
-   */
-  public boolean stopChild(String jid);
-
-  /**
-   * Called when a client actor starts
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   *
-   * @param jid the jid for the logged-in child actor
-   */
-  public void onChildStart(String jid);
-
-  /**
-   * Called when a client actor stops
-   *
-   * Examples of Actor children are IM login resources, e.g.
-   * harry@caucho.com/browser is a child of harry@caucho.com.
-   *
-   * @param jid the jid for the logged-in child actor
-   */
-  public void onChildStop(String jid);
-
-  //
-  // filtering
-  //
-
-  /**
-   * Returns a filter for messages to the actor.
-   */
-  public ActorStream getActorFilter(ActorStream stream);
-
-  /**
-   * Returns a filter for messages to the broker.
-   */
-  public ActorStream getBrokerFilter(ActorStream stream);
+  public void setActorStream(ActorStream actorStream);
 }

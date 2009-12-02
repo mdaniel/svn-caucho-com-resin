@@ -29,37 +29,24 @@
 
 package com.caucho.boot;
 
-import com.caucho.bam.*;
-import com.caucho.hemp.broker.HempMemoryQueue;
-import com.caucho.util.L10N;
-
-import java.util.logging.Logger;
+import com.caucho.bam.SimpleActor;
 
 /**
  * Service for handling the distributed cache
  */
 public class WatchdogActor extends SimpleActor
 {
-  private static final Logger log
-    = Logger.getLogger(WatchdogActor.class.getName());
-
-  private static final L10N L = new L10N(WatchdogActor.class);
-
-  private WatchdogProcess _watchdog;
-  
   WatchdogActor(WatchdogProcess watchdog)
   {
-    _watchdog = watchdog;
-    
     setJid("watchdog");
   }
 
   public void sendShutdown()
   {
-    getBrokerStream().querySet(1,
-			       "resin@admin.resin.caucho",
-			       "watchdog@admin.resin.caucho",
-			       new WatchdogStopQuery(""));
+    getLinkStream().querySet(1,
+			     "resin@admin.resin.caucho",
+			     "watchdog@admin.resin.caucho",
+			     new WatchdogStopQuery(""));
   }
   /*
   public void destroy()

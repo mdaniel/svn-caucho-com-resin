@@ -30,8 +30,10 @@
 package com.caucho.server.cluster;
 
 import com.caucho.VersionFactory;
+import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
+import com.caucho.bam.SimpleActorClient;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
 import com.caucho.config.ConfigException;
@@ -599,6 +601,14 @@ public class Server extends ProtocolDispatchServer
   public Broker getAdminBroker()
   {
     return getBamBroker();
+  }
+  
+  /**
+   * Creates a bam client to the admin.
+   */
+  public ActorClient createAdminClient(String uid)
+  {
+    return new SimpleActorClient(getAdminBroker(), uid, null);
   }
 
   /**

@@ -30,10 +30,7 @@
 package com.caucho.hemp.servlet;
 
 import com.caucho.bam.ActorClient;
-import com.caucho.bam.AbstractFilter;
-import com.caucho.bam.hmtp.AuthQuery;
-import com.caucho.bam.hmtp.HmtpPacketType;
-import com.caucho.bam.hmtp.FromLinkStream;
+import com.caucho.bam.AbstractActorStreamFilter;
 import com.caucho.bam.ActorStream;
 import java.io.*;
 import java.util.logging.*;
@@ -41,6 +38,9 @@ import javax.servlet.*;
 
 import com.caucho.hemp.*;
 import com.caucho.hessian.io.*;
+import com.caucho.hmtp.AuthQuery;
+import com.caucho.hmtp.FromLinkStream;
+import com.caucho.hmtp.HmtpPacketType;
 import com.caucho.server.connection.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -48,15 +48,22 @@ import com.caucho.vfs.*;
 /**
  * Main protocol handler for the HTTP version of HMTP
  */
-public class ServerLinkFilter extends AbstractFilter
+public class ServerLinkFilter extends AbstractActorStreamFilter
 {
+  private ActorStream _next;
   private String _ipAddress;
   
   public ServerLinkFilter(ActorStream next, String ipAddress)
   {
-    super(next);
+    _next = next;
 
     _ipAddress = ipAddress;
+  }
+  
+  @Override
+  public ActorStream getNext()
+  {
+    return _next;
   }
 
   @Override

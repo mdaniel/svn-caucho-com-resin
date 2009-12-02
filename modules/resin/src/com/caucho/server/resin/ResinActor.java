@@ -29,12 +29,12 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.bam.*;
-import com.caucho.boot.WatchdogStopQuery;
-import com.caucho.hemp.broker.HempMemoryQueue;
-import com.caucho.util.L10N;
-
 import java.util.logging.Logger;
+
+import com.caucho.bam.QuerySet;
+import com.caucho.bam.SimpleActor;
+import com.caucho.boot.WatchdogStopQuery;
+import com.caucho.util.L10N;
 
 /**
  * Service for handling the distributed cache
@@ -66,7 +66,7 @@ public class ResinActor extends SimpleActor
     _resin.startShutdown(L.l("Resin shutdown from watchdog stop '"
                              + from + "'"));
 
-    getBrokerStream().queryResult(id, from, to, query);
+    getLinkStream().queryResult(id, from, to, query);
   }
 
   public void destroy()

@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.bootjni.JniProcess;
 import com.caucho.config.ConfigException;
-import com.caucho.bam.hmtp.HmtpLink;
+import com.caucho.hmtp.HmtpLink;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.log.RotateStream;
 import com.caucho.server.connection.Port;

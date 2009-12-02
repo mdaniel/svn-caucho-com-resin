@@ -30,7 +30,7 @@
 package com.caucho.hemp.im;
 
 import com.caucho.bam.ActorStream;
-import com.caucho.bam.AbstractFilter;
+import com.caucho.bam.AbstractActorStreamFilter;
 import java.util.*;
 import java.util.logging.*;
 import java.io.Serializable;
@@ -39,13 +39,14 @@ import java.io.Serializable;
 /**
  * Filter on inbound requests
  */
-public class ImBrokerFilter extends AbstractFilter
+public class ImBrokerFilter extends AbstractActorStreamFilter
 {
+  private ActorStream _next;
   private ImUserService _resource;
   
   public ImBrokerFilter(ActorStream next, ImUserService resource)
   {
-    super(next);
+    _next = next;
 
     _resource = resource;
   }
@@ -79,5 +80,11 @@ public class ImBrokerFilter extends AbstractFilter
     if (_resource.rosterSubscribedTo(to, from, data)) {
       getNext().presenceSubscribed(to, _resource.getJid(), data);
     }
+  }
+
+  @Override
+  protected ActorStream getNext()
+  {
+    return _next;
   }
 }

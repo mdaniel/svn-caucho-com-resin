@@ -85,7 +85,7 @@ public class BamPhpRootService extends SimpleActor {
 
     // super.init();
   }
-
+/*
   @Override
   public boolean startChild(String jid)
   {
@@ -106,6 +106,7 @@ public class BamPhpRootService extends SimpleActor {
 
     return true;
   }
+  */
 
   public String toString()
   {

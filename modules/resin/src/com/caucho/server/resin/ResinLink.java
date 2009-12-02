@@ -29,7 +29,7 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.bam.hmtp.HmtpLink;
+import com.caucho.hmtp.HmtpLink;
 
 import java.io.*;
 import java.util.logging.*;

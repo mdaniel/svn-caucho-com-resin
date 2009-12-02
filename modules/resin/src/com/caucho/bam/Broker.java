@@ -29,16 +29,12 @@
 
 package com.caucho.bam;
 
+
 /**
- * BamBroker is the hub which routes messages to actors.
+ * Broker is the hub which routes messages to actors.
  */
-public interface Broker extends ClientActorFactory
+public interface Broker
 {
-  /**
-   * Returns true if the broker has been closed
-   */
-  public boolean isClosed();
-  
   /**
    * Returns the broker's jid, i.e. the virtual host domain name.
    */
@@ -50,17 +46,36 @@ public interface Broker extends ClientActorFactory
   public ActorStream getBrokerStream();
   
   /**
-   * Registers an actor.
+   * Adds an actor.
    */
-  public void addActor(Actor actor);
+  public void addActor(ActorStream actorStream);
   
   /**
    * Removes an actor.
    */
-  public void removeActor(Actor actor);
+  public void removeActor(ActorStream actorStream);
   
   /**
-   * Registers an actor manager
+   * Registers the client under a unique id. The
+   * resource is only a suggestion; the broker may
+   * return a different resource id.
+   * 
+   * @param clientStream the stream to the client
+   * @param uid the client's uid
+   * @param resource the suggested resource for the jid
+   * @return the generated jid
    */
-  public void addActorManager(ActorManager manager);   
+  public String createClient(ActorStream clientStream,
+                             String uid,
+                             String resource);
+  
+  /**
+   * Registers an listener for broker events, e.g. a missing actor.
+   */
+  public void addBrokerListener(BrokerListener listener);   
+  
+  /**
+   * Returns true if the broker has been closed
+   */
+  public boolean isClosed();  
 }

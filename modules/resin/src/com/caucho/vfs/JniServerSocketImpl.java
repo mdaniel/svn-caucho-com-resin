@@ -6,23 +6,16 @@
 
 package com.caucho.vfs;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-
 import java.io.IOException;
 import java.net.InetAddress;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.util.L10N;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 public class JniServerSocketImpl extends QServerSocket {
   private static final L10N L = new L10N(JniServerSocketImpl.class);
-  private static final Logger log
-    = Logger.getLogger(JniServerSocketImpl.class.getName());
-
   private static boolean _hasInitJni;
   private static Throwable _jniInitException;
 
@@ -130,24 +123,6 @@ public class JniServerSocketImpl extends QServerSocket {
                                 + "  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.\n  {2}",
                                 host, port, _jniInitException));
     }
-  }
-
-  /**
-   * Returns the host IP for the InetAddress.
-   */
-  private static long inetToIP(InetAddress host)
-  {
-    if (host == null)
-      return 0;
-
-    byte []addr = host.getAddress();
-    long ip = 0;
-
-    for (int i = 0; i < addr.length; i++) {
-      ip = 256 * ip + addr[i];
-    }
-
-    return ip;
   }
 
   /**
