@@ -65,7 +65,7 @@ public class ThreadRequestFactory {
 
   static {
     try {
-      String className = "com.caucho.server.port.ThreadServerRequestFactory";
+      String className = "com.caucho.server.connection.ThreadServerRequestFactory";
       Class cl = Class.forName(className);
 
       _factory = (ThreadRequestFactory) cl.newInstance();
