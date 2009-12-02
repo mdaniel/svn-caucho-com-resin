@@ -422,21 +422,6 @@ public class ServletRequestWrapper implements ServletRequest {
   }
 
   /**
-   * Sets the async timeout
-   *
-   * @since Servlet 3.0
-   */
-  public void setAsyncTimeout(long timeout)
-  {
-    _request.setAsyncTimeout(timeout);
-  }
-
-  public long getAsyncTimeout()
-  {
-    return _request.getAsyncTimeout();
-  }
-
-  /**
    * Starts an async mode
    *
    * @since Servlet 3.0

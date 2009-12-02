@@ -522,7 +522,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
    *   disp.include(request, response);
    * </pre></code>
    *
-   * @param uri path relative to <code>getRequestURI()</code>
+   * @param path path relative to <code>getRequestURI()</code>
    * (including query string) for the included file.
    * @return RequestDispatcher for later inclusion or forwarding.
    */
@@ -1952,20 +1952,6 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       return false;
   }
 
-  /**
-   * Sets the async timeout
-   *
-   * @since Servlet 3.0
-   */
-  public void setAsyncTimeout(long timeout)
-  {
-    _asyncTimeout = timeout;
-  }
-
-  public long getAsyncTimeout()
-  {
-    return _asyncTimeout;
-  }
 
   /**
    * Starts an async mode

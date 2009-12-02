@@ -427,16 +427,6 @@ public class StubServletRequest implements CauchoRequest {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void setAsyncTimeout(long timeout)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public long getAsyncTimeout()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
   public AsyncContext startAsync()
     throws IllegalStateException
   {

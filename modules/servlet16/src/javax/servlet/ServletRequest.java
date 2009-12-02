@@ -345,19 +345,6 @@ public interface ServletRequest {
   public boolean isAsyncSupported();
 
   /**
-   * Sets the async timeout
-   *
-   * @since Servlet 3.0
-   */
-  public void setAsyncTimeout(long timeout);
-
-  /**
-   * Returns asyncTimeout
-   * @return
-   */
-  public long getAsyncTimeout();
-
-  /**
    * Starts an async mode
    *
    * @since Servlet 3.0

@@ -682,16 +682,6 @@ public class RequestWrapper implements ServletRequest {
   }
 
   /**
-   * Sets the async timeout
-   *
-   * @since Servlet 3.0
-   */
-  public void setAsyncTimeout(long timeout)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
    * Starts an async mode
    *
    * @since Servlet 3.0
@@ -786,11 +776,6 @@ public class RequestWrapper implements ServletRequest {
   public boolean isInitial()
   {
     return true;
-  }
-
-  public long getAsyncTimeout()
-  {
-    return getRequest().getAsyncTimeout();
   }
 
   public DispatcherType getDispatcherType()

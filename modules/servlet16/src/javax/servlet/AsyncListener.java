@@ -45,4 +45,10 @@ public interface AsyncListener
 
   public void onTimeout(AsyncEvent event)
     throws IOException;
+
+  public void onError(AsyncEvent event)
+    throws Exception;
+
+  public void onStartAsync(AsyncEvent event)
+    throws Exception;
 }

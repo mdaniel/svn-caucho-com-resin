@@ -282,16 +282,6 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.isAsyncSupported();
   }
 
-  public void setAsyncTimeout(long timeout)
-  {
-    _request.setAsyncTimeout(timeout);
-  }
-
-  public long getAsyncTimeout()
-  {
-    return _request.getAsyncTimeout();
-  }
-
   public AsyncContext startAsync()
     throws IllegalStateException
   {

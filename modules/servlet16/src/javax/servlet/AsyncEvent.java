@@ -29,7 +29,6 @@
 
 package javax.servlet;
 
-import java.io.IOException;
 
 /**
  * Asynchronous/comet servlet support.
@@ -37,13 +36,37 @@ import java.io.IOException;
  * @since Servlet 3.0
  */
 public class AsyncEvent {
+  private final AsyncContext _context;
   private final ServletRequest _request;
   private final ServletResponse _response;
-  
-  public AsyncEvent(ServletRequest request, ServletResponse response)
+  private final Throwable _throwable;
+
+  public AsyncEvent(AsyncContext context)
   {
+    this(context, null, null, null);
+  }
+
+  public AsyncEvent(AsyncContext context,
+                    ServletRequest request,
+                    ServletResponse response)
+  {
+    this(context, request, response, null);
+  }
+
+  public AsyncEvent(AsyncContext context, Throwable throwable)
+  {
+    this(context, null, null, throwable);
+  }
+
+  public AsyncEvent(AsyncContext context,
+                    ServletRequest request,
+                    ServletResponse response,
+                    Throwable throwable)
+  {
+    _context = context;
     _request = request;
     _response = response;
+    _throwable = throwable;
   }
 
   public ServletRequest getRequest()

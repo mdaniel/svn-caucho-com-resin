@@ -62,12 +62,12 @@ public class AsyncListenerNode
   public void onTimeout()
     throws IOException
   {
-    _listener.onTimeout(new AsyncEvent(_request, _response));
+    _listener.onTimeout(new AsyncEvent(null, _request, _response));
   }
 
   public void onComplete()
     throws IOException
   {
-    _listener.onComplete(new AsyncEvent(_request, _response));
+    _listener.onComplete(new AsyncEvent(null, _request, _response));
   }
 }

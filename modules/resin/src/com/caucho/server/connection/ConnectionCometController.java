@@ -34,10 +34,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.AsyncListener;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 
 import com.caucho.servlet.comet.CometController;
 import com.caucho.util.Alarm;
@@ -263,6 +260,34 @@ public class ConnectionCometController extends ConnectionController
       = new AsyncListenerNode(listener, request, response, _listenerNode);
   }
 
+  public void addListener(AsyncListener listener)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void addListener(AsyncListener listener,
+                          ServletRequest request,
+                          ServletResponse response)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public <T extends AsyncListener> T createListener(Class<T> cl)
+    throws ServletException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public void setTimeout(long timeout)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public long getTimeout()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
   /**
    * Gets a request attribute.
    */
@@ -366,6 +391,8 @@ public class ConnectionCometController extends ConnectionController
       throw new IllegalStateException(
           L.l("AsyncContext.start() is not allowed because the AsyncContext has been completed."));
   }
+
+  
 
   /**
    * Closes the connection.
