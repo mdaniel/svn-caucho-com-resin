@@ -29,25 +29,19 @@
 
 package com.caucho.server.http;
 
-import com.caucho.util.L10N;
-import com.caucho.vfs.OutputStreamWithBuffer;
-import com.caucho.vfs.Path;
-
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.UnsupportedEncodingException;
 import java.io.Writer;
 import java.util.Locale;
-import java.util.logging.Logger;
+
+import com.caucho.vfs.OutputStreamWithBuffer;
+import com.caucho.vfs.Path;
 
 /**
  * API for handling the PrintWriter/ServletOutputStream
  */
 public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
-  private static final Logger log
-    = Logger.getLogger(AbstractResponseStream.class.getName());
-  private static final L10N L = new L10N(AbstractResponseStream.class);
-
   /**
    * Starts the response stream.
    */
@@ -263,6 +257,16 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    */
   abstract public void flushBuffer()
     throws IOException;
+  
+  /**
+   * Flushes the next buffer, leaving the current buffer alone
+   */
+  // server/1s04
+  public void flushNext()
+    throws IOException
+  {
+    flushBuffer();
+  }
 
   /**
    * Flushes the output.

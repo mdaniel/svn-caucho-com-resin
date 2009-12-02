@@ -946,12 +946,7 @@ abstract public class AbstractHttpResponse {
     if (_isClosed)
       return;
 
-    boolean isSuspend = false;
-    Connection conn = null;
-
     try {
-      conn = _request.getConnection();
-
       /* XXX:
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
 	handleNotModified(_isTopCache);

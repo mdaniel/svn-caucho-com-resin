@@ -29,29 +29,17 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.server.http.AbstractHttpResponse;
-import com.caucho.server.http.AbstractResponseStream;
-import com.caucho.server.http.HttpBufferStore;
-import com.caucho.server.http.ResponseStream;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.WriteStream;
-
-import javax.servlet.ServletContext;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.server.http.ResponseStream;
+import com.caucho.vfs.WriteStream;
 
 public class HmuxResponseStream extends ResponseStream {
   private static final Logger log
     = Logger.getLogger(HmuxResponseStream.class.getName());
 
-  private static final L10N L = new L10N(HmuxResponseStream.class);
-
-  private HmuxRequest _request;
   private WriteStream _next;
   private int _bufferStartOffset;
 
@@ -61,7 +49,6 @@ public class HmuxResponseStream extends ResponseStream {
   {
     super(response);
 
-    _request = request;
     _next = next;
   }
 
@@ -181,7 +168,7 @@ public class HmuxResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void flushNext()
+  public void flushNext()
     throws IOException
   {
     if (log.isLoggable(Level.FINE))

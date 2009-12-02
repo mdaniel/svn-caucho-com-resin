@@ -715,7 +715,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   abstract protected byte []writeNextBuffer(int offset)
     throws IOException;
 
-  abstract protected void flushNext()
+  public abstract void flushNext()
     throws IOException;
 
   abstract protected void closeNext()

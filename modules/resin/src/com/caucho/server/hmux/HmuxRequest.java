@@ -29,35 +29,44 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.hessian.io.*;
-import com.caucho.bam.*;
-import com.caucho.server.cluster.Cluster;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InterruptedIOException;
+import java.io.Serializable;
+import java.net.InetAddress;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
+import com.caucho.bam.ActorStream;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.Hessian2StreamingInput;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Connection;
 import com.caucho.server.connection.ServerRequest;
-import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.HttpBufferStore;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.server.http.InvocationKey;
 import com.caucho.server.webapp.ErrorPageManager;
-import com.caucho.util.*;
+import com.caucho.util.ByteBuffer;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharSegment;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.WriteStream;
-
-import java.io.*;
-import java.net.InetAddress;
-import java.security.cert.CertificateFactory;
-import java.security.cert.X509Certificate;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Handles requests from a remote dispatcher.  For example, mod_caucho
@@ -130,7 +139,6 @@ import java.util.logging.Logger;
 public class HmuxRequest extends AbstractHttpRequest
   implements ServerRequest
 {
-  private static final L10N L = new L10N(HmuxRequest.class);
   private static final Logger log
     = Logger.getLogger(HmuxRequest.class.getName());
 
@@ -219,8 +227,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private String _methodString;       // "GET"
   // private CharBuffer scheme;       // "http:"
   private CharBuffer _host;            // www.caucho.com
-  private int _port;                   // :80
-
   private ByteBuffer _uri;             // "/path/test.jsp/Junk"
   private CharBuffer _protocol;        // "HTTP/1.0"
   private int _version;
@@ -238,8 +244,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private CharBuffer []_headerValues;
   private int _headerSize;
 
-  private byte []_lengthBuf;
-
   private int _serverType;
 
   // write stream from the connection
@@ -254,7 +258,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private boolean _hasRequest;
 
   private Hessian2StreamingInput _in;
-  private Hessian2StreamingOutput _out;
   private Hessian2Output _hOut;
 
   private Server _server;
@@ -264,8 +267,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private HmuxProtocol _hmuxProtocol;
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
   private HmuxLinkService _linkService;
-
-  private int _srunIndex;
 
   private ActorClient _bamConn;
   private ActorClient _bamAdminConn;
@@ -316,8 +317,6 @@ public class HmuxRequest extends AbstractHttpRequest
     _cb1 = new CharBuffer();
     _cb2 = new CharBuffer();
 
-    _lengthBuf = new byte[16];
-
     _filter = new ServletFilter();
   }
 
@@ -338,7 +337,6 @@ public class HmuxRequest extends AbstractHttpRequest
   public void startConnection()
   {
     _in = null;
-    _out = null;
   }
 
   /**
@@ -556,8 +554,6 @@ public class HmuxRequest extends AbstractHttpRequest
     _version = 0;
     _uri.clear();
     _host.clear();
-    _port = 0;
-
     _headerSize = 0;
 
     _remoteHost.clear();
@@ -597,7 +593,6 @@ public class HmuxRequest extends AbstractHttpRequest
   private boolean scanHeaders()
     throws IOException
   {
-    CharBuffer cb = _cb;
     boolean isLoggable = log.isLoggable(Level.FINE);
     ReadStream is = _rawRead;
     int code;
@@ -1048,13 +1043,8 @@ public class HmuxRequest extends AbstractHttpRequest
     ActorClient bamConn = _bamBamConn;
     _bamBamConn = null;
 
-    Hessian2StreamingInput in = _in;
     _in = null;
 
-    Hessian2StreamingOutput out = _out;
-    _out = null;
-
-    Hessian2Output hOut = _hOut;
     _hOut = null;
 
     try {
@@ -1465,44 +1455,6 @@ public class HmuxRequest extends AbstractHttpRequest
     }
   }
 
-  private void hmtpConnect(int code, Broker broker)
-    throws IOException
-  {
-    try {
-      _bamConn = broker.getConnection("client", null);
-
-      _bamConn.setActorStream(new HmuxBamCallback(this));
-
-      WriteStream os = _rawWrite;
-
-      writeString(code, _bamConn.getJid());
-
-      if (log.isLoggable(Level.FINER))
-        log.fine(dbgId() + (char) code + "-r: HMTP connect " + _bamConn.getJid());
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  private Object readObject()
-    throws IOException
-  {
-    if (_in == null) {
-      InputStream is = _rawRead;
-
-      /*
-      if (log.isLoggable(Level.FINEST)) {
-        is = new HessianDebugInputStream(is, log, Level.FINEST);
-        is.startTop2();
-      }
-      */
-
-      _in = new Hessian2StreamingInput(is);
-    }
-
-    return _in.readObject();
-  }
-
   private Hessian2Input startHmtpPacket()
     throws IOException
   {
@@ -1527,33 +1479,6 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     if (_in != null)
       _in.endPacket();
-  }
-
-  private String readString(ReadStream is)
-    throws IOException
-  {
-    int code = is.read();
-    if (code != HMUX_STRING)
-      throw new IOException(L.l("expected string at " + (char) code));
-
-    int len = (is.read() << 8) + is.read();
-    _cb1.clear();
-    _rawRead.readAll(_cb1, len);
-
-    return _cb1.toString();
-  }
-
-  private long readLong(ReadStream is)
-    throws IOException
-  {
-    return (((long) is.read() << 56)
-            + ((long) is.read() << 48)
-            + ((long) is.read() << 40)
-            + ((long) is.read() << 32)
-            + ((long) is.read() << 24)
-            + ((long) is.read() << 16)
-            + ((long) is.read() << 8)
-            + ((long) is.read()));
   }
 
   /**
@@ -1732,7 +1657,7 @@ public class HmuxRequest extends AbstractHttpRequest
     }
   }
 
-  public Enumeration getHeaderNames()
+  public Enumeration<String> getHeaderNames()
   {
     HashSet<String> names = new HashSet<String>();
     for (int i = 0; i < _headerSize; i++)
@@ -1932,31 +1857,8 @@ public class HmuxRequest extends AbstractHttpRequest
     if (request != null) {
       AbstractResponseStream stream = request.getResponse().getResponseStream();
 
-      stream.flushBuffer();
+      stream.flushNext();
     }
-  }
-
-  private void writeObject(WriteStream out, Serializable value)
-    throws IOException
-  {
-    if (_out == null)
-      _out = new Hessian2StreamingOutput(_rawWrite);
-
-    _out.writeObject(value);
-    _out.flush();
-  }
-
-  private void writeLong(WriteStream out, long v)
-    throws IOException
-  {
-    out.write((int) (v << 56));
-    out.write((int) (v << 48));
-    out.write((int) (v << 40));
-    out.write((int) (v << 32));
-    out.write((int) (v << 24));
-    out.write((int) (v << 16));
-    out.write((int) (v << 8));
-    out.write((int) (v << 0));
   }
 
   void writeString(int code, String value)

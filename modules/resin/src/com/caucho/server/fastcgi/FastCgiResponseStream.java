@@ -98,7 +98,7 @@ public class FastCgiResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void flushNext()
+  public void flushNext()
     throws IOException
   {
     if (log.isLoggable(Level.FINE))

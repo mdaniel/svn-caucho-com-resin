@@ -29,18 +29,17 @@
 
 package com.caucho.server.hmux;
 
-import com.caucho.server.connection.*;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.servlet.http.Cookie;
+
 import com.caucho.server.http.AbstractHttpResponse;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.WriteStream;
-
-import javax.servlet.http.Cookie;
-import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Handles a response for a srun connection, i.e. a connection to

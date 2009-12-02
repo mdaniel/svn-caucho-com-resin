@@ -160,7 +160,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     // jsp/15m8
     if (res.isCommitted() && method == null && ! allowForward) {
       IllegalStateException exn;
-      exn = new IllegalStateException("forward() not allowed after buffer has committed.");
+      exn = new IllegalStateException(L.l("forward() not allowed after buffer has committed."));
 
       if (cauchoRes == null || ! cauchoRes.hasError()) {
         if (cauchoRes != null)
@@ -492,7 +492,6 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     subRequest.setPagePathInfo(subRequest.getPathInfo());
     subRequest.setPageQueryString(subRequest.getQueryString());
 
-    CauchoRequest oldRequest = null;
     AbstractResponseStream oldStream = null;
     /* XXX:
     if (response != null) {

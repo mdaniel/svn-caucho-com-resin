@@ -46,8 +46,6 @@ import java.util.logging.Level;
 public abstract class ToByteResponseStream extends AbstractResponseStream {
   private static final Logger log
     = Logger.getLogger(ToByteResponseStream.class.getName());
-  private static final L10N L = new L10N(ToByteResponseStream.class);
-
   protected static final int SIZE = TempBuffer.SIZE;
 
   private final char []_charBuffer = new char[SIZE];
