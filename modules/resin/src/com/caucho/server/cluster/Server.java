@@ -46,7 +46,7 @@ import com.caucho.git.GitRepository;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.hemp.broker.DomainManager;
-import com.caucho.hemp.servlet.ServerLinkManager;
+import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
 import com.caucho.loader.DynamicClassLoader;
@@ -143,9 +143,8 @@ public class Server extends ProtocolDispatchServer
   private HempBrokerManager _brokerManager;
   private DomainManager _domainManager;
   private HempBroker _broker;
-  private ServerLinkManager _serverLinkManager
-    = new ServerLinkManager();
-
+  private ServerAuthManager _serverLinkManager;
+  
   private GitRepository _git;
   private Repository _repository;
   private FileRepository _localRepository;
@@ -294,7 +293,8 @@ public class Server extends ProtocolDispatchServer
         _brokerManager.addBroker(getBamAdminName(), _broker);
         _brokerManager.addBroker("resin.caucho", _broker);
 
-        // Config.setProperty("server", new ServerVar(server), _classLoader);
+        _serverLinkManager = new ServerAuthManager(this);
+      // Config.setProperty("server", new ServerVar(server), _classLoader);
 
         _selfServer.getServerProgram().configure(this);
       } finally {
@@ -397,7 +397,7 @@ public class Server extends ProtocolDispatchServer
   /**
    * Returns the HMTP link manager
    */
-  public ServerLinkManager getServerLinkManager()
+  public ServerAuthManager getServerLinkManager()
   {
     return _serverLinkManager;
   }

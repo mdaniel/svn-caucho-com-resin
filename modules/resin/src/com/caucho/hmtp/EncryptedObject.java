@@ -43,6 +43,7 @@ public class EncryptedObject implements Serializable {
   /**
    * null constructor for Hessian.
    */
+  @SuppressWarnings("unused")
   private EncryptedObject()
   {
     _keyAlgorithm = null;

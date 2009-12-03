@@ -84,7 +84,7 @@ public class ServerFromLinkStream extends FromLinkStream
   private String _jid;
 
   public ServerFromLinkStream(Broker broker,
-			      ServerLinkManager linkManager,
+			      ServerAuthManager linkManager,
 			      InputStream is,
 			      OutputStream os,
 			      String ipAddress,
@@ -105,7 +105,7 @@ public class ServerFromLinkStream extends FromLinkStream
     _in = new Hessian2StreamingInput(is);
 
     _linkStream = new ServerToLinkStream(getJid(), os);
-    _linkService = new ServerLinkService(this, _linkStream, linkManager);
+    _linkService = null;//new ServerLinkService(this, _linkStream, linkManager);
     
     _linkServiceStream = new ServerLinkFilter(_linkService.getActorStream(),
 					      ipAddress);

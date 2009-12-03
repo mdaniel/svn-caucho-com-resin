@@ -29,16 +29,16 @@
 
 package com.caucho.hmtp;
 
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorException;
-import com.caucho.hessian.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
+import com.caucho.hessian.io.Hessian2Input;
+import com.caucho.hessian.io.Hessian2StreamingInput;
 
 /**
  * HmtpReader stream handles client packets received from the server.
@@ -74,8 +74,6 @@ public class HmtpReader {
   {
     if (actorStream == null)
       throw new IllegalStateException("HmtpReader.readPacket requires a valid ActorStream for callbacks");
-
-    int tag;
 
     Hessian2StreamingInput in = _in;
 

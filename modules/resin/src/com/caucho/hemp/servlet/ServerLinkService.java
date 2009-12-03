@@ -29,24 +29,19 @@
 
 package com.caucho.hemp.servlet;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
+import com.caucho.bam.Broker;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
-
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
-import com.caucho.hmtp.EncryptedObject;
 import com.caucho.hmtp.GetPublicKeyQuery;
-import com.caucho.hmtp.SelfEncryptedCredentials;
-
-import com.caucho.security.SelfEncryptedCookie;
 import com.caucho.security.SecurityException;
-import com.caucho.server.cluster.Server;
-
-import java.security.Key;
-import java.util.logging.*;
 
 /**
  * The LinkService is low-level link
@@ -56,25 +51,37 @@ public class ServerLinkService extends SimpleActor {
   private static final Logger log
     = Logger.getLogger(ServerLinkService.class.getName());
   
-  private ServerLinkManager _linkManager;
-  
-  private ServerFromLinkStream _manager;
-
-  private boolean _isRequireEncryptedPassword = true;
+  private final Broker _broker;
+  private final ServerLinkStream _serverLinkStream;
+  private final ServerAuthManager _authManager;
+  private final String _ipAddress;
   
   /**
    * Creates the LinkService for low-level link messages
    */
-  public ServerLinkService(ServerFromLinkStream manager,
-			   ActorStream agentStream,
-			   ServerLinkManager linkManager)
+  public ServerLinkService(ActorStream linkStream,
+                           Broker broker,
+			   ServerAuthManager authManager,
+			   String ipAddress)
   {
-    _manager = manager;
-    _linkManager = linkManager;
+    if (linkStream == null)
+      throw new NullPointerException();
     
-    // the agent stream serves as its own broker because there's no
-    // routing involved
-    setLinkStream(agentStream);
+    if (broker == null)
+      throw new NullPointerException();
+    
+    setLinkStream(linkStream);
+    
+    _broker = broker;
+    _authManager = authManager;
+    _ipAddress = ipAddress;
+    
+    _serverLinkStream = new ServerLinkStream(linkStream, this);
+  }
+  
+  public ActorStream getBrokerStream()
+  {
+    return _serverLinkStream;
   }
 
   //
@@ -85,7 +92,7 @@ public class ServerLinkService extends SimpleActor {
   public void getPublicKey(long id, String to, String from,
 			   GetPublicKeyQuery query)
   {
-    GetPublicKeyQuery result = _linkManager.getPublicKey();
+    GetPublicKeyQuery result = _authManager.getPublicKey();
 
     getLinkStream().queryResult(id, from, to, result);
   }
@@ -99,68 +106,36 @@ public class ServerLinkService extends SimpleActor {
   @QuerySet
   public void authLogin(long id, String to, String from, AuthQuery query)
   {
-    login(id, to, from, query, null);
+    login(id, to, from, query, _ipAddress);
   }
 
-  private boolean login(long id, String to, String from,
-			AuthQuery query, String ipAddress)
+  private void login(long id, String to, String from,
+                     AuthQuery query, String ipAddress)
   {
+    String uid = query.getUid();
     Object credentials = query.getCredentials();
-
-    if (credentials instanceof EncryptedObject) {
-      EncryptedObject encPassword = (EncryptedObject) credentials;
-
-      Key key = _linkManager.decryptKey(encPassword.getKeyAlgorithm(),
-					encPassword.getEncKey());
-
-      credentials = _linkManager.decrypt(key, encPassword.getEncData());
-    }
-    else if (credentials instanceof SelfEncryptedCredentials) {
-      try {
-	SelfEncryptedCredentials encCred
-	  = (SelfEncryptedCredentials) credentials;
-
-	byte []encData = encCred.getEncData();
-
-	Server server = Server.getCurrent();
-
-	String adminCookie = server.getAdminCookie();
-
-	if (adminCookie != null) {
-	  credentials = SelfEncryptedCookie.decrypt(adminCookie, encData);
-	}
-	else
-	  credentials = null;
-      } catch (SecurityException e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	getLinkStream().queryError(id, from, to, query,
-				     new ActorError(ActorError.TYPE_AUTH,
-						    ActorError.FORBIDDEN,
-						    e.getMessage()));
-	return true;
-      }
-    }
-    else if (_isRequireEncryptedPassword) {
-      getLinkStream().queryError(id, from, to, query,
-				   new ActorError(ActorError.TYPE_AUTH,
-						ActorError.FORBIDDEN,
-						"passwords must be encrypted"));
-      return true;
-    }
+  
+    try {
+      _authManager.authenticate(query.getUid(), credentials, ipAddress);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
     
-    String jid = _manager.login(query.getUid(),
-				credentials,
-				query.getResource(),
-				ipAddress);
-
-    if (jid != null)
-      getLinkStream().queryResult(id, from, to, new AuthResult(jid));
-    else
       getLinkStream().queryError(id, from, to, query,
-				   new ActorError(ActorError.TYPE_AUTH,
-						ActorError.FORBIDDEN));
+                                 new ActorError(ActorError.TYPE_AUTH,
+                                                ActorError.FORBIDDEN,
+                                                e.getMessage()));
+      return;
+    } catch (Throwable e) {
+      e.printStackTrace();
+    }
+   
+    _serverLinkStream.setBrokerStream(_broker.getBrokerStream());
 
-    return true;
+    String jid
+      = _broker.createClient(getLinkStream(), uid, query.getResource());
+   _serverLinkStream.setJid(jid);
+    
+    AuthResult result = new AuthResult(jid);
+    getLinkStream().queryResult(id, from, to, result);
   }
 }

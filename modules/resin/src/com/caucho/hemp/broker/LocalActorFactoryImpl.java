@@ -27,61 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
+package com.caucho.hemp.broker;
 
-/**
- * Query to get the public key
- */
-public class GetPublicKeyQuery implements java.io.Serializable {
-  private static final long serialVersionUID = -1166286457258394604L;
-  
-  private String _algorithm;
-  private String _format;
-  private byte []_encoded;
-  
-  /**
-   * Null constructor
-   */
-  public GetPublicKeyQuery()
-  {
-  }
-  
-  /**
-   * Constructor for the result
-   */
-  public GetPublicKeyQuery(String algorithm,
-			   String format,
-			   byte []encoded)
-  {
-    _algorithm = algorithm;
-    _format = format;
-    _encoded = encoded;
-  }
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorClientFactory;
+import com.caucho.bam.SimpleActorClient;
+import com.caucho.util.L10N;
 
-  public String getAlgorithm()
-  {
-    return _algorithm;
-  }
+public class LocalActorFactoryImpl implements ActorClientFactory
+{
+  private static final L10N L = new L10N(LocalActorFactoryImpl.class);
 
-  public String getFormat()
-  {
-    return _format;
-  }
+  private HempBroker _broker = HempBroker.getCurrent();
 
-  public byte []getEncoded()
+  public LocalActorFactoryImpl()
   {
-    return _encoded;
+    if (_broker == null)
+      throw new NullPointerException(L.l("no local broker is available"));
   }
 
   @Override
-  public String toString()
+  public ActorClient createClient(String uid, String resource)
   {
-    if (_algorithm != null) {
-      return (getClass().getSimpleName()
-	    + "[" + _algorithm + "," + _format + "]");
-    }
-    else {
-      return (getClass().getSimpleName() + "[]");
-    }
+    SimpleActorClient client = new SimpleActorClient(_broker, uid, resource);
+    
+    return client;
   }
 }

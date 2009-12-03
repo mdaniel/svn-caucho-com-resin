@@ -41,7 +41,7 @@ import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
 import com.caucho.bam.SimpleActorClient;
-import com.caucho.hemp.servlet.ServerLinkManager;
+import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.hmtp.AuthQuery;
 import com.caucho.hmtp.AuthResult;
 import com.caucho.hmtp.EncryptedObject;
@@ -64,7 +64,7 @@ public class HmuxLinkService extends SimpleActor {
     = Logger.getLogger(HmuxLinkService.class.getName());
   private static final L10N L = new L10N(HmuxLinkService.class);
   
-  private ServerLinkManager _linkManager;
+  private ServerAuthManager _linkManager;
   private Server _server;
 
   private HmuxRequest _request;

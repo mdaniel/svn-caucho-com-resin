@@ -823,7 +823,7 @@ public class HempBroker
     // queue
     if (threadMax > 0) {
       ActorStream actorStream = bamActor.getActorStream();
-      actorStream = new HempMemoryQueue(null, this, actorStream);
+      actorStream = new HempMemoryQueue(actorStream, this, threadMax);
       bamActor.setActorStream(actorStream);
     }
 

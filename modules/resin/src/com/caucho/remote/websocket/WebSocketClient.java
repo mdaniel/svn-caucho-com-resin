@@ -52,6 +52,8 @@ public class WebSocketClient {
   private String _host;
   private int _port;
   private String _path;
+  
+  private String _virtualHost;
 
   private WebSocketListener _listener;
 
@@ -61,20 +63,24 @@ public class WebSocketClient {
 
   private ClientContext _context;
 
-  public WebSocketClient()
+  public WebSocketClient(String url)
   {
+    _url = url;
+    parseUrl(url);
+  }
+  
+  public void setVirtualHost(String virtualHost)
+  {
+    _virtualHost = virtualHost;
   }
 
-  public void connect(String url, WebSocketListener listener)
+  public void connect(WebSocketListener listener)
     throws IOException
   {
     if (listener == null)
       throw new NullPointerException(L.l("listener is a required argument for connect()"));
 
     _listener = listener;
-
-    _url = url;
-    parseUrl(url);
 
     connectImpl();
   }
@@ -121,7 +127,14 @@ public class WebSocketClient {
     _os = Vfs.openWrite(_s.getOutputStream());
 
     _os.print("GET " + _path + " HTTP/1.1\r\n");
-    _os.print("Host: localhost\r\n");
+    
+    if (_virtualHost != null)
+      _os.print("Host: " + _virtualHost + "\r\n");
+    else if (_host != null)
+      _os.print("Host: " + _host + "\r\n");
+    else
+      _os.print("Host: localhost\r\n");
+    
     _os.print("Upgrade: WebSocket\r\n");
     _os.print("Connection: Upgrade\r\n");
     _os.print("Origin: Foo\r\n");
@@ -134,6 +147,9 @@ public class WebSocketClient {
     // _wsIn = new WebSocketInputStream(_is);
 
     _context = new ClientContext();
+    
+    _listener.onStart(_context);
+    
     // XXX: ThreadPool?
     Thread thread = new Thread(_context);
     thread.setDaemon(true);
@@ -262,7 +278,8 @@ public class WebSocketClient {
     public void handleRequests()
       throws IOException
     {
-      _listener.onStart(this);
+      // server/2h20
+      // _listener.onStart(this);
 
       while (_is.waitForRead()) {
         _listener.onRead(this);

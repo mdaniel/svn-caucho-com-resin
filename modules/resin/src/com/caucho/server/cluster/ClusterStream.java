@@ -211,6 +211,23 @@ public class ClusterStream implements ActorStream {
   {
     return "clusterStream@admin.resin";
   }
+  
+  public void switchToHmtp()
+  {
+    try {
+      WriteStream out = getWriteStream();
+
+      out.write(HmuxRequest.HMUX_SWITCH_TO_HMTP);
+      out.write(0);
+      out.write(1);
+      boolean isAdmin = true;
+      out.write(isAdmin ? 1 : 0);
+      out.flush();
+    } catch (IOException e) {
+      throw new ActorException(e);
+    }
+    
+  }
 
   public void message(String to, String from, Serializable query)
   {

@@ -29,24 +29,21 @@
 
 package com.caucho.security;
 
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.HessianDebugInputStream;
+import java.io.ByteArrayInputStream;
+import java.io.Serializable;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+
+import javax.crypto.Cipher;
+import javax.crypto.CipherInputStream;
+import javax.crypto.CipherOutputStream;
+import javax.crypto.NoSuchPaddingException;
+import javax.crypto.spec.SecretKeySpec;
+
 import com.caucho.hessian.io.Hessian2Input;
-import com.caucho.util.LruCache;
-import com.caucho.util.Hex;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.util.L10N;
 import com.caucho.vfs.TempOutputStream;
-
-import java.io.Serializable;
-import java.io.ByteArrayInputStream;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import java.security.*;
-
-import javax.annotation.PostConstruct;
-import javax.crypto.*;
-import javax.crypto.spec.SecretKeySpec;
 
 /**
  * Self-encrypted cookie for server to server authentication.
@@ -54,8 +51,8 @@ import javax.crypto.spec.SecretKeySpec;
  * @since Resin 4.0.0
  */
 public class SelfEncryptedCookie implements Serializable {
-  private static final Logger log
-    = Logger.getLogger(SelfEncryptedCookie.class.getName());
+  private static final long serialVersionUID = 4678288478579787074L;
+
   private static final L10N L = new L10N(SelfEncryptedCookie.class); 
   
   private final String _cookie;
@@ -64,6 +61,7 @@ public class SelfEncryptedCookie implements Serializable {
   /**
    * Hessian serialization
    */
+  @SuppressWarnings("unused")
   private SelfEncryptedCookie()
   {
     _cookie = null;

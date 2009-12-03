@@ -29,24 +29,21 @@
 
 package com.caucho.hmtp;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.io.Serializable;
-import java.net.Socket;
 import java.security.PublicKey;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.bam.ActorException;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
-import com.caucho.bam.SimpleActorStream;
+import com.caucho.hemp.broker.HempMemoryQueue;
+import com.caucho.remote.websocket.WebSocketClient;
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
 
 /**
  * HMTP client protocol
@@ -56,94 +53,36 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
     = Logger.getLogger(HmtpClient.class.getName());
 
   private String _url;
-  private String _scheme;
-  private String _host;
-  private String _virtualHost;
-  private int _port;
-  private String _path;
-  
   private boolean _isEncryptPassword = true;
+  
+  private String _jid;
 
-  protected Socket _s;
-  protected InputStream _is;
-  protected OutputStream _os;
+  private WebSocketClient _webSocketClient;
+  private WebSocketListener _webSocketHandler;
 
   private ActorException _connException;
 
-  private ClientLinkManager _linkManager = new ClientLinkManager();
-  
-  private ClientToLinkStream _linkStream;
-  private String _jid;
+  private ClientLinkManager _authManager = new ClientLinkManager();
 
   public HmtpClient(String url)
   {
-    this(url, null);
+    _url = url;
+    
+    _webSocketClient = new WebSocketClient(url);
+    _webSocketHandler = new WebSocketHandler();
   }
 
   public HmtpClient(String url, ActorStream actorStream)
+    throws IOException
   {
-    _url = url;
-    parseURL(url);
+    this(url);
     
     setClientStream(actorStream);
   }
 
   public void setVirtualHost(String host)
   {
-    _virtualHost = host;
-  }
-
-  protected void parseURL(String url)
-  {
-    int p = url.indexOf("://");
-
-    if (p < 0)
-      throw new IllegalArgumentException("URL '" + url + "' is not well-formed");
-
-    _scheme = url.substring(0, p);
-
-    url = url.substring(p + 3);
-    
-    p = url.indexOf("/");
-    if (p >= 0) {
-      _path = url.substring(p);
-      url = url.substring(0, p);
-    }
-    else {
-      _path = "/";
-    }
-
-    p = url.indexOf(':');
-    if (p > 0) {
-      _host = url.substring(0, p);
-      _port = Integer.parseInt(url.substring(p + 1));
-    }
-    else {
-      _host = url;
-      if ("https".equals(_scheme))
-	_port = 443;
-      else
-	_port = 80;
-    }
-  }
-
-  public String getHost()
-  {
-    return _host;
-  }
-
-  public int getPort()
-  {
-    return _port;
-  }
-
-  @Override
-  public void setActorStream(ActorStream actorStream)
-  {
-    if (actorStream == null)
-      throw new NullPointerException();
-
-    super.setActorStream(actorStream);
+    _webSocketClient.setVirtualHost(host);
   }
 
   public void setEncryptPassword(boolean isEncrypt)
@@ -167,94 +106,14 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
 
   protected void connectImpl()
   {
-    if (_s != null)
-      throw new IllegalStateException(this + " is already connected");
-
     try {
-      openSocket(_host, _port);
-
-      // http upgrade
-
-      print(_os, "CONNECT " + _path + " HTTP/1.1\r\n");
-
-      String host = _virtualHost;
-      if (host == null)
-	host = _host;
-      
-      print(_os, "Host: " + host + ":" + _port + "\r\n");
-      print(_os, "Upgrade: HMTP/0.9\r\n");
-      print(_os, "Connection: Upgrade\r\n");
-      print(_os, "Content-Length: 0\r\n");
-      print(_os, "\r\n");
-      _os.flush();
-
-      String status = readLine(_is);
-      int statusCode = 0;
-
-      if (status != null) {
-	String []statusLine = status.split("[\\s]+");
-
-	if (statusLine.length > 2) {
-	  try {
-	    statusCode = Integer.parseInt(statusLine[1]);
-	  } catch (Exception e) {
-	    log.finer(String.valueOf(e));
-	  }
-	}
-      }
-
-      String header;
-	
-      while (! (header = readLine(_is)).trim().equals("")) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " " + header);
-      }
-
-      if (status.startsWith("HTTP/1.1 101")) {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " " + status);
-
-	_linkStream = new ClientToLinkStream(null, _os);
-	setLinkStream(_linkStream);
-
-	executeThread(new ClientFromLinkStream(this, _is));
-      }
-      else {
-	_os.close();
-
-	StringBuilder text = new StringBuilder();
-	try {
-	  int ch;
-	  while ((ch = _is.read()) >= 0)
-	    text.append((char) ch);
-	} catch (Exception e) {
-	  if (log.isLoggable(Level.FINER))
-	    log.log(Level.FINER, e.toString(), e);
-	}
-	
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " " + status + "\n" + text);
-
-	switch (statusCode) {
-	case 0:
-	  throw new RemoteConnectionFailedException("Failed to connect to HMTP\n" + status + "\n\n" + text);
-	  
-	case HttpServletResponse.SC_SERVICE_UNAVAILABLE:
-	  throw new RemoteConnectionFailedException("Failed to connect to HMTP because server is busy or unavailable.\n" + status + "\n\n" + text);
-	  
-	case HttpServletResponse.SC_NOT_FOUND:
-	  throw new RemoteConnectionFailedException("Failed to connect to HMTP because the HMTP service has not been enabled.\n" + status + "\n\n" + text);
-	  
-	default:
-	  throw new RemoteConnectionFailedException("Failed to upgrade to HMTP\n" + status + "\n\n" + text);
-	}
-      }
+      _webSocketClient.connect(_webSocketHandler);
     } catch (ActorException e) {
       _connException = e;
 
       throw _connException;
     } catch (IOException e) {
-      _connException = new RemoteConnectionFailedException("Failed to connect to server at " + _host + ":" + _port + "\n  " + e, e);
+      _connException = new RemoteConnectionFailedException("Failed to connect to server at " + _url);
 
       throw _connException;
     }
@@ -272,12 +131,12 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
 	GetPublicKeyQuery pkValue
 	  = (GetPublicKeyQuery) queryGet(null, new GetPublicKeyQuery());
 
-	PublicKey publicKey = _linkManager.getPublicKey(pkValue);
+	PublicKey publicKey = _authManager.getPublicKey(pkValue);
 
-	ClientLinkManager.Secret secret = _linkManager.generateSecret();
+	ClientLinkManager.Secret secret = _authManager.generateSecret();
 
 	EncryptedObject encPassword
-	  = _linkManager.encrypt(secret, publicKey, credentials);
+	  = _authManager.encrypt(secret, publicKey, credentials);
 
 	credentials = encPassword;
       }
@@ -327,86 +186,16 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
       return jid;
   }
 
-  public ActorStream getLinkStream()
-  {
-    return getBrokerStream();
-  }
-  
-  /**
-   * Returns the current stream to the broker, throwing an exception if
-   * it's unavailable
-   */
-  public ActorStream getBrokerStream()
-  {
-    ActorStream stream = _linkStream;
-
-    if (stream != null)
-      return stream;
-    else if (_connException != null)
-      throw _connException;
-    else
-      throw new RemoteConnectionFailedException(_url + " connection has been closed");
-  }
-
   public void flush()
     throws IOException
   {
+    /*
     ClientToLinkStream stream = _linkStream;
 
     if (stream != null)
       stream.flush();
+      */
   }
-
-  public boolean isClosed()
-  {
-    return _linkStream == null;
-  }
-  
-  protected void openSocket(String host, int port)
-    throws IOException
-  {
-    _s = new Socket(_host, _port);
-
-    InputStream is = _s.getInputStream();
-    OutputStream os = _s.getOutputStream();
-    
-    _os = new BufferedOutputStream(os);
-    _is = new BufferedInputStream(is);
-  }
-
-  /**
-   * Spawns the thread to handle the inbound packets
-   */
-  protected void executeThread(Runnable r)
-  {
-    Thread thread = new Thread(r);
-    thread.setName("hmtp-reader-" + _host + "-" + _port);
-    thread.setDaemon(true);
-    thread.start();
-  }
-
-  protected void print(OutputStream os, String s)
-    throws IOException
-  {
-    int len = s.length();
-
-    for (int i = 0; i < len; i++)
-      os.write(s.charAt(i));
-  }
-
-  protected String readLine(InputStream is)
-    throws IOException
-  {
-    StringBuilder sb = new StringBuilder();
-    int ch;
-
-    while ((ch = is.read()) >= 0 && ch != '\n') {
-      sb.append((char) ch);
-    }
-
-    return sb.toString();
-  }
-
 
   public void close()
   {
@@ -415,44 +204,8 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
 
     super.close();
     
-    try {
-      Socket s;
-      InputStream is;
-      OutputStream os;
-      ClientToLinkStream stream;
-      
-      synchronized (this) {
-	s = _s;
-	_s = null;
-	
-	is = _is;
-	_is = null;
-
-	stream = _linkStream;
-	_linkStream = null;
-	
-	os = _os;
-	_os = null;
-      }
-
-      if (stream != null)
-	stream.close();
-
-      if (os != null) {
-	try { os.close(); } catch (IOException e) {}
-      }
-
-      if (is != null) {
-	is.close();
-      }
-
-      if (s != null) {
-	s.close();
-      }
-    } catch (Exception e) {
-      log.log(Level.WARNING, e.toString(), e);
-    }
-  }
+    _webSocketClient.close();
+   }
 
   @Override
   public String toString()
@@ -464,5 +217,38 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
   protected void finalize()
   {
     close();
+  }
+  
+  class WebSocketHandler implements WebSocketListener {
+    private HmtpReader _in;
+    private HmtpWriter _out;
+    
+    @Override
+    public void onStart(WebSocketContext context) throws IOException
+    {
+      _out = new HmtpWriter(context.getOutputStream());
+      setLinkStream(new HempMemoryQueue(_out, getActorStream(), 1));
+      
+      _in = new HmtpReader(context.getInputStream());
+    }
+
+    @Override
+    public void onRead(WebSocketContext context) throws IOException
+    {
+      InputStream is = context.getInputStream();
+      
+      while (_in.readPacket(getActorStream()) && is.available() > 0) {
+      }
+    }
+
+    @Override
+    public void onComplete(WebSocketContext context) throws IOException
+    {
+    }
+
+    @Override
+    public void onTimeout(WebSocketContext context) throws IOException
+    {
+    }    
   }
 }

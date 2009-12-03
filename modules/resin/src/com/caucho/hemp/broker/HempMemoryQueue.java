@@ -29,21 +29,34 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.hemp.packet.*;
-import com.caucho.bam.Broker;
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.ActorError;
-import com.caucho.loader.Environment;
-import com.caucho.server.resin.*;
-import com.caucho.server.util.*;
-import com.caucho.util.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.*;
-import java.lang.ref.*;
+import java.io.Closeable;
 import java.io.Serializable;
-import java.io.*;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
+import com.caucho.hemp.packet.Message;
+import com.caucho.hemp.packet.MessageError;
+import com.caucho.hemp.packet.Packet;
+import com.caucho.hemp.packet.PacketQueue;
+import com.caucho.hemp.packet.Presence;
+import com.caucho.hemp.packet.PresenceError;
+import com.caucho.hemp.packet.PresenceProbe;
+import com.caucho.hemp.packet.PresenceSubscribe;
+import com.caucho.hemp.packet.PresenceSubscribed;
+import com.caucho.hemp.packet.PresenceUnavailable;
+import com.caucho.hemp.packet.PresenceUnsubscribe;
+import com.caucho.hemp.packet.PresenceUnsubscribed;
+import com.caucho.hemp.packet.QueryError;
+import com.caucho.hemp.packet.QueryGet;
+import com.caucho.hemp.packet.QueryResult;
+import com.caucho.hemp.packet.QuerySet;
+import com.caucho.loader.Environment;
+import com.caucho.util.Alarm;
+import com.caucho.util.ThreadPool;
+import com.caucho.util.WaitQueue;
 
 /**
  * Queue of hmtp packets
@@ -52,8 +65,6 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 {
   private static final Logger log
     = Logger.getLogger(HempMemoryQueue.class.getName());
-  private static final L10N L = new L10N(HempMemoryQueue.class);
-
   private static long _gid;
 
   // how long the thread should wait for a new request before exiting
@@ -63,57 +74,44 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   private final ClassLoader _loader
     = Thread.currentThread().getContextClassLoader();
 
-  private final Broker _broker;
-  private final ActorStream _brokerStream;
+  private final String _name;
+  private final ActorStream _linkStream;
   private final ActorStream _actorStream;
 
-  private int _threadMax;
-  private AtomicInteger _threadCount = new AtomicInteger();
-  private AtomicInteger _dequeueCount = new AtomicInteger();
-  private Object _idleLock = new Object();
+  private final int _threadMax;
+  private final AtomicInteger _threadCount = new AtomicInteger();
   private final WaitQueue _wait = new WaitQueue();
-  private long _lastExitTime;
+  private final PacketQueue _queue;
 
-  private PacketQueue _queue;
-  private String _name;
+  private long _lastExitTime;
 
   private volatile boolean _isClosed;
 
-  public HempMemoryQueue(Broker broker,
-                         ActorStream actorStream)
+  public HempMemoryQueue(ActorStream actorStream,
+                         ActorStream linkStream,
+                         int threadMax)
   {
-    this(null, broker, actorStream);
-  }
-
-  public HempMemoryQueue(String name,
-                         Broker broker,
-                         ActorStream actorStream)
-  {
-    if (broker == null)
+    if (linkStream == null)
       throw new NullPointerException();
 
     if (actorStream == null)
       throw new NullPointerException();
 
-    _broker = broker;
-    _brokerStream = broker.getBrokerStream();
+    _linkStream = linkStream;
     _actorStream = actorStream;
 
-    if (Alarm.isTest())
-      _threadMax = 1;
+    _threadMax = threadMax;
+
+    if (_actorStream.getJid() == null)
+      _name = _actorStream.getClass().getSimpleName();
     else
-      _threadMax = 5;
-
-    if (name == null)
-      name = _actorStream.getJid();
-
-    _name = name;
+      _name = _actorStream.getJid();
 
     int maxDiscardSize = -1;
     int maxBlockSize = 1024;
     long expireTimeout = -1;
 
-    _queue = new PacketQueue(name, maxDiscardSize, maxBlockSize, expireTimeout);
+    _queue = new PacketQueue(_name, maxDiscardSize, maxBlockSize, expireTimeout);
 
     Environment.addCloseListener(this);
   }
@@ -161,10 +159,6 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
                        String from,
                        Serializable query)
   {
-    if (from == null) {
-      throw new NullPointerException();
-    }
-
     enqueue(new QueryGet(id, to, from, query));
   }
 
@@ -330,7 +324,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
       int threadCount = _threadCount.get();
       long now = Alarm.getCurrentTime();
 
-      if (threadCount == _threadMax) {
+      if (threadCount >= _threadMax) {
         // thread max
         return;
       }
@@ -365,7 +359,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
    */
   protected void dispatch(Packet packet, WaitQueue.Item item)
   {
-    packet.dispatch(getActorStream(), _brokerStream);
+    packet.dispatch(getActorStream(), _linkStream);
   }
 
   protected Packet dequeue(WaitQueue.Item item, long timeout)
@@ -499,7 +493,7 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
   public boolean isClosed()
   {
-    return _isClosed || _brokerStream.isClosed();
+    return _isClosed || _linkStream.isClosed();
   }
 
   @Override

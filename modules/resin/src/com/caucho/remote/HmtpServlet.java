@@ -29,32 +29,38 @@
 
 package com.caucho.remote;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.hemp.*;
-import com.caucho.hemp.broker.*;
-import com.caucho.hemp.servlet.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.servlet.GenericServlet;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
-import com.caucho.security.Authenticator;
+import com.caucho.hemp.broker.HempBroker;
+import com.caucho.hemp.broker.HempMemoryQueue;
+import com.caucho.hemp.servlet.ServerAuthManager;
+import com.caucho.hemp.servlet.ServerLinkService;
+import com.caucho.hmtp.HmtpReader;
+import com.caucho.hmtp.HmtpWriter;
 import com.caucho.security.AdminAuthenticator;
-import com.caucho.server.connection.*;
+import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.servlet.DuplexContext;
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.util.logging.*;
-
-import javax.inject.Inject;
-import javax.enterprise.inject.Instance;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.*;
 
 /**
- * Main protocol handler for the HTTP version of HeMPP.
+ * Main protocol handler for the HTTP version of BAM.
  */
 public class HmtpServlet extends GenericServlet {
   private static final Logger log
@@ -67,8 +73,9 @@ public class HmtpServlet extends GenericServlet {
   private @Inject Instance<Authenticator> _authInstance;
   private @Inject Instance<AdminAuthenticator> _adminInstance;
 
+  private Broker _broker;
   private Authenticator _auth;
-  private ServerLinkManager _linkManager;
+  private ServerAuthManager _authManager;
 
   public void setAdmin(boolean isAdmin)
   {
@@ -113,7 +120,14 @@ public class HmtpServlet extends GenericServlet {
       }
     }
 
-    _linkManager = new ServerLinkManager(_auth);
+    _authManager = new ServerAuthManager(_auth);
+
+    if (_isAdmin)
+      _broker = Server.getCurrent().getAdminBroker();
+    else
+      _broker = HempBroker.getCurrent();
+    
+    log.fine(L.l("{0} starting with broker={1}", this, _broker));
   }
 
   /**
@@ -127,30 +141,70 @@ public class HmtpServlet extends GenericServlet {
 
     String upgrade = req.getHeader("Upgrade");
 
-    if (! "HMTP/0.9".equals(upgrade)) {
+    if (! "WebSocket".equals(upgrade)) {
       // eventually can use alt method
-      res.sendError(HttpServletResponse.SC_NOT_FOUND);
+      res.sendError(400, "Upgrade denied:" + upgrade);
       return;
     }
+    
+    String ipAddress = req.getRemoteAddr();
+    
+    WebSocketHandler handler
+      = new WebSocketHandler(ipAddress);
+    
+    WebSocketContext webSocket = req.startWebSocket(handler);
 
-    ReadStream is = req.getConnection().getReadStream();
-    WriteStream os = req.getConnection().getWriteStream();
+    webSocket.setTimeout(30 * 60 * 1000L);
+  }
+  
+  class WebSocketHandler implements WebSocketListener {
+    private String _ipAddress;
+    
+    private HmtpReader _in;
+    private HmtpWriter _out;
+    
+    private ActorStream _linkStream;
+    private ActorStream _brokerStream;
+    
+    private ServerLinkService _linkService;
 
-    Broker broker;
+    WebSocketHandler(String ipAddress)
+    {
+      _ipAddress = ipAddress;
+    }
+    
+    @Override
+    public void onStart(WebSocketContext context) throws IOException
+    {
+      _in = new HmtpReader(context.getInputStream());
+      _out = new HmtpWriter(context.getOutputStream());
+      _linkStream = new HempMemoryQueue(_out, _broker.getBrokerStream(), 1);
+      
+      _linkService = new ServerLinkService(_linkStream, _broker, _authManager,
+                                           _ipAddress);
+      _brokerStream = _linkService.getBrokerStream();
+    }
 
-    if (_isAdmin)
-      broker = Server.getCurrent().getAdminBroker();
-    else
-      broker = HempBroker.getCurrent();
+    @Override
+    public void onComplete(WebSocketContext context) throws IOException
+    {
+      _brokerStream.close();
+      _linkService.close();
+    }
 
-    String address = req.getRemoteAddr();
+    @Override
+    public void onRead(WebSocketContext context) throws IOException
+    {
+      InputStream is = context.getInputStream();
+      
+      while (_in.readPacket(_brokerStream)
+            && is.available() > 0) {
+      }
+    }
 
-    ServerFromLinkStream fromLinkStream
-      = new ServerFromLinkStream(broker, _linkManager, is, os, address,
-                                 _auth, _isAuthenticationRequired);
-
-    DuplexContext duplex = req.startDuplex(fromLinkStream);
-
-    duplex.setTimeout(30 * 60 * 1000L);
+    @Override
+    public void onTimeout(WebSocketContext context) throws IOException
+    {
+    }
   }
 }

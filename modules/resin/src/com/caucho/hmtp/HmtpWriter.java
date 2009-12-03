@@ -29,16 +29,17 @@
 
 package com.caucho.hmtp;
 
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.ProtocolException;
-import com.caucho.bam.ActorError;
-import com.caucho.hessian.io.*;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
+import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.hessian.io.HessianDebugOutputStream;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
@@ -67,7 +68,10 @@ public class HmtpWriter implements ActorStream
     _os = os;
 
     if (log.isLoggable(Level.FINEST)) {
-      _os = new HessianDebugOutputStream(_os, log, Level.FINEST);
+      HessianDebugOutputStream dOut;
+      dOut = new HessianDebugOutputStream(_os, log, Level.FINEST);
+      dOut.startStreaming();
+      _os = dOut;
     }
       
     _out = new Hessian2Output(_os);
