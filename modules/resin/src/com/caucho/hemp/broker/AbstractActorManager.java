@@ -29,10 +29,9 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.Actor;
 import com.caucho.bam.ActorMissingEvent;
-import com.caucho.bam.BrokerListener;
 import com.caucho.bam.Broker;
+import com.caucho.bam.BrokerListener;
 
 /**
  * An ActorManager dynamically registers {@link com.caucho.bam.Actor Actors}

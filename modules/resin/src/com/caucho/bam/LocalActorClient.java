@@ -163,48 +163,6 @@ public class LocalActorClient implements ActorClient {
     _client.querySet(to, payload, callback);
   }
 
-  public void presence(String to, Serializable payload)
-  {
-    _client.presence(to, payload);
-  }
-
-  public void presenceUnavailable(String to, Serializable payload)
-  {
-    _client.presenceUnavailable(to, payload);
-  }
-
-  public void presenceProbe(String to, Serializable payload)
-  {
-    _client.presenceProbe(to, payload);
-  }
-
-  public void presenceSubscribe(String to, Serializable payload)
-  {
-    _client.presenceSubscribe(to, payload);
-  }
-
-  public void presenceSubscribed(String to, Serializable payload)
-  {
-    _client.presenceSubscribed(to, payload);
-  }
-
-  public void presenceUnsubscribe(String to, Serializable payload)
-  {
-    _client.presenceUnsubscribe(to, payload);
-  }
-
-  public void presenceUnsubscribed(String to, Serializable payload)
-  {
-    _client.presenceUnsubscribed(to, payload);
-  }
-
-  public void presenceError(String to,
-                            Serializable payload,
-                            ActorError error)
-  {
-    _client.presenceError(to, payload, error);
-  }
-
   public boolean isClosed()
   {
     return _client.isClosed();

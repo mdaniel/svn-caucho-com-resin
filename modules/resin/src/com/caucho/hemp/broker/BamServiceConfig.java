@@ -29,23 +29,10 @@
 
 package com.caucho.hemp.broker;
 
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
-import javax.jms.*;
-import javax.resource.spi.*;
-
-import com.caucho.bam.*;
-import com.caucho.hemp.broker.HempBroker;
 import com.caucho.config.ConfigException;
-import com.caucho.config.annotation.Start;
-import com.caucho.remote.BamService;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.inject.InjectManager;
-
-import com.caucho.util.*;
+import com.caucho.remote.BamService;
+import com.caucho.util.L10N;
 
 /**
  * bam-service configuration
@@ -53,17 +40,9 @@ import com.caucho.util.*;
 public class BamServiceConfig extends AbstractBeanConfig
 {
   private static final L10N L = new L10N(BamServiceConfig.class);
-  private static final Logger log
-    = Logger.getLogger(BamServiceConfig.class.getName());
-
-  private Broker _broker;
-
-  private int _threadMax = 1;
-  private Actor _service;
-
   public BamServiceConfig()
   {
-    _broker = HempBroker.getCurrent();
+    HempBroker.getCurrent();
 
     setScope("singleton");
   }
@@ -78,7 +57,6 @@ public class BamServiceConfig extends AbstractBeanConfig
 
   public void setThreadMax(int threadMax)
   {
-    _threadMax = threadMax;
   }
 
   protected void initImpl()

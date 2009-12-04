@@ -516,11 +516,13 @@ public class XmppReader
     if (target == null)
       target = _uid;
 
+    // XXX: need different types
     ImPresence presence = new ImPresence(to, from,
 					 show, status, priority,
 					 extraList);
 
     if (_handler != null) {
+      /*
       if ("".equals(type) || "presence".equals(type))
 	_handler.presence(target, from, presence);
       else if ("probe".equals(type))
@@ -539,6 +541,7 @@ public class XmppReader
 	_handler.presenceError(target, from, presence, error);
       else
 	log.warning(this + " " + type + " is an unknown presence type");
+	*/
     }
 
     return true;

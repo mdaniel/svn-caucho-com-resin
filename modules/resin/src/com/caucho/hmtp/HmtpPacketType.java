@@ -29,13 +29,6 @@
 
 package com.caucho.hmtp;
 
-import com.caucho.hessian.io.*;
-
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
 
 /**
  * HMTP packet types
@@ -47,16 +40,7 @@ public enum HmtpPacketType {
   QUERY_GET,
   QUERY_SET,
   QUERY_RESULT,
-  QUERY_ERROR,
-
-  PRESENCE,
-  PRESENCE_UNAVAILABLE,
-  PRESENCE_PROBE,
-  PRESENCE_SUBSCRIBE,
-  PRESENCE_SUBSCRIBED,
-  PRESENCE_UNSUBSCRIBE,
-  PRESENCE_UNSUBSCRIBED,
-  PRESENCE_ERROR;
+  QUERY_ERROR;
   
   public static final HmtpPacketType []TYPES
     = HmtpPacketType.class.getEnumConstants();

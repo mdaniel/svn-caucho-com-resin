@@ -13,6 +13,7 @@
 
 <s2 title="4.0.3 - Nov 24, 2009">
 <ul>
+<li>server: hmux post/forward issues (#3793, rep by Jamison Novak and Wesley Wu)</li>
 <li>server: hmux load balancer with incorrect protocol for short-response post (#3790, rep by Wesley Wu)</li>
 </ul>
 </s2>

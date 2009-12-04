@@ -41,14 +41,6 @@ import com.caucho.hemp.packet.Message;
 import com.caucho.hemp.packet.MessageError;
 import com.caucho.hemp.packet.Packet;
 import com.caucho.hemp.packet.PacketQueue;
-import com.caucho.hemp.packet.Presence;
-import com.caucho.hemp.packet.PresenceError;
-import com.caucho.hemp.packet.PresenceProbe;
-import com.caucho.hemp.packet.PresenceSubscribe;
-import com.caucho.hemp.packet.PresenceSubscribed;
-import com.caucho.hemp.packet.PresenceUnavailable;
-import com.caucho.hemp.packet.PresenceUnsubscribe;
-import com.caucho.hemp.packet.PresenceUnsubscribed;
 import com.caucho.hemp.packet.QueryError;
 import com.caucho.hemp.packet.QueryGet;
 import com.caucho.hemp.packet.QueryResult;
@@ -194,85 +186,6 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
                              ActorError error)
   {
     enqueue(new QueryError(id, to, from, query, error));
-  }
-
-  /**
-   * Presence
-   */
-  public void presence(String to, String from, Serializable data)
-  {
-    enqueue(new Presence(to, from, data));
-  }
-
-  /**
-   * Presence unavailable
-   */
-  public void presenceUnavailable(String to,
-                                      String from,
-                                      Serializable data)
-  {
-    enqueue(new PresenceUnavailable(to, from, data));
-  }
-
-  /**
-   * Presence probe
-   */
-  public void presenceProbe(String to,
-                                String from,
-                                Serializable data)
-  {
-    enqueue(new PresenceProbe(to, from, data));
-  }
-
-  /**
-   * Presence subscribe
-   */
-  public void presenceSubscribe(String to,
-                                    String from,
-                                    Serializable data)
-  {
-    enqueue(new PresenceSubscribe(to, from, data));
-  }
-
-  /**
-   * Presence subscribed
-   */
-  public void presenceSubscribed(String to,
-                                     String from,
-                                     Serializable data)
-  {
-    enqueue(new PresenceSubscribed(to, from, data));
-  }
-
-  /**
-   * Presence unsubscribe
-   */
-  public void presenceUnsubscribe(String to,
-                                      String from,
-                                      Serializable data)
-  {
-    enqueue(new PresenceUnsubscribe(to, from, data));
-  }
-
-  /**
-   * Presence unsubscribed
-   */
-  public void presenceUnsubscribed(String to,
-                                       String from,
-                                       Serializable data)
-  {
-    enqueue(new PresenceUnsubscribed(to, from, data));
-  }
-
-  /**
-   * Presence error
-   */
-  public void presenceError(String to,
-                                String from,
-                                Serializable data,
-                                ActorError error)
-  {
-    enqueue(new PresenceError(to, from, data, error));
   }
 
   protected ActorStream getActorStream()

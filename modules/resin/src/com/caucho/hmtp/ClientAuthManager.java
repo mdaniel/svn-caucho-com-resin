@@ -48,9 +48,9 @@ import javax.crypto.SecretKey;
  * Manages links on the client
  */
 
-public class ClientLinkManager {
+public class ClientAuthManager {
   private static final Logger log
-    = Logger.getLogger(ClientLinkManager.class.getName());
+    = Logger.getLogger(ClientAuthManager.class.getName());
 
   private static Method _keyRepReadResolve;
 

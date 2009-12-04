@@ -29,43 +29,33 @@
 
 package com.caucho.quercus.lib.bam;
 
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Logger;
+
 import com.caucho.bam.ActorClient;
-import com.caucho.bam.ActorStream;
 import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hmtp.HmtpClient;
-import com.caucho.config.inject.InjectManager;
+import com.caucho.quercus.annotation.ClassImplementation;
+import com.caucho.quercus.annotation.Optional;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.ConstStringValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.module.AbstractQuercusModule;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 import com.caucho.xmpp.im.ImMessage;
 import com.caucho.xmpp.im.ImPresence;
 import com.caucho.xmpp.im.RosterItem;
 import com.caucho.xmpp.im.RosterQuery;
 import com.caucho.xmpp.im.Text;
-
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.annotation.Optional;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.module.IniDefinitions;
-import com.caucho.quercus.env.BooleanValue;
-import com.caucho.quercus.env.JavaValue;
-import com.caucho.quercus.env.LongValue;
-import com.caucho.quercus.env.NullValue;
-import com.caucho.quercus.env.ConstStringValue;
-import com.caucho.quercus.env.StringBuilderValue;
-import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
-import com.caucho.quercus.module.IniDefinition;
-import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-
-import java.io.IOException;
-import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.logging.Logger;
 
 /**
  * BAM functions
@@ -360,61 +350,6 @@ public class BamModule extends AbstractQuercusModule
     getBrokerStream(env).queryError(id, to, getJid(env), value, error);
   }
 
-  public static void bam_send_presence(Env env, String to, Serializable value)
-  {
-    getBrokerStream(env).presence(to, getJid(env), value);
-  }
-
-  public static void bam_send_presence_unavailable(Env env, 
-                                                   String to, 
-                                                   Serializable value)
-  {
-    getBrokerStream(env).presenceUnavailable(to, getJid(env), value);
-  }
-
-  public static void bam_send_presence_probe(Env env, 
-                                             String to, 
-                                             Serializable value)
-  {
-    getBrokerStream(env).presenceProbe(to, getJid(env), value);
-  }
-
-  public static void bam_send_presence_subscribe(Env env, 
-                                                 String to, 
-                                                 Serializable value)
-  {
-    getBrokerStream(env).presenceSubscribe(to, getJid(env), value);
-  }
-
-  public static void bam_send_presence_subscribed(Env env, 
-                                                  String to, 
-                                                  Serializable value)
-  {
-    getBrokerStream(env).presenceSubscribed(to, getJid(env), value);
-  }
-
-  public static void bam_send_presence_unsubscribe(Env env, 
-                                                   String to, 
-                                                   Serializable value)
-  {
-    getBrokerStream(env).presenceUnsubscribe(to, getJid(env), value);
-  }
-
-  public static void bam_send_presence_unsubscribed(Env env, 
-                                                    String to, 
-                                                    Serializable value)
-  {
-    getBrokerStream(env).presenceUnsubscribed(to, getJid(env), value);
-  }
-
-  public static void bam_send_presence_error(Env env, 
-                                             String to, 
-                                             Serializable value,
-                                             ActorError error)
-  {
-    getBrokerStream(env).presenceError(to, getJid(env), value, error);
-  }
-
   public static Value im_send_message(Env env, 
                                       String to, 
                                       String from, 
@@ -538,7 +473,7 @@ public class BamModule extends AbstractQuercusModule
     ImPresence presence = 
       createPresence(env, to, from, show, status, priority, extras);
 
-    bam_send_presence(env, to, presence);
+    bam_send_message(env, to, presence);
   }
 
   public static void im_send_presence_unavailable(Env env, 
@@ -551,10 +486,11 @@ public class BamModule extends AbstractQuercusModule
                                                   ArrayList<Serializable> 
                                                   extras)
   {
+    // XXX: needs to be ImPresenceUnavailable
     ImPresence presence = 
       createPresence(env, to, from, show, status, priority, extras);
 
-    bam_send_presence_unavailable(env, to, presence);
+    bam_send_message(env, to, presence);
   }
 
   /**
@@ -569,10 +505,11 @@ public class BamModule extends AbstractQuercusModule
                                                 @Optional 
                                                 ArrayList<Serializable> extras)
   {
+    // XXX: presenceSubscribe
     ImPresence presence = 
       createPresence(env, to, from, show, status, priority, extras);
 
-    bam_send_presence_subscribe(env, to, presence);
+    bam_send_message(env, to, presence);
   }
 
   /**
@@ -587,10 +524,11 @@ public class BamModule extends AbstractQuercusModule
                                                  @Optional 
                                                  ArrayList<Serializable> extras)
   {
+    // presenceSubscribed
     ImPresence presence = 
       createPresence(env, to, from, show, status, priority, extras);
 
-    bam_send_presence_subscribed(env, to, presence);
+    bam_send_message(env, to, presence);
   }
 
   /**
@@ -606,10 +544,11 @@ public class BamModule extends AbstractQuercusModule
                                                   ArrayList<Serializable> 
                                                   extras)
   {
+    // XXX: presenceUnsubscribe
     ImPresence presence = 
       createPresence(env, to, from, show, status, priority, extras);
 
-    bam_send_presence_unsubscribe(env, to, presence);
+    bam_send_message(env, to, presence);
   }
 
   /**
@@ -625,10 +564,11 @@ public class BamModule extends AbstractQuercusModule
                                                    ArrayList<Serializable> 
                                                    extras)
   {
+    // presenceUnsubscribe
     ImPresence presence = 
       createPresence(env, to, from, show, status, priority, extras);
 
-    bam_send_presence_unsubscribed(env, to, presence);
+    bam_send_message(env, to, presence);
   }
 
   public static void im_send_presence_probe(Env env, 
@@ -640,10 +580,11 @@ public class BamModule extends AbstractQuercusModule
                                             @Optional 
                                             ArrayList<Serializable> extras)
   {
+    // presenceProbe
     ImPresence presence = 
       createPresence(env, to, from, show, status, priority, extras);
 
-    bam_send_presence_probe(env, to, presence);
+    bam_send_message(env, to, presence);
   }
 
   /**

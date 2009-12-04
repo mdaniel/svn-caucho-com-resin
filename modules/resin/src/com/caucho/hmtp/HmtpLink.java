@@ -50,7 +50,7 @@ import javax.servlet.http.HttpServletResponse;
 /**
  * HMTP client protocol
  */
-public class HmtpLink implements LinkClient, Runnable {
+public class HmtpLink implements Runnable {
   private static final Logger log
     = Logger.getLogger(HmtpLink.class.getName());
 
@@ -59,12 +59,10 @@ public class HmtpLink implements LinkClient, Runnable {
 
   private String _jid;
 
-  private ClientLinkManager _linkManager = new ClientLinkManager();
-
   private SimpleActorStream _actorStream;
   
-  private ClientToLinkStream _toLinkStream;
-  private ClientFromLinkStream _fromLinkStream;
+  private HmtpWriter _toLinkStream;
+  private HmtpReader _in;
 
   public HmtpLink(SimpleActorStream actorStream, InputStream is, OutputStream os)
   {
@@ -73,8 +71,8 @@ public class HmtpLink implements LinkClient, Runnable {
     _is = is;
     _os = os;
 
-    _toLinkStream = new ClientToLinkStream(null, _os);
-    _fromLinkStream = new ClientFromLinkStream(this, _is);
+    _toLinkStream = new HmtpWriter(_os);
+    _in = new HmtpReader(_is);
 
     if (actorStream.getJid() == null)
       actorStream.setJid(actorStream.getClass().getSimpleName() + "@link");
@@ -123,19 +121,13 @@ public class HmtpLink implements LinkClient, Runnable {
   {
     try {
       while (! isClosed()) {
-	readPacket();
+	_in.readPacket(_actorStream);
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
   }
-  
-  public void readPacket()
-    throws IOException
-  {
-    _fromLinkStream.readPacket();
-  }
-
+ 
   public void close()
   {
     _actorStream = null;

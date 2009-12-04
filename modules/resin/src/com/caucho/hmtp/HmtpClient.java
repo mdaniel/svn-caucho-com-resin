@@ -48,7 +48,7 @@ import com.caucho.servlet.WebSocketListener;
 /**
  * HMTP client protocol
  */
-public class HmtpClient extends SimpleActorClient implements LinkClient {
+public class HmtpClient extends SimpleActorClient {
   private static final Logger log
     = Logger.getLogger(HmtpClient.class.getName());
 
@@ -62,7 +62,7 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
 
   private ActorException _connException;
 
-  private ClientLinkManager _authManager = new ClientLinkManager();
+  private ClientAuthManager _authManager = new ClientAuthManager();
 
   public HmtpClient(String url)
   {
@@ -133,7 +133,7 @@ public class HmtpClient extends SimpleActorClient implements LinkClient {
 
 	PublicKey publicKey = _authManager.getPublicKey(pkValue);
 
-	ClientLinkManager.Secret secret = _authManager.generateSecret();
+	ClientAuthManager.Secret secret = _authManager.generateSecret();
 
 	EncryptedObject encPassword
 	  = _authManager.encrypt(secret, publicKey, credentials);
