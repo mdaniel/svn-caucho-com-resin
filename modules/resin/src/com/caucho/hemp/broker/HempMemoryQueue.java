@@ -123,6 +123,14 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   {
     return ! _queue.isEmpty();
   }
+  
+  /**
+   * Returns the stream back to the link for error packets
+   */
+  public ActorStream getLinkStream()
+  {
+    return _linkStream;
+  }
 
   /**
    * Sends a message
@@ -160,9 +168,13 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
   public void querySet(long id,
                        String to,
                        String from,
-                       Serializable query)
+                       Serializable payload)
   {
-    enqueue(new QuerySet(id, to, from, query));
+    if (to == null || from == null) {
+      System.out.println("SQ: " + to + " " + from + " " + payload);
+      Thread.dumpStack();
+    }
+    enqueue(new QuerySet(id, to, from, payload));
   }
 
   /**

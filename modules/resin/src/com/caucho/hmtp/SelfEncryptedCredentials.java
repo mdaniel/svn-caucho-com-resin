@@ -40,6 +40,7 @@ public class SelfEncryptedCredentials implements Serializable {
   /**
    * null constructor for Hessian.
    */
+  @SuppressWarnings("unused")
   private SelfEncryptedCredentials()
   {
     _encData = null;

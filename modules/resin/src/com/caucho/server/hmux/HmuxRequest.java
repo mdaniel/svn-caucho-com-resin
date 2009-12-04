@@ -210,6 +210,7 @@ public class HmuxRequest extends AbstractHttpRequest
   public static final int HMTP_QUERY_ERROR =    '5';
   public static final int HMTP_PRESENCE =       '6';
   
+  public static final int HMUX_TO_UNIDIR_HMTP = '7';
   public static final int HMUX_SWITCH_TO_HMTP = '8';
   public static final int HMUX_HMTP_OK        = '9';
 
@@ -887,6 +888,7 @@ public class HmuxRequest extends AbstractHttpRequest
           log.fine(dbgId() + (char) code + " post-data: " + len);
         return true;
         
+      case HMUX_TO_UNIDIR_HMTP:
       case HMUX_SWITCH_TO_HMTP: {
         len = (is.read() << 8) + is.read();
         boolean isAdmin = is.read() != 0;
@@ -905,12 +907,14 @@ public class HmuxRequest extends AbstractHttpRequest
         ActorStream brokerStream = broker.getBrokerStream();
         
         _linkStream = new HempMemoryQueue(_hmtpWriter, brokerStream, 1);
+        boolean isUnidir = code == HMUX_TO_UNIDIR_HMTP;
         
         ServerLinkService linkService
           = new ServerLinkService(_linkStream,
                                   _server.getAdminBroker(),
                                   _server.getServerLinkManager(),
-                                  getRemoteAddr());
+                                  getRemoteAddr(),
+                                  isUnidir);
 
         _brokerStream = linkService.getBrokerStream();        
         
@@ -2252,7 +2256,7 @@ public class HmuxRequest extends AbstractHttpRequest
         _is.skip(_pendingData);
         _pendingData = 0;
       }
-Thread.dumpStack();
+
       boolean keepalive = _request.allowKeepalive();
 
       if (! _isClientClosed) {

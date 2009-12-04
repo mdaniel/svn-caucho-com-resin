@@ -53,6 +53,8 @@ public class HmtpWriter implements ActorStream
   
   private OutputStream _os;
   private Hessian2Output _out;
+  
+  private boolean _isAutoFlush = true;
 
   public HmtpWriter()
   {
@@ -61,6 +63,11 @@ public class HmtpWriter implements ActorStream
   public HmtpWriter(OutputStream os)
   {
     init(os);
+  }
+  
+  public void setAutoFlush(boolean isAutoFlush)
+  {
+    _isAutoFlush = isAutoFlush;
   }
 
   public void init(OutputStream os)
@@ -117,7 +124,9 @@ public class HmtpWriter implements ActorStream
 	out.writeString(from);
 	out.writeObject(value);
 	out.endPacket();
-	out.flush();
+	
+	if (_isAutoFlush)
+	  out.flush();
       }
     } catch (IOException e) {
       close();
@@ -150,7 +159,9 @@ public class HmtpWriter implements ActorStream
 	out.writeObject(value);
 	out.writeObject(error);
 	out.endPacket();
-	out.flush();
+	
+	if (_isAutoFlush)
+	  out.flush();
       }
     } catch (IOException e) {
       close();
@@ -187,7 +198,9 @@ public class HmtpWriter implements ActorStream
 	out.writeLong(id);
 	out.writeObject(value);
 	out.endPacket();
-	out.flush();
+	
+	if (_isAutoFlush)
+	  out.flush();
       }
     } catch (IOException e) {
       close();
@@ -220,7 +233,9 @@ public class HmtpWriter implements ActorStream
 	out.writeLong(id);
 	out.writeObject(value);
 	out.endPacket();
-	out.flush();
+	
+	if (_isAutoFlush)
+	  out.flush();
       }
     } catch (IOException e) {
       close();
@@ -253,7 +268,9 @@ public class HmtpWriter implements ActorStream
 	out.writeLong(id);
 	out.writeObject(value);
 	out.endPacket();
-	out.flush();
+	
+	if (_isAutoFlush)
+	  out.flush();
       }
     } catch (IOException e) {
       close();
@@ -288,7 +305,9 @@ public class HmtpWriter implements ActorStream
 	out.writeObject(value);
 	out.writeObject(error);
 	out.endPacket();
-	out.flush();
+	
+	if (_isAutoFlush)
+	  out.flush();
       }
     } catch (IOException e) {
       close();

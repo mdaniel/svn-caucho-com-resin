@@ -181,7 +181,7 @@ public class HmtpServlet extends GenericServlet {
       _linkStream = new HempMemoryQueue(_out, _broker.getBrokerStream(), 1);
       
       _linkService = new ServerLinkService(_linkStream, _broker, _authManager,
-                                           _ipAddress);
+                                           _ipAddress, false);
       _brokerStream = _linkService.getBrokerStream();
     }
 

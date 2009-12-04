@@ -172,7 +172,20 @@ public class ServerAuthManager {
     Server server = Server.getCurrent();
     Authenticator auth = getAuth();
 
-    if (auth == null && ! _isAuthenticationRequired) {
+    if (credentials instanceof SelfEncryptedCookie) {
+      SelfEncryptedCookie cookie = (SelfEncryptedCookie) credentials;
+
+      // XXX: cred timeout
+      String adminCookie = server.getAdminCookie();
+      if (adminCookie == null)
+        adminCookie = "";
+      
+      if (! cookie.getCookie().equals(adminCookie)) {
+        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
+                                             uid));
+      }
+    }
+    else if (auth == null && ! _isAuthenticationRequired) {
     }
     else if (auth == null) {
       throw new NotAuthorizedException(L.l("{0} does not have a configured authenticator",
@@ -185,16 +198,6 @@ public class ServerAuthManager {
       PasswordCredentials pwdCred = new PasswordCredentials(password);
     
       if (auth.authenticate(user, pwdCred, null) == null) {
-        throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
-                                             uid));
-      }
-    }
-    else if (credentials instanceof SelfEncryptedCookie) {
-      SelfEncryptedCookie cookie = (SelfEncryptedCookie) credentials;
-
-      // XXX: cred timeout
-      
-      if (! cookie.getCookie().equals(server.getAdminCookie())) {
         throw new NotAuthorizedException(L.l("'{0}' has invalid credentials",
                                              uid));
       }
@@ -222,20 +225,19 @@ public class ServerAuthManager {
       return decrypt(key, encPassword.getEncData());
     }
     else if (credentials instanceof SelfEncryptedCredentials) {
-         SelfEncryptedCredentials encCred
-          = (SelfEncryptedCredentials) credentials;
+      SelfEncryptedCredentials encCred
+      = (SelfEncryptedCredentials) credentials;
 
-        byte []encData = encCred.getEncData();
+      byte []encData = encCred.getEncData();
 
-        Server server = Server.getCurrent();
+      Server server = Server.getCurrent();
 
-        String adminCookie = server.getAdminCookie();
+      String adminCookie = server.getAdminCookie();
+      
+      if (adminCookie == null)
+        adminCookie = "";
 
-        if (adminCookie != null) {
-          return SelfEncryptedCookie.decrypt(adminCookie, encData);
-        }
-        else
-          return null;
+      return SelfEncryptedCookie.decrypt(adminCookie, encData);
     }
     else if (_isRequireEncryptedPassword) {
       throw new SecurityException("passwords must be encrypted");

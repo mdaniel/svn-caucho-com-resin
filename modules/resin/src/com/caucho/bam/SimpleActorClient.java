@@ -51,7 +51,7 @@ public class SimpleActorClient implements ActorClient {
 
   private long _timeout = 10000L;
 
-  protected SimpleActorClient()
+  public SimpleActorClient()
   {
     _actorStream = new QueryFilterStream();
   }
@@ -72,6 +72,11 @@ public class SimpleActorClient implements ActorClient {
   public String getJid()
   {
     return _jid;
+  }
+  
+  public void setJid(String jid)
+  {
+    _jid = jid;
   }
 
   //

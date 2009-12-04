@@ -58,22 +58,10 @@ public class SimpleActorStream implements ActorStream
 
   private String _jid;
   private ActorStream _linkStream;
-  private final ActorClient _linkClient;
-
+ 
   public SimpleActorStream()
   {
     _skeleton = Skeleton.getSkeleton(getClass());
-    
-    _linkClient = new SimpleActorClient();
-    _linkClient.setClientStream(this);
-  }
-
-  public SimpleActorStream(ActorClient client)
-  {
-    _skeleton = Skeleton.getSkeleton(getClass());
-    
-    _linkClient = client;
-    _linkClient.setClientStream(this);
   }
 
   /**
@@ -95,14 +83,6 @@ public class SimpleActorStream implements ActorStream
   }
 
   /**
-   * Returns the ActorClient to the link for convenient message calls.
-   */
-  public ActorClient getLinkClient()
-  {
-    return _linkClient;
-  }
-
-  /**
    * Returns the stream to the broker for query results or errors, or
    * low-level messaging.
    */
@@ -118,7 +98,6 @@ public class SimpleActorStream implements ActorStream
   public void setLinkStream(ActorStream linkStream)
   {
     _linkStream = linkStream;
-    _linkClient.setLinkStream(linkStream);
   }
 
   //

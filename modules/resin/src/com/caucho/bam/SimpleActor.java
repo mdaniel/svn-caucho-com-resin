@@ -36,10 +36,17 @@ public class SimpleActor extends SimpleActorStream
   implements Actor
 {
   private ActorStream _actorStream;
+  
+  private final SimpleActorClient _linkClient;
 
   public SimpleActor()
   {
     setActorStream(this);
+    
+    _linkClient = new SimpleActorClient();
+    _linkClient.setClientStream(this);
+    
+    setActorStream(_linkClient.getActorStream());
   }
   
   //
@@ -65,5 +72,38 @@ public class SimpleActor extends SimpleActorStream
   public void setActorStream(ActorStream actorStream)
   {
     _actorStream = actorStream;
+  }
+  
+
+  /**
+   * Sets the Actor's jid so the {@link com.caucho.bam.Broker} can
+   * register it.
+   */
+  @Override
+  public void setJid(String jid)
+  {
+    super.setJid(jid);
+    _linkClient.setJid(jid);
+  }
+
+  /**
+   * Returns the ActorClient to the link for convenient message calls.
+   */
+  public ActorClient getLinkClient()
+  {
+    return _linkClient;
+  }
+  
+
+  /**
+   * Returns the stream to the broker for query results or errors, or
+   * low-level messaging.
+   */
+  @Override
+  public void setLinkStream(ActorStream linkStream)
+  {
+    super.setLinkStream(linkStream);
+    
+    _linkClient.setLinkStream(linkStream);
   }
 }

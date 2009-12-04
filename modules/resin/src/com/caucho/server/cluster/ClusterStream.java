@@ -212,12 +212,16 @@ public class ClusterStream implements ActorStream {
     return "clusterStream@admin.resin";
   }
   
-  public void switchToHmtp()
+  public void switchToHmtp(boolean isUnidir)
   {
     try {
       WriteStream out = getWriteStream();
 
-      out.write(HmuxRequest.HMUX_SWITCH_TO_HMTP);
+      if (isUnidir)
+        out.write(HmuxRequest.HMUX_TO_UNIDIR_HMTP);
+      else
+        out.write(HmuxRequest.HMUX_SWITCH_TO_HMTP);
+             
       out.write(0);
       out.write(1);
       boolean isAdmin = true;

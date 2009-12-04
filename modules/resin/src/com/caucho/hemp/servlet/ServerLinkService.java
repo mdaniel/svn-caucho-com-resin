@@ -53,6 +53,8 @@ public class ServerLinkService extends SimpleActor {
   
   private final Broker _broker;
   private final ServerLinkStream _serverLinkStream;
+  private final ServerPassStream _serverPassStream;
+  private final ActorStream _brokerStream;
   private final ServerAuthManager _authManager;
   private final String _ipAddress;
   
@@ -62,7 +64,8 @@ public class ServerLinkService extends SimpleActor {
   public ServerLinkService(ActorStream linkStream,
                            Broker broker,
 			   ServerAuthManager authManager,
-			   String ipAddress)
+			   String ipAddress,
+			   boolean isUnidir)
   {
     if (linkStream == null)
       throw new NullPointerException();
@@ -75,13 +78,22 @@ public class ServerLinkService extends SimpleActor {
     _broker = broker;
     _authManager = authManager;
     _ipAddress = ipAddress;
-    
-    _serverLinkStream = new ServerLinkStream(linkStream, this);
+   
+    if (isUnidir) {
+      _serverPassStream = new ServerPassStream(linkStream, this);
+      _brokerStream = _serverPassStream;
+      _serverLinkStream = null;
+    }
+    else {
+      _serverPassStream = null;
+      _serverLinkStream = new ServerLinkStream(linkStream, this);
+      _brokerStream = _serverLinkStream;
+    }
   }
   
   public ActorStream getBrokerStream()
   {
-    return _serverLinkStream;
+    return _brokerStream;
   }
 
   //
@@ -128,12 +140,19 @@ public class ServerLinkService extends SimpleActor {
     } catch (Throwable e) {
       e.printStackTrace();
     }
-   
-    _serverLinkStream.setBrokerStream(_broker.getBrokerStream());
+
+    if (_serverLinkStream != null)
+      _serverLinkStream.setBrokerStream(_broker.getBrokerStream());
+    if (_serverPassStream != null)
+      _serverPassStream.setBrokerStream(_broker.getBrokerStream());
 
     String jid
       = _broker.createClient(getLinkStream(), uid, query.getResource());
-   _serverLinkStream.setJid(jid);
+
+    if (_serverLinkStream != null)
+      _serverLinkStream.setJid(jid);
+    if (_serverPassStream != null)
+      _serverPassStream.setJid(jid);
     
     AuthResult result = new AuthResult(jid);
     getLinkStream().queryResult(id, from, to, result);
