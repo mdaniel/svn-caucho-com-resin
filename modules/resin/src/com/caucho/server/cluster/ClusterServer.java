@@ -34,6 +34,7 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.bam.ActorStream;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.program.ConfigProgram;
@@ -704,6 +705,14 @@ public final class ClusterServer {
   public final ServerPool getServerPool()
   {
     return _serverPool;
+  }
+  
+  /**
+   * Returns the bam queue to the server.
+   */
+  public ActorStream getHmtpStream()
+  {
+    return null;
   }
 
   /**
