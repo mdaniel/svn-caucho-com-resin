@@ -1,0 +1,178 @@
+<document>
+  <header>
+    <product>resin</product>
+    <version>Resin 3.1</version>
+    <title>Command-Line Configuration</title>
+    <description>
+      <p>While most configuration options have been made available in
+        resin.xml, this section describes some common command-line
+        options.</p>
+    </description>
+  </header>
+  <body>
+    <s1 title="./configure options">
+
+    <p>
+    The <code>./configure; make; make install</code> step is important for all Unix users.  It configures and compiles 
+    low level JNI code that enables Resin to provide a number of features not
+    normally available to Java programs and also provides significant performance
+    improvements.
+    </p>
+
+    <p>
+    The most commonly used options for <code>./configure</code> are documented
+    below, the full set of available command line options is available by running
+    <code>./configure --help</code>.
+    </p>
+
+    <deftable>
+    <tr>
+      <td>--help</td>
+      <td>Help for all ./configure command line options</td></tr>
+    <tr>
+      <td>--enable-64bit</td>
+      <td>Compiles the JNI using 64-bits, requires <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.xml</td>
+    </tr>
+    <tr>
+      <td>--enable-ssl</td>
+      <td>Enable OpenSSL, see the <a href="resin-security.xtp#openssl">OpenSSL</a> documentation for details.</td>
+    </tr>
+    <tr>
+      <td>--with-apxs=<var>/path/to/apxs</var></td>
+      <td>Enable <a href="install-apache.xtp">Apache integration</a> and produce mod_caucho</td>
+    </tr>
+    </deftable>
+
+    <p>
+      The 64-bit JNI compilation must match the JDK you're using, i.e.
+      you'll need to add a <code>&lt;jvm-arg>-d64&lt;/jvm-arg></code> entry in resin.xml to
+      indicate that the jvm should start in 64-bit mode.
+    </p>
+
+    </s1>
+    
+    <s1 title="Startup Options">
+      <p>As of Resin 3.1, startup options should be declared in the
+        configuration file. However, some startup options are available
+        via the command line.</p>
+      <s2 name="command-line" title="Command-line arguments">
+
+      <deftable>
+      <tr>
+        <th>Argument</th>
+        <th>Meaning</th>
+        <th>Default</th>
+      </tr>
+      <tr>
+        <td>-conf <var>xxx</var></td>
+        <td>Selects the Resin configuration file</td>
+        <td>conf/resin.xml</td>
+      </tr>
+      <tr>
+        <td>-server <var>xxx</var></td>
+        <td>Selects the &lt;server> in the resin.xml</td>
+        <td>""</td>
+      </tr>
+      <tr>
+        <td>-verbose</td>
+        <td>Show the Java environment before starting Resin.</td>
+        <td>off</td>
+      </tr>
+      <tr>
+        <td>start</td>
+        <td>Starts Resin as a daemon, starting the watchdog if necessary</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>status</td>
+        <td>Show the status of Resin as a daemon.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>stop</td>
+        <td>Stops Resin as a daemon by contacting the watchdog.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>restart</td>
+        <td>Restarts Resin as a daemon by contacting the watchdog.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>kill</td>
+        <td>Kill Resin as a daemon by contacting the watchdog, a killed process is
+           destroyed and not allowed to clean up or finish pending connections.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>shutdown</td>
+        <td>Shutdown the watchdog and all of the Resin daemons.</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-install</td>
+        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-install-as <var>xxx</var></td>
+        <td>(Windows) install Resin as a named service (but doesn't automatically start.)</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-remove</td>
+        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
+         <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-remove-as <var>xxx</var></td>
+        <td>(Windows) remove Resin as a named service (but doesn't automatically start.)</td>
+        <td>n/a</td>
+      </tr>
+      <tr>
+        <td>-resin-home <var>xxx</var></td>
+        <td>
+           Deprecated. Sets the Resin home directory.
+           Use environment variable <var>RESIN_HOME</var> or
+           <var>&lt;jvm-arg&gt;-Dresin.home=xxx&lt;/jvm-arg&gt;</var> in resin.xml.
+        </td>
+        <td>The parent directory of resin.jar</td>
+      </tr>
+      </deftable>
+      </s2>
+    </s1>
+      <s1 title="JDK arguments">
+
+      <p>Resin 3.1 has moved all JDK arguments into the resin.xml
+      file, in the &lt;<a href="server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
+      tag. Because the Resin 3.1 watchdog starts each Resin server instance,
+      it can pass the arguments defined in the configuration file to the JVM.
+      By moving the Java arguments to the configuration file, server configuration
+      is easier and more maintainable.</p>
+
+      <example title="resin.xml with Java arguments">
+      &lt;resin xmlns="http://caucho.com/ns/resin">
+        &lt;cluster id="app-tier">
+
+          &lt;server-default>
+            &lt;jvm-arg>-Xms32m&lt;/jvm-arg>
+            &lt;jvm-arg>-Xmx512m&lt;/jvm-arg>
+            &lt;jvm-arg>-Xss1m&lt;/jvm-arg>
+            &lt;jvm-arg>-verbosegc&lt;/jvm-arg>
+            &lt;jvm-arg>-Dfoo=bar&lt;/jvm-arg>
+            &lt;jvm-arg>-agentlib:resin&lt;/jvm-arg>
+            &lt;jvm-arg>-Xdebug&lt;/jvm-arg>
+            
+            &lt;http port="8080"/>
+          &lt;/server-default>
+
+          &lt;server id="a" address="192.168.2.1" port="6800"/>
+
+          ...
+        &lt;/cluster>
+      &lt;/resin>
+      </example>
+
+      </s1>
+  </body>
+</document>

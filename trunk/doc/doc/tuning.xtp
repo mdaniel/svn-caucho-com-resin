@@ -1,0 +1,248 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Performance Tuning</title>
+  </header>
+
+  <body>
+    <localtoc/>
+
+<s1 title="Resin Threads">
+
+<p>Resin will automatically allocate and free threads as the load requires.
+Since the threads are pooled, Resin can reuse old threads without the
+performance penalty of creating and destroying the threads.  When the
+load drops, Resin will slowly decrease the number of threads in the
+pool until is matches the load.</p>
+
+<p>Most users can set <var>thread-max</var> to something large (200 or
+greater) and then forget about the threading.  Some ISPs dedicate a
+JVM per user and have many JVMs on the same machine.  In that case, it
+may make sense to reduce the <var>thread-max</var> to throttle the
+requests.</p>
+
+<p>Since each servlet request gets its own thread, <var>thread-max</var>
+determines the maximum number of concurrent users.  So if you have a
+peak of 100 users with slow modems downloading a large file, you'll
+need a <var>thread-max</var> of at least 100.  The number of concurrent
+users is unrelated to the number of active sessions.  Unless the user
+is actively downloading, he doesn't need a thread (except for "keepalives").
+</p>
+
+</s1>
+
+<s1 title="Keepalives">
+
+<p>Keepalives make HTTP and srun requests more efficient.  Connecting to
+a TCP server is relatively expensive.  The client and server need to
+send several packets back and forth to establish the connection before
+the first data can go through.  HTTP/1.1 introduced a protocol to keep
+the connection open for more requests.  The srun protocol between
+Resin and the web server plugin also uses keepalives.  By keeping the
+connection open for following requests, Resin can improve performance.
+</p>
+
+<example title="resin.xml for thread-keepalive">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="app-tier">
+
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
+
+      &lt;keepalive-max&gt;500&lt;/keepalive-max&gt;
+      &lt;keepalive-timeout&gt;120s&lt;/keepalive-timeout&gt;
+    &lt;/server-default>
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<s2 title="Timeouts">
+
+<p>Requests and keepalive connections can only be idle for a limited
+time before Resin closes them.  Each connection has a read
+timeout, <var>request-timeout</var>.  If the client doesn't send a request
+within the timeout, Resin will close the TCP socket.  The timeout
+prevents idle clients from hogging Resin resources.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
+
+      &lt;socket-timeout&gt;30s&lt;/socket-timeout&gt;
+
+      &lt;http port="8080"/>
+    &lt;/server-default>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
+
+      &lt;load-balance-idle-time&gt;20s&lt;/load-balance-idle-time&gt;
+
+      &lt;socket-timeout&gt;30s&lt;/socket-timeout&gt;
+
+      &lt;http port="8080"/>
+    &lt;/server-default>
+
+     &lt;server id="app-a" address="192.168.2.1" port="6802"/>
+
+     ...
+   &lt;cluster&gt;
+ &lt;resin&gt;
+</example>
+
+<p>In general, the socket-timeout and keepalives are less important
+for Resin standalone configurations than Apache/IIS/srun
+configurations.  Very heavy traffic sites may want to reduce the
+timeout for Resin standalone.</p>
+
+<p>Since <var>socket-timeout</var> will close srun connections, its
+setting needs to take into consideration the
+&lt;<a href="server-tags.xtp#load-balance-idle-time">load-balance-idle-time</a>
+setting for mod_caucho or isapi_srun.  <var>load-balance-idle-time</var> is the
+time the plugin will keep a connection open.  <var>socket-timeout</var> must
+always be larger than <var>load-balance-idle-time</var>, otherwise the plugin
+will try to reuse a closed socket.</p>
+
+</s2>
+
+<s2 title="Plugin keepalives (mod_caucho/isapi_srun)">
+
+<p>The web server plugin, mod_caucho, needs configuration for its keepalive
+handling because requests are handled differently in the web server.
+Until the web server sends a request to Resin, it can't tell if Resin
+has closed the other end of the socket.  If the JVM has restarted
+or if closed the socket because of <var>socket-timeout</var>,
+mod_caucho will not know about the closed socket.  So mod_caucho needs
+to know how long to consider a connection reusable before closing it.
+<var>load-balance-idle-time</var> tells the plugin how long it should consider a
+socket usable.</p>
+
+<p>Because the plugin isn't signalled when Resin closes the socket,
+the socket will remain half-closed until the next web server request.
+A <var>netstat</var> will show that as a bunch of sockets in the FIN_WAIT_2
+state.  With Apache, there doesn't appear to be a good way around
+this.  If these become a problem, you can increase
+<var>socket-timeout</var> and <var>load-balance-idle-time</var> so the JVM won't close the
+keepalive connections as fast.</p>
+
+<example>
+unix&gt; netstat
+...
+localhost.32823      localhost.6802       32768      0 32768      0 CLOSE_WAIT
+localhost.6802       localhost.32823      32768      0 32768      0 FIN_WAIT_2
+localhost.32824      localhost.6802       32768      0 32768      0 CLOSE_WAIT
+localhost.6802       localhost.32824      32768      0 32768      0 FIN_WAIT_2
+...
+</example>
+
+</s2>
+
+<s2 title="TCP limits (TIME_WAIT)">
+
+<p>A client and a server that open a large number of TCP connections can
+run into operating system/TCP limits.  If mod_caucho isn't configured
+properly, it can use too many connections to Resin.  When the limit is
+reached, mod_caucho will report "can't connect" errors until a timeout
+is reached.  Load testing or benchmarking can run into the same
+limits, causing apparent connection failures even though the Resin
+process is running fine.</p>
+
+<p>The TCP limit is the TIME_WAIT timeout.  When the TCP socket
+closes, the side starting the close puts the socket into the TIME_WAIT
+state.  A <var>netstat</var> will short the sockets in the TIME_WAIT
+state.  The following shows an example of the TIME_WAIT sockets
+generated while benchmarking.  Each client connection has a unique
+ephemeral port and the server always uses its public port:</p>
+
+<example title="Typical Benchmarking Netstat">
+unix&gt; netstat
+...
+tcp   0   0 localhost:25033  localhost:8080  TIME_WAIT   
+tcp   0   0 localhost:25032  localhost:8080  TIME_WAIT   
+tcp   0   0 localhost:25031  localhost:8080  TIME_WAIT   
+tcp   0   0 localhost:25030  localhost:8080  TIME_WAIT   
+tcp   0   0 localhost:25029  localhost:8080  TIME_WAIT   
+tcp   0   0 localhost:25028  localhost:8080  TIME_WAIT
+...
+</example>
+
+<p>The socket will remain in the TIME_WAIT state for a
+system-dependent time, generally 120 seconds, but usually
+configurable.  Since there are less than 32k ephemeral socket available to
+the client, the client will eventually run out and start seeing
+connection failures.  On some operating systems, including RedHat
+Linux, the default limit is only 4k sockets.  The full 32k sockets
+with a 120 second timeout limits the number of connections to about
+250 connections per second.</p>
+
+<p>If mod_caucho or isapi_srun are misconfigured, they can use too
+many connections and run into the TIME_WAIT limits.  Using keepalives
+effectively avoids this problem.  Since keepalive connections are
+reused, they won't go into the TIME_WAIT state until they're finally
+closed.  A site can maximize the keepalives by setting
+<var>thread-keepalive</var> large and setting <var>live-time</var> and
+<var>request-timeout</var> to large values.  <var>thread-keepalive</var> limits
+the maximum number of keepalive connections.  <var>live-time</var> and
+<var>request-timeout</var> will configure how long the connection will be
+reused.</p>
+
+<example title="Configuration for a medium-loaded Apache">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier"&gt;
+
+    &lt;server-default>
+      &lt;thread-max&gt;250&lt;/thread-max&gt;
+
+      &lt;keepalive-max&gt;250&lt;/keepalive-max&gt;
+      &lt;keepalive-timeout&gt;120s&lt;/keepalive-timeout&gt;
+
+      &lt;load-balance-idle-time&gt;100s&lt;/load-balance-idle-time&gt;
+    &lt;/server-default>
+
+    &lt;server id="app-a" address="192.168.2.1"/&gt;
+
+    ...
+  &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+<p><var>socket-timeout</var> must always be larger than
+<var>load-balance-idle-time</var>.
+In addition, <var>keepalive-max</var> should be larger than
+the maximum number of Apache processes.</p>
+
+</s2>
+
+<s2 title="Apache 1.3 issues">
+
+<p>Using Apache as a web server on Unix introduces a number of issues because
+Apache uses a process model instead of a threading model.  The Apache
+processes don't share the keepalive srun connections.  Each process
+has its own connection to Resin.  In contrast, IIS uses a threaded
+model so it can share Resin connections between the threads.  The
+Apache process model means Apache needs more connections to Resin than
+a threaded model would.</p>
+
+<p>In other words, the keepalive and TIME_WAIT issues mentioned above
+are particularly important for Apache web servers.  It's a good idea
+to use <var>netstat</var> to check that a loaded Apache web server isn't
+running out of keepalive connections and running into TIME_WAIT problems.</p>
+
+</s2>
+
+</s1>
+  </body>
+</document>
