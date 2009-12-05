@@ -325,7 +325,8 @@ public class CgiEnv
                     contentType,
                     null,
                     contentLength,
-                    isMagicQuotes);
+                    isMagicQuotes,
+                    getIniBoolean("file_uploads"));
     } else if (! method.equals("GET")) {
       StringValue bb = createBinaryBuilder();
       //bb.appendReadAll(is, contentLength);

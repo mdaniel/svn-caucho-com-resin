@@ -48,6 +48,8 @@ public class CliQuercus
   public CliQuercus()  
   {
     super();
+    
+    init();
   }
   
   public static void main(String []args)

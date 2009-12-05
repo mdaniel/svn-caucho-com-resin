@@ -322,6 +322,8 @@ public class Env {
 
   private Object _duplex;
 
+  private StringValue _variablesOrder;
+  
   private CharBuffer _cb = new CharBuffer();
 
   public Env(Quercus quercus,
@@ -337,6 +339,9 @@ public class Env {
 
     _isAllowUrlInclude = quercus.isAllowUrlInclude();
     _isAllowUrlFopen = quercus.isAllowUrlFopen();
+    
+    _variablesOrder
+      = _quercus.getIniValue("variables_order").toStringValue(this);
 
     _page = page;
 
@@ -430,18 +435,80 @@ public class Env {
   {
     return getCurrent();
   }
+  
+  private void fillGet(ArrayValue array, boolean isMagicQuotes)
+  {
+    try {
+      String encoding = getHttpInputEncoding();
 
+      if (encoding == null)
+        encoding = "iso-8859-1";
+
+      _request.setCharacterEncoding(encoding);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    ArrayList<String> keys = new ArrayList<String>();
+    keys.addAll(_request.getParameterMap().keySet());
+
+    Collections.sort(keys);
+
+    for (String key : keys) {
+      String []value = _request.getParameterValues(key);
+
+      Post.addFormValue(this,
+                        array,
+                        key,
+                        value,
+                        isMagicQuotes);
+    }
+  }
+
+  private void fillPost(ArrayValue array, ArrayValue postArray)
+  {
+    for (Map.Entry<Value, Value> entry : postArray.entrySet()) {
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+
+      Value existingValue = array.get(key);
+
+      if (existingValue.isArray() && value.isArray())
+       existingValue.toArrayValue(this).putAll(value.toArrayValue(this));
+      else
+        array.put(entry.getKey(), entry.getValue().copy());
+    }
+  }
+  
+  private void fillCookies(ArrayValue array,
+                           Cookie []cookies,
+                           boolean isMagicQuotes)
+  {
+    for (int i = 0; cookies != null && i < cookies.length; i++) {
+      Cookie cookie = cookies[i];
+
+      String decodedValue = decodeValue(cookie.getValue());
+
+      Post.addFormValue(this,
+                        array,
+                        cookie.getName(),
+                        new String[] { decodedValue },
+                        isMagicQuotes);
+    }
+  }
+  
   protected void fillPost(ArrayValue postArray,
-                             ArrayValue files,
-                             HttpServletRequest request,
-                             boolean isMagicQuotes)
+                          ArrayValue files,
+                          HttpServletRequest request,
+                          boolean isMagicQuotes)
   {
     if (request != null && request.getMethod().equals("POST")) {
       Post.fillPost(this,
                     postArray,
                     files,
                     request,
-                    isMagicQuotes);
+                    isMagicQuotes,
+                    getIniBoolean("file_uploads"));
     } else if (request != null && ! request.getMethod().equals("GET")) {
       InputStream is = null;
 
@@ -2151,7 +2218,8 @@ public class Env {
 
         envVar.set(post);
 
-        if (_postArray.getSize() > 0) {
+        if (_variablesOrder.indexOf('P') >= 0
+            && _postArray.getSize() > 0) {
           for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
             post.put(entry.getKey(), entry.getValue());
           }
@@ -2209,16 +2277,19 @@ public class Env {
         ArrayValue array = new ArrayValueImpl();
         envVar.set(array);
 
-        String queryString = getQueryString();
+        if (_variablesOrder.indexOf('G') >= 0) {
+          String queryString = getQueryString();
 
-        if (queryString == null || queryString.length() == 0)
-          return envVar;
+          if (queryString == null || queryString.length() == 0)
+            return envVar;
 
-        StringUtility.parseStr(this,
-                               queryString,
-                               array,
-                               true,
-                               getHttpInputEncoding());
+          StringUtility.parseStr(this,
+                                 queryString,
+                                 array,
+                                 true,
+                                 getHttpInputEncoding());
+        }
+
 
         return envVar;
       }
@@ -2235,61 +2306,24 @@ public class Env {
 
         if (_request == null)
           return envVar;
-
-        try {
-          String encoding = getHttpInputEncoding();
-
-          if (encoding == null)
-            encoding = "iso-8859-1";
-
-          _request.setCharacterEncoding(encoding);
-        } catch (Exception e) {
-          log.log(Level.FINE, e.toString(), e);
-        }
-
-        ArrayList<String> keys = new ArrayList<String>();
-        keys.addAll(_request.getParameterMap().keySet());
-
-        Collections.sort(keys);
-
+        
         boolean isMagicQuotes = getIniBoolean("magic_quotes_gpc");
 
-        for (String key : keys) {
-          String []value = _request.getParameterValues(key);
-
-          Post.addFormValue(this,
-                            array,
-                            key,
-                            value,
-                            isMagicQuotes);
-        }
-
-        if (name.equals("_REQUEST") && _postArray != null) {
-
-          for (Map.Entry<Value, Value> entry : _postArray.entrySet()) {
-            Value key = entry.getKey();
-            Value value = entry.getValue();
-
-            Value existingValue = array.get(key);
-
-            if (existingValue.isArray() && value.isArray())
-             existingValue.toArrayValue(this).putAll(value.toArrayValue(this));
-            else
-              array.put(entry.getKey(), entry.getValue().copy());
+        int orderLen = _variablesOrder.length();
+        
+        for (int i = 0; i < orderLen; i++) {
+          switch (_variablesOrder.charAt(i)) {
+            case 'G':
+              fillGet(array, isMagicQuotes);
+              break;
+            case 'P':
+              if (_postArray.getSize() > 0)
+                fillPost(array, _postArray);
+              break;
+            case 'C':
+              fillCookies(array, _request.getCookies(), isMagicQuotes);
+              break;
           }
-        }
-
-        Cookie []cookies = _request.getCookies();
-        for (int i = 0; cookies != null && i < cookies.length; i++) {
-          Cookie cookie = cookies[i];
-
-          String decodedValue = decodeValue(cookie.getValue());
-
-          Post.addFormValue(this,
-                            array,
-                            cookie.getName(),
-                            new String[] { decodedValue },
-                            isMagicQuotes);
         }
 
         return envVar;
@@ -2328,34 +2362,40 @@ public class Env {
 
         _globalMap.put(name, envVar);
 
-        Value serverEnv = new ServerArrayValue(this);
+        Value serverEnv;
+
+        if (_variablesOrder.indexOf('S') >= 0) {
+          serverEnv = new ServerArrayValue(this);
+          
+          String query = getQueryString();
+
+          if (_quercus.getIniBoolean("register_argc_argv")
+              && query != null) {
+            ArrayValue argv = new ArrayValueImpl();
+
+            int i = 0;
+            int j = 0;
+            while ((j = query.indexOf('+', i)) >= 0) {
+              String sub = query.substring(i, j);
+
+              argv.put(sub);
+
+              i = j + 1;
+            }
+
+            if (i < query.length())
+              argv.put(query.substring(i));
+
+            serverEnv.put(createString("argc"),
+                          LongValue.create(argv.getSize()));
+
+            serverEnv.put(createString("argv"), argv);
+          }
+        }
+        else
+          serverEnv = new ArrayValueImpl();
 
         var.set(serverEnv);
-
-        String query = getQueryString();
-
-        if (_quercus.getIniBoolean("register_argc_argv")
-            && query != null) {
-          ArrayValue argv = new ArrayValueImpl();
-
-          int i = 0;
-          int j = 0;
-          while ((j = query.indexOf('+', i)) >= 0) {
-            String sub = query.substring(i, j);
-
-            argv.put(sub);
-
-            i = j + 1;
-          }
-
-          if (i < query.length())
-            argv.put(query.substring(i));
-
-          serverEnv.put(createString("argc"),
-                        LongValue.create(argv.getSize()));
-
-          serverEnv.put(createString("argv"), argv);
-        }
 
         return envVar;
       }
@@ -2383,7 +2423,10 @@ public class Env {
 
         _globalMap.put(name, envVar);
 
-        var.set(getCookies());
+        if (_variablesOrder.indexOf('C') >= 0)
+          var.set(getCookies());
+        else
+          var.set(new ArrayValueImpl());
 
         return envVar;
       }

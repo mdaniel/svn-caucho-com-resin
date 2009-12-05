@@ -119,7 +119,7 @@ public class StringUtility
             if (v instanceof ArrayValue) {
               //Check to make sure valid string (ie: foo[...])
               if (closeBracketIndex < 0) {
-                env.warning(L.l("invalid array " + key));
+                env.warning(L.l("invalid array {0}", key));
                 return NullValue.NULL;
               }
 	      

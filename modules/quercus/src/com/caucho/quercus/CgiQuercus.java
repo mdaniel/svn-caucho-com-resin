@@ -47,6 +47,8 @@ public class CgiQuercus
   public CgiQuercus()  
   {
     super();
+    
+    init();
   }
   
   @Override

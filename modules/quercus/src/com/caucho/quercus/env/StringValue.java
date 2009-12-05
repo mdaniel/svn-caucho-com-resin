@@ -34,6 +34,7 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.quercus.marshal.Marshal;
+import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
 
@@ -1672,6 +1673,42 @@ abstract public class StringValue
    * end of file or the length is reached.
    */
   public int appendReadAll(InputStream is, long length)
+  {
+    TempBuffer tBuf = TempBuffer.allocate();
+
+    try {
+      byte []buffer = tBuf.getBuffer();
+      int readLength = 0;
+
+      while (length > 0) {
+        int sublen = buffer.length;
+        if (length < sublen)
+          sublen = (int) length;
+
+        sublen = is.read(buffer, 0, sublen);
+
+        if (sublen > 0) {
+          append(buffer, 0, sublen);
+          length -= sublen;
+          readLength += sublen;
+        }
+        else
+          return readLength > 0 ? readLength : -1;
+      }
+
+      return readLength;
+    } catch (IOException e) {
+      throw new QuercusModuleException(e);
+    } finally {
+      TempBuffer.free(tBuf);
+    }
+  }
+  
+  /**
+   * Append from an input stream, reading from the input stream until
+   * end of file or the length is reached.
+   */
+  public int appendReadAll(ReadStream is, long length)
   {
     TempBuffer tBuf = TempBuffer.allocate();
 

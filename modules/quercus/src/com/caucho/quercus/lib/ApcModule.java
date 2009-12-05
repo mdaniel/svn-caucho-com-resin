@@ -226,7 +226,7 @@ public class ApcModule extends AbstractQuercusModule
       return BooleanValue.FALSE;
   }
   
-  /*
+  /**
    * Updates the value's class with a currently available one.
    */
   private static void initObject(Env env,
