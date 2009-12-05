@@ -30,26 +30,23 @@
 package com.caucho.server.hmux;
 
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 import com.caucho.server.http.ResponseStream;
 import com.caucho.vfs.WriteStream;
 
 public class HmuxResponseStream extends ResponseStream {
-  private static final Logger log
-    = Logger.getLogger(HmuxResponseStream.class.getName());
-
-  private WriteStream _next;
-  private int _bufferStartOffset;
+  private final HmuxRequest _request;
 
   HmuxResponseStream(HmuxRequest request,
                      HmuxResponse response,
                      WriteStream next)
   {
     super(response);
-
-    _next = next;
+    
+    if (request == null)
+      throw new NullPointerException();
+    
+    _request = request;
   }
 
   //
@@ -59,129 +56,41 @@ public class HmuxResponseStream extends ResponseStream {
   @Override
   protected byte []getNextBuffer()
   {
-    return _next.getBuffer();
+    return _request.getNextBuffer();
   }
 
   @Override
   protected int getNextStartOffset()
   {
-    if (_bufferStartOffset == 0) {
-      int bufferLength = _next.getBuffer().length;
-      int startOffset = _next.getBufferOffset() + 3;
-      if (bufferLength <= startOffset) {
-        try {
-          _next.flush();
-        } catch (IOException e) {
-          log.log(Level.FINE, e.toString(), e);
-        }
-        startOffset = _next.getBufferOffset() + 3;
-      }
-
-      _next.setBufferOffset(startOffset);
-      _bufferStartOffset = startOffset;
-    }
-
-    return _bufferStartOffset;
+    return _request.getNextStartOffset();
   }
 
   @Override
   protected int getNextBufferOffset()
     throws IOException
   {
-    if (_bufferStartOffset == 0) {
-      int bufferLength = _next.getBuffer().length;
-      int startOffset = _next.getBufferOffset() + 3;
-      if (bufferLength <= startOffset) {
-        _next.flush();
-        startOffset = _next.getBufferOffset() + 3;
-      }
-
-      _next.setBufferOffset(startOffset);
-      _bufferStartOffset = startOffset;
-    }
-
-    return _next.getBufferOffset();
+    return _request.getNextBufferOffset();
   }
 
   @Override
   protected void setNextBufferOffset(int offset)
     throws IOException
   {
-    // server/2642
-    int bufferStart = _bufferStartOffset;
-
-    byte []buffer = _next.getBuffer();
-
-    // if (bufferStart > 0 && offset == buffer.length) {
-    if (bufferStart > 0) {
-      int length = offset - bufferStart;
-
-      buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
-      buffer[bufferStart - 2] = (byte) (length >> 8);
-      buffer[bufferStart - 1] = (byte) (length);
-
-      _bufferStartOffset = 0;
-
-      // server/26a0
-      if (length == 0)
-        offset = bufferStart - 3;
-    }
-
-    _next.setBufferOffset(offset);
+    _request.setNextBufferOffset(offset);
   }
 
   @Override
   protected byte []writeNextBuffer(int offset)
     throws IOException
   {
-    WriteStream next = _next;
-
-    int bufferStart = _bufferStartOffset;
-
-    if (offset == bufferStart) {
-      if (offset > 0)
-        offset = bufferStart - 3;
-
-      _bufferStartOffset = 0;
-
-      return next.nextBuffer(offset);
-    }
-    else if (bufferStart > 0) {
-      byte []buffer = next.getBuffer();
-
-      int length = offset - bufferStart;
-
-      buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
-      buffer[bufferStart - 2] = (byte) (length >> 8);
-      buffer[bufferStart - 1] = (byte) (length);
-
-      _bufferStartOffset = 0;
-
-      if (log.isLoggable(Level.FINE))
-        log.fine(dbgId() + (char) HmuxRequest.HMUX_DATA + "-w(" + length + ")");
-      buffer = next.nextBuffer(offset);
-
-      return buffer;
-    }
-    else
-      throw new IllegalStateException("Illegal bufferStart '" + bufferStart + "'");
+    return _request.writeNextBuffer(offset);
   }
 
   @Override
   public void flushNext()
     throws IOException
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "flush()");
-
-    if (_bufferStartOffset == _next.getBufferOffset()
-        && _bufferStartOffset > 0) {
-      _next.setBufferOffset(_bufferStartOffset - 3);
-    }
-
-    _next.flush();
-
-    _bufferStartOffset = 0;
+    _request.flushNext();
   }
 
   @Override
@@ -195,30 +104,6 @@ public class HmuxResponseStream extends ResponseStream {
   protected void writeTail()
     throws IOException
   {
-    WriteStream next = _next;
-
-    int bufferStart = _bufferStartOffset;
-    int offset = next.getBufferOffset();
-
-    if (offset == bufferStart) {
-      if (offset > 0)
-        offset = bufferStart - 3;
-    }
-    else if (bufferStart > 0) {
-      byte []buffer = next.getBuffer();
-
-      int length = offset - bufferStart;
-
-      buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
-      buffer[bufferStart - 2] = (byte) (length >> 8);
-      buffer[bufferStart - 1] = (byte) (length);
-
-      _bufferStartOffset = 0;
-    }
-
-    if (log.isLoggable(Level.FINE) && offset > bufferStart)
-      log.fine(dbgId() + "write-tail(" + (offset - bufferStart) + ")");
-
-    next.nextBuffer(offset);
+    _request.writeTail();
   }
 }

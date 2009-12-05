@@ -40,6 +40,7 @@ import com.caucho.bam.ActorStream;
 import com.caucho.bam.ProtocolException;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianDebugOutputStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * HmtpWriteStream writes HMTP packets to an OutputStream.
@@ -178,12 +179,12 @@ public class HmtpWriter implements ActorStream
    * Low-level query get
    */
   public void queryGet(long id,
-			      String to,
-			      String from,
-			      Serializable value)
+                       String to,
+                       String from,
+                       Serializable value)
   {
     try {
-      Hessian2Output out = _out;
+     Hessian2Output out = _out;
 
       if (out != null) {
 	if (log.isLoggable(Level.FINER)) {

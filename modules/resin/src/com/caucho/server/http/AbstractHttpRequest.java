@@ -1646,8 +1646,10 @@ public abstract class AbstractHttpRequest
   public void finishInvocation()
   {
     // to avoid finish when no request server/05b0
+    /*
     if (_startTime < 0)
       return;
+      */
 
     try {
       _response.finishInvocation();
@@ -1677,19 +1679,18 @@ public abstract class AbstractHttpRequest
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
-      if (_tcpConn != null) {
-        _tcpConn.endActive();
-
-        _tcpConn.finishRequest();
-      }
-
       _requestFacade = null;
 
       _responseFacade = null;
 
       HttpBufferStore httpBuffer = _httpBuffer;
       _httpBuffer = null;
+      
+      if (_tcpConn != null) {
+        _tcpConn.endActive();
 
+        _tcpConn.finishRequest();
+      }
 
       if (httpBuffer != null)
         HttpBufferStore.free(httpBuffer);

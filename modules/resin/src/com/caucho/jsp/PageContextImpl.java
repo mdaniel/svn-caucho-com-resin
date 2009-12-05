@@ -153,7 +153,7 @@ public class PageContextImpl extends PageContext
     _attributes = new HashMapImpl<String,Object>();
     
     _bodyResponseStream = new BodyResponseStream();
-    _bodyResponseStream.start();
+    _bodyResponseStream.startRequest();
     
     _jspPrintWriter = new JspPrintWriter();
   }
@@ -633,7 +633,7 @@ public class PageContextImpl extends PageContext
       _bodyResponseStream.flushBuffer();
     } catch (IOException e) {
     }
-    _bodyResponseStream.start();
+    _bodyResponseStream.startRequest();
     _bodyResponseStream.setWriter(body);
     _bodyResponseStream.setEncoding(response.getCharacterEncoding());
     response.setResponseStream(_bodyResponseStream);
@@ -671,6 +671,7 @@ public class PageContextImpl extends PageContext
    *
    * @return the enclosing writer
    */
+  @Override
   public JspWriter popBody()
   {
     BodyContentImpl bodyOut = (BodyContentImpl) _out;

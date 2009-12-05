@@ -77,7 +77,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
   @Override
   public void init(HttpServletResponse response)
   {
-    _responseStream.start();
+    _responseStream.startRequest();
     
     super.init(response);
   }

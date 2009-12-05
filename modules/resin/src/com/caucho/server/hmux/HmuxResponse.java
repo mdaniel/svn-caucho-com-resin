@@ -46,19 +46,24 @@ import com.caucho.vfs.WriteStream;
  * a web server plugin.
  */
 public class HmuxResponse extends AbstractHttpResponse {
-  private HmuxRequest _req;
+  private final HmuxRequest _req;
 
   HmuxResponse(HmuxRequest request, WriteStream rawWrite)
   {
     super(request, rawWrite);
 
     _req = request;
+    
+    if (_req == null)
+      throw new NullPointerException();
   }
 
   @Override
   protected AbstractResponseStream createResponseStream()
   {
-    return new HmuxResponseStream(_req, this, getRawWrite());
+    HmuxRequest request = (HmuxRequest) getRequest();
+    
+    return new HmuxResponseStream(request, this, getRawWrite());
   }
 
   /**

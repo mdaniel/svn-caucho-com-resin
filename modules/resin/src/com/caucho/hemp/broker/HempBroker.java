@@ -58,6 +58,7 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.remote.BamService;
+import com.caucho.server.admin.AdminService;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.Base64;
@@ -200,7 +201,7 @@ public class HempBroker
    * Creates a session
    */
   public String createClient(ActorStream clientStream,
-                             String uid, 
+                             String uid,
                              String resourceId)
   {
     String jid = generateJid(uid, resourceId);
@@ -621,33 +622,56 @@ public class HempBroker
   // webbeans callbacks
   //
 
-  /**
-   * Called when a @Actor is annotated on the actor
-   */
-  public void registerActor(ProcessBean event)
+  public void addStartupActor(Bean bean,
+                              String name,
+                              int threadMax)
   {
-    Bean bean = event.getBean();
-
-    Annotated annotated = event.getAnnotated();
-
-    if (annotated == null)
-      return;
-
-    if (annotated.isAnnotationPresent(BamService.class)) {
-      BamService bamService = annotated.getAnnotation(BamService.class);
-
-      addStartupActor(bean, bamService);
-    }
-  }
-
-  private void addStartupActor(Bean bean, BamService bamService)
-  {
-    ActorStartup startup = new ActorStartup(bean, bamService);
+    ActorStartup startup
+      = new ActorStartup(bean, name, threadMax);
 
     Environment.addEnvironmentListener(startup);
   }
 
-  private void startActor(Bean bean, BamService bamService)
+  private void startActor(Bean bean,
+                          String name,
+                          int threadMax)
+  {
+    InjectManager beanManager = InjectManager.getCurrent();
+
+    Actor actor = (Actor) beanManager.getReference(bean);
+
+    actor.setLinkStream(this);
+
+    String jid = name;
+
+    if (jid == null || "".equals(jid))
+      jid = bean.getName();
+
+    if (jid == null || "".equals(jid))
+      jid = bean.getBeanClass().getSimpleName();
+
+    if (jid.indexOf('@') < 0)
+      jid = jid + '@' + getJid();
+    else if (jid.endsWith("@"))
+      jid = jid.substring(0, jid.length() - 1);
+
+    actor.setJid(jid);
+
+    Actor bamActor = actor;
+
+    // queue
+    if (threadMax > 0) {
+      ActorStream actorStream = bamActor.getActorStream();
+      actorStream = new HempMemoryQueue(actorStream, this, threadMax);
+      bamActor.setActorStream(actorStream);
+    }
+
+    addActor(bamActor.getActorStream());
+
+    Environment.addCloseListener(new ActorClose(bamActor));
+  }
+
+  private void startActor(Bean bean, AdminService bamService)
   {
     InjectManager beanManager = InjectManager.getCurrent();
 
@@ -746,23 +770,31 @@ public class HempBroker
   }
 
   public class ActorStartup implements EnvironmentListener{
-    private Bean _bean;
-    private BamService _service;
+    private Bean<?> _bean;
+    private String _name;
+    private int _threadMax;
 
-    ActorStartup(Bean bean, BamService service)
+    ActorStartup(Bean<?> bean, String name, int threadMax)
     {
       _bean = bean;
-      _service = service;
+
+      _name = name;
+      _threadMax = threadMax;
     }
 
-    Bean getBean()
+    Bean<?> getBean()
     {
       return _bean;
     }
 
-    BamService getBamService()
+    String getName()
     {
-      return _service;
+      return _name;
+    }
+
+    int getThreadMax()
+    {
+      return _threadMax;
     }
 
     public void environmentConfigure(EnvironmentClassLoader loader)
@@ -775,7 +807,7 @@ public class HempBroker
 
     public void environmentStart(EnvironmentClassLoader loader)
     {
-      startActor(_bean, _service);
+      startActor(_bean, _name, _threadMax);
     }
 
     public void environmentStop(EnvironmentClassLoader loader)

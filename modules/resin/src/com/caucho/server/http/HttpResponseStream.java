@@ -68,9 +68,10 @@ public class HttpResponseStream extends ResponseStream {
   /**
    * initializes the Response stream at the beginning of a request.
    */
-  public void start()
+  @Override
+  public void startRequest()
   {
-    super.start();
+    super.startRequest();
 
     _isChunkedEncoding = false;
     _bufferStartOffset = 0;

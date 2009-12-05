@@ -29,55 +29,43 @@
 
 package com.caucho.server.webbeans;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.annotation.ServiceBinding;
-import com.caucho.config.ServiceStartup;
-import com.caucho.config.cfg.BeansConfig;
-import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ProcessBeanImpl;
-import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.inject.EjbGeneratedBean;
-import com.caucho.jms.JmsMessageListener;
-import com.caucho.hemp.broker.HempBroker;
-import com.caucho.remote.BamService;
-import com.caucho.vfs.Path;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import javax.ejb.*;
+import javax.ejb.MessageDriven;
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ProcessBeanImpl;
+import com.caucho.ejb.inject.EjbGeneratedBean;
+import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.hemp.broker.HempBroker;
+import com.caucho.jms.JmsMessageListener;
+import com.caucho.remote.BamService;
+import com.caucho.server.admin.AdminService;
+import com.caucho.server.cluster.Server;
+import com.caucho.util.L10N;
 
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
 public class ResinStandardPlugin implements Extension
 {
-  private InjectManager _manager;
-  private ClassLoader _classLoader;
-
+  private static final L10N L = new L10N(ResinStandardPlugin.class);
   public ResinStandardPlugin(InjectManager manager)
   {
-    _manager = manager;
-    
-    _classLoader = Thread.currentThread().getContextClassLoader();
+    Thread.currentThread().getContextClassLoader();
   }
 
-  public void processAnnotatedType(@Observes ProcessAnnotatedType event)
+  public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> event)
   {
-    AnnotatedType annotatedType = event.getAnnotatedType();
+    AnnotatedType<T> annotatedType = event.getAnnotatedType();
 
     if (annotatedType == null)
       return;
@@ -96,34 +84,59 @@ public class ResinStandardPlugin implements Extension
     }
   }
 
-  public void processBean(@Observes ProcessBeanImpl event)
+  public <T> void processBean(@Observes ProcessBeanImpl<T> event)
   {
     Annotated annotated = event.getAnnotated();
-    Bean bean = event.getBean();
+    Bean<T> bean = event.getBean();
 
     if (annotated == null
-	|| bean instanceof EjbGeneratedBean
-	|| ! (bean instanceof AbstractBean)) {
+        || bean instanceof EjbGeneratedBean
+        || ! (bean instanceof AbstractBean<?>)) {
       return;
     }
-    
-    AbstractBean absBean = (AbstractBean) bean;
+
+    AbstractBean<T> absBean = (AbstractBean<T>) bean;
 
     if (annotated.isAnnotationPresent(Stateful.class)
-	|| annotated.isAnnotationPresent(Stateless.class)
-	|| annotated.isAnnotationPresent(MessageDriven.class)
-	|| annotated.isAnnotationPresent(JmsMessageListener.class)) {
+        || annotated.isAnnotationPresent(Stateless.class)
+        || annotated.isAnnotationPresent(MessageDriven.class)
+        || annotated.isAnnotationPresent(JmsMessageListener.class)) {
       EjbContainer ejbContainer = EjbContainer.create();
-      AnnotatedType annType = absBean.getAnnotatedType();
-      
+      AnnotatedType<T> annType = absBean.getAnnotatedType();
+
       if (annType != null) {
-	ejbContainer.createBean(annType, absBean.getInjectionTarget());
-	event.veto();
+        ejbContainer.createBean(annType, absBean.getInjectionTarget());
+        event.veto();
       }
     }
 
     if (annotated.isAnnotationPresent(BamService.class)) {
-      HempBroker.getCurrent().registerActor(event);
+      BamService service = annotated.getAnnotation(BamService.class);
+
+      HempBroker broker = HempBroker.getCurrent();
+
+      broker.addStartupActor(event.getBean(),
+                             service.name(),
+                             service.threadMax());
+    }
+
+    if (annotated.isAnnotationPresent(AdminService.class)) {
+      AdminService service = annotated.getAnnotation(AdminService.class);
+
+      Server server = Server.getCurrent();
+
+      if (server == null) {
+        throw new ConfigException(L.l("@AdminService requires an active Resin Server."));
+      }
+
+      if (! server.isWatchdog()) {
+        HempBroker broker = (HempBroker) server.getAdminBroker();
+
+
+        broker.addStartupActor(event.getBean(),
+                               service.name(),
+                               service.threadMax());
+      }
     }
   }
 

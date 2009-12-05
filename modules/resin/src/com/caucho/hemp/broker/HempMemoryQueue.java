@@ -170,10 +170,6 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
                        String from,
                        Serializable payload)
   {
-    if (to == null || from == null) {
-      System.out.println("SQ: " + to + " " + from + " " + payload);
-      Thread.dumpStack();
-    }
     enqueue(new QuerySet(id, to, from, payload));
   }
 

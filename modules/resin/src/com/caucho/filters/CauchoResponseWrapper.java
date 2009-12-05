@@ -97,7 +97,7 @@ public class CauchoResponseWrapper extends ResponseWrapper
 
     _originalStream.init(this);
 
-    _originalStream.start();
+    _originalStream.startRequest();
   } 
 
   /**

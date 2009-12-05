@@ -68,8 +68,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
   private boolean _isHead;
   private boolean _isClosed;
-  protected boolean _isCommitted;
-  protected boolean _isFinished;
+  private boolean _isCommitted;
+  private boolean _isFinished;
 
   private EncodingWriter _toByte = Encoding.getLatin1Writer();
 
@@ -80,8 +80,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Initializes the Buffered Response stream at the beginning of a request.
    */
-  @Override
-  public void start()
+  public void startRequest()
   {
     _bufferCapacity = SIZE;
 
@@ -122,6 +121,38 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public void setHead()
   {
     _isHead = true;
+  }
+  
+  public final boolean isHead()
+  {
+    return _isHead;
+  }
+  
+  public final boolean isCommitted()
+  {
+    // XXX: isCommitted || isClosed??
+    
+    return _isCommitted;
+  }
+  
+  public final void setCommitted(boolean isCommitted)
+  {
+    _isCommitted = isCommitted;
+  }
+  
+  public final boolean isFinished()
+  {
+    return _isFinished;
+  }
+  
+  public final void setFinished(boolean isFinished)
+  {
+    _isFinished = isFinished;
+  }
+  
+  public final boolean isClosed()
+  {
+    return _isClosed;
   }
 
   /**
@@ -193,7 +224,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     if (! _isOutputStreamOnly)
       flushCharBuffer();
-
+    
     return _tailByteBuffer;
   }
 

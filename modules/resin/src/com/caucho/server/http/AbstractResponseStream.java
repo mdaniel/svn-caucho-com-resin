@@ -45,7 +45,7 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   /**
    * Starts the response stream.
    */
-  public void start()
+  public void startRequest()
   {
   }
 

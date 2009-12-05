@@ -67,8 +67,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
   private boolean _isHeaderWritten;
 
   private boolean _allowFlush = true;
-  private boolean _isHead = false;
-  private boolean _isClosed = false;
 
   public ResponseStream()
   {
@@ -87,15 +85,14 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * initializes the Response stream at the beginning of a request.
    */
-  public void start()
+  @Override
+  public void startRequest()
   {
-    super.start();
+    super.startRequest();
 
     _contentLength = 0;
     _allowFlush = true;
     _disableAutoFlush = false;
-    _isClosed = false;
-    _isHead = false;
     _cacheStream = null;
     _isHeaderWritten = false;
   }
@@ -158,16 +155,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
     _disableAutoFlush = disable;
   }
 
-  public void setHead()
-  {
-    _isHead = true;
-  }
-
-  public final boolean isHead()
-  {
-    return _isHead;
-  }
-
   @Override
   public int getContentLength()
   {
@@ -178,7 +165,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    if (_isCommitted)
+    if (isCommitted())
       return _contentLength;
     else
       return super.getContentLength();
@@ -192,21 +179,15 @@ abstract public class ResponseStream extends ToByteResponseStream {
     super.setBufferSize(size);
   }
 
-  public boolean isCommitted()
-  {
-    // jsp/17ec
-    return _isCommitted || _isClosed;
-  }
-
   public boolean hasData()
   {
-    return _isCommitted || _contentLength > 0;
+    return isCommitted() || _contentLength > 0;
   }
 
   public boolean isFlushed()
   {
     try {
-      if (_isCommitted)
+      if (isCommitted())
         return true;
 
       if (_contentLength > 0) {
@@ -231,7 +212,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     clearBuffer();
 
-    if (_isCommitted)
+    if (isCommitted())
       throw new IOException(L.l("can't clear response after writing headers"));
   }
 
@@ -239,7 +220,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     super.clearBuffer();
 
-    if (! _isCommitted) {
+    if (! isCommitted()) {
       // jsp/15la
       _isHeaderWritten = false;
       _response.setHeaderWritten(false);
@@ -259,10 +240,10 @@ abstract public class ResponseStream extends ToByteResponseStream {
   protected void writeHeaders(int length)
     throws IOException
   {
-    if (_isCommitted)
+    if (isCommitted())
       return;
 
-    _isCommitted = true;
+    setCommitted(true);
 
     startCaching(true);
 
@@ -303,7 +284,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public byte []getBuffer()
     throws IOException
   {
-    if (_isCommitted) {
+    if (isCommitted()) {
       flushBuffer();
 
       return getNextBuffer();
@@ -318,7 +299,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public int getBufferOffset()
     throws IOException
   {
-    if (! _isCommitted)
+    if (! isCommitted())
       return super.getBufferOffset();
 
     flushBuffer();
@@ -332,10 +313,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public void setBufferOffset(int offset)
     throws IOException
   {
-    if (_isClosed)
+    if (isClosed()) {
       return;
+    }
 
-    if (! _isCommitted) {
+    if (! isCommitted()) {
       super.setBufferOffset(offset);
       return;
     }
@@ -367,7 +349,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       writeCache(nextBuffer, oldOffset, sublen);
     }
 
-    if (! _isHead) {
+    if (! isHead()) {
       // server/051e
       setNextBufferOffset(offset);
     }
@@ -379,13 +361,14 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public byte []nextBuffer(int offset)
     throws IOException
   {
-    if (! _isCommitted) {
+    if (! isCommitted()) {
       // server/055b
       return super.nextBuffer(offset);
     }
 
-    if (_isClosed)
+    if (isClosed()) {
       return getNextBuffer();
+    }
 
     flushBuffer();
 
@@ -407,7 +390,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     offset = oldOffset + sublen;
 
     try {
-      if (_isHead) {
+      if (isHead()) {
         return nextBuffer;
       }
 
@@ -443,7 +426,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     try {
-      if (_isClosed)
+      if (isClosed())
         return;
 
       if (_disableAutoFlush && ! isFinished)
@@ -459,8 +442,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
           writeHeaders(-1);
       }
 
-      int bufferStart = getNextStartOffset();
       int bufferOffset = getNextBufferOffset();
+      if (length == 0 && bufferOffset == 0 && ! isFinished) {
+        return;
+      }
+      
+      int bufferStart = getNextStartOffset();
 
       // server/05e2
       if (length == 0 && ! isFinished && bufferStart == bufferOffset) {
@@ -479,7 +466,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
         length = (int) (contentLengthHeader - _contentLength);
       }
 
-      if (_isHead) {
+      if (isHead()) {
         return;
       }
 
@@ -529,7 +516,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   private boolean lengthException(byte []buf, int offset, int length,
                                   long contentLengthHeader)
   {
-    if (_response.isClientDisconnect() || _isHead || _isClosed) {
+    if (_response.isClientDisconnect() || isHead() || isClosed()) {
     }
     else if (contentLengthHeader < _contentLength) {
       AbstractHttpRequest request = _response.getRequest();
@@ -581,17 +568,20 @@ abstract public class ResponseStream extends ToByteResponseStream {
     try {
       _disableAutoFlush = false;
 
-      if (_allowFlush && ! _isClosed) {
+      if (_allowFlush && ! isClosed()) {
         flushBuffer();
 
-        int bufferStart = getNextStartOffset();
         int bufferOffset = getNextBufferOffset();
+        
+        if (bufferOffset > 0) {
+          int bufferStart = getNextStartOffset();
+ 
+          if (bufferStart != bufferOffset) {
+            // server/10c9
+            // _contentLength += (bufferOffset - bufferStart);
 
-        if (bufferStart != bufferOffset) {
-          // server/10c9
-          // _contentLength += (bufferOffset - bufferStart);
-
-          writeNextBuffer(bufferOffset);
+            writeNextBuffer(bufferOffset);
+          }
         }
 
         flushNext();
@@ -642,7 +632,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   public void finish()
     throws IOException
   {
-    boolean isClosed = _isClosed;
+    boolean isClosed = isClosed();
 
     if (isClosed)
       return;
@@ -651,7 +641,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     flushCharBuffer();
 
-    _isFinished = true;
+    setFinished(true);
     _allowFlush = true;
 
     flushBuffer();
@@ -662,16 +652,16 @@ abstract public class ResponseStream extends ToByteResponseStream {
       return;
     }
 
-    _isClosed = true;
-
     try {
       writeTail();
 
+      // close();
+      
       AbstractHttpRequest req = _response.getRequest();
       if (req.isComet() || req.isDuplex()) {
       }
       else if (! req.allowKeepalive()) {
-        _isClosed = true;
+        close();
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "close stream");
@@ -680,7 +670,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
         closeNext();
       }
       else {
-        _isClosed = true;
+        close();
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "finish/keepalive");
@@ -810,21 +800,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
       setByteCacheStream(null);
       setCharCacheStream(null);
     }
-  }
-
-  /**
-   * Closes the stream.
-   */
-  public void close()
-    throws IOException
-  {
-    if (_isClosed)
-      return;
-
-    finish();
-    finishCache();
-
-    _isClosed = true;
   }
 
   public void finishCache()

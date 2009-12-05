@@ -115,6 +115,7 @@ abstract public class AbstractHttpResponse {
   protected long _contentLength;
   protected boolean _isClosed;
 
+  /*
   protected AbstractHttpResponse()
   {
     _rawWrite = null;
@@ -122,6 +123,7 @@ abstract public class AbstractHttpResponse {
     _request = null;
     _responseStream = createResponseStream();
   }
+  */
 
   protected AbstractHttpResponse(AbstractHttpRequest request,
                                  WriteStream rawWrite)
@@ -233,7 +235,7 @@ abstract public class AbstractHttpResponse {
     _footerKeys.clear();
     _footerValues.clear();
 
-    _responseStream.start();
+    _responseStream.startRequest();
 
     _isHeaderWritten = false;
     _isClientDisconnect = false;
@@ -908,7 +910,7 @@ abstract public class AbstractHttpResponse {
     if (! _request.isSuspend()) {
       finishInvocation(true);
 
-      finishRequest(true);
+      // finishRequest(true);
     }
   }
   
@@ -1017,6 +1019,8 @@ abstract public class AbstractHttpResponse {
       return;
 
     try {
+      _bufferStore = null;
+      
       AbstractHttpRequest request = _request;
 	
       try {

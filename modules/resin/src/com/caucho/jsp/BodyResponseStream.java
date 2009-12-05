@@ -176,6 +176,7 @@ public class BodyResponseStream extends AbstractResponseStream {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  @Override
   public void print(int ch)
     throws IOException
   {
@@ -185,6 +186,7 @@ public class BodyResponseStream extends AbstractResponseStream {
   /**
    * Returns the buffer offset.
    */
+  @Override
   public int getBufferOffset()
   {
     return 0;
@@ -193,6 +195,7 @@ public class BodyResponseStream extends AbstractResponseStream {
   /**
    * Sets the byte buffer offset.
    */
+  @Override
   public void setBufferOffset(int offset)
   {
     if (offset > 0) {
@@ -207,6 +210,7 @@ public class BodyResponseStream extends AbstractResponseStream {
   /**
    * Gets the byte buffer
    */
+  @Override
   public byte []getBuffer()
   {
     return _byteBuffer;
@@ -215,6 +219,7 @@ public class BodyResponseStream extends AbstractResponseStream {
   /**
    * Returns the next buffer.
    */
+  @Override
   public byte []nextBuffer(int offset)
     throws IOException
   {
@@ -231,6 +236,7 @@ public class BodyResponseStream extends AbstractResponseStream {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  @Override
   public void write(byte []buf, int offset, int length)
     throws IOException
   {
@@ -263,6 +269,7 @@ public class BodyResponseStream extends AbstractResponseStream {
    *
    * @param ch - character to write
    */
+  @Override
   public void write(int ch)
     throws IOException
   {
@@ -288,6 +295,7 @@ public class BodyResponseStream extends AbstractResponseStream {
   /**
    * Flushes the buffer.
    */
+  @Override
   public void flushBuffer()
     throws IOException
   {

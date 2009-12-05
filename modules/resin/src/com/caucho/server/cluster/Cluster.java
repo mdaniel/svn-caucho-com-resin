@@ -62,16 +62,18 @@ import javax.annotation.PostConstruct;
 /**
  * Defines a set of clustered servers.
  */
+// cluster/6615 - <cluster> is not an EnvironmentBean
 abstract public class Cluster
-  implements EnvironmentBean, EnvironmentListener, SchemaBean
+  implements EnvironmentListener, SchemaBean
+//  implements EnvironmentBean, EnvironmentListener, SchemaBean
 {
   private static final L10N L = new L10N(Cluster.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
 
   // private static final int DECODE[];
-  
+
   private String _id = "";
-  
+
   private Resin _resin;
 
   private EnvironmentClassLoader _classLoader;
@@ -91,9 +93,9 @@ abstract public class Cluster
   {
     if (resin == null)
       throw new NullPointerException(L.l("resin argument is required"));
-    
+
     _resin = resin;
-    
+
     _classLoader = EnvironmentClassLoader.create("cluster:??");
 
     Environment.addEnvironmentListener(this, resin.getClassLoader());
@@ -110,7 +112,7 @@ abstract public class Cluster
   {
     if (id == null)
       throw new NullPointerException();
-    
+
     _id = id;
 
     _classLoader.setId("cluster:" + _id);
@@ -170,7 +172,7 @@ abstract public class Cluster
   public void setRootDirectory(Path rootDirectory)
   {
     Vfs.setPwd(rootDirectory);
-    
+
     _rootDirectory = rootDirectory;
   }
 
@@ -180,7 +182,7 @@ abstract public class Cluster
   public void setDynamicServerEnable(boolean isEnable)
   {
     log.warning(L.l("{0}: dynamic-server-enable requires Resin Professional",
-		    this));
+                    this));
   }
 
   /**
@@ -231,16 +233,16 @@ abstract public class Cluster
    * Finds the first server with the given server-id.
    */
   public ClusterServer findServer(int podIndex,
-				  int index)
+                                  int index)
   {
     for (ClusterPod pod : getPodList()) {
       if (pod.getIndex() == podIndex) {
-	for (ClusterServer server : pod.getServerList()) {
-	  if (server.getIndex() == index)
-	    return server;
-	}
+        for (ClusterServer server : pod.getServerList()) {
+          if (server.getIndex() == index)
+            return server;
+        }
 
-	return null;
+        return null;
       }
     }
 
@@ -254,7 +256,7 @@ abstract public class Cluster
   {
     for (ClusterPod pod : getPodList()) {
       if (pod.getIndex() == podIndex) {
-	return pod;
+        return pod;
       }
     }
 
@@ -326,19 +328,19 @@ abstract public class Cluster
   public void addServer(ClusterServer server)
   {
   }
-  
+
   /*
   protected ClusterServer createDynamicServer()
   {
     throw new UnsupportedOperationException(L.l("{0}: createDynamicServer requires Resin Professional",
-						this));
+                                                this));
   }
 
   ClusterServer createStaticServer(ClusterServer server)
   {
     if (_lifecycle.isActive())
       throw new IllegalStateException(L.l("{0}: can't create static server after initialization", this));
-    
+
     server.setIndex(_staticServerList.size());
 
     configureServerDefault(server);
@@ -349,7 +351,7 @@ abstract public class Cluster
   protected ClusterServer createDynamicServer(ClusterServer server)
   {
     throw new UnsupportedOperationException(L.l("{0}: createDynamicServer requires Resin Professional",
-						this));
+                                                this));
   }
   */
 
@@ -382,8 +384,8 @@ abstract public class Cluster
 
     if (oldServer != null)
       throw new ConfigException(L.l("{0}: duplicate <server> with id='{1}'",
-				    this, server.getId()));
-    
+                                    this, server.getId()));
+
     _serverList.add(server);
     _serverArray = new ClusterServer[_serverList.size()];
     _serverList.toArray(_serverArray);
@@ -399,12 +401,12 @@ abstract public class Cluster
   protected void setSelfServer(ClusterServer server)
   {
     // XXX: move to Server
-    
+
     /*
     if (! _serverId.equals(server.getId()))
       throw new IllegalStateException(L.l("{0}: self server {1} does not match server id {2}",
-					  this, server, _serverId));
-    
+                                          this, server, _serverId));
+
     _selfServer = server;
 
     Config.setProperty("server", new ServerVar(server), _classLoader);
@@ -417,9 +419,9 @@ abstract public class Cluster
   {
     try {
       synchronized (this) {
-	_serverList.set(index, null);
-	_serverArray = new ClusterServer[_serverList.size()];
-	_serverList.toArray(_serverArray);
+        _serverList.set(index, null);
+        _serverArray = new ClusterServer[_serverList.size()];
+        _serverList.toArray(_serverArray);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -447,20 +449,20 @@ abstract public class Cluster
       ClusterPort clusterPort = server.getClusterPort();
 
       if (address.equals(clusterPort.getAddress())
-	  && port == clusterPort.getPort()) {
-	// XXX:
-	//return server.getClient();
-	return null;
+          && port == clusterPort.getPort()) {
+        // XXX:
+        //return server.getClient();
+        return null;
       }
     }
 
     return null;
   }
   */
-  
+
   /**
    * Returns the owning pod for a cluster server.
-   * 
+   *
    * @return the corresponding pod
    */
   /*
@@ -600,7 +602,7 @@ abstract public class Cluster
     return ports;
   }
   */
-  
+
   /**
    * Starts the server.
    */
@@ -612,7 +614,7 @@ abstract public class Cluster
 
     try {
       thread.setContextClassLoader(getClassLoader());
-      
+
       Server server = createResinServer(clusterServer);
 
       _serverProgram.configure(server);
@@ -627,7 +629,7 @@ abstract public class Cluster
   {
     return new Server(clusterServer);
   }
-  
+
   //
   // persistent store support
   //
@@ -657,16 +659,16 @@ abstract public class Cluster
     }
     else if (srunLength == 2) {
       backup = 0;
-      
+
       backupCode |= ((index + 1L) % 2) << 16;
     }
     else if (machineLength == 1) {
       int sublen = srunLength - 1;
       if (sublen > 7)
-	sublen = 7;
-	
+        sublen = 7;
+
       backup = RandomUtil.nextInt(sublen);
-      
+
       backupCode |= ((index + backup + 1L) % backupLength) << 16;
     }
     else {
@@ -674,10 +676,10 @@ abstract public class Cluster
       int machineIndex = primaryServer.getMachine().getIndex();
       int sublen = machineLength - 1;
       if (sublen > 7)
-	sublen = 7;
-	
+        sublen = 7;
+
       int backupMachine = ((machineIndex + RandomUtil.nextInt(sublen) + 1)
-			   % machineLength);
+                           % machineLength);
 
       Machine machine = machineList.get(backupMachine);
       ArrayList<ClusterServer> serverList = machine.getServerList();
@@ -685,12 +687,12 @@ abstract public class Cluster
       ClusterServer server;
 
       if (serverList.size() > 1)
-	server = serverList.get(RandomUtil.nextInt(serverList.size()));
+        server = serverList.get(RandomUtil.nextInt(serverList.size()));
       else
-	server = serverList.get(0);
+        server = serverList.get(0);
 
       backup = (int) (server.getIndex() - index + srunLength) % srunLength - 1;
-      
+
       backupCode |= ((index + backup + 1L) % backupLength) << 16;
     }
 
@@ -699,12 +701,12 @@ abstract public class Cluster
     else {
       int sublen = srunLength - 2;
       if (sublen > 6)
-	sublen = 6;
+        sublen = 6;
 
       int third = RandomUtil.nextInt(sublen);
 
       if (backup <= third)
-	third += 1;
+        third += 1;
 
       backupCode |= ((index + third + 1) % backupLength) << 32;
     }
@@ -749,7 +751,7 @@ abstract public class Cluster
     else {
       int d1 = decode(id.charAt(offset + 0));
       int d2 = decode(id.charAt(offset + 1));
-      
+
       index = d1 * 64 + d2;
     }
 
@@ -777,7 +779,7 @@ abstract public class Cluster
     else {
       int d1 = decode(id.charAt(offset + 2));
       int d2 = decode(id.charAt(offset + 3));
-      
+
       index = d1 * 64 + d2;
     }
 
@@ -805,7 +807,7 @@ abstract public class Cluster
     else {
       int d1 = decode(id.charAt(offset + 4));
       int d2 = decode(id.charAt(offset + 5));
-      
+
       index = d1 * 64 + d2;
     }
 
@@ -833,7 +835,7 @@ abstract public class Cluster
     else {
       int d1 = decode(id.charAt(offset + 0));
       int d2 = decode(id.charAt(offset + 1));
-      
+
       index = d1 * 64 + d2;
     }
 
@@ -858,7 +860,7 @@ abstract public class Cluster
     else {
       int d1 = decode(id.charAt(offset + 2));
       int d2 = decode(id.charAt(offset + 3));
-      
+
       index = d1 * 64 + d2;
     }
 
@@ -883,7 +885,7 @@ abstract public class Cluster
     else {
       int d1 = decode(id.charAt(offset + 4));
       int d2 = decode(id.charAt(offset + 5));
-      
+
       index = d1 * 64 + d2;
     }
 
@@ -896,7 +898,7 @@ abstract public class Cluster
   {
     ClusterServer []srunList = getServerList();
     int srunLength = srunList.length;
-    
+
     if (srunLength <= 64)
       cb.append(convert(digit));
     else {
@@ -941,7 +943,7 @@ abstract public class Cluster
   public void environmentBind(EnvironmentClassLoader loader)
   {
   }
-  
+
  /**
    * Handles the case where the environment is starting (after init).
    */
@@ -992,7 +994,7 @@ abstract public class Cluster
   private static char convert(long code)
   {
     code = code & 0x3f;
-    
+
     if (code < 26)
       return (char) ('a' + code);
     else if (code < 52)
@@ -1012,7 +1014,7 @@ abstract public class Cluster
     return DECODE[code & 0x7f];
   }
   */
-  
+
   /**
    * EL variables
    */

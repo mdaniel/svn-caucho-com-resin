@@ -251,6 +251,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
   // write stream from the connection
   private WriteStream _rawWrite;
+  private int _bufferStartOffset;
 
   // StreamImpl to break reads and writes to the underlying protocol
   private ServletFilter _filter;
@@ -286,7 +287,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _hmuxProtocol = protocol;
 
     _rawWrite = conn.getWriteStream();
-
+ 
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
     // _server = Server.getCurrent();
@@ -357,6 +358,13 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     return _hasRequest;
   }
+  
+  @Override
+  public boolean isSuspend()
+  {
+    return super.isSuspend() || _brokerStream != null;
+  }
+
 
   public boolean handleRequest()
     throws IOException
@@ -407,7 +415,9 @@ public class HmuxRequest extends AbstractHttpRequest
       if (! _hasRequest)
         _response.setHeaderWritten(true);
 
-      finishInvocation();
+      if (_brokerStream == null) {
+        finishInvocation();
+      }
 
       try {
         // server/0190
@@ -581,6 +591,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _clientCert.clear();
 
     _pendingData = 0;
+    _bufferStartOffset = 0;
     
    _isSecure = _conn.isSecure();
   }
@@ -869,7 +880,7 @@ public class HmuxRequest extends AbstractHttpRequest
       case HMUX_SWITCH_TO_HMTP: {
         len = (is.read() << 8) + is.read();
         boolean isAdmin = is.read() != 0;
-       
+        
         if (_hmtpReader != null)
           _hmtpReader.init(is);
         else
@@ -1412,6 +1423,139 @@ public class HmuxRequest extends AbstractHttpRequest
       stream.flushNext();
     }
   }
+
+  //
+  // HmuxResponseStream methods
+  //
+
+  protected byte []getNextBuffer()
+  {
+    return _rawWrite.getBuffer();
+  }
+
+  protected int getNextStartOffset()
+  {
+    if (_bufferStartOffset == 0) {
+      int bufferLength = _rawWrite.getBuffer().length;
+      int startOffset = _rawWrite.getBufferOffset() + 3;
+      if (bufferLength <= startOffset) {
+        try {
+          _rawWrite.flush();
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+        startOffset = _rawWrite.getBufferOffset() + 3;
+      }
+
+      _rawWrite.setBufferOffset(startOffset);
+      _bufferStartOffset = startOffset;
+    }
+
+    return _bufferStartOffset;
+  }
+
+  protected int getNextBufferOffset()
+    throws IOException
+  {
+    if (_bufferStartOffset == 0) {
+      int bufferLength = _rawWrite.getBuffer().length;
+      int startOffset = _rawWrite.getBufferOffset() + 3;
+      if (bufferLength <= startOffset) {
+        _rawWrite.flush();
+        startOffset = _rawWrite.getBufferOffset() + 3;
+      }
+
+      _rawWrite.setBufferOffset(startOffset);
+      _bufferStartOffset = startOffset;
+    }
+
+    return _rawWrite.getBufferOffset();
+  }
+
+  protected void setNextBufferOffset(int offset)
+    throws IOException
+  {
+    offset = fillDataBuffer(offset);
+    _rawWrite.setBufferOffset(offset);
+  }
+
+  protected byte []writeNextBuffer(int offset)
+    throws IOException
+  {
+    offset = fillDataBuffer(offset);
+   
+    return _rawWrite.nextBuffer(offset);
+  }
+
+  protected void flushNext()
+    throws IOException
+  {
+    WriteStream next = _rawWrite;
+    
+    if (log.isLoggable(Level.FINE))
+      log.fine(dbgId() + "flush()");
+
+    int startOffset = _bufferStartOffset;
+    
+    if (startOffset > 0) {
+      _bufferStartOffset = 0;
+      if (startOffset == next.getBufferOffset()) {
+        next.setBufferOffset(startOffset - 3);
+      }
+      else {
+        // illegal state because the data isn't filled
+        throw new IllegalStateException();
+      }
+    }
+
+    next.flush();
+  }
+
+  protected void writeTail()
+    throws IOException
+  {
+    WriteStream next = _rawWrite;
+
+    int offset = next.getBufferOffset();
+
+    offset = fillDataBuffer(offset);
+ 
+    next.nextBuffer(offset);
+  }
+  
+  private int fillDataBuffer(int offset)
+    throws IOException
+  {
+    // server/2642
+    int bufferStart = _bufferStartOffset;
+    
+    if (bufferStart == 0)
+      return offset;
+
+    byte []buffer = _rawWrite.getBuffer();
+
+    // if (bufferStart > 0 && offset == buffer.length) {
+    int length = offset - bufferStart;
+
+    _bufferStartOffset = 0;
+    // server/26a0
+    if (length == 0) {
+      offset = bufferStart - 3;
+    }
+    else {
+      buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
+      buffer[bufferStart - 2] = (byte) (length >> 8);
+      buffer[bufferStart - 1] = (byte) (length);
+           
+      if (log.isLoggable(Level.FINE))
+        log.fine(dbgId() + (char) HmuxRequest.HMUX_DATA + "-w(" + length + ")");
+    }
+    
+    _bufferStartOffset = 0;
+    
+    return offset;
+  }
+
 
   void writeString(int code, String value)
     throws IOException
