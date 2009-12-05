@@ -29,34 +29,50 @@
 
 package com.caucho.config.type;
 
-import java.beans.*;
+import java.beans.Introspector;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.logging.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Logger;
+
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.*;
+import org.w3c.dom.Node;
+
+import com.caucho.config.ConfigContext;
+import com.caucho.config.ConfigException;
+import com.caucho.config.DependencyBean;
+import com.caucho.config.TagName;
 import com.caucho.config.annotation.DisableConfig;
-import com.caucho.config.attribute.*;
+import com.caucho.config.attribute.AddAttribute;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.attribute.CreateAttribute;
+import com.caucho.config.attribute.CustomBeanAttribute;
+import com.caucho.config.attribute.ProgramAttribute;
+import com.caucho.config.attribute.PropertyAttribute;
+import com.caucho.config.attribute.SetterAttribute;
+import com.caucho.config.attribute.TextAttribute;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
+import com.caucho.config.j2ee.InjectIntrospector;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.PropertyStringProgram;
+import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.types.RawString;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.PersistentDependency;
 import com.caucho.xml.QName;
-
-import org.w3c.dom.*;
+import com.caucho.xml.QNode;
 
 /**
  * Represents an introspected bean type for configuration.
  */
-public class BeanType extends ConfigType
+public class BeanType<T> extends ConfigType
 {
   private static final L10N L = new L10N(BeanType.class);
   private static final Logger log
@@ -70,7 +86,7 @@ public class BeanType extends ConfigType
 
   private static final Object _introspectLock = new Object();
 
-  private final Class _beanClass;
+  private final Class<T> _beanClass;
   
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
@@ -83,7 +99,7 @@ public class BeanType extends ConfigType
     = new HashMap<String,Method>();
   */
 
-  private Constructor _stringConstructor;
+  private Constructor<T> _stringConstructor;
   
   private Method _valueOf;
   private Method _setParent;
@@ -113,7 +129,7 @@ public class BeanType extends ConfigType
   private boolean _isIntrospectComplete;
   private ArrayList<BeanType> _pendingChildList = new ArrayList<BeanType>();
 
-  public BeanType(Class beanClass)
+  public BeanType(Class<T> beanClass)
   {
     _beanClass = beanClass;
   }
@@ -270,7 +286,7 @@ public class BeanType extends ConfigType
     if (uri == null || ! uri.startsWith("urn:java"))
       return null;
 
-    Class cl = createClass(name);
+    Class<?> cl = createClass(name);
 
     if (cl != null) {
       attr = getAddAttribute(cl);
@@ -309,7 +325,7 @@ public class BeanType extends ConfigType
       return attr;
     }
     
-    for (Class iface : cl.getInterfaces()) {
+    for (Class<?> iface : cl.getInterfaces()) {
       attr = getAddAttribute(iface);
 
       if (attr != null)
@@ -319,7 +335,7 @@ public class BeanType extends ConfigType
     return getAddAttribute(cl.getSuperclass());
   }
 
-  private Class createClass(QName name)
+  private Class<?> createClass(QName name)
   {
     String uri = name.getNamespaceURI();
 
@@ -335,11 +351,9 @@ public class BeanType extends ConfigType
     return TypeFactory.loadClass(pkg, name.getLocalName());
   }
 
-  private Class createResinClass(String name)
+  private Class<?> createResinClass(String name)
   {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    Class cl = TypeFactory.loadClass("ee", name);
+    Class<?> cl = TypeFactory.loadClass("ee", name);
 
     return cl;
   }
@@ -392,6 +406,7 @@ public class BeanType extends ConfigType
   /**
    * Return true if the object is replaced
    */
+  @Override
   public boolean isReplace()
   {
     return _replaceObject != null;
@@ -581,13 +596,13 @@ public class BeanType extends ConfigType
 
   private void introspectParent()
   {
-    Class parentClass = _beanClass.getSuperclass();
+    Class<?> parentClass = _beanClass.getSuperclass();
     
     if (parentClass != null) {
       ConfigType parentType = TypeFactory.getType(parentClass);
 
-      if (parentType instanceof BeanType) {
-	BeanType parentBean = (BeanType) parentType;
+      if (parentType instanceof BeanType<?>) {
+	BeanType<?> parentBean = (BeanType<?>) parentType;
 
 	if (! parentBean._isIntrospected)
 	  parentBean.introspect();
@@ -660,7 +675,7 @@ public class BeanType extends ConfigType
       if (method.getAnnotation(DisableConfig.class) != null)
         continue;
       
-      Class []paramTypes = method.getParameterTypes();
+      Class<?> []paramTypes = method.getParameterTypes();
 
       String name = method.getName();
 
@@ -753,7 +768,7 @@ public class BeanType extends ConfigType
       else if ((name.startsWith("set") || name.startsWith("add"))
 	       && paramTypes.length == 1
 	       && createMap.get(name.substring(3)) == null) {
-	Class type = paramTypes[0];
+	Class<?> type = paramTypes[0];
 
 	String className = name.substring(3);
 	String propName = toXmlName(name.substring(3));
@@ -831,10 +846,10 @@ public class BeanType extends ConfigType
   }
 
   private static Constructor findConstructor(Constructor []constructors,
-					     Class ...types)
+					     Class<?> ...types)
   {
     for (Constructor ctor : constructors) {
-      Class []paramTypes = ctor.getParameterTypes();
+      Class<?> []paramTypes = ctor.getParameterTypes();
 
       if (isMatch(paramTypes, types))
 	return ctor;
@@ -843,7 +858,7 @@ public class BeanType extends ConfigType
     return null;
   }
 
-  private static boolean isMatch(Class []aTypes, Class []bTypes)
+  private static boolean isMatch(Class<?> []aTypes, Class<?> []bTypes)
   {
     if (aTypes.length != bTypes.length)
       return false;
@@ -883,38 +898,6 @@ public class BeanType extends ConfigType
 	setterMap.put(name.substring("set".length()), method);
       }
     }
-  }
-
-  private Method findCreate(Method []methods, String name)
-  {
-    String createName = "create" + name;
-
-    for (Method method : methods) {
-      if (method.getParameterTypes().length != 0)
-	continue;
-
-      if (method.getName().equals(createName))
-	return method;
-    }
-
-    return null;
-  }
-
-  private Method findSetter(String name)
-  {
-    String addName = "add" + name;
-    String setName = "set" + name;
-
-    for (Method method : _beanClass.getMethods()) {
-      if (method.getParameterTypes().length != 1)
-	continue;
-
-      if (method.getName().equals(addName)
-	  || method.getName().equals(setName))
-	return method;
-    }
-
-    return null;
   }
 
   private String toXmlName(String name)

@@ -52,7 +52,7 @@ import org.w3c.dom.*;
 /**
  * Represents an webbeans-style introspected bean type for configuration.
  */
-public class CustomBeanType extends ConfigType
+public class CustomBeanType<T> extends ConfigType
 {
   private static final L10N L = new L10N(CustomBeanType.class);
   private static final Logger log
@@ -75,7 +75,7 @@ public class CustomBeanType extends ConfigType
 
   private static final Object _introspectLock = new Object();
 
-  private final Class _beanClass;
+  private final Class<T> _beanClass;
 
   private final ConfigType _beanType;
 
@@ -91,7 +91,7 @@ public class CustomBeanType extends ConfigType
 
   private Attribute _addAttribute;
 
-  public CustomBeanType(Class beanClass)
+  public CustomBeanType(Class<T> beanClass)
   {
     _beanClass = beanClass;
 
@@ -99,25 +99,6 @@ public class CustomBeanType extends ConfigType
 
     int p = beanClass.getName().lastIndexOf('.');
     _namespaceURI = "urn:java:" + beanClass.getName().substring(0, p);
-
-    /*
-    _hasZeroArg = false;
-
-    try {
-      _hasZeroArg = beanClass.getConstructor(new Class[0]) != null;
-    } catch (Exception e) {
-    }
-
-    // server/1a75
-    if (! _hasZeroArg) {
-      // XXX: also check for value method
-      _nsAttributeMap.put(R_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
-      _nsAttributeMap.put(W_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
-      _nsAttributeMap.put(A_VALUE, CustomBeanValueArgAttribute.ATTRIBUTE);
-
-      _nsAttributeMap.put(TEXT, CustomBeanValueArgAttribute.ATTRIBUTE);
-    }
-    */
 
     _nsAttributeMap.put(W_NEW, CustomBeanNewAttribute.ATTRIBUTE);
     _nsAttributeMap.put(R_NEW, CustomBeanNewAttribute.ATTRIBUTE);
@@ -127,7 +108,7 @@ public class CustomBeanType extends ConfigType
   /**
    * Returns the given type.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return _beanClass;
   }
@@ -220,7 +201,7 @@ public class CustomBeanType extends ConfigType
       }
     }
 
-    Class cl = type.getType();
+    Class<?> cl = type.getType();
 
     if (Annotation.class.isAssignableFrom(cl)) {
       return new CustomBeanAnnotationAttribute(cl);
@@ -253,7 +234,7 @@ public class CustomBeanType extends ConfigType
     return findMethod(_beanClass, name);
   }
 
-  private Method findMethod(Class cl, String name)
+  private Method findMethod(Class<?> cl, String name)
   {
     if (cl == null || cl.equals(Object.class))
       return null;
@@ -271,7 +252,7 @@ public class CustomBeanType extends ConfigType
     return findField(_beanClass, name);
   }
 
-  private Field findField(Class cl, String name)
+  private Field findField(Class<?> cl, String name)
   {
     if (cl == null || cl.equals(Object.class))
       return null;
@@ -303,11 +284,11 @@ public class CustomBeanType extends ConfigType
     */
   }
 
-  private Class createResinClass(String name)
+  private Class<?> createResinClass(String name)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    Class cl = TypeFactory.loadClass("ee", name);
+    Class<?> cl = TypeFactory.loadClass("ee", name);
 
     return cl;
   }

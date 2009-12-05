@@ -44,14 +44,14 @@ import org.w3c.dom.Node;
 /**
  * Represents an introspected configuration type.
  */
-abstract public class ConfigType
+abstract public class ConfigType<T>
 {
   private static final L10N L = new L10N(ConfigType.class);
   
   /**
    * Returns the Java type.
    */
-  abstract public Class getType();
+  abstract public Class<T> getType();
 
   /**
    * Introspect the type.
@@ -195,7 +195,7 @@ abstract public class ConfigType
     return ConfigProgram.class.equals(getType());
   }
 
-  public ConfigType getComponentType()
+  public ConfigType<?> getComponentType()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
