@@ -45,54 +45,57 @@ import java.util.logging.Logger;
 class TcpStream extends StreamImpl {
   private static final Logger log
     = Logger.getLogger(TcpStream.class.getName());
-  
+
   private Socket _s;
   private InputStream _is;
   private OutputStream _os;
 
-  private TcpStream(TcpPath path, long timeout) throws IOException
+  private TcpStream(TcpPath path,
+                    long connectTimeout,
+                    long socketTimeout)
+    throws IOException
   {
     setPath(path);
 
     //_s = new Socket(path.getHost(), path.getPort());
     _s = new Socket();
 
-    if (timeout > 0)
-      _s.connect(path.getSocketAddress(), (int) timeout);
+    if (connectTimeout > 0)
+      _s.connect(path.getSocketAddress(), (int) connectTimeout);
     else
       _s.connect(path.getSocketAddress());
 
     if (! _s.isConnected())
       throw new IOException("connection timeout");
-    
-    if (timeout < 0)
-      timeout = 120000;
 
-    _s.setSoTimeout((int) timeout);
+    if (socketTimeout < 0)
+      socketTimeout = 120000;
+
+    _s.setSoTimeout((int) socketTimeout);
 
     try {
       if (path instanceof TcpsPath) {
-	SSLContext context = SSLContext.getInstance("TLS");
+        SSLContext context = SSLContext.getInstance("TLS");
 
-	javax.net.ssl.TrustManager tm =
-	  new javax.net.ssl.X509TrustManager() {
-	    public java.security.cert.X509Certificate[]
-	      getAcceptedIssuers() {
-	      return null;
-	    }
-	    public void checkClientTrusted(
-					   java.security.cert.X509Certificate[] cert, String foo) {
-	    }
-	    public void checkServerTrusted(
-					   java.security.cert.X509Certificate[] cert, String foo) {
-	    }
-	  };
+        javax.net.ssl.TrustManager tm =
+          new javax.net.ssl.X509TrustManager() {
+            public java.security.cert.X509Certificate[]
+              getAcceptedIssuers() {
+              return null;
+            }
+            public void checkClientTrusted(
+                                           java.security.cert.X509Certificate[] cert, String foo) {
+            }
+            public void checkServerTrusted(
+                                           java.security.cert.X509Certificate[] cert, String foo) {
+            }
+          };
 
-      
-	context.init(null, new javax.net.ssl.TrustManager[] { tm }, null);
-	SSLSocketFactory factory = context.getSocketFactory();
 
-	_s = factory.createSocket(_s, path.getHost(), path.getPort(), true);
+        context.init(null, new javax.net.ssl.TrustManager[] { tm }, null);
+        SSLSocketFactory factory = context.getSocketFactory();
+
+        _s = factory.createSocket(_s, path.getHost(), path.getPort(), true);
       }
     } catch (IOException e) {
       throw e;
@@ -101,7 +104,7 @@ class TcpStream extends StreamImpl {
     } catch (Exception e) {
       throw new IOExceptionWrapper(e);
     }
-    
+
     _is = _s.getInputStream();
     _os = _s.getOutputStream();
   }
@@ -110,31 +113,45 @@ class TcpStream extends StreamImpl {
   {
     if (name.equals("timeout")) {
       try {
-	if (value instanceof Number)
-	  _s.setSoTimeout(((Number) value).intValue());
-	else
-	  _s.setSoTimeout(Integer.parseInt(String.valueOf(value)));
+        if (value instanceof Number)
+          _s.setSoTimeout(((Number) value).intValue());
+        else
+          _s.setSoTimeout(Integer.parseInt(String.valueOf(value)));
       } catch (SocketException e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+    else if (name.equals("no-delay")) {
+      try {
+        if (Boolean.TRUE.equals(value)) {
+          _s.setTcpNoDelay(true);
+        }
+      } catch (SocketException e) {
+        log.log(Level.FINER, e.toString(), e);
       }
     }
   }
 
-  static TcpStream openRead(TcpPath path, long timeout) throws IOException
+  static TcpStream openRead(TcpPath path,
+                            long connectTimeout,
+                            long socketTimeout) throws IOException
   {
-    return new TcpStream(path, timeout);
+    return new TcpStream(path, connectTimeout, socketTimeout);
   }
 
-  static TcpStream openReadWrite(TcpPath path, long timeout) throws IOException
+  static TcpStream openReadWrite(TcpPath path,
+                                 long connectTimeout,
+                                 long socketTimeout)
+    throws IOException
   {
-    return new TcpStream(path, timeout);
+    return new TcpStream(path, connectTimeout, socketTimeout);
   }
 
   public boolean canWrite()
   {
     return _os != null;
   }
-  
+
   /**
    * Writes a buffer to the underlying stream.
    *
@@ -175,7 +192,7 @@ class TcpStream extends StreamImpl {
   {
     OutputStream os = _os;
     _os = null;
-    
+
     try {
       if (os != null)
         _s.shutdownOutput();
@@ -183,7 +200,7 @@ class TcpStream extends StreamImpl {
       if (_is == null) {
         Socket s = _s;
         _s = null;
-        
+
         if (s != null)
           s.close();
       }
@@ -194,22 +211,22 @@ class TcpStream extends StreamImpl {
   {
     InputStream is = _is;
     _is = null;
-    
+
     OutputStream os = _os;
     _os = null;
-    
+
     Socket s = _s;
     _s = null;
 
     try {
       if (os != null)
-	os.close();
+        os.close();
 
       if (is != null)
-	is.close();
+        is.close();
     } finally {
       if (s != null)
-	s.close();
+        s.close();
     }
   }
 

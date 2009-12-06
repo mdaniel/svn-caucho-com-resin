@@ -446,7 +446,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       if (length == 0 && bufferOffset == 0 && ! isFinished) {
         return;
       }
-      
+
       int bufferStart = getNextStartOffset();
 
       // server/05e2
@@ -572,10 +572,10 @@ abstract public class ResponseStream extends ToByteResponseStream {
         flushBuffer();
 
         int bufferOffset = getNextBufferOffset();
-        
+
         if (bufferOffset > 0) {
           int bufferStart = getNextStartOffset();
- 
+
           if (bufferStart != bufferOffset) {
             // server/10c9
             // _contentLength += (bufferOffset - bufferStart);
@@ -656,7 +656,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       writeTail();
 
       // close();
-      
+
       AbstractHttpRequest req = _response.getRequest();
       if (req.isComet() || req.isDuplex()) {
       }

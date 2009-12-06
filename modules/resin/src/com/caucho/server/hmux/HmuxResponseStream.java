@@ -42,10 +42,10 @@ public class HmuxResponseStream extends ResponseStream {
                      WriteStream next)
   {
     super(response);
-    
+
     if (request == null)
       throw new NullPointerException();
-    
+
     _request = request;
   }
 

@@ -50,10 +50,10 @@ public class HmuxResponse extends AbstractHttpResponse {
 
   HmuxResponse(HmuxRequest request, WriteStream rawWrite)
   {
-    super(request, rawWrite);
+    super(request);
 
     _req = request;
-    
+
     if (_req == null)
       throw new NullPointerException();
   }
@@ -62,8 +62,8 @@ public class HmuxResponse extends AbstractHttpResponse {
   protected AbstractResponseStream createResponseStream()
   {
     HmuxRequest request = (HmuxRequest) getRequest();
-    
-    return new HmuxResponseStream(request, this, getRawWrite());
+
+    return new HmuxResponseStream(request, this, request.getRawWrite());
   }
 
   /**

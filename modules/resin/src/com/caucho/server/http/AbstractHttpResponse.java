@@ -85,23 +85,20 @@ abstract public class AbstractHttpResponse {
   protected static final int HEADER_CONNECTION = HEADER_SERVER + 1;
 
   protected final AbstractHttpRequest _request;
-  
+
   protected final ArrayList<String> _headerKeys = new ArrayList<String>();
   protected final ArrayList<String> _headerValues = new ArrayList<String>();
-  
+
   protected final ArrayList<String> _footerKeys = new ArrayList<String>();
   protected final ArrayList<String> _footerValues = new ArrayList<String>();
 
-  // the raw output stream.
-  private final WriteStream _rawWrite;
-  
   private final AbstractResponseStream _responseStream;
-  
+
   private final ServletOutputStreamImpl _responseOutputStream
     = new ServletOutputStreamImpl();
   private final ResponseWriter _responsePrintWriter
     = new ResponseWriter();
-  
+
   protected final QDate _calendar = new QDate(false);
 
   protected final CharBuffer _cb = new CharBuffer();
@@ -115,29 +112,13 @@ abstract public class AbstractHttpResponse {
   protected long _contentLength;
   protected boolean _isClosed;
 
-  /*
-  protected AbstractHttpResponse()
+  protected AbstractHttpResponse(AbstractHttpRequest request)
   {
-    _rawWrite = null;
-
-    _request = null;
-    _responseStream = createResponseStream();
-  }
-  */
-
-  protected AbstractHttpResponse(AbstractHttpRequest request,
-                                 WriteStream rawWrite)
-  {
-    if (rawWrite == null)
-      throw new NullPointerException();
-    
-    _rawWrite = rawWrite;
-
     _request = request;
-    
+
     _responseStream = createResponseStream();
   }
-  
+
   TempBuffer getBuffer()
   {
     return _bufferStore.getTempBuffer();
@@ -147,7 +128,7 @@ abstract public class AbstractHttpResponse {
   {
     return _calendar;
   }
-  
+
   /**
    * If set true, client disconnect exceptions are no propagated to the
    * server code.
@@ -171,7 +152,7 @@ abstract public class AbstractHttpResponse {
   public void clientDisconnect()
   {
     _request.clientDisconnect();
-    
+
     _isClientDisconnect = true;
   }
 
@@ -204,11 +185,6 @@ abstract public class AbstractHttpResponse {
     return _request;
   }
 
-  protected WriteStream getRawWrite()
-  {
-    return _rawWrite;
-  }
-
   /**
    * Returns true for closed requests.
    */
@@ -220,7 +196,7 @@ abstract public class AbstractHttpResponse {
   public void startInvocation()
   {
   }
-  
+
   /**
    * Initializes the Response at the beginning of the request.
    */
@@ -228,10 +204,10 @@ abstract public class AbstractHttpResponse {
     throws IOException
   {
     _bufferStore = bufferStore;
-    
+
     _headerKeys.clear();
     _headerValues.clear();
-    
+
     _footerKeys.clear();
     _footerValues.clear();
 
@@ -239,7 +215,7 @@ abstract public class AbstractHttpResponse {
 
     _isHeaderWritten = false;
     _isClientDisconnect = false;
-    
+
     _contentLength = -1;
     _isClosed = false;
   }
@@ -275,17 +251,17 @@ abstract public class AbstractHttpResponse {
   {
     for (int i = 0; i < _headerKeys.size(); i++) {
       String oldKey = _headerKeys.get(i);
- 
+
       if (oldKey.equalsIgnoreCase(name))
- 	return true;
+        return true;
     }
 
     if (name.equalsIgnoreCase("content-type"))
       return _request.getResponseFacade().getContentType() != null;
-    
+
     if (name.equalsIgnoreCase("content-length"))
       return _contentLength >= 0;
- 
+
     return false;
   }
 
@@ -297,21 +273,21 @@ abstract public class AbstractHttpResponse {
   public String getHeader(String name)
   {
     ArrayList<String> keys = _headerKeys;
-    
+
     int headerSize = keys.size();
     for (int i = 0; i < headerSize; i++) {
       String oldKey = keys.get(i);
- 
+
       if (oldKey.equalsIgnoreCase(name))
- 	return (String) _headerValues.get(i);
+        return (String) _headerValues.get(i);
     }
 
     if (name.equalsIgnoreCase("content-type"))
       return _request.getResponseFacade().getContentType();
- 
+
     if (name.equalsIgnoreCase("content-length"))
       return _contentLength >= 0 ? String.valueOf(_contentLength) : null;
- 
+
     return null;
   }
 
@@ -354,20 +330,20 @@ abstract public class AbstractHttpResponse {
 
     ArrayList<String> keys = _headerKeys;
     ArrayList<String> values = _headerValues;
-    
+
     for (i = keys.size() - 1; i >= 0; i--) {
       String oldKey = keys.get(i);
 
       if (oldKey.equalsIgnoreCase(key)) {
-	if (hasHeader) {
-	  keys.remove(i);
-	  values.remove(i);
-	}
-	else {
-	  hasHeader = true;
+        if (hasHeader) {
+          keys.remove(i);
+          values.remove(i);
+        }
+        else {
+          hasHeader = true;
 
-	  values.set(i, value);
-	}
+          values.set(i, value);
+        }
       }
     }
 
@@ -420,7 +396,7 @@ abstract public class AbstractHttpResponse {
     int length = key.length();
     if (256 <= length)
       return false;
-    
+
     key.getChars(0, length, _headerBuffer, 0);
 
     switch (_headerCodes.get(_headerBuffer, length)) {
@@ -435,27 +411,27 @@ abstract public class AbstractHttpResponse {
       else {
         _request.getResponseFacade().setCacheControl(true);
       }
-      
+
       return false;
-	
+
     case HEADER_CONNECTION:
       if ("close".equalsIgnoreCase(value))
-	_request.killKeepalive();
+        _request.killKeepalive();
       return true;
-	
+
     case HEADER_CONTENT_TYPE:
       _request.getResponseFacade().setContentType(value);
       return true;
-	
+
     case HEADER_CONTENT_LENGTH:
       // server/05a8
       // php/164v
       _contentLength = Long.parseLong(value.trim());
       return true;
-	
+
     case HEADER_DATE:
       return true;
-	
+
     case HEADER_SERVER:
       return false;
 
@@ -463,12 +439,12 @@ abstract public class AbstractHttpResponse {
       return false;
     }
   }
-  
+
   public void removeHeader(String key)
   {
     ArrayList<String> keys = _headerKeys;
     ArrayList<String> values = _headerValues;
-    
+
     for (int i = keys.size() - 1; i >= 0; i--) {
       String oldKey = keys.get(i);
 
@@ -605,15 +581,15 @@ abstract public class AbstractHttpResponse {
       String oldKey = _footerKeys.get(i);
 
       if (oldKey.equalsIgnoreCase(key)) {
-	if (hasFooter) {
-	  _footerKeys.remove(i);
-	  _footerValues.remove(i);
-	}
-	else {
-	  hasFooter = true;
+        if (hasFooter) {
+          _footerKeys.remove(i);
+          _footerValues.remove(i);
+        }
+        else {
+          hasFooter = true;
 
-	  _footerValues.set(i, value);
-	}
+          _footerValues.set(i, value);
+        }
       }
     }
 
@@ -669,7 +645,7 @@ abstract public class AbstractHttpResponse {
   {
     if (_responseStream.isCommitted())
       return true;
-    
+
     // server/05a7
     if (_contentLength > 0
         && _contentLength <= _responseStream.getContentLength()) {
@@ -710,7 +686,7 @@ abstract public class AbstractHttpResponse {
   {
     _isHeaderWritten = isWritten;
   }
-  
+
   /**
    * Writes the continue
    */
@@ -718,15 +694,17 @@ abstract public class AbstractHttpResponse {
     throws IOException
   {
     if (! isHeaderWritten()) {
-      writeContinueInt(_rawWrite);
-      _rawWrite.flush();
+      // writeContinueInt(_rawWrite);
+      // _rawWrite.flush();
+
+      writeContinueInt();
     }
   }
-  
+
   /**
    * Writes the continue
    */
-  protected void writeContinueInt(WriteStream os)
+  protected void writeContinueInt()
     throws IOException
   {
   }
@@ -753,7 +731,7 @@ abstract public class AbstractHttpResponse {
 
     _isHeaderWritten = true;
     boolean isHead = false;
-    
+
     if (_request.getMethod().equals("HEAD")) {
       isHead = true;
       _responseStream.setHead();
@@ -762,12 +740,12 @@ abstract public class AbstractHttpResponse {
     WebApp webApp = _request.getWebApp();
 
     int statusCode = res.getStatus();
-    
+
     int majorCode = statusCode / 100;
 
     if (webApp != null) {
       if (majorCode == 5)
-	webApp.addStatus500();
+        webApp.addStatus500();
     }
 
     if (req != null) {
@@ -782,7 +760,7 @@ abstract public class AbstractHttpResponse {
   }
 
   abstract protected boolean writeHeadersInt(int length,
-					     boolean isHead)
+                                             boolean isHead)
     throws IOException;
 
   /**
@@ -795,11 +773,11 @@ abstract public class AbstractHttpResponse {
    */
   public boolean fillCookie(CharBuffer cb, Cookie cookie,
                             long date, int version,
-			    boolean isCookie2)
+                            boolean isCookie2)
   {
     // How to deal with quoted values?  Old browsers can't deal with
     // the quotes.
-    
+
     cb.clear();
     cb.append(cookie.getName());
     if (isCookie2) {
@@ -816,7 +794,7 @@ abstract public class AbstractHttpResponse {
     if (domain != null && ! domain.equals("")) {
       if (isCookie2) {
         cb.append("; Domain=");
-      
+
         cb.append('"');
         cb.append(domain);
         cb.append('"');
@@ -831,21 +809,21 @@ abstract public class AbstractHttpResponse {
     if (path != null && ! path.equals("")) {
       if (isCookie2) {
         cb.append("; Path=");
-      
+
         cb.append('"');
         cb.append(path);
         cb.append('"');
       }
       else {
-	// Caps from TCK test
-	if (version > 0)
-	  cb.append("; Path=");
-	else
-	  cb.append("; path=");
+        // Caps from TCK test
+        if (version > 0)
+          cb.append("; Path=");
+        else
+          cb.append("; path=");
         cb.append(path);
       }
     }
-    
+
     if (cookie.getSecure()) {
       if (version > 0)
         cb.append("; Secure");
@@ -859,10 +837,10 @@ abstract public class AbstractHttpResponse {
         cb.append("; Max-Age=");
         cb.append(maxAge);
       }
-      
+
       cb.append("; Version=");
       cb.append(version);
-      
+
       if (cookie.getComment() != null) {
         cb.append("; Comment=\"");
         cb.append(cookie.getComment());
@@ -870,14 +848,14 @@ abstract public class AbstractHttpResponse {
       }
 
       if (cookie instanceof CookieImpl) {
-	CookieImpl extCookie = (CookieImpl) cookie;
-	String port = extCookie.getPort();
+        CookieImpl extCookie = (CookieImpl) cookie;
+        String port = extCookie.getPort();
 
-	if (port != null && isCookie2) {
-	  cb.append("; Port=\"");
-	  cb.append(port);
-	  cb.append("\"");
-	}
+        if (port != null && isCookie2) {
+          cb.append("; Port=\"");
+          cb.append(port);
+          cb.append("\"");
+        }
       }
     }
 
@@ -899,7 +877,7 @@ abstract public class AbstractHttpResponse {
 
     return true;
   }
-  
+
   /**
    * Closes the request, called from web-app for early close.
    */
@@ -913,7 +891,7 @@ abstract public class AbstractHttpResponse {
       // finishRequest(true);
     }
   }
-  
+
   /**
    * Complete the invocation.  Flushes the streams, completes caching
    * and writes the appropriate logs.
@@ -923,10 +901,10 @@ abstract public class AbstractHttpResponse {
     // server/1960, server/1l11
     // finishInvocation(false);
     boolean isClose = ! _request.isSuspend();
-    
+
     finishInvocation(isClose);
   }
-  
+
   /**
    * Complete the invocation.  Flushes the streams, completes caching
    * and writes the appropriate logs.
@@ -951,12 +929,12 @@ abstract public class AbstractHttpResponse {
     try {
       /* XXX:
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
-	handleNotModified(_isTopCache);
+        handleNotModified(_isTopCache);
       }
       if (_statusCode == SC_NOT_MODIFIED) {
         boolean isTopCache = true;
-        
-	handleNotModified(isTopCache);
+
+        handleNotModified(isTopCache);
       }
       */
       // server/137p
@@ -965,39 +943,42 @@ abstract public class AbstractHttpResponse {
           && response.getStatus() == HttpServletResponse.SC_NOT_MODIFIED) {
         response.handleNotModified();
       }
-      
-      
+
+
       if (_responseStream == null) {
       }
       else if (isClose) {
-	_responseStream.close();
-	finishResponseStream(isClose);
+        _responseStream.finish();
+        // _responseStream.close();
+        finishResponseStream(isClose);
       }
       /*
       else if (_responseStream != _originalResponseStream) {
-	_responseStream.finish();
+        _responseStream.finish();
       }
       */
       else {
-	_responseStream.flush();
-	finishResponseStream(isClose);
+        _responseStream.flush();
+        finishResponseStream(isClose);
       }
 
+      /*
       if (_rawWrite != null) {
-	_rawWrite.flushBuffer();
+        _rawWrite.flushBuffer();
       }
+      */
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
       _isClientDisconnect = true;
 
       if (isIgnoreClientDisconnect())
-	log.fine(e.toString());
+        log.fine(e.toString());
       else
-	throw e;
+        throw e;
     } catch (IOException e) {
       _request.killKeepalive();
       _isClientDisconnect = true;
-      
+
       throw e;
     }
   }
@@ -1020,9 +1001,9 @@ abstract public class AbstractHttpResponse {
 
     try {
       _bufferStore = null;
-      
+
       AbstractHttpRequest request = _request;
-	
+
       try {
         request.skip();
       } catch (BadRequestException e) {
@@ -1033,7 +1014,7 @@ abstract public class AbstractHttpResponse {
       }
 
       // XXX: finishCache();
-      
+
       // include() files finish too, but shouldn't force a flush, hence
       // flush is false
       // Never send flush?
@@ -1041,21 +1022,27 @@ abstract public class AbstractHttpResponse {
 
       _isClosed = true;
 
+      _responseStream.finish();
+
+      /*
       if (_rawWrite != null)
-	_rawWrite.flushBuffer();
+        _rawWrite.flushBuffer();
+      */
+      /*
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
       _isClientDisconnect = true;
 
       if (isIgnoreClientDisconnect())
-	log.fine(e.toString());
+        log.fine(e.toString());
       else
-	throw e;
+        throw e;
     } catch (IOException e) {
       _request.killKeepalive();
       _isClientDisconnect = true;
-      
+
       throw e;
+      */
     } finally {
       _isClosed = true;
     }

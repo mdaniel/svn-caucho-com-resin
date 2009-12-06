@@ -69,6 +69,8 @@ public class HttpResponse extends AbstractHttpResponse
   private long _lastDate;
   private boolean _isChunked;
 
+  private WriteStream _rawWrite;
+
   /**
    * Creates a new HTTP-protocol response.
    *
@@ -76,9 +78,10 @@ public class HttpResponse extends AbstractHttpResponse
    */
   HttpResponse(HttpRequest request, WriteStream rawWrite)
   {
-    super(request, rawWrite);
+    super(request);
 
     _request = request;
+    _rawWrite = rawWrite;
 
     Server server = (Server) request.getDispatchServer();
 
@@ -88,12 +91,19 @@ public class HttpResponse extends AbstractHttpResponse
   @Override
   protected AbstractResponseStream createResponseStream()
   {
-    return new HttpResponseStream(this, getRawWrite());
+    HttpRequest request = (HttpRequest) getRequest();
+
+    return new HttpResponseStream(this, request.getRawWrite());
   }
 
   boolean isChunkedEncoding()
   {
     return _isChunked;
+  }
+
+  protected WriteStream getRawWrite()
+  {
+    return _rawWrite;
   }
 
   /**

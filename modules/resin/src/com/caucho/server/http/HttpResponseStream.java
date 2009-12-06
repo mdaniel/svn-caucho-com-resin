@@ -187,7 +187,6 @@ public class HttpResponseStream extends ResponseStream {
     int bufferStart = _bufferStartOffset;
 
     int bufferOffset = _next.getBufferOffset();
-
     if (bufferStart < bufferOffset) {
       if (log.isLoggable(Level.FINER))
         log.finer(dbgId() + "write-chunk-tail(" + (bufferOffset - bufferStart) + ")");

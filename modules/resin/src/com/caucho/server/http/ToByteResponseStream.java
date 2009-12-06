@@ -122,34 +122,34 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     _isHead = true;
   }
-  
+
   public final boolean isHead()
   {
     return _isHead;
   }
-  
+
   public final boolean isCommitted()
   {
     // XXX: isCommitted || isClosed??
-    
+
     return _isCommitted;
   }
-  
+
   public final void setCommitted(boolean isCommitted)
   {
     _isCommitted = isCommitted;
   }
-  
+
   public final boolean isFinished()
   {
     return _isFinished;
   }
-  
+
   public final void setFinished(boolean isFinished)
   {
     _isFinished = isFinished;
   }
-  
+
   public final boolean isClosed()
   {
     return _isClosed;
@@ -224,7 +224,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     if (! _isOutputStreamOnly)
       flushCharBuffer();
-    
+
     return _tailByteBuffer;
   }
 

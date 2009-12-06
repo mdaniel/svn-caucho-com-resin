@@ -71,6 +71,7 @@ import com.caucho.vfs.BufferedReaderAdapter;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.Encoding;
 import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Abstract request implementing methods common to the different
@@ -291,6 +292,11 @@ public abstract class AbstractHttpRequest
   final HttpBufferStore getHttpBufferStore()
   {
     return _httpBuffer;
+  }
+
+  public WriteStream getRawWrite()
+  {
+    return _conn.getWriteStream();
   }
 
   public abstract byte []getUriBuffer();
@@ -1685,7 +1691,7 @@ public abstract class AbstractHttpRequest
 
       HttpBufferStore httpBuffer = _httpBuffer;
       _httpBuffer = null;
-      
+
       if (_tcpConn != null) {
         _tcpConn.endActive();
 

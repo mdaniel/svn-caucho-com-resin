@@ -287,7 +287,7 @@ public class HmuxRequest extends AbstractHttpRequest
     _hmuxProtocol = protocol;
 
     _rawWrite = conn.getWriteStream();
- 
+
     // XXX: response.setIgnoreClientDisconnect(server.getIgnoreClientDisconnect());
 
     // _server = Server.getCurrent();
@@ -339,13 +339,13 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     ActorStream brokerStream = _brokerStream;
     _brokerStream = null;
-    
+
     ActorStream linkStream = _linkStream;
     _linkStream = null;
-    
+
     if (brokerStream != null)
       brokerStream.close();
-    
+
     if (linkStream != null)
       linkStream.close();
   }
@@ -358,7 +358,7 @@ public class HmuxRequest extends AbstractHttpRequest
   {
     return _hasRequest;
   }
-  
+
   @Override
   public boolean isSuspend()
   {
@@ -430,7 +430,7 @@ public class HmuxRequest extends AbstractHttpRequest
       }
 
       // cluster/6610 - hmtp mode doesn't close the stream.
-      if (_brokerStream == null) {        
+      if (_brokerStream == null) {
         try {
           _readStream.setDisableClose(false);
           _readStream.close();
@@ -592,7 +592,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     _pendingData = 0;
     _bufferStartOffset = 0;
-    
+
    _isSecure = _conn.isSecure();
   }
 
@@ -875,28 +875,28 @@ public class HmuxRequest extends AbstractHttpRequest
         if (isLoggable)
           log.fine(dbgId() + (char) code + " post-data: " + len);
         return true;
-        
+
       case HMUX_TO_UNIDIR_HMTP:
       case HMUX_SWITCH_TO_HMTP: {
         len = (is.read() << 8) + is.read();
         boolean isAdmin = is.read() != 0;
-        
+
         if (_hmtpReader != null)
           _hmtpReader.init(is);
         else
           _hmtpReader = new HmtpReader(is);
-        
+
         if (_hmtpWriter != null)
           _hmtpWriter.init(_rawWrite);
         else
           _hmtpWriter = new HmtpWriter(_rawWrite);
-        
+
         Broker broker = _server.getAdminBroker();
         ActorStream brokerStream = broker.getBrokerStream();
-        
+
         _linkStream = new HempMemoryQueue(_hmtpWriter, brokerStream, 1);
         boolean isUnidir = code == HMUX_TO_UNIDIR_HMTP;
-        
+
         ServerLinkService linkService
           = new ServerLinkService(_linkStream,
                                   _server.getAdminBroker(),
@@ -904,11 +904,11 @@ public class HmuxRequest extends AbstractHttpRequest
                                   getRemoteAddr(),
                                   isUnidir);
 
-        _brokerStream = linkService.getBrokerStream();        
-        
+        _brokerStream = linkService.getBrokerStream();
+
         if (isLoggable)
           log.fine(dbgId() + (char) code + "-r switch-to-hmtp");
-        
+
         return dispatchHmtp();
       }
 
@@ -1033,12 +1033,12 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     HmtpReader in = _hmtpReader;
-    
+
     do {
       if (! in.readPacket(_brokerStream))
         return false;
     } while (_rawRead.getAvailable() > 0);
-    
+
     return true;
   }
 
@@ -1454,6 +1454,7 @@ public class HmuxRequest extends AbstractHttpRequest
     return _bufferStartOffset;
   }
 
+
   protected int getNextBufferOffset()
     throws IOException
   {
@@ -1483,7 +1484,7 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     offset = fillDataBuffer(offset);
-   
+
     return _rawWrite.nextBuffer(offset);
   }
 
@@ -1491,12 +1492,12 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     WriteStream next = _rawWrite;
-    
+
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + "flush()");
 
     int startOffset = _bufferStartOffset;
-    
+
     if (startOffset > 0) {
       _bufferStartOffset = 0;
       if (startOffset == next.getBufferOffset()) {
@@ -1519,16 +1520,16 @@ public class HmuxRequest extends AbstractHttpRequest
     int offset = next.getBufferOffset();
 
     offset = fillDataBuffer(offset);
- 
+
     next.nextBuffer(offset);
   }
-  
+
   private int fillDataBuffer(int offset)
     throws IOException
   {
     // server/2642
     int bufferStart = _bufferStartOffset;
-    
+
     if (bufferStart == 0)
       return offset;
 
@@ -1546,13 +1547,13 @@ public class HmuxRequest extends AbstractHttpRequest
       buffer[bufferStart - 3] = (byte) HmuxRequest.HMUX_DATA;
       buffer[bufferStart - 2] = (byte) (length >> 8);
       buffer[bufferStart - 1] = (byte) (length);
-           
+
       if (log.isLoggable(Level.FINE))
         log.fine(dbgId() + (char) HmuxRequest.HMUX_DATA + "-w(" + length + ")");
     }
-    
+
     _bufferStartOffset = 0;
-    
+
     return offset;
   }
 
@@ -1588,7 +1589,7 @@ public class HmuxRequest extends AbstractHttpRequest
     if (log.isLoggable(Level.FINE))
       log.fine(dbgId() + (char)code + "-w: " + cb);
   }
-  
+
   public void protocolCloseEvent()
   {
   }
