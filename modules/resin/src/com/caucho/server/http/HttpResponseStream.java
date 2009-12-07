@@ -143,7 +143,12 @@ public class HttpResponseStream extends ResponseStream {
     if (bufferStart > 0) {
       byte []buffer = next.getBuffer();
 
-      writeChunkHeader(buffer, bufferStart, offset - bufferStart);
+      int len = offset - bufferStart;
+
+      if (len > 0)
+        writeChunkHeader(buffer, bufferStart, offset - bufferStart);
+      else
+        offset = bufferStart - 8;
 
       _bufferStartOffset = 0;
     }
@@ -192,8 +197,11 @@ public class HttpResponseStream extends ResponseStream {
         log.finer(dbgId() + "write-chunk-tail(" + (bufferOffset - bufferStart) + ")");
     }
 
-    if (! _isChunkedEncoding)
+    if (! _isChunkedEncoding) {
+      // server/0550
+      _next.flush();
       return;
+    }
 
     if (bufferStart > 0) {
       byte []buffer = _next.getBuffer();
@@ -224,6 +232,8 @@ public class HttpResponseStream extends ResponseStream {
 
     if (log.isLoggable(Level.FINER))
       log.finer(dbgId() + "write-chunk-tail(" + _tailChunkedLength + ")");
+
+    _next.flush();
   }
 
   /**
@@ -232,6 +242,9 @@ public class HttpResponseStream extends ResponseStream {
   private void writeChunkHeader(byte []buffer, int start, int length)
     throws IOException
   {
+    if (length == 0)
+      throw new IllegalStateException();
+
     buffer[start - 8] = (byte) '\r';
     buffer[start - 7] = (byte) '\n';
     buffer[start - 6] = hexDigit(length >> 12);

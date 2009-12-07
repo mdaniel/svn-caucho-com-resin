@@ -133,7 +133,8 @@ public class HttpResponse extends AbstractHttpResponse
   /**
    * Writes the 100 continue response.
    */
-  protected void writeContinueInt(WriteStream os)
+  @Override
+    protected void writeContinueInt()
     throws IOException
   {
     // #2938, server/0558
@@ -154,6 +155,7 @@ public class HttpResponse extends AbstractHttpResponse
     os.flush();
     */
 
+    WriteStream os = getRawWrite();
     os.print("HTTP/1.1 100 Continue\r\n\r\n");
   }
 
