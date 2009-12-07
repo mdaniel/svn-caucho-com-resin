@@ -48,11 +48,11 @@ import java.util.ArrayList;
  */
 public class FastCgiResponse extends AbstractHttpResponse {
   private FastCgiRequest _req;
-  
+
   FastCgiResponse(FastCgiRequest request, WriteStream rawWrite)
   {
-    super(request, rawWrite);
-    
+    super(request);
+
     _req = request;
 
     if (request == null)
@@ -63,8 +63,8 @@ public class FastCgiResponse extends AbstractHttpResponse {
   protected AbstractResponseStream createResponseStream()
   {
     FastCgiRequest request = (FastCgiRequest) _request;
-    
-    return new FastCgiResponseStream(request, this, getRawWrite());
+
+    return new FastCgiResponseStream(request, this, request.getRawWrite());
   }
 
   /**
@@ -78,7 +78,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
 
   @Override
   protected boolean writeHeadersInt(int length,
-				    boolean isHead)
+                                    boolean isHead)
     throws IOException
   {
     if (! _request.hasRequest())
@@ -89,7 +89,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
     int statusCode = response.getStatus();
     String statusMessage = response.getStatusMessage();
 
-    WriteStream os = getRawWrite();
+    WriteStream os = _request.getRawWrite();
 
     os.print("Status: ");
     os.print(statusCode);
@@ -98,7 +98,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
     os.print("\r\n");
 
     CharBuffer cb = _cb;
-    
+
     if (statusCode >= 400) {
       removeHeader("ETag");
       removeHeader("Last-Modified");
@@ -128,7 +128,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
 
     long now = Alarm.getCurrentTime();
     ArrayList<Cookie> cookiesOut = response.getCookies();
-    
+
     if (cookiesOut != null) {
       size = cookiesOut.size();
       for (int i = 0; i < size; i++) {
@@ -143,7 +143,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
 
         if (cookieVersion > 0) {
           fillCookie(cb, cookie, now, cookieVersion, true);
-	
+
           os.print("Set-Cookie2: ");
           os.print(cb);
           os.print("\r\n");
@@ -156,17 +156,17 @@ public class FastCgiResponse extends AbstractHttpResponse {
 
     if (contentType != null) {
       if (charEncoding != null) {
-	os.print("Content-Type: ");
-	os.print(contentType);
-	os.print("; charset=");
-	os.print(charEncoding);
-	os.print("\r\n");
+        os.print("Content-Type: ");
+        os.print(contentType);
+        os.print("; charset=");
+        os.print(charEncoding);
+        os.print("\r\n");
       }
       else {
-	os.print("Content-Type: ");
-	os.print(contentType);
-	os.print("\r\n");
-      }      
+        os.print("Content-Type: ");
+        os.print(contentType);
+        os.print("\r\n");
+      }
     }
 
     os.print("\r\n");
