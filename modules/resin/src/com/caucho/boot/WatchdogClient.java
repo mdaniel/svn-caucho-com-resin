@@ -187,7 +187,6 @@ class WatchdogClient
   public String statusWatchdog()
     throws IOException
   {
-
     ActorClient conn = getConnection();
 
     try {
@@ -333,19 +332,17 @@ class WatchdogClient
       client.setVirtualHost("admin.resin");
 
       String cookie = getAdminCookie();
+      
+      if (cookie == null)
+        cookie = "";
 
-      if (cookie != null) {
-        long now = Alarm.getCurrentTime();
+      long now = Alarm.getCurrentTime();
 
-        byte []encData = SelfEncryptedCookie.encrypt(cookie, now);
+      byte []encData = SelfEncryptedCookie.encrypt(cookie, now);
 
-        SelfEncryptedCredentials cred = new SelfEncryptedCredentials(encData);
+      SelfEncryptedCredentials cred = new SelfEncryptedCredentials(encData);
 
-        client.connect("admin.resin", cred);
-      }
-      else {
-        client.connect("admin.resin", null);
-      }
+      client.connect("admin.resin", cred);
 
       _conn = client;
     }
@@ -491,7 +488,7 @@ class WatchdogClient
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      Class cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
+      Class<?> cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
 
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {

@@ -633,7 +633,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     boolean isClosed = isClosed();
-
     if (isClosed)
       return;
 
@@ -648,13 +647,14 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
     // flushBuffer can force 304 and then a cache write which would
     // complete the finish.
-    if (isClosed) {
+    if (isClosed()) {
       return;
     }
 
     try {
       writeTail();
 
+      finishCache();
       // close();
 
       AbstractHttpRequest req = _response.getRequest();
@@ -817,11 +817,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
       if (cacheWriter != null)
         cacheWriter.close();
-
       if (_newCacheEntry != null) {
         HttpServletRequestImpl request
           = _response.getRequest().getRequestFacade();
-
         if (request == null)
           return;
 

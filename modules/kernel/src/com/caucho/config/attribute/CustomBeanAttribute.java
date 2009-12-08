@@ -46,7 +46,7 @@ public class CustomBeanAttribute extends Attribute {
 
   public static final CustomBeanAttribute ATTRIBUTE
     = new CustomBeanAttribute();
-  
+
   private final ConfigType _configType;
   private final Method _setMethod;
 
@@ -54,7 +54,7 @@ public class CustomBeanAttribute extends Attribute {
   {
     this(null, TypeFactory.getType(CustomBeanConfig.class));
   }
-  
+
   public CustomBeanAttribute(Method setMethod, ConfigType configType)
   {
     _configType = configType;
@@ -78,16 +78,16 @@ public class CustomBeanAttribute extends Attribute {
 
     if (uri.equals("urn:java:com.caucho.config.driver")) {
       TypeFactory factory = TypeFactory.getFactory();
-      
+
       Class api;
 
       if (parent instanceof BeanConfig) {
-	api = ((BeanConfig) parent).getBeanConfigClass();
+        api = ((BeanConfig) parent).getBeanConfigClass();
       }
       else if (_setMethod != null)
-	api = _setMethod.getParameterTypes()[0];
+        api = _setMethod.getParameterTypes()[0];
       else
-	api = _configType.getType();
+        api = _configType.getType();
 
       Class cl = factory.getDriverClassByScheme(api, localName);
 
@@ -98,17 +98,17 @@ public class CustomBeanAttribute extends Attribute {
       throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));
 
     String pkg = uri.substring("uri:java:".length());
-    
+
     Class cl = TypeFactory.loadClass(pkg, localName);
 
     if (cl == null) {
       ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
 
       if (type != null)
-	return type.create(parent, qName);
+        return type.create(parent, qName);
 
       throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
-				    pkg, localName, qName));
+                                    pkg, localName, qName));
     }
 
     if (Annotation.class.isAssignableFrom(cl)) {
@@ -122,7 +122,7 @@ public class CustomBeanAttribute extends Attribute {
       return config;
     }
   }
-  
+
   /**
    * Sets the value of the attribute as text
    */
@@ -132,10 +132,10 @@ public class CustomBeanAttribute extends Attribute {
     Object beanChild = create(bean, name);
 
     if (beanChild instanceof CustomBeanConfig) {
-      CustomBeanConfig config = (CustomBeanConfig) beanChild; 
+      CustomBeanConfig config = (CustomBeanConfig) beanChild;
 
       if (! value.trim().equals("")) {
-	config.addArg(new TextArgProgram(value));
+        config.addArg(new TextArgProgram(value));
       }
 
       config.init();
@@ -143,8 +143,8 @@ public class CustomBeanAttribute extends Attribute {
 
     setValue(bean, name, beanChild);
   }
-  
-  
+
+
   /**
    * Sets the value of the attribute
    */
@@ -153,23 +153,23 @@ public class CustomBeanAttribute extends Attribute {
   {
     try {
       if (value instanceof AnnotationConfig)
-	value = ((AnnotationConfig) value).replace();
-      
+        value = ((AnnotationConfig) value).replace();
+
       if (_setMethod != null && value != null) {
-	if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))
-	  throw new ConfigException(L.l("'{0}.{1}' is not assignable from {2}",
-					_setMethod.getDeclaringClass().getSimpleName(),
-					_setMethod.getName(),
-					value));
-	
-					
-	_setMethod.invoke(bean, value);
+        if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))
+          throw new ConfigException(L.l("'{0}.{1}' is not assignable from {2}",
+                                        _setMethod.getDeclaringClass().getSimpleName(),
+                                        _setMethod.getName(),
+                                        value));
+
+
+        _setMethod.invoke(bean, value);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
   }
-  
+
   static class TextArgProgram extends ConfigProgram {
     private String _arg;
 
@@ -177,7 +177,7 @@ public class CustomBeanAttribute extends Attribute {
     {
       _arg = arg;
     }
-    
+
     public void inject(Object bean, ConfigContext env)
     {
       throw new UnsupportedOperationException(getClass().getName());
