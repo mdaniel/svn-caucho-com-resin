@@ -79,7 +79,7 @@ class WatchdogArgs
     _rootDirectory = calculateResinRoot(_resinHome);
 
     _javaHome = Vfs.lookup(System.getProperty("java.home"));
-
+ 
     _argv = fillArgv(argv);
 
     _resinConf = _resinHome.lookup("conf/resin.conf");

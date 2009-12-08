@@ -219,7 +219,7 @@ public class TcpDuplexController extends ConnectionController {
     TcpConnection conn = _conn;
 
     if (conn == null)
-      return getClass().getSimpleName() + "[closed]";
+      return getClass().getSimpleName() + "[" + _handler + ",closed]";
     else if (Alarm.isTest())
       return getClass().getSimpleName() + "[" + _handler + "]";
     else

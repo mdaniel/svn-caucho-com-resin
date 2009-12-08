@@ -29,30 +29,26 @@
 
 package com.caucho.boot;
 
-import com.caucho.bam.ActorClient;
-import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.config.*;
-import com.caucho.config.program.*;
-import com.caucho.hmtp.HmtpClient;
-import com.caucho.hmtp.SelfEncryptedCredentials;
-import com.caucho.security.SelfEncryptedCookie;
-import com.caucho.server.util.*;
-import com.caucho.util.*;
-import com.caucho.VersionFactory;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.lang.reflect.*;
-import java.net.*;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.VersionFactory;
+import com.caucho.bam.ActorClient;
+import com.caucho.bam.RemoteConnectionFailedException;
+import com.caucho.config.ConfigException;
+import com.caucho.hmtp.HmtpClient;
+import com.caucho.hmtp.SelfEncryptedCredentials;
+import com.caucho.security.SelfEncryptedCookie;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Client to a watchdog-manager, i.e. ResinBoot code to ask the
@@ -402,12 +398,13 @@ class WatchdogClient
     ArrayList<String> list = new ArrayList<String>();
 
     list.add(_config.getJavaExe());
+    list.addAll(_config.getWatchdogJvmArgs());
     list.add("-Dresin.server=" + _id);
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");
-    list.add("-Dresin.home=" + resinHome.getPath());
-    list.add("-Dresin.root=" + resinRoot.getPath());
+    list.add("-Dresin.home=" + resinHome.getFullPath());
+    list.add("-Dresin.root=" + resinRoot.getFullPath());
 
     for (int i = 0; i < argv.length; i++) {
       if (argv[i].startsWith("-Djava.class.path=")) {
@@ -425,8 +422,6 @@ class WatchdogClient
       list.add("-Xss256k");
     if (! _config.hasWatchdogXmx())
       list.add("-Xmx32m");
-
-    list.addAll(_config.getWatchdogJvmArgs());
 
     // XXX: can this just be copied from original args?
     if (! list.contains("-d32") && ! list.contains("-d64")

@@ -60,6 +60,7 @@ public class WebSocketClient {
   private Socket _s;
   private ReadStream _is;
   private WriteStream _os;
+  private boolean _isClosed;
 
   private ClientContext _context;
 
@@ -190,9 +191,16 @@ public class WebSocketClient {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
+  
+  public boolean isClosed()
+  {
+    return _isClosed;
+  }
 
   public void close()
   {
+    _isClosed = true;
+    
     OutputStream os = _os;
     _os = null;
 
@@ -265,7 +273,10 @@ public class WebSocketClient {
       try {
         handleRequests();
       } catch (Exception e) {
-        log.log(Level.WARNING, e.toString(), e);
+        if (_isClosed)
+          log.log(Level.FINEST, e.toString(), e);
+        else
+          log.log(Level.WARNING, e.toString(), e);
       } finally {
         try {
           _listener.onComplete(this);
@@ -281,7 +292,7 @@ public class WebSocketClient {
       // server/2h20
       // _listener.onStart(this);
 
-      while (_is.waitForRead()) {
+      while (! isClosed() && _is.waitForRead()) {
         _listener.onRead(this);
       }
     }

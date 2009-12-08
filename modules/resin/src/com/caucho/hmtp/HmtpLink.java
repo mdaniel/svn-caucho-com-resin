@@ -120,8 +120,7 @@ public class HmtpLink implements Runnable {
   public void run()
   {
     try {
-      while (! isClosed()) {
-	_in.readPacket(_actorStream);
+      while (! isClosed() && _in.readPacket(_actorStream)) {
       }
     } catch (IOException e) {
       throw new RuntimeException(e);
