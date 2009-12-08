@@ -371,7 +371,7 @@ public class IniDefinition {
     else if (value < 0)
       return value;
     else {
-      return value * 1024L;
+      return value;
       
       //env.warning(L.l("byte-valued expression '{0}' for ini value '{1}' must have units.  '16B' for bytes, '16K' for kilobytes, '16M' for megabytes, '16G' for gigabytes", _name));
       //return deflt;

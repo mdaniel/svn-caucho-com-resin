@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -99,7 +99,14 @@ public class SwitchStatement extends Statement {
             Value retValue = _blocks[i].execute(env);
 
             if (retValue instanceof BreakValue) {
-              return null;
+              BreakValue breakValue = (BreakValue) retValue;
+              
+              int target = breakValue.getTarget();
+              
+              if (target > 1)
+                return new BreakValue(target - 1);
+              else
+                return null;
             }
             else if (retValue instanceof ContinueValue) {
               ContinueValue conValue = (ContinueValue) retValue;

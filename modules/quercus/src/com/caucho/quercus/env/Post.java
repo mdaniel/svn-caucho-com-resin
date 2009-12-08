@@ -54,6 +54,12 @@ public class Post
 {
   private static final L10N L = new L10N(Post.class);
   
+  private static StringValue MAX_FILE_SIZE
+    = new ConstStringValue("MAX_FILE_SIZE");
+  
+  private static StringValue MAX_FILE_SIZE_U
+    = new UnicodeBuilderValue("MAX_FILE_SIZE");
+  
   static void fillPost(Env env,
                        ArrayValue postArray,
                        ArrayValue files,
@@ -114,6 +120,7 @@ public class Post
       
       if (contentType != null
           && contentType.startsWith("multipart/form-data")) {
+
         String boundary = getBoundary(contentType);
 
         ReadStream rs = new ReadStream(new VfsStream(is, null));
@@ -133,6 +140,17 @@ public class Post
                             addSlashesToValues, isAllowUploads);
 
         rs.close();
+        
+        if (rs.getLength() > maxPostSize) {
+          env.warning(L.l("POST length of {0} exceeds max size of {1}",
+                          rs.getLength(),
+                          maxPostSize));
+          
+          postArray.clear();
+          files.clear();
+          
+          return;
+        }
       }
       else {
         StringValue bb = env.createBinaryBuilder();
@@ -179,6 +197,16 @@ public class Post
 
       String name = getAttribute(attr, "name", addSlashesToValues);
       String filename = getAttribute(attr, "filename", addSlashesToValues);
+      
+      if (filename != null) {
+        int slashIndex = filename.lastIndexOf('/');
+        int slashIndex2 = filename.lastIndexOf('\\');
+        
+        slashIndex = Math.max(slashIndex, slashIndex2);
+        
+        if (slashIndex >= 0)
+          filename = filename.substring(slashIndex + 1);
+      }
 
       int bracketIndex = -1;
       
@@ -235,6 +263,10 @@ public class Post
         String mimeType = getAttribute(attr, "mime-type", addSlashesToValues);
         if (mimeType == null) {
           mimeType = (String) ms.getAttribute("content-type");
+          
+          // php/085f
+          if (mimeType.endsWith(";"))
+            mimeType = mimeType.substring(0, mimeType.length() - 1);
         }
 
         // php/0864
@@ -245,13 +277,19 @@ public class Post
           mimeType = "";
         }
 
+        long maxFileSize = Long.MAX_VALUE;
+        
+        Value maxFileSizeV = postArray.get(MAX_FILE_SIZE);
+        if (! maxFileSizeV.isNull())
+          maxFileSize = maxFileSizeV.toLong();
+
         if (name != null) {
           addFormFile(env, files, name, filename, tmpName,
-                      mimeType, tmpLength, addSlashesToValues);
+                      mimeType, tmpLength, addSlashesToValues, maxFileSize);
         }
         else {
           addFormFile(env, files, filename, tmpName,
-                      mimeType, tmpLength, addSlashesToValues);
+                      mimeType, tmpLength, addSlashesToValues, maxFileSize);
         }
       }
     }
@@ -263,7 +301,8 @@ public class Post
                                   String tmpName,
                                   String mimeType,
                                   long fileLength,
-                                  boolean addSlashesToValues)
+                                  boolean addSlashesToValues,
+                                  long maxFileSize)
   {
     ArrayValue entry = new ArrayValueImpl();
     int error;
@@ -277,11 +316,13 @@ public class Post
       error = FileModule.UPLOAD_ERR_NO_FILE;
     else if (fileLength > uploadMaxFilesize)
       error = FileModule.UPLOAD_ERR_INI_SIZE;
+    else if (fileLength > maxFileSize)
+      error = FileModule.UPLOAD_ERR_FORM_SIZE;
     else
       error = FileModule.UPLOAD_ERR_OK;
 
     addFormValue(env, entry, "name", env.createString(fileName),
-        null, addSlashesToValues);
+                 null, addSlashesToValues);
 
     long size;
 
@@ -320,7 +361,8 @@ public class Post
                                   String tmpName,
                                   String mimeType,
                                   long fileLength,
-                                  boolean addSlashesToValues)
+                                  boolean addSlashesToValues,
+                                  long maxFileSize)
   {
     int p = name.indexOf('[');
     String index = "";
@@ -351,6 +393,8 @@ public class Post
       error = FileModule.UPLOAD_ERR_NO_FILE;
     else if (fileLength > uploadMaxFilesize)
       error = FileModule.UPLOAD_ERR_INI_SIZE;
+    else if (fileLength > maxFileSize)
+      error = FileModule.UPLOAD_ERR_FORM_SIZE;
     else
       error = FileModule.UPLOAD_ERR_OK;
 
@@ -359,7 +403,8 @@ public class Post
 
     long size;
 
-    if (error != FileModule.UPLOAD_ERR_INI_SIZE) {
+    
+    if (error == FileModule.UPLOAD_ERR_OK) {
       size = fileLength;
     }
     else {
@@ -653,6 +698,12 @@ public class Post
     if (map == null)
       return;
     
+    long maxFileSize = Long.MAX_VALUE;
+    
+    Value maxFileSizeV = post.get(MAX_FILE_SIZE);
+    if (maxFileSizeV.isNull())
+      maxFileSize = maxFileSizeV.toLong();
+      
     if (isAllowUploads) {
       for (Map.Entry<String,String[]> entry : map.entrySet()) {
         String key = entry.getKey();
@@ -673,7 +724,7 @@ public class Post
           long fileLength = new FilePath(tmpNames[i]).getLength();
 
           addFormFile(env, files, name, fileNames[i], tmpNames[i],
-                      mimeTypes[i], fileLength, addSlashesToValues);
+                      mimeTypes[i], fileLength, addSlashesToValues, maxFileSize);
         }
       }
     }

@@ -121,7 +121,11 @@ public class ArrayValueImpl extends ArrayValue
     _hashMask = source._hashMask;
 
     _head = source._head;
-    _current = source._current;
+    
+    // php/1704
+    source._current = source._head;
+    _current = source._head;
+    
     _tail = source._tail;
     _nextAvailableIndex = source._nextAvailableIndex;
   }

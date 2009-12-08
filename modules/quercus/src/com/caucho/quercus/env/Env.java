@@ -1905,10 +1905,14 @@ public class Env {
     // php/0809
     if (envVar != null)
       _globalMap.put(name, envVar);
-    else if (! isAutoCreate)
-      return null;
-    else
-      envVar = new EnvVarImpl(new Var());
+    else {
+      notice(L.l("${0} is an undefined variable", name));
+      
+      if (! isAutoCreate)
+        return null;
+      else
+        envVar = new EnvVarImpl(new Var());
+    }
 
     _map.put(name, envVar);
 
@@ -1955,6 +1959,8 @@ public class Env {
       envVar = getGlobalScriptContextRef(name);
 
     if (envVar == null) {
+      notice(L.l("${0} is an undefined variable", name));
+      
       if (! isAutoCreate)
         return null;
 
