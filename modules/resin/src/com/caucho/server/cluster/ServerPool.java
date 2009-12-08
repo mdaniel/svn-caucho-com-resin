@@ -54,17 +54,6 @@ public class ServerPool
     = Logger.getLogger(ServerPool.class.getName());
   private static final L10N L = new L10N(ServerPool.class);
 
-  private static final int ST_NEW = 0;
-  private static final int ST_STANDBY = 1;
-  private static final int ST_SESSION_ONLY = 2;
-  // the following 5 are the active states
-  private static final int ST_STARTING = 3;
-  private static final int ST_WARMUP = 4;
-  private static final int ST_BUSY = 5;
-  private static final int ST_FAIL = 6;
-  private static final int ST_ACTIVE = 7;
-  private static final int ST_CLOSED = 8;
-
   // number of chunks in the throttling
   private static final int WARMUP_MAX = 16;
   private static final int WARMUP_MIN = -16;
@@ -106,7 +95,7 @@ public class ServerPool
   private long _failRecoverTime;
   private long _failChunkTime;
 
-  private volatile int _state = ST_NEW;
+  private volatile State _state = State.NEW;
 
   // current connection count
   private volatile int _activeCount;
@@ -116,6 +105,7 @@ public class ServerPool
 
   // numeric value representing the throttle state
   private volatile int _warmupState;
+  private volatile int _currentFailCount;
 
   // load management data
   private volatile long _lastFailConnectTime;
@@ -359,7 +349,7 @@ public class ServerPool
     else
       _tcpPath = Vfs.lookup("tcp://" + address + ":" + _port, attr);
 
-    _state = ST_STARTING;
+    _state = State.STARTING;
   }
 
   /**
@@ -504,25 +494,7 @@ public class ServerPool
    */
   public final boolean isActive()
   {
-    int state = _state;
-
-    return state == ST_ACTIVE || state == ST_STARTING || state == ST_WARMUP;
-    /*
-    switch (_state) {
-    case ST_ACTIVE:
-      return true;
-
-    case ST_STANDBY:
-    case ST_CLOSED:
-      return false;
-
-    case ST_FAIL:
-      return (_failTime + _failRecoverTime <= Alarm.getCurrentTime());
-
-    default:
-      return false;
-    }
-    */
+    return _state.isLive();
   }
 
   /**
@@ -556,28 +528,7 @@ public class ServerPool
   {
     updateWarmup();
 
-    switch (_state) {
-    case ST_NEW:
-      return "init";
-    case ST_STANDBY:
-      return "standby";
-    case ST_SESSION_ONLY:
-      return "session-only";
-    case ST_STARTING:
-      return "starting";
-    case ST_WARMUP:
-      return "warmup";
-    case ST_BUSY:
-      return "busy";
-    case ST_FAIL:
-      return "fail";
-    case ST_ACTIVE:
-      return "active";
-    case ST_CLOSED:
-      return "closed";
-    default:
-      return "unknown(" + _state + ")";
-    }
+    return String.valueOf(_state);
   }
 
   /**
@@ -593,18 +544,24 @@ public class ServerPool
    */
   public boolean canOpenSoft()
   {
-    int state = _state;
+    State state = _state;
 
-    if (state == ST_ACTIVE)
+    if (state == State.ACTIVE)
       return true;
-    else if (ST_STARTING <= state && state < ST_ACTIVE) {
+    else if (state.isEnabled()) {
       long now = Alarm.getCurrentTime();
 
       if (now < _lastFailConnectTime + _dynamicFailRecoverTime) {
         return false;
       }
 
-      int warmupState = _warmupState;
+      long firstSuccessTime = _firstSuccessTime;
+      int warmupState = 0;
+
+      if (firstSuccessTime > 0)
+        warmupState = (int) ((now - firstSuccessTime) / _warmupChunkTime);
+
+      warmupState -= _currentFailCount;
 
       if (warmupState < 0) {
         return (_failTime - warmupState * _failChunkTime < now);
@@ -630,17 +587,12 @@ public class ServerPool
    */
   public boolean isEnabled()
   {
-    int state = _state;
-
-    return ST_STARTING <= state && state <= ST_ACTIVE;
+    return _state.isEnabled();
   }
 
   private void toActive()
   {
-    synchronized (this) {
-      if (_state < ST_CLOSED)
-        _state = ST_ACTIVE;
-    }
+    _state = _state.toActive();
   }
 
   public void toBusy()
@@ -653,8 +605,7 @@ public class ServerPool
     synchronized (this) {
       _busyCountTotal++;
 
-      if (_state < ST_CLOSED)
-        _state = ST_BUSY;
+      _state = _state.toBusy();
     }
   }
 
@@ -668,10 +619,9 @@ public class ServerPool
 
     synchronized (this) {
       _failCountTotal++;
-
-      if (_state < ST_CLOSED)
-        _state = ST_FAIL;
     }
+
+    _state = _state.toFail();
 
     clearRecycle();
   }
@@ -691,6 +641,7 @@ public class ServerPool
 
       // only degrade one per 100ms
       if (now - _failTime >= 100) {
+        _currentFailCount++;
         _warmupState--;
         _failTime = now;
         _lastFailTime = _failTime;
@@ -699,8 +650,7 @@ public class ServerPool
       if (_warmupState < WARMUP_MIN)
         _warmupState = WARMUP_MIN;
 
-      if (_state < ST_CLOSED)
-        _state = ST_FAIL;
+      _state = _state.toFail();
     }
   }
 
@@ -717,6 +667,7 @@ public class ServerPool
       _firstSuccessTime = 0;
 
       // only degrade one per 100ms
+      _currentFailCount++;
       _warmupState--;
       long now = Alarm.getCurrentTime();
       _failTime = now;
@@ -729,8 +680,7 @@ public class ServerPool
       if (_warmupState < WARMUP_MIN)
         _warmupState = WARMUP_MIN;
 
-      if (_state < ST_CLOSED)
-        _state = ST_FAIL;
+      _state = _state.toFail();
     }
   }
 
@@ -745,15 +695,29 @@ public class ServerPool
       _lastBusyTime = Alarm.getCurrentTime();
       _firstSuccessTime = 0;
 
+      _currentFailCount++;
       _warmupState--;
       if (_warmupState < 0)
         _warmupState = 0;
 
       _busyCountTotal++;
 
-      if (_state < ST_CLOSED)
-        _state = ST_BUSY;
+      _state = _state.toBusy();
     }
+  }
+
+  /**
+   * Called when the server has a successful response
+   */
+  public void success()
+  {
+    _currentFailCount = 0;
+
+    if (_firstSuccessTime <= 0)
+      _firstSuccessTime = Alarm.getCurrentTime();
+
+    // reset the connection fail recover time
+    _dynamicFailRecoverTime = 1000L;
   }
 
   /**
@@ -761,12 +725,7 @@ public class ServerPool
    */
   public void start()
   {
-    synchronized (this) {
-      if (_state == ST_ACTIVE) {
-      }
-      else if (_state < ST_CLOSED)
-        _state = ST_STARTING;
-    }
+    _state = _state.toStart();
   }
 
   /**
@@ -774,10 +733,8 @@ public class ServerPool
    */
   public void stop()
   {
-    synchronized (this) {
-      if (_state < ST_CLOSED)
-        _state = ST_STANDBY;
-    }
+    _firstSuccessTime = 0;
+    _state = _state.toStandby();
   }
 
   /**
@@ -785,10 +742,7 @@ public class ServerPool
    */
   public void enableSessionOnly()
   {
-    synchronized (this) {
-      if (_state < ST_CLOSED && _state != ST_STANDBY)
-        _state = ST_SESSION_ONLY;
-    }
+    _state = _state.toSessionOnly();
   }
 
   /**
@@ -798,9 +752,9 @@ public class ServerPool
    */
   public ClusterStream openSoft()
   {
-    int state = _state;
+    State state = _state;
 
-    if (! (ST_STARTING <= state && state <= ST_ACTIVE)) {
+    if (! state.isEnabled()) {
       return null;
     }
 
@@ -824,7 +778,7 @@ public class ServerPool
    */
   public ClusterStream openIfLive()
   {
-    if (_state == ST_CLOSED) {
+    if (_state == State.CLOSED) {
       return null;
     }
 
@@ -837,7 +791,7 @@ public class ServerPool
 
     if (now < _failTime + _failRecoverTime)
       return null;
-    else if (_state == ST_FAIL && _startingCount > 0) {
+    else if (_state == State.FAIL && _startingCount > 0) {
       // if in fail state, only one thread should try to connect
       return null;
     }
@@ -852,8 +806,8 @@ public class ServerPool
    */
   public ClusterStream openForSession()
   {
-    int state = _state;
-    if (! (ST_SESSION_ONLY <= state && state < ST_CLOSED)) {
+    State state = _state;
+    if (! state.isSessionEnabled()) {
       return null;
     }
 
@@ -882,8 +836,8 @@ public class ServerPool
    */
   public ClusterStream open()
   {
-    int state = _state;
-    if (! (ST_STARTING <= state && state < ST_CLOSED))
+    State state = _state;
+    if (! state.isInit())
       return null;
 
     ClusterStream stream = openRecycle();
@@ -952,8 +906,8 @@ public class ServerPool
       _startingCount++;
     }
 
-    int state = _state;
-    if (state == ST_NEW || state == ST_CLOSED) {
+    State state = _state;
+    if (! state.isInit()) {
       IllegalStateException e = new IllegalStateException(L.l("'{0}' connection cannot be opened because the server pool has not been started.", this));
 
       log.log(Level.WARNING, e.toString(), e);
@@ -978,11 +932,11 @@ public class ServerPool
         log.finer("connect " + stream);
 
       if (_firstSuccessTime <= 0) {
-        if (ST_STARTING <= _state && _state < ST_ACTIVE) {
+        if (_state.isStarting()) {
           if (_loadBalanceWarmupTime > 0)
-            _state = ST_WARMUP;
+            _state = State.WARMUP;
           else
-            _state = ST_ACTIVE;
+            _state = State.ACTIVE;
 
           _firstSuccessTime = Alarm.getCurrentTime();
         }
@@ -1015,8 +969,8 @@ public class ServerPool
   public void wake()
   {
     synchronized (this) {
-      if (_state == ST_FAIL) {
-        _state = ST_STARTING;
+      if (_state == State.FAIL) {
+        _state = State.STARTING;
       }
 
       _failTime = 0;
@@ -1029,12 +983,14 @@ public class ServerPool
    */
   void free(ClusterStream stream)
   {
+    success();
+
     synchronized (this) {
       _activeCount--;
 
       int size = (_idleHead - _idleTail + _idle.length) % _idle.length;
 
-      if (_state != ST_CLOSED && size < _idleSize) {
+      if (_state != State.CLOSED && size < _idleSize) {
         _idleHead = (_idleHead + 1) % _idle.length;
         _idle[_idleHead] = stream;
 
@@ -1109,7 +1065,7 @@ public class ServerPool
 
         if (WARMUP_MAX <= warmupState) {
           warmupState = WARMUP_MAX;
-          toActive();
+          _state = _state.toActive();
         }
       }
 
@@ -1188,10 +1144,10 @@ public class ServerPool
   public void close()
   {
     synchronized (this) {
-      if (_state == ST_CLOSED)
+      if (_state == State.CLOSED)
         return;
 
-      _state = ST_CLOSED;
+      _state = State.CLOSED;
     }
 
     synchronized (this) {
@@ -1323,5 +1279,77 @@ public class ServerPool
     return (getClass().getSimpleName()
             + "[" + getDebugId()
             + "," + _address + ":" + _port + "]");
+  }
+
+  enum State {
+    NEW {
+      boolean isInit() { return false; }
+      boolean isEnabled() { return false; }
+      boolean isSessionEnabled() { return false; }
+    },
+    STANDBY {
+      boolean isEnabled() { return false; }
+      boolean isSessionEnabled() { return false; }
+
+      State toFail() { return this; }
+      State toBusy() { return this; }
+      State toSessionOnly() { return this; }
+    },
+    SESSION_ONLY {
+      boolean isEnabled() { return false; }
+
+      // XXX: should change to standby?
+      State toFail() { return this; }
+      State toBusy() { return this; }
+    },
+    // the following 5 are the active states
+    STARTING {
+      boolean isStarting() { return true; }
+      boolean isLive() { return true; }
+    },
+    WARMUP {
+      boolean isStarting() { return true; }
+      boolean isLive() { return true; }
+
+      State toStart() { return this; }
+    },
+    BUSY {
+      boolean isStarting() { return true; }
+    },
+    FAIL {
+      boolean isStarting() { return true; }
+    },
+    ACTIVE {
+      boolean isLive() { return true; }
+
+      State toStart() { return this; }
+    },
+    CLOSED {
+      boolean isInit() { return false; }
+      boolean isClosed() { return true; }
+      boolean isSessionEnabled() { return false; }
+      boolean isEnabled() { return false; }
+
+      State toStart() { return this; }
+      State toActive() { return this; }
+      State toBusy() { return this; }
+      State toFail() { return this; }
+      State toStandby() { return this; }
+      State toSessionOnly() { return this; }
+    };
+
+    boolean isInit() { return true; }
+    boolean isClosed() { return false; }
+    boolean isStarting() { return false; }
+    boolean isLive() { return true; }
+    boolean isSessionEnabled() { return true; }
+    boolean isEnabled() { return true; }
+
+    State toStart() { return STARTING; }
+    State toActive() { return ACTIVE; }
+    State toFail() { return FAIL; }
+    State toBusy() { return BUSY; }
+    State toStandby() { return STANDBY; }
+    State toSessionOnly() { return SESSION_ONLY; }
   }
 }

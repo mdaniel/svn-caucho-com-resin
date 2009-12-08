@@ -1491,6 +1491,14 @@ public class HmuxRequest extends AbstractHttpRequest
   protected void flushNext()
     throws IOException
   {
+    flushNextBuffer();
+
+    _rawWrite.flush();
+  }
+
+  protected void flushNextBuffer()
+    throws IOException
+  {
     WriteStream next = _rawWrite;
 
     if (log.isLoggable(Level.FINE))
@@ -1508,8 +1516,6 @@ public class HmuxRequest extends AbstractHttpRequest
         throw new IllegalStateException();
       }
     }
-
-    next.flush();
   }
 
   protected void writeTail()
@@ -1521,7 +1527,10 @@ public class HmuxRequest extends AbstractHttpRequest
 
     offset = fillDataBuffer(offset);
 
-    next.nextBuffer(offset);
+    // server/26a6
+    // Use setBufferOffset because nextBuffer would
+    // force an early flush
+    next.setBufferOffset(offset);
   }
 
   private int fillDataBuffer(int offset)

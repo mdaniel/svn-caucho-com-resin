@@ -155,8 +155,10 @@ public class HttpResponse extends AbstractHttpResponse
     os.flush();
     */
 
+    // server/269n
     WriteStream os = getRawWrite();
     os.print("HTTP/1.1 100 Continue\r\n\r\n");
+    os.flush();
   }
 
   /**

@@ -36,9 +36,9 @@ import java.util.logging.Logger;
 
 class OidExpr extends Expr {
   private Table _table;
-  
+
   private int _tableIndex;
-  
+
   OidExpr(Table table, int tableIndex)
   {
     _table = table;
@@ -48,6 +48,12 @@ class OidExpr extends Expr {
   public Class getType()
   {
     return long.class;
+  }
+
+  @Override
+  public boolean isLong()
+  {
+    return true;
   }
 
   /**
@@ -112,6 +118,21 @@ class OidExpr extends Expr {
     TableIterator row = rows[_tableIndex];
 
     return row.getRowAddress();
+  }
+
+  /**
+   * Evaluates the expression, writing to the result stream.
+   *
+   * @param context the query context
+   * @param result the output result
+   */
+  @Override
+  public void evalToResult(QueryContext context, SelectResult result)
+  {
+    TableIterator []rows = context.getTableIterators();
+    TableIterator row = rows[_tableIndex];
+
+    result.writeLong(row.getRowAddress());
   }
 
   public String toString()

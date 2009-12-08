@@ -97,7 +97,9 @@ public class HmuxResponseStream extends ResponseStream {
   protected void closeNext()
     throws IOException
   {
-    flushNext();
+    // only flush buffer because the 'Q' still needs to
+    // be written.
+    _request.flushNextBuffer();
   }
 
   @Override

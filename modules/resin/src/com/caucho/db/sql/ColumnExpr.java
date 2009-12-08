@@ -160,6 +160,7 @@ final class ColumnExpr extends Expr {
    * @param context the query context
    * @param result the output result
    */
+  @Override
   public void evalToResult(QueryContext context, SelectResult result)
     throws SQLException
   {

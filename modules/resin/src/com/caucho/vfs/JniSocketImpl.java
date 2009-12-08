@@ -22,7 +22,7 @@ import java.util.logging.Logger;
 public class JniSocketImpl extends QSocket {
   private final static Logger log
     = Logger.getLogger(JniSocketImpl.class.getName());
-  
+
   private long _fd;
   private JniStream _stream;
 
@@ -33,7 +33,7 @@ public class JniSocketImpl extends QSocket {
   private InetAddress _localAddr;
 
   private int _localPort;
-  
+
   private byte []_remoteAddrBuffer = new byte[256];
   private char []_remoteAddrCharBuffer = new char[256];
   private int _remoteAddrLength;
@@ -41,12 +41,12 @@ public class JniSocketImpl extends QSocket {
   private InetAddress _remoteAddr;
 
   private int _remotePort;
-  
+
   private boolean _isSecure;
 
   private Object _readLock = new Object();
   private Object _writeLock = new Object();
-  
+
   private final AtomicBoolean _isClosed = new AtomicBoolean();
 
   JniSocketImpl()
@@ -69,7 +69,7 @@ public class JniSocketImpl extends QSocket {
     _isSecure = false;
 
     nativeInit(_fd); // initialize fields from the _fd
-    
+
     _isClosed.set(false);
   }
 
@@ -77,22 +77,22 @@ public class JniSocketImpl extends QSocket {
   {
     return _fd;
   }
-  
+
   public int getNativeFd()
   {
     return getNativeFd(_fd);
   }
-  
+
   /**
    * Returns the server port that accepted the request.
    */
   public int getLocalPort()
   {
     return _localPort;
-    
+
     // return getLocalPort(_fd);
   }
-  
+
   /**
    * Returns the remote client's host name.
    */
@@ -101,10 +101,10 @@ public class JniSocketImpl extends QSocket {
     if (_remoteName == null) {
       byte []remoteAddrBuffer = _remoteAddrBuffer;
       char []remoteAddrCharBuffer = _remoteAddrCharBuffer;
-      
+
       for (int i = _remoteAddrLength - 1; i >= 0; i--)
-	_remoteAddrCharBuffer[i] = (char) (_remoteAddrBuffer[i] & 0xff);
-      
+        _remoteAddrCharBuffer[i] = (char) (_remoteAddrBuffer[i] & 0xff);
+
       _remoteName = new String(_remoteAddrCharBuffer, 0, _remoteAddrLength);
     }
 
@@ -120,7 +120,7 @@ public class JniSocketImpl extends QSocket {
       try {
         _remoteAddr = InetAddress.getByName(getRemoteHost());
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -150,17 +150,17 @@ public class JniSocketImpl extends QSocket {
     long address = 0;
     for (int i = 0; i < len; i++)
       address = 256 * address + (bytes[i] & 0xff);
-    
+
     return address;
   }
-  
+
   /**
    * Returns the remote client's port.
    */
   public int getRemotePort()
   {
     return _remotePort;
-    
+
     // return getRemotePort(_fd);
   }
 
@@ -184,7 +184,7 @@ public class JniSocketImpl extends QSocket {
       try {
         _localAddr = InetAddress.getByName(getLocalHost());
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -208,7 +208,7 @@ public class JniSocketImpl extends QSocket {
   {
     _isSecure = isSecure;
   }
-  
+
   /**
    * Returns true if the connection is secure.
    */
@@ -218,7 +218,7 @@ public class JniSocketImpl extends QSocket {
 
     return _isSecure;
   }
-  
+
   /**
    * Returns the cipher for an ssl connection.
    */
@@ -226,7 +226,7 @@ public class JniSocketImpl extends QSocket {
   {
     return getCipher(_fd);
   }
-  
+
   /**
    * Returns the number of bits in the cipher for an ssl connection.
    */
@@ -235,7 +235,7 @@ public class JniSocketImpl extends QSocket {
   {
     return getCipherBits(_fd);
   }
-  
+
   /**
    * Returns the client certificate.
    */
@@ -297,7 +297,7 @@ public class JniSocketImpl extends QSocket {
         return writeNative(_fd, buffer, offset, length);
       else {
         _isClosed.set(true);
-        
+
         return writeCloseNative(_fd, buffer, offset, length);
       }
     }
@@ -313,7 +313,7 @@ public class JniSocketImpl extends QSocket {
       return flushNative(_fd);
     }
   }
-  
+
   /**
    * Returns a stream impl for the socket encapsulating the
    * input and output stream.
@@ -325,7 +325,7 @@ public class JniSocketImpl extends QSocket {
       _stream = new JniStream(this);
 
     _stream.init();
-    
+
     return _stream;
   }
 
@@ -371,7 +371,7 @@ public class JniSocketImpl extends QSocket {
 
     if (_stream != null)
       _stream.close();
-    
+
     synchronized (this) {
       nativeClose(_fd);
     }
@@ -382,31 +382,31 @@ public class JniSocketImpl extends QSocket {
   {
     try {
       super.finalize();
-    
+
       close();
     } catch (Throwable e) {
     }
 
     long fd = _fd;
     _fd = 0;
-    
+
     nativeFree(fd);
   }
 
   native int getNativeFd(long fd);
-  
+
   native boolean nativeReadNonBlock(long fd, int ms);
-  
+
   private native int nativeInit(long fd);
-  
+
   native int getRemoteIP(long fd, byte []buffer, int offset, int length);
-  
+
   native int getRemotePort(long fd);
-  
+
   native int getLocalIP(long fd, byte []buffer, int offset, int length);
-  
+
   native int getLocalPort(long fd);
-  
+
   native boolean isSecure(long fd);
 
   native String getCipher(long fd);
@@ -419,7 +419,7 @@ public class JniSocketImpl extends QSocket {
                                   int length);
 
   native int readNative(long fd, byte []buf, int offset, int length,
-			long timeout)
+                        long timeout)
     throws IOException;
 
   private native int writeNative(long fd, byte []buf, int offset, int length)
@@ -430,8 +430,8 @@ public class JniSocketImpl extends QSocket {
     throws IOException;
 
   native int writeNative2(long fd,
-			  byte []buf1, int off1, int len1,
-			  byte []buf2, int off2, int len2)
+                          byte []buf1, int off1, int len1,
+                          byte []buf2, int off2, int len2)
     throws IOException;
 
   native int flushNative(long fd) throws IOException;
@@ -440,13 +440,13 @@ public class JniSocketImpl extends QSocket {
   private native void nativeClose(long fd);
 
   native long nativeAllocate();
-  
+
   native void nativeFree(long fd);
 
   public String toString()
   {
     return ("JniSocketImpl$" + System.identityHashCode(this)
-	    + "[" + _fd + ",fd=" + getNativeFd(_fd) + "]");
+            + "[" + _fd + ",fd=" + getNativeFd(_fd) + "]");
   }
 }
 

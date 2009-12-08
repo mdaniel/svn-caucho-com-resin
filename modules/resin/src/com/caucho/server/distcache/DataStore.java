@@ -66,7 +66,7 @@ public class DataStore implements AlarmListener {
   private static final L10N L = new L10N(DataStore.class);
   private static final Logger log
     = Logger.getLogger(DataStore.class.getName());
-  
+
   private FreeList<DataConnection> _freeConn
     = new FreeList<DataConnection>(32);
 
@@ -74,11 +74,10 @@ public class DataStore implements AlarmListener {
   private final String _mnodeTableName;
 
   // remove unused data after 1 hour
-  //private long _expireTimeout = 60 * 60L * 1000L;
-  private long _expireTimeout = 10 * 60L * 1000L;
+  private long _expireTimeout = 60 * 60L * 1000L;
 
   private DataSource _dataSource;
-    
+
   private String _insertQuery;
   private String _loadQuery;
   private String _dataAvailableQuery;
@@ -86,21 +85,20 @@ public class DataStore implements AlarmListener {
   private String _updateExpiresQuery;
   private String _deleteTimeoutQuery;
   private String _validateQuery;
-  
+
   private String _countQuery;
 
   private Alarm _alarm;
-  // private long _expireReaperTimeout = 15 * 60 * 1000L;
-  
+
   public DataStore(String serverName,
-		   MnodeStore mnodeStore)
+                   MnodeStore mnodeStore)
     throws Exception
   {
     _dataSource = mnodeStore.getDataSource();
     _mnodeTableName = mnodeStore.getTableName();
-    
+
     _tableName = serverNameToTableName(serverName);
-    
+
     if (_tableName == null)
       throw new NullPointerException();
 
@@ -117,31 +115,31 @@ public class DataStore implements AlarmListener {
     throws Exception
   {
     _loadQuery = ("SELECT data"
-		  + " FROM " + _tableName
-		  + " WHERE id=?");
-    
+                  + " FROM " + _tableName
+                  + " WHERE id=?");
+
     _dataAvailableQuery = ("SELECT 1"
-			   + " FROM " + _tableName
-			   + " WHERE id=?");
+                           + " FROM " + _tableName
+                           + " WHERE id=?");
 
     _insertQuery = ("INSERT into " + _tableName
-		    + " (id,expire_time,data) "
-		    + "VALUES(?,?,?)");
+                    + " (id,expire_time,data) "
+                    + "VALUES(?,?,?)");
 
     // XXX: add random component to expire time?
     _updateExpiresQuery = ("UPDATE " + _tableName
-			   + " SET expire_time=?"
-			   + " WHERE id=?");
+                           + " SET expire_time=?"
+                           + " WHERE id=?");
 
     // XXX: add random component to expire time?
     /*
     _updateAllExpiresQuery = ("UPDATE " + _tableName
-			      + " SET expire_time=?"
-			      + " WHERE expire_time<? AND EXISTS "
-			      + "      (SELECT * FROM " + _mnodeTableName
-			      +   "       WHERE " + _tableName + ".id = " + _mnodeTableName + ".value)");
+                              + " SET expire_time=?"
+                              + " WHERE expire_time<? AND EXISTS "
+                              + "      (SELECT * FROM " + _mnodeTableName
+                              +   "       WHERE " + _tableName + ".id = " + _mnodeTableName + ".value)");
     */
-    
+
     _selectAllLimitQuery = ("SELECT value, resin_oid FROM " + _mnodeTableName
                             + " WHERE resin_oid > ?");
 
@@ -149,14 +147,14 @@ public class DataStore implements AlarmListener {
                            + " WHERE expire_time < ?");
 
     _validateQuery = ("VALIDATE " + _tableName);
-    
+
     _countQuery = "SELECT count(*) FROM " + _tableName;
 
     initDatabase();
 
     _alarm = new Alarm(this);
     // _alarm.queue(_expireTimeout);
-    
+
     _alarm.queue(0);
   }
 
@@ -170,31 +168,31 @@ public class DataStore implements AlarmListener {
 
     try {
       Statement stmt = conn.createStatement();
-      
+
       try {
-	String sql = ("SELECT id, expire_time, data"
+        String sql = ("SELECT id, expire_time, data"
                       + " FROM " + _tableName + " WHERE 1=0");
 
-	ResultSet rs = stmt.executeQuery(sql);
-	rs.next();
-	rs.close();
+        ResultSet rs = stmt.executeQuery(sql);
+        rs.next();
+        rs.close();
 
-	return;
+        return;
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
-	log.finer(this + " " + e.toString());
+        log.log(Level.FINEST, e.toString(), e);
+        log.finer(this + " " + e.toString());
       }
 
       try {
-	stmt.executeQuery("DROP TABLE " + _tableName);
+        stmt.executeQuery("DROP TABLE " + _tableName);
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
 
       String sql = ("CREATE TABLE " + _tableName + " (\n"
                     + "  id BINARY(32) PRIMARY KEY,\n"
-		    + "  expire_time BIGINT,\n"
-		    + "  data BLOB)");
+                    + "  expire_time BIGINT,\n"
+                    + "  data BLOB)");
 
 
       log.fine(sql);
@@ -216,7 +214,7 @@ public class DataStore implements AlarmListener {
   public boolean load(HashKey id, WriteStream os)
   {
     DataConnection conn = null;
-    
+
     try {
       conn = getConnection();
 
@@ -224,34 +222,34 @@ public class DataStore implements AlarmListener {
       pstmt.setBytes(1, id.getHash());
 
       ResultSet rs = pstmt.executeQuery();
-      
+
       if (rs.next()) {
-	InputStream is = rs.getBinaryStream(1);
+        InputStream is = rs.getBinaryStream(1);
 
         if (is == null)
           return false;
-          
-	try {
-	  os.writeStream(is);
-	} finally {
-	  is.close();
-	}
 
-	if (log.isLoggable(Level.FINER))
-	  log.finer(this + " load " + id + " length:" + os.getPosition());
+        try {
+          os.writeStream(is);
+        } finally {
+          is.close();
+        }
 
-	return true;
+        if (log.isLoggable(Level.FINER))
+          log.finer(this + " load " + id + " length:" + os.getPosition());
+
+        return true;
       }
 
       if (log.isLoggable(Level.FINER))
-	log.finer(this + " no data loaded for " + id);
+        log.finer(this + " no data loaded for " + id);
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
-	conn.close();
+        conn.close();
     }
 
     return false;
@@ -267,7 +265,7 @@ public class DataStore implements AlarmListener {
   public boolean isDataAvailable(HashKey id)
   {
     DataConnection conn = null;
-    
+
     try {
       conn = getConnection();
 
@@ -275,15 +273,15 @@ public class DataStore implements AlarmListener {
       pstmt.setBytes(1, id.getHash());
 
       ResultSet rs = pstmt.executeQuery();
-      
+
       if (rs.next()) {
-	return true;
+        return true;
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
-	conn.close();
+        conn.close();
     }
 
     return false;
@@ -300,7 +298,7 @@ public class DataStore implements AlarmListener {
   public InputStream openInputStream(HashKey id)
   {
     DataConnection conn = null;
-    
+
     try {
       conn = getConnection();
 
@@ -308,25 +306,25 @@ public class DataStore implements AlarmListener {
       pstmt.setBytes(1, id.getHash());
 
       ResultSet rs = pstmt.executeQuery();
-      
+
       if (rs.next()) {
-	InputStream is = rs.getBinaryStream(1);
+        InputStream is = rs.getBinaryStream(1);
 
-	InputStream dataInputStream = new DataInputStream(conn, rs, is);
-	conn = null;
+        InputStream dataInputStream = new DataInputStream(conn, rs, is);
+        conn = null;
 
-	return dataInputStream;
+        return dataInputStream;
       }
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
-	conn.close();
+        conn.close();
     }
 
     return null;
   }
-  
+
   /**
    * Saves the data, returning true on success.
    *
@@ -346,11 +344,11 @@ public class DataStore implements AlarmListener {
     }
     else {
       log.warning(this + " can't save data '" + id + "'");
-      
+
       return false;
     }
   }
-  
+
   /**
    * Stores the data, returning true on success
    *
@@ -371,12 +369,12 @@ public class DataStore implements AlarmListener {
       stmt.setBinaryStream(3, is, length);
 
       int count = stmt.executeUpdate();
-        
-      if (log.isLoggable(Level.FINER)) 
-	log.finer(this + " insert " + id + " length:" + length);
+
+      if (log.isLoggable(Level.FINER))
+        log.finer(this + " insert " + id + " length:" + length);
 
       // System.out.println("INSERT: " + id);
-	  
+
       return count > 0;
     } catch (SqlIndexAlreadyExistsException e) {
       // the data already exists in the cache, so this is okay
@@ -390,7 +388,7 @@ public class DataStore implements AlarmListener {
       log.log(Level.FINEST, e.toString(), e);
     } finally {
       if (conn != null)
-	conn.close();
+        conn.close();
     }
 
     return false;
@@ -406,18 +404,18 @@ public class DataStore implements AlarmListener {
   public boolean updateExpires(HashKey id)
   {
     DataConnection conn = null;
-    
+
     try {
       conn = getConnection();
       PreparedStatement pstmt = conn.prepareUpdateExpires();
 
       long expireTime = _expireTimeout + Alarm.getCurrentTime();
-      
+
       pstmt.setLong(1, expireTime);
       pstmt.setBytes(2, id.getHash());
 
       int count = pstmt.executeUpdate();
-      
+
       if (log.isLoggable(Level.FINER))
         log.finer(this + " updateExpires " + id);
 
@@ -434,7 +432,7 @@ public class DataStore implements AlarmListener {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
-	conn.close();
+        conn.close();
     }
 
     return false;
@@ -446,16 +444,16 @@ public class DataStore implements AlarmListener {
   public void removeExpiredData()
   {
     validateDatabase();
-    
+
     long now = Alarm.getCurrentTime();
-      
+
     updateExpire(now);
 
     DataConnection conn = null;
 
     try {
       conn = getConnection();
-  
+
       PreparedStatement pstmt = conn.prepareDeleteTimeout();
 
       pstmt.setLong(1, now);
@@ -463,7 +461,7 @@ public class DataStore implements AlarmListener {
       int count = pstmt.executeUpdate();
 
       if (count > 0)
-	log.finer(this + " expired " + count + " old data");
+        log.finer(this + " expired " + count + " old data");
 
       // System.out.println(this + " EXPIRE: " + count);
     } catch (SQLException e) {
@@ -487,7 +485,7 @@ public class DataStore implements AlarmListener {
 
       long resinOid = 0;
       boolean isData = false;
-  
+
       PreparedStatement pstmt = conn.prepareSelectAllLimitExpires();
       PreparedStatement pstmtUpdate = conn.prepareUpdateExpires();
 
@@ -499,7 +497,7 @@ public class DataStore implements AlarmListener {
       // System.out.println("UPDATE_EXPIRE:" + _expireTimeout);
       do {
         isData = false;
-        
+
         pstmt.setLong(1, resinOid);
         pstmt.setFetchSize(fetchSize);
 
@@ -509,7 +507,7 @@ public class DataStore implements AlarmListener {
 
         while (rs.next()) {
           subCount++;
-          
+
           byte []key = rs.getBytes(1);
           resinOid = rs.getLong(2);
 
@@ -558,7 +556,7 @@ public class DataStore implements AlarmListener {
 
     try {
       conn = getConnection();
-  
+
       PreparedStatement pstmt = conn.prepareValidate();
 
       int count = pstmt.executeUpdate();
@@ -578,29 +576,29 @@ public class DataStore implements AlarmListener {
   public long getCount()
   {
     DataConnection conn = null;
-    
+
     try {
       conn = getConnection();
       PreparedStatement stmt = conn.prepareCount();
-      
+
       ResultSet rs = stmt.executeQuery();
 
       if (rs != null && rs.next()) {
-	long value = rs.getLong(1);
-	
-	rs.close();
-	
-	return value;
+        long value = rs.getLong(1);
+
+        rs.close();
+
+        return value;
       }
-      
+
       return -1;
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       if (conn != null)
-	conn.close();
+        conn.close();
     }
-    
+
     return -1;
   }
 
@@ -608,10 +606,10 @@ public class DataStore implements AlarmListener {
   {
     if (_dataSource != null) {
       try {
-	removeExpiredData();
+        removeExpiredData();
       } finally {
-	// alarm.queue(_expireTimeout / 2);
-	alarm.queue(2 * 60000L);
+        // alarm.queue(_expireTimeout / 2);
+        alarm.queue(2 * 60000L);
       }
     }
   }
@@ -620,7 +618,7 @@ public class DataStore implements AlarmListener {
   {
     _dataSource = null;
     _freeConn = null;
-    
+
     Alarm alarm = _alarm;
     _alarm = null;
 
@@ -645,27 +643,27 @@ public class DataStore implements AlarmListener {
   {
     if (serverName == null || "".equals(serverName))
       return "resin_data_default";
-    
+
     StringBuilder cb = new StringBuilder();
     cb.append("resin_data_");
-    
+
     for (int i = 0; i < serverName.length(); i++) {
       char ch = serverName.charAt(i);
 
       if ('a' <= ch && ch <= 'z') {
-	cb.append(ch);
+        cb.append(ch);
       }
       else if ('A' <= ch && ch <= 'Z') {
-	cb.append(ch);
+        cb.append(ch);
       }
       else if ('0' <= ch && ch <= '9') {
-	cb.append(ch);
+        cb.append(ch);
       }
       else if (ch == '_') {
-	cb.append(ch);
+        cb.append(ch);
       }
       else
-	cb.append('_');
+        cb.append('_');
     }
 
     return cb.toString();
@@ -708,22 +706,22 @@ public class DataStore implements AlarmListener {
 
       ResultSet rs = _rs;
       _rs = null;
-      
+
       InputStream is = _is;
       _is = null;
 
       IoUtil.close(is);
 
       JdbcUtil.close(rs);
-      
+
       if (conn != null)
-	conn.close();
+        conn.close();
     }
   }
 
   class DataConnection {
     private Connection _conn;
-    
+
     private PreparedStatement _loadStatement;
     private PreparedStatement _dataAvailableStatement;
     private PreparedStatement _insertStatement;
@@ -731,7 +729,7 @@ public class DataStore implements AlarmListener {
     private PreparedStatement _updateExpiresStatement;
     private PreparedStatement _deleteTimeoutStatement;
     private PreparedStatement _validateStatement;
-    
+
     private PreparedStatement _countStatement;
 
     DataConnection(Connection conn)
@@ -743,7 +741,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_loadStatement == null)
-	_loadStatement = _conn.prepareStatement(_loadQuery);
+        _loadStatement = _conn.prepareStatement(_loadQuery);
 
       return _loadStatement;
     }
@@ -752,7 +750,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_dataAvailableStatement == null)
-	_dataAvailableStatement = _conn.prepareStatement(_dataAvailableQuery);
+        _dataAvailableStatement = _conn.prepareStatement(_dataAvailableQuery);
 
       return _dataAvailableStatement;
     }
@@ -761,7 +759,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_insertStatement == null)
-	_insertStatement = _conn.prepareStatement(_insertQuery);
+        _insertStatement = _conn.prepareStatement(_insertQuery);
 
       return _insertStatement;
     }
@@ -770,7 +768,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_selectAllLimitStatement == null)
-	_selectAllLimitStatement = _conn.prepareStatement(_selectAllLimitQuery);
+        _selectAllLimitStatement = _conn.prepareStatement(_selectAllLimitQuery);
 
       return _selectAllLimitStatement;
     }
@@ -779,7 +777,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_updateExpiresStatement == null)
-	_updateExpiresStatement = _conn.prepareStatement(_updateExpiresQuery);
+        _updateExpiresStatement = _conn.prepareStatement(_updateExpiresQuery);
 
       return _updateExpiresStatement;
     }
@@ -788,7 +786,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_deleteTimeoutStatement == null)
-	_deleteTimeoutStatement = _conn.prepareStatement(_deleteTimeoutQuery);
+        _deleteTimeoutStatement = _conn.prepareStatement(_deleteTimeoutQuery);
 
       return _deleteTimeoutStatement;
     }
@@ -797,7 +795,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_validateStatement == null)
-	_validateStatement = _conn.prepareStatement(_validateQuery);
+        _validateStatement = _conn.prepareStatement(_validateQuery);
 
       return _validateStatement;
     }
@@ -806,7 +804,7 @@ public class DataStore implements AlarmListener {
       throws SQLException
     {
       if (_countStatement == null)
-	_countStatement = _conn.prepareStatement(_countQuery);
+        _countStatement = _conn.prepareStatement(_countQuery);
 
       return _countStatement;
     }
@@ -814,10 +812,10 @@ public class DataStore implements AlarmListener {
     void close()
     {
       if (_freeConn == null || ! _freeConn.freeCareful(this)) {
-	try {
-	  _conn.close();
-	} catch (SQLException e) {
-	}
+        try {
+          _conn.close();
+        } catch (SQLException e) {
+        }
       }
     }
   }
