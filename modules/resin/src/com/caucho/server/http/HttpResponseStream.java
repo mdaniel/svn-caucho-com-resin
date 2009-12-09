@@ -29,15 +29,13 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.connection.*;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.servlet.ServletContext;
-import javax.servlet.http.HttpServletResponse;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
 
 public class HttpResponseStream extends ResponseStream {
   private static final Logger log
@@ -48,8 +46,6 @@ public class HttpResponseStream extends ResponseStream {
   private static final int _tailChunkedLength = 7;
   private static final byte []_tailChunked
     = new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
-
-  private final byte []_buffer = new byte[16];
 
   private HttpResponse _response;
   private WriteStream _next;
@@ -205,8 +201,12 @@ public class HttpResponseStream extends ResponseStream {
 
     if (bufferStart > 0) {
       byte []buffer = _next.getBuffer();
+      int len = bufferOffset - bufferStart;
 
-      writeChunkHeader(buffer, bufferStart, bufferOffset - bufferStart);
+      if (len > 0)
+        writeChunkHeader(buffer, bufferStart, len);
+      else
+        bufferOffset = bufferStart - 8;
 
       _bufferStartOffset = 0;
     }

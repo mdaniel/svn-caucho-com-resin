@@ -453,12 +453,11 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   /**
    * Close.
    */
-  public void close()
+  @Override
+  protected void closeImpl()
     throws IOException
   {
-    finish();
-
-    super.close();
+    super.closeImpl();
 
     /*
     if (_writer != null)

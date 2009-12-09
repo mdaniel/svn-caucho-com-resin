@@ -104,6 +104,7 @@ public class FilterWrapperResponseStream extends ToByteResponseStream {
   public void finish()
     throws IOException
   {
+    super.finish();
     flushBuffer();
 
     /*
@@ -118,10 +119,10 @@ public class FilterWrapperResponseStream extends ToByteResponseStream {
   /**
    * Close.
    */
-  public void close()
+  public void closeImpl()
     throws IOException
   {
-    super.close();
+    super.closeImpl();
 
     _response = null;
     

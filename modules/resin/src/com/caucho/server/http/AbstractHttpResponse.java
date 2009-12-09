@@ -29,43 +29,26 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cache.AbstractCacheEntry;
-import com.caucho.server.cache.AbstractCacheFilterChain;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.dispatch.BadRequestException;
-import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.session.CookieImpl;
-import com.caucho.server.session.SessionImpl;
-import com.caucho.server.session.SessionManager;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.webapp.ErrorPageManager;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.Alarm;
-import com.caucho.util.CaseInsensitiveIntMap;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.HTTPUtil;
-import com.caucho.util.L10N;
-import com.caucho.util.QDate;
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.FlushBuffer;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.WriteStream;
-import com.caucho.xml.XmlChar;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.io.Writer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.server.dispatch.BadRequestException;
+import com.caucho.server.session.CookieImpl;
+import com.caucho.server.session.SessionImpl;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CaseInsensitiveIntMap;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * Encapsulates the servlet response, controlling response headers and the
@@ -110,7 +93,7 @@ abstract public class AbstractHttpResponse {
   private boolean _isClientDisconnect;
 
   protected long _contentLength;
-  protected boolean _isClosed;
+  private boolean _isClosed;
 
   protected AbstractHttpResponse(AbstractHttpRequest request)
   {
@@ -193,10 +176,6 @@ abstract public class AbstractHttpResponse {
     return _isClosed;
   }
 
-  public void startInvocation()
-  {
-  }
-
   /**
    * Initializes the Response at the beginning of the request.
    */
@@ -218,6 +197,10 @@ abstract public class AbstractHttpResponse {
 
     _contentLength = -1;
     _isClosed = false;
+  }
+  
+  public void startInvocation()
+  {
   }
 
   abstract protected AbstractResponseStream createResponseStream();
@@ -925,7 +908,7 @@ abstract public class AbstractHttpResponse {
   {
     if (_isClosed)
       return;
-
+ 
     try {
       /* XXX:
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {
@@ -943,7 +926,6 @@ abstract public class AbstractHttpResponse {
           && response.getStatus() == HttpServletResponse.SC_NOT_MODIFIED) {
         response.handleNotModified();
       }
-
 
       if (_responseStream == null) {
       }

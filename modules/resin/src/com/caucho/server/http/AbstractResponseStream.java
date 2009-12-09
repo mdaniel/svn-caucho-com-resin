@@ -314,15 +314,22 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
     throws IOException
   {
     flushBuffer();
+    
+    closeImpl();
   }
 
   /**
    * Closes the response stream
    */
-  public void close()
+  public final void close()
     throws IOException
   {
     finish();
+  }
+  
+  protected void closeImpl()
+    throws IOException
+  {
   }
 
   /**

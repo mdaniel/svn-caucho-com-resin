@@ -121,6 +121,8 @@ public class ToCharResponseAdapter extends ResponseAdapter {
     /**
      * Flushes the buffer.
      */
+    /*
+    @Override
     public void close()
       throws IOException
     {
@@ -130,6 +132,7 @@ public class ToCharResponseAdapter extends ResponseAdapter {
       // server/172q
       // getResponse().getWriter().close();
     }
+    */
     
     protected void writeNext(char []buffer, int offset, int length)
       throws IOException

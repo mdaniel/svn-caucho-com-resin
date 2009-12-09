@@ -369,9 +369,12 @@ public class WrapperResponseStream extends AbstractResponseStream {
   /**
    * Close.
    */
-  public void close()
+  @Override
+  protected void closeImpl()
     throws IOException
   {
+    super.closeImpl();
+    
     // jsp/17f0
     PrintWriter writer = _writer;
     _writer = null;

@@ -154,6 +154,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     return _isClosed;
   }
+  
+  public final void setClosed(boolean isClosed)
+  {
+    _isClosed = isClosed;
+  }
 
   /**
    * Sets the encoding.
@@ -490,12 +495,12 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Closes the response stream.
    */
-  public void close()
+  protected void closeImpl()
     throws IOException
   {
     flushBuffer();
 
-    _isClosed = true;
+    setClosed(true);
   }
 
   /**

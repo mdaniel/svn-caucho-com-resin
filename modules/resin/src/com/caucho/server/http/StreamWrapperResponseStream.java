@@ -100,10 +100,11 @@ public class StreamWrapperResponseStream extends ToByteResponseStream {
   /**
    * Close.
    */
-  public void close()
+  @Override
+  protected void closeImpl()
     throws IOException
   {
-    super.close();
+    super.closeImpl();
 
     /*
     if (_writer != null)

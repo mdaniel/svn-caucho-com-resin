@@ -358,6 +358,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * Sets the next buffer
    */
+  @Override
   public byte []nextBuffer(int offset)
     throws IOException
   {
@@ -633,6 +634,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     boolean isClosed = isClosed();
+
     if (isClosed)
       return;
 
@@ -644,12 +646,13 @@ abstract public class ResponseStream extends ToByteResponseStream {
     _allowFlush = true;
 
     flushBuffer();
-
     // flushBuffer can force 304 and then a cache write which would
     // complete the finish.
     if (isClosed()) {
       return;
     }
+    
+    setClosed(true);
 
     try {
       writeTail();
