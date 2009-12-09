@@ -578,9 +578,17 @@ public class TransactionImpl implements Transaction, AlarmListener {
       _rollbackException = exn;
     }
 
-    if (log.isLoggable(Level.FINE)) {
+    if (log.isLoggable(Level.FINER)) {
+      log.log(Level.FINER, this + " rollback-only: " + exn.toString(), exn);
+    }
+    else if (log.isLoggable(Level.FINE)) {
       log.fine(this + " rollback-only: " + exn.toString());
     }
+  }
+
+  public boolean isRollbackOnly()
+  {
+    return _status == Status.STATUS_MARKED_ROLLBACK;
   }
 
   /**

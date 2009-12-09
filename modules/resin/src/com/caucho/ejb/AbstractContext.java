@@ -50,6 +50,7 @@ import javax.transaction.UserTransaction;
 
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
+import com.caucho.transaction.*;
 import com.caucho.util.L10N;
 
 /**
@@ -327,9 +328,9 @@ abstract public class AbstractContext implements EJBContext {
    */
   public void setRollbackOnly() throws IllegalStateException
   {
-    if (!getServer().isContainerTransaction())
-      throw new IllegalStateException(
-          "setRollbackOnly() is only allowed with container-managed transaction");
+    if (! getServer().isContainerTransaction()) {
+      throw new IllegalStateException(L.l("setRollbackOnly() is only allowed with container-managed transaction"));
+    }
 
     try {
       getServer().getUserTransaction().setRollbackOnly();
@@ -343,11 +344,15 @@ abstract public class AbstractContext implements EJBContext {
    */
   public boolean getRollbackOnly() throws IllegalStateException
   {
-    if (!getServer().isContainerTransaction())
-      throw new IllegalStateException(
-          "getRollbackOnly() is only allowed with container-managed transaction");
+    if (! getServer().isContainerTransaction())
+      throw new IllegalStateException("getRollbackOnly() is only allowed with container-managed transaction");
 
-    throw new IllegalStateException("invalid transaction");
+    TransactionImpl xa = TransactionManagerImpl.getLocal().getCurrent();
+
+    if (xa != null)
+      return xa.isRollbackOnly();
+    else
+      throw new IllegalStateException(L.l("getRollbackOnly() called with no active transaction."));
   }
 
   /**
