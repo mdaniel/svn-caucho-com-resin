@@ -29,16 +29,15 @@
 
 package com.caucho.server.http;
 
-import com.caucho.util.L10N;
-import com.caucho.vfs.Encoding;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.i18n.EncodingWriter;
-
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.util.Locale;
-import java.util.logging.Logger;
 import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.vfs.Encoding;
+import com.caucho.vfs.TempBuffer;
+import com.caucho.vfs.i18n.EncodingWriter;
 
 /**
  * Handles the dual char/byte buffering for the response stream.
@@ -66,11 +65,6 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   // true if character data should be ignored
   private boolean _isOutputStreamOnly;
 
-  private boolean _isHead;
-  private boolean _isClosed;
-  private boolean _isCommitted;
-  private boolean _isFinished;
-
   private EncodingWriter _toByte = Encoding.getLatin1Writer();
 
   protected ToByteResponseStream()
@@ -80,16 +74,15 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Initializes the Buffered Response stream at the beginning of a request.
    */
-  public void startRequest()
+  @Override
+  public void start()
   {
+    super.start();
+    
     _bufferCapacity = SIZE;
 
     clearBuffer();
 
-    _isHead = false;
-    _isClosed = false;
-    _isFinished = false;
-    _isCommitted = false;
     _isOutputStreamOnly = false;
 
     _toByte = Encoding.getLatin1Writer();
@@ -112,52 +105,6 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   protected boolean setFlush(boolean isAllowFlush)
   {
     return true;
-  }
-
-  /**
-   * Sets the head.
-   */
-  @Override
-  public void setHead()
-  {
-    _isHead = true;
-  }
-
-  public final boolean isHead()
-  {
-    return _isHead;
-  }
-
-  public final boolean isCommitted()
-  {
-    // XXX: isCommitted || isClosed??
-
-    return _isCommitted;
-  }
-
-  public final void setCommitted(boolean isCommitted)
-  {
-    _isCommitted = isCommitted;
-  }
-
-  public final boolean isFinished()
-  {
-    return _isFinished;
-  }
-
-  public final void setFinished(boolean isFinished)
-  {
-    _isFinished = isFinished;
-  }
-
-  public final boolean isClosed()
-  {
-    return _isClosed;
-  }
-  
-  public final void setClosed(boolean isClosed)
-  {
-    _isClosed = isClosed;
   }
 
   /**
@@ -195,6 +142,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the char buffer.
    */
+  @Override
   public final char []getCharBuffer()
   {
     return _charBuffer;
@@ -203,6 +151,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the char offset.
    */
+  @Override
   public int getCharOffset()
     throws IOException
   {
@@ -212,6 +161,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Sets the char offset.
    */
+  @Override
   public void setCharOffset(int offset)
     throws IOException
   {
@@ -224,6 +174,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the byte buffer.
    */
+  @Override
   public byte []getBuffer()
     throws IOException
   {
@@ -236,6 +187,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the byte offset.
    */
+  @Override
   public int getBufferOffset()
     throws IOException
   {
@@ -257,6 +209,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Sets the byte offset.
    */
+  @Override
   public void setBufferOffset(int offset)
     throws IOException
   {
@@ -266,24 +219,16 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the buffer capacity.
    */
+  @Override
   public int getBufferSize()
   {
     return _bufferCapacity;
   }
 
   /**
-   * Returns true for extended buffers.
-   */
-  /*
-  public boolean isExtendedBuffer()
-  {
-    return _bufferCapacity < SIZE;
-  }
-  */
-
-  /**
    * Sets the buffer capacity.
    */
+  @Override
   public void setBufferSize(int size)
   {
     _bufferCapacity = SIZE * ((size + SIZE - 1) / SIZE);
@@ -295,6 +240,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the remaining value left.
    */
+  @Override
   public int getRemaining()
   {
     return _bufferCapacity - getBufferLength();
@@ -311,6 +257,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Clears the response buffer.
    */
+  @Override
   public void clearBuffer()
   {
     TempBuffer next = _head.getNext();
@@ -333,12 +280,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Writes a byte to the output.
    */
+  @Override
   public void write(int ch)
     throws IOException
   {
-    if (_isClosed)
-      return;
-    else if (_isHead)
+    if (isClosed() || isHead())
       return;
 
     if (_charLength > 0)
@@ -365,16 +311,13 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Writes a chunk of bytes to the stream.
    */
+  @Override
   public void write(byte []buffer, int offset, int length)
     throws IOException
   {
-    boolean isFinished = false;
-
-    if (_isClosed)
+    if (isClosed() || isHead())
       return;
-    else if (_isHead)
-      return;
-
+    
     if (_charLength > 0)
       flushCharBuffer();
 
@@ -384,6 +327,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
       if (_bufferCapacity <= length) {
         // _bufferSize = length;
+        boolean isFinished = false;
         writeNext(buffer, offset, length, isFinished);
         _bufferSize = 0;
         return;
@@ -421,12 +365,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Writes a character to the output.
    */
+  @Override
   public void print(int ch)
     throws IOException
   {
-    if (_isClosed)
-      return;
-    else if (_isHead)
+    if (isClosed() || isHead())
       return;
 
     // server/13ww
@@ -439,12 +382,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Writes a char array to the output.
    */
+  @Override
   public void print(char []buffer, int offset, int length)
     throws IOException
   {
-    if (_isClosed)
-      return;
-    else if (_isHead)
+    if (isClosed() || isHead())
       return;
 
     int charLength = _charLength;
@@ -472,40 +414,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   }
 
   /**
-   * Flushes the buffer.
-   */
-  public void flushBuffer()
-    throws IOException
-  {
-    if (_charLength > 0)
-      flushCharBuffer();
-
-    flushByteBuffer();
-  }
-
-  /**
-   * Flushes the buffered response to the output stream.
-   */
-  public void flush()
-    throws IOException
-  {
-    flushBuffer();
-  }
-
-  /**
-   * Closes the response stream.
-   */
-  protected void closeImpl()
-    throws IOException
-  {
-    flushBuffer();
-
-    setClosed(true);
-  }
-
-  /**
    * Converts the char buffer.
    */
+  @Override
   public char []nextCharBuffer(int offset)
     throws IOException
   {
@@ -539,6 +450,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     }
   }
 
+  @Override
   public int getContentLength()
   {
     try {
@@ -554,6 +466,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns the next byte buffer.
    */
+  @Override
   public byte []nextBuffer(int offset)
     throws IOException
   {
@@ -587,11 +500,13 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     // jsp/0182 jsp/0502 jsp/0503
     // _isCommitted = true;
+    
+    boolean isFinished = isClosing();
 
     if (_tailByteLength == 0 && _bufferSize == 0) {
-      if (! _isCommitted) {
+      if (! isCommitted()) {
         // server/0101
-        writeNext(_head.getBuffer(), 0, 0, _isFinished);
+        writeHeaders(0);
       }
       return;
     }
@@ -599,13 +514,15 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     _tail.setLength(_tailByteLength);
     _bufferSize += _tailByteLength;
     _tailByteLength = 0;
+    
+    writeHeaders(_bufferSize);
 
     TempBuffer ptr = _head;
     do {
       TempBuffer next = ptr.getNext();
       ptr.setNext(null);
 
-      writeNext(ptr.getBuffer(), 0, ptr.getLength(), _isFinished);
+      writeNext(ptr.getBuffer(), 0, ptr.getLength(), isFinished);
 
       if (ptr != _head) {
         TempBuffer.free(ptr);
@@ -622,17 +539,54 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   }
 
   /**
+   * Writes any http headers. Because this may be called
+   * multiple times, the implementation needs to ensure
+   * the header is written once
+   * 
+   * @param length the current buffer length
+   * @throws IOException
+   */
+  protected void writeHeaders(int length)
+    throws IOException
+  {  
+  }
+  /**
    * Writes the chunk to the downward stream.
    */
   abstract protected void writeNext(byte []buffer, int offset,
                                     int length, boolean isEnd)
     throws IOException;
+  
+  /**
+   * Flushes the buffer.
+   */
+  @Override
+  public void flushBuffer()
+    throws IOException
+  {
+    if (_charLength > 0)
+      flushCharBuffer();
+
+    flushByteBuffer();
+  }
 
   /**
-   * Clears the close.
+   * Flushes the buffered response to the output stream.
    */
-  public void clearClose()
+  @Override
+  public void flush()
+    throws IOException
   {
-    _isClosed = false;
+    flushBuffer();
+  }
+
+  /**
+   * Closes the response stream.
+   */
+  @Override
+  protected void closeImpl()
+    throws IOException
+  {
+    flushBuffer();
   }
 }

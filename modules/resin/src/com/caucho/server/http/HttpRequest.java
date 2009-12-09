@@ -752,14 +752,14 @@ public class HttpRequest extends AbstractHttpRequest
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     long startTime = 0;
-
+    
     try {
       thread.setContextClassLoader(_server.getClassLoader());
       
       startRequest(HttpBufferStore.allocate((Server) _server));
 
       if (! parseRequest()) {
-        return false;
+         return false;
       }
 
       CharSequence host = getInvocationHost();

@@ -70,9 +70,9 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
    * Initializes the Buffered Response stream at the beginning of a request.
    */
   @Override
-  public void startRequest()
+  public void start()
   {
-    super.startRequest();
+    super.start();
     
     _head.clear();
     _head.setNext(null);
@@ -85,10 +85,6 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
     _bufferSize = 0;
 
     _encodingReader = null;
-    /*
-    _autoFlush = true;
-    _isClosed = false;
-    */
 
     // _toChar = Encoding.getReadEncoding("ISO-8859-1");
   }

@@ -42,25 +42,64 @@ import com.caucho.vfs.Path;
  * API for handling the PrintWriter/ServletOutputStream
  */
 public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
+  private State _state = State.START;
+  
   /**
    * Starts the response stream.
    */
-  public void startRequest()
+  public void start()
   {
+    _state = _state.toStart();
+  }
+  
+  //
+  // state predicates
+  //
+
+  /**
+   * Set true for HEAD requests.
+   */
+  public void setHead()
+  {
+    _state = _state.toHead();
+  }
+
+  /**
+   * Set true for HEAD requests.
+   */
+  public final boolean isHead()
+  {
+    return _state.isHead();
+  }
+
+  /**
+   * Test if data has been flushed to the client.
+   */
+  public boolean isCommitted()
+  {
+    return _state.isCommitted();
+  }
+
+  /**
+   * Sets the committed state
+   */
+  public void setCommitted()
+  {
+    _state = _state.toCommitted();
+  }
+  
+  /**
+   * Test if the request is closing.
+   */
+  public boolean isClosing()
+  {
+    return _state.isClosing();
   }
 
   /**
    * Returns true for a Caucho response stream.
    */
   abstract public boolean isCauchoResponseStream();
-
-  /**
-   * Returns true if data has been sent
-   */
-  public boolean isFlushed()
-  {
-    return false;
-  }
 
   public String getEncoding()
   {
@@ -143,34 +182,6 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
    */
   abstract public char []nextCharBuffer(int offset)
     throws IOException;
-
-  /**
-   * Returns true if the response is committed.
-   */
-  public boolean isCommitted()
-  {
-    return false;
-  }
-
-  public boolean hasData()
-  {
-    return false;
-  }
-
-  /**
-   * Set true for HEAD requests.
-   */
-  public void setHead()
-  {
-  }
-
-  /**
-   * Set true for HEAD requests.
-   */
-  public boolean isHead()
-  {
-    return false;
-  }
 
   /**
    * Sets a byte cache stream.
@@ -301,46 +312,140 @@ public abstract class AbstractResponseStream extends OutputStreamWithBuffer {
   /**
    * Flushes the output.
    */
+  @Override
   public void flush()
     throws IOException
   {
     flushByte();
   }
 
-  /**
-   * Finishes the response stream
-   */
-  public void finish()
-    throws IOException
+  protected void killCaching()
   {
-    flushBuffer();
-    
-    closeImpl();
   }
 
+  public final boolean isClosed()
+  {
+    return _state.isClosed();
+  }
+  
   /**
    * Closes the response stream
    */
+  @Override
   public final void close()
     throws IOException
   {
-    finish();
+    State state = _state;
+    
+    if (state.isClosed())
+      return;
+    
+    _state = state.toClosing();
+    
+    try {
+      closeImpl();
+    } finally {
+      _state = _state.toClose();
+    }
   }
   
   protected void closeImpl()
     throws IOException
   {
   }
-
-  /**
-   * Clears the close
-   */
-  public void clearClosed()
-    throws IOException
+  
+  @Override
+  public String toString()
   {
+    return getClass().getSimpleName() + "[" + _state + "]";
   }
-
-  protected void killCaching()
-  {
+  
+  enum State {
+    START {
+      State toHead() { return HEAD; }
+      State toCommitted() { return COMMITTED; }
+      State toClosing() { return CLOSING; }
+    },
+    HEAD {
+      boolean isHead() { return true; }
+      
+      State toHead() { return this; }
+      State toCommitted() { return COMMITTED_HEAD; }
+      State toClosing() { return CLOSING_HEAD; }
+    },
+    COMMITTED {
+      boolean isCommitted() { return true; }
+      
+      State toHead() { return COMMITTED_HEAD; }
+      State toCommitted() { return this; }
+      State toClosing() { return CLOSING; }
+    },
+    COMMITTED_HEAD {
+      boolean isCommitted() { return true; }
+      boolean isHead() { return true; }
+      
+      State toHead() { return this; }
+      State toCommitted() { return this; }
+      State toClosing() { return CLOSING_HEAD; }
+    },
+    CLOSING {
+      boolean isClosing() { return true; }
+      
+      State toHead() { return CLOSING_HEAD; }
+      State toCommitted() { return CLOSING_COMMITTED; }
+      State toClose() { return CLOSED; }
+    },
+    CLOSING_HEAD {
+      boolean isHead() { return true; }
+      boolean isClosing() { return true; }
+      
+      State toHead() { return this; }
+      State toCommitted() { return CLOSING_HEAD_COMMITTED; }
+      State toClose() { return CLOSED; }
+    },
+    CLOSING_COMMITTED {
+      boolean isCommitted() { return true; }
+      boolean isClosing() { return true; }
+      
+      State toHead() { return CLOSING_HEAD_COMMITTED; }
+      State toCommitted() { return this; }
+      State toClose() { return CLOSED; }
+    },
+    CLOSING_HEAD_COMMITTED {
+      boolean isHead() { return true; }
+      boolean isCommitted() { return true; }
+      boolean isClosing() { return true; }
+      
+      State toHead() { return this; }
+      State toCommitted() { return this; }
+      State toClose() { return CLOSED; }
+    },
+    CLOSED {
+      boolean isCommitted() { return true; }
+      boolean isClosed() { return true; }
+    };
+    
+    boolean isHead() { return false; }
+    boolean isCommitted() { return false; }
+    boolean isClosing() { return false; }
+    boolean isClosed() { return false; }
+   
+    State toStart() { return START; }
+    State toHead()
+    { 
+      throw new IllegalStateException(toString());
+    }
+    State toCommitted()
+    {
+      throw new IllegalStateException(toString());
+    }
+    State toClosing()
+    {
+      throw new IllegalStateException(toString());
+    }
+    State toClose()
+    { 
+      throw new IllegalStateException(toString());
+    }
   }
 }

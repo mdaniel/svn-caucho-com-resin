@@ -83,7 +83,7 @@ class IncludeResponse extends CauchoResponseWrapper
    */
   void startRequest()
   {
-    _originalStream.startRequest();
+    _originalStream.start();
     _stream = _originalStream;
 
     _responseOutputStream.init(_stream);

@@ -115,7 +115,7 @@ public class ResponseAdapter extends ResponseWrapper
       wrapper.init(response);
     }
 
-    _originalResponseStream.startRequest();
+    _originalResponseStream.start();
 
     _os.init(_originalResponseStream);
     _writer.init(_originalResponseStream);

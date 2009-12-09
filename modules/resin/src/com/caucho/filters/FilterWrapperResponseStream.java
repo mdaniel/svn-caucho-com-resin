@@ -99,24 +99,6 @@ public class FilterWrapperResponseStream extends ToByteResponseStream {
   }
 
   /**
-   * Finish.
-   */
-  public void finish()
-    throws IOException
-  {
-    super.finish();
-    flushBuffer();
-
-    /*
-    if (_os != null)
-      _os.flush();
-    */
-
-    _response = null;
-    _os = null;
-  }
-
-  /**
    * Close.
    */
   public void closeImpl()

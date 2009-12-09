@@ -76,7 +76,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
   }
 
   @Override
-  public void startRequest()
+  public void start()
   {
     if (_os != null || _writer != null)
       throw new IllegalStateException();
@@ -96,7 +96,7 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     _headerKeys.clear();
     _headerValues.clear();
 
-    super.startRequest();
+    super.start();
 
     // server/053n
     try {

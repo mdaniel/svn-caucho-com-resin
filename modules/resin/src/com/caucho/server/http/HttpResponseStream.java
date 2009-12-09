@@ -41,8 +41,6 @@ public class HttpResponseStream extends ResponseStream {
   private static final Logger log
     = Logger.getLogger(HttpResponseStream.class.getName());
 
-  private static final L10N L = new L10N(HttpResponseStream.class);
-
   private static final int _tailChunkedLength = 7;
   private static final byte []_tailChunked
     = new byte[] {'\r', '\n', '0', '\r', '\n', '\r', '\n'};
@@ -65,9 +63,9 @@ public class HttpResponseStream extends ResponseStream {
    * initializes the Response stream at the beginning of a request.
    */
   @Override
-  public void startRequest()
+  public void start()
   {
-    super.startRequest();
+    super.start();
 
     _isChunkedEncoding = false;
     _bufferStartOffset = 0;
@@ -173,12 +171,25 @@ public class HttpResponseStream extends ResponseStream {
   protected void closeNext()
     throws IOException
   {
-    if (log.isLoggable(Level.FINE))
-      log.fine(dbgId() + "close()");
-
-    _next.close();
-
     _bufferStartOffset = 0;
+    
+    AbstractHttpRequest req = _response.getRequest();
+    if (req.isComet() || req.isDuplex()) {
+    }
+    else if (! req.allowKeepalive()) {
+      if (log.isLoggable(Level.FINE)) {
+        log.fine(dbgId() + "close stream");
+      }
+
+      _next.close();
+    }
+    else {
+      // close();
+
+      if (log.isLoggable(Level.FINE)) {
+        log.fine(dbgId() + "finish/keepalive");
+      }
+    }
   }
 
   @Override

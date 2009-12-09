@@ -63,8 +63,6 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
   // bytes actually written
   private int _contentLength;
-  // True for the first chunk
-  private boolean _isHeaderWritten;
 
   private boolean _allowFlush = true;
 
@@ -86,20 +84,20 @@ abstract public class ResponseStream extends ToByteResponseStream {
    * initializes the Response stream at the beginning of a request.
    */
   @Override
-  public void startRequest()
+  public void start()
   {
-    super.startRequest();
+    super.start();
 
     _contentLength = 0;
     _allowFlush = true;
     _disableAutoFlush = false;
     _cacheStream = null;
-    _isHeaderWritten = false;
   }
 
   /**
    * Returns true for a Caucho response stream.
    */
+  @Override
   public boolean isCauchoResponseStream()
   {
     return true;
@@ -110,6 +108,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
    *
    * @param cacheStream the cache stream.
    */
+  @Override
   public void setByteCacheStream(OutputStream cacheStream)
   {
     _cacheStream = cacheStream;
@@ -122,6 +121,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     _cacheMaxLength = app.getCacheMaxLength();
   }
 
+  @Override
   protected OutputStream getByteCacheStream()
   {
     return _cacheStream;
@@ -145,6 +145,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     return isFlush;
   }
 
+  @Override
   public void setAutoFlush(boolean isAutoFlush)
   {
     setDisableAutoFlush(! isAutoFlush);
@@ -171,6 +172,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       return super.getContentLength();
   }
 
+  @Override
   public void setBufferSize(int size)
   {
     if (isCommitted())
@@ -184,29 +186,33 @@ abstract public class ResponseStream extends ToByteResponseStream {
     return isCommitted() || _contentLength > 0;
   }
 
-  public boolean isFlushed()
+  @Override
+  public boolean isCommitted()
   {
-    try {
-      if (isCommitted())
-        return true;
+    if (super.isCommitted())
+      return true;
 
+    // when the data hits the content-length, the request
+    // is committed even if the data isn't actually flushed.
+    try {
       if (_contentLength > 0) {
         flushCharBuffer();
         int bufferOffset = getByteBufferOffset();
 
         // server/05e8
-        if (_contentLength <= bufferOffset)
+        if (_contentLength <= bufferOffset) {
+          setCommitted();
           return true;
+        }
       }
     } catch (Exception e) {
       log.log(Level.FINER, e.toString(), e);
-
-      return true;
     }
 
     return false;
   }
 
+  @Override
   public void clear()
     throws IOException
   {
@@ -216,13 +222,13 @@ abstract public class ResponseStream extends ToByteResponseStream {
       throw new IOException(L.l("can't clear response after writing headers"));
   }
 
+  @Override
   public void clearBuffer()
   {
     super.clearBuffer();
 
     if (! isCommitted()) {
       // jsp/15la
-      _isHeaderWritten = false;
       _response.setHeaderWritten(false);
     }
 
@@ -237,13 +243,17 @@ abstract public class ResponseStream extends ToByteResponseStream {
     // _isClosed = false;
   }
 
+  @Override
   protected void writeHeaders(int length)
     throws IOException
   {
     if (isCommitted())
       return;
+    
+    if (! isClosing())
+      length = -1;
 
-    setCommitted(true);
+    setCommitted();
 
     startCaching(true);
 
@@ -251,7 +261,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   }
 
   @Override
-  public void write(int ch)
+  public final void write(int ch)
     throws IOException
   {
     _singleByteBuffer[0] = (byte) ch;
@@ -262,26 +272,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * Returns the byte buffer.
    */
-  /* hessian/3544
   @Override
-  public void write(byte []buffer, int offset, int length)
-    throws IOException
-  {
-    if (_isCommitted) {
-      flushBuffer();
-
-      writeNext(buffer, offset, length, false);
-    }
-    else
-      super.write(buffer, offset, length);
-  }
-  */
-
-  /**
-   * Returns the byte buffer.
-   */
-  @Override
-  public byte []getBuffer()
+  public final byte []getBuffer()
     throws IOException
   {
     if (isCommitted()) {
@@ -296,7 +288,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * Returns the byte offset.
    */
-  public int getBufferOffset()
+  @Override
+  public final int getBufferOffset()
     throws IOException
   {
     if (! isCommitted())
@@ -310,7 +303,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * Sets the byte offset.
    */
-  public void setBufferOffset(int offset)
+  @Override
+  public final void setBufferOffset(int offset)
     throws IOException
   {
     if (isClosed()) {
@@ -359,7 +353,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
    * Sets the next buffer
    */
   @Override
-  public byte []nextBuffer(int offset)
+  public final byte []nextBuffer(int offset)
     throws IOException
   {
     if (! isCommitted()) {
@@ -422,6 +416,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
    * @param offset start offset into the buffer
    * @param length length of the data in the buffer
    */
+  @Override
   protected void writeNext(byte []buf, int offset, int length,
                            boolean isFinished)
     throws IOException
@@ -433,27 +428,17 @@ abstract public class ResponseStream extends ToByteResponseStream {
       if (_disableAutoFlush && ! isFinished)
         throw new IOException(L.l("auto-flushing has been disabled"));
 
-      boolean isHeaderWritten = _isHeaderWritten;
-      _isHeaderWritten = true;
-
-      if (! isHeaderWritten) {
-        if (isFinished)
-          writeHeaders(getBufferLength());
-        else
-          writeHeaders(-1);
-      }
-
       int bufferOffset = getNextBufferOffset();
-      if (length == 0 && bufferOffset == 0 && ! isFinished) {
+      if (length == 0 && bufferOffset == 0) {
         return;
       }
 
       int bufferStart = getNextStartOffset();
 
       // server/05e2
-      if (length == 0 && ! isFinished && bufferStart == bufferOffset) {
+      if (length == 0 && bufferStart == bufferOffset) {
         // server/26a5
-        writeNextBuffer(bufferOffset);
+        // writeNextBuffer(bufferOffset);
         return;
       }
 
@@ -563,6 +548,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * Flushes the buffered response to the output stream.
    */
+  @Override
   public void flush()
     throws IOException
   {
@@ -598,6 +584,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * Flushes the buffered response to the output stream.
    */
+  @Override
   public void flushByte()
     throws IOException
   {
@@ -607,6 +594,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   /**
    * Flushes the buffered response to the writer.
    */
+  @Override
   public void flushChar()
     throws IOException
   {
@@ -614,57 +602,45 @@ abstract public class ResponseStream extends ToByteResponseStream {
   }
 
   /**
-   * Flushes the buffered response to the output stream.
-   */
-  /*
-  public void flushBuffer()
-    throws IOException
-  {
-    super.flushBuffer();
-
-    // jsp/15la
-    // _isCommitted = true;
-  }
-  */
-
-  /**
    * Complete the request.
    */
-  public void finish()
+  @Override
+  protected void closeImpl()
     throws IOException
   {
-    boolean isClosed = isClosed();
-
-    if (isClosed)
-      return;
-
-    _disableAutoFlush = false;
-
-    flushCharBuffer();
-
-    setFinished(true);
-    _allowFlush = true;
-
-    flushBuffer();
-    // flushBuffer can force 304 and then a cache write which would
-    // complete the finish.
-    if (isClosed()) {
-      return;
-    }
-    
-    setClosed(true);
-
     try {
+      _disableAutoFlush = false;
+
+      flushCharBuffer();
+
+      _allowFlush = true;
+
+      flushBuffer();
+      // flushBuffer can force 304 and then a cache write which would
+      // complete the finish.
+      /*
+      if (isClosed()) {
+        return;
+      }
+      */
+      
+      // XXX: this needs to be cleaned up with the above
+      // use of writeHeaders
+      if (! _response.isHeaderWritten()) {
+        writeHeaders(-1);
+      }
+      
       writeTail();
 
       finishCache();
-      // close();
 
+      closeNext();
+      /*
       AbstractHttpRequest req = _response.getRequest();
       if (req.isComet() || req.isDuplex()) {
       }
       else if (! req.allowKeepalive()) {
-        close();
+        // close();
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "close stream");
@@ -673,12 +649,13 @@ abstract public class ResponseStream extends ToByteResponseStream {
         closeNext();
       }
       else {
-        close();
+        // close();
 
         if (log.isLoggable(Level.FINE)) {
           log.fine(dbgId() + "finish/keepalive");
         }
       }
+      */
     } catch (ClientDisconnectException e) {
       _response.clientDisconnect();
 
@@ -793,6 +770,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
     }
   }
 
+  @Override
   public void killCaching()
   {
     AbstractCacheEntry cacheEntry = _newCacheEntry;

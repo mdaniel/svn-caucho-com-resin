@@ -190,7 +190,7 @@ abstract public class AbstractHttpResponse {
     _footerKeys.clear();
     _footerValues.clear();
 
-    _responseStream.startRequest();
+    _responseStream.start();
 
     _isHeaderWritten = false;
     _isClientDisconnect = false;
@@ -930,8 +930,7 @@ abstract public class AbstractHttpResponse {
       if (_responseStream == null) {
       }
       else if (isClose) {
-        _responseStream.finish();
-        // _responseStream.close();
+        _responseStream.close();
         finishResponseStream(isClose);
       }
       /*
@@ -995,21 +994,10 @@ abstract public class AbstractHttpResponse {
         log.log(Level.WARNING, e.toString(), e);
       }
 
-      // XXX: finishCache();
-
-      // include() files finish too, but shouldn't force a flush, hence
-      // flush is false
-      // Never send flush?
-      // _responseStream.close();
-
       _isClosed = true;
 
-      _responseStream.finish();
-
-      /*
-      if (_rawWrite != null)
-        _rawWrite.flushBuffer();
-      */
+      // server/0506
+      // _responseStream.close();
       /*
     } catch (ClientDisconnectException e) {
       _request.killKeepalive();
