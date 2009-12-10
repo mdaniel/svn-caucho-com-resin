@@ -326,6 +326,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
         flushByteBuffer();
 
       if (_bufferCapacity <= length) {
+        writeHeaders(-1); // server/05bj
+        
         // _bufferSize = length;
         boolean isFinished = false;
         writeNext(buffer, offset, length, isFinished);
