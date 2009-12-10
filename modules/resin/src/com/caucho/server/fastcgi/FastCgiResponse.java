@@ -29,18 +29,17 @@
 
 package com.caucho.server.fastcgi;
 
-import com.caucho.server.connection.*;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.servlet.http.Cookie;
+
 import com.caucho.server.http.AbstractHttpResponse;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.WriteStream;
-
-import javax.servlet.http.Cookie;
-import java.io.IOException;
-import java.util.ArrayList;
 
 /**
  * Handles a response for a srun connection, i.e. a connection to
@@ -64,7 +63,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
   {
     FastCgiRequest request = (FastCgiRequest) _request;
 
-    return new FastCgiResponseStream(request, this, request.getRawWrite());
+    return new FastCgiResponseStream(request, this, request.getWriteStream());
   }
 
   /**
@@ -89,7 +88,7 @@ public class FastCgiResponse extends AbstractHttpResponse {
     int statusCode = response.getStatus();
     String statusMessage = response.getStatusMessage();
 
-    WriteStream os = _request.getRawWrite();
+    WriteStream os = _req.getWriteStream();
 
     os.print("Status: ");
     os.print(statusCode);

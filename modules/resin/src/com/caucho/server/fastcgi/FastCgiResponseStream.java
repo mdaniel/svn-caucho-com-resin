@@ -29,21 +29,13 @@
 
 package com.caucho.server.fastcgi;
 
-import com.caucho.server.http.AbstractHttpResponse;
-import com.caucho.server.http.AbstractResponseStream;
-import com.caucho.server.http.HttpBufferStore;
-import com.caucho.server.http.ResponseStream;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.L10N;
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.WriteStream;
-
-import javax.servlet.ServletContext;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.server.http.ResponseStream;
+import com.caucho.util.L10N;
+import com.caucho.vfs.WriteStream;
 
 public class FastCgiResponseStream extends ResponseStream {
   private static final Logger log

@@ -195,7 +195,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     return new FastCgiResponse(this, getWriteStream());
   }
 
-  private WriteStream getWriteStream()
+  WriteStream getWriteStream()
   {
     if (_writeStream == null) {
       _writeStream = new WriteStream();

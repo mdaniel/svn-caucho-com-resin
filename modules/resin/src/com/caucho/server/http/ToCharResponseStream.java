@@ -94,7 +94,8 @@ abstract public class ToCharResponseStream extends AbstractResponseStream {
    */
   public boolean isCauchoResponseStream()
   {
-    return true;
+    // server/1b13
+    return false;
   }
 
   /**

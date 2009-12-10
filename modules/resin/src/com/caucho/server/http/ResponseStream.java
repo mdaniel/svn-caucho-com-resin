@@ -79,6 +79,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     _response = response;
   }
+  
+  protected AbstractHttpResponse getResponse()
+  {
+    return _response;
+  }
 
   /**
    * initializes the Response stream at the beginning of a request.

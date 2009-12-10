@@ -28,30 +28,32 @@
 
 package com.caucho.jsf.context;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
+import java.util.Locale;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.filters.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.jsp.*;
-import com.caucho.server.connection.*;
+import com.caucho.jsp.BodyResponseStream;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.CauchoResponseWrapper;
 import com.caucho.server.http.ResponseWriter;
 import com.caucho.server.http.ServletOutputStreamImpl;
+import com.caucho.vfs.FlushBuffer;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.TempStream;
+import com.caucho.vfs.WriteStream;
 
 public class JspResponseWrapper extends CauchoResponseWrapper
 {
   private static final Logger log
     = Logger.getLogger(JspResponseWrapper.class.getName());
-  private static final L10N L = new L10N(JspResponseWrapper.class);
-
   private boolean _hasError;
   private BodyResponseStream _bodyStream;
   private AbstractResponseStream _stream;
@@ -72,7 +74,7 @@ public class JspResponseWrapper extends CauchoResponseWrapper
   public void init(HttpServletResponse response)
   {
     _bodyStream = new BodyResponseStream();
-    _stream = _bodyStream;
+   _stream = _bodyStream;
     
     _out = new WriteStream(_tempStream);
     _bodyStream.setWriter(_out.getPrintWriter());

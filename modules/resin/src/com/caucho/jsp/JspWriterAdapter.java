@@ -42,17 +42,9 @@ import java.util.logging.*;
 public class JspWriterAdapter extends AbstractBodyContent {
   private static final Logger log
     = Logger.getLogger(JspWriterAdapter.class.getName());
-  private static final L10N L = new L10N(JspWriterAdapter.class);
-  
-  // the parent writer
-  private JspWriter _parent;
-  
   // the underlying writer
   private AbstractResponseStream _out;
   
-  // the page context
-  private PageContextImpl _pageContext;
-
   private boolean _isClosed;
 
   /**
@@ -69,7 +61,6 @@ public class JspWriterAdapter extends AbstractBodyContent {
    */
   void init(PageContextImpl pageContext)
   {
-    _pageContext = pageContext;
     _out = null;
     _isClosed = false;
   }
@@ -81,7 +72,6 @@ public class JspWriterAdapter extends AbstractBodyContent {
    */
   void init(JspWriter parent, AbstractResponseStream out)
   {
-    _parent = parent;
     _out = out;
     _isClosed = false;
   }
@@ -278,9 +268,11 @@ public class JspWriterAdapter extends AbstractBodyContent {
   {
     _isClosed = true;
 
+    AbstractResponseStream out = _out;
     _out = null;
-    _parent = null;
-    _pageContext = null;
+    
+    if (out != null && ! out.isCauchoResponseStream())
+      out.flushBuffer();
   }
 
   public String toString()

@@ -700,7 +700,7 @@ abstract public class AbstractHttpResponse {
    * @param length length of the response if known, or -1 is unknown.
    * @return true if the content is chunked.
    */
-  protected boolean writeHeaders(int length)
+  public final boolean writeHeaders(int length)
     throws IOException
   {
     if (isHeaderWritten())
