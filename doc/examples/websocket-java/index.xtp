@@ -175,5 +175,129 @@ ws.onopen = wsopen;
 </s2>
 </s1>
 
+<s1 title="WebSocket Servlet">
+
+<p>Resin's WebSocket support is designed to be similar to the
+Servlet 3.0 Async API, although the requirements for WebSockets are
+significantly different.</p>
+
+<p>To upgrade a HTTP socket to WebSocket, the ServletRequest is cast to
+a WebSocketServletRequest (implemented by Resin), and then call
+startWebSocket(...)</p>
+
+<example title="Example: Upgrading to WebSocket">
+import com.caucho.servlet.WebSocketServletRequest;
+import com.caucho.servlet.WebSocketListener;
+
+...
+public class MyServlet extends GenericServlet {
+
+  public void service(ServletRequest req, ServletResponse res)
+    throws IOException, ServletException
+  {
+    WebSocketServletRequest wsReq = (WebSocketServletRequest) req;
+
+    WebSocketListener handler = new MyHandler();
+
+    wsReq.startWebSocket(handler);
+  }
+}
+</example>
+
+<p>The WebSocketListener is the heart of the server-side implementation
+of websockets. It is a single-threaded listener for client events.</p>
+
+<p>When a new packet is available, Resin will call the <code>onRead</code>
+method, expecting the listener to read data from the client. While
+the <code>onRead</code> is processing, Resin will not call <code>onRead</code>
+again until the first one has completed processing.</p>
+
+<p>In this example, the handler reads a WebSocket text packet and sends
+a response.</p>
+
+<p>The <code>InputStream</code> and <code>OutputStream</code> from the
+<code>WebSocketContext</code> are not thread safe, so it's important for
+the server to synchronize writes so packets don't get jumbled up.</p>
+
+<example title="Example: MyHandler.java">
+package example;
+
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
+
+public class MyHandler implements WebSocketListener
+{
+  ...
+
+  public void onRead(WebSocketContext context)
+    throws IOException
+  {
+    StringBuilder sb = new StringBuilder();
+
+    InputStream is = context.getInputStream();
+    OutputStream os = context.getOutputStream();
+
+    int ch = _is.read();
+
+    assert(ch == 0x00); // packet starts with 0x00
+
+    while ((ch = _is.read()) >= 0 &amp;&amp; ch != 0xff) {
+      sb.append((char) ch);
+    }
+
+    String message = sb.toString();
+
+    String result = "received message";
+
+    _os.write(0x00);
+    _os.write(result.getBytes("utf-8"));
+    _os.write(0xff);
+    _os.flush();
+  }
+}
+</example>
+
+<p>Resin's WebSocketListener has four callback methods. <code>onRead</code>
+will be called the majority of the time, and <code>onStart</code> called
+at the beginning of the connection and <code>onComplete</code> called
+at the end.</p>
+
+<def title="WebSocketListener.java">
+package com.caucho.servlet;
+
+public interface WebSocketListener
+{
+  public void onStart(WebSocketContext context) throws IOException;
+
+  public void onRead(WebSocketContext context) throws IOException;
+
+  public void onComplete(WebSocketContext context) throws IOException;
+
+  public void onTimeout(WebSocketContext context) throws IOException;
+}
+</def>
+
+<p>The WebSocket context gives access to the WebSocket streams, as well
+as allowing setting of the socket timeout, and closing the connection.</p>
+
+<def title="WebSocketContext.java">
+package com.caucho.servlet;
+
+public interface WebSocketContext
+{
+  public InputStream getInputStream() throws IOException;
+
+  public OutputStream getOutputStream() throws IOException;
+
+  public void setTimeout(long timeout);
+
+  public long getTimeout();
+
+  public void complete();
+}
+</def>
+
+</s1>
+
   </body>
 </document>

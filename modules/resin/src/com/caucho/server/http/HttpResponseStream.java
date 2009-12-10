@@ -172,7 +172,7 @@ public class HttpResponseStream extends ResponseStream {
     throws IOException
   {
     _bufferStartOffset = 0;
-    
+
     AbstractHttpRequest req = _response.getRequest();
     if (req.isComet() || req.isDuplex()) {
     }

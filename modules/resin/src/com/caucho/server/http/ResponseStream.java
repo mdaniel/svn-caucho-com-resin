@@ -79,7 +79,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     _response = response;
   }
-  
+
   protected AbstractHttpResponse getResponse()
   {
     return _response;
@@ -254,7 +254,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
     if (isCommitted())
       return;
-    
+
     if (! isClosing())
       length = -1;
 
@@ -628,13 +628,13 @@ abstract public class ResponseStream extends ToByteResponseStream {
         return;
       }
       */
-      
+
       // XXX: this needs to be cleaned up with the above
       // use of writeHeaders
       if (! _response.isHeaderWritten()) {
         writeHeaders(-1);
       }
-      
+
       writeTail();
 
       finishCache();
