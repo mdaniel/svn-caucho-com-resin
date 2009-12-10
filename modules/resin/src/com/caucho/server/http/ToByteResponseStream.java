@@ -64,6 +64,8 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
   // true if character data should be ignored
   private boolean _isOutputStreamOnly;
+  // true while char buffer is flushing for length/chunked
+  private boolean _isCharFlushing;
 
   private EncodingWriter _toByte = Encoding.getLatin1Writer();
 
@@ -427,6 +429,15 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
 
     return _charBuffer;
   }
+  
+  /**
+   * True while the char buffer is being flushed, needed
+   * for content-length vs chunked headers.
+   */
+  protected boolean isCharFlushing()
+  {
+    return _isCharFlushing;
+  }
 
   /**
    * Converts the char buffer.
@@ -436,12 +447,20 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   {
     int charLength = _charLength;
     _charLength = 0;
-
+    
     if (charLength > 0 && ! _isOutputStreamOnly) {
-      boolean isFlush = setFlush(false);
+      // server/05ef
+      _isCharFlushing = true;
 
-      _toByte.write(this, _charBuffer, 0, charLength);
-      setFlush(isFlush);
+      try {
+        boolean isFlush = setFlush(false);
+
+        _toByte.write(this, _charBuffer, 0, charLength);
+        _charLength = 0;
+        setFlush(isFlush);
+      } finally {
+        _isCharFlushing = false;
+      }
 
       if (_bufferCapacity <= _tailByteLength + _bufferSize) {
         flushByteBuffer();
@@ -552,6 +571,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     throws IOException
   {  
   }
+  
   /**
    * Writes the chunk to the downward stream.
    */

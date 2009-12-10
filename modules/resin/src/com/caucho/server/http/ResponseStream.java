@@ -255,7 +255,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
     if (isCommitted())
       return;
 
-    if (! isClosing())
+    // server/05ef
+    if (! isClosing() || isCharFlushing())
       length = -1;
 
     setCommitted();
