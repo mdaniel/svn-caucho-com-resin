@@ -1,6 +1,7 @@
 com.caucho.admin
 com.caucho.config
 com.caucho.distcache
+com.caucho.ejb
 com.caucho.jms
 com.caucho.protocols
 com.caucho.remote

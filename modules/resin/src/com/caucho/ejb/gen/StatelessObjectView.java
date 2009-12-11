@@ -351,7 +351,7 @@ public class StatelessObjectView extends StatelessView {
     String beanClass = getBeanClassName();
 
     out.println();
-    out.println(beanClass + " _ejb_begin()");
+    out.println("final " + beanClass + " _ejb_begin()");
     out.println("{");
     out.pushDepth();
     
@@ -391,7 +391,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("}");
 
     out.println();
-    out.println("void _ejb_free(" + beanClass + " bean)");
+    out.println("final void _ejb_free(" + beanClass + " bean)");
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
@@ -411,6 +411,17 @@ public class StatelessObjectView extends StatelessView {
     out.println("_server.destroyInstance(bean);");
     */
 
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("final void _ejb_destroy(" + beanClass + " bean)");
+    out.println("  throws javax.ejb.EJBException");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("_statelessPool.destroy(bean);");
+    
     out.popDepth();
     out.println("}");
 
@@ -460,7 +471,7 @@ public class StatelessObjectView extends StatelessView {
       out.println(" result;");
     }
 
-    out.println(getBeanClassName() + " bean = _ejb_begin();");
+    out.println(getBeanClassName() + " bean = _statelessPool.allocate();");
 
     if (!void.class.equals(implMethod.getReturnType()))
       out.print("result = ");
@@ -495,10 +506,10 @@ public class StatelessObjectView extends StatelessView {
     if (_timeoutMethod != null) {
       String localVar = "_local_" + getViewClass().getSimpleName();
 
-      out
-          .println(getBeanClassName() + " bean = " + localVar
+      out.println(getBeanClassName() + " bean = " + localVar
               + "._ejb_begin();");
       out.println("bean." + _timeoutMethod + "(timer);");
+      // XXX: needs try-finally
       out.println(localVar + "._ejb_free(bean);");
     }
   }

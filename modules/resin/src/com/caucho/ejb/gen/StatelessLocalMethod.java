@@ -136,9 +136,10 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
     out.println("} finally {");
     out.println("  thread.setContextClassLoader(oldLoader);");
 
-    out.println("  if (bean == null) {");
-    out.println("  } else if (isValid)");
+    out.println("  if (isValid)");
     out.println("    _ejb_free(bean);");
+    out.println("  else");
+    out.println("    _ejb_destroy(bean);");
     
     out.println("}");
   }

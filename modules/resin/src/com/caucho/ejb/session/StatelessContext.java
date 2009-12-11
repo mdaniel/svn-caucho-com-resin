@@ -87,7 +87,7 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
     if (_statelessPool == null) {
       EjbProducer<T> producer = (EjbProducer<T>) getServer().getProducer();
       producer.setBeanProducer(provider);
-      _statelessPool = new StatelessPool<T>(producer);
+      _statelessPool = new StatelessPool<T>(_server, provider);
     }
     
     return _statelessPool;

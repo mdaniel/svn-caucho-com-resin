@@ -29,8 +29,11 @@
 
 package com.caucho.ejb.session;
 
+import java.util.concurrent.Semaphore;
+import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
+import com.caucho.ejb.server.BeanProducer;
 import com.caucho.ejb.server.EjbProducer;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -44,19 +47,63 @@ public class StatelessPool<T> {
   private static Logger log
     = Logger.getLogger(StatelessPool.class.getName());
   
+  private final SessionServer _server;
+  
   private final FreeList<T> _freeList;
+  private final Semaphore _concurrentSemaphore;
+  private final long _concurrentTimeout;
 
   private EjbProducer<T> _ejbProducer;
-  
-  StatelessPool(EjbProducer<T> ejbProducer)
+ 
+  StatelessPool(SessionServer server,
+                BeanProducer<T> producer)
   {
-    _ejbProducer = ejbProducer;
+    _server = server;
     
-    _freeList = new FreeList<T>(16);
+    _ejbProducer = (EjbProducer<T>) server.getProducer();
+    _ejbProducer.setBeanProducer(producer);
+    
+    int idleMax = server.getSessionIdleMax();
+    int concurrentMax = server.getSessionConcurrentMax();
+    
+    if (idleMax < 0)
+      idleMax = concurrentMax;
+    
+    if (idleMax < 0)
+      idleMax = 16;
+    
+    _freeList = new FreeList<T>(idleMax);
+    
+    if (concurrentMax == 0)
+      throw new IllegalArgumentException(L.l("maxConcurrent may not be zero")); 
+    
+    long concurrentTimeout = server.getSessionConcurrentTimeout();
+    
+    if (concurrentTimeout < 0)
+      concurrentTimeout = Long.MAX_VALUE / 2;
+    
+    _concurrentTimeout = concurrentTimeout;
+    
+    if (concurrentMax > 0)
+      _concurrentSemaphore = new Semaphore(concurrentMax);
+    else
+      _concurrentSemaphore = null;
   }
   
   public T allocate()
   {
+    Semaphore semaphore = _concurrentSemaphore;
+    
+    if (semaphore != null) {
+      try {
+        Thread.interrupted();
+        if (! semaphore.tryAcquire(_concurrentTimeout, TimeUnit.MILLISECONDS))
+          throw new RuntimeException(L.l("{0} concurrent max exceeded", this));
+      } catch (Exception e) {
+        throw new RuntimeException(e);
+      }
+    }
+    
     T bean = _freeList.allocate();
     
     if (bean == null) {
@@ -68,12 +115,28 @@ public class StatelessPool<T> {
 
   public void free(T bean)
   {
+    Semaphore semaphore = _concurrentSemaphore;
+    if (semaphore != null)
+      semaphore.release();
+    
     if (! _freeList.free(bean)) {
-      destroy(bean);
+      destroyImpl(bean);
     }
   }
   
   public void destroy(T bean)
+  {
+    if (bean == null)
+      return;
+    
+    Semaphore semaphore = _concurrentSemaphore;
+    if (semaphore != null)
+      semaphore.release();
+    
+    destroyImpl(bean);
+  }
+  
+  private void destroyImpl(T bean)
   {
     _ejbProducer.destroyInstance(bean);
   }
@@ -83,7 +146,12 @@ public class StatelessPool<T> {
     T bean;
     
     while ((bean = _freeList.allocate()) != null) {
-      destroy(bean);
+      destroyImpl(bean);
     }
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _server + "]";
   }
 }

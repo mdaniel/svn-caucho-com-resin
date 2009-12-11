@@ -45,6 +45,7 @@ import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.server.AbstractServer;
 
@@ -58,7 +59,11 @@ abstract public class SessionServer extends AbstractServer {
   private HashMap<Class, InjectionTarget> _componentMap
     = new HashMap<Class, InjectionTarget>();
 
-  private Bean _bean;
+  private Bean<?> _bean;
+  
+  private int _sessionIdleMax = 16;
+  private int _sessionConcurrentMax = -1;
+  private long _sessionConcurrentTimeout = -1;
 
   public SessionServer(EjbContainer manager, AnnotatedType annotatedType)
   {
@@ -76,6 +81,21 @@ abstract public class SessionServer extends AbstractServer {
   {
     return _bean;
   }
+  
+  public int getSessionIdleMax()
+  {
+    return _sessionIdleMax;
+  }
+  
+  public int getSessionConcurrentMax()
+  {
+    return _sessionConcurrentMax;
+  }
+  
+  public long getSessionConcurrentTimeout()
+  {
+    return _sessionConcurrentTimeout;
+  }
 
   /**
    * Initialize the server
@@ -92,6 +112,21 @@ abstract public class SessionServer extends AbstractServer {
       super.init();
 
       InjectManager beanManager = InjectManager.create();
+      
+      AnnotatedType<?> annType = getAnnotatedType();
+      SessionPool sessionPool = annType.getAnnotation(SessionPool.class);
+      
+      if (sessionPool != null) {
+        if (sessionPool.maxIdle() >= 0)
+          _sessionIdleMax = sessionPool.maxIdle();
+        
+        if (sessionPool.maxConcurrent() >= 0)
+          _sessionConcurrentMax = sessionPool.maxConcurrent();
+        
+        if (sessionPool.maxConcurrentTimeout() >= 0)
+          _sessionConcurrentTimeout = sessionPool.maxConcurrentTimeout();
+        
+      }
 
       BeanFactory factory
         = beanManager.createBeanFactory(SessionContext.class);
