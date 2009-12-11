@@ -129,6 +129,8 @@ public class MessageServer extends AbstractServer
 	Class beanClass = getBeanSkelClass();
 
 	_ejbCreate = beanClass.getMethod("ejbCreate", new Class[0]);
+	  
+	// getProducer().bindInjection();
       } catch (Exception e) {
 	log.log(Level.FINEST, e.toString(), e);
       }

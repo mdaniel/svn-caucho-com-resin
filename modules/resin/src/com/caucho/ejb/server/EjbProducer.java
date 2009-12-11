@@ -170,7 +170,7 @@ public class EjbProducer<T> {
   }
 
 
-  protected void bindInjection()
+  public void bindInjection()
   {
     InjectManager beanManager = InjectManager.create();
     ManagedBeanImpl<T> managedBean
