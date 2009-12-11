@@ -31,6 +31,7 @@ package com.caucho.ejb.session;
 
 import com.caucho.ejb.*;
 import com.caucho.ejb.protocol.*;
+import com.caucho.ejb.server.AbstractServer;
 
 import java.util.logging.*;
 import java.io.*;
@@ -47,9 +48,9 @@ abstract public class StatelessObject extends AbstractEJBObject
     = Logger.getLogger(StatelessObject.class.getName());
   
   protected final StatelessServer _server;
-  protected final Class _api;
+  protected final Class<?> _api;
 
-  protected StatelessObject(StatelessServer server, Class api)
+  protected StatelessObject(StatelessServer server, Class<?> api)
   {
     _server = server;
     _api = api;

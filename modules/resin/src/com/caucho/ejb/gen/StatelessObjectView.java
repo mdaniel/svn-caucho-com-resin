@@ -83,8 +83,7 @@ public class StatelessObjectView extends StatelessView {
   /**
    * Introspects the lifecycle methods
    */
-  @SuppressWarnings("unchecked")
-  public void introspectLifecycle(Class cl)
+  public void introspectLifecycle(Class<?> cl)
   {
     if (cl == null || cl.equals(Object.class))
       return;
@@ -100,10 +99,9 @@ public class StatelessObjectView extends StatelessView {
   /**
    * Introspects the lifecycle methods
    */
-  @SuppressWarnings("unchecked")
   public void introspectTimer(ApiClass apiClass)
   {
-    Class cl = apiClass.getJavaClass();
+    Class<?> cl = apiClass.getJavaClass();
 
     if (cl == null || cl.equals(Object.class))
       return;
@@ -206,6 +204,7 @@ public class StatelessObjectView extends StatelessView {
   /**
    * Generates the view code.
    */
+  @Override
   public void generate(JavaWriter out) throws IOException
   {
     generateBean(out);
@@ -278,21 +277,38 @@ public class StatelessObjectView extends StatelessView {
 
     out.println();
     out.println("private " + getBean().getClassName() + " _context;");
-    out.println("private " + getBeanClassName() + " []_freeBeanStack"
-        + " = new " + getBeanClassName() + "[16];");
-    out.println("private int _freeBeanTop;");
-
+    out.println("private final StatelessPool<" + getBeanClassName() + "> _statelessPool;");
+   
     out.println();
     out.println(getViewClassName() + "(" + getBean().getClassName()
         + " context)");
     out.println("{");
+    out.pushDepth();
     generateSuper(out, "context.getStatelessServer(), "
         + getViewClass().getName() + ".class");
-    out.println("  _context = context;");
-
+    out.println("_context = context;");
+    
+    out.println("_statelessPool = context.getStatelessPool(this);");
+    out.popDepth();
     out.println("}");
 
-    out.println("public Object __caucho_get()");
+    out.println("public " + getBeanClassName()
+                + " __caucho_new()");
+    out.println("{");
+    out.println("  return new " + getBeanClassName() + "(this);");
+    out.println("}");
+    
+    out.println("public void __caucho_preDestroy(Object instance)");
+    out.println("{");
+    out.println("}");
+    
+    out.println("public void __caucho_postConstruct(Object instance)");
+    out.println("{");
+    out.println("}");
+     
+    out.println();
+    out.println("public " + getViewClass().getName() 
+                + " __caucho_get()");
     out.println("{");
     out.println("  return this;");
     out.println("}");
@@ -338,6 +354,10 @@ public class StatelessObjectView extends StatelessView {
     out.println(beanClass + " _ejb_begin()");
     out.println("{");
     out.pushDepth();
+    
+    out.println("return _statelessPool.allocate();");
+    
+    /*
     out.println(beanClass + " bean;");
     out.println("synchronized (this) {");
     out.println("  if (_freeBeanTop > 0) {");
@@ -366,6 +386,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("} catch (Exception e) {");
     out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
     out.println("}");
+    */
     out.popDepth();
     out.println("}");
 
@@ -374,6 +395,9 @@ public class StatelessObjectView extends StatelessView {
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
+    
+    out.println("_statelessPool.free(bean);");
+    /*
     out.println("if (bean == null)");
     out.println("  return;");
     out.println();
@@ -385,6 +409,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("}");
 
     out.println("_server.destroyInstance(bean);");
+    */
 
     out.popDepth();
     out.println("}");
@@ -393,6 +418,9 @@ public class StatelessObjectView extends StatelessView {
     out.println("public void destroy()");
     out.println("{");
     out.pushDepth();
+    
+    out.println("_statelessPool.destroy();");
+    /*
     out.println(beanClass + " ptr;");
     out.println(beanClass + " []freeBeanStack;");
     out.println("int freeBeanTop;");
@@ -418,6 +446,7 @@ public class StatelessObjectView extends StatelessView {
 
     out.popDepth();
     out.println("}");
+    */
 
     out.popDepth();
     out.println("}");
@@ -438,7 +467,7 @@ public class StatelessObjectView extends StatelessView {
 
     out.print("bean." + implMethod.getName() + "(");
 
-    Class[] types = implMethod.getParameterTypes();
+    Class<?>[] types = implMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
       if (i != 0)
         out.print(", ");

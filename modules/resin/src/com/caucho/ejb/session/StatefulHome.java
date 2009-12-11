@@ -29,8 +29,8 @@
 package com.caucho.ejb.session;
 
 import com.caucho.ejb.AbstractEJBHome;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.HomeSkeletonWrapper;
+import com.caucho.ejb.server.AbstractServer;
 
 import javax.ejb.*;
 import java.io.ObjectStreamException;

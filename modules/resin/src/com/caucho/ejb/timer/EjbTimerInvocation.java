@@ -30,7 +30,7 @@ package com.caucho.ejb.timer;
 
 import javax.ejb.Timer;
 
-import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.config.timer.TimeoutInvoker;
 
 /**

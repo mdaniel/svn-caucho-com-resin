@@ -28,9 +28,9 @@
 
 package com.caucho.ejb.hessian;
 
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.HessianProtocolException;

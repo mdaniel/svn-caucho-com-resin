@@ -29,11 +29,11 @@
 package com.caucho.ejb.burlap;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.protocol.AbstractHandle;
 import com.caucho.ejb.protocol.AbstractHomeHandle;
 import com.caucho.ejb.protocol.HandleEncoder;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.util.CharBuffer;
 
 import javax.ejb.EJBException;

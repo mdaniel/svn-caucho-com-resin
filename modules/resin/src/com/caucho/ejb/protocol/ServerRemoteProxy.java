@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.protocol;
 
-import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
 import com.caucho.naming.ObjectProxy;

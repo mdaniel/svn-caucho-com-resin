@@ -191,7 +191,6 @@ public class StatelessServer extends SessionServer {
     }
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   protected void postStart()
   {
@@ -210,8 +209,9 @@ public class StatelessServer extends SessionServer {
     }
   }
 
+  /*
   protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
-      Class ejbClass)
+                                   Class ejbClass)
   {
     super.introspectDestroy(injectList, ejbClass);
 
@@ -225,6 +225,7 @@ public class StatelessServer extends SessionServer {
       }
     }
   }
+  */
 
   /**
    * Finds the remote bean by its key.

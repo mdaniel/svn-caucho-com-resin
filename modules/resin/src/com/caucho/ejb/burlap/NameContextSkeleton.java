@@ -30,9 +30,9 @@ package com.caucho.ejb.burlap;
 
 import com.caucho.burlap.io.BurlapInput;
 import com.caucho.burlap.io.BurlapOutput;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.EjbProtocolManager;
 import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.services.name.NameServerRemote;
 
 import javax.ejb.EJBHome;

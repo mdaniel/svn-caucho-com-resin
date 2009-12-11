@@ -27,8 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb;
+package com.caucho.ejb.server;
 
+import com.caucho.ejb.*;
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.inject.AbstractBean;
@@ -86,14 +87,15 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected int _line;
   protected String _location;
 
-  private AnnotatedType _annotatedType;
-  private Bean _bean;
-  private InjectionTarget _injectionTarget;
+  private AnnotatedType<?> _annotatedType;
+  private Bean<?> _bean;
 
   protected String _id;
   protected String _ejbName;
   protected String _moduleName;
   protected String _handleServerId;
+  
+  private EjbProducer<?> _producer;
 
   // name for IIOP, Hessian, JNDI
   protected String _mappedName;
@@ -140,23 +142,12 @@ abstract public class AbstractServer implements EnvironmentBean {
 
   protected Bean _component;
 
-  private Method _timeoutMethod;
-  private TimerService _timerService;
-
-  protected ConfigProgram _initProgram;
-  protected ConfigProgram[] _initInject;
-  protected ConfigProgram[] _destroyInject;
-
   private AroundInvokeConfig _aroundInvokeConfig;
-
-  private PreDestroyConfig _preDestroyConfig;
-  private PostConstructConfig _postConstructConfig;
 
   private boolean _isContainerTransaction = true;
 
   private final Lifecycle _lifecycle = new Lifecycle();;
   private Class _beanImplClass;
-  private Method _cauchoPostConstruct;
 
   /**
    * Creates a new server container
@@ -164,12 +155,15 @@ abstract public class AbstractServer implements EnvironmentBean {
    * @param manager
    *          the owning server container
    */
-  public AbstractServer(EjbContainer container, AnnotatedType annotatedType)
+  public AbstractServer(EjbContainer container, 
+                        AnnotatedType<?> annotatedType)
   {
     _annotatedType = annotatedType;
     _ejbContainer = container;
 
     _loader = EnvironmentClassLoader.create(container.getClassLoader());
+    
+    _producer = new EjbProducer(this, annotatedType);
   }
 
   /**
@@ -213,6 +207,11 @@ abstract public class AbstractServer implements EnvironmentBean {
   public Bean getDeployBean()
   {
     return _bean;
+  }
+  
+  public EjbProducer<?> getProducer()
+  {
+    return _producer;
   }
 
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
@@ -339,12 +338,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void setBeanImplClass(Class cl)
   {
     _beanImplClass = cl;
-
-    try {
-      _cauchoPostConstruct = cl.getDeclaredMethod("__caucho_postConstruct");
-      _cauchoPostConstruct.setAccessible(true);
-    } catch (NoSuchMethodException e) {
-    }
   }
 
   /**
@@ -618,25 +611,6 @@ abstract public class AbstractServer implements EnvironmentBean {
     return _transactionTimeout;
   }
 
-  private Method getTimeoutMethod(Class targetBean)
-  {
-    if (TimedObject.class.isAssignableFrom(targetBean)) {
-      try {
-        return targetBean.getMethod("ejbTimeout", Timer.class);
-      } catch (Exception e) {
-        throw new IllegalStateException(e);
-      }
-    }
-
-    for (Method method : targetBean.getMethods()) {
-      if (method.getAnnotation(Timeout.class) != null) {
-        return method;
-      }
-    }
-
-    return null;
-  }
-
   /**
    * Returns the timer service.
    */
@@ -847,111 +821,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   abstract public AbstractContext getContext(Object key, boolean forceLoad)
       throws FinderException;
 
-  /**
-   * Sets the injection target
-   */
-  public void setInjectionTarget(InjectionTarget injectionTarget)
-  {
-    _injectionTarget = injectionTarget;
-  }
-
-  /**
-   * Gets the injection target
-   */
-  public InjectionTarget getInjectionTarget()
-  {
-    return _injectionTarget;
-  }
-
-  /**
-   * Sets the init program.
-   */
-  public void setInitProgram(ConfigProgram init)
-  {
-    _initProgram = init;
-  }
-
-  /**
-   * Gets the init program.
-   */
-  public ConfigProgram getInitProgram()
-  {
-    return _initProgram;
-  }
-
-  /**
-   * Initialize an instance
-   */
-  public void initInstance(Object instance)
-  {
-    initInstance(instance, null, null, new ConfigContext());
-  }
-
-  /**
-   * Initialize an instance
-   */
-  public void initInstance(Object instance,
-                           InjectionTarget target,
-                           Object proxy,
-                           CreationalContext cxt)
-  {
-    ConfigContext env = (ConfigContext) cxt;
-
-    Bean bean = getDeployBean();
-
-    if (env != null && bean != null) {
-      // server/4762
-      env.put((AbstractBean) bean, proxy);
-      // env.push(proxy);
-    }
-
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      thread.setContextClassLoader(_loader);
-
-      if (target != null) {
-        target.inject(instance, env);
-      }
-
-      if (getInjectionTarget() != null && target != getInjectionTarget()) {
-        getInjectionTarget().inject(instance, env);
-      }
-
-      if (_initInject != null) {
-        if (env == null)
-          env = new ConfigContext();
-
-        for (ConfigProgram inject : _initInject)
-          inject.inject(instance, env);
-      }
-
-      if (_initProgram != null) {
-        if (env == null)
-          env = new ConfigContext();
-
-        _initProgram.inject(instance, env);
-      }
-
-      try {
-        if (_cauchoPostConstruct != null)
-          _cauchoPostConstruct.invoke(instance, null);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e.getCause());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-
-    if (env != null && bean != null)
-      env.remove(bean);
-  }
-
   public void timeout(Timer timer)
   {
     /*
@@ -959,30 +828,6 @@ abstract public class AbstractServer implements EnvironmentBean {
                                                 this));
     */
     getContext().__caucho_timeout_callback(timer);
-  }
-
-  /**
-   * Remove an object.
-   */
-  public void destroyInstance(Object instance)
-  {
-    if (_destroyInject != null) {
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
-
-      try {
-        thread.setContextClassLoader(_loader);
-
-        ConfigContext env = null;
-        if (env == null)
-          env = new ConfigContext();
-
-        for (ConfigProgram inject : _destroyInject)
-          inject.inject(instance, env);
-      } finally {
-        thread.setContextClassLoader(oldLoader);
-      }
-    }
   }
 
   public void init() throws Exception
@@ -1021,80 +866,19 @@ abstract public class AbstractServer implements EnvironmentBean {
     return true;
   }
 
+  protected void bindInjection()
+  {
+    
+  }
+  
   protected void bindContext()
   {
-
+    _producer.setEnvLoader(_loader);
+    _producer.bindInjection();
   }
 
   protected void postStart()
   {
-  }
-
-  protected void bindInjection()
-  {
-    InjectManager beanManager = InjectManager.create();
-    ManagedBeanImpl managedBean
-      = beanManager.createManagedBean(_annotatedType);
-
-    _bean = managedBean;
-    _injectionTarget = managedBean.getInjectionTarget();
-
-    _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
-
-    if (_timeoutMethod != null)
-      _timerService = new EjbTimerService(this);
-
-    // Injection binding occurs in the start phase
-
-    InjectManager inject = InjectManager.create();
-
-    // server/4751
-    if (_injectionTarget == null)
-      _injectionTarget = inject.createInjectionTarget(getEjbClass());
-
-    if (_timerService != null) {
-      BeanFactory factory = inject.createBeanFactory(TimerService.class);
-      inject.addBean(factory.singleton(_timerService));
-    }
-    /*
-    ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
-    InjectIntrospector.introspectInject(injectList, getEjbClass());
-    // XXX: add inject from xml here
-    */
-
-    ArrayList<ConfigProgram> injectList = null;
-    if (_initProgram != null) {
-      injectList = new ArrayList<ConfigProgram>();
-      injectList.add(_initProgram);
-    }
-
-    // InjectIntrospector.introspectInit(injectList, getEjbClass(), null);
-    // XXX: add init from xml here
-
-    if (injectList != null && injectList.size() > 0) {
-      ConfigProgram[] injectArray = new ConfigProgram[injectList.size()];
-      injectList.toArray(injectArray);
-
-      if (injectArray.length > 0)
-        _initInject = injectArray;
-    }
-
-    injectList = new ArrayList<ConfigProgram>();
-
-    introspectDestroy(injectList, getEjbClass());
-
-    ConfigProgram[] injectArray;
-    injectArray = new ConfigProgram[injectList.size()];
-    injectList.toArray(injectArray);
-
-    if (injectArray.length > 0)
-      _destroyInject = injectArray;
-  }
-
-  protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
-      Class ejbClass)
-  {
-    InjectIntrospector.introspectDestroy(injectList, getEjbClass());
   }
 
   /**
@@ -1145,26 +929,6 @@ abstract public class AbstractServer implements EnvironmentBean {
   public void destroy()
   {
     _lifecycle.toDestroy();
-  }
-
-  public PostConstructConfig getPostConstruct()
-  {
-    return _postConstructConfig;
-  }
-
-  public PreDestroyConfig getPreDestroy()
-  {
-    return _preDestroyConfig;
-  }
-
-  public void setPostConstruct(PostConstructConfig postConstruct)
-  {
-    _postConstructConfig = postConstruct;
-  }
-
-  public void setPreDestroy(PreDestroyConfig preDestroy)
-  {
-    _preDestroyConfig = preDestroy;
   }
 
   /**

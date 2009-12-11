@@ -47,7 +47,7 @@ import com.caucho.config.timer.EjbTimer;
 import com.caucho.config.timer.TimeoutInvoker;
 import com.caucho.config.timer.TimerTask;
 import com.caucho.config.types.Trigger;
-import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.resources.TimerTrigger;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;

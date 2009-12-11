@@ -45,23 +45,21 @@ import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.server.AbstractServer;
 
 /**
  * Server container for a session bean.
  */
 abstract public class SessionServer extends AbstractServer {
-  private final static Logger log = Logger.getLogger(SessionServer.class
-      .getName());
+  private final static Logger log
+     = Logger.getLogger(SessionServer.class.getName());
 
-  @SuppressWarnings("unchecked")
-  private HashMap<Class, InjectionTarget> _componentMap = new HashMap<Class, InjectionTarget>();
+  private HashMap<Class, InjectionTarget> _componentMap
+    = new HashMap<Class, InjectionTarget>();
 
-  @SuppressWarnings("unchecked")
   private Bean _bean;
 
-  @SuppressWarnings("unchecked")
   public SessionServer(EjbContainer manager, AnnotatedType annotatedType)
   {
     super(manager, annotatedType);
@@ -73,7 +71,6 @@ abstract public class SessionServer extends AbstractServer {
     return "session:";
   }
 
-  @SuppressWarnings("unchecked")
   @Override
   public Bean getDeployBean()
   {
@@ -83,7 +80,6 @@ abstract public class SessionServer extends AbstractServer {
   /**
    * Initialize the server
    */
-  @SuppressWarnings("unchecked")
   @Override
   public void init() throws Exception
   {
@@ -117,7 +113,6 @@ abstract public class SessionServer extends AbstractServer {
     log.fine(this + " initialized");
   }
 
-  @SuppressWarnings("unchecked")
   private void registerWebBeans()
   {
     Class beanClass = getBeanSkelClass();
@@ -168,7 +163,6 @@ abstract public class SessionServer extends AbstractServer {
     return _bean;
   }
 
-  @SuppressWarnings("unchecked")
   protected Bean createBean(ManagedBeanImpl mBean, Class api)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -183,24 +177,12 @@ abstract public class SessionServer extends AbstractServer {
      */
   }
 
-  @SuppressWarnings("unchecked")
   abstract protected InjectionTarget createSessionComponent(Class api,
       Class beanClass);
 
-  @SuppressWarnings("unchecked")
   protected InjectionTarget getComponent(Class api)
   {
     return _componentMap.get(api);
-  }
-
-  /**
-   * Returns the object key from a handle.
-   */
-  @SuppressWarnings("unchecked")
-  @Override
-  public Class getPrimaryKeyClass()
-  {
-    return null;
   }
 
   /**

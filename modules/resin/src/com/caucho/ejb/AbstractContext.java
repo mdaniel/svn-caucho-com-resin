@@ -48,6 +48,7 @@ import javax.ejb.RemoveException;
 import javax.ejb.TimerService;
 import javax.transaction.UserTransaction;
 
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.transaction.*;

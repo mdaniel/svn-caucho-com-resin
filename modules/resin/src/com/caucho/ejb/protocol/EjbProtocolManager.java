@@ -30,8 +30,8 @@
 package com.caucho.ejb.protocol;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;

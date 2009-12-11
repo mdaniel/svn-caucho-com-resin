@@ -33,7 +33,6 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.types.EnvEntry;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BeanGenerator;
@@ -42,6 +41,8 @@ import com.caucho.ejb.gen.SessionGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.EjbProducer;
 import com.caucho.ejb.session.StatefulServer;
 import com.caucho.ejb.session.StatelessServer;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -483,9 +484,11 @@ public class EjbSessionBean extends EjbBean {
     try {
       thread.setContextClassLoader(server.getClassLoader());
 
-      server.setInjectionTarget(getInjectionTarget());
+      EjbProducer<?> producer = server.getProducer();
+      
+      producer.setInjectionTarget(getInjectionTarget());
 
-      server.setInitProgram(getInitProgram());
+      producer.setInitProgram(getInitProgram());
 
       try {
         if (getServerProgram() != null)

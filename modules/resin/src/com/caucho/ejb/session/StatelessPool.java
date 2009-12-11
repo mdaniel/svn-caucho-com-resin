@@ -27,22 +27,63 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.ejb.session;
 
-import com.caucho.config.gen.ApiClass;
+import java.util.logging.Logger;
+
+import com.caucho.ejb.server.EjbProducer;
+import com.caucho.util.FreeList;
+import com.caucho.util.L10N;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateless view
+ * Pool of stateless session beans.
  */
-public class StatelessLocalView extends StatelessObjectView {
-  public StatelessLocalView(StatelessGenerator bean, ApiClass api)
+public class StatelessPool<T> {
+  private static final L10N L = new L10N(StatelessPool.class);
+
+  private static Logger log
+    = Logger.getLogger(StatelessPool.class.getName());
+  
+  private final FreeList<T> _freeList;
+
+  private EjbProducer<T> _ejbProducer;
+  
+  StatelessPool(EjbProducer<T> ejbProducer)
   {
-    super(bean, api);
+    _ejbProducer = ejbProducer;
+    
+    _freeList = new FreeList<T>(16);
+  }
+  
+  public T allocate()
+  {
+    T bean = _freeList.allocate();
+    
+    if (bean == null) {
+      bean = _ejbProducer.newInstance();
+    }
+    
+    return bean;
   }
 
-  @Override
-  public String getViewClassName()
+  public void free(T bean)
   {
-    return getViewClass().getSimpleName() + "__EJBLocal";
+    if (! _freeList.free(bean)) {
+      destroy(bean);
+    }
+  }
+  
+  public void destroy(T bean)
+  {
+    _ejbProducer.destroyInstance(bean);
+  }
+  
+  public void destroy()
+  {
+    T bean;
+    
+    while ((bean = _freeList.allocate()) != null) {
+      destroy(bean);
+    }
   }
 }

@@ -29,7 +29,7 @@
 package com.caucho.ejb.burlap;
 
 import com.caucho.ejb.AbstractEJBObject;
-import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.hessian.io.AbstractHessianOutput;
 import com.caucho.hessian.io.AbstractSerializer;
 import com.caucho.hessian.io.HessianRemoteObject;

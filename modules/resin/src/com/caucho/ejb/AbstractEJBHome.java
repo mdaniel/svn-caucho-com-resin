@@ -26,6 +26,8 @@
 
 package com.caucho.ejb;
 
+import com.caucho.ejb.server.AbstractServer;
+
 /**
  * Interface for stubs inside the same JVM.
  */

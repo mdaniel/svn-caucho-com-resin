@@ -32,6 +32,7 @@ import javax.ejb.TimerService;
 
 import com.caucho.config.*;
 import com.caucho.ejb.*;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.util.*;
 
 /**

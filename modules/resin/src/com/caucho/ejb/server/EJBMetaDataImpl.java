@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb;
+package com.caucho.ejb.server;
 
 import com.caucho.util.CharBuffer;
 

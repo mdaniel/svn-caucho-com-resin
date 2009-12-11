@@ -29,8 +29,8 @@
 package com.caucho.ejb.session;
 
 import com.caucho.ejb.AbstractEJBObject;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
+import com.caucho.ejb.server.AbstractServer;
 
 import javax.ejb.Handle;
 import javax.ejb.SessionBean;

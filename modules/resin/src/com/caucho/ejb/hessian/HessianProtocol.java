@@ -30,11 +30,11 @@ package com.caucho.ejb.hessian;
 
 import com.caucho.hessian.server.HessianSkeleton;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.message.MessageServer;
 import com.caucho.ejb.protocol.HandleEncoder;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.util.L10N;
 

@@ -39,9 +39,10 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.gen.MessageGenerator;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.message.*;
+import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.EjbProducer;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
 import com.caucho.jms.JmsMessageListener;
@@ -709,7 +710,7 @@ public class EjbMessageBean extends EjbBean {
 
       // server.setMessageListenerType(_messagingType);
 
-      Class beanClass = javaGen.loadClass(getEJBClass().getName());
+      javaGen.loadClass(getEJBClass().getName());
 
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
@@ -719,7 +720,9 @@ public class EjbMessageBean extends EjbBean {
 
         ContainerProgram initContainer = getInitProgram();
 
-        server.setInitProgram(initContainer);
+        EjbProducer<?> producer = server.getProducer();
+        
+        producer.setInitProgram(initContainer);
 
         if (getServerProgram() != null)
           getServerProgram().configure(server);

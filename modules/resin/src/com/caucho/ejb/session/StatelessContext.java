@@ -32,15 +32,18 @@ import javax.ejb.*;
 
 import com.caucho.config.*;
 import com.caucho.ejb.*;
+import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.EjbProducer;
 import com.caucho.util.*;
 
 /**
  * Abstract base class for an stateless session context
  */
-abstract public class StatelessContext extends AbstractSessionContext {
+abstract public class StatelessContext<T> extends AbstractSessionContext {
   private static final L10N L = new L10N(StatelessContext.class);
   
   private transient StatelessServer _server;
+  private StatelessPool<T> _statelessPool;
 
   public StatelessContext(StatelessServer server)
   {
@@ -74,9 +77,20 @@ abstract public class StatelessContext extends AbstractSessionContext {
     return _server.getTimerService();
   }
   
-  public StatelessProvider getProvider(Class api)
+  public StatelessProvider getProvider(Class<?> api)
   {
     return null;
+  }
+  
+  public StatelessPool<T> getStatelessPool(StatelessProvider<T> provider)
+  {
+    if (_statelessPool == null) {
+      EjbProducer<T> producer = (EjbProducer<T>) getServer().getProducer();
+      producer.setBeanProducer(provider);
+      _statelessPool = new StatelessPool<T>(producer);
+    }
+    
+    return _statelessPool;
   }
   
   /**
@@ -90,7 +104,7 @@ abstract public class StatelessContext extends AbstractSessionContext {
   /**
    * Returns the new instance for EJB 3.0
    */
-  protected Object _caucho_newInstance()
+  protected T _caucho_newInstance()
   {
     return null;
   }
@@ -98,7 +112,7 @@ abstract public class StatelessContext extends AbstractSessionContext {
   /**
    * Returns the new instance for EJB 3.0
    */
-  protected Object _caucho_newInstance(ConfigContext env)
+  protected T _caucho_newInstance(ConfigContext env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

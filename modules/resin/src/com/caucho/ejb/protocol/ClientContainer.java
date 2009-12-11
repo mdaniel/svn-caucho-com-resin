@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.protocol;
 
-import com.caucho.ejb.AbstractServer;
+import com.caucho.ejb.server.AbstractServer;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 

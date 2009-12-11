@@ -33,8 +33,9 @@ import com.caucho.config.*;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.AbstractServer;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.EjbProducer;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
 
@@ -230,7 +231,10 @@ public class MessageServer extends AbstractServer
     
       Object listener = ctor.newInstance(this);
 
-      initInstance(listener);
+      EjbProducer<Object> producer
+        = (EjbProducer<Object>) getProducer();
+      
+      producer.initInstance(listener);
 
       if (_ejbCreate != null)
 	_ejbCreate.invoke(listener);

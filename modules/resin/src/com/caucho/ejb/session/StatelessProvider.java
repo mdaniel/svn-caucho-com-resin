@@ -29,9 +29,11 @@
 
 package com.caucho.ejb.session;
 
+import com.caucho.ejb.server.BeanProducer;
+
 /**
  * Creates a new instance of a stateless bean
  */
-public interface StatelessProvider {
-  public Object __caucho_get();
+public interface StatelessProvider<T> extends BeanProducer<T> {
+  public T __caucho_get();
 }
