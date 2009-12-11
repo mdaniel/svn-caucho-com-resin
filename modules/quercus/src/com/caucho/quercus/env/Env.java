@@ -193,6 +193,10 @@ public class Env {
     = new HashMap<String, EnvVar>();
 
   private EnvVar []_globalList;
+  
+  // Statics
+  private Map<String, Var> _staticMap
+    = new HashMap<String, Var>();
 
   // Current env
   private Map<String, EnvVar> _map = _globalMap;
@@ -1906,10 +1910,12 @@ public class Env {
     if (envVar != null)
       _globalMap.put(name, envVar);
     else {
-      notice(L.l("${0} is an undefined variable", name));
-      
-      if (! isAutoCreate)
+      if (! isAutoCreate) {
+        // php/0206
+        notice(L.l("${0} is an undefined variable", name));
+
         return null;
+      }
       else
         envVar = new EnvVarImpl(new Var());
     }
@@ -1959,10 +1965,11 @@ public class Env {
       envVar = getGlobalScriptContextRef(name);
 
     if (envVar == null) {
-      notice(L.l("${0} is an undefined variable", name));
-      
-      if (! isAutoCreate)
+      if (! isAutoCreate) {
+        notice(L.l("${0} is an undefined variable", name));
+         
         return null;
+      }
 
       Var var = new Var();
       var.setGlobal();
@@ -2031,7 +2038,14 @@ public class Env {
    */
   public final Var getStaticVar(String name)
   {
-    return getGlobalVar(name);
+    Var var = _staticMap.get(name);
+    
+    if (var == null) {
+      var = new Var();
+      _staticMap.put(name, var);
+    }
+    
+    return var;
   }
 
   /**
@@ -2052,8 +2066,8 @@ public class Env {
       className = callingClass.getName();
 
     name = className + "::" + name;
-
-    return getGlobalVar(name);
+    
+    return getStaticVar(name);
   }
 
   /**
@@ -2064,7 +2078,7 @@ public class Env {
   public final Var unsetVar(String name)
   {
     EnvVar envVar = _map.get(name);
-
+    
     if (envVar != null)
       envVar.setRef(new Var());
 
@@ -2122,7 +2136,7 @@ public class Env {
   public final Var unsetGlobalVar(String name)
   {
     EnvVar envVar = _globalMap.get(name);
-
+    
     if (envVar != null)
       envVar.setRef(new Var());
 
@@ -3690,6 +3704,9 @@ public class Env {
    */
   protected Value executePage(QuercusPage page)
   {
+    if (log.isLoggable(Level.FINEST))
+      log.finest(this + " executePage " + page);
+    
     if (page.getCompiledPage() != null)
       return page.getCompiledPage().execute(this);
     else
@@ -5149,10 +5166,12 @@ public class Env {
     }
   }
 
-
-
   void executePage(Path path)
   {
+    if (log.isLoggable(Level.FINEST)) {
+      log.finest(this + " execute " + path);
+    }
+ 
     try {
       QuercusPage page = _quercus.parse(path);
 
@@ -6137,6 +6156,7 @@ public class Env {
     if ((mask & (E_ERROR | E_CORE_ERROR | E_COMPILE_ERROR | E_USER_ERROR)) != 0)
     {
       String locPrefix = getLocationPrefix(location, loc);
+      QuercusErrorException exn;
 
       if (! "".equals(locPrefix)) {
         /*
@@ -6144,12 +6164,18 @@ public class Env {
                                               getCodeName(mask) +
                                               msg);
         */
-        throw new QuercusErrorException(locPrefix
+        exn = new QuercusErrorException(locPrefix
                                         + getCodeName(mask)
                                         + msg);
       }
       else
-        throw new QuercusErrorException(msg);
+        exn = new QuercusErrorException(msg);
+      
+      exn.fillInStackTrace();
+      
+      if (log.isLoggable(Level.FINER)) {
+        log.log(Level.FINER, exn.toString(), exn);
+      }
     }
 
     return NullValue.NULL;

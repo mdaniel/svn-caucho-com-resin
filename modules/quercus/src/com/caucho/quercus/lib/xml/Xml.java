@@ -851,12 +851,17 @@ public class Xml {
         value = _env.createString(buf, start, length);
       }
       else {
+        String encoding = _xmlOptionTargetEncoding;
+        
+        if (encoding == null)
+          encoding = "UTF-8";
+        
         String s = new String(buf, start, length);
         
         byte[] bytes;
         
         try {
-          bytes = s.getBytes(_xmlOptionTargetEncoding);
+          bytes = s.getBytes(encoding);
         } catch (UnsupportedEncodingException e) {
           throw new QuercusException(e);
         }
