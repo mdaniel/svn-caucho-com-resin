@@ -40,6 +40,8 @@ import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 
 import java.util.*;
+
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
@@ -52,7 +54,7 @@ import javax.ejb.NoSuchEJBException;
 /**
  * Server container for a session bean.
  */
-public class StatefulServer extends SessionServer
+public class StatefulServer<T> extends SessionServer<T>
 {
   private static final L10N L = new L10N(StatefulServer.class);
   private static final Logger log
@@ -64,7 +66,7 @@ public class StatefulServer extends SessionServer
   private LruCache<String,StatefulObject> _remoteSessions;
 
   public StatefulServer(EjbContainer ejbContainer,
-			AnnotatedType annotatedType)
+			AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);
   }
@@ -86,8 +88,8 @@ public class StatefulServer extends SessionServer
     synchronized (this) {
       if (_homeContext == null) {
         try {
-          Class []param = new Class[] { StatefulServer.class };
-          Constructor cons = _contextImplClass.getConstructor(param);
+          Class<?> []param = new Class[] { StatefulServer.class };
+          Constructor<?> cons = _contextImplClass.getConstructor(param);
 
           _homeContext = (StatefulContext) cons.newInstance(this);
         } catch (Exception e) {
@@ -195,6 +197,17 @@ public class StatefulServer extends SessionServer
 
     return cxt;
     */
+  }
+
+  /**
+   * Initialize an instance
+   */
+  public void initInstance(T instance,
+                           InjectionTarget<T> target,
+                           Object proxy,
+                           CreationalContext<T> cxt)
+  {
+    getProducer().initInstance(instance, target, proxy, cxt);
   }
 
   /**

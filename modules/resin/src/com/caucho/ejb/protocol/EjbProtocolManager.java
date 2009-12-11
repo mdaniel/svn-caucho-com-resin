@@ -212,7 +212,7 @@ public class EjbProtocolManager {
   /**
    * Returns the named server if it's in the same JVM.
    */
-  public static AbstractServer getJVMServer(String serverId)
+  public static AbstractServer<?> getJVMServer(String serverId)
   {
     WeakReference<AbstractServer> serverRef = _staticServerMap.get(serverId);
 
@@ -222,8 +222,7 @@ public class EjbProtocolManager {
   /**
    * Adds a server.
    */
-  @SuppressWarnings("unchecked")
-  public void addServer(AbstractServer server)
+  public void addServer(AbstractServer<?> server)
   {
     _serverMap.put(server.getProtocolId(), server);
 
@@ -249,7 +248,7 @@ public class EjbProtocolManager {
       if (_localJndiPrefix != null) {
         Object localHome = server.getLocalObject(server.getLocalHomeClass());
 
-        Class api = null;
+        Class<?> api = null;
 
         String jndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
 
@@ -261,7 +260,7 @@ public class EjbProtocolManager {
             bindServer(jndiName, server, api);
           }
 
-          for (Class localApi : server.getLocalApiList()) {
+          for (Class<?> localApi : server.getLocalApiList()) {
             bindServer(jndiName + '#' + localApi.getName(), server, localApi);
           }
         }

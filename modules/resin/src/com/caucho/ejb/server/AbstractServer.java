@@ -74,7 +74,7 @@ import java.lang.reflect.Method;
 /**
  * Base server for a single home/object bean pair.
  */
-abstract public class AbstractServer implements EnvironmentBean {
+abstract public class AbstractServer<T> implements EnvironmentBean {
   private final static Logger log = Logger.getLogger(AbstractServer.class
       .getName());
   private static final L10N L = new L10N(AbstractServer.class);
@@ -87,7 +87,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected int _line;
   protected String _location;
 
-  private AnnotatedType<?> _annotatedType;
+  private AnnotatedType<T> _annotatedType;
   private Bean<?> _bean;
 
   protected String _id;
@@ -95,7 +95,7 @@ abstract public class AbstractServer implements EnvironmentBean {
   protected String _moduleName;
   protected String _handleServerId;
   
-  private EjbProducer<?> _producer;
+  private EjbProducer<T> _producer;
 
   // name for IIOP, Hessian, JNDI
   protected String _mappedName;
@@ -156,7 +156,7 @@ abstract public class AbstractServer implements EnvironmentBean {
    *          the owning server container
    */
   public AbstractServer(EjbContainer container, 
-                        AnnotatedType<?> annotatedType)
+                        AnnotatedType<T> annotatedType)
   {
     _annotatedType = annotatedType;
     _ejbContainer = container;
@@ -209,7 +209,7 @@ abstract public class AbstractServer implements EnvironmentBean {
     return _bean;
   }
   
-  public EjbProducer<?> getProducer()
+  public EjbProducer<T> getProducer()
   {
     return _producer;
   }

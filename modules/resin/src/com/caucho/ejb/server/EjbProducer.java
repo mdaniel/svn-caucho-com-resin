@@ -57,7 +57,7 @@ import com.caucho.ejb.timer.EjbTimerService;
  * Creates an configures an ejb instance
  */
 public class EjbProducer<T> {
-  private AbstractServer _server;
+  private AbstractServer<T> _server;
   
   private Class<T> _ejbClass;
   private AnnotatedType<T> _annotatedType;
@@ -82,7 +82,7 @@ public class EjbProducer<T> {
   private Method _timeoutMethod;
   private TimerService _timerService;
   
-  EjbProducer(AbstractServer server,
+  EjbProducer(AbstractServer<T> server,
               AnnotatedType<T> annotatedType)
   {
     _server = server;
@@ -329,7 +329,8 @@ public class EjbProducer<T> {
         throw new RuntimeException(e);
       }
       
-      _beanProducer.__caucho_postConstruct(instance);
+      if (_beanProducer != null)
+        _beanProducer.__caucho_postConstruct(instance);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

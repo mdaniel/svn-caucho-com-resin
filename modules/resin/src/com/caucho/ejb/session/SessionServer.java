@@ -52,7 +52,7 @@ import com.caucho.ejb.server.AbstractServer;
 /**
  * Server container for a session bean.
  */
-abstract public class SessionServer extends AbstractServer {
+abstract public class SessionServer<T> extends AbstractServer<T> {
   private final static Logger log
      = Logger.getLogger(SessionServer.class.getName());
 
@@ -65,7 +65,7 @@ abstract public class SessionServer extends AbstractServer {
   private int _sessionConcurrentMax = -1;
   private long _sessionConcurrentTimeout = -1;
 
-  public SessionServer(EjbContainer manager, AnnotatedType annotatedType)
+  public SessionServer(EjbContainer manager, AnnotatedType<T> annotatedType)
   {
     super(manager, annotatedType);
   }

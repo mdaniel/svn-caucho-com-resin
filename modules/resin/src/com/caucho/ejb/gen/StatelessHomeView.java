@@ -124,6 +124,22 @@ abstract public class StatelessHomeView extends StatelessView {
     out.println("}");
     out.println();
 
+    out.println();
+    out.println("public Object __caucho_new()");
+    out.println("{");
+    out.println("  return this;");
+    out.println("}");
+    
+    out.println();
+    out.println("public void __caucho_postConstruct(Object instance)");
+    out.println("{");
+    out.println("}");
+    
+    out.println();
+    out.println("public void __caucho_preDestroy(Object instance)");
+    out.println("{");
+    out.println("}");     
+
     generateBusinessMethods(out);
   }
 
