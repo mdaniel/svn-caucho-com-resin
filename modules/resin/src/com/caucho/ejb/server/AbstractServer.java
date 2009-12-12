@@ -838,7 +838,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
 
   public boolean start() throws Exception
   {
-    if (!_lifecycle.toActive())
+    if (! _lifecycle.toActive())
       return false;
 
     Thread thread = Thread.currentThread();
@@ -865,16 +865,15 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
 
     return true;
   }
-
-  protected void bindInjection()
-  {
-    
-  }
   
   protected void bindContext()
   {
+  }
+
+  protected void bindInjection()
+  {
     _producer.setEnvLoader(_loader);
-    _producer.bindInjection();
+    _producer.bindInjection();   
   }
 
   protected void postStart()

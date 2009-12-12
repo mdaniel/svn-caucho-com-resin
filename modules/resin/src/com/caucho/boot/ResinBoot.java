@@ -289,7 +289,7 @@ public class ResinBoot {
                                  _client.getWatchdogAddress(),
                                  _client.getWatchdogPort()));
       } catch (Exception e) {
-        System.err.println(L().l("Resin/{0} can't shutdown watchdog at {1}:{2}.\n{3}",
+        System.out.println(L().l("Resin/{0} can't shutdown watchdog at {1}:{2}.\n{3}",
                                  VersionFactory.getVersion(),
                                  _client.getWatchdogAddress(),
                                  _client.getWatchdogPort(),

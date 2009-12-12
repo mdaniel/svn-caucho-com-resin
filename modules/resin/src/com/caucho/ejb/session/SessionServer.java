@@ -203,15 +203,6 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  protected void bindInjection()
-  {
-    super.bindInjection();
-
-    /*
-     * for (ComponentImpl comp : _componentMap.values()) { comp.bind(); }
-     */
-  }
-
   abstract protected InjectionTarget createSessionComponent(Class api,
       Class beanClass);
 
