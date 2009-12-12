@@ -45,11 +45,12 @@ import com.caucho.util.*;
  * Represents an interface class, either Local or Remote
  */
 public class ApiClass {
-  public static final ApiClass OBJECT = new ApiClass(Object.class);
+  public static final ApiClass OBJECT
+  = new ApiClass(Object.class);
   public static final ApiClass ENTITY_BEAN
     = new ApiClass(javax.ejb.EntityBean.class);
 
-  private Class _apiClass;
+  private Class<?> _apiClass;
   private AnnotatedType<?> _annotatedType;
 
   private boolean _isReadOnly;
@@ -59,14 +60,15 @@ public class ApiClass {
     
   private ArrayList<ApiMethod> _methods = new ArrayList<ApiMethod>();
 
-  private ArrayList<ApiClass> _interfaces = new ArrayList<ApiClass>();
+  private ArrayList<ApiClass> _interfaces
+    = new ArrayList<ApiClass>();
   
   /**
    * Creates a new api class
    *
    * @param topClass the api class
    */
-  public ApiClass(Class apiClass)
+  public ApiClass(Class<?> apiClass)
   {
     this(apiClass, null, null, false);
   }
@@ -76,7 +78,7 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
-  public ApiClass(Class apiClass, boolean isReadOnly)
+  public ApiClass(Class<?> apiClass, boolean isReadOnly)
   {
     this(apiClass, null, null, isReadOnly);
   }

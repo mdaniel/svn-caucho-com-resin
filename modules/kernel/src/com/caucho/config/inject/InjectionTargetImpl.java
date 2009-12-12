@@ -322,13 +322,18 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         program.inject(instance, env);
       }
 
+      // server/4750
+      /*
       if (_cauchoPostConstruct != null) {
         _cauchoPostConstruct.invoke(instance);
       }
+      */
     } catch (RuntimeException e) {
       throw e;
+      /*
     } catch (InvocationTargetException e) {
       throw ConfigException.create(e.getCause());
+      */
     } catch (Exception e) {
       throw new CreationException(e);
     }
