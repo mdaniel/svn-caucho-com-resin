@@ -40,6 +40,10 @@ public class NullCallChain implements EjbCallChain {
   NullCallChain()
   {
   }
+  
+  //
+  // introspection
+  //
 
   /**
    * Returns true if this filter will generate code.
@@ -57,31 +61,49 @@ public class NullCallChain implements EjbCallChain {
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
   }
+  
+  //
+  // bean instance interception
+  //
 
   /**
-   * Generates the static class prologue
+   * Generates the bean instance class prologue
    */
   @Override
-  public void generatePrologue(JavaWriter out, HashMap<String,Object> map)
+  public void generateBeanPrologue(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
   }
 
   /**
-   * Generates the static class prologue
+   * Generates bean instance interception
    */
   @Override
-  public void generateProxyPrologue(JavaWriter out, HashMap<String,Object> map)
+  public void generateBeanConstructor(JavaWriter out,
+                                      HashMap<String,Object> map)
     throws IOException
   {
   }
 
   /**
-   * Generates initialization in the constructor
+   * Generates bean post construct interception
    */
   @Override
-  public void generateConstructor(JavaWriter out,
-                                  HashMap<String,Object> map)
+  public void generatePostConstruct(JavaWriter out,
+                                    HashMap<String,Object> map)
+    throws IOException
+  {
+  }
+  
+  //
+  // business method interception
+  //
+
+  /**
+   * Generates the static class prologue
+   */
+  @Override
+  public void generateMethodPrologue(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
   }

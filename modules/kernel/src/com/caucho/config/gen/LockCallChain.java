@@ -161,8 +161,8 @@ public class LockCallChain extends AbstractCallChain {
    * Generates the class prologue.
    */
   @Override
-  public void generatePrologue(JavaWriter out,
-                               HashMap<String,Object> map)
+  public void generateMethodPrologue(JavaWriter out,
+                                     HashMap<String,Object> map)
     throws IOException
   {
     if ((_isContainerManaged && (_lockType != null))
@@ -173,7 +173,7 @@ public class LockCallChain extends AbstractCallChain {
       out.println("private transient final java.util.concurrent.locks.ReentrantReadWriteLock _readWriteLock = new java.util.concurrent.locks.ReentrantReadWriteLock();");
     }
 
-    _next.generatePrologue(out, map);
+    _next.generateMethodPrologue(out, map);
   }
 
   /**

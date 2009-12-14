@@ -118,8 +118,8 @@ public class InjectManager
     "javax.enterprise.inject.spi.Extension",
   };
 
-  private static final Class []_forbiddenAnnotations;
-  private static final Class []_forbiddenClasses;
+  private static final Class<?> []_forbiddenAnnotations;
+  private static final Class<?> []_forbiddenClasses;
 
   private String _id;
 
@@ -136,11 +136,11 @@ public class InjectManager
   private HashSet<String> _configuredClasses
     = new HashSet<String>();
 
-  private HashSet<Class> _specializedClasses
-    = new HashSet<Class>();
+  private HashSet<Class<?>> _specializedClasses
+    = new HashSet<Class<?>>();
 
-  private HashMap<Class,Integer> _deploymentMap
-    = new HashMap<Class,Integer>();
+  private HashMap<Class<?>,Integer> _deploymentMap
+    = new HashMap<Class<?>,Integer>();
 
   private BaseTypeFactory _baseTypeFactory = new BaseTypeFactory();
 
@@ -148,17 +148,17 @@ public class InjectManager
   // self configuration
   //
 
-  private HashMap<Class,Set<TypedBean>> _selfBeanMap
-    = new HashMap<Class,Set<TypedBean>>();
+  private HashMap<Class<?>,Set<TypedBean>> _selfBeanMap
+    = new HashMap<Class<?>,Set<TypedBean>>();
 
   private HashMap<String,ArrayList<Bean<?>>> _selfNamedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
 
-  private HashMap<Class,ObserverMap> _extObserverMap
-    = new HashMap<Class,ObserverMap>();
+  private HashMap<Class<?>,ObserverMap> _extObserverMap
+    = new HashMap<Class<?>,ObserverMap>();
 
-  private HashMap<Class,ObserverMap> _selfObserverMap
-    = new HashMap<Class,ObserverMap>();
+  private HashMap<Class<?>,ObserverMap> _selfObserverMap
+    = new HashMap<Class<?>,ObserverMap>();
 
   private HashMap<String,Bean<?>> _selfPassivationBeanMap
     = new HashMap<String,Bean<?>>();
@@ -173,8 +173,8 @@ public class InjectManager
   private HashMap<String,ArrayList<Bean<?>>> _namedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
 
-  private HashMap<Class,ObserverMap> _observerMap
-    = new HashMap<Class,ObserverMap>();
+  private HashMap<Class<?>,ObserverMap> _observerMap
+    = new HashMap<Class<?>,ObserverMap>();
 
   private HashMap<Type,Bean> _newBeanMap
     = new HashMap<Type,Bean>();
@@ -202,14 +202,14 @@ public class InjectManager
   private ArrayList<WebBeansRootContext> _pendingRootContextList
     = new ArrayList<WebBeansRootContext>();
 
-  private ArrayList<AnnotatedType> _pendingAnnotatedTypes
-    = new ArrayList<AnnotatedType>();
+  private ArrayList<AnnotatedType<?>> _pendingAnnotatedTypes
+    = new ArrayList<AnnotatedType<?>>();
 
-  private ArrayList<AbstractBean> _pendingBindList
-    = new ArrayList<AbstractBean>();
+  private ArrayList<AbstractBean<?>> _pendingBindList
+    = new ArrayList<AbstractBean<?>>();
 
-  private ArrayList<Bean> _pendingServiceList
-    = new ArrayList<Bean>();
+  private ArrayList<Bean<?>> _pendingServiceList
+    = new ArrayList<Bean<?>>();
 
   private Lifecycle _lifecycle = new Lifecycle();
   private boolean _isBeforeBeanDiscoveryComplete;
@@ -807,7 +807,7 @@ public class InjectManager
    */
   public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type)
   {
-    InjectionTargetImpl bean = new InjectionTargetImpl(this, type);
+    InjectionTargetImpl<T> bean = new InjectionTargetImpl<T>(this, type);
 
     bean.introspect();
 
@@ -827,8 +827,8 @@ public class InjectManager
    */
   public <T> InjectionTarget<T> processInjectionTarget(InjectionTarget<T> target)
   {
-    ProcessInjectionTargetImpl processTarget
-      = new ProcessInjectionTargetImpl(target);
+    ProcessInjectionTargetImpl<T> processTarget
+      = new ProcessInjectionTargetImpl<T>(target);
 
     fireExtensionEvent(processTarget);
 
@@ -838,11 +838,11 @@ public class InjectManager
   /**
    * Creates a managed bean.
    */
-  public ManagedBeanImpl createManagedBean(AnnotatedType type)
+  public <T> ManagedBeanImpl<T> createManagedBean(AnnotatedType<T> type)
   {
-    InjectionTarget target = createInjectionTarget(type);
+    InjectionTarget<T> target = createInjectionTarget(type);
 
-    ManagedBeanImpl bean = new ManagedBeanImpl(this, type, target);
+    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type, target);
     bean.introspect();
 
     return bean;
@@ -851,9 +851,9 @@ public class InjectManager
   /**
    * Creates a managed bean.
    */
-  public ManagedBeanImpl createManagedBean(Class cl)
+  public <T> ManagedBeanImpl<T> createManagedBean(Class<T> cl)
   {
-    AnnotatedType type = createAnnotatedType(cl);
+    AnnotatedType<T> type = createAnnotatedType(cl);
 
     return createManagedBean(type);
   }
@@ -863,7 +863,7 @@ public class InjectManager
    */
   public <T> Bean<T> processBean(Bean<T> bean)
   {
-    ProcessBeanImpl processBean = new ProcessBeanImpl(this, bean);
+    ProcessBeanImpl<T> processBean = new ProcessBeanImpl<T>(this, bean);
 
     fireExtensionEvent(processBean);
 
@@ -921,8 +921,6 @@ public class InjectManager
 
   private void registerJmx(Bean bean)
   {
-    int id = _beanId.incrementAndGet();
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
@@ -1715,7 +1713,7 @@ public class InjectManager
    * @param observer the observer object
    * @param bindings the binding set for the event
    */
-  private void addObserver(HashMap<Class,ObserverMap> observerMap,
+  private void addObserver(HashMap<Class<?>,ObserverMap> observerMap,
                            ObserverMethod<?> observer,
                            BaseType eventBaseType,
                            Annotation... bindings)
@@ -1864,7 +1862,7 @@ public class InjectManager
     return set;
   }
 
-  private ArrayList<ObserverMap> getLocalObserverList(Class cl)
+  private ArrayList<ObserverMap> getLocalObserverList(Class<?> cl)
   {
     ArrayList<ObserverMap> observerList;
 
@@ -1890,7 +1888,7 @@ public class InjectManager
     fireLocalEvent(_extObserverMap, event, bindings);
   }
 
-  private void fireLocalEvent(HashMap<Class,ObserverMap> localMap,
+  private void fireLocalEvent(HashMap<Class<?>,ObserverMap> localMap,
                               Object event, Annotation... bindings)
   {
     ArrayList<ObserverMap> observerList = new ArrayList<ObserverMap>();
@@ -1905,7 +1903,7 @@ public class InjectManager
     }
   }
 
-  private void fillLocalObserverList(HashMap<Class,ObserverMap> localMap,
+  private void fillLocalObserverList(HashMap<Class<?>,ObserverMap> localMap,
                                      ArrayList<ObserverMap> list,
                                      BaseType eventType)
   {
@@ -2296,6 +2294,12 @@ public class InjectManager
 
     InjectionTarget target = createInjectionTarget(type);
 
+    if (target instanceof InjectionTargetImpl) {
+      InjectionTargetImpl targetImpl = (InjectionTargetImpl) target;
+      
+      targetImpl.setGenerateInterception(true);
+    }
+    
     target = processInjectionTarget(target);
 
     if (target == null)
@@ -2303,6 +2307,7 @@ public class InjectManager
 
     ManagedBeanImpl bean = new ManagedBeanImpl(this, type, target);
 
+    
     bean.introspect();
 
     addDiscoveredBean(bean);

@@ -142,8 +142,8 @@ public class XaCallChain extends AbstractCallChain {
    * Generates the static class prologue
    */
   @Override
-  public void generatePrologue(JavaWriter out,
-                               HashMap<String,Object> map)
+  public void generateMethodPrologue(JavaWriter out,
+                                     HashMap<String,Object> map)
     throws IOException
   {
     if (map.get("caucho.ejb.xa") == null) {
@@ -154,7 +154,7 @@ public class XaCallChain extends AbstractCallChain {
       out.println("  = new com.caucho.ejb.util.XAManager();");
     }
 
-    _next.generatePrologue(out, map);
+    _next.generateMethodPrologue(out, map);
   }
   
   //

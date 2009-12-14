@@ -37,23 +37,23 @@ public class InvocationContextImpl implements InvocationContext {
   private final Object _target;
   private final Method _apiMethod;
   private final Method _implMethod;
-  
+
   private final Method []_chainMethods;
   private final Object []_chainObjects;
   private final int []_chainIndex;
-  
+
   private Object []_param;
 
   private int _index;
   private HashMap<String,Object> _map;
 
   public InvocationContextImpl(Object target,
-			       Method apiMethod,
-			       Method implMethod,
-			       Method []chainMethods,
-			       Object []chainObjects,
-			       int []chainIndex,
-			       Object []param)
+                               Method apiMethod,
+                               Method implMethod,
+                               Method []chainMethods,
+                               Object []chainObjects,
+                               int []chainIndex,
+                               Object []param)
   {
     _target = target;
     _apiMethod = apiMethod;
@@ -63,7 +63,7 @@ public class InvocationContextImpl implements InvocationContext {
     _chainIndex = chainIndex;
     _param = param;
   }
-  
+
   public Object getTarget()
   {
     return _target;
@@ -73,7 +73,7 @@ public class InvocationContextImpl implements InvocationContext {
   {
     return _apiMethod;
   }
-  
+
   public Object getTimer()
   {
     return null;
@@ -98,26 +98,26 @@ public class InvocationContextImpl implements InvocationContext {
 
     return _map;
   }
-      
+
   public Object proceed()
     throws Exception
   {
     try {
       // ioc/0c57
       if (_chainObjects != null && _index < _chainIndex.length) {
-	int i = _index++;
+        int i = _index++;
 
-	return _chainMethods[i].invoke(_chainObjects[_chainIndex[i]], this);
+        return _chainMethods[i].invoke(_chainObjects[_chainIndex[i]], this);
       }
       else
-	return _implMethod.invoke(_target, _param);
+        return _implMethod.invoke(_target, _param);
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
 
       if (cause instanceof Exception)
-	throw (Exception) cause;
+        throw (Exception) cause;
       else
-	throw e;
+        throw e;
     }
   }
 }

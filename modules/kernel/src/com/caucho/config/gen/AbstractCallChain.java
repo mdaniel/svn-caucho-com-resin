@@ -46,6 +46,10 @@ abstract public class AbstractCallChain implements EjbCallChain {
 
     _next = next;
   }
+  
+  //
+  // introspection methods
+  //
 
   /**
    * Returns true if this filter will generate code.
@@ -60,39 +64,58 @@ abstract public class AbstractCallChain implements EjbCallChain {
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
   }
+  
+  //
+  // bean instance interception
+  //
 
   /**
    * Generates the static class prologue
    */
   @Override
-  public void generatePrologue(JavaWriter out, HashMap<String,Object> map)
+  public void generateBeanPrologue(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
-    _next.generatePrologue(out, map);
-  }
-
-  /**
-   * Generates the static class prologue
-   */
-  @Override
-  public void generateProxyPrologue(JavaWriter out, HashMap<String,Object> map)
-    throws IOException
-  {
-    _next.generateProxyPrologue(out, map);
+    _next.generateBeanPrologue(out, map);
   }
 
   /**
    * Generates initialization in the constructor
    */
   @Override
-  public void generateConstructor(JavaWriter out, 
-                                  HashMap<String,Object> map)
+  public void generateBeanConstructor(JavaWriter out, 
+                                      HashMap<String,Object> map)
     throws IOException
   {
-    _next.generateConstructor(out, map);
+    _next.generateBeanConstructor(out, map);
+  }
+
+  /**
+   * Generates @PostConstruct code
+   */
+  @Override
+  public void generatePostConstruct(JavaWriter out, 
+                                    HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generatePostConstruct(out, map);
   }
   
-    /**
+  //
+  // business method interception
+  //
+
+  /**
+   * Generates the static class prologue
+   */
+  @Override
+  public void generateMethodPrologue(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateMethodPrologue(out, map);
+  }
+  
+  /**
    * Generates code before the try block
    */
   public void generatePreTry(JavaWriter out)

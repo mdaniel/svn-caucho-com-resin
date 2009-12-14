@@ -136,11 +136,17 @@ public class SecurityCallChain extends AbstractCallChain {
     if (denyAll != null)
       _roles = new String[0];
   }
+  
+  //
+  // business method interception
+  //
 
   /**
    * Generates the static class prologue
    */
-  public void generatePrologue(JavaWriter out, HashMap map)
+  @Override
+  public void generateMethodPrologue(JavaWriter out, 
+                                     HashMap<String,Object> map)
     throws IOException
   {
     if (_roles != null) {
@@ -160,7 +166,7 @@ public class SecurityCallChain extends AbstractCallChain {
       out.println("};");
     }
 
-    _next.generatePrologue(out, map);
+    _next.generateMethodPrologue(out, map);
   }
   
   //

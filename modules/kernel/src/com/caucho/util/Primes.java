@@ -29,7 +29,6 @@
 
 package com.caucho.util;
 
-import java.io.*;
 
 /**
  * Base64 decoding.

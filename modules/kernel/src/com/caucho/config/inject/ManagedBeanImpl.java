@@ -72,7 +72,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private AnnotatedType _annotatedType;
+  private AnnotatedType<X> _annotatedType;
 
   private InjectionTarget<X> _injectionTarget;
 
@@ -85,12 +85,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   private HashSet<ObserverMethodImpl<X,?>> _observerMethods
     = new LinkedHashSet<ObserverMethodImpl<X,?>>();
 
-  private Class _instanceClass;
+  private Class<X> _instanceClass;
   private boolean _isBound;
   private Object _scopeAdapter;
 
   public ManagedBeanImpl(InjectManager webBeans,
-                         AnnotatedType beanType)
+                         AnnotatedType<X> beanType)
   {
     super(webBeans, beanType);
 
@@ -105,8 +105,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   }
 
   public ManagedBeanImpl(InjectManager webBeans,
-                         AnnotatedType beanType,
-                         InjectionTarget injectionTarget)
+                         AnnotatedType<X> beanType,
+                         InjectionTarget<X> injectionTarget)
   {
     this(webBeans, beanType);
 
@@ -118,12 +118,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     return _annotatedType;
   }
 
-  public InjectionTarget getInjectionTarget()
+  public InjectionTarget<X> getInjectionTarget()
   {
     return _injectionTarget;
   }
 
-  public void setInjectionTarget(InjectionTarget target)
+  public void setInjectionTarget(InjectionTarget<X> target)
   {
     _injectionTarget = target;
   }
@@ -309,7 +309,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     }
   }
 
-  protected void addProduces(AnnotatedMethod beanMethod)
+  protected void addProduces(AnnotatedMethod<X> beanMethod)
   {
     Arg []args = introspectArguments(beanMethod.getParameters());
 
@@ -331,12 +331,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     _producerBeans.add(bean);
   }
 
-  protected Arg []introspectArguments(List<AnnotatedParameter> params)
+  protected Arg []introspectArguments(List<AnnotatedParameter<X>> params)
   {
     Arg []args = new Arg[params.size()];
 
     for (int i = 0; i < args.length; i++) {
-      AnnotatedParameter param = params.get(i);
+      AnnotatedParameter<X> param = params.get(i);
 
       if (InjectionPoint.class.equals(param.getBaseType()))
         args[i] = new InjectionPointArg();

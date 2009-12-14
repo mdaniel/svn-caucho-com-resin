@@ -184,6 +184,10 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     return false;
   }
+  
+  //
+  // introspection
+  //
 
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
@@ -193,6 +197,47 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _xa.introspect(apiMethod, implMethod);
     _interceptor.introspect(apiMethod, implMethod);
   }
+  
+  //
+  // bean instance interception
+  //
+
+  /**
+   * Generates interception for the bean instance constructo
+   */
+  @Override
+  public void generateBeanPrologue(JavaWriter out,
+                                   HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateBeanPrologue(out, map);
+    
+    // generateTail(out);
+  }
+
+  /**
+   * Generates interception for the bean instance constructo
+   */
+  @Override
+  public void generateBeanConstructor(JavaWriter out,
+                                      HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateBeanConstructor(out, map);
+  }
+
+  /**
+   * Generates interception for the bean @PostConstruct
+   */
+  @Override
+  public void generatePostConstruct(JavaWriter out,
+                                    HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generatePostConstruct(out, map);
+  }
+
+  /*
 
   public final void generatePrologueTop(JavaWriter out,
                                         HashMap<String,Object> prologueMap)
@@ -205,33 +250,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     generateInterceptorTarget(out);
   }
-
-  public final void generateConstructorTop(JavaWriter out,
-                                           HashMap<String,Object> prologueMap)
-      throws IOException
-  {
-    if (! isEnhanced())
-      return;
-
-    _security.generateConstructor(out, prologueMap);
-  }
-
-  /**
-   * Generates any additional configuration in the constructor
-   */
-  public void generateConstructor(JavaWriter out,
-                                  HashMap<String,Object> map)
-    throws IOException
-  {
-  }
-
-  public void generateProxyPrologue(JavaWriter out,
-                                    HashMap<String,Object> map)
-    throws IOException
-  {
-    _next.generateProxyPrologue(out, map);
-  }
-
+  
   public final void generatePostConstruct(JavaWriter out,
                                           HashMap<String,Object> map)
     throws IOException
@@ -241,6 +260,11 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     _interceptor.generatePostConstruct(out, map);
   }
+  */
+  
+  //
+  // business method interception
+  //
 
   //
   // generation for the actual method
@@ -256,7 +280,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     if (! isEnhanced())
       return;
     
-    generatePrologue(out, prologueMap);
+    generateMethodPrologue(out, prologueMap);
 
     generateHeader(out);
 
@@ -273,18 +297,19 @@ public class BusinessMethodGenerator implements EjbCallChain {
    * Generates class code before the class itself
    * 
    * <code><pre>
-   * [prologue]
+   * [method-prologue]
    * MyType myCall(...)
    * {
    *   ...
    * }
    * </pre></code>
    */
-  public void generatePrologue(JavaWriter out,
-                               HashMap<String,Object> map)
+  @Override
+  public void generateMethodPrologue(JavaWriter out,
+                                     HashMap<String,Object> map)
     throws IOException
   {
-    _next.generatePrologue(out, map);
+    _next.generateMethodPrologue(out, map);
   }
 
   /**
@@ -332,14 +357,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
       generateThrows(out, _implMethod.getExceptionTypes());
     else
       generateThrows(out, _apiMethod.getExceptionTypes());
-  }
-
-  protected Class<?>[] getExceptionTypes()
-  {
-    if (_implMethod != null)
-      return _implMethod.getExceptionTypes();
-    else
-      return _apiMethod.getExceptionTypes();
   }
 
   /**
@@ -398,6 +415,11 @@ public class BusinessMethodGenerator implements EjbCallChain {
     out.println();
     out.println("try {");
     out.pushDepth();
+    
+    if (! void.class.equals(_apiMethod.getReturnType())) {
+      out.printClass(_apiMethod.getReturnType());
+      out.println(" result;");
+    }
 
     generatePreCall(out);
 
@@ -424,6 +446,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Generates method code before the "try" block.
    */
+  @Override
   public void generatePreTry(JavaWriter out)
     throws IOException
   {
@@ -433,12 +456,14 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Generates the underlying bean instance
    */
+  @Override
   public void generatePreCall(JavaWriter out)
     throws IOException
   {
     _next.generatePreCall(out);
   }
 
+  @Override
   public void generateCall(JavaWriter out)
     throws IOException
   {
@@ -465,12 +490,10 @@ public class BusinessMethodGenerator implements EjbCallChain {
       exceptionSet.add(exn);
     }
     
-    boolean isRuntimeException = false;
+    exceptionSet.add(RuntimeException.class);
+    
     Class<?> exn;
     while ((exn = selectException(exceptionSet)) != null) {
-      if (exn.equals(RuntimeException.class))
-        isRuntimeException = true;
-   
       boolean isSystemException
         = (RuntimeException.class.isAssignableFrom(exn)
             && ! exn.isAnnotationPresent(ApplicationException.class));
@@ -486,65 +509,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
       out.println();
       out.println("throw e;");
 
-      out.popDepth();
-    }
-    
-    if (! isRuntimeException) {
-      out.println("} catch (RuntimeException e) {");
-      out.pushDepth();
-      
-      generateSystemException(out, exn);
-      
-      out.println();
-      out.println("throw e;");
-      
-      out.popDepth();
-    }
-  }
-  
-  private Class<?> selectException(HashSet<Class<?>> exnSet)
-  {
-    for (Class<?> exn : exnSet) {
-      if (isMostSpecific(exn, exnSet)) {
-        exnSet.remove(exn);
-
-        return exn;
-      }
-    }
-    
-    return null;
-  }
-  
-  private boolean isMostSpecific(Class<?> exn, HashSet<Class<?>> exnSet)
-  {
-    for (Class<?> testExn : exnSet) {
-      if (exn == testExn)
-        continue;
-      
-      if (testExn.isAssignableFrom(exn))
-        return false;
-    }
-    
-    return true;
-  }
-  
-  private void generateSystemExceptions(JavaWriter out)
-    throws IOException
-  {
-    boolean isRuntimeException = false;
-    
-    for (Class<?> exn : getExceptionTypes()) {   
-    }
-    
-    if (! isRuntimeException) {
-      out.println("} catch (RuntimeException e) {");
-      out.pushDepth();
-      
-      _next.generateSystemException(out, RuntimeException.class);
-      
-      out.println();
-      out.print("throw e;");
-      
       out.popDepth();
     }
   }
@@ -602,9 +566,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
     out.println();
     
     if (! void.class.equals(_apiMethod.getReturnType())) {
-      out.printClass(_apiMethod.getReturnType());
-      out.println(" result;");
-      out.println();
       out.print("result = ");
     }
 
@@ -656,7 +617,13 @@ public class BusinessMethodGenerator implements EjbCallChain {
   //
 
   // XXX: move to InterceptorCallChain
-  protected void generateInterceptorTarget(JavaWriter out) throws IOException
+  public void generateInterceptorTarget(JavaWriter out) throws IOException
+  {
+    generateTail(out);
+  }
+  
+  protected void generateTail(JavaWriter out)
+    throws IOException
   {
     if (_interceptor.isEnhanced()) {
       out.println();
@@ -682,8 +649,16 @@ public class BusinessMethodGenerator implements EjbCallChain {
       out.println();
       out.println("{");
       out.pushDepth();
+      
+      if (! void.class.equals(_apiMethod.getReturnType())) {
+        out.printClass(_apiMethod.getReturnType());
+        out.println(" result;");
+      }
 
       generateTailCall(out, "super");
+
+      if (! void.class.equals(_implMethod.getReturnType()))
+        out.println("return result;");
 
       out.popDepth();
       out.println("}");
@@ -719,6 +694,40 @@ public class BusinessMethodGenerator implements EjbCallChain {
     }
 
     return true;
+  }
+  
+  private Class<?> selectException(HashSet<Class<?>> exnSet)
+  {
+    for (Class<?> exn : exnSet) {
+      if (isMostSpecific(exn, exnSet)) {
+        exnSet.remove(exn);
+
+        return exn;
+      }
+    }
+    
+    return null;
+  }
+  
+  private boolean isMostSpecific(Class<?> exn, HashSet<Class<?>> exnSet)
+  {
+    for (Class<?> testExn : exnSet) {
+      if (exn == testExn)
+        continue;
+      
+      if (exn.isAssignableFrom(testExn))
+        return false;
+    }
+    
+    return true;
+  }
+
+  protected Class<?>[] getExceptionTypes()
+  {
+    if (_implMethod != null)
+      return _implMethod.getExceptionTypes();
+    else
+      return _apiMethod.getExceptionTypes();
   }
 
   public boolean equals(Object o)

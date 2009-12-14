@@ -72,27 +72,34 @@ public interface EjbCallChain {
   /**
    * Generates the static class prologue
    */
-  public void generatePrologue(JavaWriter out, 
-                               HashMap<String,Object> map)
-    throws IOException;
-
-  /**
-   * Generates the static class prologue
-   */
-  public void generateProxyPrologue(JavaWriter out, 
-                                    HashMap<String,Object> map)
+  public void generateBeanPrologue(JavaWriter out, 
+                                   HashMap<String,Object> map)
     throws IOException;
 
   /**
    * Generates initialization in the constructor
    */
-  public void generateConstructor(JavaWriter out, 
-                                  HashMap<String,Object> map)
+  public void generateBeanConstructor(JavaWriter out, 
+                                      HashMap<String,Object> map)
+    throws IOException;
+
+  /**
+   * Generates @PostConstruct code
+   */
+  public void generatePostConstruct(JavaWriter out, 
+                                    HashMap<String,Object> map)
     throws IOException;
   
   //
   // method call interception
   //
+
+  /**
+   * Generates the static class prologue
+   */
+  public void generateMethodPrologue(JavaWriter out, 
+                                     HashMap<String,Object> map)
+    throws IOException;
   
   /**
    * Generates code before the try block

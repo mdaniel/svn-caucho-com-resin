@@ -29,44 +29,12 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import java.io.IOException;
-import java.util.ArrayList;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateful view
+ * Creates an configures an ejb instance
  */
-public class PojoView extends View {
-  private static final L10N L = new L10N(PojoView.class);
+public interface BeanInjectionTarget {
+  public void __caucho_postConstruct();
 
-  public PojoView(BeanGenerator bean, ApiClass api)
-  {
-    super(bean, api);
-  }
-
-  public String getViewClassName()
-  {
-    return getBean().getFullClassName();
-  }
-
-  /**
-   * Returns the introspected methods
-   */
-  public ArrayList<? extends BusinessMethodGenerator> getMethods()
-  {
-    PojoBean bean = (PojoBean) getBean();
-    
-    return bean.getBusinessMethods();
-  }
-
-  /**
-   * Generates the view code.
-   */
-  public void generate(JavaWriter out)
-    throws IOException
-  {
-  }
+  // public void __caucho_preDestroy(T instance);
 }
