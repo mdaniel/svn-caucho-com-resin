@@ -73,7 +73,7 @@ public class LockCallChain extends AbstractCallChain {
 
   /**
    * Sets the lock timeout.
-   * 
+   *
    * @param timeout
    *          The timeout period.
    */
@@ -122,7 +122,7 @@ public class LockCallChain extends AbstractCallChain {
       _lockType = lockAttribute.value();
     }
 
-    AccessTimeout accessTimeoutAttribute 
+    AccessTimeout accessTimeoutAttribute
       = getAnnotation(AccessTimeout.class,
                       apiMethod, apiClass,
                       implementationMethod, implementationClass);
@@ -161,7 +161,7 @@ public class LockCallChain extends AbstractCallChain {
    * Generates the class prologue.
    */
   @Override
-  public void generatePrologue(JavaWriter out, 
+  public void generatePrologue(JavaWriter out,
                                HashMap<String,Object> map)
     throws IOException
   {
@@ -170,9 +170,7 @@ public class LockCallChain extends AbstractCallChain {
       map.put("caucho.ejb.lock", "done");
 
       out.println();
-      out
-          .println("private transient final java.util.concurrent.locks.ReentrantReadWriteLock _readWriteLock = new java.util.concurrent.locks.ReentrantReadWriteLock();");
-      out.println();
+      out.println("private transient final java.util.concurrent.locks.ReentrantReadWriteLock _readWriteLock = new java.util.concurrent.locks.ReentrantReadWriteLock();");
     }
 
     _next.generatePrologue(out, map);
@@ -186,95 +184,35 @@ public class LockCallChain extends AbstractCallChain {
   {
     // TODO Is this too much code to be in-lined?
     if (_isContainerManaged && (_lockType != null)) {
+      out.println();
+
       switch (_lockType) {
       case READ:
         if (_lockTimeout != -1) {
-          out.println();
-          out.println("boolean lockAcquired = false;");
-        }
-        break;
-
-      case WRITE:
-        out.println("if ((_readWriteLock.getReadHoldCount() > 0) && (_readWriteLock.getWriteHoldCount() == 0)) {");
-        out.println("  throw new javax.ejb.IllegalLoopbackException(\"Cannot attempt a nested write lock without an existing write lock.\");");
-
-        if (_lockTimeout != -1) {
-          out.println();
-          out.println("boolean lockAcquired = false;");
-        }
-        break;
-      }
-    }
-    
-    super.generatePreTry(out);
-  }
-
-  /**
-   * Generates the method interception code.
-   */
-  @Override
-  public void generatePreCall(JavaWriter out) throws IOException
-  {
-    // TODO Is this too much code to be in-lined?
-    if (_isContainerManaged && (_lockType != null)) {
-      switch (_lockType) {
-      case READ:
-        if (_lockTimeout != -1) {
-          out.println();
-          out.println("lockAcquired = _readWriteLock.readLock().tryLock("
-              + _lockTimeoutUnit.toMillis(_lockTimeout)
-              + ", java.util.concurrent.TimeUnit.MILLISECONDS);");
-          out.popDepth();
-          out.println("} catch (InterruptedException interruptedException) {");
-          out.pushDepth();
-          out
-              .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring read lock: \" + interruptedException.getMessage());");
-          out.popDepth();
-          out.println("}");
-          out.println();
-          out.println("if (! lockAquired) {");
-          out.println("  throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
-          out.println("}");
+          out.println("com.caucho.config.util.LockUtil.lockRead("
+                      + "_readWriteLock.readLock(),"
+                      + _lockTimeoutUnit.toMillis(_lockTimeout)
+                      + ");");
         } else {
-          out.println();
           out.println("_readWriteLock.readLock().lock();");
         }
         break;
 
       case WRITE:
-        out.println();
-        out.println("if ((_readWriteLock.getReadHoldCount() > 0) && (_readWriteLock.getWriteHoldCount() == 0)) {");
-        out.println("  throw new javax.ejb.IllegalLoopbackException(\"Cannot attempt a nested write lock without an existing write lock.\");");
-        out.popDepth();
-        out.println("}");
-        out.println();
-
         if (_lockTimeout != -1) {
-          out.println();
-          out.println("lockAcquired = _readWriteLock.writeLock().tryLock("
-              + _lockTimeoutUnit.toMillis(_lockTimeout)
-              + ", java.util.concurrent.TimeUnit.MILLISECONDS);");
-          out.popDepth();
-          out.println("} catch (InterruptedException interruptedException) {");
-          out.pushDepth();
-          out
-              .println("throw new javax.ejb.ConcurrentAccessTimeoutException(\"Thread interruption acquiring write lock: \" + interruptedException.getMessage());");
-          out.popDepth();
-          out.println("}");
-          out.println();
-          out.println("if (! lockAquired) {");
-          out.println("  throw new javax.ejb.ConcurrentAccessTimeoutException(\"Timed out acquiring read lock.\");");
-          out.println("}");
+          out.println("com.caucho.config.util.LockUtil.lockWrite("
+                      + "_readWriteLock,"
+                      + _lockTimeoutUnit.toMillis(_lockTimeout)
+                      + ");");
         } else {
-          out.println();
-          out.println("_readWriteLock.writeLock().lock();");
+          out.println("com.caucho.config.util.LockUtil.lockWrite("
+                      + "_readWriteLock);");
         }
-
         break;
       }
     }
 
-    super.generatePreCall(out);
+    super.generatePreTry(out);
   }
 
   /**
