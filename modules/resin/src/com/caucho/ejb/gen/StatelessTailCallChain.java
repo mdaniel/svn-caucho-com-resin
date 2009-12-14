@@ -26,14 +26,27 @@
  *
  * @author Scott Ferguson
  */
+package com.caucho.ejb.gen;
 
-package com.caucho.ejb.session;
+import java.io.IOException;
 
-import com.caucho.config.gen.BeanProducer;
+import com.caucho.config.gen.MethodTailCallChain;
+import com.caucho.java.JavaWriter;
 
 /**
- * Creates a new instance of a stateless bean
+ * The actual method call for a interceptor chain
  */
-public interface StatelessProvider<T> extends BeanProducer<T> {
-  public T __caucho_get();
+public class StatelessTailCallChain extends MethodTailCallChain {
+  public StatelessTailCallChain(StatelessLocalMethod bizMethod)
+  {
+    super(bizMethod);
+  }
+
+  /*
+  @Override
+  public void generateCall(JavaWriter out)
+    throws IOException
+  {
+  }
+  */
 }

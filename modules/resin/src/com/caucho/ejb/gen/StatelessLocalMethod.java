@@ -60,6 +60,12 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
     _beanClassName = beanClassName;
     _ejbClass = ejbClass;
   }
+  
+  @Override
+  protected EjbCallChain createTailCallChain()
+  {
+    return new StatelessTailCallChain(this);
+  }
 
   /**
    * Session bean default is REQUIRED
@@ -233,4 +239,12 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   {
     return "bean";
   }
+  
+  /*
+  // XXX: move to InterceptorCallChain
+  @Override
+  public void generateInterceptorTarget(JavaWriter out) throws IOException
+  {
+  }
+  */
 }

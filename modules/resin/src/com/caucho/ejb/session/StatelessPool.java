@@ -33,7 +33,7 @@ import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Logger;
 
-import com.caucho.ejb.server.BeanProducer;
+import com.caucho.config.gen.BeanProducer;
 import com.caucho.ejb.server.EjbProducer;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -117,7 +117,7 @@ public class StatelessPool<T> {
     
       return bean;
     } finally {
-      if (! isValid)
+      if (! isValid && semaphore != null)
         semaphore.release();
     }
   }

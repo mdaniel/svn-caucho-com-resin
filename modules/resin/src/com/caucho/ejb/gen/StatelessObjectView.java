@@ -212,7 +212,7 @@ public class StatelessObjectView extends StatelessView {
   @Override
   public void generate(JavaWriter out) throws IOException
   {
-    generateBean(out);
+    // generateBean(out);
 
     generateProxy(out);
   }
@@ -231,7 +231,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("private transient " + getViewClassName() + " _context;");
 
     HashMap<String,Object> map = new HashMap<String,Object>();
-    generateBusinessPrologue(out, map);
+    generateBeanPrologue(out, map);
 
     generatePostConstruct(out);
 
@@ -245,7 +245,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("_context = context;");
 
     map = new HashMap<String,Object>();
-    generateBusinessConstructor(out, map);
+    generateBeanConstructor(out, map);
     _postConstructInterceptor.generateConstructor(out, map);
     _preDestroyInterceptor.generateConstructor(out, map);
 
@@ -343,6 +343,8 @@ public class StatelessObjectView extends StatelessView {
      *
      * out.popDepth(); out.println("}"); }
      */
+    
+    generateBean(out);
 
     out.popDepth();
     out.println("}");
@@ -397,13 +399,15 @@ public class StatelessObjectView extends StatelessView {
     out.popDepth();
     out.println("}");
 
+    String baseClass = getViewClass().getName();
+    
     out.println();
-    out.println("final void _ejb_free(" + beanClass + " bean)");
+    out.println("final void _ejb_free(" + baseClass + " bean)");
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
     
-    out.println("_statelessPool.free(bean);");
+    out.println("_statelessPool.free((" + beanClass + ") bean);");
     /*
     out.println("if (bean == null)");
     out.println("  return;");
@@ -524,8 +528,8 @@ public class StatelessObjectView extends StatelessView {
     if (_timeoutMethod != null) {
       String localVar = "_local_" + getViewClass().getSimpleName();
 
-      out.println(getBeanClassName() + " bean = " + localVar
-              + "._ejb_begin();");
+      out.println(getViewClass().getSimpleName() + " bean = " + localVar
+                  + "._ejb_begin();");
       out.println("bean." + _timeoutMethod + "(timer);");
       // XXX: needs try-finally
       out.println(localVar + "._ejb_free(bean);");

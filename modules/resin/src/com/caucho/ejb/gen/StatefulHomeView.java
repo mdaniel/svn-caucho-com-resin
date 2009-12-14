@@ -71,7 +71,7 @@ abstract public class StatefulHomeView extends StatefulView {
     out.println("private " + getContextClassName() + " _context;");
     out.println("private StatefulServer _server;");
     
-    generateBusinessPrologue(out);
+    generateBeanPrologue(out);
 
     out.println();
     out.println(getViewClassName() + "(" + getContextClassName() + " context)");

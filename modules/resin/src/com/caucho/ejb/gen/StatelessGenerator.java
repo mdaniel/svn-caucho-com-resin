@@ -225,7 +225,7 @@ public class StatelessGenerator extends SessionGenerator {
     }
 
     if (objectView != null) {
-      out.print(objectView.getBeanClassName() + " bean = ");
+      out.print(objectView.getViewClass().getName() + " bean = ");
       objectView.generateNewInstance(out);
       out.println(";");
       out.println("method.invoke(bean, timer);");
@@ -242,7 +242,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.pushDepth();
 
     if (objectView != null) {
-      out.print(objectView.getBeanClassName() + " bean = ");
+      out.print(objectView.getViewClass().getName() + " bean = ");
       objectView.generateNewInstance(out);
       out.println(";");
       out.println("method.invoke(bean);");

@@ -43,9 +43,11 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.ConfigContext;
+import com.caucho.config.gen.BeanProducer;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InjectionTargetImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
@@ -113,6 +115,12 @@ public class EjbProducer<T> {
   public void setInjectionTarget(InjectionTarget<T> injectionTarget)
   {
     _injectionTarget = injectionTarget;
+    
+    if (injectionTarget instanceof InjectionTargetImpl<?>) {
+      InjectionTargetImpl<T> targetImpl = (InjectionTargetImpl<T>) injectionTarget;
+      
+      targetImpl.setGenerateInterception(false);
+    }
   }
 
   /**
@@ -177,7 +185,7 @@ public class EjbProducer<T> {
       = beanManager.createManagedBean(_annotatedType);
     
     _bean = managedBean;
-    _injectionTarget = managedBean.getInjectionTarget();
+    setInjectionTarget(managedBean.getInjectionTarget());
 
     _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
 

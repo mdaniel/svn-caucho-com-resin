@@ -66,7 +66,7 @@ abstract public class StatefulObjectView extends StatefulView {
 
     HashMap map = new HashMap();
     
-    generateBusinessPrologue(out, map);
+    generateBeanPrologue(out, map);
 
     generatePostConstruct(out);
     //_postConstructInterceptor.generatePrologue(out, map);
@@ -79,7 +79,7 @@ abstract public class StatefulObjectView extends StatefulView {
     out.println("_context = context;");
 
     map = new HashMap();
-    generateBusinessConstructor(out, map);    
+    generateBeanConstructor(out, map);    
     //_postConstructInterceptor.generateConstructor(out, map);
     //_preDestroyInterceptor.generateConstructor(out, map);
 

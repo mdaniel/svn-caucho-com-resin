@@ -99,7 +99,7 @@ abstract public class StatelessHomeView extends StatelessView {
     out.println("_context = context;");
     out.println("_server = context.getStatelessServer();");
     
-    generateBusinessConstructor(out);
+    generateBeanConstructor(out);
     
     out.popDepth();
     out.println("}");
