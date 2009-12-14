@@ -249,12 +249,14 @@ public class PojoBean extends BeanGenerator {
   {
     generateHeader(out);
 
+    /*
     HashMap map = new HashMap();
     for (BusinessMethodGenerator method : _businessMethods) {
       method.generatePrologueTop(out, map);
     }
+    */
 
-    for (Constructor ctor
+    for (Constructor<?> ctor
            : _beanClass.getJavaClass().getDeclaredConstructors()) {
       if (Modifier.isPublic(ctor.getModifiers()))
         generateConstructor(out, ctor);
@@ -262,7 +264,7 @@ public class PojoBean extends BeanGenerator {
 
     generatePostConstruct(out);
 
-    map = new HashMap();
+    HashMap<String,Object> map = new HashMap<String,Object>();
     for (BusinessMethodGenerator method : _businessMethods) {
       method.generate(out, map);
     }
@@ -334,7 +336,7 @@ public class PojoBean extends BeanGenerator {
     out.println("{");
     out.pushDepth();
 
-    HashMap map = new HashMap();
+    HashMap<String,Object> map = new HashMap<String,Object>();
     for (BusinessMethodGenerator method : _businessMethods) {
       method.generatePostConstruct(out, map);
     }
