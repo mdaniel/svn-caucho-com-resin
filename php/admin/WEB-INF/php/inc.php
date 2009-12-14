@@ -60,11 +60,11 @@ function mbean_init()
 
   $g_server_index = $_GET["s"];
 
-  if (! empty($_REQUEST["new_s"])) {
+  if (isset($_REQUEST["new_s"])) {
     $g_server_index = $_REQUEST["new_s"];
   }
 
-  if (empty($g_server_index)) {
+  if (! isset($g_server_index)) {
     $g_mbean_server = new MBeanServer();
     $g_server = $g_mbean_server->lookup("resin:type=Server");
     $g_server_index = $g_server->SelfServer->ClusterIndex;
@@ -75,9 +75,9 @@ function mbean_init()
   }
   else {
     $g_mbean_server = new MBeanServer("");
-    $server = server_find_by_index($g_mbean_server, g_server_index);
+    $server = server_find_by_index($g_mbean_server, $g_server_index);
 
-    $g_server_id = $server->Id;
+    $g_server_id = $server->Name;
     $g_mbean_server = new MBeanServer($g_server_id);
 
     $g_server = $g_mbean_server->lookup("resin:type=Server");
@@ -556,7 +556,7 @@ function display_header($script, $title, $server,
 
   $g_next_url = "?q=" . $g_page . "&s=" . $g_server_index . $query;
 
-  if (! empty($_REQUEST["new_s"]) && $_REQUEST["new_s"] != $_GET["s"]) {
+  if (isset($_REQUEST["new_s"]) && $_REQUEST["new_s"] != $_GET["s"]) {
     header("Location: " . $g_next_url);
     return false;
   }
@@ -729,6 +729,7 @@ function display_servers($server)
 
     echo " value=\"" . $cluster_server->ClusterIndex ."\">";
     printf("%02d - %s\n", $cluster_server->ClusterIndex, $id);
+    echo "  </option>";
   }
   echo "</select>";
   echo "</form>";
@@ -888,11 +889,12 @@ function server_find_by_index($g_mbean_server, $index)
 {
   $server = $g_mbean_server->lookup("resin:type=Server");
 
-  foreach ($server->Servers as $cluster_server) {
-    if ($cluster_server->ServerIndex == $index)
+  foreach ($server->Cluster->Servers as $cluster_server) {
+    if ($cluster_server->ClusterIndex == $index) {
       return $cluster_server;
+    }
   }
-
+  
   return null;
 }
 
