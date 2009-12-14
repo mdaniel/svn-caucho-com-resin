@@ -281,11 +281,13 @@ public class PojoBean extends BeanGenerator {
     out.println("private static final boolean __isFiner");
     out.println("  = __log.isLoggable(java.util.logging.Level.FINER);");
 
+    /*
     if (_hasXA) {
       out.println();
-      out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
-      out.println("  = new com.caucho.ejb3.xa.XAManager();");
+      out.println("private static final com.caucho.ejb.gen.XAManager _xa");
+      out.println("  = new com.caucho.ejb.gen.XAManager();");
     }
+    */
 
     if (_isSerializeHandle) {
       generateSerializeHandle(out);

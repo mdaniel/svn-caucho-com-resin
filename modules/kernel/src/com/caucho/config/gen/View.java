@@ -135,11 +135,11 @@ abstract public class View {
     }
     else {
       for (Annotation ann : cl.getAnnotations()) {
-        Class annType = ann.annotationType();
+        Class<?> annType = ann.annotationType();
 
         if (annType.isAnnotationPresent(Stereotype.class)) {
           for (Annotation sAnn : ann.annotationType().getAnnotations()) {
-            Class sAnnType = sAnn.annotationType();
+            Class<?> sAnnType = sAnn.annotationType();
 
             if (sAnnType.isAnnotationPresent(InterceptorBinding.class)) {
               interceptorBindingList.add(sAnn);
@@ -243,7 +243,7 @@ abstract public class View {
   public void generateBusinessConstructor(JavaWriter out)
     throws IOException
   {
-    HashMap map = new HashMap();
+    HashMap<String,Object> map = new HashMap<String,Object>();
     generateBusinessConstructor(out, map);
   }
 
@@ -286,7 +286,7 @@ abstract public class View {
      out.println("{");
      out.pushDepth();
 
-     HashMap map = new HashMap();
+     HashMap<String,Object> map = new HashMap<String,Object>();
      for (BusinessMethodGenerator method : getMethods()) {
        method.generatePostConstruct(out, map);
      }
@@ -302,7 +302,7 @@ abstract public class View {
   public void generateBusinessMethods(JavaWriter out)
     throws IOException
   {
-    HashMap map = new HashMap();
+    HashMap<String,Object> map = new HashMap<String,Object>();
     for (BusinessMethodGenerator method : getMethods()) {
       method.generate(out, map);
     }

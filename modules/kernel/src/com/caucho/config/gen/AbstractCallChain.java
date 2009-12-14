@@ -64,30 +64,122 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Generates the static class prologue
    */
-  @SuppressWarnings("unchecked")
   @Override
-  public void generatePrologue(JavaWriter out, HashMap map) throws IOException
+  public void generatePrologue(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
   {
     _next.generatePrologue(out, map);
   }
 
   /**
+   * Generates the static class prologue
+   */
+  @Override
+  public void generateProxyPrologue(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateProxyPrologue(out, map);
+  }
+
+  /**
    * Generates initialization in the constructor
    */
-  @SuppressWarnings("unchecked")
   @Override
-  public void generateConstructor(JavaWriter out, HashMap map)
-      throws IOException
+  public void generateConstructor(JavaWriter out, 
+                                  HashMap<String,Object> map)
+    throws IOException
   {
     _next.generateConstructor(out, map);
+  }
+  
+    /**
+   * Generates code before the try block
+   */
+  public void generatePreTry(JavaWriter out)
+    throws IOException
+  {
+    _next.generatePreTry(out);
+  }  
+  
+  /**
+   * Generates code before the call, in the try block.
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   try {
+   *     [pre-call]
+   *     value = bean.myMethod(...);
+   *     ...
+   * }
+   * </pre></code>
+   */
+  public void generatePreCall(JavaWriter out)
+    throws IOException
+  {
+    _next.generatePreCall(out);
   }
 
   /**
    * Generates the method interception code
    */
-  @Override
-  public void generateCall(JavaWriter out) throws IOException
+  public void generateCall(JavaWriter out) 
+    throws IOException
   {
     _next.generateCall(out);
+  }
+  
+  /**
+   * Generates code after the call, before the return.
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   try {
+   *     ...
+   *     value = bean.myMethod(...);
+   *     [post-call]
+   *     return value;
+   *   } finally {
+   *     ...
+   *   }
+   * }
+   * </pre></code>
+   */
+  public void generatePostCall(JavaWriter out)
+    throws IOException
+  {
+    _next.generatePostCall(out);
+  }
+  
+  /**
+   * Generates application (checked) exception code for
+   * the method.
+   */
+  @Override
+  public void generateApplicationException(JavaWriter out,
+                                           Class<?> exn)
+    throws IOException
+  {
+    _next.generateApplicationException(out, exn);
+  }
+  
+  /**
+   * Generates system (runtime) exception code for
+   * the method.
+   */
+  @Override
+  public void generateSystemException(JavaWriter out,
+                                      Class<?> exn)
+    throws IOException
+  {
+    _next.generateSystemException(out, exn);
+  }
+  
+  /**
+   * Generates finally code for the method
+   */
+  public void generateFinally(JavaWriter out)
+    throws IOException
+  {
+    _next.generateFinally(out);
   }
 }

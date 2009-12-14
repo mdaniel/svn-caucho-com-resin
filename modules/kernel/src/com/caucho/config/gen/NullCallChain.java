@@ -35,65 +35,57 @@ import com.caucho.java.JavaWriter;
 
 /**
  * Represents a filter for invoking a method
- * 
- * <code><pre>
- * MyType foo(args)
- * {
- *   [pre-try]
- *   try {
- *     [pre-call]
- *     value = [call]
- *     [post-call]
- *     return value;
- *   } catch (ApplicationException e) {
- *     [application-exception]
- *     throw e;
- *   } catch (RuntimeException e) {
- *     [system-exception]
- *     throw e;
- *   } finally {
- *     [finally]
- *   }
- * }
- * </pre></code>
  */
-public interface EjbCallChain {
+public class NullCallChain implements EjbCallChain {
+  NullCallChain()
+  {
+  }
+
   /**
    * Returns true if this filter will generate code.
    */
-  public boolean isEnhanced();
+  @Override
+  public boolean isEnhanced()
+  {
+    return false;
+  }
 
   /**
    * Introspects the method for the default values
    */
-  public void introspect(ApiMethod apiMethod, 
-                         ApiMethod implMethod);
+  @Override
+  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  {
+  }
 
   /**
    * Generates the static class prologue
    */
-  public void generatePrologue(JavaWriter out, 
-                               HashMap<String,Object> map)
-    throws IOException;
+  @Override
+  public void generatePrologue(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+  }
 
   /**
    * Generates the static class prologue
    */
-  public void generateProxyPrologue(JavaWriter out, 
-                                    HashMap<String,Object> map)
-    throws IOException;
+  @Override
+  public void generateProxyPrologue(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+  }
 
   /**
    * Generates initialization in the constructor
    */
-  public void generateConstructor(JavaWriter out, 
+  @Override
+  public void generateConstructor(JavaWriter out,
                                   HashMap<String,Object> map)
-    throws IOException;
-  
-  //
-  // method call interception
-  //
-  
+    throws IOException
+  {
+  }
+
   /**
    * Generates code before the try block
    * <code><pre>
@@ -105,9 +97,12 @@ public interface EjbCallChain {
    * }
    * </pre></code>
    */
+  @Override
   public void generatePreTry(JavaWriter out)
-    throws IOException;
-  
+    throws IOException
+  {
+  }
+
   /**
    * Generates code before the call, in the try block.
    * <code><pre>
@@ -120,15 +115,21 @@ public interface EjbCallChain {
    * }
    * </pre></code>
    */
+  @Override
   public void generatePreCall(JavaWriter out)
-    throws IOException;
+    throws IOException
+  {
+  }
 
   /**
    * Generates the method interception code
    */
-  public void generateCall(JavaWriter out) 
-    throws IOException;
-  
+  @Override
+  public void generateCall(JavaWriter out)
+    throws IOException
+  {
+  }
+
   /**
    * Generates code after the call, before the return.
    * <code><pre>
@@ -145,28 +146,39 @@ public interface EjbCallChain {
    * }
    * </pre></code>
    */
+  @Override
   public void generatePostCall(JavaWriter out)
-    throws IOException;
-  
+    throws IOException
+  {
+  }
+
   /**
    * Generates application (checked) exception code for
    * the method.
    */
+  @Override
   public void generateApplicationException(JavaWriter out,
                                            Class<?> exn)
-    throws IOException;
-  
+    throws IOException
+  {
+  }
+
   /**
    * Generates system (runtime) exception code for
    * the method.
    */
+  @Override
   public void generateSystemException(JavaWriter out,
                                       Class<?> exn)
-    throws IOException;
-  
+    throws IOException
+  {
+  }
+
   /**
    * Generates finally code for the method
    */
   public void generateFinally(JavaWriter out)
-    throws IOException;
+    throws IOException
+  {
+  }
 }
