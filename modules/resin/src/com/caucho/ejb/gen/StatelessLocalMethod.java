@@ -82,23 +82,140 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   }
 
   /**
-   * Generates the underlying bean instance
+   * Generates code before the "try" block
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   [pre-try]
+   *   try {
+   *     ...
+   * }
+   * </pre></code>
    */
-  protected void generatePreCall(JavaWriter out)
+  @Override
+  public void generatePreTry(JavaWriter out)
     throws IOException
   {
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
 
+    super.generatePreTry(out);
+
     out.println();
-    out.println(_beanClassName + " bean = _ejb_begin();");
     out.println("boolean isValid = false;");
-    out.println();
-    out.println("try {");
-    out.pushDepth();
+    
+    // bean allocation must be last because it needs to be
+    // freed or discarded in the finally block
+    out.println(_beanClassName + " bean = _statelessPool.allocate();");
+  }
+
+  /**
+   * Generates code in the "try" block before the call
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   ...
+   *   try {
+   *     [pre-call]
+   *     ret = super.myMethod(...)
+   *     ...
+   * }
+   * </pre></code>
+   */
+  @Override
+  public void generatePreCall(JavaWriter out)
+    throws IOException
+  {
     out.println("thread.setContextClassLoader(_context.getStatelessServer().getClassLoader());");
+    
+    super.generatePreCall(out);
   }
   
+  /**
+   * Generates code for the invocation itself.
+   */
+  @Override
+  public void generateCall(JavaWriter out)
+    throws IOException
+  {
+    super.generateCall(out);
+  }
+
+  /**
+   * Generates aspect code after the invocation.
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   ...
+   *   try {
+   *     ...
+   *     ret = super.myMethod(...)
+   *     [post-call]
+   *     return ret;
+   *   } finally {
+   *     ...
+   *   }
+   * }
+   * </pre></code>
+   */
+  @Override
+  public void generatePostCall(JavaWriter out)
+    throws IOException
+  {
+    super.generatePostCall(out);
+    
+    out.println();
+    out.println("isValid = true;");
+  }
+  
+  /**
+   * Generates code for an application (checked) exception.
+   */
+  @Override
+  public void generateApplicationException(JavaWriter out,
+                                           Class<?> exn)
+    throws IOException
+  {
+    out.println("isValid = true;");
+    
+    super.generateApplicationException(out, exn);
+  }
+
+  /**
+   * Generates the code in the finally block
+   * <code><pre>
+   * myRet myMethod(...)
+   * {
+   *   try {
+   *     ...
+   *   } finally {
+   *     [finally]
+   *   }
+   * </pre></code>
+   */
+  @Override
+  public void generateFinally(JavaWriter out)
+    throws IOException
+  {
+    // free/discard must be first in case of exceptions
+    // in the other finally methods
+    // XXX: (possibly free semaphore first and allow bean at
+    // end, since it's the semaphore that's critical
+    out.println("if (isValid)");
+    out.println("  _statelessPool.free(bean);");
+    out.println("else");
+    out.println("  _statelessPool.discard(bean);");
+     
+    super.generateFinally(out);
+    
+    out.println();
+    out.println("thread.setContextClassLoader(oldLoader);");
+  }
+  
+  //
+  // lifecycle override code
+  //
+   
   /**
    * Generates the underlying bean instance
    */
@@ -115,32 +232,5 @@ public class StatelessLocalMethod extends BusinessMethodGenerator
   protected String getSuper()
   {
     return "bean";
-  }
-
-  /**
-   * Generates the underlying bean instance
-   */
-  protected void generatePreReturn(JavaWriter out)
-    throws IOException
-  {
-    out.println("isValid = true;");
-  }
-
-  /**
-   * Generates the underlying bean instance
-   */
-  protected void generatePostCall(JavaWriter out)
-    throws IOException
-  {
-    out.popDepth();
-    out.println("} finally {");
-    out.println("  thread.setContextClassLoader(oldLoader);");
-
-    out.println("  if (isValid)");
-    out.println("    _ejb_free(bean);");
-    out.println("  else");
-    out.println("    _ejb_destroy(bean);");
-    
-    out.println("}");
   }
 }

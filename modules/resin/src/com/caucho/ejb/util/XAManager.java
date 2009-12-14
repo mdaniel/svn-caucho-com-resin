@@ -26,7 +26,7 @@
  *
  * @author Scott Ferguson
  */
-package com.caucho.ejb3.xa;
+package com.caucho.ejb.util;
 
 import java.util.logging.Logger;
 
@@ -51,9 +51,7 @@ import com.caucho.util.L10N;
  */
 public class XAManager {
   private static L10N L = new L10N(XAManager.class);
-  @SuppressWarnings("unused")
-  private static Logger log = Logger.getLogger(XAManager.class.getName());
-
+ 
   private UserTransactionProxy _ut;
 
   public XAManager()
@@ -113,8 +111,7 @@ public class XAManager {
       Transaction xa = tm.getTransaction();
 
       if (xa == null)
-        throw new EJBTransactionRequiredException(L
-            .l("Transaction required for 'Mandatory' transaction attribute"));
+        throw new EJBTransactionRequiredException(L.l("Transaction required for 'Mandatory' transaction attribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -133,8 +130,7 @@ public class XAManager {
       Transaction xa = tm.getTransaction();
 
       if (xa != null)
-        throw new EJBException(L
-            .l("Transaction forbidden for 'Never' transaction attribute"));
+        throw new EJBException(L.l("Transaction forbidden for 'Never' transaction attribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -194,10 +190,13 @@ public class XAManager {
    * 
    * @return the current transaction if it exists
    */
-  public void endRequiresNew(Transaction xa)
+  public void endRequiresNew(Transaction xa, boolean isCommit)
   {
     try {
-      _ut.commit();
+      if (isCommit)
+        _ut.commit();
+      else
+        _ut.rollback();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -250,6 +249,29 @@ public class XAManager {
   {
     try {
       _ut.commit();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (RollbackException e) {
+      throw new TransactionRolledbackLocalException(e.getMessage(), e);
+    } catch (HeuristicMixedException e) {
+      throw new TransactionRolledbackLocalException(e.getMessage(), e);
+    } catch (HeuristicRollbackException e) {
+      throw new TransactionRolledbackLocalException(e.getMessage(), e);
+    } catch (Exception e) {
+      throw new EJBException(e);
+    }
+  }
+
+  /**
+   * Commits transaction.
+   */
+  public void commit(boolean isCommit)
+  {
+    try {
+      if (isCommit)
+        _ut.commit();
+      else
+        _ut.rollback();
     } catch (RuntimeException e) {
       throw e;
     } catch (RollbackException e) {

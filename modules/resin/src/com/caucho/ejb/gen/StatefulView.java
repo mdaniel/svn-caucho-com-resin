@@ -185,8 +185,8 @@ abstract public class StatefulView extends View {
     out.println("private transient boolean _isActive;");
 
     out.println();
-    out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
-    out.println("  = new com.caucho.ejb3.xa.XAManager();");
+    out.println("private static final com.caucho.ejb.gen.XAManager _xa");
+    out.println("  = new com.caucho.ejb.gen.XAManager();");
 
     //generateBusinessPrologue(out);
 

@@ -47,7 +47,7 @@ public class StatelessPool<T> {
   private static Logger log
     = Logger.getLogger(StatelessPool.class.getName());
   
-  private final SessionServer _server;
+  private final SessionServer<T> _server;
   
   private final FreeList<T> _freeList;
   private final Semaphore _concurrentSemaphore;
@@ -55,12 +55,12 @@ public class StatelessPool<T> {
 
   private EjbProducer<T> _ejbProducer;
  
-  StatelessPool(SessionServer server,
+  StatelessPool(SessionServer<T> server,
                 BeanProducer<T> producer)
   {
     _server = server;
     
-    _ejbProducer = (EjbProducer<T>) server.getProducer();
+    _ejbProducer = server.getProducer();
     _ejbProducer.setBeanProducer(producer);
     
     int idleMax = server.getSessionIdleMax();
@@ -104,13 +104,22 @@ public class StatelessPool<T> {
       }
     }
     
-    T bean = _freeList.allocate();
+    boolean isValid = false;
     
-    if (bean == null) {
-      bean = _ejbProducer.newInstance();
+    try {
+      T bean = _freeList.allocate();
+    
+      if (bean == null) {
+        bean = _ejbProducer.newInstance();
+      }
+      
+      isValid = true;
+    
+      return bean;
+    } finally {
+      if (! isValid)
+        semaphore.release();
     }
-    
-    return bean;
   }
 
   public void free(T bean)
@@ -134,6 +143,16 @@ public class StatelessPool<T> {
       semaphore.release();
     
     destroyImpl(bean);
+  }
+  
+  public void discard(T bean)
+  {
+    if (bean == null)
+      return;
+    
+    Semaphore semaphore = _concurrentSemaphore;
+    if (semaphore != null)
+      semaphore.release();
   }
   
   private void destroyImpl(T bean)

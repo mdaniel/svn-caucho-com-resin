@@ -97,7 +97,8 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
     return false;
   }
 
-  protected void generatePreCall(JavaWriter out)
+  @Override
+  public void generatePreCall(JavaWriter out)
     throws IOException
   {
     out.println("Thread thread = Thread.currentThread();");
@@ -146,7 +147,7 @@ public class StatefulCreateMethod extends BusinessMethodGenerator
    * Generates the underlying bean instance
    */
   @Override
-  protected void generatePostCall(JavaWriter out)
+  public void generatePostCall(JavaWriter out)
     throws IOException
   {
     out.println("return remote;");

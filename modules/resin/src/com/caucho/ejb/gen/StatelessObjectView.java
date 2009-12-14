@@ -47,7 +47,8 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
- * Represents any stateless view.
+ * Represents the stateless object view, i.e. the client's
+ * class and instances for a @Local interface.
  */
 public class StatelessObjectView extends StatelessView {
   private static final L10N L = new L10N(StatelessObjectView.class);
@@ -129,6 +130,10 @@ public class StatelessObjectView extends StatelessView {
       }
     }
   }
+  
+  //
+  // code generation
+  //
 
   /**
    * Generates prologue for the context.
@@ -213,7 +218,7 @@ public class StatelessObjectView extends StatelessView {
   }
 
   /**
-   * Generates the view code.
+   * Generates code for a bean (pooled) instance.
    */
   public void generateBean(JavaWriter out) throws IOException
   {
@@ -225,7 +230,7 @@ public class StatelessObjectView extends StatelessView {
 
     out.println("private transient " + getViewClassName() + " _context;");
 
-    HashMap map = new HashMap();
+    HashMap<String,Object> map = new HashMap<String,Object>();
     generateBusinessPrologue(out, map);
 
     generatePostConstruct(out);
@@ -239,7 +244,7 @@ public class StatelessObjectView extends StatelessView {
     out.pushDepth();
     out.println("_context = context;");
 
-    map = new HashMap();
+    map = new HashMap<String,Object>();
     generateBusinessConstructor(out, map);
     _postConstructInterceptor.generateConstructor(out, map);
     _preDestroyInterceptor.generateConstructor(out, map);
@@ -256,7 +261,7 @@ public class StatelessObjectView extends StatelessView {
   }
 
   /**
-   * Generates the view code.
+   * Generates the local/remote proxy.
    */
   public void generateProxy(JavaWriter out) throws IOException
   {
@@ -271,9 +276,11 @@ public class StatelessObjectView extends StatelessView {
     // out.println();
     // out.println("com.caucho.ejb.xa.EjbTransactionManager _xaManager;");
 
+    /*
     out.println();
-    out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
-    out.println("  = new com.caucho.ejb3.xa.XAManager();");
+    out.println("private static final com.caucho.ejb.gen.XAManager _xa");
+    out.println("  = new com.caucho.ejb.gen.XAManager();");
+    */
 
     out.println();
     out.println("private " + getBean().getClassName() + " _context;");
@@ -314,7 +321,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("}");
 
     generateProxyPool(out);
-
+    
     generateBusinessMethods(out);
 
     /*
@@ -421,6 +428,17 @@ public class StatelessObjectView extends StatelessView {
     out.pushDepth();
     
     out.println("_statelessPool.destroy(bean);");
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("final void _ejb_discard(" + beanClass + " bean)");
+    out.println("  throws javax.ejb.EJBException");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("_statelessPool.discard(bean);");
     
     out.popDepth();
     out.println("}");

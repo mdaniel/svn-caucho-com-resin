@@ -158,7 +158,8 @@ public class StatefulMethod extends BusinessMethodGenerator
     }
   }
 
-  protected void generatePreCall(JavaWriter out)
+  @Override
+  public void generatePreCall(JavaWriter out)
     throws IOException
   {
     out.println("if (_isActive)");
@@ -211,7 +212,8 @@ public class StatefulMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
-  protected void generatePostCall(JavaWriter out)
+  @Override
+  public void generatePostCall(JavaWriter out)
     throws IOException
   {
     out.popDepth();

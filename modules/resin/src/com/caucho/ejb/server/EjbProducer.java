@@ -318,6 +318,7 @@ public class EjbProducer<T> {
         getInjectionTarget().postConstruct(instance);
       }
 
+      /*
       try {
         if (_cauchoPostConstruct != null)
           _cauchoPostConstruct.invoke(instance);
@@ -328,6 +329,7 @@ public class EjbProducer<T> {
       } catch (Exception e) {
         throw new RuntimeException(e);
       }
+      */
       
       if (_beanProducer != null)
         _beanProducer.__caucho_postConstruct(instance);

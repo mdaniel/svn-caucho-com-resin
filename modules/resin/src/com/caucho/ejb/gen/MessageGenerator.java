@@ -134,10 +134,12 @@ public class MessageGenerator extends BeanGenerator {
     out.println("{");
     out.pushDepth();
 
+    /*
     // ejb/0931
     out.println();
     out.println("private static final com.caucho.ejb3.xa.XAManager _xa");
     out.println("  = new com.caucho.ejb3.xa.XAManager();");
+    */
 
     out.println("private static HashSet<Method> _xaMethods = new HashSet<Method>();");
     out.println();
