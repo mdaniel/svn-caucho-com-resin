@@ -20,7 +20,8 @@
 
 <s2 title="4.0.2 - Nov 24, 2009">
 <ul>
-<li>resin-admin: pages does not respond to changing "Server:" (#3806)</li>
+<li>resin-admin: fixed cluster page not loading graphs (#3805)</li>
+<li>resin-admin: fixed pages does not respond to changing "Server:" error (#3806)</li>
 <li>resin-admin: fixed jmx page exception on Mac OSX 10.6.2 (#3782)</li>
 <li>resin.exe: fixed timeout issue when stopping resin(#3762)</li>
 <li>resin: max-uri-length configuration tag introduced to set limit on URIs served by Resin. Default is 1024.</li>

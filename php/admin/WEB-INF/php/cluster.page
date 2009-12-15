@@ -54,6 +54,7 @@ foreach ($g_resin->Clusters as $cluster) {
 
     $sub_server = $sub_mbean_server->lookup("resin:type=Server");
     $sub_cluster_server = server_by_name($name, $cluster);
+    $cluster_index = sprintf("%02d", $sub_cluster_server->ClusterIndex);
 
     $is_dynamic = false;
 
@@ -96,9 +97,9 @@ foreach ($g_resin->Clusters as $cluster) {
       echo "<tr class='rb'>";
 
     if ($sub_server)
-      echo "<td class='item'>$name_field</td>";
+      echo "<td class='item'>$cluster_index - $name_field</td>";
     else
-      echo "<td class='itemfail'>$name_field</td>";
+      echo "<td class='itemfail'>$cluster_index - $name_field</td>";
 
     if ($sub_server) {
       $live_count++;
@@ -182,6 +183,8 @@ foreach ($g_resin->Clusters as $cluster) {
 echo "</table>";
 
 $servers = null;
+
+/*
 foreach ($g_resin->Clusters as $cluster) {
   if (empty($cluster->Servers))
     continue;
@@ -191,29 +194,37 @@ foreach ($g_resin->Clusters as $cluster) {
   }
 }
 sort($servers);
+*/
+
+//reduce to app-tier servers only
+foreach ($g_server->Cluster->Servers as $server) {
+  $servers[] = sprintf("%02d", $server->ClusterIndex); 
+}
 
 $stat_service = $g_mbean_server->lookup("resin:type=StatService");
 
 if ($stat_service) {
-  create_graph("cpu", "OS|CPU|CPU Active", $servers);
-  create_graph("used", "JVM|Memory|Tenured Used", $servers);
-  create_graph("thread", "JVM|Thread|Thread Max", $servers);
+  create_graph("cpu", "OS|CPU|Unix Load Avg", $servers);
+  create_graph("used", "JVM|Memory|Tenured Memory Used", $servers);
+  create_graph("thread", "JVM|Thread|JVM Thread Count", $servers);
 }
 
-function create_graph($name, $attr, $servers)
+function create_graph($canvas_name, $attr, $servers)
 {
   echo "<p>\n";
 
   $names = array();
 
-  foreach ($servers as $name) {
-    $names[] = $index . "|" . $attr;
+  foreach ($servers as $server) {
+    $names[] = $server . "|" . $attr;
   }
 
+  //overview is for 24h period
+  $period = 24 * 60 * 60;
   $end = time();
-  $start = $now - 3600 * 1000;
+  $start = $end - $period;
 
-  stat_graph($name, 600, 300, $start, $end, $names);
+  stat_graph($canvas_name, 600, 300, $start, $end, $names);
 }
 
 echo "<h2>Database Pools</h2>";
@@ -388,4 +399,3 @@ if ($live_count < 2) {
   echo "&lt;/resin>\n";
   echo "</pre>\n";
 }
-
