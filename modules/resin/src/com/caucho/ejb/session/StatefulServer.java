@@ -211,6 +211,14 @@ public class StatefulServer<T> extends SessionServer<T>
   }
 
   /**
+   * Initialize an instance
+   */
+  public void destroyInstance(T instance)
+  {
+    getProducer().destroyInstance(instance);
+  }
+
+  /**
    * Returns the remote object.
    */
   @Override

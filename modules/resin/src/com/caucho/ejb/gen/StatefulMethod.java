@@ -104,6 +104,7 @@ public class StatefulMethod extends BusinessMethodGenerator
     return true;
   }
 
+  /*
   protected void generateContent(JavaWriter out)
     throws IOException
   {
@@ -157,22 +158,95 @@ public class StatefulMethod extends BusinessMethodGenerator
       out.println("}");
     }
   }
-
+  */
+  
   @Override
-  public void generatePreCall(JavaWriter out)
+  public void generatePreTry(JavaWriter out)
     throws IOException
   {
+    super.generatePreTry(out);
+    
+    if (getView().isRemote()
+        && hasException(java.rmi.NoSuchObjectException.class)) {
+      out.println("if (! _isValid)");
+      out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
+                  + getBeanClass().getSimpleName() + " is no longer valid\");");
+    }
+    else {
+      out.println("if (! _isValid)");
+      out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
+                  + getBeanClass().getSimpleName() + " is no longer valid\");");
+    }
+
+    if (_isRemove) {
+      out.println("boolean isRemove = false;");
+    }
+    
     out.println("if (_isActive)");
     out.println("  throw new EJBException(\"session bean is not reentrant\");");
     out.println();
     
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
-    out.println("try {");
-    out.pushDepth();
+  }
+  
+  @Override
+  public void generateFinally(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("_isActive = false;");
+    out.println();
+    
+    if (_isRemoveRetainIfException) {
+      out.println("if (isRemove) {");
+      out.pushDepth();
+    }
+    
+    out.println("boolean isValid = _isValid;");
+    out.println("_isValid = false;");
+    out.println();
+    out.println("if (isValid)");
+    out.print("  _server.destroyInstance(");
+    generateThis(out);
+    out.println(");");
+    
+    if (_isRemoveRetainIfException) {
+      out.popDepth();
+      out.println("}");
+    }
+    
+    out.println("thread.setContextClassLoader(oldLoader);");
+    
+    super.generateFinally(out);
+  }
+
+  @Override
+  public void generatePreCall(JavaWriter out)
+    throws IOException
+  {
     out.println("thread.setContextClassLoader(_server.getClassLoader());");
     out.println("_isActive = true;");
+    
+    super.generatePreCall(out);
   }
+
+  /**
+   * Generates the underlying bean instance
+   */
+  /*
+  @Override
+  public void generatePostCall(JavaWriter out)
+    throws IOException
+  {
+    out.popDepth();
+    out.println("} finally {");
+    out.println("  thread.setContextClassLoader(oldLoader);");
+    out.println("  _isActive = false;");
+    
+    out.println("}");
+  }
+  */
 
   /**
    * Generates the underlying bean instance
@@ -207,20 +281,5 @@ public class StatefulMethod extends BusinessMethodGenerator
     else {
       return "super";
     }
-  }
-
-  /**
-   * Generates the underlying bean instance
-   */
-  @Override
-  public void generatePostCall(JavaWriter out)
-    throws IOException
-  {
-    out.popDepth();
-    out.println("} finally {");
-    out.println("  thread.setContextClassLoader(oldLoader);");
-    out.println("  _isActive = false;");
-    
-    out.println("}");
   }
 }
