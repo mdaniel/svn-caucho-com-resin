@@ -307,6 +307,12 @@ public class XaCallChain extends AbstractCallChain {
   {
     super.generateApplicationException(out, exn);
     
+    ApplicationException appExn
+      = exn.getAnnotation(ApplicationException.class);
+    
+    if (appExn != null && appExn.rollback())
+      return;
+    
     if (_isContainerManaged
         && (_xa == REQUIRED || _xa == REQUIRES_NEW)) {
       out.println("isXAValid = true;");
