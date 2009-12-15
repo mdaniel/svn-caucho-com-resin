@@ -407,14 +407,16 @@ function display_jmx($mbean_server, $group_mbeans)
         echo "<tr>";
 	echo "<td>" . $attr_name . "</td>";
 
-	$v = $mbean->$attr_name;
-	
-	echo "<td>";
-
-	display_jmx_data($v);
-	
+        //OS X 10.6.2 JDK 1.6 fix for #3782
+        try {
+          echo "<td>";
+          $v = $mbean->$attr_name;
+          display_jmx_data($v);
+        } catch (Exception $e) {
+          echo "Data unavailable due to error: " . $e;
+        }
+        
         echo "</td>\n";
-
         echo "</tr>\n";
       }
       echo "</table>";
