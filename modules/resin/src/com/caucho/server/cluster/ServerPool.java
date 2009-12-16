@@ -29,21 +29,25 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.util.QDate;
-import com.caucho.vfs.*;
-import com.caucho.admin.*;
-import com.caucho.server.resin.*;
-
-import javax.management.ObjectName;
 import java.io.IOException;
-import java.io.Serializable;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.admin.ActiveProbe;
+import com.caucho.admin.ActiveTimeProbe;
+import com.caucho.admin.CountProbe;
+import com.caucho.admin.ProbeManager;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.QDate;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.ReadWritePair;
+import com.caucho.vfs.Vfs;
 
 /**
  * A pool of connections to a Resin server.
@@ -342,8 +346,8 @@ public class ServerPool
       address = "localhost";
 
     HashMap<String,Object> attr = new HashMap<String,Object>();
-    attr.put("connect-timeout", new Long(_loadBalanceConnectTimeout));
-
+    attr.put("connect-timeout", _loadBalanceConnectTimeout);
+    attr.put("socket-timeout", _loadBalanceSocketTimeout);
     if (_isSecure)
       _tcpPath = Vfs.lookup("tcps://" + address + ":" + _port, attr);
     else
@@ -588,11 +592,6 @@ public class ServerPool
   public boolean isEnabled()
   {
     return _state.isEnabled();
-  }
-
-  private void toActive()
-  {
-    _state = _state.toActive();
   }
 
   public void toBusy()
@@ -864,7 +863,7 @@ public class ServerPool
     synchronized (this) {
       if (_idleHead != _idleTail) {
         stream = _idle[_idleHead];
-        long freeTime = stream.getFreeTime();
+        long freeTime = stream.getIdleStartTime();
 
         _idle[_idleHead] = null;
         _idleHead = (_idleHead + _idle.length - 1) % _idle.length;
@@ -873,7 +872,7 @@ public class ServerPool
           _activeCount++;
           _keepaliveCountTotal++;
 
-          stream.clearFreeTime();
+          stream.clearIdleStartTime();
           stream.toActive();
 
           return stream;
@@ -884,7 +883,7 @@ public class ServerPool
     if (stream != null) {
       if (log.isLoggable(Level.FINER))
         log.finer(this + " close idle " + stream
-                  + " expire=" + QDate.formatISO8601(stream.getFreeTime() + _loadBalanceIdleTime));
+                  + " expire=" + QDate.formatISO8601(stream.getIdleStartTime() + _loadBalanceIdleTime));
 
       stream.closeImpl();
     }
@@ -979,7 +978,9 @@ public class ServerPool
 
   /**
    * Free the read/write pair for reuse.  Called only from
-   * ClusterStream.free()
+   * ClusterStream.free().
+   * 
+   * @param stream the stream to free
    */
   void free(ClusterStream stream)
   {
@@ -1030,7 +1031,7 @@ public class ServerPool
           oldStream = _idle[nextTail];
 
           if (oldStream != null
-              && oldStream.getFreeTime() + maxIdleTime < now) {
+              && oldStream.getIdleStartTime() + maxIdleTime < now) {
             _idle[nextTail] = null;
             _idleTail = nextTail;
           }
@@ -1189,7 +1190,7 @@ public class ServerPool
       ClusterStream stream = open();
 
       if (stream != null) {
-        stream.free();
+        stream.free(stream.getIdleStartTime());
 
         return true;
       }

@@ -157,7 +157,9 @@ class WatchdogProcess
 
       if (jvmOut != null && ! _watchdog.isConsole()) {
         try {
-          jvmOut.close();
+          synchronized (jvmOut) {
+            jvmOut.close();
+          }
         } catch (Exception e) {
         }
       }
@@ -718,6 +720,8 @@ class WatchdogProcess
       thread.setName("watchdog-process-log-" + _pid + "-" + _id);
 
       thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+      
+      WriteStream out = _out;
 
       try {
         int len;
@@ -725,15 +729,18 @@ class WatchdogProcess
         byte []data = new byte[4096];
 
         while ((len = _is.read(data, 0, data.length)) >= 0) {
-          _out.write(data, 0, len);
-          _out.flush();
+          out.write(data, 0, len);
+          out.flush();
         }
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       } finally {
         try {
-          if (! _watchdog.isConsole())
-            _out.close();
+          if (! _watchdog.isConsole()) {
+            synchronized (out) {
+              out.close();
+            }
+          }
         } catch (IOException e) {
         }
 

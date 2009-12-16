@@ -412,6 +412,10 @@ public class FileServlet extends GenericServlet {
         last = 10 * last + ch - '0';
         hasLast = true;
       }
+      
+      // #3766 - browser errors in range
+      if (off < length && ch != ' ')
+        return false;
 
       // Skip whitespace
       for (; off < length && (ch = range.charAt(off)) == ' '; off++) {
@@ -434,7 +438,7 @@ public class FileServlet extends GenericServlet {
         last = cacheLength - 1;
       }
 
-      if (last < first)
+      if (last <= first)
         break;
 
       if (cacheLength <= last) {

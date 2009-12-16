@@ -71,7 +71,7 @@ public class ClusterStream {
   private long _requestStartTime;
   private boolean _isIdle;
 
-  private long _freeTime;
+  private long _idleStartTime;
 
   private String _debugId;
 
@@ -106,7 +106,7 @@ public class ClusterStream {
    */
   public ReadStream getReadStream()
   {
-    _freeTime = 0;
+    _idleStartTime = 0;
 
     return _is;
   }
@@ -116,7 +116,7 @@ public class ClusterStream {
    */
   public WriteStream getWriteStream()
   {
-    _freeTime = 0;
+    _idleStartTime = 0;
 
     return _os;
   }
@@ -172,38 +172,52 @@ public class ClusterStream {
   }
 
   /**
-   * Returns the free time, i.e. the time the connection was last idle.
+   * Returns the idle start time, 
+   * i.e. the time the connection was last idle.
    */
-  public long getFreeTime()
+  public long getIdleStartTime()
   {
-    return _freeTime;
+    return _idleStartTime;
   }
 
   /**
-   * Sets the free time.
+   * Sets the idle start time. Because of clock skew and
+   * tcp delays, it's often better to use the request
+   * start time instead of the request end time for the
+   * idle start time.
    */
-  public void setFreeTime(long freeTime)
+  public void setIdleStartTime(long idleStartTime)
   {
-    _freeTime = freeTime;
+    _idleStartTime = idleStartTime;
   }
 
   /**
-   * Sets the free time.
+   * Sets the idle start time.
    */
-  public void clearFreeTime()
+  public void clearIdleStartTime()
   {
-    _freeTime = 0;
+    _idleStartTime = 0;
     _is.clearReadTime();
   }
 
   /**
    * Returns true if nearing end of free time.
    */
-  public boolean isLongIdle()
+  public boolean isIdleExpired()
   {
     long now = Alarm.getCurrentTime();
 
-    return (_pool.getLoadBalanceIdleTime() < now - _freeTime + 2000L);
+    return (_pool.getLoadBalanceIdleTime() < now - _idleStartTime);
+  }
+
+  /**
+   * Returns true if nearing end of free time.
+   */
+  public boolean isIdleAlmostExpired(long delta)
+  {
+    long now = Alarm.getCurrentTime();
+
+    return (_pool.getLoadBalanceIdleTime() < now - _idleStartTime + delta);
   }
 
   //
@@ -254,8 +268,15 @@ public class ClusterStream {
 
   /**
    * Adds the stream to the free pool.
+   *
+   * The idleStartTime may be earlier than the current time
+   * to deal with TCP buffer delays. Typically it will be
+   * recorded as the start time of the request's write.
+   * 
+   * @param idleStartTime the time to be used as the start 
+   * of the idle period.
    */
-  public void free()
+  public void free(long idleStartTime)
   {
     if (_is == null) {
       IllegalStateException exn = new IllegalStateException(L.l("{0} unexpected free of closed stream", this));
@@ -274,14 +295,16 @@ public class ClusterStream {
 
     // #2369 - the load balancer might set its own view of the free
     // time
-    if (_freeTime <= 0) {
-      _freeTime = _is.getReadTime();
+    if (idleStartTime <= 0) {
+      idleStartTime = _is.getReadTime();
 
-      if (_freeTime <= 0) {
+      if (idleStartTime <= 0) {
         // for write-only, the read time is zero
-        _freeTime = Alarm.getCurrentTime();
+        idleStartTime = Alarm.getCurrentTime();
       }
     }
+    
+    _idleStartTime = idleStartTime;
 
     _idleProbe.start();
     _isIdle = true;
