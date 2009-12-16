@@ -61,15 +61,18 @@ public class TcpPath extends Path {
     _port = port == 0 ? 80 : port;
 
     if (newAttributes != null) {
-      Object timeout = newAttributes.get("connect-timeout");
+      Object connTimeout = newAttributes.get("connect-timeout");
 
-      if (timeout instanceof Number)
-        _connectTimeout = ((Number) timeout).longValue();
+      if (connTimeout instanceof Number)
+        _connectTimeout = ((Number) connTimeout).longValue();
+      
+      Object socketTimeout = newAttributes.get("socket-timeout");
 
-      timeout = newAttributes.get("timeout");
+      if (socketTimeout == null)
+        socketTimeout = newAttributes.get("timeout");
 
-      if (timeout instanceof Number)
-        _socketTimeout = ((Number) timeout).longValue();
+      if (socketTimeout instanceof Number)
+        _socketTimeout = ((Number) socketTimeout).longValue();
     }
   }
 

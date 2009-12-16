@@ -45,17 +45,18 @@ public class TempInputStream extends InputStream {
   public int read()
     throws IOException
   {
-    if (_head == null)
+    TempBuffer head = _head;
+    
+    if (head == null)
       return -1;
 
-    int value = _head._buf[_offset++] & 0xff;
+    int value = head._buf[_offset++] & 0xff;
 
-    if (_head._length <= _offset) {
-      TempBuffer next = _head._next;
+    if (head._length <= _offset) {
+      _head = head._next;
 
-      _head._next = null;
-      TempBuffer.free(_head);
-      _head = next;
+      head._next = null;
+      TempBuffer.free(head);
       _offset = 0;
     }
 
@@ -65,22 +66,23 @@ public class TempInputStream extends InputStream {
   @Override
   public int read(byte []buf, int offset, int length) throws IOException
   {
-    if (_head == null)
+    TempBuffer head = _head;
+    
+    if (head == null)
       return -1;
 
-    int sublen = _head._length - _offset;
+    int sublen = head._length - _offset;
 
     if (length < sublen)
       sublen = length;
 
-    System.arraycopy(_head._buf, _offset, buf, offset, sublen);
+    System.arraycopy(head._buf, _offset, buf, offset, sublen);
 
-    if (_head._length <= _offset + sublen) {
-      TempBuffer next = _head._next;
+    if (head._length <= _offset + sublen) {
+      _head = head._next;
 
-      _head._next = null;
-      TempBuffer.free(_head);
-      _head = next;
+      head._next = null;
+      TempBuffer.free(head);
       _offset = 0;
     }
     else
@@ -102,10 +104,11 @@ public class TempInputStream extends InputStream {
   public void close()
     throws IOException
   {
-    if (_head != null)
-      TempBuffer.freeAll(_head);
-    
+    TempBuffer head = _head;
     _head = null;
+    
+    if (head != null)
+      TempBuffer.freeAll(head);
   }
 
   @Override

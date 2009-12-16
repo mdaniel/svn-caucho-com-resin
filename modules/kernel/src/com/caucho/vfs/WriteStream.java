@@ -91,7 +91,6 @@ public class WriteStream extends OutputStreamWithBuffer
   private boolean _disableFlush;
   private boolean reuseBuffer;
 
-  private StreamWriter _writer;
   private StreamPrintWriter _printWriter;
 
   private String newline = "\n";
@@ -124,7 +123,7 @@ public class WriteStream extends OutputStreamWithBuffer
     _disableClose = false;
     _isDisableCloseSource = false;
 
-    if (this._source != null && this._source != source) {
+    if (_source != null && _source != source) {
       try {
         close();
       } catch (IOException e) {
@@ -1229,12 +1228,13 @@ public class WriteStream extends OutputStreamWithBuffer
         _writeEncoding = null;
 
       if (! reuseBuffer) {
-        if (_tempWrite != null) {
-          TempBuffer.free(_tempWrite);
-          _tempWrite = null;
-        }
+        TempBuffer tempWrite = _tempWrite;
         _tempWrite = null;
         _writeBuffer = null;
+        
+        if (tempWrite != null) {
+          TempBuffer.free(tempWrite);
+        }
       }
 
       if (s != null && ! _isDisableCloseSource)
@@ -1249,13 +1249,14 @@ public class WriteStream extends OutputStreamWithBuffer
   {
     _source = null;
 
-    if (_tempWrite != null) {
-      TempBuffer.free(_tempWrite);
-      _tempWrite = null;
-    }
-
+    TempBuffer tempWrite = _tempWrite;
+    
     _tempWrite = null;
     _writeBuffer = null;
+    
+    if (tempWrite != null) {
+      TempBuffer.free(tempWrite);
+    }
   }
 
 

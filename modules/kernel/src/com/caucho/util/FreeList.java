@@ -40,6 +40,7 @@ import java.util.concurrent.atomic.AtomicReferenceArray;
  * do nothing.
  */
 public final class FreeList<T> {
+  private final int _size;
   private final AtomicReferenceArray<T> _freeStack;
   private final AtomicInteger _top = new AtomicInteger();
 
@@ -50,7 +51,8 @@ public final class FreeList<T> {
    */
   public FreeList(int size)
   {
-    _freeStack = new AtomicReferenceArray(size);
+    _size = size;
+    _freeStack = new AtomicReferenceArray<T>(size);
   }
   
   /**
@@ -77,9 +79,9 @@ public final class FreeList<T> {
    */
   public boolean free(T obj)
   {
-    int top = _top.get();
+    final int top = _top.get();
 
-    if (top < _freeStack.length()) {
+    if (top < _size) {
       boolean isFree = _freeStack.compareAndSet(top, null, obj);
       
       _top.compareAndSet(top, top + 1);
@@ -88,11 +90,6 @@ public final class FreeList<T> {
     }
     else
       return false;
-  }
-
-  public boolean allowFree(T obj)
-  {
-    return _top.get() < _freeStack.length();
   }
 
   /**
@@ -114,7 +111,7 @@ public final class FreeList<T> {
    */
   public boolean checkDuplicate(T obj)
   {
-    int top = _top.get();
+    final int top = _top.get();
 
     for (int i = top - 1; i >= 0; i--) {
       if (_freeStack.get(i) == obj)

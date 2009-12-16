@@ -50,17 +50,22 @@ public class TempBuffer implements java.io.Serializable {
     = new FreeList<TempBuffer>(32);
 
   private static final boolean _isSmallmem;
+  
   public static final int SMALL_SIZE;
   public static final int LARGE_SIZE;
   public static final int SIZE;
-
+  
+  private static boolean _isFreeException;
+  
   TempBuffer _next;
   final byte []_buf;
   int _offset;
   int _length;
   int _bufferCount;
 
-  private boolean _isFree;
+  // validation of allocate/free
+  private transient boolean _isFree;
+  private transient RuntimeException _freeException;
 
   /**
    * Create a new TempBuffer.
@@ -211,39 +216,6 @@ public class TempBuffer implements java.io.Serializable {
     return length;
   }
 
-  public static TempBuffer copyFromStream(ReadStream is)
-    throws IOException
-  {
-    TempBuffer head = TempBuffer.allocate();
-    TempBuffer tail = head;
-    int len;
-
-    while ((len = is.readAll(tail._buf, 0, tail._buf.length)) == tail._buf.length) {
-      TempBuffer buf = TempBuffer.allocate();
-      tail._length = len;
-      tail._next = buf;
-      tail = buf;
-    }
-
-    if (len == 0 && head == tail)
-      return null; // XXX: TempBuffer leak of _head?
-    else if (len == 0) {
-      for (TempBuffer ptr = head; ptr.getNext() != null; ptr = ptr.getNext()) {
-        TempBuffer next = ptr.getNext();
-
-	if (next.getNext() == null) {
-	  TempBuffer.free(next);
-          next = null;
-	  ptr._next = null;
-	}
-      }
-    }
-    else
-      tail._length = len;
-
-    return head;
-  }
-
   /**
    * Frees a single buffer.
    */
@@ -251,19 +223,25 @@ public class TempBuffer implements java.io.Serializable {
   {
     buf._next = null;
     
-    if (buf._isFree) // XXX:
+    if (buf._isFree) {
+      _isFreeException = true;
+      RuntimeException freeException = buf._freeException;
+      RuntimeException secondException = new IllegalStateException("duplicate free");
+      secondException.fillInStackTrace();
+      
+      log().log(Level.WARNING, "initial free location", freeException);
+      log().log(Level.WARNING, "secondary free location", secondException);
+      
       throw new IllegalStateException();
+    }
+    
+    buf._isFree = true;
 
     if (buf._buf.length == SIZE) {
-      if (buf._isFree) {
-	RuntimeException e
-	  = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
-	log().log(Level.SEVERE, e.toString(), e);
-	throw e;
+      if (_isFreeException) {
+        buf._freeException = new IllegalStateException("initial free");
+        buf._freeException.fillInStackTrace();
       }
-
-      buf._isFree = true;
-      
       _freeList.free(buf);
     }
   }
@@ -274,19 +252,7 @@ public class TempBuffer implements java.io.Serializable {
       TempBuffer next = buf._next;
       buf._next = null;
       
-      if (buf._buf.length == SIZE) {
-	if (buf._isFree) {
-	  RuntimeException e
-	    = new IllegalStateException("illegal TempBuffer.free.  Please report at http://bugs.caucho.com");
-	  
-	  log().log(Level.SEVERE, e.toString(), e);
-	  throw e;
-	}
-
-	buf._isFree = true;
-      
-	_freeList.free(buf);
-      }
+      free(buf);
       
       buf = next;
     }

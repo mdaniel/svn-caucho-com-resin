@@ -64,25 +64,26 @@ public class TempReadStream extends StreamImpl {
   @Override
   public int read(byte []buf, int offset, int length) throws IOException
   {
-    if (_cursor == null)
+    TempBuffer cursor = _cursor;
+    
+    if (cursor == null)
       return -1;
 
-    int sublen = _cursor._length - _offset;
+    int sublen = cursor._length - _offset;
 
     if (length < sublen)
       sublen = length;
 
-    System.arraycopy(_cursor._buf, _offset, buf, offset, sublen);
+    System.arraycopy(cursor._buf, _offset, buf, offset, sublen);
 
-    if (_cursor._length <= _offset + sublen) {
-      TempBuffer next = _cursor._next;
+    if (cursor._length <= _offset + sublen) {
+      _cursor = cursor._next;
 
       if (_freeWhenDone) {
-	_cursor._next = null;
-        TempBuffer.free(_cursor);
-        _cursor = null;
+	cursor._next = null;
+        TempBuffer.free(cursor);
+        cursor = null;
       }
-      _cursor = next;
       _offset = 0;
     }
     else
