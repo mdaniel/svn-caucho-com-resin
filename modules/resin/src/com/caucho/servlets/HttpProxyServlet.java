@@ -29,6 +29,7 @@
 
 package com.caucho.servlets;
 
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.config.types.*;
@@ -152,6 +153,8 @@ public class HttpProxyServlet extends GenericServlet {
     ClusterStream stream = _loadBalancer.openServer(sessionId, null);
 
     try {
+      long startRequestTime = Alarm.getCurrentTime();
+      
       if (stream == null) {
         log.warning(L.l("{0}: no backend servers available to process {1}",
                         this, req.getRequestURI()));
@@ -159,7 +162,7 @@ public class HttpProxyServlet extends GenericServlet {
         res.sendError(503); // send a busy
       }
       else if (handleRequest(req, res, uri, stream)) {
-        stream.free();
+        stream.free(startRequestTime);
         stream = null;
         return;
       }

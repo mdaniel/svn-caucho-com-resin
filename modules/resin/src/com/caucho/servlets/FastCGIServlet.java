@@ -232,8 +232,10 @@ public class FastCGIServlet extends GenericServlet {
       // fcgiSocket.setExpire(Alarm.getCurrentTime() + _keepaliveTimeout);
 
       boolean isKeepalive = true;
+      long startRequestTime = Alarm.getCurrentTime();
+      
       if (handleRequest(req, res, stream, out, isKeepalive)) {
-        stream.free();
+        stream.free(startRequestTime);
         stream = null;
       }
     } catch (Exception e) {
