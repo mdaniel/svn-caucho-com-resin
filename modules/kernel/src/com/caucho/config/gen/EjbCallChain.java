@@ -37,6 +37,7 @@ import com.caucho.java.JavaWriter;
  * Represents a filter for invoking a method
  * 
  * <code><pre>
+ * [method-prologue]
  * MyType foo(args)
  * {
  *   [pre-try]

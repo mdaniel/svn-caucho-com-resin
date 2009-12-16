@@ -369,6 +369,13 @@ public class InjectManager
       if (webBeans == null) {
         EnvironmentClassLoader envLoader
           = Environment.getEnvironmentClassLoader(loader);
+        
+        // ejb doesn't create a new InjectManager even though it's a new
+        // environment
+        if (envLoader != null 
+            && Boolean.FALSE.equals(envLoader.getAttribute("caucho.inject"))) {
+          webBeans = create(envLoader.getParent());
+        }
 
         String id;
 
@@ -377,7 +384,8 @@ public class InjectManager
         else
           id = "";
 
-        webBeans = new InjectManager(id, null, envLoader, true);
+        if (webBeans == null)
+          webBeans = new InjectManager(id, null, envLoader, true);
 
         // _localContainer.set(webBeans, loader);
       }

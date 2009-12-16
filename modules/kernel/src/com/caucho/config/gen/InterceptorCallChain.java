@@ -255,7 +255,7 @@ public class InterceptorCallChain
       _interceptionType = InterceptionType.AROUND_INVOKE;
       _interceptorBinding.addAll(interceptorTypes.values());
     }
-
+        
     ArrayList<Type> decorators = _view.getBean().getDecoratorTypes();
 
     for (Type decorator : decorators) {
@@ -266,6 +266,8 @@ public class InterceptorCallChain
           _decoratorType = decoratorClass;
       }
     }
+    
+    introspectDefaults();
   }
 
   private void addInterceptorBindings(HashMap<Class<?>,Annotation> interceptorTypes,
@@ -289,6 +291,23 @@ public class InterceptorCallChain
       for (Annotation subAnn : annType.getAnnotations()) {
         addInterceptorBindings(interceptorTypes, subAnn);
       }
+    }
+  }
+
+  public void introspectDefaults()
+  {
+    // XXX: this code should be a pre-generation
+    // ejb/0fb6
+    if (! _isExcludeClassInterceptors && _interceptors.size() == 0) {
+      for (Class<?> iClass : _classInterceptors) {
+        if (_interceptors.indexOf(iClass) < 0)
+          _interceptors.add(iClass);
+      }
+    }
+
+    for (Class<?> iClass : _methodInterceptors) {
+      if (_interceptors.indexOf(iClass) < 0)
+        _interceptors.add(iClass);
     }
   }
   
@@ -539,19 +558,6 @@ public class InterceptorCallChain
       _interceptors.addAll(_view.getBean().getDefaultInterceptors());
     */
 
-    // ejb/0fb6
-    if (! _isExcludeClassInterceptors && _interceptors.size() == 0) {
-      for (Class<?> iClass : _classInterceptors) {
-        if (_interceptors.indexOf(iClass) < 0)
-          _interceptors.add(iClass);
-      }
-    }
-
-    for (Class<?> iClass : _methodInterceptors) {
-      if (_interceptors.indexOf(iClass) < 0)
-        _interceptors.add(iClass);
-    }
-
     if (hasInterceptor())
       generateInterceptorPrologue(out, map);
 
@@ -666,7 +672,6 @@ public class InterceptorCallChain
 
       int []indexChain = new int[_interceptors.size()];
 
-      // XXX: reduce number of static blocks
       out.println("static {");
       out.pushDepth();
       for (int i = 0; i < _interceptors.size(); i++) {
@@ -1222,8 +1227,11 @@ public class InterceptorCallChain
 
       out.println("}");
     }
-    else {
+    else if (hasDecorator()) {
       generateDelegator(out);
+    }
+    else {
+      throw new IllegalStateException();
     }
   }
   
@@ -1267,6 +1275,9 @@ public class InterceptorCallChain
   protected void generateDelegator(JavaWriter out)
     throws IOException
   {
+    if (_decoratorLocalVar == null)
+      throw new NullPointerException();
+    
     out.print(_decoratorLocalVar);
     out.print(".set(new " + _decoratorClass + "(");
     out.println(_decoratorBeanVar + "_i.length));");

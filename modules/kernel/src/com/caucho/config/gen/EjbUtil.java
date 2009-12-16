@@ -85,7 +85,7 @@ public class EjbUtil {
     }
 
     for (int i = 0; i < interceptors.size(); i++) {
-      Interceptor interceptor = interceptors.get(i);
+      Interceptor<?> interceptor = interceptors.get(i);
 
       int index = beans.indexOf(interceptor);
       if (index >= 0)
