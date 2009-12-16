@@ -1046,12 +1046,12 @@ function error_report($testname, $logname, $tested)
 
 function get_quercus_cmd()
 {
-  return get_quercus_cmd_impl("com.caucho.quercus.QuercusEngine");
+  return get_quercus_cmd_impl("com.caucho.quercus.CliQuercus");
 }
 
 function get_quercus_cgi_cmd()
 {
-  return get_quercus_cmd_impl("com.caucho.quercus.QuercusCgiEngine");
+  return get_quercus_cmd_impl("com.caucho.quercus.CgiQuercus");
 }
 
 function get_quercus_cmd_impl($class_name)

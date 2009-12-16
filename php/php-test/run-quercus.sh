@@ -25,6 +25,6 @@ else
   PATH_SEP=\:
 fi
 
-QUERCUS_CLASS=com.caucho.quercus.QuercusEngine
+QUERCUS_CLASS=com.caucho.quercus.CliQuercus
 
 exec $JAVA_EXE -cp ${RESIN_HOME}/lib/resin.jar${PATH_SEP}${RESIN_HOME}/lib/quercus.jar${PATH_SEP}${RESIN_HOME}/lib/resin-kernel.jar${PATH_SEP}${RESIN_HOME}/lib/pro.jar${PATH_SEP}${PRO_HOME}/lib/pro.jar${PATH_SEP}${PRO_HOME}/lib/license.jar ${QUERCUS_CLASS} $*
