@@ -1744,18 +1744,22 @@ public class Env {
    */
   public Value getValue(String name)
   {
-    EnvVar var = getEnvVar(name);
-
-    // XXX: not auto-create?
-
-    return var.get();
-
-    /*
+    return getValue(name, true, false);
+  }
+  
+  /**
+   * Gets a value.
+   */
+  public Value getValue(String name,
+                        boolean isAutoCreate,
+                        boolean isOutputNotice)
+  {
+    EnvVar var = getEnvVar(name, isAutoCreate, isOutputNotice);
+    
     if (var != null)
-      return var.toValue();
+      return var.get();
     else
       return NullValue.NULL;
-    */
   }
 
   /**
@@ -1855,7 +1859,7 @@ public class Env {
    */
   public Var getRef(String name, boolean isAutoCreate)
   {
-    EnvVar envVar = getEnvVar(name, isAutoCreate);
+    EnvVar envVar = getEnvVar(name, isAutoCreate, true);
 
     if (envVar != null)
       return envVar.getRef();
@@ -1885,7 +1889,7 @@ public class Env {
 
   public final EnvVar getEnvVar(String name)
   {
-    return getEnvVar(name, true);
+    return getEnvVar(name, true, false);
   }
 
   /**
@@ -1894,7 +1898,9 @@ public class Env {
    * @param name the variable name
    * @param var the current value of the variable
    */
-  public final EnvVar getEnvVar(String name, boolean isAutoCreate)
+  public final EnvVar getEnvVar(String name,
+                                boolean isAutoCreate,
+                                boolean isOutputNotice)
   {
     EnvVar envVar = _map.get(name);
 
@@ -1902,7 +1908,7 @@ public class Env {
       return envVar;
 
     if (_map == _globalMap)
-      return getGlobalEnvVar(name, isAutoCreate);
+      return getGlobalEnvVar(name, isAutoCreate, isOutputNotice);
 
     envVar = getSuperGlobalRef(name, true, false);
 
@@ -1912,7 +1918,8 @@ public class Env {
     else {
       if (! isAutoCreate) {
         // php/0206
-        notice(L.l("${0} is an undefined variable", name));
+        if (isOutputNotice)
+          notice(L.l("${0} is an undefined variable", name));
 
         return null;
       }
@@ -1932,7 +1939,7 @@ public class Env {
    */
   public final EnvVar getGlobalEnvVar(String name)
   {
-    return getGlobalEnvVar(name, true);
+    return getGlobalEnvVar(name, true, false);
   }
 
   /**
@@ -1941,7 +1948,9 @@ public class Env {
    * @param name the variable name
    * @param isAutoCreate
    */
-  public final EnvVar getGlobalEnvVar(String name, boolean isAutoCreate)
+  public final EnvVar getGlobalEnvVar(String name,
+                                      boolean isAutoCreate,
+                                      boolean isOutputNotice)
   {
     EnvVar envVar = _globalMap.get(name);
 
@@ -1966,7 +1975,9 @@ public class Env {
 
     if (envVar == null) {
       if (! isAutoCreate) {
-        notice(L.l("${0} is an undefined variable", name));
+        
+        if (isOutputNotice)
+          notice(L.l("${0} is an undefined variable", name));
          
         return null;
       }
@@ -4001,6 +4012,7 @@ public class Env {
                          _classDef,
                          _qClass,
                          _const,
+                         _staticMap,
                          _globalMap,
                          _includeMap,
                          _importMap);
@@ -4054,6 +4066,11 @@ public class Env {
 
     System.arraycopy(constList, 0, _const, 0, constList.length);
 
+    IntMap staticNameMap = saveState.getStaticNameMap();
+    Value []staticList = saveState.getStaticList();
+    
+    _staticMap = new LazyStaticMap(staticNameMap, staticList);
+    
     IntMap globalNameMap = saveState.getGlobalNameMap();
     Value []globalList = saveState.getGlobalList();
 
@@ -4073,7 +4090,7 @@ public class Env {
     }
 
     // php/404j - include_once
-    HashMap<Path,QuercusPage> includeMap = saveState.getIncludeMap();
+    Map<Path,QuercusPage> includeMap = saveState.getIncludeMap();
     _includeMap = new HashMap<Path,QuercusPage>(includeMap);
 
     // php/404l
@@ -6176,6 +6193,8 @@ public class Env {
       if (log.isLoggable(Level.FINER)) {
         log.log(Level.FINER, exn.toString(), exn);
       }
+      
+      throw exn;
     }
 
     return NullValue.NULL;

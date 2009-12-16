@@ -238,7 +238,7 @@ public class ServerArrayValue extends ArrayValueImpl
     if (! _isFilled)
       fillMap();
     
-    return new ArrayValueImpl(this);
+    return super.copy();
   }
 
   /**
@@ -434,7 +434,7 @@ public class ServerArrayValue extends ArrayValueImpl
     if (! _isFilled)
       fillMap();
     
-    return new ArrayValueImpl(this);
+    return super.copy();
   }
 }
 

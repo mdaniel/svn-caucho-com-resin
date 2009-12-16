@@ -363,6 +363,19 @@ abstract public class Expr {
    * @return the expression value.
    */
   abstract public Value eval(Env env);
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalTop(Env env)
+  {
+    return eval(env);
+  }
+  
 
   /**
    * Evaluates the expression, with the object expected to be modified,

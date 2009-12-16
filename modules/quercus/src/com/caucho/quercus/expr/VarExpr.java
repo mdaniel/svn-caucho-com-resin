@@ -42,8 +42,6 @@ import com.caucho.quercus.parser.QuercusParser;
 public class VarExpr
   extends AbstractVarExpr
 {
-  private static final NullValue NULL = NullValue.create();
-
   private final VarInfo _var;
   protected final String _name;
 
@@ -135,14 +133,19 @@ public class VarExpr
    */
   public Value eval(Env env)
   {
-    Value value;
-
-    value = env.getValue(_name);
-
-    if (value != null)
-      return value;
-    else
-      return NULL;
+    return env.getValue(_name, false, true);
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   * @return the expression value.
+   */
+  @Override
+  public Value evalTop(Env env)
+  {
+    return env.getValue(_name, false, false);
   }
 
   /**
@@ -154,9 +157,7 @@ public class VarExpr
   @Override
   public Value evalCopy(Env env)
   {
-    Value v = eval(env);
-    
-    return v.copy();
+    return eval(env).copy();
   }
 
   /**

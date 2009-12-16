@@ -51,11 +51,14 @@ public class SaveState {
   private QuercusClass []_qClass;
 
   private Value []_const;
+  
+  private IntMap _staticNameMap = new IntMap();
+  private Value []_staticValues;
 
   private IntMap _globalNameMap = new IntMap();
   private Value []_globalValues;
   
-  private HashMap<Path,QuercusPage> _includeMap;
+  private Map<Path,QuercusPage> _includeMap;
   private ImportMap _importMap;
 
   /**
@@ -66,6 +69,7 @@ public class SaveState {
             ClassDef []classDef,
             QuercusClass []qClass,
             Value []constants,
+            Map<String,Var> staticMap,
             Map<String,EnvVar> globalMap,
             HashMap<Path,QuercusPage> includeMap,
             ImportMap importMap)
@@ -81,7 +85,8 @@ public class SaveState {
     
     _const = new Value[constants.length];
     System.arraycopy(constants, 0, _const, 0, constants.length);
-
+    
+    saveStatics(env, staticMap);
     saveGlobals(env, globalMap);
     
     _includeMap = new HashMap<Path,QuercusPage>(includeMap);
@@ -121,6 +126,22 @@ public class SaveState {
   {
     return _const;
   }
+  
+  /**
+   * Returns the global name map
+   */
+  public IntMap getStaticNameMap()
+  {
+    return _staticNameMap;
+  }
+  
+  /**
+   * Returns the constant list
+   */
+  public Value []getStaticList()
+  {
+    return _staticValues;
+  }
 
   /**
    * Returns the global name map
@@ -141,7 +162,7 @@ public class SaveState {
   /**
    * Returns the list of included pages.
    */
-  public HashMap<Path,QuercusPage> getIncludeMap()
+  public Map<Path,QuercusPage> getIncludeMap()
   {
     return _includeMap;
   }
@@ -158,6 +179,17 @@ public class SaveState {
   {
     return false;
   }
+  
+  private void saveStatics(Env env, Map<String,Var> staticMap)
+  {
+    _staticValues = new Value[staticMap.size()];
+
+    for (Map.Entry<String,Var> entry : staticMap.entrySet()) {
+      int id = addStaticName(entry.getKey());
+
+      _staticValues[id] = entry.getValue().toValue().copy(env);
+    }
+  }
 
   private void saveGlobals(Env env, Map<String,EnvVar> globalMap)
   {
@@ -173,6 +205,19 @@ public class SaveState {
 
       _globalValues[id] = envVar.get().copy(env);
     }
+  }
+  
+  private int addStaticName(String name)
+  {
+    int id = _staticNameMap.get(name);
+
+    if (id >= 0)
+      return id;
+
+    id = _staticNameMap.size();
+    _staticNameMap.put(name, id);
+
+    return id;
   }
 
   private int addGlobalName(String name)

@@ -265,7 +265,7 @@ public class Post
           mimeType = (String) ms.getAttribute("content-type");
           
           // php/085f
-          if (mimeType.endsWith(";"))
+          if (mimeType != null && mimeType.endsWith(";"))
             mimeType = mimeType.substring(0, mimeType.length() - 1);
         }
 
