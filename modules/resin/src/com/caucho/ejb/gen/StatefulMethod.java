@@ -178,9 +178,7 @@ public class StatefulMethod extends BusinessMethodGenerator
                   + getBeanClass().getSimpleName() + " is no longer valid\");");
     }
 
-    if (_isRemove) {
-      out.println("boolean isRemove = false;");
-    }
+    out.println("boolean isValid = false;");
     
     out.println("if (_isActive)");
     out.println("  throw new EJBException(\"session bean is not reentrant\");");
@@ -188,37 +186,6 @@ public class StatefulMethod extends BusinessMethodGenerator
     
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
-  }
-  
-  @Override
-  public void generateFinally(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("_isActive = false;");
-    out.println();
-    
-    if (_isRemoveRetainIfException) {
-      out.println("if (isRemove) {");
-      out.pushDepth();
-    }
-    
-    out.println("boolean isValid = _isValid;");
-    out.println("_isValid = false;");
-    out.println();
-    out.println("if (isValid)");
-    out.print("  _server.destroyInstance(");
-    generateThis(out);
-    out.println(");");
-    
-    if (_isRemoveRetainIfException) {
-      out.popDepth();
-      out.println("}");
-    }
-    
-    out.println("thread.setContextClassLoader(oldLoader);");
-    
-    super.generateFinally(out);
   }
 
   @Override
@@ -234,19 +201,52 @@ public class StatefulMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
-  /*
   @Override
   public void generatePostCall(JavaWriter out)
     throws IOException
   {
-    out.popDepth();
-    out.println("} finally {");
-    out.println("  thread.setContextClassLoader(oldLoader);");
-    out.println("  _isActive = false;");
-    
-    out.println("}");
+    out.println("isValid = true;");
   }
-  */
+
+  /**
+   * Generates the underlying bean instance
+   */
+  @Override
+  public void generateApplicationException(JavaWriter out,
+                                           Class<?> exn)
+    throws IOException
+  {
+    out.println("isValid = true;");
+  }
+
+  @Override
+  public void generateFinally(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("_isActive = false;");
+    out.println();
+    
+    if (! _isRemoveRetainIfException) {
+      out.println("if (! isValid) {");
+      out.pushDepth();
+    
+      out.println("boolean isOldValid = _isValid;");
+      out.println("_isValid = false;");
+      out.println();
+      out.println("if (isOldValid)");
+      out.print("  _server.destroyInstance(");
+      generateThis(out);
+      out.println(");");
+    
+      out.popDepth();
+      out.println("}");
+    }
+    
+    out.println("thread.setContextClassLoader(oldLoader);");
+    
+    super.generateFinally(out);
+  }
 
   /**
    * Generates the underlying bean instance

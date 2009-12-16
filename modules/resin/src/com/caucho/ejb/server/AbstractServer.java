@@ -162,6 +162,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
     _ejbContainer = container;
 
     _loader = EnvironmentClassLoader.create(container.getClassLoader());
+    _loader.setAttribute("caucho.inject", false);
     
     _producer = new EjbProducer(this, annotatedType);
   }

@@ -528,7 +528,8 @@ public class StatelessObjectView extends StatelessView {
     if (_timeoutMethod != null) {
       String localVar = "_local_" + getViewClass().getSimpleName();
 
-      out.println(getViewClass().getSimpleName() + " bean = " + localVar
+      out.println(getBeanClass().getName() + " bean = " 
+                  + localVar
                   + "._ejb_begin();");
       out.println("bean." + _timeoutMethod + "(timer);");
       // XXX: needs try-finally

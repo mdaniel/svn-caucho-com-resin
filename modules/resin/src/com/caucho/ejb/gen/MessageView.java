@@ -118,8 +118,8 @@ public class MessageView extends View {
   public void generate(JavaWriter out)
     throws IOException
   {
-    HashMap map = new HashMap();
-    map.put("caucho.ejb.xa", "done");
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    //map.put("caucho.ejb.xa", "done");
 
     /* ejb/0fbm
     for (BusinessMethodGenerator bizMethod : _businessMethods) {

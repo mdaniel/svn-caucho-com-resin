@@ -74,9 +74,11 @@ public class MessageXaCallChain extends XaCallChain
   */
 
   @Override
-  protected void generateNext(JavaWriter out)
+  public void generatePreCall(JavaWriter out)
     throws IOException
   {
+    super.generatePreCall(out);
+    
     if (REQUIRED.equals(getTransactionType())) {
       out.println();
       out.println("if (_xaResource != null)");
@@ -84,7 +86,5 @@ public class MessageXaCallChain extends XaCallChain
     }
 
     out.println("/* ... */");
-      
-    super.generateNext(out);
   }
 }
