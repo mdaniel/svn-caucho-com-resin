@@ -482,7 +482,7 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public Value reset()
   {
-    throw new UnsupportedOperationException();
+    return BooleanValue.FALSE;
   }
 
   /**
@@ -490,7 +490,7 @@ abstract public class JavaAdapter extends ArrayValue
    */
   public Value end()
   {
-    throw new UnsupportedOperationException();
+    return BooleanValue.FALSE;
   }
 
   /**
