@@ -351,8 +351,6 @@ public class InterceptorCallChain
       out.println("__caucho_interceptor_objects;");
     }
 
-    _uniqueName = "_" + _implMethod.getName() + "_v" + out.generateId();
-    
     generateBeanInterceptorChain(out, map);
     
     _bizMethod.generateInterceptorTarget(out);
@@ -390,6 +388,8 @@ public class InterceptorCallChain
       out.popDepth();
       out.println("}");
     }
+    
+    generateConstructorImpl(out, map);
   }
 
   private void generateConstructorImpl(JavaWriter out,
@@ -408,9 +408,22 @@ public class InterceptorCallChain
       out.println(") __caucho_manager.getInstance(" + var + "_f);");
     }
 
+    _decoratorClass = (String) map.get("decorator_class");
+
+    if (_decoratorClass == null) {
+      _decoratorClass = getUniqueName(out) + "_class";
+      _decoratorLocalVar = _decoratorClass + "_tl";
+
+      map.put("decorator_class", _decoratorClass);
+    }
+    
+    if (_decoratorBeanVar == null)
+      _decoratorBeanVar = getUniqueName(out) + "_bean";
+
+
     if (_decoratorType != null) {
       out.println();
-      out.println("if (" + _delegateVar + " == null) {");
+      out.println("if (" + getDelegateVar(out) + " == null) {");
       out.pushDepth();
 
       out.println("if (" + _decoratorBeanVar + " == null) {");
@@ -425,6 +438,9 @@ public class InterceptorCallChain
       out.println("}");
 
       String className = _decoratorClass;
+      
+      if (_decoratorClass == null)
+        throw new NullPointerException();
 
       /*
       generateThis(out);
@@ -440,8 +456,8 @@ public class InterceptorCallChain
       */
 
       out.println();
-      out.println("if (" + _delegateVar + " == null)");
-      out.println("  " + _delegateVar + " = new " + className + "(0);");
+      out.println("if (" + getDelegateVar(out) + " == null)");
+      out.println("  " + getDelegateVar(out) + " = new " + className + "(0);");
 
       out.println();
       out.println("if (" + _decoratorBeanVar + "_i == null) {");
@@ -449,7 +465,7 @@ public class InterceptorCallChain
       out.print(_decoratorBeanVar + "_i = ");
       out.print("com.caucho.config.gen.EjbUtil.generateProxyDelegate(");
       out.print("__caucho_manager, ");
-      out.println(_decoratorBeanVar + ", " + _delegateVar + ");");
+      out.println(_decoratorBeanVar + ", " + getDelegateVar(out) + ");");
       out.popDepth();
       out.println("}");
 
@@ -471,7 +487,7 @@ public class InterceptorCallChain
       return;
     }
 
-    _chainName = _uniqueName;
+    _chainName = getUniqueName(out);
     map.put(_bindingEntry, _chainName);
 
     if (_interceptors.size() > 0) {
@@ -551,7 +567,6 @@ public class InterceptorCallChain
       out.println(">();");
     }
 
-    _uniqueName = "_" + _implMethod.getName() + "_v" + out.generateId();
 
     /* XXX:
     if (! _isExcludeDefaultInterceptors)
@@ -559,15 +574,15 @@ public class InterceptorCallChain
     */
 
     if (hasInterceptor())
-      generateInterceptorPrologue(out, map);
+      generateInterceptorMethodPrologue(out, map);
 
     if (hasDecorator())
-      generateDecoratorPrologue(out, map);
+      generateDecoratorMethodPrologue(out, map);
     
     // _bizMethod.generateInterceptorTarget(out);
   }
 
-  public void generateInterceptorPrologue(JavaWriter out, 
+  public void generateInterceptorMethodPrologue(JavaWriter out, 
                                           HashMap<String,Object> map)
     throws IOException
   {
@@ -580,12 +595,10 @@ public class InterceptorCallChain
     throws IOException
   {
     out.println();
-    out.println("private static java.lang.reflect.Method " +
-                _uniqueName +
-                "_method;");
-    out.println("private static java.lang.reflect.Method " +
-                _uniqueName +
-                "_implMethod;");
+    out.println("private static java.lang.reflect.Method "
+                + getUniqueName(out) + "_method;");
+    out.println("private static java.lang.reflect.Method "
+                + getUniqueName(out) + "_implMethod;");
 
     boolean isAroundInvokePrologue = false;
     if (getAroundInvokeMethod() != null
@@ -604,13 +617,13 @@ public class InterceptorCallChain
     out.println("try {");
     out.pushDepth();
 
-    out.print(_uniqueName + "_method = ");
+    out.print(getUniqueName(out) + "_method = ");
     generateGetMethod(out,
                       _implMethod.getDeclaringClass().getName(),
                       _implMethod.getName(),
                       _implMethod.getParameterTypes());
     out.println(";");
-    out.println(_uniqueName + "_method.setAccessible(true);");
+    out.println(getUniqueName(out) + "_method.setAccessible(true);");
 
     String superMethodName;
 
@@ -619,13 +632,13 @@ public class InterceptorCallChain
     else
       superMethodName = "__caucho_" + _implMethod.getName();
 
-    out.print(_uniqueName + "_implMethod = ");
+    out.print(getUniqueName(out) + "_implMethod = ");
     generateGetMethod(out,
                       _bizMethod.getView().getBeanClassName(),
                       superMethodName,
                       _implMethod.getParameterTypes());
     out.println(";");
-    out.println(_uniqueName + "_implMethod.setAccessible(true);");
+    out.println(getUniqueName(out) + "_implMethod.setAccessible(true);");
 
     if (isAroundInvokePrologue) {
       ApiMethod aroundInvoke = getAroundInvokeMethod();
@@ -661,7 +674,7 @@ public class InterceptorCallChain
       return;
     }
 
-    _chainName = _uniqueName;
+    _chainName = getUniqueName(out);
     map.put(_bindingEntry, _chainName);
 
     if (_interceptors.size() > 0) {
@@ -877,16 +890,15 @@ public class InterceptorCallChain
       out.print(value);
   }
 
-  public void generateDecoratorPrologue(JavaWriter out, 
+  public void generateDecoratorMethodPrologue(JavaWriter out, 
                                         HashMap<String,Object> map)
     throws IOException
   {
-    if (_uniqueName == null)
-      _uniqueName = "_v" + out.generateId();
-
+    String uniqueName = getUniqueName(out);
+    
     _decoratorBeanVar = (String) map.get("decorator_beans");
     if (_decoratorBeanVar == null) {
-      _decoratorBeanVar = _uniqueName + "_bean";
+      _decoratorBeanVar = uniqueName + "_bean";
       map.put("decorator_beans", _decoratorBeanVar);
 
       out.println();
@@ -901,22 +913,16 @@ public class InterceptorCallChain
     _delegateVar = (String) map.get(_decoratorType.getName() + "_var");
 
     if (_delegateVar == null) {
-      _delegateVar = _uniqueName + "_delegate";
+      _delegateVar = getDelegateVar(out);
       map.put(_decoratorType.getName() + "_var", _delegateVar);
 
       out.print("private transient ");
       out.printClass(_decoratorType);
-      out.print(" " + _delegateVar + ";");
+      out.println(" " + _delegateVar + ";");
     }
-
-    _decoratorClass = (String) map.get("decorator_class");
-
-    if (_decoratorClass == null) {
-      _decoratorClass = _uniqueName + "_class";
-      _decoratorLocalVar = _decoratorClass + "_tl";
-
-      map.put("decorator_class", _decoratorClass);
-
+    
+    if (map.get("decorator_class_decl") == null) {
+      map.put("decorator_class_decl", true);
 
       out.println("static ThreadLocal<" + _decoratorClass + "> "
                   + _decoratorLocalVar
@@ -997,11 +1003,16 @@ public class InterceptorCallChain
                                        HashMap<ArrayList<Class<?>>, String> apiMap)
     throws IOException
   {
+    String uniqueName = getUniqueName(out);
+    
+    if (_decoratorBeanVar == null)
+      _decoratorBeanVar = uniqueName + "_bean";
+
     ArrayList<Class<?>> apis = getMethodApis(method);
 
     String apiName = apiMap.get(apis);
     if (apiName == null && apis.size() > 1) {
-      apiName = _uniqueName + "_api_" + apiMap.size();
+      apiName = uniqueName + "_api_" + apiMap.size();
 
       apiMap.put(apis, apiName);
     }
@@ -1112,33 +1123,6 @@ public class InterceptorCallChain
     out.popDepth();
     out.println("}");
   }
-
-  private ArrayList<Class<?>> getMethodApis(Method method)
-  {
-    ArrayList<Class<?>> apis = new ArrayList<Class<?>>();
-
-    for (Type decorator : _view.getBean().getDecoratorTypes()) {
-      Class<?> decoratorClass = (Class<?>) decorator;
-
-      if (containsMethod(decoratorClass.getMethods(), method)
-          && ! apis.contains(decoratorClass))
-        apis.add(decoratorClass);
-    }
-
-    return apis;
-  }
-
-  private boolean hasInterceptor()
-  {
-    return (_interceptors.size() > 0
-            || _interceptorBinding.size() > 0
-            || getAroundInvokeMethod() != null);
-  }
-
-  private boolean hasDecorator()
-  {
-    return _decoratorType != null;
-  }
   
   //
   // method generators
@@ -1152,6 +1136,8 @@ public class InterceptorCallChain
       super.generateCall(out);
       return;
     }
+    
+    String uniqueName = getUniqueName(out);
 
     if (hasInterceptor()) {
       out.println("try {");
@@ -1167,9 +1153,9 @@ public class InterceptorCallChain
       generateThis(out);
       out.print(", ");
       // generateThis(out);
-      out.print(_uniqueName + "_method, ");
+      out.print(uniqueName + "_method, ");
       // generateThis(out);
-      out.print(_uniqueName + "_implMethod, ");
+      out.print(uniqueName + "_implMethod, ");
       // generateThis(out);
       out.print(_chainName + "_methodChain, ");
       generateThis(out);
@@ -1234,10 +1220,6 @@ public class InterceptorCallChain
       throw new IllegalStateException();
     }
   }
-  
-  //
-  // utilities
-  //
 
   protected void generateDecoratorMethod(JavaWriter out)
     throws IOException
@@ -1284,9 +1266,9 @@ public class InterceptorCallChain
     out.println();
 
     if (! void.class.equals(_implMethod.getReturnType()))
-      out.print("return ");
+      out.print("result = ");
 
-    out.print(_delegateVar + ".");
+    out.print(getDelegateVar(out) + ".");
     out.print(_implMethod.getName());
     out.print("(");
 
@@ -1298,6 +1280,53 @@ public class InterceptorCallChain
     }
 
     out.println(");");
+  }
+  
+  //
+  // utilities
+  //
+  
+  private String getUniqueName(JavaWriter out)
+  {
+    if (_uniqueName == null)
+      _uniqueName = "_" + _implMethod.getName() + "_v" + out.generateId();
+
+    return _uniqueName;
+  }
+
+  private String getDelegateVar(JavaWriter out)
+  {
+    if (_delegateVar == null)
+      _delegateVar = getUniqueName(out) + "_delegate";
+
+    return _delegateVar;
+  }
+
+  private ArrayList<Class<?>> getMethodApis(Method method)
+  {
+    ArrayList<Class<?>> apis = new ArrayList<Class<?>>();
+
+    for (Type decorator : _view.getBean().getDecoratorTypes()) {
+      Class<?> decoratorClass = (Class<?>) decorator;
+
+      if (containsMethod(decoratorClass.getMethods(), method)
+          && ! apis.contains(decoratorClass))
+        apis.add(decoratorClass);
+    }
+
+    return apis;
+  }
+
+  private boolean hasInterceptor()
+  {
+    return (_interceptors.size() > 0
+            || _interceptorBinding.size() > 0
+            || getAroundInvokeMethod() != null);
+  }
+
+  private boolean hasDecorator()
+  {
+    return _decoratorType != null;
   }
 
   protected void generateThis(JavaWriter out)
