@@ -83,9 +83,9 @@ public class AssignExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    Value value = _value.eval(env);
-    
-    _var.evalAssign(env, value.copy());
+    Value value = _value.evalCopy(env);
+
+    _var.evalAssign(env, value);
 
     return value;
   }
