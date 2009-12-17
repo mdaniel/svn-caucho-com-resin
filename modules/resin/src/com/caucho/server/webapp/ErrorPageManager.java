@@ -78,26 +78,26 @@ public class ErrorPageManager {
   private final static L10N L = new L10N(ErrorPageManager.class);
   private final static Logger log
     = Logger.getLogger(ErrorPageManager.class.getName());
-  
+
   public static final char []MSIE_PADDING;
-  
+
   public static String REQUEST_URI = "javax.servlet.include.request_uri";
   public static String CONTEXT_PATH = "javax.servlet.include.context_path";
   public static String SERVLET_PATH = "javax.servlet.include.servlet_path";
   public static String PATH_INFO = "javax.servlet.include.path_info";
   public static String QUERY_STRING = "javax.servlet.include.query_string";
-  
+
   public static String STATUS_CODE = "javax.servlet.error.status_code";
   public static String EXCEPTION_TYPE = "javax.servlet.error.exception_type";
   public static String MESSAGE = "javax.servlet.error.message";
   public static String EXCEPTION = "javax.servlet.error.exception";
   public static String ERROR_URI = "javax.servlet.error.request_uri";
   public static String SERVLET_NAME = "javax.servlet.error.servlet_name";
-  
+
   public static String JSP_EXCEPTION = "javax.servlet.jsp.jspException";
-  
+
   public static String SHUTDOWN = "com.caucho.shutdown";
-  
+
   private final WebApp _app;
   private WebAppContainer _appContainer;
   private HashMap<Object,String> _errorPageMap = new HashMap<Object,String>();
@@ -162,13 +162,13 @@ public class ErrorPageManager {
     if (_app != null && _app.getServer() != null)
       return _app.getServer().isDevelopmentModeErrorPage();
     else if (Resin.getCurrent() != null
-	     && Resin.getCurrent().getServer() != null) {
+             && Resin.getCurrent().getServer() != null) {
       return Resin.getCurrent().getServer().isDevelopmentModeErrorPage();
     }
     else
       return true;
   }
-  
+
   /**
    * Displays a parse error.
    */
@@ -181,13 +181,13 @@ public class ErrorPageManager {
       sendServletErrorImpl(e, req, res);
     } finally {
       if (res instanceof CauchoResponse)
-	((CauchoResponse) res).close();
+        ((CauchoResponse) res).close();
     }
   }
-  
+
   public void sendServletErrorImpl(Throwable e,
-				   ServletRequest req,
-				   ServletResponse res)
+                                   ServletRequest req,
+                                   ServletResponse res)
     throws IOException
   {
     HttpServletResponse response = (HttpServletResponse) res;
@@ -195,7 +195,7 @@ public class ErrorPageManager {
     Throwable rootExn = e;
     Throwable errorPageExn = null;
     LineMap lineMap = null;
-    
+
     try {
       response.reset();
     } catch (IllegalStateException e1) {
@@ -206,7 +206,7 @@ public class ErrorPageManager {
       resFacade.killCache();
       resFacade.setNoCache(true);
     }
-    
+
     if (rootExn instanceof ClientDisconnectException)
       throw (ClientDisconnectException) rootExn;
 
@@ -222,41 +222,41 @@ public class ErrorPageManager {
     String lineMessage = null;
 
     boolean lookupErrorPage = true;
-    
+
     while (true) {
       if (rootExn instanceof LineMapException)
         lineMap = ((LineMapException) rootExn).getLineMap();
 
       if (lookupErrorPage) {
-	errorPageExn = rootExn;
+        errorPageExn = rootExn;
       }
 
       if (rootExn instanceof DisplayableException) {
         doStackTrace = false;
         isCompileException = true;
-	if (compileException == null)
-	  compileException = rootExn;
+        if (compileException == null)
+          compileException = rootExn;
       }
       else if (rootExn instanceof CompileException) {
         doStackTrace = false;
         isCompileException = true;
 
         // use outer exception because it might have added more location info
-	/*
+        /*
         if (rootExn instanceof LineCompileException) {
-	  compileException = rootExn;
-	  
+          compileException = rootExn;
+
           isLineCompileException = true;
         }
-	else if (compileException == null) // ! isLineCompileException)
+        else if (compileException == null) // ! isLineCompileException)
           compileException = rootExn;
-	*/
-	if (compileException == null) // ! isLineCompileException)
+        */
+        if (compileException == null) // ! isLineCompileException)
           compileException = rootExn;
       }
       else if (rootExn instanceof LineException) {
-	if (lineMessage == null)
-	  lineMessage = rootExn.getMessage();
+        if (lineMessage == null)
+          lineMessage = rootExn.getMessage();
       }
 
       if (rootExn instanceof BadRequestException)
@@ -268,28 +268,28 @@ public class ErrorPageManager {
                && rootExn instanceof ServletException
                && ! (rootExn instanceof LineCompileException)
                && rootExn.getCause() != null) {
-	// hack to deal with JSP wrapping
+        // hack to deal with JSP wrapping
       }
       else if (! isServletException) {
-	// SRV.9.9.2 Servlet 2.4
+        // SRV.9.9.2 Servlet 2.4
         //location = getErrorPage(rootExn, ServletException.class);
         location = getErrorPage(rootExn);
-	isServletException = true;
+        isServletException = true;
       }
       else {
         location = getErrorPage(rootExn);
-	lookupErrorPage = false;
+        lookupErrorPage = false;
       }
 
       if (location != null)
-	lookupErrorPage = false;
+        lookupErrorPage = false;
 
       Throwable cause = null;
       if (rootExn instanceof ServletException
           && ! (rootExn instanceof LineCompileException))
         cause = ((ServletException) rootExn).getRootCause();
       else {
-	lookupErrorPage = false;
+        lookupErrorPage = false;
         cause = rootExn.getCause();
       }
 
@@ -315,43 +315,43 @@ public class ErrorPageManager {
     if (badRequest) {
       // server/05a0
       if (rootExn instanceof CompileException)
-	title = rootExn.getMessage();
+        title = rootExn.getMessage();
       else
-	title = String.valueOf(rootExn);
+        title = String.valueOf(rootExn);
 
       doStackTrace = false;
       badRequest = true;
 
       if (request instanceof CauchoRequest)
-	((CauchoRequest) request).killKeepalive();
-      
+        ((CauchoRequest) request).killKeepalive();
+
       response.resetBuffer();
-      
+
       response.setStatus(response.SC_BAD_REQUEST, title);
 
       if (location == null)
-	log.warning(e.toString());
+        log.warning(e.toString());
     }
     else if (rootExn instanceof UnavailableException) {
       UnavailableException unAvail = (UnavailableException) rootExn;
 
       if (unAvail.isPermanent()) {
-	response.setStatus(HttpServletResponse.SC_NOT_FOUND);
-	title = "404 Not Found";
+        response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+        title = "404 Not Found";
 
-	if (location == null)
-	  location = getErrorPage(response.SC_NOT_FOUND);
+        if (location == null)
+          location = getErrorPage(response.SC_NOT_FOUND);
       }
       else {
-	response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
-	title = "503 Unavailable";
+        response.setStatus(HttpServletResponse.SC_SERVICE_UNAVAILABLE);
+        title = "503 Unavailable";
 
-	if (unAvail.getUnavailableSeconds() > 0)
-	  response.setIntHeader("Retry-After",
-				unAvail.getUnavailableSeconds());
-	
-	if (location == null)
-	  location = getErrorPage(response.SC_SERVICE_UNAVAILABLE);
+        if (unAvail.getUnavailableSeconds() > 0)
+          response.setIntHeader("Retry-After",
+                                unAvail.getUnavailableSeconds());
+
+        if (location == null)
+          location = getErrorPage(response.SC_SERVICE_UNAVAILABLE);
       }
     }
     /*
@@ -362,7 +362,7 @@ public class ErrorPageManager {
     */
     else
       response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
-    
+
     if (location == null)
       location = _defaultLocation;
 
@@ -379,8 +379,8 @@ public class ErrorPageManager {
 
     if (location != null) {
       if (errorPageExn == null)
-	errorPageExn = rootExn;
-      
+        errorPageExn = rootExn;
+
       request.setAttribute(JSP_EXCEPTION, errorPageExn);
       request.setAttribute(EXCEPTION, errorPageExn);
       request.setAttribute(EXCEPTION_TYPE, errorPageExn.getClass());
@@ -405,10 +405,10 @@ public class ErrorPageManager {
         // can't use filters because of error pages due to filters
         // or security.
 
-	if (_app != null)
-	  disp = _app.getRequestDispatcher(location);
-	else if (_appContainer != null)
-	  disp = _appContainer.getRequestDispatcher(location);
+        if (_app != null)
+          disp = _app.getRequestDispatcher(location);
+        else if (_appContainer != null)
+          disp = _appContainer.getRequestDispatcher(location);
 
         if (disp != null) {
           ((RequestDispatcherImpl) disp).error(request, response);
@@ -429,9 +429,9 @@ public class ErrorPageManager {
     else {
       Locale locale = Locale.getDefault();
       if (! "ISO-8859-1".equals(Encoding.getMimeName(locale)))
-	response.setLocale(Locale.getDefault());
+        response.setLocale(Locale.getDefault());
       else
-	response.setCharacterEncoding("utf-8");
+        response.setCharacterEncoding("utf-8");
     }
 
     PrintWriter out = response.getWriter();
@@ -439,46 +439,41 @@ public class ErrorPageManager {
     if (isDevelopmentModeErrorPage()) {
       out.println("<html>");
       if (! response.isCommitted())
-	out.println("<head><title>" + escapeHtml(title) + "</title></head>");
+        out.println("<head><title>" + escapeHtml(title) + "</title></head>");
       out.println("<body>");
       out.println("<h1>" + escapeHtml(title) + "</h1>");
 
       out.println("<code><pre>");
-    
-      /*
-	if (app != null && app.getServer().isClosed()) {
-	pw.println("Server is temporarily unavailable");
-	doStackTrace = false;
-	}
-	else
-      */
-    
+
       if (log.isLoggable(Level.FINE) && ! Alarm.isTest())
-	doStackTrace = true;
+        doStackTrace = true;
 
       if (doStackTrace) {
-	out.println("<script language='javascript' type='text/javascript'>");
-	out.println("function show() { document.getElementById('trace').style.display = ''; }");
-	out.println("</script>");
-	out.print("<a style=\"text-decoration\" href=\"javascript:show();\">[show]</a> ");
+        out.println("<script language='javascript' type='text/javascript'>");
+        out.println("function show() { document.getElementById('trace').style.display = ''; }");
+        out.println("</script>");
+        out.print("<a style=\"text-decoration\" href=\"javascript:show();\">[show]</a> ");
       }
-    
-      if (compileException instanceof DisplayableException) {
-	DisplayableException dispExn = (DisplayableException) compileException;
 
-	dispExn.print(out);
+      if (compileException instanceof DisplayableException) {
+        DisplayableException dispExn = (DisplayableException) compileException;
+
+        // ioc/0000
+        // XXX: dispExn.print doesn't normalize user.name
+        // dispExn.print(out);
+        out.println(escapeHtml(compileException.getMessage()));
       }
       else if (compileException != null)
-	out.println(escapeHtml(compileException.getMessage()));
+        out.println(escapeHtml(compileException.getMessage()));
       else
-	out.println(escapeHtml(rootExn.toString()));
+        out.println(escapeHtml(rootExn.toString()));
 
       if (doStackTrace) {
-	out.println("<span id=\"trace\" style=\"display:none\">");
-	printStackTrace(out, lineMessage, e, rootExn, lineMap);
-	out.println("</span>");
+        out.println("<span id=\"trace\" style=\"display:none\">");
+        printStackTrace(out, lineMessage, e, rootExn, lineMap);
+        out.println("</span>");
       }
-    
+
       /*
        *if (doStackTrace || log.isLoggable(Level.FINE)) {
        printStackTrace(out, lineMessage, e, rootExn, lineMap);
@@ -493,25 +488,25 @@ public class ErrorPageManager {
       if (server == null) {
       }
       else if (server.getServerHeader() != null) {
-	version = server.getServerHeader();
+        version = server.getServerHeader();
       }
       else if (CauchoSystem.isTesting()) {
       }
       else
-	version = VersionFactory.getFullVersion();
-    
+        version = VersionFactory.getFullVersion();
+
       if (version != null) {
-	out.println("<p /><hr />");
-	out.println("<small>");
-	
-	out.println(version);
-	
-	if (server != null)
-	  out.println("Server: '" + server.getServerId() + "'");
-	  
-	out.println("</small>");
+        out.println("<p /><hr />");
+        out.println("<small>");
+
+        out.println(version);
+
+        if (server != null)
+          out.println("Server: '" + server.getServerId() + "'");
+
+        out.println("</small>");
       }
-      
+
       out.println("</body></html>");
     }
     else { // non-development mode
@@ -522,20 +517,20 @@ public class ErrorPageManager {
       out.println("<p>The server is temporarily unavailable due to an");
       out.println("internal error.  Please notify the system administrator");
       out.println("of this problem.</p>");
-      
+
       out.println("<pre><code>");
       out.println("Date: " + new QDate().formatISO8601(Alarm.getCurrentTime()));
       if (Resin.getCurrent() != null)
-	out.println("Server: '" + Resin.getCurrent().getServerId() + "'");
-      
+        out.println("Server: '" + Resin.getCurrent().getServerId() + "'");
+
       out.println("</code></pre>");
-      
+
       out.println("</html>");
       out.println("</body></html>");
     }
 
     String userAgent = request.getHeader("User-Agent");
-      
+
     if (userAgent != null && userAgent.indexOf("MSIE") >= 0) {
       out.print(MSIE_PADDING);
     }
@@ -583,22 +578,22 @@ public class ErrorPageManager {
    * @param message a string message
    */
   public void sendErrorImpl(CauchoRequest request,
-			    CauchoResponse response,
-			    int code, String message)
+                            CauchoResponse response,
+                            int code, String message)
     throws IOException
   {
     response.resetBuffer();
-    
+
     /* XXX: if we've already got an error, won't this just mask it?
     if (responseStream.isCommitted())
       throw new IllegalStateException("response can't sendError() after commit");
     */
 
     response.setStatus(code, message);
-    
+
     try {
       if (handleErrorStatus(request, response, code, message)
-	  || code == HttpServletResponse.SC_NOT_MODIFIED) {
+          || code == HttpServletResponse.SC_NOT_MODIFIED) {
         return;
       }
 
@@ -630,34 +625,34 @@ public class ErrorPageManager {
       if (_app == null) {
       }
       else if (_app.getServer() != null
-	       && _app.getServer().getServerHeader() != null) {
-	version = _app.getServer().getServerHeader();
+               && _app.getServer().getServerHeader() != null) {
+        version = _app.getServer().getServerHeader();
       }
       else if (CauchoSystem.isTesting()) {
       }
       else
-	version = VersionFactory.getFullVersion();
-    
+        version = VersionFactory.getFullVersion();
+
       if (version != null) {
-	out.println("<p /><hr />");
-	out.println("<small>");
-	
-	out.println(version);
-	  
-	out.println("</small>");
+        out.println("<p /><hr />");
+        out.println("<small>");
+
+        out.println(version);
+
+        out.println("</small>");
       }
       out.println("</body></html>");
 
       String userAgent = request.getHeader("User-Agent");
-      
+
       if (userAgent != null && userAgent.indexOf("MSIE") >= 0) {
-	out.write(MSIE_PADDING, 0, MSIE_PADDING.length);
+        out.write(MSIE_PADDING, 0, MSIE_PADDING.length);
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
-  
+
   /**
    * Handles an error status code.
    *
@@ -669,8 +664,8 @@ public class ErrorPageManager {
     throws ServletException, IOException
   {
     if (code == HttpServletResponse.SC_OK
-	|| code == HttpServletResponse.SC_MOVED_TEMPORARILY
-	|| code == HttpServletResponse.SC_NOT_MODIFIED)
+        || code == HttpServletResponse.SC_MOVED_TEMPORARILY
+        || code == HttpServletResponse.SC_NOT_MODIFIED)
       return false;
 
     if (request.getRequestDepth(0) > 16)
@@ -681,9 +676,9 @@ public class ErrorPageManager {
     }
 
     response.killCache();
-    
+
     String location = getErrorPage(code);
-      
+
     if (location == null)
       location = _defaultLocation;
 
@@ -692,7 +687,7 @@ public class ErrorPageManager {
 
     if (_app == null && _appContainer == null)
       return false;
-    
+
     if (location != null && ! location.equals(request.getRequestURI())) {
       request.setAttribute(AbstractHttpRequest.STATUS_CODE,
                             new Integer(code));
@@ -710,22 +705,22 @@ public class ErrorPageManager {
         RequestDispatcher disp = null;
         // can't use filters because of error pages due to filters
         // or security.
-	if (_app != null)
-	  disp = _app.getRequestDispatcher(location);
-	else if (_appContainer != null)
-	  disp = _appContainer.getRequestDispatcher(location);
+        if (_app != null)
+          disp = _app.getRequestDispatcher(location);
+        else if (_appContainer != null)
+          disp = _appContainer.getRequestDispatcher(location);
 
         //disp.forward(request, this, "GET", false);
 
-	if (disp != null) {
-	  ((RequestDispatcherImpl) disp).error(request, response);
-	}
-	else
-	  return false;
+        if (disp != null) {
+          ((RequestDispatcherImpl) disp).error(request, response);
+        }
+        else
+          return false;
       } catch (Throwable e) {
         sendServletError(e, request, response);
       }
-          
+
       return true;
     }
 
@@ -739,7 +734,7 @@ public class ErrorPageManager {
   {
     return getErrorPage(e, Throwable.class);
   }
-  
+
   /**
    * Returns the URL of an error page for the given exception.
    */
@@ -754,7 +749,7 @@ public class ErrorPageManager {
       if (cl == limit)
         break;
     }
-    
+
     for (cl = e.getClass(); cl != null; cl = cl.getSuperclass()) {
       String name = cl.getName();
       int p = name.lastIndexOf('.');
@@ -766,14 +761,14 @@ public class ErrorPageManager {
         if (location != null)
           return location;
       }
-      
+
       if (cl == limit)
         break;
     }
 
     return null;
   }
-  
+
   /**
    * Returns the URL of an error page for the given exception.
    */
@@ -792,9 +787,9 @@ public class ErrorPageManager {
    * Escapes HTML symbols in a stack trace.
    */
   private void printStackTrace(PrintWriter out,
-			       String lineMessage,
-			       Throwable e,
-			       Throwable rootExn,
+                               String lineMessage,
+                               Throwable e,
+                               Throwable rootExn,
                                LineMap lineMap)
   {
     CharArrayWriter writer = new CharArrayWriter();
@@ -822,26 +817,30 @@ public class ErrorPageManager {
     if (s == null)
       return null;
 
+    if (Alarm.isTest()) {
+      s = normalizeForTesting(s);
+    }
+
     CharBuffer cb = new CharBuffer();
     int lineCharacter = 0;
     boolean startsWithSpace = false;
-    
+
     for (int i = 0; i < s.length(); i++) {
       char ch = s.charAt(i);
 
       lineCharacter++;
-      
+
       if (ch == '<')
-	cb.append("&lt;");
+        cb.append("&lt;");
       else if (ch == '&')
-	cb.append("&amp;");
+        cb.append("&amp;");
       /*
       else if (ch == '%')
-	cb.append("%25");
+        cb.append("%25");
       */
       else if (ch == '\n' || ch == '\r') {
         lineCharacter = 0;
-	cb.append(ch);
+        cb.append(ch);
         startsWithSpace = false;
       }
       else if (lineCharacter > 70 && ch == ' ' && ! startsWithSpace) {
@@ -855,10 +854,26 @@ public class ErrorPageManager {
         startsWithSpace = true;
       }
       else
-	cb.append(ch);
+        cb.append(ch);
     }
 
     return cb.toString();
+  }
+
+  private String normalizeForTesting(String s)
+  {
+    String userName = System.getProperty("user.name");
+
+    int p;
+
+    while ((p = s.indexOf(userName)) >= 0) {
+      String head = s.substring(0, p);
+      String tail = s.substring(p + userName.length());
+
+      s = head + "caucho" + tail;
+    }
+
+    return s;
   }
 
   public String toString()
