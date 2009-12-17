@@ -1122,6 +1122,15 @@ abstract public class Value implements java.io.Serializable
   {
     return this;
   }
+  
+  /**
+   * Copy for assignment.
+   */
+  public Value resetAndCopy()
+  {
+    reset();
+    return copy();
+  }
 
   /**
    * Copy as an array item
