@@ -13,6 +13,15 @@
 
 <s2 title="4.0.3 - Nov 24, 2009">
 <ul>
+<li>hessian: avoid NPE on protocol corruption error (#3777, rep by Riccardo Cohen)</li>
+<li>hessian: patch for GAE compatibility (rep by Jeff Schnitzer)</li>
+<li>server: FileServlet handling of broken browser range requests (#3766, rep by Knut Forkalsrud)</li>
+<li>cluster: hmux idle timeouts not properly handled (#3812, rep by Wesley Wu)</li>
+<li>watchdog: race condition in log stream closing (#3807, rep by jnovak)</li>
+<li>server: add logging to track down TempBuffer issues (#3807, rep by jnovak)</li>
+<li>hessian: add UnsafeSerializer and deserializer</li>
+<li>ejb: @SessionPool to configure maxIdle and maxConcurrent (#3739, rep by Jeff Schnitzer)</li>
+<li>ejb: @PostConstruct not called on @Stateless (#3798, rep by voodude)</li>
 <li>hessian: HessianProxyFactory needs to consistently use the ClassLoader instead of Thread.contextClassLoader() (#2860, rep by jghallen)</li>
 <li>hessian: deserializer construct w/o calling constructors (#3357, rep by oehmiche)</li>
 <li>hessian: reading of InputStream as object not properly dispatched (#3634, rep by mate)</li>

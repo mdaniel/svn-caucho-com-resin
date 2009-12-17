@@ -43,4 +43,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ApplicationException {
   boolean rollback() default false;
+  boolean inherit() default true;
 }
