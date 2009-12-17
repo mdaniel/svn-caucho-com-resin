@@ -85,9 +85,6 @@ public class AssignExpr extends Expr {
   {
     Value value = _value.eval(env);
     
-    // php/1704
-    value.reset();
-
     _var.evalAssign(env, value.copy());
 
     return value;

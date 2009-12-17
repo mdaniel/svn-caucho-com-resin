@@ -13,6 +13,13 @@
 
 <s2 title="4.0.3 - Nov 24, 2009">
 <ul>
+<li>hessian: HessianProxyFactory needs to consistently use the ClassLoader instead of Thread.contextClassLoader() (#2860, rep by jghallen)</li>
+<li>hessian: deserializer construct w/o calling constructors (#3357, rep by oehmiche)</li>
+<li>hessian: reading of InputStream as object not properly dispatched (#3634, rep by mate)</li>
+<li>hessian: string/binary encoding problems with 0x30-0x37 (#3690, rep by Adam Bryzak)</li>
+<li>hessian: HessianSkeleton.createDebugPrintWriter created to allow debug override (#3646, rep by Peter Dettman)</li>
+<li>hessian: add HessianProxyFactory.setConnectTimeout (#3658, rep by Patrik Stymne)</li>
+<li>hessian: EnumSet deserialization (#3663, rep by danwatt)</li>
 <li>server: hmux post/forward issues (#3793, rep by Jamison Novak and Wesley Wu)</li>
 <li>server: hmux load balancer with incorrect protocol for short-response post (#3790, rep by Wesley Wu)</li>
 </ul>

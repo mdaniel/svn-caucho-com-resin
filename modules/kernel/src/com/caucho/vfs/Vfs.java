@@ -137,6 +137,11 @@ public final class Vfs {
     }
   }
 
+  public static SchemeMap getDefaultScheme()
+  {
+    return DEFAULT_SCHEME_MAP;
+  }
+
   /**
    * Returns a path for the current directory.
    */
