@@ -54,6 +54,11 @@ public enum ConnectionState {
   // predicates
   //
 
+  boolean isIdle()
+  {
+    return this == IDLE;
+  }
+  
   boolean isComet()
   {
     switch (this) {
@@ -382,5 +387,13 @@ public enum ConnectionState {
       return CLOSED;
     else
       return this;
+  }
+
+  ConnectionState toDestroy()
+  {
+    if (this != IDLE)
+      return DESTROYED;
+    else
+      throw new IllegalStateException(this + " is an illegal destroy state");
   }
 }

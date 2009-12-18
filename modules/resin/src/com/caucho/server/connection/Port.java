@@ -87,7 +87,7 @@ public class Port extends TaskWorker
 
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
-  private FreeList<TcpConnection> _freeConn
+  private FreeList<TcpConnection> _idleConn
     = new FreeList<TcpConnection>(32);
 
   // The owning server
@@ -1592,7 +1592,7 @@ public class Port extends TaskWorker
       if (isStartThreadRequired()
           && _lifecycle.isActive()
           && _activeConnectionCount.get() <= _connectionMax) {
-        startConn = _freeConn.allocate();
+        startConn = _idleConn.allocate();
 
         if (startConn == null || startConn.isDestroyed()) {
           int connId = _connectionCount.incrementAndGet();
@@ -1648,26 +1648,28 @@ public class Port extends TaskWorker
   }
 
   /**
-   * Frees the connection.
+   * Frees the connection to the idle pool.
    *
    * Called only from TcpConnection
    */
   void free(TcpConnection conn)
   {
+    assert(conn.isClosed());
+    
     closeConnection(conn);
 
-    conn.toIdle();
-
-    _freeConn.free(conn);
+    _idleConn.free(conn);
   }
 
   /**
-   * Frees the connection.
+   * Destroys the connection.
    *
    * Called only from TcpConnection
    */
-  void kill(TcpConnection conn)
+  void destroy(TcpConnection conn)
   {
+    assert(conn.isDestroyed());
+      
     closeConnection(conn);
   }
 
@@ -1679,7 +1681,7 @@ public class Port extends TaskWorker
     _activeConnectionSet.remove(conn);
     _suspendConnectionSet.remove(conn);
     _activeConnectionCount.decrementAndGet();
-
+    
     // wake the start thread
     wake();
   }
@@ -1790,7 +1792,7 @@ public class Port extends TaskWorker
     }
 
     TcpConnection conn;
-    while ((conn = _freeConn.allocate()) != null) {
+    while ((conn = _idleConn.allocate()) != null) {
       conn.destroy();
     }
 

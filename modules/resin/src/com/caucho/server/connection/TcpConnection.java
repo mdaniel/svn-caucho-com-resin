@@ -29,35 +29,27 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.server.connection.*;
+import java.io.IOException;
+import java.io.InterruptedIOException;
+import java.net.InetAddress;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
-import com.caucho.server.connection.*;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.DuplexListener;
 import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
 import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
 import com.caucho.vfs.StreamImpl;
-
-import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.io.InputStream;
-import java.lang.reflect.Constructor;
-import java.net.InetAddress;
-import java.net.SocketTimeoutException;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
 
 /**
  * A protocol-independent TcpConnection.  TcpConnection controls the
@@ -67,7 +59,6 @@ import javax.servlet.ServletResponse;
  */
 public class TcpConnection extends Connection
 {
-  private static final L10N L = new L10N(TcpConnection.class);
   private static final Logger log
     = Logger.getLogger(TcpConnection.class.getName());
 
@@ -113,8 +104,6 @@ public class TcpConnection extends Connection
   private String _displayState;
 
   private Thread _thread;
-
-  private Exception _startThread;
 
   /**
    * Creates a new TcpConnection.
@@ -545,7 +534,6 @@ public class TcpConnection extends Connection
   {
     Thread thread = Thread.currentThread();
 
-    boolean isValid = false;
     RequestState result = null;
 
    try {
@@ -1023,6 +1011,11 @@ public class TcpConnection extends Connection
   {
     _state = _state.toInit();
   }
+  
+  public final boolean isIdle()
+  {
+    return _state.isIdle();
+  }
 
   public final void toIdle()
   {
@@ -1045,14 +1038,14 @@ public class TcpConnection extends Connection
     closeImpl();
 
     ConnectionState state = _state;
-    _state = ConnectionState.DESTROYED;
+    _state = _state.toDestroy();
 
     if (state.isKeepalive()) {
       getPort().keepaliveEnd(this);
     }
 
     if (state != ConnectionState.DESTROYED) {
-      getPort().kill(this);
+      getPort().destroy(this);
     }
   }
 
@@ -1063,10 +1056,12 @@ public class TcpConnection extends Connection
   {
     closeImpl();
 
-    if (! _state.isDestroyed())
+    if (_state.isClosed())
       getPort().free(this);
+    else if (_state.isDestroyed())
+      getPort().destroy(this);
     else
-      getPort().kill(this);
+      throw new IllegalStateException("state=" + _state);
   }
 
   protected String dbgId()
@@ -1166,10 +1161,6 @@ public class TcpConnection extends Connection
     RequestState doTask()
       throws IOException
     {
-      Port port = _port;
-
-      ServerRequest request = getRequest();
-
       RequestState result = RequestState.EXIT;
 
       // _state = _state.toAccept();
@@ -1231,8 +1222,6 @@ public class TcpConnection extends Connection
   class KeepaliveRequestTask extends ConnectionReadTask {
     public void run()
     {
-      Port port = _port;
-
       runThread();
     }
 
@@ -1274,8 +1263,6 @@ public class TcpConnection extends Connection
 
     public void run()
     {
-      Port port = _port;
-
       runThread();
     }
 

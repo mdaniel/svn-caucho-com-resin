@@ -647,6 +647,10 @@ public class HmuxRequest extends AbstractHttpRequest
       case HMUX_YIELD:
         if (log.isLoggable(Level.FINER))
           log.finer(dbgId() + (char) code + "-r: yield");
+        
+        _rawWrite.write(HMUX_ACK);
+        _rawWrite.write(0);
+        _rawWrite.write(0);
         break;
 
       case HMUX_QUIT:
@@ -982,8 +986,12 @@ public class HmuxRequest extends AbstractHttpRequest
       }
     }
 
-    if (result == HMUX_YIELD)
+    if (result == HMUX_YIELD) {
+      _rawWrite.write(HMUX_ACK);
+      _rawWrite.write(0);
+      _rawWrite.write(0);
       return; // XXX:
+    }
     else {
       if (result == HMUX_QUIT && ! allowKeepalive())
         result = HMUX_EXIT;
@@ -1366,14 +1374,6 @@ public class HmuxRequest extends AbstractHttpRequest
   void writeStatus(CharBuffer message)
     throws IOException
   {
-    int channel = 2;
-
-    WriteStream os = _rawWrite;
-
-    os.write(HMUX_CHANNEL);
-    os.write(channel >> 8);
-    os.write(channel);
-
     writeString(HMUX_STATUS, message);
   }
 
@@ -1453,7 +1453,6 @@ public class HmuxRequest extends AbstractHttpRequest
 
     return _bufferStartOffset;
   }
-
 
   protected int getNextBufferOffset()
     throws IOException
@@ -1696,19 +1695,6 @@ public class HmuxRequest extends AbstractHttpRequest
         log.finest(new String(buf, offset, readLen));
 
       while (_pendingData == 0) {
-        if (_needsAck) {
-          _request.flushResponseBuffer();
-
-          _os.write(HMUX_ACK);
-          _os.write(0);
-          _os.write(0);
-
-          if (log.isLoggable(Level.FINE))
-            log.fine(_request.dbgId() + "A-w:ack channel");
-        }
-
-        _needsAck = false;
-
         int code = is.read();
 
         switch (code) {
@@ -1737,7 +1723,14 @@ public class HmuxRequest extends AbstractHttpRequest
         }
 
         case HMUX_YIELD: {
-          _needsAck = true;
+          _request.flushResponseBuffer();
+
+          _os.write(HMUX_ACK);
+          _os.write(0);
+          _os.write(0);
+
+          if (log.isLoggable(Level.FINE))
+            log.fine(_request.dbgId() + "A-w:ack");
           break;
         }
 
