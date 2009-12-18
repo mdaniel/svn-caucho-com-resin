@@ -295,15 +295,18 @@ public class ArrayValueImpl extends ArrayValue
   }
   
   /**
-   * Copy for assignment.
+   * Copy the value.
    */
   public Value copy()
   {
+    // php/1704
+    reset();
+    
     return new ArrayValueImpl(this);
   }
   
   /**
-   * Copy for assignment.
+   * Copy for return.
    */
   public Value copyReturn()
   {
@@ -340,12 +343,26 @@ public class ArrayValueImpl extends ArrayValue
   }
   
   /**
+   * Copy for saving a method's arguments.
+   */
+  public Value copySaveFunArg()
+  {
+    return new ArrayValueImpl(this);
+  }
+  
+  /**
    * Convert to an argument value.
    */
   @Override
   public Value toArgValue()
   {
-    return copy();
+    // php/1708
+    
+    Value copy = new ArrayValueImpl(this);
+    
+    copy.reset();
+    
+    return copy;
   }
   
   /**
@@ -1154,7 +1171,7 @@ public class ArrayValueImpl extends ArrayValue
   {
     return _tail;
   }
-
+  
   /**
    * Shuffles the array
    */

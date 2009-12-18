@@ -79,9 +79,10 @@ public class StaticFieldVarGetExpr extends AbstractVarExpr {
    */
   public Value evalCopy(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _varName.evalString(env)).copy();
+    return env.getStaticClassFieldVar(_className,
+                                      _varName.evalString(env)).copy();
   }
-
+  
   /**
    * Evaluates the expression.
    *

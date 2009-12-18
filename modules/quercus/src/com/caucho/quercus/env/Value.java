@@ -1124,15 +1124,6 @@ abstract public class Value implements java.io.Serializable
   }
   
   /**
-   * Copy for assignment.
-   */
-  public Value resetAndCopy()
-  {
-    reset();
-    return copy();
-  }
-
-  /**
    * Copy as an array item
    */
   public Value copyArrayItem()
@@ -1180,6 +1171,14 @@ abstract public class Value implements java.io.Serializable
   public Value clone(Env env)
   {
     return this;
+  }
+  
+  /**
+   * Copy for saving a method's arguments.
+   */
+  public Value copySaveFunArg()
+  {
+    return copy();
   }
 
   /**

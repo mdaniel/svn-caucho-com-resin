@@ -240,6 +240,17 @@ public class ServerArrayValue extends ArrayValueImpl
     
     return super.copy();
   }
+  
+  /**
+   * Copy for saving a function arguments.
+   */
+  public Value copySaveFunArg()
+  {
+    if (! _isFilled)
+      fillMap();
+    
+    return super.copySaveFunArg();
+  }
 
   /**
    * Returns an iterator of the entries.

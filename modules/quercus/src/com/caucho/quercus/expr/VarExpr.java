@@ -157,8 +157,7 @@ public class VarExpr
   @Override
   public Value evalCopy(Env env)
   {
-    // php/1704
-    return eval(env).resetAndCopy();
+    return eval(env).copy();
   }
 
   /**

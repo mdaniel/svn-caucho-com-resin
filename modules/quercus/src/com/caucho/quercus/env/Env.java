@@ -3033,7 +3033,7 @@ public class Env {
 
     for (int i = 0; args != null && i < args.length; i++) {
       // php/3715, 3768
-      newArgs[i] = args[i].toValue().toArgValue();
+      newArgs[i] = args[i].toValue().copySaveFunArg();
     }
 
     _functionArgs = newArgs;

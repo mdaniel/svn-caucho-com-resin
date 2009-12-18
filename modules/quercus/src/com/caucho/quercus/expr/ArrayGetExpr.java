@@ -99,7 +99,7 @@ public class ArrayGetExpr extends AbstractVarExpr {
 
     return array.get(index).copy();
   }
-
+  
   /**
    * Evaluates the expression, creating an array if the value is unset..
    *

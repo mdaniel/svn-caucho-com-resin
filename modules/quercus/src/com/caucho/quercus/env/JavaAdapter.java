@@ -249,7 +249,7 @@ abstract public class JavaAdapter extends ArrayValue
    * Copy for assignment.
    */
   abstract public Value copy();
-
+  
   /**
    * Copy for serialization
    */

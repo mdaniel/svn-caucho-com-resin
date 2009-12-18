@@ -92,9 +92,8 @@ public class VarVarExpr extends AbstractVarExpr {
 
     Value value = env.getValue(varName);
 
-    // php/1706
     if (value != null)
-      return value.resetAndCopy();
+      return value.copy();
     else
       return NULL;
   }

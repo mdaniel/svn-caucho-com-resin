@@ -82,6 +82,17 @@ public class CopyArrayValue extends ArrayValue {
     else
       return _constArray.copy(env, map);
   }
+  
+  /**
+   * Copy for saving a function arguments.
+   */
+  public Value copySaveFunArg()
+  {
+    if (_copyArray != null)
+      return _copyArray.copySaveFunArg();
+    else
+      return _constArray.copySaveFunArg();
+  }
 
   /**
    * Returns the size.

@@ -352,7 +352,7 @@ abstract public class ArrayValue extends Value {
    */
   @Override
   abstract public Value copy();
-
+  
   /**
    * Copy for serialization
    */

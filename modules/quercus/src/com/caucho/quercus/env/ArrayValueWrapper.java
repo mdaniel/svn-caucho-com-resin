@@ -63,6 +63,15 @@ public class ArrayValueWrapper extends ArrayValue {
   }
   
   /**
+   * Copy for assignment.
+   */
+  @Override
+  public Value copySaveFunArg()
+  {
+    return _array.copySaveFunArg();
+  }
+  
+  /**
    * Copy for serialization
    */
   @Override
