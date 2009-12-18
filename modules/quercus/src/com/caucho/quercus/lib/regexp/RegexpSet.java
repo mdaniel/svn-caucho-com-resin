@@ -108,8 +108,9 @@ class RegexpSet {
    */
   void setRange(int low, int high)
   {
-    // 0xeffff is highest unicode assigned value
-    if (low > high || low < 0 || high > 0xfffff)
+    // php/4es0
+    // http://bugs.caucho.com/view.php?id=3811
+    if (low > high || low < 0 || high > 0x10ffff)
       throw new RuntimeException("Range out of range (" + low + ", " + high + ")");
 
     if (low < BITSET_CHARS) {
