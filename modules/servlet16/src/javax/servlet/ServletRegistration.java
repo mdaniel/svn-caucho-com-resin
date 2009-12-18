@@ -38,11 +38,13 @@ public interface ServletRegistration
 
   public Iterable<String> getMappings();
 
-  public void setMultipartConfig(MultipartConfigElement multipartConfig);
+  public String getRunAsRole();
 
   interface Dynamic
     extends ServletRegistration, Registration.Dynamic
   {
     public void setLoadOnStartup(int loadOnStartup);
+    public void setMultipartConfig(MultipartConfigElement multipartConfig);
+    public void setRunAsRole(String roleName);
   }
 }

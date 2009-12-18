@@ -493,6 +493,25 @@ public class ServletConfigImpl
       _runAs = new BasicPrincipal(roleName);
   }
 
+  public String getRunAsRole()
+  {
+    if (_runAs != null)
+      return _runAs.getName();
+
+    return null;
+  }
+
+  public void setRunAsRole(String roleName)
+  {
+    if (roleName == null)
+      throw new IllegalArgumentException();
+
+    if (! _webApp.isInitializing())
+      throw new IllegalStateException();
+
+    _runAs = new BasicPrincipal(roleName);
+  }
+
   /**
    * Returns the servlet context.
    */
