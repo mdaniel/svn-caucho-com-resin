@@ -38,10 +38,11 @@ public interface ServletRegistration
 
   public Iterable<String> getMappings();
 
+  public void setMultipartConfig(MultipartConfigElement multipartConfig);
+
   interface Dynamic
     extends ServletRegistration, Registration.Dynamic
   {
     public void setLoadOnStartup(int loadOnStartup);
   }
-
 }

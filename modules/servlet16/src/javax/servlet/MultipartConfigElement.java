@@ -35,39 +35,50 @@ import javax.servlet.annotation.MultipartConfig;
  */
 public class MultipartConfigElement {
 
+  private String _location = "";
+  private long _maxFileSize;
+  private long _maxRequestSize;
+  private int _fileSizeThreshold;
+
   public MultipartConfigElement(String location)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _location = location;
   }
 
   public MultipartConfigElement(String location, long maxFileSize,
                                 long maxRequestSize, int fileSizeThreshold)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _location = location;
+    _maxFileSize = maxFileSize;
+    _maxRequestSize = maxRequestSize;
+    _fileSizeThreshold = fileSizeThreshold;
   }
 
   public MultipartConfigElement(MultipartConfig config)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _location = config.location();
+    _maxFileSize = config.maxFileSize();
+    _maxRequestSize = config.maxRequestSize();
+    _fileSizeThreshold = config.fileSizeThreshold();
   }
 
   public String getLocation()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _location;
   }
 
   public long getMaxFileSize()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _maxFileSize;
   }
 
   public long getMaxRequestSize()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _maxRequestSize;
   }
 
   public int getFileSizeThreshold()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _fileSizeThreshold;
   }
 }

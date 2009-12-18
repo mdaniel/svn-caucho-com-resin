@@ -35,11 +35,7 @@ import com.caucho.server.http.AbstractHttpRequest;
 
 import com.caucho.util.L10N;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.annotation.MultipartConfig;
+import javax.servlet.*;
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -70,7 +66,7 @@ public class ServletInvocation {
   private FilterChain _filterChain;
 
   private boolean _isAsyncSupported = true;
-  private MultipartConfig _multipartConfig;
+  private MultipartConfigElement _multipartConfig;
 
   private AtomicLong _requestCount = new AtomicLong();
 
@@ -252,11 +248,11 @@ public class ServletInvocation {
     _isAsyncSupported = false;
   }
 
-  public MultipartConfig getMultipartConfig() {
+  public MultipartConfigElement getMultipartConfig() {
     return _multipartConfig;
   }
 
-  public void setMultipartConfig(MultipartConfig multipartConfig) {
+  public void setMultipartConfig(MultipartConfigElement multipartConfig) {
     _multipartConfig = multipartConfig;
   }
 

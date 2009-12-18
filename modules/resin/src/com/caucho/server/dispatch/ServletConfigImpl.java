@@ -104,6 +104,8 @@ public class ServletConfigImpl
   private RunAt _runAt;
   private CronType _cron;
 
+  private MultipartConfigElement _multipartConfigElement;
+
   private ServletProtocolConfig _protocolConfig;
   private ProtocolServletFactory _protocolFactory;
   
@@ -194,6 +196,30 @@ public class ServletConfigImpl
     _initParams.put(name, value);
 
     return true;
+  }
+
+  public void setMultipartConfig(MultipartConfigElement multipartConfig)
+  {
+    if (multipartConfig == null)
+      throw new IllegalArgumentException();
+
+    if (!_webApp.isInitializing())
+      throw new IllegalStateException();
+
+    _multipartConfigElement = multipartConfig;
+  }
+
+  public MultipartConfigElement getMultipartConfig() {
+    if (_multipartConfigElement == null) {
+      Class servletClass = getServletClass();
+      MultipartConfig config
+        = (MultipartConfig) servletClass.getAnnotation(MultipartConfig.class);
+
+      if (config != null)
+        _multipartConfigElement = new MultipartConfigElement(config);
+    }
+
+    return _multipartConfigElement;
   }
 
   public Set<String> addMapping(String... urlPatterns)
@@ -679,16 +705,6 @@ public class ServletConfigImpl
   public Object getServlet()
   {
     return _servlet;
-  }
-
-  public MultipartConfig getMultipartConfig()
-  {
-    Class servletClass = getServletClass();
-
-    if (servletClass != null)
-      return (MultipartConfig) servletClass.getAnnotation(MultipartConfig.class);
-    else
-      return null;
   }
 
   public void merge(ServletConfigImpl config) {

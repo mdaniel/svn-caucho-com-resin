@@ -1123,14 +1123,14 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
           return form;
         }
 
-        MultipartConfig multipartConfig
+        MultipartConfigElement multipartConfig
           = _invocation.getMultipartConfig();
 
         long fileUploadMax = -1;
 
         if (multipartConfig != null) {
-          formUploadMax = multipartConfig.maxRequestSize();
-          fileUploadMax = multipartConfig.maxFileSize();
+          formUploadMax = multipartConfig.getMaxRequestSize();
+          fileUploadMax = multipartConfig.getMaxFileSize();
         }
 
         if (multipartConfig != null
@@ -2288,8 +2288,8 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       else
         path = (Path) value;
 
-      MultipartConfig mc = _invocation.getMultipartConfig();
-      String location = mc.location().replace('\\', '/');
+      MultipartConfigElement mc = _invocation.getMultipartConfig();
+      String location = mc.getLocation().replace('\\', '/');
       fileName = fileName.replace('\\', '/');
 
       String file;

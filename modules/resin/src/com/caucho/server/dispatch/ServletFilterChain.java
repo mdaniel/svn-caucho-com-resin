@@ -38,7 +38,6 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.UnavailableException;
-import javax.servlet.annotation.MultipartConfig;
 import java.io.IOException;
 import java.util.HashMap;
 
@@ -52,7 +51,6 @@ public class ServletFilterChain implements FilterChain {
   private ServletConfigImpl _config;
   // servlet
   private Servlet _servlet;
-  private MultipartConfig _multipartConfig;
 
   /**
    * Create the filter chain servlet.
@@ -65,7 +63,6 @@ public class ServletFilterChain implements FilterChain {
       throw new NullPointerException();
 
     _config = config;
-    _multipartConfig = config.getMultipartConfig();
   }
 
   /**
@@ -133,3 +130,4 @@ public class ServletFilterChain implements FilterChain {
     return getClass().getSimpleName() + "[" + getServletName() + "]";
   }
 }
+
