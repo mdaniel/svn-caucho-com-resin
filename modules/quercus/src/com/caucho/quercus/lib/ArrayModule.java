@@ -2664,8 +2664,8 @@ public class ArrayModule
         if (oldValue != null && oldValue.isset()) {
           if (oldValue.isArray() && value.isArray()) {
             arrayMergeRecursiveImpl(env,
-                                    (ArrayValue) oldValue,
-                                    (ArrayValue) value);
+                                    oldValue.toArrayValue(env),
+                                    value.toArrayValue(env));
           }
           else if (oldValue.isArray()) {
             oldValue.put(value);
