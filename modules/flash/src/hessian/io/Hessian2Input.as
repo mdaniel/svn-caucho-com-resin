@@ -2104,6 +2104,11 @@ package hessian.io
             _chunkLength = code - 0x00;
             break;
 
+          case 0x30: case 0x31: case 0x32: case 0x33:
+            _isLastChunk = true;
+            _chunkLength = ((code - 0x30) << 8) + read();
+            break;
+
           default:
             throw expect("string", code);
         }
