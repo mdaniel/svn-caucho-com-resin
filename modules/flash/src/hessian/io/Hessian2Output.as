@@ -1064,6 +1064,8 @@ package hessian.io
     {
       _refs = new Dictionary();
       _numRefs = 0;
+      _classRefs = null;
+      _numClassRefs = 0;
     }
 
     /**
