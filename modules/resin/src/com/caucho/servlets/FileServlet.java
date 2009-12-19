@@ -237,7 +237,7 @@ public class FileServlet extends GenericServlet {
         char ch = relPath.charAt(i);
 
         if (ch == 0) {
-          res.sendError(res.SC_NOT_FOUND);
+          res.sendError(HttpServletResponse.SC_NOT_FOUND);
           return;
         }
       }
@@ -257,7 +257,7 @@ public class FileServlet extends GenericServlet {
       if (_dir != null)
         _dir.forward(req, res);
       else
-        res.sendError(res.SC_NOT_FOUND);
+        res.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
 
@@ -265,7 +265,7 @@ public class FileServlet extends GenericServlet {
       if (isInclude)
         throw new FileNotFoundException(uri);
       else
-        res.sendError(res.SC_NOT_FOUND);
+        res.sendError(HttpServletResponse.SC_NOT_FOUND);
       return;
     }
 
@@ -274,7 +274,7 @@ public class FileServlet extends GenericServlet {
 
     if (ifMatch != null && ifMatch.equals(etag)) {
       res.addHeader("ETag", etag);
-      res.sendError(res.SC_NOT_MODIFIED);
+      res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
       return;
     }
 
@@ -309,7 +309,7 @@ public class FileServlet extends GenericServlet {
       if (! isModified) {
         if (etag != null)
           res.addHeader("ETag", etag);
-        res.sendError(res.SC_NOT_MODIFIED);
+        res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
         return;
       }
     }
@@ -414,7 +414,7 @@ public class FileServlet extends GenericServlet {
       }
       
       // #3766 - browser errors in range
-      if (off < length && ch != ' ')
+      if (off < length && ch != ' ' && ch != ',')
         return false;
 
       // Skip whitespace

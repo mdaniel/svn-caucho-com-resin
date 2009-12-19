@@ -53,6 +53,7 @@ import com.caucho.hemp.servlet.ServerLinkService;
 import com.caucho.hessian.io.Hessian2Input;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.Hessian2StreamingInput;
+import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWriter;
 import com.caucho.server.cluster.Server;
@@ -885,10 +886,18 @@ public class HmuxRequest extends AbstractHttpRequest
         len = (is.read() << 8) + is.read();
         boolean isAdmin = is.read() != 0;
 
+        InputStream rawIs = is;
+        
+        if (log.isLoggable(Level.FINEST)) {
+          HessianDebugInputStream dIs
+            = new HessianDebugInputStream(is, log, Level.FINEST);
+          dIs.startStreaming();
+          rawIs = dIs;
+        }
         if (_hmtpReader != null)
-          _hmtpReader.init(is);
+          _hmtpReader.init(rawIs);
         else
-          _hmtpReader = new HmtpReader(is);
+          _hmtpReader = new HmtpReader(rawIs);
 
         if (_hmtpWriter != null)
           _hmtpWriter.init(_rawWrite);

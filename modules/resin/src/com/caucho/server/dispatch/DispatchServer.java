@@ -54,10 +54,11 @@ public class DispatchServer implements Dependency {
 
   private InvocationDecoder _invocationDecoder;
 
-  private HashMap<String,Object> _attributeMap = new HashMap<String,Object>();
+  private HashMap<String,Object> _attributeMap
+    = new HashMap<String,Object>();
 
-  private ArrayList<ServerListener> _listeners =
-    new ArrayList<ServerListener>();
+  private ArrayList<ServerListener> _listeners
+    = new ArrayList<ServerListener>();
 
   private int _invocationCacheSize = 64 * 1024;
   private int _maxURLLength = 256;

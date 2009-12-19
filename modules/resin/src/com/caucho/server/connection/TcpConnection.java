@@ -75,6 +75,7 @@ public class TcpConnection extends Connection
   private final Port _port;
   private final QSocket _socket;
   private final ServerRequest _request;
+  private final ClassLoader _loader;
   private final byte []_testBuffer = new byte[1];
 
   private final AcceptTask _acceptTask = new AcceptTask();
@@ -122,6 +123,18 @@ public class TcpConnection extends Connection
 
     int id = getId();
 
+    ProtocolDispatchServer server = port.getServer();
+    
+    ClassLoader loader = null;
+    
+    if (server != null)
+      loader = server.getClassLoader();
+    
+    if (loader != null)
+      _loader = loader;
+    else
+      _loader = _systemClassLoader;
+    
     Protocol protocol = port.getProtocol();
 
     _request = protocol.createRequest(this);
@@ -558,7 +571,7 @@ public class TcpConnection extends Connection
        log.log(Level.FINE, dbgId() + e, e);
      }
    } finally {
-     thread.setContextClassLoader(_systemClassLoader);
+     thread.setContextClassLoader(_loader);
 
      _currentRequest.set(null);
 
@@ -579,12 +592,11 @@ public class TcpConnection extends Connection
     throws IOException
   {
     Thread thread = Thread.currentThread();
-    ClassLoader systemLoader = _systemClassLoader;
 
     RequestState result = null;
 
     do {
-      thread.setContextClassLoader(systemLoader);
+      thread.setContextClassLoader(_loader);
 
       if (_port.isClosed()) {
         return RequestState.EXIT;
@@ -599,7 +611,7 @@ public class TcpConnection extends Connection
 
       ConnectionState state = _state;
 
-      _state = _state.toActive();
+      _state = state.toActive();
 
       if (state.isKeepalive()) {
         getPort().keepaliveEnd(this);
