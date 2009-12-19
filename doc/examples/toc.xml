@@ -118,6 +118,7 @@
       <item link="servlet-comet/index.xtp" title="Comet"/>
       <item link="servlet-ioc/index.xtp" title="IoC"/>
       <item link="websocket-java/index.xtp" title="WebSocket"/>
+      <item link="websocket-php/index.xtp" title="WebSocket PHP"/>
     </item>
     
     <item link="security-basic/index.xtp" title="Security"/>
