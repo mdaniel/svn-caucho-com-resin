@@ -28,9 +28,12 @@
  */
 package com.caucho.config.gen;
 
-import java.io.IOException;
+import static javax.ejb.TransactionAttributeType.NOT_SUPPORTED;
+import static javax.ejb.TransactionAttributeType.REQUIRED;
+import static javax.ejb.TransactionAttributeType.REQUIRES_NEW;
+import static javax.ejb.TransactionAttributeType.SUPPORTS;
 
-import static javax.ejb.TransactionAttributeType.*;
+import java.io.IOException;
 import java.util.HashMap;
 
 import javax.ejb.ApplicationException;
@@ -41,7 +44,6 @@ import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
 
 import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
 
 /**
  * Represents the XA interception
@@ -50,7 +52,7 @@ public class XaCallChain extends AbstractCallChain {
   private BusinessMethodGenerator _bizMethod;
   private EjbCallChain _next;
 
-  private TransactionAttributeType _xa;
+  private TransactionAttributeType _transactionType;
   private boolean _isContainerManaged = true;
   private boolean _isSessionSynchronization;
 
@@ -74,9 +76,8 @@ public class XaCallChain extends AbstractCallChain {
    */
   public boolean isEnhanced()
   {
-    return (_isContainerManaged
-            && _xa != null
-            && !_xa.equals(SUPPORTS));
+    return (_isContainerManaged && _transactionType != null && !_transactionType
+        .equals(SUPPORTS));
   }
 
   /**
@@ -84,7 +85,7 @@ public class XaCallChain extends AbstractCallChain {
    */
   public TransactionAttributeType getTransactionType()
   {
-    return _xa;
+    return _transactionType;
   }
 
   /**
@@ -131,9 +132,9 @@ public class XaCallChain extends AbstractCallChain {
     }
 
     if (xaAttr != null)
-      _xa = xaAttr.value();
+      _transactionType = xaAttr.value();
   }
-  
+
   //
   // bean prologue generation
   //
@@ -142,9 +143,8 @@ public class XaCallChain extends AbstractCallChain {
    * Generates the static class prologue
    */
   @Override
-  public void generateMethodPrologue(JavaWriter out,
-                                     HashMap<String,Object> map)
-    throws IOException
+  public void generateMethodPrologue(JavaWriter out, HashMap<String, Object> map)
+      throws IOException
   {
     if (map.get("caucho.ejb.xa") == null) {
       map.put("caucho.ejb.xa", "done");
@@ -156,15 +156,13 @@ public class XaCallChain extends AbstractCallChain {
 
     _next.generateMethodPrologue(out, map);
   }
-  
+
   //
   // method generation code
   //
 
-
   /**
-   * Generates code before the "try" block
-   * <code><pre>
+   * Generates code before the "try" block <code><pre>
    * retType myMethod(...)
    * {
    *   [pre-try]
@@ -174,39 +172,33 @@ public class XaCallChain extends AbstractCallChain {
    * </pre></code>
    */
   @Override
-  public void generatePreTry(JavaWriter out)
-    throws IOException
+  public void generatePreTry(JavaWriter out) throws IOException
   {
-    
-    if (_isContainerManaged
-        && (_xa == REQUIRED || _xa == REQUIRES_NEW)) {
+    if (_isContainerManaged) {
       out.println();
       out.println("boolean isXAValid = false;");
     }
-    
-    if (! _isContainerManaged) {
+
+    if (!_isContainerManaged) {
       out.println();
       out.println("Transaction xa = null;");
-    }
-    else if (_xa != null) {
-      switch (_xa) {
+    } else if (_transactionType != null) {
+      switch (_transactionType) {
       case NOT_SUPPORTED:
       case REQUIRED:
-      case REQUIRES_NEW:
-      {
+      case REQUIRES_NEW: {
         out.println();
         out.println("Transaction xa = null;");
         break;
       }
       }
     }
-    
+
     super.generatePreTry(out);
   }
 
   /**
-   * Generates the interceptor code after the try-block
-   * and before the call.
+   * Generates the interceptor code after the try-block and before the call.
    * 
    * <code><pre>
    * retType myMethod(...)
@@ -218,14 +210,12 @@ public class XaCallChain extends AbstractCallChain {
    * </pre></code>
    */
   @Override
-  public void generatePreCall(JavaWriter out) 
-    throws IOException
+  public void generatePreCall(JavaWriter out) throws IOException
   {
-    if (! _isContainerManaged) {
+    if (!_isContainerManaged) {
       out.println("xa = _xa.beginNotSupported();");
-    }
-    else if (_xa != null) {
-      switch (_xa) {
+    } else if (_transactionType != null) {
+      switch (_transactionType) {
       case MANDATORY: {
         out.println();
         out.println("_xa.beginMandatory();");
@@ -268,8 +258,7 @@ public class XaCallChain extends AbstractCallChain {
   }
 
   /**
-   * Generates the interceptor code after invocation
-   * and before the call.
+   * Generates the interceptor code after invocation and before the call.
    * 
    * <code><pre>
    * retType myMethod(...)
@@ -285,37 +274,49 @@ public class XaCallChain extends AbstractCallChain {
    * </pre></code>
    */
   @Override
-  public void generatePostCall(JavaWriter out) 
-    throws IOException
+  public void generatePostCall(JavaWriter out) throws IOException
   {
     super.generatePostCall(out);
-    
+
     if (_isContainerManaged
-        && (_xa == REQUIRED || _xa == REQUIRES_NEW)) {
+        && (_transactionType == REQUIRED || _transactionType == REQUIRES_NEW)) {
       out.println("isXAValid = true;");
     }
   }
-  
+
   /**
    * Generates aspect code for an application exception
-   *
+   * 
    */
   @Override
-  public void generateApplicationException(JavaWriter out,
-                                           Class<?> exn)
-    throws IOException
+  public void generateApplicationException(JavaWriter out, Class<?> exception)
+      throws IOException
   {
-    super.generateApplicationException(out, exn);
-    
-    ApplicationException appExn
-      = exn.getAnnotation(ApplicationException.class);
-    
-    if (appExn != null && appExn.rollback())
-      return;
-    
-    if (_isContainerManaged
-        && (_xa == REQUIRED || _xa == REQUIRES_NEW)) {
+    super.generateApplicationException(out, exception);
+
+    ApplicationException applicationException = exception
+        .getAnnotation(ApplicationException.class);
+
+    if ((applicationException != null) && (applicationException.rollback())) {
+      if (_isContainerManaged && (_transactionType != NOT_SUPPORTED)) {
+        out.println("if (_xa.getTransaction() != null)");
+        out.println("  _xa.markRollback(e);");
+      }
+    } else if (_isContainerManaged
+        && (_transactionType == REQUIRED || _transactionType == REQUIRES_NEW)) {
       out.println("isXAValid = true;");
+    }
+  }
+
+  @Override
+  public void generateSystemException(JavaWriter out, Class<?> exn)
+      throws IOException
+  {
+    if (_isContainerManaged) {
+      out.println("if (_xa.getTransaction() != null) {");
+      out.println("  _xa.markRollback(e);");
+      out.println("  isXAValid = true;");
+      out.println("}");
     }
   }
 
@@ -334,17 +335,15 @@ public class XaCallChain extends AbstractCallChain {
    * </pre></code>
    */
   @Override
-  public void generateFinally(JavaWriter out) 
-    throws IOException
+  public void generateFinally(JavaWriter out) throws IOException
   {
     super.generateFinally(out);
 
-    if (! _isContainerManaged) {
+    if (!_isContainerManaged) {
       out.println("if (xa != null)");
       out.println("  _xa.resume(xa);");
-    }
-    else if (_xa != null) {
-      switch (_xa) {
+    } else if (_transactionType != null) {
+      switch (_transactionType) {
       case NOT_SUPPORTED: {
         out.println("if (xa != null)");
         out.println("  _xa.resume(xa);");
