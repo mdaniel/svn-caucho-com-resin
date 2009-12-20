@@ -262,4 +262,3 @@ public class UserTransactionProxy
     return getClass().getSimpleName() + "[]";
   }
 }
-
