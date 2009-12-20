@@ -28,39 +28,46 @@
 
 package com.caucho.transaction;
 
-import com.caucho.config.inject.SingletonBindingHandle;
-import com.caucho.config.types.Period;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.server.cluster.Server;
-import com.caucho.transaction.xalog.AbstractXALogManager;
-import com.caucho.transaction.xalog.AbstractXALogStream;
-import com.caucho.util.Crc64;
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-
-import javax.transaction.*;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.InvalidTransactionException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.TransactionManager;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+
+import com.caucho.config.inject.SingletonBindingHandle;
+import com.caucho.config.types.Period;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.Environment;
+import com.caucho.transaction.xalog.AbstractXALogManager;
+import com.caucho.transaction.xalog.AbstractXALogStream;
+import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+
 /**
  * Implementation of the transaction manager.
  */
-public class TransactionManagerImpl
-  implements TransactionManager, Serializable,
-	     ClassLoaderListener
-{
+public class TransactionManagerImpl implements TransactionManager,
+    Serializable, ClassLoaderListener {
+  private static final long serialVersionUID = 1L;
   private static L10N L = new L10N(TransactionManagerImpl.class);
-  private static Logger log
-    = Logger.getLogger(TransactionManagerImpl.class.getName());
-  
+  private static Logger log = Logger.getLogger(TransactionManagerImpl.class
+      .getName());
+
   private static TransactionManagerImpl _tm = new TransactionManagerImpl();
 
   private int _serverId;
@@ -68,15 +75,9 @@ public class TransactionManagerImpl
   private AbstractXALogManager _xaLogManager;
 
   // thread local is dependent on the transaction manager
-  private ThreadLocal<TransactionImpl> _threadTransaction
-    = new ThreadLocal<TransactionImpl>();
+  private ThreadLocal<TransactionImpl> _threadTransaction = new ThreadLocal<TransactionImpl>();
 
-  private ArrayList<WeakReference<TransactionImpl>> _transactionList
-    = new ArrayList<WeakReference<TransactionImpl>>();
-
-  // listeners for transaction begin
-  private ArrayList<TransactionListener> _transactionListeners
-    = new ArrayList<TransactionListener>();
+  private ArrayList<WeakReference<TransactionImpl>> _transactionList = new ArrayList<WeakReference<TransactionImpl>>();
 
   private long _timeout = -1;
 
@@ -127,8 +128,7 @@ public class TransactionManagerImpl
   /**
    * Create a new transaction and associate it with the thread.
    */
-  public void begin()
-    throws NotSupportedException, SystemException
+  public void begin() throws NotSupportedException, SystemException
   {
     getCurrent().begin();
   }
@@ -138,9 +138,9 @@ public class TransactionManagerImpl
    */
   XidImpl createXID()
   {
-    return new XidImpl(getServerId(),
-		       RandomUtil.getRandomLong());
+    return new XidImpl(getServerId(), RandomUtil.getRandomLong());
   }
+
   /**
    * Creates a new transaction id.
    */
@@ -161,29 +161,26 @@ public class TransactionManagerImpl
       String server = (String) Environment.getAttribute("caucho.server-id");
 
       if (server == null)
-	_serverId = 1;
+        _serverId = 1;
       else
-	_serverId = (int) Crc64.generate(server);
+        _serverId = (int) Crc64.generate(server);
     }
-    
+
     return _serverId;
   }
 
   /**
    * Returns the transaction for the current thread.
    */
+  @Override
   public Transaction getTransaction()
-    throws SystemException
   {
     TransactionImpl trans = _threadTransaction.get();
-    
-    if (trans == null
-	|| trans.getStatus() == Status.STATUS_NO_TRANSACTION
-	|| trans.getStatus() == Status.STATUS_UNKNOWN
-	|| trans.isSuspended()) {
+
+    if (trans == null || trans.getStatus() == Status.STATUS_NO_TRANSACTION
+        || trans.getStatus() == Status.STATUS_UNKNOWN || trans.isSuspended()) {
       return null;
-    }
-    else {
+    } else {
       return trans;
     }
   }
@@ -191,17 +188,15 @@ public class TransactionManagerImpl
   /**
    * Suspend the transaction.
    */
-  public Transaction suspend()
-    throws SystemException
+  public Transaction suspend() throws SystemException
   {
     TransactionImpl trans = _threadTransaction.get();
 
-    if (trans == null ||
-        (! trans.hasResources() &&
-         (trans.getStatus() == Status.STATUS_NO_TRANSACTION ||
-          trans.getStatus() == Status.STATUS_UNKNOWN)))
+    if (trans == null
+        || (!trans.hasResources() && (trans.getStatus() == Status.STATUS_NO_TRANSACTION || trans
+            .getStatus() == Status.STATUS_UNKNOWN)))
       return null;
-    
+
     _threadTransaction.set(null);
     trans.suspend();
 
@@ -211,13 +206,15 @@ public class TransactionManagerImpl
   /**
    * Resume the transaction.
    */
-  public void resume(Transaction tobj)
-    throws InvalidTransactionException, SystemException
+  public void resume(Transaction tobj) throws InvalidTransactionException,
+      SystemException
   {
     Transaction old = _threadTransaction.get();
-    
+
     if (old != null && old.getStatus() != Status.STATUS_NO_TRANSACTION)
-      throw new SystemException(L.l("can't resume transaction with active transaction {0}", String.valueOf(old)));
+      throw new SystemException(L.l(
+          "can't resume transaction with active transaction {0}", String
+              .valueOf(old)));
 
     TransactionImpl impl = (TransactionImpl) tobj;
 
@@ -225,16 +222,15 @@ public class TransactionManagerImpl
 
     _threadTransaction.set(impl);
   }
-  
+
   /**
    * Force any completion to be a rollback.
    */
-  public void setRollbackOnly()
-    throws SystemException
+  public void setRollbackOnly() throws SystemException
   {
     getCurrent().setRollbackOnly();
   }
-  
+
   /**
    * Force any completion to be a rollback.
    */
@@ -246,8 +242,7 @@ public class TransactionManagerImpl
   /**
    * Returns the transaction's status
    */
-  public int getStatus()
-    throws SystemException
+  public int getStatus() throws SystemException
   {
     return getCurrent().getStatus();
   }
@@ -255,8 +250,7 @@ public class TransactionManagerImpl
   /**
    * sets the timeout for the transaction
    */
-  public void setTransactionTimeout(int seconds)
-    throws SystemException
+  public void setTransactionTimeout(int seconds) throws SystemException
   {
     getCurrent().setTransactionTimeout(seconds);
   }
@@ -264,9 +258,8 @@ public class TransactionManagerImpl
   /**
    * Commit the transaction.
    */
-  public void commit()
-    throws RollbackException, HeuristicMixedException,
-    HeuristicRollbackException, SystemException
+  public void commit() throws RollbackException, HeuristicMixedException,
+      HeuristicRollbackException, SystemException
   {
     getCurrent().commit();
   }
@@ -283,22 +276,20 @@ public class TransactionManagerImpl
    * Returns the corresponding user transaction.
    */
   /*
-  public UserTransaction getUserTransaction()
-  {
-    return this;
-  }
-  */
-  
+   * public UserTransaction getUserTransaction() { return this; }
+   */
+
   /**
    * Returns the current TransactionImpl, creating if necessary.
-   *
-   * <p/>The TransactionImpl is not an official externally
-   * visible Transaction if the status == NO_TRANSACTION.
+   * 
+   * <p/>
+   * The TransactionImpl is not an official externally visible Transaction if
+   * the status == NO_TRANSACTION.
    */
   public TransactionImpl getCurrent()
   {
     TransactionImpl trans = _threadTransaction.get();
-    
+
     if (trans == null || trans.isDead()) {
       trans = new TransactionImpl(this);
       _threadTransaction.set(trans);
@@ -313,10 +304,10 @@ public class TransactionManagerImpl
   {
     synchronized (_transactionList) {
       for (int i = _transactionList.size() - 1; i >= 0; i--) {
-	WeakReference<TransactionImpl> ref = _transactionList.get(i);
+        WeakReference<TransactionImpl> ref = _transactionList.get(i);
 
-	if (ref.get() == null)
-	  _transactionList.remove(i);
+        if (ref.get() == null)
+          _transactionList.remove(i);
       }
 
       _transactionList.add(new WeakReference<TransactionImpl>(trans));
@@ -326,45 +317,42 @@ public class TransactionManagerImpl
   /**
    * Returns the corresponding user transaction.
    */
-  public void recover(XAResource xaRes)
-    throws XAException
+  public void recover(XAResource xaRes) throws XAException
   {
-    Xid []xids;
+    Xid [] xids;
 
-    xids = xaRes.recover(XAResource.TMSTARTRSCAN|XAResource.TMENDRSCAN);
+    xids = xaRes.recover(XAResource.TMSTARTRSCAN | XAResource.TMENDRSCAN);
 
     if (xids == null)
       return;
 
     for (int i = 0; i < xids.length; i++) {
-      byte []global = xids[i].getGlobalTransactionId();
+      byte [] global = xids[i].getGlobalTransactionId();
 
       if (global.length != XidImpl.GLOBAL_LENGTH)
-	continue;
-      
+        continue;
+
       XidImpl xidImpl = new XidImpl(xids[i].getGlobalTransactionId());
 
-      if (_xaLogManager != null
-	  && _xaLogManager.hasCommittedXid(xidImpl)) {
-	log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));
+      if (_xaLogManager != null && _xaLogManager.hasCommittedXid(xidImpl)) {
+        log.fine(L.l("XAResource {0} commit xid {1}", xaRes, xidImpl));
 
-	try {
-	  xaRes.commit(xidImpl, false);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-      else {
-	// XXX: need to check if the transaction belongs to this TM
-	// the ownership is encoded in the xid
-	
-	log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
-	
-	try {
-	  xaRes.forget(xidImpl);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          xaRes.commit(xidImpl, false);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      } else {
+        // XXX: need to check if the transaction belongs to this TM
+        // the ownership is encoded in the xid
+
+        log.fine(L.l("XAResource {0} forget xid {1}", xaRes, xidImpl));
+
+        try {
+          xaRes.forget(xidImpl);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }
@@ -377,14 +365,14 @@ public class TransactionManagerImpl
     if (_xaLogManager != null)
       _xaLogManager.flush();
   }
-  
+
   /**
    * Handles the case where a class loader has completed initialization
    */
   public void classLoaderInit(DynamicClassLoader loader)
   {
   }
-  
+
   /**
    * Handles the case where a class loader is dropped.
    */
@@ -392,7 +380,7 @@ public class TransactionManagerImpl
   {
     AbstractXALogManager xaLogManager = _xaLogManager;
     _xaLogManager = null;
-    
+
     if (xaLogManager != null)
       xaLogManager.close();
 
@@ -402,8 +390,8 @@ public class TransactionManagerImpl
 
     synchronized (_transactionList) {
       for (int i = _transactionList.size() - 1; i >= 0; i--) {
-	WeakReference<TransactionImpl> ref = _transactionList.get(i);
-	TransactionImpl xa = ref.get();
+        WeakReference<TransactionImpl> ref = _transactionList.get(i);
+        TransactionImpl xa = ref.get();
 
         if (xa != null)
           xaList.add(xa);
