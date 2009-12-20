@@ -28,8 +28,6 @@
  */
 package com.caucho.ejb.util;
 
-import java.util.logging.Logger;
-
 import javax.ejb.EJBException;
 import javax.ejb.EJBTransactionRequiredException;
 import javax.ejb.SessionSynchronization;
@@ -51,7 +49,7 @@ import com.caucho.util.L10N;
  */
 public class XAManager {
   private static L10N L = new L10N(XAManager.class);
- 
+
   private UserTransactionProxy _ut;
 
   public XAManager()
@@ -111,7 +109,8 @@ public class XAManager {
       Transaction xa = tm.getTransaction();
 
       if (xa == null)
-        throw new EJBTransactionRequiredException(L.l("Transaction required for 'Mandatory' transaction attribute"));
+        throw new EJBTransactionRequiredException(L
+            .l("Transaction required for 'Mandatory' transaction attribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -130,7 +129,8 @@ public class XAManager {
       Transaction xa = tm.getTransaction();
 
       if (xa != null)
-        throw new EJBException(L.l("Transaction forbidden for 'Never' transaction attribute"));
+        throw new EJBException(L
+            .l("Transaction forbidden for 'Never' transaction attribute"));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -227,6 +227,24 @@ public class XAManager {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
 
       return tm.suspend();
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new EJBException(e);
+    }
+  }
+
+  /**
+   * Gets the active transaction.
+   * 
+   * @return The current transaction if it exists.
+   */
+  public Transaction getTransaction()
+  {
+    try {
+      TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
+
+      return tm.getTransaction();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
