@@ -78,10 +78,10 @@ public class ServletConfigImpl
 
   private String _jndiName;
   private String _var;
-  
+
   private String _servletName;
   private String _servletNameDefault;
-  
+
   private String _servletClassName;
   private Class _servletClass;
   private Bean _bean;
@@ -108,7 +108,7 @@ public class ServletConfigImpl
 
   private ServletProtocolConfig _protocolConfig;
   private ProtocolServletFactory _protocolFactory;
-  
+
   private Alarm _alarm;
   private InjectionTarget _comp;
 
@@ -209,14 +209,18 @@ public class ServletConfigImpl
     _multipartConfigElement = multipartConfig;
   }
 
-  public MultipartConfigElement getMultipartConfig() {
+  public MultipartConfigElement getMultipartConfig()
+  {
     if (_multipartConfigElement == null) {
       Class servletClass = getServletClass();
-      MultipartConfig config
-        = (MultipartConfig) servletClass.getAnnotation(MultipartConfig.class);
 
-      if (config != null)
-        _multipartConfigElement = new MultipartConfigElement(config);
+      if (servletClass != null) {
+        MultipartConfig config
+          = (MultipartConfig) servletClass.getAnnotation(MultipartConfig.class);
+
+        if (config != null)
+          _multipartConfigElement = new MultipartConfigElement(config);
+      }
     }
 
     return _multipartConfigElement;
@@ -226,7 +230,7 @@ public class ServletConfigImpl
   {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
-    
+
     try {
 
       ServletMapping mapping = _webApp.createServletMapping();
@@ -259,7 +263,7 @@ public class ServletConfigImpl
   {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
-    
+
     Set<String> conflicting = new HashSet<String>();
 
     for (Map.Entry<String, String> param : initParameters.entrySet()) {
@@ -331,7 +335,7 @@ public class ServletConfigImpl
   {
     return _bean != null || _servletClassName != null;
   }
-  
+
   /**
    * Sets the servlet class.
    */
@@ -343,12 +347,12 @@ public class ServletConfigImpl
     // JSF is special
     if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
       // ioc/0566
-      
+
       if (_loadOnStartup < 0)
-	_loadOnStartup = 1;
+        _loadOnStartup = 1;
 
       if (_servletContext instanceof WebApp)
-	((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
+        ((WebApp) _servletContext).createJsp().setLoadTldOnInit(true);
     }
 
     InjectManager beanManager = InjectManager.create();
@@ -371,26 +375,26 @@ public class ServletConfigImpl
   {
     if (_bean != null)
       return _bean.getBeanClass();
-    
+
     if (_servletClassName == null)
       return null;
-    
+
     if (_servletClass == null) {
       try {
-	Thread thread = Thread.currentThread();
-	ClassLoader loader = thread.getContextClassLoader();
+        Thread thread = Thread.currentThread();
+        ClassLoader loader = thread.getContextClassLoader();
 
         _servletClass = Class.forName(_servletClassName, false, loader);
       } catch (Exception e) {
-	throw error(L.l("'{0}' is not a known servlet class.  Servlets belong in the classpath, for example WEB-INF/classes.",
-			_servletClassName),
-		    e);
+        throw error(L.l("'{0}' is not a known servlet class.  Servlets belong in the classpath, for example WEB-INF/classes.",
+                        _servletClassName),
+                    e);
       }
     }
-      
+
     return _servletClass;
   }
-  
+
   public void setServlet(Servlet servlet)
   {
     _singletonServlet = servlet;
@@ -771,7 +775,7 @@ public class ServletConfigImpl
     }
     else if (_protocolConfig != null) {
       String protocolName = _protocolConfig.getUri();
-      
+
       setServletName(_servletClassName + "-" + protocolName);
     }
     else
@@ -780,26 +784,26 @@ public class ServletConfigImpl
     // XXX: should only be for web services
     if (_jndiName != null) {
       validateClass(true);
-      
+
       Object servlet = createServlet(false);
 
       try {
-	Jndi.bindDeepShort(_jndiName, servlet);
+        Jndi.bindDeepShort(_jndiName, servlet);
       } catch (NamingException e) {
-	throw new ServletException(e);
+        throw new ServletException(e);
       }
     }
 
     InjectManager webBeans = InjectManager.create();
-    
+
     if (_var != null) {
       validateClass(true);
-      
+
       Object servlet = createServlet(false);
 
       BeanFactory factory = webBeans.createBeanFactory(servlet.getClass());
       factory.name(_var);
-      
+
       webBeans.addBean(factory.singleton(servlet));
     }
   }
@@ -821,9 +825,9 @@ public class ServletConfigImpl
       try {
         _servletClass = Class.forName(_servletClassName, false, loader);
       } catch (ClassNotFoundException e) {
-	if (e instanceof CompileException)
-	  throw error(e);
-	
+        if (e instanceof CompileException)
+          throw error(e);
+
         log.log(Level.FINER, e.toString(), e);
       }
 
@@ -847,10 +851,10 @@ public class ServletConfigImpl
       }
       /*
       else if (_servletClass.isAnnotationPresent(WebService.class)) {
-	// update protocol for "soap"?
-      } 
+        // update protocol for "soap"?
+      }
       else if (_servletClass.isAnnotationPresent(WebServiceProvider.class)) {
-	// update protocol for "soap"?
+        // update protocol for "soap"?
       }
       */
       else
@@ -916,7 +920,7 @@ public class ServletConfigImpl
 
       Alarm nextAlarm = _alarm;
       if (nextAlarm != null)
-	alarm.queue(nextTime - now);
+        alarm.queue(nextTime - now);
     }
   }
 
@@ -933,9 +937,9 @@ public class ServletConfigImpl
   {
     synchronized (this) {
       // JSP files need to have separate chains created for each JSP
-      
+
       if (_servletChain != null)
-	return _servletChain;
+        return _servletChain;
       else
         return createServletChainImpl();
     }
@@ -1052,21 +1056,21 @@ public class ServletConfigImpl
 
     if (Alarm.getCurrentTime() < _nextInitTime)
       throw _initException;
-    
+
     if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
       addFacesResolvers();
     }
 
     try {
       synchronized (this) {
-	if (! isNew && _servlet != null)
-	  return _servlet;
-	  
-	// XXX: this was outside of the sync block
-	servlet = createServletImpl();
+        if (! isNew && _servlet != null)
+          return _servlet;
 
-	if (! isNew)
-	  _servlet = servlet;
+        // XXX: this was outside of the sync block
+        servlet = createServletImpl();
+
+        if (! isNew)
+          _servlet = servlet;
       }
 
       if (log.isLoggable(Level.FINE))
@@ -1075,21 +1079,21 @@ public class ServletConfigImpl
       //J2EEManagedObject.register(new com.caucho.management.j2ee.Servlet(this));
 
       if (! isNew) {
-	// If the servlet has an MBean, register it
-	try {
-	  Hashtable<String,String> props = new Hashtable<String,String>();
+        // If the servlet has an MBean, register it
+        try {
+          Hashtable<String,String> props = new Hashtable<String,String>();
 
-	  props.put("type", _servlet.getClass().getSimpleName());
-	  props.put("name", _servletName);
-	  Jmx.register(_servlet, props);
-	} catch (Exception e) {
-	  log.finest(e.toString());
-	}
+          props.put("type", _servlet.getClass().getSimpleName());
+          props.put("name", _servletName);
+          Jmx.register(_servlet, props);
+        } catch (Exception e) {
+          log.finest(e.toString());
+        }
 
-	if ((_runAt != null || _cron != null) && _alarm != null) {
-	  long nextTime = nextTimeout(Alarm.getCurrentTime());
-	  _alarm.queue(nextTime - Alarm.getCurrentTime());
-	}
+        if ((_runAt != null || _cron != null) && _alarm != null) {
+          long nextTime = nextTimeout(Alarm.getCurrentTime());
+          _alarm.queue(nextTime - Alarm.getCurrentTime());
+        }
       }
 
       if (log.isLoggable(Level.FINE))
@@ -1114,9 +1118,9 @@ public class ServletConfigImpl
       Application app = appFactory.getApplication();
 
       if (app != null) {
-	InjectManager beanManager = InjectManager.create();
+        InjectManager beanManager = InjectManager.create();
 
-	app.addELResolver(beanManager.getELResolver());
+        app.addELResolver(beanManager.getELResolver());
       }
     }
   }
@@ -1128,14 +1132,14 @@ public class ServletConfigImpl
       Object service = createServletImpl();
 
       if (_protocolFactory == null)
-	_protocolFactory = _protocolConfig.createFactory();
+        _protocolFactory = _protocolConfig.createFactory();
 
       if (_protocolFactory == null)
-	throw new IllegalStateException(L.l("unknown protocol factory for '{0}'",
-					    this));
+        throw new IllegalStateException(L.l("unknown protocol factory for '{0}'",
+                                            this));
 
       Servlet servlet
-	= _protocolFactory.createServlet(getServletClass(), service);
+        = _protocolFactory.createServlet(getServletClass(), service);
 
       servlet.init(this);
 
@@ -1156,7 +1160,7 @@ public class ServletConfigImpl
       ConfigContext env = ConfigContext.create();
       return _bean.create(env);
     }
-      
+
     Class servletClass = getServletClass();
 
     Object servlet;
@@ -1170,7 +1174,7 @@ public class ServletConfigImpl
 
     else if (servletClass != null) {
       InjectManager inject = InjectManager.create();
-      
+
       _comp = inject.createInjectionTarget(servletClass);
 
       ConfigContext env = ConfigContext.create();
@@ -1186,13 +1190,13 @@ public class ServletConfigImpl
 
     try {
       if (servlet instanceof Page) {
-	// server/102i
-	// page already configured
+        // server/102i
+        // page already configured
       }
       else if (servlet instanceof Servlet) {
-	Servlet servletObj = (Servlet) servlet;
-	
-	servletObj.init(this);
+        Servlet servletObj = (Servlet) servlet;
+
+        servletObj.init(this);
       }
     } catch (UnavailableException e) {
       setInitException(e);
@@ -1252,10 +1256,10 @@ public class ServletConfigImpl
 
     Alarm alarm = _alarm;
     _alarm = null;
-    
+
     if (alarm != null)
       alarm.dequeue();
-    
+
     if (_comp != null)
       _comp.preDestroy(servlet);
 
@@ -1274,7 +1278,7 @@ public class ServletConfigImpl
   protected ConfigException error(String msg)
   {
     ConfigException e;
-    
+
     if (_location != null)
       e = new LineConfigException(_location + msg);
     else
@@ -1288,7 +1292,7 @@ public class ServletConfigImpl
   protected ConfigException error(String msg, Throwable e)
   {
     ConfigException e1;
-    
+
     if (_location != null)
       e1 = new LineConfigException(_location + msg, e);
     else
@@ -1302,7 +1306,7 @@ public class ServletConfigImpl
   protected RuntimeException error(Throwable e)
   {
     RuntimeException e1;
-    
+
     if (_location != null)
       e1 = new LineConfigException(_location + e.getMessage(), e);
     else

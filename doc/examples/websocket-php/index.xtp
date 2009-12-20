@@ -1,8 +1,8 @@
 <document>
   <header>
     <product>resin</product>
-    <title>Hello, World WebSocket in Resin/Quercus</title>
-    <description><p>A "hello, world" WebSocket servlet in Resin</p></description>
+    <title>Hello, World WebSocket in Quercus/PHP</title>
+    <description><p>A "hello, world" WebSocket servlet using the Quercus PHP implementation</p></description>
     <type>tutorial</type>
    <tutorial-startpage>client.php</tutorial-startpage>
   </header>

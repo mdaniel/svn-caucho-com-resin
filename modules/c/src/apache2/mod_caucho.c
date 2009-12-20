@@ -843,7 +843,6 @@ write_request(stream_t *s, request_rec *r, config_t *config,
   int len;
   int code = -1;
 
-  hmux_start_channel(s, 1);
   write_env(s, r);
   write_headers(s, r);
   write_added_headers(s, r);
