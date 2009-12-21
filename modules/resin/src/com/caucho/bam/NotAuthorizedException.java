@@ -63,7 +63,7 @@ public class NotAuthorizedException
       return error;
 
     return new ActorError(ActorError.TYPE_AUTH,
-			ActorError.NOT_AUTHORIZED,
-			getMessage());
+			  ActorError.NOT_AUTHORIZED,
+			  getMessage());
   }
 }

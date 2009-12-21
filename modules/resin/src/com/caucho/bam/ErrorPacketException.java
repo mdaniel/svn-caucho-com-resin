@@ -37,6 +37,7 @@ public class ErrorPacketException extends ActorException {
   
   public ErrorPacketException()
   {
+    Thread.dumpStack();
   }
 
   public ErrorPacketException(String msg)

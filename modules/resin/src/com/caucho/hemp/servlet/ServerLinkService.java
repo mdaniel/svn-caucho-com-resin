@@ -33,6 +33,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorException;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.bam.QueryGet;
@@ -129,12 +130,19 @@ public class ServerLinkService extends SimpleActor {
   
     try {
       _authManager.authenticate(query.getUid(), credentials, ipAddress);
+    } catch (ActorException e) {
+      log.log(Level.FINE, e.toString(), e);
+    
+      getLinkStream().queryError(id, from, to, query,
+                                 e.createActorError());
+
+      return;
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     
       getLinkStream().queryError(id, from, to, query,
                                  new ActorError(ActorError.TYPE_AUTH,
-                                                ActorError.FORBIDDEN,
+                                                ActorError.NOT_AUTHORIZED,
                                                 e.getMessage()));
       return;
     } catch (Throwable e) {
