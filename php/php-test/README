@@ -1,7 +1,0 @@
-1. Download the test suite at:
-
-http://qa.php.net/
-
-2. To run, just specify the resin directory to the modified run-tests.php:
-
-php run-tests.php --resin-home c:/caucho/checkout/resin tests/strings/001.phpt
