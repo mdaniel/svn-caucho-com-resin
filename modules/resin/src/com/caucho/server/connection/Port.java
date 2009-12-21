@@ -636,7 +636,8 @@ public class Port extends TaskWorker
   {
     Throttle throttle = createThrottle();
 
-    throttle.setMaxConcurrentRequests(max);
+    if (throttle != null)
+      throttle.setMaxConcurrentRequests(max);
   }
 
   /**
@@ -664,7 +665,9 @@ public class Port extends TaskWorker
     if (_throttle == null) {
       _throttle = Throttle.createPro();
 
-      if (_throttle == null)
+      if (_throttle == null
+          && Server.getCurrent() != null
+          && ! Server.getCurrent().isWatchdog())
         throw new ConfigException(L.l("throttle configuration requires Resin Professional"));
     }
 
