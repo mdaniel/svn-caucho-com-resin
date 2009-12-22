@@ -119,7 +119,12 @@ public class MessageView extends View {
     throws IOException
   {
     HashMap<String,Object> map = new HashMap<String,Object>();
-    //map.put("caucho.ejb.xa", "done");
+
+    map.put("caucho.ejb.xa", "done");
+
+    out.println();
+    out.println("private static final com.caucho.ejb.util.XAManager _xa");
+    out.println("  = new com.caucho.ejb.util.XAManager();");
 
     /* ejb/0fbm
     for (BusinessMethodGenerator bizMethod : _businessMethods) {

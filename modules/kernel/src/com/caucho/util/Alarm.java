@@ -494,16 +494,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   static long nextAlarmTime()
   {
-    synchronized (_queueLock) {
-      Alarm []heap = _heap;
+    Alarm []heap = _heap;
 
-      Alarm alarm = heap[1];
+    Alarm alarm = heap[1];
 
-      if (alarm != null)
-        return alarm._wakeTime;
-      else
-        return getCurrentTime() + 120000;
-    }
+    if (alarm != null)
+      return alarm._wakeTime;
+    else
+      return getCurrentTime() + 120000;
   }
 
   /**
