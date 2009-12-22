@@ -130,7 +130,7 @@ public class StatelessObjectView extends StatelessView {
       }
     }
   }
-  
+
   //
   // code generation
   //
@@ -285,7 +285,7 @@ public class StatelessObjectView extends StatelessView {
     out.println();
     out.println("private " + getBean().getClassName() + " _context;");
     out.println("private final StatelessPool<" + getBeanClassName() + "> _statelessPool;");
-   
+
     out.println();
     out.println(getViewClassName() + "(" + getBean().getClassName()
         + " context)");
@@ -294,7 +294,7 @@ public class StatelessObjectView extends StatelessView {
     generateSuper(out, "context.getStatelessServer(), "
         + getViewClass().getName() + ".class");
     out.println("_context = context;");
-    
+
     out.println("_statelessPool = context.getStatelessPool(this);");
     out.popDepth();
     out.println("}");
@@ -304,24 +304,24 @@ public class StatelessObjectView extends StatelessView {
     out.println("{");
     out.println("  return new " + getBeanClassName() + "(this);");
     out.println("}");
-    
+
     out.println("public void __caucho_preDestroy(Object instance)");
     out.println("{");
     out.println("}");
-    
+
     out.println("public void __caucho_postConstruct(Object instance)");
     out.println("{");
     out.println("}");
-     
+
     out.println();
-    out.println("public " + getViewClass().getName() 
+    out.println("public " + getViewClass().getName()
                 + " __caucho_get()");
     out.println("{");
     out.println("  return this;");
     out.println("}");
 
     generateProxyPool(out);
-    
+
     generateBusinessMethods(out);
 
     /*
@@ -343,7 +343,7 @@ public class StatelessObjectView extends StatelessView {
      *
      * out.popDepth(); out.println("}"); }
      */
-    
+
     generateBean(out);
 
     out.popDepth();
@@ -363,9 +363,9 @@ public class StatelessObjectView extends StatelessView {
     out.println("final " + beanClass + " _ejb_begin()");
     out.println("{");
     out.pushDepth();
-    
+
     out.println("return _statelessPool.allocate();");
-    
+
     /*
     out.println(beanClass + " bean;");
     out.println("synchronized (this) {");
@@ -400,13 +400,13 @@ public class StatelessObjectView extends StatelessView {
     out.println("}");
 
     String baseClass = getViewClass().getName();
-    
+
     out.println();
     out.println("final void _ejb_free(" + baseClass + " bean)");
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
-    
+
     out.println("_statelessPool.free((" + beanClass + ") bean);");
     /*
     out.println("if (bean == null)");
@@ -430,9 +430,9 @@ public class StatelessObjectView extends StatelessView {
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
-    
+
     out.println("_statelessPool.destroy(bean);");
-    
+
     out.popDepth();
     out.println("}");
 
@@ -441,9 +441,9 @@ public class StatelessObjectView extends StatelessView {
     out.println("  throws javax.ejb.EJBException");
     out.println("{");
     out.pushDepth();
-    
+
     out.println("_statelessPool.discard(bean);");
-    
+
     out.popDepth();
     out.println("}");
 
@@ -451,7 +451,7 @@ public class StatelessObjectView extends StatelessView {
     out.println("public void destroy()");
     out.println("{");
     out.pushDepth();
-    
+
     out.println("_statelessPool.destroy();");
     /*
     out.println(beanClass + " ptr;");
@@ -495,7 +495,7 @@ public class StatelessObjectView extends StatelessView {
 
     out.println(getBeanClassName() + " bean = _statelessPool.allocate();");
 
-    if (!void.class.equals(implMethod.getReturnType()))
+    if (! void.class.equals(implMethod.getReturnType()))
       out.print("result = ");
 
     out.print("bean." + implMethod.getName() + "(");
@@ -528,7 +528,7 @@ public class StatelessObjectView extends StatelessView {
     if (_timeoutMethod != null) {
       String localVar = "_local_" + getViewClass().getSimpleName();
 
-      out.println(getBeanClass().getName() + " bean = " 
+      out.println(getBeanClass().getName() + " bean = "
                   + localVar
                   + "._ejb_begin();");
       out.println("bean." + _timeoutMethod + "(timer);");
