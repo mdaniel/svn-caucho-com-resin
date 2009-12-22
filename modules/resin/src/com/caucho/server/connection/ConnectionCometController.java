@@ -253,8 +253,9 @@ public class ConnectionCometController extends ConnectionController
     _listenerNode = node;
   }
 
-  public void addAsyncListener(AsyncListener listener, ServletRequest request,
-      ServletResponse response)
+  public void addAsyncListener(AsyncListener listener,
+			       ServletRequest request,
+			       ServletResponse response)
   {
     _listenerNode
       = new AsyncListenerNode(listener, request, response, _listenerNode);
@@ -262,14 +263,15 @@ public class ConnectionCometController extends ConnectionController
 
   public void addListener(AsyncListener listener)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    addListener(listener, _request, _response);
   }
 
   public void addListener(AsyncListener listener,
                           ServletRequest request,
                           ServletResponse response)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _listenerNode
+      = new AsyncListenerNode(listener, request, response, _listenerNode);
   }
 
   public <T extends AsyncListener> T createListener(Class<T> cl)

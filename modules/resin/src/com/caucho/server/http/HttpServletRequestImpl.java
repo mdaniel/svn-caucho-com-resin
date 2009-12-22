@@ -2096,7 +2096,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
   public DispatcherType getDispatcherType()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return DispatcherType.REQUEST;
   }
 
   @Override

@@ -65,7 +65,6 @@ import javax.annotation.PostConstruct;
 // cluster/6615 - <cluster> is not an EnvironmentBean
 abstract public class Cluster
   implements EnvironmentListener, SchemaBean
-//  implements EnvironmentBean, EnvironmentListener, SchemaBean
 {
   private static final L10N L = new L10N(Cluster.class);
   private static final Logger log = Logger.getLogger(Cluster.class.getName());
@@ -483,8 +482,9 @@ abstract public class Cluster
   /**
    * Adds a program.
    */
-  public void addBuilderProgram(ConfigProgram program)
+  public void addContentProgram(ConfigProgram program)
   {
+    // server/4322 - resin:import and resin:if must execute for cluster
     _serverProgram.addProgram(program);
   }
 
