@@ -338,17 +338,6 @@ public class HmuxRequest extends AbstractHttpRequest
    */
   public void startConnection()
   {
-    ActorStream brokerStream = _brokerStream;
-    _brokerStream = null;
-
-    ActorStream linkStream = _linkStream;
-    _linkStream = null;
-
-    if (brokerStream != null)
-      brokerStream.close();
-
-    if (linkStream != null)
-      linkStream.close();
   }
 
   /**
@@ -391,7 +380,7 @@ public class HmuxRequest extends AbstractHttpRequest
    * <p>Note: ClientDisconnectException must be rethrown to
    * the caller.
    */
-  public boolean handleRequestImpl()
+  private boolean handleRequestImpl()
     throws IOException
   {
     // XXX: should be moved to TcpConnection
@@ -402,8 +391,6 @@ public class HmuxRequest extends AbstractHttpRequest
       log.fine(dbgId() + "start request");
 
     _filter.init(this, _rawRead, _rawWrite);
-
-    _hasRequest = false;
 
     try {
       HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
@@ -447,11 +434,13 @@ public class HmuxRequest extends AbstractHttpRequest
     throws IOException
   {
     try {
+      _hasRequest = false;
+
       if (! scanHeaders()) {
         killKeepalive();
         return false;
       }
-      else if (_uri.size() == 0) {
+      else if (! _hasRequest) {
         return true;
       }
     } catch (InterruptedIOException e) {
@@ -691,6 +680,7 @@ public class HmuxRequest extends AbstractHttpRequest
         _rawRead.readAll(_uri.getBuffer(), 0, len);
         if (isLoggable)
           log.fine(dbgId() + (char) code + ":uri " + _uri);
+	_hasRequest = true;
         break;
 
       case HMUX_METHOD:
@@ -883,6 +873,9 @@ public class HmuxRequest extends AbstractHttpRequest
 
       case HMUX_TO_UNIDIR_HMTP:
       case HMUX_SWITCH_TO_HMTP: {
+	if (_hasRequest)
+	  throw new IllegalStateException();
+	
         len = (is.read() << 8) + is.read();
         boolean isAdmin = is.read() != 0;
 
@@ -894,6 +887,7 @@ public class HmuxRequest extends AbstractHttpRequest
           dIs.startStreaming();
           rawIs = dIs;
         }
+	
         if (_hmtpReader != null)
           _hmtpReader.init(rawIs);
         else
@@ -906,6 +900,8 @@ public class HmuxRequest extends AbstractHttpRequest
 
         Broker broker = _server.getAdminBroker();
         ActorStream brokerStream = broker.getBrokerStream();
+
+	_hmtpWriter.setJid("server-" + getConnectionId() + "-hmtp");
 
         _linkStream = new HempMemoryQueue(_hmtpWriter, brokerStream, 1);
         boolean isUnidir = code == HMUX_TO_UNIDIR_HMTP;
@@ -1054,7 +1050,7 @@ public class HmuxRequest extends AbstractHttpRequest
     do {
       if (! in.readPacket(_brokerStream))
         return false;
-    } while (_rawRead.getAvailable() > 0);
+    } while (in.isDataAvailable());
 
     return true;
   }
@@ -1607,8 +1603,30 @@ public class HmuxRequest extends AbstractHttpRequest
       log.fine(dbgId() + (char)code + "-w: " + cb);
   }
 
+  /**
+   * Close when the socket closes.
+   */
   public void protocolCloseEvent()
   {
+    ActorStream brokerStream = _brokerStream;
+    _brokerStream = null;
+
+    ActorStream linkStream = _linkStream;
+    _linkStream = null;
+
+    if (brokerStream != null)
+      brokerStream.close();
+
+    if (linkStream != null)
+      linkStream.close();
+
+    HmtpWriter writer = _hmtpWriter;
+
+    if (writer != null)
+      writer.close();
+
+    if (_bufferStartOffset > 0 || _rawWrite.getBufferOffset() > 0)
+      Thread.dumpStack();
   }
 
   @Override

@@ -118,7 +118,7 @@ public class HmtpWriter implements ActorStream
 	  log.finer(this + " message " + value
 		    + " {to:" + to + ", from:" + from + "}");
 	}
-	
+
 	out.startPacket();
 	out.writeInt(HmtpPacketType.MESSAGE.ordinal());
 	out.writeString(to);
@@ -152,7 +152,7 @@ public class HmtpWriter implements ActorStream
 	  log.finer(this + " messageError " + value
 		    + " {to:" + to + ", from:" + from + "}");
 	}
-	
+
 	out.startPacket();
 	out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
 	out.writeString(to);
@@ -226,7 +226,7 @@ public class HmtpWriter implements ActorStream
 	  log.finer(this + " querySet " + value
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
-	
+
 	out.startPacket();
 	out.writeInt(HmtpPacketType.QUERY_SET.ordinal());
 	out.writeString(to);
@@ -261,7 +261,7 @@ public class HmtpWriter implements ActorStream
 	  log.finer(this + " queryResult " + value
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
-	
+
 	out.startPacket();
 	out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
 	out.writeString(to);
@@ -297,7 +297,7 @@ public class HmtpWriter implements ActorStream
 	  log.finer(this + " queryError " + error + " " + value
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
-	
+
 	out.startPacket();
 	out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
 	out.writeString(to);

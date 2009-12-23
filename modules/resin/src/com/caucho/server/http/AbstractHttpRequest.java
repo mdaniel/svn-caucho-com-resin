@@ -226,6 +226,11 @@ public abstract class AbstractHttpRequest
     return _conn;
   }
 
+  public final int getConnectionId()
+  {
+    return _conn.getId();
+  }
+
   /**
    * returns the dispatch server.
    */

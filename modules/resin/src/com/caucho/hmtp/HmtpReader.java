@@ -66,6 +66,15 @@ public class HmtpReader {
   }
 
   /**
+   * Returns true if buffered read data is already available, i.e.
+   * the read stream will not block.
+   */
+  public boolean isDataAvailable()
+  {
+    return _in != null && _in.isDataAvailable();
+  }
+
+  /**
    * Reads the next HMTP packet from the stream, returning false on
    * end of file.
    */

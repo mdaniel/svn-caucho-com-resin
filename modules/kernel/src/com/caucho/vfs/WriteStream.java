@@ -89,7 +89,7 @@ public class WriteStream extends OutputStreamWithBuffer
   private boolean _disableClose;
   private boolean _isDisableCloseSource;
   private boolean _disableFlush;
-  private boolean reuseBuffer;
+  private boolean _reuseBuffer;
 
   private StreamPrintWriter _printWriter;
 
@@ -138,7 +138,7 @@ public class WriteStream extends OutputStreamWithBuffer
       _writeBuffer = _tempWrite._buf;
     }
 
-    this._source = source;
+    _source = source;
 
     _position = 0;
     _writeLength = 0;
@@ -201,7 +201,7 @@ public class WriteStream extends OutputStreamWithBuffer
 
   public void setReuseBuffer(boolean reuse)
   {
-    this.reuseBuffer = reuse;
+    _reuseBuffer = reuse;
   }
 
   /**
@@ -1227,7 +1227,7 @@ public class WriteStream extends OutputStreamWithBuffer
       if (_writeEncoding != null)
         _writeEncoding = null;
 
-      if (! reuseBuffer) {
+      if (! _reuseBuffer) {
         TempBuffer tempWrite = _tempWrite;
         _tempWrite = null;
         _writeBuffer = null;

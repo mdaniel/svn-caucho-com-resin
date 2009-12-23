@@ -94,8 +94,9 @@ public class HempMemoryQueue implements ActorStream, Runnable, Closeable
 
     _threadMax = threadMax;
 
-    if (_actorStream.getJid() == null)
+    if (_actorStream.getJid() == null) {
       _name = _actorStream.getClass().getSimpleName();
+    }
     else
       _name = _actorStream.getJid();
 

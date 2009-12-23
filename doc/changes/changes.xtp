@@ -11,8 +11,9 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.3 - Nov 24, 2009">
+<s2 title="4.0.3 - snapshot">
 <ul>
+<li>hessian: allow custom URL connector with HessianProxy</li>
 <li>hessian: avoid NPE on protocol corruption error (#3777, rep by Riccardo Cohen)</li>
 <li>hessian: patch for GAE compatibility (rep by Jeff Schnitzer)</li>
 <li>server: FileServlet handling of broken browser range requests (#3766, rep by Knut Forkalsrud)</li>
