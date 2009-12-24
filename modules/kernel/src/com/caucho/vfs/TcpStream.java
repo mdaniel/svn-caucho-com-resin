@@ -182,8 +182,16 @@ class TcpStream extends StreamImpl {
 
   public int read(byte []buf, int offset, int length) throws IOException
   {
-    if (_is != null)
-      return _is.read(buf, offset, length);
+    InputStream is = _is;
+    
+    if (is != null) {
+      int len = is.read(buf, offset, length);
+      
+      if (len < 0)
+        close();
+      
+      return len;
+    }
     else
       return -1;
   }

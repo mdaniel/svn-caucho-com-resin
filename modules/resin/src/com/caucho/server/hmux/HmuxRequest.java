@@ -895,9 +895,11 @@ public class HmuxRequest extends AbstractHttpRequest
 
         if (_hmtpWriter != null)
           _hmtpWriter.init(_rawWrite);
-        else
+        else {
           _hmtpWriter = new HmtpWriter(_rawWrite);
-
+	  _hmtpWriter.setAutoFlush(true);
+	}
+        
         Broker broker = _server.getAdminBroker();
         ActorStream brokerStream = broker.getBrokerStream();
 

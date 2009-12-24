@@ -1223,7 +1223,10 @@ public class TcpConnection extends Connection
       _idleTimeout = _port.getKeepaliveTimeout();
 
       getWriteStream().init(_socket.getStream());
-      getReadStream().init(_socket.getStream(), getWriteStream());
+      
+      // ReadStream cannot use getWriteStream or auto-flush
+      // because of duplex mode
+      getReadStream().init(_socket.getStream(), null);
 
       if (log.isLoggable(Level.FINE)) {
         log.fine(dbgId() + "starting connection " + TcpConnection.this + ", total=" + _port.getConnectionCount());

@@ -114,20 +114,22 @@ public class HmtpWriter implements ActorStream
       Hessian2Output out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " message " + value
-		    + " {to:" + to + ", from:" + from + "}");
-	}
+        if (log.isLoggable(Level.FINER)) {
+          log.finer(this + " message " + value
+                    + " {to:" + to + ", from:" + from + "}");
+        }
 
-	out.startPacket();
-	out.writeInt(HmtpPacketType.MESSAGE.ordinal());
-	out.writeString(to);
-	out.writeString(from);
-	out.writeObject(value);
-	out.endPacket();
+        synchronized (out) {
+          out.startPacket();
+          out.writeInt(HmtpPacketType.MESSAGE.ordinal());
+          out.writeString(to);
+          out.writeString(from);
+          out.writeObject(value);
+          out.endPacket();
 	
-	if (_isAutoFlush)
-	  out.flush();
+          if (_isAutoFlush)
+            out.flush();
+        }
       }
     } catch (IOException e) {
       close();
@@ -153,16 +155,18 @@ public class HmtpWriter implements ActorStream
 		    + " {to:" + to + ", from:" + from + "}");
 	}
 
-	out.startPacket();
-	out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
-	out.writeString(to);
-	out.writeString(from);
-	out.writeObject(value);
-	out.writeObject(error);
-	out.endPacket();
+	synchronized (out) {
+	  out.startPacket();
+	  out.writeInt(HmtpPacketType.MESSAGE_ERROR.ordinal());
+	  out.writeString(to);
+	  out.writeString(from);
+	  out.writeObject(value);
+	  out.writeObject(error);
+	  out.endPacket();
 	
-	if (_isAutoFlush)
-	  out.flush();
+	  if (_isAutoFlush)
+	    out.flush();
+	}
       }
     } catch (IOException e) {
       close();
@@ -187,21 +191,23 @@ public class HmtpWriter implements ActorStream
      Hessian2Output out = _out;
 
       if (out != null) {
-	if (log.isLoggable(Level.FINER)) {
-	  log.finer(this + " queryGet " + value
-		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
-	}
+        synchronized (out) {
+          if (log.isLoggable(Level.FINER)) {
+            log.finer(this + " queryGet " + value
+                      + " {id: " + id + ", to:" + to + ", from:" + from + "}");
+          }
 
-	out.startPacket();
-	out.writeInt(HmtpPacketType.QUERY_GET.ordinal());
-	out.writeString(to);
-	out.writeString(from);
-	out.writeLong(id);
-	out.writeObject(value);
-	out.endPacket();
+          out.startPacket();
+          out.writeInt(HmtpPacketType.QUERY_GET.ordinal());
+          out.writeString(to);
+          out.writeString(from);
+          out.writeLong(id);
+          out.writeObject(value);
+          out.endPacket();
 	
-	if (_isAutoFlush)
-	  out.flush();
+          if (_isAutoFlush)
+            out.flush();
+        }
       }
     } catch (IOException e) {
       close();
@@ -227,16 +233,18 @@ public class HmtpWriter implements ActorStream
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
 
-	out.startPacket();
-	out.writeInt(HmtpPacketType.QUERY_SET.ordinal());
-	out.writeString(to);
-	out.writeString(from);
-	out.writeLong(id);
-	out.writeObject(value);
-	out.endPacket();
+	synchronized (out) {
+	  out.startPacket();
+	  out.writeInt(HmtpPacketType.QUERY_SET.ordinal());
+	  out.writeString(to);
+	  out.writeString(from);
+	  out.writeLong(id);
+	  out.writeObject(value);
+	  out.endPacket();
 	
-	if (_isAutoFlush)
-	  out.flush();
+	  if (_isAutoFlush)
+	    out.flush();
+	}
       }
     } catch (IOException e) {
       close();
@@ -262,16 +270,18 @@ public class HmtpWriter implements ActorStream
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
 
-	out.startPacket();
-	out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
-	out.writeString(to);
-	out.writeString(from);
-	out.writeLong(id);
-	out.writeObject(value);
-	out.endPacket();
+	synchronized (out) {
+	  out.startPacket();
+	  out.writeInt(HmtpPacketType.QUERY_RESULT.ordinal());
+	  out.writeString(to);
+	  out.writeString(from);
+	  out.writeLong(id);
+	  out.writeObject(value);
+	  out.endPacket();
 	
-	if (_isAutoFlush)
-	  out.flush();
+	  if (_isAutoFlush)
+	    out.flush();
+	}
       }
     } catch (IOException e) {
       close();
@@ -298,17 +308,19 @@ public class HmtpWriter implements ActorStream
 		    + " {id: " + id + ", to:" + to + ", from:" + from + "}");
 	}
 
-	out.startPacket();
-	out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
-	out.writeString(to);
-	out.writeString(from);
-	out.writeLong(id);
-	out.writeObject(value);
-	out.writeObject(error);
-	out.endPacket();
+	synchronized (out) {
+	  out.startPacket();
+	  out.writeInt(HmtpPacketType.QUERY_ERROR.ordinal());
+	  out.writeString(to);
+	  out.writeString(from);
+	  out.writeLong(id);
+	  out.writeObject(value);
+	  out.writeObject(error);
+	  out.endPacket();
 	
-	if (_isAutoFlush)
-	  out.flush();
+	  if (_isAutoFlush)
+	    out.flush();
+	}
       }
     } catch (IOException e) {
       close();
@@ -327,7 +339,9 @@ public class HmtpWriter implements ActorStream
     Hessian2Output out = _out;
 
     if (out != null) {
-      out.flush();
+      synchronized (out) {
+        out.flush();
+      }
     }
   }
 
@@ -345,8 +359,11 @@ public class HmtpWriter implements ActorStream
       Hessian2Output out = _out;
       _out = null;
 
-      if (out != null)
-	out.close();
+      if (out != null) {
+        synchronized (out) {
+          out.close();
+        }
+      }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }

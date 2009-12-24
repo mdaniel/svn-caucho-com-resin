@@ -142,6 +142,7 @@ public class WriteStream extends OutputStreamWithBuffer
 
     _position = 0;
     _writeLength = 0;
+    
     flushOnNewline = source.getFlushOnNewline();
     // Possibly, this should be dependent on the source.  For example,
     // a http: stream should behave the same on Mac as on unix.
@@ -277,6 +278,8 @@ public class WriteStream extends OutputStreamWithBuffer
     if (_implicitFlush)
       flush();
   }
+  
+  private boolean _isDebug;
 
   /**
    * Writes a byte array
@@ -284,17 +287,17 @@ public class WriteStream extends OutputStreamWithBuffer
   public void write(byte []buf, int offset, int length) throws IOException
   {
     byte []buffer = _writeBuffer;
-
+    
     int bufferLength = buffer.length;
     int writeLength = _writeLength;
-
+    
     StreamImpl source = _source;
     if (source == null)
       return;
 
     if (bufferLength <= length) {
       if (source.write(buffer, 0, writeLength,
-                        buf, offset, length, false)) {
+                       buf, offset, length, false)) {
         _position += (writeLength + length);
         return;
       }
@@ -322,6 +325,7 @@ public class WriteStream extends OutputStreamWithBuffer
 
     _writeLength = writeLength;
 
+ 
     if (_implicitFlush)
       flush();
   }
@@ -363,6 +367,7 @@ public class WriteStream extends OutputStreamWithBuffer
     int len = _writeLength;
     if (len > 0) {
       _writeLength = 0;
+      
       _source.write(_writeBuffer, 0, len, false);
 
       _position += len;
@@ -574,7 +579,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (_source == null)
       return;
 
-    byte []writeBuffer = this._writeBuffer;
+    byte []writeBuffer = _writeBuffer;
 
     while (length > 0) {
       int writeLength = _writeLength;
@@ -1018,7 +1023,7 @@ public class WriteStream extends OutputStreamWithBuffer
     int length = _writeBuffer.length;
     long outputLength = 0;
 
-    if (_writeLength >= length) {
+    if (length <= _writeLength) {
       int tmplen = _writeLength;
       _writeLength = 0;
       _source.write(_writeBuffer, 0, tmplen, false);
@@ -1081,7 +1086,6 @@ public class WriteStream extends OutputStreamWithBuffer
     if (source == null)
       return;
 
-    int len;
     int length = _writeBuffer.length;
 
     if (length <= _writeLength) {
@@ -1133,7 +1137,7 @@ public class WriteStream extends OutputStreamWithBuffer
     if (_writeLength >= length) {
       int tmplen = _writeLength;
       _writeLength = 0;
-      this._source.write(_writeBuffer, 0, tmplen, false);
+      _source.write(_writeBuffer, 0, tmplen, false);
       _position += tmplen;
     }
 
@@ -1144,7 +1148,7 @@ public class WriteStream extends OutputStreamWithBuffer
       if (_writeLength >= length) {
         int tmplen = _writeLength;
         _writeLength = 0;
-        this._source.write(_writeBuffer, 0, tmplen, false);
+        _source.write(_writeBuffer, 0, tmplen, false);
         _position += tmplen;
       }
     }
@@ -1214,6 +1218,7 @@ public class WriteStream extends OutputStreamWithBuffer
       int len = _writeLength;
       if (len > 0) {
         _writeLength = 0;
+	
         if (s != null)
           s.write(_writeBuffer, 0, len, true);
       }
@@ -1292,7 +1297,7 @@ public class WriteStream extends OutputStreamWithBuffer
   /**
    * Lists all named attributes.
    */
-  public Iterator getAttributeNames()
+  public Iterator<String> getAttributeNames()
     throws IOException
   {
     return _source.getAttributeNames();
@@ -1397,62 +1402,5 @@ public class WriteStream extends OutputStreamWithBuffer
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _source + "]";
-  }
-
-  private class StreamWriter extends Writer
-    implements EnclosedWriteStream, FlushBuffer {
-    public final void write(char ch)
-      throws IOException
-    {
-      WriteStream.this.print(ch);
-    }
-
-    public final void write(char []buffer, int offset, int length)
-      throws IOException
-    {
-      WriteStream.this.print(buffer, offset, length);
-    }
-
-    public final void write(char []buffer)
-      throws IOException
-    {
-      WriteStream.this.print(buffer, 0, buffer.length);
-    }
-
-    public final void write(String string)
-      throws IOException
-    {
-      WriteStream.this.print(string);
-    }
-
-    public final void write(String string, int off, int len)
-      throws IOException
-    {
-      WriteStream.this.print(string, off, len);
-    }
-
-    public final void flush()
-      throws IOException
-    {
-      WriteStream.this.flush();
-    }
-
-    public final void flushBuffer()
-      throws IOException
-    {
-      WriteStream.this.flushBuffer();
-    }
-
-    public final void close()
-      throws IOException
-    {
-      // XXX: if flush, then servlets are sloooow
-      // WriteStream.this.flush();
-    }
-
-    public WriteStream getWriteStream()
-    {
-      return WriteStream.this;
-    }
   }
 }

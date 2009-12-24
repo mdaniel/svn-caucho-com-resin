@@ -1137,12 +1137,30 @@ public abstract class Path {
    */
   public ReadWritePair openReadWrite() throws IOException
   {
+    return openReadWrite(false);
+  }
+
+  /**
+   * Opens a resin ReadWritePair for reading and writing.
+   *
+   * <p>A chat channel, for example, would open its socket using this
+   * interface.
+   */
+  public ReadWritePair openReadWrite(boolean isAutoFlush) throws IOException
+  {
     clearStatusCache();
 
     StreamImpl impl = openReadWriteImpl();
     impl.setPath(this);
+    
     WriteStream writeStream = new WriteStream(impl);
-    ReadStream readStream = new ReadStream(impl, writeStream);
+    ReadStream readStream;
+
+    if (isAutoFlush)
+      readStream = new ReadStream(impl, writeStream);
+    else
+      readStream = new ReadStream(impl, null);
+    
     return new ReadWritePair(readStream, writeStream);
   }
 

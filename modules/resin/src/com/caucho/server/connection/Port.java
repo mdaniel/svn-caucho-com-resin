@@ -1317,8 +1317,6 @@ public class Port extends TaskWorker
       int idleThreadCount = _idleThreadCount.incrementAndGet();
 
       while (_lifecycle.isActive()) {
-        long now = Alarm.getCurrentTime();
-
         idleThreadCount = _idleThreadCount.get();
 
         if (_idleThreadMax < idleThreadCount
