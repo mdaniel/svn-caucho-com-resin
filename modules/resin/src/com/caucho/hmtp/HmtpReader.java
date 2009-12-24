@@ -47,6 +47,8 @@ public class HmtpReader {
   private static final Logger log
     = Logger.getLogger(HmtpReader.class.getName());
 
+  private String _id;
+  
   private InputStream _is;
   private Hessian2StreamingInput _in;
 
@@ -57,6 +59,11 @@ public class HmtpReader {
   public HmtpReader(InputStream is)
   {
     init(is);
+  }
+  
+  public void setId(String id)
+  {
+    _id = id;
   }
 
   public void init(InputStream is)
@@ -230,6 +237,9 @@ public class HmtpReader {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _is + "]";
+    if (_id != null)
+      return getClass().getSimpleName() + "[" + _id + "]";
+    else
+      return getClass().getSimpleName() + "[" + _is + "]";
   }
 }

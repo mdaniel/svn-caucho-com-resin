@@ -130,8 +130,6 @@ public class Server extends ProtocolDispatchServer
   private final Resin _resin;
   private final ClusterServer _selfServer;
 
-  private final String _id;
-
   private EnvironmentClassLoader _classLoader;
 
   private Throwable _configException;
@@ -244,16 +242,12 @@ public class Server extends ProtocolDispatchServer
     _resin = cluster.getResin();
     _resin.setServer(this);
 
-    _id = cluster.getId() + ":" + clusterServer.getId();
-
     // pod id can't include the server since it's used as part of
     // cache ids
     String podId
       = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
 
-    _classLoader = (EnvironmentClassLoader) cluster.getClassLoader();
-
-    _classLoader.setId("server:" + podId);
+    _classLoader = EnvironmentClassLoader.create("server:" + podId);
 
     _serverLocal.set(this, _classLoader);
 
@@ -276,27 +270,8 @@ public class Server extends ProtocolDispatchServer
         thread.setContextClassLoader(_classLoader);
 
         _serverIdLocal.set(_selfServer.getId());
-
-        _hostContainer = new HostContainer();
-        _hostContainer.setClassLoader(_classLoader);
-        _hostContainer.setDispatchServer(this);
-
-        _alarm = new Alarm(this);
-
-        _webBeans = InjectManager.create();
-
-        _brokerManager = createBrokerManager();
-        _domainManager = createDomainManager();
-
-        _broker = new HempBroker(getBamAdminName());
-
-        _brokerManager.addBroker(getBamAdminName(), _broker);
-        _brokerManager.addBroker("resin.caucho", _broker);
-
-        _serverLinkManager = new ServerAuthManager(this);
-      // Config.setProperty("server", new ServerVar(server), _classLoader);
-
-        _selfServer.getServerProgram().configure(this);
+        
+        preInit();
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -307,6 +282,30 @@ public class Server extends ProtocolDispatchServer
     } finally {
       _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }
+  }
+  
+  protected void preInit()
+  {
+    _hostContainer = new HostContainer();
+    _hostContainer.setClassLoader(_classLoader);
+    _hostContainer.setDispatchServer(this);
+
+    _alarm = new Alarm(this);
+
+    _webBeans = InjectManager.create();
+
+    _brokerManager = createBrokerManager();
+    _domainManager = createDomainManager();
+
+    _broker = new HempBroker(getBamAdminName());
+
+    _brokerManager.addBroker(getBamAdminName(), _broker);
+    _brokerManager.addBroker("resin.caucho", _broker);
+
+    _serverLinkManager = new ServerAuthManager(this);
+    // Config.setProperty("server", new ServerVar(server), _classLoader);
+
+    _selfServer.getServerProgram().configure(this);
   }
 
   /**

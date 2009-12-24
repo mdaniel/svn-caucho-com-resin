@@ -1503,6 +1503,14 @@ public class Port extends TaskWorker
       boolean result = is.fillWithTimeout(timeout);
 
       return result;
+    } catch (IOException e) {
+      if (isClosed()) {
+        log.log(Level.FINEST, e.toString(), e);
+        
+        return false;
+      }
+      
+      throw e; 
     } finally {
       keepaliveThreadEnd();
     }

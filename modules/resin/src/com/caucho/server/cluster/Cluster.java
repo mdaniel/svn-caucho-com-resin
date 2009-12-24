@@ -75,8 +75,8 @@ abstract public class Cluster
 
   private Resin _resin;
 
-  private EnvironmentClassLoader _classLoader;
-  private Path _rootDirectory;
+  //private EnvironmentClassLoader _classLoader;
+  //private Path _rootDirectory;
 
   private ClusterAdmin _admin;
 
@@ -95,13 +95,13 @@ abstract public class Cluster
 
     _resin = resin;
 
-    _classLoader = EnvironmentClassLoader.create("cluster:??");
+    //_classLoader = EnvironmentClassLoader.create("cluster:??");
 
-    Environment.addEnvironmentListener(this, resin.getClassLoader());
+    //Environment.addEnvironmentListener(this, resin.getClassLoader());
 
-    Config.setProperty("cluster", new Var(), _classLoader);
+    // Config.setProperty("cluster", new Var(), _classLoader);
 
-    _rootDirectory = Vfs.getPwd();
+    //_rootDirectory = Vfs.getPwd();
   }
 
   /**
@@ -114,7 +114,7 @@ abstract public class Cluster
 
     _id = id;
 
-    _classLoader.setId("cluster:" + _id);
+    // _classLoader.setId("cluster:" + _id);
   }
 
   /**
@@ -144,10 +144,12 @@ abstract public class Cluster
   /**
    * Returns the environment class loader.
    */
+  /*
   public ClassLoader getClassLoader()
   {
     return _classLoader;
   }
+  */
 
   /**
    * Returns the relax schema.
@@ -160,20 +162,24 @@ abstract public class Cluster
   /**
    * Gets the root directory.
    */
+  /*
   public Path getRootDirectory()
   {
     return _rootDirectory;
   }
+  */
 
   /**
    * Sets the root directory.
    */
+  /*
   public void setRootDirectory(Path rootDirectory)
   {
     Vfs.setPwd(rootDirectory);
 
     _rootDirectory = rootDirectory;
   }
+  */
 
   /**
    * Enables dynamic servers
@@ -613,9 +619,11 @@ abstract public class Cluster
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(getClassLoader());
+      thread.setContextClassLoader(getResin().getClassLoader());
 
       Server server = createResinServer(clusterServer);
+      
+      thread.setContextClassLoader(server.getClassLoader());
 
       _serverProgram.configure(server);
 
@@ -1034,7 +1042,7 @@ abstract public class Cluster
      */
     public Path getRoot()
     {
-      return Cluster.this.getRootDirectory();
+      return Server.getCurrent().getRootDirectory();
     }
 
     /**

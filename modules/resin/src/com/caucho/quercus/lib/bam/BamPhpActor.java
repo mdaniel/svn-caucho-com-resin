@@ -154,7 +154,7 @@ public class BamPhpActor extends SimpleActor {
       _children.put(jid, child);
     }
 
-    _broker.addActor(child);
+    _broker.addActor(child.getActorStream());
   }
 
   private void setId(Env env, long id)

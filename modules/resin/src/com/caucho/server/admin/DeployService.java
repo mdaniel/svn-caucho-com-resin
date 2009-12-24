@@ -109,7 +109,7 @@ public class DeployService extends SimpleActor
     _repository = new RepositoryManager();
 
     setLinkStream(getBroker().getBrokerStream());
-    getBroker().addActor(this);
+    getBroker().addActor(getActorStream());
   }
 
   @QueryGet

@@ -890,13 +890,16 @@ public class HmuxRequest extends AbstractHttpRequest
 	
         if (_hmtpReader != null)
           _hmtpReader.init(rawIs);
-        else
+        else {
           _hmtpReader = new HmtpReader(rawIs);
+          _hmtpReader.setId(getRequestId());
+        }
 
         if (_hmtpWriter != null)
           _hmtpWriter.init(_rawWrite);
         else {
           _hmtpWriter = new HmtpWriter(_rawWrite);
+          // _hmtpWriter.setId(getRequestId());
 	  _hmtpWriter.setAutoFlush(true);
 	}
         
@@ -1629,6 +1632,16 @@ public class HmuxRequest extends AbstractHttpRequest
 
     if (_bufferStartOffset > 0 || _rawWrite.getBufferOffset() > 0)
       Thread.dumpStack();
+  }
+  
+  protected String getRequestId()
+  {
+    String id = _server.getServerId();
+
+    if (id.equals(""))
+      return "server-" + getConnection().getId();
+    else
+      return "server-" + id + ":" + getConnection().getId();   
   }
 
   @Override
