@@ -862,9 +862,10 @@ public class ErrorPageManager {
 
   private String normalizeForTesting(String s)
   {
-    return s;
-    /*
     String userName = System.getProperty("user.name");
+    
+    if ("caucho".equals(userName))
+      return s;
 
     int p;
 
@@ -876,7 +877,6 @@ public class ErrorPageManager {
     }
 
     return s;
-    */
   }
 
   public String toString()

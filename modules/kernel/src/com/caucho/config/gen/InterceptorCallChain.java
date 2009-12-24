@@ -29,16 +29,9 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.InterceptorBean;
-import com.caucho.config.inject.AnnotatedMethodImpl;
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,17 +40,23 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
-import javax.enterprise.inject.Stereotype;
 import javax.enterprise.util.Nonbinding;
+import javax.inject.Inject;
 import javax.interceptor.AroundInvoke;
+import javax.interceptor.ExcludeClassInterceptors;
 import javax.interceptor.ExcludeDefaultInterceptors;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
-import javax.interceptor.ExcludeClassInterceptors;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.java.JavaWriter;
+import com.caucho.util.L10N;
 
 /**
  * Represents the interception
@@ -185,6 +184,12 @@ public class InterceptorCallChain
     // interceptors aren't intercepted
     if (_view.getBeanClass().isAnnotationPresent(Interceptor.class)
         || _view.getBeanClass().isAnnotationPresent(Decorator.class)) {
+      return;
+    }
+    
+    if (implMethod.isAnnotationPresent(Inject.class)
+        || implMethod.isAnnotationPresent(PostConstruct.class)) {
+      // ioc/0a23, ioc/0c57
       return;
     }
 
@@ -1137,10 +1142,16 @@ public class InterceptorCallChain
     out.println("{");
     out.pushDepth();
 
-    if (! void.class.equals(_implMethod.getReturnType()))
-      out.print("return ");
+    if (! void.class.equals(_implMethod.getReturnType())) {
+      out.printClass(_implMethod.getReturnType());
+      out.println(" result;");
+    }
 
     generateDecoratorCall(out);
+
+    if (! void.class.equals(_implMethod.getReturnType())) {
+      out.println("return result;");
+    }
 
     out.popDepth();
     out.println("}");
@@ -1166,9 +1177,12 @@ public class InterceptorCallChain
     out.println(_decoratorIndexVar + ".length);");
  
     out.print(_decoratorLocalVar);
-    out.print(".set(delegate);");
+    out.println(".set(delegate);");
   }
 
+  /**
+   * Generates the low-level decorator call at the end of the chain.
+   */
   protected void generateDecoratorCall(JavaWriter out)
     throws IOException
   {
@@ -1176,10 +1190,11 @@ public class InterceptorCallChain
     
     assert(decoratorSetName != null);
 
+    //_bizMethod.generateTailCall(out);
     if (! void.class.equals(_implMethod.getReturnType()))
       out.print("result = ");
 
-    out.print("delegate.");
+    out.print("__caucho_delegate.");
     out.print(_implMethod.getName());
     out.print("(");
 

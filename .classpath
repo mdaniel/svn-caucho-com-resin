@@ -31,7 +31,10 @@
 	<classpathentry kind="lib" path="modules/ext/trang.jar"/>
 	<classpathentry kind="lib" path="modules/ext/webservices-api.jar"/>
 	<classpathentry kind="lib" path="modules/ext/webservices-extra-api.jar"/>
-	<classpathentry kind="lib" path="modules/j2ee-deploy/dist/j2ee-deploy-10.jar"/>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
+		<accessrules>
+			<accessrule kind="discouraged" pattern="**/Unsafe*"/>
+		</accessrules>
+	</classpathentry>
 	<classpathentry kind="output" path="modules/webutil/classes"/>
 </classpath>
