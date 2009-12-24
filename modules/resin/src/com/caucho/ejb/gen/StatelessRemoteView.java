@@ -35,6 +35,7 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
+
 import java.io.IOException;
 import java.lang.reflect.*;
 import java.util.*;
@@ -54,4 +55,31 @@ public class StatelessRemoteView extends StatelessLocalView {
   {
     return getViewClass().getSimpleName() + "__EJBRemote";
   }
+  
+  /**
+   * Generates prologue for the context.
+   */
+  public void generateContextPrologue(JavaWriter out)
+    throws IOException
+  {
+    super.generateContextPrologue(out);
+ 
+    /*
+    if (EJBObject.class.isAssignableFrom(getViewClass().getJavaClass())) {
+      String name = "_local_" + getViewClass().getJavaClass().getSimpleName();
+      
+      out.println();
+      out.println("@Override");
+      out.println("public EJBObject getEJBObject()");
+      out.println("{");
+      out.println("  if (" + name + " != null)");
+      out.println("    return " + name + ";");
+      out.println("  else");
+      out.println("    return super.getEJBObject();");
+      out.println("}");
+    }
+    */
+  }
+
+
 }

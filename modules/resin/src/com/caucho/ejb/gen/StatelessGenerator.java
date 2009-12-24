@@ -209,6 +209,8 @@ public class StatelessGenerator extends SessionGenerator {
   protected void generateTimeoutCallback(JavaWriter out)
     throws IOException
   {
+    String beanClass = getBeanClass().getName();
+    
     out.println();
     out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
     out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
@@ -225,7 +227,7 @@ public class StatelessGenerator extends SessionGenerator {
     }
 
     if (objectView != null) {
-      out.print(objectView.getViewClass().getName() + " bean = ");
+      out.print(beanClass + " bean = ");
       objectView.generateNewInstance(out);
       out.println(";");
       out.println("method.invoke(bean, timer);");
@@ -242,7 +244,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.pushDepth();
 
     if (objectView != null) {
-      out.print(objectView.getViewClass().getName() + " bean = ");
+      out.print(beanClass + " bean = ");
       objectView.generateNewInstance(out);
       out.println(";");
       out.println("method.invoke(bean);");

@@ -399,7 +399,7 @@ public class StatelessObjectView extends StatelessView {
     out.popDepth();
     out.println("}");
 
-    String baseClass = getViewClass().getName();
+    String baseClass = getBeanClass().getName();
 
     out.println();
     out.println("final void _ejb_free(" + baseClass + " bean)");
