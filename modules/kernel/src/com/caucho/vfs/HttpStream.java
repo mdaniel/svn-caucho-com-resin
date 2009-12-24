@@ -764,6 +764,7 @@ class HttpStream extends StreamImpl {
       _isKeepalive = false;
 
     _attributes.put("status", String.valueOf(status));
+    _attributes.put("status-message", line.toString());
 
     CharBuffer key = new CharBuffer();
     while (true) {
