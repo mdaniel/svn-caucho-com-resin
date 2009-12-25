@@ -187,6 +187,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   private Socket _pingSocket;
 
   private String _stage = null;
+  private boolean _isDumpHeapOnExit;
 
   /**
    * Creates a new resin server.
@@ -1121,21 +1122,25 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     return _lifecycle.isDestroyed();
   }
 
-  /**
-   * Start the server shutdown
-   */
-  public void startShutdown(String msg)
+  public void startFailSafeShutdown(String msg)
   {
     // start the fail-safe thread in case the shutdown fails
     FailSafeHaltThread haltThread = _failSafeHaltThread;
     if (haltThread != null)
       haltThread.startShutdown();
 
+    log().severe(msg);    
+  }
+  /**
+   * Start the server shutdown
+   */
+  public void startShutdown(String msg)
+  {
+    startFailSafeShutdown(msg);
+
     if (_lifecycle.isDestroying())
       return;
-
-    log().severe(msg);
-
+    
     ShutdownThread shutdownThread = _shutdownThread;
     if (shutdownThread != null)
       shutdownThread.startShutdown();
@@ -1145,15 +1150,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
   public void destroy()
   {
-    // start the fail-safe thread in case the shutdown fails
-    FailSafeHaltThread haltThread = _failSafeHaltThread;
-    if (haltThread != null)
-      haltThread.startShutdown();
+    startFailSafeShutdown("Resin shutdown from destroy() call");
 
     if (_lifecycle.isDestroying())
       return;
-
-    log().severe("Resin shutdown from destroy() call");
 
     shutdownImpl();
   }
@@ -1169,6 +1169,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       haltThread.startShutdown();
 
     try {
+      if (_isDumpHeapOnExit) {
+        dumpHeapOnExit();
+      }
+      
       try {
         Socket socket = _pingSocket;
 
@@ -1265,6 +1269,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       else if (argv[i].equals("-config-server")
                || argv[i].equals("--config-server")) {
         i += 2;
+      }
+      else if (argv[i].equals("--dump-heap-on-exit")) {
+        _isDumpHeapOnExit = true;
+        
+        i += 1;
       }
       else if (i + 1 < len
                && (argv[i].equals("-dynamic-server")
@@ -1596,6 +1605,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     RandomUtil.addRandom(System.currentTimeMillis());
     */
   }
+  
+  protected void dumpHeapOnExit()
+  {
+    
+  }
 
   /**
    * Thread to wait until Resin should be stopped.
@@ -1614,15 +1628,20 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       try {
         Thread.sleep(10);
 
-        if (! checkMemory(runtime))
+        if (! checkMemory(runtime)) {
+          startFailSafeShutdown("Resin shutdown from out of memory");
+          dumpHeapOnExit();
           return;
+        }
 
-        if (! checkFileDescriptor())
+        if (! checkFileDescriptor()) {
+          startFailSafeShutdown("Resin shutdown from out of file descriptors");
+          dumpHeapOnExit();
           return;
+        }
 
         if (_waitIn != null) {
-          int len;
-          if ((len = _waitIn.read()) >= 0) {
+          if (_waitIn.read() >= 0) {
             socketExceptionCount = 0;
           }
           else
@@ -1655,11 +1674,14 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
         else if (socketExceptionCount > 100)
           return;
       } catch (OutOfMemoryError e) {
+        startFailSafeShutdown("Resin shutdown from out of memory");
+        dumpHeapOnExit();
+        
         try {
           EnvironmentStream.getOriginalSystemErr().println("Resin halting due to out of memory");
         } catch (Exception e1) {
         } finally {
-          Runtime.getRuntime().halt(1);
+          System.exit(1);
         }
       } catch (Throwable e) {
         log().log(Level.WARNING, e.toString(), e);

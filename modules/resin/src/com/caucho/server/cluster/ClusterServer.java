@@ -246,7 +246,7 @@ public final class ClusterServer {
    */
   public ClusterPod.Owner getTriadOwner()
   {
-    return getClusterPod().getOwner(getIndex());
+    return ClusterPod.getOwner(getIndex());
   }
 
   /**
