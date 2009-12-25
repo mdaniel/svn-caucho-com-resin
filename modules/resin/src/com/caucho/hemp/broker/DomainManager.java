@@ -29,17 +29,8 @@
 
 package com.caucho.hemp.broker;
 
-import com.caucho.bam.*;
-import com.caucho.hemp.*;
-import com.caucho.loader.*;
-import com.caucho.server.cluster.*;
-import com.caucho.server.host.*;
-import com.caucho.server.resin.*;
-import com.caucho.util.*;
-import java.util.*;
-import java.util.logging.*;
-import java.lang.ref.*;
-import java.io.Serializable;
+import com.caucho.bam.ActorStream;
+import com.caucho.loader.EnvironmentLocal;
 
 
 /**
@@ -47,10 +38,6 @@ import java.io.Serializable;
  */
 abstract public class DomainManager
 {
-  private static final Logger log
-    = Logger.getLogger(DomainManager.class.getName());
-  private static final L10N L = new L10N(HempDomainManager.class);
-
   private static EnvironmentLocal<DomainManager> _localDomain
     = new EnvironmentLocal<DomainManager>();
 
@@ -65,6 +52,13 @@ abstract public class DomainManager
   }
 
   abstract public ActorStream findDomain(String name);
+
+  /**
+   * Close the domain manager on shutdown.
+   */
+  public void close()
+  {
+  }
   
   @Override
   public String toString()

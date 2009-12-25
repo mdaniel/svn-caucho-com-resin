@@ -55,6 +55,9 @@ public class ClusterStream {
     = Logger.getLogger(ClusterStream.class.getName());
 
   private ServerPool _pool;
+  
+  // The pools sequence id when the stream was allocated.
+  private long _poolSequenceId;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -79,6 +82,7 @@ public class ClusterStream {
                 ReadStream is, WriteStream os)
   {
     _pool = pool;
+    _poolSequenceId = pool.getStartSequenceId();
     _is = is;
     _os = os;
 
@@ -138,40 +142,6 @@ public class ClusterStream {
   }
 
   /**
-   * Returns the hessian input stream
-   */
-  public Hessian2StreamingInput getHessianInputStream()
-  {
-    if (_in == null)
-      _in = new Hessian2StreamingInput(_is);
-
-    return _in;
-  }
-
-  /**
-   * Returns the hessian output stream
-   */
-  public Hessian2Output getHessianOutputStream()
-  {
-    if (_out == null) {
-      OutputStream os = _os;
-
-      /*
-      if (log.isLoggable(Level.FINEST)) {
-        HessianDebugOutputStream hOs
-          = new HessianDebugOutputStream(os, log, Level.FINEST);
-        // hOs.startTop2();
-        os = hOs;
-      }
-      */
-        
-      _out = new Hessian2Output(os);
-    }
-
-    return _out;
-  }
-
-  /**
    * Returns the idle start time, 
    * i.e. the time the connection was last idle.
    */
@@ -218,6 +188,14 @@ public class ClusterStream {
     long now = Alarm.getCurrentTime();
 
     return (_pool.getLoadBalanceIdleTime() < now - _idleStartTime + delta);
+  }
+  
+  /**
+   * Returns true if the sequence id is valid.
+   */
+  public boolean isPoolSequenceIdValid()
+  {
+    return _poolSequenceId == _pool.getStartSequenceId();
   }
 
   //

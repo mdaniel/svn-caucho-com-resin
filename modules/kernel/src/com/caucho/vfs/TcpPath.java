@@ -48,6 +48,7 @@ public class TcpPath extends Path {
   protected SocketAddress _address;
   protected long _connectTimeout = 5000L;
   protected long _socketTimeout = 600000L;
+  private boolean _noDelay;
 
   public TcpPath(TcpPath root, String userPath,
                  Map<String,Object> newAttributes,
@@ -73,6 +74,10 @@ public class TcpPath extends Path {
 
       if (socketTimeout instanceof Number)
         _socketTimeout = ((Number) socketTimeout).longValue();
+      
+      if (Boolean.TRUE.equals(newAttributes.get("no-delay"))) {
+        _noDelay = true;
+      }
     }
   }
 
@@ -155,12 +160,12 @@ public class TcpPath extends Path {
 
   public StreamImpl openReadImpl() throws IOException
   {
-    return TcpStream.openRead(this, _connectTimeout, _socketTimeout);
+    return TcpStream.openRead(this, _connectTimeout, _socketTimeout, _noDelay);
   }
 
   public StreamImpl openReadWriteImpl() throws IOException
   {
-    return TcpStream.openReadWrite(this, _connectTimeout, _socketTimeout);
+    return TcpStream.openReadWrite(this, _connectTimeout, _socketTimeout, _noDelay);
   }
 
   @Override

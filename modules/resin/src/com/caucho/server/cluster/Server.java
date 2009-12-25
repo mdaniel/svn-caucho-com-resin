@@ -2473,6 +2473,13 @@ public class Server extends ProtocolDispatchServer
       } catch (Throwable e) {
         log.log(Level.WARNING, e.toString(), e);
       }
+      
+      try {
+        if (_domainManager != null)
+          _domainManager.close();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
 
       try {
         ThreadPool.getThreadPool().interrupt();

@@ -52,7 +52,8 @@ class TcpStream extends StreamImpl {
 
   private TcpStream(TcpPath path,
                     long connectTimeout,
-                    long socketTimeout)
+                    long socketTimeout,
+                    boolean isNoDelay)
     throws IOException
   {
     setPath(path);
@@ -72,6 +73,9 @@ class TcpStream extends StreamImpl {
       socketTimeout = 120000;
 
     _s.setSoTimeout((int) socketTimeout);
+    
+    if (isNoDelay)
+      _s.setTcpNoDelay(true);
 
     try {
       if (path instanceof TcpsPath) {
@@ -134,17 +138,20 @@ class TcpStream extends StreamImpl {
 
   static TcpStream openRead(TcpPath path,
                             long connectTimeout,
-                            long socketTimeout) throws IOException
+                            long socketTimeout,
+                            boolean isNoDelay)
+    throws IOException
   {
-    return new TcpStream(path, connectTimeout, socketTimeout);
+    return new TcpStream(path, connectTimeout, socketTimeout, isNoDelay);
   }
 
   static TcpStream openReadWrite(TcpPath path,
                                  long connectTimeout,
-                                 long socketTimeout)
+                                 long socketTimeout,
+                                 boolean isNoDelay)
     throws IOException
   {
-    return new TcpStream(path, connectTimeout, socketTimeout);
+    return new TcpStream(path, connectTimeout, socketTimeout, isNoDelay);
   }
 
   public boolean canWrite()

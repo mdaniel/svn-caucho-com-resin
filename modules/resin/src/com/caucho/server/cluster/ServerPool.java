@@ -96,10 +96,13 @@ public class ServerPool
 
   private long _warmupChunkTime;
 
-  private long _failRecoverTime;
   private long _failChunkTime;
 
   private volatile State _state = State.NEW;
+  
+  // server start/stop sequence for heartbeat/restarts
+  private final AtomicInteger _startSequenceId
+    = new AtomicInteger();
 
   // current connection count
   private volatile int _activeCount;
@@ -326,6 +329,15 @@ public class ServerPool
   {
     _loadBalanceWeight = weight;
   }
+  
+  /**
+   * Returns the server start/stop sequence. Each enable/disable
+   * increments the sequence, allowing old streams to be purge.
+   */
+  public int getStartSequenceId()
+  {
+    return _startSequenceId.get();
+  }
 
   /**
    * Initialize
@@ -348,6 +360,8 @@ public class ServerPool
     HashMap<String,Object> attr = new HashMap<String,Object>();
     attr.put("connect-timeout", _loadBalanceConnectTimeout);
     attr.put("socket-timeout", _loadBalanceSocketTimeout);
+    attr.put("no-delay", true);
+    
     if (_isSecure)
       _tcpPath = Vfs.lookup("tcps://" + address + ":" + _port, attr);
     else
@@ -355,6 +369,10 @@ public class ServerPool
 
     _state = State.STARTING;
   }
+  
+  //
+  // statistics
+  //
 
   /**
    * Returns the number of active connections.
@@ -670,15 +688,15 @@ public class ServerPool
       _warmupState--;
       long now = Alarm.getCurrentTime();
       _failTime = now;
-      _lastFailTime = _failTime;
+      _lastFailTime = now;
       _lastFailConnectTime = now;
       _dynamicFailRecoverTime *= 2;
-      if (_failRecoverTime < _dynamicFailRecoverTime)
-        _dynamicFailRecoverTime = _failRecoverTime;
+      if (_loadBalanceRecoverTime < _dynamicFailRecoverTime)
+        _dynamicFailRecoverTime = _loadBalanceRecoverTime;
 
       if (_warmupState < WARMUP_MIN)
         _warmupState = WARMUP_MIN;
-
+      
       _state = _state.toFail();
     }
   }
@@ -725,6 +743,8 @@ public class ServerPool
   public void start()
   {
     _state = _state.toStart();
+    
+    _startSequenceId.incrementAndGet();
   }
 
   /**
@@ -732,8 +752,11 @@ public class ServerPool
    */
   public void stop()
   {
-    _firstSuccessTime = 0;
     _state = _state.toStandby();
+    _firstSuccessTime = 0;
+    
+    _startSequenceId.incrementAndGet(); 
+    clearRecycle();
   }
 
   /**
@@ -787,8 +810,8 @@ public class ServerPool
       return stream;
 
     long now = Alarm.getCurrentTime();
-
-    if (now < _failTime + _failRecoverTime)
+    
+    if (now <= _failTime + _loadBalanceRecoverTime)
       return null;
     else if (_state == State.FAIL && _startingCount > 0) {
       // if in fail state, only one thread should try to connect
@@ -817,11 +840,11 @@ public class ServerPool
 
     long now = Alarm.getCurrentTime();
 
-    if (now < _failTime + _failRecoverTime) {
+    if (now < _failTime + _loadBalanceRecoverTime) {
       return null;
     }
 
-    if (now < _lastBusyTime + _failRecoverTime) {
+    if (now < _lastBusyTime + _loadBalanceRecoverTime) {
       return null;
     }
 
@@ -1093,6 +1116,8 @@ public class ServerPool
    */
   public void notifyStart()
   {
+    _startSequenceId.incrementAndGet();
+    
     clearRecycle();
     wake();
   }
@@ -1102,6 +1127,8 @@ public class ServerPool
    */
   public void notifyStop()
   {
+    _startSequenceId.incrementAndGet();
+    
     clearRecycle();
     toFail();
   }
