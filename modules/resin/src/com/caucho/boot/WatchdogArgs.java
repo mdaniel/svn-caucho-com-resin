@@ -79,7 +79,7 @@ class WatchdogArgs
     _rootDirectory = calculateResinRoot(_resinHome);
 
     _javaHome = Vfs.lookup(System.getProperty("java.home"));
- 
+
     _argv = fillArgv(argv);
 
     _resinConf = _resinHome.lookup("conf/resin.conf");
@@ -305,6 +305,8 @@ class WatchdogArgs
       }
       else if ("-jmx-port".equals(arg) || "--jmx-port".equals(arg)) {
         i++;
+      }
+      else if ("--dump-heap-on-exit".equals(arg)) {
       }
       else if ("-verbose".equals(arg) || "--verbose".equals(arg)) {
         _isVerbose = true;

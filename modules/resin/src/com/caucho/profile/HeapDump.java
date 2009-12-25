@@ -43,11 +43,11 @@ public class HeapDump {
   private static final L10N L = new L10N(HeapDump.class);
   private static final Logger log
     = Logger.getLogger(HeapDump.class.getName());
-  
+
   private static HeapDump _heapDump;
-  
+
   protected HeapDump() {}
-  
+
   /**
    * Creates/returns the HeapDump instance. Will throw an IllegalStateException
    * if Resin Professional is not available.
@@ -55,20 +55,23 @@ public class HeapDump {
   public static HeapDump create()
   {
     try {
-      Class<?> heapDumpClass = Class.forName("com.caucho.profile.ProHeapDump");
-      
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      Class<?> heapDumpClass
+        = Class.forName("com.caucho.profile.ProHeapDump", false, loader);
+
       _heapDump = (HeapDump) heapDumpClass.newInstance();
-      
+
       return _heapDump;
     } catch (ClassNotFoundException e) {
       log.log(Level.FINEST, e.toString(), e);
-      
+
       throw new ConfigException(L.l("HeapDump requires Resin Professional"));
     } catch (Exception e) {
       throw ConfigException.create(e);
-    }    
+    }
   }
-  
+
   /**
    * Checks if the heap is available
    */
@@ -77,12 +80,12 @@ public class HeapDump {
     try {
       return create() != null;
     } catch (Exception e) {
-      log.log(Level.FINEST, e.toString(), e);   
-      
+      log.log(Level.FINEST, e.toString(), e);
+
       return false;
     }
   }
-  
+
   /**
    * Returns an array of the HeapDump entries.
    */
@@ -90,7 +93,7 @@ public class HeapDump {
   {
     throw new ConfigException(L.l("HeapDump requires Resin Professional"));
   }
-  
+
   /**
    * Returns the last heap dump
    */
@@ -98,7 +101,7 @@ public class HeapDump {
   {
     throw new ConfigException(L.l("HeapDump requires Resin Professional"));
   }
-  
+
   /**
    * Writes a text value of the heap dump to an output stream.
    */
@@ -107,11 +110,11 @@ public class HeapDump {
   {
     throw new ConfigException(L.l("HeapDump requires Resin Professional"));
   }
-  
+
   public void logHeapDump(Logger log,
                           Level level)
   {
-    throw new ConfigException(L.l("HeapDump requires Resin Professional"));    
+    throw new ConfigException(L.l("HeapDump requires Resin Professional"));
   }
-  
+
 }

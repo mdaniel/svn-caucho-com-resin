@@ -1129,7 +1129,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     if (haltThread != null)
       haltThread.startShutdown();
 
-    log().severe(msg);    
+    log().severe(msg);
   }
   /**
    * Start the server shutdown
@@ -1140,7 +1140,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     if (_lifecycle.isDestroying())
       return;
-    
+
     ShutdownThread shutdownThread = _shutdownThread;
     if (shutdownThread != null)
       shutdownThread.startShutdown();
@@ -1172,7 +1172,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       if (_isDumpHeapOnExit) {
         dumpHeapOnExit();
       }
-      
+
       try {
         Socket socket = _pingSocket;
 
@@ -1272,7 +1272,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       }
       else if (argv[i].equals("--dump-heap-on-exit")) {
         _isDumpHeapOnExit = true;
-        
+
         i += 1;
       }
       else if (i + 1 < len
@@ -1605,10 +1605,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     RandomUtil.addRandom(System.currentTimeMillis());
     */
   }
-  
+
   protected void dumpHeapOnExit()
   {
-    
+
   }
 
   /**
@@ -1676,7 +1676,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       } catch (OutOfMemoryError e) {
         startFailSafeShutdown("Resin shutdown from out of memory");
         dumpHeapOnExit();
-        
+
         try {
           EnvironmentStream.getOriginalSystemErr().println("Resin halting due to out of memory");
         } catch (Exception e1) {
