@@ -1610,6 +1610,13 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   {
 
   }
+  
+  public void memoryShutdown(String msg)
+  {
+    _isDumpHeapOnExit = true;
+    
+    startShutdown(msg);
+  }
 
   /**
    * Thread to wait until Resin should be stopped.
