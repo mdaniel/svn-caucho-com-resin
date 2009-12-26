@@ -291,6 +291,8 @@ public class FastCGIServlet extends GenericServlet {
       writeHeader(fcgiSocket, ws, FCGI_STDIN, 0);
     */
     writeHeader(ws, FCGI_STDIN, 0);
+    
+    ws.flush();
 
     FastCGIInputStream is = new FastCGIInputStream(stream);
 

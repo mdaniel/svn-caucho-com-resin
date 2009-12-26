@@ -254,6 +254,8 @@ public class HttpProxyServlet extends GenericServlet {
 
       TempBuffer.free(tempBuffer);
 
+      out.flush();
+      
       return parseResults(rs, req, res);
     } catch (IOException e1) {
       log.log(Level.FINE, e1.toString(), e1);
