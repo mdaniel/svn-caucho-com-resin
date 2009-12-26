@@ -611,6 +611,8 @@ public class HmuxRequest extends AbstractHttpRequest
     int len;
 
     while (true) {
+      _rawWrite.flush();
+      
       code = is.read();
 
       if (_server == null || _server.isDestroyed()) {
@@ -1730,6 +1732,7 @@ public class HmuxRequest extends AbstractHttpRequest
       if (length < sublen)
         sublen = length;
 
+      _os.flush();
       int readLen = is.read(buf, offset, sublen);
       _pendingData -= readLen;
 
@@ -1737,6 +1740,8 @@ public class HmuxRequest extends AbstractHttpRequest
         log.finest(new String(buf, offset, readLen));
 
       while (_pendingData == 0) {
+        _os.flush();
+        
         int code = is.read();
 
         switch (code) {

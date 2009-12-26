@@ -90,7 +90,11 @@ echo "</table>";
 
 echo "<h2>Heap Dump</h2>";
 
-$heap = @new Java("com.caucho.profile.Heap");
+$heap_dump_cl = java_class("com.caucho.profile.HeapDump");
+
+if ($heap_dump_cl->isAvailable()) {
+  $heap = @$heap_dump_cl->create();
+  }
 
 $is_heap_available_heap = false;
 

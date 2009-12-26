@@ -628,7 +628,10 @@ public class TcpConnection extends Connection
         // duplex (xmpp/hmtp) handling
         return RequestState.DUPLEX;
       }
-      else if (_state.isCometActive()) {
+      
+      getWriteStream().flush();
+      
+      if (_state.isCometActive()) {
         _port.suspend(this);
 
         return RequestState.THREAD_DETACHED;

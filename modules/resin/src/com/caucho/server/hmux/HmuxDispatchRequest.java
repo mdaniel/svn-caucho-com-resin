@@ -103,6 +103,8 @@ public class HmuxDispatchRequest {
     String etag = null;
 
     while (true) {
+      os.flush();
+      
       code = is.read();
 
       switch (code) {
