@@ -84,8 +84,8 @@ public class RegexpModule
 
   public static final boolean [] PREG_QUOTE = new boolean[256];
 
-  private static LruCache<StringValue, Regexp> _regexpCache
-    = new LruCache<StringValue, Regexp>(1024);
+  private static LruCache<StringValue, RegexpCacheItem> _regexpCache
+    = new LruCache<StringValue, RegexpCacheItem>(1024);
 
   private static LruCache<StringValue, Ereg> _eregCache
     = new LruCache<StringValue, Ereg>(1024);
@@ -120,7 +120,7 @@ public class RegexpModule
     if (size < 0 || size == _regexpCache.getCapacity())
       return;
 
-    _regexpCache = new LruCache<StringValue, Regexp>(size);
+    _regexpCache = new LruCache<StringValue, RegexpCacheItem>(size);
 
     _eregCache = new LruCache<StringValue, Ereg>(size);
 
@@ -254,18 +254,7 @@ public class RegexpModule
   public static Regexp createRegexp(StringValue regexpValue)
   {
     try {
-      if (regexpValue.length() < 2) {
-        throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
-      }
-
-      Regexp regexp = _regexpCache.get(regexpValue);
-
-      if (regexp == null)
-        regexp = new Regexp(regexpValue);
-
-      _regexpCache.put(regexpValue, regexp);
-
-      return regexp;
+      return createRegexpImpl(regexpValue);
     }
     catch (IllegalRegexpException e) {
       throw new QuercusException(e);
@@ -275,19 +264,7 @@ public class RegexpModule
   public static Regexp createRegexp(Env env, StringValue regexpValue)
   {
     try {
-      if (regexpValue.length() < 2) {
-        env.warning(L.l("Regexp pattern must have opening and closing delimiters"));
-        return null;
-      }
-
-      Regexp regexp = _regexpCache.get(regexpValue);
-
-      if (regexp == null)
-        regexp = new Regexp(regexpValue);
-
-      _regexpCache.put(regexpValue, regexp);
-
-      return regexp;
+      return createRegexpImpl(regexpValue);
     }
     catch (IllegalRegexpException e) {
       log.log(Level.FINE, e.getMessage(), e);
@@ -295,6 +272,26 @@ public class RegexpModule
 
       return null;
     }
+  }
+
+  private static Regexp createRegexpImpl(StringValue regexpValue)
+    throws IllegalRegexpException
+  {
+    if (regexpValue.length() < 2) {
+      throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
+    }
+
+    RegexpCacheItem cacheItem = _regexpCache.get(regexpValue);
+
+    if (cacheItem == null) {
+      cacheItem = new RegexpCacheItem(regexpValue);
+        
+      _regexpCache.putIfNew(regexpValue, cacheItem);
+        
+      cacheItem = _regexpCache.get(regexpValue);
+    }
+      
+    return cacheItem.get();
   }
 
   public static Regexp []createRegexpArray(Value pattern)
@@ -2470,6 +2467,39 @@ public class RegexpModule
 
       return _regexpValue.equals(ereg._regexpValue)
         && _encoding.equals(ereg._encoding);
+    }
+  }
+  
+  static final class RegexpCacheItem {
+    private final StringValue _pattern;
+    
+    private Regexp _regexp;
+    private IllegalRegexpException _exn;
+    
+    RegexpCacheItem(StringValue pattern)
+    {
+      _pattern = pattern;
+    }
+    
+    public Regexp get()
+      throws IllegalRegexpException
+    {
+      if (_regexp != null)
+        return _regexp;
+      else if (_exn != null)
+        throw _exn;
+      
+      synchronized (this) {
+        try {
+          _regexp = new Regexp(_pattern);
+          
+          return _regexp;
+        } catch (IllegalRegexpException e) {
+          _exn = e;
+          
+          throw e;
+        }
+      }
     }
   }
 

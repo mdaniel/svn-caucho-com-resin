@@ -45,6 +45,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -62,7 +63,9 @@ public class QuercusProgram {
   
   private Path _sourceFile;
   
-  private boolean _isCompiling;
+  private final AtomicBoolean _isCompiling
+    = new AtomicBoolean();
+  
   private boolean _isCompilable = true;
   
   private Exception _compileException;
@@ -181,14 +184,7 @@ public class QuercusProgram {
    */
   public boolean startCompiling()
   {
-    synchronized (this) {
-      if (_isCompiling)
-	return false;
-      
-      _isCompiling = true;
-    }
-
-    return true;
+    return _isCompiling.compareAndSet(false, true);
   }
   
   /*
@@ -197,8 +193,8 @@ public class QuercusProgram {
   public void finishCompiling()
   {
     synchronized (this) {
-      _isCompiling = false;
-
+      _isCompiling.set(false);
+      
       notifyAll();
     }
   }
@@ -209,7 +205,7 @@ public class QuercusProgram {
   public void waitForCompile()
   {
     synchronized (this) {
-      if (_isCompiling) {
+      if (_isCompiling.get()) {
 	try {
 	  wait(120000);
 	} catch (Exception e) {
@@ -224,7 +220,7 @@ public class QuercusProgram {
    */
   public boolean isCompiling()
   {
-    return _isCompiling;
+    return _isCompiling.get();
   }
   
   /*
