@@ -966,8 +966,11 @@ public class TcpConnection extends Connection
   private void closeImpl()
   {
     ConnectionState state = _state;
-
     _state = _state.toClosed();
+
+    if (state.isKeepalive()) {
+      _port.keepaliveEnd(this);
+    }
 
     if (state.isClosed())
       return;
@@ -987,10 +990,6 @@ public class TcpConnection extends Connection
       controller.closeImpl();
 
     Port port = getPort();
-
-    if (state.isKeepalive()) {
-      port.keepaliveEnd(this);
-    }
 
     if (log.isLoggable(Level.FINER)) {
       if (port != null)
@@ -1054,7 +1053,7 @@ public class TcpConnection extends Connection
 
     ConnectionState state = _state;
     _state = _state.toDestroy();
-
+    
     if (state.isKeepalive()) {
       getPort().keepaliveEnd(this);
     }
@@ -1288,7 +1287,12 @@ public class TcpConnection extends Connection
     public RequestState doTask()
       throws IOException
     {
-      _state = _state.toDuplexActive();
+      ConnectionState state = _state;
+      _state = state.toDuplexActive();
+      
+      if (state.isKeepalive()) {
+        _port.keepaliveEnd(TcpConnection.this);
+      }
 
       RequestState result;
       long position = 0;
