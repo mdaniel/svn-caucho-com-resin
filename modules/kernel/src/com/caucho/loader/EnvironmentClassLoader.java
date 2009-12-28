@@ -64,16 +64,14 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 {
   private static Logger _log;
 
-  private static boolean _isStaticInit;
+  private static final Object _childListenerLock = new Object();
 
   // listeners invoked at the start of any child environment
-  private static EnvironmentLocal<ArrayList<EnvironmentListener>> _childListeners
-    = new EnvironmentLocal<ArrayList<EnvironmentListener>>();
+  private static EnvironmentLocal<ArrayList<EnvironmentListener>> _childListeners;
 
   // listeners invoked when a Loader is added
-  private static EnvironmentLocal<ArrayList<AddLoaderListener>> _addLoaderListeners
-    = new EnvironmentLocal<ArrayList<AddLoaderListener>>();
-
+  private static EnvironmentLocal<ArrayList<AddLoaderListener>> _addLoaderListeners;
+  
   // The owning bean
   private EnvironmentBean _owner;
 
@@ -159,8 +157,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     if (className != null) {
       try {
-        Class cl = Thread.currentThread().getContextClassLoader().loadClass(className);
-        Constructor ctor = cl.getConstructor(new Class[] { ClassLoader.class, String.class});
+        Class<?> cl = Thread.currentThread().getContextClassLoader().loadClass(className);
+        Constructor<?> ctor = cl.getConstructor(new Class[] { ClassLoader.class, String.class});
         Object instance = ctor.newInstance(parent, id);
 
         return (EnvironmentClassLoader) instance;
@@ -353,7 +351,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   void addChildListener(EnvironmentListener listener)
   {
-    synchronized (_childListeners) {
+    synchronized (_childListenerLock) {
+      if (_childListeners == null)
+        _childListeners = new EnvironmentLocal<ArrayList<EnvironmentListener>>();
+      
       ArrayList<EnvironmentListener> listeners
         = _childListeners.getLevel(this);
 
@@ -376,7 +377,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   void removeChildListener(EnvironmentListener listener)
   {
-    synchronized (_childListeners) {
+    synchronized (_childListenerLock) {
+      if (_childListeners == null)
+        return;
+      
       ArrayList<EnvironmentListener> listeners
         = _childListeners.getLevel(this);
 
@@ -393,8 +397,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     ArrayList<EnvironmentListener> listeners;
     listeners = new ArrayList<EnvironmentListener>();
 
-    // add the descendent listeners
-    synchronized (_childListeners) {
+    // add the descendant listeners
+    if (_childListeners == null)
+      return listeners;
+    
+    synchronized (_childListenerLock) {
       ClassLoader loader;
 
       for (loader = this; loader != null; loader = loader.getParent()) {
@@ -432,7 +439,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
    */
   public void addLoaderListener(AddLoaderListener listener)
   {
-    synchronized (_addLoaderListeners) {
+    synchronized (_childListenerLock) {
+      if (_addLoaderListeners == null)
+        _addLoaderListeners = new EnvironmentLocal<ArrayList<AddLoaderListener>>();
+      
       ArrayList<AddLoaderListener> listeners
         = _addLoaderListeners.getLevel(this);
 
@@ -458,8 +468,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     ArrayList<AddLoaderListener> listeners;
     listeners = new ArrayList<AddLoaderListener>();
 
+    if (_addLoaderListeners == null)
+      return listeners;
+    
     // add the descendent listeners
-    synchronized (_addLoaderListeners) {
+    synchronized (_childListenerLock) {
       ClassLoader loader;
 
       for (loader = this; loader != null; loader = loader.getParent()) {

@@ -46,6 +46,8 @@ import java.util.logging.Logger;
  * Proxy logger that understands the environment.
  */
 class EnvironmentLogger extends Logger implements ClassLoaderListener {
+  private static ClassLoader _systemClassLoader;
+  
   // The custom local handlers
   private final EnvironmentLocal<Logger> _localLoggers
     = new EnvironmentLocal<Logger>();
@@ -65,8 +67,8 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   private boolean _hasLocalLevel;
   
   // Application level override
-  private final EnvironmentLocal<Level> _localLevel
-    = new EnvironmentLocal<Level>();
+  private EnvironmentLocal<Level> _localLevel;
+  private Level _systemLevel = null;
 
   private EnvironmentLogger _parent;
 
@@ -197,8 +199,11 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
     Handler []newHandlers = new Handler[handlers.size()];
     handlers.toArray(newHandlers);
+    
+    if (loader == _systemClassLoader)
+      loader = null;
 
-    _localHandlers.set(newHandlers);
+    _localHandlers.set(newHandlers, loader);
 
     setHandlerLevel(handler.getLevel());
   }
@@ -210,7 +215,6 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    boolean hasLoader = false;
     for (int i = _loaders.size() - 1; i >= 0; i--) {
       WeakReference<ClassLoader> ref = _loaders.get(i);
       ClassLoader refLoader = ref.get();
@@ -258,7 +262,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     Handler []newHandlers = new Handler[handlers.size()];
     handlers.toArray(newHandlers);
 
-    _localHandlers.set(newHandlers);
+    _localHandlers.set(newHandlers, loader);
 
     setHandlerLevel(handler.getLevel());
   }
@@ -314,12 +318,16 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     if (record == null)
       return;
     
-    if (_hasLocalLevel) {
-      Level level = _localLevel.get();
+    Level level;
+    
+    if (_localLevel != null) {
+      level = _localLevel.get();
+   }
+    else
+      level = _systemLevel;
 
-      if (level != null && record.getLevel().intValue() < level.intValue())
-	return;
-    }
+    if (level != null && record.getLevel().intValue() < level.intValue())
+      return;
 
     for (Logger ptr = this; ptr != null; ptr = ptr.getParent()) {
       Handler handlers[] = ptr.getHandlers();
@@ -387,7 +395,8 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     if (ownHandlers != null)
       ownHandlers.destroy();
 
-    _localLevel.remove(loader);
+    if (_localLevel != null)
+      _localLevel.remove(loader);
 
     updateAssignedLevel();
     updateHandlerLevel();
@@ -400,11 +409,19 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
    */
   public void setLevel(Level level)
   {
-    _localLevel.set(level);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+    if (loader != null && loader != _systemClassLoader) {
+      if (_localLevel == null)
+        _localLevel = new EnvironmentLocal<Level>();
+      
+      _localLevel.set(level);
+    }
+    else {
+      _systemLevel = level;
+    }
     
     if (level != null) {
-      ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
       addLoader(loader);
     }
 
@@ -416,7 +433,6 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
    */
   private void addLoader(ClassLoader loader)
   {
-    boolean hasLoader = false;
     for (int i = _loaders.size() - 1; i >= 0; i--) {
       WeakReference<ClassLoader> ref = _loaders.get(i);
       ClassLoader refLoader = ref.get();
@@ -437,7 +453,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
    */
   public Level getLevel()
   {
-    if (_hasLocalLevel) {
+    if (_localLevel != null) {
       Level level = _localLevel.get();
 
       if (level != null) {
@@ -445,7 +461,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       }
     }
 
-    return null;
+    return _systemLevel;
   }
 
   /**
@@ -500,11 +516,15 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     Level oldAssignedLevel = _assignedLevel;
     
     _assignedLevel = Level.INFO;
-    _hasLocalLevel = false;
+    
+   _hasLocalLevel = false;
 
     if (_parent != null) {
       _assignedLevel = _parent.getAssignedLevel();
     }
+    
+    if (_systemLevel != null)
+      _assignedLevel = _systemLevel;
 
     for (int i = _loaders.size() - 1; i >= 0; i--) {
       WeakReference<ClassLoader> ref = _loaders.get(i);
@@ -543,6 +563,12 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 
   private void updateClassLoaderLevel(ClassLoader loader)
   {
+    if (_localLevel == null) {
+      if (_systemLevel != null)
+        _assignedLevel = _systemLevel;
+      return;
+    }
+    
     Level localLevel = _localLevel.get(loader);
 
     if (localLevel != null) {
@@ -679,6 +705,14 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
 	  e.printStackTrace();
 	}
       }
+    }
+  }
+  
+  static {
+    try {
+      _systemClassLoader = ClassLoader.getSystemClassLoader();
+    } catch (Exception e) {
+      // too early to log
     }
   }
 }

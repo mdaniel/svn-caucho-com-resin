@@ -2,13 +2,20 @@ resin_home=@resin_home@
 resin_conf=@resin_conf@
 resin_root=@resin_root@
 resin_init_d=@resin_init_d@
+resin_pro=@resin_pro@
 LIBEXEC=@LIBEXEC@
 
 all	: 
 	(cd modules/c/src; $(MAKE))
+	if test -r $(resin_pro)/modules/c/src/Makefile; then \
+	  cd $(resin_pro)/modules/c/src; $(MAKE); \
+	fi
 
 clean	:
 	(cd modules/c/src; $(MAKE) clean)
+	if test -r $(resin_pro)/modules/c/src/Makefile; then \
+	  cd $(resin_pro)/modules/c/src; $(MAKE) clean; \
+	fi
 	- rm -r $(LIBEXEC)
 
 install	:
@@ -36,3 +43,6 @@ install	:
 	  chmod +x $(resin_init_d); \
 	fi; \
 	(cd modules/c/src; $(MAKE) install)
+	if test -r $(resin_pro)/modules/c/src/Makefile; then \
+	  cd $(resin_pro)/modules/c/src; $(MAKE) install; \
+	fi

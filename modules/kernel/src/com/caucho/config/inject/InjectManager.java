@@ -2375,6 +2375,9 @@ public class InjectManager
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      if (loader == null)
+        return;
 
       Enumeration e = loader.getResources("META-INF/services/" + Extension.class.getName());
 
