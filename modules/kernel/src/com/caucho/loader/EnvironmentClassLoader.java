@@ -398,19 +398,18 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     listeners = new ArrayList<EnvironmentListener>();
 
     // add the descendant listeners
-    if (_childListeners == null)
-      return listeners;
-    
-    synchronized (_childListenerLock) {
-      ClassLoader loader;
+    if (_childListeners != null) {
+      synchronized (_childListenerLock) {
+        ClassLoader loader;
 
-      for (loader = this; loader != null; loader = loader.getParent()) {
-        if (loader instanceof EnvironmentClassLoader) {
-          ArrayList<EnvironmentListener> childListeners;
-          childListeners = _childListeners.getLevel(loader);
+        for (loader = this; loader != null; loader = loader.getParent()) {
+          if (loader instanceof EnvironmentClassLoader) {
+            ArrayList<EnvironmentListener> childListeners;
+            childListeners = _childListeners.getLevel(loader);
 
-          if (childListeners != null)
-            listeners.addAll(childListeners);
+            if (childListeners != null)
+              listeners.addAll(childListeners);
+          }
         }
       }
     }
@@ -752,7 +751,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _artifactManager.start();
 
     ArrayList<EnvironmentListener> listeners = getEnvironmentListeners();
-
     int size = listeners.size();
     for (int i = 0; listeners != null && i < size; i++) {
       EnvironmentListener listener = listeners.get(i);

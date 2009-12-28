@@ -59,7 +59,7 @@ public class Environment {
   private static ArrayList<ClassLoaderListener> _globalLoaderListeners
     = new ArrayList<ClassLoaderListener>();
   
-  private static EnvironmentClassLoader _envSystemClassLoader;
+  // private static EnvironmentClassLoader _envSystemClassLoader;
 
   /**
    * Returns the local environment.
@@ -73,7 +73,7 @@ public class Environment {
         return (EnvironmentClassLoader) loader;
     }
 
-    return _envSystemClassLoader;
+    return null;
   }
 
   /**
@@ -118,10 +118,12 @@ public class Environment {
       }
     }
     
+    /*
     if (_envSystemClassLoader != null) {
       _envSystemClassLoader.addListener(listener);
       return;
     }
+    */
 
     _globalEnvironmentListeners.add(listener);
   }
@@ -245,10 +247,12 @@ public class Environment {
       }
     }
     
+    /*
     if (_envSystemClassLoader != null) {
       _envSystemClassLoader.addListener(listener);
       return;
     }
+    */
 
     _globalLoaderListeners.add(listener);
   }
@@ -504,8 +508,10 @@ public class Environment {
       }
     }
     
+    /*
     if (_envSystemClassLoader != null)
       return _envSystemClassLoader.getAttribute(name);
+      */
 
     return null;
   }
@@ -540,8 +546,10 @@ public class Environment {
       }
     }
     
+    /*
     if (_envSystemClassLoader != null)
       return _envSystemClassLoader.getAttribute(name);
+      */
 
     return null;
   }
@@ -586,6 +594,7 @@ public class Environment {
       }
     }
     
+    /*
     if (_envSystemClassLoader != null) {
       Object oldValue = _envSystemClassLoader.getAttribute(name);
 
@@ -593,6 +602,7 @@ public class Environment {
 
       return oldValue;
     }
+    */
 
     return null;
   }
@@ -721,6 +731,7 @@ public class Environment {
       }
     }
     
+    /*
     if (_envSystemClassLoader != null) {
       String name = _envSystemClassLoader.getId();
       
@@ -729,6 +740,7 @@ public class Environment {
       else
         return "";
     }
+    */
 
     return Thread.currentThread().getContextClassLoader().toString();
   }
@@ -749,9 +761,11 @@ public class Environment {
       }
     }
     
+    /*
     if (_envSystemClassLoader != null) {
       _envSystemClassLoader.applyVisibleModules(apply);
     }
+    */
   }
 
   /**
@@ -925,7 +939,8 @@ public class Environment {
 
     return _log;
   }
-  
+
+  /*
   static {
     try {
       ClassLoader systemClassLoader = ClassLoader.getSystemClassLoader();
@@ -937,4 +952,5 @@ public class Environment {
       // can't log this early in startup
     }
   }
+  */
 }
