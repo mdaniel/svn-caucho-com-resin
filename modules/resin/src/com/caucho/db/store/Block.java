@@ -515,10 +515,4 @@ abstract public class Block implements SyncCacheListener, CacheListener {
     return (getClass().getSimpleName()
             + "[" + _store + "," + Long.toHexString(_blockId) + "]");
   }
-
-  public void finalize()
-  {
-    if (_dirtyMin < _dirtyMax)
-      System.out.println("BLOCK freed while dirty " + this);
-  }
 }
