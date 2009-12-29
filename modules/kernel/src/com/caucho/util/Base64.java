@@ -337,49 +337,24 @@ public class Base64 {
     }
   }
 
-  public static String oldDecode(String value)
-  {
-    CharBuffer cb = new CharBuffer();
-
-    int length = value.length();
-    for (int i = 0; i + 3 < length; i += 4) {
-      int ch0 = value.charAt(i + 0) & 0xff;
-
-      // skip whitespace
-      if (ch0 == ' ' || ch0 == '\n' || ch0 == '\r') {
-        i -= 3;
-        continue;
-      }
-      
-      int ch1 = value.charAt(i + 1) & 0xff;
-      int ch2 = value.charAt(i + 2) & 0xff;
-      int ch3 = value.charAt(i + 3) & 0xff;
-
-      int chunk = ((_decode[ch0] << 18) +
-		   (_decode[ch1] << 12) +
-		   (_decode[ch2] << 6) +
-		   (_decode[ch3]));
-
-      cb.append((char) ((chunk >> 16) & 0xff));
-
-      if (ch2 != '=')
-	cb.append((char) ((chunk >> 8) & 0xff));
-      if (ch3 != '=')
-	cb.append((char) ((chunk & 0xff)));
-    }
-
-    return cb.toString();
-  }
-
   private static int readNonWhitespace(Reader r)
     throws IOException
   {
     while(true) {
       int ret = r.read();
       // skip whitespace
-      if (ret == ' ' || ret == '\n' || ret == '\r')
-	continue;
-      return ret;
+      switch (ret) {
+      
+      case 0xf0: case 0xf1: case 0xf2: case 0xf3:
+      case 0xf4: case 0xf5: case 0xf6: case 0xf7:
+      case 0xf8: case 0xf9: case 0xfa: case 0xfb:
+      case 0xfc: case 0xfd: case 0xfe: case 0xff:
+      case ' ': case '\n': case '\r': case '\t': 
+      case '\f':
+        break;
+      default:
+        return ret;
+      }
     }
   }
 
