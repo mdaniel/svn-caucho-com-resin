@@ -1972,18 +1972,29 @@ public class StringModule extends AbstractQuercusModule {
             i = j;
             break loop;
 
-          case 'i':
-            ch = 'd';
           case 'u':
-            int signIndex = flags.indexOf("+");
-            if (signIndex > -1) {
-              flags.deleteCharAt(signIndex);
-            }
-            //signIndex = flags.indexOf("-");
-            //if (signIndex > -1) {
-              //flags.deleteCharAt(signIndex);
-            //}         
-            ch = 'd';          
+            sb.setLength(sb.length() - 1);
+            if (sb.length() > 0)
+              segments.add(new TextPrintfSegment(sb));
+            sb.setLength(0);
+
+            if (isLeft)
+              sb.append('-');
+            if (isAlt)
+              sb.append('#');
+            sb.append(flags);
+
+            sb.append(format, head, j);
+
+            sb.append(ch);
+
+            //segments.add(UnsignedLongPrintfSegment.create(env, sb.toString(), index++));
+            sb.setLength(0);
+            i = j;
+            break loop;
+            
+          case 'i':
+            ch = 'd';            
           case 'd': case 'x': case 'o': case 'X':
             sb.setLength(sb.length() - 1);
             if (sb.length() > 0)
@@ -4484,78 +4495,58 @@ public class StringModule extends AbstractQuercusModule {
    * @param breakString the break string
    * @param cut if true, break on exact match
    */
-  public static String wordwrap(String string,
-                                @Optional("75") int width,
-                                @Optional("'\n'") String breakString,
-                                @Optional boolean cut)
+  public static StringValue wordwrap(Env env,
+                                     String string, 
+                                     @Optional("75") int width,
+                                     @Optional("'\n'") String breakString,
+                                     @Optional boolean isCut)
   {
     if (string == null)
       string = "";
 
-    if (breakString == null)
-      breakString = "";
-
     int len = string.length();
+    int breakLen = (breakString != null) ? breakString.length() : 0;    
+    int breakChar;
+    
+    if (breakLen == 0)
+      breakChar = -1;
+    else 
+      breakChar = breakString.charAt(0);
+
     int head = 0;
+    int lastSpace = 0;    
 
-    StringBuilder sb = new StringBuilder();
-    while (head + width < len) {
-      int newline = string.indexOf('\n', head + 1);
-
-      int tail = head + width;
+    StringValue sb = env.createStringBuilder();
+    
+    for (int i = 0; i < len; i++) {      
+      char ch = string.charAt(i);
       
-      for (;
-            head < tail && Character.isWhitespace(string.charAt(head));
-           head++) {
-      }      
-
-      if (newline > 0 && newline < tail) {
-        if (sb.length() > 0)
+      if (ch == breakChar && string.regionMatches(i, breakString, 0, breakLen)) {
+    	sb.append(string, head, i + 1);
+    	head = i + 1;
+      } else if (width <= i - head) {        
+        if (ch == ' ') {
+          sb.append(string, head, i);
           sb.append(breakString);
-
-        sb.append(string.substring(head, newline));
-        head = newline + 1;
-        continue;
-      }
-
-      for (;
-           head < tail && ! Character.isWhitespace(string.charAt(tail));
-           tail--) {
-      }
-
-      if (head == tail)
-        tail = head + width;
-   
-      if (! cut) {
-        for (;
-             tail < len && ! Character.isWhitespace(string.charAt(tail));
-             tail++) {
+          head = i + 1;
+        } else if (head < lastSpace) {
+          sb.append(string, head, lastSpace);
+          sb.append(breakString);
+          head = lastSpace + 1;
+        } else if (isCut) {
+          sb.append(string, head, i);
+          head = i;
         }
+      } else if (ch == ' ') {       
+        lastSpace = i;
       }
-
-      if (sb.length() > 0)
-        sb.append(breakString);
-      
-      sb.append(string.substring(head, tail));
-
-      head = tail;
-
-      if (! cut && head < len && Character.isWhitespace(string.charAt(head)))
-        head++;
     }
-
+    
     if (head < len) {
-      if (sb.length() > 0)
-        sb.append(breakString);
-
-      for (;
-           head < len && Character.isWhitespace(string.charAt(head));
-           head++) {
-      }      
-      sb.append(string.substring(head));
+      sb.append(string, head, len);
     }
-
-    return sb.toString();
+      
+    return sb;
   }
 
   /**
