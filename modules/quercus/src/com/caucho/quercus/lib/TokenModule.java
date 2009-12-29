@@ -292,6 +292,9 @@ public class TokenModule extends AbstractQuercusModule {
 	case '>':
 	  sb.append("&gt;");
 	  break;
+    case ' ':
+       sb.append("&nbsp;");
+       break;	  
 	default:
 	  sb.append(ch);
 	  break;
@@ -310,6 +313,9 @@ public class TokenModule extends AbstractQuercusModule {
 	case '>':
 	  out.print("&gt;");
 	  break;
+    case ' ':
+       out.print("&nbsp;");
+       break;	  
 	default:
 	  out.print(ch);
 	  break;
