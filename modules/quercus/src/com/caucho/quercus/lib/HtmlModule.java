@@ -559,13 +559,13 @@ public class HtmlModule extends AbstractQuercusModule {
     entity(array, map, 255, "&yuml;");
     
     // XXX: charset
-    //entity(array, map, '\u20ac', "&euro;");    
-    //entity(array, map, '\u2002', "&ensp;");
-    //entity(array, map, '\u2009', "&thinsp;");
-    //entity(array, map, '\u2018', "&lsquo;");
-    //entity(array, map, '\u2020', "&dagger;");
-    //entity(array, map, '\u2033', "&prime;");
-    //entity(array, map, '\u2044', "&frasl;");
+    entity(array, map, 0x20ac, "&euro;");    
+    entity(array, map, 0x2002, "&ensp;");
+    entity(array, map, 0x2009, "&thinsp;");
+    entity(array, map, 0x2018, "&lsquo;");
+    entity(array, map, 0x2020, "&dagger;");
+    entity(array, map, 0x2033, "&prime;");
+    entity(array, map, 0x2044, "&frasl;");
     
     HTML_ENTITIES_ARRAY = new ConstArrayValue(array);
   }
