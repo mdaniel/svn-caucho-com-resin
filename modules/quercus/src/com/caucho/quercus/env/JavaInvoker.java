@@ -629,6 +629,7 @@ abstract public class JavaInvoker
       obj = qThis != null ? qThis.toJavaObject() : null;
     }
 
+    String warnMessage = null;
     for (int i = 0; i < _marshalArgs.length; i++) {
       if (i < args.length && args[i] != null)
         javaArgs[k] = _marshalArgs[i].marshal(env, args[i], _param[k]);
@@ -636,9 +637,9 @@ abstract public class JavaInvoker
         javaArgs[k] = _marshalArgs[i].marshal(env,
                                               _defaultExprs[i],
                                               _param[k]);
-      } else {
-        env.warning(L.l("function '{0}' has {1} required arguments, but only {2} were provided",
-                        _name, _minArgumentLength, args.length));
+      } else {        
+        warnMessage = L.l("function '{0}' has {1} required arguments, but only {2} were provided",
+                           _name, _minArgumentLength, args.length);
 
         //return NullValue.NULL;
 
@@ -652,6 +653,9 @@ abstract public class JavaInvoker
 
       k++;
     }
+    
+    if (warnMessage != null)
+      env.warning(warnMessage);
     
     if (_hasRestArgs) {
       Value []rest;
