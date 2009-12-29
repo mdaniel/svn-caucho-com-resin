@@ -109,12 +109,12 @@ public class StringModule extends AbstractQuercusModule {
    * @param characters the set of characters to convert
    * @return the escaped string
    */
-  public static StringValue addcslashes(StringValue source, String characters)
+  public static StringValue addcslashes(Env env, StringValue source, String characters)
   {
     if (characters == null)
       characters = "";
 
-    boolean []bitmap = parseCharsetBitmap(characters);
+    boolean []bitmap = parseCharsetBitmap(env, characters);
 
     int length = source.length();
 
@@ -176,7 +176,7 @@ public class StringModule extends AbstractQuercusModule {
    * @param charset the bitmap string
    * @return  the actual bitmap
    */
-  private static boolean []parseCharsetBitmap(String charset)
+  private static boolean []parseCharsetBitmap(Env env, String charset)
   {
     boolean []bitmap = new boolean[256];
 
@@ -199,8 +199,9 @@ public class StringModule extends AbstractQuercusModule {
       char last = charset.charAt(i + 3);
 
       if (last < ch) {
-        // XXX: exception type
-        throw new RuntimeException(L.l("Invalid range."));
+        env.warning(L.l("character set range is invalid: {0}..{1}",
+                        ch, last));
+        continue;
       }
 
       i += 3;
@@ -222,7 +223,7 @@ public class StringModule extends AbstractQuercusModule {
    */
   public static StringValue addslashes(StringValue source)
   {
-    StringValue sb = source.createStringBuilder(source.length() * 5 / 4);
+    StringValue sb = source.createStringBuilder(source.length() * 5 / 4);   
 
     int length = source.length();
     for (int i = 0; i < length; i++) {
@@ -765,7 +766,7 @@ public class StringModule extends AbstractQuercusModule {
     if (characters.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(characters);
+      trim = parseCharsetBitmap(env, characters);
 
     for (int i = 0; i < string.length(); i++) {
       char ch = string.charAt(i);
@@ -1523,7 +1524,7 @@ public class StringModule extends AbstractQuercusModule {
     if (characters.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(characters);
+      trim = parseCharsetBitmap(env, characters);
 
     for (int i = string.length() - 1; i >= 0; i--) {
       char ch = string.charAt(i);
@@ -1971,8 +1972,18 @@ public class StringModule extends AbstractQuercusModule {
             i = j;
             break loop;
 
-          case 'i': case 'u':
+          case 'i':
             ch = 'd';
+          case 'u':
+            int signIndex = flags.indexOf("+");
+            if (signIndex > -1) {
+              flags.deleteCharAt(signIndex);
+            }
+            //signIndex = flags.indexOf("-");
+            //if (signIndex > -1) {
+              //flags.deleteCharAt(signIndex);
+            //}         
+            ch = 'd';          
           case 'd': case 'x': case 'o': case 'X':
             sb.setLength(sb.length() - 1);
             if (sb.length() > 0)
@@ -2099,15 +2110,15 @@ public class StringModule extends AbstractQuercusModule {
              fIndex++) {
         }
 
-        ch = string.charAt(sIndex);
+        /*ch = string.charAt(sIndex);
         if (! isWhitespace(ch)) {
           // XXX: return false?
           return sscanfReturn(env, array, args, argIndex, isAssign, true);
-        }
-
-        for (sIndex++;
-             sIndex < strlen && isWhitespace(string.charAt(sIndex));
-             sIndex++) {
+        }*/
+        
+        for (;
+          sIndex < strlen && isWhitespace(string.charAt(sIndex));
+          sIndex++) {
         }
       }
       else if (ch == '%') {
@@ -2117,7 +2128,7 @@ public class StringModule extends AbstractQuercusModule {
         while (fIndex < fmtLen) {
           ch = format.charAt(fIndex++);
 
-          if (sIndex >= strlen) {
+          if (sIndex >= strlen && ch != 'n') {
             array.append(NullValue.NULL);
             break loop;
           }
@@ -2159,6 +2170,10 @@ public class StringModule extends AbstractQuercusModule {
               maxLen = 1;
 
             sIndex = sscanfString(string, sIndex, maxLen, obj, isAssign);
+            break loop;
+
+          case 'n':
+            sIndex = sscanfStringLength(sIndex, obj, isAssign);
             break loop;
 
           case 'd':
@@ -2248,6 +2263,18 @@ public class StringModule extends AbstractQuercusModule {
 
     return sIndex;
   }
+  
+  /**
+   * Find number of characters processed so far 
+   */
+  private static int sscanfStringLength(int sIndex, 
+                                        Value obj,
+                                        boolean isAssignment)
+  {
+    sscanfPut(obj, LongValue.create(sIndex), isAssignment);
+
+    return sIndex;
+  }  
 
   private static void sscanfPut(Value obj, Value val, boolean isAssignment)
   {
@@ -3328,7 +3355,11 @@ public class StringModule extends AbstractQuercusModule {
 
       if (ch == '\\') {
         if (i + 1 < len) {
-          sb.append(string.charAt(i + 1));
+          char ch2 = string.charAt(i + 1);
+          if (ch2 == '0') {
+            ch2 = 0x0;
+          }          
+          sb.append(ch2);
           i++;
         }
       }
@@ -3868,13 +3899,16 @@ public class StringModule extends AbstractQuercusModule {
     StringValue string;
     StringValue characters;
     int offset;
+    //StringValue savedToken = null;
 
     if (string2.isNull()) {
       StringValue savedString = (StringValue) env.getSpecialValue("caucho.strtok_string");
       Integer savedOffset = (Integer) env.getSpecialValue("caucho.strtok_offset");
+      //savedToken = (StringValue) env.getSpecialValue("caucho.strtok_token");
 
       string = savedString == null ? env.getEmptyString() : savedString;
       offset = savedOffset == null ? 0 : savedOffset;
+      //savedToken = savedToken == null ? env.getEmptyString() : savedToken;
       characters = string1;
     }
     else {
@@ -3883,6 +3917,7 @@ public class StringModule extends AbstractQuercusModule {
       characters = string2.toStringValue();
 
       env.setSpecialValue("caucho.strtok_string", string);
+      //env.setSpecialValue("caucho.strtok_token", string2);
     }
 
     int strlen = string.length();
@@ -3900,19 +3935,30 @@ public class StringModule extends AbstractQuercusModule {
     if (offset == strlen)
       result = BooleanValue.FALSE;
     else {
+      
+      //if (string2.isNull() && !(string1.eq(savedToken))) {
+      //  offset = offset + savedToken.length();
+      //}
+     
       int start = offset;
-
-      offset++;
+      int end = start;
 
       // find end
-      for (; offset < strlen; offset++) {
-        char ch = string.charAt(offset);
+      for (; end < strlen; end++) {
+        char ch = string.charAt(end);
 
         if (characters.indexOf(ch) > -1)
           break;
       }
+      
+      for (offset = end; offset < strlen; offset++) {
+        char ch = string.charAt(offset);
 
-      result = string.substring(start, offset);
+        if (characters.indexOf(ch) < 0)
+          break;
+      }      
+
+      result = string.substring(start, end);
     }
 
     env.setSpecialValue("caucho.strtok_offset", offset);
@@ -4297,7 +4343,7 @@ public class StringModule extends AbstractQuercusModule {
     if (characters == null || characters.equals(""))
       trim = TRIM_WHITESPACE;
     else
-      trim = parseCharsetBitmap(characters.toString());
+      trim = parseCharsetBitmap(env, characters.toString());
 
     int len = string.length();
 
@@ -4457,6 +4503,11 @@ public class StringModule extends AbstractQuercusModule {
       int newline = string.indexOf('\n', head + 1);
 
       int tail = head + width;
+      
+      for (;
+            head < tail && Character.isWhitespace(string.charAt(head));
+           head++) {
+      }      
 
       if (newline > 0 && newline < tail) {
         if (sb.length() > 0)
@@ -4467,19 +4518,24 @@ public class StringModule extends AbstractQuercusModule {
         continue;
       }
 
+      for (;
+           head < tail && ! Character.isWhitespace(string.charAt(tail));
+           tail--) {
+      }
+
+      if (head == tail)
+        tail = head + width;
+   
       if (! cut) {
         for (;
-             head < tail && ! Character.isWhitespace(string.charAt(tail));
-             tail--) {
+             tail < len && ! Character.isWhitespace(string.charAt(tail));
+             tail++) {
         }
-
-        if (head == tail)
-          tail = head + width;
       }
 
       if (sb.length() > 0)
         sb.append(breakString);
-
+      
       sb.append(string.substring(head, tail));
 
       head = tail;
@@ -4492,6 +4548,10 @@ public class StringModule extends AbstractQuercusModule {
       if (sb.length() > 0)
         sb.append(breakString);
 
+      for (;
+           head < len && Character.isWhitespace(string.charAt(head));
+           head++) {
+      }      
       sb.append(string.substring(head));
     }
 
