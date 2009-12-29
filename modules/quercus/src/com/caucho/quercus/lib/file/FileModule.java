@@ -160,7 +160,7 @@ public class FileModule extends AbstractQuercusModule {
     else
       file = path.substring(p + 1, len);
 
-    if (suffix != null && file.endsWith(suffix))
+    if (suffix != null && file.endsWith(suffix) && !file.equals(suffix))
       file = file.substring(0, file.length() - suffix.length());
 
     return file;
