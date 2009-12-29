@@ -1616,6 +1616,12 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     _isDumpHeapOnExit = true;
     
     startShutdown(msg);
+    
+    try {
+      Thread.sleep(10 * 60 * 1000L);
+    } catch (Exception e) {
+      // interrupted exception
+    }
   }
 
   /**

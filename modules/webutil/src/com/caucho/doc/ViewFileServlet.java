@@ -92,9 +92,9 @@ public class ViewFileServlet extends GenericServlet {
       String re_beg_str = request.getParameter(PARAM_RE_START);
       String re_end_str = request.getParameter(PARAM_RE_END);
 
-      Pattern re_mrk = re_mrk_str == null || re_mrk_str.length() == 0 ? null : Pattern.compile(re_mrk_str);
-      Pattern re_beg = re_beg_str == null || re_beg_str.length() == 0 ? null : Pattern.compile(re_beg_str);
-      Pattern re_end = re_end_str == null || re_end_str.length() == 0 ? null : Pattern.compile(re_end_str);
+      Pattern re_mrk = null; //re_mrk_str == null || re_mrk_str.length() == 0 ? null : Pattern.compile(re_mrk_str);
+      Pattern re_beg = null; //re_beg_str == null || re_beg_str.length() == 0 ? null : Pattern.compile(re_beg_str);
+      Pattern re_end = null; //re_end_str == null || re_end_str.length() == 0 ? null : Pattern.compile(re_end_str);
 
       /*
        * write the verbatim source to the browser.

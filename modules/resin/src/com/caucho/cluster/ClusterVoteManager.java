@@ -148,7 +148,7 @@ public class ClusterVoteManager
     throws ConfigException
   {
     Server server = Server.getCurrent();
-
+    
     if (server == null)
       throw new ConfigException(L.l("'{0}' cannot be initialized because it is not in a Resin environment",
                                     getClass().getSimpleName()));
