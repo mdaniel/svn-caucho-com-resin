@@ -94,22 +94,33 @@ $heap_dump_cl = java_class("com.caucho.profile.HeapDump");
 
 if ($heap_dump_cl->isAvailable()) {
   $heap = @$heap_dump_cl->create();
-  }
+}
 
 $is_heap_available_heap = false;
 
+$heap_file = "/tmp/java.heap";
+
 if ($heap) {
   echo "<form action='?q=memory' method='post'>";
-  echo "<input type='submit' name='action' value='dump heap'>";
+  echo "Resin Heap Dump: <input type='submit' name='action' value='dump heap'><br>";
+  echo "JVM Heap Dump: <input type='submit' name='action' value='jvm heap dump'> (saves JVM binary heap to $heap_file)";
   echo "</form>";
 
+  if ($_POST['action'] == 'jvm heap dump') {
+    $memory_mbean = $g_mbean_server->lookup("com.sun.management:type=HotSpotDiagnostic");
+
+    $memory_mbean->dumpHeap($heap_file, true);
+
+    echo "<h2>Saving Heap to $heap_file</h2>";
+  }
+  
   if ($_POST['action'] == 'dump heap') {
     $entries = $heap->dump();
 
     $is_heap_available = sizeof($entries) > 0;
   }
   else {
-    $entries = $heap->lastDump();
+    $entries = $heap->getLastHeapDump();
     $is_heap_available = true;
   }
 }

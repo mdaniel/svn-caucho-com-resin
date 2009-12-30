@@ -49,33 +49,38 @@ import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.inject.Scope;
 
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
 /**
  * Read-only introspected annotated type.
  */
-public class ReflectionAnnotatedType
+public class ReflectionAnnotatedType<T>
   extends ReflectionAnnotated
-  implements AnnotatedType
+  implements AnnotatedType<T>
 {
+  private static final L10N L = new L10N(ReflectionAnnotatedType.class);
+  
   private static final Logger log
     = Logger.getLogger(ReflectionAnnotatedType.class.getName());
 
-  private Class _javaClass;
+  private Class<T> _javaClass;
 
-  private Set<AnnotatedConstructor> _constructorSet
-    = new LinkedHashSet<AnnotatedConstructor>();
+  private Set<AnnotatedConstructor<T>> _constructorSet
+    = new LinkedHashSet<AnnotatedConstructor<T>>();
 
-  private Set<AnnotatedField> _fieldSet
-    = new LinkedHashSet<AnnotatedField>();
+  private Set<AnnotatedField<? super T>> _fieldSet
+    = new LinkedHashSet<AnnotatedField<? super T>>();
 
-  private Set<AnnotatedMethod> _methodSet
-    = new LinkedHashSet<AnnotatedMethod>();
+  private Set<AnnotatedMethod<? super T>> _methodSet
+    = new LinkedHashSet<AnnotatedMethod<? super T>>();
 
-  ReflectionAnnotatedType(Class javaClass)
+  ReflectionAnnotatedType(Class<T> javaClass)
   {
     this(javaClass, javaClass);
   }
 
-  ReflectionAnnotatedType(Type type, Class javaClass)
+  ReflectionAnnotatedType(Type type, Class<T> javaClass)
   {
     super(type, javaClass.getDeclaredAnnotations());
 
@@ -87,7 +92,7 @@ public class ReflectionAnnotatedType
   /**
    * Returns the concrete Java class
    */
-  public Class<?> getJavaClass()
+  public Class<T> getJavaClass()
   {
     return _javaClass;
   }
@@ -95,7 +100,7 @@ public class ReflectionAnnotatedType
   /**
    * Returns the abstract introspected constructors
    */
-  public Set<AnnotatedConstructor> getConstructors()
+  public Set<AnnotatedConstructor<T>> getConstructors()
   {
     return _constructorSet;
   }
@@ -103,7 +108,7 @@ public class ReflectionAnnotatedType
   /**
    * Returns the abstract introspected methods
    */
-  public Set<AnnotatedMethod> getMethods()
+  public Set<AnnotatedMethod<? super T>> getMethods()
   {
     return _methodSet;
   }
@@ -129,36 +134,42 @@ public class ReflectionAnnotatedType
   /**
    * Returns the abstract introspected fields
    */
-  public Set<AnnotatedField> getFields()
+  public Set<AnnotatedField<? super T>> getFields()
   {
     return _fieldSet;
   }
 
   private void introspect(Class cl)
   {
-    introspectInheritedAnnotations(cl.getSuperclass());
+    try {
+      introspectInheritedAnnotations(cl.getSuperclass());
 
-    introspectFields(cl);
+      introspectFields(cl);
 
-    for (Method method : cl.getDeclaredMethods()) {
-      if (hasBeanAnnotation(method)) {
-        _methodSet.add(new AnnotatedMethodImpl(this, null, method));
-      }
-    }
-
-    if (! cl.isInterface()) {
-      for (Constructor ctor : cl.getDeclaredConstructors()) {
-        _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
-      }
-
-      if (_constructorSet.size() == 0) {
-        try {
-          Constructor ctor = cl.getConstructor(new Class[0]);
-          _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
-        } catch (NoSuchMethodException e) {
-          log.log(Level.FINE, e.toString(), e);
+      for (Method method : cl.getDeclaredMethods()) {
+        if (hasBeanAnnotation(method)) {
+          _methodSet.add(new AnnotatedMethodImpl(this, null, method));
         }
       }
+
+      if (! cl.isInterface()) {
+        for (Constructor ctor : cl.getDeclaredConstructors()) {
+          _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
+        }
+
+        if (_constructorSet.size() == 0) {
+          try {
+            Constructor ctor = cl.getConstructor(new Class[0]);
+            _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
+          } catch (NoSuchMethodException e) {
+            log.log(Level.FINE, e.toString(), e);
+          }
+        }
+      }
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(L.l("{0} introspection failed: {1}", cl.getName(), e), e);
     }
   }
 
@@ -170,8 +181,14 @@ public class ReflectionAnnotatedType
     introspectFields(cl.getSuperclass());
 
     for (Field field : cl.getDeclaredFields()) {
-      if (hasBeanAnnotation(field.getAnnotations())) {
-        _fieldSet.add(new AnnotatedFieldImpl(this, field));
+      try {
+	if (hasBeanAnnotation(field.getAnnotations())) {
+	  _fieldSet.add(new AnnotatedFieldImpl(this, field));
+	}
+      } catch (ConfigException e) {
+	throw e;
+      } catch (Throwable e) {
+	throw ConfigException.create(L.l("{0}: {1}\n", field, e), e);
       }
     }
   }
