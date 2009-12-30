@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.lib.OutputModule;
 import com.caucho.vfs.*;
 
 import java.io.IOException;
@@ -40,10 +41,6 @@ import java.util.logging.Level;
  * Represents a PHP output buffer
  */
 public class OutputBuffer {
-  public static final int PHP_OUTPUT_HANDLER_START = 0;
-  public static final int PHP_OUTPUT_HANDLER_CONT = 1;
-  public static final int PHP_OUTPUT_HANDLER_END = 2;
-
   private static final Logger log
     = Logger.getLogger(OutputBuffer.class.getName());
 
@@ -102,7 +99,7 @@ public class OutputBuffer {
       }
     }
 
-    _state = 1 << PHP_OUTPUT_HANDLER_START;
+    _state = OutputModule.PHP_OUTPUT_HANDLER_START;
     _haveFlushed = false;
   }
 
@@ -206,9 +203,15 @@ public class OutputBuffer {
   public void clean()
   {
     try {
+      _state |= OutputModule.PHP_OUTPUT_HANDLER_CONT;
+      
       _out.flush();
 
       _tempStream.clearWrite();
+      
+      _state &= ~(OutputModule.PHP_OUTPUT_HANDLER_START);
+      _state &= ~(OutputModule.PHP_OUTPUT_HANDLER_CONT);
+      
     } catch (IOException e) {
       _env.error(e.toString(), e);
     }
@@ -220,15 +223,15 @@ public class OutputBuffer {
    */
   public void flush()
   {
-    _state |= 1 << PHP_OUTPUT_HANDLER_CONT;
+    _state |= OutputModule.PHP_OUTPUT_HANDLER_CONT;
 
     if (! callCallback()) {
       // clear the start and cont flags
       doFlush();
     }
     
-    _state &= ~(1 << PHP_OUTPUT_HANDLER_START);
-    _state &= ~(1 << PHP_OUTPUT_HANDLER_CONT);
+    _state &= ~(OutputModule.PHP_OUTPUT_HANDLER_START);
+    _state &= ~(OutputModule.PHP_OUTPUT_HANDLER_CONT);
     _haveFlushed = true;
   }
 
@@ -237,7 +240,7 @@ public class OutputBuffer {
    */
   public void close()
   {
-    _state |= 1 << PHP_OUTPUT_HANDLER_END;
+    _state |= OutputModule.PHP_OUTPUT_HANDLER_END;
 
     if (! callCallback()) {
       // all data that has and ever will be written has now been processed

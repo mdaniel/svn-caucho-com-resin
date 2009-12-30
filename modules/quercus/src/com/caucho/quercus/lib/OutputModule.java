@@ -71,6 +71,10 @@ public class OutputModule extends AbstractQuercusModule
   private static HashMap<Env,GZOutputPair> _gzOutputPairs 
     = new HashMap<Env,GZOutputPair>();
 
+  public static final int PHP_OUTPUT_HANDLER_START = 1;
+  public static final int PHP_OUTPUT_HANDLER_CONT = 2;
+  public static final int PHP_OUTPUT_HANDLER_END = 4;
+  
   /**
    * Returns the default php.ini values.
    */
@@ -508,7 +512,7 @@ public class OutputModule extends AbstractQuercusModule
 
     StringValue result = env.createBinaryBuilder();
     
-    if ((state & (1 << OutputBuffer.PHP_OUTPUT_HANDLER_START)) != 0) {
+    if ((state & (PHP_OUTPUT_HANDLER_START)) != 0) {
       HttpModule.header(env, env.createString("Vary: Accept-Encoding"), true, 0);
 
       int encodingFlag = 0;
@@ -545,7 +549,7 @@ public class OutputModule extends AbstractQuercusModule
       buffer.writeTo(pair._outputStream);
       pair._outputStream.flush();
 
-      if ((state & (1 << OutputBuffer.PHP_OUTPUT_HANDLER_END)) != 0) {
+      if ((state & (PHP_OUTPUT_HANDLER_END)) != 0) {
         pair._outputStream.close();
       }
     } catch (IOException e) {
