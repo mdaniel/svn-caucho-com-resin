@@ -80,10 +80,10 @@ public class Quercus
 
   private ModuleContext _moduleContext;
 
-  private LruCache<String, UnicodeBuilderValue> _unicodeMap
+  private static LruCache<String, UnicodeBuilderValue> _unicodeMap
     = new LruCache<String, UnicodeBuilderValue>(8 * 1024);
 
-  private LruCache<String, StringValue> _stringMap
+  private static LruCache<String, StringValue> _stringMap
     = new LruCache<String, StringValue>(8 * 1024);
 
   private HashMap<String, ModuleInfo> _modules

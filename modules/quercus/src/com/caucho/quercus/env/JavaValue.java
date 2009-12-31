@@ -60,7 +60,16 @@ public class JavaValue extends ObjectValue
 
     setQuercusClass(env.createJavaQuercusClass(def));
 
-    _env = env;
+    _classDef = def;
+    _object = object;
+  }
+
+  public JavaValue(Object object, JavaClassDef def, QuercusClass qClass)
+  {
+    super();
+
+    setQuercusClass(qClass);
+
     _classDef = def;
     _object = object;
   }

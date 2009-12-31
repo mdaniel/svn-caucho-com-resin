@@ -79,8 +79,6 @@ public class Xml {
    */
   private boolean _xmlOptionSkipWhite = false;
 
-  private Env _env;
-
   /** XXX: _separator is set by xml_parse_create_ns but
    *  not yet used.  Default value is ":"
    *  Possibly should report error if user wants to use
@@ -105,6 +103,8 @@ public class Xml {
   private Value _obj;
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
+  
+  Env _env; // XXX: need to remove
 
   private StringValue _xmlString;
   private XmlHandler _xmlHandler;
@@ -114,8 +114,9 @@ public class Xml {
              String separator)
   {
     _env = env;
+    
     _xmlOptionTargetEncoding = outputEncoding;
-    _parser = _env.wrapJava(this);
+    _parser = env.wrapJava(this);
     _separator = separator;
   }
 
