@@ -1236,7 +1236,7 @@ cse_init_config(config_t *config)
 
   if (! config->cache_lock) {
     LOG(("%s:%d:cse_init_config(): config lock %p\n",
-	 __FILE__, __LINE__, config->lock));
+	 __FILE__, __LINE__, config->config_lock));
     config->cache_lock = cse_create_lock(config);
     config->config_lock = cse_create_lock(config);
     config->server_lock = cse_create_lock(config);
