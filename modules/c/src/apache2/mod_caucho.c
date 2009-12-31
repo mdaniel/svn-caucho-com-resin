@@ -88,13 +88,21 @@ cse_log(char *fmt, ...)
   strftime(timestamp, sizeof(timestamp), "[%m/%b/%Y:%H:%M:%S %z]",
 	   localtime(&t));
 
+#ifdef WIN32
+#if APR_HAS_THREADS
+  _snprintf(buffer, sizeof(buffer), "%s %d_%ld: ",
+	   timestamp, pid, (long int) apr_os_thread_current());
+#else   
+  _snprintf(buffer, sizeof(buffer), "%s %d: ", timestamp, pid);
+#endif
+#else
 #if APR_HAS_THREADS
   snprintf(buffer, sizeof(buffer), "%s %d_%ld: ",
 	   timestamp, pid, (long int) apr_os_thread_current());
 #else   
   snprintf(buffer, sizeof(buffer), "%s %d: ", timestamp, pid);
 #endif
-  
+#endif  
    va_start(args, fmt);
    vsprintf(buffer + strlen(buffer), fmt, args);
    va_end(args);
