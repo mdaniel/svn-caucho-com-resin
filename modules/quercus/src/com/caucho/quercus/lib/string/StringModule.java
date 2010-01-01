@@ -3099,7 +3099,10 @@ public class StringModule extends AbstractQuercusModule {
                               StringValue characters,
                               @Optional("0") int offset,
                               @Optional("-2147483648") int length)
-  {
+  {    
+    //if (characters.length() == 0) {
+    //  characters = StringValue.create((char)0);
+    //}
     return strspnImpl(string, characters, offset, length, false);
   }
 
@@ -3155,17 +3158,22 @@ public class StringModule extends AbstractQuercusModule {
       }
 
       StringValue tagName = string.substring(tagNameStart, j);
+      int tagEnd = 0;
 
       if (allowedTagMap != null && allowedTagMap.contains(tagName)) {
         result.append(string, i, Math.min(j + 1, len));
       }
       else {
-        while (j < len && (ch = string.charAt(j)) != '>') {
+        while (j < len && (ch = string.charAt(j)) != '<') {
+          
+          if (ch == '>') {
+            tagEnd = j;
+          }
           j++;
         }
       }
-
-      i = j;
+      
+      i = (tagEnd != 0) ? tagEnd : j;
     }
 
     return result;
@@ -3550,8 +3558,13 @@ public class StringModule extends AbstractQuercusModule {
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strncasecmp(StringValue a, StringValue b, int length)
+  public static int strncasecmp(Env env, StringValue a, StringValue b, int length)
   {
+    if (length < 0) {
+      env.warning(L.l("strncasecmp() length '{0}' must be non-negative",
+                      length));
+    }
+    
     int aLen = a.length();
     int bLen = b.length();
 
@@ -3812,8 +3825,7 @@ public class StringModule extends AbstractQuercusModule {
     int count = 0;
 
     for (; offset < end; offset++) {
-      char ch = string.charAt(offset);
-
+      char ch = string.charAt(offset);      
       boolean isPresent = characters.indexOf(ch) > -1;
 
       if (isPresent == isMatch)
@@ -4161,7 +4173,7 @@ public class StringModule extends AbstractQuercusModule {
       if (len < 0)
         end = strLen + len;
       else
-        end = start + len;
+        end = (strLen < len) ? strLen : start + len;
 
       if (end <= start)
         return BooleanValue.FALSE;
@@ -4326,8 +4338,10 @@ public class StringModule extends AbstractQuercusModule {
 
     if (len < 0)
       end = Math.max(strLen + len, start);
-    else
-      end = Math.min(start + len, strLen);
+    else {
+      end = (strLen < len) ? strLen : (start + len);  
+    }
+      
 
     StringValue result = string.createStringBuilder();
 
@@ -4535,6 +4549,7 @@ public class StringModule extends AbstractQuercusModule {
           head = lastSpace + 1;
         } else if (isCut) {
           sb.append(string, head, i);
+          sb.append(breakString);
           head = i;
         }
       } else if (ch == ' ') {       
