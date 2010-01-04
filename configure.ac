@@ -87,10 +87,12 @@ AC_SUBST(resin_init_d)
 
 resin_pro=.
 resin_os=../resin_os
+is_dev=""
 
 if test -r "../pro/modules/c/src/resin/resin.h"; then
   resin_pro="../pro"
   resin_os="../../../../../resin/modules/c/src/resin_os"
+  is_dev="true"
 fi  
 
 AC_SUBST(resin_os)
@@ -1256,6 +1258,14 @@ AC_ARG_ENABLE(debug,
 if test "$debug" = true; then
   CFLAGS="$CFLAGS -DDEBUG -Wall"
   HARDCORE_CFLAGS="$HARDCORE_CFLAGS -DDEBUG"
+fi
+
+#
+# final cleanup
+#
+
+if test -z "${is_dev}"; then
+  $resin_plugin="$resin_plugin $resin_pro_plugin"
 fi
 
 AC_OUTPUT([
