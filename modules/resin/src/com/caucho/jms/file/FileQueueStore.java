@@ -170,6 +170,7 @@ public class FileQueueStore
 		   long expireTime)
   {
     StoreConnection conn = null;
+    boolean isValid = false;
 
     try {
       TempOutputStream os = new TempOutputStream();
@@ -201,6 +202,8 @@ public class FileQueueStore
       long id = rs.getLong(1);
 
       rs.close();
+      
+      isValid = true;
 
       return id;
     } catch (RuntimeException e) {
@@ -208,7 +211,7 @@ public class FileQueueStore
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      freeConnection(conn);
+      freeConnection(conn, true);
     }
   }
 
@@ -218,6 +221,7 @@ public class FileQueueStore
   boolean receiveStart(byte []queueHash, FileQueueImpl fileQueue)
   {
     StoreConnection conn = null;
+    boolean isValid = false;
     
     try {
       conn = getConnection();
@@ -242,6 +246,8 @@ public class FileQueueStore
       }
 
       rs.close();
+      
+      isValid = true;
 
       return count < START_LIMIT;
     } catch (RuntimeException e) {
@@ -249,7 +255,7 @@ public class FileQueueStore
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      freeConnection(conn);
+      freeConnection(conn, isValid);
     }
   }
 
@@ -259,6 +265,7 @@ public class FileQueueStore
   public Serializable readMessage(long id)
   {
     StoreConnection conn = null;
+    boolean isValid = false;
 
     try {
       conn = getConnection();
@@ -291,7 +298,7 @@ public class FileQueueStore
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      freeConnection(conn);
+      freeConnection(conn, isValid);
     }
 
     return null;
@@ -303,6 +310,7 @@ public class FileQueueStore
   public Serializable receive(byte []queueHash)
   {
     StoreConnection conn = null;
+    boolean isValid = false;
     
     try {
       conn = getConnection();
@@ -329,7 +337,7 @@ public class FileQueueStore
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      freeConnection(conn);
+      freeConnection(conn, isValid);
     }
 
     return null;
@@ -341,6 +349,7 @@ public class FileQueueStore
   public void remove(String id)
   {
     StoreConnection conn = null;
+    boolean isValid = false;
     
     try {
       conn = getConnection();
@@ -350,12 +359,14 @@ public class FileQueueStore
       removeStmt.setString(1, id);
 
       removeStmt.executeUpdate();
+      
+      isValid = true;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      freeConnection(conn);
+      freeConnection(conn, isValid);
     }
   }
 
@@ -365,6 +376,7 @@ public class FileQueueStore
   void delete(long id)
   {
     StoreConnection conn = null;
+    boolean isValid = false;
     
     try {
       conn = getConnection();
@@ -374,12 +386,14 @@ public class FileQueueStore
       deleteStmt.setLong(1, id);
 
       deleteStmt.executeUpdate();
+      
+      isValid = true;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     } finally {
-      freeConnection(conn);
+      freeConnection(conn, isValid);
     }
   }
 
@@ -447,10 +461,14 @@ public class FileQueueStore
     }
   }
 
-  private void freeConnection(StoreConnection conn)
+  private void freeConnection(StoreConnection conn, boolean isValid)
   {
-    if (conn != null)
+    if (conn == null) {     
+    } else if (isValid) {
       _freeList.free(conn);
+    }
+    else
+      conn.close();
   }
 
   private static String escapeName(String name)
@@ -573,6 +591,19 @@ public class FileQueueStore
       }
 
       return _deleteStmt;
+    }
+    
+    void close()
+    {
+      try {
+        Connection conn = _conn;
+        _conn = null;
+        
+        if (conn != null)
+          conn.close();
+      } catch (SQLException e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
     }
   }
 }
