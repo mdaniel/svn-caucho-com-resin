@@ -467,7 +467,8 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
   if (srun->send_buffer_size == 0) {
     int size;
     unsigned int len = sizeof(size);
-    
+
+    /*
 #ifdef SO_SNDBUF
     if (getsockopt(s->socket, SOL_SOCKET, SO_SNDBUF, (char *) &size, &len) >= 0) {
       size -= 1024;
@@ -480,6 +481,9 @@ cse_open(stream_t *s, cluster_t *cluster, cluster_srun_t *cluster_srun,
 #else
     srun->send_buffer_size = 16 * 1024;
 #endif
+    */
+    
+    srun->send_buffer_size = 8 * 1024;
     
     LOG(("%s:%d:cse_open(): send buffer size %d\n",
 	 __FILE__, __LINE__,

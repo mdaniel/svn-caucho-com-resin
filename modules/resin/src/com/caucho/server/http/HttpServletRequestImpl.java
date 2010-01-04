@@ -2359,7 +2359,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     private final DuplexListener _listener;
 
     private TcpDuplexController _controller;
-    
+
     DuplexContextImpl(HttpServletRequestImpl request,
                       HttpServletResponseImpl response,
                       DuplexListener listener)
@@ -2435,7 +2435,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     private final WebSocketListener _listener;
 
     private TcpDuplexController _controller;
-    
+
     WebSocketContextImpl(HttpServletRequestImpl request,
                          HttpServletResponseImpl response,
                          WebSocketListener listener)

@@ -2158,9 +2158,13 @@ public class Store {
       file = wrapper.getFile();
 
     if (file == null) {
-      file = _path.openRandomAccess();
+      Path path = _path;
 
-      wrapper = new RandomAccessWrapper(file);
+      if (path != null) {
+        file = path.openRandomAccess();
+
+        wrapper = new RandomAccessWrapper(file);
+      }
     }
 
     return wrapper;

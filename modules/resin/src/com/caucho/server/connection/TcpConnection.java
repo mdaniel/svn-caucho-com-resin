@@ -124,17 +124,17 @@ public class TcpConnection extends Connection
     int id = getId();
 
     ProtocolDispatchServer server = port.getServer();
-    
+
     ClassLoader loader = null;
-    
+
     if (server != null)
       loader = server.getClassLoader();
-    
+
     if (loader != null)
       _loader = loader;
     else
       _loader = _systemClassLoader;
-    
+
     Protocol protocol = port.getProtocol();
 
     _request = protocol.createRequest(this);
@@ -628,9 +628,9 @@ public class TcpConnection extends Connection
         // duplex (xmpp/hmtp) handling
         return RequestState.DUPLEX;
       }
-      
+
       getWriteStream().flush();
-      
+
       if (_state.isCometActive()) {
         _port.suspend(this);
 
@@ -1025,7 +1025,7 @@ public class TcpConnection extends Connection
   {
     _state = _state.toInit();
   }
-  
+
   public final boolean isIdle()
   {
     return _state.isIdle();
@@ -1053,7 +1053,7 @@ public class TcpConnection extends Connection
 
     ConnectionState state = _state;
     _state = _state.toDestroy();
-    
+
     if (state.isKeepalive()) {
       getPort().keepaliveEnd(this);
     }
@@ -1225,7 +1225,7 @@ public class TcpConnection extends Connection
       _idleTimeout = _port.getKeepaliveTimeout();
 
       getWriteStream().init(_socket.getStream());
-      
+
       // ReadStream cannot use getWriteStream or auto-flush
       // because of duplex mode
       getReadStream().init(_socket.getStream(), null);
@@ -1289,7 +1289,7 @@ public class TcpConnection extends Connection
     {
       ConnectionState state = _state;
       _state = state.toDuplexActive();
-      
+
       if (state.isKeepalive()) {
         _port.keepaliveEnd(TcpConnection.this);
       }

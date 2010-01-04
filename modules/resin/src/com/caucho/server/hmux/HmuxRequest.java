@@ -192,12 +192,9 @@ public class HmuxRequest extends AbstractHttpRequest
 
   public static final int CSE_SEND_HEADER =     'G';
 
-  public static final int CSE_DATA =            'D';
   public static final int CSE_FLUSH =           'F';
   public static final int CSE_KEEPALIVE =       'K';
-  public static final int CSE_ACK =             'A';
   public static final int CSE_END =             'Z';
-  public static final int CSE_CLOSE =           'X';
 
   // other, specialized protocols
   public static final int CSE_QUERY =           'Q';
@@ -612,7 +609,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
     while (true) {
       _rawWrite.flush();
-      
+
       code = is.read();
 
       if (_server == null || _server.isDestroyed()) {
@@ -639,10 +636,11 @@ public class HmuxRequest extends AbstractHttpRequest
       case HMUX_YIELD:
         if (log.isLoggable(Level.FINER))
           log.finer(dbgId() + (char) code + "-r: yield");
-        
+
         _rawWrite.write(HMUX_ACK);
         _rawWrite.write(0);
         _rawWrite.write(0);
+        _rawWrite.flush();
         break;
 
       case HMUX_QUIT:
@@ -682,7 +680,7 @@ public class HmuxRequest extends AbstractHttpRequest
         _rawRead.readAll(_uri.getBuffer(), 0, len);
         if (isLoggable)
           log.fine(dbgId() + (char) code + ":uri " + _uri);
-	_hasRequest = true;
+        _hasRequest = true;
         break;
 
       case HMUX_METHOD:
@@ -866,30 +864,33 @@ public class HmuxRequest extends AbstractHttpRequest
                                         new com.caucho.security.BasicPrincipal(_cb.toString()));
         break;
 
-      case CSE_DATA:
+      case HMUX_DATA:
         len = (is.read() << 8) + is.read();
         _pendingData = len;
         if (isLoggable)
           log.fine(dbgId() + (char) code + " post-data: " + len);
-        return true;
+
+        if (len > 0)
+          return true;
+        break;
 
       case HMUX_TO_UNIDIR_HMTP:
       case HMUX_SWITCH_TO_HMTP: {
-	if (_hasRequest)
-	  throw new IllegalStateException();
-	
+        if (_hasRequest)
+          throw new IllegalStateException();
+
         len = (is.read() << 8) + is.read();
         boolean isAdmin = is.read() != 0;
 
         InputStream rawIs = is;
-        
+
         if (log.isLoggable(Level.FINEST)) {
           HessianDebugInputStream dIs
             = new HessianDebugInputStream(is, log, Level.FINEST);
           dIs.startStreaming();
           rawIs = dIs;
         }
-	
+
         if (_hmtpReader != null)
           _hmtpReader.init(rawIs);
         else {
@@ -902,13 +903,13 @@ public class HmuxRequest extends AbstractHttpRequest
         else {
           _hmtpWriter = new HmtpWriter(_rawWrite);
           // _hmtpWriter.setId(getRequestId());
-	  _hmtpWriter.setAutoFlush(true);
-	}
-        
+          _hmtpWriter.setAutoFlush(true);
+        }
+
         Broker broker = _server.getAdminBroker();
         ActorStream brokerStream = broker.getBrokerStream();
 
-	_hmtpWriter.setJid("server-" + getConnectionId() + "-hmtp");
+        _hmtpWriter.setJid("server-" + getConnectionId() + "-hmtp");
 
         _linkStream = new HempMemoryQueue(_hmtpWriter, brokerStream, 1);
         boolean isUnidir = code == HMUX_TO_UNIDIR_HMTP;
@@ -1002,6 +1003,7 @@ public class HmuxRequest extends AbstractHttpRequest
       _rawWrite.write(HMUX_ACK);
       _rawWrite.write(0);
       _rawWrite.write(0);
+      _rawWrite.flush();
       return; // XXX:
     }
     else {
@@ -1377,7 +1379,7 @@ public class HmuxRequest extends AbstractHttpRequest
    * Called for a connection: close
    */
   @Override
-  protected void connectionClose()
+  protected void handleConnectionClose()
   {
     // ignore for hmux
   }
@@ -1635,7 +1637,7 @@ public class HmuxRequest extends AbstractHttpRequest
     if (_bufferStartOffset > 0 || _rawWrite.getBufferOffset() > 0)
       Thread.dumpStack();
   }
-  
+
   protected String getRequestId()
   {
     String id = _server.getServerId();
@@ -1643,7 +1645,7 @@ public class HmuxRequest extends AbstractHttpRequest
     if (id.equals(""))
       return "server-" + getConnection().getId();
     else
-      return "server-" + id + ":" + getConnection().getId();   
+      return "server-" + id + ":" + getConnection().getId();
   }
 
   @Override
@@ -1741,7 +1743,7 @@ public class HmuxRequest extends AbstractHttpRequest
 
       while (_pendingData == 0) {
         _os.flush();
-        
+
         int code = is.read();
 
         switch (code) {
@@ -1752,6 +1754,11 @@ public class HmuxRequest extends AbstractHttpRequest
             log.fine(_request.dbgId() + "D-r:post-data " + len);
 
           _pendingData = len;
+
+          if (len > 0)
+            return readLen;
+
+          break;
         }
 
         case HMUX_QUIT: {
@@ -1775,9 +1782,12 @@ public class HmuxRequest extends AbstractHttpRequest
           _os.write(HMUX_ACK);
           _os.write(0);
           _os.write(0);
+          _os.flush();
 
-          if (log.isLoggable(Level.FINE))
+          if (log.isLoggable(Level.FINE)) {
+            log.fine(_request.dbgId() + "Y-r:yield");
             log.fine(_request.dbgId() + "A-w:ack");
+          }
           break;
         }
 

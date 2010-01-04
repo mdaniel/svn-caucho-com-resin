@@ -636,7 +636,7 @@ public abstract class AbstractHttpRequest
           && match(keyBuf, keyOff, keyLen, CONNECTION)) {
         if (match(value.getBuffer(), value.getOffset(), value.getLength(),
                   CLOSE)) {
-          killKeepalive();
+          handleConnectionClose();
         }
       }
       else if (keyLen == COOKIE.length
@@ -694,7 +694,7 @@ public abstract class AbstractHttpRequest
   /**
    * Called for a connection: close
    */
-  protected void connectionClose()
+  protected void handleConnectionClose()
   {
     Connection conn = _conn;
 

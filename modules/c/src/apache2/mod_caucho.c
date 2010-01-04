@@ -767,17 +767,17 @@ send_data(stream_t *s, request_rec *r)
 
     code = cse_read_byte(s);
 
-    LOG(("%s:%d:send_data(): code %c\n", __FILE__, __LINE__, code));
+    LOG(("%s:%d:send_data(): r-code %c\n", __FILE__, __LINE__, code));
     
     switch (code) {
     case HMUX_CHANNEL:
       channel = hmux_read_len(s);
-      LOG(("%s:%d:send_data(): channel %d\n", __FILE__, __LINE__, channel));
+      LOG(("%s:%d:send_data(): r-channel %d\n", __FILE__, __LINE__, channel));
       break;
       
     case HMUX_ACK:
       channel = hmux_read_len(s);
-      LOG(("%s:%d:send_data(): ack %d\n", __FILE__, __LINE__, channel));
+      LOG(("%s:%d:send_data(): r-ack %d\n", __FILE__, __LINE__, channel));
       return code;
       
     case HMUX_STATUS:
@@ -862,19 +862,26 @@ write_request(stream_t *s, request_rec *r, config_t *config,
     int send_length = 0;
 
     while ((len = ap_get_client_block(r, buf, BUF_LENGTH)) > 0) {
-      cse_write_packet(s, HMUX_DATA, buf, len);
-
-      send_length += len;
+      LOG(("%s:%d:write-request(): w-D %d\n", __FILE__, __LINE__, len));
       
-      if (ack_size <= send_length) {
+      if (ack_size <= send_length + len && send_length > 0) {
+        LOG(("%s:%d:write-request(): w-Y send_length=%d ack_size=%d\n",
+             __FILE__, __LINE__, send_length, ack_size));
+        
 	send_length = 0;
 	cse_write_byte(s, HMUX_YIELD);
         code = send_data(s, r);
         if (code != HMUX_ACK)
           break;
       }
+
+      cse_write_packet(s, HMUX_DATA, buf, len);
+
+      send_length += len;
     }
   }
+
+  LOG(("%s:%d:write-request(): w-Q\n", __FILE__, __LINE__));
 
   cse_write_byte(s, HMUX_QUIT);
   code = send_data(s, r);

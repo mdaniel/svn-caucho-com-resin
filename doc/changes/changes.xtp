@@ -13,6 +13,7 @@
 
 <s2 title="4.0.3 - snapshot">
 <ul>
+<li>mod_caucho: post/ack cleanup</li>
 <li>hessian: allow custom URL connector with HessianProxy</li>
 <li>hessian: avoid NPE on protocol corruption error (#3777, rep by Riccardo Cohen)</li>
 <li>hessian: patch for GAE compatibility (rep by Jeff Schnitzer)</li>
