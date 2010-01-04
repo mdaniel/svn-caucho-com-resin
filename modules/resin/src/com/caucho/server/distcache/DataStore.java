@@ -608,8 +608,7 @@ public class DataStore implements AlarmListener {
       try {
         removeExpiredData();
       } finally {
-        // alarm.queue(_expireTimeout / 2);
-        alarm.queue(2 * 60000L);
+        alarm.queue(_expireTimeout / 2);
       }
     }
   }

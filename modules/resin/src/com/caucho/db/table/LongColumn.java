@@ -206,6 +206,18 @@ class LongColumn extends Column {
   }
   
   /**
+   * Gets an integer value from the column.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
+   */
+  @Override
+  public double getDouble(byte []block, int rowOffset)
+  {
+    return (double) getLong(block, rowOffset);
+  }
+  
+  /**
    * Sets the column based on an expression.
    *
    * @param block the block's buffer
