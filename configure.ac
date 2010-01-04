@@ -821,7 +821,6 @@ if test -r "${resin_pro}/modules/c/src/resinssl/ssl.c"; then
    resin_ssl_plugin="resinssl"
 fi
 
-resin_plugin=
 resin_pro_plugins=
 
 case "$target_cpu" in
@@ -1265,7 +1264,8 @@ fi
 #
 
 if test -z "${is_dev}"; then
-  $resin_plugin="$resin_plugin $resin_pro_plugin"
+  plugins="$plugins $resin_pro_plugins"
+  resin_pro_plugins="$plugins"
 fi
 
 AC_OUTPUT([
