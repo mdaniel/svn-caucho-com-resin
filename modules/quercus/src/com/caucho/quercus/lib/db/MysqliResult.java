@@ -952,6 +952,7 @@ public class MysqliResult extends JdbcResultResource {
 
       // XXX: i18n
       StringBuilderValue sb = new StringBuilderValue();
+      sb.ensureAppendCapacity(length);
 
       qRs.getString(column, sb.getBuffer(), sb.getOffset());
       sb.setOffset(sb.getOffset() + length);

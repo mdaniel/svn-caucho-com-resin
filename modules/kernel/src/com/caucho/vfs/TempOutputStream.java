@@ -284,7 +284,7 @@ public class TempOutputStream extends OutputStream
       System.arraycopy(dataBuffer, position, buffer, offset, sublen);
 
       offset += sublen;
-      position += sublen;
+      position = 0;
       length -= sublen;
     }
   }
