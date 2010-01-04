@@ -99,7 +99,7 @@ public class ServerPool
   private long _failChunkTime;
 
   private volatile State _state = State.NEW;
-  
+
   // server start/stop sequence for heartbeat/restarts
   private final AtomicInteger _startSequenceId
     = new AtomicInteger();
@@ -329,7 +329,7 @@ public class ServerPool
   {
     _loadBalanceWeight = weight;
   }
-  
+
   /**
    * Returns the server start/stop sequence. Each enable/disable
    * increments the sequence, allowing old streams to be purge.
@@ -361,7 +361,7 @@ public class ServerPool
     attr.put("connect-timeout", _loadBalanceConnectTimeout);
     attr.put("socket-timeout", _loadBalanceSocketTimeout);
     attr.put("no-delay", true);
-    
+
     if (_isSecure)
       _tcpPath = Vfs.lookup("tcps://" + address + ":" + _port, attr);
     else
@@ -369,7 +369,7 @@ public class ServerPool
 
     _state = State.STARTING;
   }
-  
+
   //
   // statistics
   //
@@ -467,7 +467,18 @@ public class ServerPool
    */
   public double getLatencyFactor()
   {
-    return _latencyFactor;
+    long now = Alarm.getCurrentTime();
+
+    long decayPeriod = 60000;
+
+    long delta = decayPeriod - (now - _lastSuccessTime);
+
+    // decay the latency factor over 60s
+
+    if (delta <= 0)
+      return 0;
+    else
+      return (_latencyFactor * delta) / decayPeriod;
   }
 
   /**
@@ -696,7 +707,7 @@ public class ServerPool
 
       if (_warmupState < WARMUP_MIN)
         _warmupState = WARMUP_MIN;
-      
+
       _state = _state.toFail();
     }
   }
@@ -743,7 +754,7 @@ public class ServerPool
   public void start()
   {
     _state = _state.toStart();
-    
+
     _startSequenceId.incrementAndGet();
   }
 
@@ -754,8 +765,8 @@ public class ServerPool
   {
     _state = _state.toStandby();
     _firstSuccessTime = 0;
-    
-    _startSequenceId.incrementAndGet(); 
+
+    _startSequenceId.incrementAndGet();
     clearRecycle();
   }
 
@@ -810,7 +821,7 @@ public class ServerPool
       return stream;
 
     long now = Alarm.getCurrentTime();
-    
+
     if (now <= _failTime + _loadBalanceRecoverTime)
       return null;
     else if (_state == State.FAIL && _startingCount > 0) {
@@ -1002,7 +1013,7 @@ public class ServerPool
   /**
    * Free the read/write pair for reuse.  Called only from
    * ClusterStream.free().
-   * 
+   *
    * @param stream the stream to free
    */
   void free(ClusterStream stream)
@@ -1117,7 +1128,7 @@ public class ServerPool
   public void notifyStart()
   {
     _startSequenceId.incrementAndGet();
-    
+
     clearRecycle();
     wake();
   }
@@ -1128,7 +1139,7 @@ public class ServerPool
   public void notifyStop()
   {
     _startSequenceId.incrementAndGet();
-    
+
     clearRecycle();
     toFail();
   }
