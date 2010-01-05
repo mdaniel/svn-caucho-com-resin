@@ -187,4 +187,12 @@ public class CallbackFunction extends Callback {
   {
     return getFunction() instanceof JavaInvoker;
   }
+  
+  /**
+   * Exports the value.
+   */
+  public void varExport(StringBuilder sb)
+  {
+    sb.append("'' . \"\\0\" . '" + _funName.substring(1) + "'");
+  }
 }

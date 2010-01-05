@@ -3528,7 +3528,7 @@ public class Env {
       _anonymousFunMap = new HashMap<String, AbstractFunction>();
 
     // PHP naming style for anonymous functions
-    String name = "\u0000lamba" + (_anonymousFunMap.size() + 1);
+    String name = "\u0000lambda_" + (_anonymousFunMap.size() + 1);
 
     AbstractFunction fun = getQuercus().parseFunction(name, args, code);
 

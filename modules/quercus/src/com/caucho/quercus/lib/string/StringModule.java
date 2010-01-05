@@ -29,13 +29,42 @@
 
 package com.caucho.quercus.lib.string;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.security.MessageDigest;
+import java.text.DecimalFormat;
+import java.text.DecimalFormatSymbols;
+import java.text.NumberFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Currency;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.UsesSymbolTable;
-import com.caucho.quercus.env.*;
+import com.caucho.quercus.env.ArrayValue;
+import com.caucho.quercus.env.ArrayValueImpl;
+import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.DefaultValue;
+import com.caucho.quercus.env.DoubleValue;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.LocaleInfo;
+import com.caucho.quercus.env.LongValue;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusLocale;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.lib.file.BinaryOutput;
 import com.caucho.quercus.lib.file.FileModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -45,26 +74,6 @@ import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
 import com.caucho.vfs.ByteToChar;
 import com.caucho.vfs.Path;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.nio.charset.Charset;
-import java.security.MessageDigest;
-import java.text.DecimalFormat;
-import java.text.DecimalFormatSymbols;
-import java.text.NumberFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.Currency;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Locale;
-import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.zip.CRC32;
 
 /**
  * PHP functions implemented from the string module
@@ -2625,14 +2634,19 @@ public class StringModule extends AbstractQuercusModule {
       ArrayValue resultArray = new ArrayValueImpl();
 
       for (Map.Entry<Value, Value> entry : subjectArray.entrySet()) {
-        Value result = strReplaceImpl(env,
+        
+        if (entry.getValue() instanceof ArrayValue) {
+          resultArray.append(entry.getKey(), entry.getValue());
+        } else {
+          Value result = strReplaceImpl(env,
                                       search,
                                       replace,
                                       entry.getValue().toStringValue(),
                                       count,
                                       isInsensitive);
 
-        resultArray.append(entry.getKey(), result);
+          resultArray.append(entry.getKey(), result);
+        }
       }
 
       return resultArray;
@@ -3100,9 +3114,9 @@ public class StringModule extends AbstractQuercusModule {
                               @Optional("0") int offset,
                               @Optional("-2147483648") int length)
   {    
-    //if (characters.length() == 0) {
-    //  characters = StringValue.create((char)0);
-    //}
+    if (characters.length() == 0) {
+      characters = StringValue.create((char)0);
+    }
     return strspnImpl(string, characters, offset, length, false);
   }
 
@@ -3558,11 +3572,12 @@ public class StringModule extends AbstractQuercusModule {
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strncasecmp(Env env, StringValue a, StringValue b, int length)
+  public static Value strncasecmp(Env env, StringValue a, StringValue b, int length)
   {
     if (length < 0) {
       env.warning(L.l("strncasecmp() length '{0}' must be non-negative",
                       length));
+      return BooleanValue.FALSE;
     }
     
     int aLen = a.length();
@@ -3570,20 +3585,20 @@ public class StringModule extends AbstractQuercusModule {
 
     for (int i = 0; i < length; i++) {
       if (aLen <= i)
-        return -1;
+        return LongValue.MINUS_ONE;
       else if (bLen <= i)
-        return 1;
+        return LongValue.ONE;
 
       char aChar = Character.toUpperCase(a.charAt(i));
       char bChar = Character.toUpperCase(b.charAt(i));
 
       if (aChar < bChar)
-        return -1;
+        return LongValue.MINUS_ONE;
       else if (bChar < aChar)
-        return 1;
+        return LongValue.ONE;
     }
 
-    return 0;
+    return LongValue.ZERO;
   }
 
   /**
@@ -3593,11 +3608,12 @@ public class StringModule extends AbstractQuercusModule {
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static int strncmp(Env env, StringValue a, StringValue b, int length)
+  public static Value strncmp(Env env, StringValue a, StringValue b, int length)
   {
     if (length < 0) {
       env.warning(L.l("strncmp() length '{0}' must be non-negative",
                       length));
+      return BooleanValue.FALSE;
     }
 
     if (length < a.length())
@@ -3606,7 +3622,7 @@ public class StringModule extends AbstractQuercusModule {
     if (length < b.length())
       b = b.substring(0, length);
 
-    return strcmp(a, b);
+    return LongValue.create(strcmp(a, b));
   }
 
   /**
