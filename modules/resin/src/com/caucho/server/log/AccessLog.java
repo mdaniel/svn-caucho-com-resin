@@ -104,7 +104,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   private final ByteBuffer _timeBuffer = new ByteBuffer();
   private long _lastTime;
 
-  private Alarm _alarm = new Alarm(this);
+  private Alarm _alarm = new WeakAlarm(this);
   private boolean _isActive;
 
   public AccessLog()
@@ -728,6 +728,8 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   public void destroy()
     throws IOException
   {
+    super.destroy();
+
     _isActive = false;
 
     Alarm alarm = _alarm;
@@ -737,6 +739,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       alarm.dequeue();
 
     flush();
+
     _logWriter.close();
   }
 

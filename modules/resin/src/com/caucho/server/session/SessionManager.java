@@ -47,6 +47,7 @@ import com.caucho.server.dispatch.InvocationDecoder;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
+import com.caucho.util.WeakAlarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -240,10 +241,10 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     if (_distributionId == null)
       _distributionId = name;
 
-    _alarm = new Alarm(this);
+    _alarm = new WeakAlarm(this);
     _sessionSaveSample
       = ProbeManager.createAverageProbe("Resin|WebApp|Session Save", "Size");
-    
+
     _admin = new SessionManagerAdmin(this);
   }
 
@@ -1218,7 +1219,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       // based on the timestamp.  So QA sessions don't have milliseconds
       if (Alarm.isTest())
         time -= time % 1000;
-      
+
       for (int i = 0; i < 7 && length-- > 0; i++) {
         sb.append(convert(time));
         time = time >> 6;
@@ -1667,7 +1668,11 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     if (_sessions == null)
       return;
 
-    _alarm.dequeue();
+    Alarm alarm = _alarm;
+    _alarm = null;
+
+    if (alarm != null)
+      alarm.dequeue();
 
     ArrayList<SessionImpl> list = new ArrayList<SessionImpl>();
 

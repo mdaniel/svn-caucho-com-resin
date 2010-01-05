@@ -40,11 +40,10 @@ import java.sql.SQLException;
 import java.util.logging.Logger;
 
 class IndexExpr extends RowIterateExpr {
-  private IndexCache _cache = IndexCache.create();
   private IdExpr _columnExpr;
   private Column _column;
   private BTree _index;
-  
+
   private Expr _expr;
 
   IndexExpr(IdExpr index, Expr expr)
@@ -69,7 +68,7 @@ class IndexExpr extends RowIterateExpr {
     throws SQLException
   {
     _expr = _expr.bind(query);
-    
+
     return this;
   }
 
@@ -92,7 +91,7 @@ class IndexExpr extends RowIterateExpr {
     // the Query will call initRow immediately after, so the following
     // call isn't necessary
     //return initRow(context, rowIter);
-    
+
     return true;
   }
 
@@ -110,7 +109,7 @@ class IndexExpr extends RowIterateExpr {
     context.unlock();
 
     tableIter.setRow(rowAddr);
-    
+
     context.lock();
 
     return true;
@@ -123,7 +122,7 @@ class IndexExpr extends RowIterateExpr {
   {
     return false;
   }
-  
+
   long evalIndex(QueryContext context)
     throws SQLException
   {
@@ -138,13 +137,13 @@ class IndexExpr extends RowIterateExpr {
 
     /*
     long index = _cache.lookup(_index, buffer, 0, length,
-			       context.getTransaction());
+                               context.getTransaction());
     */
-    
+
     long index;
     try {
       index = _index.lookup(buffer, 0, length,
-			    context.getTransaction());
+                            context.getTransaction());
     } catch (IOException e) {
       throw new SQLException(e);
     }
@@ -161,7 +160,7 @@ class IndexExpr extends RowIterateExpr {
     throws IOException, SQLException
   {
     context.unlock();
-    
+
     return false;
   }
 

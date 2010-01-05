@@ -812,6 +812,8 @@ public class AbstractRolloverLog {
   public void close()
     throws IOException
   {
+    _rolloverWorker.destroy();
+
     synchronized (_logLock) {
       closeLogStream();
     }

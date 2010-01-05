@@ -98,7 +98,7 @@ if ($heap_dump_cl->isAvailable()) {
 
 $is_heap_available_heap = false;
 
-$heap_file = "/tmp/java.heap";
+$heap_file = "/tmp/java.hprof";
 
 if ($heap) {
   echo "<form action='?q=memory' method='post'>";

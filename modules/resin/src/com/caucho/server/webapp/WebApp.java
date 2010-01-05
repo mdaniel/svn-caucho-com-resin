@@ -167,7 +167,7 @@ public class WebApp extends ServletContextImpl
   private final Path _appDir;
 
   private InvocationDecoder _invocationDecoder;
-  
+
   // The context path
   private String _baseContextPath = "";
   private String _versionContextPath = "";
@@ -3678,8 +3678,9 @@ public class WebApp extends ServletContextImpl
       _sessionManager = null;
 
       if (sessionManager != null
-          && (! _isInheritSession || _controller.getParent() == null))
+          && (! _isInheritSession || _controller.getParent() == null)) {
         sessionManager.close();
+      }
 
       if (_servletManager != null)
         _servletManager.destroy();
@@ -3750,8 +3751,16 @@ public class WebApp extends ServletContextImpl
         }
       }
 
-      if (_accessLog != null) {
-        _accessLog.flush();
+      AbstractAccessLog accessLog = _accessLog;
+      _accessLog = null;
+
+      if (accessLog != null) {
+        try {
+          accessLog.flush();
+          accessLog.destroy();
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

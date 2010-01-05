@@ -131,7 +131,7 @@ public class WebAppController
   void setContextPath(String contextPath)
   {
     // server/1h10
-    
+
     _contextPath = contextPath;
   }
 

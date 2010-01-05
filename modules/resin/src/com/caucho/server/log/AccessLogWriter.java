@@ -102,7 +102,7 @@ public class AccessLogWriter extends AbstractRolloverLog
     throws IOException
   {
     super.init();
-    
+
     _isAutoFlush = _log.isAutoFlush();
   }
 
@@ -144,7 +144,7 @@ public class AccessLogWriter extends AbstractRolloverLog
   {
     // server/021g
     _logWriterTask.wake();
-    
+
     /*
     boolean isFlush = false;
 
@@ -260,6 +260,8 @@ public class AccessLogWriter extends AbstractRolloverLog
   public void destroy()
     throws IOException
   {
+    _logWriterTask.destroy();
+
     /*
     long expire = Alarm.getCurrentTime() + 5000;
 
