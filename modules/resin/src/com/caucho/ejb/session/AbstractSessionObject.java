@@ -28,7 +28,6 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.ejb.AbstractEJBObject;
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
 import com.caucho.ejb.server.AbstractServer;
 
@@ -40,7 +39,7 @@ import java.io.Serializable;
 /**
  * Abstract base class for a 3.0 session object
  */
-abstract public class AbstractSessionObject extends AbstractEJBObject
+abstract public class AbstractSessionObject
     implements Serializable
 {
   // ejb/0ff0
@@ -57,32 +56,11 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
   abstract public AbstractServer getServer();
 
   /**
-   * Returns the handle.
-   */
-  public Handle getHandle()
-  {
-    return getServer().getHandleEncoder().createHandle(__caucho_getId());
-  }
-
-  public Object getPrimaryKey()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
    * Returns the server.
    */
   public AbstractServer __caucho_getServer()
   {
     return getServer();
-  }
-
-  /**
-   * The home id is null.
-   */
-  public String __caucho_getId()
-  {
-    return getServer().encodeId(getPrimaryKey());
   }
 
   /**
@@ -108,6 +86,6 @@ abstract public class AbstractSessionObject extends AbstractEJBObject
    */
   public Object writeReplace() throws ObjectStreamException
   {
-    return new ObjectSkeletonWrapper(getHandle());
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

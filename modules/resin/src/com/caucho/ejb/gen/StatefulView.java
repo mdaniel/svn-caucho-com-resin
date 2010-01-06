@@ -29,20 +29,23 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.*;
-import com.caucho.config.*;
+import java.io.IOException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.gen.ApiClass;
+import com.caucho.config.gen.ApiMethod;
+import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.View;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import java.io.IOException;
-import java.lang.reflect.*;
-import java.util.*;
 
 /**
  * Represents a public interface to a stateful bean, e.g. a stateful view
  */
-abstract public class StatefulView extends View {
+public class StatefulView extends View {
   private static final L10N L = new L10N(StatefulView.class);
 
   private StatefulGenerator _sessionBean;
@@ -67,12 +70,19 @@ abstract public class StatefulView extends View {
     return getSessionBean().getClassName();
   }
 
+  /**
+   * True if the implementation is a proxy, i.e. an interface stub which
+   * calls an instance class.
+   */
   public boolean isProxy()
   {
     return ! getViewClass().equals(getBeanClass());
   }
 
-  abstract public String getViewClassName();
+  public String getViewClassName()
+  {
+    return getViewClass().getSimpleName() + "__EJBLocal";
+  }
 
   public String getBeanClassName()
   {
@@ -94,7 +104,6 @@ abstract public class StatefulView extends View {
   @Override
   public void introspect()
   {
-    ApiClass implClass = getBeanClass();
     ApiClass apiClass = getViewClass();
 
     for (ApiMethod apiMethod : apiClass.getMethods()) {
@@ -166,9 +175,48 @@ abstract public class StatefulView extends View {
     out.println("}");
   }
 
-  protected void generateBean(JavaWriter out)
+  /**
+   * Generates the view code.
+   */
+  public void generateBean(JavaWriter out)
     throws IOException
   {
+    out.println();
+    out.println("public static class " + getBeanClassName());
+    out.println("  extends " + getBeanClass().getName());
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("private transient " + getViewClassName() + " _context;");
+
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    
+    generateBeanPrologue(out, map);
+
+    generatePostConstruct(out);
+    //_postConstructInterceptor.generatePrologue(out, map);
+    //_preDestroyInterceptor.generatePrologue(out, map);
+
+    out.println();
+    out.println(getBeanClassName() + "(" + getViewClassName() + " context)");
+    out.println("{");
+    out.pushDepth();
+    out.println("_context = context;");
+
+    map = new HashMap<String,Object>();
+    generateBeanConstructor(out, map);    
+    //_postConstructInterceptor.generateConstructor(out, map);
+    //_preDestroyInterceptor.generateConstructor(out, map);
+
+    //_postConstructInterceptor.generateCall(out);
+
+    out.popDepth();
+    out.println("}");
+
+    // generateBusinessMethods(out);
+    
+    out.popDepth();
+    out.println("}");
   }
 
   protected void generateClassContent(JavaWriter out)

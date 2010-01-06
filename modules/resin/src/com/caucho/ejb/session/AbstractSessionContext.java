@@ -34,7 +34,7 @@ import javax.ejb.EJBLocalHome;
 import javax.ejb.SessionContext;
 import javax.xml.rpc.handler.MessageContext;
 
-import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
 
 /**

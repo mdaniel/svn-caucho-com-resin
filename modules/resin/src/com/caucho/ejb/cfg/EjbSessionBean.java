@@ -241,19 +241,15 @@ public class EjbSessionBean extends EjbBean {
     
     if (_isStateless) {
       _sessionBean = new StatelessGenerator(getEJBName(),
-					    ejbClass,
-					    getLocalHome(),
-					    getLocalList(),
-					    getRemoteHome(),
-					    getRemoteList());
+                                            ejbClass,
+                                            getLocalList(),
+                                            getRemoteList());
     }
     else {
       _sessionBean = new StatefulGenerator(getEJBName(),
-					   ejbClass,
-					   getLocalHome(),
-					   getLocalList(),
-					   getRemoteHome(),
-					   getRemoteList());
+                                           ejbClass,
+                                           getLocalList(),
+                                           getRemoteList());
     }
     
     return _sessionBean;
@@ -424,10 +420,6 @@ public class EjbSessionBean extends EjbBean {
     
     server.setEjbClass(loadClass(getEJBClass().getName()));
 
-    ApiClass remoteHome = getRemoteHome();
-    if (remoteHome != null)
-      server.setRemoteHomeClass(loadClass(remoteHome.getName()));
-
     ArrayList<ApiClass> remoteList = _sessionBean.getRemoteApi();
     if (remoteList.size() > 0) {
       ArrayList<Class> classList = new ArrayList<Class>();
@@ -442,10 +434,6 @@ public class EjbSessionBean extends EjbBean {
     if (getRemote21() != null)
       server.setRemote21(loadClass(getRemote21().getName()));
      */
-
-    ApiClass localHome = getLocalHome();
-    if (localHome != null)
-      server.setLocalHomeClass(loadClass(localHome.getName()));
 
     ArrayList<ApiClass> localList = _sessionBean.getLocalApi();
     if (localList.size() > 0) {

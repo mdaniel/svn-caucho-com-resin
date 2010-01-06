@@ -44,9 +44,8 @@ import javax.inject.Named;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.ejb.AbstractContext;
-import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractServer;
 
 /**
@@ -59,7 +58,7 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
   private HashMap<Class, InjectionTarget> _componentMap
     = new HashMap<Class, InjectionTarget>();
 
-  private Bean<?> _bean;
+  private Bean<T> _bean;
   
   private int _sessionIdleMax = 16;
   private int _sessionConcurrentMax = -1;
@@ -77,7 +76,7 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
   }
 
   @Override
-  public Bean getDeployBean()
+  public Bean<T> getDeployBean()
   {
     return _bean;
   }
@@ -128,17 +127,12 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
         
       }
 
-      BeanFactory factory
+      BeanFactory<?> factory
         = beanManager.createBeanFactory(SessionContext.class);
 
       _component = factory.singleton(getSessionContext());
 
       beanManager.addBean(_component);
-
-      if (_localHomeClass != null)
-        _localHome = (EJBLocalHome) getLocalObject(_localHomeClass);
-      if (_remoteHomeClass != null)
-        _remoteHome = (EJBHome) getRemoteObject(_remoteHomeClass);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -150,9 +144,9 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
 
   private void registerWebBeans()
   {
-    Class beanClass = getBeanSkelClass();
-    ArrayList<Class> localApiList = getLocalApiList();
-    ArrayList<Class> remoteApiList = getRemoteApiList();
+    Class<?> beanClass = getBeanSkelClass();
+    ArrayList<Class<?>> localApiList = getLocalApiList();
+    ArrayList<Class<?>> remoteApiList = getRemoteApiList();
 
     if (beanClass != null && (localApiList != null || remoteApiList != null)) {
       InjectManager beanManager = InjectManager.create();
@@ -209,15 +203,6 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
   protected InjectionTarget getComponent(Class api)
   {
     return _componentMap.get(api);
-  }
-
-  /**
-   * Returns the EJBLocalHome stub for the container
-   */
-  @Override
-  public EJBLocalHome getEJBLocalHome()
-  {
-    return _localHome;
   }
 
   @Override

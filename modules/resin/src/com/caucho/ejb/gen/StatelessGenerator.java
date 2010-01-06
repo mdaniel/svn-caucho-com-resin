@@ -29,30 +29,23 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.*;
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
-
 import java.io.IOException;
 import java.util.ArrayList;
-import javax.ejb.*;
+
+import com.caucho.config.gen.ApiClass;
+import com.caucho.config.gen.View;
+import com.caucho.java.JavaWriter;
 
 /**
  * Generates the skeleton for a session bean.
  */
 public class StatelessGenerator extends SessionGenerator {
-  private static final L10N L = new L10N(StatelessGenerator.class);
-
   public StatelessGenerator(String ejbName,
                             ApiClass ejbClass,
-                            ApiClass localHome,
                             ArrayList<ApiClass> localApi,
-                            ApiClass remoteHome,
                             ArrayList<ApiClass> remoteApi)
   {
-    super(ejbName, ejbClass,
-          localHome, localApi,
-          remoteHome, remoteApi);
+    super(ejbName, ejbClass, localApi, remoteApi);
   }
 
   public boolean isStateless()
@@ -63,25 +56,13 @@ public class StatelessGenerator extends SessionGenerator {
   @Override
   protected View createLocalView(ApiClass api)
   {
-    return new StatelessLocalView(this, api);
-  }
-
-  @Override
-  protected View createLocalHomeView(ApiClass api)
-  {
-    return new StatelessLocalHomeView(this, api);
+    return new StatelessView(this, api);
   }
 
   @Override
   protected View createRemoteView(ApiClass api)
   {
-    return new StatelessRemoteView(this, api);
-  }
-
-  @Override
-  protected View createRemoteHomeView(ApiClass api)
-  {
-    return new StatelessRemoteHomeView(this, api);
+    return new StatelessView(this, api);
   }
 
   /**
@@ -146,21 +127,8 @@ public class StatelessGenerator extends SessionGenerator {
   protected void generateContext(JavaWriter out)
     throws IOException
   {
-    String shortContextName = getBeanClass().getSimpleName();
-
-    int freeStackMax = 16;
-
     out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
     out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
-
-    String beanClass = getBeanClass().getName();
-
-    /*
-    out.println();
-    out.println("private " + beanClass + " []_freeBeanStack = new "
-                + beanClass + "[" + freeStackMax + "];");
-    out.println("private int _freeBeanTop;");
-    */
 
     out.println();
     out.println("public " + getClassName() + "(StatelessServer server)");
@@ -220,7 +188,7 @@ public class StatelessGenerator extends SessionGenerator {
     View objectView = null;
 
     for (View view : getViews()) {
-      if (view instanceof StatelessObjectView) {
+      if (view instanceof StatelessView) {
         objectView = view;
         break;
       }

@@ -91,7 +91,7 @@ public class HessianXAResource implements XAResource {
     throws XAException
   {
     try {
-      Object value = MetaStub.call(_path, "prepare", xidToString(xid));
+      //Object value = MetaStub.call(_path, "prepare", xidToString(xid));
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -120,7 +120,7 @@ public class HessianXAResource implements XAResource {
     throws XAException
   {
     try {
-      MetaStub.call(_path, "rollback", xidToString(xid));
+      //MetaStub.call(_path, "rollback", xidToString(xid));
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -132,10 +132,12 @@ public class HessianXAResource implements XAResource {
     throws XAException
   {
     try {
+      /*
       if (onephase)
 	MetaStub.call(_path, "commitOnePhase", xidToString(xid));
       else
 	MetaStub.call(_path, "commit", xidToString(xid));
+	*/
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
 

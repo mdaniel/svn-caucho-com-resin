@@ -727,9 +727,12 @@ public class EnterpriseApplication
 
   public String getClientRefs()
   {
+    throw new UnsupportedOperationException(getClass().getName());
+    /*
     EjbContainer ejbContainer = EjbContainer.create();
 
     return ejbContainer.getClientRemoteConfig();
+    */
   }
 
   public String toString()

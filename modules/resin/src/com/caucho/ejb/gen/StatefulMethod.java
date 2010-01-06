@@ -29,37 +29,28 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.*;
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
+import java.io.IOException;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import javax.annotation.security.*;
-import javax.ejb.*;
-import javax.interceptor.*;
+import javax.ejb.Remove;
+import javax.ejb.TransactionAttributeType;
+
+import com.caucho.config.gen.ApiMethod;
+import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents a stateful local business method
  */
 public class StatefulMethod extends BusinessMethodGenerator
 {
-  private boolean _isRemove;
   private boolean _isRemoveRetainIfException;
   
   public StatefulMethod(StatefulView view,
-			ApiMethod apiMethod,
-			ApiMethod implMethod,
-			int index)
+                        ApiMethod apiMethod,
+                        ApiMethod implMethod,
+                        int index)
   {
     super(view, apiMethod, implMethod, index);
-  }
-
-  @Override
-  public void setRemove(boolean isRemove)
-  {
-    _isRemove = isRemove;
   }
 
   @Override
@@ -85,7 +76,6 @@ public class StatefulMethod extends BusinessMethodGenerator
 
     Remove remove = implMethod.getAnnotation(Remove.class);
     if (remove != null) {
-      _isRemove = true;
       _isRemoveRetainIfException = remove.retainIfException();
     }
   }
@@ -103,62 +93,6 @@ public class StatefulMethod extends BusinessMethodGenerator
   {
     return true;
   }
-
-  /*
-  protected void generateContent(JavaWriter out)
-    throws IOException
-  {
-    if (getView().isRemote()
-	&& hasException(java.rmi.NoSuchObjectException.class)) {
-      out.println("if (! _isValid)");
-      out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
-		  + getBeanClass().getSimpleName() + " is no longer valid\");");
-    }
-    else {
-      out.println("if (! _isValid)");
-      out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
-		  + getBeanClass().getSimpleName() + " is no longer valid\");");
-    }
-
-    if (_isRemove) {
-      out.println("boolean isRemove = false;");
-      out.println("try {");
-      out.pushDepth();
-    }
-    
-    super.generateContent(out);
-
-    if (_isRemove) {
-      out.println("isRemove = true;");
-      
-      out.popDepth();
-
-      if (_isRemoveRetainIfException) {
-	out.println("} catch (RuntimeException e) {");
-	out.println("  isRemove = true;");
-	out.println("  throw e;");
-      }
-      
-      out.println("} finally {");
-      
-      if (_isRemoveRetainIfException) {
-	out.println("if (isRemove) {");
-	out.pushDepth();
-      }
-      
-      out.println("  boolean isValid = _isValid;");
-      out.println("  _isValid = false;");
-      out.println("  if (isValid)");
-      out.println("    _server.destroyInstance(this);");
-      
-      if (_isRemoveRetainIfException) {
-	out.popDepth();
-	out.println("}");
-      }
-      out.println("}");
-    }
-  }
-  */
   
   @Override
   public void generatePreTry(JavaWriter out)

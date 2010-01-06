@@ -32,13 +32,8 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ejb.EJBObject;
-import javax.ejb.FinderException;
-import javax.ejb.Remove;
-import javax.ejb.SessionBean;
 import javax.ejb.Timer;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
@@ -46,30 +41,26 @@ import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.j2ee.PreDestroyInject;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.timer.ScheduleIntrospector;
 import com.caucho.config.timer.TimeoutCaller;
 import com.caucho.config.timer.TimerTask;
-import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatelessBeanImpl;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
+import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
 
 /**
  * Server home container for a stateless session bean
  */
-public class StatelessServer extends SessionServer {
+public class StatelessServer<T> extends SessionServer<T> {
   private static final L10N L = new L10N(StatelessServer.class);
 
-  protected static Logger log = Logger.getLogger(StatelessServer.class
-      .getName());
+  protected static Logger log
+    = Logger.getLogger(StatelessServer.class.getName());
 
-  private StatelessContext _homeContext;
-  private StatelessProvider _remoteProvider;
+  private StatelessContext<T> _homeContext;
+  private StatelessProvider<T> _remoteProvider;
 
   /**
    * Creates a new stateless server.
@@ -81,7 +72,8 @@ public class StatelessServer extends SessionServer {
    * @param config
    *          the session configuration from the ejb.xml
    */
-  public StatelessServer(EjbContainer ejbContainer, AnnotatedType annotatedType)
+  public StatelessServer(EjbContainer ejbContainer, 
+                         AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);
   }
@@ -182,11 +174,12 @@ public class StatelessServer extends SessionServer {
   {
     super.init();
 
-    ArrayList<Class> remoteApiList = getRemoteApiList();
+    ArrayList<Class<?>> remoteApiList = getRemoteApiList();
 
-    if (remoteApiList != null && remoteApiList.size() > 0) {
-      Class api = remoteApiList.get(0);
+    if (remoteApiList.size() > 0) {
+      Class<?> api = remoteApiList.get(0);
 
+      // XXX: concept of unique remote api not correct.
       _remoteProvider = getStatelessContext().getProvider(api);
     }
   }
@@ -197,7 +190,7 @@ public class StatelessServer extends SessionServer {
     ScheduleIntrospector introspector = new ScheduleIntrospector();
 
     InjectManager manager = InjectManager.create();
-    AnnotatedType type = manager.createAnnotatedType(getEjbClass());
+    AnnotatedType<T> type = manager.createAnnotatedType(getEjbClass());
     ArrayList<TimerTask> timers;
 
     timers = introspector.introspect(new StatelessTimeoutCaller(), type);
@@ -207,38 +200,6 @@ public class StatelessServer extends SessionServer {
         task.start();
       }
     }
-  }
-
-  /*
-  protected void introspectDestroy(ArrayList<ConfigProgram> injectList,
-                                   Class ejbClass)
-  {
-    super.introspectDestroy(injectList, ejbClass);
-
-    for (Method method : ejbClass.getDeclaredMethods()) {
-      if (method.isAnnotationPresent(Remove.class)
-          && method.getParameterTypes().length == 0) {
-        injectList.add(new PreDestroyInject(method));
-      } else if ("ejbRemove".equals(method.getName())
-                 && SessionBean.class.isAssignableFrom(ejbClass)) {
-        injectList.add(new PreDestroyInject(method));
-      }
-    }
-  }
-  */
-
-  /**
-   * Finds the remote bean by its key.
-   *
-   * @param key
-   *          the remote key
-   *
-   * @return the remote interface of the entity.
-   */
-  @Override
-  public EJBObject getEJBObject(Object key) throws FinderException
-  {
-    return getStatelessContext().getEJBObject();
   }
 
   public AbstractContext getContext()
@@ -276,71 +237,9 @@ public class StatelessServer extends SessionServer {
     return _homeContext;
   }
 
-  /**
-   * Returns the object serialization handle for the given api
-   */
-  Object getObjectHandle(StatelessObject obj, Class api)
-  {
-    /*
-     * XXX: ComponentImpl comp = getComponent(api);
-     *
-     * // XXX: remote handle differently if (comp != null && comp.getHandle() !=
-     * null) return comp.getHandle(); else return new
-     * ObjectSkeletonWrapper(obj.getHandle());
-     */
-
-    return new ObjectSkeletonWrapper(obj.getHandle());
-  }
-
-  /**
-   * Creates a handle for a new session.
-   */
-  AbstractHandle createHandle(AbstractContext context)
-  {
-    String key = createSessionKey(context);
-
-    return getHandleEncoder().createHandle(key);
-  }
-
-  /**
-   * Creates a handle for a new session.
-   */
-  /*
-   * JVMObject createEJBObject(Object primaryKey) { try { JVMObject obj =
-   * (JVMObject) _remoteStubClass.newInstance(); obj._init(this,
-   * createSessionKey(null));
-   *
-   * return obj; } catch (Exception e) { throw new EJBExceptionWrapper(e); } }
-   */
-
-  /**
-   * Creates a handle for a new session.
-   */
-  String createSessionKey(AbstractContext context)
-  {
-    return "::ejb:stateless";
-  }
-
-  /**
-   * Cleans up the entity server nicely.
-   */
-  @Override
-  public void destroy()
-  {
-    if (_homeContext != null) {
-      try {
-        _homeContext.destroy();
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    super.destroy();
-  }
-
   class StatelessTimeoutCaller implements TimeoutCaller {
     public void timeout(Method method, Timer timer)
-        throws InvocationTargetException, IllegalAccessException
+      throws InvocationTargetException, IllegalAccessException
     {
       getContext().__caucho_timeout_callback(method, timer);
     }

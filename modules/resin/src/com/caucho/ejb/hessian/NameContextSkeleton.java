@@ -82,8 +82,8 @@ public class NameContextSkeleton extends Skeleton {
     is.read();
     is.read();
 
-    Hessian2Input in = new HessianReader(is);
-    Hessian2Output out = new HessianWriter(os);
+    Hessian2Input in = new Hessian2Input(is);
+    Hessian2Output out = new Hessian2Output(os);
 
     in.startCall();
 
@@ -133,6 +133,7 @@ public class NameContextSkeleton extends Skeleton {
       server = container.getServerByEJBName(name);
 
     if (server != null) {
+      /*
       EJBHome home = server.getEJBHome();
       
       out.startReply();
@@ -143,6 +144,8 @@ public class NameContextSkeleton extends Skeleton {
 	out.writeObject(server.getRemoteObject(server.getRemoteHomeClass(), "hessian"));
 
       out.completeReply();
+      */
+      throw new UnsupportedOperationException(getClass().getName());
     }
     else if (container.getRemoteChildren(name) != null) {
       out.startReply();
@@ -188,6 +191,8 @@ public class NameContextSkeleton extends Skeleton {
     ArrayList children;
 
     if (server != null) {
+      throw new UnsupportedOperationException(getClass().getName());
+      /*
       EJBHome home = server.getEJBHome();
       
       out.startReply();
@@ -195,6 +200,7 @@ public class NameContextSkeleton extends Skeleton {
       out.writeNull();
 
       out.completeReply();
+      */
     }
     else if ((children = container.getRemoteChildren(_prefix)) != null) {
       out.startReply();

@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.message;
 
-import com.caucho.ejb.AbstractContext;
+import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractServer;
 import com.caucho.transaction.*;
 import com.caucho.util.L10N;

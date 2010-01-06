@@ -103,17 +103,7 @@ public class ProtocolContainer {
   public void removeServer(AbstractServer server)
   {
   }
-
-  protected HandleEncoder createHandleEncoder(AbstractServer server,
-                                              Class primaryKeyClass)
-    throws ConfigException
-  {
-    if (_urlPrefix != null)
-      return new HandleEncoder(server, _urlPrefix + server.getProtocolId());
-    else
-      return new HandleEncoder(server, server.getProtocolId());
-  }
-
+  
   /**
    * Returns the skeleton
    */

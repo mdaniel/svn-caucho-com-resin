@@ -59,7 +59,8 @@ public class EjbProtocolManager {
 
   private static ThreadLocal<String> _protocolLocal = new ThreadLocal<String>();
 
-  private static Hashtable<String, WeakReference<AbstractServer>> _staticServerMap = new Hashtable<String, WeakReference<AbstractServer>>();
+  private static Hashtable<String, WeakReference<AbstractServer>> _staticServerMap
+    = new Hashtable<String, WeakReference<AbstractServer>>();
 
   private final EjbContainer _ejbContainer;
   private final ClassLoader _loader;
@@ -69,7 +70,8 @@ public class EjbProtocolManager {
 
   private String _jndiPrefix; // java:comp/env/ejb/FooBean/local
 
-  private HashMap<String, AbstractServer> _serverMap = new HashMap<String, AbstractServer>();
+  private HashMap<String, AbstractServer> _serverMap 
+    = new HashMap<String, AbstractServer>();
 
   // handles remote stuff
   protected ProtocolContainer _protocolContainer;
@@ -243,52 +245,6 @@ public class EjbProtocolManager {
       // with the local prefix
 
       bindDefaultJndi(_jndiPrefix, server);
-
-      // backward compat
-      if (_localJndiPrefix != null) {
-        Object localHome = server.getLocalObject(server.getLocalHomeClass());
-
-        Class<?> api = null;
-
-        String jndiName = Jndi.getFullName(_localJndiPrefix + "/" + ejbName);
-
-        if (localHome != null) {
-          Jndi.bindDeep(jndiName, localHome);
-        } else {
-          if (server.getLocalApiList().size() == 1) {
-            api = server.getLocalApiList().get(0);
-            bindServer(jndiName, server, api);
-          }
-
-          for (Class<?> localApi : server.getLocalApiList()) {
-            bindServer(jndiName + '#' + localApi.getName(), server, localApi);
-          }
-        }
-      }
-
-      // backward compat
-      if (_remoteJndiPrefix != null) {
-        Object remoteHome = server.getRemoteObject(server.getRemoteHomeClass(),
-            null);
-
-        Class api = null;
-
-        String jndiName = Jndi.getFullName(_remoteJndiPrefix + "/" + ejbName);
-
-        if (remoteHome != null) {
-          Jndi.bindDeep(jndiName, remoteHome);
-        } else {
-          if (server.getRemoteApiList().size() == 1) {
-            api = server.getRemoteApiList().get(0);
-            bindRemoteServer(jndiName, server, api);
-          }
-
-          for (Class remoteApi : server.getRemoteApiList()) {
-            bindRemoteServer(jndiName + '#' + remoteApi.getName(), server,
-                remoteApi);
-          }
-        }
-      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -326,9 +282,6 @@ public class EjbProtocolManager {
       }
 
       Object localHome = null;
-
-      if (server.getLocalHomeClass() != null)
-        localHome = server.getLocalObject(server.getLocalHomeClass());
 
       if (localHome != null) {
         String jndiName = prefix + "/local-home";
@@ -479,63 +432,12 @@ public class EjbProtocolManager {
       String name = iter.next();
 
       AbstractServer server = _serverMap.get(name);
-
-      if (server.getRemoteObjectClass() == null)
-        continue;
-
-      if (name.startsWith(ejbName)) {
-        int prefixLength = ejbName.length();
-        int p = name.indexOf('/', prefixLength);
-
-        if (p > 0)
-          name = name.substring(prefixLength, p);
-        else
-          name = name.substring(prefixLength);
-
-        if (!children.contains(name))
-          children.add(name);
-      }
     }
 
     if (children.size() == 0)
       return null;
     else
       return children;
-  }
-
-  @SuppressWarnings("unchecked")
-  public HandleEncoder createHandleEncoder(AbstractServer server,
-      Class primaryKeyClass, String protocolName) throws ConfigException
-  {
-    ProtocolContainer protocol = null;
-
-    synchronized (_protocolMap) {
-      protocol = _protocolMap.get(protocolName);
-    }
-
-    if (protocol != null)
-      return protocol.createHandleEncoder(server, primaryKeyClass);
-    else if (_protocolContainer != null)
-      return _protocolContainer.createHandleEncoder(server, primaryKeyClass);
-    else
-      return new HandleEncoder(server, server.getProtocolId());
-  }
-
-  @SuppressWarnings("unchecked")
-  protected HandleEncoder createHandleEncoder(AbstractServer server,
-      Class primaryKeyClass) throws ConfigException
-  {
-    if (_protocolContainer != null)
-      return _protocolContainer.createHandleEncoder(server, primaryKeyClass);
-    else
-      return new HandleEncoder(server, server.getProtocolId());
-  }
-
-  /**
-   * Removes an object.
-   */
-  protected void remove(AbstractHandle handle)
-  {
   }
 
   /**

@@ -45,12 +45,6 @@ import java.util.*;
 abstract public class SessionGenerator extends BeanGenerator {
   private static final L10N L = new L10N(SessionGenerator.class);
 
-  private ApiClass _localHome;
-  private ApiClass _remoteHome;
-
-  private ApiClass _localObject;
-  private ApiClass _remoteObject;
-  
   private ArrayList<ApiClass> _localApi
     = new ArrayList<ApiClass>();
 
@@ -62,21 +56,17 @@ abstract public class SessionGenerator extends BeanGenerator {
   protected String _contextClassName = "dummy";
 
   public SessionGenerator(String ejbName,
-			  ApiClass ejbClass,
-			  ApiClass localHome,
-			  ArrayList<ApiClass> localApi,
-			  ApiClass remoteHome,
-			  ArrayList<ApiClass> remoteApi)
+                          ApiClass ejbClass,
+                          ArrayList<ApiClass> localApi,
+                          ArrayList<ApiClass> remoteApi)
   {
     super(toFullClassName(ejbName, ejbClass.getSimpleName()),
           ejbClass);
     
     _contextClassName = "dummy";
 
-    _localHome = localHome;
     _localApi = new ArrayList<ApiClass>(localApi);
     
-    _remoteHome = remoteHome;
     _remoteApi = new ArrayList<ApiClass>(remoteApi);
   }
 
@@ -93,11 +83,11 @@ abstract public class SessionGenerator extends BeanGenerator {
       char ch = ejbName.charAt(i);
 
       if (ch == '/')
-	sb.append('.');
+        sb.append('.');
       else if (Character.isJavaIdentifierPart(ch))
-	sb.append(ch);
+        sb.append(ch);
       else
-	sb.append('_');
+        sb.append('_');
     }
 
     sb.append(".");
@@ -110,38 +100,6 @@ abstract public class SessionGenerator extends BeanGenerator {
   public boolean isStateless()
   {
     return false;
-  }
-  
-  /**
-   * Sets the local object
-   */
-  public void setLocalObject(ApiClass objectApi)
-  {
-    _localObject = objectApi;
-  }
-
-  /**
-   * the local object
-   */
-  public ApiClass getLocalObject()
-  {
-    return _localObject;
-  }
-
-  /**
-   * Sets the remote object
-   */
-  public void setRemoteObject(ApiClass objectApi)
-  {
-    _remoteObject = objectApi;
-  }
-
-  /**
-   * Gets the remote object
-   */
-  public ApiClass getRemoteObject()
-  {
-    return _remoteObject;
   }
 
   /**
@@ -189,16 +147,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   {
     super.introspect();
 
-    if (_localHome == null && _localApi.size() == 0)
-      _localApi = introspectLocalApi();
-
-    if (_remoteHome == null && _remoteApi.size() == 0)
-      _remoteApi = introspectRemoteApi();
-
-    if (_localHome == null
-	&& _localApi.size() == 0
-	&& _remoteHome == null
-	&& _remoteApi.size() == 0) {
+    if (_localApi.size() == 0 && _remoteApi.size() == 0) {
       _localApi = introspectLocalDefault();
     }
   }
@@ -209,24 +158,12 @@ abstract public class SessionGenerator extends BeanGenerator {
   @Override
   public void createViews()
   {
-    if (_localHome != null) {
-      View view = createLocalHomeView(_localHome);
-
-      _views.add(view);
-    }
-    
     for (ApiClass api : _localApi) {
       View view = createLocalView(api);
 
       _views.add(view);
     }
-    
-    if (_remoteHome != null) {
-      View view = createRemoteHomeView(_remoteHome);
-
-      _views.add(view);
-    }
-    
+   
     for (ApiClass api : _remoteApi) {
       View view = createRemoteView(api);
 
@@ -235,22 +172,6 @@ abstract public class SessionGenerator extends BeanGenerator {
 
     for (View view : _views)
       view.introspect();
-  }
-
-  /**
-   * Generates the local home view for the given class
-   */
-  protected View createLocalHomeView(ApiClass api)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Generates the remote home view for the given class
-   */
-  protected View createRemoteHomeView(ApiClass api)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -289,7 +210,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     Remote remote = (Remote) getBeanClass().getAnnotation(Remote.class);
 
     if (local != null && local.value().length > 0) {
-      for (Class api : local.value()) {
+      for (Class<?> api : local.value()) {
 	apiList.add(new ApiClass(api));
       }
 
@@ -300,9 +221,9 @@ abstract public class SessionGenerator extends BeanGenerator {
 
     for (ApiClass api : getBeanClass().getInterfaces()) {
       if (api.getJavaClass().isAnnotationPresent(Local.class))
-	apiList.add(api);
+        apiList.add(api);
       if (api.getJavaClass().isAnnotationPresent(Remote.class))
-	hasRemote = true;
+        hasRemote = true;
     }
 
     if (apiList.size() > 0 || hasRemote)
@@ -325,10 +246,10 @@ abstract public class SessionGenerator extends BeanGenerator {
       }
 
       if (singleApi != null) {
-	throw new ConfigException(L.l("{0}: does not have a unique local API.  Both '{1}' and '{2}' are local.",
-				      getBeanClass().getName(),
-				      singleApi.getName(),
-				      api.getName()));
+        throw new ConfigException(L.l("{0}: does not have a unique local API.  Both '{1}' and '{2}' are local.",
+                                      getBeanClass().getName(),
+                                      singleApi.getName(),
+                                      api.getName()));
       }
 
       singleApi = api;
@@ -367,14 +288,14 @@ abstract public class SessionGenerator extends BeanGenerator {
       Class javaApi = api.getJavaClass();
       
       if (java.io.Serializable.class.equals(javaApi))
-	continue;
+        continue;
       else if (java.io.Externalizable.class.equals(javaApi))
-	continue;
+        continue;
       else if (javaApi.getName().startsWith("javax.ejb"))
-	continue;
+        continue;
       
       if (javaApi.isAnnotationPresent(Remote.class) || remote != null)
-	apiList.add(api);
+        apiList.add(api);
     }
 
     if (apiList.size() > 0)
@@ -427,287 +348,6 @@ abstract public class SessionGenerator extends BeanGenerator {
     */
 
     out.println("return cxt.createRemoteView" + suffix + "();");
-
-    out.popDepth();
-    out.println("}");
-  }
-
-  private void generateBean(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("public static class Bean extends " + getBeanClass().getName() + " {");
-    out.pushDepth();
-
-    out.println();
-    out.println("protected final static java.util.logging.Logger __caucho_log");
-    out.println("  = java.util.logging.Logger.getLogger(\"" + getBeanClass().getName() + "\");");
-    out.println("private static int __caucho_dbg_id;");
-    out.println("private String __caucho_id;");
-
-    out.println(_contextClassName + " _ejb_context;");
-    out.println("boolean _ejb_isActive;");
-
-    int i = 0;
-
-    /*
-    for (Interceptor interceptor : _bean.getInterceptors()) {
-      out.println("Object _interceptor" + i++ + ";");
-    }
-     * */
-
-    out.println();
-    if (isStateless())
-      out.println("Bean(" + _contextClassName + " context)");
-    else
-      out.println("Bean(" + _contextClassName + " context, javax.enterprise.context.spi.CreationalContext env)");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("if (__caucho_isFiner) {");
-    out.pushDepth();
-
-    out.println("synchronized (" + getBeanClass().getName() + ".class) {");
-    out.println("  __caucho_id = \"" + getBeanClass().getName() + "[\" + __caucho_dbg_id++ + \"]\";");
-    out.println("}");
-    out.println("__caucho_log.fine(__caucho_id + \":new()\");");
-    out.popDepth();
-    out.println("}");
-
-
-    out.println("try {");
-    out.pushDepth();
-
-    out.println("_ejb_context = context;");
-
-    if (hasMethod("setSessionContext", new Class[] { SessionContext.class })) {
-      // TCK: ejb30/bb/session/stateless/annotation/resource/dataSourceTest
-      // ejb/0f55 setSessionContext() can be private, out.println("setSessionContext(context);");
-      out.println("invokeMethod(this, \"setSessionContext\", new Class[] { javax.ejb.SessionContext.class }, new Object[] { context });");
-    }
-
-    /*
-    // ejb/0fd0
-    out.println();
-    out.println("__caucho_initInjection();");
-    */
-
-    out.println();
-    if (isStateless())
-      out.println("context.getServer().initInstance(this, null);");
-    else
-      out.println("context.getServer().initInstance(this, env);");
-
-    out.println();
-    out.println("__caucho_callInterceptorsPostConstruct();");
-
-    out.popDepth();
-    out.println("} catch (RuntimeException e) {");
-    out.println("  throw e;");
-    out.println("} catch (Exception e) {");
-    out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
-    out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public Object __caucho_callInterceptors(Object target, Object []args, String methodName, Class paramTypes[])");
-    out.println("  throws java.lang.reflect.InvocationTargetException");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("try {");
-    out.pushDepth();
-
-    out.println("Class cl;");
-    out.println("Class methodParamTypes[] = new Class[] { javax.interceptor.InvocationContext.class };");
-    out.println();
-
-    StringBuilder interceptors = new StringBuilder();
-    StringBuilder interceptorMethods = new StringBuilder();
-
-    boolean hasAroundInvoke = false;
-
-    i = 0;
-
-    /*
-    for (Interceptor interceptor : _bean.getInterceptors()) {
-      int j = i++;
-
-      String aroundInvokeMethodName = interceptor.getAroundInvokeMethodName();
-
-      // ejb/0fbi
-      if (aroundInvokeMethodName == null)
-        continue;
-
-      if (! hasAroundInvoke) {
-        hasAroundInvoke = true;
-      } else {
-        interceptors.append(", ");
-        interceptorMethods.append(", ");
-      }
-
-      interceptors.append("_interceptor");
-      interceptors.append(j);
-      interceptorMethods.append("method");
-      interceptorMethods.append(j);
-
-      String clName = interceptor.getInterceptorClass();
-
-      out.println("Class cl" + j + " = Class.forName(\"" + clName + "\");");
-
-      out.println("if (_interceptor" + j + " == null) {");
-      out.println("  _interceptor" + j + " = cl" + j + ".newInstance();");
-
-      out.println("}");
-
-      out.println();
-
-      generateCallReflectionGetMethod(out, "method" + j, aroundInvokeMethodName, "methodParamTypes", "cl" + j);
-
-      out.println();
-    }
-    
-
-    out.println("javax.interceptor.InvocationContext invocationContext;");
-
-    String aroundInvokeMethodName = _bean.getAroundInvokeMethodName();
-
-    // ejb/0fb8
-    if (aroundInvokeMethodName != null) {
-      if (i > 0) {
-        interceptors.append(", ");
-        interceptorMethods.append(", ");
-      }
-
-      interceptors.append("this");
-      interceptorMethods.append(aroundInvokeMethodName);
-
-      out.println();
-
-      generateCallReflectionGetMethod(out, aroundInvokeMethodName, aroundInvokeMethodName, "methodParamTypes", "getClass()");
-    }
-
-    // XXX: invocation context pool ???
-    out.println();
-    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl(this,");
-    out.println("  target, methodName, paramTypes, new Object[] { " + interceptors + " }, new java.lang.reflect.Method[] { " + interceptorMethods + " });");
-    out.println("invocationContext.setParameters(args);");
-
-    out.println("return invocationContext.proceed();");
-
-    out.popDepth();
-*/
-    /* ejb/0fba
-
-    // ejb/0f66
-    if (_bean.getInterceptors().size() > 0) {
-      out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
-      out.println("  throw e;");
-    }
-    */
-
-    out.println("} catch (java.lang.reflect.InvocationTargetException e) {");
-    out.println("  throw e;");
-    out.println("} catch (RuntimeException e) {");
-    out.println("  throw e;");
-    out.println("} catch (Throwable e) {");
-    out.println("  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
-    out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-    out.println("}");
-
-    // out.println();
-    // out.println("return null;");
-    //out.println("return invocationContext;");
-
-    out.popDepth();
-    out.println("}");
-
-    // ejb/0fbh
-    out.println();
-    out.println("private void __caucho_callInterceptorsPostConstruct()");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("try {");
-    out.pushDepth();
-
-    out.println("Class methodParamTypes[] = new Class[] { javax.interceptor.InvocationContext.class };");
-
-    i = 0;
-/*
-    for (Interceptor interceptor : _bean.getInterceptors()) {
-      int j = i++;
-
-      String postConstructMethodName = interceptor.getPostConstructMethodName();
-
-      if (postConstructMethodName == null)
-        continue;
-
-      String clName = interceptor.getInterceptorClass();
-
-      out.println("Class cl" + j + " = Class.forName(\"" + clName + "\");");
-
-      out.println("if (_interceptor" + j + " == null) {");
-      out.println("  _interceptor" + j + " = cl" + j + ".newInstance();");
-
-      out.println("}");
-
-      out.println();
-
-      generateCallReflectionGetMethod(out, "method" + j, postConstructMethodName, "methodParamTypes", "cl" + j);
-
-      out.println();
-    }
-
-    interceptors.setLength(0);
-    interceptorMethods.setLength(0);
-
-    boolean isFirst = true;
-
-    i = 0;
-
-    for (Interceptor interceptor : _bean.getInterceptors()) {
-      int j = i++;
-
-      if (interceptor.getPostConstructMethodName() == null)
-        continue;
-
-      if (isFirst) {
-        isFirst = false;
-      } else {
-        interceptors.append(", ");
-        interceptorMethods.append(", ");
-      }
-
-      interceptors.append("_interceptor");
-      interceptors.append(j);
-      interceptorMethods.append("method");
-      interceptorMethods.append(j);
-    }
-
-    out.println("javax.interceptor.InvocationContext invocationContext;");
-
-    // XXX: invocation context pool ???
-    out.println();
-    out.println("invocationContext = new com.caucho.ejb.interceptor.InvocationContextImpl(this,");
-    out.println("  this, null, null, new Object[] { " + interceptors + " }, new java.lang.reflect.Method[] { " + interceptorMethods + " });");
-
-    out.println("invocationContext.proceed();");
-
-    out.popDepth();
-    out.println("} catch (Exception e) {");
-    out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-
-    generateInitInjection(out);
-*/
-    generateReflectionGetMethod(out);
 
     out.popDepth();
     out.println("}");
@@ -942,7 +582,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     return getBeanClass().hasMethod(methodName, paramTypes);
   }
 
-  private String generateTypeCasting(String value, Class cl, boolean isEscapeString)
+  private String generateTypeCasting(String value, Class<?> cl, boolean isEscapeString)
   {
     if (cl.equals(String.class)) {
       if (isEscapeString)

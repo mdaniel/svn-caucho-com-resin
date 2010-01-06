@@ -29,24 +29,25 @@
 
 package com.caucho.ejb.server;
 
-import com.caucho.ejb.*;
-import com.caucho.config.*;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import javax.ejb.FinderException;
+import javax.ejb.Timer;
+import javax.ejb.TimerService;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
+import javax.transaction.UserTransaction;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.BeanFactory;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.j2ee.InjectIntrospector;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.ejb.cfg.*;
+import com.caucho.ejb.cfg.AroundInvokeConfig;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.protocol.AbstractHandle;
-import com.caucho.ejb.protocol.EjbProtocolManager;
-import com.caucho.ejb.protocol.HandleEncoder;
 import com.caucho.ejb.session.AbstractSessionContext;
-import com.caucho.ejb.session.SessionServer;
-import com.caucho.ejb.session.StatelessServer;
-import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
@@ -54,29 +55,12 @@ import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.L10N;
 
-import javax.ejb.*;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.naming.Context;
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
-import javax.sql.DataSource;
-import javax.transaction.UserTransaction;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Logger;
-import java.util.logging.Level;
-import java.lang.reflect.Method;
-
 /**
  * Base server for a single home/object bean pair.
  */
 abstract public class AbstractServer<T> implements EnvironmentBean {
-  private final static Logger log = Logger.getLogger(AbstractServer.class
-      .getName());
+  private final static Logger log
+    = Logger.getLogger(AbstractServer.class.getName());
   private static final L10N L = new L10N(AbstractServer.class);
 
   protected final EjbContainer _ejbContainer;
@@ -87,67 +71,46 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   protected int _line;
   protected String _location;
 
+  // The original bean implementation class
+  protected Class<T> _ejbClass;
+
+  // introspected bean information
   private AnnotatedType<T> _annotatedType;
-  private Bean<?> _bean;
+  private Bean<T> _bean;
 
   protected String _id;
   protected String _ejbName;
   protected String _moduleName;
   protected String _handleServerId;
-  
-  private EjbProducer<T> _producer;
 
   // name for IIOP, Hessian, JNDI
   protected String _mappedName;
 
+  protected ArrayList<Class<?>> _remoteApiList = new ArrayList<Class<?>>();
+  protected ArrayList<Class<?>> _localApiList = new ArrayList<Class<?>>();
+
+  protected Class<?> _serviceEndpointClass;
+
   private Context _jndiEnv;
+  
+  // server-specific classloader
+  protected EnvironmentClassLoader _loader;
 
   private ConfigProgram _serverProgram;
 
-  protected HashMap<String, HandleEncoder> _protocolEncoderMap;
-  protected HandleEncoder _handleEncoder;
-
-  protected DataSource _dataSource;
-
-  protected EnvironmentClassLoader _loader;
-
-  // The original bean implementation class
-  protected Class _ejbClass;
-
-  // The class for the extended bean
-  protected Class _contextImplClass;
-
-  protected Class _local21;
-  protected Class _remote21;
-
-  protected Class _remoteHomeClass;
-  protected Class _remoteObjectClass;
-  protected ArrayList<Class> _remoteApiList = new ArrayList<Class>();
-  protected Class _primaryKeyClass;
-  protected Class _localHomeClass;
-  protected ArrayList<Class> _localApiList = new ArrayList<Class>();
-
-  protected Class _remoteStubClass;
-  protected Class _homeStubClass;
-
-  protected HomeHandle _homeHandle;
-  protected EJBHome _remoteHome;
-  protected EJBHome _remoteHomeView;
-  protected EJBLocalHome _localHome;
-  protected EJBMetaDataImpl _metaData;
-
-  protected Class _serviceEndpointClass;
-
-  protected long _transactionTimeout;
-
-  protected Bean _component;
-
-  private AroundInvokeConfig _aroundInvokeConfig;
+  // injection/postconstruct from Java Injection
+  private EjbProducer<T> _producer;
 
   private boolean _isContainerTransaction = true;
+  protected long _transactionTimeout;
+
+  // Generated classes
+  protected Class<? extends T> _contextImplClass;
+
+  // generated Java Injection bean
+  protected Bean<T> _component;
 
   private final Lifecycle _lifecycle = new Lifecycle();;
-  private Class _beanImplClass;
 
   /**
    * Creates a new server container
@@ -164,7 +127,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
     _loader = EnvironmentClassLoader.create(container.getClassLoader());
     _loader.setAttribute("caucho.inject", false);
     
-    _producer = new EjbProducer(this, annotatedType);
+    _producer = new EjbProducer<T>(this, annotatedType);
   }
 
   /**
@@ -205,7 +168,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
     return "ejb:";
   }
 
-  public Bean getDeployBean()
+  public Bean<T> getDeployBean()
   {
     return _bean;
   }
@@ -217,7 +180,6 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
 
   public void setAroundInvoke(AroundInvokeConfig aroundInvoke)
   {
-    _aroundInvokeConfig = aroundInvoke;
   }
 
   /**
@@ -291,7 +253,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   /**
    * The name to use for remoting protocols, such as IIOP and Hessian.
    */
-  public String getProtocolId(Class cl)
+  public String getProtocolId(Class<?> cl)
   {
     if (cl == null)
       return getProtocolId();
@@ -307,7 +269,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
     return url;
   }
 
-  public AnnotatedType getAnnotatedType()
+  public AnnotatedType<T> getAnnotatedType()
   {
     return _annotatedType;
   }
@@ -315,7 +277,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   /**
    * Sets the ejb class
    */
-  public void setEjbClass(Class cl)
+  public void setEjbClass(Class<T> cl)
   {
     _ejbClass = cl;
   }
@@ -323,7 +285,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   /**
    * Sets the ejb class
    */
-  protected Class getEjbClass()
+  protected Class<T> getEjbClass()
   {
     return _ejbClass;
   }
@@ -336,50 +298,22 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
     _contextImplClass = cl;
   }
 
-  public void setBeanImplClass(Class cl)
+  public void setBeanImplClass(Class<T> cl)
   {
-    _beanImplClass = cl;
-  }
-
-  /**
-   * Sets the remote home class.
-   */
-  public void setRemoteHomeClass(Class cl)
-  {
-    _remoteHomeClass = cl;
-  }
-
-  /**
-   * Gets the remote home class.
-   */
-  public Class getRemoteHomeClass()
-  {
-    return _remoteHomeClass;
-  }
-
-  /**
-   * Gets the 2.1 remote interface.
-   */
-  public Class getRemote21()
-  {
-    return _remote21;
   }
 
   /**
    * Sets the remote object list.
    */
-  public void setRemoteApiList(ArrayList<Class> list)
+  public void setRemoteApiList(ArrayList<Class<?>> list)
   {
-    _remoteApiList = new ArrayList<Class>(list);
-
-    if (_remoteApiList.size() > 0)
-      _remoteObjectClass = _remoteApiList.get(0);
+    _remoteApiList = new ArrayList<Class<?>>(list);
   }
 
   /**
    * Returns the remote object list.
    */
-  public ArrayList<Class> getRemoteApiList()
+  public ArrayList<Class<?>> getRemoteApiList()
   {
     return _remoteApiList;
   }
@@ -389,110 +323,23 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
    */
   public boolean hasRemoteObject()
   {
-    if (_remoteApiList == null)
-      return false;
-
-    if (_remoteApiList.size() == 0)
-      return false;
-
-    return true;
-  }
-
-  /**
-   * Sets the remote object class.
-   */
-  public void setRemoteObjectClass(Class cl)
-  {
-    _remoteObjectClass = cl;
-
-    if (_remoteApiList == null) {
-      _remoteApiList = new ArrayList<Class>();
-      _remoteApiList.add(cl);
-    }
-  }
-
-  /**
-   * Gets the remote object class.
-   */
-  public Class getRemoteObjectClass()
-  {
-    return _remoteObjectClass;
-  }
-
-  /**
-   * Sets the local home class.
-   */
-  public void setLocalHomeClass(Class cl)
-  {
-    _localHomeClass = cl;
-  }
-
-  /**
-   * Gets the local home class.
-   */
-  public Class getLocalHomeClass()
-  {
-    return _localHomeClass;
-  }
-
-  /**
-   * Sets the service endpoint.
-   */
-  public void setServiceEndpoint(Class cl)
-  {
-    _serviceEndpointClass = cl;
-  }
-
-  /**
-   * Gets the service endpoint
-   */
-  public Class getServiceEndpoint()
-  {
-    return _serviceEndpointClass;
+    return _remoteApiList.size() > 0;
   }
 
   /**
    * Sets the local api class list
    */
-  public void setLocalApiList(ArrayList<Class> list)
+  public void setLocalApiList(ArrayList<Class<?>> list)
   {
-    _localApiList = new ArrayList<Class>(list);
+    _localApiList = new ArrayList<Class<?>>(list);
   }
 
   /**
    * Sets the remote object class.
    */
-  public ArrayList<Class> getLocalApiList()
+  public ArrayList<Class<?>> getLocalApiList()
   {
     return _localApiList;
-  }
-
-  public HandleEncoder getHandleEncoder(String protocol)
-  {
-    HandleEncoder encoder;
-
-    if (_protocolEncoderMap != null) {
-      encoder = _protocolEncoderMap.get(protocol);
-
-      if (encoder != null)
-        return encoder;
-    }
-
-    try {
-      Class keyClass = getPrimaryKeyClass();
-
-      encoder = _ejbContainer.getProtocolManager().createHandleEncoder(this,
-          keyClass, protocol);
-    } catch (Exception e) {
-      throw EJBExceptionWrapper.createRuntime(e);
-    }
-
-    if (_protocolEncoderMap == null)
-      _protocolEncoderMap = new HashMap<String, HandleEncoder>(8);
-
-    _protocolEncoderMap.put(protocol, encoder);
-
-    return encoder;
   }
 
   /**
@@ -501,54 +348,6 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   public String encodeId(Object primaryKey)
   {
     return String.valueOf(primaryKey);
-  }
-
-  public HandleEncoder addHandleEncoder(String protocol, String serverId)
-  {
-    HandleEncoder encoder;
-
-    if (_protocolEncoderMap != null) {
-      encoder = _protocolEncoderMap.get(protocol);
-
-      if (encoder != null)
-        return encoder;
-    }
-
-    try {
-      Class keyClass = getPrimaryKeyClass();
-
-      encoder = new HandleEncoder(this, serverId + _ejbName);
-    } catch (Exception e) {
-      throw EJBExceptionWrapper.createRuntime(e);
-    }
-
-    if (_protocolEncoderMap == null)
-      _protocolEncoderMap = new HashMap<String, HandleEncoder>(8);
-
-    _protocolEncoderMap.put(protocol, encoder);
-
-    return encoder;
-  }
-
-  public HandleEncoder getHandleEncoder()
-  {
-    return getHandleEncoder(EjbProtocolManager.getThreadProtocol());
-  }
-
-  public void setHandleEncoder(HandleEncoder encoder)
-  {
-    if (_homeHandle != null)
-      _homeHandle = null;
-
-    _handleEncoder = encoder;
-  }
-
-  public String getHandleServerId()
-  {
-    if (_handleServerId == null)
-      _handleServerId = getHandleEncoder().getServerId();
-
-    return _handleServerId;
   }
 
   /**
@@ -630,22 +429,6 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   }
 
   /**
-   * Remove an object.
-   */
-  public Object remove(AbstractHandle handle)
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Remove an object.
-   */
-  public void remove(Object primaryKey)
-  {
-    // throw new UnsupportedOperationException();
-  }
-
-  /**
    * Gets the class loader
    */
   public DynamicClassLoader getClassLoader()
@@ -661,96 +444,12 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
     return _contextImplClass;
   }
 
-  public Class getRemoteStubClass()
-  {
-    return _remoteStubClass;
-  }
-
-  public Class getHomeStubClass()
-  {
-    return _homeStubClass;
-  }
-
-  /**
-   * Returns the meta data
-   */
-  public EJBMetaData getEJBMetaData()
-  {
-    if (_metaData == null) {
-      try {
-        EJBHome home = getEJBHome();
-
-        _metaData = new EJBMetaDataImpl(home, getRemoteHomeClass(),
-            getRemoteObjectClass(), getPrimaryKeyClass());
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw new EJBException(e);
-      }
-
-      if (this instanceof StatelessServer) {
-        _metaData.setSession(true);
-        _metaData.setStatelessSession(true);
-      } else if (this instanceof SessionServer) {
-        _metaData.setSession(true);
-      }
-    }
-
-    return _metaData;
-  }
-
-  /**
-   * Returns the home handle for the container
-   */
-  public HomeHandle getHomeHandle()
-  {
-    if (_homeHandle == null)
-      _homeHandle = getHandleEncoder().createHomeHandle();
-
-    return _homeHandle;
-  }
-
-  void setEJBHome(EJBHome remoteHome)
-  {
-    _remoteHome = remoteHome;
-  }
-
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  public EJBHome getEJBHome()
-  {
-    if (_remoteHome != null)
-      return _remoteHome;
-    else {
-      EJBHome home = (EJBHome) getRemoteObject(getRemoteHomeClass(), null);
-
-      return home;
-    }
-  }
-
-  /**
-   * Returns the EJBHome stub for the container
-   */
-  EJBHome getClientHome()
-  {
-    return getEJBHome();
-  }
-
   /**
    * Returns the session context.
    */
   public AbstractSessionContext getSessionContext()
   {
     return null;
-  }
-
-  /**
-   * Returns the EJBLocalHome stub for the container
-   */
-  public EJBLocalHome getEJBLocalHome()
-  {
-    return _localHome;
   }
 
   /**
@@ -761,7 +460,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
    * @param protocol
    *          the remote protocol
    */
-  abstract public Object getRemoteObject(Class api, String protocol);
+  abstract public Object getRemoteObject(Class<?> api, String protocol);
 
   /**
    * Returns the a new local stub for the given API
@@ -769,7 +468,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
    * @param api
    *          the bean's api to return a value for
    */
-  abstract public Object getLocalObject(Class api);
+  abstract public Object getLocalObject(Class<?> api);
 
   /**
    * Returns the local jndi proxy for the given API
@@ -777,20 +476,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
    * @param api
    *          the bean's api to return a value for
    */
-  abstract public Object getLocalProxy(Class api);
-
-  /**
-   * Returns the object key from a handle.
-   */
-  public Class getPrimaryKeyClass()
-  {
-    return _primaryKeyClass;
-  }
-
-  public EJBObject getEJBObject(Object key) throws FinderException
-  {
-    return getContext(key).getEJBObject();
-  }
+  abstract public Object getLocalProxy(Class<?> api);
 
   /**
    * Returns the remote object.
@@ -809,11 +495,6 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   public AbstractContext getContext(Object key) throws FinderException
   {
     return getContext(key, true);
-  }
-
-  public AbstractContext getContext(long key) throws FinderException
-  {
-    return getContext(new Long(key));
   }
 
   /**
@@ -898,29 +579,11 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   }
 
   /**
-   * Returns true is there is a local home or local client object for the bean.
-   */
-  public boolean isLocal()
-  {
-    return (_localHome != null || _localApiList != null
-        && _localApiList.size() > 0);
-  }
-
-  /**
-   * Returns true is there is a remote home or remote client object for the
-   * bean.
-   */
-  public boolean isRemote()
-  {
-    return _remoteHome != null || _remoteHomeView != null;
-  }
-
-  /**
    * Returns true if the server is dead.
    */
   public boolean isDead()
   {
-    return !_lifecycle.isActive();
+    return ! _lifecycle.isActive();
   }
 
   /**
@@ -929,23 +592,6 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   public void destroy()
   {
     _lifecycle.toDestroy();
-  }
-
-  /**
-   * Client information for connecting to the server.
-   */
-  public void addClientRemoteConfig(StringBuilder sb)
-  {
-    if (_remoteApiList != null && _remoteApiList.size() > 0) {
-      sb.append("<ejb-ref>\n");
-      sb.append("<ejb-ref-name>" + getEJBName() + "</ejb-ref-name>\n");
-
-      if (_remoteHomeClass != null)
-        sb.append("<home>" + _remoteHomeClass.getName() + "</home>\n");
-
-      sb.append("<remote>" + _remoteApiList.get(0).getName() + "</remote>\n");
-      sb.append("</ejb-ref>\n");
-    }
   }
 
   public ConfigException error(String msg)
@@ -959,8 +605,8 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
   public String toString()
   {
     if (getMappedName() != null)
-      return getClass().getSimpleName() + "[" + getEJBName() + ","
-          + getMappedName() + "]";
+      return (getClass().getSimpleName()
+              + "[" + getEJBName() + "," + getMappedName() + "]");
     else
       return getClass().getSimpleName() + "[" + getEJBName() + "]";
   }

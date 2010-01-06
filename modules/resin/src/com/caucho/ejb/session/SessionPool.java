@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,26 +19,42 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
  */
 
-package com.caucho.ejb;
+package com.caucho.ejb.session;
 
-import com.caucho.ejb.server.AbstractServer;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Interface for stubs inside the same JVM.
+ * Configures the size of the session pool.
  */
-public abstract class AbstractEJBObject {
+@Documented
+@Retention(RUNTIME)
+@Target({TYPE})
+public @interface SessionPool {
   /**
-   * Returns the object's server
+   * Maximum number of idle instances.
    */
-  abstract public AbstractServer __caucho_getServer();
-  
+  public int maxIdle() default -1;
+
   /**
-   * Returns the URL for the given protocol.
+   * Maximum number of concurrent instances.
    */
-  abstract public String __caucho_getId();
+  public int maxConcurrent() default -1;
+
+  /**
+   * Timeout for concurrent instances.
+   */
+  public long maxConcurrentTimeout() default -1;
 }

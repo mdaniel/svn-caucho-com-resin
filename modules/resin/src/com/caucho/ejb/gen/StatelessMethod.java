@@ -29,43 +29,39 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.*;
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
+import java.io.IOException;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import javax.annotation.security.*;
-import javax.ejb.*;
-import javax.interceptor.*;
+import com.caucho.config.gen.ApiClass;
+import com.caucho.config.gen.ApiMethod;
+import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents a stateless local business method
  */
-public class StatelessLocalMethod extends BusinessMethodGenerator
+public class StatelessMethod extends BusinessMethodGenerator
 {
-  private ApiClass _ejbClass;
   private String _beanClassName;
   
-  public StatelessLocalMethod(ApiClass ejbClass,
-			      String beanClassName,
-			      StatelessView view,
-			      ApiMethod apiMethod,
-			      ApiMethod implMethod,
-			      int index)
+  public StatelessMethod(ApiClass ejbClass,
+                              String beanClassName,
+                              StatelessView view,
+                              ApiMethod apiMethod,
+                              ApiMethod implMethod,
+                              int index)
   {
     super(view, apiMethod, implMethod, index);
 
     _beanClassName = beanClassName;
-    _ejbClass = ejbClass;
   }
   
+  /*
   @Override
   protected EjbCallChain createTailCallChain()
   {
-    return new StatelessTailCallChain(this);
+    return new MethodTailCallChain(this);
   }
+  */
 
   /**
    * Session bean default is REQUIRED

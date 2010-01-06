@@ -25,7 +25,7 @@
  *
  * @author Scott Ferguson
  */
-package com.caucho.ejb;
+package com.caucho.ejb.server;
 
 import java.rmi.RemoteException;
 import java.security.Identity;
@@ -48,7 +48,6 @@ import javax.ejb.RemoveException;
 import javax.ejb.TimerService;
 import javax.transaction.UserTransaction;
 
-import com.caucho.ejb.server.AbstractServer;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.transaction.*;
@@ -85,7 +84,7 @@ abstract public class AbstractContext implements EJBContext {
    */
   public EJBMetaData getEJBMetaData()
   {
-    return getServer().getEJBMetaData();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -101,20 +100,7 @@ abstract public class AbstractContext implements EJBContext {
    */
   public EJBLocalHome getEJBLocalHome()
   {
-    try {
-      Object localHome = getServer().getEJBLocalHome();
-
-      // ejb/0f61
-      if (localHome == null && getServer().getEJBHome() == null)
-        throw new IllegalStateException(
-            "getEJBLocalHome() is only allowed through EJB 2.1 interfaces");
-
-      return null;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      return null;
-    }
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -130,7 +116,7 @@ abstract public class AbstractContext implements EJBContext {
    */
   public HomeHandle getHomeHandle()
   {
-    return getServer().getHomeHandle();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**

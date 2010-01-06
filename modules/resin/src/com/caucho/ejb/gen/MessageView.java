@@ -87,7 +87,6 @@ public class MessageView extends View {
   @Override
   public void introspect()
   {
-    ApiClass implClass = getBeanClass();
     ApiClass apiClass = getViewClass();
 
     for (ApiMethod apiMethod : apiClass.getMethods()) {

@@ -55,7 +55,6 @@ public class HessianModel extends AbstractModel {
   private String _namePrefix;
   private HessianModel _root;
   private Hashtable _cache;
-  private HessianClientContainer _client;
   private NameServerRemote _remoteRoot;
   private NameServerRemote _remote;
   
@@ -88,11 +87,6 @@ public class HessianModel extends AbstractModel {
   void setRemote(NameServerRemote remote)
   {
     _remote = remote;
-  }
-
-  void setClientContainer(HessianClientContainer client)
-  {
-    _root._client = client;
   }
 
   /**
@@ -133,6 +127,7 @@ public class HessianModel extends AbstractModel {
       if (obj != null)
         return obj;
 
+      /*
       if (_root._remoteRoot == null) {
         if (_root._client == null)
           _root._client = HessianClientContainer.find(urlPrefix);
@@ -141,9 +136,11 @@ public class HessianModel extends AbstractModel {
 
         _root._remoteRoot = (NameServerRemote) stub;
       }
+      */
 
-      obj = _root._remoteRoot.lookup(_namePrefix + name);
+      // obj = _root._remoteRoot.lookup(_namePrefix + name);
 
+      /*
       if (obj instanceof EJBHome)
         _root._cache.put(cacheName, obj);
       else if (obj instanceof NameServerRemote) {
@@ -153,6 +150,7 @@ public class HessianModel extends AbstractModel {
         obj = model;
         _root._cache.put(cacheName, obj);
       }
+      */
 
       return obj;
     } catch (Exception e) {
@@ -168,6 +166,8 @@ public class HessianModel extends AbstractModel {
   public List list()
     throws NamingException
   {
+    return null;
+    /*
     try {
       if (_remote == null) {
         if (_root._remoteRoot == null) {
@@ -199,6 +199,7 @@ public class HessianModel extends AbstractModel {
     } catch (Exception e) {
       throw new NamingExceptionWrapper(e);
     }
+    */
   }
 
   public String toString()

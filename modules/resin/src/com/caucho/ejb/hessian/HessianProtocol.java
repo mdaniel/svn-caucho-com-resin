@@ -31,7 +31,6 @@ package com.caucho.ejb.hessian;
 import com.caucho.hessian.server.HessianSkeleton;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.message.MessageServer;
-import com.caucho.ejb.protocol.HandleEncoder;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.ejb.server.AbstractServer;
@@ -65,7 +64,7 @@ public class HessianProtocol extends ProtocolContainer {
    */
   public HessianProtocol()
   {
-    _resolver = new HessianStubFactory();
+   // _resolver = new HessianStubFactory();
   }
 
   public String getName()
@@ -91,16 +90,6 @@ public class HessianProtocol extends ProtocolContainer {
     log.finer(this + " remove " + server);
 
     _serverMap.remove(server.getProtocolId());
-  }
-
-  @Override
-  protected HandleEncoder createHandleEncoder(AbstractServer server,
-                                              Class primaryKeyClass)
-    throws ConfigException
-  {
-    return new HessianHandleEncoder(server,
-                                   getURLPrefix() + server.getProtocolId(),
-                                   primaryKeyClass);
   }
 
   /**
@@ -146,6 +135,7 @@ public class HessianProtocol extends ProtocolContainer {
         return null; // XXX: should return error skeleton
       */
     }
+    /*
     else if (objectId != null) {
       Object key = server.getHandleEncoder("hessian").objectIdToKey(objectId);
 
@@ -191,6 +181,7 @@ public class HessianProtocol extends ProtocolContainer {
 	return new HessianEjbSkeleton(remote, skel, _resolver);
       }
     }
+    */
 
     return null;
   }
@@ -198,12 +189,14 @@ public class HessianProtocol extends ProtocolContainer {
   /**
    * Returns the skeleton to use to return configuration exceptions
    */
+  /*
   @Override
   public Skeleton getExceptionSkeleton()
     throws Exception
   {
     return new ExceptionSkeleton();
   }
+  */
 
   /**
    * Returns the class for home skeletons.

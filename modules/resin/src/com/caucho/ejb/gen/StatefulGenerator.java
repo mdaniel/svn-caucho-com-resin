@@ -29,29 +29,22 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.*;
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
-
-import javax.ejb.*;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import com.caucho.config.gen.ApiClass;
+import com.caucho.config.gen.View;
+import com.caucho.java.JavaWriter;
 
 /**
  * Generates the skeleton for a stateful bean.
  */
 public class StatefulGenerator extends SessionGenerator {
-  private static final L10N L = new L10N(StatefulGenerator.class);
-
   public StatefulGenerator(String ejbName, ApiClass ejbClass,
-			   ApiClass localHome,
-			   ArrayList<ApiClass> localApi,
-			   ApiClass remoteHome,
-			   ArrayList<ApiClass> remoteApi)
+                           ArrayList<ApiClass> localApi,
+                           ArrayList<ApiClass> remoteApi)
   {
-    super(ejbName, ejbClass,
-	  localHome, localApi,
-	  remoteHome, remoteApi);
+    super(ejbName, ejbClass, localApi, remoteApi);
   }
 
   public boolean isStateless()
@@ -62,25 +55,13 @@ public class StatefulGenerator extends SessionGenerator {
   @Override
   protected View createLocalView(ApiClass api)
   {
-    return new StatefulLocalView(this, api);
-  }
-
-  @Override
-  protected View createLocalHomeView(ApiClass api)
-  {
-    return new StatefulLocalHomeView(this, api);
-  }
-
-  @Override
-  protected View createRemoteHomeView(ApiClass api)
-  {
-    return new StatefulRemoteHomeView(this, api);
+    return new StatefulView(this, api);
   }
 
   @Override
   protected View createRemoteView(ApiClass api)
   {
-    return new StatefulRemoteView(this, api);
+    return new StatefulView(this, api);
   }
 
   /**

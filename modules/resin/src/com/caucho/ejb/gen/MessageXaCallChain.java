@@ -29,26 +29,20 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.*;
-import com.caucho.config.*;
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
+import static javax.ejb.TransactionAttributeType.REQUIRED;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import javax.annotation.security.*;
-import javax.ejb.*;
-import static javax.ejb.TransactionAttributeType.*;
-import javax.interceptor.*;
+import java.io.IOException;
+
+import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.EjbCallChain;
+import com.caucho.config.gen.XaCallChain;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents the xa interception
  */
 public class MessageXaCallChain extends XaCallChain
 {
-  private static final L10N L = new L10N(MessageXaCallChain.class);
-  
   public MessageXaCallChain(BusinessMethodGenerator bizMethod,
 			    EjbCallChain next)
   {

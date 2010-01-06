@@ -41,16 +41,15 @@ import javax.ejb.*;
 /**
  * Abstract base class for a 3.0 session object
  */
-abstract public class StatelessObject extends AbstractEJBObject
-  implements EJBLocalObject, EJBObject
+abstract public class StatelessObject<T>
 {
   private static final Logger log
     = Logger.getLogger(StatelessObject.class.getName());
   
-  protected final StatelessServer _server;
-  protected final Class<?> _api;
+  protected final StatelessServer<T> _server;
+  protected final Class<T> _api;
 
-  protected StatelessObject(StatelessServer server, Class<?> api)
+  protected StatelessObject(StatelessServer<T> server, Class<T> api)
   {
     _server = server;
     _api = api;
@@ -59,7 +58,7 @@ abstract public class StatelessObject extends AbstractEJBObject
   /**
    * Returns the stateless server.
    */
-  public StatelessServer getStatelessServer()
+  public StatelessServer<T> getStatelessServer()
   {
     return _server;
   }
@@ -67,70 +66,15 @@ abstract public class StatelessObject extends AbstractEJBObject
   /**
    * Returns the stateless server.
    */
-  public AbstractServer getServer()
+  public AbstractServer<T> getServer()
   {
     return _server;
-  }
-  
-  /*
-   * Returns the handle.
-   */
-  public Handle getHandle()
-  {
-    return getServer().getHandleEncoder().createHandle(__caucho_getId());
-  }
-
-  /**
-   * Returns the EJBHome stub for the container.
-   */
-  public EJBHome getEJBHome()
-  {
-    try {
-      return getServer().getEJBHome();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-    }
-  }
-
-  /**
-   * Returns the EJBLocalHome stub for the container.
-   */
-  public EJBLocalHome getEJBLocalHome()
-  {
-    try {
-      return (EJBLocalHome) getServer().getEJBLocalHome();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-      return null;
-    }
-  }
-
-  public Object getPrimaryKey()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the SessionBean's primary stub
-   */
-  public EJBObject getEJBObject()
-  {
-    return this;
-  }
-
-  /**
-   * Returns the SessionBean's primary stub
-   */
-  public EJBLocalObject getEJBLocalObject()
-  {
-    return this;
   }
 
   /**
    * Returns the server.
    */
-  public AbstractServer __caucho_getServer()
+  public AbstractServer<T> __caucho_getServer()
   {
     return getServer();
   }
@@ -143,26 +87,6 @@ abstract public class StatelessObject extends AbstractEJBObject
     return "::ejb:stateless";
   }
 
-  //
-  // EJB 2.1 methods
-  //
-
-  /**
-   * Returns true if the two objects are identical.
-   */
-  public boolean isIdentical(EJBObject obj) throws RemoteException
-  {
-    return getHandle().equals(obj.getHandle());
-  }
-
-  /**
-   * Returns true if the two objects are identical.
-   */
-  public boolean isIdentical(EJBLocalObject obj)
-  {
-    return this == obj;
-  }
-
   /**
    * Serialize the HomeSkeletonWrapper in place of this object.
    *
@@ -170,11 +94,7 @@ abstract public class StatelessObject extends AbstractEJBObject
    */
   public Object writeReplace() throws ObjectStreamException
   {
-    return _server.getObjectHandle(this, _api);
-  }
-
-  public void remove()
-    throws javax.ejb.RemoveException
-  {
+    throw new UnsupportedOperationException(getClass().getName());
+    // XXX:return _server.getObjectHandle(this, _api);
   }
 }

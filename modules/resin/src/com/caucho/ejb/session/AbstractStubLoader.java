@@ -19,30 +19,55 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
+package com.caucho.ejb.session;
 
-import com.caucho.config.gen.ApiClass;
+import com.caucho.config.ConfigException;
+import com.caucho.java.WorkDir;
+import com.caucho.loader.Loader;
+import com.caucho.vfs.Path;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateless view
+ * Class loader builds stubs.
+ * picks up new jars.
  */
-public class StatelessLocalView extends StatelessObjectView {
-  public StatelessLocalView(StatelessGenerator bean, ApiClass api)
+abstract public class AbstractStubLoader extends Loader {
+  // The work directory
+  private Path _path;
+
+  /**
+   * Sets the resource directory.
+   */
+  public void setPath(Path path)
   {
-    super(bean, api);
+    _path = path;
   }
 
-  @Override
-  public String getViewClassName()
+  /**
+   * Gets the resource path.
+   */
+  public Path getPath()
   {
-    return getViewClass().getSimpleName() + "__EJBLocal";
+    if (_path != null)
+      return _path;
+    else
+      return WorkDir.getLocalWorkDir();
   }
+
+  /**
+   * Initializes the loader.
+   */
+  abstract public void init()
+    throws ConfigException;
+
+  /**
+   * Adds a stub class.
+   */
+  abstract public void addStubClass(String className);
 }

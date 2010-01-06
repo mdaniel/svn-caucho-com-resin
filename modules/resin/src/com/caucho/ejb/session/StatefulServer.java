@@ -31,11 +31,10 @@ package com.caucho.ejb.session;
 
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.ejb.AbstractContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatefulBeanImpl;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.protocol.AbstractHandle;
+import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
 
@@ -152,19 +151,6 @@ public class StatefulServer<T> extends SessionServer<T>
     
     return new StatefulComponent(provider, beanClass);
   }
-  
-  /**
-   * Creates a handle for a new session.
-   */
-  AbstractHandle createHandle(AbstractContext context)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-    /*
-    String key = ((StatelessContext) context).getPrimaryKey();
-
-    return getHandleEncoder().createHandle(key);
-     */
-  }
 
   public void addSession(StatefulObject remoteObject)
   {
@@ -237,6 +223,8 @@ public class StatefulServer<T> extends SessionServer<T>
    */
   public String createSessionKey(StatefulObject remote)
   {
+    throw new UnsupportedOperationException(getClass().getName());
+    /*
     String key = getHandleEncoder().createRandomStringKey();
 
     if (_remoteSessions == null)
@@ -245,6 +233,7 @@ public class StatefulServer<T> extends SessionServer<T>
     _remoteSessions.put(key, remote);
 
     return key;
+    */
   }
 
   /**
@@ -264,28 +253,14 @@ public class StatefulServer<T> extends SessionServer<T>
     else
       return null;
   }
-  
-  /**
-   * Remove an object by its handle.
-   */
-  @Override
-  public Object remove(AbstractHandle handle)
-  {
-    if (_remoteSessions != null)
-      return _remoteSessions.remove(handle.getObjectId());
-    else
-      return null;
-    // _ejbManager.remove(handle);
-  }
 
   /**
    * Remove an object.
    */
-  @Override
-  public void remove(Object key)
+  public void remove(String key)
   {
     if (_remoteSessions != null) {
-      _remoteSessions.remove(String.valueOf(key));
+      _remoteSessions.remove(key);
 
       /*
       // ejb/0fe2
@@ -314,6 +289,7 @@ public class StatefulServer<T> extends SessionServer<T>
 
     _remoteSessions = null;
 
+    /* XXX: may need to restore this
     for (StatefulObject obj : values) {
       try {
         obj.remove();
@@ -321,6 +297,7 @@ public class StatefulServer<T> extends SessionServer<T>
         log.log(Level.WARNING, e.toString(), e);
       }
     }
+    */
     
     log.fine(this + " closed");
   }

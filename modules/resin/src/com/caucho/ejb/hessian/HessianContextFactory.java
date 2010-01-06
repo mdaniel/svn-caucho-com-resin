@@ -65,6 +65,7 @@ public class HessianContextFactory implements InitialContextFactory {
       String auth = Base64.encode(user + ':' + pw);
       
       HessianModel model = new HessianModel(prefix);
+      /* XXX: needs replacement
       HessianClientContainer client;
       try {
 	client = new HessianClientContainer(model.getURLPrefix());
@@ -74,7 +75,7 @@ public class HessianContextFactory implements InitialContextFactory {
       }
 
       model.setClientContainer(client);
-      
+      */
       return new ContextImpl(model, environment);
     }
 
