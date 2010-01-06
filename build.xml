@@ -8,6 +8,8 @@
 
   <property name="shell" value="bash"/>
 
+  <property name="debian.component" value="universe"/>
+
   <target name="compile" 
           depends="init, hessian, javaee, jaxstream, jcache, portlet, script, resin-kernel, quercus, resin, ecmascript, inject, webutil, conf, ext, j2ee-management, j2ee-deploy">
   </target>

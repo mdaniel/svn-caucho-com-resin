@@ -8,7 +8,7 @@
   -->
   <property name="resindir" location="."/>
   <property name="prodir" location="${basedir}/../pro"/>
-  
+
   <property name="install" location="${basedir}/"/>
   <property name="resin.install" location="${resindir}/"/>
 
@@ -17,22 +17,22 @@
 
   <property name="artifacts" location="${basedir}/artifacts"/>
   <property name="resin.artifacts" location="${resindir}/artifacts"/>
-  
+
   <property name="src" location="${basedir}/src"/>
   <property name="ext" location="${resindir}/modules/ext"/>
   <property name="ivy.lib" location="${resindir}/ivy-lib"/>
   <property name="doc" location="${resindir}/doc"/>
 
   <property name="build" location="${install}/build"/>
-  
+
   <property name="lib" location="${install}/lib"/>
   <property name="resin.lib" location="${resin.install}/lib"/>
 
   <property name="resin.http" value="8080"/>
   <property name="resin.https" value="8443"/>
-  
+
   <property name="clientlib" location="${install}/clientlib"/>
-  
+
   <property name="dist" location="${install}/dist"/>
   <property name="resin.dist" location="${resin.install}/dist"/>
 
@@ -56,6 +56,8 @@
   <property name="jdkapi.href" value="http://java.sun.com/j2se/1.5.0/docs/api"/>
 
   <property name="shell" value="bash"/>
+
+  <property name="debian.stability" value="unstable"/>
 
   <target name="update">
     <mkdir dir="${ivy.lib}"/>
@@ -232,7 +234,7 @@
     </copy>
 
     <copy tofile="${artifact.build}/META-INF/maven/caucho.com/pom.xml"
-	  file="${artifact.maven}/pom.xml"
+          file="${artifact.maven}/pom.xml"
           preservelastmodified="true"
           overwrite="true">
         <filterset>
@@ -1237,15 +1239,10 @@
         <include name="configure"/>
       </fileset>
     </chmod>
-    
+
     <exec dir="${libexec}" executable="/bin/sh">
       <arg value="configure"/>
       <arg value="--prefix=${libexec}"/>
-      <!--
-      <arg value="-with-resin-root=dist-debian/var/www"/>
-      <arg value="-with-resin-init-d=dist-debian/etc/init.d/resin"/>
-      <arg value="-with-resin-conf=${libexec}/etc/resin"/>
-      -->
     </exec>
     
     <exec dir="${libexec}" executable="make">
@@ -1255,7 +1252,7 @@
       <arg value="install"/>
     </exec>
   </target>
-  
+
   <target name="debian" depends="compile,resin.dist.jar,debian-libexec,debian-perm">
     <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
@@ -1380,7 +1377,7 @@
       </fileset>
     </copy>
 
-    <exec executable="uname" outputproperty="architecture">
+    <exec executable="uname" outputproperty="debian.architecture">
       <arg value="-m"/>
  
       <redirector>
@@ -1397,7 +1394,7 @@
           tofile="dist-debian/DEBIAN/control">
       <filterset>
         <filter token="VERSION" value="${version}"/>
-        <filter token="ARCHITECTURE" value="${architecture}"/>
+        <filter token="ARCHITECTURE" value="${debian.architecture}"/>
       </filterset>
     </copy>
 
@@ -1410,14 +1407,30 @@
     <chmod perm="755" file="dist-debian/DEBIAN/postinst"/>
 
     <exec executable="${basedir}/debian-perm"/>
+
+    <delete dir="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"
+            failonerror="false"/>
+
+    <mkdir dir="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"/>
         
     <exec executable="dpkg">
       <arg value="-b"/>
       <arg value="dist-debian"/>
-      <arg value="${dist}/${shortproduct}_${version}-${architecture}.deb"/>
+      <arg value="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/${shortproduct}_${version}-${debian.architecture}.deb"/>
+    </exec>
+
+    <exec executable="dpkg-scanpackages"
+          dir="/tmp/debian"
+          output="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/Packages"
+          logError="true">
+      <arg value="dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"/>
+    </exec>
+
+    <exec executable="gzip">
+      <arg value="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/Packages"/>
     </exec>
   </target>
-  
+
   <target name="debian-src" depends="init">
     <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
