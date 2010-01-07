@@ -42,17 +42,17 @@ import com.caucho.config.program.ConfigProgram;
  */
 abstract public class InjectionPointHandler {
   public void introspectType(ArrayList<ConfigProgram> program,
-                             AnnotatedType type)
+                             AnnotatedType<?> type)
   {
   }
   
   public void introspectField(ArrayList<ConfigProgram> program,
-                              AnnotatedField field)
+                              AnnotatedField<?> field)
   {
   }
   
   public void introspectMethod(ArrayList<ConfigProgram> program,
-                               AnnotatedMethod method)
+                               AnnotatedMethod<?> method)
   {
   }
 }
