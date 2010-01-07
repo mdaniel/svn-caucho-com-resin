@@ -1,8 +1,0 @@
-<ivysettings>
-  <settings defaultResolver="caucho"/>
-  <resolvers>
-    <url name="caucho" m2compatible="true">
-      <artifact pattern="http://caucho.com/m2/com/caucho/[artifact]/[revision]/[artifact]-[revision].jar"/>
-    </url>
-  </resolvers>
-</ivysettings>
