@@ -46,6 +46,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.lang.reflect.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -61,16 +62,16 @@ import java.util.logging.Logger;
  * JVM exits, the WatchdogProcess will finish.  It is not reused on a
  * restart.
  */
-class WatchdogProcess
+class WatchdogChildProcess
 {
-  private static final L10N L = new L10N(WatchdogProcess.class);
+  private static final L10N L = new L10N(WatchdogChildProcess.class);
   private static final Logger log
-    = Logger.getLogger(WatchdogProcess.class.getName());
+    = Logger.getLogger(WatchdogChildProcess.class.getName());
 
   private static Boot _jniBoot;
 
   private final String _id;
-  private final Watchdog _watchdog;
+  private final WatchdogChild _watchdog;
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private WatchdogActor _watchdogActor;
@@ -82,7 +83,7 @@ class WatchdogProcess
 
   private int _status = -1;
 
-  WatchdogProcess(String id, Watchdog watchdog)
+  WatchdogChildProcess(String id, WatchdogChild watchdog)
   {
     _id = id;
     _watchdog = watchdog;
@@ -91,6 +92,17 @@ class WatchdogProcess
   int getPid()
   {
     return _pid;
+  }
+  
+  /**
+   * General queries of the Resin instance.
+   */
+  Serializable queryGet(Serializable payload)
+  {
+    if (_watchdogActor != null)
+      return _watchdogActor.queryGet(payload);
+    else
+      return null;
   }
 
   public void run()
@@ -292,7 +304,7 @@ class WatchdogProcess
     try {
       ThreadPool.getCurrent().schedule(link);
     } catch (Exception e) {
-      e.printStackTrace();
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 
@@ -461,7 +473,14 @@ class WatchdogProcess
 
     jvmArgs.add(_watchdog.getJavaExe());
 
-    jvmArgs.add("-Dresin.watchdog=" + _watchdog.getWatchdogPort());
+    // user args are first so they're displayed by ps
+    for (String arg : _watchdog.getJvmArgs()) {
+      if (! arg.startsWith("-Djava.class.path"))
+        jvmArgs.add(arg);
+    }
+    
+    jvmArgs.add("-Dresin.server=" + _id);
+
     jvmArgs.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
 
     // This is needed for JMX to work correctly.
@@ -481,11 +500,6 @@ class WatchdogProcess
 
     if (! _watchdog.hasXmx())
       jvmArgs.add("-Xmx256m");
-
-    for (String arg : _watchdog.getJvmArgs()) {
-      if (! arg.startsWith("-Djava.class.path"))
-        jvmArgs.add(arg);
-    }
 
     String[] argv = _watchdog.getArgv();
 

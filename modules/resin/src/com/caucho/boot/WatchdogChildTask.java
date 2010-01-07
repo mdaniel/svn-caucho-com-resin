@@ -29,12 +29,12 @@
 
 package com.caucho.boot;
 
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.util.*;
+import java.io.Serializable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.lang.reflect.*;
-import java.net.*;
-import java.util.logging.*;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.util.ThreadPool;
 
 /**
  * Thread responsible for the Resin restart capability, managing and
@@ -44,19 +44,18 @@ import java.util.logging.*;
  * Resin exits, the WatchdogProcess completes, and WatchdogTask will
  * create a new one.
  */
-class WatchdogTask implements Runnable
+class WatchdogChildTask implements Runnable
 {
-  private static final L10N L = new L10N(WatchdogTask.class);
   private static final Logger log
-    = Logger.getLogger(WatchdogTask.class.getName());
+    = Logger.getLogger(WatchdogChildTask.class.getName());
 
-  private final Watchdog _watchdog;
+  private final WatchdogChild _watchdog;
   
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  private WatchdogProcess _process;
+  private WatchdogChildProcess _process;
 
-  WatchdogTask(Watchdog watchdog)
+  WatchdogChildTask(WatchdogChild watchdog)
   {
     _watchdog = watchdog;
 
@@ -86,11 +85,38 @@ class WatchdogTask implements Runnable
    */
   int getPid()
   {
-    WatchdogProcess process = _process;
-    if (process != null)
-      return process.getPid();
-    else
+    WatchdogChildProcess process = _process;
+    
+    if (process == null)
       return 0;
+    
+    int pid = process.getPid();
+      
+    if (pid > 0)
+      return pid;
+    
+    PidQuery pidQuery = new PidQuery();
+    
+    try {
+      PidQuery result = (PidQuery) process.queryGet(pidQuery);
+
+      if (result != null)
+        return result.getPid();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return 0;
+  }
+  
+  Serializable queryGet(Serializable payload)
+  {
+    WatchdogChildProcess process = _process;
+    
+    if (process != null)
+      return process.queryGet(payload);
+    else
+      return null;
   }
 
   /**
@@ -113,7 +139,7 @@ class WatchdogTask implements Runnable
     if (! _lifecycle.toDestroy())
       return;
 
-    WatchdogProcess process = _process;
+    WatchdogChildProcess process = _process;
     _process = null;
     
     if (process != null) {
@@ -142,14 +168,14 @@ class WatchdogTask implements Runnable
 
 	log.info(_watchdog + " starting");
 	
-	_process = new WatchdogProcess(id, _watchdog);
+	_process = new WatchdogChildProcess(id, _watchdog);
 	
 	try {
 	  _process.run();
 	} catch (Exception e) {
 	  log.log(Level.WARNING, e.toString(), e);
 	} finally {
-	  WatchdogProcess process = _process;
+	  WatchdogChildProcess process = _process;
 	  _process = null;
 
 	  if (process != null)
@@ -174,7 +200,7 @@ class WatchdogTask implements Runnable
   {
     _lifecycle.toDestroy();
     
-    WatchdogProcess process = _process;
+    WatchdogChildProcess process = _process;
     _process = null;
     
     if (process != null)

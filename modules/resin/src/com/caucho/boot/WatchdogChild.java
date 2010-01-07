@@ -35,6 +35,7 @@ import com.caucho.server.connection.Port;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
 
+import java.io.Serializable;
 import java.lang.reflect.*;
 import java.net.*;
 import java.util.ArrayList;
@@ -46,19 +47,19 @@ import java.util.logging.Logger;
 /**
  * Thread responsible for watching a backend server.
  */
-class Watchdog
+class WatchdogChild
 {
-  private static final L10N L = new L10N(Watchdog.class);
+  private static final L10N L = new L10N(WatchdogChild.class);
   private static final Logger log
-    = Logger.getLogger(Watchdog.class.getName());
+    = Logger.getLogger(WatchdogChild.class.getName());
   
   private final String _id;
 
   private final WatchdogConfig _config;
   private final WatchdogAdmin _admin;
   
-  private AtomicReference<WatchdogTask> _taskRef
-    = new AtomicReference<WatchdogTask>();
+  private AtomicReference<WatchdogChildTask> _taskRef
+    = new AtomicReference<WatchdogChildTask>();
   
   private boolean _isConsole;
 
@@ -67,7 +68,7 @@ class Watchdog
   private Date _lastStartTime;
   private int _startCount;
 
-  Watchdog(String id, WatchdogArgs args, Path rootDirectory)
+  WatchdogChild(String id, WatchdogArgs args, Path rootDirectory)
   {
     _id = id;
     _config = new WatchdogConfig(args, rootDirectory);
@@ -75,7 +76,7 @@ class Watchdog
     _admin = new WatchdogAdmin();
   }
 
-  Watchdog(WatchdogConfig config)
+  WatchdogChild(WatchdogConfig config)
   {
     _id = config.getId();
     _config = config;
@@ -268,7 +269,7 @@ class Watchdog
 
   public String getState()
   {
-    WatchdogTask task = _taskRef.get();
+    WatchdogChildTask task = _taskRef.get();
     
     if (task == null)
       return "inactive";
@@ -278,12 +279,22 @@ class Watchdog
 
   int getPid()
   {
-    WatchdogTask task = _taskRef.get();
+    WatchdogChildTask task = _taskRef.get();
     
     if (task != null)
       return task.getPid();
     else
       return 0;
+  }
+  
+  Serializable queryGet(Serializable payload)
+  {
+    WatchdogChildTask task = _taskRef.get();
+    
+    if (task != null)
+      return task.queryGet(payload);
+    else
+      return null;
   }
 
   boolean isVerbose()
@@ -295,7 +306,7 @@ class Watchdog
   {
     _isConsole = true;
     
-    WatchdogTask task = new WatchdogTask(this);
+    WatchdogChildTask task = new WatchdogChildTask(this);
 
     if (! _taskRef.compareAndSet(null, task))
       return -1;
@@ -310,10 +321,10 @@ class Watchdog
    */
   public void start()
   {
-    WatchdogTask task = new WatchdogTask(this);
+    WatchdogChildTask task = new WatchdogChildTask(this);
 
     if (! _taskRef.compareAndSet(null, task)) {
-      WatchdogTask oldTask = _taskRef.get();
+      WatchdogChildTask oldTask = _taskRef.get();
       
       if (oldTask != null && ! oldTask.isActive()) {
 	_taskRef.set(task);
@@ -338,7 +349,7 @@ class Watchdog
    */
   public void stop()
   {
-    WatchdogTask task = _taskRef.getAndSet(null);
+    WatchdogChildTask task = _taskRef.getAndSet(null);
     
     if (task != null)
       task.stop();
@@ -349,7 +360,7 @@ class Watchdog
    */
   public void kill()
   {
-    WatchdogTask task = _taskRef.getAndSet(null);
+    WatchdogChildTask task = _taskRef.getAndSet(null);
     
     if (task != null)
       task.kill();
@@ -371,7 +382,7 @@ class Watchdog
       _initialStartTime = _lastStartTime; 
   }
 
-  void completeTask(WatchdogTask task)
+  void completeTask(WatchdogChildTask task)
   {
     _taskRef.compareAndSet(task, null);
   }
@@ -396,7 +407,7 @@ class Watchdog
 
     public String getId()
     {
-      return Watchdog.this.getId();
+      return WatchdogChild.this.getId();
     }
     
     public String getName()
@@ -412,22 +423,22 @@ class Watchdog
 
     public String getResinHome()
     {
-      return Watchdog.this.getResinHome().getNativePath();
+      return WatchdogChild.this.getResinHome().getNativePath();
     }
 
     public String getResinRoot()
     {
-      return Watchdog.this.getResinRoot().getNativePath();
+      return WatchdogChild.this.getResinRoot().getNativePath();
     }
 
     public String getResinConf()
     {
-      return Watchdog.this.getResinConf().getNativePath();
+      return WatchdogChild.this.getResinConf().getNativePath();
     }
 
     public String getUserName()
     {
-      String userName = Watchdog.this.getUserName();
+      String userName = WatchdogChild.this.getUserName();
 
       if (userName != null)
 	return userName;
@@ -437,7 +448,7 @@ class Watchdog
 
     public String getState()
     {
-      WatchdogTask task = _taskRef.get();
+      WatchdogChildTask task = _taskRef.get();
     
       if (task == null)
 	return "inactive";
@@ -470,17 +481,17 @@ class Watchdog
 
     public void start()
     {
-      Watchdog.this.start();
+      WatchdogChild.this.start();
     }
 
     public void stop()
     {
-      Watchdog.this.stop();
+      WatchdogChild.this.stop();
     }
 
     public void kill()
     {
-      Watchdog.this.kill();
+      WatchdogChild.this.kill();
     }
   }
 }
