@@ -1026,7 +1026,7 @@ abstract public class Cluster
   /**
    * EL variables
    */
-  public class Var {
+  public class ClusterVar {
     /**
      * Returns the resin.id
      */

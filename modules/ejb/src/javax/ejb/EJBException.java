@@ -32,6 +32,8 @@ package javax.ejb;
  * The main ejb context.
  */
 public class EJBException extends RuntimeException {
+  private Exception causeException;
+  
   public EJBException()
   {
   }
@@ -39,6 +41,8 @@ public class EJBException extends RuntimeException {
   public EJBException(Exception e)
   {
     super(e);
+
+    this.causeException = e;
   }
 
   public EJBException(String message)
@@ -49,10 +53,12 @@ public class EJBException extends RuntimeException {
   public EJBException(String message, Exception e)
   {
     super(message, e);
+
+    this.causeException = e;
   }
 
   public Exception getCausedByException()
   {
-    return (Exception) getCause();
+    return causeException;
   }
 }

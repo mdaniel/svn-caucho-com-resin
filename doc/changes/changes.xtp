@@ -13,6 +13,7 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>config: ${cluster} regression failure (#3842, rep by Jamie Novak)</li>
 <li>database-pool: connection timing issues with multiple request (#3837, rep by Bryant Harris)</li>
 </ul>
 </s2>

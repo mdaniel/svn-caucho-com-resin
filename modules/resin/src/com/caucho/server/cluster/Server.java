@@ -36,6 +36,7 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.distcache.ClusterCache;
 import com.caucho.distcache.GlobalCache;
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
@@ -303,7 +304,9 @@ public class Server extends ProtocolDispatchServer
     _brokerManager.addBroker("resin.caucho", _broker);
 
     _serverLinkManager = new ServerAuthManager(this);
-    // Config.setProperty("server", new ServerVar(server), _classLoader);
+    
+    Config.setProperty("server", new ServerVar(_selfServer), _classLoader);
+    Config.setProperty("cluster", new ClusterVar(), _classLoader);
 
     _selfServer.getServerProgram().configure(this);
   }
@@ -2578,6 +2581,138 @@ public class Server extends ProtocolDispatchServer
     return (getClass().getSimpleName()
             + "[id=" + getServerId()
             + ",cluster=" + _selfServer.getCluster().getId() + "]");
+  }
+
+  /**
+   * EL variables
+   */
+  public class ClusterVar {
+    /**
+     * Returns the resin.id
+     */
+    public String getId()
+    {
+      return getCluster().getId();
+    }
+
+    /**
+     * Returns the root directory.
+     *
+     * @return root directory
+     */
+    public Path getRoot()
+    {
+      return getRootDirectory();
+    }
+
+    /**
+     * Returns the root directory.
+     *
+     * @return root directory
+     */
+    public Path getRootDir()
+    {
+      return getRootDirectory();
+    }
+
+    /**
+     * Returns the root directory.
+     *
+     * @return root directory
+     */
+    public Path getRootDirectory()
+    {
+      return Server.this.getRootDirectory();
+    }
+  }
+
+  public class ServerVar {
+    private final ClusterServer _server;
+
+    public ServerVar(ClusterServer server)
+    {
+      _server = server;
+    }
+
+    public String getId()
+    {
+      return _server.getId();
+    }
+
+    private int getPort(Port port)
+    {
+      if (port == null)
+        return 0;
+
+      return port.getPort();
+    }
+
+    private String getAddress(Port port)
+    {
+      if (port == null)
+        return null;
+
+      String address = port.getAddress();
+
+      if (address == null || address.length() == 0)
+        address = "INADDR_ANY";
+
+      return address;
+    }
+
+    private Port getFirstPort(String protocol, boolean isSSL)
+    {
+      if (_server.getPorts() == null)
+        return null;
+
+      for (Port port : _server.getPorts()) {
+        if (protocol.equals(port.getProtocolName()) && (port.isSSL() == isSSL))
+          return port;
+      }
+
+      return null;
+    }
+
+    public String getAddress()
+    {
+      return getAddress(_server.getClusterPort());
+    }
+
+    public int getPort()
+    {
+      return getPort(_server.getClusterPort());
+    }
+
+    public String getHttpAddress()
+    {
+      return getAddress(getFirstPort("http", false));
+    }
+
+    public int getHttpPort()
+    {
+      return getPort(getFirstPort("http", false));
+    }
+
+
+    public String getHttpsAddress()
+    {
+      return getAddress(getFirstPort("http", true));
+    }
+
+    public int getHttpsPort()
+    {
+      return getPort(getFirstPort("http", true));
+    }
+
+    /**
+     * @deprecated backwards compat.
+     */
+    public Path getRoot()
+    {
+      Resin resin =  Resin.getLocal();
+
+      return resin == null ? Vfs.getPwd() : resin.getRootDirectory();
+    }
   }
 
   public static class SelectManagerCompat {
