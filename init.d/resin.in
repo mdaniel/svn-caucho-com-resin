@@ -12,8 +12,21 @@
 # To install, configure this file as needed and copy init.resin
 # to /etc/rc.d/init.d as resin.  Then use "# /sbin/chkconfig resin reset"
 #
+
 JAVA_HOME="@JAVA_HOME@"
 RESIN_HOME="@resin_home@"
+
+# for ubuntu
+if [ ! -d $JAVA_HOME ]; then
+  _JAVA_HOMES="/usr/lib/jvm/java-6-sun /usr/lib/jvm/java-6-openjdk"
+
+  for _java_home in $_JAVA_HOMES; do
+    if [ -d $_java_home ]; then
+      JAVA_HOME=$_java_home
+      break
+    fi
+  done
+fi
 
 export JAVA_HOME RESIN_HOME
 
@@ -85,9 +98,9 @@ case "$1" in
   stop)
 	log_daemon_msg "Stopping resin"
 	if test -n "$USER"; then
-  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop""" 1>/dev/null 2>/dev/null
+  	  su $USER -c """$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown""" 1>/dev/null 2>/dev/null
 	else
-	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS stop 2>&1`
+	    errors=`$JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS shutdown 2>&1`
 	    if [ $? != 0 ]; then
 		log_daemon_msg $errors
 	    fi

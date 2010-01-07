@@ -1,4 +1,4 @@
-<project basedir="." xmlns:ivy="antlib:org.apache.ivy.ant">
+<project basedir="." xmlns:artifact="antlib:org.apache.maven.artifact.ant">
   <property environment="env"/>
 
   <property file="local.properties"/>
@@ -20,7 +20,7 @@
 
   <property name="src" location="${basedir}/src"/>
   <property name="ext" location="${resindir}/modules/ext"/>
-  <property name="ivy.lib" location="${resindir}/ivy-lib"/>
+  <property name="maven.lib" location="${resindir}/maven-lib"/>
   <property name="doc" location="${resindir}/doc"/>
 
   <property name="build" location="${install}/build"/>
@@ -60,8 +60,16 @@
   <property name="debian.stability" value="unstable"/>
 
   <target name="update">
-    <mkdir dir="${ivy.lib}"/>
-    <ivy:retrieve pattern="${ivy.lib}/[artifact]-[revision].[ext]"/>
+    <!-- <mkdir dir="${maven.lib}"/>-->
+    <artifact:dependencies filesetId="dependency.classpath">
+      <pom file="maven.xml"/>
+    </artifact:dependencies>
+
+    <mkdir dir="${maven.lib}"/>
+    <copy todir="${maven.lib}">
+      <fileset refid="dependency.classpath"/>
+      <mapper type="flatten"/>
+    </copy>
   </target>
 
   <target name="tstamp">
@@ -104,7 +112,7 @@
     <mkdir dir="${build}/webapps"/>
     <mkdir dir="${build}/ext-webapp-lib"/>
     <mkdir dir="${build}/plugins"/>
-    <mkdir dir="${ivy.lib}"/>
+    <mkdir dir="${maven.lib}"/>
 
     <condition property="unix">
       <os family="unix"/>
@@ -183,7 +191,7 @@
         <fileset dir="${ext}">
           <include name="**/*.jar"/>
         </fileset>
-        <fileset dir="${ivy.lib}">
+        <fileset dir="${maven.lib}">
           <include name="**/*.jar"/>
         </fileset>
       </classpath>
@@ -264,7 +272,7 @@
         <fileset dir="${ext}">
           <include name="**/*.jar"/>
         </fileset>
-        <fileset dir="${ivy.lib}">
+        <fileset dir="${maven.lib}">
           <include name="**/*.jar"/>
         </fileset>
       </classpath>
@@ -659,7 +667,7 @@
         <include name="modules/ext/jsr173_1.0_api.jar"/>
         <include name="modules/ext/webservices-api.jar"/>
         <include name="modules/ext/webservices-extra-api.jar"/>
-        <include name="ivy-lib"/>
+        <include name="maven-lib"/>
         <include name="win32/**"/>
         <include name="win64/**"/>
         <include name="bin/**"/>
@@ -1406,6 +1414,11 @@
 
     <chmod perm="755" file="dist-debian/DEBIAN/postinst"/>
 
+    <copy file="${install}/debian/prerm"
+          tofile="dist-debian/DEBIAN/prerm"/>
+
+    <chmod perm="755" file="dist-debian/DEBIAN/prerm"/>
+
     <exec executable="${basedir}/debian-perm"/>
 
     <delete dir="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"
@@ -1511,7 +1524,7 @@
   <target name="distclean" depends="init, clean, win32clean">
     <delete dir="${install}/conf"/>
     <delete dir="${lib}"/>
-    <delete dir="${ivy.lib}"/>
+    <delete dir="${maven.lib}"/>
     <delete dir="${clientlib}"/>
     <delete dir="${install}/unix"/>
 
