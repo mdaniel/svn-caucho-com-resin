@@ -685,7 +685,7 @@ public class ConnectionPool extends AbstractManagedObject
         userPoolItem = transaction.allocate(mcf, subject, info);
 
       if (userPoolItem == null)
-        userPoolItem = allocatePoolConnection(mcf, subject, info);
+        userPoolItem = allocatePoolConnection(mcf, subject, info, null);
 
       Object dataSource = userPoolItem.allocateUserConnection();
 
@@ -706,9 +706,10 @@ public class ConnectionPool extends AbstractManagedObject
    * @param subject the user's authentication credentials
    * @param info the user's extra connection information
    */
-  private UserPoolItem allocatePoolConnection(ManagedConnectionFactory mcf,
-                                              Subject subject,
-                                              ConnectionRequestInfo info)
+  UserPoolItem allocatePoolConnection(ManagedConnectionFactory mcf,
+				      Subject subject,
+				      ConnectionRequestInfo info,
+				      UserPoolItem oldItem)
     throws ResourceException
   {
     long expireTime = Alarm.getCurrentTimeActual() + _connectionWaitTimeout;

@@ -312,7 +312,8 @@ class UserPoolItem {
     throws ResourceException
   {
     if (_ownPoolItem == null) {
-      UserPoolItem item = _cm.allocatePool(_mcf, _subject, _info, this);
+      UserPoolItem item
+	= _cm.allocatePoolConnection(_mcf, _subject, _info, this);
 
       assert(item == this);
       
