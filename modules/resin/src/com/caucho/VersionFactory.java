@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,7 +39,7 @@ final public class VersionFactory {
   private static Field _copyright;
 
   public static final String COPYRIGHT =
-    "Copyright(c) 1998-2008 Caucho Technology.  All rights reserved.";
+    "Copyright(c) 1998-2010 Caucho Technology.  All rights reserved.";
 
   public static String FULL_VERSION = "Resin-4.0.s091130 (built Mon, 30 Nov 2009 11:06:01 PST)";
   public static String VERSION = "4.0.s091130";

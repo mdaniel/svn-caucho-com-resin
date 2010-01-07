@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -42,7 +42,7 @@ import javax.servlet.jsp.JspFactory;
  */
 public class JspServlet extends QServlet {
   static final String COPYRIGHT =
-    "Copyright (c) 1998-2008 Caucho Technology.  All rights reserved.";
+    "Copyright (c) 1998-2010 Caucho Technology.  All rights reserved.";
 
   private boolean _isXml = false;
   private boolean _loadTldOnInit = false;

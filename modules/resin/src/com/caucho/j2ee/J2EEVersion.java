@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * Caucho Technology permits modification and use of this file in
  * source and binary form ("the Software") subject to the Caucho
