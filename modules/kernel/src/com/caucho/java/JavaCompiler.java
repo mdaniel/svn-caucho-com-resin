@@ -33,6 +33,7 @@ import com.caucho.bytecode.ByteCodeParser;
 import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.SourceDebugExtensionAttribute;
 import com.caucho.config.*;
+import com.caucho.i18n.CharacterEncoding;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Loader;
 import com.caucho.make.Make;
@@ -84,6 +85,13 @@ public class JavaCompiler {
 
   private JavaCompiler()
   {
+    String encoding = CharacterEncoding.getLocalEncoding();
+    String javaEncoding = Encoding.getJavaName(encoding);
+
+    if (javaEncoding == null || javaEncoding.equals("ISO8859_1"))
+      javaEncoding = null;
+    
+    _charEncoding = javaEncoding;
   }
 
   /**

@@ -29,44 +29,31 @@
 
 package com.caucho.hmtp;
 
-import com.caucho.bam.QueryCallback;
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorClient;
-import com.caucho.bam.SimpleActorClient;
-import com.caucho.bam.SimpleActorStream;
-import com.caucho.bam.ActorException;
-import com.caucho.bam.RemoteConnectionFailedException;
-import com.caucho.hessian.io.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-import java.util.concurrent.*;
-import java.util.logging.*;
-import java.security.PublicKey;
-import javax.servlet.http.HttpServletResponse;
+import com.caucho.bam.Actor;
+import com.caucho.bam.ActorStream;
+import com.caucho.bam.RemoteConnectionFailedException;
 
 /**
  * HMTP client protocol
  */
 public class HmtpLink implements Runnable {
-  private static final Logger log
-    = Logger.getLogger(HmtpLink.class.getName());
-
   protected InputStream _is;
   protected OutputStream _os;
 
   private String _jid;
 
-  private SimpleActorStream _actorStream;
+  private ActorStream _actorStream;
   
   private HmtpWriter _toLinkStream;
   private HmtpReader _in;
 
-  public HmtpLink(SimpleActorStream actorStream, InputStream is, OutputStream os)
+  public HmtpLink(Actor actor, InputStream is, OutputStream os)
   {
-    _actorStream = actorStream;
+    _actorStream = actor.getActorStream();
     
     _is = is;
     _os = os;
@@ -74,10 +61,10 @@ public class HmtpLink implements Runnable {
     _toLinkStream = new HmtpWriter(_os);
     _in = new HmtpReader(_is);
 
-    if (actorStream.getJid() == null)
-      actorStream.setJid(actorStream.getClass().getSimpleName() + "@link");
+    if (actor.getJid() == null)
+      actor.setJid(actor.getClass().getSimpleName() + "@link");
     
-    actorStream.setLinkStream(_toLinkStream);
+    actor.setLinkStream(_toLinkStream);
   }
 
   public String getJid()
@@ -96,7 +83,7 @@ public class HmtpLink implements Runnable {
   }
   
   /**
-   * Returns the current stream to the broker, throwing an exception if
+   * Returns the current stream to the actor, throwing an exception if
    * it's unavailable
    */
   public ActorStream getActorStream()

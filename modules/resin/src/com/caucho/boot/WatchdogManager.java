@@ -30,6 +30,7 @@
 package com.caucho.boot;
 
 import com.caucho.admin.RemoteAdminService;
+import com.caucho.bam.ActorError;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.BeanFactory;
@@ -40,6 +41,7 @@ import com.caucho.config.lib.ResinConfigLibrary;
 import com.caucho.config.types.RawString;
 import com.caucho.config.types.Period;
 import com.caucho.hemp.broker.HempBroker;
+import com.caucho.jmx.Jmx;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
 import com.caucho.log.EnvironmentStream;
@@ -73,6 +75,9 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
 /**
  * Process responsible for watching a backend watchdog.
  */
@@ -94,8 +99,8 @@ class WatchdogManager implements AlarmListener {
   private Server _server;
   private Port _httpPort;
 
-  private HashMap<String,Watchdog> _watchdogMap
-    = new HashMap<String,Watchdog>();
+  private HashMap<String,WatchdogChild> _watchdogMap
+    = new HashMap<String,WatchdogChild>();
 
   WatchdogManager(String []argv)
     throws Exception
@@ -149,7 +154,7 @@ class WatchdogManager implements AlarmListener {
 
     readConfig(_args);
 
-    Watchdog server = null;
+    WatchdogChild server = null;
 
     if (_args.isDynamicServer()) {
       String serverId = _args.getDynamicAddress() + "-"
@@ -309,7 +314,7 @@ class WatchdogManager implements AlarmListener {
       return false;
   }
 
-  Watchdog findServer(String id)
+  WatchdogChild findServer(String id)
   {
     return _watchdogMap.get(id);
   }
@@ -326,12 +331,15 @@ class WatchdogManager implements AlarmListener {
     synchronized (_watchdogMap) {
       ArrayList<String> keys = new ArrayList<String>(_watchdogMap.keySet());
       Collections.sort(keys);
+      
+      sb.append("\nwatchdog:\n");
+      sb.append("  watchdog-pid: " + getWatchdogPid());
 
       for (String key : keys) {
-        Watchdog watchdog = _watchdogMap.get(key);
+        WatchdogChild child = _watchdogMap.get(key);
 
-        sb.append("\n");
-        sb.append("server '" + key + "' : " + watchdog.getState() + "\n");
+        sb.append("\n\n");
+        sb.append("server '" + key + "' : " + child.getState() + "\n");
 
         if (getAdminCookie() == null)
           sb.append("  password: missing\n");
@@ -340,16 +348,16 @@ class WatchdogManager implements AlarmListener {
 
         sb.append("  user: " + System.getProperty("user.name"));
 
-        if (watchdog.getGroupName() != null)
-          sb.append("(" + watchdog.getGroupName() + ")");
+        if (child.getGroupName() != null)
+          sb.append("(" + child.getGroupName() + ")");
 
         sb.append("\n");
 
-        sb.append("  root: " + watchdog.getResinRoot() + "\n");
-        sb.append("  conf: " + watchdog.getResinConf() + "\n");
+        sb.append("  root: " + child.getResinRoot() + "\n");
+        sb.append("  conf: " + child.getResinConf() + "\n");
 
-        if (watchdog.getPid() > 0)
-          sb.append("  pid: " + watchdog.getPid());
+        if (child.getPid() > 0)
+          sb.append("  pid: " + child.getPid());
       }
     }
 
@@ -380,7 +388,7 @@ class WatchdogManager implements AlarmListener {
       if (args.isDynamicServer())
         serverId = args.getDynamicAddress() + "-" + args.getDynamicPort();
 
-      Watchdog watchdog = _watchdogMap.get(serverId);
+      WatchdogChild watchdog = _watchdogMap.get(serverId);
 
       if (watchdog == null)
         throw new ConfigException(L().l("No matching <server> found for -server '{0}' in '{1}'",
@@ -398,7 +406,7 @@ class WatchdogManager implements AlarmListener {
   void stopServer(String serverId)
   {
     synchronized (_watchdogMap) {
-      Watchdog watchdog = _watchdogMap.get(serverId);
+      WatchdogChild watchdog = _watchdogMap.get(serverId);
 
       if (watchdog == null)
         throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
@@ -417,7 +425,7 @@ class WatchdogManager implements AlarmListener {
   {
     // no synchronization because kill must avoid blocking
 
-    Watchdog watchdog = _watchdogMap.get(serverId);
+    WatchdogChild watchdog = _watchdogMap.get(serverId);
 
     if (watchdog == null)
       throw new ConfigException(L().l("No matching <server> found for -server '{0}' in {1}",
@@ -435,7 +443,7 @@ class WatchdogManager implements AlarmListener {
   void restartServer(String serverId, String []argv)
   {
     synchronized (_watchdogMap) {
-      Watchdog server = _watchdogMap.get(serverId);
+      WatchdogChild server = _watchdogMap.get(serverId);
 
       if (server != null)
         server.stop();
@@ -449,7 +457,7 @@ class WatchdogManager implements AlarmListener {
     return _server != null && _server.isActive();
   }
 
-  private Watchdog readConfig(WatchdogArgs args)
+  private WatchdogChild readConfig(WatchdogArgs args)
     throws Exception
   {
     Config config = new Config();
@@ -504,7 +512,7 @@ class WatchdogManager implements AlarmListener {
         server = resin.findServer(serverId);
     }
 
-    Watchdog watchdog = _watchdogMap.get(server.getId());
+    WatchdogChild watchdog = _watchdogMap.get(server.getId());
 
     if (watchdog != null) {
       if (watchdog.isActive()) {
@@ -518,11 +526,40 @@ class WatchdogManager implements AlarmListener {
         watchdog.close();
     }
 
-    watchdog = new Watchdog(server);
+    watchdog = new WatchdogChild(server);
 
     _watchdogMap.put(server.getId(), watchdog);
 
     return watchdog;
+  }
+  
+  private int getWatchdogPid()
+  {
+    try {
+      MBeanServer server = Jmx.getGlobalMBeanServer();
+      ObjectName objName = new ObjectName("java.lang:type=Runtime");
+      
+      String runtimeName = (String) server.getAttribute(objName, "Name");
+      
+      if (runtimeName == null) {
+        return 0;
+      }
+      
+      int p = runtimeName.indexOf('@');
+      
+      if (p > 0) {
+        int pid = Integer.parseInt(runtimeName.substring(0, p));
+
+        return pid;
+      }
+      
+      return 0;
+    } catch (Exception e) {
+      log().log(Level.FINE, e.toString(), e);
+      
+      return 0;
+    }
+
   }
 
   public void waitForExit()

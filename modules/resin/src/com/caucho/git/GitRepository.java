@@ -258,6 +258,14 @@ public class GitRepository {
   public void expandToPath(Path path, String sha1)
     throws IOException
   {
+    long now = Alarm.getCurrentTime();
+    
+    expandToPath(path, sha1, now);
+  }
+  
+  public void expandToPath(Path path, String sha1, long now)
+    throws IOException
+  {
     GitObjectStream is = open(sha1);
     
     try {
@@ -265,7 +273,7 @@ public class GitRepository {
 	GitTree tree = is.parseTree();
 	is.close();
 
-	expandTreeToPath(path, tree);
+	expandTreeToPath(path, tree, now);
       }
       else if (GitType.BLOB == is.getType()) {
 	WriteStream os = path.openWrite();
@@ -275,6 +283,9 @@ public class GitRepository {
 	} finally {
 	  os.close();
 	}
+	
+	// #3839
+	path.setLastModified(now);
       }
       else
 	throw new IOException(L.l("'{0}' is an unexpected type, expected 'blob' or 'tree'",
@@ -284,7 +295,7 @@ public class GitRepository {
     }
   }
 
-  private void expandTreeToPath(Path path, GitTree tree)
+  private void expandTreeToPath(Path path, GitTree tree, long now)
     throws IOException
   {
     path.mkdirs();
@@ -292,7 +303,7 @@ public class GitRepository {
     for (GitTree.Entry entry : tree.entries()) {
       String name = entry.getName();
 
-      expandToPath(path.lookup(name), entry.getSha1());
+      expandToPath(path.lookup(name), entry.getSha1(), now);
     }
   }
 

@@ -68,7 +68,7 @@ class WatchdogClient
   private String _id = "";
 
   private WatchdogConfig _config;
-  private Watchdog _watchdog;
+  private WatchdogChild _watchdog;
 
   private ActorClient _conn;
 
@@ -175,7 +175,7 @@ class WatchdogClient
     throws IOException
   {
     if (_watchdog == null)
-      _watchdog = new Watchdog(_config);
+      _watchdog = new WatchdogChild(_config);
 
     return _watchdog.startConsole();
   }
@@ -395,8 +395,11 @@ class WatchdogClient
     ArrayList<String> list = new ArrayList<String>();
 
     list.add(_config.getJavaExe());
+    
+    // #3759 - user args are first so they're displayed by ps
     list.addAll(_config.getWatchdogJvmArgs());
-    list.add("-Dresin.server=" + _id);
+
+    list.add("-Dresin.watchdog=" + _id);
     list.add("-Djava.util.logging.manager=com.caucho.log.LogManagerImpl");
     list.add("-Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl");
     list.add("-Djava.awt.headless=true");

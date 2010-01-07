@@ -7,9 +7,8 @@
  * notice unmodified.
  *
  * Resin Open Source is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
+ * it under the terms of the GNU General Public License version 2
+ * as published by the Free Software Foundation.
  *
  * Resin Open Source is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
@@ -31,35 +30,34 @@ package com.caucho.boot;
 
 import java.io.Serializable;
 
-import com.caucho.bam.SimpleActor;
-
 /**
- * Service for handling the distributed cache
+ * Queries the Resin instance for its pid.
  */
-public class WatchdogActor extends SimpleActor
-{
-  WatchdogActor(WatchdogChildProcess watchdog)
+@SuppressWarnings("serial")
+public class PidQuery implements Serializable {
+  private final int _pid;
+
+  public PidQuery()
   {
-    setJid("watchdog");
-  }
-  
-  public Serializable queryGet(Serializable payload)
-  {
-    return getLinkClient().queryGet("resin@admin.resin.caucho", payload);
+    _pid = 0;
   }
 
-  public void sendShutdown()
+  public PidQuery(int pid)
   {
-    getLinkStream().querySet(1,
-			     "resin@admin.resin.caucho",
-			     "watchdog@admin.resin.caucho",
-			     new WatchdogStopQuery(""));
+    _pid = pid;
   }
   
-  /*
-  public void destroy()
+  /**
+   * Returns the query's pid
+   */
+  public int getPid()
   {
-    _resin.destroy();
+    return _pid;
   }
-  */
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _pid + "]";
+  }
 }

@@ -13,8 +13,14 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>deploy: git-expand needs to setLastModified of created files to consistent time (#3839, rep by Matt Pangaro)</li>
+<li>watchdog: "status" returns watchdog-pid (#3768, rep by cyttesen)</li>
+<li>watchdog: "status" queries Resin using HMTP/BAM for pid (#3768, rep by cyttesen)</li>
+<li>watchdog: jvm-args are first in command-line to help 'ps' control (#3759, rep by Nathan Bardsley)</li>
+<li>javac: use file.encoding as default encoding (#3719, rep by Shinomiya Nobuaki)</li>
+<li>ejb: update EJBException serialization (#3779, rep by C Yttesen)</li>
 <li>config: ${cluster} regression failure (#3842, rep by Jamie Novak)</li>
-<li>database-pool: connection timing issues with multiple request (#3837, rep by Bryant Harris)</li>
+<li>database-pool: connection timing issues with multiple request (#3837, #3779, rep by Bryant Harris)</li>
 </ul>
 </s2>
 

@@ -29,11 +29,19 @@
 
 package com.caucho.server.resin;
 
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
+
+import com.caucho.bam.ActorError;
+import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
+import com.caucho.boot.PidQuery;
 import com.caucho.boot.WatchdogStopQuery;
+import com.caucho.jmx.Jmx;
 import com.caucho.util.L10N;
 
 /**
@@ -54,6 +62,48 @@ public class ResinActor extends SimpleActor
     
     setJid("resin");
   }
+  
+  /**
+   * Query for the process pid.
+   */
+  @QueryGet
+  public void queryPid(long id,
+                       String to,
+                       String from,
+                       PidQuery query)
+  {
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " " + query);
+    
+    try {
+      MBeanServer server = Jmx.getGlobalMBeanServer();
+      ObjectName objName = new ObjectName("java.lang:type=Runtime");
+      
+      String runtimeName = (String) server.getAttribute(objName, "Name");
+      
+      if (runtimeName == null) {
+        getLinkStream().queryError(id, from, to, query, 
+                                   new ActorError("null runtime name"));
+        return;
+      }
+      
+      int p = runtimeName.indexOf('@');
+      
+      if (p > 0) {
+        int pid = Integer.parseInt(runtimeName.substring(0, p));
+      
+        getLinkStream().queryResult(id, from, to, new PidQuery(pid));
+        return;
+      }
+      
+      getLinkStream().queryError(id, from, to, query,
+                                 new ActorError("malformed name=" + runtimeName));
+   
+    } catch (Exception e) {
+      getLinkStream().queryError(id, from, to, query,
+                                 ActorError.create(e));
+    }
+   }
 
   @QuerySet
   public void stop(long id,
