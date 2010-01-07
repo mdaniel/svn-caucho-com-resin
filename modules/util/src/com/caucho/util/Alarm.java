@@ -222,6 +222,18 @@ public class Alarm implements ThreadTask {
   }
 
   /**
+   * Returns the approximate current time in milliseconds.
+   * Convenient for minimizing system calls.
+   */
+  public static long getCurrentTimeActual()
+  {
+    if (isTest())
+      return System.currentTimeMillis();
+    else
+      return _currentTime;
+  }
+
+  /**
    * Returns the exact current time in milliseconds.
    */
   public static long getExactTime()

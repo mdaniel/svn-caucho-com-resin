@@ -784,6 +784,8 @@ public class ConnectionPool extends AbstractManagedObject
     throws ResourceException
   {
     long timeoutCount = _connectionWaitCount;
+    
+    long expireTime = Alarm.getCurrentTimeActual() + _connectionWaitTime;
 
     while (_lifecycle.isActive()) {
       UserPoolItem userPoolItem = allocateIdle(mcf, subject,
@@ -797,7 +799,9 @@ public class ConnectionPool extends AbstractManagedObject
       if (userPoolItem != null)
         return userPoolItem;
 
-      if (timeoutCount-- < 0)
+      long now = Alarm.getCurrentTimeActual();
+      
+      if (expireTime < now)
         break;
     }
 
@@ -910,6 +914,7 @@ public class ConnectionPool extends AbstractManagedObject
 	       && (_maxConnections <= _createCount + size
 		   || _maxCreateConnections <= _createCount)) {
         try {
+	  Thread.interrupted();
           _pool.wait(1000);
         } catch (Exception e) {
           log.log(Level.FINE, e.toString(), e);

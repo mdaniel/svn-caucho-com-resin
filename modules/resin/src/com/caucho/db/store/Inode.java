@@ -964,7 +964,7 @@ public class Inode {
 
       fragCount -= DIRECT_BLOCKS + SINGLE_INDIRECT_BLOCKS;
 
-      int index = (int) 8 * (fragCount / INDIRECT_BLOCKS);
+      int index = (int) (8 * (fragCount / INDIRECT_BLOCKS));
       
       long doubleIndirectAddr = store.readFragmentLong(indirectAddr, index);
 					  
