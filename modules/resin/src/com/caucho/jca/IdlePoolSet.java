@@ -36,8 +36,8 @@ import java.util.Iterator;
 import javax.resource.spi.ManagedConnection;
 
 /**
- * Stack (fifo) ordered set, used by the JCA code so recent
- * connections are used first.
+ * Queue (fifo) ordered set, used by the JCA code so connections can be
+ * load balanced using a round-robin.
  */
 public class IdlePoolSet extends AbstractSet<ManagedConnection> {
   private final int _capacity;
@@ -87,16 +87,18 @@ public class IdlePoolSet extends AbstractSet<ManagedConnection> {
    */
   public boolean add(ManagedConnection o)
   {
-    if (_capacity <= size())
-      return false;
+    synchronized (this) {
+      if (_capacity <= size())
+        return false;
 
-    for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
-      if (_entries[i] == o)
-	return false;
+      for (int i = _tail; i != _head; i = (i + 1) % _entriesLength) {
+        if (_entries[i] == o)
+          return false;
+      }
+
+      _entries[_head] = o;
+      _head = (_head + 1) % _entriesLength;
     }
-
-    _entries[_head] = o;
-    _head = (_head + 1) % _entriesLength;
 
     return true;
   }

@@ -2091,7 +2091,7 @@ public class StringModule extends AbstractQuercusModule {
 
     return segments;
   }
-
+  
   /**
    * scans a string
    *
@@ -2105,6 +2105,226 @@ public class StringModule extends AbstractQuercusModule {
                              StringValue format,
                              @Optional @Reference Value []args)
   {
+    ScanfSegment[] formatArray = sscanfParseFormat(env, format);
+    
+    int strlen = string.length();
+
+    int sIndex = 0;
+
+    boolean isReturnArray = args.length == 0;
+    int argIndex = 0;
+
+    if (strlen == 0) {
+      return isReturnArray ? NullValue.NULL : LongValue.MINUS_ONE;
+    }
+
+    ArrayValue array = new ArrayValueImpl();
+
+    for (int i = 0; i < formatArray.length; i++) {
+      ScanfSegment segment = formatArray[i];
+      
+      Value var;
+
+      if (! segment.isAssigned()) {
+        var = null;
+      } else if (isReturnArray) {
+        var = array;
+      } else {
+        if (argIndex < args.length)
+          var = args[argIndex++];
+        else {
+          env.warning(L.l("not enough vars passed in"));
+          
+          var = NullValue.NULL;
+        }
+      }
+
+      sIndex = segment.apply(string,
+                             strlen,
+                             sIndex,
+                             var,
+                             isReturnArray);
+      
+      if (sIndex < 0) {
+        if (isReturnArray)
+          return sscanfFillNull(array, formatArray, i);
+        else
+          return LongValue.create(argIndex);
+      }
+      else if (sIndex == strlen) {
+        if (isReturnArray)
+          return sscanfFillNull(array, formatArray, i + 1);
+        else
+          return LongValue.create(argIndex);
+      }
+    }
+    
+    return sscanfReturn(env, array, args, argIndex, isReturnArray, false);
+  }
+  
+  private static Value sscanfFillNull(ArrayValue array, ScanfSegment[] formatArray, int fIndex)
+  {
+    for (; fIndex < formatArray.length; fIndex++) {
+      ScanfSegment segment = formatArray[fIndex];
+      
+      if (segment.isAssigned())
+        array.put(NullValue.NULL);
+    }
+    
+    return array;
+  }
+
+  /**
+   * scans a string
+   *
+   * @param format the format string
+   * @param args the format arguments
+   *
+   * @return the formatted string
+   */
+  private static ScanfSegment[] sscanfParseFormat(Env env,
+                                                  StringValue format)
+  {
+    int fmtLen = format.length();
+    int fIndex = 0;
+    
+    ArrayList<ScanfSegment> segmentList = new ArrayList<ScanfSegment>();
+    StringBuilder sb = new StringBuilder();
+
+    while (fIndex < fmtLen) {
+      char ch = format.charAt(fIndex++);
+
+      if (isWhitespace(ch)) {
+        for (;
+             (fIndex < fmtLen
+              && isWhitespace(ch = format.charAt(fIndex)));
+             fIndex++) {
+        }
+
+        scanfAddConstant(segmentList, sb);
+        
+        segmentList.add(ScanfWhitespace.SEGMENT);
+      }
+      else if (ch == '%') {
+        int maxLen = -1;
+
+        loop:
+        while (fIndex < fmtLen) {
+          ch = format.charAt(fIndex++);
+
+          switch (ch) {
+          case '%':
+            sb.append('%');
+            break loop;
+
+          case '0': case '1': case '2': case '3': case '4':
+          case '5': case '6': case '7': case '8': case '9':
+            if (maxLen < 0)
+              maxLen = 0;
+
+            maxLen = 10 * maxLen + ch - '0';
+            break;
+
+          case 's':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfString(maxLen));
+            break loop;
+          }
+
+          case 'c':
+          {
+            if ( maxLen < 0)
+              maxLen = 1;
+
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfString(maxLen));
+            
+            break loop;
+          }
+          case 'n':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(ScanfStringLength.SEGMENT);
+
+            break loop;
+          }
+          case 'd':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfInteger(maxLen, 10, false));
+            break loop;
+          }
+          case 'u':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfInteger(maxLen, 10, true));
+            break loop;
+          }
+          case 'o':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfInteger(maxLen, 8, false));
+            break loop;
+          }
+          case 'x': case 'X':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfHex(maxLen));
+            
+            break loop;
+          }
+          case 'e': case 'f':
+          {
+            scanfAddConstant(segmentList, sb);
+            segmentList.add(new ScanfScientific(maxLen));
+            break loop;
+          }
+          default:
+            log.fine(L.l("'{0}' is a bad sscanf string.", format));
+            env.warning(L.l("'{0}' is a bad sscanf string.", format));
+
+            // XXX:
+            //return isAssign ? LongValue.create(argIndex) : array;
+            
+            break loop;
+          }
+        }
+      }
+      else
+        sb.append(ch);
+    }
+    
+    scanfAddConstant(segmentList, sb);
+
+    ScanfSegment[] segmentArray = new ScanfSegment[segmentList.size()];
+    
+    return segmentList.toArray(segmentArray);
+  }
+  
+  private static void scanfAddConstant(ArrayList<ScanfSegment> segmentList, StringBuilder sb)
+  {
+    if (sb.length() == 0)
+      return;
+    
+    segmentList.add(new ScanfConstant(sb.toString()));
+    
+    sb.setLength(0);
+  }
+  
+  /**
+   * scans a string
+   *
+   * @param format the format string
+   * @param args the format arguments
+   *
+   * @return the formatted string
+   */
+  public static Value sscanfOld(Env env,
+                             StringValue string,
+                             StringValue format,
+                             @Optional @Reference Value []args)
+  {
     int fmtLen = format.length();
     int strlen = string.length();
 
@@ -2112,6 +2332,7 @@ public class StringModule extends AbstractQuercusModule {
     int fIndex = 0;
 
     boolean isAssign = args.length != 0;
+    boolean isReturnArray = ! isAssign;
     int argIndex = 0;
 
     if (strlen == 0) {
@@ -2182,40 +2403,71 @@ public class StringModule extends AbstractQuercusModule {
             break;
 
           case 's':
-            sIndex = sscanfString(string, sIndex, maxLen, obj, isAssign);
+          {
+            ScanfSegment seg = new ScanfString(maxLen);
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
             break loop;
+          }
 
           case 'c':
+          {
             if ( maxLen < 0)
               maxLen = 1;
 
-            sIndex = sscanfString(string, sIndex, maxLen, obj, isAssign);
+            ScanfSegment seg = new ScanfString(maxLen);
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
             break loop;
-
+          }
           case 'n':
-            sIndex = sscanfStringLength(sIndex, obj, isAssign);
+          {
+            ScanfSegment seg = ScanfStringLength.SEGMENT;
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
+            
             break loop;
-
+          }
           case 'd':
-            sIndex = sscanfInteger(string, sIndex, maxLen, obj, isAssign, 10, false);
+          {
+            ScanfSegment seg = new ScanfInteger(maxLen, 10, false);
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
+            
             break loop;
-
+          }
           case 'u':
-            sIndex = sscanfInteger(string, sIndex, maxLen, obj, isAssign, 10, true);
+          {
+            ScanfSegment seg = new ScanfInteger(maxLen, 10, true);
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
+            
             break loop;
-
+          }
           case 'o':
-            sIndex = sscanfInteger(string, sIndex, maxLen, obj, isAssign, 8, false);
+          {
+            ScanfSegment seg = new ScanfInteger(maxLen, 8, false);
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
+            
             break loop;
-
+          }
           case 'x': case 'X':
-            sIndex = sscanfHex(string, sIndex, maxLen, obj, isAssign);
+          {
+            ScanfSegment seg = new ScanfHex(maxLen);
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
+            
             break loop;
-
+          }
           case 'e': case 'f':
-            sIndex = sscanfScientific(string, sIndex, maxLen, obj, isAssign);
+          {
+            ScanfSegment seg = new ScanfScientific(maxLen);
+            
+            sIndex = seg.apply(string, strlen, sIndex, obj, isReturnArray);
+            
             break loop;
-
+          }
           default:
             log.fine(L.l("'{0}' is a bad sscanf string.", format));
             env.warning(L.l("'{0}' is a bad sscanf string.", format));
@@ -2238,21 +2490,18 @@ public class StringModule extends AbstractQuercusModule {
                                     ArrayValue array,
                                     Value []args,
                                     int argIndex,
-                                    boolean isAssign,
+                                    boolean isReturnArray,
                                     boolean isWarn)
   {
-    if (isAssign) {
+    if (isReturnArray)
+      return array;
+    else {
       if (isWarn && argIndex != args.length)
         env.warning(L.l("{0} vars passed in but saw only {1} '%' args", args.length, argIndex));
 
       return LongValue.create(argIndex);
     }
-    else {
-      return array;
-    }
   }
-
-
 
   /**
    * Scans a string with a given length.
@@ -2283,18 +2532,6 @@ public class StringModule extends AbstractQuercusModule {
 
     return sIndex;
   }
-  
-  /**
-   * Find number of characters processed so far 
-   */
-  private static int sscanfStringLength(int sIndex, 
-                                        Value obj,
-                                        boolean isAssignment)
-  {
-    sscanfPut(obj, LongValue.create(sIndex), isAssignment);
-
-    return sIndex;
-  }  
 
   private static void sscanfPut(Value obj, Value val, boolean isAssignment)
   {
@@ -5041,6 +5278,410 @@ public class StringModule extends AbstractQuercusModule {
       return number;
     }
   }
+  
+  // sscanf
+
+  abstract static class ScanfSegment {
+    abstract public boolean isAssigned();
+    
+    abstract public int apply(StringValue string,
+                              int strlen,
+                              int sIndex,
+                              Value var,
+                              boolean isReturnArray);
+
+    void sscanfPut(Value var, Value val, boolean isReturnArray)
+    {
+      if (isReturnArray)
+        var.put(val);
+      else
+        var.set(val);
+    }
+  }
+  
+  static class ScanfConstant extends ScanfSegment {
+    private final String _string;
+    private final int _strlen;
+    
+    private ScanfConstant(String string)
+    {
+      _string = string;
+      _strlen = string.length();
+    }
+    
+    @Override
+    public boolean isAssigned()
+    {
+      return false;
+    }
+    
+    @Override
+    public int apply(StringValue string,
+                     int strlen,
+                     int sIndex,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      int fStrlen = _strlen;
+      String fString = _string;
+      
+      if (strlen - sIndex < fStrlen)
+        return -1;
+      
+      for (int i = 0; i < fStrlen; i++) {
+        if (string.charAt(sIndex++) != fString.charAt(i))
+          return -1;
+      }
+      
+      return sIndex;
+    }
+  }
+  
+  static class ScanfWhitespace extends ScanfSegment {
+    static final ScanfWhitespace SEGMENT = new ScanfWhitespace();
+    
+    private ScanfWhitespace()
+    {
+
+    }
+    
+    @Override
+    public boolean isAssigned()
+    {
+      return false;
+    }
+    
+    @Override
+    public int apply(StringValue string,
+                     int strlen,
+                     int sIndex,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      for (;
+           sIndex < strlen && isWhitespace(string.charAt(sIndex));
+           sIndex++) {
+      }
+      
+      return sIndex;
+    }
+  }
+  
+  static class ScanfStringLength extends ScanfSegment {
+    static final ScanfStringLength SEGMENT = new ScanfStringLength();
+    
+    private ScanfStringLength()
+    {
+    }
+    
+    @Override
+    public boolean isAssigned()
+    {
+      return true;
+    }
+
+    @Override
+    public int apply(StringValue string,
+                     int strlen,
+                     int sIndex,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      sscanfPut(var, LongValue.create(sIndex), isReturnArray);
+
+      return sIndex; 
+    }
+  }
+  
+  static class ScanfScientific extends ScanfSegment {
+    private final int _maxLen;
+    
+    ScanfScientific(int maxLen)
+    {
+      if (maxLen < 0)
+        maxLen = Integer.MAX_VALUE;
+      
+      _maxLen  = maxLen; 
+    }
+    
+    @Override
+    public boolean isAssigned()
+    {
+      return true;
+    }
+
+    @Override
+    public int apply(StringValue s,
+                     int strlen,
+                     int i,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      int start = i;
+      int len = strlen;
+      int ch = 0;
+      
+      int maxLen = _maxLen;
+      
+      if (i < len && maxLen > 0 && ((ch = s.charAt(i)) == '+' || ch == '-')) {
+        i++;
+        maxLen--;
+      }
+
+      for (; i < len && maxLen > 0
+             && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+        maxLen--;
+      }
+
+      if (ch == '.') {
+        maxLen--;
+
+        for (i++; i < len && maxLen > 0
+                  && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+          maxLen--;
+        }
+      }
+
+      if (ch == 'e' || ch == 'E') {
+        maxLen--;
+
+        int e = i++;
+
+        if (start == e) {
+          sscanfPut(var, NullValue.NULL, isReturnArray);
+          return start;
+        }
+
+        if (i < len && maxLen > 0 && (ch = s.charAt(i)) == '+' || ch == '-') {
+          i++;
+          maxLen--;
+        }
+
+        for (; i < len && maxLen > 0
+               && '0' <= (ch = s.charAt(i)) && ch <= '9'; i++) {
+          maxLen--;
+        }
+
+        if (i == e + 1)
+          i = e;
+      }
+
+      double val;
+
+      if (i == 0)
+        val = 0;
+      else
+        val = Double.parseDouble(s.substring(start, i).toString());
+
+      sscanfPut(var, DoubleValue.create(val), isReturnArray);
+
+      return i;
+    }
+  }
+  
+  static class ScanfHex extends ScanfSegment {
+    private final int _maxLen;;
+    
+    ScanfHex(int maxLen)
+    {
+      if (maxLen < 0)
+        maxLen = Integer.MAX_VALUE;
+      
+      _maxLen = maxLen;
+    }
+    
+    @Override
+    public boolean isAssigned()
+    {
+      return true;
+    }
+
+    @Override
+    public int apply(StringValue string,
+                     int strlen,
+                     int sIndex,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      int val = 0;
+      int sign = 1;
+      boolean isMatched = false;
+
+      int maxLen = _maxLen;
+      
+      if (sIndex < strlen) {
+        char ch = string.charAt(sIndex);
+
+        if (ch == '+') {
+          sIndex++;
+          maxLen--;
+        }
+        else if (ch == '-') {
+          sign = -1;
+
+          sIndex++;
+          maxLen--;
+        }
+      }
+
+      for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
+        char ch = string.charAt(sIndex);
+
+        if ('0' <= ch && ch <= '9') {
+          val = val * 16 + ch - '0';
+          isMatched = true;
+        }
+        else if ('a' <= ch && ch <= 'f') {
+          val = val * 16 + ch - 'a' + 10;
+          isMatched = true;
+        }
+        else if ('A' <= ch && ch <= 'F') {
+          val = val * 16 + ch - 'A' + 10;
+          isMatched = true;
+        }
+        else if (! isMatched) {
+          sscanfPut(var, NullValue.NULL, isReturnArray);
+          return sIndex;
+        }
+        else
+          break;
+      }
+
+      sscanfPut(var, LongValue.create(val * sign), isReturnArray);
+
+      return sIndex; 
+    }
+  }
+  
+  static class ScanfInteger extends ScanfSegment {
+    private final int _maxLen;
+    private final int _base;
+    private final boolean _isUnsigned;
+    
+    ScanfInteger(int maxLen, int base, boolean isUnsigned)
+    {
+      if (maxLen < 0)
+        maxLen = Integer.MAX_VALUE;
+      
+      _maxLen = maxLen;
+      
+      _base = base;
+      _isUnsigned = isUnsigned;
+    }
+    
+    @Override
+    public boolean isAssigned()
+    {
+      return true;
+    }
+
+    @Override
+    public int apply(StringValue string,
+                     int strlen,
+                     int sIndex,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      // XXX: 32-bit vs 64-bit
+      int val = 0;
+      
+      int sign = 1;
+      boolean isNotMatched = true;
+      
+      int maxLen = _maxLen;
+
+      if (sIndex < strlen) {
+        char ch = string.charAt(sIndex);
+
+        if (ch == '+') {
+          sIndex++;
+          maxLen--;
+        }
+        else if (ch == '-') {
+          sign = -1;
+
+          sIndex++;
+          maxLen--;
+        }
+      }
+      
+      int base = _base;
+
+      int topRange = base + '0';
+
+      for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
+        char ch = string.charAt(sIndex);
+
+        if ('0' <= ch && ch < topRange) {
+          val = val * base + ch - '0';
+          isNotMatched = false;
+        }
+        else if (isNotMatched) {
+          sscanfPut(var, NullValue.NULL, isReturnArray);
+          return sIndex;
+        }
+        else
+          break;
+      }
+
+      if (_isUnsigned) {
+        if (sign == -1 && val != 0)
+          sscanfPut(var, StringValue.create(0xffffffffL - val + 1), isReturnArray);
+        else
+          sscanfPut(var, LongValue.create(val), isReturnArray);
+      }
+      else
+        sscanfPut(var, LongValue.create(val * sign), isReturnArray);
+
+      return sIndex;  
+    }
+  }
+  
+  static class ScanfString extends ScanfSegment {
+    private final int _maxLen;
+    
+    ScanfString(int maxLen)
+    {
+      if (maxLen < 0)
+        maxLen = Integer.MAX_VALUE;
+      
+      _maxLen = maxLen;
+    }
+    
+    @Override
+    public boolean isAssigned()
+    {
+      return true;
+    }
+    
+    /**
+     * Scans a string with a given length.
+     */
+    @Override
+    public int apply(StringValue string,
+                     int strlen,
+                     int sIndex,
+                     Value var,
+                     boolean isReturnArray)
+    {
+      StringValue sb = string.createStringBuilder();
+
+      int maxLen = _maxLen;
+      
+      for (; sIndex < strlen && maxLen-- > 0; sIndex++) {
+        char ch = string.charAt(sIndex);
+
+        if (isWhitespace(ch))
+          break;
+        
+        sb.append(ch);
+      }
+
+      sscanfPut(var, sb, isReturnArray);
+
+      return sIndex;
+    }
+ }
 
   static {
     DEFAULT_DECIMAL_FORMAT_SYMBOLS = new DecimalFormatSymbols();

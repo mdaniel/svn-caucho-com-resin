@@ -36,5 +36,5 @@
 			<accessrule kind="discouraged" pattern="**/Unsafe*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="output" path="modules/webutil/classes"/>
+	<classpathentry kind="output" path="classes"/>
 </classpath>

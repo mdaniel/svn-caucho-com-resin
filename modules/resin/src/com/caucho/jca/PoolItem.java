@@ -226,8 +226,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
    * @return true if the pool item is valid, false if it should be removed.
    */
   synchronized UserPoolItem toActive(Subject subject,
-				     ConnectionRequestInfo info,
-				     UserPoolItem userPoolItem)
+				     ConnectionRequestInfo info)
     throws ResourceException
   {
     long now = Alarm.getCurrentTime();
@@ -247,16 +246,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
     _poolEventTime = now;
     _isXATransaction = _xaResource != null; // disable LT-optim by default
 
-    if (userPoolItem != null) {
-      Object uConn = userPoolItem.getUserConnection();
-
-      if (uConn != null)
-	_mConn.associateConnection(uConn);
-
-      userPoolItem.associatePoolItem(this);
-    }
-    else
-      userPoolItem = new UserPoolItem(_cm, this);
+    UserPoolItem userPoolItem = new UserPoolItem(_cm, this);
     
     if (! isValid(subject, info, userPoolItem))
       return null;
