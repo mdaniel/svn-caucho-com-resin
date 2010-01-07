@@ -589,12 +589,10 @@
     </antcall>
     -->
 
-    <!-- 4.0.2
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
       <param name="artifacts" value="${resin.artifacts}"/>
     </antcall>
-    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
@@ -1151,11 +1149,9 @@
     </antcall>
     -->
 
-    <!-- xxx 4.0.2
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
     </antcall>
-    -->
     
     <antcall target="artifact.dist.macro" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
@@ -1512,6 +1508,11 @@
       <fileset dir="${artifacts}">
         <include name="*/classes/**"/>
         <include name="*/dist/**"/>
+      </fileset>
+    </delete>
+    <delete>
+      <fileset dir="${lib}">
+        <include name="**/*.jar"/>
       </fileset>
     </delete>
     <delete>

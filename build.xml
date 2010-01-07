@@ -136,11 +136,9 @@
     </antcall>
     -->
 
-    <!-- xxx 4.0.2
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="spring"/>
     </antcall>
-    -->
     
     <antcall target="artifact" inheritRefs="true">
       <param name="artifact.name" value="wicket"/>
