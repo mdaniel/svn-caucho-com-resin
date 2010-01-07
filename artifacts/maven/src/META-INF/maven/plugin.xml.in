@@ -447,7 +447,136 @@
         <contextRoot implementation="java.lang.String">/${project.build.finalName}</contextRoot>
       </configuration>
     </mojo>
- 
+
+    <mojo>
+      <goal>ec2-start-triad</goal>
+      <description>Starts a Resin triad on EC2</description>
+      <requiresDirectInvocation>true</requiresDirectInvocation>
+      <requiresProject>false</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>true</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>deploy</executePhase>
+      <implementation>com.caucho.maven.aws.MavenEc2StartTriad</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+          <name>triad-ips</name>
+          <type>java.lang.String[]</type>
+          <required>true</required>
+        </parameter>        
+        <parameter>
+          <name>frontend-ip</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+        </parameter>
+        <parameter>
+          <name>admin-password</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>access-key-id</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>secret-access-key</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>ami</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>key-pair</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>security-groups</name>
+          <type>java.util.List</type>
+          <required>false</required>
+        </parameter>
+      </parameters>
+    </mojo>
+
+    <mojo>
+      <goal>ec2-list-cluster</goal>
+      <description>List Resin cluster members on EC2</description>
+      <requiresDirectInvocation>true</requiresDirectInvocation>
+      <requiresProject>false</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>true</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>deploy</executePhase>
+      <implementation>com.caucho.maven.aws.MavenEc2ListCluster</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+          <name>triad-ips</name>
+          <type>java.lang.String[]</type>
+          <required>true</required>
+        </parameter>        
+        <parameter>
+          <name>frontend-ip</name>
+          <type>java.lang.String</type>
+          <required>false</required>
+        </parameter>
+        <parameter>
+          <name>admin-password</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>access-key-id</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>secret-access-key</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+      </parameters>
+    </mojo>
+
+    <mojo>
+      <goal>ec2-list-resin-amis</goal>
+      <description>List available Resin AMIs on EC2</description>
+      <requiresDirectInvocation>true</requiresDirectInvocation>
+      <requiresProject>false</requiresProject>
+      <requiresReports>false</requiresReports>
+      <aggregator>false</aggregator>
+      <requiresOnline>true</requiresOnline>
+      <inheritedByDefault>true</inheritedByDefault>
+      <executePhase>deploy</executePhase>
+      <implementation>com.caucho.maven.aws.MavenEc2ListResinAmis</implementation>
+      <language>java</language>
+      <instantiationStrategy>per-lookup</instantiationStrategy>
+      <executionStrategy>once-per-session</executionStrategy>
+      <parameters>
+        <parameter>
+          <name>access-key-id</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+        <parameter>
+          <name>secret-access-key</name>
+          <type>java.lang.String</type>
+          <required>true</required>
+        </parameter>
+      </parameters>
+    </mojo>
+
   </mojos>
     
   <dependencies>
