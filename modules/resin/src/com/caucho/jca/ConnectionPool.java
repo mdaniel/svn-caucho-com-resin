@@ -709,7 +709,7 @@ public class ConnectionPool extends AbstractManagedObject
   UserPoolItem allocatePoolConnection(ManagedConnectionFactory mcf,
 				      Subject subject,
 				      ConnectionRequestInfo info,
-				      UserPoolItem oldItem)
+				      UserPoolItem oldPoolItem)
     throws ResourceException
   {
     long expireTime = Alarm.getCurrentTimeActual() + _connectionWaitTimeout;
@@ -719,7 +719,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     do {
       UserPoolItem userPoolItem
-        = allocateIdleConnection(mcf, subject, info);
+        = allocateIdleConnection(mcf, subject, info, oldPoolItem);
 
       if (userPoolItem != null)
         return userPoolItem;
@@ -763,7 +763,8 @@ public class ConnectionPool extends AbstractManagedObject
    */
   private UserPoolItem allocateIdleConnection(ManagedConnectionFactory mcf,
                                               Subject subject,
-                                              ConnectionRequestInfo info)
+                                              ConnectionRequestInfo info,
+					      UserPoolItem oldPoolItem)
     throws ResourceException
   {
     while (_lifecycle.isActive()) {
@@ -810,7 +811,7 @@ public class ConnectionPool extends AbstractManagedObject
       try {
         // Ensure the connection is still valid
         UserPoolItem userPoolItem;
-        userPoolItem = poolItem.toActive(subject, info);
+        userPoolItem = poolItem.toActive(subject, info, oldPoolItem);
 
         if (userPoolItem != null) {
           poolItem = null;
@@ -873,8 +874,9 @@ public class ConnectionPool extends AbstractManagedObject
 
       UserPoolItem userPoolItem;
 
+      UserPoolItem oldPoolItem = null;
       // Ensure the connection is still valid
-      userPoolItem = poolItem.toActive(subject, info);
+      userPoolItem = poolItem.toActive(subject, info, oldPoolItem);
       
       if (userPoolItem == null) {
         throw new IllegalStateException(L.l("Connection '{0}' was not valid on creation",
@@ -983,7 +985,6 @@ public class ConnectionPool extends AbstractManagedObject
   private void notifyConnectionAvailable()
   {
     if (_availableWaitCount.get() > 0) {
-      log.info("WAKE:");
       synchronized (_availableLock) {
         _availableLock.notifyAll();
       }

@@ -11,7 +11,14 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.3 - snapshot">
+<s2 title="4.0.4 - snapshot">
+<ul>
+<li>database-pool: connection timing issues with multiple request (#3837, rep by Bryant Harris)</li>
+</ul>
+</s2>
+
+
+<s2 title="4.0.3 - Jan 4, 2010">
 <ul>
 <li>mod_caucho: post/ack cleanup</li>
 <li>hessian: allow custom URL connector with HessianProxy</li>
