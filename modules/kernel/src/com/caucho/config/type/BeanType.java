@@ -57,6 +57,7 @@ import com.caucho.config.attribute.PropertyAttribute;
 import com.caucho.config.attribute.SetterAttribute;
 import com.caucho.config.attribute.TextAttribute;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InjectionTargetImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
@@ -384,12 +385,10 @@ public class BeanType<T> extends ConfigType
   @Override
   public void inject(Object bean)
   {
-    /* XXX: pre-removal
     introspectInject();
     
     for (int i = 0; i < _injectList.size(); i++)
       _injectList.get(i).inject(bean, null);
-      */
   }
 
   /**
@@ -398,12 +397,10 @@ public class BeanType<T> extends ConfigType
   @Override
   public void init(Object bean)
   {
-    /* XXX: pre-removal
     introspectInject();
     
     for (int i = 0; i < _initList.size(); i++)
       _initList.get(i).inject(bean, null);
-      */
   }
 
   /**
@@ -835,7 +832,6 @@ public class BeanType<T> extends ConfigType
    */
   private void introspectInject()
   {
-    /*
     synchronized (_introspectLock) {
       if (_injectList != null)
 	return;
@@ -843,11 +839,10 @@ public class BeanType<T> extends ConfigType
       _injectList = new ArrayList<ConfigProgram>();
       _initList = new ArrayList<ConfigProgram>();
     
-      InjectIntrospector.introspectInject(_injectList, _beanClass);
+      // InjectionTargetImpl.introspectInject(_injectList, _beanClass);
 
-      InjectIntrospector.introspectInit(_initList, _beanClass, null);
+      InjectionTargetImpl.introspectInit(_initList, _beanClass, null);
     }
-    */
   }
 
   private static Constructor findConstructor(Constructor []constructors,

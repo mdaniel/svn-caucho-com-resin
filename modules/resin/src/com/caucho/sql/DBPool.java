@@ -34,6 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
 import com.caucho.config.Names;
 import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.types.InitParam;
@@ -751,7 +752,7 @@ public class DBPool
     }
 
     InjectManager manager = InjectManager.create();
-    BeanFactory factory = manager.createBeanFactory(DataSource.class);
+    BeanFactory<?> factory = manager.createBeanFactory(DataSource.class);
 
     String name = _name;
     
@@ -761,13 +762,15 @@ public class DBPool
     if (name == null)
       name = _var;
 
-    Annotation []bindingList = null;
-
     if (_bindingList.size() > 0) {
       factory.binding(_bindingList);
     }
-    else if (name != null)
-      factory.binding(Names.create(name));
+    else {
+      if (name != null)
+        factory.binding(Names.create(name));
+      
+      factory.binding(CurrentLiteral.CURRENT);
+    }
 
     if (name != null)
       factory.name(name);

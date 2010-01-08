@@ -1025,7 +1025,7 @@ public class InjectManager
                                Annotation []bindings)
   {
     WebComponent component = getWebComponent(baseType);
-
+    
     if (component != null) {
       Set beans = component.resolve(baseType, bindings);
 

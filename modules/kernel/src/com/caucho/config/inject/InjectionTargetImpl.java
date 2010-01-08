@@ -222,7 +222,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   {
   }
 
-  private boolean isAnnotationPresent(Annotation []annotations, Class type)
+  private static boolean isAnnotationPresent(Annotation []annotations, Class type)
   {
     for (Annotation ann : annotations) {
       if (ann.annotationType().equals(type))
@@ -429,7 +429,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     }
   }
 
-  public void
+  public static void
     introspectInit(ArrayList<ConfigProgram> initList,
                    Class type,
                    HashMap<Method,Annotation[]> methodAnnotationMap)

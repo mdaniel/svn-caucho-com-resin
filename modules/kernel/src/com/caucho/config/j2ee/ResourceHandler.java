@@ -115,7 +115,7 @@ public class ResourceHandler extends JavaeeInjectionHandler {
 
     }
     else {
-      throw new ConfigException(location + L.l("@Resource cannot find any persistence contexts.  No @Resource with type='{0}'",
+      throw new ConfigException(location + L.l("@Resource cannot find any matching resources with type='{0}'",
 					       bindType));
     }
 

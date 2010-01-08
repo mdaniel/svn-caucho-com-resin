@@ -89,6 +89,6 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
   protected String getLocation(Field javaField)
   {
     return (javaField.getDeclaringClass().getName() 
-            + "." + javaField.getName());
+            + "." + javaField.getName() + " ");
   }
 }
