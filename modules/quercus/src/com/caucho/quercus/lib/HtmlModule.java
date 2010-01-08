@@ -67,9 +67,11 @@ public class HtmlModule extends AbstractQuercusModule {
   
   private static ArrayValue HTML_SPECIALCHARS_ARRAY;
   private static ArrayValue HTML_ENTITIES_ARRAY;
+  private static ArrayValue HTML_ENTITIES_ARRAY_ENTITY_KEY;
 
   private static ArrayValueImpl HTML_ENTITIES_ARRAY_UNICODE;
   private static ArrayValueImpl HTML_SPECIALCHARS_ARRAY_UNICODE;
+  private static ArrayValueImpl HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY;
 
   public HtmlModule()
   {
@@ -378,29 +380,45 @@ public class HtmlModule extends AbstractQuercusModule {
     if (string.length() == 0)
       return env.getEmptyString();
 
-    Iterator<Map.Entry<Value,Value>> iter;
+    ArrayValue htmlEntities = null;
 
     if (env.isUnicodeSemantics()) {
-      if (HTML_ENTITIES_ARRAY_UNICODE == null)
-        HTML_ENTITIES_ARRAY_UNICODE = toUnicodeArray(env, HTML_ENTITIES_ARRAY);
+      if (HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY == null)
+        HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY = toUnicodeArray(env, HTML_ENTITIES_ARRAY_ENTITY_KEY);
       
-      iter = HTML_ENTITIES_ARRAY_UNICODE.getIterator(env);
+      htmlEntities = HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY;
     }
     else
-      iter = HTML_ENTITIES_ARRAY.getIterator(env);
+      htmlEntities = HTML_ENTITIES_ARRAY_ENTITY_KEY;
 
-    while (iter.hasNext()) {
-      Map.Entry<Value,Value> entry = iter.next();
-      StringValue key = entry.getKey().toStringValue();
-      Value value = entry.getValue();
-
-      string = RegexpModule.ereg_replace(env,
-                                         value,
-                                         key,
-                                         string).toStringValue();
+    int len = string.length();
+    int htmlEntityStart = -1;    
+    StringValue result = env.createStringBuilder();
+    
+    // Loop through each character
+    for (int i = 0; i < len; i++) {      
+      char ch = string.charAt(i);
+      Value entity = null;
+      
+      // Check whether it's a html entity i.e. starts with '&' and ends with ';'
+      if (ch == '&') {                    
+        htmlEntityStart = i;
+      } else if (ch == ';') {
+        // If so substitute the entity and add it to result.
+        entity = string.substring(htmlEntityStart, i+1);
+        result.append(htmlEntities.get(entity));
+        htmlEntityStart = -1;  
+      } else if (htmlEntityStart < 0 && entity == null) {
+        // else add it to result.
+        result.append(ch);
+      } 
     }
-
-    return string;
+    
+    if (htmlEntityStart > 0) {
+      result.append(string, htmlEntityStart, len);
+    }
+   
+    return result;
   }
 
   /**
@@ -568,6 +586,19 @@ public class HtmlModule extends AbstractQuercusModule {
     entity(array, map, 0x2044, "&frasl;");
     
     HTML_ENTITIES_ARRAY = new ConstArrayValue(array);
+    
+    //array = new ArrayValueImpl();
+    HTML_ENTITIES_ARRAY_ENTITY_KEY = new ArrayValueImpl();
+
+    // Store the Entities as Key.
+    Iterator<Map.Entry<Value,Value>> iter = HTML_ENTITIES_ARRAY.getIterator();
+
+    while (iter.hasNext()) {
+      Map.Entry<Value,Value> entry = iter.next();
+      Value key = entry.getKey();
+      Value value = entry.getValue();
+      HTML_ENTITIES_ARRAY_ENTITY_KEY.put(value, key);
+    }    
   }
 }
 
