@@ -1,7 +1,0 @@
-<navigation threaded="true">
-  <item link="index.xtp" title="Administration">
-    <item link="quick/index.xtp" title="Quick Start"/>
-    <item link="full/index.xtp" title="Full Documentation"/>
-    <item link="reference/index.xtp" title="Reference"/>
-  </item>
-</navigation>
