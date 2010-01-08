@@ -66,8 +66,8 @@ public class BeansConfig {
 
   private Path _beansFile;
 
-  private ArrayList<Class> _deployList
-    = new ArrayList<Class>();
+  private ArrayList<Class<?>> _deployList
+    = new ArrayList<Class<?>>();
 
   private ArrayList<Interceptor> _interceptorList;
 
@@ -140,7 +140,7 @@ public class BeansConfig {
     _isConfigured = isConfigured;
   }
 
-  public ArrayList<Class> getDeployList()
+  public ArrayList<Class<?>> getDeployList()
   {
     return _deployList;
   }

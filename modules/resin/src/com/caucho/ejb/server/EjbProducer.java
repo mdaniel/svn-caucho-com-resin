@@ -49,7 +49,6 @@ import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.j2ee.InjectIntrospector;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
@@ -229,7 +228,8 @@ public class EjbProducer<T> {
 
     injectList = new ArrayList<ConfigProgram>();
 
-    InjectIntrospector.introspectDestroy(injectList, _ejbClass);
+    // XXX:
+    // InjectIntrospector.introspectDestroy(injectList, _ejbClass);
 
     ConfigProgram[] injectArray;
     injectArray = new ConfigProgram[injectList.size()];

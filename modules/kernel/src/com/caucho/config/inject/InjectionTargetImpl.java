@@ -56,6 +56,7 @@ import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.inject.Qualifier;
 import javax.inject.Inject;
+import javax.interceptor.InvocationContext;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
@@ -375,12 +376,12 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       */
 
       ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
-      InjectIntrospector.introspectInit(initList, cl, methodMap);
+      introspectInit(initList, cl, methodMap);
       _initProgram = new ConfigProgram[initList.size()];
       initList.toArray(_initProgram);
 
       ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
-      InjectIntrospector.introspectDestroy(destroyList, cl);
+      introspectDestroy(destroyList, cl);
       _destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(_destroyProgram);
 
@@ -392,33 +393,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
         introspectConstructor(beanType);
       }
-
-      /*
-      if (_ctor != null) {
-        String loc = _ctor.getDeclaringClass().getName() + "(): ";
-        Type []param = _ctor.getGenericParameterTypes();
-        Annotation [][]paramAnn = _ctor.getParameterAnnotations();
-
-        Arg []ctorArgs = new Arg[param.length];
-
-        for (int i = 0; i < param.length; i++) {
-          ComponentImpl arg;
-
-          if (_newArgs != null && i < _newArgs.length) {
-            ConfigProgram argProgram = _newArgs[i];
-            ConfigType type = TypeFactory.getType(param[i]);
-
-            ctorArgs[i] = new ProgramArg(type, argProgram);
-          }
-
-          if (ctorArgs[i] == null) {
-            ctorArgs[i] = new BeanArg(loc, param[i], paramAnn[i]);
-          }
-        }
-
-        _ctorArgs = ctorArgs;
-      }
-      */
 
       // introspectObservers(getTargetClass());
 
@@ -455,22 +429,92 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     }
   }
 
+  public void
+    introspectInit(ArrayList<ConfigProgram> initList,
+                   Class type,
+                   HashMap<Method,Annotation[]> methodAnnotationMap)
+    throws ConfigException
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectInit(initList, type.getSuperclass(), methodAnnotationMap);
+
+    for (Method method : type.getDeclaredMethods()) {
+      Annotation []annList = null;
+
+      if (methodAnnotationMap != null)
+        annList = methodAnnotationMap.get(method);
+
+      if (annList == null)
+        annList = method.getAnnotations();
+
+      if (! isAnnotationPresent(annList, PostConstruct.class)) {
+        // && ! isAnnotationPresent(annList, Inject.class)) {
+        continue;
+      }
+
+      if (method.getParameterTypes().length == 1
+          && InvocationContext.class.equals(method.getParameterTypes()[0]))
+        continue;
+
+      if (isAnnotationPresent(annList, PostConstruct.class)
+          && method.getParameterTypes().length != 0) {
+          throw new ConfigException(location(method)
+                                    + L.l("{0}: @PostConstruct is requires zero arguments"));
+      }
+
+      PostConstructProgram initProgram
+        = new PostConstructProgram(method);
+
+      if (! initList.contains(initProgram))
+        initList.add(initProgram);
+    }
+  }
+
+  private void
+    introspectDestroy(ArrayList<ConfigProgram> destroyList, Class<?> type)
+    throws ConfigException
+  {
+    if (type == null || type.equals(Object.class))
+      return;
+
+    introspectDestroy(destroyList, type.getSuperclass());
+
+    for (Method method : type.getDeclaredMethods()) {
+      if (method.isAnnotationPresent(PreDestroy.class)) {
+        Class<?> []types = method.getParameterTypes();
+
+        if (types.length == 0) {
+        }
+        else if (types.length == 1 && types[0].equals(InvocationContext.class)) {
+          // XXX:
+          continue;
+        }
+        else
+          throw new ConfigException(location(method)
+                                    + L.l("@PreDestroy is requires zero arguments"));
+
+        PreDestroyInject destroyProgram
+          = new PreDestroyInject(method);
+
+        if (! destroyList.contains(destroyProgram))
+          destroyList.add(destroyProgram);
+      }
+    }
+  }
+
+  private static String location(Method method)
+  {
+    String className = method.getDeclaringClass().getName();
+
+    return className + "." + method.getName() + ": ";
+  }
+
   private boolean isSerializeHandle()
   {
     return getAnnotated().isAnnotationPresent(SerializeHandle.class);
   }
-
-  /*
-  protected ComponentImpl createArg(ConfigType type, ConfigProgram program)
-  {
-    Object value = program.configure(type);
-
-    if (value != null)
-      return new SingletonBean(getWebBeans(), value);
-    else
-      return null;
-  }
-  */
 
   /**
    * Call pre-destroy
@@ -638,7 +682,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     Arg []args = new Arg[params.size()];
 
     for (int i = 0; i < args.length; i++) {
-      AnnotatedParameter param = params.get(i);
+      AnnotatedParameter<?> param = params.get(i);
 
       Annotation []qualifiers = getQualifiers(param);
 
@@ -674,14 +718,14 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   {
     // configureClassResources(injectList, type);
 
-    for (AnnotatedField field : type.getFields()) {
+    for (AnnotatedField<?> field : type.getFields()) {
       if (field.getAnnotations().size() == 0)
         continue;
 
       if (field.isAnnotationPresent(Delegate.class))
         continue;
       else if (hasQualifierAnnotation(field)) {
-        boolean isOptional = isQualifierOptional(field);
+        // boolean isOptional = isQualifierOptional(field);
 
         InjectionPoint ij = new InjectionPointImpl(this, field);
 
@@ -690,7 +734,12 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         _injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
       }
       else {
-        InjectIntrospector.introspect(_injectProgramList, field);
+        ConfigProgram program = getBeanManager().getInjectionPoint(field);
+        
+        if (program != null)
+          _injectProgramList.add(program);
+        
+        // InjectIntrospector.introspect(_injectProgramList, field);
       }
     }
 
@@ -717,7 +766,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
                                                        args));
       }
       else {
-        InjectIntrospector.introspect(_injectProgramList, method);
+        // XXX:
+        // InjectIntrospector.introspect(_injectProgramList, method);
       }
     }
 

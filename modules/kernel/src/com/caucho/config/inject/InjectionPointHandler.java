@@ -29,8 +29,6 @@
 
 package com.caucho.config.inject;
 
-import java.util.ArrayList;
-
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -41,18 +39,18 @@ import com.caucho.config.program.ConfigProgram;
  * Handles special injection points like @Resource, @EJB.
  */
 abstract public class InjectionPointHandler {
-  public void introspectType(ArrayList<ConfigProgram> program,
-                             AnnotatedType<?> type)
+  public ConfigProgram introspectType(AnnotatedType<?> type)
   {
+    return null;
   }
   
-  public void introspectField(ArrayList<ConfigProgram> program,
-                              AnnotatedField<?> field)
+  public ConfigProgram introspectField(AnnotatedField<?> field)
   {
+    return null;
   }
   
-  public void introspectMethod(ArrayList<ConfigProgram> program,
-                               AnnotatedMethod<?> method)
+  public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
   {
+    return null;
   }
 }

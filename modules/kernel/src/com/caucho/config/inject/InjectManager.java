@@ -58,7 +58,9 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.*;
 
+import javax.annotation.Resource;
 import javax.decorator.Delegate;
+import javax.ejb.EJB;
 import javax.el.*;
 import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
@@ -76,6 +78,8 @@ import javax.inject.Inject;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.naming.*;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 
 /**
  * The web beans container for a given environment.
@@ -143,6 +147,9 @@ public class InjectManager
     = new HashMap<Class<?>,Integer>();
 
   private BaseTypeFactory _baseTypeFactory = new BaseTypeFactory();
+  
+  private HashMap<Class<?>,InjectionPointHandler> _injectionMap
+    = new HashMap<Class<?>,InjectionPointHandler>();
 
   //
   // self configuration
@@ -266,6 +273,15 @@ public class InjectManager
       addContext("com.caucho.server.webbeans.ConversationScope");
       addContext(_applicationScope);
       addContext(_singletonScope);
+      
+      _injectionMap.put(PersistenceContext.class, 
+                        new PersistenceContextHandler(this));
+      _injectionMap.put(PersistenceUnit.class,
+                        new PersistenceUnitHandler(this));
+      _injectionMap.put(Resource.class,
+                        new ResourceHandler(this));
+      _injectionMap.put(EJB.class,
+                        new EjbHandler(this));
 
       _deploymentMap.put(CauchoDeployment.class, 0);
       // DEFAULT_PRIORITY
@@ -305,8 +321,8 @@ public class InjectManager
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      Class cl = Class.forName(className, false, loader);
-      Constructor ctor= cl.getConstructor(new Class[] { InjectManager.class });
+      Class<?> cl = Class.forName(className, false, loader);
+      Constructor<?> ctor= cl.getConstructor(new Class[] { InjectManager.class });
 
       Extension extension = (Extension) ctor.newInstance(this);
 
@@ -319,7 +335,7 @@ public class InjectManager
   private void addContext(String contextClassName)
   {
     try {
-      Class cl = Class.forName(contextClassName);
+      Class<?> cl = Class.forName(contextClassName);
       Context context = (Context) cl.newInstance();
 
       addContext(context);
@@ -451,7 +467,7 @@ public class InjectManager
     _pendingPathList.add(path);
   }
 
-  public void setDeploymentTypes(ArrayList<Class> deploymentList)
+  public void setDeploymentTypes(ArrayList<Class<?>> deploymentList)
   {
     _deploymentMap.clear();
 
@@ -528,7 +544,7 @@ public class InjectManager
    *
    * @param scope the scope annotation type identifying the scope
    */
-  public ScopeContext getScopeContext(Class scope)
+  public ScopeContext getScopeContext(Class<?> scope)
   {
     if (scope == null)
       throw new NullPointerException();
@@ -752,7 +768,7 @@ public class InjectManager
   /**
    * Creates a BaseType from a Type
    */
-  public BaseType createClassBaseType(Class type)
+  public BaseType createClassBaseType(Class<?> type)
   {
     return _baseTypeFactory.createClass(type);
   }
@@ -1456,6 +1472,26 @@ public class InjectManager
     }
 
     return list;
+  }
+  
+  ConfigProgram getInjectionPoint(AnnotatedField<?> field)
+  {
+    // InjectIntrospector.introspect(_injectProgramList, field);
+    
+    for (Annotation ann : field.getAnnotations()) {
+      Class<? extends Annotation> annType = ann.annotationType();
+      
+      InjectionPointHandler handler = _injectionMap.get(annType);
+      
+      if (handler != null) {
+        ConfigProgram program = handler.introspectField(field);
+        
+        if (program != null)
+          return program;
+      }
+    }
+    
+    return null;
   }
 
   /**
