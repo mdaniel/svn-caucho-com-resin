@@ -1511,6 +1511,7 @@ public class StringModule extends AbstractQuercusModule {
     TRIM_WHITESPACE['\t'] = true;
     TRIM_WHITESPACE['\r'] = true;
     TRIM_WHITESPACE['\n'] = true;
+    TRIM_WHITESPACE[0x0B] = true;    
   }
 
   /**
@@ -3588,11 +3589,17 @@ public class StringModule extends AbstractQuercusModule {
    * @param needleV the substring argument to check
    * @param offsetV optional starting position
    */
-  public static Value stripos(StringValue haystack,
+  public static Value stripos(Env env, StringValue haystack,
                               Value needleV,
                               @Optional int offset)
   {
     StringValue needle;
+    int len = haystack.length();
+    
+    if (len < offset) {
+      env.warning(L.l("offset can not be greater than length of String"));
+      return BooleanValue.FALSE;
+    }
 
     if (needleV instanceof StringValue)
       needle = (StringValue) needleV;
@@ -4449,9 +4456,13 @@ public class StringModule extends AbstractQuercusModule {
 
     if (! lenV.isDefault() && len == 0)
       return BooleanValue.FALSE;
-
-    if (len > strLen
-        || offset > strLen
+    
+    if (offset > strLen) {
+      env.warning(L.l("offset can not be greater than length of string"));
+      return BooleanValue.FALSE;
+    }
+    
+    if (len > strLen      
         || len + offset > strLen) {
       return BooleanValue.FALSE;
     }
