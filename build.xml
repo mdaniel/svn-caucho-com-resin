@@ -68,6 +68,13 @@
       </fileset>
     </jar>
   </target>
+     
+  <target name="junit" depends="init">
+    <antcall target="artifact" inheritRefs="true">
+      <param name="artifact.name" value="junit"/>
+      <param name="artifact.jar" value="resin-junit.jar"/>
+    </antcall>
+  </target>
 
   <target name="netbeans" depends="init">
     <antcall target="artifact" inheritRefs="true">
