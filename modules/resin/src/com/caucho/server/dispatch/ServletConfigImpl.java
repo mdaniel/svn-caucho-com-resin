@@ -198,12 +198,22 @@ public class ServletConfigImpl
     return true;
   }
 
+  public void setServletSecurity(ServletSecurityElement securityElement)
+  {
+    _servletManager.addSecurityElement(getServletClass(), securityElement);
+  }
+
+  public ServletSecurityElement getSecurityElement()
+  {
+    return _servletManager.getSecurityElement(getServletClass());
+  }
+
   public void setMultipartConfig(MultipartConfigElement multipartConfig)
   {
     if (multipartConfig == null)
       throw new IllegalArgumentException();
 
-    if (!_webApp.isInitializing())
+    if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     _multipartConfigElement = multipartConfig;

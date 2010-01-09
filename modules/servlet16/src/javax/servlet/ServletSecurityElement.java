@@ -30,52 +30,98 @@ package javax.servlet;
 
 import java.util.*;
 import javax.servlet.annotation.ServletSecurity;
+import javax.servlet.annotation.HttpMethodConstraint;
 
 /**
  * @since Servlet 3.0
  */
 public class ServletSecurityElement extends HttpConstraintElement {
 
+  private Collection<String> _methodNames;
+  private Collection<HttpMethodConstraintElement> _httpMethodConstraints;
+
   public ServletSecurityElement()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _methodNames = new HashSet<String>(0);
+    _httpMethodConstraints = new HashSet<HttpMethodConstraintElement>(0);
   }
 
   public ServletSecurityElement(HttpConstraintElement constraint)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    super(constraint.getEmptyRoleSemantic(),
+          constraint.getTransportGuarantee(),
+          constraint.getRolesAllowed());
   }
 
   public ServletSecurityElement(
     Collection<HttpMethodConstraintElement> methodConstraints)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this(new HttpConstraintElement(), methodConstraints);
   }
 
   public ServletSecurityElement(HttpConstraintElement constraint,
                                 Collection<HttpMethodConstraintElement> methodConstraints)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this(constraint);
+
+    _methodNames = new HashSet<String>(methodConstraints.size());
+
+    for (HttpMethodConstraintElement methodConstraint : methodConstraints) {
+      String httpMethod = methodConstraint.getMethodName();
+
+      if (_methodNames.contains(httpMethod))
+        throw new IllegalArgumentException("Http method "
+          + httpMethod
+          + " was already used.");
+      else
+        _methodNames.add(httpMethod);
+    }
+
+    _httpMethodConstraints = methodConstraints;
   }
 
   public ServletSecurityElement(ServletSecurity annotation)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    super(annotation.value().value(),
+          annotation.value().transportGuarantee(),
+          annotation.value().rolesAllowed());
+
+    HttpMethodConstraint []methodConstraints
+      = annotation.httpMethodConstraints();
+
+    _methodNames = new HashSet<String>(methodConstraints.length);
+    _httpMethodConstraints = new HashSet<HttpMethodConstraintElement>(
+      methodConstraints.length);
+
+    for (HttpMethodConstraint methodConstraint : methodConstraints) {
+      String httpMethod = methodConstraint.value();
+
+      if (_methodNames.contains(httpMethod)) {
+        throw new IllegalArgumentException("Http method "
+          + httpMethod
+          + " was already used.");
+      } else {
+        _methodNames.add(httpMethod);
+
+        HttpMethodConstraintElement methodConstraintElement
+          = new HttpMethodConstraintElement(httpMethod,
+                                            new HttpConstraintElement(
+                                              methodConstraint.emptyRoleSemantic(),
+                                              methodConstraint.transportGuarantee(),
+                                              methodConstraint.rolesAllowed()));
+
+        _httpMethodConstraints.add(methodConstraintElement);
+      }
+    }
   }
 
   public Collection<HttpMethodConstraintElement> getHttpMethodConstraints()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _httpMethodConstraints;
   }
 
   public Collection<String> getMethodNames()
   {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  private Collection<String> checkMethodNames(
-    Collection<HttpMethodConstraintElement> methodConstraints)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _methodNames;
   }
 }

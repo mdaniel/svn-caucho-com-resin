@@ -176,4 +176,13 @@ public class ConstraintManager extends FilterChainBuilder {
 
     return next;
   }
+
+  public boolean hasConstraintForUrlPattern(String pattern) {
+    for (SecurityConstraint constraint : _constraints) {
+      if (constraint.isMatch(pattern))
+        return true;
+    }
+
+    return false;
+  }
 }

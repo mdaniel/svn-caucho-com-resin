@@ -57,11 +57,6 @@ import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.DispatchRule;
-import com.caucho.server.repository.Repository;
-import com.caucho.security.Authenticator;
-import com.caucho.security.BasicLogin;
-import com.caucho.security.Login;
-import com.caucho.security.Deny;
 import com.caucho.rewrite.RedirectSecure;
 import com.caucho.rewrite.IfSecure;
 import com.caucho.rewrite.Not;
@@ -80,10 +75,11 @@ import com.caucho.server.log.AbstractAccessLog;
 import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
-import com.caucho.security.RoleMapManager;
+import com.caucho.security.*;
 import com.caucho.server.security.ConstraintManager;
 import com.caucho.server.security.LoginConfig;
 import com.caucho.server.security.SecurityConstraint;
+import com.caucho.server.security.TransportConstraint;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -102,10 +98,7 @@ import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 import javax.naming.NamingException;
 import javax.servlet.*;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.annotation.WebFilter;
-import javax.servlet.annotation.WebListener;
-import javax.servlet.annotation.WebInitParam;
+import javax.servlet.annotation.*;
 import javax.servlet.http.*;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.context.spi.CreationalContext;
@@ -1068,6 +1061,60 @@ public class WebApp extends ServletContextImpl
       result.put(key, configMap.get(key));
 
     return Collections.unmodifiableMap(result);
+  }
+
+  private void addServletSecurity(Class<? extends Servlet> servletClass,
+                                  ServletSecurity security)
+  {
+    ServletSecurityElement securityElement
+      = new ServletSecurityElement(security);
+
+    _servletManager.addSecurityElement(servletClass, securityElement);
+  }
+
+  private void initSecurityConstraints() {
+    Map<String, ServletConfigImpl> servlets = _servletManager.getServlets();
+
+    for (Map.Entry<String, ServletConfigImpl> entry : servlets.entrySet()) {
+      ServletSecurityElement securityElement
+        = entry.getValue().getSecurityElement();
+
+      if (securityElement == null)
+        continue;
+
+      ServletSecurity.EmptyRoleSemantic emptyRoleSemantic
+        = securityElement.getEmptyRoleSemantic();
+
+      ServletSecurity.TransportGuarantee transportGuarantee
+        = securityElement.getTransportGuarantee();
+
+      String []roles = securityElement.getRolesAllowed();
+
+      Set<String> patterns = _servletMapper.getUrlPatterns(entry.getKey());
+      for (String pattern : patterns) {
+        if (_constraintManager.hasConstraintForUrlPattern(pattern))
+          continue;
+
+        SecurityConstraint constraint = null;
+        if (emptyRoleSemantic == ServletSecurity.EmptyRoleSemantic.DENY)
+          constraint = new Deny();
+
+        if (constraint == null)
+          constraint = new SecurityConstraint();
+
+        if (transportGuarantee
+          == ServletSecurity.TransportGuarantee.CONFIDENTIAL)
+          constraint.addConstraint(new TransportConstraint("CONFIDENTIAL"));
+
+        constraint.addURLPattern(pattern);
+        
+        for (String role : roles)
+          constraint.addRoleName(role);
+
+        _constraintManager.addConstraint(constraint);
+
+      }
+    }
   }
 
 
@@ -2651,6 +2698,12 @@ public class WebApp extends ServletContextImpl
 
       if (webServlet != null)
         addServlet(webServlet, servletClass.getName());
+
+      ServletSecurity servletSecurity
+        = (ServletSecurity) servletClass.getAnnotation(ServletSecurity.class);
+
+      if (servletSecurity != null)
+        addServletSecurity(servletClass, servletSecurity);
     }
   }
 
@@ -2732,6 +2785,8 @@ public class WebApp extends ServletContextImpl
       try {
         _filterManager.init();
         _servletManager.init();
+
+        initSecurityConstraints();
       } catch (Exception e) {
         setConfigException(e);
       }

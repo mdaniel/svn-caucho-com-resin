@@ -31,19 +31,27 @@ package javax.servlet;
 
 public class HttpMethodConstraintElement extends HttpConstraintElement {
 
+  private String _methodName;
+
   public HttpMethodConstraintElement(String methodName)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    super();
+    
+    _methodName = methodName;
   }
 
   public HttpMethodConstraintElement(String methodName,
                                      HttpConstraintElement constraint)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    super(constraint.getEmptyRoleSemantic(),
+          constraint.getTransportGuarantee(),
+          constraint.getRolesAllowed());
+
+    _methodName = methodName;
   }
 
   public String getMethodName()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _methodName;
   }
 }

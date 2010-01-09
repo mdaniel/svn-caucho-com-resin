@@ -32,8 +32,7 @@ package javax.servlet;
 import java.util.Set;
 
 public interface ServletRegistration
-  extends Registration
-{
+  extends Registration {
   public Set<String> addMapping(String... urlPatterns);
 
   public Iterable<String> getMappings();
@@ -41,10 +40,13 @@ public interface ServletRegistration
   public String getRunAsRole();
 
   interface Dynamic
-    extends ServletRegistration, Registration.Dynamic
-  {
+    extends ServletRegistration, Registration.Dynamic {
     public void setLoadOnStartup(int loadOnStartup);
+
+    public void setServletSecurity(ServletSecurityElement securityElement);
+
     public void setMultipartConfig(MultipartConfigElement multipartConfig);
+
     public void setRunAsRole(String roleName);
   }
 }

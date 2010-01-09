@@ -35,42 +35,49 @@ import javax.servlet.annotation.ServletSecurity.TransportGuarantee;
  * @since Servlet 3.0
  */
 public class HttpConstraintElement {
+  private final static String []_emptyRoles = new String[0];
+
+  private final EmptyRoleSemantic _emtpyRoleSemantic;
+  private final TransportGuarantee _transportGuarantee;
+  private final String []_rolesAllowed;
 
   public HttpConstraintElement()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this(EmptyRoleSemantic.PERMIT);
   }
 
   public HttpConstraintElement(EmptyRoleSemantic semantic)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this(semantic, TransportGuarantee.NONE, _emptyRoles);
   }
 
   public HttpConstraintElement(TransportGuarantee guarantee,
                                String... roleNames)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    this(EmptyRoleSemantic.PERMIT, guarantee, roleNames);
   }
 
   public HttpConstraintElement(EmptyRoleSemantic semantic,
                                TransportGuarantee guarantee,
                                String... roleNames)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _emtpyRoleSemantic = semantic;
+    _transportGuarantee = guarantee;
+    _rolesAllowed = roleNames;
   }
 
   public EmptyRoleSemantic getEmptyRoleSemantic()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _emtpyRoleSemantic;
   }
 
   public TransportGuarantee getTransportGuarantee()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _transportGuarantee;
   }
 
-  public String[] getRolesAllowed()
+  public String []getRolesAllowed()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _rolesAllowed;
   }
 }

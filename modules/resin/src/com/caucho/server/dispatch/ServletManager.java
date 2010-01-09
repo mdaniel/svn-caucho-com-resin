@@ -36,8 +36,10 @@ import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
+import javax.servlet.ServletSecurityElement;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -56,6 +58,10 @@ public class ServletManager {
   
   private ArrayList<ServletConfigImpl> _cronList
   = new ArrayList<ServletConfigImpl>();
+
+  private Map<Class<? extends Servlet>, ServletSecurityElement>
+    _servletSecurityElements
+    = new HashMap<Class<? extends Servlet>, ServletSecurityElement>();
 
   private boolean _isLazyValidate;
 
@@ -140,6 +146,17 @@ public class ServletManager {
         _servletList.add(config);
       }
     }
+  }
+
+  public void addSecurityElement(Class<? extends Servlet> servletClass,
+                                   ServletSecurityElement securityElement)
+  {
+    _servletSecurityElements.put(servletClass, securityElement);
+  }
+
+  public ServletSecurityElement getSecurityElement(Class<? extends Servlet> servletClass)
+  {
+    return _servletSecurityElements.get(servletClass);
   }
 
   /**
