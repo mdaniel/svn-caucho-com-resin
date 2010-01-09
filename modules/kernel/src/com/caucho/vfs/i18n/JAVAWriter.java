@@ -28,6 +28,7 @@
 
 package com.caucho.vfs.i18n;
 
+import com.caucho.util.ByteAppendable;
 import com.caucho.vfs.OutputStreamWithBuffer;
 
 import java.io.IOException;
@@ -72,7 +73,7 @@ public class JAVAWriter extends EncodingWriter {
    *
    * @param ch the character to write.
    */
-  public void write(OutputStreamWithBuffer os, char ch)
+  public void write(ByteAppendable os, char ch)
     throws IOException
   {
     if (ch < 0x80)
@@ -121,5 +122,5 @@ public class JAVAWriter extends EncodingWriter {
         os.write(b < 10 ? b + '0' : b + 'a' - 10);
       }
     }
-  }
+  }  
 }

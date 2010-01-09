@@ -28,9 +28,10 @@
 
 package com.caucho.vfs.i18n;
 
-import com.caucho.vfs.OutputStreamWithBuffer;
-
 import java.io.IOException;
+
+import com.caucho.util.ByteAppendable;
+import com.caucho.vfs.OutputStreamWithBuffer;
 
 /**
  * Implements an encoding char-to-byte writer for the windows hack
@@ -72,7 +73,7 @@ public class WindowsHackWriter extends EncodingWriter {
    *
    * @param ch the character to write.
    */
-  public void write(OutputStreamWithBuffer os, char ch)
+  public void write(ByteAppendable os, char ch)
     throws IOException
   {
     os.write(ch);

@@ -29,13 +29,15 @@
 
 package com.caucho.vfs.i18n;
 
-import com.caucho.vfs.OutputStreamWithBuffer;
-
 import java.io.IOException;
+import java.io.OutputStream;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
+
+import com.caucho.util.ByteAppendable;
+import com.caucho.vfs.OutputStreamWithBuffer;
 
 /**
  * Factory for JDK-based encoding writers.
@@ -87,7 +89,8 @@ public class JDKWriter extends EncodingWriter {
   /**
    * JDKWriter is only a factory.
    */
-  public void write(OutputStreamWithBuffer os, char ch)
+  @Override
+  public void write(ByteAppendable os, char ch)
     throws IOException
   {
     throw new UnsupportedOperationException();
@@ -97,7 +100,7 @@ public class JDKWriter extends EncodingWriter {
     private Charset _charset;
     private String _encoding;
     private OutputStreamWriter _writer;
-    private OutputStreamWithBuffer _os;
+    //private OutputStreamWithBuffer _os;
 
     OutputStreamEncodingWriter(String javaEncoding)
       throws UnsupportedEncodingException
@@ -119,16 +122,22 @@ public class JDKWriter extends EncodingWriter {
     /**
      * Writes a char.
      */
-    public void write(OutputStreamWithBuffer os, char ch)
+    public void write(ByteAppendable sb, char ch)
       throws IOException
     {
-      if (_os != os) {
+      if (_writer == null) {
+        OutputStream os;
+        
+        if (sb instanceof OutputStream) {
+          os = (OutputStream)sb;
+        } else {
+          os = new OutputStreamAdapter(sb);  
+        }
+        
 	if (_charset != null)
 	  _writer = new OutputStreamWriter(os, _charset);
 	else
 	  _writer = new OutputStreamWriter(os, _encoding);
-
-	_os = os;
       }
       
       _writer.write(ch);
@@ -142,13 +151,11 @@ public class JDKWriter extends EncodingWriter {
 		      char []buf, int offset, int length)
       throws IOException
     {
-      if (_os != os) {
+      if (_writer == null) {
 	if (_charset != null)
 	  _writer = new OutputStreamWriter(os, _charset);
 	else
 	  _writer = new OutputStreamWriter(os, _encoding);
-
-	_os = os;
       }
       
       _writer.write(buf, offset, length);
@@ -161,6 +168,26 @@ public class JDKWriter extends EncodingWriter {
     public EncodingWriter create(String encoding)
     {
       throw new UnsupportedOperationException();
+    }
+  }
+  
+  static class OutputStreamAdapter extends OutputStream {    
+    private final ByteAppendable _out;
+    
+    OutputStreamAdapter(ByteAppendable out) 
+    {
+      _out = out;
+    }
+    
+    public void write(int b) throws IOException
+    {
+      _out.write(b);
+    }
+    
+    public void write(byte[] buffer, int offset, int len) 
+      throws IOException
+    {
+      _out.write(buffer, offset, len);
     }
   }
 }

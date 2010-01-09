@@ -28,10 +28,11 @@
 
 package com.caucho.vfs.i18n;
 
-import com.caucho.vfs.OutputStreamWithBuffer;
-
 import java.io.IOException;
 import java.util.logging.Logger;
+
+import com.caucho.util.ByteAppendable;
+import com.caucho.vfs.OutputStreamWithBuffer;
 
 /**
  * Abstract class for a character-to-byte encoding writer.
@@ -85,7 +86,7 @@ abstract public class EncodingWriter {
    *
    * @param ch the character to write
    */
-  public abstract void write(OutputStreamWithBuffer os, char ch)
+  public abstract void write(ByteAppendable os, char ch)
     throws IOException;
 
   /**
@@ -100,5 +101,5 @@ abstract public class EncodingWriter {
   {
     for (int i = 0; i < len; i++)
       write(os, cbuf[off + i]);
-  }
+  }  
 }

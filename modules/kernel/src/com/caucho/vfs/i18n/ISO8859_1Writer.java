@@ -29,6 +29,7 @@
 
 package com.caucho.vfs.i18n;
 
+import com.caucho.util.ByteAppendable;
 import com.caucho.vfs.OutputStreamWithBuffer;
 
 import java.io.IOException;
@@ -87,7 +88,7 @@ public final class ISO8859_1Writer extends EncodingWriter {
    *
    * @param ch the character to write.
    */
-  public void write(OutputStreamWithBuffer os, char ch)
+  public void write(ByteAppendable os, char ch)
     throws IOException
   {
     os.write(ch);

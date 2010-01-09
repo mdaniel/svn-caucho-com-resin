@@ -32,10 +32,14 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.io.OutputStream;
 
+import com.caucho.util.ByteAppendable;
+
 /**
  * An OutputStream with an accessible buffer.
  */
-abstract public class OutputStreamWithBuffer extends OutputStream {
+abstract public class OutputStreamWithBuffer extends OutputStream 
+  implements ByteAppendable {
+
   /**
    * Returns the stream's buffer.
    */

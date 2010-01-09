@@ -28,9 +28,10 @@
 
 package com.caucho.vfs.i18n;
 
-import com.caucho.vfs.OutputStreamWithBuffer;
-
 import java.io.IOException;
+
+import com.caucho.util.ByteAppendable;
+import com.caucho.vfs.OutputStreamWithBuffer;
 
 /**
  * Implements an encoding char-to-byte writer for UTF8 and the associated
@@ -79,31 +80,21 @@ public class UTF8Writer extends EncodingWriter {
    *
    * @param ch the character to write.
    */
-  public void write(OutputStreamWithBuffer os, char ch)
+  public void write(ByteAppendable os, char ch)
     throws IOException
   {
-    byte []buffer = os.getBuffer();
-    int length = os.getBufferOffset();
-    
-    if (buffer.length <= length + 2) {
-      buffer = os.nextBuffer(length);
-      length = os.getBufferOffset();
-    }
-    
     if (ch < 0x80) {
-      buffer[length++] = (byte) ch;
+      os.write(ch);
     }
     else if (ch < 0x800) {
-      buffer[length++] = (byte) (0xc0 + (ch >> 6));
-      buffer[length++] = (byte) (0x80 + (ch & 0x3f));
+      os.write((0xc0 + (ch >> 6)));
+      os.write((0x80 + (ch & 0x3f)));
     }
     else {
-      buffer[length++] = (byte) (0xe0 + (ch >> 12));
-      buffer[length++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-      buffer[length++] = (byte) (0x80 + (ch & 0x3f));
+      os.write((0xe0 + (ch >> 12)));
+      os.write((0x80 + ((ch >> 6) & 0x3f)));
+      os.write((0x80 + (ch & 0x3f)));
     }
-
-    os.setBufferOffset(length);
   }
 
   /**
