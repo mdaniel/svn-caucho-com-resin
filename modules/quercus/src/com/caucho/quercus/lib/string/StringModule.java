@@ -4457,7 +4457,7 @@ public class StringModule extends AbstractQuercusModule {
     if (! lenV.isDefault() && len == 0)
       return BooleanValue.FALSE;
     
-    if (offset > strLen) {
+    if (strLen < offset) {
       env.warning(L.l("offset can not be greater than length of string"));
       return BooleanValue.FALSE;
     }

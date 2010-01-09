@@ -29,25 +29,33 @@
 
 package com.caucho.quercus.env;
 
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.io.Reader;
+import java.io.UnsupportedEncodingException;
+import java.util.IdentityHashMap;
+import java.util.zip.CRC32;
+
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.lib.file.BinaryInput;
 import com.caucho.quercus.lib.i18n.Decoder;
 import com.caucho.quercus.marshal.Marshal;
+import com.caucho.util.ByteAppendable;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.TempBuffer;
 import com.caucho.vfs.WriteStream;
-
-import java.io.*;
-import java.util.IdentityHashMap;
-import java.util.zip.CRC32;
 
 /**
  * Represents a Quercus string value.
  */
 abstract public class StringValue
   extends Value
-  implements CharSequence
+  implements CharSequence, ByteAppendable
 {
   public static final StringValue EMPTY = new ConstStringValue("");
 
@@ -2347,6 +2355,22 @@ abstract public class StringValue
     return crc.getValue() & 0xffffffff;
   }
 
+  //
+  // ByteAppendable methods
+  //
+  public void write(int value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Appends buffer to the ByteAppendable.
+   */
+  public void write(byte[] buffer, int offset, int len)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
   //
   // java.lang.Object methods
   //

@@ -1141,6 +1141,16 @@ public class StringBuilderValue
 
     return this;
   }
+  
+  @Override
+  public final void write(int ch)
+  {
+    if (_buffer.length < _length + 1)
+      ensureCapacity(_length + 1);
+
+    _buffer[_length++] = (byte) ch;
+  }
+  
 
   /**
    * Append a Java buffer to the value.
@@ -1378,6 +1388,12 @@ public class StringBuilderValue
     _length = end;
 
     return this;
+  }
+
+  @Override
+  public final void write(byte []buf, int offset, int length)
+  {
+    append(buf, offset, length);
   }
 
   /**
