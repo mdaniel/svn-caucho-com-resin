@@ -123,7 +123,7 @@ public class HttpResponseStream extends ResponseStream {
     if (log.isLoggable(Level.FINER)) {
       log.finer(dbgId() + "write-set-offset(" + offset + ")");
     }
-    
+
     _next.setBufferOffset(offset);
   }
 
@@ -137,7 +137,7 @@ public class HttpResponseStream extends ResponseStream {
 
     if (log.isLoggable(Level.FINER))
       log.finer(dbgId() + "write-next-buffer(" + (offset - bufferStart) + ")");
-    
+
     if (bufferStart > 0) {
       byte []buffer = next.getBuffer();
 
@@ -185,7 +185,11 @@ public class HttpResponseStream extends ResponseStream {
         log.fine(dbgId() + "close stream");
       }
 
-      _next.close();
+      try {
+        _next.close();
+      } catch (IOException e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
     }
     else {
       // close();
@@ -205,7 +209,7 @@ public class HttpResponseStream extends ResponseStream {
       _next.flush();
       return;
     }
-    
+
     int bufferStart = _bufferStartOffset;
 
     int bufferOffset = _next.getBufferOffset();

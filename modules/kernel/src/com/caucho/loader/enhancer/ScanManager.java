@@ -65,6 +65,10 @@ public class ScanManager {
   
   public void scan(EnvironmentClassLoader loader, Path root)
   {
+    if (root.getPath().endsWith(".jar") && ! (root instanceof JarPath)) {
+      root = JarPath.create(root);
+    }
+    
     ScanListener []listeners = new ScanListener[_listeners.length];
 
     boolean hasListener = false;
@@ -94,31 +98,31 @@ public class ScanManager {
   }
 
   private void scanForClasses(Path root,
-			      Path path,
-			      PathByteCodeMatcher matcher)
+                              Path path,
+                              PathByteCodeMatcher matcher)
   {
     try {
       if (path.isDirectory()) {
-	for (String name : path.list())
-	  scanForClasses(root, path.lookup(name), matcher);
+        for (String name : path.list())
+          scanForClasses(root, path.lookup(name), matcher);
 
-	return;
+        return;
       }
 
       if (! path.getPath().endsWith(".class"))
-	return;
+        return;
 
       matcher.init(root, path);
 
       ReadStream is = path.openRead();
       
       try {
-	ByteCodeClassScanner classScanner
-	  = new ByteCodeClassScanner(path.getPath(), is, matcher);
+        ByteCodeClassScanner classScanner
+        = new ByteCodeClassScanner(path.getPath(), is, matcher);
 
-	classScanner.scan();
+        classScanner.scan();
       } finally {
-	is.close();
+        is.close();
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);

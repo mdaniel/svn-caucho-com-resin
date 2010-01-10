@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.marshal;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
@@ -37,8 +40,11 @@ import com.caucho.quercus.expr.Expr;
 /**
  * Code for marshaling (PHP to Java) and unmarshaling (Java to PHP) arguments.
  */
-public class StringMarshal extends Marshal {
-  public static final StringMarshal MARSHAL = new StringMarshal();
+public class ClassMarshal extends Marshal {
+  private static final Logger log
+    = Logger.getLogger(ClassMarshal.class.getName());
+  
+  public static final ClassMarshal MARSHAL = new ClassMarshal();
 
   public boolean isString()
   {
@@ -52,12 +58,31 @@ public class StringMarshal extends Marshal {
 
   public Object marshal(Env env, Expr expr, Class expectedClass)
   {
-    return expr.evalString(env);
+    return marshal(env, expr.eval(env), expectedClass);
   }
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    return value.toJavaString();
+    Object obj = value.toJavaObject();
+
+    if (obj instanceof Class)
+      return (Class) obj;
+    else {
+      Thread thread = Thread.currentThread();
+      ClassLoader loader = thread.getContextClassLoader();
+
+      try {
+        String className = value.toJavaString();
+
+        return Class.forName(className, false, loader);
+      } catch (ClassNotFoundException e) {
+        log.log(Level.FINE, e.toString(), e);
+
+        env.warning("class argument is an unknown class: " + e);
+        
+        return null;
+      }
+    }
   }
 
   public Value unmarshal(Env env, Object value)
@@ -65,13 +90,19 @@ public class StringMarshal extends Marshal {
     if (value == null)
       return NullValue.NULL;
     else
-      return env.createString((String) value);
+      return env.wrapJava(value);
   }
 
   @Override
   protected int getMarshalingCostImpl(Value argValue)
   {
-    return argValue.toStringMarshalCost();
+    Object javaValue = argValue.toJavaObject();
+    
+    if (Class.class.equals(javaValue))
+      return Marshal.COST_IDENTICAL;
+    else
+      return argValue.toStringMarshalCost() + 1;
+
     /*
     if (argValue.isString()) {
       if (argValue.isUnicode())
@@ -99,6 +130,6 @@ public class StringMarshal extends Marshal {
   @Override
   public Class getExpectedClass()
   {
-    return String.class;
+    return Class.class;
   }
 }

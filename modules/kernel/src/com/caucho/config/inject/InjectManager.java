@@ -183,11 +183,11 @@ public class InjectManager
   private HashMap<Class<?>,ObserverMap> _observerMap
     = new HashMap<Class<?>,ObserverMap>();
 
-  private HashMap<Type,Bean> _newBeanMap
-    = new HashMap<Type,Bean>();
+  private HashMap<Type,Bean<?>> _newBeanMap
+    = new HashMap<Type,Bean<?>>();
 
-  private HashMap<Class,Context> _contextMap
-    = new HashMap<Class,Context>();
+  private HashMap<Class<?>,Context> _contextMap
+    = new HashMap<Class<?>,Context>();
 
   private HashMap<Class,ArrayList<ObserverMap>> _observerListCache
     = new HashMap<Class,ArrayList<ObserverMap>>();
@@ -253,8 +253,13 @@ public class InjectManager
     try {
       thread.setContextClassLoader(_classLoader);
 
-      if (isSetLocal)
+      if (isSetLocal) {
         _localContainer.set(this, _classLoader);
+        
+        if (_parent == null) {
+          _localContainer.setGlobal(this);
+        }
+      }
 
       try {
         InitialContext ic = new InitialContext();
@@ -377,20 +382,26 @@ public class InjectManager
    */
   public static InjectManager create(ClassLoader loader)
   {
-    InjectManager webBeans = null;
+    InjectManager manager = null;
 
     synchronized (_localContainer) {
-      webBeans = _localContainer.getLevel(loader);
+      manager = _localContainer.getLevel(loader);
 
-      if (webBeans == null) {
+      if (manager == null) {
         EnvironmentClassLoader envLoader
           = Environment.getEnvironmentClassLoader(loader);
+        
+        if (envLoader == null) {
+          // InjectManager requires an EnvironmentClassLoader
+          
+          return null;
+        }
         
         // ejb doesn't create a new InjectManager even though it's a new
         // environment
         if (envLoader != null 
             && Boolean.FALSE.equals(envLoader.getAttribute("caucho.inject"))) {
-          webBeans = create(envLoader.getParent());
+          manager = create(envLoader.getParent());
         }
 
         String id;
@@ -400,14 +411,14 @@ public class InjectManager
         else
           id = "";
 
-        if (webBeans == null)
-          webBeans = new InjectManager(id, null, envLoader, true);
+        if (manager == null)
+          manager = new InjectManager(id, null, envLoader, true);
 
         // _localContainer.set(webBeans, loader);
       }
     }
 
-    return webBeans;
+    return manager;
   }
 
   /**
@@ -524,9 +535,7 @@ public class InjectManager
     if (log.isLoggable(Level.FINEST))
       log.finest(bean + "(" + type + ") added to " + this);
 
-    Class rawType = type.getRawClass();
-
-    WebComponent webComponent;
+    Class<?> rawType = type.getRawClass();
 
     Set<TypedBean> beanSet = _selfBeanMap.get(rawType);
 
@@ -1025,7 +1034,7 @@ public class InjectManager
                                Annotation []bindings)
   {
     WebComponent component = getWebComponent(baseType);
-    
+
     if (component != null) {
       Set beans = component.resolve(baseType, bindings);
 
@@ -1126,7 +1135,7 @@ public class InjectManager
 
   private WebComponent getWebComponent(BaseType baseType)
   {
-    Class rawClass = baseType.getRawClass();
+    Class<?> rawClass = baseType.getRawClass();
 
     if (_beanMap == null)
       return null;
@@ -2238,6 +2247,7 @@ public class InjectManager
       Class cl;
 
       cl = Class.forName(className, false, _classLoader);
+      
 
       if (! isValidSimpleBean(cl))
         return;
@@ -2939,6 +2949,11 @@ public class InjectManager
       TypedBean bean = (TypedBean) o;
 
       return _type.equals(bean._type) && _bean.equals(bean._bean);
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _type + "," + _bean + "]";
     }
   }
 

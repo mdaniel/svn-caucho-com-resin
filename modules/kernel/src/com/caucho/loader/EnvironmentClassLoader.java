@@ -45,6 +45,7 @@ import javax.naming.NamingException;
 import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.net.URL;
+import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Properties;
@@ -536,6 +537,28 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     _pendingScanUrls.add(url);
   }
+  
+  /**
+   * Tells the classloader to scan the root classpath.
+   */
+  public void scanRoot()
+  {
+    super.scanRoot();
+    
+    ClassLoader parent = getParent();
+    if (parent instanceof EnvironmentClassLoader)
+      return;
+    
+    if (parent instanceof URLClassLoader) {    
+      URLClassLoader urlParent = (URLClassLoader) parent;
+
+      for (URL url : urlParent.getURLs()) {
+        _pendingScanUrls.add(url);
+      }
+      
+      return;
+    }
+  }
 
   /**
    * Adds a scan listener.
@@ -668,7 +691,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
     _pendingScanUrls.clear();
-
+    
     try {
       if (_scanListeners != null && urlList.size() > 0) {
         try {

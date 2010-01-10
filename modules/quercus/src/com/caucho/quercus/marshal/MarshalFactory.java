@@ -48,6 +48,7 @@ import java.net.URL;
 import java.util.Calendar;
 import java.util.Collection;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -57,6 +58,9 @@ import java.util.Map;
 public class MarshalFactory {
   private static final L10N L = new L10N(MarshalFactory.class);
 
+  private static final HashMap<Class<?>,Marshal> _marshalMap
+    = new HashMap<Class<?>,Marshal>();
+  
   protected ModuleContext _moduleContext;
 
   public MarshalFactory(ModuleContext moduleContext)
@@ -79,11 +83,15 @@ public class MarshalFactory {
                         boolean isNotNull,
                         boolean isNullAsFalse)
   {
-    final Marshal marshal;
+    Marshal marshal;
+    
+    marshal = _marshalMap.get(argType);
+    
     // optimized cases, new types should be added to JavaMarshal
+    // XXX: put the static classes in _marshalMap
 
-    if (String.class.equals(argType)) {
-      marshal = StringMarshal.MARSHAL;
+    if (marshal != null) {
+      
     }
     else if (boolean.class.equals(argType)) {
       marshal = BooleanMarshal.MARSHAL;
@@ -278,6 +286,11 @@ public class MarshalFactory {
   public Marshal createValuePassThru()
   {
     return ValueMarshal.MARSHAL_PASS_THRU;
+  }
+  
+  static {
+    _marshalMap.put(String.class, StringMarshal.MARSHAL);
+    _marshalMap.put(Class.class, ClassMarshal.MARSHAL);
   }
 }
 

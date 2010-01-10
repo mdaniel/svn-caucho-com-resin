@@ -194,7 +194,7 @@ abstract public class JavaInvoker
             }
           }
 
-          Class argType = _param[i + envOffset];
+          Class<?> argType = _param[i + envOffset];
 
           if (isReference) {
             _marshalArgs[i] = marshalFactory.createReference();

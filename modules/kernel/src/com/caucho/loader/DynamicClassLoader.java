@@ -1298,6 +1298,11 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       loaders.get(i).validate();
   }
 
+  public void scanRoot()
+  {
+    _hasNewLoader = true;
+  }
+  
   public void scan()
   {
   }

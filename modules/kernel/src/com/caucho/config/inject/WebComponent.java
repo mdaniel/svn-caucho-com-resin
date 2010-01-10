@@ -65,7 +65,7 @@ public class WebComponent {
 
   private ArrayList<BeanEntry> _beanList = new ArrayList<BeanEntry>();
 
-  public WebComponent(InjectManager beanManager, Class rawType)
+  public WebComponent(InjectManager beanManager, Class<?> rawType)
   {
     _beanManager = beanManager;
     _rawType = rawType;

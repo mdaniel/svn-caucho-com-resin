@@ -214,10 +214,6 @@ r_http-transport = element http {
   & (r_url-pattern | r_url-regexp)
 }
 
-r_interface = 
-  attribute interface { string }
-  | element interface { string }
-
 r_jdbc-store = element jdbc-store {
   (attribute data-source { r_jndi }
    | element data-source { r_jndi })

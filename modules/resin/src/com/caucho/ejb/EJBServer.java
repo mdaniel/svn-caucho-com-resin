@@ -524,16 +524,19 @@ public class EJBServer
    */
   @PostConstruct
   public void init()
-    throws Exception
   {
-    Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+    try {
+      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
     
-    // _ejbContainer.start();
+      // _ejbContainer.start();
 
-    if ("manual".equals(_startupMode))
-      return;
+      if ("manual".equals(_startupMode))
+        return;
 
-    manualInit();
+      manualInit();
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   /**
