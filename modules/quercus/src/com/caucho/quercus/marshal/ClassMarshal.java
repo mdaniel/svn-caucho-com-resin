@@ -43,7 +43,7 @@ import com.caucho.quercus.expr.Expr;
 public class ClassMarshal extends Marshal {
   private static final Logger log
     = Logger.getLogger(ClassMarshal.class.getName());
-  
+
   public static final ClassMarshal MARSHAL = new ClassMarshal();
 
   public boolean isString()
@@ -74,12 +74,15 @@ public class ClassMarshal extends Marshal {
       try {
         String className = value.toJavaString();
 
+        if (className == null)
+          return null;
+
         return Class.forName(className, false, loader);
       } catch (ClassNotFoundException e) {
         log.log(Level.FINE, e.toString(), e);
 
         env.warning("class argument is an unknown class: " + e);
-        
+
         return null;
       }
     }
@@ -97,7 +100,7 @@ public class ClassMarshal extends Marshal {
   protected int getMarshalingCostImpl(Value argValue)
   {
     Object javaValue = argValue.toJavaObject();
-    
+
     if (Class.class.equals(javaValue))
       return Marshal.COST_IDENTICAL;
     else

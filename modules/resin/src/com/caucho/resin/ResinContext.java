@@ -77,19 +77,19 @@ import javax.enterprise.inject.spi.Bean;
  *   }
  * }
  * </pre></code>
- * 
+ *
  * <h2>Configuration File</h2>
- * 
+ *
  * The optional configuration file for the ResinContext allows the same
  * environment and bean configuration as the resin-web.xml, but without the
  * servlet-specific configuration.
- * 
+ *
  * <pre><code>
  * &lt;resin-context xmlns="http://caucho.com/ns/resin"
  *              xmlns:resin="urn:java:com.caucho.resin">
  *
  *    &lt;resin:import path="${__DIR__}/my-include.xml"/>
- *    
+ *
  *    &lt;database name="my-database">
  *      &lt;driver ...>
  *        ...
@@ -109,7 +109,7 @@ public class ResinContext
 
   private EnvironmentClassLoader _classLoader;
   private InjectManager _injectManager;
-  
+
   private ThreadLocal<RequestContext> _localContext
     = new ThreadLocal<RequestContext>();
 
@@ -121,17 +121,20 @@ public class ResinContext
     _classLoader = EnvironmentClassLoader.create("resin-context");
     _injectManager = InjectManager.create(_classLoader);
     _injectManager.addContext(new RequestScope());
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
-      thread.setContextClassLoader(oldLoader);
+      thread.setContextClassLoader(_classLoader);
+
+      Environment.init();
+
       EJBServer ejbServer = new EJBServer();
       ejbServer.init();
-      
+
       Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
-    
+
       _classLoader.scanRoot();
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -156,31 +159,31 @@ public class ResinContext
       _classLoader.addLoader(loader);
     }
   }
-  
+
   /**
-   * Adds a Resin context configuration file, allowing creation of 
+   * Adds a Resin context configuration file, allowing creation of
    * databases, or bean configuration.
-   * 
+   *
    * @param pathName URL/path to the configuration file
    */
   public void addContextConfiguration(String pathName)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
       Path path = Vfs.lookup(pathName);
-      
+
       ContextConfig context = new ContextConfig();
-      
+
       Config config = new Config();
       config.configure(context, path, SCHEMA);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-    
+
   }
-  
+
   /**
    * Sets the work directory for Resin to use when generating temporary
    * files.
@@ -197,10 +200,10 @@ public class ResinContext
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       _classLoader.start();
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -210,7 +213,7 @@ public class ResinContext
   /**
    * Returns a new instance of the given type with optional bindings. If
    * the type is a managed bean, it will be injected before returning.
-   * 
+   *
    * @param className the className of the bean to instantiate
    * @param qualifier optional @Qualifier annotations to select the bean
    */
@@ -218,12 +221,12 @@ public class ResinContext
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       Class<?> cl = Class.forName(className, false, _classLoader);
-      
+
       return getInstance(cl, qualifiers);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
@@ -240,15 +243,15 @@ public class ResinContext
   {
     if (type == null)
       throw new NullPointerException();
-    
+
     Set<Bean<?>> beans = _injectManager.getBeans(type, qualifiers);
-    
+
     if (beans.size() > 0) {
       Bean<?> bean = _injectManager.resolve(beans);
-      
+
       return (T) _injectManager.getReference(bean);
     }
-    
+
     try {
       return type.newInstance();
     } catch (InstantiationException e) {
@@ -264,36 +267,36 @@ public class ResinContext
    * Enters the Resin context and begins a new request on the thread. The
    * the returned context must be passed to the completeRequest. To ensure
    * the request is properly closed, use the following pattern:
-   * 
+   *
    * <code><pre>
    * ResinContext resinContext = ...;
-   * 
+   *
    * RequestContext cxt = resinContext.beginRequest();
-   * 
+   *
    * try {
    *    // ... actions inside the Resin request context
    * } finally {
    *   resinContext.completeRequest(cxt);
    * }
    * </pre></code>
-   * 
-   * @return the RequestContext which must be passed to 
+   *
+   * @return the RequestContext which must be passed to
    *    <code>completeContext</code>
    */
   public RequestContext beginRequest()
   {
     Thread thread = Thread.currentThread();
-    
+
     ClassLoader oldLoader = thread.getContextClassLoader();
-    
+
     RequestContext oldContext = _localContext.get();
-    
+
     RequestContext context = new RequestContext(oldLoader, oldContext);
-    
+
     thread.setContextClassLoader(_classLoader);
-    
+
     _localContext.set(context);
-    
+
     return context;
   }
 
@@ -315,7 +318,7 @@ public class ResinContext
   {
     EnvironmentClassLoader loader = _classLoader;
     _classLoader = null;
-    
+
     if (loader != null) {
       loader.destroy();
     }
@@ -325,23 +328,23 @@ public class ResinContext
   {
     return getClass().getName() + "[]";
   }
-  
+
   class ContextConfig implements EnvironmentBean {
     public ClassLoader getClassLoader()
     {
       return _classLoader;
     }
   }
-  
+
   class RequestScope implements Context {
     @Override
     public <T> T get(Contextual<T> bean)
     {
       RequestContext cxt = _localContext.get();
-      
+
       if (cxt == null)
         throw new IllegalStateException(L.l("No RequestScope is active"));
-      
+
       return cxt.get(bean);
     }
 
@@ -349,10 +352,10 @@ public class ResinContext
     public <T> T get(Contextual<T> bean, CreationalContext<T> creationalContext)
     {
       RequestContext cxt = _localContext.get();
-      
+
       if (cxt == null)
         throw new IllegalStateException(L.l("No RequestScope is active"));
-      
+
       return cxt.get(bean, creationalContext, _injectManager);
     }
 
@@ -367,6 +370,6 @@ public class ResinContext
     {
       return _localContext.get() != null;
     }
-    
+
   }
 }

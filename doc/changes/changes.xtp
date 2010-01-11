@@ -13,6 +13,7 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>embed: add com.caucho.resin.ResinContext for non-server embedding, e.g. testing.</li>
 <li>javaee: refactor @PersistenceContext, @PersistenceUnit, @Resource (#3708, rep by Wesley)</li>
 <li>deploy: git-expand needs to setLastModified of created files to consistent time (#3839, rep by Matt Pangaro)</li>
 <li>watchdog: "status" returns watchdog-pid (#3768, rep by cyttesen)</li>

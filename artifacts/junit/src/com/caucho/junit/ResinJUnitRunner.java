@@ -32,16 +32,72 @@ package com.caucho.junit;
 import org.junit.runner.*;
 import org.junit.runner.notification.*;
 import org.junit.runners.*;
+import org.junit.runners.model.*;
+
+import com.caucho.resin.*;
 
 /**
  * ResinJUnit runner runs a JUnit within the context of Resin.
  */
 public class ResinJUnitRunner extends BlockJUnit4ClassRunner {
   private Class<?> _testClass;
-  
+
+  private ResinContext _resinContext;
+  private ResinDescription _resinDescription;
+
   public ResinJUnitRunner(Class<?> testClass)
     throws Throwable
   {
     super(testClass);
+
+    _testClass = testClass;
+
+    _resinDescription = testClass.getAnnotation(ResinDescription.class);
+  }
+
+  @Override
+  protected void runChild(FrameworkMethod method, RunNotifier notifier)
+  {
+    ResinContext resinContext = getResinContext();
+    RequestContext request = resinContext.beginRequest();
+
+    try {
+      super.runChild(method, notifier);
+    } finally {
+      resinContext.completeRequest(request);
+    }
+  }
+
+  @Override
+  protected Object createTest()
+    throws Exception
+  {
+    return getResinContext().getInstance(_testClass);
+  }
+
+  protected ResinContext getResinContext()
+  {
+    if (_resinContext == null) {
+      _resinContext = new ResinContext();
+
+      String userName = System.getProperty("user.name");
+      String workDir = "file:/tmp/" + userName;
+
+      _resinContext.setWorkDirectory(workDir);
+
+      if (_resinDescription != null) {
+        for (String module : _resinDescription.modules()) {
+          _resinContext.addModule(module);
+        }
+
+        for (String conf : _resinDescription.contextConfig()) {
+          _resinContext.addContextConfiguration(conf);
+        }
+      }
+
+      _resinContext.start();
+    }
+
+    return _resinContext;
   }
 }
