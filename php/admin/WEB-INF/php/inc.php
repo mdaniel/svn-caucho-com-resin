@@ -636,7 +636,7 @@ if (! empty($server)) {
 
   </td>
 
-  <td align='right'
+  <td align='right'>
    <img src='<?= uri("images/caucho-logo.png") ?>' width='300'</tr>
   </td>
 
