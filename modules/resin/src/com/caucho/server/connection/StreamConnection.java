@@ -116,7 +116,7 @@ public class StreamConnection extends Connection {
   }
 
   @Override
-  public boolean isKeepalive()
+  public boolean isKeepaliveAllocated()
   {
     return _isKeepalive;
   }

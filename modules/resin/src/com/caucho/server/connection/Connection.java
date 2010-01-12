@@ -29,17 +29,17 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.util.L10N;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-
 import java.lang.reflect.Constructor;
 import java.net.InetAddress;
+
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
+
 /**
- * Represents a protocol-independent connection.  Prococol servers and
+ * Represents a protocol-independent connection.  Protocol servers and
  * their associated Requests use Connection to retrieve the read and
  * write streams and to get information about the connection.
  *
@@ -48,9 +48,7 @@ import javax.servlet.ServletResponse;
  */
 public abstract class Connection
 {
-  private static final L10N L = new L10N(Connection.class);
-
-  private static Constructor _cometConstructor;
+  private static Constructor<?> _cometConstructor;
 
   private final ReadStream _readStream;
   private final WriteStream _writeStream;
@@ -152,7 +150,7 @@ public abstract class Connection
   {
   }
 
-  public boolean isKeepalive()
+  public boolean isKeepaliveAllocated()
   {
     return false;
   }
@@ -168,7 +166,7 @@ public abstract class Connection
 
   public ConnectionState getState()
   {
-    return ConnectionState.REQUEST_ACTIVE;
+    return ConnectionState.REQUEST_ACTIVE_KA;
   }
 
   /**
@@ -247,7 +245,7 @@ public abstract class Connection
 
   static {
     try {
-      Class asyncComet = Class.forName("com.caucho.server.connection.AsyncConnectionCometController");
+      Class<?> asyncComet = Class.forName("com.caucho.server.connection.AsyncConnectionCometController");
 
       _cometConstructor = asyncComet.getConstructor(new Class[] {
           Connection.class,

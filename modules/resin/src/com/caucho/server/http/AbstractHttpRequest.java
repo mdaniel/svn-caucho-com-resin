@@ -1461,7 +1461,7 @@ public abstract class AbstractHttpRequest
       String url = _tcpConn.getAsyncDispatchUrl();
 
       // servlet 3.0 spec defaults to suspend
-      _tcpConn.suspend();
+      _tcpConn.cometSuspend();
 
       if (url != null) {
         if (webApp == null)
@@ -1576,7 +1576,7 @@ public abstract class AbstractHttpRequest
    */
   protected boolean isKeepalive()
   {
-    return _conn != null && _conn.isKeepalive();
+    return _conn != null && _conn.isKeepaliveAllocated();
   }
 
   public boolean isComet()
@@ -1587,7 +1587,7 @@ public abstract class AbstractHttpRequest
   public boolean isSuspend()
   {
     // return _tcpConn != null && (_tcpConn.isSuspend() || _tcpConn.isDuplex());
-    return _tcpConn != null && (_tcpConn.isSuspend() || _tcpConn.isDuplex());
+    return _tcpConn != null && (_tcpConn.isComet() || _tcpConn.isDuplex());
   }
 
   public boolean isDuplex()
@@ -1596,22 +1596,17 @@ public abstract class AbstractHttpRequest
   }
 
   /**
-   * Returns true if keepalives are allowed.
-   *
-   * This method should only be called once, when the response is
-   * deciding whether to send the Connection: close (or 'Q' vs 'X'),
-   * after that, the calling routines should call isKeepalive() to
-   * see what the decision was.
-   *
-   * Otherwise, the browser might see a keepalive when the final decision
-   * is to close the connection.
+   * Returns true if a keepalive has been allocated for the request.
+   * 
+   * The keepalives are preallocated at the start of the request to keep
+   * the connection state machine simple.
    */
-  public boolean allowKeepalive()
+  public boolean isKeepaliveAllowed()
   {
     Connection conn = _conn;
 
     if (conn != null)
-      return conn.toKeepalive();
+      return conn.isKeepaliveAllocated();
     else
       return true;
   }

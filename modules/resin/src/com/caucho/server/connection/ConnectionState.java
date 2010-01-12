@@ -30,7 +30,10 @@
 package com.caucho.server.connection;
 
 enum ConnectionState {
-  INIT {                // allocated, ready to accept
+  /**
+   * The allocated, ready to accept state
+   */
+  INIT {
     @Override
     ConnectionState toInit() 
     { 
@@ -43,18 +46,32 @@ enum ConnectionState {
       return ACCEPT; 
     }
   },
-
+  
+  /**
+   * Waiting in an accept() for a new connection
+   */
   ACCEPT {               // accepting
     @Override
     boolean isActive() { return true; }
 
     @Override
-    ConnectionState toActive(TcpConnection conn) 
+    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
     { 
-      return REQUEST_ACTIVE; 
+      conn.getPort().keepaliveAllocate();
+      
+      return REQUEST_ACTIVE_KA;
+    }
+
+    @Override
+    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    { 
+      return REQUEST_ACTIVE_NKA;
     }
   },
 
+  /**
+   * Connection opened, waiting for the request.
+   */
   REQUEST_READ {         // after accept, but before any data is read
     @Override
     boolean isActive() { return true; }
@@ -62,25 +79,38 @@ enum ConnectionState {
     @Override
     boolean isRequestActive() { return true; }
 
-    @Override
-    boolean isAllowKeepalive() { return true; }
-
-    @Override
-    ConnectionState toActive(TcpConnection conn) 
-    { 
-      return REQUEST_ACTIVE; 
-    }
-
+    /**
+     * A slow initial read might go into the keepalive state.
+     * 
+     * XXX: qa
+     */
     @Override
     ConnectionState toKeepalive(TcpConnection conn)
     {
-      conn.getPort().keepaliveBegin();
-
+      conn.getPort().keepaliveAllocate();
+      
       return REQUEST_KEEPALIVE;
+    }
+    
+    @Override
+    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    { 
+      conn.getPort().keepaliveAllocate();
+      
+      return REQUEST_ACTIVE_KA; 
+    }
+
+    @Override
+    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    { 
+      return REQUEST_ACTIVE_NKA;
     }
   },
 
-  REQUEST_ACTIVE {       // processing a request
+  /**
+   * Processing a request with a keepalive slot allocated.
+   */
+  REQUEST_ACTIVE_KA {       // processing a request
     @Override
     boolean isActive() { return true; }
 
@@ -88,50 +118,65 @@ enum ConnectionState {
     boolean isRequestActive() { return true; }
 
     @Override
-    boolean isAllowKeepalive() { return true; }
-
+    boolean isKeepaliveAllocated() { return true; }
+    
     @Override
-    ConnectionState toPostActive()
-    {
-      return REQUEST_READ; 
+    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    { 
+      return REQUEST_ACTIVE_KA; 
     }
 
     @Override
-    ConnectionState toKillKeepalive()
+    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    { 
+      conn.getPort().keepaliveFree();
+      
+      return REQUEST_ACTIVE_NKA;
+    }
+
+    @Override
+    ConnectionState toKillKeepalive(TcpConnection conn)
     {
-      return REQUEST_NKA;
+      conn.getPort().keepaliveFree();
+      
+      return REQUEST_ACTIVE_NKA;
     }
 
     @Override
     ConnectionState toKeepalive(TcpConnection conn)
     {
-      conn.getPort().keepaliveBegin();
-
       return REQUEST_KEEPALIVE;
     }
 
     @Override
     ConnectionState toComet()
     {
-      return COMET;
+      return COMET_KA;
     }
 
     @Override
-    ConnectionState toDuplex()
+    ConnectionState toDuplex(TcpConnection conn)
     {
+      conn.getPort().keepaliveFree();
+      
       return DUPLEX;
+    }
+    
+    @Override
+    ConnectionState toClosed(TcpConnection conn)
+    {
+      conn.getPort().keepaliveFree();
+      
+      return CLOSED;
     }
   },
 
-  REQUEST_NKA {          // processing a request, but keepalive forbidden
+  /**
+   * Request active with keepalive forbidden.
+   */
+  REQUEST_ACTIVE_NKA {          // processing a request, but keepalive forbidden
     @Override
     boolean isActive() { return true; }
-
-    @Override
-    ConnectionState toPostActive()
-    {
-      return this; 
-    }
 
     @Override
     ConnectionState toComet()
@@ -140,25 +185,34 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toDuplex()
+    ConnectionState toDuplex(TcpConnection conn)
     {
       return DUPLEX;
     }
   },
 
+  /**
+   * Waiting for a read from the keepalive connection.
+   */
   REQUEST_KEEPALIVE {   // waiting for keepalive data
     @Override
     boolean isKeepalive() { return true; }
 
     @Override
-    boolean isAllowKeepalive() { throw new IllegalStateException(); }
+    boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toActive(TcpConnection conn) 
+    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
     { 
-      conn.getPort().keepaliveEnd(conn);
+      return REQUEST_ACTIVE_KA; 
+    }
 
-      return REQUEST_ACTIVE; 
+    @Override
+    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    {
+      conn.getPort().keepaliveFree();
+      
+      return REQUEST_ACTIVE_KA; 
     }
 
     @Override
@@ -170,7 +224,7 @@ enum ConnectionState {
     @Override
     ConnectionState toClosed(TcpConnection conn)
     {
-      conn.getPort().keepaliveEnd(conn);
+      conn.getPort().keepaliveFree();
 
       return CLOSED;
     }
@@ -181,26 +235,35 @@ enum ConnectionState {
     boolean isKeepalive() { return true; }
 
     @Override
-    boolean isAllowKeepalive() { throw new IllegalStateException(); }
+    boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toActive(TcpConnection conn) 
+    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
     { 
-      conn.getPort().keepaliveEnd(conn);
+      return REQUEST_ACTIVE_KA; 
+    }
 
-      return REQUEST_ACTIVE; 
+    @Override
+    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    {
+      conn.getPort().keepaliveFree();
+
+      return REQUEST_ACTIVE_NKA; 
     }
 
     @Override
     ConnectionState toClosed(TcpConnection conn)
     {
-      conn.getPort().keepaliveEnd(conn);
+      conn.getPort().keepaliveFree();
 
       return CLOSED;
     }
   },    
 
-  COMET {                // processing an active comet service
+  /**
+   * Comet request with a keepalive allocated.
+   */
+  COMET_KA {                // processing an active comet service
     @Override
     boolean isComet() { return true; }
 
@@ -208,105 +271,40 @@ enum ConnectionState {
     boolean isCometActive() { return true; }
 
     @Override
-    boolean isCometSuspend() { return true; }
+    boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    boolean isAllowKeepalive() { return true; }
-
-    @Override
-    ConnectionState toActive(TcpConnection conn) 
+    ConnectionState toCometDispatch() 
     { 
-      return COMET;
+      return this;
     }
 
     @Override
-    ConnectionState toPostActive()
+    ConnectionState toKillKeepalive(TcpConnection conn)
     {
-      return this; 
-    }
-
-    @Override
-    ConnectionState toKillKeepalive()
-    {
+      conn.getPort().keepaliveFree();
+      
       return COMET_NKA;
     }
 
     @Override
     ConnectionState toCometSuspend()
     {
-      return COMET_SUSPEND;
+      return COMET_SUSPEND_KA;
     }
 
     @Override
     ConnectionState toCometComplete()
     {
-      return COMET_COMPLETE;
+      return COMET_COMPLETE_KA;
     }
-  },
-
-  COMET_SUSPEND {        // suspended waiting for a wake
+    
     @Override
-    boolean isComet() { return true; }
-
-    @Override
-    boolean isCometSuspend() { return true; }
-
-    @Override
-    boolean isAllowKeepalive() { return true; }
-
-    @Override
-    ConnectionState toKillKeepalive()
+    ConnectionState toClosed(TcpConnection conn)
     {
-      return COMET_SUSPEND_NKA;
-    }
-
-    @Override
-    ConnectionState toCometResume()
-    {
-      return COMET;
-    }
-
-    @Override
-    ConnectionState toDestroy(TcpConnection conn)
-    {
-      throw new IllegalStateException();
-    }
-  },
-
-  COMET_COMPLETE {       // complete or timeout
-    @Override
-    boolean isComet() { return true; }
-
-    @Override
-    boolean isCometComplete() { return true; }
-
-    @Override
-    boolean isAllowKeepalive() { return true; }
-
-    @Override
-    ConnectionState toActive(TcpConnection conn) 
-    { 
-      return REQUEST_ACTIVE;
-    }
-
-    @Override
-    ConnectionState toPostActive()
-    {
-      return this; 
-    }
-
-    @Override
-    ConnectionState toKillKeepalive()
-    {
-      return COMET_COMPLETE_NKA;
-    }
-
-    @Override
-    ConnectionState toKeepalive(TcpConnection conn)
-    {
-      conn.getPort().keepaliveBegin();
-
-      return REQUEST_KEEPALIVE;
+      conn.getPort().keepaliveFree();
+      
+      return CLOSED;
     }
   },
 
@@ -318,18 +316,9 @@ enum ConnectionState {
     boolean isCometActive() { return true; }
 
     @Override
-    boolean isCometSuspend() { return true; }
-
-    @Override
-    ConnectionState toActive(TcpConnection conn) 
+    ConnectionState toCometDispatch() 
     { 
       return COMET_NKA;
-    }
-
-    @Override
-    ConnectionState toPostActive()
-    {
-      return this; 
     }
 
     @Override
@@ -342,6 +331,43 @@ enum ConnectionState {
     ConnectionState toCometComplete()
     {
       return COMET_COMPLETE_NKA;
+    }
+  },
+
+  COMET_SUSPEND_KA {        // suspended waiting for a wake
+    @Override
+    boolean isComet() { return true; }
+
+    @Override
+    boolean isCometSuspend() { return true; }
+
+    @Override
+    boolean isKeepaliveAllocated() { return true; }
+
+    @Override
+    ConnectionState toKillKeepalive(TcpConnection conn)
+    {
+      conn.getPort().keepaliveFree();
+      
+      return COMET_SUSPEND_NKA;
+    }
+
+    @Override
+    ConnectionState toCometResume()
+    {
+      return COMET_KA;
+    }
+    
+    @Override
+    ConnectionState toClosed(TcpConnection conn)
+    {
+      throw new IllegalStateException();
+    }
+
+    @Override
+    ConnectionState toDestroy(TcpConnection conn)
+    {
+      throw new IllegalStateException();
     }
   },
 
@@ -355,7 +381,13 @@ enum ConnectionState {
     @Override
     ConnectionState toCometResume()
     {
-      return COMET;
+      return COMET_NKA;
+    }
+    
+    @Override
+    ConnectionState toClosed(TcpConnection conn)
+    {
+      throw new IllegalStateException();
     }
 
     @Override
@@ -365,7 +397,7 @@ enum ConnectionState {
     }
   },
 
-  COMET_COMPLETE_NKA {   // complete or timeout
+  COMET_COMPLETE_KA {       // complete or timeout
     @Override
     boolean isComet() { return true; }
 
@@ -373,10 +405,51 @@ enum ConnectionState {
     boolean isCometComplete() { return true; }
 
     @Override
-    ConnectionState toPostActive()
-    {
-      return this; 
+    boolean isKeepaliveAllocated() { return true; }
+
+    @Override
+    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    { 
+      return REQUEST_ACTIVE_KA;
     }
+
+    @Override
+    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    { 
+      conn.getPort().keepaliveFree();
+      
+      return REQUEST_ACTIVE_NKA;
+    }
+
+    @Override
+    ConnectionState toKillKeepalive(TcpConnection conn)
+    {
+      conn.getPort().keepaliveFree();
+      
+      return COMET_COMPLETE_NKA;
+    }
+
+    @Override
+    ConnectionState toKeepalive(TcpConnection conn)
+    {
+      return REQUEST_KEEPALIVE;
+    }
+    
+    @Override
+    ConnectionState toClosed(TcpConnection conn)
+    {
+      conn.getPort().keepaliveFree();
+      
+      return CLOSED;
+    }
+  },
+
+  COMET_COMPLETE_NKA {   // complete or timeout
+    @Override
+    boolean isComet() { return true; }
+
+    @Override
+    boolean isCometComplete() { return true; }
   },
 
   DUPLEX {               // converted to a duplex/websocket
@@ -386,7 +459,7 @@ enum ConnectionState {
     @Override
     ConnectionState toKeepalive(TcpConnection conn)
     {
-      conn.getPort().keepaliveBegin();
+      conn.getPort().duplexKeepaliveBegin();
 
       return REQUEST_KEEPALIVE;
     }
@@ -408,7 +481,7 @@ enum ConnectionState {
     @Override
     ConnectionState toDuplexActive(TcpConnection conn)
     {
-      conn.getPort().keepaliveEnd(conn);
+      conn.getPort().duplexKeepaliveEnd();
 
       return DUPLEX;
     }
@@ -416,7 +489,7 @@ enum ConnectionState {
     @Override
     ConnectionState toClosed(TcpConnection conn)
     {
-      conn.getPort().keepaliveEnd(conn);
+      conn.getPort().duplexKeepaliveEnd();
 
       return CLOSED;
     }
@@ -518,6 +591,15 @@ enum ConnectionState {
   {
     return false;
   }
+  
+  /**
+   * True if a keepalive has been allocated, i.e. if the connection
+   * is allowed to keepalive to the next request.
+   */
+  boolean isKeepaliveAllocated()
+  {
+    return false;
+  }
 
   /**
    * True if the state is one of the keepalive states, either
@@ -548,11 +630,6 @@ enum ConnectionState {
     return false;
   }
 
-  boolean isAllowKeepalive()
-  {
-    return false;
-  }
-
   boolean isAllowIdle()
   { 
     return false; 
@@ -568,7 +645,7 @@ enum ConnectionState {
    */
   ConnectionState toInit()
   {
-    throw new IllegalStateException(this + " is an illegal init state");
+    throw new IllegalStateException(this + " cannot switch to init");
   }
 
   /**
@@ -576,38 +653,41 @@ enum ConnectionState {
    */
   ConnectionState toAccept()
   {
-    throw new IllegalStateException(this + " is an illegal accept state");
+    throw new IllegalStateException(this + " cannot switch to accept");
   }
 
-  ConnectionState toActive(TcpConnection conn)
+  /**
+   * Changes to the active state with the keepalive allocated.
+   */
+  ConnectionState toActiveWithKeepalive(TcpConnection conn)
   {
-    /*
-    case COMET_COMPLETE:
-    case COMET_COMPLETE_NKA:
-      return this;
-      */
-
-    throw new IllegalStateException(this + " is an illegal active state");
+    throw new IllegalStateException(this + " cannot switch to active");
   }
 
-  ConnectionState toPostActive()
+  /**
+   * Changes to the active state with no keepalive allocatedn.
+   */
+  ConnectionState toActiveNoKeepalive(TcpConnection conn)
   {
-    throw new IllegalStateException(this + " is an illegal active state");
+    throw new IllegalStateException(this + " cannot switch to active");
   }
 
-  ConnectionState toKillKeepalive()
+  /**
+   * Kill the keepalive, i.e. remove the keepalive allocation.
+   */
+  ConnectionState toKillKeepalive(TcpConnection conn)
   {
     return this;
   }
 
   ConnectionState toKeepalive(TcpConnection conn)
   {
-    throw new IllegalStateException(this + " is an illegal active state");
+    throw new IllegalStateException(this + " cannot switch to keepalive");
   }
 
   ConnectionState toKeepaliveSelect()
   {
-    throw new IllegalStateException(this + " is an illegal keepalive state");
+    throw new IllegalStateException(this + " cannot switch to keepalive select");
   }
 
   //
@@ -619,14 +699,19 @@ enum ConnectionState {
     throw new IllegalStateException(this + " cannot switch to comet");
   }
 
+  ConnectionState toCometSuspend()
+  {
+    throw new IllegalStateException(this + " cannot suspend comet");
+  }
+
   ConnectionState toCometResume()
   {
     throw new IllegalStateException(this + " cannot resume comet");
   }
 
-  ConnectionState toCometSuspend()
+  ConnectionState toCometDispatch()
   {
-    throw new IllegalStateException(this + " cannot suspend comet");
+    throw new IllegalStateException(this + " cannot dispatch comet");
   }
     
   ConnectionState toCometComplete()
@@ -638,7 +723,7 @@ enum ConnectionState {
   // duplex/websocket
   //
 
-  ConnectionState toDuplex()
+  ConnectionState toDuplex(TcpConnection conn)
   {
     throw new IllegalStateException(this + " cannot switch to duplex/websocket");
   }

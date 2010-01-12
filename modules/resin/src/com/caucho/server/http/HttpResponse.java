@@ -434,7 +434,7 @@ public class HttpResponse extends AbstractHttpResponse
       else
       */
 
-      if (_request.allowKeepalive()) {
+      if (_request.isKeepaliveAllowed()) {
       }
       else if (isUpgrade) {
       }

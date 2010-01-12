@@ -183,7 +183,7 @@ public class Port extends TaskWorker
   private volatile long _lifetimeWriteBytes;
 
   // total keepalive
-  private AtomicInteger _keepaliveCount = new AtomicInteger();
+  private AtomicInteger _keepaliveAllocateCount = new AtomicInteger();
   // thread-based
   private AtomicInteger _keepaliveThreadCount = new AtomicInteger();
   // True if the port has been bound
@@ -905,7 +905,7 @@ public class Port extends TaskWorker
    */
   public int getKeepaliveCount()
   {
-    return _keepaliveCount.get();
+    return _keepaliveAllocateCount.get();
   }
 
   public Lifecycle getLifecycleState()
@@ -970,7 +970,7 @@ public class Port extends TaskWorker
    */
   public int getFreeKeepalive()
   {
-    int freeKeepalive = _keepaliveMax - _keepaliveCount.get();
+    int freeKeepalive = _keepaliveMax - _keepaliveAllocateCount.get();
     int freeConnections = (_connectionMax - _activeConnectionCount.get()
                            - _minSpareConnection);
     int freeSelect = _server.getFreeSelectKeepalive();
@@ -1366,6 +1366,7 @@ public class Port extends TaskWorker
   void startConnection(TcpConnection conn)
   {
     _startThreadCount.decrementAndGet();
+    
     wake();
   }
 
@@ -1383,96 +1384,43 @@ public class Port extends TaskWorker
   void threadEnd(TcpConnection conn)
   {
     _threadCount.decrementAndGet();
+    
     wake();
   }
 
   /**
-   * Returns true if the keepalive is allowed
+   * Allocates a keepalive for the connection.
+   * 
+   * @param connectionStartTime - when the connection's accept occurred.
    */
-  public boolean allowKeepalive(long acceptStartTime)
+  boolean isKeepaliveAllowed(long connectionStartTime)
   {
     if (! _lifecycle.isActive())
       return false;
-    else if (acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
+    else if (connectionStartTime + _keepaliveTimeMax < Alarm.getCurrentTime())
       return false;
-    else if (_keepaliveMax <= _keepaliveCount.get())
-      return false;
-    else if (_connectionMax
-             <= _activeConnectionCount.get() + _minSpareConnection)
+    else if (_keepaliveMax <= _keepaliveAllocateCount.get())
       return false;
     else
       return true;
   }
 
   /**
-   * Marks a keepalive as starting running.  Called only from TcpConnection.
-   */
-  boolean isKeepaliveAllowed(TcpConnection conn, long acceptStartTime)
-  {
-    if (! _lifecycle.isActive())
-      return false;
-    else if (_connectionMax
-             <= _activeConnectionCount.get() + _minSpareConnection) {
-      log.warning(conn + " failed keepalive, active-connections="
-                  + _activeConnectionCount.get());
-
-      return false;
-    }
-    else if (false &&
-             acceptStartTime + _keepaliveTimeMax < Alarm.getCurrentTime()) {
-      // #2262 - skip this check to avoid confusing the load balancer
-      // the keepalive check is in allowKeepalive
-      log.warning(conn + " failed keepalive, delay=" + (Alarm.getCurrentTime() - acceptStartTime));
-
-      return false;
-    }
-    else if (false && _keepaliveMax <= _keepaliveCount.get()) {
-      // #2262 - skip this check to avoid confusing the load balancer
-      // the keepalive check is in allowKeepalive
-      log.warning(conn + " failed keepalive, keepalive-max " + _keepaliveCount);
-
-      return false;
-    }
-
-    return true;
-  }
-
-  /**
-   * only called from ConnectionState
-   */
-  void keepaliveBegin()
-  {
-    _keepaliveCount.incrementAndGet();
-  }
-
-  /**
-   * Marks the keepalive as ending. 
+   * Marks the keepalive allocation as starting. 
    * Only called from ConnectionState.
    */
-  void keepaliveEnd(TcpConnection conn)
+  void keepaliveAllocate()
   {
-    long count = _keepaliveCount.decrementAndGet();
-
-    if (count < 0) {
-      log.warning(conn + " internal error: negative keepalive count " + count);
-      Thread.dumpStack();
-    }
+    _keepaliveAllocateCount.decrementAndGet();
   }
 
   /**
-   * Starts a keepalive thread.
+   * Marks the keepalive allocation as ending. 
+   * Only called from ConnectionState.
    */
-  void keepaliveThreadBegin()
+  void keepaliveFree()
   {
-    _keepaliveThreadCount.incrementAndGet();
-  }
-
-  /**
-   * Ends a keepalive thread.
-   */
-  void keepaliveThreadEnd()
-  {
-    _keepaliveThreadCount.decrementAndGet();
+    _keepaliveAllocateCount.incrementAndGet();
   }
 
   /**
@@ -1504,7 +1452,7 @@ public class Port extends TaskWorker
 
     // server/2l02
 
-    keepaliveThreadBegin();
+    _keepaliveThreadCount.incrementAndGet();
 
     try {
       boolean result = is.fillWithTimeout(timeout);
@@ -1519,7 +1467,7 @@ public class Port extends TaskWorker
       
       throw e; 
     } finally {
-      keepaliveThreadEnd();
+      _keepaliveThreadCount.decrementAndGet();
     }
   }
 
@@ -1528,7 +1476,7 @@ public class Port extends TaskWorker
    *
    * @return true if the connection was added to the suspend list
    */
-  void suspend(TcpConnection conn)
+  void cometSuspend(TcpConnection conn)
   {
     if (conn.isWakeRequested()) {
       _threadPool.schedule(conn.getResumeTask());
@@ -1545,7 +1493,7 @@ public class Port extends TaskWorker
   /**
    * Remove from suspend list.
    */
-  boolean detach(TcpConnection conn)
+  boolean cometDetach(TcpConnection conn)
   {
     return _suspendConnectionSet.remove(conn);
   }
@@ -1553,7 +1501,7 @@ public class Port extends TaskWorker
   /**
    * Resumes the controller (for comet-style ajax)
    */
-  boolean resume(TcpConnection conn)
+  boolean cometResume(TcpConnection conn)
   {
     if (_suspendConnectionSet.remove(conn)) {
       _threadPool.schedule(conn.getResumeTask());
@@ -1562,6 +1510,14 @@ public class Port extends TaskWorker
     }
     else
       return false;
+  }
+  
+  void duplexKeepaliveBegin()
+  {  
+  }
+  
+  void duplexKeepaliveEnd()
+  {
   }
 
   /**
@@ -1868,7 +1824,7 @@ public class Port extends TaskWorker
           if (log.isLoggable(Level.FINE))
             log.fine(this + " suspend idle timeout " + conn);
 
-          conn.toTimeout();
+          conn.toCometTimeout();
         }
 
         for (int i = _completeSet.size() - 1; i >= 0; i--) {

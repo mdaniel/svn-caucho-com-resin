@@ -267,6 +267,12 @@ public class TcpConnection extends Connection
     return _state.isRequestActive();
   }
 
+  @Override
+  public boolean isKeepaliveAllocated()
+  {
+    return _state.isKeepaliveAllocated();
+  }
+
   /**
    * Returns true for closed.
    */
@@ -278,13 +284,6 @@ public class TcpConnection extends Connection
   public final boolean isDestroyed()
   {
     return _state.isDestroyed();
-  }
-
-  @Override
-  public boolean isKeepalive()
-  {
-    // return _state.isKeepalive();
-    return _state.isAllowKeepalive();
   }
 
   @Override
@@ -606,7 +605,7 @@ public class TcpConnection extends Connection
 
         return RequestState.THREAD_DETACHED;
       }
-    } while (_state.isAllowKeepalive());
+    } while (_state.isKeepaliveAllocated());
 
     return result;
   }
@@ -622,34 +621,20 @@ public class TcpConnection extends Connection
       _currentRequest.set(_request);
 
       _isWakeRequested = false;
-      _state = _state.toActive(this);
+      
+      if (_port.isKeepaliveAllowed(_connectionStartTime))
+        _state = _state.toActiveWithKeepalive(this);
+      else
+        _state = _state.toActiveNoKeepalive(this);
 
       if (! getRequest().handleRequest()) {
-        _state = _state.toKillKeepalive();
+        _state = _state.toKillKeepalive(this);
       }
     }
     finally {
       thread.setContextClassLoader(_loader);
 
       _currentRequest.set(null);
-
-      _state = _state.toPostActive();
-    }
-  }
-
-  private void gatherStatistics(boolean isStatKeepalive)
-  {
-    if (_requestStartTime > 0) {
-      long startTime = _requestStartTime;
-      _requestStartTime = 0;
-
-      if (isStatKeepalive)
-        _port.addLifetimeKeepaliveCount();
-
-      _port.addLifetimeRequestCount();
-
-      long now = Alarm.getCurrentTime();
-      _port.addLifetimeRequestTime(now - startTime);
     }
   }
 
@@ -673,13 +658,6 @@ public class TcpConnection extends Connection
 
     _idleStartTime = Alarm.getCurrentTime();
     _idleExpireTime = _idleStartTime + _idleTimeout;
-
-    // start keepalive, checking that Port allows another keepalive
-    if (! _port.isKeepaliveAllowed(this, _connectionStartTime)) {
-      close();
-
-      return RequestState.EXIT;
-    }
 
     _state = _state.toKeepalive(this);
 
@@ -757,22 +735,7 @@ public class TcpConnection extends Connection
   @Override
   public void killKeepalive()
   {
-    _state = _state.toKillKeepalive();
-  }
-
-  @Override
-  public boolean toKeepalive()
-  {
-    if (! _state.isAllowKeepalive()) {
-      return false;
-    }
-
-    if (! _port.allowKeepalive(_connectionStartTime)) {
-      _state = _state.toKillKeepalive();
-      return false;
-    }
-    else
-      return true;
+    _state = _state.toKillKeepalive(this);
   }
 
   /**
@@ -818,7 +781,7 @@ public class TcpConnection extends Connection
   }
 
   // XXX Possible spec requirement problem
-  public void suspend()
+  public void cometSuspend()
   {
     if (_controller != null)
       _controller.suspend();
@@ -831,7 +794,7 @@ public class TcpConnection extends Connection
 
     _state = _state.toCometSuspend();
 
-    _port.suspend(this);
+    _port.cometSuspend(this);
   }
 
   /**
@@ -845,7 +808,7 @@ public class TcpConnection extends Connection
     _isWakeRequested = true;
 
     // comet
-    if (getPort().resume(this)) {
+    if (getPort().cometResume(this)) {
       log.fine(dbgId() + " wake");
       return true;
     }
@@ -854,10 +817,8 @@ public class TcpConnection extends Connection
     }
   }
 
-  void toTimeout()
+  void toCometTimeout()
   {
-    ConnectionState state = _state;
-
     _state = _state.toCometComplete();
 
     ConnectionController async = getController();
@@ -883,7 +844,7 @@ public class TcpConnection extends Connection
    */
   public TcpDuplexController startDuplex(TcpDuplexHandler handler)
   {
-    _state = _state.toDuplex();
+    _state = _state.toDuplex(this);
 
     TcpDuplexController duplex = new TcpDuplexController(this, handler);
 
@@ -913,7 +874,7 @@ public class TcpConnection extends Connection
   {
     _state = _state.toCometComplete();
 
-    getPort().resume(this);
+    getPort().cometResume(this);
   }
 
   public void close()
@@ -936,7 +897,7 @@ public class TcpConnection extends Connection
 
     // detach any comet
     if (state.isComet() || state.isCometSuspend())
-      getPort().detach(this);
+      getPort().cometDetach(this);
 
     getRequest().protocolCloseEvent();
 
@@ -1255,9 +1216,7 @@ public class TcpConnection extends Connection
           isValid = true;
         }
         else {
-          _state = _state.toPostActive();
-
-          if (_state.isAllowKeepalive()) {
+          if (_state.isKeepaliveAllocated()) {
             isValid = true;
             _keepaliveTask.run();
           }

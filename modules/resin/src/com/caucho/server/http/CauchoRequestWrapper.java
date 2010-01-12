@@ -680,11 +680,11 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return cRequest.isDuplex();
   }
   
-  public boolean allowKeepalive()
+  public boolean isKeepaliveAllowed()
   {
     CauchoRequest cRequest = (CauchoRequest) _request;
 
-    return cRequest.allowKeepalive();
+    return cRequest.isKeepaliveAllowed();
   }
   
   public boolean isClientDisconnect()

@@ -550,7 +550,7 @@ public class RequestAdapter extends RequestWrapper
   {
   }
   
-  public boolean allowKeepalive()
+  public boolean isKeepaliveAllowed()
   {
     return true;
   }

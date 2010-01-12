@@ -1007,7 +1007,7 @@ public class HmuxRequest extends AbstractHttpRequest
       return; // XXX:
     }
     else {
-      if (result == HMUX_QUIT && ! allowKeepalive())
+      if (result == HMUX_QUIT && ! isKeepaliveAllowed())
         result = HMUX_EXIT;
 
       if (result == HMUX_QUIT) {
@@ -1897,7 +1897,7 @@ public class HmuxRequest extends AbstractHttpRequest
         _pendingData = 0;
       }
 
-      boolean keepalive = _request.allowKeepalive();
+      boolean keepalive = _request.isKeepaliveAllowed();
 
       if (! _isClientClosed) {
         if (log.isLoggable(Level.FINE)) {

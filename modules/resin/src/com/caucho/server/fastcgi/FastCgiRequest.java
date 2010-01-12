@@ -1518,7 +1518,7 @@ public class FastCgiRequest extends AbstractHttpRequest
         _pendingData = 0;
       }
 
-      boolean keepalive = _request.allowKeepalive();
+      boolean keepalive = _request.isKeepaliveAllowed();
 
       if (! _isClientClosed) {
         if (log.isLoggable(Level.FINE)) {

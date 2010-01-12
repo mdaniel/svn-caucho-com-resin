@@ -226,7 +226,7 @@ public class StubServletRequest implements CauchoRequest {
   {
   }
 
-  public boolean allowKeepalive()
+  public boolean isKeepaliveAllowed()
   {
     return false;
   }
