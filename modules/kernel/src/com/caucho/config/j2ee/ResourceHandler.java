@@ -31,6 +31,7 @@ package com.caucho.config.j2ee;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Set;
 
 import javax.annotation.Resource;
@@ -63,6 +64,9 @@ import com.caucho.util.L10N;
 public class ResourceHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(ResourceHandler.class);
   
+  private static HashMap<Class<?>,Class<?>> _boxingMap
+    = new HashMap<Class<?>,Class<?>>();
+  
   public ResourceHandler(InjectManager manager)
   {
     super(manager);
@@ -83,6 +87,7 @@ public class ResourceHandler extends JavaeeInjectionHandler {
   {
     String name = resource.name();
     String mappedName = resource.mappedName();
+    String lookup = null; // resource.lookup();
 
     Field javaField = field.getJavaMember();
     
@@ -90,15 +95,37 @@ public class ResourceHandler extends JavaeeInjectionHandler {
 
     Class<?> bindType = javaField.getType();
     
+    ValueGenerator gen;
+
+    if (lookup == null || ! "".equals(lookup))
+      gen = new JndiValueGenerator(location, bindType, lookup);
+    else
+      gen = bindValueGenerator(location, bindType, name, mappedName);
+      
+    bindJndi(name, gen, javaField);
+    
+    return new FieldGeneratorProgram(javaField, gen);
+  }
+
+  private ValueGenerator bindValueGenerator(String location, 
+                                            Class<?> bindType,
+                                            String name,
+                                            String mappedName)
+  {
+    Class<?> boxedType = _boxingMap.get(bindType);
+  
+    if (boxedType != null)
+      bindType = boxedType;
+  
     /*
     if (! "".equals(pContext.name()))
       jndiName = pContext.name();
-      */
+     */
 
     Bean<?> bean;
-    
+  
     bean = bind(location, bindType, name);
-    
+  
     if (bean == null)
       bean = bind(location, bindType, mappedName);
 
@@ -112,20 +139,27 @@ public class ResourceHandler extends JavaeeInjectionHandler {
     else if (! "".equals(mappedName)) {
       throw new ConfigException(location + L.l("mappedName='{0}' is an unknown @Resource.",
                                                mappedName));
-
     }
     else {
       throw new ConfigException(location + L.l("@Resource cannot find any matching resources with type='{0}'",
-					       bindType));
+                                               bindType));
     }
 
     // bindJndi(location, jndiName, bean);
 
     // return new ComponentValueGenerator(location, (AbstractBean) bean);
-    
-    BeanValueGenerator gen
-      = new BeanValueGenerator(location, bean);
-    
-    return new FieldGeneratorProgram(javaField, gen);
+  
+    return new BeanValueGenerator(location, bean);
+  }
+  
+  static {
+    _boxingMap.put(boolean.class, Boolean.class);
+    _boxingMap.put(char.class, Character.class);
+    _boxingMap.put(byte.class, Byte.class);
+    _boxingMap.put(short.class, Short.class);
+    _boxingMap.put(int.class, Integer.class);
+    _boxingMap.put(long.class, Long.class);
+    _boxingMap.put(float.class, Float.class);
+    _boxingMap.put(double.class, Double.class);
   }
 }

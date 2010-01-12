@@ -572,6 +572,10 @@
       <fileset dir="${resin.modules}/quercus/classes">
         <exclude name="**/.*"/>
       </fileset>
+      
+      <fileset dir="${resin.modules}/junit/classes">
+        <exclude name="**/.*"/>
+      </fileset>
     </jar>
   </target>
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2004 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -46,26 +47,26 @@ public @interface Resource {
     CONTAINER,
     APPLICATION
   }
+  
+  AuthenticationType authenticationType()
+    default AuthenticationType.CONTAINER;
+  
+  String description() default "";
 
   /**
    * JNDI name.
    */
   String name() default "";
+  
+  boolean shareable() default true;
 
   /**
    * Java type of the resource.
    */
   Class type() default Object.class;
-  
-  AuthenticationType authenticationType()
-    default AuthenticationType.CONTAINER;
-  
-  boolean shareable() default true;
 
   /**
    * Product-specific name.
    */
   String mappedName() default "";
-  
-  String description() default "";
 }

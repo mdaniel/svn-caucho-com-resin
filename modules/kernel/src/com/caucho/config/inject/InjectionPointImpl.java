@@ -39,26 +39,26 @@ import javax.inject.Qualifier;
 
 /**
  */
-public class InjectionPointImpl implements InjectionPoint
+public class InjectionPointImpl<T> implements InjectionPoint
 {
-  private final Bean _bean;
+  private final Bean<T> _bean;
   private final Annotated _annotated;
   private final Member _member;
   private final HashSet<Annotation> _bindings = new HashSet<Annotation>();
 
-  InjectionPointImpl(Bean bean,
-                     AnnotatedField field)
+  InjectionPointImpl(Bean<T> bean,
+                     AnnotatedField<T> field)
   {
     this(bean, field, field.getJavaMember());
   }
 
-  InjectionPointImpl(Bean bean,
-                     AnnotatedParameter param)
+  InjectionPointImpl(Bean<T> bean,
+                     AnnotatedParameter<?> param)
   {
     this(bean, param, param.getDeclaringCallable().getJavaMember());
   }
 
-  InjectionPointImpl(Bean bean,
+  InjectionPointImpl(Bean<T> bean,
                      Annotated annotated,
                      Member member)
   {

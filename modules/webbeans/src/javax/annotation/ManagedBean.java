@@ -19,47 +19,29 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.j2ee;
+package javax.annotation;
 
-import javax.naming.InitialContext;
-import javax.naming.NamingException;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ValueGenerator;
+/**
+ * Marks a class as a managed bean.
+ */
 
-public class JndiValueGenerator extends ValueGenerator {
-  private final String _location;
-  private final String _jndiName;
-  private final Class<?> _type;
-
-  public JndiValueGenerator(String location, Class<?> type, String jndiName)
-  {
-    _location = location;
-    _type = type;
-    _jndiName = jndiName;
-  }
-
-  @Override
-  public Object create()
-    throws ConfigException
-  {
-    try {
-      return new InitialContext().lookup(_jndiName);
-    } catch (NamingException e) {
-      throw ConfigException.create(_location, e);
-    }
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _jndiName + "," + _type + "]";
-  }
+@Retention(RetentionPolicy.RUNTIME)
+@Target({TYPE})
+public @interface ManagedBean {
+  public String value() default "";
 }

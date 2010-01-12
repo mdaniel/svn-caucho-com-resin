@@ -35,10 +35,16 @@ import java.util.Set;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.AnnotationLiteral;
+import javax.naming.NamingException;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
+import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionPointHandler;
+import com.caucho.config.program.BeanValueGenerator;
+import com.caucho.config.program.ValueGenerator;
+import com.caucho.naming.Jndi;
 
 /**
  * Common JavaEE injection handler
@@ -67,6 +73,8 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
 
     if (name != null)
       beans = injectManager.getBeans(type, Names.create(name));
+    else
+      beans = injectManager.getBeans(type, CurrentLiteral.CURRENT);
 
     if (beans != null && beans.size() != 0)
       return injectManager.resolve(beans);
@@ -84,6 +92,23 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     }
 
     return null;
+  }
+  
+  protected void bindJndi(String name, ValueGenerator gen, Field field)
+  {
+    if (name == null || "".equals(name)) {
+      name = field.getDeclaringClass().getName() + "/" + field.getName();
+    }
+    
+    if (! name.startsWith("java:")) {
+      name = "java:comp/env/" + name;
+    }
+    
+    try {
+      Jndi.bindDeep(name, gen);
+    } catch (NamingException e) {
+      throw ConfigException.create(e);
+    }
   }
 
   protected String getLocation(Field javaField)

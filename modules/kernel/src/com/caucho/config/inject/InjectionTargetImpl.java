@@ -232,24 +232,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return false;
   }
 
-  private boolean isAnnotationDeclares(Annotation []annotations, Class type)
-  {
-    for (Annotation ann : annotations) {
-      if (ann.annotationType().isAnnotationPresent(type))
-        return true;
-    }
-
-    return false;
-  }
-
-  //
-  // Create
-  //
-
-  //
-  // InjectionTarget
-  //
-
   @Override
   public X produce(CreationalContext contextEnv)
   {
@@ -734,12 +716,14 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         _injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
       }
       else {
-        ConfigProgram program = getBeanManager().getInjectionPoint(field);
+        InjectionPointHandler handler
+          = getBeanManager().getInjectionPointHandler(field);
         
-        if (program != null)
+        if (handler != null) {
+          ConfigProgram program = new FieldHandlerProgram(field, handler);
+          
           _injectProgramList.add(program);
-        
-        // InjectIntrospector.introspect(_injectProgramList, field);
+        }
       }
     }
 
@@ -868,5 +852,31 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         throw ConfigException.create(_method, e);
       }
     }
+  }
+  
+  class FieldHandlerProgram extends ConfigProgram {
+    private final AnnotatedField<?> _field;
+    private final InjectionPointHandler _handler;
+    private ConfigProgram _boundProgram;
+    
+    FieldHandlerProgram(AnnotatedField<?> field, InjectionPointHandler handler)
+    {
+      _field = field;
+      _handler = handler;
+    }
+  
+    public void inject(Object instance, ConfigContext env)
+    {
+      if (_boundProgram == null)
+        bind();
+      
+      _boundProgram.inject(instance, env);
+    }
+    
+    private void bind()
+    {
+      _boundProgram = _handler.introspectField(_field);
+    }
+      
   }
 }

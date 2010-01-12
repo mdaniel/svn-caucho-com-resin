@@ -1483,7 +1483,7 @@ public class InjectManager
     return list;
   }
   
-  ConfigProgram getInjectionPoint(AnnotatedField<?> field)
+  InjectionPointHandler getInjectionPointHandler(AnnotatedField<?> field)
   {
     // InjectIntrospector.introspect(_injectProgramList, field);
     
@@ -1493,10 +1493,7 @@ public class InjectManager
       InjectionPointHandler handler = _injectionMap.get(annType);
       
       if (handler != null) {
-        ConfigProgram program = handler.introspectField(field);
-        
-        if (program != null)
-          return program;
+        return handler;
       }
     }
     

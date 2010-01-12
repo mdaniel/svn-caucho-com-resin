@@ -1,0 +1,171 @@
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin 4.0.4 Release Notes</title>
+  </header>
+
+<body>
+
+<localtoc/>
+
+<s1 title="Resin 4.0.4 Overview">
+
+<ul>
+<li>com.caucho.resin.ResinContext for embedded Resin use.</li>
+<li>com.caucho.junit.ResinJUnitRunner for embedded junit use.</li>
+</ul>
+
+<p>Resin 4.0.x is the active development branch.</p>
+</s1>
+
+<s1 title="Embedded ResinContext">
+
+<p>The new embedded ResinContext lets you use Resin's CanDI and EJB
+environment in a non-Resin context like a JUnit test or even in a
+standalone application.</p>
+
+<p>The simplest use of Resin context scans for *.jar files with CanDI
+beans.xml or EJB ejb-jar.xml files and lets you start a CanDI
+request scope.</p>
+
+<s2 title="Embedded Requests">
+
+<code><pre>
+import com.caucho.resin.*;
+
+public class MyMain {
+  static void main(String []argv)
+  {
+    ResinContext resinContext = new ResinContext();
+
+    // scan classpath and initialize @Startup beans
+    resinContext.start();
+
+    // start a new request
+    RequestContext cxt = resinContext.beginRequest();
+
+    try {
+      MyBean bean = cxt.newInstance(MyBean.class);
+
+      bean.doStuff();
+    } finally {
+      resinContext.completeRequest(cxt);
+    }
+  }
+}
+</pre></code>
+
+</s2>
+
+<s2 title="Configuring resin-context">
+
+<p>You can configure the resin-context using the same environment
+tags as are available to the resin.xml and resin-web.xml like
+&lt;mypkg:MyBean> for CanDI, &lt;database> for databases, and
+&lt;resin:import> to include files.</p>
+
+<code><pre>
+&lt;resin-context xmlns="http://caucho.com/ns/resin"
+   xmlns:lang="urn:java:java.lang"
+   xmlns:ee="urn:java:ee">
+
+  &lt;mypkg:MyBean xmlns="urn:java:com.mycom.mypkg">
+    &lt;my-field>my-value&lt;/my-field>
+  &lt;/mypkg:MyBean>
+
+  &lt;lang:String>
+    &lt;new>my-config-value&lt;/new>
+    &lt;ee:Named>my-config-name&lt;/ee:Named>
+  &lt;/lang:String>
+
+  &lt;database name="my-db">
+    &lt;driver type="..." url="..."/>
+  &lt;/database>
+    
+&lt;/resin-context>
+</pre></code>
+
+</s2>
+
+</s1>
+
+<s1 title="Java Injection (JSR-299, JSR-330, CanDI)">
+
+<p>The Java Injection specification has changed significantly between 4.0.1
+and 4.0.2. Resin now supports the JSR-330 annotations for Java Injection.</p>
+
+<p>The main changes are repackaging and renaming of the key injection
+annotations to match JSR-299.  The
+<a href="../examples/ioc-binding/index.xtp">Java Injection Tutorial</a>
+has been updated for the new injections.</p>
+
+</s1>
+
+<s1 title="Clustered JMS Queues and Topics">
+
+<p>Resin's clustering now includes support for clustered queues and topics.
+The primary clustered queue is a singleton queue with failover. The clustered
+topics notify all servers in a cluster pod.</p>
+
+</s1>
+
+<s1 title="/resin-admin">
+
+<p>We've added /resin-admin features to improve visibility to the server, 
+  development and debugging, and adminstration.</p>
+
+<p>The "summary" tab now includes statistical gathered as the server is
+running including request counts, request times, CPU time, netstat reports,
+and database activity.</p>
+
+<p>A "postmortem" tab helps debugging of a server crash by displaying
+the server state at the time just before a restart.</p>
+
+<p>Customized statistics gathering based on JMX is now available through
+the &lt;jmx> and &lt;jmx-delta> tags of the &lt;resin:StatManager> service.</p>
+
+<p>Customizable REST pages are now available through /resin-admin using PHP
+to script the gathered data. The REST capability is intended for integration
+with administration tools like Nagios.</p>
+
+</s1>
+
+<s1 title="Distributed Deployment">
+
+<p>Distributed deployment has been enhanced with staging and versioning
+capabilities, and integrated with the development flow with ant and maven
+tasks.</p>
+
+<p>A new application version can be deployed with the following process:</p>
+
+<ol>
+<li>Upload the .war contents transactionally to the server (but not activated yet)</li>
+<li>Deploy and test a "staging" version on a single machine.</li>
+<li>Activate the .war for the production servers.</li>
+</ol>
+
+</s1>
+
+<s1 title="Quercus: Availability on other Application Servers">
+
+<p>Quercus development in 4.0.2 has focused on bugs fixes and QA regression
+cleanup.</p>
+
+</s1>
+
+<s1 title="WebSocket, HMTP, and JMTP support">
+
+<p>Resin 4.0.2 now includes support for the HTML 5 WebSocket protocol, which
+is a fully-bidirectional TCP connection established using HTTP handshaking,
+allowing for true interactive applications with HTML 5 browsers.</p>
+
+<p>On top of WebSockets, we've created JMTP and HMTP as a programmable
+messaging layer. JMTP (JSON Message Transport Prototocol) and
+HMTP (Hessian Message Transport Protocol) provide general
+messaging, RPC, and publish/subscribe capabilities in a clean, simple
+interface.</p>
+
+</s1>
+
+</body>
+</document>

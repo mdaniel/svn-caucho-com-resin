@@ -166,7 +166,7 @@ public class ResinContext
    *
    * @param pathName URL/path to the configuration file
    */
-  public void addContextConfiguration(String pathName)
+  public void addContextConfig(String pathName)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
