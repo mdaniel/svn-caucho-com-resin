@@ -34,6 +34,8 @@ import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
+import java.util.Set;
+import java.util.HashSet;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
@@ -44,10 +46,12 @@ public class WebResourceCollection {
   static L10N L = new L10N(WebResourceCollection.class);
 
   public enum HttpMethod { GET, POST, PUT, DELETE, HEAD, OPTIONS, TRACE };
+  public static final String []_methods = new String[HttpMethod.values().length];
 
   private String _webResourceName;
   private String _description;
   private ArrayList<String> _methodList;
+  private Set<String> _methodOmitList;
   private ArrayList<Pattern> _urlPatternList = new ArrayList<Pattern>();
 
 
@@ -137,11 +141,37 @@ public class WebResourceCollection {
     _methodList.add(method);
   }
 
+  public void addHttpMethodOmission(String method)
+  {
+    if (!Pattern.matches("[a-zA-Z]+", method)) {
+      throw new ConfigException(L.l("'{0}' is not a valid http-method.",
+                                    method));
+    }
+
+    if (_methodOmitList == null)
+      _methodOmitList = new HashSet<String>();
+
+    _methodOmitList.add(method);
+  }
+
   /**
    * Returns the methods.
    */
   public ArrayList<String> getMethods()
   {
+    if (_methodOmitList == null)
+      return _methodList;
+
+    if (_methodList == null) {
+      _methodList = new ArrayList<String>(_methods.length
+        - _methodOmitList.size());
+
+      for (String method : _methods) {
+        if (! _methodOmitList.contains(method))
+          _methodList.add(method);
+      }
+    }
+
     return _methodList;
   }
 
@@ -161,5 +191,14 @@ public class WebResourceCollection {
     }
 
     return false;
+  }
+
+  static {
+    HttpMethod []methods = HttpMethod.values();
+
+    for (int i = 0; i < methods.length; i++) {
+      HttpMethod method = methods[i];
+      _methods[i] = method.toString();
+    }
   }
 }

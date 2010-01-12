@@ -66,15 +66,19 @@ javaee_form-login-config = element form-login-config {
   element form-error-page { string }
 }
 
-javaee_http-method = element http-method {
-   "GET"
- | "POST"
- | "PUT"
- | "DELETE"
- | "HEAD"
- | "OPTIONS"
- | "TRACE"
-}
+javaee_http-method-type =
+  "GET"
+  | "POST"
+  | "PUT"
+  | "DELETE"
+  | "HEAD"
+  | "OPTIONS"
+  | "TRACE"
+
+
+javaee_http-method = element http-method {javaee_http-method-type}
+
+javaee_http-method-omission = element http-method-omission {javaee_http-method-type}
 
 javaee_jsp-config = element jsp-config {
   attribute id { string }?,
@@ -319,7 +323,8 @@ javaee_web-resource-collection = element web-resource-collection {
 
   javaee_url-pattern+,
 
-  javaee_http-method*
+  (javaee_http-method*
+   | javaee_http-method-omission*)
 }
 
 javaee_welcome-file = element welcome-file {

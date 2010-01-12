@@ -405,6 +405,10 @@ r_http-method =
   attribute http-method { r_http-method-Values }
   | element http-method { r_http-method-Values }
 
+r_http-method-omission =
+  attribute http-method-omission { r_http-method-Values }
+  | element http-method-omission { r_http-method-Values }
+
 r_ip-constraint =
   (attribute ip-constraint { string }
    | element ip-constraint { string })*
@@ -1297,7 +1301,8 @@ r_web-resource-collection = element web-resource-collection {
 
   r_url-pattern*,
 
-  r_http-method*
+  (r_http-method*
+   | r_http-method-omission*)
 }
 
 r_web-service = element web-service {
