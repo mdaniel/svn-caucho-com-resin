@@ -76,10 +76,9 @@ import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.security.*;
-import com.caucho.server.security.ConstraintManager;
-import com.caucho.server.security.LoginConfig;
-import com.caucho.server.security.SecurityConstraint;
-import com.caucho.server.security.TransportConstraint;
+import com.caucho.security.Authenticator;
+import com.caucho.security.BasicLogin;
+import com.caucho.server.security.*;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -1082,6 +1081,48 @@ public class WebApp extends ServletContextImpl
       if (securityElement == null)
         continue;
 
+      final Set<String> patterns = _servletMapper.getUrlPatterns(entry.getKey());
+
+      for (HttpMethodConstraintElement httpMethodConstraintElement
+        : securityElement.getHttpMethodConstraints()) {
+        ServletSecurity.EmptyRoleSemantic emptyRoleSemantic
+          = httpMethodConstraintElement.getEmptyRoleSemantic();
+
+        ServletSecurity.TransportGuarantee transportGuarantee
+          = httpMethodConstraintElement.getTransportGuarantee();
+
+        String []roles = httpMethodConstraintElement.getRolesAllowed();
+
+        SecurityConstraint constraint = new SecurityConstraint();
+        constraint.setFallthrough(false);
+
+        if (emptyRoleSemantic == ServletSecurity.EmptyRoleSemantic.DENY) {
+          constraint.addConstraint(new PermitEmptyRolesConstraint(false));
+        } else if (roles.length == 0
+          && transportGuarantee == ServletSecurity.TransportGuarantee.NONE) {
+          constraint.addConstraint(new PermitEmptyRolesConstraint(true));
+        } else {
+          for (String role : roles)
+            constraint.addRoleName(role);
+
+          if (transportGuarantee
+            == ServletSecurity.TransportGuarantee.CONFIDENTIAL)
+            constraint.addConstraint(new TransportConstraint("CONFIDENTIAL"));
+        }
+
+        WebResourceCollection resources = new WebResourceCollection();
+        resources.addHttpMethod(httpMethodConstraintElement.getMethodName());
+        
+        for (String pattern: patterns) {
+          resources.addURLPattern(pattern);
+          constraint.addURLPattern(pattern);
+        }
+        
+        constraint.addWebResourceCollection(resources);
+
+        _constraintManager.addConstraint(constraint);
+      }
+
       ServletSecurity.EmptyRoleSemantic emptyRoleSemantic
         = securityElement.getEmptyRoleSemantic();
 
@@ -1090,30 +1131,27 @@ public class WebApp extends ServletContextImpl
 
       String []roles = securityElement.getRolesAllowed();
 
-      Set<String> patterns = _servletMapper.getUrlPatterns(entry.getKey());
-      for (String pattern : patterns) {
-        if (_constraintManager.hasConstraintForUrlPattern(pattern))
-          continue;
+      SecurityConstraint constraint = new SecurityConstraint();
 
-        SecurityConstraint constraint = null;
-        if (emptyRoleSemantic == ServletSecurity.EmptyRoleSemantic.DENY)
-          constraint = new Deny();
-
-        if (constraint == null)
-          constraint = new SecurityConstraint();
+      if (emptyRoleSemantic == ServletSecurity.EmptyRoleSemantic.DENY) {
+        constraint.addConstraint(new PermitEmptyRolesConstraint(false));
+      } else if (roles.length == 0
+        && transportGuarantee == ServletSecurity.TransportGuarantee.NONE) {
+        constraint.addConstraint(new PermitEmptyRolesConstraint(true));
+      } else {
+        for (String role : roles)
+          constraint.addRoleName(role);
 
         if (transportGuarantee
           == ServletSecurity.TransportGuarantee.CONFIDENTIAL)
           constraint.addConstraint(new TransportConstraint("CONFIDENTIAL"));
-
-        constraint.addURLPattern(pattern);
-        
-        for (String role : roles)
-          constraint.addRoleName(role);
-
-        _constraintManager.addConstraint(constraint);
-
       }
+
+      for (String pattern : patterns) {
+        constraint.addURLPattern(pattern);
+      }
+      
+      _constraintManager.addConstraint(constraint);
     }
   }
 
