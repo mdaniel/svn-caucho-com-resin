@@ -6,7 +6,7 @@
  * Each copy or derived work must preserve the copyright notice and this
  * notice unmodified.
  *
- * Resin Open Source is finishThread software; you can redistribute it and/or modify
+ * Resin Open Source is software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
  * the Free Software Foundation; either version 2 of the License, or
  * (at your option) any later version.
@@ -89,7 +89,7 @@ public class TcpConnection extends Connection
 
   private final Admin _admin = new Admin();
 
-  private ConnectionState _state = ConnectionState.IDLE;
+  private ConnectionState _state = ConnectionState.INIT;
   private ConnectionController _controller;
   private boolean _isWake;
 
@@ -244,6 +244,11 @@ public class TcpConnection extends Connection
   public ConnectionState getState()
   {
     return _state;
+  }
+
+  public final boolean isIdle()
+  {
+    return _state.isIdle();
   }
 
   /**
@@ -417,17 +422,6 @@ public class TcpConnection extends Connection
   }
 
   /**
-   * Returns the time the current request has taken.
-   */
-  public final long getRequestActiveTime()
-  {
-    if (_requestStartTime > 0)
-      return Alarm.getCurrentTime() - _requestStartTime;
-    else
-      return -1;
-  }
-
-  /**
    * Returns the idle expire time (keepalive or suspend).
    */
   public long getIdleExpireTime()
@@ -553,8 +547,6 @@ public class TcpConnection extends Connection
      // clear the interrupted flag
      Thread.interrupted();
 
-     _currentRequest.set(_request);
-
      result = handleRequestsImpl();
    } catch (ClientDisconnectException e) {
      _port.addLifetimeClientDisconnectCount();
@@ -573,8 +565,6 @@ public class TcpConnection extends Connection
    } finally {
      thread.setContextClassLoader(_loader);
 
-     _currentRequest.set(null);
-
      if (result == null)
        destroy();
    }
@@ -591,38 +581,18 @@ public class TcpConnection extends Connection
   private RequestState handleRequestsImpl()
     throws IOException
   {
-    Thread thread = Thread.currentThread();
-
     RequestState result = null;
 
     do {
-      thread.setContextClassLoader(_loader);
-
       if (_port.isClosed()) {
         return RequestState.EXIT;
       }
-
-      boolean isStatKeepalive = _state.isKeepalive();
-      _isWake = false;
 
       if ((result = processKeepalive()) != RequestState.REQUEST) {
         return result;
       }
 
-      ConnectionState state = _state;
-
-      _state = state.toActive();
-
-      if (state.isKeepalive()) {
-        getPort().keepaliveEnd(this);
-      }
-
-      if (! getRequest().handleRequest()) {
-        _state = _state.toKillKeepalive();
-      }
-
-      // statistics
-      gatherStatistics(isStatKeepalive);
+      dispatchRequest();
 
       if (_state == ConnectionState.DUPLEX) {
         // duplex (xmpp/hmtp) handling
@@ -631,17 +601,43 @@ public class TcpConnection extends Connection
 
       getWriteStream().flush();
 
+      // XXX state = state.toCometSuspend
+      // if state == comet_suspend
+      //   port.suspend
       if (_state.isCometActive()) {
         _port.suspend(this);
 
         return RequestState.THREAD_DETACHED;
       }
-
-      // server/1l80
-      _state = _state.toFinishRequest();
     } while (_state.isAllowKeepalive());
 
     return result;
+  }
+
+  private void dispatchRequest()
+    throws IOException
+  {
+    Thread thread = Thread.currentThread();
+
+    try {
+      thread.setContextClassLoader(_loader);
+
+      _currentRequest.set(_request);
+
+      _isWake = false;
+      _state = _state.toActive(this);
+
+      if (! getRequest().handleRequest()) {
+        _state = _state.toKillKeepalive();
+      }
+    }
+    finally {
+      thread.setContextClassLoader(_loader);
+
+      _currentRequest.set(null);
+
+      _state = _state.toPostActive();
+    }
   }
 
   private void gatherStatistics(boolean isStatKeepalive)
@@ -682,13 +678,13 @@ public class TcpConnection extends Connection
     _idleExpireTime = _idleStartTime + _idleTimeout;
 
     // start keepalive, checking that Port allows another keepalive
-    if (! _port.keepaliveBegin(this, _connectionStartTime)) {
+    if (! _port.isKeepaliveAllowed(this, _connectionStartTime)) {
       close();
 
       return RequestState.EXIT;
     }
 
-    _state = _state.toKeepalive();
+    _state = _state.toKeepalive(this);
 
     // use select manager if available
     if (_port.getSelectManager() != null) {
@@ -714,10 +710,6 @@ public class TcpConnection extends Connection
 
       // if blocking read has available data
       if (getReadStream().waitForRead()) {
-        port.keepaliveEnd(this);
-
-        _state = _state.toActive();
-
         return RequestState.REQUEST;
       }
       // blocking read timed out or closed
@@ -746,25 +738,6 @@ public class TcpConnection extends Connection
 
     _state = _state.isKeepalive = false;
     */
-  }
-
-  /**
-   * Begins an active connection.
-   */
-  public final long beginActive()
-  {
-    _state = _state.toActive();
-    _requestStartTime = Alarm.getCurrentTime();
-    return _requestStartTime;
-  }
-
-  /**
-   * Ends an active connection.
-   */
-  public final void endActive()
-  {
-    // state change?
-    // _requestStartTime = 0;
   }
 
   /**
@@ -894,9 +867,6 @@ public class TcpConnection extends Connection
   {
     ConnectionState state = _state;
 
-    if (state.isKeepalive())
-      getPort().keepaliveEnd(this);
-
     _state = _state.toCometComplete();
 
     ConnectionController async = getController();
@@ -966,11 +936,7 @@ public class TcpConnection extends Connection
   private void closeImpl()
   {
     ConnectionState state = _state;
-    _state = _state.toClosed();
-
-    if (state.isKeepalive()) {
-      _port.keepaliveEnd(this);
-    }
+    _state = _state.toClosed(this);
 
     if (state.isClosed())
       return;
@@ -1026,22 +992,6 @@ public class TcpConnection extends Connection
     _state = _state.toInit();
   }
 
-  public final boolean isIdle()
-  {
-    return _state.isIdle();
-  }
-
-  public final void toIdle()
-  {
-    ConnectionState state = _state;
-
-    _state = state.toIdle();
-
-    if (state.isKeepalive()) {
-      getPort().keepaliveEnd(this);
-    }
-  }
-
   /**
    * Destroys the connection()
    */
@@ -1051,16 +1001,7 @@ public class TcpConnection extends Connection
 
     closeImpl();
 
-    ConnectionState state = _state;
-    _state = _state.toDestroy();
-
-    if (state.isKeepalive()) {
-      getPort().keepaliveEnd(this);
-    }
-
-    if (state != ConnectionState.DESTROYED) {
-      getPort().destroy(this);
-    }
+    _state = _state.toDestroy(this);
   }
 
   /**
@@ -1070,12 +1011,7 @@ public class TcpConnection extends Connection
   {
     closeImpl();
 
-    if (_state.isClosed())
-      getPort().free(this);
-    else if (_state.isDestroyed())
-      getPort().destroy(this);
-    else
-      throw new IllegalStateException("state=" + _state);
+    _state = _state.toIdle(this);
   }
 
   protected String dbgId()
@@ -1246,14 +1182,6 @@ public class TcpConnection extends Connection
     public RequestState doTask()
       throws IOException
     {
-      ConnectionState state = _state;
-
-      _state = _state.toActive();
-
-      if (state.isKeepalive()) {
-        getPort().keepaliveEnd(TcpConnection.this);
-      }
-
       RequestState result = handleRequests();
 
       if (result == RequestState.THREAD_DETACHED) {
@@ -1287,27 +1215,18 @@ public class TcpConnection extends Connection
     public RequestState doTask()
       throws IOException
     {
-      ConnectionState state = _state;
-      _state = state.toDuplexActive();
-
-      if (state.isKeepalive()) {
-        _port.keepaliveEnd(TcpConnection.this);
-      }
+      _state = _state.toDuplexActive(TcpConnection.this);
 
       RequestState result;
-      long position = 0;
-      int retry = 256;
 
       ReadStream readStream = getReadStream();
 
       while ((result = processKeepalive()) == RequestState.REQUEST) {
+        long position = readStream.getPosition();
+
         _duplex.serviceRead();
 
-        if (position != readStream.getPosition()) {
-          retry = 256;
-          position = readStream.getPosition();
-        }
-        else if (retry-- < 0) {
+        if (position == readStream.getPosition()) {
           log.warning(_duplex + " was not processing any data. Shutting down.");
           close();
           return RequestState.EXIT;
@@ -1338,10 +1257,13 @@ public class TcpConnection extends Connection
 
           isValid = true;
         }
-        else if (_state.isAllowKeepalive()) {
-          _state = _state.toFinishRequest();
-          isValid = true;
-          _keepaliveTask.run();
+        else {
+          _state = _state.toPostActive();
+
+          if (_state.isAllowKeepalive()) {
+            isValid = true;
+            _keepaliveTask.run();
+          }
         }
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
@@ -1375,7 +1297,10 @@ public class TcpConnection extends Connection
 
     public long getRequestActiveTime()
     {
-      return TcpConnection.this.getRequestActiveTime();
+      if (_requestStartTime > 0)
+        return Alarm.getCurrentTime() - _requestStartTime;
+      else
+        return -1;
     }
 
     public String getUrl()

@@ -1407,7 +1407,7 @@ public class Port extends TaskWorker
   /**
    * Marks a keepalive as starting running.  Called only from TcpConnection.
    */
-  boolean keepaliveBegin(TcpConnection conn, long acceptStartTime)
+  boolean isKeepaliveAllowed(TcpConnection conn, long acceptStartTime)
   {
     if (! _lifecycle.isActive())
       return false;
@@ -1434,13 +1434,20 @@ public class Port extends TaskWorker
       return false;
     }
 
-    _keepaliveCount.incrementAndGet();
-
     return true;
   }
 
   /**
-   * Marks the keepalive as ending. Called only from TcpConnection.
+   * only called from ConnectionState
+   */
+  void keepaliveBegin()
+  {
+    _keepaliveCount.incrementAndGet();
+  }
+
+  /**
+   * Marks the keepalive as ending. 
+   * Only called from ConnectionState.
    */
   void keepaliveEnd(TcpConnection conn)
   {
@@ -1524,6 +1531,7 @@ public class Port extends TaskWorker
   void suspend(TcpConnection conn)
   {
     if (conn.isWake()) {
+      // XXX timing with wake
       conn.toResume();
 
       _threadPool.schedule(conn.getResumeTask());
@@ -1603,16 +1611,15 @@ public class Port extends TaskWorker
           && _activeConnectionCount.get() <= _connectionMax) {
         startConn = _idleConn.allocate();
 
-        if (startConn == null || startConn.isDestroyed()) {
+        if (startConn != null) {
+          startConn.toInit(); // change to the init/ready state
+        }
+        else {
           int connId = _connectionCount.incrementAndGet();
           QSocket socket = _serverSocket.createSocket();
           startConn = new TcpConnection(connId, this, socket);
         }
 
-        startConn.toInit(); // change to the init/ready state
-      }
-
-      if (startConn != null) {
         _startThreadCount.incrementAndGet();
         _activeConnectionCount.incrementAndGet();
         _activeConnectionSet.add(startConn);
@@ -1659,12 +1666,10 @@ public class Port extends TaskWorker
   /**
    * Frees the connection to the idle pool.
    *
-   * Called only from TcpConnection
+   * only called from ConnectionState
    */
   void free(TcpConnection conn)
   {
-    assert(conn.isClosed());
-    
     closeConnection(conn);
 
     _idleConn.free(conn);
@@ -1673,12 +1678,10 @@ public class Port extends TaskWorker
   /**
    * Destroys the connection.
    *
-   * Called only from TcpConnection
+   * only called from ConnectionState
    */
   void destroy(TcpConnection conn)
   {
-    assert(conn.isDestroyed());
-      
     closeConnection(conn);
   }
 
@@ -1688,7 +1691,6 @@ public class Port extends TaskWorker
   private void closeConnection(TcpConnection conn)
   {
     _activeConnectionSet.remove(conn);
-    _suspendConnectionSet.remove(conn);
     _activeConnectionCount.decrementAndGet();
     
     // wake the start thread
@@ -1764,7 +1766,12 @@ public class Port extends TaskWorker
     }
 
     for (TcpConnection conn : activeSet) {
-      conn.destroy();
+      try {
+        conn.destroy();
+      }
+      catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
     }
 
     // wake the start thread

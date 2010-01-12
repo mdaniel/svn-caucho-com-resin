@@ -1643,9 +1643,6 @@ public abstract class AbstractHttpRequest
   protected void startInvocation()
     throws IOException
   {
-    if (_tcpConn != null)
-      _tcpConn.beginActive();
-
     _startTime = Alarm.getCurrentTime();
 
     _response.startInvocation();
@@ -1698,8 +1695,6 @@ public abstract class AbstractHttpRequest
       _httpBuffer = null;
 
       if (_tcpConn != null) {
-        _tcpConn.endActive();
-
         _tcpConn.finishRequest();
       }
 
