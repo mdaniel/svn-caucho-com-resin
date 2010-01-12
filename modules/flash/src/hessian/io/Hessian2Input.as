@@ -59,6 +59,8 @@ package hessian.io
 
 	import hessian.util.ByteUtils;
 
+	import mx.collections.ArrayCollection;
+
   /**
    * A reader for the Hessian 2.0 protocol.
    *
@@ -1748,8 +1750,28 @@ package hessian.io
 
       addRef(value);
 
-      for each (var key:String in fieldNames)
-        value[key] = readObject();
+      for each (var key:String in fieldNames) {
+        var lastValue:Object = readObject();
+
+        try {
+          value[key] = lastValue;
+        }
+        catch (e:TypeError) {
+          // if we read an array and got a TypeError, it's possible that
+          // the field is actually ArrayCollection and needs to be wrapped.
+          // 
+          // XXX Two other possible implementations would be :
+          // 1) check the type of every variable before assignment, but this 
+          // would punish all reads, not just ArrayCollections
+          // 2) use object skeletons and field deserializers - a major
+          // refactor and possible problems with dynamic nature of AS3
+        
+          if (lastValue is Array) {
+            lastValue = new ArrayCollection(lastValue as Array);
+            value[key] = lastValue;
+          }
+        }
+      }
 
       return value;
     }

@@ -36,11 +36,23 @@ import java.io.PrintWriter;
 import com.caucho.config.types.*;
 
 public class TableHeader extends FormattedTextWithAnchors implements TableCell {
+  private String _rowspan;
+  private String _colspan;
   private String _width;
 
   public TableHeader(Document document)
   {
     super(document);
+  }
+
+  public void setRowspan(String rowspan)
+  {
+    _rowspan = rowspan;
+  }
+
+  public void setColspan(String colspan)
+  {
+    _colspan = colspan;
   }
 
   public void setWidth(String width)
@@ -54,6 +66,7 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
     addItem(new Text(text.getValue().toUpperCase()));
   }
 
+  @Override
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -62,11 +75,18 @@ public class TableHeader extends FormattedTextWithAnchors implements TableCell {
     if (_width != null)
       out.writeAttribute("width", _width);
 
+    if (_colspan != null)
+      out.writeAttribute("colspan", _colspan);
+
+    if (_rowspan != null)
+      out.writeAttribute("rowspan", _rowspan);
+
     super.writeHtml(out);
 
     out.writeEndElement(); // th
   }
 
+  @Override
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {

@@ -57,6 +57,8 @@ package hessian.io
 
   import hessian.util.IntrospectionUtil;
 
+	import mx.collections.ArrayCollection;
+
   /**
    * A writer for the Hessian 2.0 protocol.
    */
@@ -280,6 +282,23 @@ package hessian.io
         var hasEnd:Boolean = writeListBegin(array.length);
 
         for (var i:int = 0; i < array.length; i++)
+          writeObject(array[i]);
+
+        if (hasEnd)
+          writeListEnd();
+
+        return;
+      }
+      else if (object is ArrayCollection || 
+               className == "mx.collections.ArrayCollection") {
+        if (addRef(object))
+          return;
+
+        array = (object as ArrayCollection).source;
+
+        hasEnd = writeListBegin(array.length);
+
+        for (i = 0; i < array.length; i++)
           writeObject(array[i]);
 
         if (hasEnd)

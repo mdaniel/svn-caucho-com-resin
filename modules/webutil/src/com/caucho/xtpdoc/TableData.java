@@ -33,15 +33,44 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
 public class TableData extends FormattedTextWithAnchors implements TableCell {
+  private String _rowspan;
+  private String _colspan;
+  private String _width;
+
   public TableData(Document document)
   {
     super(document);
   }
 
+  public void setRowspan(String rowspan)
+  {
+    _rowspan = rowspan;
+  }
+
+  public void setColspan(String colspan)
+  {
+    _colspan = colspan;
+  }
+
+  public void setWidth(String width)
+  {
+    _width = width;
+  }
+
+  @Override
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
     out.writeStartElement("td");
+
+    if (_width != null)
+      out.writeAttribute("width", _width);
+
+    if (_colspan != null)
+      out.writeAttribute("colspan", _colspan);
+
+    if (_rowspan != null)
+      out.writeAttribute("rowspan", _rowspan);
 
     super.writeHtml(out);
 
