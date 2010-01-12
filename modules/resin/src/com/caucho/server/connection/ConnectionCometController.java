@@ -127,8 +127,10 @@ public class ConnectionCometController extends ConnectionController
   {
     Connection conn = _conn;
 
+    /* XXX probably gone from the spec
     if (conn != null)
       conn.toSuspend();
+      */
   }
 
   /**
@@ -445,7 +447,7 @@ public class ConnectionCometController extends ConnectionController
     if (tcpConn != null && tcpConn.getState().isCometSuspend())
       sb.append(",suspended");
 
-    if (tcpConn != null && tcpConn.isWake())
+    if (tcpConn != null && tcpConn.isWakeRequested())
       sb.append(",wake");
 
     sb.append("]");

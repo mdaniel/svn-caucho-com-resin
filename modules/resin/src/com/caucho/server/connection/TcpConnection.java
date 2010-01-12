@@ -91,7 +91,7 @@ public class TcpConnection extends Connection
 
   private ConnectionState _state = ConnectionState.INIT;
   private ConnectionController _controller;
-  private boolean _isWake;
+  private boolean _isWakeRequested;
 
   private long _idleTimeout;
 
@@ -304,9 +304,9 @@ public class TcpConnection extends Connection
     return _state.isDuplex();
   }
 
-  public boolean isWake()
+  public boolean isWakeRequested()
   {
-    return _isWake;
+    return _isWakeRequested;
   }
 
   //
@@ -601,11 +601,8 @@ public class TcpConnection extends Connection
 
       getWriteStream().flush();
 
-      // XXX state = state.toCometSuspend
-      // if state == comet_suspend
-      //   port.suspend
       if (_state.isCometActive()) {
-        _port.suspend(this);
+        toSuspend();
 
         return RequestState.THREAD_DETACHED;
       }
@@ -624,7 +621,7 @@ public class TcpConnection extends Connection
 
       _currentRequest.set(_request);
 
-      _isWake = false;
+      _isWakeRequested = false;
       _state = _state.toActive(this);
 
       if (! getRequest().handleRequest()) {
@@ -820,27 +817,21 @@ public class TcpConnection extends Connection
     return controller;
   }
 
-  void toResume()
-  {
-    _isWake = false;
-    _idleStartTime = 0;
-  }
-
-  void toWake()
-  {
-    _isWake = true;
-  }
-
+  // XXX Possible spec requirement problem
   public void suspend()
   {
     if (_controller != null)
       _controller.suspend();
   }
 
-  public void toSuspend()
+  private void toSuspend()
   {
     _idleStartTime = Alarm.getCurrentTime();
     _idleExpireTime = _idleStartTime + _idleTimeout;
+
+    _state = _state.toCometSuspend();
+
+    _port.suspend(this);
   }
 
   /**
@@ -851,7 +842,7 @@ public class TcpConnection extends Connection
     if (! _state.isComet())
       return false;
 
-    _isWake = true;
+    _isWakeRequested = true;
 
     // comet
     if (getPort().resume(this)) {
@@ -1011,7 +1002,12 @@ public class TcpConnection extends Connection
   {
     closeImpl();
 
-    _state = _state.toIdle(this);
+    ConnectionState state = _state;
+    _state = state.toIdle();
+
+    if (state.isAllowIdle()) {
+      _port.free(this);
+    }
   }
 
   protected String dbgId()
@@ -1246,14 +1242,15 @@ public class TcpConnection extends Connection
         ConnectionCometController comet
           = (ConnectionCometController) _controller;
 
+        _state = _state.toCometResume();
+
         if (comet != null)
           comet.startResume();
 
-        _isWake = false;
+        _isWakeRequested = false;
 
         if (getRequest().handleResume()) {
-          // XXX:keepalive?
-          _port.suspend(TcpConnection.this);
+          toSuspend();
 
           isValid = true;
         }

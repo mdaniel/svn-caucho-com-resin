@@ -1530,15 +1530,10 @@ public class Port extends TaskWorker
    */
   void suspend(TcpConnection conn)
   {
-    if (conn.isWake()) {
-      // XXX timing with wake
-      conn.toResume();
-
+    if (conn.isWakeRequested()) {
       _threadPool.schedule(conn.getResumeTask());
     }
     else if (conn.isComet()) {
-      conn.toSuspend();
-
       _suspendConnectionSet.add(conn);
     }
     else {
@@ -1561,8 +1556,6 @@ public class Port extends TaskWorker
   boolean resume(TcpConnection conn)
   {
     if (_suspendConnectionSet.remove(conn)) {
-      conn.toResume();
-
       _threadPool.schedule(conn.getResumeTask());
 
       return true;

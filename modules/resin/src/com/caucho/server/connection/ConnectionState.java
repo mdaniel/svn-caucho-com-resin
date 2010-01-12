@@ -232,6 +232,12 @@ enum ConnectionState {
     }
 
     @Override
+    ConnectionState toCometSuspend()
+    {
+      return COMET_SUSPEND;
+    }
+
+    @Override
     ConnectionState toCometComplete()
     {
       return COMET_COMPLETE;
@@ -252,6 +258,12 @@ enum ConnectionState {
     ConnectionState toKillKeepalive()
     {
       return COMET_SUSPEND_NKA;
+    }
+
+    @Override
+    ConnectionState toCometResume()
+    {
+      return COMET;
     }
 
     @Override
@@ -321,6 +333,12 @@ enum ConnectionState {
     }
 
     @Override
+    ConnectionState toCometSuspend()
+    {
+      return COMET_SUSPEND_NKA;
+    }
+
+    @Override
     ConnectionState toCometComplete()
     {
       return COMET_COMPLETE_NKA;
@@ -333,6 +351,12 @@ enum ConnectionState {
 
     @Override
     boolean isCometSuspend() { return true; }
+
+    @Override
+    ConnectionState toCometResume()
+    {
+      return COMET;
+    }
 
     @Override
     ConnectionState toDestroy(TcpConnection conn)
@@ -403,16 +427,17 @@ enum ConnectionState {
     boolean isClosed() { return true; }
 
     @Override
+    boolean isAllowIdle() { return true; }
+
+    @Override
     ConnectionState toAccept() 
     { 
       return ACCEPT; 
     }
 
     @Override
-    ConnectionState toIdle(TcpConnection conn)
+    ConnectionState toIdle()
     {
-      conn.getPort().free(conn);
-
       return IDLE;
     }
   },
@@ -442,7 +467,7 @@ enum ConnectionState {
     boolean isDestroyed() { return true; }
 
     @Override
-    ConnectionState toIdle(TcpConnection conn)
+    ConnectionState toIdle()
     {
       return this;
     }
@@ -528,6 +553,11 @@ enum ConnectionState {
     return false;
   }
 
+  boolean isAllowIdle()
+  { 
+    return false; 
+  }
+
   //
   // state changes
   //
@@ -589,6 +619,16 @@ enum ConnectionState {
     throw new IllegalStateException(this + " cannot switch to comet");
   }
 
+  ConnectionState toCometResume()
+  {
+    throw new IllegalStateException(this + " cannot resume comet");
+  }
+
+  ConnectionState toCometSuspend()
+  {
+    throw new IllegalStateException(this + " cannot suspend comet");
+  }
+    
   ConnectionState toCometComplete()
   {
     throw new IllegalStateException(this + " cannot complete comet");
@@ -612,7 +652,7 @@ enum ConnectionState {
   // idle/close
   //
 
-  ConnectionState toIdle(TcpConnection conn)
+  ConnectionState toIdle()
   {
     throw new IllegalStateException(this + " is an illegal idle state");
   }

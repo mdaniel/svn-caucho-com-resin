@@ -229,9 +229,11 @@ public abstract class Connection
   {
   }
 
+  /*
   public void toSuspend()
   {
   }
+  */
 
   /**
    * Wakes the connection
