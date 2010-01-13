@@ -32,8 +32,6 @@ package com.caucho.server.connection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.servlet.DuplexContext;
-import com.caucho.servlet.DuplexListener;
 import com.caucho.util.Alarm;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;

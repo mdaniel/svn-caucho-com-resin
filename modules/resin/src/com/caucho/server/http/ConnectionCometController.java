@@ -34,27 +34,31 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.*;
+import javax.servlet.AsyncListener;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 
-import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.connection.AsyncController;
-import com.caucho.server.connection.TcpConnection;
+import com.caucho.server.connection.CometHandler;
+import com.caucho.server.connection.TransportConnection;
 import com.caucho.servlet.comet.CometController;
-import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
 
 /**
  * Public API to control a comet connection.
  */
-public class ConnectionCometController extends AsyncController
-  implements CometController {
+@SuppressWarnings("deprecation")
+public class ConnectionCometController
+  implements CometController, CometHandler {
   private static final L10N L = new L10N(ConnectionCometController.class);
   private static final Logger log = Logger
       .getLogger(ConnectionCometController.class.getName());
 
-  private TransportConnection _conn;
-
+  private final AsyncController _cometController;
+  
   private HashMap<String, Object> _map;
 
   private ServletRequest _request;
@@ -64,17 +68,18 @@ public class ConnectionCometController extends AsyncController
 
   private boolean _isTimeout;
 
-  private boolean _isInitial = true;
+  // private boolean _isInitial = true;
 
   private String _forwardPath;
 
   private long _maxIdleTime;
 
-  public ConnectionCometController(TransportConnection conn, boolean isTop,
+  public ConnectionCometController(TransportConnection conn,
+                                   boolean isTop,
                                    ServletRequest request,
                                    ServletResponse response)
   {
-    _conn = conn;
+    _cometController = conn.toComet(this);
 
     _request = request;
     _response = response;
@@ -97,10 +102,12 @@ public class ConnectionCometController extends AsyncController
     return _maxIdleTime;
   }
 
+  /*
   public TcpConnection getConnection()
   {
     return (TcpConnection) _conn;
   }
+  */
 
   /**
    * Returns true if the connection is the initial request
@@ -115,38 +122,21 @@ public class ConnectionCometController extends AsyncController
   /**
    * Returns true if the connection should be suspended
    */
+  /*
   public final boolean isSuspended()
   {
     TransportConnection conn = _conn;
 
     return conn != null && conn.isComet();
   }
-
-  /**
-   * Suspend the connection on the next request
-   */
-  @Override
-  public final void suspend()
-  {
-    TransportConnection conn = _conn;
-
-    /* XXX probably gone from the spec
-    if (conn != null)
-      conn.toSuspend();
-      */
-  }
+  */
 
   /**
    * Returns true if the connection is complete.
    */
   public final boolean isComplete()
   {
-    TransportConnection conn = _conn;
-
-    if (conn != null)
-      return conn.isCometComplete();
-    else
-      return true;
+    return _cometController.isCometComplete();
   }
 
   /**
@@ -154,11 +144,24 @@ public class ConnectionCometController extends AsyncController
    */
   public final void complete()
   {
-    TransportConnection conn = _conn;
-
-    if (conn != null)
-      conn.toCometComplete();
-
+    _cometController.complete();
+  }
+  
+  public void onTimeout()
+  {
+    for (AsyncListenerNode node = _listenerNode;
+         node != null;
+         node = node.getNext()) {
+      try {
+        node.onTimeout();
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+  }
+  
+  public void onComplete()
+  {
     for (AsyncListenerNode node = _listenerNode;
          node != null;
          node = node.getNext()) {
@@ -168,8 +171,6 @@ public class ConnectionCometController extends AsyncController
         log.log(Level.FINE, e.toString(), e);
       }
     }
-
-    wake();
   }
 
   /**
@@ -188,12 +189,9 @@ public class ConnectionCometController extends AsyncController
    */
   public final boolean wake()
   {
-    TransportConnection conn = _conn;
-
-    if (conn != null)
-      return conn.wake();
-    else
-      return false;
+    _cometController.wake();
+    
+    return false;
   }
 
   /**
@@ -219,7 +217,7 @@ public class ConnectionCometController extends AsyncController
       }
     }
 
-    _conn.toCometComplete();
+    // _conn.toCometComplete();
 
     wake();
   }
@@ -237,7 +235,7 @@ public class ConnectionCometController extends AsyncController
    */
   public final boolean isActive()
   {
-    return _conn != null;
+    return  false; // _cometController.isActive();
   }
 
   /**
@@ -245,9 +243,7 @@ public class ConnectionCometController extends AsyncController
    */
   public boolean isComet()
   {
-    TransportConnection conn = _conn;
-
-    return conn != null && ! conn.isCometComplete();
+    return false; // ! _cometController.isCometComplete();
   }
 
   /**
@@ -342,9 +338,7 @@ public class ConnectionCometController extends AsyncController
    */
   public final boolean isClosed()
   {
-    TransportConnection conn = _conn;
-
-    return conn == null || conn.isCometComplete();
+    return _cometController.isCometComplete();
   }
 
   public ServletRequest getRequest()
@@ -369,11 +363,7 @@ public class ConnectionCometController extends AsyncController
 
   public void dispatch()
   {
-    TransportConnection conn = _conn;
-
-    if (conn != null) {
-      conn.wake();
-    }
+    _cometController.wake();
   }
 
   public void dispatch(String path)
@@ -392,14 +382,14 @@ public class ConnectionCometController extends AsyncController
 
   public void start(Runnable task)
   {
-    if (_conn != null)
+    if (isActive()) {
       ThreadPool.getCurrent().schedule(task);
+    }
     else
       throw new IllegalStateException(
           L.l("AsyncContext.start() is not allowed because the AsyncContext has been completed."));
   }
 
-  
 
   /**
    * Closes the connection.
@@ -409,52 +399,18 @@ public class ConnectionCometController extends AsyncController
     complete();
   }
 
-  @Override
   public void closeImpl()
   {
     // complete();
 
-    TransportConnection conn = _conn;
-    _conn = null;
+    _cometController.complete();
 
     _request = null;
     _response = null;
-
-    if (conn != null)
-      conn.closeController(this);
   }
 
   public String toString()
   {
-    TransportConnection conn = _conn;
-
-    if (conn == null)
-      return getClass().getSimpleName() + "[closed]";
-
-    StringBuilder sb = new StringBuilder();
-    sb.append(getClass().getSimpleName()).append("[");
-
-    if (Alarm.isTest())
-      sb.append("test");
-    else
-      sb.append(conn.getId());
-
-    TcpConnection tcpConn = null;
-
-    if (_conn instanceof TcpConnection)
-      tcpConn = (TcpConnection) _conn;
-
-    if (tcpConn != null && tcpConn.isCometComplete())
-      sb.append(",complete");
-
-    if (tcpConn != null && tcpConn.isCometSuspend())
-      sb.append(",suspended");
-
-    if (tcpConn != null && tcpConn.isWakeRequested())
-      sb.append(",wake");
-
-    sb.append("]");
-
-    return sb.toString();
+    return getClass().getSimpleName() + "[" + _cometController + "]";
   }
 }

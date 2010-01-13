@@ -370,32 +370,11 @@ public class ServletRequestWrapper implements ServletRequest {
   }
 
   /**
-   * Adds an async listener for this request
-   *
-   * @since Servlet 3.0
-   */
-  public void addAsyncListener(AsyncListener listener)
-  {
-    _request.addAsyncListener(listener);
-  }
-
-  /**
-   * Adds an async listener for this request
-   *
-   * @since Servlet 3.0
-   */
-  public void addAsyncListener(AsyncListener listener,
-			       ServletRequest request,
-			       ServletResponse response)
-  {
-    _request.addAsyncListener(listener, request, response);
-  }
-
-  /**
    * Returns the async context for the request
    *
    * @since Servlet 3.0
    */
+  @Override
   public AsyncContext getAsyncContext()
   {
     return _request.getAsyncContext();
@@ -406,6 +385,7 @@ public class ServletRequestWrapper implements ServletRequest {
    *
    * @since Servlet 3.0
    */
+  @Override
   public boolean isAsyncStarted()
   {
     return _request.isAsyncStarted();
@@ -416,6 +396,7 @@ public class ServletRequestWrapper implements ServletRequest {
    *
    * @since Servlet 3.0
    */
+  @Override
   public boolean isAsyncSupported()
   {
     return _request.isAsyncSupported();
@@ -426,6 +407,7 @@ public class ServletRequestWrapper implements ServletRequest {
    *
    * @since Servlet 3.0
    */
+  @Override
   public AsyncContext startAsync()
     throws IllegalStateException
   {
@@ -437,6 +419,7 @@ public class ServletRequestWrapper implements ServletRequest {
    *
    * @since Servlet 3.0
    */
+  @Override
   public AsyncContext startAsync(ServletRequest servletRequest,
                                  ServletResponse servletResponse)
     throws IllegalStateException
@@ -445,28 +428,12 @@ public class ServletRequestWrapper implements ServletRequest {
   }
 
   /**
-   *
-   * @param wrapped
-   * @return
+   * Returns the dispatcherType (request, include, etc) for the current
+   * request.
    */
-  public boolean isWrapperFor(ServletRequest wrapped) {
-    throw new UnsupportedOperationException("unimplemented");
-  }
-
-  /**
-   * @param wrappedType
-   * @return
-   */
-  public boolean isWrapperFor(Class wrappedType)
+  @Override
+  public DispatcherType getDispatcherType() 
   {
-    throw new UnsupportedOperationException("unimplemented");
-  }
-
-  /**
-   * 
-   * @return
-   */
-  public DispatcherType getDispatcherType() {
     return _request.getDispatcherType();
   }
 }

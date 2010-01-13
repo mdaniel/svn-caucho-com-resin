@@ -41,6 +41,7 @@ import javax.xml.stream.XMLStreamReader;
 
 import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.HempBrokerManager;
+import com.caucho.server.connection.AbstractProtocolConnection;
 import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.connection.TcpDuplexController;
@@ -56,7 +57,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * XMPP protocol
  */
-public class XmppRequest implements ProtocolConnection {
+public class XmppRequest extends AbstractProtocolConnection {
   private static final L10N L = new L10N(XmppRequest.class);
   private static final Logger log
     = Logger.getLogger(XmppRequest.class.getName());
@@ -574,7 +575,7 @@ public class XmppRequest implements ProtocolConnection {
   /**
    * Handles a close event when the connection is closed.
    */
-  public void protocolCloseEvent()
+  public void onCloseConnection()
   {
     _requestId++;
     

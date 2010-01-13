@@ -48,6 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.connection.TcpDuplexController;
@@ -78,7 +79,7 @@ import com.caucho.vfs.WriteStream;
  * request implementations.
  */
 public abstract class AbstractHttpRequest
-  implements SecurityContextProvider
+  implements SecurityContextProvider, ProtocolConnection
 {
   private static final Logger log
     = Logger.getLogger(AbstractHttpRequest.class.getName());
@@ -242,7 +243,8 @@ public abstract class AbstractHttpRequest
   /**
    * Called when the connection starts
    */
-  public void startConnection()
+  @Override
+  public void onStartConnection()
   {
   }
 
@@ -349,6 +351,17 @@ public abstract class AbstractHttpRequest
       return request.getRequestURI();
     else
       return null;
+  }
+  
+  @Override
+  public String getProtocolRequestURL()
+  {
+    HttpServletRequestImpl request = getRequestFacade();
+
+    if (request != null)
+      return request.getRequestURL().toString();
+    else
+      return null;    
   }
 
   /**
@@ -1442,7 +1455,7 @@ public abstract class AbstractHttpRequest
 
     return invocation.getRequestInvocation(_requestFacade);
   }
-
+  
   /**
    * Handles a comet-style resume.
    *
@@ -1457,11 +1470,11 @@ public abstract class AbstractHttpRequest
       if (! isComet())
         return false;
 
-      WebApp webApp = _tcpConn.getAsyncDispatchWebApp();
-      String url = _tcpConn.getAsyncDispatchUrl();
+      WebApp webApp = getAsyncDispatchWebApp();
+      String url = getAsyncDispatchUrl();
 
       // servlet 3.0 spec defaults to suspend
-      _tcpConn.cometSuspend();
+      // _tcpConn.cometSuspend();
 
       if (url != null) {
         if (webApp == null)
@@ -1505,6 +1518,19 @@ public abstract class AbstractHttpRequest
 
     return isSuspend();
   }
+  
+  WebApp getAsyncDispatchWebApp()
+  {
+    // XXX:
+    throw new UnsupportedOperationException();
+  }
+  
+  String getAsyncDispatchUrl()
+  {
+    // XXX:
+    throw new UnsupportedOperationException();
+  }
+
 
   protected void sendRequestError(Throwable e)
     throws IOException

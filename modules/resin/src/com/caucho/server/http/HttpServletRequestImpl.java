@@ -35,6 +35,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
+import com.caucho.server.connection.CometHandler;
 import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.connection.TcpDuplexController;
 import com.caucho.server.connection.TcpDuplexHandler;
@@ -585,18 +586,21 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
    *
    * @since Servlet 3.0
    */
+  /*
   public void suspend(long timeout)
   {
     suspend();
 
     // _comet.setTimeout(timeout);
   }
+  */
 
   /**
    * Suspend the request
    *
    * @since Servlet 3.0
    */
+  /*
   public void suspend()
   {
     if (_comet == null) {
@@ -606,6 +610,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
     _comet.suspend();
   }
+  */
 
   /**
    * Resume the request
@@ -1780,6 +1785,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     return _request.isComet();
   }
 
+  /*
   public ConnectionCometController toComet()
   {
     if (_comet == null) {
@@ -1794,6 +1800,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     return _comet;
   }
+  */
 
   /**
    * Adds a file to be removed at the end.
@@ -1963,13 +1970,15 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
                                           getServletName(), getServletPath()));
 
     if (_comet == null) {
-      _comet = _request.getConnection().toComet(true, this, _response);
+      _comet = null; // _request.getConnection().toComet(true, this, _response);
+      
       if (_asyncTimeout > 0)
         _comet.setMaxIdleTime(_asyncTimeout);
+      
       _comet.setAsyncListenerNode(_asyncListenerNode);
     }
 
-    _comet.suspend();
+    // _comet.suspend();
 
     return (AsyncContext) _comet;
   }
@@ -1983,11 +1992,15 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
                                  ServletResponse response)
   {
     if (_comet == null) {
-      _comet = _request.getConnection().toComet(false, request, response);
+      TransportConnection conn = _request.getConnection();
+      
+      _comet = new ConnectionCometController(conn, false, request, response);
+      
+      // _comet = _request.getConnection().toComet(false, request, response);
       _comet.setAsyncListenerNode(_asyncListenerNode);
     }
 
-    _comet.suspend();
+    // _comet.suspend();
 
     return (AsyncContext) _comet;
   }

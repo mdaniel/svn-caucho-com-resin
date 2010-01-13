@@ -32,7 +32,6 @@ package com.caucho.server.snmp;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.HashMap;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.management.AttributeNotFoundException;
@@ -42,20 +41,26 @@ import javax.management.MBeanServer;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.management.ReflectionException;
-import javax.inject.Inject;
 
 import com.caucho.jmx.Jmx;
+import com.caucho.server.connection.AbstractProtocolConnection;
 import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.snmp.types.*;
-import com.caucho.server.thread.ResinThreadPoolExecutor;
+import com.caucho.server.snmp.types.GetResponsePduValue;
+import com.caucho.server.snmp.types.IntegerValue;
+import com.caucho.server.snmp.types.NullValue;
+import com.caucho.server.snmp.types.ObjectIdentifierValue;
+import com.caucho.server.snmp.types.OctetStringValue;
+import com.caucho.server.snmp.types.SnmpMessageValue;
+import com.caucho.server.snmp.types.SnmpValue;
+import com.caucho.server.snmp.types.VarBindListValue;
+import com.caucho.server.snmp.types.VarBindValue;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 
 /*
  * Responds to SNMP requests.
  */
-public class SnmpRequest implements ProtocolConnection
+public class SnmpRequest extends AbstractProtocolConnection
 {
   private static final Logger log
     = Logger.getLogger(SnmpRequest.class.getName());
@@ -311,7 +316,7 @@ public class SnmpRequest implements ProtocolConnection
   /**
    * Handles a close event when the connection is closed.
    */
-  public void protocolCloseEvent()
+  public void onCloseConnection()
   {
   }
 

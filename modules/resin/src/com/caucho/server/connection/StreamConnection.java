@@ -39,7 +39,7 @@ import java.net.InetAddress;
  * A Connection based on streams.  Stream connection is primarily used
  * for testing.
  */
-public class StreamConnection extends TransportConnection {
+public class StreamConnection extends AbstractTransportConnection {
   private int _id = 1;
   private InetAddress _localAddress;
   private int _localPort;

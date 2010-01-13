@@ -29,34 +29,32 @@
 
 package com.caucho.server.connection;
 
-import java.util.HashMap;
-
-import com.caucho.servlet.comet.CometController;
 import com.caucho.util.Alarm;
 
 /**
  * Public API to control a comet connection.
  */
-public class TcpCometController
-  implements CometController
-{
+public class TcpCometController extends AsyncController {
   private TcpConnection _conn;
-  
-  private HashMap<String,Object> _map;
-  
+
+  private CometHandler _cometHandler;
+
   private boolean _isTimeout;
 
-  private boolean _isInitial = true;
-  private boolean _isSuspended;
-  private boolean _isComplete;
-  
   private long _maxIdleTime;
 
-  public TcpCometController(TcpConnection conn)
+  TcpCometController(TcpConnection conn,
+                     CometHandler cometHandler)
   {
     _conn = conn;
+    _cometHandler = cometHandler;
   }
-  
+
+  public TcpConnection getConnection()
+  {
+    return _conn;
+  }
+
   /**
    * Sets the max idle time.
    */
@@ -65,7 +63,7 @@ public class TcpCometController
     if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
       _maxIdleTime = Long.MAX_VALUE / 2;
   }
-  
+
   /**
    * Gets the max idle time.
    */
@@ -74,66 +72,21 @@ public class TcpCometController
     return _maxIdleTime;
   }
 
-  public TransportConnection getConnection()
-  {
-    return _conn;
-  }
-
-  /**
-   * Returns true if the connection is the initial request
-   */
-  public final boolean isInitial()
-  {
-    return _isInitial;
-  }
-
-  /**
-   * Returns true if the connection should be suspended
-   */
-  public final boolean isSuspended()
-  {
-    return _isSuspended;
-  }
-
-  /**
-   * Suspend the connection on the next request
-   */
-  public final void suspend()
-  {
-    if (! _isComplete)
-      _isSuspended = true;
-  }
-
-  /**
-   * Returns true if the connection is complete.
-   */
-  public final boolean isComplete()
-  {
-    return _isComplete;
-  }
-
   /**
    * Complete the connection
    */
   public final void complete()
   {
-    close();
-    /*
-    _isComplete = true;
-    _isSuspended = false;
+    TcpConnection conn = _conn;
+
+    if (conn != null)
+      conn.toCometComplete();
+
+    _cometHandler.onComplete();
+
     wake();
-    */
   }
 
-  /**
-   * Suspend the connection on the next request
-   */
-  public final void startResume()
-  {
-    _isSuspended = false;
-    _isInitial = false;
-  }
-  
   /**
    * Wakes the connection.
    */
@@ -160,7 +113,11 @@ public class TcpCometController
    */
   public final void timeout()
   {
-    _isTimeout = true;
+    _cometHandler.onTimeout();
+
+    _conn.toCometComplete();
+
+    wake();
   }
 
   /**
@@ -184,45 +141,9 @@ public class TcpCometController
    */
   public boolean isComet()
   {
-    return _conn != null;
-  }
-  
-  /**
-   * Gets a request attribute.
-   */
-  public Object getAttribute(String name)
-  {
-    if (_map != null) {
-      synchronized (_map) {
-	return _map.get(name);
-      }
-    }
-    else
-      return null;
-  }
-  
-  /**
-   * Sets a request attribute.
-   */
-  public void setAttribute(String name, Object value)
-  {
-    if (_map != null) {
-      synchronized (_map) {
-	_map.put(name, value);
-      }
-    }
-  }
-  
-  /**
-   * Remove a request attribute.
-   */
-  public void removeAttribute(String name)
-  {
-    if (_map != null) {
-      synchronized (_map) {
-	_map.remove(name);
-      }
-    }
+    TcpConnection conn = _conn;
+
+    return conn != null && ! conn.isCometComplete();
   }
 
   /**
@@ -230,23 +151,21 @@ public class TcpCometController
    */
   public final boolean isClosed()
   {
-    return _conn == null;
+    TcpConnection conn = _conn;
+
+    return conn == null || conn.isCometComplete();
   }
 
-  /**
-   * Closes the connection.
-   */
-  public void close()
+  @Override
+  public void closeImpl()
   {
     // complete();
-    
+
     TcpConnection conn = _conn;
     _conn = null;
 
-    /*
     if (conn != null)
       conn.closeController(this);
-    */
   }
 
   public String toString()
@@ -255,9 +174,31 @@ public class TcpCometController
 
     if (conn == null)
       return getClass().getSimpleName() + "[closed]";
-    else if (Alarm.isTest())
-      return getClass().getSimpleName() + "[]";
+
+    StringBuilder sb = new StringBuilder();
+    sb.append(getClass().getSimpleName()).append("[");
+
+    if (Alarm.isTest())
+      sb.append("test");
     else
-      return getClass().getSimpleName() + "[" + conn.getId() + "]";
+      sb.append(conn.getId());
+
+    TcpConnection tcpConn = null;
+
+    if (_conn instanceof TcpConnection)
+      tcpConn = (TcpConnection) _conn;
+
+    if (tcpConn != null && tcpConn.isCometComplete())
+      sb.append(",complete");
+
+    if (tcpConn != null && tcpConn.isCometSuspend())
+      sb.append(",suspended");
+
+    if (tcpConn != null && tcpConn.isWakeRequested())
+      sb.append(",wake");
+
+    sb.append("]");
+
+    return sb.toString();
   }
 }

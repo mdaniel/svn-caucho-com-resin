@@ -113,11 +113,12 @@ public class CometServletFilterChain implements FilterChain {
 
       HttpServletRequestImpl requestImpl = (HttpServletRequestImpl) reqPtr;
 
-      controller = requestImpl.getCometController();
+      // XXX: temp refactor
+      // controller = requestImpl.getCometController();
 
       if (controller != null) {
         if (_servlet.resume(request, response, controller)) {
-          requestImpl.suspend();
+          // requestImpl.suspend();
           controller = null;
         }
         else {
@@ -126,10 +127,11 @@ public class CometServletFilterChain implements FilterChain {
         }
       }
       else {
-        controller = requestImpl.toComet();
+        // XXX: temp refactor
+        // controller = requestImpl.toComet();
 
         if (_servlet.service(request, response, controller)) {
-          requestImpl.suspend();
+          // requestImpl.suspend();
           controller = null;
         }
       }

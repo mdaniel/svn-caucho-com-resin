@@ -1229,7 +1229,7 @@ public class HttpRequest extends AbstractHttpRequest
     return context;
   }
 
-  public final void protocolCloseEvent()
+  public final void onCloseConnection()
   {
   }
 

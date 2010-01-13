@@ -31,6 +31,8 @@ package com.caucho.servlet.comet;
 
 /**
  * Public API to control a comet connection.
+ * 
+ * @deprecated
  */
 public interface CometController {
   /**

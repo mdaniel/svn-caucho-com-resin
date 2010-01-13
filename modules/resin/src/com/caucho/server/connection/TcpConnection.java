@@ -35,17 +35,10 @@ import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
-import com.caucho.server.http.AbstractHttpRequest;
-import com.caucho.server.http.ConnectionCometController;
-import com.caucho.server.resin.Resin;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.vfs.ClientDisconnectException;
 import com.caucho.vfs.QSocket;
@@ -58,7 +51,7 @@ import com.caucho.vfs.StreamImpl;
  *
  * <p>Each TcpConnection has its own thread.
  */
-public class TcpConnection extends TransportConnection
+public class TcpConnection extends AbstractTransportConnection
 {
   private static final Logger log
     = Logger.getLogger(TcpConnection.class.getName());
@@ -130,23 +123,8 @@ public class TcpConnection extends TransportConnection
 
     _request = protocol.createConnection(this);
 
-    String protocolName = protocol.getProtocolName();
-
-    if (port.getAddress() == null) {
-      Resin resin = Resin.getLocal();
-      String serverId = resin != null ? resin.getServerId() : null;
-      if (serverId == null)
-        serverId = "";
-
-      _id = protocolName + "-" + serverId + "-" + port.getPort() + "-" + id;
-      _name = protocolName + "-" + port.getPort() + "-" + id;
-    }
-    else {
-      _id = (protocolName + "-" + port.getAddress() + ":" +
-             port.getPort() + "-" + id);
-      _name = (protocolName + "-" + port.getAddress() + "-" +
-               port.getPort() + "-" + id);
-    }
+    _id = port.getDebugId() + "-" + id;
+    _name = _id;
   }
 
   /**
@@ -483,26 +461,13 @@ public class TcpConnection extends TransportConnection
   // async/comet predicates
   //
 
-  public AsyncController getController()
+  public AsyncController getAsyncController()
   {
     return _controller;
   }
 
-  public WebApp getAsyncDispatchWebApp()
-  {
-    return null;
-  }
-
-  public String getAsyncDispatchUrl()
-  {
-    if (_controller != null)
-      return _controller.getForwardPath();
-    else
-      return null;
-  }
-
   /**
-   * Poll the socket to test for an end-of-file.
+   * Poll the socket to test for an end-of-file for a comet socket.
    */
   public boolean isReadEof()
   {
@@ -758,6 +723,7 @@ public class TcpConnection extends TransportConnection
   /**
    * Starts a comet request
    */
+  /*
   @Override
   public ConnectionCometController toComet(boolean isTop,
                                            ServletRequest request,
@@ -775,12 +741,19 @@ public class TcpConnection extends TransportConnection
 
     return controller;
   }
-
-  // XXX Possible spec requirement problem
-  public void cometSuspend()
+  */
+  
+  @Override
+  public AsyncController toComet(CometHandler cometHandler)
   {
-    if (_controller != null)
-      _controller.suspend();
+    _state = _state.toComet();
+    
+    _controller = new TcpCometController(this, cometHandler);
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " starting comet");
+    
+    return _controller;
   }
 
   private void toSuspend()
@@ -817,7 +790,7 @@ public class TcpConnection extends TransportConnection
   {
     _state = _state.toCometComplete();
 
-    AsyncController async = getController();
+    AsyncController async = getAsyncController();
 
     if (async != null)
       async.timeout();
@@ -825,7 +798,6 @@ public class TcpConnection extends TransportConnection
     wake();
   }
 
-  @Override
   public void toCometComplete()
   {
     _state = _state.toCometComplete();
@@ -854,7 +826,7 @@ public class TcpConnection extends TransportConnection
     return duplex;
   }
 
-  public void closeController(ConnectionCometController controller)
+  public void closeController(TcpCometController controller)
   {
     if (controller == _controller) {
       _controller = null;
@@ -895,7 +867,7 @@ public class TcpConnection extends TransportConnection
     if (state.isComet() || state.isCometSuspend())
       getPort().cometDetach(this);
 
-    getRequest().protocolCloseEvent();
+    getRequest().onCloseConnection();
 
     AsyncController controller = _controller;
     _controller = null;
@@ -1084,7 +1056,7 @@ public class TcpConnection extends TransportConnection
         setStatState("read");
         initSocket();
 
-        _request.startConnection();
+        _request.onStartConnection();
 
         result = handleRequests();
 
@@ -1196,13 +1168,7 @@ public class TcpConnection extends TransportConnection
       boolean isValid = false;
 
       try {
-        ConnectionCometController comet
-          = (ConnectionCometController) _controller;
-
         _state = _state.toCometResume();
-
-        if (comet != null)
-          comet.startResume();
 
         _isWakeRequested = false;
 
@@ -1259,26 +1225,17 @@ public class TcpConnection extends TransportConnection
     {
       ProtocolConnection request = TcpConnection.this.getRequest();
 
-      if (request instanceof AbstractHttpRequest) {
-        AbstractHttpRequest req = (AbstractHttpRequest) request;
+      String url = request.getProtocolRequestURL();
+      
+      if (url != null && ! "".equals(url))
+        return url;
+      
+      Port port = TcpConnection.this.getPort();
 
-        if (! "".equals(req.getRequestURI())) {
-          String url = String.valueOf(req.getRequestURL());
-
-          return url;
-        }
-        else {
-          Port port = TcpConnection.this.getPort();
-
-          if (port.getAddress() == null)
-            return "accept://*:" + port.getPort();
-          else
-            return "accept://" + port.getAddress() + ":" + port.getPort();
-        }
-      }
-
-
-      return null;
+      if (port.getAddress() == null)
+        return "request://*:" + port.getPort();
+      else
+        return "request://" + port.getAddress() + ":" + port.getPort();
     }
 
     public String getState()

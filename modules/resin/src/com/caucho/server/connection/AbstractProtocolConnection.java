@@ -46,6 +46,21 @@ public abstract  class AbstractProtocolConnection implements ProtocolConnection 
   {
   }
   
+  @Override
+  public void onStartConnection()
+  {
+    
+  }
+  
+  /**
+   * Returns a default debugging identifier for the connection
+   */
+  @Override
+  public String getProtocolRequestURL()
+  {
+    return null;
+  }
+  
   /**
    * Handles a new connection.  The controlling TcpServer may call
    * handleConnection again after the connection completes, so 
@@ -59,7 +74,8 @@ public abstract  class AbstractProtocolConnection implements ProtocolConnection 
   /**
    * Handles a close event when the connection is closed.
    */
-  public void closeEvent()
+  @Override
+  public void onCloseConnection()
   {
   }
 }

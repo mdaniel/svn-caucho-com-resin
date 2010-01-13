@@ -29,13 +29,8 @@
 
 package com.caucho.server.connection;
 
-import java.lang.reflect.Constructor;
 import java.net.InetAddress;
 
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-
-import com.caucho.server.http.ConnectionCometController;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -47,223 +42,99 @@ import com.caucho.vfs.WriteStream;
  * <p>TcpConnection is the most common implementation.  The test harness
  * provides a string based Connection.
  */
-public abstract class TransportConnection
-{
-  private static Constructor<?> _cometConstructor;
-
-  private final ReadStream _readStream;
-  private final WriteStream _writeStream;
-
-  public TransportConnection()
-  {
-    _readStream = new ReadStream();
-    _readStream.setReuseBuffer(true);
-    _writeStream = new WriteStream();
-    _writeStream.setReuseBuffer(true);
-  }
-
+public interface TransportConnection {
   /**
    * Returns the connection id.  Primarily for debugging.
    */
-  abstract public int getId();
+  public int getId();
 
   /**
-   * Returns the connection's buffered read stream.  If the ReadStream
-   * needs to block, it will automatically flush the corresponding
-   * WriteStream.
+   * Returns the connection's buffered read stream.
    */
-  public final ReadStream getReadStream()
-  {
-    return _readStream;
-  }
+  public ReadStream getReadStream();
 
   /**
-   * Returns the connection's buffered write stream.  If the ReadStream
-   * needs to block, it will automatically flush the corresponding
-   * WriteStream.
+   * Returns the connection's buffered write stream. 
    */
-  public final WriteStream getWriteStream()
-  {
-    return _writeStream;
-  }
+  public WriteStream getWriteStream();
 
   /**
    * Returns true if secure (ssl)
    */
-  public boolean isSecure()
-  {
-    return false;
-  }
+  public boolean isSecure();
+  
   /**
-   * Returns the static virtual host
+   * Returns the static configured virtual host
    */
-  public String getVirtualHost()
-  {
-    return null;
-  }
+  public String getVirtualHost();
+  
   /**
    * Returns the local address of the connection
    */
-  public abstract InetAddress getLocalAddress();
+  public InetAddress getLocalAddress();
 
   /**
    * Returns the local port of the connection
    */
-  public abstract int getLocalPort();
+  public int getLocalPort();
 
   /**
    * Returns the remote address of the connection
    */
-  public abstract InetAddress getRemoteAddress();
+  public InetAddress getRemoteAddress();
 
   /**
    * Returns the remote client's inet address.
    */
-  public String getRemoteHost()
-  {
-    return getRemoteAddress().getHostAddress();
-  }
+  public String getRemoteHost();
 
   /**
    * Returns the remote address of the connection
    */
-  public int getRemoteAddress(byte []buffer, int offset, int length)
-  {
-    InetAddress remote = getRemoteAddress();
-    String name = remote.getHostAddress();
-    int len = name.length();
-
-    for (int i = 0; i < len; i++)
-      buffer[offset + i] = (byte) name.charAt(i);
-
-    return len;
-  }
+  public int getRemoteAddress(byte []buffer, int offset, int length);
 
   /**
    * Returns the remove port of the connection
    */
-  public abstract int getRemotePort();
-
-  /**
-   * Sends a broadcast request.
-   */
-  /*
-  public void sendBroadcast(BroadcastTask task)
-  {
-  }
-  */
-
-  public boolean isKeepaliveAllocated()
-  {
-    return false;
-  }
-
-  /*
-  public boolean toKeepalive()
-  {
-    return false;
-  }
-  */
-
-  public void killKeepalive()
-  {
-  }
-
-  public ConnectionState getState()
-  {
-    return ConnectionState.REQUEST_ACTIVE_KA;
-  }
-
-  /**
-   * Returns true for a comet connection
-   */
-  public boolean isComet()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true for a comet connection
-   */
-  public boolean isCometSuspend()
-  {
-    return false;
-  }
+  public int getRemotePort();
   
-  public boolean isCometComplete()
-  {
-    return false;
-  }
+  //
+  // keepalive support
+  //
 
-  /**
-   * Returns true for a duplex connection
-   */
-  public boolean isDuplex()
-  {
-    return false;
-  }
+  public boolean isKeepaliveAllocated();
 
-  public boolean wake()
-  {
-    return false;
-  }
+  public void killKeepalive();
+
+  //
+  // comet support
+  //
 
   /**
    * Starts a comet request
    */
-  public ConnectionCometController toComet(boolean isTop,
-                                           ServletRequest request,
-                                           ServletResponse response)
-  {
-    ConnectionCometController controller = null;
-
-    try {
-      controller = (ConnectionCometController) _cometConstructor.newInstance(this, isTop, request, response);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-
-    return controller;
-  }
+  public AsyncController toComet(CometHandler cometHandler);
+  
+  /**
+   * Returns true for a comet connection
+   */
+  public boolean isComet();
 
   /**
-   * Close the controller
+   * Returns true for a comet connection
    */
-  public void closeController(ConnectionCometController controller)
-  {
-  }
+  public boolean isCometSuspend();
+  
+  public boolean isCometComplete();
 
-  public void toCometComplete()
-  {
-  }
-
-  /*
-  public void toSuspend()
-  {
-  }
-  */
-
+  public boolean wake();
+  
+  //
+  // duplex support
+  //
+  
   /**
-   * Wakes the connection
+   * Returns true for a duplex connection
    */
-  /*
-  protected boolean wake()
-  {
-    return false;
-  }
-  */
-
-  static {
-    try {
-      Class<?> asyncComet = Class.forName("com.caucho.server.connection.AsyncConnectionCometController");
-
-      _cometConstructor = asyncComet.getConstructor(new Class[] {
-          TransportConnection.class,
-          boolean.class,
-          ServletRequest.class,
-          ServletResponse.class
-        });
-    } catch (Throwable e) {
-    }
-  }
+  public boolean isDuplex();
 }

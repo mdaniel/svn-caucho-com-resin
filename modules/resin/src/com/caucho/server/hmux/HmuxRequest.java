@@ -1615,7 +1615,7 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Close when the socket closes.
    */
-  public void protocolCloseEvent()
+  public void onCloseConnection()
   {
     ActorStream brokerStream = _brokerStream;
     _brokerStream = null;

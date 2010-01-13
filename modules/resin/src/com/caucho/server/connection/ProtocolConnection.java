@@ -53,7 +53,7 @@ public interface ProtocolConnection {
   /**
    * Called when the connection starts, i.e. just after the accept
    */
-  public void startConnection();
+  public void onStartConnection();
 
   /**
    * Handles a new request.  The controlling TcpServer may call
@@ -61,6 +61,11 @@ public interface ProtocolConnection {
    * the implementation must initialize any variables for each connection.
    */
   public boolean handleRequest() throws IOException;
+  
+  /**
+   * Returns a request URL for debugging/management.
+   */
+  public String getProtocolRequestURL();
 
   /**
    * Handles a resumption of the connection for an async/comet request.
@@ -70,5 +75,5 @@ public interface ProtocolConnection {
   /**
    * Handles a close event when the connection is closed.
    */
-  public void protocolCloseEvent();
+  public void onCloseConnection();
 }

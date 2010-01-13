@@ -30,38 +30,17 @@
 package com.caucho.server.connection;
 
 /**
- * Controls a tcp connection for comet.
+ * Application handler for a comet controller.
  */
-public class AsyncController {
+public interface CometHandler
+{
   /**
-   * Creates a new TcpConnectionController.
+   * Called when the connection closes
    */
-  protected AsyncController()
-  {
-  }
-
-  public boolean wake()
-  {
-    return true;
-  }
+  public void onComplete();
   
-  public boolean isCometComplete()
-  {
-    return false;
-  }
-  
-  public void timeout()
-  {
-  }
-
-  public void complete()
-  {
-  }
-
   /**
-   * Closes the connection.
+   * Called when the connection times out
    */
-  public void closeImpl()
-  {
-  }
+  public void onTimeout();
 }

@@ -40,6 +40,9 @@ import java.io.IOException;
 public interface AsyncListener
   extends EventListener
 {
+  public void onStartAsync(AsyncEvent event)
+    throws IOException;
+  
   public void onComplete(AsyncEvent event)
     throws IOException;
 
@@ -47,8 +50,5 @@ public interface AsyncListener
     throws IOException;
 
   public void onError(AsyncEvent event)
-    throws IOException;
-
-  public void onStartAsync(AsyncEvent event)
     throws IOException;
 }

@@ -1255,7 +1255,7 @@ public class FastCgiRequest extends AbstractHttpRequest
     return _rawRead;
   }
 
-  public final void protocolCloseEvent()
+  public final void onCloseConnection()
   {
   }
 

@@ -108,6 +108,8 @@ public class Port extends TaskWorker
 
   // URL for debugging
   private String _url;
+  
+  private String _debugId;
 
   // The protocol
   private Protocol _protocol;
@@ -331,6 +333,11 @@ public class Port extends TaskWorker
   {
   }
   */
+  
+  public String getDebugId()
+  {
+    return _debugId;
+  }
   
   public ClassLoader getClassLoader()
   {
@@ -1015,6 +1022,8 @@ public class Port extends TaskWorker
     }
 
     _url = url.toString();
+    
+    _debugId = _url;
   }
 
   /**
@@ -1916,7 +1925,7 @@ public class Port extends TaskWorker
           if (log.isLoggable(Level.FINE))
             log.fine(this + " async end-of-file " + conn);
 
-          AsyncController async = conn.getController();
+          AsyncController async = conn.getAsyncController();
 
           if (async != null)
             async.complete();
