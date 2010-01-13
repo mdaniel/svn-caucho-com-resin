@@ -35,9 +35,7 @@ import com.caucho.security.Authenticator;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.AsyncListenerNode;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.ConnectionCometController;
+import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.connection.TcpDuplexController;
 import com.caucho.server.connection.TcpDuplexHandler;
 import com.caucho.server.dispatch.Invocation;
@@ -1833,7 +1831,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     _request.clientDisconnect();
   }
 
-  public Connection getConnection()
+  public TransportConnection getConnection()
   {
     return _request.getConnection();
   }

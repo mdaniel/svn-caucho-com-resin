@@ -29,14 +29,46 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.server.connection.*;
+import java.io.IOException;
 
 /**
- * Protocol specific information for each request.  ServerRequest
+ * Protocol specific information for each connection.  ProtocolConnection
  * is reused to reduce memory allocations.
  *
- * <p>ServerRequests are created by Server.createRequest()
+ * <p>ProtocolConnections are created by Protocol.createConnection
  */
-public interface TcpServerRequest extends ServerRequest {
-  public Connection getConnection();
+public interface ProtocolConnection {
+  /**
+   * Initialize the connection.  At this point, the current thread is the
+   * connection thread.
+   */
+  public void init();
+
+  /**
+   * Return true if the connection should wait for a read before
+   * handling the request.
+   */
+  public boolean isWaitForRead();
+
+  /**
+   * Called when the connection starts, i.e. just after the accept
+   */
+  public void startConnection();
+
+  /**
+   * Handles a new request.  The controlling TcpServer may call
+   * handleRequest again after the connection completes, so
+   * the implementation must initialize any variables for each connection.
+   */
+  public boolean handleRequest() throws IOException;
+
+  /**
+   * Handles a resumption of the connection for an async/comet request.
+   */
+  public boolean handleResume() throws IOException;
+
+  /**
+   * Handles a close event when the connection is closed.
+   */
+  public void protocolCloseEvent();
 }

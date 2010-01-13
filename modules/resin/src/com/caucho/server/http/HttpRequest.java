@@ -64,7 +64,7 @@ import javax.servlet.http.HttpServletResponse;
  * Handles a new request from an HTTP connection.
  */
 public class HttpRequest extends AbstractHttpRequest
-  implements TcpServerRequest
+  implements ProtocolConnection
 {
   private static final Logger log
     = Logger.getLogger(HttpRequest.class.getName());
@@ -128,7 +128,7 @@ public class HttpRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  public HttpRequest(Server server, Connection conn)
+  public HttpRequest(Server server, TransportConnection conn)
   {
     super(server, conn);
 

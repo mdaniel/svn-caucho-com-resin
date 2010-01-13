@@ -45,8 +45,8 @@ import javax.management.ReflectionException;
 import javax.inject.Inject;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.snmp.types.*;
 import com.caucho.server.thread.ResinThreadPoolExecutor;
 import com.caucho.util.L10N;
@@ -55,7 +55,7 @@ import com.caucho.vfs.ReadStream;
 /*
  * Responds to SNMP requests.
  */
-public class SnmpRequest implements ServerRequest
+public class SnmpRequest implements ProtocolConnection
 {
   private static final Logger log
     = Logger.getLogger(SnmpRequest.class.getName());
@@ -69,14 +69,14 @@ public class SnmpRequest implements ServerRequest
   public static final int READ_ONLY = 4;
   public static final int GENERAL_ERROR = 5;
   
-  private final Connection _connection;
+  private final TransportConnection _connection;
 
   private IntegerValue _version = IntegerValue.ZERO;
   private final OctetStringValue _communityString;
   
   private HashMap<String, Oid> _mibMap;
   
-  public SnmpRequest(Connection connection,
+  public SnmpRequest(TransportConnection connection,
                      HashMap<String, Oid> mibMap,
                      OctetStringValue community)
   {

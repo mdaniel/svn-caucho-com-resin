@@ -31,8 +31,8 @@ package com.caucho.protocols;
 
 import com.caucho.config.program.ConfigProgram;
 
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ProtocolPort;
+import com.caucho.server.cluster.ProtocolPort;
+import com.caucho.server.connection.AbstractProtocol;
 import com.caucho.server.fastcgi.FastCgiProtocol;
 
 /**
@@ -40,7 +40,7 @@ import com.caucho.server.fastcgi.FastCgiProtocol;
  */
 public class FastCgiPort extends ProtocolPort
 {
-  public Protocol getProtocol()
+  public AbstractProtocol getProtocol()
   {
     return new FastCgiProtocol();
   }

@@ -29,8 +29,8 @@
 package com.caucho.server.resin;
 
 import com.caucho.config.ConfigException;
+import com.caucho.server.cluster.ProtocolConfig;
 import com.caucho.server.connection.Port;
-import com.caucho.server.connection.ProtocolConfig;
 import com.caucho.util.L10N;
 
 /**

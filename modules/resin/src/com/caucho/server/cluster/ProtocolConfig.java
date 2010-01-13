@@ -19,31 +19,63 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.cluster;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import com.caucho.server.connection.AbstractProtocol;
+import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.server.connection.TransportConnection;
+
 
 /**
- * Public API to control a comet connection.
+ * Represents a protocol connection.
  */
-public class AsyncConnectionCometController extends ConnectionCometController
-  implements AsyncContext
-{
-  public AsyncConnectionCometController(Connection conn,
-					boolean isTop,
-					ServletRequest request,
-					ServletResponse response)
+public class ProtocolConfig extends AbstractProtocol {
+  private String _name;
+  
+  /**
+   * Sets the protocol name.
+   */
+  public void setId(String text)
   {
-    super(conn, isTop, request, response);
+    _name = text;
+  }
+  
+  /**
+   * Sets the protocol name.
+   */
+  public void addText(String text)
+  {
+    _name = text;
+  }
+
+  /**
+   * Returns the protocol name.
+   */
+  public String getId()
+  {
+    return _name;
+  }
+
+  /**
+   * Returns the protocol name.
+   */
+  public String getProtocol()
+  {
+    return _name;
+  }
+
+  /**
+   * Create a Request object for the new thread.
+   */
+  public ProtocolConnection createConnection(TransportConnection conn)
+  {
+    throw new UnsupportedOperationException();
   }
 }

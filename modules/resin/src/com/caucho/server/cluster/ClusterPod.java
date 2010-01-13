@@ -294,10 +294,8 @@ abstract public class ClusterPod
       if (server == null)
 	continue;
 
-      ClusterPort clusterPort = server.getClusterPort();
-      
-      if (address.equals(clusterPort.getAddress())
-	  && port == clusterPort.getPort()) {
+      if (address.equals(server.getAddress())
+	  && port == server.getPort()) {
         return server;
       }
     }

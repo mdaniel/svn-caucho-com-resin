@@ -63,7 +63,7 @@ import com.caucho.rewrite.Not;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
@@ -2336,7 +2336,7 @@ public class WebApp extends ServletContextImpl
 
   public static ServletRequest getThreadRequest()
   {
-    ServerRequest serverRequest = TcpConnection.getCurrentRequest();
+    ProtocolConnection serverRequest = TcpConnection.getCurrentRequest();
 
     if (serverRequest instanceof ServletRequest)
       return (ServletRequest) serverRequest;

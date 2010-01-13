@@ -29,79 +29,31 @@
 
 package com.caucho.server.cluster;
 
+import javax.annotation.PostConstruct;
+
+import com.caucho.config.ConfigException;
 import com.caucho.server.connection.Port;
 import com.caucho.server.hmux.HmuxProtocol;
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
 
 /**
  * Represents a protocol connection.
  */
 public class ClusterPort extends Port {
-  private static final L10N L = new L10N(ClusterPort.class);
-
-  private ClusterServer _server;
-  
-  private int _clientWeight = 100;
-
-  public ClusterPort(ClusterServer server)
+  public ClusterPort(String address, int port)
   {
-    _server = server;
-    
     try {
-      setAddress("127.0.0.1");
+      setAddress(address);
       
-      setPort(-1);
+      setPort(port);
       
       setProtocol(new HmuxProtocol());
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw ConfigException.create(e);
     }
-  }
-
-  /**
-   * Returns the cluster server.
-   */
-  public ClusterServer getClusterServer()
-  {
-    return _server;
-  }
-
-  /**
-   * Returns the session index for the srun.
-   */
-  public int getIndex()
-  {
-    return _server.getIndex();
-  }
-
-  /**
-   * Set the client weight.
-   */
-  public void setClientWeight(int weight)
-  {
-    _clientWeight = weight;
-  }
-
-  /**
-   * Return the client weight.
-   */
-  public int getClientWeight()
-  {
-    return _clientWeight;
   }
 
   @PostConstruct
   public void init()
   {
-  }
-
-  public String toString()
-  {
-    if (getAddress() != null)
-      return "ClusterPort[address=" + getAddress() + ",port=" + getPort() + "]";
-    else
-      return "ClusterPort[address=*,port=" + getPort() + "]";
   }
 }

@@ -57,6 +57,8 @@ public class ResinEmbed
   private ClusterServer _clusterServer;
   private Host _host;
   private Server _server;
+  
+  private int _httpPort = -1;
 
   private Lifecycle _lifecycle = new Lifecycle();
   
@@ -87,7 +89,7 @@ public class ResinEmbed
 
   public void setHttpPort(int port)
   {
-    _clusterServer.createHttp().setPort(port);
+    _httpPort = port;
   }
 
   public void addWebApp(String contextPath,
@@ -114,6 +116,10 @@ public class ResinEmbed
     try {
       _resin.start();
       _server = _resin.getServer();
+      
+      if (_httpPort >= 0)
+        _server.createHttp().setPort(_httpPort);
+      
       HostConfig hostConfig = new HostConfig();
       _server.addHost(hostConfig);
       _host = _server.getHost("", 0);

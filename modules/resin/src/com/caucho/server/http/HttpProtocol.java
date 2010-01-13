@@ -28,10 +28,8 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
 
 /**
  * The main class for the HTTP server.
@@ -41,33 +39,17 @@ import com.caucho.server.connection.ServerRequest;
  *
  * @see com.caucho.server.TcpServer
  */
-public class HttpProtocol extends Protocol {
-  static final String COPYRIGHT =
-    "Copyright (c) 1998-2010 Caucho Technology.  All rights reserved.";
-
-  private String _protocolName = "http";
-
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName()
+public class HttpProtocol extends AbstractHttpProtocol {
+  public HttpProtocol()
   {
-    return _protocolName;
-  }
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _protocolName = name;
+    setProtocolName("http");
   }
 
-  /**
+ /**
    * Create a HttpRequest object for the new thread.
    */
-  public ServerRequest createRequest(Connection conn)
+  public ProtocolConnection createConnection(TransportConnection conn)
   {
-    return new HttpRequest((Server) getServer(), conn);
+    return new HttpRequest(getServer(), conn);
   }
 }

@@ -29,25 +29,69 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-
 /**
- * Represents a protocol connection.
+ * Abstract implementation of the Protocol.
  */
-abstract public class ProtocolPort
-{
-  private ContainerProgram _program = new ContainerProgram();
+abstract public class AbstractProtocol implements Protocol {
+  // The owning port
+  //private Port _port;
+  
+  private ClassLoader _classLoader;
 
-  abstract public Protocol getProtocol();
+  // The protocol name
+  private String _name = "tcp";
 
-  public void addBuilderProgram(ConfigProgram program)
+  protected AbstractProtocol()
   {
-    _program.addProgram(program);
+    _classLoader = Thread.currentThread().getContextClassLoader();
+  }
+  
+  /**
+   * Sets the protocol name.
+   */
+  public void setProtocolName(String name)
+  {
+    _name = name;
   }
 
-  public ConfigProgram getConfigProgram()
+  /**
+   * Returns the protocol name.
+   */
+  public String getProtocolName()
   {
-    return _program;
+    return _name;
   }
+  
+  /**
+   * Sets the containing port
+   */
+  /*
+  public void setPort(Port port)
+  {
+    _port = port;
+  }
+  */
+
+  /**
+   * Gets the parent port.
+   */
+  /*
+  public Port getPort()
+  {
+    return _port;
+  }
+  */
+  
+  /**
+   * Returns the protocol owning classloader
+   */
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+  
+  /**
+   * Create a Request object for the new thread.
+   */
+  abstract public ProtocolConnection createConnection(TransportConnection conn);
 }

@@ -146,7 +146,7 @@ public class ResinEmbed
     if (_clusterServer == null)
       initConfig(_configFile);
     
-    port.bindTo(_clusterServer);
+    // XXX: port.bindTo(_clusterServer);
   }
 
   /**

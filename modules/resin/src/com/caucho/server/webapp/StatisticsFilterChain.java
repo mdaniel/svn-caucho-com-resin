@@ -30,7 +30,7 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.http.AbstractHttpRequest;
@@ -60,7 +60,7 @@ public class StatisticsFilterChain implements FilterChain
     if (request instanceof AbstractHttpRequest) {
       AbstractHttpRequest httpRequest = (AbstractHttpRequest) request;
 
-      Connection connection = httpRequest.getConnection();
+      TransportConnection connection = httpRequest.getConnection();
 
       if (connection instanceof TcpConnection) {
         TcpConnection tcpConnection = (TcpConnection) connection;

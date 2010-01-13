@@ -31,21 +31,17 @@ package com.caucho.server.snmp;
 
 import java.util.HashMap;
 
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.Port;
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ServerRequest;
-
+import com.caucho.server.connection.AbstractProtocol;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.snmp.types.OctetStringValue;
 import com.caucho.server.snmp.types.SnmpValue;
 
 /*
  * SNMP v1 protocol.
  */
-public class SnmpProtocol extends Protocol
+public class SnmpProtocol extends AbstractProtocol
 {
-  private String _protocolName = "snmp";
-
   //holds the mappings from SNMP oids to MBeans
   private HashMap<String, Oid> _mibMap
     = new HashMap<String, Oid>();
@@ -57,6 +53,8 @@ public class SnmpProtocol extends Protocol
 
   public SnmpProtocol()
   {
+    setProtocolName("snmp");
+    
     addOid("1.3.6.1.2.1.1.1",
            "resin:type=Resin",
            "Version",
@@ -160,31 +158,6 @@ public class SnmpProtocol extends Protocol
     */
   }
   
-  /**
-   * Sets the containing port.
-   */
-  @Override
-  public void setParent(Port port)
-  {
-    super.setParent(port);
-  }
-
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName()
-  {
-    return _protocolName;
-  }
-
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _protocolName = name;
-  }
-  
   /*
    * Adds an SNMP-MBean mapping.
    */
@@ -222,7 +195,7 @@ public class SnmpProtocol extends Protocol
     _community = s;
   }
 
-  public ServerRequest createRequest(Connection connection)
+  public ProtocolConnection createConnection(TransportConnection connection)
   {
     OctetStringValue community;
     

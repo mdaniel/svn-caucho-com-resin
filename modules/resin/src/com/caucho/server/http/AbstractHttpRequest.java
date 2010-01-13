@@ -48,7 +48,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
+import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.connection.TcpDuplexController;
 import com.caucho.server.connection.TcpDuplexHandler;
@@ -120,7 +120,7 @@ public abstract class AbstractHttpRequest
 
   protected final Server _server;
 
-  protected final Connection _conn;
+  protected final TransportConnection _conn;
   protected final TcpConnection _tcpConn;
 
   protected final AbstractHttpResponse _response;
@@ -175,7 +175,7 @@ public abstract class AbstractHttpRequest
    *
    * @param server the parent server
    */
-  protected AbstractHttpRequest(Server server, Connection conn)
+  protected AbstractHttpRequest(Server server, TransportConnection conn)
   {
     _server = server;
 
@@ -221,7 +221,7 @@ public abstract class AbstractHttpRequest
   /**
    * Returns the connection.
    */
-  public final Connection getConnection()
+  public final TransportConnection getConnection()
   {
     return _conn;
   }
@@ -696,7 +696,7 @@ public abstract class AbstractHttpRequest
    */
   protected void handleConnectionClose()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn != null)
       conn.killKeepalive();
@@ -1559,7 +1559,7 @@ public abstract class AbstractHttpRequest
    */
   public void killKeepalive()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn != null)
       conn.killKeepalive();
@@ -1603,7 +1603,7 @@ public abstract class AbstractHttpRequest
    */
   public boolean isKeepaliveAllowed()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn != null)
       return conn.isKeepaliveAllocated();

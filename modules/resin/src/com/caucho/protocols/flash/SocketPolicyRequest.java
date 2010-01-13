@@ -3,8 +3,8 @@ package com.caucho.protocols.flash;
 import java.io.*;
 
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.http.HttpRequest;
 import com.caucho.vfs.*;
@@ -15,10 +15,10 @@ public class SocketPolicyRequest extends HttpRequest
   private final static L10N L = new L10N(SocketPolicyRequest.class);
   
   private final Path _policy;
-  private final Connection _connection;
+  private final TransportConnection _connection;
 
   public SocketPolicyRequest(Server server,
-			     Connection connection,
+			     TransportConnection connection,
 			     Path policy)
   {
     super(server, connection);

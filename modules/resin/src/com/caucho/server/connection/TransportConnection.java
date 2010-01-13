@@ -35,6 +35,7 @@ import java.net.InetAddress;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
+import com.caucho.server.http.ConnectionCometController;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
@@ -46,14 +47,14 @@ import com.caucho.vfs.WriteStream;
  * <p>TcpConnection is the most common implementation.  The test harness
  * provides a string based Connection.
  */
-public abstract class Connection
+public abstract class TransportConnection
 {
   private static Constructor<?> _cometConstructor;
 
   private final ReadStream _readStream;
   private final WriteStream _writeStream;
 
-  public Connection()
+  public TransportConnection()
   {
     _readStream = new ReadStream();
     _readStream.setReuseBuffer(true);
@@ -146,19 +147,23 @@ public abstract class Connection
   /**
    * Sends a broadcast request.
    */
+  /*
   public void sendBroadcast(BroadcastTask task)
   {
   }
+  */
 
   public boolean isKeepaliveAllocated()
   {
     return false;
   }
 
+  /*
   public boolean toKeepalive()
   {
     return false;
   }
+  */
 
   public void killKeepalive()
   {
@@ -180,7 +185,12 @@ public abstract class Connection
   /**
    * Returns true for a comet connection
    */
-  public boolean isSuspend()
+  public boolean isCometSuspend()
+  {
+    return false;
+  }
+  
+  public boolean isCometComplete()
   {
     return false;
   }
@@ -248,7 +258,7 @@ public abstract class Connection
       Class<?> asyncComet = Class.forName("com.caucho.server.connection.AsyncConnectionCometController");
 
       _cometConstructor = asyncComet.getConstructor(new Class[] {
-          Connection.class,
+          TransportConnection.class,
           boolean.class,
           ServletRequest.class,
           ServletResponse.class

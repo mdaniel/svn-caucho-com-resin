@@ -31,6 +31,7 @@ package com.caucho.resin;
 
 import com.caucho.config.ConfigException;
 import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.Port;
 
 /**
@@ -83,7 +84,7 @@ public class HttpEmbed extends PortEmbed
   /**
    * Binds the port to the server
    */
-  public void bindTo(ClusterServer server)
+  public void bindTo(Server server)
   {
     try {
       _port = server.createHttp();

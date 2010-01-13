@@ -19,59 +19,55 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.http;
 
+import java.io.IOException;
+
+import javax.servlet.*;
 
 /**
- * Represents a protocol connection.
+ * User facade for http requests.
  */
-public class ProtocolConfig extends Protocol {
-  private String _name;
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void setId(String text)
+public class AsyncListenerNode
+{
+  private final AsyncListener _listener;
+  private final ServletRequest _request;
+  private final ServletResponse _response;
+  private final AsyncListenerNode _next;
+
+  public AsyncListenerNode(AsyncListener listener,
+                    ServletRequest request,
+                    ServletResponse response,
+                    AsyncListenerNode next)
   {
-    _name = text;
-  }
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void addText(String text)
-  {
-    _name = text;
+    _listener = listener;
+    _request = request;
+    _response = response;
+    _next = next;
   }
 
-  /**
-   * Returns the protocol name.
-   */
-  public String getId()
+  public AsyncListenerNode getNext()
   {
-    return _name;
+    return _next;
   }
 
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocol()
+  public void onTimeout()
+    throws IOException
   {
-    return _name;
+    _listener.onTimeout(new AsyncEvent(null, _request, _response));
   }
 
-  /**
-   * Create a Request object for the new thread.
-   */
-  public ServerRequest createRequest(Connection conn)
+  public void onComplete()
+    throws IOException
   {
-    throw new UnsupportedOperationException();
+    _listener.onComplete(new AsyncEvent(null, _request, _response));
   }
 }

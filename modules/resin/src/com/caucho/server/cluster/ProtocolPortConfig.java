@@ -40,7 +40,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.server.connection.Port;
-import com.caucho.server.connection.Protocol;
+import com.caucho.server.connection.AbstractProtocol;
 import com.caucho.util.L10N;
 
 /**
@@ -61,11 +61,6 @@ public class ProtocolPortConfig extends Port
   {
   }
 
-  public ProtocolPortConfig(ClusterServer server)
-  {
-    super(server);
-  }
-
   /**
    * Sets protocol class.
    */
@@ -79,7 +74,7 @@ public class ProtocolPortConfig extends Port
    */
   public void setClass(Class cl)
   {
-    Config.validate(cl, Protocol.class);
+    Config.validate(cl, AbstractProtocol.class);
 
     _protocolClass = cl;
   }
@@ -109,7 +104,7 @@ public class ProtocolPortConfig extends Port
       InjectionTarget target = webBeans.createManagedBean(_protocolClass);
       CreationalContext env = webBeans.createCreationalContext(null);
 
-      Protocol protocol = (Protocol) target.produce(env);
+      AbstractProtocol protocol = (AbstractProtocol) target.produce(env);
       target.inject(protocol, env);
 
       if (_init != null)

@@ -29,46 +29,6 @@
 
 package com.caucho.boot;
 
-import com.caucho.admin.RemoteAdminService;
-import com.caucho.bam.ActorError;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.BeanFactory;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.SingletonBean;
-import com.caucho.config.inject.CurrentLiteral;
-import com.caucho.config.lib.ResinConfigLibrary;
-import com.caucho.config.types.RawString;
-import com.caucho.config.types.Period;
-import com.caucho.hemp.broker.HempBroker;
-import com.caucho.jmx.Jmx;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.*;
-import com.caucho.log.EnvironmentStream;
-import com.caucho.log.LogConfig;
-import com.caucho.log.RotateStream;
-import com.caucho.security.Authenticator;
-import com.caucho.security.AdminAuthenticator;
-import com.caucho.server.cluster.Cluster;
-import com.caucho.server.cluster.SingleCluster;
-import com.caucho.server.cluster.ClusterServer;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Port;
-import com.caucho.server.connection.ProtocolDispatchServer;
-import com.caucho.server.dispatch.ServletMapping;
-import com.caucho.server.host.Host;
-import com.caucho.server.host.HostConfig;
-import com.caucho.server.resin.Resin;
-import com.caucho.server.resin.ResinELContext;
-import com.caucho.server.util.*;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.server.webapp.WebAppConfig;
-import com.caucho.util.*;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.WriteStream;
-
-import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -77,6 +37,39 @@ import java.util.logging.Logger;
 
 import javax.management.MBeanServer;
 import javax.management.ObjectName;
+
+import com.caucho.admin.RemoteAdminService;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.CurrentLiteral;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.lib.ResinConfigLibrary;
+import com.caucho.config.types.Period;
+import com.caucho.hemp.broker.HempBroker;
+import com.caucho.jmx.Jmx;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.DependencyCheckInterval;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.log.EnvironmentStream;
+import com.caucho.log.LogConfig;
+import com.caucho.log.RotateStream;
+import com.caucho.security.AdminAuthenticator;
+import com.caucho.security.Authenticator;
+import com.caucho.server.cluster.Cluster;
+import com.caucho.server.cluster.ClusterServer;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.connection.Port;
+import com.caucho.server.resin.Resin;
+import com.caucho.server.resin.ResinELContext;
+import com.caucho.server.util.JniCauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Process responsible for watching a backend watchdog.
@@ -185,19 +178,6 @@ class WatchdogManager implements AlarmListener {
     clusterServer.setId("");
     clusterServer.setPort(0);
 
-    _httpPort = clusterServer.createHttp();
-    if (_watchdogPort > 0)
-      _httpPort.setPort(_watchdogPort);
-    else
-      _httpPort.setPort(server.getWatchdogPort());
-
-    _httpPort.setAddress(server.getWatchdogAddress());
-
-    _httpPort.setMinSpareListen(1);
-    _httpPort.setMaxSpareListen(2);
-
-    _httpPort.init();
-
     // clusterServer.addHttp(http);
 
     cluster.addServer(clusterServer);
@@ -205,6 +185,20 @@ class WatchdogManager implements AlarmListener {
     resin.addCluster(cluster);
 
     _server = resin.createServer();
+
+    _httpPort = _server.createHttp();
+    if (_watchdogPort > 0)
+      _httpPort.setPort(_watchdogPort);
+    else
+      _httpPort.setPort(server.getWatchdogPort());
+
+    _httpPort.setAddress(server.getWatchdogAddress());
+
+    _httpPort.setAcceptThreadMin(1);
+    _httpPort.setAcceptThreadMax(2);
+
+    _httpPort.init();
+    
     _server.bindPorts();
 
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -219,7 +213,7 @@ class WatchdogManager implements AlarmListener {
         auth = _management.getAdminAuthenticator();
 
       if (auth != null) {
-        BeanFactory factory = webBeans.createBeanFactory(Authenticator.class);
+        BeanFactory<?> factory = webBeans.createBeanFactory(Authenticator.class);
 
         factory.type(Authenticator.class);
         factory.type(AdminAuthenticator.class);

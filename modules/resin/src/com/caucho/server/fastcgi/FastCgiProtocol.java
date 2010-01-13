@@ -29,56 +29,26 @@
 
 package com.caucho.server.fastcgi;
 
-import java.lang.ref.*;
-import java.util.*;
-
-import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ServerRequest;
-import com.caucho.loader.*;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.server.http.AbstractHttpProtocol;
 
 /**
  * Dispatches the FastCgi protocol.
  *
- * @see com.caucho.server.connection.Protocol
+ * @see com.caucho.server.connection.AbstractProtocol
  */
-public class FastCgiProtocol extends Protocol {
-  private String _protocolName = "fcgi";
-
-  private ClassLoader _classLoader;
-
+public class FastCgiProtocol extends AbstractHttpProtocol {
   public FastCgiProtocol()
   {
-    _classLoader = Thread.currentThread().getContextClassLoader();
-  }
-
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName()
-  {
-    return _protocolName;
-  }
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _protocolName = name;
+    setProtocolName("fcgi");
   }
 
   /**
    * Create a HmuxRequest object for the new thread.
    */
-  public ServerRequest createRequest(Connection conn)
+  public ProtocolConnection createConnection(TransportConnection conn)
   {
-    return new FastCgiRequest((Server) getServer(), conn);
-  }
-
-  public ClassLoader getClassLoader()
-  {
-    return _classLoader;
+    return new FastCgiRequest(getServer(), conn);
   }
 }

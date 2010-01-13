@@ -74,7 +74,7 @@ public class TcpCometController
     return _maxIdleTime;
   }
 
-  public Connection getConnection()
+  public TransportConnection getConnection()
   {
     return _conn;
   }

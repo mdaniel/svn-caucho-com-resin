@@ -36,7 +36,7 @@ import java.util.HashMap;
 import com.caucho.servlet.comet.CometServlet;
 import com.caucho.servlet.comet.CometController;
 
-import com.caucho.server.connection.ConnectionCometController;
+import com.caucho.server.http.ConnectionCometController;
 import com.caucho.server.http.HttpConnectionController;
 import com.caucho.server.http.HttpServletRequestImpl;
 

@@ -79,5 +79,5 @@ abstract public class PortEmbed
   /**
    * Binds the port to the server
    */
-  abstract public void bindTo(ClusterServer server);
+  abstract public void bindTo(Server server);
 }

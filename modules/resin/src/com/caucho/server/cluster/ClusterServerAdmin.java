@@ -84,7 +84,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
    */
   public String getAddress()
   {
-    return _server.getClusterPort().getAddress();
+    return _server.getAddress();
   }
 
   /**
@@ -254,6 +254,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return null;
   }
 
+  @Override
   public double getLatencyFactor()
   {
     ServerPool pool = _server.getServerPool();
@@ -264,6 +265,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public long getConnectionBusyCountTotal()
   {
     ServerPool pool = _server.getServerPool();
@@ -274,6 +276,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public Date getLastBusyTime()
   {
     ServerPool pool = _server.getServerPool();
@@ -284,6 +287,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return null;
   }
 
+  @Override
   public long getConnectionKeepaliveCountTotal()
   {
     ServerPool pool = _server.getServerPool();
@@ -294,6 +298,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public double getServerCpuLoadAvg()
   {
     ServerPool pool = _server.getServerPool();
@@ -304,6 +309,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       return 0;
   }
 
+  @Override
   public void start()
   {
     ServerPool pool = _server.getServerPool();
@@ -312,6 +318,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       pool.start();
   }
 
+  @Override
   public void stop()
   {
     ServerPool pool = _server.getServerPool();
@@ -320,6 +327,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       pool.stop();
   }
 
+  @Override
   public void enableSessionOnly()
   {
     ServerPool pool = _server.getServerPool();
@@ -328,6 +336,7 @@ public class ClusterServerAdmin extends AbstractManagedObject
       pool.enableSessionOnly();
   }
 
+  @Override
   public boolean ping()
   {
     ServerPool pool = _server.getServerPool();
@@ -341,15 +350,14 @@ public class ClusterServerAdmin extends AbstractManagedObject
   /**
    * Remove the server as a dynamic server
    */
+  @Override
   public void removeDynamicServer()
   {
     ClusterServer clusterServer = _server;
     
-    ClusterPort port = clusterServer.getClusterPort();
-    
     clusterServer.getClusterPod().removeDynamicServer(clusterServer.getId(),
-						      port.getAddress(),
-						      port.getPort());
+						      clusterServer.getAddress(),
+						      clusterServer.getPort());
   }
 
   protected void register()

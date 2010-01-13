@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.http;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -36,6 +36,9 @@ import java.util.logging.Logger;
 
 import javax.servlet.*;
 
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.AsyncController;
+import com.caucho.server.connection.TcpConnection;
 import com.caucho.servlet.comet.CometController;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -44,13 +47,13 @@ import com.caucho.util.ThreadPool;
 /**
  * Public API to control a comet connection.
  */
-public class ConnectionCometController extends ConnectionController
+public class ConnectionCometController extends AsyncController
   implements CometController {
   private static final L10N L = new L10N(ConnectionCometController.class);
   private static final Logger log = Logger
       .getLogger(ConnectionCometController.class.getName());
 
-  private Connection _conn;
+  private TransportConnection _conn;
 
   private HashMap<String, Object> _map;
 
@@ -67,7 +70,7 @@ public class ConnectionCometController extends ConnectionController
 
   private long _maxIdleTime;
 
-  public ConnectionCometController(Connection conn, boolean isTop,
+  public ConnectionCometController(TransportConnection conn, boolean isTop,
                                    ServletRequest request,
                                    ServletResponse response)
   {
@@ -114,9 +117,9 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean isSuspended()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
-    return conn != null && conn.getState().isCometSuspend();
+    return conn != null && conn.isComet();
   }
 
   /**
@@ -125,7 +128,7 @@ public class ConnectionCometController extends ConnectionController
   @Override
   public final void suspend()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     /* XXX probably gone from the spec
     if (conn != null)
@@ -138,10 +141,10 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean isComplete()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn != null)
-      return conn.getState().isCometComplete();
+      return conn.isCometComplete();
     else
       return true;
   }
@@ -151,7 +154,7 @@ public class ConnectionCometController extends ConnectionController
    */
   public final void complete()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn != null)
       conn.toCometComplete();
@@ -185,7 +188,7 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean wake()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn != null)
       return conn.wake();
@@ -242,9 +245,9 @@ public class ConnectionCometController extends ConnectionController
    */
   public boolean isComet()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
-    return conn != null && ! conn.getState().isCometComplete();
+    return conn != null && ! conn.isCometComplete();
   }
 
   /**
@@ -339,9 +342,9 @@ public class ConnectionCometController extends ConnectionController
    */
   public final boolean isClosed()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
-    return conn == null || conn.getState().isCometComplete();
+    return conn == null || conn.isCometComplete();
   }
 
   public ServletRequest getRequest()
@@ -366,7 +369,7 @@ public class ConnectionCometController extends ConnectionController
 
   public void dispatch()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn != null) {
       conn.wake();
@@ -411,7 +414,7 @@ public class ConnectionCometController extends ConnectionController
   {
     // complete();
 
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
     _conn = null;
 
     _request = null;
@@ -423,7 +426,7 @@ public class ConnectionCometController extends ConnectionController
 
   public String toString()
   {
-    Connection conn = _conn;
+    TransportConnection conn = _conn;
 
     if (conn == null)
       return getClass().getSimpleName() + "[closed]";
@@ -441,10 +444,10 @@ public class ConnectionCometController extends ConnectionController
     if (_conn instanceof TcpConnection)
       tcpConn = (TcpConnection) _conn;
 
-    if (tcpConn != null && tcpConn.getState().isCometComplete())
+    if (tcpConn != null && tcpConn.isCometComplete())
       sb.append(",complete");
 
-    if (tcpConn != null && tcpConn.getState().isCometSuspend())
+    if (tcpConn != null && tcpConn.isCometSuspend())
       sb.append(",suspended");
 
     if (tcpConn != null && tcpConn.isWakeRequested())

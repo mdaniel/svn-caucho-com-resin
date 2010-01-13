@@ -33,13 +33,13 @@ import java.util.HashMap;
 
 import javax.servlet.ServletRequest;
 
-import com.caucho.server.connection.ConnectionController;
+import com.caucho.server.connection.AsyncController;
 import com.caucho.util.Alarm;
 
 /**
  * Public API to control a comet connection.
  */
-public class HttpConnectionController extends ConnectionController
+public class HttpConnectionController extends AsyncController
 					      /*  implements CometController */
 {
   private HttpServletRequestImpl _request;

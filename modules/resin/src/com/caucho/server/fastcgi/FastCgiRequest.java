@@ -29,47 +29,35 @@
 
 package com.caucho.server.fastcgi;
 
-import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.ServerRequest;
-import com.caucho.server.connection.TcpCometController;
-import com.caucho.server.connection.TcpConnection;
-import com.caucho.server.connection.TcpServerRequest;
-import com.caucho.server.dispatch.BadRequestException;
-import com.caucho.server.dispatch.DispatchServer;
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.InvocationDecoder;
-import com.caucho.server.http.AbstractHttpRequest;
-import com.caucho.server.http.HttpBufferStore;
-import com.caucho.server.http.HttpServletRequestImpl;
-import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.server.http.InvocationKey;
-import com.caucho.server.cluster.*;
-import com.caucho.server.webapp.*;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.CharSegment;
-import com.caucho.vfs.ClientDisconnectException;
-import com.caucho.vfs.QSocket;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.StreamImpl;
-import com.caucho.vfs.TempBuffer;
-
 import java.io.IOException;
-import java.io.InterruptedIOException;
-import java.security.cert.X509Certificate;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.servlet.http.HttpServletRequest;
+
+import com.caucho.server.cluster.Server;
+import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.dispatch.BadRequestException;
+import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.dispatch.InvocationDecoder;
+import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.http.HttpBufferStore;
+import com.caucho.server.http.InvocationKey;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CharBuffer;
+import com.caucho.util.CharSegment;
+import com.caucho.vfs.ClientDisconnectException;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImpl;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Handles a new request from a FastCGI connection.
  */
 public class FastCgiRequest extends AbstractHttpRequest
-  implements TcpServerRequest
+  implements ProtocolConnection
 {
   private static final Logger log
     = Logger.getLogger(FastCgiRequest.class.getName());
@@ -177,7 +165,7 @@ public class FastCgiRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  public FastCgiRequest(Server server, Connection conn)
+  public FastCgiRequest(Server server, TransportConnection conn)
   {
     super(server, conn);
 

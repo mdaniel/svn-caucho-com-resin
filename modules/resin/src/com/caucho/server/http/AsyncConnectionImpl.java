@@ -19,21 +19,33 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.http;
+
+import javax.servlet.AsyncContext;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+
+import com.caucho.server.connection.TransportConnection;
 
 /**
- * Represents a broadcast task.
+ * Public API to control a comet connection.
  */
-public interface BroadcastTask {
-  /**
-   * Executes the task.
-   */
-  public void execute(Connection conn);
+public class AsyncConnectionImpl extends ConnectionCometController
+  implements AsyncContext
+{
+  public AsyncConnectionImpl(TransportConnection conn,
+                             boolean isTop,
+                             ServletRequest request,
+                             ServletResponse response)
+  {
+    super(conn, isTop, request, response);
+  }
 }

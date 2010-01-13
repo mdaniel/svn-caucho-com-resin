@@ -1,14 +1,12 @@
 package com.caucho.protocols.flash;
 
-import javax.annotation.*;
-import java.io.*;
+import javax.annotation.PostConstruct;
 
-import com.caucho.config.*;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ServerRequest;
-import com.caucho.util.*;
+import com.caucho.config.ConfigException;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.server.http.AbstractHttpProtocol;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 /**
@@ -17,12 +15,16 @@ import com.caucho.vfs.Path;
  * for flash.net.Sockets when the target port of the socket is < 1024.
  *
  **/
-public class SocketPolicyProtocol extends Protocol
+public class SocketPolicyProtocol extends AbstractHttpProtocol
 {
   private final static L10N L = new L10N(SocketPolicyRequest.class);
   
-  private String _protocolName = "http";
   private Path _policy;
+  
+  public SocketPolicyProtocol()
+  {
+    setProtocolName("http");
+  }
 
   public void setSocketPolicyFile(Path path)
   {
@@ -37,22 +39,6 @@ public class SocketPolicyProtocol extends Protocol
     _policy = path;
   }
 
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName()
-  {
-    return _protocolName;
-  }
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _protocolName = name;
-  }
-
   @PostConstruct
   public void init()
   {
@@ -60,8 +46,8 @@ public class SocketPolicyProtocol extends Protocol
       throw new ConfigException(L.l("flash requires a policy-file"));
   }
 
-  public ServerRequest createRequest(Connection conn)
+  public ProtocolConnection createConnection(TransportConnection conn)
   {
-    return new SocketPolicyRequest((Server) getServer(), conn, _policy);
+    return new SocketPolicyRequest(getServer(), conn, _policy);
   }
 }

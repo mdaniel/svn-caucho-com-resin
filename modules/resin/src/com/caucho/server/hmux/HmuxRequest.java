@@ -57,8 +57,8 @@ import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWriter;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractResponseStream;
@@ -145,7 +145,7 @@ import com.caucho.vfs.WriteStream;
  *
  */
 public class HmuxRequest extends AbstractHttpRequest
-  implements ServerRequest
+  implements ProtocolConnection
 {
   private static final Logger log
     = Logger.getLogger(HmuxRequest.class.getName());
@@ -272,7 +272,7 @@ public class HmuxRequest extends AbstractHttpRequest
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   public HmuxRequest(Server server,
-                     Connection conn,
+                     TransportConnection conn,
                      HmuxProtocol protocol)
   {
     super(server, conn);

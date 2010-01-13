@@ -1570,9 +1570,9 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     for (int i = 0; i < _boundPortList.size(); i++) {
       BoundPort port = _boundPortList.get(i);
 
-      clusterServer.bind(port.getAddress(),
-                         port.getPort(),
-                         port.getServerSocket());
+      _server.bind(port.getAddress(),
+                   port.getPort(),
+                   port.getServerSocket());
     }
 
     start();
@@ -1820,14 +1820,12 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       Thread.sleep(resin.getShutdownWaitMax() + 600000);
       System.exit(0);
     } catch (Throwable e) {
-      boolean isCompile = false;
       Throwable cause;
 
       for (cause = e;
            cause != null && cause.getCause() != null;
            cause = cause.getCause()) {
         if (cause instanceof CompileException) {
-          isCompile = true;
           break;
         }
       }
@@ -1888,50 +1886,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     validatePackage("javax.management.MBeanServer", new String[] { "1.2", "1.5" });
     validatePackage("javax.resource.spi.ResourceAdapter", new String[] {"1.5", "1.4"});
     */
-  }
-
-  /**
-   * Validates a package version.
-   */
-  private static void validatePackage(String className, String []versions)
-    throws ConfigException
-  {
-    Class cl = null;
-
-    try {
-      cl = Class.forName(className);
-    } catch (Throwable e) {
-      throw new ConfigException(L().l("class {0} is not loadable on startup.  Resin requires {0} to be in the classpath on startup.",
-                                      className),
-                                e);
-
-    }
-
-    Package pkg = cl.getPackage();
-
-    if (pkg == null) {
-      log().warning(L().l("package for class {0} is missing.  Resin requires class {0} in the classpath on startup.",
-                        className));
-
-      return;
-    }
-    else if (pkg.getSpecificationVersion() == null) {
-      log().warning(L().l("{0} has no specification version.  Resin {1} requires version {2}.",
-                                    pkg, VersionFactory.getVersion(),
-                                    versions[0]));
-
-      return;
-    }
-
-    for (int i = 0; i < versions.length; i++) {
-      if (versions[i].compareTo(pkg.getSpecificationVersion()) <= 0)
-        return;
-    }
-
-    log().warning(L().l("Specification version {0} of {1} is not compatible with Resin {2}.  Resin {2} requires version {3}.",
-                      pkg.getSpecificationVersion(),
-                      pkg, VersionFactory.getVersion(),
-                      versions[0]));
   }
 
   private static L10N L()

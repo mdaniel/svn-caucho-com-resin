@@ -32,11 +32,11 @@ package com.caucho.server.connection;
 /**
  * Controls a tcp connection for comet.
  */
-public class ConnectionController {
+public class AsyncController {
   /**
    * Creates a new TcpConnectionController.
    */
-  protected ConnectionController()
+  protected AsyncController()
   {
   }
 

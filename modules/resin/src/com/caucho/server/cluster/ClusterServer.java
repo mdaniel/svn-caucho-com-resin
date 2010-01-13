@@ -29,6 +29,7 @@
 
 package com.caucho.server.cluster;
 
+import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -42,14 +43,8 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.management.server.ClusterServerMXBean;
-import com.caucho.server.connection.Port;
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ProtocolPort;
-import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.vfs.QServerSocket;
 
 /**
  * Defines a member of the cluster, corresponds to <server> in the conf file.
@@ -59,11 +54,9 @@ import com.caucho.vfs.QServerSocket;
  * Resin .
  */
 public final class ClusterServer {
-  private static final L10N L = new L10N(ClusterServer.class);
   private static final Logger log
     = Logger.getLogger(ClusterServer.class.getName());
 
-  private static final long DEFAULT = 0xcafebabe;
   private static final int DECODE[];
 
   private final Cluster _cluster;
@@ -82,33 +75,39 @@ public final class ClusterServer {
   private String _serverDomainId;
   // the bam admin name
   private String _bamJid;
+  
+  private String _address = "127.0.0.1";
+  private int _port = -1;
+  private boolean _isSSL;
 
-  private ClusterPort _clusterPort;
-  private boolean _isClusterPortConfig;
+  // private ClusterPort _clusterPort;
+  // private boolean _isClusterPortConfig;
 
   //
   // config parameters
   //
 
-  private long _socketTimeout = 90000L;
-  private long _keepaliveTimeout = 75000L;
+  // private long _socketTimeout = 90000L;
+  // private long _keepaliveTimeout = 75000L;
 
   private int _loadBalanceConnectionMin = 0;
-  private long _loadBalanceIdleTime = DEFAULT;
+  private long _loadBalanceIdleTime = 15000L;
   private long _loadBalanceRecoverTime = 15000L;
-  private long _loadBalanceSocketTimeout = DEFAULT;
+  private long _loadBalanceSocketTimeout = 600000L;
   private long _loadBalanceWarmupTime = 60000L;
 
   private long _loadBalanceConnectTimeout = 5000L;
 
   private int _loadBalanceWeight = 100;
+  
+  private ConfigProgram _portDefaults = new ContainerProgram();
 
   private ContainerProgram _serverProgram
     = new ContainerProgram();
 
-  private ArrayList<ConfigProgram> _portDefaults
-    = new ArrayList<ConfigProgram>();
-  private ArrayList<Port> _ports = new ArrayList<Port>();
+  //private ArrayList<ConfigProgram> _portDefaults
+  //  = new ArrayList<ConfigProgram>();
+  // private ArrayList<Port> _ports = new ArrayList<Port>();
 
   private ArrayList<String> _pingUrls = new ArrayList<String>();
 
@@ -131,8 +130,8 @@ public final class ClusterServer {
     _cluster = pod.getCluster();
     _index = index;
 
-    _clusterPort = new ClusterPort(this);
-    _ports.add(_clusterPort);
+    // _clusterPort = new ClusterPort(this);
+    // _ports.add(_clusterPort);
 
     StringBuilder sb = new StringBuilder();
 
@@ -270,18 +269,32 @@ public final class ClusterServer {
   /**
    * Sets the address
    */
+  @Configurable
   public void setAddress(String address)
     throws UnknownHostException
   {
-    _clusterPort.setAddress(address);
+    if ("*".equals(address))
+      address = null;
+
+    _address = address;
+    
+    if (address != null) {
+      InetAddress.getByName(address);
+    }
   }
 
+ 
   /**
    * Gets the address
    */
   public String getAddress()
   {
-    return _clusterPort.getAddress();
+    return _address;
+  }
+  
+  public boolean isSSL()
+  {
+    return _isSSL;
   }
 
   /**
@@ -308,22 +321,10 @@ public final class ClusterServer {
   {
     return _isDynamic;
   }
-
-  /**
-   * Sets the keepalive timeout.
-   */
-  public void setKeepaliveTimeout(Period timeout)
-  {
-    _keepaliveTimeout = timeout.getPeriod();
-  }
-
-  /**
-   * Gets the keepalive timeout.
-   */
-  public long getKeepaliveTimeout()
-  {
-    return _keepaliveTimeout;
-  }
+  
+  //
+  // load balance configuration
+  //
 
   /**
    * Sets the loadBalance connection time.
@@ -371,10 +372,7 @@ public final class ClusterServer {
    */
   public long getLoadBalanceSocketTimeout()
   {
-    if (_loadBalanceSocketTimeout != DEFAULT)
-      return _loadBalanceSocketTimeout;
-    else
-      return _socketTimeout + 600000L;
+    return _loadBalanceSocketTimeout;
   }
 
   /**
@@ -390,12 +388,7 @@ public final class ClusterServer {
    */
   public long getLoadBalanceIdleTime()
   {
-    if (_loadBalanceIdleTime != DEFAULT)
-      return _loadBalanceIdleTime;
-    else if (_keepaliveTimeout < 15000L)
-      return _keepaliveTimeout - 5000L;
-    else
-      return _keepaliveTimeout - 10000L;
+    return _loadBalanceIdleTime;
   }
 
   /**
@@ -413,6 +406,105 @@ public final class ClusterServer {
   {
     return _loadBalanceRecoverTime;
   }
+  
+  //
+  // port defaults
+  //
+  
+
+  //
+  // Configuration from <server>
+  //
+
+  /**
+   * Sets the socket's listen property
+   */
+  public void setAcceptListenBacklog(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the minimum spare listen.
+   */
+  public void setAcceptThreadMin(ConfigProgram program)
+    throws ConfigException
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the maximum spare listen.
+   */
+  public void setAcceptThreadMax(ConfigProgram program)
+    throws ConfigException
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the maximum connections per port
+   */
+  public void setConnectionMax(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the maximum keepalive
+   */
+  public void setKeepaliveMax(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the keepalive timeout
+   */
+  public void setKeepaliveTimeout(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the keepalive connection timeout
+   */
+  public void setKeepaliveConnectionTimeMax(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public void setKeepaliveSelectEnable(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public void setKeepaliveSelectMax(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the select-based keepalive timeout
+   */
+  public void setKeepaliveSelectThreadTimeout(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the suspend timeout
+   */
+  public void setSuspendTimeMax(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
 
   /**
    * Adds a ping url for availability testing
@@ -428,22 +520,6 @@ public final class ClusterServer {
   public ArrayList<String> getPingUrlList()
   {
     return _pingUrls;
-  }
-
-  /**
-   * Sets the loadBalance read/write timeout
-   */
-  public void setSocketTimeout(Period period)
-  {
-    _socketTimeout = period.getPeriod();
-  }
-
-  /**
-   * Gets the loadBalance read/write timeout
-   */
-  public long getSocketTimeout()
-  {
-    return _socketTimeout;
   }
 
   /**
@@ -539,7 +615,7 @@ public final class ClusterServer {
    */
   public void setPort(int port)
   {
-    _clusterPort.setPort(port);
+    _port = port;
   }
 
   /**
@@ -547,30 +623,22 @@ public final class ClusterServer {
    */
   public int getPort()
   {
-    return _clusterPort.getPort();
-  }
-
-  /**
-   * Adds a port default
-   */
-  public void addPortDefault(ContainerProgram program)
-  {
-    _portDefaults.add(program);
+    return _port;
   }
 
   /**
    * Adds a http.
    */
+  /*
   public Port createHttp()
     throws ConfigException
   {
     Port port = new Port(this);
 
     HttpProtocol protocol = new HttpProtocol();
-    protocol.setParent(port);
     port.setProtocol(protocol);
 
-    addProtocolPort(port);
+    _ports.add(port);
 
     applyPortDefaults(port);
 
@@ -595,8 +663,7 @@ public final class ClusterServer {
   {
     Port port = new Port(this);
 
-    Protocol protocol = protocolPort.getProtocol();
-    protocol.setParent(port);
+    AbstractProtocol protocol = protocolPort.getProtocol();
     port.setProtocol(protocol);
 
     applyPortDefaults(port);
@@ -612,10 +679,13 @@ public final class ClusterServer {
       program.configure(port);
     }
   }
+  */
 
   /**
    * Pre-binding of ports.
    */
+  
+  /*
   public void bind(String address, int port, QServerSocket ss)
     throws Exception
   {
@@ -640,6 +710,7 @@ public final class ClusterServer {
     throw new IllegalStateException(L.l("No matching port for {0}:{1}",
                                         address, port));
   }
+  */
 
   /**
    * Sets the user name.
@@ -658,14 +729,17 @@ public final class ClusterServer {
   /**
    * Returns the ports.
    */
+  /*
   public ArrayList<Port> getPorts()
   {
     return _ports;
   }
+  */
 
   /**
    * Sets the ClusterPort.
    */
+  /*
   public ClusterPort createClusterPort()
   {
     applyPortDefaults(_clusterPort);
@@ -674,14 +748,17 @@ public final class ClusterServer {
 
     return _clusterPort;
   }
+  */
 
   /**
    * Sets the ClusterPort.
    */
+  /*
   public ClusterPort getClusterPort()
   {
     return _clusterPort;
   }
+  */
 
   /**
    * Returns true for the self server
@@ -694,10 +771,12 @@ public final class ClusterServer {
   /**
    * Returns true for secure.
    */
+  /*
   public boolean isSSL()
   {
     return getClusterPort().isSSL();
   }
+  */
 
   /**
    * Returns the server connector.
@@ -734,11 +813,19 @@ public final class ClusterServer {
   }
 
   /**
-   * Adds a program.
+   * Returns the configuration program for the Server.
    */
   public ConfigProgram getServerProgram()
   {
     return _serverProgram;
+  }
+  
+  /**
+   * Returns the port defaults for the Server
+   */
+  public ConfigProgram getPortDefaults()
+  {
+    return _portDefaults;
   }
 
   /**
@@ -746,10 +833,12 @@ public final class ClusterServer {
    */
   public void init()
   {
+    /*
     if (! _isClusterPortConfig)
       applyPortDefaults(_clusterPort);
 
     _clusterPort.init();
+    */
 
     if (! getId().equals(Resin.getCurrent().getServerId())) {
       _serverPool = new ServerPool(Resin.getCurrent().getServerId(), this);

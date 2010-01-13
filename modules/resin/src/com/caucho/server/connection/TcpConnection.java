@@ -42,6 +42,7 @@ import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.http.ConnectionCometController;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.server.webapp.WebApp;
@@ -57,13 +58,13 @@ import com.caucho.vfs.StreamImpl;
  *
  * <p>Each TcpConnection has its own thread.
  */
-public class TcpConnection extends Connection
+public class TcpConnection extends TransportConnection
 {
   private static final Logger log
     = Logger.getLogger(TcpConnection.class.getName());
 
-  private static final ThreadLocal<ServerRequest> _currentRequest
-    = new ThreadLocal<ServerRequest>();
+  private static final ThreadLocal<ProtocolConnection> _currentRequest
+    = new ThreadLocal<ProtocolConnection>();
 
   private static ClassLoader _systemClassLoader;
 
@@ -74,7 +75,7 @@ public class TcpConnection extends Connection
 
   private final Port _port;
   private final QSocket _socket;
-  private final ServerRequest _request;
+  private final ProtocolConnection _request;
   private final ClassLoader _loader;
   private final byte []_testBuffer = new byte[1];
 
@@ -90,7 +91,7 @@ public class TcpConnection extends Connection
   private final Admin _admin = new Admin();
 
   private ConnectionState _state = ConnectionState.INIT;
-  private ConnectionController _controller;
+  private AsyncController _controller;
   private boolean _isWakeRequested;
 
   private long _idleTimeout;
@@ -123,21 +124,11 @@ public class TcpConnection extends Connection
 
     int id = getId();
 
-    ProtocolDispatchServer server = port.getServer();
-
-    ClassLoader loader = null;
-
-    if (server != null)
-      loader = server.getClassLoader();
-
-    if (loader != null)
-      _loader = loader;
-    else
-      _loader = _systemClassLoader;
+    _loader = port.getClassLoader();
 
     Protocol protocol = port.getProtocol();
 
-    _request = protocol.createRequest(this);
+    _request = protocol.createConnection(this);
 
     String protocolName = protocol.getProtocolName();
 
@@ -161,7 +152,7 @@ public class TcpConnection extends Connection
   /**
    * Returns the ServerRequest for the current thread.
    */
-  public static ServerRequest getCurrentRequest()
+  public static ProtocolConnection getCurrentRequest()
   {
     return _currentRequest.get();
   }
@@ -169,7 +160,7 @@ public class TcpConnection extends Connection
   /**
    * For QA only, set the current request.
    */
-  public static void qaSetCurrentRequest(ServerRequest request)
+  public static void qaSetCurrentRequest(ProtocolConnection request)
   {
     _currentRequest.set(request);
   }
@@ -201,7 +192,7 @@ public class TcpConnection extends Connection
   /**
    * Returns the request for the connection.
    */
-  public final ServerRequest getRequest()
+  public final ProtocolConnection getRequest()
   {
     return _request;
   }
@@ -292,9 +283,14 @@ public class TcpConnection extends Connection
     return _state.isComet();
   }
 
-  public boolean isSuspend()
+  public boolean isCometSuspend()
   {
     return _state.isCometSuspend();
+  }
+
+  public boolean isCometComplete()
+  {
+    return _state.isCometComplete();
   }
 
   @Override
@@ -487,7 +483,7 @@ public class TcpConnection extends Connection
   // async/comet predicates
   //
 
-  public ConnectionController getController()
+  public AsyncController getController()
   {
     return _controller;
   }
@@ -720,7 +716,7 @@ public class TcpConnection extends Connection
    */
   public void finishRequest()
   {
-    ConnectionController controller = _controller;
+    AsyncController controller = _controller;
     _controller = null;
 
     if (controller != null)
@@ -821,7 +817,7 @@ public class TcpConnection extends Connection
   {
     _state = _state.toCometComplete();
 
-    ConnectionController async = getController();
+    AsyncController async = getController();
 
     if (async != null)
       async.timeout();
@@ -901,7 +897,7 @@ public class TcpConnection extends Connection
 
     getRequest().protocolCloseEvent();
 
-    ConnectionController controller = _controller;
+    AsyncController controller = _controller;
     _controller = null;
 
     if (controller != null)
@@ -1261,7 +1257,7 @@ public class TcpConnection extends Connection
 
     public String getUrl()
     {
-      ServerRequest request = TcpConnection.this.getRequest();
+      ProtocolConnection request = TcpConnection.this.getRequest();
 
       if (request instanceof AbstractHttpRequest) {
         AbstractHttpRequest req = (AbstractHttpRequest) request;

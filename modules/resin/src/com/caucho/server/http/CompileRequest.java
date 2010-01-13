@@ -29,7 +29,7 @@
 package com.caucho.server.http;
 
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ProtocolDispatchServer;
+import com.caucho.server.dispatch.ProtocolDispatchServer;
 
 /**
  * Handles a compiling request.

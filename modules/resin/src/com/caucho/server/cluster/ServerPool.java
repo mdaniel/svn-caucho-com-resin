@@ -177,9 +177,9 @@ public class ServerPool
          server.getId(),
          "Resin|Cluster",
          getStatId(server),
-         server.getClusterPort().getAddress(),
-         server.getClusterPort().getPort(),
-         server.getClusterPort().isSSL());
+         server.getAddress(),
+         server.getPort(),
+         server.isSSL());
 
     _loadBalanceConnectTimeout = server.getLoadBalanceConnectTimeout();
     _loadBalanceConnectionMin = server.getLoadBalanceConnectionMin();

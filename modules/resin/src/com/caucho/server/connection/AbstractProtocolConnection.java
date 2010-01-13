@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,19 +29,37 @@
 
 package com.caucho.server.connection;
 
+import java.io.IOException;
 
 /**
- * Factory to create new request objects.
+ * Protocol specific information for each request.  ServerRequest
+ * is reused to reduce memory allocations.
  *
- * @see TcpServer
+ * <p>ServerRequests are created by Server.createRequest()
  */
-public interface RequestFactory {
+public abstract  class AbstractProtocolConnection implements ProtocolConnection {
   /**
-   * Returns the protocol name.
+   * Initialize the connection.  At this point, the current thread is the
+   * connection thread.
    */
-  public String getProtocolName();
+  public void init()
+  {
+  }
+  
   /**
-   * Creates a new server request.
+   * Handles a new connection.  The controlling TcpServer may call
+   * handleConnection again after the connection completes, so 
+   * the implementation must initialize any variables for each connection.
+   *
+   * @param conn Information about the connection, including buffered
+   * read and write streams.
    */
-  public ServerRequest createRequest(Connection conn);
+  public abstract boolean handleRequest() throws IOException;
+
+  /**
+   * Handles a close event when the connection is closed.
+   */
+  public void closeEvent()
+  {
+  }
 }

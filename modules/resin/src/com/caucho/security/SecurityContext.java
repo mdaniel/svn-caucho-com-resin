@@ -29,7 +29,7 @@
 
 package com.caucho.security;
 
-import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.connection.TcpConnection;
 import com.caucho.util.L10N;
 
@@ -170,7 +170,7 @@ public class SecurityContext {
    */
   public static SecurityContextProvider getProvider()
   {
-    ServerRequest request = TcpConnection.getCurrentRequest();
+    ProtocolConnection request = TcpConnection.getCurrentRequest();
 
     if (request instanceof SecurityContextProvider)
       return (SecurityContextProvider) request;

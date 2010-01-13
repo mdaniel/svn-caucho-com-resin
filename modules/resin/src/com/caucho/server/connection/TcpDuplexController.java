@@ -43,7 +43,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Public API to control a http upgrade connection.
  */
-public class TcpDuplexController extends ConnectionController {
+public class TcpDuplexController extends AsyncController {
   private static final L10N L = new L10N(TcpDuplexController.class);
   private static final Logger log
     = Logger.getLogger(TcpDuplexController.class.getName());

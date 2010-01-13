@@ -27,9 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.dispatch;
 
-import com.caucho.server.dispatch.DispatchServer;
+import com.caucho.server.connection.AbstractSelectManager;
 
 public class ProtocolDispatchServer extends DispatchServer {
   private boolean _isIgnoreClientDisconnect = true;

@@ -27,23 +27,28 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.cluster;
 
-import javax.servlet.AsyncContext;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.server.connection.AbstractProtocol;
 
 /**
- * Public API to control a comet connection.
+ * Represents a protocol connection.
  */
-public class ConnectionCometControllerImpl extends ConnectionCometController
-  implements AsyncContext
+abstract public class ProtocolPort
 {
-  public ConnectionCometControllerImpl(Connection conn,
-				       boolean isTop,
-				       ServletRequest request,
-				       ServletResponse response)
+  private ContainerProgram _program = new ContainerProgram();
+
+  abstract public AbstractProtocol getProtocol();
+
+  public void addBuilderProgram(ConfigProgram program)
   {
-    super(conn, isTop, request, response);
+    _program.addProgram(program);
+  }
+
+  public ConfigProgram getConfigProgram()
+  {
+    return _program;
   }
 }

@@ -29,34 +29,29 @@
 
 package com.caucho.server.hmux;
 
-import java.lang.ref.*;
-import java.util.*;
+import java.lang.ref.WeakReference;
+import java.util.HashMap;
 
-import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ServerRequest;
-import com.caucho.loader.*;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.server.http.AbstractHttpProtocol;
 
 /**
  * Dispatches the HMUX protocol.
  *
- * @see com.caucho.server.connection.Protocol
+ * @see com.caucho.server.connection.AbstractProtocol
  */
-public class HmuxProtocol extends Protocol {
+public class HmuxProtocol extends AbstractHttpProtocol {
   private static EnvironmentLocal<HmuxProtocol> _localManager
     = new EnvironmentLocal<HmuxProtocol>();
-
-  private String _protocolName = "server";
-
-  private ClassLoader _classLoader;
 
   private HashMap<Integer,WeakReference<HmuxExtension>> _extensionMap
     = new HashMap<Integer,WeakReference<HmuxExtension>>();
 
   public HmuxProtocol()
   {
-    _classLoader = Thread.currentThread().getContextClassLoader();
+    setProtocolName("server");
 
     _localManager.set(this);
   }
@@ -69,32 +64,11 @@ public class HmuxProtocol extends Protocol {
   }
 
   /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName()
-  {
-    return _protocolName;
-  }
-
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _protocolName = name;
-  }
-
-  /**
    * Create a HmuxRequest object for the new thread.
    */
-  public ServerRequest createRequest(Connection conn)
+  public ProtocolConnection createConnection(TransportConnection conn)
   {
-    return new HmuxRequest((Server) getServer(), conn, this);
-  }
-
-  public ClassLoader getClassLoader()
-  {
-    return _classLoader;
+    return new HmuxRequest(getServer(), conn, this);
   }
 
   public HmuxExtension getExtension(Integer id)

@@ -29,35 +29,26 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.lifecycle.StartLifecycleException;
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.management.server.ClusterMXBean;
-import com.caucho.management.server.EnvironmentMXBean;
-import com.caucho.server.connection.Port;
-import com.caucho.server.distcache.DistributedCacheManager;
-import com.caucho.server.resin.Resin;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.RandomUtil;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.*;
+
 import javax.annotation.PostConstruct;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.SchemaBean;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.StartLifecycleException;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.management.server.ClusterMXBean;
+import com.caucho.server.distcache.DistributedCacheManager;
+import com.caucho.server.resin.Resin;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Defines a set of clustered servers.
@@ -1066,6 +1057,7 @@ abstract public class Cluster
     }
   }
 
+  /*
   public class ServerVar {
     private final ClusterServer _server;
 
@@ -1115,12 +1107,12 @@ abstract public class Cluster
 
     public String getAddress()
     {
-      return getAddress(_server.getClusterPort());
+      return _server.getAddress();
     }
 
     public int getPort()
     {
-      return getPort(_server.getClusterPort());
+      return _server.getPort();
     }
 
     public String getHttpAddress()
@@ -1144,9 +1136,6 @@ abstract public class Cluster
       return getPort(getFirstPort("http", true));
     }
 
-    /**
-     * @deprecated backwards compat.
-     */
     public Path getRoot()
     {
       Resin resin =  Resin.getLocal();
@@ -1154,6 +1143,7 @@ abstract public class Cluster
       return resin == null ? Vfs.getPwd() : resin.getRootDirectory();
     }
   }
+*/
 
   /*
   static {

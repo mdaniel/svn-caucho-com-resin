@@ -27,47 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.http;
 
-import java.io.IOException;
-
-import javax.servlet.*;
+import com.caucho.config.ConfigException;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.AbstractProtocol;
+import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.util.L10N;
 
 /**
- * User facade for http requests.
+ * Abstract Protocol handling for HTTP requests.
  */
-public class AsyncListenerNode
-{
-  private final AsyncListener _listener;
-  private final ServletRequest _request;
-  private final ServletResponse _response;
-  private final AsyncListenerNode _next;
-
-  public AsyncListenerNode(AsyncListener listener,
-                    ServletRequest request,
-                    ServletResponse response,
-                    AsyncListenerNode next)
+abstract public class AbstractHttpProtocol extends AbstractProtocol {
+  private static final L10N L = new L10N(AbstractHttpProtocol.class);
+  
+  private Server _server;
+  
+  protected AbstractHttpProtocol()
   {
-    _listener = listener;
-    _request = request;
-    _response = response;
-    _next = next;
+    _server = Server.getCurrent();
+    
+    if (_server == null)
+      throw new ConfigException(L.l("{0} needs an active Resin Server.",
+				    getClass().getName()));
   }
 
-  public AsyncListenerNode getNext()
+  /**
+   * Returns the active server.
+   */
+  public Server getServer()
   {
-    return _next;
-  }
-
-  public void onTimeout()
-    throws IOException
-  {
-    _listener.onTimeout(new AsyncEvent(null, _request, _response));
-  }
-
-  public void onComplete()
-    throws IOException
-  {
-    _listener.onComplete(new AsyncEvent(null, _request, _response));
+    return _server;
   }
 }

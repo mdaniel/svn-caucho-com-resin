@@ -29,46 +29,30 @@
 
 package com.caucho.xmpp;
 
-import java.util.logging.Logger;
-
 import javax.annotation.PostConstruct;
 
-import com.caucho.bam.Broker;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.broker.HempBrokerManager;
-import com.caucho.server.connection.Connection;
-import com.caucho.server.connection.Protocol;
-import com.caucho.server.connection.ServerRequest;
+import com.caucho.server.connection.TransportConnection;
+import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.connection.TcpConnection;
+import com.caucho.server.http.AbstractHttpProtocol;
 
 /*
  * XMPP protocol server
  */
-public class XmppProtocol extends Protocol
+public class XmppProtocol extends AbstractHttpProtocol
 {
-  private static final Logger log
-    = Logger.getLogger(XmppProtocol.class.getName());
-
   private HempBrokerManager _brokerManager;
-  private Broker _broker;
   
-  private ClassLoader _loader;
-
   private XmppMarshalFactory _marshalFactory;
   
   public XmppProtocol()
   {
     setProtocolName("xmpp");
 
-    _loader = Thread.currentThread().getContextClassLoader();
-
     _brokerManager = HempBrokerManager.getCurrent();
-  }
-
-  ClassLoader getClassLoader()
-  {
-    return _loader;
   }
 
   HempBrokerManager getBrokerManager()
@@ -86,7 +70,7 @@ public class XmppProtocol extends Protocol
   {
     InjectManager manager = InjectManager.create();
     
-    BeanFactory factory = manager.createBeanFactory(getClass());
+    BeanFactory<?> factory = manager.createBeanFactory(getClass());
     manager.addBean(factory.singleton(this));
 
     _marshalFactory = new XmppMarshalFactory();
@@ -96,7 +80,7 @@ public class XmppProtocol extends Protocol
    * Returns an new xmpp connection
    */
   @Override
-  public ServerRequest createRequest(Connection connection)
+  public ProtocolConnection createConnection(TransportConnection connection)
   {
     return new XmppRequest(this, (TcpConnection) connection);
   }

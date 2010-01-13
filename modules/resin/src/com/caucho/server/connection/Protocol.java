@@ -29,84 +29,19 @@
 
 package com.caucho.server.connection;
 
-import com.caucho.server.dispatch.DispatchServer;
 
 /**
- * Represents a protocol connection.
+ * Protocol factory responsible for creating new protocol connection objects. 
+ * Each protocol connection corresponds to a stream/socket connection.
  */
-public class Protocol implements RequestFactory {
-  // The owning server
-  private DispatchServer _server;
-  
-  // The owning port
-  private Port _port;
-
-  // The protocol name
-  private String _name = "tcp";
-  
-  /**
-   * Sets the containing port.
-   */
-  public void setParent(Port port)
-  {
-    _port = port;
-    
-    setServer(port.getServer());
-  }
-
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _name = name;
-  }
-
+public interface Protocol {
   /**
    * Returns the protocol name.
    */
-  public String getProtocolName()
-  {
-    return _name;
-  }
-
-  /**
-   * Gets the parent port.
-   */
-  public Port getPort()
-  {
-    return _port;
-  }
+  public String getProtocolName();
   
   /**
-   * Sets the server.
+   * Creates a new protocol connection.
    */
-  public void setServer(DispatchServer server)
-  {
-    _server = server;
-  }
-  
-  /**
-   * Gets the server.
-   */
-  public DispatchServer getServer()
-  {
-    return _server;
-  }
-
-  /**
-   * Sets the protocol name.
-   */
-  public void addText(String name)
-  {
-    setProtocolName(name);
-  }
-  
-  /**
-   * Create a Request object for the new thread.
-   */
-  public ServerRequest createRequest(Connection conn)
-  {
-    throw new UnsupportedOperationException();
-  }
+  public ProtocolConnection createConnection(TransportConnection conn);
 }

@@ -27,10 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.server.http;
 
 import com.caucho.config.scope.ThreadRequestFactory;
-import com.caucho.server.http.AbstractHttpRequest;
+import com.caucho.server.connection.TcpConnection;
 
 import javax.servlet.http.HttpServletRequest;
 
