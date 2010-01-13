@@ -352,3 +352,1468 @@ be applied if the Dispatch rule matches.</p>
 
 </body>
 </document>
+
+<document>
+<header>
+  <product>resin</product>
+  <title>URL rewrite tags</title>
+  <version>Resin 3.0</version>
+
+  <description>
+<p>Resin's <a href="#rewrite-dispatch">&lt;rewrite-dispatch></a> tag allows
+configuration for URL aliasing, rewriting, dispatching, and redirection.</p>
+
+<p><a href="#rewrite-real-path">&lt;rewrite-real-path></a> configures an alias
+for files located on the filesystem, allowing for the mapping of a virtual directory.</p>
+
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<defun title="&lt;and&gt;">
+<parents>when, unless</parents>
+
+<p>
+Contains one or more conditions and evaluates to true if all of the contained
+conditions evaluate to true, false if any of the contained conditions does not
+evaluate to true.
+</p>
+
+</defun>
+
+<defun title="auth-type">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the authorization mechanism used in the request is the given value.
+The comparison is always case insensitive.
+</p>
+
+<p>
+If the auth-type is not "none", or if the auth-type of the request is not
+"none", a <code>Cache-Control</code> header containing "<code>private</code>"
+is added to the response.
+</p>
+
+<deftable-childtags>
+<tr><td>auth-type</td>
+    <td>BASIC, CLIENT-CERT, DIGEST, FORM, or NONE</td>
+    <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a <code>Vary</code> header containing "<code>Cookie</code>" as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="cookie">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of a cookie with a given <var/name/> matches a regular
+expression <var/regexp/>, false if it does not or if the cookie does not exist.
+</p>
+
+<p>
+The <var/Vary/> header of the response is updated to include "Cookie",
+which indicates to the browser and any intervening proxy cache that the
+response varies based on the submitted value of cookies.
+</p>
+
+<deftable-childtags>
+<tr>
+  <td>cookie</td>
+  <td>Name of the cookie</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>regexp</td>
+  <td>The regular expression to match</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>send-vary</td>
+  <td>Send a <code>Vary</code> header containing "<code>Cookie</code>" as part of the response</td>
+  <td>true</td>
+</tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="disable-at">
+<p>
+Cron syntax for specifying a time or times that that the rule should be disabled.
+In conjunction, <var>enable-at</var> and <var>disable-at</var> provide a means for
+scheduling the enablement of a rule.
+</p>
+</defun>
+
+<defun title="&lt;dispatch>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>If &lt;dispatch> matches the current URL, the rest of the items in the enclosing
+rewrite-dispatch are not considered and the request passes immediately to
+normal servlet evaluation.  &lt;dispatch> is often used to specify URLs
+which should be handled normally before a more general pattern which
+modifies the URL.</p>
+
+<p>For example, the following pattern uses &lt;dispatch> to handle
+images and *.php files normally, but forward's all other requests to
+/index.php.</p>
+
+<example title="Mediawiki dispatch in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;dispatch regexp="\.(php|gif|css|jpg|png)"/>
+   &lt;forward regexp="^" target="/index.php"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<deftable-childtags>
+<tr>
+  <td><a href="#disable-at">disable-at</a></td>
+  <td>A cron syntax time specification for triggering disablement of the rule</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td><a href="#enable-at">enable-at</a></td>
+  <td>A cron syntax time specification for triggering enablement of the rule</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>enabled</td>
+  <td>False to start with the rule initially disabled</td>
+  <td>true</td>
+</tr>
+<tr>
+  <td><a href="#name">name</a></td>
+  <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+  <td>do not register an mbean</td>
+</tr>
+<tr>
+  <td>regexp</td>
+  <td>A regexp that must match the <a href="#URL">URL</a></td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td><a href="#when">when</a></td>
+  <td>A condition which must evaluate to true</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td><a href="#unless">unless</a></td>
+  <td>A condition which must not evaluate to true</td>
+  <td>optional</td>
+</tr>
+</deftable-childtags>
+</defun>
+
+<defun title="dispatch-type">
+<p>
+The dispatch-type lets you configure rewrite-dispatch for REQUEST,
+FORWARD, or INCLUDE.  By default, the rewrite-dispatch is REQUEST.
+</p>
+
+<example title="Example: FORWARD dispatch">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-dispatch>
+    &lt;dispatch-type>FORWARD&lt;/dispatch-type>
+
+    &lt;forward regexp="/foo" target="/bar.jsp"/>
+  &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+</defun>
+
+<defun title="enable-at">
+<p>
+Cron syntax for specifying a time or times that that the rule should be enabled,
+see <a href="#disable-at">&lt;disable-at/&gt;</a>.
+</p>
+</defun>
+
+<defun title="enabled">
+<p>
+Set's the initial state of the rule, default is true.  In conjunction with
+<a href="#name">name</a>, an initial enabled value of "false" is valuable for
+rules which are to be turned on and turned off at runtime.
+</p>
+</defun>
+
+<defun title="&lt;forbidden>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;forbidden> sents a 403 forbidden message to the browser
+for a matching URL.</p>
+
+<example title="Forbidding a directory">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;forbidden regexp="^/protected"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;forward>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;forward> rewrites the current URL, forwarding it to the target
+using the servlet forward() call.  Because &lt;forward> is internal,
+it will have better performance than a &lt;redirect> when the target
+URL is on the same server, the browser will not know that the
+underlying resource has moved.</p>
+
+<example title="Forwarding to a new URL">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;forward regexp="^/old" target="/new"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td>target</td>
+    <td>The target of the the foreward</td>
+    <td>required</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="header">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of a header with a given <var/name/> matches a regular
+expression <var/regexp/>, false if it does not or if the header does not exist.
+</p>
+
+<p>
+The <var/Vary/> header of the response is updated  to include the header name
+which indicates to the browser and any intervening proxy cache that the
+response varies based on the submitted value of the header.
+</p>
+
+<deftable-childtags>
+<tr><td>header</td>
+    <td>Name of the header</td>
+    <td>required</td></tr>
+<tr><td>regexp</td>
+    <td>The regular expression to match</td>
+    <td>optional</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a <code>Vary</code> header containing the header name as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;gone>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;gone> sents a 410 gone response to the browser
+for a matching URL.</p>
+
+<example title="Hiding a directory">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;gone regexp="^/protected"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="&lt;import>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>
+&lt;import> loads rules from an external xml file.
+</p>
+
+<example title="Importing rules from an external file">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+
+  &lt;rewrite-dispatch&gt;
+    &lt;import path='/WEB-INF/rewrite-maintenance.xml' enabled="false"/&gt;
+    &lt;import path='/WEB-INF/rewrite-rules.xml'/&gt;
+  &lt;/rewrite-dispatch&gt;
+
+&lt;/web-app&gt;
+</example>
+
+<example title="An external file containing rules">
+&lt;rewrite-dispatch xmlns="http://caucho.com/ns/resin"
+                  xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+
+   &lt;dispatch regexp="\.(css|gif|jpg|pdf|png)"/&gt;
+
+   &lt;forward regexp=".*" target="/maintenance.html"/&gt;
+
+&lt;/rewrite-dispatch&gt;
+</example>
+
+<p>
+Changes to the external file are checked for at a frequency determined by
+<var>dependency-check-interval</var> or when the <code>update()</code>
+operation of the mbean is invoked.  If an error occurs when loading the
+modified file, the contents of the old file are used until the errors are
+corrected or the server is restarted.  The log file will contain details for
+the error, and the <code>RedeployError</code> property of the mbean wil contain 
+a description of the error.
+</p>
+
+<p>
+Each &lt;import> registers an mbean of type RewriteImport, with a full a name
+like "resin:Host=default,WebApp=/,name=Foo,type=RewriteRule" and an interface
+of <a href="javadoc|com.caucho.management.server.RewriteImportMXBean|"/>.
+It provides the <code>update()</code>, <code>start()</code> and <code>stop()</code> operations.
+The <code>update()</code> operations forces an immediate check for modifications to the external file.
+</p>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>dependency-check-interval</td>
+    <td>The frequency with which to check the external file for changes</td>
+    <td>The <a href="env-tags.xtp#dependency-check-interval">dependency-check-interval</a>
+        of the environment</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteImport</td>
+    <td>the value of <var/path/></td></tr>
+<tr><td>optional</td>
+    <td>If false, do not require that the path exists</td>
+    <td>true</td></tr>
+<tr><td>path</td>
+    <td>A path to an external xml file</td>
+    <td>required</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="&lt;load-balance>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;load-balance> forwards requests from a <g>web-tier</g> server
+to a cluster of <g>app-tier</g> servers for
+<a href="resin-clustering.xtp">load-balancing</a>.  Load balancing
+provides scalability by splitting load among many application servers
+and increases reliability by avoiding servers which are upgrading or
+restarting.</p>
+
+<p>In the following example, the web-tier load-balances all traffic
+to a cluster of backend application servers.  Because the web-tier
+has a <a href="proxy-cache.xtp">proxy cache</a>, static pages
+and cached pages will be served directory from the web-tier.</p>
+
+<p>&lt;load-balance> requires Resin Professional.</p>
+
+<example title="Load balancing to an app-tier">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+
+  &lt;cluster id="app-tier">
+    &lt;server id="app-a" address="192.168.3.1">
+    &lt;server id="app-b" address="192.168.3.2">
+    ...
+  &lt;/cluster>
+
+  &lt;cluster id="web-tier">
+    &lt;server id="web-a" address="192.168.2.1">
+      &lt;http port="80"/>
+    &lt;/server>
+
+    &lt;cache/>
+
+    &lt;host id="">
+      &lt;web-app id="/">
+
+        &lt;rewrite-dispatch>
+          &lt;load-balance regexp="" cluster="app-tier"/>
+        &lt;/rewrite-dispatch>
+
+      &lt;/web-app>
+    &lt;/host>
+
+&lt;/resin>
+</example>
+
+<deftable-childtags>
+<tr><td>cluster</td>
+    <td>The cluster that gets the matching requests</td>
+    <td>required</td></tr>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td>sticky-sessions</td>
+    <td>Whether or not sessions should be sticky</td>
+    <td>true</td></tr>
+<tr><td>strategy</td>
+    <td>The load balancing strategy, `round-robin' or `least-connection'</td>
+    <td>least-connection</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="locale">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of the Locale matches a regular
+expression, false if it does not.   The comparison is always case
+insensitive.
+</p>
+
+<p>
+The Locale is a normalization of the value of the Accept-Language header.
+For example "fr" remains "fr" and "FR-CA" becomes "fr_CA".
+If the request does not include the Accept-Language header then the Locale is
+the default Locale for the server.
+</p>
+
+<example>
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+
+  &lt;rewrite-dispatch&gt;
+    &lt;forward regexp='^/' target='/fr/'&gt;
+      &lt;when locale="^fr"/&gt;
+    &lt;/forward&gt;
+
+    &lt;forward regexp='^/' target='/en/'/&gt;
+  &lt;/rewrite-dispatch&gt;
+&lt;/web-app&gt;
+</example>
+
+<deftable-childtags>
+<tr><td>locale</td>
+    <td>Regular expression to match</td>
+    <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a <code>Vary</code> header containing "<code>Accept-Language</code>" as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="local-port">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of the request's local port is the specified
+value, false if it does not.  The local port is the port that Resin has bound
+to and has used to receive the request.
+</p>
+
+<deftable-childtags>
+<tr><td>local-port</td>
+    <td>The local port to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="method">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the http method used in the request is the given value.
+The comparison is always case insensitive.  Common methods include HEAD, GET,
+POST, DELETE, OPTIONS, PUT, and TRACE, although a method by any name may be
+used by a client.
+</p>
+
+<deftable-childtags>
+<tr><td>method</td>
+    <td>The method to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;match>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>
+&lt;match> provides a way to group more specific rules based on the url.
+The contents of the &lt;match> are any rule, and they are considered only if
+the regexp of the &lt;match> is satsified and the match is <var>enabled</var>.
+</p>
+
+<p>
+Judicious use of &lt;match> will provide better performance in situations where
+there are many rules and some of them contain <a href="#when">when</a> or
+<a href="#if">if</a> conditions.
+</p>
+
+<p>
+&lt;match> also provides a convenient way to group a set of rules that can be
+enabled or disabled using an mbean.  If the <var>name</var> attribute is specified
+for the &lt;match> then an mbean with a name like
+<code>resin:Host=default,WebApp=/,name=<i>name</i>,type=RewriteRule</code>
+is registered and the <code>start()</code> and <code>stop()</code> operations
+are available.
+</p>
+
+<p>
+The documentation for <a href="#rewrite-dispatch">&lt;rewrite-dispatch></a> provides
+a table of all rules.  In addition to the rules that can be contained within &lt;match>,
+the following configuration tags are available.
+</p>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;moved-permanently>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;moved-permanently> sends a HTTP 301 moved permanently
+response to the browser, indicating that the resource has moved.</p>
+
+<p>
+The following example causes all requests to the "old.com" host to be
+immediately redirected to "new.com".  The urls will be maintained, so for
+example a request to <code>http://old.com/hello/world.html?foo=bar</code> will
+get redirected to <code>http://new.com/hello/world.html?foo=bar</code>.
+</p>
+
+<example title="Forwarding to a new virtual host">
+  &lt;host id="old.com"&gt;
+    &lt;web-app id="/"&gt;
+      &lt;rewrite-dispatch&gt;
+        &lt;moved-permanently regexp="^/(.*)$"
+                           target="http://new.com/$1"/&gt;
+      &lt;/rewrite-dispatch&gt;
+    &lt;/web-app&gt;
+  &lt;/host&gt;
+</example>
+
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="name">
+<p>
+A rule can be given a <i>name</i>, which causes a JMX mbean to be registered.
+The mbean has a name like "resin:Host=default,WebApp=/,name=Foo,type=RewriteRule"
+and an interface of <a href="javadoc|com.caucho.management.server.RewriteRuleMXBean|"/>.
+It provides the <code>start()</code> and <code>stop()</code> operations.
+</p>
+</defun>
+
+<defun title="&lt;not&gt;">
+<parents>when, unless</parents>
+
+<p>
+Contains one or more conditions and evaluates to true only if none of the
+contained conditions evaluate to true, false if any of the contained conditions
+evaluate to true.
+</p>
+
+</defun>
+
+<defun title="&lt;not-found>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;not-found> sents a 404 not found to the browser
+for a matching URL.</p>
+
+<example title="Hiding a directory">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;not-found regexp="^/protected"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="&lt;or&gt;">
+<parents>when, unless</parents>
+
+<p>
+Contains one or more conditions and evaluates to true if any of the contained
+conditions evaluate to true, false only if all of the contained conditions
+evaluate to false.
+</p>
+
+</defun>
+
+<defun title="&lt;proxy>">
+
+<p>The &lt;proxy> tag proxies HTTP requests to a backend service like
+&lt;load-balance> proxies requests to a backend Resin service.
+Frameworks like Ruby can sit behind a Resin instance and deliver
+requests through the proxy tag.</p>
+
+<deftable title="proxy attribute">
+<tr>
+  <th>attribute</th>
+  <th>description</th>
+  <th>default</th>
+</tr>
+<tr>
+  <td>address</td>
+  <td>target IP and port like 192.168.1.10:8080</td>
+  <td></td>
+</tr>
+<tr>
+  <td>target</td>
+  <td>replaced URL if the URL should be rewritten</td>
+  <td></td>
+</tr>  
+</deftable>
+
+</defun>
+
+<defun title="query-param">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of a query parameter with a given <var/name/> matches a regular
+expression <var/regexp/>, false if it does not or if the parameter does not exist.
+</p>
+
+<p>
+Form parameters submitted in the body of a POST are not available for the comparison performed by query-param.
+</p>
+
+<deftable-childtags>
+<tr><td>query-param</td>
+    <td>Name of the parameter</td>
+    <td>required</td></tr>
+<tr><td>regexp</td>
+    <td>The regular expression to match</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;redirect>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;redirect> sends a HTTP 302 redirect response to the browser,
+indicating that the resource has moved.</p>
+
+<example title="Forwarding to a new virtual host">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-dispatch>
+    &lt;redirect regexp="^/(foo)" target="http://$1.bar.com"/>
+  &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<example title="Redirecting all http:// requests to https://">
+  &lt;host ... &gt;
+     &lt;rewrite-dispatch&gt;
+        &lt;redirect regexp="^" target="https://${host.name}"&gt;
+          &lt;when secure="false"/&gt;
+        &lt;/redirect&gt;
+      &lt;/rewrite-dispatch&gt;
+      ...
+   &lt;/host&gt;
+</example>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+</defun>
+
+<defun title="&lt;regexp>">
+
+<p>The regular expression in a regexp tag or attribute is a standard
+Java regular expression.</p>
+
+<p>To make the regexp case insensitive, you can use the <code>(?i:...)</code> syntax:</p>
+
+<example title="case-insensitive match">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+  &lt;rewrite-dispatch&gt;
+    &lt;forbidden regexp='(?i:^/foo)'/&gt;
+  &lt;/rewrite-dispatch&gt;
+&lt;/web-app&gt;
+</example>
+
+</defun>
+
+<defun title="remote-addr">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the remote address of the client matches the specified ip
+address.
+</p>
+
+<p>
+A <code>Cache-Control</code> header containing "<code>private</code>" is added
+to the response.
+</p>
+
+<example title="Forbidding admin access to clients outside of the local network">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="http://caucho.com/ns/resin/core"&gt;
+  &lt;rewrite-dispatch&gt;
+    &lt;forbidden regexp='^/foo'&gt;
+      &lt;unless remote-addr="192.168.2.1/24"/&gt;
+    &lt;/forbidden&gt;
+
+  &lt;/rewrite-dispatch&gt;
+&lt;/web-app&gt;
+</example>
+
+<deftable-childtags>
+<tr><td>remote-addr</td>
+    <td>An IP address, optionally followed by a <code>/</code> and a number of bits to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="remote-user">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the user is authenticated and has the specified name.
+</p>
+
+<p>
+If there is a current user, a <code>Cache-Control</code> header containing
+"<code>private</code>" is added to the response.
+</p>
+
+<deftable-childtags>
+<tr><td>remote-user</td>
+    <td>A user name.</td>
+    <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a <code>Vary</code> header containing "<code>Cookie</code>" as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;rewrite>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>&lt;rewrite> rewrites the current URL, continuing processing of
+the &lt;rewrite-dispatch> tags.  &lt;rewrite> can be used as an
+intermediate rewriting stage for more complicated patterns.</p>
+
+</defun>
+
+<defun title="&lt;rewrite-real-path>">
+<parents>web-app</parents>
+
+<p>
+&lt;rewrite-real-path> configures an alias for the getRealPath() call, i.e.
+an enhancement to the &lt;path-mapping> tag. It provides a virtual directory
+mapping that allows url patterns in the web application to have a local path anywhere
+on the physical filesystem.
+</p>
+<!-- note: "virtual-directory-mapping" "local-path" and "url-pattern" are weblogic terms/config for the same thing -->
+
+<p>The source path is a URL, the target path is a real filesystem path.</p>
+
+<example title="/images located outside of /var/www">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-real-path>
+    &lt;real-path regexp="^/images" target="/usr/local/share/images"/>
+  &lt;/rewrite-real-path>
+</example>
+
+<example title="Managing versions of software bundles">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-real-path&gt;
+    &lt;real-path regexp="^/" target="WEB-INF/SugarCE-Full-5.0.0a"/&gt;
+  &lt;/rewrite-real-path&gt;
+</example>
+
+<s2 title="Merge paths">
+
+<p>
+A merge path is a collection of paths, similar to a classpath.  It allows the
+specification of multiple paths that are merged together and presented to the
+application as if it was one unified path.  Merge paths are specified with a
+syntax of "<code>merge:(path1[;path2[;pathN]])</code>".  If a file is in
+<code>path1</code> it overrides a file with the same name in <code>path2</code>,
+if a file is not in <code>path1</code> then the file will be matched to
+<code>path2</code>.
+</p>
+
+<p>
+Merge paths are useful for specifying customization directories that allow for
+the insertion of files that replace the usual file that is shipped with a web
+application.
+</p>
+
+<!-- server/13n8.qa -->
+<example title="Merge path: replacing some images with custom images">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;rewrite-real-path&gt;
+    &lt;real-path regexp="^/images" target="merge:(custom-images;images)"/&gt;
+  &lt;/rewrite-real-path&gt;
+</example>
+
+<!-- server/13n9.qa -->
+<example title="Merge path: managing the versioning and customization of a php application">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+  &lt;rewrite-real-path&gt;
+    &lt;real-path regexp="^/" target="merge:(WEB-INF/SugarCE-local;WEB-INF/SugarCE-Full-5.0.0a)"/&gt;
+  &lt;/rewrite-real-path&gt;
+</example>
+
+</s2>
+
+</defun>
+
+<defun title="&lt;rewrite-dispatch>">
+<parents>server, host, web-app</parents>
+
+<p>&lt;rewrite-dispatch> evaluates the child tags in order.  The first
+matching tag dispatches the request.  If no children match, the request
+uses the standard servlet handling.</p>
+
+<p>The child tags rewrite and dispatch based on regexp patterns.</p>
+
+<example title="Mediawiki dispatch in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin">
+
+ &lt;rewrite-dispatch>
+   &lt;dispatch regexp="\.(php|gif|css|jpg|png)"/>
+   &lt;forward regexp="^" target="/index.php"/>
+ &lt;/rewrite-dispatch>
+
+&lt;/web-app>
+</example>
+
+<deftable-childtags>
+<tr><td><a href="#dispatch">&lt;dispatch></a></td>
+    <td>Dispatch the request immediately
+        and do not process any more rules</td>
+    <td></td></tr>
+<tr><td><a href="#forbidden">&lt;forbidden></a></td>
+    <td>Send a 403 Forbidden response to browser
+        and do not process any more rules</td>
+    <td></td></tr>
+<tr><td><a href="#forward">&lt;forward></a></td>
+    <td>Rewrite the URL and internally forward the request
+        without processing any more rules</td>
+    <td></td></tr>
+<tr><td><a href="#forbidden">&lt;forbidden></a></td>
+    <td>Send a 410 Gone response to  the browser
+        and do not process any more rules</td>
+    <td></td></tr>
+<tr><td><a href="#import">&lt;import></a></td>
+    <td>Import rules from an external file</td>
+    <td></td></tr>
+<tr><td><a href="#load-balance">&lt;load-balance></a></td>
+    <td>Forward requests to another instance or instances of Resin
+        and do not process any more rules</td>
+    <td></td></tr>
+<tr><td><a href="#match">&lt;match></a></td>
+    <td>Group more specific rules</td>
+    <td></td></tr>
+<tr><td><a href="#moved-permanently">&lt;moved-permanently></a></td>
+    <td>Send a 310 Moved Permanently response to the browser
+        and do not process any more rules</td>
+    <td></td></tr>
+<tr><td><a href="#redirect">&lt;redirect></a></td>
+    <td>Send a 302 Moved response to the browser
+        and do not process any more rules</td>
+    <td></td></tr>
+<tr><td><a href="#rewrite">&lt;rewrite></a></td>
+    <td>Rewrite the current URL
+        and continue processing rules</td>
+    <td></td></tr>
+<tr><td><a href="#set">&lt;set></a></td>
+    <td>Set a property of the request or response
+        and continue processing rules</td>
+    <td></td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="secure">
+<parents>when, unless</parents>
+
+<p>
+&lt;secure> specifies a condition for the ssl status of the request. If <var/secure/> is true,
+then the request must be using ssl for the rule to match.  If <var/secure/> is
+false, then the request must not be using ssl for the rule to match.  If
+<var/secure/> is not specified, the ssl status of the request is not considered when
+testing if the rule matches.
+</p>
+
+<example title="secure example">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;rewrite-dispatch&gt;
+    &lt;redirect regexp='^/foo' target='/secure'&gt;
+      &lt;when secure='true'/&gt;
+    &lt;/redirect&gt;
+
+    &lt;redirect regexp='^/foo' target='/insecure'&gt;
+      &lt;when secure='false'/&gt;
+    &lt;/redirect&gt;
+
+    &lt;redirect regexp='^/bar' target='/public'/&gt;
+  &lt;/rewrite-dispatch&gt;
+&lt;/web-app&gt;
+</example>
+
+<results>
+http://localhost:8080/foo/index.html
+  --> redirect to /insecure/index.html
+
+https://localhost:8080/foo/index.html
+  --> redirect to /secure/index.html
+
+http://localhost:8080/bar/index.html
+  --> redirect to /public/index.html
+
+https://localhost:8080/bar/index.html
+  --> redirect to /public/index.html
+</results>
+</defun>
+
+<defun title="server-name">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of the request's server name matches the specified
+regexp, false if it does not.  The comparison is always case insensitive.
+The server name is the name that the client has used to connect to the server 
+and may not be the name of the actual server that is hosting Resin.
+</p>
+
+<p>
+Most potential problems that can be solved by  <code>server-name</code> are
+more efficiently solved using <g>virtual hosts</g> and the
+<a href="host-tags.xtp#host">host-alias</a> tag.
+</p>
+
+<deftable-childtags>
+<tr><td>server-name</td>
+    <td>A regular expression to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="server-port">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the value of the request's server port is the specified
+value, false if it does not.  The server port is the port that the client has used to connect to the server 
+and may not be the actual port that Resin is bound to.
+</p>
+
+<deftable-childtags>
+<tr><td>server-port</td>
+    <td>The server port to match.</td>
+    <td>required</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;set>">
+<parents>rewrite-dispatch, match</parents>
+
+<p>
+&lt;set> is used to set properties of the request or response before continuing on to the next rule.
+The properties are maintained after the rewriting is complete, for example a request that becomes secure
+because of &lt;set> will continue to be regarded as secure when the request eventually reaches a jsp
+or servlet.
+</p>
+
+<example title="Making the request secure in response to a header from a hardware load balancer">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;rewrite-dispatch&gt;
+    &lt;set request-secure="true"&gt;
+      &lt;when header="X-SSL-cipher"/&gt;
+    &lt;/set&gt;
+
+    &lt;forward regexp="^/checkout" target="https://hogwarts.com/checkout"&gt;
+      &lt;when secure="false"/&gt;
+    &lt;/forward&gt;
+
+  &lt;/rewrite-dispatch&gt;
+
+&lt;/web-app&gt;
+</example>
+
+<deftable-childtags>
+<tr><td><a href="#disable-at">disable-at</a></td>
+    <td>A cron syntax time specification for triggering disablement of the rule</td>
+    <td>none</td></tr>
+<tr><td><a href="#enable-at">enable-at</a></td>
+    <td>A cron syntax time specification for triggering enablement of the rule</td>
+    <td>none</td></tr>
+<tr><td>enabled</td>
+    <td>False to start with the rule initially disabled</td>
+    <td>true</td></tr>
+<tr><td><a href="#name">name</a></td>
+    <td>A name to use for registering a JMX mbean with type=RewriteRule</td>
+    <td>do not register an mbean</td></tr>
+<tr><td>regexp</td>
+    <td>A regexp that must match the <a href="#URL">URL</a></td>
+    <td>optional</td></tr>
+<tr><td>request-character-encoding</td>
+    <td>Sets the character encoding of the request, used for parsing POST data, request.setCharacterEncoding(value)</td>
+    <td>none</td></tr>
+<tr><td>request-secure</td>
+    <td>Sets the value of request.isSecure()</td>
+    <td>none</td></tr>
+<tr><td>response-character-encoding</td>
+    <td>Sets the value of the character encoding sent for the response
+        with response.setCharacterEncoding(value).  If a Content-Type is
+        not set either with a set rule, or by some other process involved in
+        servicing the request, this has no effect.</td>
+    <td>none</td></tr>
+<tr><td>response-content-type</td>
+    <td>Sets the value of the content type sent for the response. If the final
+        destination is a file with a corresponding
+        <a href="webapp-tags.xtp#mime-mapping">mime-mapping</a>,
+        the mime-mapping will override the content-type set here</td>
+    <td>none</td></tr>
+<tr><td><a href="#when">when</a></td>
+    <td>A condition which must evaluate to true</td>
+    <td>optional</td></tr>
+<tr><td><a href="#unless">unless</a></td>
+    <td>A condition which must not evaluate to true</td>
+    <td>optional</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;unless&gt;">
+
+<p>
+Contains a condition that further refines the match of the enclosing tag beyond
+the information provided by the url.  If the condition does not evaluate to
+true, then the enclosing tag is applied.
+</p>
+
+<p>See <a href="#when">&lt;when></a> for a description of possible conditions.</p>
+
+</defun>
+
+<defun title="user-in-role">
+<parents>when, unless</parents>
+
+<p>
+Evaluates to true if the user is authenticated and in the specified role.
+The special role of '*' means any role.
+</p>
+
+<p>
+If the current user is any role, a <code>Cache-Control</code> header containing
+"<code>private</code>" is added to the response.
+</p>
+
+<deftable-childtags>
+<tr><td>user-in-role</td>
+    <td>A role name.</td>
+    <td>required</td></tr>
+<tr><td>send-vary</td>
+    <td>Send a <code>Vary</code> header containing "<code>Cookie</code>" as part of the response</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;when>">
+
+<p>
+Contains a condition that further refines the match of the enclosing tag beyond
+the information provided by the url.  If the condition evaluates to true, then
+the enclosing tag is applied.
+</p>
+
+<deftable-childtags>
+<tr><td><a href="#and">&lt;and></a></td>
+    <td>A subgroup of conditions that must all pass</td>
+    <td></td></tr>
+<tr><td><a href="#auth-type">auth-type</a></td>
+    <td>Evaluates to true if the authorization mechanism used in the request
+        is the given value</td>
+    <td></td></tr>
+<tr><td><a href="#cookie">cookie</a></td>
+    <td>Evaluates to true if a cookie exists and matches an
+        optional <var/regexp/></td>
+    <td></td></tr>
+<tr><td><a href="#header">header</a></td>
+    <td>Evaluates to true if a request header exists and matches an
+        optional <var/regexp/></td>
+    <td></td></tr>
+<tr><td><a href="#locale">locale</a></td>
+    <td>Evaluates to true if the request locale matches the specified value</td>
+    <td></td></tr>
+<tr><td><a href="#local-port">local-port</a></td>
+    <td>Evaluates to true if the local port is the specified value
+        (the local port is the actual port that Resin is using)</td>
+    <td></td></tr>
+<tr><td><a href="#method">method</a></td>
+    <td>Evaluates to true if the http method used for the request is
+         the specified value</td>
+    <td></td></tr>
+<tr><td><a href="#not">&lt;not></a></td>
+    <td>A subgroup of conditions, none of which may pass</td>
+    <td></td></tr>
+<tr><td><a href="#or">&lt;or></a></td>
+    <td>A subgroup of conditions, any of which may pass</td>
+    <td></td></tr>
+<tr><td><a href="#query-param">query-param</a></td>
+    <td>Evaluates to true if a query parameter exists and matches an
+        optional <var/regexp/></td>
+    <td></td></tr>
+<tr><td>regexp</td>
+    <td>Used in conjunction with <var/cookie/>, <var/header/>,
+        and <var/query-param/></td>
+    <td></td></tr>
+<tr><td><a href="#remote-addr">remote-addr</a></td>
+    <td>Evaluates to true if the remote address of the client matches
+        the specified ip address</td>
+    <td></td></tr>
+<tr><td><a href="#remote-user">remote-user</a></td>
+    <td>Evaluates to true if the user is authenticated and has the specified
+        name</td>
+    <td></td></tr>
+<tr><td><a href="#secure">secure</a></td>
+    <td>Evaluates to true if the ssl status of the request is equal to the
+        specified value of true or false</td>
+    <td></td></tr>
+<tr><td><a href="#server-name">server-name</a></td>
+    <td>Evaluates to true if the server name used by the client matches
+        the specified value</td>
+    <td></td></tr>
+<tr><td><a href="#server-port">server-port</a></td>
+    <td>Evaluates to true if the port used by the client equals
+        the specified value</td>
+    <td></td></tr>
+<tr><td><a href="#user-in-role">user-in-role</a></td>
+    <td>Evaluates to true if the user is authenticated and in the specified role</td>
+    <td></td></tr>
+</deftable-childtags>
+
+</defun>
+
+<s1 title="Logging and Debugging">
+<p>
+Logging for the name <code>com.caucho.server.rewrite</code>
+at the "finer" level reveals successful matches.  At the "finest" level both
+successful and unsuccessful matches are logged.
+</p>
+
+<example title="Logging example">
+&lt;logger name="com.caucho.server.rewrite" level="finest"/&gt;
+</example>
+
+<results>
+[1998/05/08 02:51:31.000] forward ^/foo: '/baz/test.jsp'  no match
+[1998/05/08 02:51:31.000] forward ^/bar: '/baz/test.jsp'  no match
+[1998/05/08 02:51:31.000] forward ^/baz: '/baz/test.jsp'  -->  '/hogwarts/test.jsp'
+</results>
+
+</s1>
+
+<s1 title="Examples">
+<s2 title="Redirect http:// requests to https:// requests">
+  <p>
+  The desired behaviour is to redirect plain connections to SSL connections.
+  </p>
+
+  <example title="Desired behaviour">
+    http://anything.com/anything.html
+      redirect => https://anything.com/anything.html
+  </example>
+
+  <example title="Configuration">
+    &lt;host ...&gt;
+      ...
+      &lt;rewrite-dispatch&gt;
+        &lt;redirect regexp="^" target="https://${host.name}"&gt;
+          &lt;when secure="false"/&gt;
+        &lt;/redirect&gt;
+      &lt;/rewrite-dispatch&gt;
+      ...
+    &lt;/host&gt;
+  </example>
+</s2>
+
+<s2 title="Make an alias for a web-app">
+  <p>
+  The desired behaviour is to make it so that a web-app will match more than
+  one url pattern.  For example, a web-app is deployed in
+  <code>webapps/physics</code> and available at
+  <code>http://hostname/physics/</code>, the desired behaviour is to allow a
+  request to <code>http://hostname/classroom/physics</code> to end up at the
+  <code>/physics</code> web-app.
+
+  </p>
+
+  <example title="Desired behaviour">
+    http://hostname/classroom/physics
+      forward => http://hostname/physics 
+
+    http://hostname/classroom/physics/anything
+      forward => http://hostname/physics/anything
+  </example>
+
+  <p>
+  The rewrite-dispatch tag is used at the &lt;host&gt; level.  If it was placed in a 
+  &lt;web-app&gt; then it would be too late to forward to a different web-app
+  because Resin would have already resolved the web-app.
+  </p>
+
+  <example title="Configuration">
+    &lt;host&gt;
+      &lt;rewrite-dispatch&gt;
+        &lt;forward regexp="^/classroom/physics" target="/physics"/&gt;
+      &lt;/rewrite-dispatch&gt;
+       ...
+  </example>
+</s2>
+
+<s2 title="Forward based on host name">
+  <p>
+  The desired behaviour is to internally forward requests based on the host name.
+  </p>
+
+  <example title="Desired behaviour">
+    http://gryffindor.hogwarts.com/anything.html
+      forward => /gryffindor/*
+
+    http://slytherin.hogwarts.com/anything.html
+      forward => /slytherin/anything.html
+
+    http://hogwarts.com/anything.html
+      forward => /anything.html
+  </example>
+
+  <p>
+  The rewrite-dispatch tag is used at the &lt;cluster&gt; level.  If it was placed in the &lt;host&gt;
+  or the &lt;web-app&gt; then it would be too late to forward to a different host
+  because Resin would have already resolved the host.
+  </p>
+
+  <example title="Configuration">
+    &lt;cluster&gt;
+      ...
+      &lt;rewrite-dispatch&gt;
+        &lt;forward regexp="http://gryffindor\.[^/]+" target="/gryffindor/"/&gt;
+        &lt;forward regexp="http://slytherin\.[^/]+" target="/slytherin/"/&gt;
+      &lt;/rewrite-dispatch&gt;
+      ...
+    &lt;/cluster&gt;
+  </example>
+</s2>
+</s1>
+
+</body>
+
+</document>
