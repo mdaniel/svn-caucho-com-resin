@@ -1713,3 +1713,1064 @@ idle session before invalidating it.  The value is specified in minutes.</p>
 </body>
 
 </document>
+
+<?xml version="1.0"?>
+<document>
+  <header>
+    <product>resin</product>
+    <title>Cluster Application Deployment</title>
+    <type>contents</type>
+    <description>
+      <p/>
+    </description>
+  </header>
+  <body>
+    <s1 title="Maven Deploy Client">
+      <example title="Configuring the Maven Plugin in a pom.xml file">
+&lt;?xml version="1.0"?>
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0" 
+            xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+            xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+  &lt;modelVersion>4.0.0&lt;/modelVersion>
+  &lt;groupId>com.test&lt;/groupId>
+  &lt;artifactId>test&lt;/artifactId>
+  &lt;packaging>war&lt;/packaging>
+  &lt;version>1.0-SNAPSHOT&lt;/version>
+  &lt;name>test Maven Webapp&lt;/name>
+  &lt;url>http://maven.apache.org&lt;/url>
+
+  &lt;dependencies>
+  ...
+  &lt;/dependencies>
+
+  &lt;pluginRepositories>
+    &lt;pluginRepository>
+      &lt;snapshots>
+        &lt;enabled>true&lt;/enabled>
+        &lt;updatePolicy>always&lt;/updatePolicy>
+        &lt;checksumPolicy>ignore&lt;/checksumPolicy>
+      &lt;/snapshots>
+      &lt;id>caucho&lt;/id>
+      &lt;name>Caucho&lt;/name>
+      &lt;url>http://caucho.com/m2-snapshot&lt;/url>
+    &lt;/pluginRepository>
+  &lt;/pluginRepositories>
+
+  &lt;build>
+    &lt;finalName>foo&lt;/finalName>
+
+    &lt;plugins>
+      &lt;plugin>
+        &lt;groupId>com.caucho&lt;/groupId>
+        &lt;artifactId>resin-maven-plugin&lt;/artifactId>
+        &lt;version>4.0-SNAPSHOT&lt;/version>
+        &lt;configuration>
+          &lt;server>127.0.0.1&lt;/server>
+          &lt;port>8086&lt;/port>
+          &lt;user>foo&lt;/user>
+          &lt;password>test&lt;/password>
+        &lt;/configuration>
+      &lt;/plugin>
+    &lt;/plugins>
+  &lt;/build>
+&lt;/project>
+      </example>
+
+      <deftable title="Maven Mojo Reference">
+        <tr>
+          <th>Mojo</th>
+          <th>Parameter name</th>
+          <th>System property</th>
+          <th>Required?</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <th rowspan="5">Common properties for all Mojos</th>
+          <td>server</td>
+          <td>resin.server</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The IP or address of the Resin server</td>
+        </tr>
+        <tr>
+          <td>port</td>
+          <td>resin.port</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The port of the Resin server's HTTP port</td>
+        </tr>
+        <tr>
+          <td>user</td>
+          <td>resin.user</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The user to use when logging into the Resin server</td>
+        </tr>
+        <tr>
+          <td>password</td>
+          <td>resin.password</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The password to use when logging into the Resin server</td>
+        </tr>
+        <tr>
+          <td>commitMessage</td>
+          <td>resin.commitMessage</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The commit message to log for any changes to the application repository</td>
+        </tr>
+        <tr>
+          <th rowspan="7">resin:upload-war</th>
+          <td>warFile</td>
+          <td>resin.warFile</td>
+          <td>Yes</td>
+          <td>${project.build.directory}/ ${project.build.finalName}.war (the war file produced for the project)</td>
+          <td>The war file to upload to the Resin server</td>
+        </tr>
+        <tr>
+          <td>stage</td>
+          <td>resin.stage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage to use for the deployed application</td>
+        </tr>
+        <tr>
+          <td>virtualHost</td>
+          <td>resin.virtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host to use for the deployed application</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>resin.contextRoot</td>
+          <td>Yes</td>
+          <td>/${project.build.finalName}<br/>(the "final name" of the project)</td>
+          <td>The context root of the deployed application</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>resin.version</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version to use for the deployed application</td>
+        </tr>
+        <tr>
+          <td>archive</td>
+          <td>resin.archive</td>
+          <td>No</td>
+          <td>false</td>
+          <td>When set to true, an archive tag is set in addition to the main tag.  Can also be an explicit tag.</td>
+        </tr>
+        <tr>
+          <td>writeHead</td>
+          <td>resin.writeHead</td>
+          <td>No</td>
+          <td>true</td>
+          <td>When set to true and using versioning, a "head" tag is also set.</td>
+        </tr>
+        <tr>
+          <th rowspan="10">resin:copy-tag</th>
+          <td>stage</td>
+          <td>resin.stage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the target tag</td>
+        </tr>
+        <tr>
+          <td>virtualHost</td>
+          <td>resin.virtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host of the target tag</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>resin.contextRoot</td>
+          <td>Yes (if tag not given)</td>
+          <td>/${project.build.finalName}<br/>(the "final name" of the project)</td>
+          <td>The context root of the target tag</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>resin.version</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version of the target tag</td>
+        </tr>
+        <tr>
+          <td>sourceStage</td>
+          <td>resin.sourceStage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the source tag</td>
+        </tr>
+        <tr>
+          <td>sourceVirtualHost</td>
+          <td>resin.sourceVirtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host of the source tag</td>
+        </tr>
+        <tr>
+          <td>sourceContextRoot</td>
+          <td>resin.sourceContextRoot</td>
+          <td>Yes (if sourceTag not given)</td>
+          <td>N/A</td>
+          <td>The context root of the source tag</td>
+        </tr>
+        <tr>
+          <td>sourceVersion</td>
+          <td>resin.sourceVersion</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version of the source tag</td>
+        </tr>
+        <tr>
+          <td>tag</td>
+          <td>resin.tag</td>
+          <td>Yes (if contextRoot not given)</td>
+          <td>N/A</td>
+          <td>An explicit target tag</td>
+        </tr>
+        <tr>
+          <td>sourceTag</td>
+          <td>resin.sourceTag</td>
+          <td>Yes (if sourceContextRoot not given)</td>
+          <td>N/A</td>
+          <td>An explicit source tag</td>
+        </tr>
+        <tr>
+          <th rowspan="5">resin:delete-tag</th>
+          <td>stage</td>
+          <td>resin.stage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>virtualHost</td>
+          <td>resin.virtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>resin.contextRoot</td>
+          <td>Yes (if tag not given)</td>
+          <td>/${project.build.finalName}<br/>(the "final name" of the project)</td>
+          <td>The context root of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>resin.version</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>tag</td>
+          <td>resin.tag</td>
+          <td>Yes (if contextRoot not given)</td>
+          <td>N/A</td>
+          <td>An explicit tag to be deleted</td>
+        </tr>
+        <tr>
+          <th rowspan="5">resin:query-tags
+</th>
+          <td>stage</td>
+          <td>resin.stage</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>"default"</td>
+          <td>The query pattern for the stage portion of tags in the repository
+</td>
+        </tr>
+        <tr>
+          <td>virtualHost</td>
+          <td>resin.virtualHost</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>"default"</td>
+          <td>The query pattern for the virtual host portion of tags in the repository</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>resin.contextRoot</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>/${project.build.finalName}<br/>(the "final name" of the project)</td>
+          <td>The query pattern for the context root portion of tags in the repository</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>resin.version</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>N/A</td>
+          <td>The query pattern for the version portion of tags in the repository</td>
+        </tr>
+        <tr>
+          <td>pattern</td>
+          <td>resin.pattern</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>N/A</td>
+          <td>An explicit query pattern for entire tags in the repository</td>
+        </tr>
+      </deftable>
+    </s1>
+
+    <s1 title="Ant Deploy Client">
+      <example title="Using the Ant tasks">
+&lt;project xmlns:resin="antlib:com.caucho.ant">
+  &lt;-- if resin-ant.jar is not installed locally -->
+  &lt;taskdef uri="antlib:com.caucho.ant"
+           resource="com/caucho/ant/antlib.xml"
+           classpath="path/to/resin-ant.jar"/>
+
+  &lt;resin:upload-war server="192.168.0.10"
+                    port="8080"
+                    user="admin"
+                    password="myadminpass"
+                    warFile="clustered-app.war"
+                    version="1.0"/>
+&lt;/project>
+      </example>
+      <deftable title="Ant Task Reference">
+        <tr>
+          <th>Task name</th>
+          <th>Parameter name</th>
+          <th>Required?</th>
+          <th>Default</th>
+          <th>Description</th>
+        </tr>
+        <tr>
+          <th rowspan="5">Common properties for all tasks</th>
+          <td>server</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The IP or address of the Resin server</td>
+        </tr>
+        <tr>
+          <td>port</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The port of the Resin server's HTTP port</td>
+        </tr>
+        <tr>
+          <td>user</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The user to use when logging into the Resin server</td>
+        </tr>
+        <tr>
+          <td>password</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The password to use when logging into the Resin server</td>
+        </tr>
+        <tr>
+          <td>commitMessage</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The commit message to log for any changes to the application repository</td>
+        </tr>
+        <tr>
+          <th rowspan="7">resin-upload-war (com.caucho.ant.ResinUploadWar)</th>
+          <td>warFile</td>
+          <td>Yes</td>
+          <td>N/A</td>
+          <td>The war file to upload to the Resin server</td>
+        </tr>
+        <tr>
+          <td>stage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage to use for the deployed application</td>
+        </tr>
+        <tr>
+          <td>virtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host to use for the deployed application</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>No</td>
+          <td>/[war file prefix]</td>
+          <td>The context root of the deployed application</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version to use for the deployed application</td>
+        </tr>
+        <tr>
+          <td>archive</td>
+          <td>No</td>
+          <td>false</td>
+          <td>When set to true, an archive tag is set in addition to the main tag.  Can also be an explicit tag.</td>
+        </tr>
+        <tr>
+          <td>writeHead</td>
+          <td>No</td>
+          <td>true</td>
+          <td>When set to true and using versioning, a "head" tag is also set.</td>
+        </tr>
+        <tr>
+          <th rowspan="10">resin-copy-tag (com.caucho.ant.ResinCopyTag)</th>
+          <td>stage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the target tag</td>
+        </tr>
+        <tr>
+          <td>virtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host of the target tag</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>Yes (if tag not given)</td>
+          <td>N/A</td>
+          <td>The context root of the target tag</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version of the target tag</td>
+        </tr>
+        <tr>
+          <td>sourceStage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the source tag</td>
+        </tr>
+        <tr>
+          <td>sourceVirtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host of the source tag</td>
+        </tr>
+        <tr>
+          <td>sourceContextRoot</td>
+          <td>Yes (if sourceTag not given)</td>
+          <td>N/A</td>
+          <td>The context root of the source tag</td>
+        </tr>
+        <tr>
+          <td>sourceVersion</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version of the source tag</td>
+        </tr>
+        <tr>
+          <td>tag</td>
+          <td>Yes (if contextRoot not given)</td>
+          <td>N/A</td>
+          <td>An explicit target tag</td>
+        </tr>
+        <tr>
+          <td>sourceTag</td>
+          <td>Yes (if sourceContextRoot not given)</td>
+          <td>N/A</td>
+          <td>An explicit source tag</td>
+        </tr>
+        <tr>
+          <th rowspan="5">resin-delete-tag (com.caucho.ant.ResinDeleteTag)
+    </th>
+          <td>stage</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The stage of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>resin.virtualHost</td>
+          <td>No</td>
+          <td>"default"</td>
+          <td>The virtual host of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>Yes (if tag not given)</td>
+          <td>N/A</td>
+          <td>The context root of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>No</td>
+          <td>N/A</td>
+          <td>The version of the tag to be deleted</td>
+        </tr>
+        <tr>
+          <td>tag</td>
+          <td>Yes (if contextRoot not given)</td>
+          <td>N/A</td>
+          <td>An explicit tag to be deleted</td>
+        </tr>
+        <tr>
+          <th rowspan="5">resin-query-tags (com.caucho.ant.ResinQueryTags)</th>
+          <td>stage</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>"default"</td>
+          <td>The query pattern for the stage portion of tags in the repository</td>
+        </tr>
+        <tr>
+          <td>virtualHost</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>"default"</td>
+          <td>The query pattern for the virtual host portion of tags in the repository</td>
+        </tr>
+        <tr>
+          <td>contextRoot</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>".*"</td>
+          <td>The query pattern for the context root portion of tags in the repository</td>
+        </tr>
+        <tr>
+          <td>version</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>N/A</td>
+          <td>The query pattern for the version portion of tags in the repository</td>
+        </tr>
+        <tr>
+          <td>pattern</td>
+          <td>Yes (At least one pattern (either stage, virtualHost, contextRoot, version, or pattern) must be given</td>
+          <td>N/A</td>
+          <td>An explicit query pattern for entire tags in the repository</td>
+        </tr>
+      </deftable>
+    </s1>
+  </body>
+</document>
+
+<document>
+<header>
+  <title>port: Port tag configuration</title>
+  <version>Resin 3.1</version>
+
+  <description>
+
+  <p>The port tags configure &lt;http> ports, addresses, cluster-ports
+and custom protocol TCP ports.</p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<s1 title="See Also">
+
+<ul>
+<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
+<li>See &lt;<a href="cluster-tags.xtp">cluster</a>&gt; tag configuration</li>
+<li>See &lt;<a href="server-tags.xtp">server</a>&gt; tag configuration</li>
+</ul>
+
+</s1>
+
+<defun title="&lt;accept-listen-backlog>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-listen-backlog> configures operating system TCP listen
+queue size for the port.</p>
+
+</defun>
+
+<defun title="&lt;accept-thread-max>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-thread-max> configures the maximum number of 
+threads listening for new connections on this port.</p>
+
+</defun>
+
+<defun title="&lt;accept-thread-min>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;accept-thread-min> configures the minimum number of 
+threads listening for new connections on this port.</p>
+
+</defun>
+
+<defun title="&lt;address>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>The &lt;address> defines the IP interface for a port.
+A value of '*' binds to all ports.  Because the &lt;address> is
+specific to a server, it should only be defined in a &lt;server&gt; tag,
+not a &lt;server-default>.</p>
+
+<default>*</default>
+
+<example title="http address">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="web-tier"&gt;
+    &lt;server id="web-a" address="192.168.1.1" port="6800">
+      &lt;http address="10.0.1.1" port="80"/>
+    &lt;/server>
+
+    &lt;server id="web-b" address="192.168.1.2" port="6800">
+      &lt;http address="10.0.1.2" port="80"/>
+    &lt;/server>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;ca-certificate-file> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;ca-certificate-file> configures the path to a CA certificate
+file for intermediate CA support.</p>
+
+</defun>
+
+<defun title="&lt;ca-certificate-path> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;ca-certificate-path> configures the path to a CA certificate
+directory for intermediate CA support.</p>
+
+</defun>
+
+<defun title="&lt;ca-revocation-file> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;ca-revocation-file> configures the path to a list of
+revoked CA certificates.</p>
+
+</defun>
+
+<defun title="&lt;ca-revocation-path> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;ca-revocation-path> configures the path to a list of
+revoked CA certificates.</p>
+
+</defun>
+
+<defun title="&lt;certificate-file> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;certificate-file> configures the path to the server's
+SSL certificate.</p>
+
+</defun>
+
+<defun title="&lt;certificate-chain-file> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;certificate-chain-file> configures the path to the server's
+SSL certificate for OpenSSL.</p>
+
+</defun>
+
+<defun title="&lt;certificate-key-file> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;certificate-key-file> configures the path to the server's
+SSL private key certificate for OpenSSL.</p>
+
+</defun>
+
+<defun title="&lt;cipher-suite> (OpenSSL)" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;cipher-suite> configures the path to the server's
+SSL cryptographic ciphers.</p>
+
+</defun>
+
+<defun title="&lt;cluster-port>" version="Resin 3.0">
+<parents>server</parents>
+
+<p>&lt;cluster-port> configures the cluster and load balancing socket,
+for load balancing, distributed sessions, and distributed management.</p>
+
+<p>When configuring Resin in a load-balanced cluster, each Resin instance
+will have its own &lt;srun&gt; configuration, which Resin uses for distributed
+session management and for the load balancing itself.</p>
+
+<p>When configuring multiple JVMs, each &lt;srun&gt; will have a
+unique &lt;server-id&gt; which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>address</td>
+    <td>hostname of the interface to listen to</td>
+    <td>*</td></tr>
+<tr><td>jsse-ssl</td>
+    <td>configures the port to use JSSE for SSL</td>
+    <td>none</td></tr>
+<tr><td>openssl</td>
+    <td>configures the port to use OpenSSL</td>
+    <td>none</td></tr>
+<tr><td>port</td>
+    <td>port to listen to</td>
+    <td>required</td></tr>
+<tr><td>socket-timeout</td>
+     <td>timeout waiting to read/write to idle client</td>
+     <td>65s</td></tr>
+<tr><td>accept-listen-backlog</td>
+    <td>The socket factory's listen backlog for receiving sockets</td>
+    <td>100</td></tr>
+<tr><td>tcp-no-delay</td>
+    <td>sets the NO_DELAY socket parameter</td>
+    <td>true</td></tr>
+</deftable-childtags>
+
+<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
+
+</defun>
+
+<defun title="&lt;connection-max>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;connection-max> configures the maximum number of 
+concurrent connections on this port.</p>
+
+</defun>
+
+<defun title="&lt;http>" version="Resin 3.0">
+<parents>server</parents>
+
+<p>&lt;http> configures a HTTP or HTTPS port listening for HTTP requests.</p>
+
+<p>When configuring multiple JVMs, each &lt;http&gt; will have a
+unique &lt;server-id&gt; which allows the -server command-line to select
+which ports the server should listen to.</p>
+
+<deftable-childtags>
+<tr><td>address</td>
+    <td>IP address of the interface to listen to</td>
+    <td>*</td></tr>
+<tr><td>port</td>
+    <td>port to listen to</td>
+    <td>required</td></tr>
+<tr><td>tcp-no-delay</td>
+    <td>sets the NO_DELAY socket parameter</td>
+    <td>true</td></tr>
+<tr><td>socket-timeout</td>
+    <td>timeout waiting to write to idle client</td>
+    <td>65s</td></tr>
+<tr><td>accept-listen-backlog</td>
+    <td>The socket factory's listen backlog for receiving sockets</td>
+    <td>100</td></tr>
+<tr><td>virtual-host</td>
+    <td>forces all requests to this &lt;http&gt; to use the named virtual host</td>
+    <td>none</td></tr>
+<tr><td>openssl</td>
+    <td>configures the port to use OpenSSL</td>
+    <td>none</td></tr>
+<tr><td>jsse-ssl</td>
+    <td>configures the port to use JSSE for SSL</td>
+    <td>none</td></tr>
+</deftable-childtags>
+
+<p>The <var>virtual-host</var> attribute overrides the browser's
+Host directive, specifying the explicit host and port for
+<code>request.getServerName()</code> and <code>getServerPort()</code>.
+It is not used in most virtual host configurations.
+Only IP-based virtual hosts which wish to ignore the browser's Host
+will use @virtual-host.</p>
+
+</defun>
+
+<defun title="&lt;jsse-ssl>" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;jsse-ssl> configures the port to use JSSE for SSL
+support.</p>
+
+<p>
+The <a href="../admin/security.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
+</p>
+
+<deftable-childtags>
+<tr>
+  <td>alias</td>
+  <td>Configures the key alias name in the key store file.</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>key-store-file</td>
+  <td>Path to the certificate key store file</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>password</td>
+  <td>Private key password</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>key-store-type</td>
+  <td>Type of the keystore</td>
+  <td>jks</td>
+</tr>
+<tr>
+  <td>key-manager-factory</td>
+  <td>Special factory for creating keys</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>ssl-context</td>
+  <td>Special configuration for the ssl context.</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>verify-client</td>
+  <td>Settings for client validation</td>
+  <td>required</td>
+</tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;keepalive-max>" version="Resin 3.1">
+<parents>http, connection-port, protocol</parents>
+
+<p>&lt;keepalive-max> configures the maximum number of 
+keepalives on this port.</p>
+
+</defun>
+
+<defun title="&lt;openssl>" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>&lt;openssl> configures the port to use OpenSSL for SSL
+support (requires Resin Professional).  OpenSSL is a fast C implementation
+of SSL security used by Apache.  Resin's configuration is OpenSSL
+follows Apache's configuration, so any documentation on installing
+SSL certificates can use documentation for Apache.</p>
+
+<p>
+The <a href="../admin/security.xtp">SSL</a> section of the Security documentation provides a comprehensive overview of SSL.
+</p>
+
+<deftable-childtags>
+<tr>
+  <td>ca-certificate-file</td>
+  <td>Path to a CA certificate file for intermediate CA support</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>ca-certificate-path</td>
+  <td>Path to a directory of CA certificates for intermediate CA support</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>ca-revocation-file</td>
+  <td>Path to a list of revoked CA certificates</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>ca-revocation-path</td>
+  <td>Path to a directory of revoked CA certificates</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>certificate-file</td>
+  <td>Path to the server's SSL certificate</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>certificate-chain-file</td>
+  <td>Path to the certificate chains for client validation.</td>
+  <td>optional</td>
+</tr>
+<tr>
+  <td>certificate-key-file</td>
+  <td>Path to the server's SSL private key certificate</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>cipher-suite</td>
+  <td>Additions and restrictions to the allowed cryptography ciphers</td>
+  <td>see openssl-tags</td>
+</tr>
+<tr>
+  <td>password</td>
+  <td>Password protecting the public key</td>
+  <td>see openssl-tags</td>
+</tr>
+<tr>
+  <td>protocol</td>
+  <td>Optional restrictions on the SSL protocol</td>
+  <td>see openssl-tags</td>
+</tr>
+<tr>
+  <td>session-cache</td>
+  <td>Boolean enabling caching of SSL sessions for performance</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>session-cache-timeout</td>
+  <td>Timeout for session cache values</td>
+  <td>30s</td>
+</tr>
+<tr>
+  <td>unclean-shutdown</td>
+  <td>Flag indicating that openssl sockets can be shutdown uncleanly</td>
+  <td>false</td>
+</tr>
+<tr>
+  <td>verify-client</td>
+  <td>Options for client validation</td>
+  <td>none</td>
+</tr>
+<tr>
+  <td>verify-depth</td>
+  <td>Depth of the client certificate chains to validate</td>
+  <td>unlimited</td>
+</tr>
+</deftable-childtags>
+
+</defun>
+
+<defun title="&lt;password> (OpenSSL)" version="Resin 3.1">
+<parents>openssl</parents>
+
+<p>&lt;password> configures the SSL private key certificate password.</p>
+
+</defun>
+
+<defun title="&lt;port>" version="Resin 3.1">
+<parents>http, protocol, server</parents>
+
+<p>The &lt;port> defines the TCP port the HTTP or protocol
+should bind to.</p>
+
+<example title="http port">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+  &lt;cluster id="web-tier"&gt;
+    &lt;server id="web-a" address="192.168.1.1" port="6800">
+      &lt;http address="10.0.1.1" port="80"/>
+      &lt;http address="192.168.1.1" port="8080"/>
+    &lt;/server>
+
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;protocol>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;protocol> configures custom socket protocols using Resin's thread
+and connection management.</p>
+
+<p>The custom protocol will extend from com.caucho.server.port.Protocol.</p>
+
+<example>
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+&lt;cluster id="web-tier"&gt;
+
+  &lt;server id="a"&gt;
+    &lt;protocol address="localhost" port="8888"&gt;
+      &lt;type>example.Magic8BallProtocol&lt;/type>
+    &lt;/port&gt;
+  &lt;/server&gt;
+
+&lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+<defun title="&lt;protocol> (OpenSSL)" version="Resin 3.1">
+<parents>openssl</parents>
+
+<p>&lt;protocol> configures the SSL allowed protocols.</p>
+
+</defun>
+
+<defun title="&lt;session-cache> (OpenSSL)" version="Resin 3.1">
+<parents>openssl</parents>
+
+<p>&lt;session-cache> configures the SSL session cache.</p>
+
+</defun>
+
+<defun title="&lt;session-cache-timeout> (OpenSSL)" version="Resin 3.1">
+<parents>openssl</parents>
+
+<p>&lt;session-cache> configures the SSL session cache timeout.</p>
+
+</defun>
+
+<defun title="&lt;socket-timeout>" version="Resin 3.1">
+<parents>http, cluster-port, protocol, server</parents>
+
+<p>&lt;socket-timeout> overrides the socket timeout from the
+&lt;server>.</p>
+
+</defun>
+
+<defun title="&lt;tcp-no-delay>" version="Resin 3.1">
+<parents>http, protocol, cluster-port</parents>
+
+<p>Sets the tcp-no-delay parameter.</p>
+
+</defun>
+
+<defun title="&lt;unclean-shutdown> (OpenSSL)" version="Resin 3.1">
+<parents>openssl</parents>
+
+<p>&lt;unclean-shutdown> configures the OpenSSL unclean shutdown on
+connection close.</p>
+
+</defun>
+
+<defun title="&lt;verify-client> (OpenSSL)" version="Resin 3.1">
+<parents>openssl</parents>
+
+<p>
+&lt;verify-client> sets the client certificate configuration.  If the
+certificate is available, it will be put in the
+javax.servlet.request.X509Certificate request attribute. 
+</p>
+
+<deftable>
+<tr>
+  <td>none</td>
+  <td>do not ask for a client certificate (default)</td>
+</tr>
+<tr>
+  <td>required</td>
+  <td>require a client certificate</td>
+</tr>
+<tr>
+  <td>optional</td>
+  <td>ask for a client certificate if availiable </td>
+</tr>
+<tr>
+  <td>optional-no-ca</td>
+  <td>ask for a client certificate, but do not validate the Certificate Authority</td>
+</tr>
+</deftable>
+
+<example title="Obtaining the client certificate">
+  X509Certificate []certs = (X509Certificate [])
+       request.getAttribute("javax.servlet.request.X509Certificate");
+</example>
+
+</defun>
+
+<defun title="&lt;verify-depth> (OpenSSL)" version="Resin 3.1">
+<parents>openssl</parents>
+
+<p>&lt;verify-depth> configures the OpenSSL client verification depth.</p>
+
+</defun>
+
+</body>
+</document>
