@@ -224,6 +224,17 @@ foreach ($sections as $section => $names) {
 echo "</ul>";
 */
 
+if ($p_graph) {
+  $rest_url = "rest.php?q=graph&graph={$p_graph}&period={$p_period}";
+
+  echo "<div><a href='{$rest_url}'>Embedded graph URL</a></div>";
+}
+elseif ($p_hash) {
+  $rest_url = "rest.php?q=graph&hash={$p_hash}&period={$p_period}";
+
+  echo "<div><a href='{$rest_url}'>Embedded graph URL</a></div>";
+}
+
 echo "<br>";
 
 // server
