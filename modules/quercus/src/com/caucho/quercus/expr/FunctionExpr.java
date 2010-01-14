@@ -48,6 +48,7 @@ public class FunctionExpr extends Expr {
   private static final L10N L = new L10N(FunctionExpr.class);
   
   protected final String _name;
+  protected final String _nsName;
   protected final Expr []_args;
 
   public FunctionExpr(Location location, String name, ArrayList<Expr> args)
@@ -55,6 +56,14 @@ public class FunctionExpr extends Expr {
     // quercus/120o
     super(location);
     _name = name.intern();
+    
+    int ns = _name.lastIndexOf('\\');
+    
+    if (ns > 0) {
+      _nsName = _name.substring(ns + 1);
+    }
+    else
+      _nsName = null;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -65,6 +74,14 @@ public class FunctionExpr extends Expr {
     // quercus/120o
     super(location);
     _name = name.intern();
+    
+    int ns = _name.lastIndexOf('\\');
+    
+    if (ns > 0) {
+      _nsName = _name.substring(ns + 1);
+    }
+    else
+      _nsName = null;
 
     _args = args;
   }
@@ -163,9 +180,14 @@ public class FunctionExpr extends Expr {
     AbstractFunction fun = env.findFunction(_name);
 
     if (fun == null) {
-      env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
+      if (_nsName != null)
+        fun = env.findFunction(_nsName);
+      
+      if (fun == null) {
+        env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
 
-      return NullValue.NULL;
+        return NullValue.NULL;
+      }
     }
 
     Value []args = fun.evalArguments(env, this, _args);

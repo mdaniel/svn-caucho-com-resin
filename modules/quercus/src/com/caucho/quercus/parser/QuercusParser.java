@@ -173,6 +173,7 @@ public class QuercusParser {
 
   private final static int IMPORT = 574;
   private final static int TEXT_PHP = 575;
+  private final static int NAMESPACE = 576;
 
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
@@ -194,6 +195,8 @@ public class QuercusParser {
   private String _encoding;
 
   private CharBuffer _sb = new CharBuffer();
+  
+  private String _namespace = "";
 
   private int _peekToken = -1;
   private String _lexeme = "";
@@ -685,6 +688,10 @@ public class QuercusParser {
 
       case TRY:
         statementList.add(parseTry());
+        break;
+        
+      case NAMESPACE:
+        statementList.addAll(parseNamespace());
         break;
 
       case '{':
@@ -1609,6 +1616,8 @@ public class QuercusParser {
         _peekToken = token;
 
       String name = parseIdentifier();
+      
+      name = resolveIdentifier(name);
 
       if (isAbstract && ! _scope.isAbstract()) {
         if (_classDef != null)
@@ -2155,6 +2164,43 @@ public class QuercusParser {
         _peekToken = token;
         return modifiers;
       }
+    }
+  }
+  
+  private ArrayList<Statement> parseNamespace()
+    throws IOException
+  {
+    int token = parseToken();
+    
+    String var = "";
+    
+    if (token == IDENTIFIER) {
+      var = _lexeme;
+      
+      token = parseToken();
+    }
+    
+    if (var.startsWith("\\"))
+      var = var.substring(1);
+    
+    String oldNamespace = _namespace;
+    
+    _namespace = var;
+    
+    if (token == '{') {
+      ArrayList<Statement> statementList = parseStatementList();
+      
+      expect('}');
+      
+      _namespace = oldNamespace;
+      
+      return statementList;
+    }
+    else if (token == ';') {
+      return new ArrayList<Statement>();
+    }
+    else {
+      throw error(L.l("namespace must be followed by '{' or ';'"));
     }
   }
 
@@ -3511,6 +3557,16 @@ public class QuercusParser {
     return _factory.createVar(_function.createVar(_lexeme));
   }
 
+  private String resolveIdentifier(String id)
+  {
+    if (id.startsWith("\\"))
+      return id.substring(1);
+    else if (_namespace.equals(""))
+      return id;
+    else
+      return _namespace + "\\" + id;
+  }
+  
   /**
    * Parses the next function
    */
@@ -3523,6 +3579,8 @@ public class QuercusParser {
   {
     if (name.equalsIgnoreCase("array"))
       return parseArrayFunction();
+    
+    name = resolveIdentifier(name);
 
     int token = parseToken();
 
@@ -3583,30 +3641,6 @@ public class QuercusParser {
         return _factory.createClassConst(className, name);
     }
     else if (name.equals("__FILE__")) {
-      /*
-      Path pwd = _quercus.getPwd();
-      String pwdStr = pwd.getNativePath();
-
-      String fileName = _parserLocation.getFileName();
-
-      if (fileName.contains(pwdStr)) {
-        int end = pwdStr.length();
-
-        fileName = fileName.substring(end);
-
-        char ch = fileName.charAt(0);
-
-        if (ch == '/') {
-        }
-        else if (ch == '\\')
-          fileName = '/' + fileName.substring(1);
-        else
-          fileName = '/' + fileName;
-      }
-
-      return _factory.createFileName(fileName);
-      */
-
       return _factory.createFileNameExpr(_parserLocation.getFileName());
     }
     else if (name.equals("__LINE__"))
@@ -3625,6 +3659,9 @@ public class QuercusParser {
       }
       else
         return createString(_function.getName());
+    }
+    else if (name.equals("__NAMESPACE__")) {
+      return createString(_namespace);
     }
     else
       return _factory.createConst(name);
@@ -5027,10 +5064,10 @@ public class QuercusParser {
     if (ch < 0)
       return false;
     else
-      return (ch >= 'a' && ch <= 'z' ||
-              ch >= 'A' && ch <= 'Z' ||
-              ch == '_' ||
-              Character.isLetter(ch));
+      return (ch >= 'a' && ch <= 'z' 
+              || ch >= 'A' && ch <= 'Z'
+              || ch == '_' || ch == '\\'
+              || Character.isLetter(ch));
   }
 
   private boolean isIdentifierPart(int ch)
@@ -5038,11 +5075,11 @@ public class QuercusParser {
     if (ch < 0)
       return false;
     else
-      return (ch >= 'a' && ch <= 'z' ||
-              ch >= 'A' && ch <= 'Z' ||
-              ch >= '0' && ch <= '9' ||
-              ch == '_' ||
-              Character.isLetterOrDigit(ch));
+      return (ch >= 'a' && ch <= 'z'
+              || ch >= 'A' && ch <= 'Z'
+              || ch >= '0' && ch <= '9'
+              || ch == '_' || ch == '\\'
+              || Character.isLetterOrDigit(ch));
   }
 
   private int parseOctalEscape(int ch)
@@ -5507,6 +5544,9 @@ public class QuercusParser {
 
     case SCOPE:
       return "SCOPE (" + _lexeme +  ")";
+      
+    case NAMESPACE:
+      return "NAMESPACE";
 
     default:
       if (32 <= token && token < 127)
@@ -5760,5 +5800,6 @@ public class QuercusParser {
     _insensitiveReserved.put("implements", IMPLEMENTS);
 
     _insensitiveReserved.put("import", IMPORT);
+    _insensitiveReserved.put("namespace", NAMESPACE);
   }
 }

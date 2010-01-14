@@ -81,7 +81,12 @@ abstract public class AbstractFunction {
   
   public final String getCompilationName()
   {
-    return getName() + "_" + _parseIndex;
+    String compName = getName() + "_" + _parseIndex;
+    
+    compName = compName.replace("__", "___");
+    compName = compName.replace("\\", "__");
+    
+    return compName;
   }
   
   /*

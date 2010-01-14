@@ -1270,8 +1270,14 @@ public class Quercus
                        functionMap, 0, _functionMap.length);
       _functionMap = functionMap;
     }
+    
+    int globalId = -1;
+    int ns = name.lastIndexOf('\\');
+    if (ns > 0) {
+      globalId = getFunctionId(name.substring(ns + 1));
+    }
 
-    _functionMap[id] = new UndefinedFunction(name);
+    _functionMap[id] = new UndefinedFunction(id, name, globalId);
   }
 
   /**
