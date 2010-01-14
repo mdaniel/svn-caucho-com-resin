@@ -185,7 +185,7 @@ public class TypeFactory implements AddLoaderListener
   public static TypeFactory getFactory(ClassLoader loader)
   {
     if (loader == null)
-      loader = ClassLoader.getSystemClassLoader();
+      loader = _systemClassLoader;
 
     TypeFactory factory = _localFactory.getLevel(loader);
 
@@ -397,7 +397,7 @@ public class TypeFactory implements AddLoaderListener
         ClassLoader loader = _loader;
 
         if (loader == null)
-          loader = ClassLoader.getSystemClassLoader();
+          loader = _systemClassLoader;
 
         is = loader.getResourceAsStream(pkg.replace('.', '/') + "/namespace");
 
@@ -721,7 +721,7 @@ public class TypeFactory implements AddLoaderListener
 
     ClassLoader loader = _loader;
     if (_loader == null)
-      loader = ClassLoader.getSystemClassLoader();
+      loader = _systemClassLoader;
 
     for (Map.Entry<String,String> entry : driverMap.entrySet()) {
       String scheme = entry.getKey();
@@ -771,7 +771,7 @@ public class TypeFactory implements AddLoaderListener
       ClassLoader loader = _loader;
 
       if (loader == null)
-        loader = ClassLoader.getSystemClassLoader();
+        loader = _systemClassLoader;
 
       Enumeration<URL> urls
         = loader.getResources("META-INF/caucho/com.caucho.config.uri/"
