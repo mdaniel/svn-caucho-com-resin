@@ -1,53 +1,14 @@
-* [[Resin Installation]]
-** Manual installation
-** Windows
-** Migration
-*** From 3.0
-*** From 3.1
-* Admin guide
-** [[Deploy]]
-*** File system deploy
-*** Git overview
-*** Tool reference (Eclipse, ant, maven)
-*** [[Pomegranate]]
-** [[Starting Resin]]
-*** [[Command line]]
-*** Server stages
-*** [[Watchdog]]
-** Configuration
-*** [[EL]]
-*** [[CanDI]]
-** [[Resin Logging]]
-*** Loggers and Log handlers
-*** Rollover
-** Database
-*** [[Pool configuration]]
-** [[Resin Security]]
-*** Authenticators
-*** OpenSSL
-** [[Scheduled tasks]]
-** [[Administration console]]
-*** (One section per page)
-*** REST interface
-** [[Resin Clustering]]
-*** Concepts (triads, dyn hosts)
-*** Configuration
-*** [[Load balancer]] 
-** HTTP
-*** [[Virtual Hosts]]
-*** [[Rewrite]]
-*** 10k
-*** Proxy caching
-** Advanced topics
-*** Thread pools
-*** Gzip
-*** [[Classloaders]]
-*** [[JMX]]
-* Wiki
-** EC2
-** [[Tuning (JVM)]]
-** OS (Mac OS X, Solaris, RHEL, Ubuntu, Windows)
-** Eclipse
-** Ant
-** Maven
-** Nagios w/resin-admin REST
+<document>
+  <header>
+    <product>resin</product>
+    <title>Resin</title>
+    <type>contents</type>
+    <description>
+    </description>
+
+  </header>
+
+  <body>
+    <summary/>
+  </body>
+</document>
