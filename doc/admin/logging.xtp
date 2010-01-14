@@ -1,0 +1,15 @@
+<document>
+  <header>
+    <title>Logging</title>
+    <type>contents</type>
+  <description>
+  <p>Configuration for java.util and HTTP access logging including rollover.
+  </description>
+    
+  </header>
+
+  <body>
+
+    <summary/>
+  </body>
+</document>

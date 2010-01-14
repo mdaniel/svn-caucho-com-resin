@@ -263,7 +263,7 @@ public class Body extends ContainerNode {
     out.writeStartElement("small");
     out.writeCharacters("Copyright ");
     out.writeEntityRef("copy");
-    out.writeCharacters(" 1998-2009 Caucho Technology, Inc. All rights reserved.");
+    out.writeCharacters(" 1998-2010 Caucho Technology, Inc. All rights reserved.");
     out.writeEmptyElement("br");
     out.writeCharacters("Resin ");
     out.writeStartElement("sup");
