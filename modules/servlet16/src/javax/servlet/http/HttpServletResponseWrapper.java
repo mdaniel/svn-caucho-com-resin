@@ -31,6 +31,7 @@ package javax.servlet.http;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletResponseWrapper;
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * Wraps a servlet request in another request.  Filters may
@@ -233,15 +234,13 @@ public class HttpServletResponseWrapper extends ServletResponseWrapper
     return response.getHeader(name);
   }
 
-  public Iterable<String> getHeaders(String name)
+  public Collection<String> getHeaders(String name)
   {
-    //XXX: test
     return response.getHeaders(name);
   }
 
-  public Iterable<String> getHeaderNames()
+  public Collection<String> getHeaderNames()
   {
-    //XXX: test
     return response.getHeaderNames();
   }
 

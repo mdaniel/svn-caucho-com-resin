@@ -31,6 +31,7 @@ package javax.servlet.http;
 
 import javax.servlet.ServletResponse;
 import java.io.IOException;
+import java.util.Collection;
 
 /**
  * HttpServletResponse extends ServletResponse allowing servlets to
@@ -224,7 +225,7 @@ public interface HttpServletResponse extends ServletResponse {
    * @param name
    * @return
    */
-  public Iterable<String> getHeaders(String name);
+  public Collection<String> getHeaders(String name);
 
   /**
    * Returns an Iterable for header names set via {@link #setHeader}, {@link
@@ -233,5 +234,5 @@ public interface HttpServletResponse extends ServletResponse {
    *
    * @return
    */
-  public Iterable<String> getHeaderNames();
+  public Collection<String> getHeaderNames();
 }
