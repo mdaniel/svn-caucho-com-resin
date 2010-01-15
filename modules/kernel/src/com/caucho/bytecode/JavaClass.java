@@ -84,6 +84,11 @@ public class JavaClass extends JClass {
 
   private boolean _isWrite;
 
+  public JavaClass()
+  {
+    this(new JavaClassLoader());
+  }
+
   public JavaClass(JavaClassLoader loader)
   {
     if (loader == null)

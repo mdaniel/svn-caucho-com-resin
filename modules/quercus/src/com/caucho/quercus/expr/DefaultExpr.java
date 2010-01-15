@@ -38,6 +38,8 @@ import com.caucho.quercus.env.Value;
  * Represents a PHP default expression.
  */
 public class DefaultExpr extends Expr {
+  public static final DefaultExpr DEFAULT = new DefaultExpr();
+
   public DefaultExpr(Location location)
   {
     super(location);

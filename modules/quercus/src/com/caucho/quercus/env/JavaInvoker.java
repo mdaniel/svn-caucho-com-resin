@@ -370,7 +370,7 @@ abstract public class JavaInvoker
   /**
    * Returns the marshal arguments.
    */
-  protected Marshal []getMarshalArgs()
+  public Marshal []getMarshalArgs()
   {
     if (! _isInit)
       init();

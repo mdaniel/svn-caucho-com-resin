@@ -241,6 +241,21 @@ public class CodeWriterAttribute extends CodeAttribute {
     write(index >> 8);
     write(index);
   }
+
+  public void invokestatic(String className,
+                           String methodName,
+                           String signature,
+                           int argStack,
+                           int returnStack)
+  {
+    _stack += returnStack - argStack;
+
+    int index = addMethodRef(className, methodName, signature);
+    
+    write(CodeVisitor.INVOKESTATIC);
+    write(index >> 8);
+    write(index);
+  }
   
   public void addReturn()
   {
