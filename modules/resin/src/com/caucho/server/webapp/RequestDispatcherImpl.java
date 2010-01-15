@@ -107,6 +107,11 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   {
     return _includeInvocation.isModified();
   }
+  
+  public Invocation getAsyncInvocation()
+  {
+    return _dispatchInvocation;
+  }
 
   public void forward(ServletRequest request, ServletResponse response)
     throws ServletException, IOException

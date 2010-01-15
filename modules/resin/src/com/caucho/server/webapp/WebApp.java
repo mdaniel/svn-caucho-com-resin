@@ -3242,7 +3242,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Returns a dispatcher for the named servlet.
    */
-  public RequestDispatcher getRequestDispatcher(String url)
+  public RequestDispatcherImpl getRequestDispatcher(String url)
   {
     if (url == null)
       throw new IllegalArgumentException(L.l("request dispatcher url can't be null."));
