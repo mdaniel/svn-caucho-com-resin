@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.parser;
 
+import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.program.Function;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.quercus.Location;
@@ -125,17 +126,25 @@ abstract public class Scope {
   }
   
   /**
+   * Adds a constant.
+   */
+  public void addConstant(String name, Expr value)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
    * Adds a function.
    */
   abstract public void addFunction(String name,
-				   Function function,
-				   boolean isTop);
+                                   Function function,
+                                   boolean isTop);
 
   /*
    *  Adds a function defined in a conditional block.
    */
   protected void addConditionalFunction(String name,
-					Function function)
+                                        Function function)
   {
     addConditionalFunction(function);
   }
@@ -155,7 +164,7 @@ abstract public class Scope {
                                                String parent,
                                                ArrayList<String> ifaceList,
                                                int index,
-					       boolean isTop);
+                                               boolean isTop);
   
   /*
    *  Adds a conditional class.

@@ -3094,9 +3094,19 @@ public class Env {
   public Value getConstant(String name, boolean isAutoCreateString)
   {
     Value value = getConstantImpl(name);
-
+    
     if (value != null)
       return value;
+    
+    int ns = name.lastIndexOf('\\');
+    
+    if (ns >= 0) {
+      name = name.substring(ns + 1);
+      value = getConstantImpl(name);
+      
+      if (value != null)
+        return value;
+    }
 
     /* XXX:
        notice(L.l("Converting undefined constant '{0}' to string.",
@@ -3185,10 +3195,30 @@ public class Env {
     int lowerId = _quercus.getConstantLower(id);
 
     value = _const[lowerId];
-    if (value != null)
-      return value;
+    if (value != null) {
+      _const[id] = value;
 
-    return _quercus.getConstantName(id);
+      return value;
+    }
+    
+    Value nameValue = _quercus.getConstantName(id);
+    
+    String name = nameValue.toString();
+    
+    int ns = name.lastIndexOf('\\');
+    if (ns >= 0) {
+      name = name.substring(ns + 1);
+      
+      value = getConstantImpl(name);
+      
+      if (value != null) {
+        _const[id] = value;
+      
+        return value;
+      }
+    }
+
+    return nameValue;
 
     /*
     value = _quercus.getConstant(name);

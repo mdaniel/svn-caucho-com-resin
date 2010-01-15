@@ -172,7 +172,11 @@ public class InterpretedClassDef extends ClassDef
    */
   public String getCompilationName()
   {
-    return getName() + "_" + _parseIndex;
+    String name = getName();
+    name = name.replace("__", "___");
+    name = name.replace("\\", "__");
+    
+    return name + "_" + _parseIndex;
   }
 
   /**

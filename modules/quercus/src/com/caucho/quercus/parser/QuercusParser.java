@@ -634,6 +634,10 @@ public class QuercusParser {
         // parseClassDefinition(M_INTERFACE);
         statementList.add(parseClassDefinition(M_INTERFACE));
         break;
+        
+      case CONST:
+        statementList.addAll(parseConstDefinition());
+        break;
 
       case IF:
         statementList.add(parseIf());
@@ -1564,7 +1568,7 @@ public class QuercusParser {
       while (token == CATCH) {
         expect('(');
 
-        String id = parseIdentifier();
+        String id = parseNamespaceIdentifier();
 
         AbstractVarExpr lhs = parseLeftHandSide();
 
@@ -1615,10 +1619,14 @@ public class QuercusParser {
       else
         _peekToken = token;
 
-      String name = parseIdentifier();
+      String name;
       
-      name = resolveIdentifier(name);
-
+      if (_classDef == null) {
+        name = parseNamespaceIdentifier();
+      }
+      else
+        name = parseIdentifier();
+      
       if (isAbstract && ! _scope.isAbstract()) {
         if (_classDef != null)
           throw error(L.l("'{0}' may not be abstract because class {1} is not abstract.",
@@ -1901,7 +1909,7 @@ public class QuercusParser {
   private Statement parseClassDefinition(int modifiers)
     throws IOException
   {
-    String name = parseIdentifier();
+    String name = parseNamespaceIdentifier();
 
     String comment = _comment;
 
@@ -1913,13 +1921,13 @@ public class QuercusParser {
     if (token == EXTENDS) {
       if ((modifiers & M_INTERFACE)!= 0) {
         do {
-          ifaceList.add(parseIdentifier());
+          ifaceList.add(parseNamespaceIdentifier());
 
           token = parseToken();
         } while (token == ',');
       }
       else {
-        parentName = parseIdentifier();
+        parentName = parseNamespaceIdentifier();
 
         token = parseToken();
       }
@@ -1927,7 +1935,7 @@ public class QuercusParser {
 
     if ((modifiers & M_INTERFACE) == 0 && token == IMPLEMENTS) {
       do {
-        ifaceList.add(parseIdentifier());
+        ifaceList.add(parseNamespaceIdentifier());
 
         token = parseToken();
       } while (token == ',');
@@ -2101,6 +2109,40 @@ public class QuercusParser {
     } while (token == ',');
 
     _peekToken = token;
+  }
+
+  /**
+   * Parses a const definition
+   */
+  private ArrayList<Statement> parseConstDefinition()
+    throws IOException
+  {
+    ArrayList<Statement> constList = new ArrayList<Statement>();
+    
+    int token;
+
+    do {
+      String name = parseNamespaceIdentifier();
+
+      expect('=');
+
+      Expr expr = parseExpr();
+
+      ArrayList<Expr> args = new ArrayList<Expr>();
+      args.add(_factory.createString(name));
+      args.add(expr);
+      
+      Expr fun = _factory.createFunction(getLocation(), "define", args);
+      
+      constList.add(_factory.createExpr(getLocation(), fun));
+      // _scope.addConstant(name, expr);
+
+      token = parseToken();
+    } while (token == ',');
+
+    _peekToken = token;
+    
+    return constList;
   }
 
   /**
@@ -3553,18 +3595,12 @@ public class QuercusParser {
     }
     else if (_lexeme == null)
       throw error(L.l("Expected identifier at '{0}'", tokenName(token)));
+    
+    if (_lexeme.indexOf('\\') >= 0) {
+      throw error(L.l("Namespace is not allowed for variable ${0}", _lexeme));
+    }
 
     return _factory.createVar(_function.createVar(_lexeme));
-  }
-
-  private String resolveIdentifier(String id)
-  {
-    if (id.startsWith("\\"))
-      return id.substring(1);
-    else if (_namespace.equals(""))
-      return id;
-    else
-      return _namespace + "\\" + id;
   }
   
   /**
@@ -3580,7 +3616,8 @@ public class QuercusParser {
     if (name.equalsIgnoreCase("array"))
       return parseArrayFunction();
     
-    name = resolveIdentifier(name);
+    if (className == null)
+      name = resolveIdentifier(name);
 
     int token = parseToken();
 
@@ -3663,8 +3700,13 @@ public class QuercusParser {
     else if (name.equals("__NAMESPACE__")) {
       return createString(_namespace);
     }
-    else
-      return _factory.createConst(name);
+    
+    name = resolveIdentifier(name);
+    
+    if (name.startsWith("\\"))
+      name = name.substring(1);
+    
+    return _factory.createConst(name);
   }
 
   /**
@@ -3810,6 +3852,8 @@ public class QuercusParser {
       // php/0957
       if ("self".equals(name) && _classDef != null)
         name = _classDef.getName();
+      else
+        name = resolveIdentifier(name);
     }
 
     int token = parseToken();
@@ -4049,19 +4093,6 @@ public class QuercusParser {
     //expect(';');
 
     return _factory.createImport(getLocation(), sb.toString(), isWildcard);
-  }
-
-  private String parseIdentifier()
-    throws IOException
-  {
-    int token = parseToken();
-
-    if (token == IDENTIFIER)
-      return _lexeme;
-    else if (FIRST_IDENTIFIER_LEXEME <= token)
-      return _lexeme;
-    else
-      throw error(L.l("expected identifier at {0}.", tokenName(token)));
   }
 
   /**
@@ -4414,38 +4445,122 @@ public class QuercusParser {
           else
             _peek = ch2;
         }
-
-        if (isIdentifierStart(ch)) {
-          _sb.setLength(0);
-          _sb.append((char) ch);
-
-          for (ch = read(); isIdentifierPart(ch); ch = read()) {
-            _sb.append((char) ch);
-          }
-
-          _peek = ch;
-
-          _lexeme = _sb.toString();
-
-          // the 'static' reserved keyword vs late static binding (static::$a)
-          if (_peek == ':' && "static".equals(_lexeme))
-            return IDENTIFIER;
-
-          int reserved = _reserved.get(_lexeme);
-
-          if (reserved > 0)
-            return reserved;
-
-          reserved = _insensitiveReserved.get(_lexeme.toLowerCase());
-          if (reserved > 0)
-            return reserved;
-          else
-            return IDENTIFIER;
-        }
-
-        throw error("unknown lexeme:" + (char) ch);
+        
+        return parseNamespaceIdentifier(ch);
       }
     }
+  }
+
+  private String parseIdentifier()
+    throws IOException
+  {
+    int token = _peekToken;
+    _peekToken = -1;
+    
+    if (token <= 0)
+      token = parseIdentifier(read());
+
+    if (token == IDENTIFIER)
+      return _lexeme;
+    else if (FIRST_IDENTIFIER_LEXEME <= token)
+      return _lexeme;
+    else
+      throw error(L.l("expected identifier at {0}.", tokenName(token)));
+  }
+  
+
+  private String parseNamespaceIdentifier()
+    throws IOException
+  {
+    int token = _peekToken;
+    _peekToken = -1;
+    
+    if (token <= 0)
+      token = parseNamespaceIdentifier(read());
+
+    if (token == IDENTIFIER)
+      return resolveIdentifier(_lexeme);
+    else if (FIRST_IDENTIFIER_LEXEME <= token)
+      return resolveIdentifier(_lexeme);
+    else
+      throw error(L.l("expected identifier at {0}.", tokenName(token)));
+  }
+
+  private String resolveIdentifier(String id)
+  {
+    if (id.startsWith("\\"))
+      return id.substring(1);
+    else if (_namespace.equals(""))
+      return id;
+    else
+      return _namespace + "\\" + id;
+  }
+
+  private int parseIdentifier(int ch)
+    throws IOException
+  {
+    for (; Character.isWhitespace(ch); ch = read()) {
+    }
+    
+    if (isIdentifierStart(ch)) {
+      _sb.setLength(0);
+      _sb.append((char) ch);
+
+      for (ch = read(); isIdentifierPart(ch); ch = read()) {
+        _sb.append((char) ch);
+      }
+
+      _peek = ch;
+      
+      return lexemeToToken();
+    }
+
+    throw error("expected identifier at " + (char) ch);
+  }
+
+  private int parseNamespaceIdentifier(int ch)
+    throws IOException
+  {
+    for (; Character.isWhitespace(ch); ch = read()) {
+    }
+    
+    if (isNamespaceIdentifierStart(ch)) {
+      _sb.setLength(0);
+      _sb.append((char) ch);
+
+      for (ch = read(); isNamespaceIdentifierPart(ch); ch = read()) {
+        _sb.append((char) ch);
+      }
+
+      _peek = ch;
+      
+      int token = lexemeToToken();
+      
+      return token;
+    }
+
+    throw error("unknown lexeme:" + (char) ch);
+  }
+
+  private int lexemeToToken()
+    throws IOException
+  {
+    _lexeme = _sb.toString();
+
+    // the 'static' reserved keyword vs late static binding (static::$a)
+    if (_peek == ':' && "static".equals(_lexeme))
+      return IDENTIFIER;
+
+    int reserved = _reserved.get(_lexeme);
+
+    if (reserved > 0)
+      return reserved;
+
+    reserved = _insensitiveReserved.get(_lexeme.toLowerCase());
+    if (reserved > 0)
+      return reserved;
+    else
+      return IDENTIFIER;
   }
 
   /**
@@ -5058,7 +5173,12 @@ public class QuercusParser {
 
     return STRING;
   }
-
+ 
+  private boolean isNamespaceIdentifierStart(int ch)
+  {
+    return isIdentifierStart(ch) || ch == '\\';
+  }
+  
   private boolean isIdentifierStart(int ch)
   {
     if (ch < 0)
@@ -5066,10 +5186,15 @@ public class QuercusParser {
     else
       return (ch >= 'a' && ch <= 'z' 
               || ch >= 'A' && ch <= 'Z'
-              || ch == '_' || ch == '\\'
+              || ch == '_'
               || Character.isLetter(ch));
   }
-
+  
+  private boolean isNamespaceIdentifierPart(int ch)
+  {
+    return isIdentifierPart(ch) || ch == '\\';
+  }
+  
   private boolean isIdentifierPart(int ch)
   {
     if (ch < 0)
@@ -5078,7 +5203,7 @@ public class QuercusParser {
       return (ch >= 'a' && ch <= 'z'
               || ch >= 'A' && ch <= 'Z'
               || ch >= '0' && ch <= '9'
-              || ch == '_' || ch == '\\'
+              || ch == '_'
               || Character.isLetterOrDigit(ch));
   }
 
@@ -5514,6 +5639,7 @@ public class QuercusParser {
     case STATIC: return "'static'";
     case FINAL: return "'final'";
     case ABSTRACT: return "'abstract'";
+    case CONST: return "'const'";
 
     case GLOBAL: return "'global'";
 
