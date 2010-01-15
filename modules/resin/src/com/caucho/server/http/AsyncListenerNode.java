@@ -58,6 +58,12 @@ public class AsyncListenerNode
   {
     return _next;
   }
+  
+  public void onStart(AsyncEvent event)
+    throws IOException
+  {
+    _listener.onStartAsync(event);
+  }
 
   public void onTimeout()
     throws IOException

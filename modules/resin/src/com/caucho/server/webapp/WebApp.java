@@ -176,8 +176,8 @@ public class WebApp extends ServletContextImpl
   private boolean _isCompileContext;
 
   // Any war-generators.
-  private ArrayList<DeployGenerator> _appGenerators
-    = new ArrayList<DeployGenerator>();
+  private ArrayList<DeployGenerator<WebAppController>> _appGenerators
+    = new ArrayList<DeployGenerator<WebAppController>>();
 
   // Any web-app-default for children
   private ArrayList<WebAppConfig> _webAppDefaultList
@@ -1794,6 +1794,11 @@ public class WebApp extends ServletContextImpl
     }
   }
 
+  public <T extends EventListener> T createListener(Class<T> listenerClass)
+  {
+    return _beanManager.createTransientObject(listenerClass);
+  }
+
   @Configurable
   public void addListener(Listener listener)
     throws Exception
@@ -2680,7 +2685,8 @@ public class WebApp extends ServletContextImpl
     return result;
   }
 
-  public void initAnnotated() throws Exception {
+  public void initAnnotated() throws Exception
+  {
     List<Class> listeners = new ArrayList<Class>();
 
     List<Class> servlets = new ArrayList<Class>();
@@ -2690,7 +2696,7 @@ public class WebApp extends ServletContextImpl
     _pendingClasses.clear();
 
     for (String className : pendingClasses) {
-      Class cl = _classLoader.loadClass(className);
+      Class<?> cl = _classLoader.loadClass(className);
 
       if (ServletContextListener.class.isAssignableFrom(cl))
         listeners.add(cl);
@@ -2710,9 +2716,9 @@ public class WebApp extends ServletContextImpl
         filters.add(cl);
     }
 
-    for (Class listenerClass : listeners) {
+    for (Class<?> listenerClass : listeners) {
       WebListener webListener
-        = (WebListener) listenerClass.getAnnotation(WebListener.class);
+        = listenerClass.getAnnotation(WebListener.class);
 
       if (webListener != null) {
         Listener listener = new Listener();
@@ -2722,17 +2728,17 @@ public class WebApp extends ServletContextImpl
       }
     }
 
-    for (Class filterClass : filters) {
+    for (Class<?> filterClass : filters) {
       WebFilter webFilter
-        = (WebFilter) filterClass.getAnnotation(WebFilter.class);
+        = filterClass.getAnnotation(WebFilter.class);
 
       if (webFilter != null)
         addFilter(webFilter, filterClass.getName());
     }
 
-    for (Class servletClass : servlets) {
+    for (Class<? extends Servlet> servletClass : servlets) {
       WebServlet webServlet
-        = (WebServlet) servletClass.getAnnotation(WebServlet.class);
+        = servletClass.getAnnotation(WebServlet.class);
 
       if (webServlet != null)
         addServlet(webServlet, servletClass.getName());
@@ -3676,7 +3682,7 @@ public class WebApp extends ServletContextImpl
    */
   public long getMaxAge(String uri)
   {
-    CacheMapping map = (CacheMapping) _cacheMappingMap.map(uri);
+    CacheMapping map = _cacheMappingMap.map(uri);
 
     if (map != null)
       return map.getMaxAge();
@@ -3689,7 +3695,7 @@ public class WebApp extends ServletContextImpl
    */
   public long getSMaxAge(String uri)
   {
-    CacheMapping map = (CacheMapping) _cacheMappingMap.map(uri);
+    CacheMapping map = _cacheMappingMap.map(uri);
 
     if (map != null)
       return map.getSMaxAge();
@@ -3836,7 +3842,7 @@ public class WebApp extends ServletContextImpl
 
       for (int i = _appGenerators.size() - 1; i >= 0; i--) {
         try {
-          DeployGenerator deploy = _appGenerators.get(i);
+          DeployGenerator<WebAppController> deploy = _appGenerators.get(i);
           _parent.removeWebAppDeploy(deploy);
           deploy.destroy();
         } catch (Throwable e) {
@@ -3926,36 +3932,6 @@ public class WebApp extends ServletContextImpl
   {
     return "WebApp[" + getId() + "]";
   }
-
-  /**
-   * WebBeans callbacks
-   */
-  /*
-  class WebBeansObserver implements Observer<BeanManager> {
-    public boolean notify(BeanManager manager)
-    {
-      // search for servlets
-
-      for (Bean bean : manager.getBeans(Servlet.class, new CurrentLiteral())) {
-        if (bean instanceof CauchoBean) {
-          CauchoBean cBean = (CauchoBean) bean;
-
-          for (Annotation ann : cBean.getAnnotations()) {
-            if (ann.annotationType().equals(WebServlet.class)) {
-              //ServletConfigImpl config
-              //  = new ServletConfigImpl(this, ann, manager.getInstance(bean));
-
-              // _servletManager.addServlet(config);
-
-            }
-          }
-        }
-      }
-
-      return false;
-    }
-  }
-  */
 
   static class FilterChainEntry {
     FilterChain _filterChain;

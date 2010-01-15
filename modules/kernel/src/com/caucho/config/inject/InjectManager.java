@@ -124,6 +124,8 @@ public class InjectManager
 
   private static final Class<?> []_forbiddenAnnotations;
   private static final Class<?> []_forbiddenClasses;
+  
+  private static final ClassLoader _systemClassLoader;
 
   private String _id;
 
@@ -391,11 +393,18 @@ public class InjectManager
         EnvironmentClassLoader envLoader
           = Environment.getEnvironmentClassLoader(loader);
         
+        // XXX: issues with system class loader?
+        /*
         if (envLoader == null) {
           // InjectManager requires an EnvironmentClassLoader
           
-          return null;
+          envLoader = Environment.getEnvironmentClassLoader(_systemClassLoader);
+          
+          if (envLoader == null)
+            throw new IllegalStateException(L.l("CanDI requires an active Resin environment {0}",
+                                                loader));
         }
+        */
         
         // ejb doesn't create a new InjectManager even though it's a new
         // environment
@@ -3325,5 +3334,17 @@ public class InjectManager
 
     _forbiddenClasses = new Class[forbiddenClasses.size()];
     forbiddenClasses.toArray(_forbiddenClasses);
+    
+    ClassLoader systemClassLoader = null;
+    
+    try {
+      systemClassLoader = ClassLoader.getSystemClassLoader();
+    } catch (Throwable e) {
+      // a security manager may not allow this call
+      
+      log.log(Level.FINEST, e.toString(), e);
+    }
+    
+    _systemClassLoader = systemClassLoader;
   }
 }

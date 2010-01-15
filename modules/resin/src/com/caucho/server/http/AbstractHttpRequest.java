@@ -42,8 +42,10 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.ServletContext;
 import javax.servlet.ServletInputStream;
 import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.security.SecurityContextProvider;
@@ -1466,15 +1468,21 @@ public abstract class AbstractHttpRequest
   {
     try {
       startInvocation();
-
-      if (! isComet())
+      
+      HttpServletRequestImpl request = getRequestFacade();
+      
+      if (! request.isAsyncStarted())
         return false;
 
-      WebApp webApp = getAsyncDispatchWebApp();
-      String url = getAsyncDispatchUrl();
+      AsyncContextImpl asyncContext = request.getAsyncContext();
 
-      // servlet 3.0 spec defaults to suspend
-      // _tcpConn.cometSuspend();
+      ServletContext webApp = asyncContext.getDispatchContext();
+      String url = asyncContext.getDispatchPath();
+      
+      HttpServletRequest asyncRequest = getRequestFacade();
+      HttpServletResponse asyncResponse = getResponseFacade();
+      
+      asyncContext.onStart(webApp, asyncRequest, asyncResponse);
 
       if (url != null) {
         if (webApp == null)

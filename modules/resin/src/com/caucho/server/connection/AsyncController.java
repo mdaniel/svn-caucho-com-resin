@@ -39,6 +39,15 @@ public class AsyncController {
   protected AsyncController()
   {
   }
+  
+  public void setMaxIdleTime(long idleTimeout)
+  {
+  }
+  
+  public long getMaxIdleTime()
+  {
+    return -1;
+  }
 
   public boolean wake()
   {

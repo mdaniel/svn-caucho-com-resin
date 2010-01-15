@@ -1483,12 +1483,10 @@ public class Port extends TaskWorker
     if (conn.isWakeRequested()) {
       _threadPool.schedule(conn.getResumeTask());
     }
-    else if (conn.isComet()) {
-      _suspendConnectionSet.add(conn);
-    }
     else {
-      throw new IllegalStateException(L.l("{0} suspend is not allowed because the connection is not an asynchronous connection",
-                                          conn));
+      _suspendConnectionSet.add(conn);
+      
+      // XXX: wake
     }
   }
 

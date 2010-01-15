@@ -171,7 +171,7 @@ public class ServletContextImpl extends ServletContextCompat
   /**
    * Gets the init params
    */
-  public Enumeration getInitParameterNames()
+  public Enumeration<String> getInitParameterNames()
   {
     return Collections.enumeration(_initParams.keySet());
   }
@@ -191,7 +191,7 @@ public class ServletContextImpl extends ServletContextCompat
   /**
    * Returns an enumeration of the attribute names.
    */
-  public Enumeration getAttributeNames()
+  public Enumeration<String> getAttributeNames()
   {
     synchronized (_attributes) {
       return Collections.enumeration(_attributes.keySet());
@@ -431,12 +431,12 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException("getServlet is deprecated");
   }
 
-  public Enumeration getServletNames()
+  public Enumeration<String> getServletNames()
   {
     throw new UnsupportedOperationException("getServletNames is deprecated");
   }
 
-  public Enumeration getServlets()
+  public Enumeration<String> getServlets()
   {
     throw new UnsupportedOperationException("getServlets is deprecated");
   }
@@ -528,12 +528,6 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public <T extends EventListener> T createListener(Class<T> listenerClass)
-    throws ServletException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
   public JspConfigDescriptor getJspConfigDescriptor()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -552,5 +546,15 @@ public class ServletContextImpl extends ServletContextCompat
   protected boolean isActive()
   {
     throw new UnsupportedOperationException("unimplemented");
+  }
+
+  /* (non-Javadoc)
+   * @see javax.servlet.ServletContext#createListener(java.lang.Class)
+   */
+  @Override
+  public <T extends EventListener> T createListener(Class<T> listenerClass)
+      throws ServletException {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
