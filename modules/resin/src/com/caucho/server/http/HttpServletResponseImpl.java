@@ -1561,13 +1561,13 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     return _statusMessage;
   }
 
-  public Iterable<String> getHeaders(String name)
+  public Collection<String> getHeaders(String name)
   {
     // XXX: test
     return _response.getHeaders(name);
   }
 
-  public Iterable<String> getHeaderNames()
+  public Collection<String> getHeaderNames()
   {
     // XXX: test
     return _response.getHeaderNames();

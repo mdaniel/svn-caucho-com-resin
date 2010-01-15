@@ -31,6 +31,8 @@ package com.caucho.server.http;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -506,14 +508,23 @@ abstract public class AbstractHttpResponse {
     return _headerValues;
   }
 
-  public Iterable<String> getHeaders(String name)
+  public Collection<String> getHeaders(String name)
   {
-    throw new UnsupportedOperationException("unimplemented");
+    ArrayList<String> headers = new ArrayList<String>();
+
+    for (int i = 0; i < _headerKeys.size(); i++) {
+      String key = _headerKeys.get(i);
+
+      if (key.equals(name))
+        headers.add(_headerValues.get(i));
+    }
+
+    return headers;
   }
 
-  public Iterable<String> getHeaderNames()
+  public Collection<String> getHeaderNames()
   {
-    return _headerKeys;
+    return new HashSet<String>(_headerKeys);
   }
 
   public ArrayList<String> getFooterKeys()

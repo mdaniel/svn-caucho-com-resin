@@ -129,6 +129,14 @@ public class IncludeResponseStream2 extends ToByteResponseStream {
     _headerKeys.add(key);
     _headerValues.add(value);
   }
+
+  List<String> getHeaderKeys() {
+    return _headerKeys;
+  }
+
+  List<String> getHeaderValues() {
+    return _headerValues;
+  }
     
   /**
    * Sets any cache stream.

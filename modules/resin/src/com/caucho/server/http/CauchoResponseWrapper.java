@@ -317,12 +317,12 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
     return _response.getHeader(name);
   }
   
-  public Iterable<String> getHeaders(String name)
+  public Collection<String> getHeaders(String name)
   {
     return _response.getHeaders(name);
   }
   
-  public Iterable<String> getHeaderNames()
+  public Collection<String> getHeaderNames()
   {
     return _response.getHeaderNames();
   }

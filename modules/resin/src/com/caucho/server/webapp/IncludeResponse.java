@@ -42,6 +42,10 @@ import com.caucho.util.QDate;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
+import java.util.Collection;
+import java.util.Set;
+import java.util.HashSet;
+import java.util.List;
 
 /**
  * Internal response for an include() or forward()
@@ -154,7 +158,42 @@ class IncludeResponse extends CauchoResponseWrapper
   {
     _originalStream.addHeader(name, value);
   }
-  
+
+  @Override
+  public Collection<String> getHeaders(String name)
+  {
+    Collection<String> headers = super.getHeaders(name);
+
+    List<String> headerKeys = _originalStream.getHeaderKeys();
+    List<String> headerValues = _originalStream.getHeaderValues();
+
+    for (int i = 0; i < headerKeys.size(); i++) {
+      String key = headerKeys.get(i);
+
+      if (key.equals(name))
+        headers.add(headerValues.get(i));
+    }
+
+    return headers;
+  }
+
+  @Override
+  public Collection<String> getHeaderNames()
+  {
+    Collection<String> responseHeaders = super.getHeaderNames();
+
+    final Set<String> headers;
+
+    if (responseHeaders instanceof Set)
+      headers = (Set) responseHeaders;
+    else
+      headers = new HashSet(responseHeaders);
+
+    headers.addAll(_originalStream.getHeaderKeys());
+
+    return headers;
+  }
+
   @Override
   public boolean containsHeader(String name)
   {

@@ -34,12 +34,12 @@ import com.caucho.vfs.FlushBuffer;
 import javax.servlet.ServletOutputStream;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.util.logging.Logger;
+import java.util.Collection;
 
 public class ResponseAdapter extends ResponseWrapper
   implements CauchoResponse
@@ -384,14 +384,14 @@ public class ResponseAdapter extends ResponseWrapper
     throw new UnsupportedOperationException("unimplemented");
   }
 
-  public Iterable<String> getHeaders(String name)
+  public Collection<String> getHeaders(String name)
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return _response.getHeaders(name);
   }
 
-  public Iterable<String> getHeaderNames()
+  public Collection<String> getHeaderNames()
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return _response.getHeaderNames();
   }
 
   public void setForwardEnclosed(boolean isForwardEnclosed) {
