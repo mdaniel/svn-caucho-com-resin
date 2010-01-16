@@ -48,18 +48,18 @@ import com.caucho.vfs.WriteStream;
 
 public class QuercusEngine
 {
-  private Quercus _quercus;
+  private QuercusContext _quercus;
   private OutputStream _out;
   
   public QuercusEngine()
   {
-    _quercus = new Quercus();
+    _quercus = new QuercusContext();
   }
   
   /**
    * Returns the Quercus object.
    */
-  public Quercus getQuercus()
+  public QuercusContext getQuercus()
   {
     return _quercus;
   }

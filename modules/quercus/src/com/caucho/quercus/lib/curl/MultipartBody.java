@@ -37,7 +37,7 @@ import java.util.Map;
 
 import javax.servlet.ServletContext;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -278,7 +278,7 @@ public class MultipartBody extends PostBody
     
     private static String getContentType(Env env, String name)
     {
-      Quercus quercus = env.getQuercus();
+      QuercusContext quercus = env.getQuercus();
       
       ServletContext context = quercus.getServletContext();
       

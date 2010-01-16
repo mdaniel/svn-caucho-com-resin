@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2006 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -26,45 +26,32 @@
  *
  * @author Scott Ferguson
  */
+ 
+package com.caucho.quercus.env;
 
-package com.caucho.quercus.program;
-
-import com.caucho.quercus.QuercusContext;
-import com.caucho.quercus.expr.VarInfo;
-
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
- * Information about the entire Quercus program
+ * Case-insensitive method mapping
  */
-public class ProgramInfo
+public final class MethodIntern
 {
-  private final QuercusContext _quercus;
-  private boolean _hasNonPublicMethods;
-  
-  public ProgramInfo(QuercusContext quercus)
+  private static final ConcurrentHashMap<String,char[]> _internMap
+    = new ConcurrentHashMap<String,char[]>();
+
+  public static char[] intern(String name)
   {
-    _quercus = quercus;
-  }
-  
-  /**
-   * Returns the owning quercus.
-   */
-  public QuercusContext getPhp()
-  {
-    return _quercus;
-  }
-  
-  public boolean getHasNonPublicMethods()
-  {
-    return _hasNonPublicMethods;
-  }
-  
-  public void setHasNonPublicMethods(boolean val)
-  {
-    _hasNonPublicMethods = val;
+    char []buffer = _internMap.get(name);
+
+    if (buffer == null) {
+      buffer = name.toCharArray();
+
+      char []oldBuffer= _internMap.putIfAbsent(name, buffer);
+      
+      if (oldBuffer != null)
+        buffer = oldBuffer;
+   }
+
+    return buffer;
   }
 }
-

@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.UsesSymbolTable;
@@ -104,7 +104,7 @@ public class OptionsModule extends AbstractQuercusModule {
   public static Value q_assert(Env env, String code)
   {
     try {
-      Quercus quercus = env.getQuercus();
+      QuercusContext quercus = env.getQuercus();
 
       QuercusProgram program = quercus.parseCode(code);
 
@@ -224,7 +224,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value get_include_path(Env env)
   {
-    return Quercus.INI_INCLUDE_PATH.getAsStringValue(env);
+    return QuercusContext.INI_INCLUDE_PATH.getAsStringValue(env);
   }
 
   /**

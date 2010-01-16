@@ -134,7 +134,7 @@ public class ResinQuercusServlet extends QuercusServletImpl
    * Returns the Quercus instance.
    */
   @Override
-  protected Quercus getQuercus()
+  protected QuercusContext getQuercus()
   {
     synchronized (this) {
       if (_quercus == null)

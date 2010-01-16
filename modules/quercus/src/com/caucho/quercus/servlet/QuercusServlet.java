@@ -30,7 +30,7 @@
 package com.caucho.quercus.servlet;
 
 import com.caucho.config.ConfigException;
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.module.QuercusModule;
 import com.caucho.util.L10N;
@@ -65,7 +65,7 @@ public class QuercusServlet
   private static final Logger log
     = Logger.getLogger(QuercusServlet.class.getName());
 
-  private Quercus _quercus;
+  private QuercusContext _quercus;
   private QuercusServletImpl _impl;
 
   private boolean _isCompile;
@@ -546,7 +546,7 @@ public class QuercusServlet
 
     _impl.init(config);
 
-    Quercus quercus = getQuercus();
+    QuercusContext quercus = getQuercus();
 
     quercus.setCompile(_isCompile);
     quercus.setLazyCompile(_isLazyCompile);
@@ -613,7 +613,7 @@ public class QuercusServlet
   /**
    * Returns the Quercus instance.
    */
-  private Quercus getQuercus()
+  private QuercusContext getQuercus()
   {
     if (_quercus == null)
       _quercus = _impl.getQuercus();

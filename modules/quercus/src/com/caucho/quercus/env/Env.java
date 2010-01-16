@@ -168,7 +168,7 @@ public class Env {
   private static final LruCache<String,StringValue> _internStringMap
     = new LruCache<String,StringValue>(4096);
 
-  protected final Quercus _quercus;
+  protected final QuercusContext _quercus;
 
   private QuercusPage _page;
 
@@ -318,6 +318,8 @@ public class Env {
   private Object _gzStream;
 
   private Env _oldThreadEnv;
+  
+  private boolean _isTimeout;
 
   private long _firstMicroTime;
   private long _firstNanoTime;
@@ -330,7 +332,7 @@ public class Env {
   
   private CharBuffer _cb = new CharBuffer();
 
-  public Env(Quercus quercus,
+  public Env(QuercusContext quercus,
              QuercusPage page,
              WriteStream out,
              HttpServletRequest request,
@@ -425,7 +427,7 @@ public class Env {
     }
   }
 
-  public Env(Quercus quercus)
+  public Env(QuercusContext quercus)
   {
     this(quercus, null, null, null, null);
   }
@@ -668,10 +670,10 @@ public class Env {
     if (! _isUnicodeSemantics)
       return null;
 
-    String encoding = Quercus.INI_UNICODE_OUTPUT_ENCODING.getAsString(this);
+    String encoding = QuercusContext.INI_UNICODE_OUTPUT_ENCODING.getAsString(this);
 
     if (encoding == null)
-      encoding = Quercus.INI_UNICODE_FALLBACK_ENCODING.getAsString(this);
+      encoding = QuercusContext.INI_UNICODE_FALLBACK_ENCODING.getAsString(this);
 
     if (encoding == null)
       encoding = "utf-8";
@@ -888,6 +890,8 @@ public class Env {
 
     for (ModuleStartupListener listener : listeners)
       listener.startup(this);
+    
+    _quercus.startEnv(this);
   }
 
   /**
@@ -938,7 +942,7 @@ public class Env {
   /**
    * Returns the owning PHP engine.
    */
-  public Quercus getQuercus()
+  public QuercusContext getQuercus()
   {
     return _quercus;
   }
@@ -1043,16 +1047,29 @@ public class Env {
    */
   public void checkTimeout()
   {
+    /*
     long now = Alarm.getCurrentTime();
 
     if (_endTime < now)
       throw new QuercusRuntimeException(L.l("script timed out"));
+      */
+    if (_isTimeout)
+      throw new QuercusRuntimeException(L.l("script timed out"));
   }
-
+ 
+  public void updateTimeout()
+  {
+    long now = Alarm.getCurrentTime();
+    
+    if (_endTime < now)
+      _isTimeout = true;
+  }
+  
   public void resetTimeout()
   {
     _startTime = Alarm.getCurrentTime();
     _endTime = _startTime + _timeLimit;
+    _isTimeout = false;
   }
 
   public long getStartTime()
@@ -2234,7 +2251,7 @@ public class Env {
       }
 
       case HTTP_POST_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
           return getGlobalEnvVar("_POST");
@@ -2260,7 +2277,7 @@ public class Env {
       }
 
       case HTTP_POST_FILES:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
           return getGlobalEnvVar("_FILES");
@@ -2285,7 +2302,7 @@ public class Env {
       }
 
       case HTTP_GET_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else if (! isGlobal)
           return null;
@@ -2361,7 +2378,7 @@ public class Env {
       }
 
       case HTTP_RAW_POST_DATA: {
-        if (! Quercus.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this)) {
+        if (! QuercusContext.INI_ALWAYS_POPULATE_RAW_POST_DATA.getAsBoolean(this)) {
           String contentType = getContentType();
 
           if (contentType == null || ! contentType.equals("unknown/type"))
@@ -2382,7 +2399,7 @@ public class Env {
       }
 
       case HTTP_SERVER_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
           return getGlobalEnvVar("_SERVER");
@@ -2443,7 +2460,7 @@ public class Env {
       }
 
       case HTTP_COOKIE_VARS:
-        if (! Quercus.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
+        if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
           return getGlobalEnvVar("_COOKIE");
@@ -2545,7 +2562,7 @@ public class Env {
    */
   protected EnvVar getGlobalSpecialRef(String name)
   {
-    if (Quercus.isSuperGlobal(name))
+    if (QuercusContext.isSuperGlobal(name))
       return _globalMap.get(name);
     else
       return null;
@@ -3643,7 +3660,7 @@ public class Env {
     if (log.isLoggable(Level.FINER))
       log.finer(code);
 
-    Quercus quercus = getQuercus();
+    QuercusContext quercus = getQuercus();
 
     QuercusProgram program = quercus.parseEvalExpr(code);
 
@@ -5325,7 +5342,7 @@ public class Env {
     String includePath = _includePath;
 
     if (_includePathIniCount != _iniCount) {
-      includePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+      includePath = QuercusContext.INI_INCLUDE_PATH.getAsString(this);
       _includePath = null;
       _includePathList = null;
     }
@@ -5442,12 +5459,12 @@ public class Env {
    */
   public String setIncludePath(String path)
   {
-    String prevIncludePath = Quercus.INI_INCLUDE_PATH.getAsString(this);
+    String prevIncludePath = QuercusContext.INI_INCLUDE_PATH.getAsString(this);
 
     if (_defaultIncludePath == null)
       _defaultIncludePath = prevIncludePath;
 
-    Quercus.INI_INCLUDE_PATH.set(this, path);
+    QuercusContext.INI_INCLUDE_PATH.set(this, path);
 
     // reset include path cache count
     _includePathIniCount = -1;
@@ -5565,7 +5582,7 @@ public class Env {
    */
   public void restoreIncludePath()
   {
-    Quercus.INI_INCLUDE_PATH.set(this, _defaultIncludePath);
+    QuercusContext.INI_INCLUDE_PATH.set(this, _defaultIncludePath);
   }
 
   /**
@@ -6712,6 +6729,8 @@ public class Env {
    */
   public void close()
   {
+    _quercus.completeEnv(this);
+    
     if (_duplex != null) {
       log.fine(this + " skipping close for duplex mode");
       return;

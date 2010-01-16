@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.page;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.QuercusProgram;
 import com.caucho.util.Alarm;
@@ -51,7 +51,7 @@ public class PageManager
 
   protected static final L10N L = new L10N(PageManager.class);
   
-  private final Quercus _quercus;
+  private final QuercusContext _quercus;
   
   //private Path _pwd;
   private boolean _isLazyCompile;
@@ -68,12 +68,12 @@ public class PageManager
   /**
    * Constructor.
    */ 
-  public PageManager(Quercus quercus)
+  public PageManager(QuercusContext quercus)
   {
     _quercus = quercus;
   }
 
-  public Quercus getQuercus()
+  public QuercusContext getQuercus()
   {
     return _quercus;
   }

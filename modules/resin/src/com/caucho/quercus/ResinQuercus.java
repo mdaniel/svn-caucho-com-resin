@@ -50,7 +50,7 @@ import java.util.logging.Logger;
 /**
  * Facade for the PHP language.
  */
-public class ResinQuercus extends Quercus
+public class ResinQuercus extends QuercusContext
 {
   private static L10N L = new L10N(ResinQuercus.class);
   private static final Logger log

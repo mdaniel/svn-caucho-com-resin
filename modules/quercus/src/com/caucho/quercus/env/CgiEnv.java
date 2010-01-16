@@ -34,7 +34,7 @@ import java.io.InputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.page.QuercusPage;
@@ -43,7 +43,7 @@ import com.caucho.vfs.WriteStream;
 public class CgiEnv
   extends Env
 {
-  public CgiEnv(Quercus quercus,
+  public CgiEnv(QuercusContext quercus,
                 QuercusPage page,
                 WriteStream out,
                 HttpServletRequest request,
@@ -52,7 +52,7 @@ public class CgiEnv
     super(quercus, page, out, request, response);
   }
 
-  public CgiEnv(Quercus quercus)
+  public CgiEnv(QuercusContext quercus)
   {
     this(quercus, null, null, null, null);
   }

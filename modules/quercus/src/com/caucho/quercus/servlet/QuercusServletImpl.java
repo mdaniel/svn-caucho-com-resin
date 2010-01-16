@@ -30,7 +30,7 @@
 package com.caucho.quercus.servlet;
 
 import com.caucho.java.WorkDir;
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusDieException;
 import com.caucho.quercus.QuercusErrorException;
 import com.caucho.quercus.QuercusExitException;
@@ -73,7 +73,7 @@ public class QuercusServletImpl extends HttpServlet
   private static final Logger log
     = Logger.getLogger(QuercusServletImpl.class.getName());
 
-  protected Quercus _quercus;
+  protected QuercusContext _quercus;
   protected ServletConfig _config;
   protected ServletContext _servletContext;
   
@@ -153,7 +153,7 @@ public class QuercusServletImpl extends HttpServlet
       // php/6006
       ws.setNewlineString("\n");
 
-      Quercus quercus = getQuercus();
+      QuercusContext quercus = getQuercus();
       
       env = quercus.createEnv(page, ws, request, response);
       quercus.setServletContext(_servletContext);
@@ -292,11 +292,11 @@ public class QuercusServletImpl extends HttpServlet
   /**
    * Returns the Quercus instance.
    */
-  protected Quercus getQuercus()
+  protected QuercusContext getQuercus()
   {
     synchronized (this) {
       if (_quercus == null)
-	_quercus = new Quercus();
+	_quercus = new QuercusContext();
     }
 
     return _quercus;

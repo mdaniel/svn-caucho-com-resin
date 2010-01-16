@@ -63,10 +63,11 @@ import java.util.logging.Logger;
 /**
  * Facade for the PHP language.
  */
-public class Quercus
+public class QuercusContext implements AlarmListener
 {
-  private static L10N L = new L10N(Quercus.class);
-  private static final Logger log = Log.open(Quercus.class);
+  private static L10N L = new L10N(QuercusContext.class);
+  private static final Logger log
+    = Logger.getLogger(QuercusContext.class.getName());
 
   private static HashSet<String> _superGlobals
     = new HashSet<String>();
@@ -180,6 +181,9 @@ public class Quercus
 
   private ConcurrentHashMap<String,DataSource> _databaseMap
     = new ConcurrentHashMap<String,DataSource>();
+  
+  private ConcurrentHashMap<Env,Env> _activeEnvSet
+    = new ConcurrentHashMap<Env,Env>();
 
   private long _staticId;
 
@@ -187,11 +191,14 @@ public class Quercus
   private Path _workDir;
 
   private ServletContext _servletContext;
+  
+  private long _envTimeout = 60000L;
+  private boolean _isClosed;
 
   /**
    * Constructor.
    */
-  public Quercus()
+  public QuercusContext()
   {
     _loader = Thread.currentThread().getContextClassLoader();
 
@@ -205,6 +212,8 @@ public class Quercus
        _serverEnvMap.put(createString(entry.getKey()),
                          createString(entry.getValue()));
     }
+    
+    new WeakAlarm(this).queue(_envTimeout);
   }
 
   /**
@@ -1254,9 +1263,9 @@ public class Quercus
 
       id = _functionNameMap.size();
 
-      extendFunctionMap(name, id);
-
       _functionNameMap.put(name, id);
+      
+      extendFunctionMap(name, id);
     }
 
     return id;
@@ -1959,8 +1968,40 @@ public class Quercus
     return new ExprFactory();
   }
 
+  public void startEnv(Env env)
+  {
+    _activeEnvSet.put(env, env);
+  }
+  
+  public void completeEnv(Env env)
+  {
+    _activeEnvSet.remove(env);
+  }
+  @Override
+  public void handleAlarm(Alarm alarm)
+  {
+    try {
+      ArrayList<Env> activeEnv = new ArrayList<Env>(_activeEnvSet.keySet());
+    
+      for (Env env : activeEnv) {
+        env.updateTimeout();
+      }
+    } finally {
+      if (! isClosed()) {
+        alarm.queue(_envTimeout);
+      }
+    }
+  }
+  
+  private boolean isClosed()
+  {
+    return _isClosed;
+  }
+
   public void close()
   {
+    _isClosed = true;
+    
     _sessionManager.close();
     _pageManager.close();
   }
@@ -2071,6 +2112,5 @@ public class Quercus
     = _ini.add("unicode.runtime_encoding", null, IniDefinition.PHP_INI_ALL);
   public static final IniDefinition INI_UNICODE_SCRIPT_ENCODING
     = _ini.add("unicode.script_encoding", null, IniDefinition.PHP_INI_ALL);
-
 }
 

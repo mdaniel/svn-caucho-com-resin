@@ -46,7 +46,7 @@ public class LongValue extends NumberValue
   public static final LongValue ONE = new LongValue(1);
 
   public static final int STATIC_MIN = -1024;
-  public static final int STATIC_MAX = 2048;
+  public static final int STATIC_MAX = 16 * 1024;
 
   public static final LongValue[]STATIC_VALUES;
 
@@ -285,7 +285,9 @@ public class LongValue extends NumberValue
    */
   public Value increment(int incr)
   {
-    return LongValue.create(_value + incr);
+    long newValue = _value + incr;
+    
+    return LongValue.create(newValue);
   }
 
   /**

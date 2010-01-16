@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.env;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.ClassDef;
@@ -58,7 +58,7 @@ public final class DefinitionState {
     LruCache<ClassKey,SoftReference<QuercusClass>> _classCache
     = new LruCache<ClassKey,SoftReference<QuercusClass>>(4096);
 
-  private final Quercus _quercus;
+  private final QuercusContext _quercus;
 
   private boolean _isStrict;
 
@@ -75,7 +75,7 @@ public final class DefinitionState {
   // crc of the entries
   private long _crc;
 
-  public DefinitionState(Quercus quercus)
+  public DefinitionState(QuercusContext quercus)
   {
     _quercus = quercus;
 
@@ -135,7 +135,7 @@ public final class DefinitionState {
   /**
    * Returns the owning PHP engine.
    */
-  public Quercus getQuercus()
+  public QuercusContext getQuercus()
   {
     return _quercus;
   }

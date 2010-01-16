@@ -30,7 +30,7 @@
 package com.caucho.quercus.parser;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.expr.*;
@@ -174,13 +174,14 @@ public class QuercusParser {
   private final static int IMPORT = 574;
   private final static int TEXT_PHP = 575;
   private final static int NAMESPACE = 576;
+  private final static int USE= 577;
 
   private final static int LAST_IDENTIFIER_LEXEME = 1024;
 
   private final static IntMap _insensitiveReserved = new IntMap();
   private final static IntMap _reserved = new IntMap();
 
-  private Quercus _quercus;
+  private QuercusContext _quercus;
 
   private Path _sourceFile;
 
@@ -224,7 +225,7 @@ public class QuercusParser {
 
   private String _comment;
 
-  public QuercusParser(Quercus quercus)
+  public QuercusParser(QuercusContext quercus)
   {
     _quercus = quercus;
 
@@ -237,7 +238,7 @@ public class QuercusParser {
     _scope = _globalScope;
   }
 
-  public QuercusParser(Quercus quercus,
+  public QuercusParser(QuercusContext quercus,
                        Path sourceFile,
                        ReadStream is)
   {
@@ -283,7 +284,7 @@ public class QuercusParser {
     _parserLocation.setLineNumber(line);
   }
 
-  public static QuercusProgram parse(Quercus quercus,
+  public static QuercusProgram parse(QuercusContext quercus,
                                      Path path,
                                      String encoding)
     throws IOException
@@ -302,7 +303,7 @@ public class QuercusParser {
     }
   }
 
-  public static QuercusProgram parse(Quercus quercus,
+  public static QuercusProgram parse(QuercusContext quercus,
                                      Path path,
                                      String encoding,
                                      String fileName,
@@ -326,7 +327,7 @@ public class QuercusParser {
     }
   }
 
-  public static QuercusProgram parse(Quercus quercus,
+  public static QuercusProgram parse(QuercusContext quercus,
                                      ReadStream is)
     throws IOException
   {
@@ -336,14 +337,14 @@ public class QuercusParser {
     return parser.parse();
   }
 
-  public static QuercusProgram parse(Quercus quercus,
+  public static QuercusProgram parse(QuercusContext quercus,
                                      Path path, ReadStream is)
     throws IOException
   {
     return new QuercusParser(quercus, path, is).parse();
   }
 
-  public static QuercusProgram parseEval(Quercus quercus, String str)
+  public static QuercusProgram parseEval(QuercusContext quercus, String str)
     throws IOException
   {
     Path path = new StringPath(str);
@@ -353,7 +354,7 @@ public class QuercusParser {
     return parser.parseCode();
   }
 
-  public static QuercusProgram parseEvalExpr(Quercus quercus, String str)
+  public static QuercusProgram parseEvalExpr(QuercusContext quercus, String str)
     throws IOException
   {
     Path path = new StringPath(str);
@@ -363,7 +364,7 @@ public class QuercusParser {
     return parser.parseCode().createExprReturn();
   }
 
-  public static AbstractFunction parseFunction(Quercus quercus,
+  public static AbstractFunction parseFunction(QuercusContext quercus,
                                                String name,
                                                String args,
                                                String code)
@@ -381,7 +382,7 @@ public class QuercusParser {
     return fun;
   }
 
-  public static Expr parse(Quercus quercus, String str)
+  public static Expr parse(QuercusContext quercus, String str)
     throws IOException
   {
       Path path = new StringPath(str);
@@ -696,6 +697,10 @@ public class QuercusParser {
         
       case NAMESPACE:
         statementList.addAll(parseNamespace());
+        break;
+        
+      case USE:
+        parseUse();
         break;
 
       case '{':
@@ -2244,6 +2249,14 @@ public class QuercusParser {
     else {
       throw error(L.l("namespace must be followed by '{' or ';'"));
     }
+  }
+  
+  private void parseUse()
+    throws IOException
+  {
+    String name = parseNamespaceIdentifier();
+    
+    expect(';');
   }
 
   /**
@@ -5673,6 +5686,9 @@ public class QuercusParser {
       
     case NAMESPACE:
       return "NAMESPACE";
+      
+    case USE:
+      return "USE";
 
     default:
       if (32 <= token && token < 127)
@@ -5927,5 +5943,6 @@ public class QuercusParser {
 
     _insensitiveReserved.put("import", IMPORT);
     _insensitiveReserved.put("namespace", NAMESPACE);
+    _insensitiveReserved.put("use", USE);
   }
 }

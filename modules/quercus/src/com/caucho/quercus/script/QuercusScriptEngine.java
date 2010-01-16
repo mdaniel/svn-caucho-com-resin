@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.script;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusExitException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -51,15 +51,15 @@ public class QuercusScriptEngine
   extends AbstractScriptEngine
   implements Compilable {
   private QuercusScriptEngineFactory _factory;
-  private final Quercus _quercus;
+  private final QuercusContext _quercus;
 
   QuercusScriptEngine(QuercusScriptEngineFactory factory)
   {
-    this(factory, new Quercus());
+    this(factory, new QuercusContext());
   }
 
   public QuercusScriptEngine(QuercusScriptEngineFactory factory,
-			     Quercus quercus)
+			     QuercusContext quercus)
   {
     _factory = factory;
     _quercus = quercus;
@@ -68,7 +68,7 @@ public class QuercusScriptEngine
   /**
    * Returns the Quercus object.
    */
-  Quercus getQuercus()
+  QuercusContext getQuercus()
   {
     return _quercus;
   }

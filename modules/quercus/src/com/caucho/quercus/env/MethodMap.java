@@ -31,16 +31,33 @@ package com.caucho.quercus.env;
 
 import java.util.*;
 
+import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.util.L10N;
+import com.caucho.util.Primes;
+
 /**
  * Case-insensitive method mapping
  */
-public class MethodMap<V>
+public final class MethodMap<V>
 {
+  private static final L10N L = new L10N(MethodMap.class);
+  
+  private final QuercusClass _quercusClass;
+  
   private Entry<V> []_entries = new Entry[16];
+  private int _prime = Primes.getBiggestPrime(_entries.length);
   private int _size;
-    
-  public void put(char []buffer, int length, V value)
+  
+  public MethodMap(QuercusClass quercusClass)
   {
+    _quercusClass = quercusClass;
+  }
+    
+  public void put(String name, V value)
+  {
+    char []buffer = MethodIntern.intern(name);
+    int length = buffer.length;
+    
     if (_entries.length <= _size * 4)
       resize();
     
@@ -49,7 +66,7 @@ public class MethodMap<V>
     char []key = new char[length];
     System.arraycopy(buffer, 0, key, 0, length);
 
-    int bucket = hash & (_entries.length - 1);
+    int bucket = (hash & 0x7fffffff) % _prime;
 
     Entry<V> entry;
     for (entry = _entries[bucket]; entry != null; entry = entry._next) {
@@ -75,7 +92,40 @@ public class MethodMap<V>
 
   public V get(int hash, char []buffer, int length)
   {
-    int bucket = hash & (_entries.length - 1);
+    int bucket = (hash & 0x7fffffff) % _prime;
+
+    for (Entry<V> entry = _entries[bucket];
+         entry != null;
+         entry = entry._next) {
+      char []key = entry._key;
+
+      if (key == buffer || match(key, buffer, length))
+        return entry._value;
+    }
+    
+    AbstractFunction call = null;
+    
+    if (_quercusClass != null)
+      call = _quercusClass.getCall();
+    
+    if (call != null)
+      return (V) call;
+
+    Env env = Env.getCurrent();
+    
+    env.error(L.l("Call to undefined method {0}::{1}",
+                  _quercusClass.getName(), toMethod(buffer, length)));
+
+    throw new IllegalStateException();
+  }
+
+  public V getRaw(String name)
+  {
+    int length = name.length();
+    char []buffer = name.toCharArray();
+    int hash = hash(buffer, length);
+
+    int bucket = (hash & 0x7fffffff) % _prime;
 
     for (Entry<V> entry = _entries[bucket];
          entry != null;
@@ -85,15 +135,8 @@ public class MethodMap<V>
       if (match(key, buffer, length))
         return entry._value;
     }
-
+    
     return null;
-  }
-
-  public void put(String keyString, V value)
-  {
-    char []key = keyString.toCharArray();
-
-    put(key, key.length, value);
   }
 
   public V get(String keyString)
@@ -142,7 +185,8 @@ public class MethodMap<V>
   private void resize()
   {
     Entry<V> []newEntries = new Entry[2 * _entries.length];
-
+    int newPrime = Primes.getBiggestPrime(newEntries.length);
+    
     for (int i = 0; i < _entries.length; i++) {
       Entry<V> entry = _entries[i];
       
@@ -150,7 +194,7 @@ public class MethodMap<V>
         Entry<V> next = entry._next;
 
         int hash = hash(entry._key, entry._key.length);
-        int bucket = hash & (newEntries.length - 1);
+        int bucket = (hash & 0x7fffffff) % newPrime;
 
         entry._next = newEntries[bucket];
         newEntries[bucket] = entry;
@@ -160,6 +204,7 @@ public class MethodMap<V>
     }
 
     _entries = newEntries;
+    _prime = newPrime;
   }
 
   public static int hash(char []buffer, int length)
@@ -195,6 +240,10 @@ public class MethodMap<V>
     return hash;
   }
     
+  private static String toMethod(char []key, int keyLength)
+  {
+    return new String(key, 0, keyLength);
+  }
 
   final static class Entry<V> {
     final char []_key;

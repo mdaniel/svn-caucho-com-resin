@@ -40,7 +40,7 @@ import com.caucho.vfs.StringPath;
 import com.caucho.vfs.WriteStream;
 
 public class CliQuercus
-  extends Quercus
+  extends QuercusContext
 {
   private String _fileName;
   private String []_args;

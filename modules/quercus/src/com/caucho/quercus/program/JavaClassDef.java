@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusRuntimeException;
@@ -92,7 +92,7 @@ public class JavaClassDef extends ClassDef {
     = new HashMap<String, Value>();
 
   private final MethodMap<AbstractJavaMethod> _functionMap
-    = new MethodMap<AbstractJavaMethod>();
+    = new MethodMap<AbstractJavaMethod>(null);
 
   private final HashMap<StringValue, AbstractJavaMethod> _getMap
     = new HashMap<StringValue, AbstractJavaMethod>();
@@ -1313,7 +1313,7 @@ public class JavaClassDef extends ClassDef {
         continue;
 
       try {
-        Value value = Quercus.objectToValue(field.get(null));
+        Value value = QuercusContext.objectToValue(field.get(null));
 
         if (value != null)
           _constMap.put(field.getName().intern(), value);
@@ -1369,7 +1369,7 @@ public class JavaClassDef extends ClassDef {
           throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method.getName()));
         
         JavaMethod newFun = new JavaMethod(moduleContext, method);
-        AbstractJavaMethod fun = _functionMap.get(newFun.getName());
+        AbstractJavaMethod fun = _functionMap.getRaw(newFun.getName());
 
         if (fun != null)
           fun = fun.overload(newFun);

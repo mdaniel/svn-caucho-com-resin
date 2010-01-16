@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.StringLiteralExpr;
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.util.Primes;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -55,11 +56,12 @@ public class ObjectExtValue extends ObjectValue
     = new ConstStringValue("__toString");
 
   private static final int DEFAULT_SIZE = 16;
+  private static final int DEFAULT_PRIME = Primes.getBiggestPrime(DEFAULT_SIZE);
 
   private MethodMap<AbstractFunction> _methodMap;
 
   private Entry []_entries;
-  private int _hashMask;
+  private int _prime;
 
   private int _size;
   private boolean _isFieldInit;
@@ -71,7 +73,7 @@ public class ObjectExtValue extends ObjectValue
     _methodMap = cl.getMethodMap();
 
     _entries = new Entry[DEFAULT_SIZE];
-    _hashMask = _entries.length - 1;
+    _prime = DEFAULT_PRIME;
   }
 
   public ObjectExtValue(Env env, ObjectExtValue copy, CopyRoot root)
@@ -88,7 +90,7 @@ public class ObjectExtValue extends ObjectValue
     Entry []copyEntries = copy._entries;
 
     _entries = new Entry[copyEntries.length];
-    _hashMask = copy._hashMask;
+    _prime = copy._prime;
 
     int len = copyEntries.length;
     for (int i = 0; i < len; i++) {
@@ -122,7 +124,7 @@ public class ObjectExtValue extends ObjectValue
     Entry []copyEntries = copy._entries;
 
     _entries = new Entry[copyEntries.length];
-    _hashMask = copy._hashMask;
+    _prime= copy._prime;
 
     int len = copyEntries.length;
     for (int i = 0; i < len; i++) {
@@ -145,7 +147,7 @@ public class ObjectExtValue extends ObjectValue
   private void init()
   {
     _entries = new Entry[DEFAULT_SIZE];
-    _hashMask = _entries.length - 1;
+    _prime = DEFAULT_PRIME;
     _size = 0;
   }
 
@@ -169,7 +171,7 @@ public class ObjectExtValue extends ObjectValue
     Entry []existingEntries = _entries;
 
     _entries = new Entry[DEFAULT_SIZE];
-    _hashMask = _entries.length - 1;
+    _prime = DEFAULT_PRIME;
     _size = 0;
 
     cls.initObject(env, this);
@@ -550,7 +552,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public void unsetField(StringValue name)
   {
-    int hash = name.hashCode() & _hashMask;
+    int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
     for (Entry entry = _entries[hash];
          entry != null;
@@ -611,10 +613,12 @@ public class ObjectExtValue extends ObjectValue
    */
   private Entry getEntry(Env env, StringValue name)
   {
-    int hash = name.hashCode() & _hashMask;
+    int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
     for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-      if (name.equals(entry._key)) {
+      StringValue entryKey = entry._key;
+      
+      if (name == entryKey || name.equals(entryKey)) {
 
         /*
         if (entry._visibility == FieldVisibility.PRIVATE) {
@@ -641,10 +645,12 @@ public class ObjectExtValue extends ObjectValue
    */
   private Entry getThisEntry(StringValue name)
   {
-    int hash = name.hashCode() & _hashMask;
+    int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
     for (Entry entry = _entries[hash]; entry != null; entry = entry._next) {
-      if (name.equals(entry._key))
+      StringValue entryKey = entry._key;
+      
+      if (name == entryKey || name.equals(entryKey))
         return entry;
     }
 
@@ -656,7 +662,7 @@ public class ObjectExtValue extends ObjectValue
    */
   private Entry createEntry(StringValue name, FieldVisibility visibility)
   {
-    int hash = name.hashCode() & _hashMask;
+    int hash = (name.hashCode() & 0x7fffffff) % _prime;
 
     for (Entry entry = _entries[hash];
          entry != null;
@@ -792,6 +798,9 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public Value callMethod(Env env, int hash, char []name, int nameLen)
   {
+    return _methodMap.get(hash, name, nameLen).callMethod(env, this);
+    
+    /*
     AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
     if (fun != null)
@@ -805,6 +814,7 @@ public class ObjectExtValue extends ObjectValue
     else
       return env.error(L.l("Call to undefined method {0}::{1}()",
                            getName(), toMethod(name, nameLen)));
+                           */
   }
 
   /**

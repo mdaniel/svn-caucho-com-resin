@@ -732,7 +732,9 @@ public class ArrayValueImpl extends ArrayValue
       for (Entry entry = entries[hash];
 	   entry != null;
 	   entry = entry._nextHash) {
-        if (key.equals(entry._key)) {
+        Value entryKey = entry._key;
+        
+        if (key == entryKey || key.equals(entryKey)) {
           Var var = entry._var;
         
           return var != null ? var.toValue() : entry._value;
@@ -745,7 +747,9 @@ public class ArrayValueImpl extends ArrayValue
       for (Entry entry = _head;
 	   entry != null;
 	   entry = entry._next) {
-        if (key.equals(entry._key)) {
+        Value entryKey = entry._key;
+        
+        if (key == entryKey || key.equals(entryKey)) {
           Var var = entry._var;
         
           return var != null ? var.toValue() : entry._value;
@@ -865,7 +869,9 @@ public class ArrayValueImpl extends ArrayValue
       for (Entry entry = entries[hash];
            entry != null;
            entry = entry._nextHash) {
-        if (key.equals(entry._key))
+        Value entryKey = entry._key;
+        
+        if (key == entryKey || key.equals(entryKey))
           return entry;
       }
     }
@@ -873,7 +879,9 @@ public class ArrayValueImpl extends ArrayValue
       for (Entry entry = _head;
            entry != null;
            entry = entry._next) {
-        if (key.equals(entry._key))
+        Value entryKey = entry._key;
+        
+        if (key == entryKey || key.equals(entryKey))
           return entry;
      }
     }
@@ -996,13 +1004,16 @@ public class ArrayValueImpl extends ArrayValue
     
     int hashMask = _hashMask;
     int hash = key.hashCode() & hashMask;
-
+    
     Entry []entries = _entries;
     if (entries != null) {
+
       for (Entry entry = entries[hash];
 	   entry != null;
 	   entry = entry._nextHash) {
-	if (key.equals(entry._key))
+        Value entryKey = entry._key;
+        
+	if (key.equals(entryKey))
 	  return entry;
       }
     }
@@ -1010,7 +1021,9 @@ public class ArrayValueImpl extends ArrayValue
       for (Entry entry = _head;
 	   entry != null;
 	   entry = entry._next) {
-	if (key.equals(entry._key))
+        Value entryKey = entry._key;
+        
+	if (key.equals(entryKey))
 	  return entry;
       }
     }

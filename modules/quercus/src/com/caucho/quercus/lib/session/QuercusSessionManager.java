@@ -30,7 +30,7 @@
 package com.caucho.quercus.lib.session;
 
 import com.caucho.config.ConfigException;
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.StringBuilderValue;
@@ -104,7 +104,7 @@ public class QuercusSessionManager implements AlarmListener {
   /**
    * Creates and initializes a new session manager.
    */
-  public QuercusSessionManager(Quercus quercus)
+  public QuercusSessionManager(QuercusContext quercus)
   {
     _sessions = new LruCache<String,SessionArrayValue>(_sessionMax);
     _sessionIter = _sessions.values();

@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.page.QuercusPage;
@@ -56,7 +56,7 @@ public class QuercusProgram {
   private static final Logger log
     = Logger.getLogger(QuercusProgram.class.getName());
   
-  private Quercus _quercus;
+  private QuercusContext _quercus;
 
   private QuercusPage _compiledPage;
   private QuercusPage _profilePage;
@@ -101,7 +101,7 @@ public class QuercusProgram {
    * @param sourceFile the path to the source file
    * @param statement the top-level statement
    */
-  public QuercusProgram(Quercus quercus, Path sourceFile,
+  public QuercusProgram(QuercusContext quercus, Path sourceFile,
                         HashMap<String,Function> functionMap,
                         ArrayList<Function> functionList,
                         HashMap<String,InterpretedClassDef> classMap,
@@ -141,7 +141,7 @@ public class QuercusProgram {
    * @param sourceFile the path to the source file
    * @param statement the top-level statement
    */
-  public QuercusProgram(Quercus quercus,
+  public QuercusProgram(QuercusContext quercus,
 			Path sourceFile,
 			QuercusPage page)
   {
@@ -156,7 +156,7 @@ public class QuercusProgram {
   /**
    * Returns the engine.
    */
-  public Quercus getPhp()
+  public QuercusContext getPhp()
   {
     return _quercus;
   }

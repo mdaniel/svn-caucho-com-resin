@@ -117,7 +117,7 @@ public class QuercusClass {
     _initializers = new ArrayList<InstanceInitializer>();
   
     _fieldMap = new LinkedHashMap<StringValue,ClassField>();
-    _methodMap = new MethodMap<AbstractFunction>();
+    _methodMap = new MethodMap<AbstractFunction>(this);
     _constMap = new HashMap<String,Expr>();
     _staticFieldExprMap = new LinkedHashMap<String,ArrayList<StaticField>>();
 
@@ -571,7 +571,7 @@ public class QuercusClass {
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
-    AbstractFunction existingFun = _methodMap.get(name);
+    AbstractFunction existingFun = _methodMap.getRaw(name);
     
     if (existingFun == null || ! fun.isAbstract())
       _methodMap.put(name, fun);
@@ -591,7 +591,7 @@ public class QuercusClass {
     //php/09j9
     // XXX: this is a hack to get Zend Framework running, the better fix is
     // to initialize all interface classes before any concrete classes
-    AbstractFunction existingFun = _methodMap.get(name);
+    AbstractFunction existingFun = _methodMap.getRaw(name);
 
     if (existingFun == null && ! fun.isAbstract())
       _methodMap.put(name, fun);

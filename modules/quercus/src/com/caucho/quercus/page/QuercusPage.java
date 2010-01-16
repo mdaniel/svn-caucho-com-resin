@@ -30,7 +30,7 @@
 package com.caucho.quercus.page;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
@@ -210,7 +210,7 @@ abstract public class QuercusPage
    *
    * @param quercus the owning engine
    */
-  public void init(Quercus quercus)
+  public void init(QuercusContext quercus)
   {
   }
 

@@ -90,7 +90,7 @@ import java.util.logging.Logger;
 public class GoogleEnv extends Env {
   private int _timeoutCount;
   
-  public GoogleEnv(Quercus quercus,
+  public GoogleEnv(QuercusContext quercus,
 		   QuercusPage page,
 		   WriteStream out,
 		   HttpServletRequest request,
@@ -99,7 +99,7 @@ public class GoogleEnv extends Env {
     super(quercus, page, out, request, response);
   }
 
-  public GoogleEnv(Quercus quercus)
+  public GoogleEnv(QuercusContext quercus)
   {
     super(quercus);
   }

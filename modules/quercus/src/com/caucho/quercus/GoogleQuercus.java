@@ -43,7 +43,7 @@ import java.util.logging.Logger;
 /**
  * Facade for the PHP language.
  */
-public class GoogleQuercus extends Quercus
+public class GoogleQuercus extends QuercusContext
 {
   private static L10N L = new L10N(GoogleQuercus.class);
   private static final Logger log

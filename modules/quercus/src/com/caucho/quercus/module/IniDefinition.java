@@ -30,7 +30,7 @@
 package com.caucho.quercus.module;
 
 import com.caucho.quercus.env.*;
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.util.L10N;
 
 import java.util.HashMap;
@@ -152,7 +152,7 @@ public class IniDefinition {
   /**
    * Set the ini value for the given scope.
    */
-  public void set(Quercus quercus, Value value)
+  public void set(QuercusContext quercus, Value value)
   {
     set(quercus.getIniMap(true), PHP_INI_SYSTEM, value);
   }
@@ -160,7 +160,7 @@ public class IniDefinition {
   /**
    * Set the ini value for the given scope.
    */
-  public void set(Quercus quercus, String value)
+  public void set(QuercusContext quercus, String value)
   {
     set(quercus, new ConstStringValue(value));
   }
@@ -231,7 +231,7 @@ public class IniDefinition {
    * Returns the value set for name, or the default from the definition if
    * it has not been set.
    */
-  public Value getValue(Quercus quercus)
+  public Value getValue(QuercusContext quercus)
   {
     return get(null, quercus.getIniMap(false));
   }
@@ -248,7 +248,7 @@ public class IniDefinition {
     return get(env.getIniMap(false), env.getQuercus().getIniMap(false));
   }
 
-  public StringValue getAsStringValue(Quercus quercus)
+  public StringValue getAsStringValue(QuercusContext quercus)
   {
     return get(null, quercus.getIniMap(false)).toStringValue();
   }
@@ -268,7 +268,7 @@ public class IniDefinition {
     return (value.length() == 0) ? null : value.toString();
   }
 
-  public boolean getAsBoolean(Quercus quercus)
+  public boolean getAsBoolean(QuercusContext quercus)
   {
     return getAsBooleanValue(quercus).toBoolean();
   }
@@ -278,7 +278,7 @@ public class IniDefinition {
     return getAsBooleanValue(env).toBoolean();
   }
 
-  public BooleanValue getAsBooleanValue(Quercus quercus)
+  public BooleanValue getAsBooleanValue(QuercusContext quercus)
   {
     return getAsBooleanValue(null, quercus.getIniMap(false));
   }
@@ -296,7 +296,7 @@ public class IniDefinition {
     return toBooleanValue(value);
   }
 
-  public LongValue getAsLongValue(Quercus quercus)
+  public LongValue getAsLongValue(QuercusContext quercus)
   {
     return getAsLongValue(null, quercus.getIniMap(false));
   }

@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.lib;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
 import com.caucho.quercus.annotation.NotNull;
@@ -185,7 +185,7 @@ public class MiscModule extends AbstractQuercusModule {
       if (log.isLoggable(Level.FINER))
         log.finer("quercus eval: [[" + code + "]]");
 
-      Quercus quercus = env.getQuercus();
+      QuercusContext quercus = env.getQuercus();
 
       QuercusProgram program = quercus.parseCode(code);
 

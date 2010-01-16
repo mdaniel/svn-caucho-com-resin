@@ -29,7 +29,7 @@
 
 package com.caucho.quercus.program;
 
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.expr.VarInfo;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ import java.util.HashMap;
  */
 public class FunctionInfo
 {
-  private final Quercus _quercus;
+  private final QuercusContext _quercus;
 
   private final String _name;
   
@@ -70,7 +70,7 @@ public class FunctionInfo
 
   private boolean _isReadOnly = true;
 
-  public FunctionInfo(Quercus quercus, String name)
+  public FunctionInfo(QuercusContext quercus, String name)
   {
     _quercus = quercus;
     _name = name;
@@ -106,7 +106,7 @@ public class FunctionInfo
   /**
    * Returns the owning quercus.
    */
-  public Quercus getQuercus()
+  public QuercusContext getQuercus()
   {
     return _quercus;
   }

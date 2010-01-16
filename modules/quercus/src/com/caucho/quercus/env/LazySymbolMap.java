@@ -34,7 +34,7 @@ import com.caucho.java.ScriptStackTrace;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.SimpleLoader;
 import com.caucho.quercus.Location;
-import com.caucho.quercus.Quercus;
+import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.page.QuercusPage;
 import com.caucho.util.L10N;
