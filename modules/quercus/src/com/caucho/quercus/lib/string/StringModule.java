@@ -4785,17 +4785,76 @@ public class StringModule extends AbstractQuercusModule {
    * @param breakString the break string
    * @param cut if true, break on exact match
    */
-  public static StringValue wordwrap(Env env,
-                                     String string,
-                                     @Optional("75") int width,
-                                     @Optional("'\n'") String breakString,
-                                     @Optional boolean isCut)
+  public static Value wordwrap(Env env,
+                               Value value,
+                               @Optional Value widthV,
+                               @Optional Value breakV,
+                               @Optional Value cutV)
   {
-    if (string == null)
-      string = "";
+    if (! value.isString()
+        && ! value.isLong()
+        && ! value.isDouble()
+        && ! value.isBoolean()) {
+      env.warning(L.l("a string is expected, but {0} given",
+                      value.getType()));
+      return NullValue.NULL;
+    }
+    
+    if (! widthV.isDefault()
+        && ! widthV.isLongConvertible()) {
+      env.warning(L.l("wrap width must be numeric, but {0} given",
+                      widthV.getType()));
+      return NullValue.NULL;
+    }
+    
+    int width = 0;
+    
+    if (widthV.isDefault())
+      width = 75;
+    else
+      width = widthV.toInt();
+    
+    String string = value.toString();
+    
+    if (! cutV.isBoolean()
+        && ! cutV.isNull()
+        && ! cutV.isString()
+        && ! cutV.isNumeric()) {
+      env.warning(L.l("cut argument must be boolean, but {0} given",
+                      cutV.getType()));
+      return NullValue.NULL;
+    }
+    
+    boolean isCut = cutV.toBoolean();
+    
+    if (isCut && width == 0 && string.length() > 0) {
+      env.warning(L.l("cannot cut string to width 0"));
+      return BooleanValue.FALSE;
+    }
 
-    int len = string.length();
-    int breakLen = (breakString != null) ? breakString.length() : 0;
+    int len = string != null ? string.length() : 0;
+    
+    if (! breakV.isString()
+        && ! breakV.isLong()
+        && ! breakV.isDouble()
+        && ! breakV.isBoolean()
+        && ! breakV.isNull()) {
+      env.warning(L.l("break string must be a string, but {0} given",
+                      breakV.getType()));
+      return NullValue.NULL;
+    }
+    
+    String breakString = "\n";
+    
+    if (! breakV.isDefault())
+      breakString = breakV.toString();
+    
+    if (breakString == null || breakString.length() == 0) {
+      env.warning(L.l("break string cannot be empty"));
+      return BooleanValue.FALSE;
+    }
+    
+    int breakLen = breakString.length();
     int breakChar;
 
     if (breakLen == 0)
@@ -4810,10 +4869,10 @@ public class StringModule extends AbstractQuercusModule {
 
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
-
+      
       if (ch == breakChar && string.regionMatches(i, breakString, 0, breakLen)) {
-        sb.append(string, head, i + 1);
-        head = i + 1;
+        sb.append(string, head, i + breakLen);
+        head = i + breakLen;
       } else if (width <= i - head) {
         if (ch == ' ') {
           sb.append(string, head, i);
