@@ -29,6 +29,8 @@
 
 package javax.servlet.http;
 
+import java.io.Serializable;
+
 /**
  * Encapsulates HTTP cookies.
  *
@@ -60,17 +62,16 @@ package javax.servlet.http;
  * response.addCookie(myCookie);
  * </pre></code>
  */
-public class Cookie implements Cloneable {
-  private String _key;
-  private String _value;
-  private String _comment;
-  private int _maxAge = -1;
-  private String _path;
-  private boolean _secure;
-  private String _name;
-  private String _domain;
-  private int _version = 0;
-  private boolean _isHttpOnly;
+public class Cookie implements Cloneable, Serializable {
+  private String name;
+  private String value;
+  private String comment;
+  private String domain;
+  private int maxAge = -1;
+  private String path;
+  private boolean secure;
+  private int version = 0;
+  private boolean isHttpOnly;
 
   /**
    * Create a new cookie with the specified name and value.
@@ -92,8 +93,8 @@ public class Cookie implements Cloneable {
         throw new IllegalArgumentException("cookie can't start with '$'");
     }
 
-    _name = name;
-    _value = value;
+    this.name = name;
+    this.value = value;
   }
 
   /**
@@ -103,7 +104,7 @@ public class Cookie implements Cloneable {
    */
   public void setComment(String comment)
   {
-    _comment = comment;
+    this.comment = comment;
   }
 
   /**
@@ -111,7 +112,7 @@ public class Cookie implements Cloneable {
    */
   public String getComment()
   {
-    return _comment;
+    return this.comment;
   }
 
   /**
@@ -126,7 +127,7 @@ public class Cookie implements Cloneable {
    */
   public void setDomain(String domain)
   {
-    _domain = domain;
+    this.domain = domain;
   }
 
   /**
@@ -134,7 +135,7 @@ public class Cookie implements Cloneable {
    */
   public String getDomain()
   {
-    return _domain;
+    return this.domain;
   }
 
   /**
@@ -144,7 +145,7 @@ public class Cookie implements Cloneable {
    */
   public boolean isHttpOnly()
   {
-    return _isHttpOnly;
+    return this.isHttpOnly;
   }
 
   /**
@@ -154,7 +155,7 @@ public class Cookie implements Cloneable {
    */
   public void setHttpOnly(boolean isHttpOnly)
   {
-    _isHttpOnly = isHttpOnly;
+    this.isHttpOnly = isHttpOnly;
   }
 
   /**
@@ -167,7 +168,7 @@ public class Cookie implements Cloneable {
    */
   public void setMaxAge(int maxAge)
   {
-    _maxAge = maxAge;
+    this.maxAge = maxAge;
   }
 
   /**
@@ -175,7 +176,7 @@ public class Cookie implements Cloneable {
    */
   public int getMaxAge()
   {
-    return _maxAge;
+    return this.maxAge;
   }
 
   /**
@@ -184,7 +185,7 @@ public class Cookie implements Cloneable {
    */
   public void setPath(String path)
   {
-    _path = path;
+    this.path = path;
   }
 
   /**
@@ -192,7 +193,7 @@ public class Cookie implements Cloneable {
    */
   public String getPath()
   {
-    return _path;
+    return this.path;
   }
 
   /**
@@ -201,7 +202,7 @@ public class Cookie implements Cloneable {
    */
   public void setSecure(boolean secure)
   {
-    _secure = secure;
+    this.secure = secure;
   }
 
   /**
@@ -209,7 +210,7 @@ public class Cookie implements Cloneable {
    */
   public boolean getSecure()
   {
-    return _secure;
+    return this.secure;
   }
 
   /**
@@ -217,7 +218,7 @@ public class Cookie implements Cloneable {
    */
   public String getName()
   {
-    return _name;
+    return this.name;
   }
 
   /**
@@ -226,7 +227,7 @@ public class Cookie implements Cloneable {
    */
   public void setValue(String value)
   {
-    _value = value;
+    this.value = value;
   }
 
   /**
@@ -234,7 +235,7 @@ public class Cookie implements Cloneable {
    */
   public String getValue()
   {
-    return _value;
+    return this.value;
   }
 
   /**
@@ -242,7 +243,7 @@ public class Cookie implements Cloneable {
    */
   public int getVersion()
   {
-    return _version;
+    return this.version;
   }
 
   /**
@@ -250,7 +251,7 @@ public class Cookie implements Cloneable {
    */
   public void setVersion(int version)
   {
-    _version = version;
+    this.version = version;
   }
 
   /**
@@ -271,16 +272,16 @@ public class Cookie implements Cloneable {
   public String toString()
   {
     StringBuffer sb = new StringBuffer();
-    sb.append("Cookie[" + _name + "=" + _value);
-    if (_path != null)
-      sb.append(",path=" + _path);
-    if (_domain != null)
-      sb.append(",domain=" + _domain);
-    if (_maxAge > 0)
-      sb.append(",max-age=" + _maxAge);
-    if (_secure)
+    sb.append("Cookie[" + this.name + "=" + this.value);
+    if (this.path != null)
+      sb.append(",path=" + this.path);
+    if (this.domain != null)
+      sb.append(",domain=" + this.domain);
+    if (this.maxAge > 0)
+      sb.append(",max-age=" + this.maxAge);
+    if (this.secure)
       sb.append(",secure");
-    if (_isHttpOnly)
+    if (this.isHttpOnly)
       sb.append(",httpOnly");
     sb.append("]");
     return sb.toString();

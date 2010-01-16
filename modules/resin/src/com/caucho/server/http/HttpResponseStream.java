@@ -178,7 +178,7 @@ public class HttpResponseStream extends ResponseStream {
     _bufferStartOffset = 0;
 
     AbstractHttpRequest req = _response.getRequest();
-    if (req.isComet() || req.isDuplex()) {
+    if (req.isCometActive() || req.isDuplex()) {
     }
     else if (! req.isKeepaliveAllowed()) {
       if (log.isLoggable(Level.FINE)) {

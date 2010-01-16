@@ -256,9 +256,9 @@ public class TcpConnection extends AbstractTransportConnection
   }
 
   @Override
-  public boolean isComet()
+  public boolean isCometActive()
   {
-    return _state.isComet();
+    return _state.isCometActive();
   }
 
   public boolean isCometSuspend()
@@ -503,36 +503,36 @@ public class TcpConnection extends AbstractTransportConnection
 
     RequestState result = null;
 
-   try {
-     // clear the interrupted flag
-     Thread.interrupted();
+    try {
+      // clear the interrupted flag
+      Thread.interrupted();
 
-     result = handleRequestsImpl();
-   } catch (ClientDisconnectException e) {
-     _port.addLifetimeClientDisconnectCount();
+      result = handleRequestsImpl();
+    } catch (ClientDisconnectException e) {
+      _port.addLifetimeClientDisconnectCount();
 
-     if (log.isLoggable(Level.FINER)) {
-       log.finer(dbgId() + e);
-     }
-   } catch (InterruptedIOException e) {
-     if (log.isLoggable(Level.FINEST)) {
-       log.log(Level.FINEST, dbgId() + e, e);
-     }
-   } catch (IOException e) {
-     if (log.isLoggable(Level.FINE)) {
-       log.log(Level.FINE, dbgId() + e, e);
-     }
-   } finally {
-     thread.setContextClassLoader(_loader);
+      if (log.isLoggable(Level.FINER)) {
+        log.finer(dbgId() + e);
+      }
+    } catch (InterruptedIOException e) {
+      if (log.isLoggable(Level.FINEST)) {
+        log.log(Level.FINEST, dbgId() + e, e);
+      }
+    } catch (IOException e) {
+      if (log.isLoggable(Level.FINE)) {
+        log.log(Level.FINE, dbgId() + e, e);
+      }
+    } finally {
+      thread.setContextClassLoader(_loader);
 
-     if (result == null)
-       destroy();
-   }
+      if (result == null)
+        destroy();
+    }
 
-   if (result == RequestState.DUPLEX)
-     return _duplexReadTask.doTask();
-   else
-     return result;
+    if (result == RequestState.DUPLEX)
+      return _duplexReadTask.doTask();
+    else
+      return result;
   }
 
   /**
@@ -788,7 +788,8 @@ public class TcpConnection extends AbstractTransportConnection
 
   void toCometTimeout()
   {
-    _state = _state.toCometComplete();
+    _state = _state.toCometResume();
+    // _state = _state.toCometComplete();
 
     AsyncController async = getAsyncController();
 
@@ -800,6 +801,13 @@ public class TcpConnection extends AbstractTransportConnection
 
   public void toCometComplete()
   {
+    ConnectionState state = _state;
+    
+    if (state.isCometSuspend()) {
+      // XXX: timing issues, need to have isComplete flag
+      wake();
+    }
+    
     _state = _state.toCometComplete();
   }
 
@@ -1171,19 +1179,26 @@ public class TcpConnection extends AbstractTransportConnection
         _state = _state.toCometResume();
 
         _isWakeRequested = false;
+        
+        _state = _state.toCometDispatch();
+        
+        AsyncController controller = _controller;
+        _controller = null;
 
-        if (getRequest().handleResume()) {
+        if (controller != null)
+          controller.close();
+
+        getRequest().handleResume();
+        
+        if (_state.isCometActive()) {
           toSuspend();
 
           isValid = true;
+        } else if (_state.isKeepaliveAllocated()) {
+          isValid = true;
+          _keepaliveTask.run();
         }
-        else {
-          if (_state.isKeepaliveAllocated()) {
-            isValid = true;
-            _keepaliveTask.run();
-          }
-        }
-      } catch (IOException e) {
+     } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       } catch (OutOfMemoryError e) {
         CauchoSystem.exitOom(getClass(), e);

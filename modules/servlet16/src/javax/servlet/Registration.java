@@ -49,8 +49,6 @@ public interface Registration {
   interface Dynamic
     extends Registration
   {
-    public void setDescription(String description);
-
     public void setAsyncSupported(boolean isAsyncSupported);
   }
 }

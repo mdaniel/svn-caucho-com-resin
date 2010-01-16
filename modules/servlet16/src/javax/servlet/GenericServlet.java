@@ -128,7 +128,7 @@ public abstract class GenericServlet
   /**
    * Enumerates all the initialization parameter.
    */
-  public Enumeration getInitParameterNames()
+  public Enumeration<String> getInitParameterNames()
   {
     ServletConfig config = getServletConfig();
     

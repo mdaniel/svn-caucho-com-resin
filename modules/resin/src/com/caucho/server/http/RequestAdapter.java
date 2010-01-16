@@ -45,6 +45,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.http.Part;
 import java.io.IOException;
+import java.util.Collection;
 import java.util.HashMap;
 
 /**
@@ -631,7 +632,7 @@ public class RequestAdapter extends RequestWrapper
   /**
    * @since Servlet 3.0
    */
-  public Iterable<Part> getParts()
+  public Collection<Part> getParts()
     throws IOException, ServletException
   {
     return getRequest().getParts();

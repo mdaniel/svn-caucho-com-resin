@@ -47,6 +47,7 @@ import com.caucho.server.connection.AsyncController;
 import com.caucho.server.connection.CometHandler;
 import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.dispatch.Invocation;
+import com.caucho.server.webapp.AsyncRequest;
 import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.comet.CometController;
@@ -64,8 +65,8 @@ public class AsyncContextImpl
 
   private AsyncController _cometController;
 
-  private ServletRequest _request;
-  private ServletResponse _response;
+  private final ServletRequest _request;
+  private final ServletResponse _response;
   
   private boolean _isOriginal;
 
@@ -73,11 +74,6 @@ public class AsyncContextImpl
 
   private WebApp _dispatchWebApp;
   private String _dispatchPath;
-  
-  // the async wrapper around the HttpServletRequestImpl
-  private ServletRequest _asyncRequest;
-  // the servlet request invoked through dispatch
-  private ServletRequest _dispatchRequest;
 
   public AsyncContextImpl(AbstractHttpRequest httpConn,
                           ServletRequest request,
@@ -86,6 +82,10 @@ public class AsyncContextImpl
   {
     _request = request;
     _response = response;
+    
+    if (! (request instanceof HttpServletRequest)) {
+      throw new IllegalStateException(L.l("startAsync requires a HttpServletRequest"));
+    }
     
     _dispatchWebApp = (WebApp) request.getServletContext();
     
@@ -209,18 +209,7 @@ public class AsyncContextImpl
     
     if (cometController == null)
       throw new IllegalStateException(L.l("dispatch is not valid when no AsyncContext is available"));
-    
-    RequestDispatcherImpl dispatch
-      = _dispatchWebApp.getRequestDispatcher(_dispatchPath);
-    
-    Invocation invocation = dispatch.getAsyncInvocation();
-    
-    HttpServletRequestImpl req = (HttpServletRequestImpl) _request;
-    HttpServletResponseImpl res = (HttpServletResponseImpl) _response;
-    
-    _asyncRequest = new AsyncRequest(req, res, invocation);
-    _dispatchRequest = _asyncRequest;
-    
+     
     cometController.wake();
   }
 
@@ -267,8 +256,6 @@ public class AsyncContextImpl
       cometController.complete();
     } finally {
       _cometController = null;
-      _request = null;
-      _response = null;
     }
   }
   

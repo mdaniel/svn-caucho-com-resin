@@ -198,9 +198,12 @@ public class ServletConfigImpl
     return true;
   }
 
-  public void setServletSecurity(ServletSecurityElement securityElement)
+  public Set<String> setServletSecurity(ServletSecurityElement securityElement)
   {
     _servletManager.addSecurityElement(getServletClass(), securityElement);
+    
+    // XXX:
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public ServletSecurityElement getSecurityElement()
@@ -262,7 +265,7 @@ public class ServletConfigImpl
     }
   }
 
-  public Iterable<String> getMappings()
+  public Collection<String> getMappings()
   {
     Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
 

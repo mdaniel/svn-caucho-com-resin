@@ -29,6 +29,7 @@
 
 package javax.servlet;
 
+import java.util.Collection;
 import java.util.EnumSet;
 
 /**
@@ -38,16 +39,18 @@ public interface FilterRegistration
   extends Registration
 {
   public void addMappingForServletNames(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
+    EnumSet<DispatcherType> dispatcherTypes, 
+    boolean isMatchAfter,
     String... servletNames);
 
-  public Iterable<String> getServletNameMappings();
+  public Collection<String> getServletNameMappings();
 
   public void addMappingForUrlPatterns(
-    EnumSet<DispatcherType> dispatcherTypes, boolean isMatchAfter,
+    EnumSet<DispatcherType> dispatcherTypes, 
+    boolean isMatchAfter,
     String... urlPatterns);
 
-  public Iterable<String> getUrlPatternMappings();
+  public Collection<String> getUrlPatternMappings();
 
   interface Dynamic
     extends FilterRegistration, Registration.Dynamic

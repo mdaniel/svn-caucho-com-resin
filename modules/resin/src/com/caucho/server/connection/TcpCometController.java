@@ -82,7 +82,7 @@ public class TcpCometController extends AsyncController {
     if (conn != null)
       conn.toCometComplete();
 
-    _cometHandler.onComplete();
+    // _cometHandler.onComplete();
 
     wake();
   }

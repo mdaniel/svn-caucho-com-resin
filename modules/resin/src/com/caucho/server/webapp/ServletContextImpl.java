@@ -436,7 +436,7 @@ public class ServletContextImpl extends ServletContextCompat
     throw new UnsupportedOperationException("getServletNames is deprecated");
   }
 
-  public Enumeration<String> getServlets()
+  public Enumeration<Servlet> getServlets()
   {
     throw new UnsupportedOperationException("getServlets is deprecated");
   }

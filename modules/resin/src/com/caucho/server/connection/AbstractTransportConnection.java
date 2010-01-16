@@ -171,7 +171,7 @@ public abstract class AbstractTransportConnection
   /**
    * Returns true for a comet connection
    */
-  public boolean isComet()
+  public boolean isCometActive()
   {
     return false;
   }

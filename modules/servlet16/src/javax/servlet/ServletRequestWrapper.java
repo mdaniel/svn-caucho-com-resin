@@ -177,7 +177,7 @@ public class ServletRequestWrapper implements ServletRequest {
    * Returns the parameter map request parameters.  By default, returns
    * the underlying request's map.
    */
-  public Map getParameterMap()
+  public Map<String,String[]> getParameterMap()
   {
     return _request.getParameterMap();
   }
@@ -206,7 +206,7 @@ public class ServletRequestWrapper implements ServletRequest {
    * }
    * </pre></code>
    */
-  public Enumeration getParameterNames()
+  public Enumeration<String> getParameterNames()
   {
     return _request.getParameterNames();
   }
@@ -275,7 +275,7 @@ public class ServletRequestWrapper implements ServletRequest {
   /**
    * Returns an enumeration of all locales acceptable by the client.
    */
-  public Enumeration getLocales()
+  public Enumeration<Locale> getLocales()
   {
     return _request.getLocales();
   }
@@ -309,7 +309,7 @@ public class ServletRequestWrapper implements ServletRequest {
   /**
    * Enumerates all attribute names in the request.
    */
-  public Enumeration getAttributeNames()
+  public Enumeration<String> getAttributeNames()
   {
     return _request.getAttributeNames();
   }
@@ -350,6 +350,7 @@ public class ServletRequestWrapper implements ServletRequest {
   /**
    * Returns the real path.
    */
+  @SuppressWarnings("deprecation")
   public String getRealPath(String uri)
   {
     return _request.getRealPath(uri);
@@ -435,5 +436,15 @@ public class ServletRequestWrapper implements ServletRequest {
   public DispatcherType getDispatcherType() 
   {
     return _request.getDispatcherType();
+  }
+
+  public boolean isWrapperFor(ServletRequest wrapped)
+  {
+    throw new UnsupportedOperationException("unimplemented");
+  }
+
+  public boolean isWrapperFor(Class wrappedType)
+  {
+    throw new UnsupportedOperationException("unimplemented");
   }
 }

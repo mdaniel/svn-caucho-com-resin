@@ -34,6 +34,7 @@ package javax.servlet.http;
 
 import java.io.InputStream;
 import java.io.IOException;
+import java.util.Collection;
 
 public interface Part {
   public InputStream getInputStream()
@@ -53,7 +54,7 @@ public interface Part {
 
   public String getHeader(String name);
 
-  public Iterable<String> getHeaders(String name);
+  public Collection<String> getHeaders(String name);
 
-  public Iterable<String> getHeaderNames();
+  public Collection<String> getHeaderNames();
 }

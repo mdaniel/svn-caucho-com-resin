@@ -45,10 +45,11 @@ import java.lang.annotation.Target;
 @Documented  
 public @interface WebServlet {
   public boolean asyncSupported() default false;
-  public long asyncTimeout() default 60000L;
   
+  public String displayName() default "";
   public String description() default "";
-  public String icon() default "";
+  public String smallIcon() default "";
+  public String largeIcon() default "";
   
   public WebInitParam[] initParams() default {};
   public int loadOnStartup() default -1;

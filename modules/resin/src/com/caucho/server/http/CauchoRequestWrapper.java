@@ -493,7 +493,7 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.getPart(name);
   }
 
-  public Iterable<Part> getParts()
+  public Collection<Part> getParts()
     throws IOException, ServletException
   {
     return _request.getParts();

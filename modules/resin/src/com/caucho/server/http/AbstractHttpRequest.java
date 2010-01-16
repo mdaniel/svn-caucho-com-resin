@@ -1471,8 +1471,10 @@ public abstract class AbstractHttpRequest
       
       HttpServletRequestImpl request = getRequestFacade();
       
+      /*
       if (! request.isAsyncStarted())
         return false;
+        */
 
       AsyncContextImpl asyncContext = request.getAsyncContext();
 
@@ -1515,9 +1517,10 @@ public abstract class AbstractHttpRequest
     } finally {
       finishInvocation();
 
-      if (! isSuspend())
+      if (! isSuspend()) {
         finishRequest();
-    }
+      }
+   }
 
     if (log.isLoggable(Level.FINE)) {
       log.fine(dbgId() +
@@ -1613,15 +1616,15 @@ public abstract class AbstractHttpRequest
     return _conn != null && _conn.isKeepaliveAllocated();
   }
 
-  public boolean isComet()
+  public boolean isCometActive()
   {
-    return _tcpConn != null && _tcpConn.isComet();
+    return _tcpConn != null && _tcpConn.isCometActive();
   }
 
   public boolean isSuspend()
   {
     // return _tcpConn != null && (_tcpConn.isSuspend() || _tcpConn.isDuplex());
-    return _tcpConn != null && (_tcpConn.isComet() || _tcpConn.isDuplex());
+    return _tcpConn != null && (_tcpConn.isCometActive() || _tcpConn.isDuplex());
   }
 
   public boolean isDuplex()

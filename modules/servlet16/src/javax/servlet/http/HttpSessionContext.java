@@ -38,7 +38,7 @@ public interface HttpSessionContext {
   /**
    * @deprecated
    */
-  public Enumeration getIds();
+  public Enumeration<String> getIds();
   /**
    * @deprecated
    */

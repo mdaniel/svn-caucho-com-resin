@@ -274,9 +274,21 @@ enum ConnectionState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toCometDispatch() 
-    { 
-      return this;
+    ConnectionState toCometSuspend()
+    {
+      return COMET_SUSPEND_KA;
+    }
+    
+    @Override
+    ConnectionState toCometDispatch()
+    {
+      return REQUEST_ACTIVE_KA;
+    }
+
+    @Override
+    ConnectionState toCometComplete()
+    {
+      return COMET_COMPLETE_KA;
     }
 
     @Override
@@ -285,18 +297,6 @@ enum ConnectionState {
       conn.getPort().keepaliveFree();
       
       return COMET_NKA;
-    }
-
-    @Override
-    ConnectionState toCometSuspend()
-    {
-      return COMET_SUSPEND_KA;
-    }
-
-    @Override
-    ConnectionState toCometComplete()
-    {
-      return COMET_COMPLETE_KA;
     }
     
     @Override
@@ -318,7 +318,7 @@ enum ConnectionState {
     @Override
     ConnectionState toCometDispatch() 
     { 
-      return COMET_NKA;
+      return REQUEST_ACTIVE_NKA;
     }
 
     @Override
@@ -430,6 +430,12 @@ enum ConnectionState {
     }
 
     @Override
+    ConnectionState toCometComplete()
+    {
+      return this;
+    }
+
+    @Override
     ConnectionState toKeepalive(TcpConnection conn)
     {
       return REQUEST_KEEPALIVE;
@@ -450,6 +456,12 @@ enum ConnectionState {
 
     @Override
     boolean isCometComplete() { return true; }
+
+    @Override
+    ConnectionState toCometComplete()
+    {
+      return this;
+    }
   },
 
   DUPLEX {               // converted to a duplex/websocket

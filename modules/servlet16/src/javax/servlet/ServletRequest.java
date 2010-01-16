@@ -293,8 +293,9 @@ public interface ServletRequest {
 
   /**
    * Returns the path of the URI.
+   * 
+   * @deprecated
    */
-  @Deprecated
   public String getRealPath(String uri);
 
   //

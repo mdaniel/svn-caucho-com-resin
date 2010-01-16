@@ -1913,7 +1913,7 @@ public class Port extends TaskWorker
 
           if (log.isLoggable(Level.FINE))
             log.fine(this + " suspend idle timeout " + conn);
-
+          
           conn.toCometTimeout();
         }
 

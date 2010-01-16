@@ -307,7 +307,7 @@ public class StubServletRequest implements CauchoRequest {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public Iterable<Part> getParts()
+  public Collection<Part> getParts()
     throws IOException, ServletException
   {
     throw new UnsupportedOperationException(getClass().getName());

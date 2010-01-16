@@ -33,6 +33,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestWrapper;
 import javax.servlet.ServletException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.io.IOException;
 
@@ -78,7 +79,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper
    */
   public String getMethod()
   {
-    return request.getMethod();
+    return this.request.getMethod();
   }
   /**
    * Returns the entire request URI
@@ -184,14 +185,14 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper
    * @param name the header name
    * @return an enumeration of the header values.
    */
-  public Enumeration getHeaders(String name)
+  public Enumeration<String> getHeaders(String name)
   {
     return request.getHeaders(name);
   }
   /**
    * Returns an enumeration of all headers sent by the client.
    */
-  public Enumeration getHeaderNames()
+  public Enumeration<String> getHeaderNames()
   {
     return request.getHeaderNames();
   }
@@ -333,7 +334,7 @@ public class HttpServletRequestWrapper extends ServletRequestWrapper
   /**
    * @since Servlet 3.0
    */
-  public Iterable<Part> getParts()
+  public Collection<Part> getParts()
     throws IOException, ServletException
   {
     return request.getParts();

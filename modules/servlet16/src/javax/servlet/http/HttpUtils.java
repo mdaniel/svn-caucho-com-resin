@@ -40,9 +40,9 @@ public class HttpUtils {
   /**
    * Converts a queryString to a hashtable.
    */
-  public static Hashtable parseQueryString(String query)
+  public static Hashtable<String,String[]> parseQueryString(String query)
   {
-    Hashtable table = new Hashtable();
+    Hashtable<String,String[]> table = new Hashtable<String,String[]>();
     int length = query.length();
     int i = 0;
     char ch;
@@ -109,7 +109,7 @@ public class HttpUtils {
   /**
    * Parses POST data using www-form-urlencoding
    */
-  public static Hashtable parsePostData(int length, ServletInputStream is)
+  public static Hashtable<String,String[]> parsePostData(int length, ServletInputStream is)
   {
     try {
       if (length >= 0) {
@@ -132,7 +132,7 @@ public class HttpUtils {
         return parseQueryString(new String(buf, 0, buf.length));
       }
       else
-        return new Hashtable();
+        return new Hashtable<String,String[]>();
     } catch (IOException e) {
       throw new IllegalArgumentException("illegal post data");
     }

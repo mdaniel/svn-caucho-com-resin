@@ -37,6 +37,7 @@ import com.caucho.vfs.PrintWriterImpl;
 import javax.servlet.*;
 import javax.servlet.http.*;
 import java.io.*;
+import java.util.Collection;
 import java.util.Locale;
 import java.util.Collection;
 

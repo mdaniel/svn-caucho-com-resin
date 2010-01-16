@@ -161,21 +161,6 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
   {
     _response.setContentLength(len);
   }
-  
-  public void disable()
-  {
-    _response.disable();
-  }
-  
-  public void enable()
-  {
-    _response.enable();
-  }
-  
-  public boolean isDisabled()
-  {
-    return _response.isDisabled();
-  }
 
   //
   // HttpServletResponse

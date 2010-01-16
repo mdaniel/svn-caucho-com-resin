@@ -98,6 +98,9 @@ import java.util.*;
  * as a way for servlets to communicate.
  */
 public interface ServletContext {
+  public static final String ORDERED_LIBS = "javax.servlet.context.orderedLibs"; 
+  public static final String TEMPDIR = "javax.servlet.context.tempdir"; 
+
   /**
    * Returns the URL prefix for the ServletContext.
    */
@@ -155,7 +158,7 @@ public interface ServletContext {
 
   /**
    * Returns the ServletContext for the uri.
-   * Note: the uri is <em>not</em> relative to the application.
+   * Note: the uri is <em>not</em> relative to the application.T
    *
    * @param uri path relative to the root
    * @return the ServletContext responsible for the given uri.
@@ -283,7 +286,7 @@ public interface ServletContext {
   /**
    * Returns the set all resources held by the application.
    */
-  public Set getResourcePaths(String prefix);
+  public Set<String> getResourcePaths(String prefix);
 
   /**
    * Returns the resource as a stream.  In general, the
@@ -303,7 +306,7 @@ public interface ServletContext {
   /**
    * @deprecated
    */
-  public Enumeration getServlets();
+  public Enumeration<Servlet> getServlets();
 
   /**
    * @deprecated

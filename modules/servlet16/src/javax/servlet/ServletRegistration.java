@@ -29,13 +29,14 @@
 
 package javax.servlet;
 
+import java.util.Collection;
 import java.util.Set;
 
 public interface ServletRegistration
   extends Registration {
   public Set<String> addMapping(String... urlPatterns);
 
-  public Iterable<String> getMappings();
+  public Collection<String> getMappings();
 
   public String getRunAsRole();
 
@@ -43,7 +44,7 @@ public interface ServletRegistration
     extends ServletRegistration, Registration.Dynamic {
     public void setLoadOnStartup(int loadOnStartup);
 
-    public void setServletSecurity(ServletSecurityElement securityElement);
+    public Set<String> setServletSecurity(ServletSecurityElement securityElement);
 
     public void setMultipartConfig(MultipartConfigElement multipartConfig);
 

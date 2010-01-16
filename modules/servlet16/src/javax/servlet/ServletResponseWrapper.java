@@ -230,36 +230,6 @@ public class ServletResponseWrapper implements ServletResponse {
     _response.setContentLength(len);
   }
 
-  /**
-   * Disables the response
-   *
-   * @since Servlet 3.0
-   */
-  public void disable()
-  {
-    _response.disable();
-  }
-
-  /**
-   * Enables the response
-   *
-   * @since Servlet 3.0
-   */
-  public void enable()
-  {
-    _response.enable();
-  }
-
-  /**
-   * Returns true if the response is disabled
-   *
-   * @since Servlet 3.0
-   */
-  public boolean isDisabled()
-  {
-    return _response.isDisabled();
-  }
-
   public boolean isWrapperFor(ServletResponse wrapped) {
     throw new UnsupportedOperationException("unimplemented");
   }

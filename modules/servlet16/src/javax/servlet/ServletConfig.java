@@ -83,7 +83,7 @@ public interface ServletConfig {
   /**
    * Returns an enumeration of the init-parameter names
    */
-  public Enumeration getInitParameterNames();
+  public Enumeration<String> getInitParameterNames();
   /**
    * Returns the ServletContext for the servlet or filter.
    */

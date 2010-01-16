@@ -36,6 +36,7 @@ import java.io.OutputStream;
 import java.security.Principal;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.List;
@@ -140,7 +141,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
   // comet
   private long _asyncTimeout = 10000;
-  private AsyncContextImpl _comet;
+  private AsyncContextImpl _asyncContext;
 
   private ArrayList<Path> _closeOnExit;
 
@@ -945,7 +946,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
    * @since Servlet 3.0
    */
   @Override
-  public Iterable<Part> getParts()
+  public Collection<Part> getParts()
     throws IOException, ServletException
   {
     if (! getContentType().startsWith("multipart/form-data"))
@@ -1737,7 +1738,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
   public boolean isComet()
   {
-    return _request.isComet();
+    return _request.isCometActive();
   }
 
   /**
@@ -1832,7 +1833,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public boolean isAsyncStarted()
   {
-    return _comet != null;
+    return _request.isCometActive();
   }
 
   /**
@@ -1876,16 +1877,16 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not support asynchronous mode.  The servlet should be annotated with a @WebServlet(asyncSupported=true) annotation or have a <async-supported> tag in the web.xml.",
                                           getServletName(), getServletPath()));
 
-    if (_comet == null) {
+    if (_asyncContext == null) {
       boolean isOriginal = (request == this && response == _response);
       
-      _comet = new AsyncContextImpl(_request, this, response, isOriginal);
+      _asyncContext = new AsyncContextImpl(_request, request, response, isOriginal);
       
       if (_asyncTimeout > 0)
-        _comet.setTimeout(_asyncTimeout);
+        _asyncContext.setTimeout(_asyncTimeout);
     }
 
-    return _comet;
+    return _asyncContext;
   }
 
   /**
@@ -1896,8 +1897,8 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public AsyncContextImpl getAsyncContext()
   {
-    if (_comet != null)
-      return _comet;
+    if (_asyncContext != null)
+      return _asyncContext;
     else
       throw new IllegalStateException(L.l("getAsyncContext() must be called after asyncStarted() has started a new AsyncContext."));
   }
@@ -2011,8 +2012,8 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   protected void finishRequest()
     throws IOException
   {
-    AsyncContextImpl comet = _comet;
-    _comet = null;
+    AsyncContextImpl comet = _asyncContext;
+    _asyncContext = null;
     
     if (comet != null) {
       comet.onComplete();
@@ -2135,12 +2136,12 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       return null;
     }
 
-    public Iterable<String> getHeaderNames()
+    public Collection<String> getHeaderNames()
     {
       return _headers.keySet();
     }
 
-    public Iterable<String> getHeaders(String name)
+    public Collection<String> getHeaders(String name)
     {
       return _headers.get(name);
     }

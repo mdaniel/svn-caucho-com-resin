@@ -118,7 +118,7 @@ public interface TransportConnection {
   /**
    * Returns true for a comet connection
    */
-  public boolean isComet();
+  public boolean isCometActive();
 
   /**
    * Returns true for a comet connection

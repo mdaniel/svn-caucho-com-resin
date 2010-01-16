@@ -37,6 +37,7 @@ import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.servlet.AsyncContext;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -199,6 +200,13 @@ public class ErrorPageManager {
     try {
       response.reset();
     } catch (IllegalStateException e1) {
+    }
+    
+    if (req.isAsyncStarted()) {
+      AsyncContext async = req.getAsyncContext();
+      
+      if (async != null)
+        async.complete();
     }
 
     if (response instanceof HttpServletResponseImpl) {

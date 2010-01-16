@@ -66,6 +66,11 @@ public class AsyncController {
   public void complete()
   {
   }
+  
+  public void close()
+  {
+    
+  }
 
   /**
    * Closes the connection.

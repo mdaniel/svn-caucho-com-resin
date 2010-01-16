@@ -33,6 +33,7 @@ package javax.servlet.http;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletException;
 import java.security.Principal;
+import java.util.Collection;
 import java.util.Enumeration;
 import java.io.IOException;
 
@@ -188,11 +189,11 @@ public interface HttpServletRequest extends ServletRequest {
    * @param name the header name
    * @return an enumeration of the header values.
    */
-  public Enumeration getHeaders(String name);
+  public Enumeration<String> getHeaders(String name);
   /**
    * Returns an enumeration of all headers sent by the client.
    */
-  public Enumeration getHeaderNames();
+  public Enumeration<String> getHeaderNames();
   /**
    * Converts a header value to an integer.
    *
@@ -290,7 +291,7 @@ public interface HttpServletRequest extends ServletRequest {
   /**
    * @since Servlet 3.0
    */
-  public Iterable<Part> getParts()
+  public Collection<Part> getParts()
     throws IOException, ServletException;
 
 
