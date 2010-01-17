@@ -46,6 +46,7 @@ import java.io.CharConversionException;
 import java.io.UnsupportedEncodingException;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
 
 /**
@@ -198,6 +199,8 @@ public class QuercusParser {
   private CharBuffer _sb = new CharBuffer();
   
   private String _namespace = "";
+  private HashMap<String,String> _namespaceUseMap
+    = new HashMap<String,String>();
 
   private int _peekToken = -1;
   private String _lexeme = "";
@@ -1626,11 +1629,11 @@ public class QuercusParser {
 
       String name;
       
+      name = parseIdentifier();
+      
       if (_classDef == null) {
-        name = parseNamespaceIdentifier();
+        name = resolveIdentifier(name);
       }
-      else
-        name = parseIdentifier();
       
       if (isAbstract && ! _scope.isAbstract()) {
         if (_classDef != null)
@@ -1914,7 +1917,9 @@ public class QuercusParser {
   private Statement parseClassDefinition(int modifiers)
     throws IOException
   {
-    String name = parseNamespaceIdentifier();
+    String name = parseIdentifier();
+    
+    name = resolveIdentifier(name);
 
     String comment = _comment;
 
@@ -2255,6 +2260,33 @@ public class QuercusParser {
     throws IOException
   {
     String name = parseNamespaceIdentifier();
+    
+    int ns = name.lastIndexOf('\\');
+    
+    String tail;
+    if (ns >= 0)
+      tail = name.substring(ns + 1);
+    else
+      tail = name;
+    
+    if (name.startsWith("\\"))
+      name = name.substring(1);
+    
+    int token = parseToken();
+    
+    if (token == ';') {
+      _namespaceUseMap.put(tail, name);
+      return;
+    }
+    else if (token == AS) {
+      do {
+        tail = parseIdentifier();
+        
+        _namespaceUseMap.put(tail, name);
+      } while ((token = parseToken()) == ',');
+    }
+    
+    _peekToken = token;
     
     expect(';');
   }
@@ -4473,12 +4505,19 @@ public class QuercusParser {
     if (token <= 0)
       token = parseIdentifier(read());
 
-    if (token == IDENTIFIER)
-      return _lexeme;
-    else if (FIRST_IDENTIFIER_LEXEME <= token)
-      return _lexeme;
-    else
+    if (token != IDENTIFIER && token < FIRST_IDENTIFIER_LEXEME)
       throw error(L.l("expected identifier at {0}.", tokenName(token)));
+    
+    if (_lexeme.indexOf('\\') >= 0) {
+      throw error(L.l("namespace identifier is not allowed at '{0}'",
+                      _lexeme));
+    }
+    else if (_peek == '\\') {
+        throw error(L.l("namespace identifier is not allowed at '{0}\\'",
+                        _lexeme));
+    }
+    
+    return _lexeme;
   }
   
 
@@ -4503,10 +4542,31 @@ public class QuercusParser {
   {
     if (id.startsWith("\\"))
       return id.substring(1);
-    else if (_namespace.equals(""))
-      return id;
-    else
-      return _namespace + "\\" + id;
+    
+    int ns = id.indexOf('\\');
+    
+    if (ns > 0) {
+      String prefix = id.substring(0, ns);
+      
+      String use = _namespaceUseMap.get(prefix);
+      
+      if (use != null)
+        return use + id.substring(ns);
+      else if (_namespace.equals(""))
+        return id;
+      else
+        return _namespace + "\\" + id;
+    }
+    else {
+      String use = _namespaceUseMap.get(id);
+      
+      if (use != null)
+        return use;
+      else if (_namespace.equals(""))
+        return id;
+      else
+        return _namespace + '\\' + id;
+    }
   }
 
   private int parseIdentifier(int ch)
@@ -4524,7 +4584,7 @@ public class QuercusParser {
       }
 
       _peek = ch;
-      
+
       return lexemeToToken();
     }
 
