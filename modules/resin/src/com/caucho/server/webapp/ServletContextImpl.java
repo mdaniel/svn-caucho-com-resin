@@ -507,8 +507,13 @@ public class ServletContextImpl extends ServletContextCompat
   {
     throw new UnsupportedOperationException("unimplemented");
   }
-
-  public Map<String, FilterRegistration> getFilterRegistrations()
+  
+  /**
+   * Returns filter registrations
+   * @return
+   */
+  @Override
+  public Map<String, ? extends FilterRegistration> getFilterRegistrations()
   {
     throw new UnsupportedOperationException("unimplemented");
   }

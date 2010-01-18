@@ -2471,6 +2471,88 @@ public class InjectManager
     }
   }
 
+  public <T> ArrayList<T> loadServices(Class<T> serviceClass)
+  {
+    return loadServices(serviceClass, new HashSet<URL>());
+  }
+  
+  private <T> ArrayList<T> loadServices(Class<T> serviceApiClass, 
+                                        HashSet<URL> serviceSet)
+  {
+    ArrayList<T> services = new ArrayList<T>();
+    
+    try {
+      ClassLoader loader = _classLoader;
+      
+      if (loader == null)
+        return services;
+
+      Enumeration e = loader.getResources("META-INF/services/" 
+                                          + serviceApiClass.getName());
+
+      while (e.hasMoreElements()) {
+        URL url = (URL) e.nextElement();
+
+        if (serviceSet.contains(url))
+          continue;
+
+        serviceSet.add(url);
+
+        InputStream is = null;
+        try {
+          is = url.openStream();
+          ReadStream in = Vfs.openRead(is);
+
+          String line;
+
+          while ((line = in.readLine()) != null) {
+            int p = line.indexOf('#');
+            if (p >= 0)
+              line = line.substring(0, p);
+            line = line.trim();
+
+            if (line.length() > 0) {
+              Class<T> cl = loadServiceClass(serviceApiClass, line);
+              
+              if (cl != null)
+                services.add(createTransientObject(cl));
+            }
+          }
+
+          in.close();
+        } catch (IOException e1) {
+          log.log(Level.WARNING, e1.toString(), e1);
+        } finally {
+          IoUtil.close(is);
+        }
+      }
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+    
+    return services;
+  }
+
+  private <T> Class<T> loadServiceClass(Class<T> serviceApi, 
+                                        String className)
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      Class serviceClass= Class.forName(className, false, loader);
+
+      if (! serviceApi.isAssignableFrom(serviceClass))
+        throw new InjectionException(L.l("'{0}' is not a valid servicebecause it does not implement {1}",
+                                         serviceClass, serviceApi.getName()));
+      
+      return serviceClass;
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+      
+      return null;
+    }
+  }
+
   private void loadExtension(String className)
   {
     try {

@@ -356,37 +356,22 @@ public interface ServletContext {
 
   /**
    * Adds a servlet with the given className to context
-   * @param servletName
-   * @param className
-   * @return
-   */
-  public ServletRegistration.Dynamic addServlet(
-        String servletName, String className);
+  */
+  public ServletRegistration.Dynamic addServlet(String servletName, String className);
 
   /**
    * Adds a servlet to context
-   * @param servletName
-   * @param servlet
-   * @return
    */
-  public ServletRegistration.Dynamic addServlet(
-      String servletName, Servlet servlet);
+  public ServletRegistration.Dynamic addServlet(String servletName, Servlet servlet);
 
   /**
-   *
-   * @param servletName
-   * @param servletClass
-   * @return
+   * Adds a servlet class to the servlet container.
    */
   public ServletRegistration.Dynamic addServlet(String servletName,
-      Class <? extends Servlet> servletClass);
+                                                Class <? extends Servlet> servletClass);
 
   /**
-   *
-   * @param c
-   * @param <T>
-   * @return
-   * @throws ServletException
+   * Creates a servlet instance using the web-apps injection.
    */
   public <T extends Servlet> T createServlet(Class<T> c)
       throws ServletException;
@@ -409,8 +394,7 @@ public interface ServletContext {
    * @param className
    * @return
    */
-  public FilterRegistration.Dynamic addFilter(
-      String filterName, String className);
+  public FilterRegistration.Dynamic addFilter(String filterName, String className);
 
   /**
    * Adds a dynamic filter registration using filter
@@ -419,8 +403,7 @@ public interface ServletContext {
    * @param filter
    * @return
    */
-  public FilterRegistration.Dynamic addFilter(
-    String filterName, Filter filter);
+  public FilterRegistration.Dynamic addFilter(String filterName, Filter filter);
 
   /**
    * Adds a filter using filterClass

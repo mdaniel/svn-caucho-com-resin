@@ -99,6 +99,7 @@ import javax.naming.NamingException;
 import javax.servlet.*;
 import javax.servlet.annotation.*;
 import javax.servlet.http.*;
+import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.context.spi.CreationalContext;
 import java.io.File;
@@ -946,6 +947,17 @@ public class WebApp extends ServletContextImpl
     _servletManager.addServlet(config, _isApplyingWebFragments);
   }
 
+  @Override
+  public <T extends Servlet> T createServlet(Class<T> servletClass)
+    throws ServletException
+  {
+    try {
+      return _beanManager.createTransientObject(servletClass);
+    } catch (InjectionException e) {
+      throw new ServletException(e);      
+    }
+  }
+
   public void addServlet(WebServlet webServlet, String servletClassName)
     throws ServletException
   {
@@ -1155,6 +1167,16 @@ public class WebApp extends ServletContextImpl
     }
   }
 
+  @Override
+  public <T extends Filter> T createFilter(Class<T> filterClass)
+    throws ServletException
+  {
+    try {
+      return _beanManager.createTransientObject(filterClass);
+    } catch (InjectionException e) {
+      throw new ServletException(e);      
+    }
+  }
 
   public void addFilter(WebFilter webFilter, String filterClassName)
     throws Exception
@@ -1400,6 +1422,16 @@ public class WebApp extends ServletContextImpl
   public FilterRegistration getFilterRegistration(String filterName)
   {
     return _filterManager.getFilter(filterName);
+  }
+  
+  /**
+   * Returns filter registrations
+   * @return
+   */
+  @Override
+  public Map<String, ? extends FilterRegistration> getFilterRegistrations()
+  {
+    return new HashMap();
   }
 
   /**
@@ -1794,9 +1826,15 @@ public class WebApp extends ServletContextImpl
     }
   }
 
+  @Override
   public <T extends EventListener> T createListener(Class<T> listenerClass)
+    throws ServletException
   {
-    return _beanManager.createTransientObject(listenerClass);
+    try {
+      return _beanManager.createTransientObject(listenerClass);
+    } catch (InjectionException e) {
+      throw new ServletException(e);      
+    }
   }
 
   @Configurable
@@ -2426,7 +2464,7 @@ public class WebApp extends ServletContextImpl
                             BeanManager.class,
                             new AnnotationLiteral<Initialized>() {});
       */
-
+      
       if (! _metadataComplete) {
         loadWebFragments();
 
@@ -2471,6 +2509,8 @@ public class WebApp extends ServletContextImpl
           validator.validate();
         }
       }
+
+      callInitializers();
 
       //Servlet 3.0
       initAnnotated();
@@ -2684,13 +2724,24 @@ public class WebApp extends ServletContextImpl
 
     return result;
   }
+  
+  private void callInitializers()
+    throws Exception
+  {
+    for (ServletContainerInitializer init
+          : _beanManager.loadServices(ServletContainerInitializer.class)) {
+      init.onStartup(null, this);
+    }
+  }
 
   public void initAnnotated() throws Exception
   {
-    List<Class> listeners = new ArrayList<Class>();
+    List<Class<?>> listeners = new ArrayList<Class<?>>();
 
-    List<Class> servlets = new ArrayList<Class>();
-    List<Class> filters = new ArrayList<Class>();
+    List<Class<? extends Servlet>> servlets 
+      = new ArrayList<Class<? extends Servlet>>();
+    
+    List<Class<?>> filters = new ArrayList<Class<?>>();
 
     List<String> pendingClasses = new ArrayList<String>(_pendingClasses);
     _pendingClasses.clear();
@@ -2711,7 +2762,7 @@ public class WebApp extends ServletContextImpl
       else if (HttpSessionAttributeListener.class.isAssignableFrom(cl))
         listeners.add(cl);
       else if (Servlet.class.isAssignableFrom(cl))
-        servlets.add(cl);
+        servlets.add((Class) cl);
       else if (Filter.class.isAssignableFrom(cl))
         filters.add(cl);
     }
