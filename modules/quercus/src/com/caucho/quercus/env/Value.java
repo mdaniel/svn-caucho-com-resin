@@ -54,6 +54,8 @@ abstract public class Value implements java.io.Serializable
 {
   protected static final L10N L = new L10N(Value.class);
 
+  private static final Value []NULL_ARG_VALUES = new Value[0];
+
   public static final StringValue SCALAR_V = new ConstStringValue("scalar");
 
   public static final Value []NULL_VALUE_ARRAY = new Value[0];
@@ -1122,7 +1124,7 @@ abstract public class Value implements java.io.Serializable
   {
     return this;
   }
-  
+
   /**
    * Copy as an array item
    */
@@ -1172,7 +1174,7 @@ abstract public class Value implements java.io.Serializable
   {
     return this;
   }
-  
+
   /**
    * Copy for saving a method's arguments.
    */
@@ -1269,6 +1271,149 @@ abstract public class Value implements java.io.Serializable
   public AbstractFunction findFunction(String methodName)
   {
     return null;
+  }
+
+  //
+  // function invocation
+  //
+
+  /**
+   * Evaluates the function.
+   */
+  public Value call(Env env, Value []args)
+  {
+    AbstractFunction fun = env.getFunction(this);
+
+    if (fun != null)
+      return fun.call(env, args);
+    else
+      return env.warning(L.l("{0} is not a valid function",
+                             this));
+  }
+
+  /**
+   * Evaluates the function, returning a reference.
+   */
+  public Value callRef(Env env, Value []args)
+  {
+    AbstractFunction fun = env.getFunction(this);
+
+    if (fun != null)
+      return fun.callRef(env, args);
+    else
+      return env.warning(L.l("{0} is not a valid function",
+                             this));
+  }
+
+  /**
+   * Evaluates the function, returning a copy
+   */
+  public Value callCopy(Env env, Value []args)
+  {
+    AbstractFunction fun = env.getFunction(this);
+
+    if (fun != null)
+      return fun.callCopy(env, args);
+    else
+      return env.warning(L.l("{0} is not a valid function",
+                             this));
+  }
+
+  /**
+   * Evaluates the function.
+   */
+  public Value call(Env env)
+  {
+    return call(env, NULL_ARG_VALUES);
+  }
+
+  /**
+   * Evaluates the function with an argument .
+   */
+  public Value call(Env env, Value a1)
+  {
+    return call(env, new Value[] { a1 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2)
+  {
+    return call(env, new Value[] { a1, a2 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2, Value a3)
+  {
+    return call(env, new Value[] { a1, a2, a3 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4)
+  {
+    return call(env, new Value[] { a1, a2, a3, a4 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return call(env, new Value[] { a1, a2, a3, a4, a5 });
+  }
+
+  /**
+   * Evaluates the function.
+   */
+  public Value callRef(Env env)
+  {
+    return callRef(env, NULL_ARG_VALUES);
+  }
+
+  /**
+   * Evaluates the function with an argument .
+   */
+  public Value callRef(Env env, Value a1)
+  {
+    return callRef(env, new Value[] { a1 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env, Value a1, Value a2)
+  {
+    return callRef(env, new Value[] { a1, a2 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env, Value a1, Value a2, Value a3)
+  {
+    return callRef(env, new Value[] { a1, a2, a3 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env, Value a1, Value a2, Value a3, Value a4)
+  {
+    return callRef(env, new Value[] { a1, a2, a3, a4 });
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env,
+                       Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return callRef(env, new Value[] { a1, a2, a3, a4, a5 });
   }
 
   //
@@ -2542,7 +2687,7 @@ abstract public class Value implements java.io.Serializable
   {
     return false;
   }
-  
+
   /**
    * Returns true if the key exists in the array.
    */
@@ -2550,7 +2695,7 @@ abstract public class Value implements java.io.Serializable
   {
     return isset(key);
   }
-  
+
   /**
    * Returns the corresponding value if this array contains the given key
    *

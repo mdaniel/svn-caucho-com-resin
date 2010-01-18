@@ -43,7 +43,7 @@ import com.caucho.util.L10N;
 /**
  * Represents a function
  */
-abstract public class AbstractFunction {
+abstract public class AbstractFunction extends Value {
   private static final L10N L = new L10N(AbstractFunction.class);
 
   private static final Arg []NULL_ARGS = new Arg[0];
@@ -55,6 +55,7 @@ abstract public class AbstractFunction {
   protected boolean _isStatic = false;
   protected boolean _isFinal = false;
   protected boolean _isConstructor = false;
+  protected boolean _isClosure = false;
   
   protected Visibility _visibility = Visibility.PUBLIC;
   protected String _declaringClassName;
@@ -174,6 +175,22 @@ abstract public class AbstractFunction {
   public final void setFinal(boolean isFinal)
   {
     _isFinal = isFinal;
+  }
+  
+  /**
+   * Sets true if function is a closure.
+   */
+  public void setClosure(boolean isClosure)
+  {
+    _isClosure= isClosure;
+  }
+  
+  /**
+   * Returns true for a closure.
+   */
+  public boolean isClosure()
+  {
+    return _isClosure;
   }
   
   public boolean isConstructor()
@@ -368,29 +385,6 @@ abstract public class AbstractFunction {
     try {
       if (obj != null) {
         env.setThis(obj);
-
-        /*
-        if (isPublic()) {
-        }
-        else if (isProtected()) {
-          if (oldThis != null
-              && oldThis.isA(getDeclaringClassName())) {
-          }
-          else {
-            errorProtectedAccess(env, oldThis);
-          }
-        }
-        else {
-          //private
-          
-          if (oldThis != null
-              && getDeclaringClassName().equals(oldThis.getClassName())) {
-          }
-          else {
-            errorPrivateAccess(env, oldThis);
-          }
-        }
-	*/
       }
 
       return call(env, args);
@@ -620,7 +614,7 @@ abstract public class AbstractFunction {
    * Evaluates the function as a method call.
    */
   public Value callMethod(Env env, Value obj,
-			  Value a1, Value a2, Value a3, Value a4, Value a5)
+                          Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     return callMethod(env, obj, new Value[] { a1, a2, a3, a4, a5 });
   }
@@ -635,10 +629,10 @@ abstract public class AbstractFunction {
 
     for (int i = 0; i < exprs.length; i++) {
       if (i < args.length && args[i].isReference()) {
-	argValues[i] = exprs[i].evalArg(env, true);
+        argValues[i] = exprs[i].evalArg(env, true);
       }
       else
-	argValues[i] = exprs[i].eval(env);
+        argValues[i] = exprs[i].eval(env);
     }
 
     return callMethod(env, obj, argValues);

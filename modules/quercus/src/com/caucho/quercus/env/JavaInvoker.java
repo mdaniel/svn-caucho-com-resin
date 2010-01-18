@@ -602,7 +602,7 @@ abstract public class JavaInvoker
 
   public Value call(Env env, Value []args)
   {
-    return callMethod(env, null, args);
+    return callMethod(env, (Value) null, args);
   }
 
   public Value callMethod(Env env, Value qThis, Value []args)

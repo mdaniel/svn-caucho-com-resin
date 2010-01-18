@@ -56,6 +56,7 @@ public class FunctionInfo
 
   private boolean _hasThis; // if true, override default
   private boolean _isGlobal;
+  private boolean _isClosure;
   
   private boolean _isPageMain;
   private boolean _isPageStatic;
@@ -86,6 +87,7 @@ public class FunctionInfo
     copy._fun = _fun;
     copy._hasThis = _hasThis;
     copy._isGlobal = _isGlobal;
+    copy._isClosure = _isClosure;
     copy._isPageMain = _isPageMain;
     copy._isPageStatic = _isPageStatic;
     copy._isReturnsReference = _isReturnsReference;
@@ -139,7 +141,23 @@ public class FunctionInfo
   {
     _isGlobal = isGlobal;
   }
-  
+
+  /**
+   * True for a closure.
+   */
+  public void setClosure(boolean isClosure)
+  {
+    _isClosure= isClosure;
+  }
+
+  /**
+   * True for a closure function (top-level script).
+   */
+  public boolean isClosure()
+  {
+    return _isClosure;
+  }
+   
   /*
    * True for a final function.
    */
@@ -378,6 +396,15 @@ public class FunctionInfo
   public int getTempIndex()
   {
     return _tempVarList.size();
+  }
+  
+  public String createTempVar()
+  {
+    String name = "q_temp_" + getTempIndex();
+    
+    _tempVarList.add(name);
+    
+    return name;
   }
 
   public String toString()

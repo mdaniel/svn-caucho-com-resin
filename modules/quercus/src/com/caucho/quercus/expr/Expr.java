@@ -241,21 +241,51 @@ abstract public class Expr {
    * Creates a field ref
    */
   public Expr createFieldGet(ExprFactory factory,
-                             Location location,
                              StringValue name)
   {
-    return factory.createFieldGet(location, this, name);
+    return factory.createFieldGet(this, name);
   }
 
   /**
    * Creates a field ref
    */
   public Expr createFieldGet(ExprFactory factory,
-                             Location location,
                              Expr name)
   {
-    return factory.createFieldVarGet(location, this, name);
+    return factory.createFieldVarGet(this, name);
   }
+  
+  //
+  // class field refs $class::$bar
+  //
+  
+  /**
+   * Creates a class field $class::foo
+   */
+  public Expr createClassConst(ExprFactory factory, String name)
+  {
+    return factory.createClassConst(this, name);
+  }
+  
+  /**
+   * Creates a class field $class::$foo
+   */
+  public Expr createClassField(ExprFactory factory, String name)
+  {
+    return factory.createClassField(this, name);
+  }
+  
+  /**
+   * Creates a class field $class::${foo}
+   */
+  public Expr createClassField(ExprFactory factory, Expr name)
+  {
+    return factory.createClassField(this, name);
+  }
+  
+  //
+  // unary operations
+  //
 
   /**
    * Creates a assignment

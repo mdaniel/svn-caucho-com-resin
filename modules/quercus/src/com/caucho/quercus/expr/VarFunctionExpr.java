@@ -30,6 +30,7 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.Closure;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
@@ -102,17 +103,27 @@ public class VarFunctionExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    Value name = _name.eval(env);
-    AbstractFunction fun = env.getFunction(name);
+    Value value = _name.eval(env);
+    
+    Value []args = evalArgs(env, _args);
 
     env.pushCall(this, NullValue.NULL, null);
 
     try {
       env.checkTimeout();
 
+      if (value instanceof Closure) {
+        return ((Closure) value).call(env, args);
+      }
+    
+      Value name = value;
+    
+      AbstractFunction fun;
+    
+      fun = env.getFunction(name);
       // FIXME: FunctionExpr also invokes callRef() and callCopy().
 
-      return fun.call(env, _args);
+      return fun.call(env, args);
     } finally {
       env.popCall();
     }
@@ -128,6 +139,19 @@ public class VarFunctionExpr extends Expr {
   public Value evalRef(Env env)
   {
     return env.getFunction(_name.eval(env)).callRef(env, _args);
+  }
+  
+  private Value []evalArgs(Env env, Expr []argExprs)
+  {
+    int len = argExprs.length;
+    
+    Value []args = new Value[len];
+    
+    for (int i = 0; i < len; i++) {
+      args[i] = argExprs[i].eval(env);
+    }
+    
+    return args;
   }
   
   public String toString()

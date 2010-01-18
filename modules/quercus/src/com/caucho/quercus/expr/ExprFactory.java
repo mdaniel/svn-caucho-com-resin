@@ -138,12 +138,24 @@ public class ExprFactory {
     return new VarVarExpr(var);
   }
   
+  //
+  // constants
+  //
+  
   /**
    * Creates a __FILE__ expression.
    */
   public FileNameExpr createFileNameExpr(String fileName)
   {
     return new FileNameExpr(fileName);
+  }
+  
+  /**
+   * Creates a __DIR__ expression.
+   */
+  public DirNameExpr createDirExpr(String dirName)
+  {
+    return new DirNameExpr(dirName);
   }
 
   /**
@@ -155,29 +167,16 @@ public class ExprFactory {
   }
 
   /**
-   * Creates a class const expression.
-   */
-  public ClassConstExpr createClassConst(String className, String name)
-  {
-    return new ClassConstExpr(className, name);
-  }
-  
-  /**
-   * Creates a class const expression (static::FOO).
-   */
-  public LateStaticBindingClassConstExpr
-    createLateStaticBindingClassConst(String name)
-  {
-    return new LateStaticBindingClassConstExpr(name);
-  }
-
-  /**
    * Creates a this expression.
    */
   public ThisExpr createThis(Location location, InterpretedClassDef cl)
   {
     return new ThisExpr(location, cl);
   }
+  
+  //
+  // array deref
+  //
 
   /**
    * Creates an array get 'a[0]' expression.
@@ -203,64 +202,126 @@ public class ExprFactory {
   {
     return new ArrayTailExpr(location, base);
   }
+  
+  //
+  // field deref
+  //
 
   /**
    * Creates an object get '$a->b' expression.
    */
-  public Expr createFieldGet(Location location,
-                             Expr base,
+  public Expr createFieldGet(Expr base,
                              StringValue name)
   {
-    return new FieldGetExpr(location, base, name);
+    return new FieldGetExpr(base, name);
   }
 
   /**
    * Creates an object get '$a->$b' expression.
    */
-  public Expr createFieldVarGet(Location location,
-                                Expr base,
+  public Expr createFieldVarGet(Expr base,
                                 Expr name)
   {
-    return new FieldVarGetExpr(location, base, name);
+    return new FieldVarGetExpr(base, name);
+  }
+  
+  //
+  // class scope foo::bar
+  //
+
+  /**
+   * Creates a class const expression.
+   */
+  public ClassConstExpr createClassConst(String className, String name)
+  {
+    return new ClassConstExpr(className, name);
   }
 
   /**
-   * Creates an object get 'a::b' expression.
+   * Creates an expression class const expression ($class::FOO).
    */
-  public Expr createStaticFieldGet(Location location,
-                                   String className,
-                                   String name)
+  public Expr createClassConst(Expr className, String name)
   {
-    return new StaticFieldGetExpr(location, className, name);
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**
-   * Creates an object get 'static::b' expression.
+   * Creates a class const expression (static::FOO).
    */
-  public Expr createLateStaticBindingFieldGet(Location location,
-                                              String name)
+  public LateStaticBindingClassConstExpr
+    createClassConstLateStaticBinding(String name)
   {
-    return new LateStaticBindingFieldGetExpr(location, name);
+    return new LateStaticBindingClassConstExpr(name);
+  }
+  
+  //
+  // class fields
+  //
+
+  /**
+   * Creates an class static field 'a::$b' expression.
+   */
+  public Expr createClassField(String className,
+                               String name)
+  {
+    return new StaticFieldGetExpr(className, name);
   }
 
   /**
-   * Creates an object get 'a::${b}' expression.
+   * Creates an class static field 'a::$b' expression.
    */
-  public Expr createStaticFieldVarGet(Location location,
-                                      String className,
-                                      Expr name)
+  public Expr createClassField(Expr className,
+                               String name)
   {
-    return new StaticFieldVarGetExpr(location, className, name);
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**
-   * Creates an object get 'static::${b}' expression.
+   * Creates a class static field 'static::$b' expression.
    */
-  public Expr createLateStaticBindingFieldVarGet(Location location,
-                                                 Expr name)
+  public Expr createClassFieldLateStaticBinding(String name)
   {
-    return new LateStaticBindingFieldVarGetExpr(location, name);
+    return new LateStaticBindingFieldGetExpr(name);
   }
+
+  /**
+   * Creates an class static field 'a::${b}' expression.
+   */
+  public Expr createClassField(String className,
+                               Expr name)
+  {
+    return new StaticFieldVarGetExpr(className, name);
+  }
+
+  /**
+   * Creates an class static field '$class::$b' expression.
+   */
+  public Expr createClassField(Expr className,
+                               Expr name)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  /**
+   * Creates a class static field 'static::${b}' expression.
+   */
+  public Expr createClassFieldLateStaticBinding(Expr name)
+  {
+    return new LateStaticBindingFieldVarGetExpr(name);
+  }
+
+  /**
+   * Creates a class static field '$class::${b}' expression.
+   */
+  public Expr createStaticFieldGet(Expr className,
+                                   Expr name)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  //
+  // unary expressions
+  //
   
   /**
    * Creates an unset '$a' expression.
@@ -783,7 +844,7 @@ public class ExprFactory {
    * Creates a list expression.
    */
   public final Expr createList(QuercusParser parser,
-			       ListHeadExpr head, Expr value)
+                               ListHeadExpr head, Expr value)
   {
     boolean isSuppress = value instanceof SuppressErrorExpr;
 
@@ -840,6 +901,14 @@ public class ExprFactory {
   }
 
   /**
+   * Creates an conditional expression.
+   */
+  public Expr createShortConditional(Expr test, Expr right)
+  {
+    return new ShortConditionalExpr(test, right);
+  }
+
+  /**
    * Creates a array() expression.
    */
   public Expr createArrayFun(ArrayList<Expr> keys, ArrayList<Expr> values)
@@ -851,8 +920,8 @@ public class ExprFactory {
    * Creates a new function call.
    */
   public Expr createFunction(Location loc,
-			     String name,
-			     ArrayList<Expr> args)
+                             String name,
+                             ArrayList<Expr> args)
   {
     if ("isset".equals(name) && args.size() == 1)
       return new IssetExpr(args.get(0));
@@ -864,19 +933,29 @@ public class ExprFactory {
    * Creates a new var function call.
    */
   public VarFunctionExpr createVarFunction(Location loc,
-					   Expr name,
-					   ArrayList<Expr> args)
+                                           Expr name,
+                                           ArrayList<Expr> args)
   {
     return new VarFunctionExpr(loc, name, args);
+  }
+  
+  /**
+   * Creates a new closure.
+   */
+  public ClosureExpr createClosure(Location loc, 
+                                   Function fun,
+                                   ArrayList<VarExpr> useArgs)
+  {
+    return new ClosureExpr(loc, fun);
   }
 
   /**
    * Creates a new function call.
    */
   public Expr createClassMethod(Location loc,
-				String className,
-				String name,
-				ArrayList<Expr> args)
+                                String className,
+                                String name,
+                                ArrayList<Expr> args)
   {
     return new ClassMethodExpr(loc, className, name, args);
   }
@@ -906,9 +985,9 @@ public class ExprFactory {
    * Creates a static function call.
    */
   public Expr createStaticMethod(Location loc,
-				 String className,
-				 String name,
-				 ArrayList<Expr> args)
+                                 String className,
+                                 String name,
+                                 ArrayList<Expr> args)
   {
     return new StaticMethodExpr(loc, className, name, args);
   }
@@ -927,9 +1006,9 @@ public class ExprFactory {
    * Creates a new method A::$f()
    */
   public Expr createStaticVarMethod(Location loc,
-				    String className,
-				    Expr var,
-				    ArrayList<Expr> args)
+                                    String className,
+                                    Expr var,
+                                    ArrayList<Expr> args)
   {
     return new StaticVarMethodExpr(loc, className, var, args);
   }
@@ -948,9 +1027,9 @@ public class ExprFactory {
    * Creates a new method call.
    */
   public Expr createMethodCall(Location loc,
-				       Expr objExpr,
-				       String name,
-				       ArrayList<Expr> args)
+                               Expr objExpr,
+                               String name,
+                               ArrayList<Expr> args)
   {
     return new MethodCallExpr(loc, objExpr, name, args);
   }
@@ -959,9 +1038,9 @@ public class ExprFactory {
    * Creates a new method call.
    */
   public Expr createVarMethodCall(Location loc,
-				  Expr objExpr,
-				  Expr name,
-				  ArrayList<Expr> args)
+                                  Expr objExpr,
+                                  Expr name,
+                                  ArrayList<Expr> args)
   {
     return new VarMethodCallExpr(loc, objExpr, name, args);
   }
@@ -970,8 +1049,8 @@ public class ExprFactory {
    * Creates a new function call.
    */
   public NewExpr createNew(Location loc,
-			   String name,
-			   ArrayList<Expr> args)
+                           String name,
+                           ArrayList<Expr> args)
   {
     return new NewExpr(loc, name, args);
   }
@@ -980,8 +1059,8 @@ public class ExprFactory {
    * Creates a new function call.
    */
   public VarNewExpr createVarNew(Location loc,
-				 Expr name,
-				 ArrayList<Expr> args)
+                                 Expr name,
+                                 ArrayList<Expr> args)
   {
     return new VarNewExpr(loc, name, args);
   }
@@ -990,8 +1069,8 @@ public class ExprFactory {
    * Creates an include expr
    */
   public Expr createInclude(Location loc,
-			    Path source,
-			    Expr expr)
+                            Path source,
+                            Expr expr)
   {
     return new IncludeExpr(loc, source, expr, false);
   }
@@ -1000,8 +1079,8 @@ public class ExprFactory {
    * Creates an include expr
    */
   public Expr createRequire(Location loc,
-			    Path source,
-			    Expr expr)
+                            Path source,
+                            Expr expr)
   {
     return new IncludeExpr(loc, source, expr, true);
   }
@@ -1010,8 +1089,8 @@ public class ExprFactory {
    * Creates an include expr
    */
   public Expr createIncludeOnce(Location loc,
-				Path source,
-				Expr expr)
+                                Path source,
+                                Expr expr)
   {
     return new IncludeOnceExpr(loc, source, expr, false);
   }
@@ -1020,8 +1099,8 @@ public class ExprFactory {
    * Creates an include expr
    */
   public Expr createRequireOnce(Location loc,
-				Path source,
-				Expr expr)
+                                Path source,
+                                Expr expr)
   {
     return new IncludeOnceExpr(loc, source, expr, true);
   }
@@ -1035,6 +1114,10 @@ public class ExprFactory {
   {
     return new ImportExpr(loc, name, isWildcard);
   }
+  
+  //
+  // statements
+  //
 
   /**
    * Creates a null literal expression.
@@ -1061,7 +1144,7 @@ public class ExprFactory {
   }
 
   public final Statement createBlock(Location loc,
-				     ArrayList<Statement> statementList)
+                                     ArrayList<Statement> statementList)
   {
     if (statementList.size() == 1)
       return statementList.get(0);
@@ -1089,7 +1172,7 @@ public class ExprFactory {
    * Creates an expr statement
    */
   public final BlockStatement createBlockImpl(Location loc,
-					      ArrayList<Statement> statementList)
+                                              ArrayList<Statement> statementList)
   {
     Statement []statements = new Statement[statementList.size()];
 
@@ -1118,9 +1201,9 @@ public class ExprFactory {
    * Creates an if statement
    */
   public Statement createIf(Location loc,
-			    Expr test,
-			    Statement trueBlock,
-			    Statement falseBlock)
+                            Expr test,
+                            Statement trueBlock,
+                            Statement falseBlock)
   {
     return new IfStatement(loc, test, trueBlock, falseBlock);
   }
@@ -1242,8 +1325,8 @@ public class ExprFactory {
    * Creates a static statement
    */
   public Statement createStatic(Location loc,
-				VarExpr var,
-				Expr value)
+                                VarExpr var,
+                                Expr value)
   {
     return new StaticStatement(loc, var, value);
   }
@@ -1252,7 +1335,7 @@ public class ExprFactory {
    * Creates a throw statement
    */
   public Statement createThrow(Location loc,
-				Expr value)
+                               Expr value)
   {
     return new ThrowStatement(loc, value);
   }
@@ -1260,8 +1343,8 @@ public class ExprFactory {
   /**
    * Creates a try statement
    */
-  public TryStatement createTry(Location loc,
-				Statement block)
+  public TryStatement createTry(Location loc,   
+                                Statement block)
   {
     return new TryStatement(loc, block);
   }
@@ -1270,7 +1353,7 @@ public class ExprFactory {
    * Creates a return statement
    */
   public Statement createReturn(Location loc,
-				Expr value)
+                                Expr value)
   {
     return new ReturnStatement(loc, value);
   }
@@ -1279,7 +1362,7 @@ public class ExprFactory {
    * Creates a return ref statement
    */
   public Statement createReturnRef(Location loc,
-				   Expr value)
+                                   Expr value)
   {
     return new ReturnRefStatement(loc, value);
   }
@@ -1288,7 +1371,7 @@ public class ExprFactory {
    * Creates a new function definition def.
    */
   public Statement createFunctionDef(Location loc,
-				     Function fun)
+                                     Function fun)
   {
     return new FunctionDefStatement(loc, fun);
   }

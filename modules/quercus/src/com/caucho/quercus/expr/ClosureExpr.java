@@ -29,50 +29,80 @@
 
 package com.caucho.quercus.expr;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.env.*;
-import com.caucho.quercus.program.InterpretedClassDef;
+import com.caucho.quercus.*;
+import com.caucho.quercus.env.Closure;
+import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.UnsetValue;
+import com.caucho.quercus.env.Value;
+import com.caucho.quercus.parser.QuercusParser;
+import com.caucho.quercus.program.Function;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
 
-/**
- * Represents the 'this' expression.
- */
-public class ThisExpr extends AbstractVarExpr {
-  private static final L10N L = new L10N(ThisExpr.class);
+import java.util.ArrayList;
 
-  protected final InterpretedClassDef _quercusClass;
-  
-  public ThisExpr(Location location, InterpretedClassDef quercusClass)
+/**
+ * Represents a PHP closure expression.
+ */
+public class ClosureExpr extends Expr {
+  private static final L10N L = new L10N(ClosureExpr.class);
+
+  protected final Function _fun;
+
+  public ClosureExpr(Location location, Function fun)
   {
+    // quercus/120o
     super(location);
-    _quercusClass = quercusClass;
-  }
-  
-  public ThisExpr(InterpretedClassDef quercusClass)
-  {
-    _quercusClass = quercusClass;
+
+    _fun = fun;
   }
 
   /**
-   * Creates a field ref
+   * Returns the name.
+   */
+  public String getName()
+  {
+    return _fun.getName();
+  }
+  
+  /**
+   * Returns the function
+   */
+  public Function getFunction()
+  {
+    return _fun;
+  }
+
+  /**
+   * Returns the location if known.
+   */
+  public String getFunctionLocation()
+  {
+    return " [" + getName() + "]";
+  }
+
+  /**
+   * Returns the reference of the value.
+   * @param location
    */
   @Override
-  public Expr createFieldGet(ExprFactory factory,
-                             StringValue name)
+  public Expr createRef(QuercusParser parser)
   {
-    return new ThisFieldExpr(_quercusClass, name);
+    return parser.getFactory().createRef(this);
   }
 
   /**
-   * Creates a field ref
+   * Returns the copy of the value.
+   * @param location
    */
-  public Expr createFieldGet(ExprFactory factory,
-                             Location location,
-                             Expr name)
+  @Override
+  public Expr createCopy(ExprFactory factory)
   {
-    return new ThisFieldVarGetExpr(location, name);
+    return this;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -82,22 +112,9 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getThis();
+    return evalImpl(env);
   }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  @Override
-    public Value evalArg(Env env, boolean isTop)
-  {
-    return env.getThis();
-  }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -107,9 +124,9 @@ public class ThisExpr extends AbstractVarExpr {
    */
   public Value evalRef(Env env)
   {
-    return env.getThis();
+    return evalImpl(env);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -117,11 +134,11 @@ public class ThisExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
+  public Value evalCopy(Env env)
   {
-    env.error(getLocation(), "can't assign $this");
+    return evalImpl(env);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -129,14 +146,14 @@ public class ThisExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalUnset(Env env)
+  private Value evalImpl(Env env)
   {
-    env.error(getLocation(), "can't unset $this");
+    return new Closure(env, _fun);
   }
-  
+
   public String toString()
   {
-    return "$this";
+    return getName() + "()";
   }
 }
 

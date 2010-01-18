@@ -1672,8 +1672,8 @@ public class QuercusParser {
         expect(';');
 
         function = _factory.createMethodDeclaration(location,
-                                                        _classDef, name,
-                                                        _function, args);
+                                                    _classDef, name,
+                                                    _function, args);
       }
       else {
         expect('{');
@@ -1728,6 +1728,102 @@ public class QuercusParser {
       _isTop = oldTop;
     }
   }
+
+  /**
+   * Parses a function definition
+   */
+  private Expr parseClosure()
+    throws IOException
+  {
+    boolean oldTop = _isTop;
+    _isTop = false;
+
+    boolean oldReturnsReference = _returnsReference;
+    FunctionInfo oldFunction = _function;
+
+    try {
+      _returnsReference = false;
+
+      int token = parseToken();
+
+      String comment = null;
+
+      if (token == '&')
+        _returnsReference = true;
+      else
+        _peekToken = token;
+      
+      String name = "__quercus_closure_" + _functionsParsed;
+
+      _function = getFactory().createFunctionInfo(_quercus, name);
+      _function.setReturnsReference(_returnsReference);
+      _function.setClosure(true);
+
+      Location location = getLocation();
+
+      expect('(');
+
+      Arg []args = parseFunctionArgDefinition();
+
+      expect(')');
+
+      Arg []useArgs;
+      ArrayList<VarExpr> useVars = new ArrayList<VarExpr>();
+      
+      token = parseToken();
+      
+      if (token == USE) {
+        expect('(');
+
+        useArgs = parseFunctionArgDefinition();
+        
+        for (Arg arg : useArgs) {
+          VarExpr var = _factory.createVar(oldFunction.createVar(arg.getName()));
+          
+          useVars.add(var);
+        }
+
+        expect(')');
+      }
+      else {
+        useArgs = new Arg[0];
+      
+        _peekToken = token;
+      }
+      
+      expect('{');
+
+      Statement []statements = null;
+
+      Scope oldScope = _scope;
+      try {
+        _scope = new FunctionScope(_factory, oldScope);
+        statements = parseStatements();
+      } finally {
+        _scope = oldScope;
+      }
+
+      expect('}');
+
+      Function function = _factory.createFunction(location, name,
+                                                  _function, args,
+                                                  statements);
+
+      function.setParseIndex(_functionsParsed++);
+      function.setComment(comment);
+      function.setClosure(true);
+      function.setClosureUseArgs(useArgs);
+      
+      _globalScope.addFunction(name, function, oldTop);
+
+      return _factory.createClosure(location, function, useVars);
+    } finally {
+      _returnsReference = oldReturnsReference;
+      _function = oldFunction;
+      _isTop = oldTop;
+    }
+  }
+
 
   private Arg []parseFunctionArgDefinition()
     throws IOException
@@ -2473,10 +2569,19 @@ public class QuercusParser {
 
       switch (token) {
       case '?':
-        Expr trueExpr = parseExpr();
-        expect(':');
-        // php/33c1
-        expr = _factory.createConditional(expr, trueExpr, parseOrExpr());
+        token = parseToken();
+        
+        if (token == ':') {
+          expr = _factory.createShortConditional(expr, parseOrExpr());
+        }
+        else {
+          _peekToken = token;
+          
+          Expr trueExpr = parseExpr();
+          expect(':');
+          // php/33c1
+          expr = _factory.createConditional(expr, trueExpr, parseOrExpr());
+        }
         break;
       default:
         _peekToken = token;
@@ -2895,6 +3000,7 @@ public class QuercusParser {
    *      ::= term '{' index '}'
    *      ::= term '(' index ')'
    *      ::= term '->' name
+   *      ::= term '::' name
    * </pre>
    */
   private Expr parseTerm()
@@ -2946,6 +3052,10 @@ public class QuercusParser {
 
       case DEREF:
         term = parseDeref(term);
+        break;
+        
+      case SCOPE:
+        term = parseScope(term);
         break;
 
       case '(':
@@ -3086,7 +3196,7 @@ public class QuercusParser {
       // php/0d6g
         term = parseDeref(term);
         break;
-
+        
       default:
         _peekToken = token;
         return term;
@@ -3148,7 +3258,6 @@ public class QuercusParser {
 
         _peekToken = token;
         return term.createFieldGet(_factory,
-                                   getLocation(),
                                    createStringValue(name));
       }
 
@@ -3170,12 +3279,12 @@ public class QuercusParser {
     else if (nameExpr != null) {
       _peekToken = token;
 
-      return term.createFieldGet(_factory, getLocation(), nameExpr);
+      return term.createFieldGet(_factory, nameExpr);
     }
     else {
       _peekToken = token;
 
-      return term.createFieldGet(_factory, getLocation(), createStringValue(name));
+      return term.createFieldGet(_factory, createStringValue(name));
     }
   }
 
@@ -3383,6 +3492,9 @@ public class QuercusParser {
 
     case NEW:
       return parseNew();
+      
+    case FUNCTION:
+      return parseClosure();
 
     case INCLUDE:
       return _factory.createInclude(getLocation(), _sourceFile, parseExpr());
@@ -3410,82 +3522,27 @@ public class QuercusParser {
         if (_lexeme.equals("new"))
           return parseNew();
 
-        String className = null;
         String name = _lexeme;
-        boolean isParent = false;
 
         token = parseToken();
         _peekToken = token;
 
-        boolean isInstantiated = false;
-        boolean isLateStaticBinding = false;
-
-        if (token == SCOPE) {
-          _peekToken = -1;
-
-          className = name;
-
-          if (className.equals("self")) {
-            isInstantiated = true;
-            className = _classDef.getName();
-
-            if (className == null)
-              throw error(L.l("cannot access self when not in object scope"));
-          }
-          else if (className.equals("parent")) {
-            isInstantiated = true;
-            className = _classDef.getParentName();
-            isParent = true;
-
-            if (className == null)
-              throw error(L.l("object does not have a parent class"));
-          }
-          else if (className.equals("static")) {
-            isLateStaticBinding = true;
-          }
-
-          token = parseToken();
-          if (token == '$')
-            return parseStaticClassField(className, isLateStaticBinding);
-          else
-            _peekToken = token;
-
-          name = parseIdentifier();
-
-          token = parseToken();
-          _peekToken = token;
-        }
-
-        if (token == '(') {
-
-          if (_isNewExpr) {
-            if ("self".equals(name))
-              return createString(_classDef.getName());
-            else if ("parent".equals(name))
-              return createString(_classDef.getParentName());
-            else
-              return createString(name);
-          }
-
-          /*
-          if (_isNewExpr && className == null
-              && ("self".equals(name) || "parent".equals(name))) {
-            if ("self".equals(name))
-              return createString(_classDef.getName());
-            else
-              return createString(_classDef.getParentName());
-          }
-          */
-          else {
-            return parseFunction(className,
-                                 name,
-                                 isInstantiated,
-                                 isLateStaticBinding,
-                                 isParent);
-          }
+        if (token == '(' && ! _isNewExpr) {
+          // shortcut for common case of static function
+          
+          String className = null;
+          boolean isInstantiated = false;
+          boolean isLateStaticBinding = false;
+          boolean isParent = false;
+          
+          return parseFunction(className,
+                               name,
+                               isInstantiated,
+                               isLateStaticBinding,
+                               isParent);
         }
         else
-          return parseConstant(className, name);
+          return parseConstant(name);
       }
 
     case '(':
@@ -3498,6 +3555,10 @@ public class QuercusParser {
 
         if (expr instanceof ConstExpr) {
           String type = ((ConstExpr) expr).getVar();
+          
+          int ns = type.lastIndexOf('\\');
+          if (ns >= 0)
+            type = type.substring(ns + 1);
 
           if ("bool".equalsIgnoreCase(type)
               || "boolean".equalsIgnoreCase(type))
@@ -3614,6 +3675,36 @@ public class QuercusParser {
     }
   }
 
+  private Expr parseScope(Expr classNameExpr)
+    throws IOException
+  {
+    int token = parseToken();
+
+    Expr varExpr = null;
+    String var = null;
+
+    if (token == IDENTIFIER) {
+      return classNameExpr.createClassConst(_factory, _lexeme);
+    }
+    else if (token == '$') {
+      String name = parseIdentifier();
+      
+      return classNameExpr.createClassField(_factory, name);
+    }
+    else if (token == '{') {
+      _peekToken = parseToken();
+
+      Expr nameExpr = parseExpr();
+
+      expect('}');
+      
+      return classNameExpr.createClassField(_factory, nameExpr);
+    }
+    
+    throw error(L.l("unexpected token '{0}' in class scope expression",
+                    tokenName(token)));
+  }
+
   /**
    * Parses the next variable
    */
@@ -3714,16 +3805,15 @@ public class QuercusParser {
   /**
    * Parses the next constant
    */
-  private Expr parseConstant(String className, String name)
+  private Expr parseConstant(String name)
   {
-    if (className != null) {
-      if (className.equals("static"))
-        return _factory.createLateStaticBindingClassConst(name);
-      else
-        return _factory.createClassConst(className, name);
-    }
-    else if (name.equals("__FILE__")) {
+    if (name.equals("__FILE__")) {
       return _factory.createFileNameExpr(_parserLocation.getFileName());
+    }
+    else if (name.equals("__DIR__")) {
+      Path parent = Vfs.lookup(_parserLocation.getFileName()).getParent();
+      
+      return _factory.createDirExpr(parent.getNativePath());
     }
     else if (name.equals("__LINE__"))
       return _factory.createLong(_parserLocation.getLineNumber());
@@ -3752,72 +3842,6 @@ public class QuercusParser {
       name = name.substring(1);
     
     return _factory.createConst(name);
-  }
-
-  /**
-   * Parses the next constant
-   */
-  private Expr parseStaticClassField(String className,
-                                     boolean isLateStaticBinding)
-    throws IOException
-  {
-    int token = parseToken();
-
-    Expr varExpr = null;
-    String var = null;
-
-    if (token == '{') {
-      _peekToken = parseToken();
-
-      varExpr = parseTerm();
-
-      expect('}');
-    }
-    else if (token == '$') {
-      varExpr = parseVariable();
-    }
-    else {
-      // class constant
-      _peekToken = token;
-
-      var = parseIdentifier();
-    }
-
-    _comment = null;
-
-
-    _peekToken = parseToken();
-    if (_peekToken == '(' && ! _isNewExpr) {
-      parseToken();
-
-      if (varExpr != null)
-        varExpr = _factory.createVarVar(varExpr);
-      else
-        varExpr = _factory.createVar(_function.createVar(var));
-
-      ArrayList<Expr> args = parseArgs();
-
-      if (isLateStaticBinding)
-        return _factory.createLateStaticBindingStaticVarMethod(getLocation(),
-                                                               varExpr, args);
-      else
-        return _factory.createStaticVarMethod(getLocation(), className,
-                                              varExpr, args);
-    }
-    else if (varExpr != null) {
-      if (isLateStaticBinding)
-        return _factory.createLateStaticBindingFieldVarGet(getLocation(),
-                                                           varExpr);
-      else
-        return _factory.createStaticFieldVarGet(getLocation(),
-                                                className, varExpr);
-    }
-    else {
-      if (isLateStaticBinding)
-        return _factory.createLateStaticBindingFieldGet(getLocation(), var);
-      else
-        return _factory.createStaticFieldGet(getLocation(), className, var);
-    }
   }
 
   private ArrayList<Expr> parseArgs()
@@ -4981,7 +5005,7 @@ public class QuercusParser {
                 _sb.append((char) ch);
               }
 
-              tail = tail.createFieldGet(_factory, getLocation(), createStringValue(_sb.toString()));
+              tail = tail.createFieldGet(_factory, createStringValue(_sb.toString()));
             }
             else {
               tail = _factory.createAppend(tail, createString("->"));

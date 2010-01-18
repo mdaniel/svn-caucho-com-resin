@@ -68,6 +68,8 @@ public class Function extends AbstractFunction {
   protected boolean _hasReturn;
   
   protected String _comment;
+  
+  protected Arg []_closureUseArgs;
 
   Function(Location location,
            String name,
@@ -85,6 +87,7 @@ public class Function extends AbstractFunction {
     _statement = new BlockStatement(location, statements);
 
     setGlobal(info.isPageStatic());
+    setClosure(info.isClosure());
     
     _isStatic = true;
   }
@@ -110,6 +113,7 @@ public class Function extends AbstractFunction {
     _statement = exprFactory.createBlock(location, statements);
 
     setGlobal(info.isPageStatic());
+    setClosure(info.isClosure());
     
     _isStatic = true;
   }
@@ -129,6 +133,11 @@ public class Function extends AbstractFunction {
   public ClassDef getDeclaringClass()
   {
     return _info.getDeclaringClass();
+  }
+  
+  public FunctionInfo getInfo()
+  {
+    return _info;
   }
   
   /*
@@ -151,6 +160,22 @@ public class Function extends AbstractFunction {
   public Arg []getArgs()
   {
     return _args;
+  }
+
+  /**
+   * Returns the args.
+   */
+  public Arg []getClosureUseArgs()
+  {
+    return _closureUseArgs;
+  }
+
+  /**
+   * Returns the args.
+   */
+  public void setClosureUseArgs(Arg []useArgs)
+  {
+    _closureUseArgs = useArgs;
   }
 
   public boolean isObjectMethod()
@@ -308,23 +333,30 @@ public class Function extends AbstractFunction {
 
   public Value call(Env env, Value []args)
   {
-    return callImpl(env, args, false);
+    return callImpl(env, args, false, null, null);
   }
 
   public Value callCopy(Env env, Value []args)
   {
-    return callImpl(env, args, false);
+    return callImpl(env, args, false, null, null);
   }
 
   public Value callRef(Env env, Value []args)
   {
-    return callImpl(env, args, true);
+    return callImpl(env, args, true, null, null);
   }
 
-  private Value callImpl(Env env, Value []args, boolean isRef)
+  public Value callImpl(Env env, Value []args, boolean isRef,
+                        Arg []useParams, Value []useArgs)
   {
     HashMap<String,EnvVar> map = new HashMap<String,EnvVar>(8);
 
+    if (useParams != null) {
+      for (int i = 0; i < useParams.length; i++) {
+        map.put(useParams[i].getName(), new EnvVarImpl(useArgs[i].toVar()));
+      }
+    }
+      
     for (int i = 0; i < args.length; i++) {
       Arg arg = null;
 

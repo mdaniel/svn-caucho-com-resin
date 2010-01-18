@@ -1629,6 +1629,135 @@ public class Var extends Value
     return _value.pop(env);
   }
 
+  //
+  // function calls
+  //
+
+  /**
+   * Evaluates the function.
+   */
+  public Value call(Env env, Value []args)
+  {
+    return _value.call(env, args);
+  }
+
+  /**
+   * Evaluates the function, returning a reference.
+   */
+  public Value callRef(Env env, Value []args)
+  {
+    return _value.callRef(env, args);
+  }
+
+  /**
+   * Evaluates the function, returning a copy
+   */
+  public Value callCopy(Env env, Value []args)
+  {
+    return _value.callCopy(env, args);
+  }
+
+  /**
+   * Evaluates the function.
+   */
+  public Value call(Env env)
+  {
+    return _value.call(env);
+  }
+
+  /**
+   * Evaluates the function with an argument .
+   */
+  public Value call(Env env, Value a1)
+  {
+    return _value.call(env, a1);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2)
+  {
+    return _value.call(env, a1, a2);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2, Value a3)
+  {
+    return _value.call(env, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4)
+  {
+    return _value.call(env, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return _value.call(env, a1, a2, a3, a4, a5);
+  }
+
+  /**
+   * Evaluates the function.
+   */
+  public Value callRef(Env env)
+  {
+    return _value.callRef(env);
+  }
+
+  /**
+   * Evaluates the function with an argument .
+   */
+  public Value callRef(Env env, Value a1)
+  {
+    return _value.callRef(env, a1);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env, Value a1, Value a2)
+  {
+    return _value.callRef(env, a1, a2);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env, Value a1, Value a2, Value a3)
+  {
+    return _value.callRef(env, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env, Value a1, Value a2, Value a3, Value a4)
+  {
+    return _value.callRef(env, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  public Value callRef(Env env,
+                       Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return _value.callRef(env, a1, a2, a3, a4, a5);
+  }
+
+  //
+  // method calls
+  //
+
   /**
    * Evaluates a method.
    */
