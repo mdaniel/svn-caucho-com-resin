@@ -129,10 +129,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     if (_outputStream != null)
       return _outputStream;
 
-    /*
-    if (_hasWriter)
+    // server/1b08 (tck)
+    if (_writer != null)
       throw new IllegalStateException(L.l("getOutputStream() can't be called after getWriter()."));
-    */
 
     _outputStream = _response.getResponseOutputStream();
     _outputStream.init(_responseStream);
@@ -140,7 +139,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     /*
     // server/10a2
     if (! _hasWriter) {
-      // jsp/0510 vs jsp/1b00
+      // jsp/0510 vs server/1b00
       // _responseStream.setOutputStreamOnly(true);
     }
     */
@@ -160,10 +159,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     if (_writer != null)
       return _writer;
 
-    /*
-    if (_hasOutputStream)
+    if (_outputStream != null)
       throw new IllegalStateException(L.l("getWriter() can't be called after getOutputStream()."));
-    */
 
     String encoding = getCharacterEncoding();
 

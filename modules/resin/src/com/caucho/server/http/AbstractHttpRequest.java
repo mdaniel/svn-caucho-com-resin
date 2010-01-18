@@ -937,6 +937,11 @@ public abstract class AbstractHttpRequest
   public void setCharacterEncoding(String encoding)
     throws UnsupportedEncodingException
   {
+    // server/122k (tck)
+    
+    if (_hasReadStream)
+      return;
+    
     _readEncoding = encoding;
 
     try {
