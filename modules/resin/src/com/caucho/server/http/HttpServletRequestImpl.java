@@ -1818,6 +1818,11 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
   public void finishInvocation()
   {
+    AsyncContextImpl asyncContext = _asyncContext;
+    
+    if (asyncContext != null)
+      asyncContext.onComplete();
+    
     _request.finishInvocation();
   }
 
@@ -1877,14 +1882,15 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not support asynchronous mode.  The servlet should be annotated with a @WebServlet(asyncSupported=true) annotation or have a <async-supported> tag in the web.xml.",
                                           getServletName(), getServletPath()));
 
-    if (_asyncContext == null) {
-      boolean isOriginal = (request == this && response == _response);
+    if (_asyncContext != null)
+      throw new IllegalStateException(L.l("startAsync may not be called twice on the same dispatch."));
+
+    boolean isOriginal = (request == this && response == _response);
       
-      _asyncContext = new AsyncContextImpl(_request, request, response, isOriginal);
+    _asyncContext = new AsyncContextImpl(_request, request, response, isOriginal);
       
-      if (_asyncTimeout > 0)
-        _asyncContext.setTimeout(_asyncTimeout);
-    }
+    if (_asyncTimeout > 0)
+      _asyncContext.setTimeout(_asyncTimeout);
 
     return _asyncContext;
   }
@@ -2015,9 +2021,11 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     AsyncContextImpl comet = _asyncContext;
     _asyncContext = null;
     
+    /* server/1ld5
     if (comet != null) {
       comet.onComplete();
     }
+    */
     
     super.finishRequest();
 

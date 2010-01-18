@@ -65,15 +65,21 @@ public class AsyncListenerNode
     _listener.onStartAsync(event);
   }
 
-  public void onTimeout()
+  public void onTimeout(AsyncEvent event)
     throws IOException
   {
-    _listener.onTimeout(new AsyncEvent(null, _request, _response));
+    _listener.onTimeout(event);
   }
 
-  public void onComplete()
+  public void onError(AsyncEvent event)
     throws IOException
   {
-    _listener.onComplete(new AsyncEvent(null, _request, _response));
+    _listener.onError(event);
+  }
+
+  public void onComplete(AsyncEvent event)
+    throws IOException
+  {
+    _listener.onComplete(event);
   }
 }

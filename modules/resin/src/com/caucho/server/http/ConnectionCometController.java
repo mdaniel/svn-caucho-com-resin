@@ -149,28 +149,10 @@ public class ConnectionCometController
   
   public void onTimeout()
   {
-    for (AsyncListenerNode node = _listenerNode;
-         node != null;
-         node = node.getNext()) {
-      try {
-        node.onTimeout();
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-    }
   }
   
   public void onComplete()
   {
-    for (AsyncListenerNode node = _listenerNode;
-         node != null;
-         node = node.getNext()) {
-      try {
-        node.onComplete();
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-    }
   }
 
   /**
@@ -207,16 +189,6 @@ public class ConnectionCometController
    */
   public final void timeout()
   {
-    for (AsyncListenerNode node = _listenerNode;
-         node != null;
-         node = node.getNext()) {
-      try {
-        node.onTimeout();
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
-      }
-    }
-
     // _conn.toCometComplete();
 
     wake();

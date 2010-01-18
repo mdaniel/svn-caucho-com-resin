@@ -286,14 +286,33 @@ public class AsyncContextImpl
   /**
    * CometHandler callback when the connection times out.
    */
-  @Override
   public void onTimeout()
   {
+    AsyncEvent event = new AsyncEvent(this, _request, _response);
+    
     for (AsyncListenerNode node = _listenerNode;
          node != null;
          node = node.getNext()) {
       try {
-        node.onTimeout();
+        node.onTimeout(event);
+      } catch (IOException e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+  }
+  
+  /**
+   * CometHandler callback when the connection times out.
+   */
+  public void onError()
+  {
+    AsyncEvent event = new AsyncEvent(this, _request, _response);
+    
+    for (AsyncListenerNode node = _listenerNode;
+         node != null;
+         node = node.getNext()) {
+      try {
+        node.onError(event);
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       }
@@ -302,11 +321,13 @@ public class AsyncContextImpl
   
   public void onComplete()
   {
+    AsyncEvent event = new AsyncEvent(this, _request, _response);
+    
     for (AsyncListenerNode node = _listenerNode;
          node != null;
          node = node.getNext()) {
       try {
-        node.onComplete();
+        node.onComplete(event);
       } catch (IOException e) {
         log.log(Level.FINE, e.toString(), e);
       }

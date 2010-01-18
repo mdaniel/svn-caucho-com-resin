@@ -440,11 +440,11 @@ public class ServletRequestWrapper implements ServletRequest {
 
   public boolean isWrapperFor(ServletRequest wrapped)
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return _request == wrapped;
   }
 
   public boolean isWrapperFor(Class wrappedType)
   {
-    throw new UnsupportedOperationException("unimplemented");
+    return wrappedType.equals(_request.getClass());
   }
 }

@@ -3966,6 +3966,7 @@ public class QuercusParser {
     throws IOException
   {
     int token = parseToken();
+    _peekToken = token;
 
     if (token == '(') {
       ArrayList<Expr> args = parseArgs();
@@ -3976,8 +3977,6 @@ public class QuercusParser {
         return _factory.createExit(null);
     }
     else {
-      _peekToken = token;
-
       return _factory.createExit(null);
     }
   }
@@ -3989,6 +3988,7 @@ public class QuercusParser {
     throws IOException
   {
     int token = parseToken();
+    _peekToken = token;
 
     if (token == '(') {
       ArrayList<Expr> args = parseArgs();
@@ -3999,8 +3999,6 @@ public class QuercusParser {
         return _factory.createDie(null);
     }
     else {
-      _peekToken = token;
-
       return _factory.createDie(null);
     }
   }
@@ -4541,7 +4539,7 @@ public class QuercusParser {
       }
 
       _peek = ch;
-
+      
       return lexemeToToken();
     }
 
@@ -4563,10 +4561,8 @@ public class QuercusParser {
       }
 
       _peek = ch;
-      
-      int token = lexemeToToken();
-      
-      return token;
+        
+      return lexemeToToken();
     }
 
     throw error("unknown lexeme:" + (char) ch);
@@ -4583,6 +4579,8 @@ public class QuercusParser {
 
     int reserved = _reserved.get(_lexeme);
 
+    if (_lexeme.length() == 0)
+      throw new IllegalStateException();
     if (reserved > 0)
       return reserved;
 
