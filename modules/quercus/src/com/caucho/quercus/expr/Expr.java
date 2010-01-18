@@ -36,6 +36,7 @@ import com.caucho.quercus.statement.Statement;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.logging.Logger;
 
 /**
@@ -161,6 +162,58 @@ abstract public class Expr {
     return true;
   }
 
+  /**
+   * Returns true if the expression evaluates to a boolean.
+   */
+  public boolean isBoolean()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the expression evaluates to a long.
+   */
+  public boolean isLong()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the expression evaluates to a double.
+   */
+  public boolean isDouble()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the expression evaluates to a number.
+   */
+  public boolean isNumber()
+  {
+    return isLong() || isDouble();
+  }
+
+  /**
+   * Returns true if the expression evaluates to a string.
+   */
+  public boolean isString()
+  {
+    return false;
+  }
+
+  /**
+   * Returns true if the expression evaluates to an array.
+   */
+  public boolean isArray()
+  {
+    return false;
+  }
+  
+  //
+  // expression creation functions
+  //
+
   public Expr createAssign(QuercusParser parser, Expr value)
     throws IOException
   {
@@ -262,24 +315,30 @@ abstract public class Expr {
   /**
    * Creates a class field $class::foo
    */
-  public Expr createClassConst(ExprFactory factory, String name)
+  public Expr createClassConst(QuercusParser parser, String name)
   {
+    ExprFactory factory = parser.getExprFactory();
+    
     return factory.createClassConst(this, name);
   }
   
   /**
    * Creates a class field $class::$foo
    */
-  public Expr createClassField(ExprFactory factory, String name)
+  public Expr createClassField(QuercusParser parser, String name)
   {
+    ExprFactory factory = parser.getExprFactory();
+    
     return factory.createClassField(this, name);
   }
   
   /**
    * Creates a class field $class::${foo}
    */
-  public Expr createClassField(ExprFactory factory, Expr name)
+  public Expr createClassField(QuercusParser parser, Expr name)
   {
+    ExprFactory factory = parser.getExprFactory();
+    
     return factory.createClassField(this, name);
   }
   
@@ -306,54 +365,25 @@ abstract public class Expr {
     throw new IOException(L.l("{0} is an illegal value to isset",
                               this));
   }
+  
+  //
+  // function call creation
+  //
 
   /**
-   * Returns true if the expression evaluates to a boolean.
+   * Creates a function call expression
    */
-  public boolean isBoolean()
+  public Expr createCall(ExprFactory factory,
+                         Location location,
+                         ArrayList<Expr> args)
+    throws IOException
   {
-    return false;
+    return factory.createVarFunction(location, this, args);
   }
-
-  /**
-   * Returns true if the expression evaluates to a long.
-   */
-  public boolean isLong()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the expression evaluates to a double.
-   */
-  public boolean isDouble()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the expression evaluates to a number.
-   */
-  public boolean isNumber()
-  {
-    return isLong() || isDouble();
-  }
-
-  /**
-   * Returns true if the expression evaluates to a string.
-   */
-  public boolean isString()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the expression evaluates to an array.
-   */
-  public boolean isArray()
-  {
-    return false;
-  }
+  
+  //
+  // evaluation
+  //
 
   /**
    * Evaluates the expression as a constant.
@@ -614,6 +644,20 @@ abstract public class Expr {
     Value array = evalDirty(env);
 
     array.remove(index);
+  }
+  
+  /**
+   * Evaluates arguments
+   */
+  public static Value []evalArgs(Env env, Expr []exprs)
+  {
+    Value []args = new Value[exprs.length];
+    
+    for (int i = 0; i < args.length; i++) {
+      args[i] = exprs[i].eval(env);
+    }
+    
+    return args;
   }
 
   /**

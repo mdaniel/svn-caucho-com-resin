@@ -37,7 +37,7 @@ import java.io.IOException;
  * PHP parse exception
  */
 public class QuercusParseException
-  extends IOException
+  extends RuntimeException
   implements LineCompileException {
   public QuercusParseException()
   {

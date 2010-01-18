@@ -1050,13 +1050,13 @@ public class QuercusClass {
     if (fun != null)
       return fun;
     else if (_className.equalsIgnoreCase(toMethod(name, nameLen))
-	     && _parent != null) {
+             && _parent != null) {
       // php/093j
       return _parent.getFunction(_parent.getName());
     }
     else {
       throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
-					getName(), toMethod(name, nameLen)));
+                                            getName(), toMethod(name, nameLen)));
     }
   }
 
@@ -1137,7 +1137,6 @@ public class QuercusClass {
   public Value callMethod(Env env,
                           Value thisValue,
                           StringValue name,
-
                           Value []args)
   {
     AbstractFunction fun = _methodMap.get(name.toString());
@@ -1148,6 +1147,29 @@ public class QuercusClass {
       return getCall().callMethod(env,
                                   thisValue,
                                   name,
+                                  new ArrayValueImpl(args));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), name));
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethod(Env env,
+                          Value thisValue,
+                          String name,
+                          Value []args)
+  {
+    AbstractFunction fun = _methodMap.get(name);
+
+    if (fun != null)
+      return fun.callMethod(env, thisValue, args);
+    else if (getCall() != null) {
+      return getCall().callMethod(env,
+                                  thisValue,
+                                  env.createString(name),
                                   new ArrayValueImpl(args));
     }
     else
@@ -1180,8 +1202,8 @@ public class QuercusClass {
    * calls the function.
    */
   public Value callMethod(Env env, Value thisValue,
-			  int hash, char []name, int nameLen,
-			  Value a1)
+                          int hash, char []name, int nameLen,
+                          Value a1)
   {
     AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
@@ -1228,7 +1250,7 @@ public class QuercusClass {
    */
   public Value callMethod(Env env, Value thisValue, 
                           int hash, char []name, int nameLen,
-			  Value a1, Value a2, Value a3)
+                          Value a1, Value a2, Value a3)
   {
     AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
@@ -1253,7 +1275,7 @@ public class QuercusClass {
    */
   public Value callMethod(Env env, Value thisValue, 
                           int hash, char []name, int nameLen,
-			  Value a1, Value a2, Value a3, Value a4)
+                          Value a1, Value a2, Value a3, Value a4)
   {
     AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
@@ -1279,7 +1301,7 @@ public class QuercusClass {
    */
   public Value callMethod(Env env, Value thisValue,
                           int hash, char []name, int nameLen,
-			  Value a1, Value a2, Value a3, Value a4, Value a5)
+                          Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     AbstractFunction fun = _methodMap.get(hash, name, nameLen);
 
@@ -1317,9 +1339,9 @@ public class QuercusClass {
    * calls the function.
    */
   public Value callMethodRef(Env env,
-			     Value thisValue,
-			     StringValue methodName,
-			     Expr []args)
+                             Value thisValue,
+                             StringValue methodName,
+                             Expr []args)
   {
     AbstractFunction fun = _methodMap.get(methodName.toString());
     
@@ -1375,6 +1397,29 @@ public class QuercusClass {
                                      thisValue,
                                      name,
                                      new ArrayValueImpl(args));
+    }
+    else
+      return env.error(L.l("Call to undefined method {0}::{1}()",
+                           getName(), name));
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callMethodRef(Env env,
+                             Value thisValue,
+                             String name,
+                             Value []args)
+  {
+    AbstractFunction fun = _methodMap.get(name);
+
+    if (fun != null)
+      return fun.callMethod(env, thisValue, args);
+    else if (getCall() != null) {
+      return getCall().callMethod(env,
+                                  thisValue,
+                                  env.createString(name),
+                                  new ArrayValueImpl(args));
     }
     else
       return env.error(L.l("Call to undefined method {0}::{1}()",
@@ -1586,6 +1631,23 @@ public class QuercusClass {
    */
   public Value callStaticMethod(Env env,
                                 Value thisValue,
+                                String methodName,
+                                Value []args)
+  {
+    QuercusClass oldClass = env.setCallingClass(this);
+    
+    try {
+      return callMethod(env, thisValue, methodName, args);
+    } finally {
+      env.setCallingClass(oldClass);
+    }
+  }  
+
+  /**
+   * calls the function.
+   */
+  public Value callStaticMethod(Env env,
+                                Value thisValue,
                                 StringValue name,
                                 Value []args)
   {
@@ -1731,6 +1793,23 @@ public class QuercusClass {
       env.setCallingClass(oldClass);
     }
   }
+
+  /**
+   * calls the function.
+   */
+  public Value callStaticMethodRef(Env env,
+                                   Value thisValue,
+                                   String methodName,
+                                   Value []args)
+  {
+    QuercusClass oldClass = env.setCallingClass(this);
+    
+    try {
+      return callMethodRef(env, thisValue, methodName, args);
+    } finally {
+      env.setCallingClass(oldClass);
+    }
+  }  
 
   /**
    * calls the function.

@@ -3251,39 +3251,12 @@ public class QuercusParser {
       name = parseIdentifier();
     }
 
-    token = parseToken();
-    if (token == '(') {
-      if (_isNewExpr) {
-        //php/09fj
-
-        _peekToken = token;
-        return term.createFieldGet(_factory,
-                                   createStringValue(name));
-      }
-
-      ArrayList<Expr> args = new ArrayList<Expr>();
-
-      parseFunctionArgs(args);
-
-      if (nameExpr != null)
-        return _factory.createVarMethodCall(getLocation(),
-                                            term,
-                                            nameExpr,
-                                            args);
-      else
-        return _factory.createMethodCall(getLocation(),
-                                         term,
-                                         name,
-                                         args);
-    }
-    else if (nameExpr != null) {
+    if (nameExpr != null) {
       _peekToken = token;
 
       return term.createFieldGet(_factory, nameExpr);
     }
     else {
-      _peekToken = token;
-
       return term.createFieldGet(_factory, createStringValue(name));
     }
   }
@@ -3530,16 +3503,7 @@ public class QuercusParser {
         if (token == '(' && ! _isNewExpr) {
           // shortcut for common case of static function
           
-          String className = null;
-          boolean isInstantiated = false;
-          boolean isLateStaticBinding = false;
-          boolean isParent = false;
-          
-          return parseFunction(className,
-                               name,
-                               isInstantiated,
-                               isLateStaticBinding,
-                               isParent);
+          return parseFunction(name);
         }
         else
           return parseConstant(name);
@@ -3594,7 +3558,7 @@ public class QuercusParser {
         if (token == '(') {
           _peekToken = token;
 
-          return parseFunction(null, importTokenString, false, false, false);
+          return parseFunction(importTokenString);
         }
         else {
           _peekToken = token;
@@ -3680,16 +3644,16 @@ public class QuercusParser {
   {
     int token = parseToken();
 
-    Expr varExpr = null;
-    String var = null;
-
     if (token == IDENTIFIER) {
-      return classNameExpr.createClassConst(_factory, _lexeme);
+      return classNameExpr.createClassConst(this, _lexeme);
     }
-    else if (token == '$') {
-      String name = parseIdentifier();
-      
-      return classNameExpr.createClassField(_factory, name);
+    
+    _peekToken = token;
+    expect('$');
+    
+    token = parseToken();
+    if (token == IDENTIFIER) {
+      return classNameExpr.createClassField(this, _lexeme);
     }
     else if (token == '{') {
       _peekToken = parseToken();
@@ -3698,7 +3662,7 @@ public class QuercusParser {
 
       expect('}');
       
-      return classNameExpr.createClassField(_factory, nameExpr);
+      return classNameExpr.createClassField(this, nameExpr);
     }
     
     throw error(L.l("unexpected token '{0}' in class scope expression",
@@ -3742,30 +3706,19 @@ public class QuercusParser {
   /**
    * Parses the next function
    */
-  private Expr parseFunction(String className,
-                             String name,
-                             boolean isInstantiated,
-                             boolean isLateStaticBinding,
-                             boolean isParent)
+  private Expr parseFunction(String name)
     throws IOException
   {
     if (name.equalsIgnoreCase("array"))
       return parseArrayFunction();
+
+    ArrayList<Expr> args = parseArgs();
     
-    if (className == null)
-      name = resolveIdentifier(name);
 
-    int token = parseToken();
+    return _factory.createFunction(getLocation(), name, args);
 
-    if (token != '(')
-      throw error(L.l("Expected '('"));
-
-    ArrayList<Expr> args = new ArrayList<Expr>();
-
-    parseFunctionArgs(args);
-
-    if (className == null && ! isLateStaticBinding) {
-      if (name.equals("each")) {
+    /*
+     if (name.equals("each")) {
         if (args.size() != 1)
           throw error(L.l("each requires a single expression"));
 
@@ -3773,33 +3726,7 @@ public class QuercusParser {
         // we should let ArrayModule.each() handle it
         //return _factory.createEach(args.get(0));
       }
-
-      return _factory.createFunction(getLocation(), name, args);
-    }
-    else if (isInstantiated) {
-      if (isLateStaticBinding)
-        return _factory.createLateStaticBindingClassMethod(getLocation(),
-                                                           name, args);
-      else if (isParent) {
-        return _factory.createParentMethod(getLocation(),
-                                           className,
-                                           name,
-                                           args);
-      }
-      else
-        return _factory.createClassMethod(getLocation(),
-                                          className, name, args);
-    }
-    else {
-      if (isLateStaticBinding)
-        return _factory.createLateStaticBindingStaticMethod(getLocation(),
-                                                            name,
-                                                            args);
-      else
-        return _factory.createStaticMethod(getLocation(),
-                                           className, name, args);
-    }
-
+      */
   }
 
   /**
@@ -3844,19 +3771,22 @@ public class QuercusParser {
     return _factory.createConst(name);
   }
 
+  /**
+   * Parses the next function
+   */
+  private Expr parseFunction(Expr name)
+    throws IOException
+  {
+    return name.createCall(_factory, getLocation(), parseArgs());
+  }
+
   private ArrayList<Expr> parseArgs()
     throws IOException
   {
+    expect('(');
+    
     ArrayList<Expr> args = new ArrayList<Expr>();
-
-    parseFunctionArgs(args);
-
-    return args;
-  }
-
-  private void parseFunctionArgs(ArrayList<Expr> args)
-    throws IOException
-  {
+    
     int token;
 
     while ((token = parseToken()) > 0 && token != ')') {
@@ -3880,23 +3810,26 @@ public class QuercusParser {
       else if (token != ',')
         throw expect("','", token);
     }
+    
+    return args;
   }
 
-  /**
-   * Parses the next function
-   */
-  private Expr parseFunction(Expr name)
-    throws IOException
+  public String getSelfClassName()
   {
-    expect('(');
-
-    ArrayList<Expr> args = new ArrayList<Expr>();
-
-    parseFunctionArgs(args);
-
-    return _factory.createVarFunction(getLocation(), name, args);
+    if (_classDef == null)
+      throw error(L.l("'self' is not valid because there is no active class."));
+    
+    return _classDef.getName();
   }
 
+  public String getParentClassName()
+  {
+    if (_classDef == null)
+      throw error(L.l("'parent' is not valid because there is no active class."));
+    
+    return _classDef.getParentName();
+  }
+  
   /**
    * Parses the new expression
    */
@@ -5619,7 +5552,7 @@ public class QuercusParser {
   /**
    * Returns an error.
    */
-  private IOException expect(String expected, int token)
+  private QuercusParseException expect(String expected, int token)
   {
     return error(L.l("expected {0} at {1}", expected, tokenName(token)));
   }
@@ -5627,7 +5560,7 @@ public class QuercusParser {
   /**
    * Returns an error.
    */
-  public IOException error(String msg)
+  public QuercusParseException error(String msg)
   {
     int lineNumber = _parserLocation.getLineNumber();
 

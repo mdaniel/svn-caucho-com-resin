@@ -41,23 +41,15 @@ import com.caucho.util.L10N;
 /**
  * Represents a PHP parent::FOO constant call expression.
  */
-public class ClassConstExpr extends Expr {
-  private static final L10N L = new L10N(ClassMethodExpr.class);
+public class VarClassConstExpr extends Expr {
+  private static final L10N L = new L10N(VarClassConstExpr.class);
 
-  protected final String _className;
+  protected final Expr _className;
   protected final String _name;
 
-  public ClassConstExpr(Location location, String className, String name)
+  public VarClassConstExpr(Expr className, String name)
   {
-    super(location);
-    
-    _className = className.intern();
-    _name = name.intern();
-  }
-
-  public ClassConstExpr(String className, String name)
-  {
-    _className = className.intern();
+    _className = className;
     _name = name.intern();
   }
   
@@ -76,7 +68,7 @@ public class ClassConstExpr extends Expr {
   {
     return factory.createClassMethodCall(location, _className, _name, args);
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -84,12 +76,13 @@ public class ClassConstExpr extends Expr {
    *
    * @return the expression value.
    */
-  @Override
   public Value eval(Env env)
   {
-    return env.getClass(_className).getConstant(env, _name);
+    String className = _className.evalString(env);
+
+    return env.getClass(className).getConstant(env, _name);
   }
-  
+
   public String toString()
   {
     return _className + "::" + _name;

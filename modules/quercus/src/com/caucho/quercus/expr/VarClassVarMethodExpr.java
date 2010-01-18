@@ -30,10 +30,12 @@
 package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
-import com.caucho.quercus.env.Closure;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.MethodMap;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.L10N;
@@ -41,45 +43,43 @@ import com.caucho.util.L10N;
 import java.util.ArrayList;
 
 /**
- * Represents a PHP function expression.
+ * Represents a PHP static method expression ${class}:${foo}(...).
  */
-public class VarFunctionExpr extends Expr {
-  private static final L10N L = new L10N(FunctionExpr.class);
-  
-  protected final Expr _name;
+public class VarClassVarMethodExpr extends Expr {
+  private static final L10N L = new L10N(VarClassVarMethodExpr.class);
+
+  protected final Expr _className;
+  protected final Expr _methodName;
   protected final Expr []_args;
 
-  public VarFunctionExpr(Location location, Expr name, ArrayList<Expr> args)
+  protected Expr []_fullArgs;
+
+  protected AbstractFunction _fun;
+  protected boolean _isMethod;
+
+  public VarClassVarMethodExpr(Location location,
+                               Expr className,
+                               Expr methodName,
+                               ArrayList<Expr> args)
   {
     super(location);
-    _name = name;
+
+    _className = className;
+    _methodName = methodName;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public VarFunctionExpr(Location location, Expr name, Expr []args)
-  {
-    super(location);
-    _name = name;
-
-    _args = args;
-  }
-
-  public VarFunctionExpr(Expr name, ArrayList<Expr> args)
-  {
-    this(Location.UNKNOWN, name, args);
-  }
-
-  public VarFunctionExpr(Expr name, Expr []args)
-  {
-    this(Location.UNKNOWN, name, args);
-  }
+  //
+  // expr creation
+  //
 
   /**
    * Returns the reference of the value.
    * @param location
    */
+  @Override
   public Expr createRef(QuercusParser parser)
   {
     return parser.getFactory().createRef(this);
@@ -89,11 +89,16 @@ public class VarFunctionExpr extends Expr {
    * Returns the copy of the value.
    * @param location
    */
+  @Override
   public Expr createCopy(ExprFactory factory)
   {
-    return this;
+    return factory.createCopy(this);
   }
-  
+
+  //
+  // evaluation
+  //
+
   /**
    * Evaluates the expression.
    *
@@ -103,30 +108,18 @@ public class VarFunctionExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    Value value = _name.eval(env);
+    String className = _className.evalString(env);
     
-    Value []args = evalArgs(env, _args);
+    QuercusClass cl = env.findClass(className);
 
-    env.pushCall(this, NullValue.NULL, null);
-
-    try {
-      env.checkTimeout();
-
-      if (value instanceof Closure) {
-        return ((Closure) value).call(env, args);
-      }
-    
-      Value name = value;
-    
-      AbstractFunction fun;
-    
-      fun = env.getFunction(name);
-      // XXX: FunctionExpr also invokes callRef() and callCopy().
-
-      return fun.call(env, args);
-    } finally {
-      env.popCall();
+    if (cl == null) {
+      env.error(getLocation(), L.l("no matching class {0}", className));
     }
+
+    Value thisValue = env.getThis();
+    StringValue methodName = _methodName.evalStringValue(env);
+
+    return cl.callStaticMethod(env, thisValue, methodName, _args);
   }
 
   /**
@@ -139,12 +132,24 @@ public class VarFunctionExpr extends Expr {
   @Override
   public Value evalRef(Env env)
   {
-    return env.getFunction(_name.eval(env)).callRef(env, _args);
+    String className = _className.evalString(env);
+    
+    QuercusClass cl = env.findClass(className);
+
+    if (cl == null) {
+      env.error(getLocation(), L.l("no matching class {0}", className));
+    }
+
+    // qa/0954 - what appears to be a static call may be a call to a super constructor
+    Value thisValue = env.getThis();
+    StringValue methodName = _methodName.evalStringValue(env);
+
+    return cl.callStaticMethodRef(env, thisValue, methodName, _args);
   }
-  
+
   public String toString()
   {
-    return _name + "()";
+    return _className + "::" + _methodName + "()";
   }
 }
 

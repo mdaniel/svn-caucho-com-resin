@@ -60,14 +60,14 @@ public class ExprFactory {
   {
     if (! _isPro)
       return new ExprFactory();
-    
+
     try {
       Class cl = Class.forName("com.caucho.quercus.expr.ProExprFactory");
 
       return (ExprFactory) cl.newInstance();
     } catch (Exception e) {
       log.log(Level.FINEST, e.toString(), e);
-      
+
       _isPro = false;
 
       return new ExprFactory();
@@ -137,11 +137,11 @@ public class ExprFactory {
   {
     return new VarVarExpr(var);
   }
-  
+
   //
   // constants
   //
-  
+
   /**
    * Creates a __FILE__ expression.
    */
@@ -149,7 +149,7 @@ public class ExprFactory {
   {
     return new FileNameExpr(fileName);
   }
-  
+
   /**
    * Creates a __DIR__ expression.
    */
@@ -173,7 +173,7 @@ public class ExprFactory {
   {
     return new ThisExpr(location, cl);
   }
-  
+
   //
   // array deref
   //
@@ -202,7 +202,7 @@ public class ExprFactory {
   {
     return new ArrayTailExpr(location, base);
   }
-  
+
   //
   // field deref
   //
@@ -224,7 +224,7 @@ public class ExprFactory {
   {
     return new FieldVarGetExpr(base, name);
   }
-  
+
   //
   // class scope foo::bar
   //
@@ -242,9 +242,9 @@ public class ExprFactory {
    */
   public Expr createClassConst(Expr className, String name)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new VarClassConstExpr(className, name);
   }
-  
+
   /**
    * Creates a class const expression (static::FOO).
    */
@@ -253,7 +253,7 @@ public class ExprFactory {
   {
     return new LateStaticBindingClassConstExpr(name);
   }
-  
+
   //
   // class fields
   //
@@ -268,14 +268,14 @@ public class ExprFactory {
   }
 
   /**
-   * Creates an class static field 'a::$b' expression.
+   * Creates an class static field '$a::$b' expression.
    */
   public Expr createClassField(Expr className,
                                String name)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new VarClassFieldExpr(className, name);
   }
-  
+
   /**
    * Creates a class static field 'static::$b' expression.
    */
@@ -299,9 +299,9 @@ public class ExprFactory {
   public Expr createClassField(Expr className,
                                Expr name)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new VarClassVarFieldExpr(className, name);
   }
-  
+
   /**
    * Creates a class static field 'static::${b}' expression.
    */
@@ -318,11 +318,11 @@ public class ExprFactory {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-  
+
   //
   // unary expressions
   //
-  
+
   /**
    * Creates an unset '$a' expression.
    */
@@ -603,7 +603,7 @@ public class ExprFactory {
       StringLiteralExpr string = (StringLiteralExpr) left;
 
       if (string.evalConstant().length() == 0)
-	return ToStringExpr.create(right);
+        return ToStringExpr.create(right);
     }
     */
 
@@ -611,7 +611,7 @@ public class ExprFactory {
       leftAppend = (AppendExpr) left;
     else
       leftAppend = createAppendImpl(left, null);
-    
+
     AppendExpr next;
 
     /*
@@ -622,7 +622,7 @@ public class ExprFactory {
       StringLiteralExpr string = (StringLiteralExpr) right;
 
       if (string.evalConstant().length() == 0)
-	return ToStringExpr.create(left);
+        return ToStringExpr.create(left);
     }
     */
 
@@ -647,9 +647,9 @@ public class ExprFactory {
   {
     if (left == null)
       return tail;
-    
+
     tail = append(left.getNext(), tail);
-    
+
     if (left.getValue() instanceof BinaryLiteralExpr
         && tail.getValue() instanceof BinaryLiteralExpr) {
       BinaryLiteralExpr leftString = (BinaryLiteralExpr) left.getValue();
@@ -678,7 +678,7 @@ public class ExprFactory {
       StringLiteralExpr rightString = (StringLiteralExpr) tail.getValue();
 
       Expr value = createString(leftString.evalConstant().toString()
-				+ rightString.evalConstant().toString());
+                                + rightString.evalConstant().toString());
 
       return createAppendImpl(value, tail.getNext());
     }
@@ -688,7 +688,7 @@ public class ExprFactory {
       UnicodeLiteralExpr rightString = (UnicodeLiteralExpr) tail.getValue();
 
       Expr value = createUnicode(leftString.evalConstant().toString()
-				 + rightString.evalConstant().toString());
+                                 + rightString.evalConstant().toString());
 
       return createAppendImpl(value, tail.getNext());
     }
@@ -698,7 +698,7 @@ public class ExprFactory {
       return left;
     }
   }
-  
+
   protected AppendExpr createAppendImpl(Expr left, AppendExpr right)
   {
     return new AppendExpr(left, right);
@@ -938,85 +938,101 @@ public class ExprFactory {
   {
     return new VarFunctionExpr(loc, name, args);
   }
-  
+
   /**
    * Creates a new closure.
    */
-  public ClosureExpr createClosure(Location loc, 
+  public ClosureExpr createClosure(Location loc,
                                    Function fun,
                                    ArrayList<VarExpr> useArgs)
   {
     return new ClosureExpr(loc, fun);
   }
+  
+  //
+  // methods
+  //
 
   /**
-   * Creates a new function call.
+   * Creates a method call $a->foo(...).
    */
-  public Expr createClassMethod(Location loc,
-                                String className,
-                                String name,
-                                ArrayList<Expr> args)
+  public Expr createMethodCall(Location loc,
+                               Expr objExpr,
+                               String methodName,
+                               ArrayList<Expr> args)
   {
-    return new ClassMethodExpr(loc, className, name, args);
+    return new MethodCallExpr(loc, objExpr, methodName, args);
   }
-  
+
   /**
-   * Creates a new function call.
+   * Creates a variable method call $a->${"foo"}(...).
    */
-  public Expr createParentMethod(Location loc,
-                                 String parentName,
-                                 String name,
-                                 ArrayList<Expr> args)
+  public Expr createMethodCall(Location loc,
+                               Expr objExpr,
+                               Expr methodName,
+                               ArrayList<Expr> args)
   {
-    return new ParentMethodExpr(loc, parentName, name, args);
+    return new VarMethodCallExpr(loc, objExpr, methodName, args);
   }
-  
+
+  /**
+   * Creates a class method call A::foo(...)
+   */
+  public Expr createClassMethodCall(Location loc,
+                                    String className,
+                                    String methodName,
+                                    ArrayList<Expr> args)
+  {
+    return new ClassMethodExpr(loc, className, methodName, args);
+  }
+
+  /**
+   * Creates a class method call ${class}::foo(...)
+   */
+  public Expr createClassMethodCall(Location loc,
+                                    Expr className,
+                                    String methodName,
+                                    ArrayList<Expr> args)
+  {
+    return new VarClassMethodExpr(loc, className, methodName, args);
+  }
+
   /**
    * Creates a new function call based on the class context.
    */
-  public Expr createLateStaticBindingClassMethod(Location loc,
-                                                 String name,
-                                                 ArrayList<Expr> args)
+  public Expr createClassMethodCallLateStaticBinding(Location loc,
+                                                     String methodName,
+                                                     ArrayList<Expr> args)
   {
-    return new LateStaticBindingClassMethodExpr(loc, name, args);
-  }
-
-  /**
-   * Creates a static function call.
-   */
-  public Expr createStaticMethod(Location loc,
-                                 String className,
-                                 String name,
-                                 ArrayList<Expr> args)
-  {
-    return new StaticMethodExpr(loc, className, name, args);
-  }
-  
-  /**
-   * Creates a static function call based on the calling class.
-   */
-  public Expr createLateStaticBindingStaticMethod(Location loc,
-                                                  String name,
-                                                  ArrayList<Expr> args)
-  {
-    return new LateStaticBindingStaticMethodExpr(loc, name, args);
+    return new LateStaticBindingClassMethodExpr(loc, methodName, args);
   }
 
   /**
    * Creates a new method A::$f()
    */
-  public Expr createStaticVarMethod(Location loc,
+  public Expr createClassMethodCall(Location loc,
                                     String className,
-                                    Expr var,
+                                    Expr methodName,
                                     ArrayList<Expr> args)
   {
-    return new StaticVarMethodExpr(loc, className, var, args);
+    return new StaticVarMethodExpr(loc, className, methodName, args);
   }
-  
+
+  /**
+   * Creates a new method ${class}::$f()
+   */
+  public Expr createClassMethodCall(Location loc,
+                                    Expr className,
+                                    Expr methodName,
+                                    ArrayList<Expr> args)
+  {
+    return new VarClassVarMethodExpr(loc, className, methodName, args);
+  }
+
   /**
    * Creates a new method static::$f()
    */
-  public Expr createLateStaticBindingStaticVarMethod(Location loc,
+  public Expr createClassMethodCallLateStaticBinding(Location loc,
                                                      Expr var,
                                                      ArrayList<Expr> args)
   {
@@ -1024,29 +1040,47 @@ public class ExprFactory {
   }
 
   /**
-   * Creates a new method call.
+   * Creates a parent method call parent::foo(...)
+   * 
+   * XXX: isn't this lexical?
    */
-  public Expr createMethodCall(Location loc,
-                               Expr objExpr,
-                               String name,
-                               ArrayList<Expr> args)
+  /*
+  public Expr createParentClassMethod(Location loc,
+                                      String parentName,
+                                      String name,
+                                      ArrayList<Expr> args)
   {
-    return new MethodCallExpr(loc, objExpr, name, args);
+    return new ParentMethodExpr(loc, parentName, name, args);
   }
+  */
 
   /**
-   * Creates a new method call.
+   * Creates a static function call.
    */
-  public Expr createVarMethodCall(Location loc,
-                                  Expr objExpr,
-                                  Expr name,
-                                  ArrayList<Expr> args)
+  /*
+  public Expr createStaticMethod(Location loc,
+                                 String className,
+                                 String name,
+                                 ArrayList<Expr> args)
   {
-    return new VarMethodCallExpr(loc, objExpr, name, args);
+    return new StaticMethodExpr(loc, className, name, args);
   }
+  */
 
   /**
-   * Creates a new function call.
+   * Creates a static function call based on the calling class.
+   */
+  /*
+  public Expr createLateStaticBindingStaticMethod(Location loc,
+                                                  String name,
+                                                  ArrayList<Expr> args)
+  {
+    return new LateStaticBindingStaticMethodExpr(loc, name, args);
+  }
+  */
+
+  /**
+   * Creates a new function call new foo(...).
    */
   public NewExpr createNew(Location loc,
                            String name,
@@ -1114,7 +1148,7 @@ public class ExprFactory {
   {
     return new ImportExpr(loc, name, isWildcard);
   }
-  
+
   //
   // statements
   //
@@ -1177,7 +1211,7 @@ public class ExprFactory {
     Statement []statements = new Statement[statementList.size()];
 
     statementList.toArray(statements);
-    
+
     return createBlockImpl(loc, statements);
   }
 
@@ -1296,7 +1330,7 @@ public class ExprFactory {
    * Creates a global statement
    */
   public Statement createGlobal(Location loc,
-				VarExpr var)
+                                VarExpr var)
   {
     return new GlobalStatement(loc, var);
   }
@@ -1309,7 +1343,7 @@ public class ExprFactory {
   {
     return new VarGlobalStatement(loc, var);
   }
-  
+
   /**
    * Creates a static statement inside a class
    */
@@ -1343,7 +1377,7 @@ public class ExprFactory {
   /**
    * Creates a try statement
    */
-  public TryStatement createTry(Location loc,   
+  public TryStatement createTry(Location loc,
                                 Statement block)
   {
     return new TryStatement(loc, block);
@@ -1388,7 +1422,7 @@ public class ExprFactory {
   //
   // functions
   //
-  
+
   /**
    * Creates a new FunctionInfo
    */
@@ -1396,7 +1430,7 @@ public class ExprFactory {
   {
     return new FunctionInfo(quercus, name);
   }
-  
+
   /**
    * Creates a new function definition.
    */

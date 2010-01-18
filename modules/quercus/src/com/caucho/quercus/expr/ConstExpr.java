@@ -34,6 +34,7 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.UnicodeValueImpl;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.parser.QuercusParser;
 
 /**
  * Represents a PHP constant expression.
@@ -58,6 +59,66 @@ public class ConstExpr extends Expr {
   public String getVar()
   {
     return _var;
+  }
+  
+  //
+  // expression creation
+  //
+  
+  /**
+   * Creates a class field $class::foo
+   */
+  @Override
+  public Expr createClassConst(QuercusParser parser, String name)
+  {
+    ExprFactory factory = parser.getExprFactory();
+    
+    String className = _var;
+    
+    if ("self".equals(className)) {
+      className = parser.getSelfClassName();
+      
+      return factory.createClassConst(className, name);
+    }
+    else if ("parent".equals(className)) {
+      className = parser.getParentClassName();
+      
+      return factory.createClassConst(className, name);
+    }
+    else if ("static".equals(className)) {
+      return factory.createClassConstLateStaticBinding(name);
+    }
+    else {
+      return factory.createClassConst(className, name);
+    }
+  }
+  
+  /**
+   * Creates a class field $class::foo
+   */
+  @Override
+  public Expr createClassField(QuercusParser parser, String name)
+  {
+    ExprFactory factory = parser.getExprFactory();
+    
+    String className = _var;
+    
+    if ("self".equals(className)) {
+      className = parser.getSelfClassName();
+      
+      return factory.createClassField(className, name);
+    }
+    else if ("parent".equals(className)) {
+      className = parser.getParentClassName();
+      
+      return factory.createClassField(className, name);
+    }
+    else if ("static".equals(className)) {
+      return factory.createClassFieldLateStaticBinding(name);
+    }
+    else {
+      return factory.createClassField(className, name);
+    }
   }
 
   /**
