@@ -3252,8 +3252,6 @@ public class QuercusParser {
     }
 
     if (nameExpr != null) {
-      _peekToken = token;
-
       return term.createFieldGet(_factory, nameExpr);
     }
     else {
@@ -4579,8 +4577,6 @@ public class QuercusParser {
 
     int reserved = _reserved.get(_lexeme);
 
-    if (_lexeme.length() == 0)
-      throw new IllegalStateException();
     if (reserved > 0)
       return reserved;
 

@@ -338,18 +338,18 @@ public class Encoding {
     _mimeName.put("ISO2022-JP2", "ISO-2022-JP-2");
     _javaName.put("ISO-2022-JP-2", "ISO2022_JP2");
 
-    _mimeName.put("ISO_8859-1:1987", "iso-8859-1");
-    _mimeName.put("ISO-IR-100", "iso-8859-1");
-    _mimeName.put("ISO-8859-1", "iso-8859-1");
-    _mimeName.put("LATIN1", "iso-8859-1");
-    _mimeName.put("LATIN-1", "iso-8859-1");
-    _mimeName.put("L1", "iso-8859-1");
-    _mimeName.put("IBM819", "iso-8859-1");
-    _mimeName.put("CP819", "iso-8859-1");
-    _mimeName.put("CSISOLATIN1", "iso-8859-1");
-    _mimeName.put("ISO8859-1", "iso-8859-1");
-    _mimeName.put("8859-1", "iso-8859-1");
-    _mimeName.put("8859_1", "iso-8859-1");
+    _mimeName.put("ISO_8859-1:1987", "ISO-8859-1");
+    _mimeName.put("ISO-IR-100", "ISO-8859-1");
+    _mimeName.put("ISO-8859-1", "ISO-8859-1");
+    _mimeName.put("LATIN1", "ISO-8859-1");
+    _mimeName.put("LATIN-1", "ISO-8859-1");
+    _mimeName.put("L1", "ISO-8859-1");
+    _mimeName.put("IBM819", "ISO-8859-1");
+    _mimeName.put("CP819", "ISO-8859-1");
+    _mimeName.put("CSISOLATIN1", "ISO-8859-1");
+    _mimeName.put("ISO8859-1", "ISO-8859-1");
+    _mimeName.put("8859-1", "ISO-8859-1");
+    _mimeName.put("8859_1", "ISO-8859-1");
     _javaName.put("ISO-8859-1", "ISO8859_1");
 
     _mimeName.put("ISO-8859-2:1987", "ISO-8859-2");
