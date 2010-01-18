@@ -56,7 +56,7 @@ public class QuercusView
   private static final Logger log
     = Logger.getLogger(QuercusView.class.getName());
 
-  protected Quercus _quercus;
+  protected QuercusContext _quercus;
   protected ServletContext _servletContext;
 
   public QuercusView()
@@ -125,7 +125,7 @@ public class QuercusView
       
       ws.setNewlineString("\n");
 
-      Quercus quercus = getQuercus();
+      QuercusContext quercus = getQuercus();
       quercus.setServletContext(_servletContext);
       
       env = quercus.createEnv(page, ws, request, response);
@@ -253,11 +253,11 @@ public class QuercusView
   /**
    * Returns the Quercus instance.
    */
-  protected Quercus getQuercus()
+  protected QuercusContext getQuercus()
   {
     synchronized (this) {
       if (_quercus == null)
-        _quercus = new Quercus();
+        _quercus = new QuercusContext();
     }
 
     return _quercus;
