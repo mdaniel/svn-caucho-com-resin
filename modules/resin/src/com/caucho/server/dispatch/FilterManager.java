@@ -50,13 +50,13 @@ public class FilterManager {
 
   static final L10N L = new L10N(FilterManager.class);
 
-  private Hashtable<String,FilterConfigImpl> _filters
-    = new Hashtable<String,FilterConfigImpl>();
+  private HashMap<String,FilterConfigImpl> _filters
+    = new HashMap<String,FilterConfigImpl>();
 
   private InjectionTarget _bean;
 
-  private Hashtable<String,Filter> _instances
-    = new Hashtable<String,Filter>();
+  private HashMap<String,Filter> _instances
+    = new HashMap<String,Filter>();
 
   private Map<String, Set<String>> _urlPatterns
     = new HashMap<String, Set<String>>();
@@ -81,6 +81,11 @@ public class FilterManager {
   public FilterConfigImpl getFilter(String filterName)
   {
     return _filters.get(filterName);
+  }
+
+  public HashMap<String,FilterConfigImpl> getFilters()
+  {
+    return _filters;
   }
 
   /**
@@ -230,10 +235,7 @@ public class FilterManager {
 
     if (_instances != null) {
       synchronized (_instances) {
-        Enumeration<Filter> en = _instances.elements();
-        while (en.hasMoreElements()) {
-          Filter filter = en.nextElement();
-
+        for (Filter filter : _instances.values()) {
           filterList.add(filter);
         }
       }

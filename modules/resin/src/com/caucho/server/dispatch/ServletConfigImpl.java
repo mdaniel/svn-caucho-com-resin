@@ -258,7 +258,7 @@ public class ServletConfigImpl
 
       Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
 
-      return Collections.unmodifiableSet(new HashSet<String>(patterns));
+      return Collections.unmodifiableSet(new LinkedHashSet<String>(patterns));
     }
     catch (ServletException e) {
       throw new RuntimeException(e.getMessage(), e);
@@ -269,7 +269,7 @@ public class ServletConfigImpl
   {
     Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
 
-    return Collections.unmodifiableSet(new HashSet<String>(patterns));
+    return Collections.unmodifiableSet(new LinkedHashSet<String>(patterns));
   }
 
   public Set<String> setInitParameters(Map<String, String> initParameters)
@@ -743,7 +743,8 @@ public class ServletConfigImpl
     return _servlet;
   }
 
-  public void merge(ServletConfigImpl config) {
+  public void merge(ServletConfigImpl config) 
+  {
     if (_loadOnStartup == Integer.MIN_VALUE)
       _loadOnStartup = config._loadOnStartup;
 
@@ -1062,8 +1063,14 @@ public class ServletConfigImpl
     // server/102e
     if (_servlet != null && ! isNew)
       return _servlet;
-    else if (_singletonServlet != null)
+    else if (_singletonServlet != null) {
+      // server/1p19
+      _servlet = _singletonServlet;
+
+      _singletonServlet.init(this);
+
       return _singletonServlet;
+    }
 
     Object servlet = null;
 

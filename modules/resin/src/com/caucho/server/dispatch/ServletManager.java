@@ -210,14 +210,14 @@ public class ServletManager {
       ServletConfigImpl config = loadOnStartup.get(i);
 
       try {
-	config.createServlet(false);
+        config.createServlet(false);
       } catch (ServletException e) {
-	// XXX: should JSP failure also cause a system failure?
-	if (config.getJspFile() == null)
-	  throw e;
-	else {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        // XXX: should JSP failure also cause a system failure?
+        if (config.getJspFile() == null)
+          throw e;
+        else {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }

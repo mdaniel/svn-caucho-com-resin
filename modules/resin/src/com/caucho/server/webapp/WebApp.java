@@ -1019,9 +1019,10 @@ public class WebApp extends ServletContextImpl
   private ServletRegistration.Dynamic addServlet(String servletName,
                                                  String servletClassName,
                                                  Class<? extends Servlet> servletClass,
-                                                 Servlet servlet) {
+                                                 Servlet servlet) 
+  {
     if (! isInitializing())
-      throw new IllegalStateException();
+      throw new IllegalStateException(L.l("addServlet may only be called during initialization"));
 
     try {
       ServletConfigImpl config = createServlet();
@@ -1029,15 +1030,6 @@ public class WebApp extends ServletContextImpl
       config.setServletClass(servletClassName);
 
       if (servlet != null) {
-        CreationalContext context = _beanManager.createCreationalContext(null);
-
-        InjectionTarget injectionTarget
-          = _beanManager.createInjectionTarget(servlet.getClass());
-
-        injectionTarget.inject(servlet, context);
-
-        servlet.init(config);
-
         config.setServlet(servlet);
       }
       else if (servletClass != null) {
@@ -1066,10 +1058,7 @@ public class WebApp extends ServletContextImpl
     Map<String, ServletConfigImpl> configMap = _servletManager.getServlets();
 
     Map<String, ServletRegistration> result
-      = new HashMap<String, ServletRegistration>();
-
-    for (String key: configMap.keySet())
-      result.put(key, configMap.get(key));
+      = new HashMap<String, ServletRegistration>(configMap);
 
     return Collections.unmodifiableMap(result);
   }
@@ -1431,7 +1420,12 @@ public class WebApp extends ServletContextImpl
   @Override
   public Map<String, ? extends FilterRegistration> getFilterRegistrations()
   {
-    return new HashMap();
+    Map<String, FilterConfigImpl> configMap = _filterManager.getFilters();
+
+    Map<String, FilterRegistration> result
+      = new HashMap<String, FilterRegistration>(configMap);
+
+    return Collections.unmodifiableMap(result);
   }
 
   /**
@@ -1832,9 +1826,35 @@ public class WebApp extends ServletContextImpl
   {
     try {
       return _beanManager.createTransientObject(listenerClass);
-    } catch (InjectionException e) {
+    }
+    catch (InjectionException e) {
       throw new ServletException(e);      
     }
+  }
+
+  @Override
+  public void addListener(String className)
+  {
+    try {
+      Class listenerClass = Class.forName(className, false, getClassLoader());
+
+      addListener(listenerClass);
+    }
+    catch (ClassNotFoundException e) { 
+      throw ConfigException.create(e);
+    }
+  }
+
+  @Override
+  public void addListener(Class<? extends EventListener> listenerClass)
+  {
+    addListener(_beanManager.createTransientObject(listenerClass));
+  }
+
+  @Override
+  public <T extends EventListener> void addListener(T listener)
+  {
+    addListenerObject(listener, true);
   }
 
   @Configurable

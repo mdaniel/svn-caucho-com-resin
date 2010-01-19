@@ -76,4 +76,13 @@ public class ServletContextAttributeEvent extends ServletContextEvent {
   {
     return value;
   }
+
+  @Override 
+  public String toString()
+  {
+    return (getClass().getName() 
+            + "[name=" + this.name 
+            + ",source=" + getSource() 
+            + "]");
+  }
 }

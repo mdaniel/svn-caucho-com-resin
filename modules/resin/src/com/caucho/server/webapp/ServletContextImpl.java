@@ -558,7 +558,8 @@ public class ServletContextImpl extends ServletContextCompat
    */
   @Override
   public <T extends EventListener> T createListener(Class<T> listenerClass)
-      throws ServletException {
+    throws ServletException 
+  {
     // TODO Auto-generated method stub
     return null;
   }
