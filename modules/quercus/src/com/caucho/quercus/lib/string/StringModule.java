@@ -589,38 +589,50 @@ public class StringModule extends AbstractQuercusModule {
    * @param limit the max number of elements
    * @return an array of exploded values
    */
-  public static Value explode(StringValue separator,
+  public static Value explode(Env env,
+                              StringValue separator,
                               StringValue string,
                               @Optional("0x7fffffff") long limit)
   {
     if (separator.length() == 0)
       return BooleanValue.FALSE;
-
+    
+    int head = 0;    
     ArrayValue array = new ArrayValueImpl();
 
-    int head = 0;
-    int tail;
-
-    int i = 0;
     int separatorLength = separator.length();
-    while ((tail = string.indexOf(separator, head)) >= 0) {
-      if (limit <= i + 1)
-        break;
-
-      LongValue key = LongValue.create(i++);
-
-      StringValue chunk = string.substring(head, tail);
-
-      array.put(key, chunk);
-
-      head = tail + separatorLength;
+    int stringLength = string.length();
+    long ulimit;
+    
+    if (limit >= 0) {
+      ulimit = limit;      
+    } else {
+      ulimit = 0x7fffffff;
     }
 
-    LongValue key = LongValue.create(i);
+    for (int i = 0; i < stringLength; ++i) {
+      
+      if (ulimit <= array.getSize() + 1) {
+        break;
+      }
+      
+      if (string.regionMatches(i, separator, 0, separatorLength)) {
+
+        StringValue chunk = string.substring(head, i);
+        array.append(chunk);
+        
+        head = i + separatorLength;
+        i = head - 1;
+      }
+    }
 
     StringValue chunk = string.substring(head);
 
-    array.put(key, chunk);
+    array.append(chunk);
+    
+    while (array.getSize() > 0 && limit++ < 0) {
+      array.pop(env);
+    }
 
     return array;
   }
