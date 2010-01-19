@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.expr;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
@@ -54,6 +57,22 @@ public class LateStaticBindingClassConstExpr extends Expr {
   public LateStaticBindingClassConstExpr(String name)
   {
     _name = name.intern();
+  }
+  
+  //
+  // function call creation
+  //
+
+  /**
+   * Creates a function call expression
+   */
+  @Override
+  public Expr createCall(ExprFactory factory,
+                         Location location,
+                         ArrayList<Expr> args)
+    throws IOException
+  {
+    return factory.createClassMethodCallLateStaticBinding(location, _name, args);
   }
   
   /**

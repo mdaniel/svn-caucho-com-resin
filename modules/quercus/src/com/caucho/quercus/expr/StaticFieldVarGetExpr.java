@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.expr;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -56,6 +59,22 @@ public class StaticFieldVarGetExpr extends AbstractVarExpr {
     _className = className;
     
     _varName = varName;
+  }
+  
+  //
+  // function call creation
+  //
+
+  /**
+   * Creates a function call expression
+   */
+  @Override
+  public Expr createCall(ExprFactory factory,
+                         Location location,
+                         ArrayList<Expr> args)
+    throws IOException
+  {
+    return factory.createClassMethodCall(location, _className, _varName, args);
   }
   
   /**

@@ -107,6 +107,7 @@ public class ClassMethodExpr extends Expr {
 
     Value obj = env.getThis();
     env.pushCall(this, obj, values);
+    QuercusClass oldClass = env.setCallingClass(cl);
 
     try {
       env.checkTimeout();
@@ -114,6 +115,7 @@ public class ClassMethodExpr extends Expr {
       return fun.callMethod(env, obj, values);
     } finally {
       env.popCall();
+      env.setCallingClass(oldClass);
     }
   }
   
