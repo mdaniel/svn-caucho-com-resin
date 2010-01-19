@@ -1248,7 +1248,6 @@ public class WebApp extends ServletContextImpl
                                                Class<? extends Filter> filterClass,
                                                Filter filter)
   {
-
     if (! isInitializing())
       throw new IllegalStateException();
 
@@ -1272,8 +1271,13 @@ public class WebApp extends ServletContextImpl
       return config;
     }
     catch (ClassNotFoundException e) {
+      e.printStackTrace();
       //spec declares no throws so far.
       throw new RuntimeException(e.getMessage(), e);
+    }
+    catch (Exception e) {
+      e.printStackTrace();
+      return null;
     }
   }
 

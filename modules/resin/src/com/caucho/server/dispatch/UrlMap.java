@@ -92,13 +92,22 @@ public class UrlMap<E> {
   public void addMap(String pattern, E value, boolean isIgnore)
     throws PatternSyntaxException
   {
-    addMap(pattern, null, value, isIgnore);
+    addMap(pattern, null, value, isIgnore, false);
   }
 
   public void addMap(String pattern, E value)
     throws PatternSyntaxException
   {
-    addMap(pattern, null, value, false);
+    addMap(pattern, null, value, false, false);
+  }
+
+  public void addMap(String pattern, 
+                     E value,
+                     boolean isIgnore,
+                     boolean ifAbsent)
+    throws PatternSyntaxException
+  {
+    addMap(pattern, null, value, isIgnore, ifAbsent);
   }
 
   /**
@@ -107,18 +116,21 @@ public class UrlMap<E> {
    * @param pattern servlet2.2 url-pattern
    * @param value object stored as the value
    */
-  public void addMap(String pattern, String flags, E value,
-                     boolean isIgnore)
+  public void addMap(String pattern, 
+                     String flags, 
+                     E value,
+                     boolean isIgnore,
+                     boolean ifAbsent)
     throws PatternSyntaxException
   {
     if (pattern.length() == 0
         || pattern.length() == 1 && pattern.charAt(0) == '/') {
-      addRegexp(-1, "", flags, value, true, isIgnore);
+      addRegexp(-1, "", flags, value, true, isIgnore, ifAbsent);
       return;
     }
 
     else if (pattern.equals("/*")) {
-      addRegexp(1, "/*", "", flags, value, true, isIgnore);
+      addRegexp(1, "/*", flags, value, true, isIgnore, ifAbsent);
       return;
     }
 
@@ -188,7 +200,7 @@ public class UrlMap<E> {
       cb.insert(0, '^');
 
     addRegexp(prefixLength, pattern, cb.close(), flags, value,
-              isShort, isIgnore);
+              isShort, isIgnore, ifAbsent);
   }
 
   public static String urlPatternToRegexpPattern(String pattern)
@@ -256,9 +268,11 @@ public class UrlMap<E> {
                            E value)
     throws PatternSyntaxException, ServletException
   {
+    boolean ifAbsent = false;
+    
     if (pattern.length() == 0
         || pattern.length() == 1 && pattern.charAt(0) == '/') {
-      addRegexp(-1, "^.*$", flags, value, true, false);
+      addRegexp(-1, "^.*$", flags, value, true, false, ifAbsent);
       return;
     }
 
@@ -309,19 +323,25 @@ public class UrlMap<E> {
     cb.append("$");
 
     addRegexp(prefixLength, pattern, cb.close(), flags, value,
-              isShort, false);
+              isShort, false, ifAbsent);
   }
 
   public void addRegexp(String regexp, String flags, E value)
     throws PatternSyntaxException
   {
-    addRegexp(0, regexp, flags, value, false, false);
+    addRegexp(0, regexp, flags, value, false, false, false);
   }
 
   public void addRegexp(String regexp, E value)
     throws PatternSyntaxException
   {
-    addRegexp(0, regexp, null, value, false, false);
+    addRegexp(0, regexp, null, value, false, false, false);
+  }
+
+  public void addRegexpIfAbsent(String regexp, E value)
+    throws PatternSyntaxException
+  {
+    addRegexp(0, regexp, null, value, false, false, true);
   }
 
   /**
@@ -333,9 +353,13 @@ public class UrlMap<E> {
    * @param value the value for matching the pattern
    * @param isShort if true, this regexp expects to be shorter than others
    */
-  public void addRegexp(int prefixLength, String regexp,
-                        String flags, E value,
-                        boolean isShort, boolean isIgnore)
+  public void addRegexp(int prefixLength, 
+                        String regexp,
+                        String flags,
+                        E value,
+                        boolean isShort, 
+                        boolean isIgnore,
+                        boolean ifAbsent)
     throws PatternSyntaxException
   {
     RegexpEntry<E> entry
@@ -344,9 +368,21 @@ public class UrlMap<E> {
     for (int i = 0; i < _regexps.size(); i++) {
       RegexpEntry<E> re = _regexps.get(i);
 
+      /*
       if (re.equals(entry)) {
         _regexps.remove(i);
         break;
+      }
+      */
+      if (re.equals(entry)) {
+        if (ifAbsent) {
+          // server/1p1b - registration does not overwrite
+          return;
+        }
+        else {
+          _regexps.remove(i);
+          break;
+        }
       }
     }
 
@@ -368,7 +404,9 @@ public class UrlMap<E> {
    */
   public void addRegexp(int prefixLength, String pattern,
                         String regexp, String flags,
-                        E value, boolean isShort, boolean isIgnore)
+                        E value, boolean isShort, 
+                        boolean isIgnore,
+                        boolean ifAbsent)
     throws PatternSyntaxException
   {
     RegexpEntry<E> entry
@@ -379,7 +417,12 @@ public class UrlMap<E> {
       RegexpEntry<E> re = _regexps.get(i);
 
       if (re.equals(entry)) {
-        _regexps.remove(i);
+        if (ifAbsent) {
+          return;
+        }
+        else {
+          _regexps.remove(i);
+        }
       }
     }
 

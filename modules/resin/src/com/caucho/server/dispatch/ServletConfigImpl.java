@@ -247,6 +247,7 @@ public class ServletConfigImpl
     try {
 
       ServletMapping mapping = _webApp.createServletMapping();
+      mapping.setIfAbsent(true);
 
       mapping.setServletName(getServletName());
 

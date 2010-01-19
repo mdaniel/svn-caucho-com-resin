@@ -55,6 +55,7 @@ public class ServletMapping extends ServletConfigImpl {
     = new ArrayList<Mapping>();
   
   private boolean _isStrictMapping;
+  private boolean _ifAbsent;
   
   /**
    * Creates a new servlet mapping object.
@@ -63,6 +64,11 @@ public class ServletMapping extends ServletConfigImpl {
   {
   }
 
+  public void setIfAbsent(boolean ifAbsent)
+  {
+    _ifAbsent = ifAbsent;
+  }
+  
   /**
    * Sets the url pattern
    */
@@ -135,7 +141,7 @@ public class ServletMapping extends ServletConfigImpl {
       }
 
       if (urlPattern != null)
-	mapper.addUrlMapping(urlPattern, getServletName(), this);
+	mapper.addUrlMapping(urlPattern, getServletName(), this, _ifAbsent);
       else
 	mapper.addUrlRegexp(urlRegexp, getServletName(), this);
     }

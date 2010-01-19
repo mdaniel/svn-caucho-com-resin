@@ -124,7 +124,8 @@ public class ServletMapper {
    */
   void addUrlMapping(String urlPattern,
 		     String servletName,
-		     ServletMapping mapping)
+		     ServletMapping mapping,
+		     boolean ifAbsent)
     throws ServletException
   {
     try {
@@ -160,7 +161,7 @@ public class ServletMapper {
         _servletMap.addStrictMap(urlPattern, null, mapping);
       }
       else
-        _servletMap.addMap(urlPattern, mapping, isIgnore);
+        _servletMap.addMap(urlPattern, mapping, isIgnore, ifAbsent);
 
       Set<String> patterns = _urlPatterns.get(servletName);
 
