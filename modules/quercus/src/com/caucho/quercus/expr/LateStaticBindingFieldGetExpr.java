@@ -73,7 +73,7 @@ public class LateStaticBindingFieldGetExpr extends AbstractVarExpr {
       return NullValue.NULL;
     }
     
-    return cls.getStaticField(env, _varName).toValue();
+    return cls.getStaticFieldValue(env, _varName);
   }
 
   /**

@@ -208,7 +208,9 @@ public class FunctionInfo
    */
   public boolean hasThis()
   {
-    return _hasThis || (_classDef != null && ! _fun.isStatic());
+    // php/396z
+    // return _hasThis || (_classDef != null && ! _fun.isStatic());
+    return _hasThis || _classDef != null;
   }
   
   /**
@@ -231,6 +233,14 @@ public class FunctionInfo
    * True for a method.
    */
   public boolean isMethod()
+  {
+    return _classDef != null;
+  }
+
+  /**
+   * True for a method.
+   */
+  public boolean isNonStaticMethod()
   {
     return _classDef != null && ! _fun.isStatic();
   }

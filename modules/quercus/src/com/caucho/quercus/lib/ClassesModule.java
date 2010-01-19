@@ -132,8 +132,7 @@ public class ClassesModule extends AbstractQuercusModule {
     QuercusClass cls = env.getCallingClass();
     
     if (cls == null) {
-      env.warning("called from outside class scope");
-      
+      env.warning("get_called_class was not called from a class method");
       return null;
     }
     

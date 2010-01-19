@@ -42,7 +42,7 @@ import java.util.IdentityHashMap;
 public class CallbackObjectMethod extends Callback {
   private static final L10N L = new L10N(CallbackObjectMethod.class);
   
-  private final ObjectValue _obj;
+  private final Value _obj;
   private final AbstractFunction _fun;
   
   private final String _methodName;
@@ -50,7 +50,7 @@ public class CallbackObjectMethod extends Callback {
   private final char []_name;
   
   public CallbackObjectMethod(Env env,
-                              ObjectValue obj,
+                              Value obj,
                               AbstractFunction fun,
                               String methodName)
   {

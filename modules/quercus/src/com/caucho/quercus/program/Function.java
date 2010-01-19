@@ -297,10 +297,10 @@ public class Function extends AbstractFunction {
         return env.error("expected default expression");
       else if (arg.isReference())
         map.put(arg.getName(),
-		new EnvVarImpl(defaultExpr.evalRef(env).toVar()));
+                new EnvVarImpl(defaultExpr.evalRef(env).toVar()));
       else {
         map.put(arg.getName(),
-		new EnvVarImpl(defaultExpr.eval(env).copy().toVar()));
+                new EnvVarImpl(defaultExpr.eval(env).copy().toVar()));
       }
     }
 
@@ -404,7 +404,7 @@ public class Function extends AbstractFunction {
     Value []oldArgs = env.setFunctionArgs(args);
     Value oldThis;
 
-    if (isStatic()) {
+    if (! _info.isMethod()) {
       // php/0967, php/091i
       oldThis = env.setThis(NullThisValue.NULL);
     }
@@ -423,7 +423,7 @@ public class Function extends AbstractFunction {
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
-      env.setThis(oldThis);
+      // env.setThis(oldThis);
     }
   }
 

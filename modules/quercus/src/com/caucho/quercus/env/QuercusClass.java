@@ -54,7 +54,7 @@ import java.util.logging.Logger;
 /**
  * Represents a Quercus runtime class.
  */
-public class QuercusClass extends Value {
+public class QuercusClass extends NullValue {
   private static final L10N L = new L10N(QuercusClass.class);
   private static final Logger log
     = Logger.getLogger(QuercusClass.class.getName());
@@ -142,7 +142,7 @@ public class QuercusClass extends Value {
       classDefList = new ClassDef[parent._classDefList.length + 1];
 
       System.arraycopy(parent._classDefList, 0, classDefList, 1,
-		       parent._classDefList.length);
+                       parent._classDefList.length);
 
       classDefList[0] = classDef;
     }
@@ -392,10 +392,10 @@ public class QuercusClass extends Value {
       _isModified = true;
       
       if (_cacheRef != null) {
-	QuercusClass cacheClass = _cacheRef.get();
+        QuercusClass cacheClass = _cacheRef.get();
 
-	if (cacheClass != null)
-	  cacheClass.setModified();
+        if (cacheClass != null)
+          cacheClass.setModified();
       }
     }
   }
@@ -407,7 +407,7 @@ public class QuercusClass extends Value {
   {
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST, L.l("{0} adding array delegate {1}",
-				this,  delegate));
+                                this,  delegate));
 
     _arrayDelegate = delegate;
   }
@@ -427,7 +427,7 @@ public class QuercusClass extends Value {
   {
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST, L.l("{0} setting traversable delegate {1}",
-				this,  delegate));
+                                this,  delegate));
 
     _traversableDelegate = delegate;
   }
@@ -447,7 +447,7 @@ public class QuercusClass extends Value {
   {
     if (log.isLoggable(Level.FINEST))
       log.log(Level.FINEST, L.l("{0} setting count delegate {1}",
-				this,  delegate));
+                                this,  delegate));
 
     _countDelegate = delegate;
   }
@@ -725,6 +725,24 @@ public class QuercusClass extends Value {
     */
 
     return null;
+  }
+
+  public Value getStaticFieldValue(Env env, String name)
+  {
+    Var var = getStaticFieldRec(env, name);
+
+    if (var != null)
+      return var.toValue();;
+
+    /*
+    String fullName = _className + "::" + name;
+      
+    EnvVar envVar = env.getGlobalEnvVar(fullName);
+      
+    return envVar.getRef();
+    */
+
+    return NullValue.NULL;
   }
 
   protected Var getStaticFieldRec(Env env, String name)
@@ -1620,7 +1638,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, hash, name, nameLen, args);
+      return callMethod(env, this, hash, name, nameLen, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1637,7 +1655,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, methodName, args);
+      return callMethod(env, this, methodName, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1654,7 +1672,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, name, args);
+      return callMethod(env, this, name, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1669,7 +1687,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, hash, name, nameLen);
+      return callMethod(env, this, hash, name, nameLen);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1685,7 +1703,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, hash, name, nameLen,
+      return callMethod(env, this, hash, name, nameLen,
                         a1);
     } finally {
       env.setCallingClass(oldClass);
@@ -1702,7 +1720,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, hash, name, nameLen,
+      return callMethod(env, this, hash, name, nameLen,
                         a1, a2);
     } finally {
       env.setCallingClass(oldClass);
@@ -1719,7 +1737,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, hash, name, nameLen,
+      return callMethod(env, this, hash, name, nameLen,
                         a1, a2, a3);
     } finally {
       env.setCallingClass(oldClass);
@@ -1736,7 +1754,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, hash, name, nameLen,
+      return callMethod(env, this, hash, name, nameLen,
                         a1, a2, a3, a4);
     } finally {
       env.setCallingClass(oldClass);
@@ -1754,7 +1772,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethod(env, thisValue, hash, name, nameLen,
+      return callMethod(env, this, hash, name, nameLen,
                         a1, a2, a3, a4, a5);
     } finally {
       env.setCallingClass(oldClass);
@@ -1771,7 +1789,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen, args);
+      return callMethodRef(env, this, hash, name, nameLen, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1788,7 +1806,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, methodName, args);
+      return callMethodRef(env, this, methodName, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1805,7 +1823,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, methodName, args);
+      return callMethodRef(env, this, methodName, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1821,7 +1839,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen, args);
+      return callMethodRef(env, this, hash, name, nameLen, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1837,7 +1855,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, name, args);
+      return callMethodRef(env, this, name, args);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1852,7 +1870,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen);
+      return callMethodRef(env, this, hash, name, nameLen);
     } finally {
       env.setCallingClass(oldClass);
     }
@@ -1868,7 +1886,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen,
+      return callMethodRef(env, this, hash, name, nameLen,
                            a1);
     } finally {
       env.setCallingClass(oldClass);
@@ -1885,7 +1903,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen,
+      return callMethodRef(env, this, hash, name, nameLen,
                            a1, a2);
     } finally {
       env.setCallingClass(oldClass);
@@ -1902,7 +1920,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen,
+      return callMethodRef(env, this, hash, name, nameLen,
                            a1, a2, a3);
     } finally {
       env.setCallingClass(oldClass);
@@ -1919,7 +1937,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen,
+      return callMethodRef(env, this, hash, name, nameLen,
                            a1, a2, a3, a4);
     } finally {
       env.setCallingClass(oldClass);
@@ -1937,7 +1955,7 @@ public class QuercusClass extends Value {
     QuercusClass oldClass = env.setCallingClass(this);
     
     try {
-      return callMethodRef(env, thisValue, hash, name, nameLen,
+      return callMethodRef(env, this, hash, name, nameLen,
                            a1, a2, a3, a4, a5);
     } finally {
       env.setCallingClass(oldClass);
@@ -1974,7 +1992,7 @@ public class QuercusClass extends Value {
       return fun;
     else {
       throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown method",
-					getName(), name));
+                                            getName(), name));
     }
   }
 
@@ -1989,7 +2007,7 @@ public class QuercusClass extends Value {
       return expr.eval(env);
 
     throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown constant",
-					getName(), name));
+                                          getName(), name));
   }
   
   /**
@@ -2006,6 +2024,16 @@ public class QuercusClass extends Value {
   public final HashMap<String, Expr> getConstantMap()
   {
     return _constMap;
+  }
+  
+  //
+  // Value methods
+  //
+  
+  @Override
+  public QuercusClass getQuercusClass()
+  {
+    return this;
   }
 
   public int hashCode()

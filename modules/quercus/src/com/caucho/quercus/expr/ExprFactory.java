@@ -925,6 +925,8 @@ public class ExprFactory {
   {
     if ("isset".equals(name) && args.size() == 1)
       return new IssetExpr(args.get(0));
+    else if ("get_called_class".equals(name) && args.size() == 0)
+      return new GetCalledClassExpr(loc);
     else
       return new FunctionExpr(loc, name, args);
   }
@@ -948,7 +950,7 @@ public class ExprFactory {
   {
     return new ClosureExpr(loc, fun);
   }
-  
+
   //
   // methods
   //
@@ -1041,7 +1043,7 @@ public class ExprFactory {
 
   /**
    * Creates a parent method call parent::foo(...)
-   * 
+   *
    * XXX: isn't this lexical?
    */
   /*

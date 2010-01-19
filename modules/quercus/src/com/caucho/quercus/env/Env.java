@@ -2991,7 +2991,7 @@ public class Env {
   public QuercusClass getCallingClass(Value qThis)
   {
     QuercusClass cls = qThis.getQuercusClass();
-
+    
     if (cls == null)
       cls = _callingClass;
 
@@ -5120,7 +5120,7 @@ public class Env {
         else
           fun = obj.findFunction(name);
 
-        return new CallbackObjectMethod(this, (ObjectValue) obj, fun, name);
+        return new CallbackObjectMethod(this, obj, fun, name);
       }
       else {
         QuercusClass cl = findClass(obj.toString());
@@ -5132,7 +5132,7 @@ public class Env {
           return null;
         }
 
-        return new CallbackFunction(cl.getFunction(name));
+        return new CallbackObjectMethod(this, cl, cl.getFunction(name), name);
       }
     }
     else

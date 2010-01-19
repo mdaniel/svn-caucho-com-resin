@@ -74,22 +74,37 @@ public class ConstExpr extends Expr {
     ExprFactory factory = parser.getExprFactory();
     
     String className = _var;
-    
-    if ("self".equals(className)) {
+    String specialClassName = getSpecialClassName();
+
+    if ("self".equals(specialClassName)) {
       className = parser.getSelfClassName();
       
       return factory.createClassConst(className, name);
     }
-    else if ("parent".equals(className)) {
+    else if ("parent".equals(specialClassName)) {
       className = parser.getParentClassName();
       
       return factory.createClassConst(className, name);
     }
-    else if ("static".equals(className)) {
+    else if ("static".equals(specialClassName)) {
       return factory.createClassConstLateStaticBinding(name);
     }
     else {
       return factory.createClassConst(className, name);
+    }
+  }
+  
+  private String getSpecialClassName()
+  {
+    String className = _var;
+    
+    int ns = className.lastIndexOf('\\');
+    
+    if (ns >= 0) {
+      return className.substring(ns + 1);
+    }
+    else {
+      return className;
     }
   }
   
@@ -102,18 +117,19 @@ public class ConstExpr extends Expr {
     ExprFactory factory = parser.getExprFactory();
     
     String className = _var;
-    
-    if ("self".equals(className)) {
+    String specialClassName = getSpecialClassName();
+   
+    if ("self".equals(specialClassName)) {
       className = parser.getSelfClassName();
       
       return factory.createClassField(className, name);
     }
-    else if ("parent".equals(className)) {
+    else if ("parent".equals(specialClassName)) {
       className = parser.getParentClassName();
       
       return factory.createClassField(className, name);
     }
-    else if ("static".equals(className)) {
+    else if ("static".equals(specialClassName)) {
       return factory.createClassFieldLateStaticBinding(name);
     }
     else {
