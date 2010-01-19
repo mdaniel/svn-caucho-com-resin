@@ -62,18 +62,18 @@ import javax.enterprise.inject.spi.Bean;
  * <code><pre>
  * static void main(String []args)
  * {
- *   ResinContext cxt = new ResinContext();
+ *   ResinCdiContainer cdi = new ResinCdiContainer();
  *
- *   cxt.addModule("test.jar");
- *   cxt.start();
+ *   cdi.addModule("test.jar");
+ *   cdi.start();
  *
- *   ClassLoader loader = cxt.beginRequest();
+ *   RequestContext req = cxt.beginRequest();
  *   try {
  *     MyMain main = cxt.getInstance(MyMain.class);
  *
  *     main.main(args);
  *   } finally {
- *     cxt.endRequest(loader);
+ *     req.close();
  *   }
  * }
  * </pre></code>
@@ -85,7 +85,7 @@ import javax.enterprise.inject.spi.Bean;
  * servlet-specific configuration.
  *
  * <pre><code>
- * &lt;resin-context xmlns="http://caucho.com/ns/resin"
+ * &lt;beans xmlns="http://caucho.com/ns/resin"
  *              xmlns:resin="urn:java:com.caucho.resin">
  *
  *    &lt;resin:import path="${__DIR__}/my-include.xml"/>
@@ -99,12 +99,12 @@ import javax.enterprise.inject.spi.Bean;
  *    &lt;mypkg:MyBean xmlns:mypkg="urn:java:com.mycom.mypkg">
  *      &lt;my-property>my-data&lt;/my-property>
  *    &lt;/mypkg:MyBean>
- * &lt;/resin-context>
+ * &lt;/beans>
  * </code></pre>
  */
-public class ResinContext
+public class ResinBeanContainer
 {
-  private static final L10N L = new L10N(ResinContext.class);
+  private static final L10N L = new L10N(ResinBeanContainer.class);
   private static final String SCHEMA = "com/caucho/resin/resin-context.rnc";
 
   private EnvironmentClassLoader _classLoader;
@@ -116,7 +116,7 @@ public class ResinContext
   /**
    * Creates a new ResinContext.
    */
-  public ResinContext()
+  public ResinBeanContainer()
   {
     _classLoader = EnvironmentClassLoader.create("resin-context");
     _injectManager = InjectManager.create(_classLoader);
@@ -291,7 +291,7 @@ public class ResinContext
 
     RequestContext oldContext = _localContext.get();
 
-    RequestContext context = new RequestContext(oldLoader, oldContext);
+    RequestContext context = new RequestContext(this, oldLoader, oldContext);
 
     thread.setContextClassLoader(_classLoader);
 
@@ -303,7 +303,7 @@ public class ResinContext
   /**
    * Completes the thread's request and exits the Resin context.
    */
-  public void completeRequest(RequestContext context)
+  void completeRequest(RequestContext context)
   {
     Thread thread = Thread.currentThread();
 

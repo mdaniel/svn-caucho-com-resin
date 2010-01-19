@@ -58,13 +58,16 @@ public class RequestContext
 {
   private ClassLoader _oldClassLoader;
   private RequestContext _oldContext;
+  private ResinBeanContainer _cdiContainer;
   
   private HashMap<Contextual<?>,Object> _requestScope
     = new HashMap<Contextual<?>,Object>(8);
 
-  RequestContext(ClassLoader oldClassLoader,
+  RequestContext(ResinBeanContainer cdiContainer,
+                 ClassLoader oldClassLoader,
                  RequestContext oldContext)
   {
+    _cdiContainer = cdiContainer;
     _oldClassLoader = oldClassLoader;
     _oldContext = oldContext;
   }
@@ -100,5 +103,14 @@ public class RequestContext
     _requestScope.put(bean, value);
     
     return (T) value;
+  }
+  
+  public void close()
+  {
+    ResinBeanContainer cdiContainer = _cdiContainer;
+    _cdiContainer = null;
+    
+    if (cdiContainer != null)
+      cdiContainer.completeRequest(this);
   }
 }

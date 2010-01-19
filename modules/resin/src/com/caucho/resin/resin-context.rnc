@@ -4,6 +4,6 @@ include "../server/resin/env.rnc"
 
 start = r_resin-context
 
-r_resin-context = element resin-context {
+r_beans = element beans {
   r_env-Content
 }
