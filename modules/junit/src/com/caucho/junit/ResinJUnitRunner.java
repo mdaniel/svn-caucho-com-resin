@@ -42,7 +42,7 @@ import com.caucho.resin.*;
 public class ResinJUnitRunner extends BlockJUnit4ClassRunner {
   private Class<?> _testClass;
 
-  private ResinContext _resinContext;
+  private ResinBeanContainer _resinContext;
   private ResinDescription _resinDescription;
 
   public ResinJUnitRunner(Class<?> testClass)
@@ -58,13 +58,13 @@ public class ResinJUnitRunner extends BlockJUnit4ClassRunner {
   @Override
   protected void runChild(FrameworkMethod method, RunNotifier notifier)
   {
-    ResinContext resinContext = getResinContext();
+    ResinBeanContainer resinContext = getResinContext();
     RequestContext request = resinContext.beginRequest();
 
     try {
       super.runChild(method, notifier);
     } finally {
-      resinContext.completeRequest(request);
+      request.close();
     }
   }
 
@@ -75,10 +75,10 @@ public class ResinJUnitRunner extends BlockJUnit4ClassRunner {
     return getResinContext().getInstance(_testClass);
   }
 
-  protected ResinContext getResinContext()
+  protected ResinBeanContainer getResinContext()
   {
     if (_resinContext == null) {
-      _resinContext = new ResinContext();
+      _resinContext = new ResinBeanContainer();
 
       String userName = System.getProperty("user.name");
       String workDir = "file:/tmp/" + userName;
@@ -91,7 +91,7 @@ public class ResinJUnitRunner extends BlockJUnit4ClassRunner {
         }
 
         for (String conf : _resinDescription.contextConfig()) {
-          _resinContext.addContextConfiguration(conf);
+          _resinContext.addContextConfig(conf);
         }
       }
 
