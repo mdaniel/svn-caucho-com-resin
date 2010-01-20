@@ -1086,18 +1086,20 @@ indexes start at 0.</p>
 <s2 title="HttpServletRequest and HttpSession">
 
 <p>
-QuercusServlet automatically creates the <code>$request</code> variable for PHP
-scripts.  It contains the <a href="javadoc|javax.servlet.http.HttpServletRequest"/>
-object.
+You may retreive the <a href="javadoc|javax.servlet.http.HttpServletRequest"/>
+object by calling <code>quercus_servlet_request()</code> from within your
+PHP script.
 </p>
 
 <p>
-PHP sessions are not shared with servlet sessions.  The <code>$request</code>
-variable can be used to obtain the servlet session if required.
+PHP sessions are not shared with servlet sessions.  The <code>HttpServletRequest</code>
+object can be used to obtain the servlet session if required.
 </p>
 
 <example title="$request->getSession(true) HttpSession">
 &lt;?php
+  $request = quercus_servlet_request();
+
   $session = $request->getSession(true);
 
   $foo = $session->getAttribute("foo");
