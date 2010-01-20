@@ -874,7 +874,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public void setSecure(boolean secure)
   {
     if (! _webApp.isInitializing())
-      throw new IllegalStateException();
+      throw new IllegalStateException(L.l("SessionCookieConfig must be set during initialization"));
 
     _isSecure = secure;
   }

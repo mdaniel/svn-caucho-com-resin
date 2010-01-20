@@ -835,10 +835,16 @@ abstract public class AbstractHttpResponse {
       cb.append("; Version=");
       cb.append(version);
 
-      if (cookie.getComment() != null) {
+      if (cookie.getComment() == null) {
+      }
+      else if (isCookie2) {
         cb.append("; Comment=\"");
         cb.append(cookie.getComment());
         cb.append("\"");
+      }
+      else {
+        cb.append("; Comment=");
+        cb.append(cookie.getComment());        
       }
 
       if (cookie instanceof CookieImpl) {

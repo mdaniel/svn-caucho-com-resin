@@ -38,6 +38,7 @@ import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.util.L10N;
 
+import javax.servlet.DispatcherType;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
@@ -119,7 +120,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     throws ServletException, IOException
   {
     forward((HttpServletRequest) request, (HttpServletResponse) response,
-            null, _forwardInvocation);
+            null, _forwardInvocation, DispatcherType.FORWARD);
   }
 
   public void dispatchResume(ServletRequest request, ServletResponse response)
@@ -133,14 +134,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     throws ServletException, IOException
   {
     forward((HttpServletRequest) request, (HttpServletResponse) response,
-            "error", _errorInvocation);
+            "error", _errorInvocation, DispatcherType.ERROR);
   }
 
   public void dispatch(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
     forward((HttpServletRequest) request, (HttpServletResponse) response,
-            "error", _dispatchInvocation);
+            "error", _dispatchInvocation, DispatcherType.REQUEST);
   }
 
   /**
@@ -151,7 +152,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
    * @param method special to tell if from error.
    */
   public void forward(HttpServletRequest req, HttpServletResponse res,
-                      String method, Invocation invocation)
+                      String method, Invocation invocation,
+                      DispatcherType type)
     throws ServletException, IOException
   {
     CauchoResponse cauchoRes = null;
@@ -225,6 +227,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     if (_isLogin)
       subRequest = new LoginRequest(parentReq, parentRes, invocation);
+    else if (type == DispatcherType.ERROR)
+      subRequest = new ErrorRequest(parentReq, parentRes, invocation);
     else
       subRequest = new ForwardRequest(parentReq, parentRes, invocation);
 

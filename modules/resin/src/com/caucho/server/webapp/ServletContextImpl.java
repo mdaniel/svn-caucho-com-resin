@@ -210,8 +210,6 @@ public class ServletContextImpl extends ServletContextCompat
   {
     Object oldValue;
     
-    System.out.println("SET: " + name + " " + value);
-
     synchronized (_attributes) {
       if (value != null)
         oldValue = _attributes.put(name, value);
