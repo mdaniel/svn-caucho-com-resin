@@ -494,6 +494,21 @@ abstract public class ArrayValue extends Value {
 
     return value;
   }
+  
+
+  /**
+   * Adds a new value.
+   */
+  public final void put(StringValue keyBinary,
+                        StringValue keyUnicode,
+                        Value value,
+                        boolean isUnicode)
+  {
+    if (isUnicode)
+      append(keyUnicode, value);
+    else
+      append(keyBinary, value);
+  }
 
   /**
    * Add
