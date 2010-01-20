@@ -1179,34 +1179,39 @@ public class WebApp extends ServletContextImpl
       filterName = filterClassName;
 
     config.setFilterName(filterName);
+    
+    boolean isMapping = false;
 
-    if (webFilter.value().length > 0
-        && webFilter.urlPatterns().length == 0
-        && webFilter.servletNames().length == 0) {
+    if (webFilter.value().length > 0) {
       FilterMapping.URLPattern urlPattern = config.createUrlPattern();
       for (String url : webFilter.value())
         urlPattern.addText(url);
-
+      
       urlPattern.init();
+      
+      isMapping = true;
     }
-    else if (webFilter.urlPatterns().length > 0
-             && webFilter.value().length == 0
-             && webFilter.servletNames().length == 0) {
+
+    if (webFilter.urlPatterns().length > 0) {
       FilterMapping.URLPattern urlPattern = config.createUrlPattern();
 
       for (String url : webFilter.urlPatterns()) {
         urlPattern.addText(url);
       }
-
+      
       urlPattern.init();
+      
+      isMapping = true;
     }
-    else if (webFilter.servletNames().length > 0
-             && webFilter.value().length == 0
-             && webFilter.urlPatterns().length == 0) {
+    
+    if (webFilter.servletNames().length > 0) {
       for (String servletName : webFilter.servletNames())
         config.addServletName(servletName);
+      
+      isMapping = true;
     }
-    else {
+    
+    if (! isMapping) {
       throw new ConfigException(L.l("Annotation @WebFilter at '{0}' must specify either value, urlPatterns or servletNames", filterClassName));
     }
 
