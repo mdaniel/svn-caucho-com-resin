@@ -288,6 +288,21 @@ public class MarshalFactory {
     return ValueMarshal.MARSHAL_PASS_THRU;
   }
   
+  public Marshal createExpectString()
+  {
+    return ExpectMarshal.MARSHAL_EXPECT_STRING;
+  }
+  
+  public Marshal createExpectNumeric()
+  {
+    return ExpectMarshal.MARSHAL_EXPECT_NUMERIC;
+  }
+  
+  public Marshal createExpectBoolean()
+  {
+    return ExpectMarshal.MARSHAL_EXPECT_BOOLEAN;
+  }
+  
   static {
     _marshalMap.put(String.class, StringMarshal.MARSHAL);
     _marshalMap.put(Class.class, ClassMarshal.MARSHAL);

@@ -24,55 +24,23 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
-package com.caucho.quercus.expr;
+package com.caucho.quercus.annotation;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.env.DefaultValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * Represents a PHP default expression.
+ * Expected type for a function argument.
  */
-public class DefaultExpr extends Expr {
-  public static final DefaultExpr DEFAULT = new DefaultExpr();
-
-  public DefaultExpr(Location location)
-  {
-    super(location);
-  }
-
-  public DefaultExpr()
-  {
-    super();
-  }
+@Target({ElementType.PARAMETER})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Expect {
+  public enum Type {STRING, NUMERIC, BOOLEAN}
   
-  /**
-   * Returns true for a constant expression.
-   */
-  public boolean isConstant()
-  {
-    return true;
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value eval(Env env)
-  {
-    return DefaultValue.DEFAULT;
-  }
-
-  public String toString()
-  {
-    return "default";
-  }
+  Type type();
 }
-

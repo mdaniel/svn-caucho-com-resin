@@ -24,55 +24,22 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Nam Nguyen
  */
 
-package com.caucho.quercus.expr;
+package com.caucho.quercus.env;
 
-import com.caucho.quercus.Location;
-import com.caucho.quercus.env.DefaultValue;
-import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.Value;
-
-/**
- * Represents a PHP default expression.
- */
-public class DefaultExpr extends Expr {
-  public static final DefaultExpr DEFAULT = new DefaultExpr();
-
-  public DefaultExpr(Location location)
+public class UnexpectedValue extends NullValue
+{
+  private final Value _value;
+  
+  public UnexpectedValue(Value value)  
   {
-    super(location);
-  }
-
-  public DefaultExpr()
-  {
-    super();
+    _value = value;
   }
   
-  /**
-   * Returns true for a constant expression.
-   */
-  public boolean isConstant()
+  public String getType()
   {
-    return true;
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value eval(Env env)
-  {
-    return DefaultValue.DEFAULT;
-  }
-
-  public String toString()
-  {
-    return "default";
+    return _value.getType();
   }
 }
-

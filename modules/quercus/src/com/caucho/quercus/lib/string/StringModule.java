@@ -49,6 +49,7 @@ import java.util.logging.Logger;
 
 import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.QuercusModuleException;
+import com.caucho.quercus.annotation.Expect;
 import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.Reference;
@@ -64,6 +65,7 @@ import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusLocale;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.UnexpectedValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.lib.file.BinaryOutput;
@@ -4801,23 +4803,19 @@ public class StringModule extends AbstractQuercusModule {
    * @param cut if true, break on exact match
    */
   public static Value wordwrap(Env env,
-                               Value value,
-                               @Optional Value widthV,
-                               @Optional Value breakV,
-                               @Optional Value cutV)
+      @Expect(type=Expect.Type.STRING) Value value,
+      @Optional @Expect(type=Expect.Type.NUMERIC) Value widthV,
+      @Optional @Expect(type=Expect.Type.STRING) Value breakV,
+      @Optional @Expect(type=Expect.Type.BOOLEAN) Value cutV)
   {
-    if (! value.isString()
-        && ! value.isLong()
-        && ! value.isDouble()
-        && ! value.isBoolean()) {
-      env.warning(L.l("a string is expected, but {0} given",
+    if (value instanceof UnexpectedValue) {
+      env.warning(L.l("word must be a string, but {0} given",
                       value.getType()));
       return NullValue.NULL;
     }
     
-    if (! widthV.isDefault()
-        && ! widthV.isLongConvertible()) {
-      env.warning(L.l("wrap width must be numeric, but {0} given",
+    if (widthV instanceof UnexpectedValue) {
+      env.warning(L.l("width must be numeric, but {0} given",
                       widthV.getType()));
       return NullValue.NULL;
     }
@@ -4831,11 +4829,8 @@ public class StringModule extends AbstractQuercusModule {
     
     String string = value.toString();
     
-    if (! cutV.isBoolean()
-        && ! cutV.isNull()
-        && ! cutV.isString()
-        && ! cutV.isNumeric()) {
-      env.warning(L.l("cut argument must be boolean, but {0} given",
+    if (cutV instanceof UnexpectedValue) {
+      env.warning(L.l("cut must be a boolean, but {0} given",
                       cutV.getType()));
       return NullValue.NULL;
     }
@@ -4849,11 +4844,7 @@ public class StringModule extends AbstractQuercusModule {
 
     int len = string != null ? string.length() : 0;
     
-    if (! breakV.isString()
-        && ! breakV.isLong()
-        && ! breakV.isDouble()
-        && ! breakV.isBoolean()
-        && ! breakV.isNull()) {
+    if (breakV instanceof UnexpectedValue) {
       env.warning(L.l("break string must be a string, but {0} given",
                       breakV.getType()));
       return NullValue.NULL;

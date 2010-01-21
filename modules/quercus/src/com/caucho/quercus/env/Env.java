@@ -5773,6 +5773,58 @@ public class Env {
   {
     return value;
   }
+  
+  /**
+   * Check for expected type.
+   */
+  public Value expectString(Value value)
+  {
+    if (! value.isString()
+        && ! value.isLong()
+        && ! value.isDouble()
+        && ! value.isBoolean()
+        && ! value.isNull()) {
+      //warning(L.l("argument must be a string, but {0} given",
+      //            value.getType()));
+      
+      return new UnexpectedValue(value);
+    }
+    
+    return value;
+  }
+  
+  /**
+   * Check for expected type.
+   */
+  public Value expectNumeric(Value value)
+  {
+    if (! value.isNull()
+        && ! value.isLongConvertible()) {
+      //warning(L.l("argument must be numeric, but {0} given",
+      //            value.getType()));
+      
+      return new UnexpectedValue(value);
+    }
+    
+    return value;
+  }
+  
+  /**
+   * Check for expected type.
+   */
+  public Value expectBoolean(Value value)
+  {
+    if (! value.isBoolean()
+        && ! value.isNull()
+        && ! value.isString()
+        && ! value.isNumeric()) {
+      //warning(L.l("argument must be boolean, but {0} given",
+      //            value.getType()));
+      return new UnexpectedValue(value);
+    }
+    
+    return value;
+  }
 
   /**
    * Check for type hinting

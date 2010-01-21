@@ -505,6 +505,9 @@ public class MiscModule extends AbstractQuercusModule {
   {
     try {
       ArrayList<PackSegment> segments = parsePackFormat(env, format, false);
+      
+      if (segments == null)
+        return BooleanValue.FALSE;
 
       StringValue bb = env.createBinaryBuilder();
 
@@ -524,8 +527,14 @@ public class MiscModule extends AbstractQuercusModule {
    */
   public Value unpack(Env env, String format, StringValue s)
   {
+    if (format == null)
+      return NullValue.NULL;
+    
     try {
       ArrayList<PackSegment> segments = parsePackFormat(env, format, true);
+      
+      if (segments == null)
+        return BooleanValue.FALSE;
 
       ArrayValue array = new ArrayValueImpl();
 
@@ -1046,8 +1055,8 @@ public class MiscModule extends AbstractQuercusModule {
   }
 
   private static ArrayList<PackSegment> parsePackFormat(Env env,
-                                                                                    String format,
-                                                                                    boolean hasName)
+                                                        String format,
+                                                        boolean hasName)
   {
     ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
 
@@ -1161,6 +1170,9 @@ public class MiscModule extends AbstractQuercusModule {
       case '@':
         segments.add(new PositionPackSegment(name, count));
         break;
+      default:
+        env.warning(L.l("invalid format '{0}'", String.valueOf(ch)));
+        return null;
       }
     }
 

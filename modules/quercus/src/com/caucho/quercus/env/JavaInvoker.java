@@ -172,7 +172,13 @@ abstract public class JavaInvoker
           boolean isPassThru = false;
 
           boolean isNotNull = false;
+          
+          boolean isExpectString = false;
+          boolean isExpectNumeric = false;
+          boolean isExpectBoolean = false;
 
+          Class<?> argType = _param[i + envOffset];
+          
           for (Annotation ann : _paramAnn[i + envOffset]) {
             if (Optional.class.isAssignableFrom(ann.annotationType())) {
               _minArgumentLength--;
@@ -186,35 +192,60 @@ abstract public class JavaInvoker
               else
                 _defaultExprs[i] = QuercusParser.parseDefault(opt.value());
             } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
+              if (! Value.class.equals(argType)
+                  && ! Var.class.equals(argType)) {
+                throw new QuercusException(L.l("reference must be Value or Var for {0}",
+                                               _name));
+              }
+              
               isReference = true;
             } else if (PassThru.class.isAssignableFrom(ann.annotationType())) {
+              if (! Value.class.equals(argType)) {
+                throw new QuercusException(L.l("pass thru must be Value for {0}",
+                                               _name));
+              }
+              
               isPassThru = true;
             } else if (NotNull.class.isAssignableFrom(ann.annotationType())) {
               isNotNull = true;
+            } else if (Expect.class.isAssignableFrom(ann.annotationType())) {
+              if (! Value.class.equals(argType)) {
+                throw new QuercusException(L.l("Expect type must be Value for {0}",
+                                               _name));
+              }
+              
+              Expect.Type type = ((Expect) ann).type();
+              
+              if (type == Expect.Type.STRING) {
+                isExpectString = true;
+              }
+              else if (type == Expect.Type.NUMERIC) {
+                isExpectNumeric = true;
+              }
+              else if (type == Expect.Type.BOOLEAN) {
+                isExpectBoolean = true;
+              }
             }
           }
-
-          Class<?> argType = _param[i + envOffset];
 
           if (isReference) {
             _marshalArgs[i] = marshalFactory.createReference();
-
-            if (! Value.class.equals(argType)
-                && ! Var.class.equals(argType)) {
-              throw new QuercusException(L.l("reference must be Value or Var for {0}",
-                                             _name));
-            }
           }
           else if (isPassThru) {
             _marshalArgs[i] = marshalFactory.createValuePassThru();
-
-            if (! Value.class.equals(argType)) {
-              throw new QuercusException(L.l("pass thru must be Value for {0}",
-                                             _name));
-            }
           }
-          else
+          else if (isExpectString) {
+            _marshalArgs[i] = marshalFactory.createExpectString();
+          }
+          else if (isExpectNumeric) {
+            _marshalArgs[i] = marshalFactory.createExpectNumeric();
+          }
+          else if (isExpectBoolean) {
+            _marshalArgs[i] = marshalFactory.createExpectBoolean();
+          }
+          else {
             _marshalArgs[i] = marshalFactory.create(argType, isNotNull);
+          }
         }
 
         _unmarshalReturn = marshalFactory.create(_retType,
