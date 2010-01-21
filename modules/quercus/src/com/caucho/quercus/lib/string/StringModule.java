@@ -594,8 +594,11 @@ public class StringModule extends AbstractQuercusModule {
                               StringValue string,
                               @Optional("0x7fffffff") long limit)
   {
-    if (separator.length() == 0)
+    if (separator.length() == 0) {
+      env.warning(L.l("Delimiter is empty"));
       return BooleanValue.FALSE;
+    }
+      
     
     int head = 0;    
     ArrayValue array = new ArrayValueImpl();
