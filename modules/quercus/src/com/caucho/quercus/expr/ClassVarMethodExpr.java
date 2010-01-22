@@ -116,9 +116,11 @@ public class ClassVarMethodExpr extends Expr {
     if (cl == null) {
       env.error(getLocation(), L.l("no matching class {0}", _className));
     }
+    
+    int hash = _methodName.hashCodeCaseInsensitive();
 
     return cl.callMethod(env, env.getThis(), 
-                         _methodName, _methodName.hashCode(),
+                         _methodName, hash,
                          evalArgs(env, _args));
   }
 
@@ -139,11 +141,12 @@ public class ClassVarMethodExpr extends Expr {
     if (cl == null) {
       env.error(getLocation(), L.l("no matching class {0}", _className));
     }
+    
+    int hash = _methodName.hashCodeCaseInsensitive();
 
-    // qa/0954 - what appears to be a static call may be a call to a super constructor
-    Value thisValue = env.getThis();
-
-    return cl.callMethodRef(env, _methodName, evalArgs(env, _args));
+    return cl.callMethodRef(env, env.getThis(), 
+                            _methodName, hash,
+                            evalArgs(env, _args));
   }
 
   public String toString()

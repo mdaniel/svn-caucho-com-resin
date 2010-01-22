@@ -107,7 +107,7 @@ public class LiteralStringExpr extends Expr {
       return factory.createClassConst(className, name);
     }
     else if ("static".equals(className)) {
-      return factory.createClassConstLateStaticBinding(name);
+      return factory.createClassVirtualConst(name);
     }
     else {
       return factory.createClassConst(className, name);

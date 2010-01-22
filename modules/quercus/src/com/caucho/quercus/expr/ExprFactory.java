@@ -283,8 +283,7 @@ public class ExprFactory {
   /**
    * Creates a class const expression (static::FOO).
    */
-  public ClassVirtualConstExpr
-    createClassConstLateStaticBinding(String name)
+  public ClassVirtualConstExpr createClassVirtualConst(String name)
   {
     return new ClassVirtualConstExpr(name);
   }
@@ -314,7 +313,7 @@ public class ExprFactory {
   /**
    * Creates a class static field 'static::$b' expression.
    */
-  public Expr createClassFieldLateStaticBinding(String name)
+  public Expr createClassVirtualField(String name)
   {
     return new ClassVirtualFieldExpr(name);
   }
@@ -340,18 +339,9 @@ public class ExprFactory {
   /**
    * Creates a class static field 'static::${b}' expression.
    */
-  public Expr createClassFieldLateStaticBinding(Expr name)
+  public Expr createClassVirtualField(Expr name)
   {
     return new ClassVirtualFieldVarExpr(name);
-  }
-
-  /**
-   * Creates a class static field '$class::${b}' expression.
-   */
-  public Expr createStaticFieldGet(Expr className,
-                                   Expr name)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   //
@@ -954,14 +944,18 @@ public class ExprFactory {
   /**
    * Creates a new function call.
    */
-  public Expr createFunction(Location loc,
-                             String name,
-                             ArrayList<Expr> args)
+  public Expr createCall(QuercusParser parser,
+                         String name,
+                         ArrayList<Expr> args)
   {
+    Location loc = parser.getLocation();
+    
     if ("isset".equals(name) && args.size() == 1)
       return new FunIssetExpr(args.get(0));
     else if ("get_called_class".equals(name) && args.size() == 0)
       return new FunGetCalledClassExpr(loc);
+    else if ("get_class".equals(name) && args.size() == 0)
+      return new FunGetClassExpr(parser);
     else
       return new CallExpr(loc, name, args);
   }
@@ -1037,9 +1031,9 @@ public class ExprFactory {
   /**
    * Creates a new function call based on the class context.
    */
-  public Expr createClassMethodCallLateStaticBinding(Location loc,
-                                                     String methodName,
-                                                     ArrayList<Expr> args)
+  public Expr createClassVirtualMethodCall(Location loc,
+                                           String methodName,
+                                           ArrayList<Expr> args)
   {
     return new ClassVirtualMethodExpr(loc, methodName, args);
   }
@@ -1069,9 +1063,9 @@ public class ExprFactory {
   /**
    * Creates a new method static::$f()
    */
-  public Expr createClassVirtualMethod(Location loc,
-                                       Expr var,
-                                       ArrayList<Expr> args)
+  public Expr createClassVirtualMethodCall(Location loc,
+                                           Expr var,
+                                           ArrayList<Expr> args)
   {
     return new ClassVirtualMethodVarExpr(loc, var, args);
   }

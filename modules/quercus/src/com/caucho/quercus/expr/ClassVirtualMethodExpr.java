@@ -49,6 +49,7 @@ public class ClassVirtualMethodExpr extends Expr {
   private static final L10N L = new L10N(ClassVirtualMethodExpr.class);
 
   protected final StringValue _methodName;
+  private final int _hash;
   protected final Expr []_args;
 
   protected boolean _isMethod;
@@ -60,6 +61,7 @@ public class ClassVirtualMethodExpr extends Expr {
     super(location);
     
     _methodName = MethodIntern.intern(methodName);
+    _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
@@ -72,6 +74,7 @@ public class ClassVirtualMethodExpr extends Expr {
     super(location);
 
     _methodName = MethodIntern.intern(name);
+    _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = args;
   }
@@ -85,7 +88,9 @@ public class ClassVirtualMethodExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    QuercusClass cls = env.getCallingClass();
+    Value qThis = env.getThis();
+    
+    QuercusClass cls = qThis.getQuercusClass();
 
     if (cls == null) {
       env.error(getLocation(), L.l("no calling class found"));
@@ -100,7 +105,7 @@ public class ClassVirtualMethodExpr extends Expr {
     try {
       env.checkTimeout();
 
-      return cls.callMethod(env, _methodName, _methodName.hashCode(), values);
+      return cls.callMethod(env, qThis, _methodName, _hash, values);
     } finally {
       env.popCall();
     }

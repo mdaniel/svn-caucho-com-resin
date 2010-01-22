@@ -117,10 +117,11 @@ public class ClassVarMethodVarExpr extends Expr {
     }
 
     StringValue methodName = _methodName.evalStringValue(env);
+    int hash = methodName.hashCodeCaseInsensitive();
     Value []args = evalArgs(env, _args);
     
     return cl.callMethod(env, env.getThis(),
-                         methodName, methodName.hashCode(),
+                         methodName, hash,
                          args);
   }
 
@@ -145,10 +146,11 @@ public class ClassVarMethodVarExpr extends Expr {
     // qa/0954 - what appears to be a static call may be a call to a super constructor
     Value qThis = env.getThis();
     StringValue methodName = _methodName.evalStringValue(env);
+    int hash = methodName.hashCodeCaseInsensitive();
     Value []args = evalArgs(env, _args);
 
     return cl.callMethodRef(env, qThis, 
-                            methodName, methodName.hashCode(), 
+                            methodName, hash,
                             args);
   }
 

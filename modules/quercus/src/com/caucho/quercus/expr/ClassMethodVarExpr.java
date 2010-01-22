@@ -162,11 +162,12 @@ public class ClassMethodVarExpr extends Expr {
     // qa/0954 - static calls pass the current $this
     Value qThis = env.getThis();
     StringValue methodName = _nameExpr.evalStringValue(env);
+    int hash = methodName.hashCodeCaseInsensitive();
     
     Value []args = evalArgs(env, _args);
     
     return cl.callMethodRef(env, qThis, 
-                            methodName, methodName.hashCode(),
+                            methodName, hash,
                             args);
   }
   

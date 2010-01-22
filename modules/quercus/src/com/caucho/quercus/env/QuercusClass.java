@@ -1090,10 +1090,21 @@ public class QuercusClass extends NullValue {
                           StringValue methodName, int hash,
                           Value []args)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis, args);
-  }  
+  }
+  
+  public final Value callMethod(Env env, Value qThis, StringValue methodName,
+                                Value []args)
+  {
+    return callMethod(env, qThis, 
+                      methodName, methodName.hashCodeCaseInsensitive(),
+                      args);
+  }
 
   /**
    * calls the function.
@@ -1101,10 +1112,19 @@ public class QuercusClass extends NullValue {
   public Value callMethod(Env env, Value qThis,
                           StringValue methodName, int hash)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis);
   }  
+  
+  public final Value callMethod(Env env, Value qThis, StringValue methodName)
+  {
+    return callMethod(env, qThis, 
+                      methodName, methodName.hashCodeCaseInsensitive());
+  }
 
   /**
    * calls the function.
@@ -1113,10 +1133,21 @@ public class QuercusClass extends NullValue {
                           StringValue methodName, int hash,
                           Value a1)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis, a1);
   }  
+  
+  public final Value callMethod(Env env, Value qThis, StringValue methodName,
+                                Value a1)
+  {
+    return callMethod(env, qThis, 
+                      methodName, methodName.hashCodeCaseInsensitive(),
+                      a1);
+  }
 
   /**
    * calls the function.
@@ -1125,10 +1156,21 @@ public class QuercusClass extends NullValue {
                           StringValue methodName, int hash,
                           Value a1, Value a2)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis, a1, a2);
   }  
+  
+  public final Value callMethod(Env env, Value qThis, StringValue methodName,
+                                Value a1, Value a2)
+  {
+    return callMethod(env, qThis, 
+                      methodName, methodName.hashCodeCaseInsensitive(),
+                      a1, a2);
+  }
 
   /**
    * calls the function.
@@ -1137,10 +1179,21 @@ public class QuercusClass extends NullValue {
                           StringValue methodName, int hash,
                           Value a1, Value a2, Value a3)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis, a1, a2, a3);
   }  
+  
+  public final Value callMethod(Env env, Value qThis, StringValue methodName,
+                                Value a1, Value a2, Value a3)
+  {
+    return callMethod(env, qThis, 
+                      methodName, methodName.hashCodeCaseInsensitive(),
+                      a1, a2, a3);
+  }
 
   /**
    * calls the function.
@@ -1149,10 +1202,21 @@ public class QuercusClass extends NullValue {
                           StringValue methodName, int hash,
                           Value a1, Value a2, Value a3, Value a4)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis, a1, a2, a3, a4);
   }  
+  
+  public final Value callMethod(Env env, Value qThis, StringValue methodName,
+                                Value a1, Value a2, Value a3, Value a4)
+  {
+    return callMethod(env, qThis, 
+                      methodName, methodName.hashCodeCaseInsensitive(),
+                      a1, a2, a3, a4);
+  }
 
   /**
    * calls the function.
@@ -1161,10 +1225,22 @@ public class QuercusClass extends NullValue {
                           StringValue methodName, int hash,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis, a1, a2, a3, a4, a5);
   }  
+  
+  public final Value callMethod(Env env, Value qThis, StringValue methodName,
+                                Value a1, Value a2, Value a3, Value a4,
+                                Value a5)
+  {
+    return callMethod(env, qThis, 
+                      methodName, methodName.hashCodeCaseInsensitive(),
+                      a1, a2, a3, a4, a5);
+  }
 
   /**
    * calls the function.
@@ -1173,10 +1249,21 @@ public class QuercusClass extends NullValue {
                              StringValue methodName, int hash,
                              Value []args)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethodRef(env, this, qThis, args);
   }  
+  
+  public final Value callMethodRef(Env env, Value qThis, StringValue methodName,
+                                   Value []args)
+  {
+    return callMethodRef(env, qThis, 
+                         methodName, methodName.hashCodeCaseInsensitive(),
+                         args);
+  }
 
   /**
    * calls the function.
@@ -1184,10 +1271,19 @@ public class QuercusClass extends NullValue {
   public Value callMethodRef(Env env, Value qThis,
                              StringValue methodName, int hash)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethodRef(env, this, qThis);
   }  
+  
+  public final Value callMethodRef(Env env, Value qThis, StringValue methodName)
+  {
+    return callMethodRef(env, qThis, 
+                         methodName, methodName.hashCodeCaseInsensitive());
+  }
 
   /**
    * calls the function.
@@ -1196,10 +1292,21 @@ public class QuercusClass extends NullValue {
                              StringValue methodName, int hash,
                              Value a1)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethodRef(env, this, qThis, a1);
   }  
+  
+  public final Value callMethodRef(Env env, Value qThis, StringValue methodName,
+                                   Value a1)
+  {
+    return callMethodRef(env, qThis, 
+                         methodName, methodName.hashCodeCaseInsensitive(),
+                         a1);
+  }
 
   /**
    * calls the function.
@@ -1208,11 +1315,21 @@ public class QuercusClass extends NullValue {
                              StringValue methodName, int hash,
                              Value a1, Value a2)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
-
 
     return fun.callMethodRef(env, this, qThis, a1, a2);
   }  
+  
+  public final Value callMethodRef(Env env, Value qThis, StringValue methodName,
+                                   Value a1, Value a2)
+  {
+    return callMethodRef(env, qThis, 
+                         methodName, methodName.hashCodeCaseInsensitive(),
+                         a1, a2);
+  }
 
   /**
    * calls the function.
@@ -1221,10 +1338,21 @@ public class QuercusClass extends NullValue {
                              StringValue methodName, int hash,
                              Value a1, Value a2, Value a3)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethodRef(env, this, qThis, a1, a2, a3);
   }  
+  
+  public final Value callMethodRef(Env env, Value qThis, StringValue methodName,
+                                   Value a1, Value a2, Value a3)
+  {
+    return callMethodRef(env, qThis, 
+                         methodName, methodName.hashCodeCaseInsensitive(),
+                         a1, a2, a3);
+  }
 
   /**
    * calls the function.
@@ -1233,11 +1361,22 @@ public class QuercusClass extends NullValue {
                              StringValue methodName, int hash,
                              Value a1, Value a2, Value a3, Value a4)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethodRef(env, this, qThis,
                              a1, a2, a3, a4);
   }  
+  
+  public final Value callMethodRef(Env env, Value qThis, StringValue methodName,
+                                   Value a1, Value a2, Value a3, Value a4)
+  {
+    return callMethodRef(env, qThis, 
+                         methodName, methodName.hashCodeCaseInsensitive(),
+                         a1, a2, a3, a4);
+  }
 
   /**
    * calls the function.
@@ -1246,10 +1385,22 @@ public class QuercusClass extends NullValue {
                              StringValue methodName, int hash,
                              Value a1, Value a2, Value a3, Value a4, Value a5)
   {
+    if (qThis.isNull())
+      qThis = this;
+    
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethodRef(env, this, qThis,
                              a1, a2, a3, a4, a5);
+  }
+  
+  public final Value callMethodRef(Env env, Value qThis, StringValue methodName,
+                                   Value a1, Value a2, Value a3, Value a4,
+                                   Value a5)
+  {
+    return callMethodRef(env, qThis, 
+                         methodName, methodName.hashCodeCaseInsensitive(),
+                         a1, a2, a3, a4, a5);
   }
   
   //
@@ -1505,6 +1656,15 @@ public class QuercusClass extends NullValue {
   //
   // Value methods
   //
+
+  /**
+   * Returns the value's class name.
+   */
+  @Override
+  public String getClassName()
+  {
+    return getName();
+  }
   
   @Override
   public QuercusClass getQuercusClass()

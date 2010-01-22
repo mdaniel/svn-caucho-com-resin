@@ -1465,7 +1465,9 @@ abstract public class Value implements java.io.Serializable
                                 StringValue methodName,
                                 Value []args)
   {
-    return callMethod(env, methodName, methodName.hashCode(), args);
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethod(env, methodName, hash, args);
   }
 
 
@@ -1486,7 +1488,9 @@ abstract public class Value implements java.io.Serializable
                                    StringValue methodName,
                                    Value []args)
   {
-    return callMethodRef(env, methodName, methodName.hashCode(), args);
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash, args);
   }
 
   /**
@@ -1502,7 +1506,9 @@ abstract public class Value implements java.io.Serializable
    */
   public final Value callMethod(Env env, StringValue methodName)
   {
-    return callMethod(env, methodName, methodName.hashCode());
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethod(env, methodName, hash);
   }
 
   /**
@@ -1518,7 +1524,9 @@ abstract public class Value implements java.io.Serializable
    */
   public final Value callMethodRef(Env env, StringValue methodName)
   {
-    return callMethodRef(env, methodName, methodName.hashCode());
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash);
   }
 
   /**
@@ -1538,7 +1546,9 @@ abstract public class Value implements java.io.Serializable
                                 StringValue methodName,
                                 Value a1)
   {
-    return callMethod(env, methodName, methodName.hashCode(), a1);
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethod(env, methodName, hash, a1);
   }
 
   /**
@@ -1558,7 +1568,9 @@ abstract public class Value implements java.io.Serializable
                                    StringValue methodName,
                                    Value a1)
   {
-    return callMethodRef(env, methodName, methodName.hashCode(), a1);
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash, a1);
   }
 
   /**
@@ -1578,7 +1590,9 @@ abstract public class Value implements java.io.Serializable
                                 StringValue methodName,
                                 Value a1, Value a2)
   {
-    return callMethod(env, methodName, methodName.hashCode(),
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethod(env, methodName, hash,
                       a1, a2);
   }
 
@@ -1599,7 +1613,9 @@ abstract public class Value implements java.io.Serializable
                                    StringValue methodName,
                                    Value a1, Value a2)
   {
-    return callMethodRef(env, methodName, methodName.hashCode(),
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash,
                          a1, a2);
   }
 
@@ -1620,7 +1636,9 @@ abstract public class Value implements java.io.Serializable
                                 StringValue methodName,
                                 Value a1, Value a2, Value a3)
   {
-    return callMethod(env, methodName, methodName.hashCode(),
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethod(env, methodName, hash,
                       a1, a2, a3);
   }
 
@@ -1641,7 +1659,9 @@ abstract public class Value implements java.io.Serializable
                                    StringValue methodName,
                                    Value a1, Value a2, Value a3)
   {
-    return callMethodRef(env, methodName, methodName.hashCode(),
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash,
                          a1, a2, a3);
   }
 
@@ -1663,7 +1683,9 @@ abstract public class Value implements java.io.Serializable
                                 StringValue methodName,
                                 Value a1, Value a2, Value a3, Value a4)
   {
-    return callMethod(env, methodName, methodName.hashCode(),
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethod(env, methodName, hash,
                       a1, a2, a3, a4);
   }
 
@@ -1685,7 +1707,9 @@ abstract public class Value implements java.io.Serializable
                                    StringValue methodName,
                                    Value a1, Value a2, Value a3, Value a4)
   {
-    return callMethodRef(env, methodName, methodName.hashCode(),
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash,
                          a1, a2, a3, a4);
   }
 
@@ -1707,7 +1731,9 @@ abstract public class Value implements java.io.Serializable
                              StringValue methodName,
                              Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return callMethodRef(env, methodName, methodName.hashCode(),
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash,
                          a1, a2, a3, a4, a5);
   }
 

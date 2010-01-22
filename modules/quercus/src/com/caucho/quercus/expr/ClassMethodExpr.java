@@ -95,16 +95,27 @@ public class ClassMethodExpr extends Expr {
 
     Value []values = evalArgs(env, _args);
 
-    Value obj = env.getThis();
+    Value oldThis = env.getThis();
+    
+    Value qThis;
+    
+    if (oldThis.isNull()) {
+      qThis = cl;
+      env.setThis(qThis);
+    }
+    else
+      qThis = oldThis;
+    
     env.pushCall(this, cl, values);
     // QuercusClass oldClass = env.setCallingClass(cl);
 
     try {
       env.checkTimeout();
       
-      return cl.callMethod(env, obj, _methodName, _hash, values);
+      return cl.callMethod(env, qThis, _methodName, _hash, values);
     } finally {
       env.popCall();
+      env.setThis(oldThis);
       // env.setCallingClass(oldClass);
     }
   }

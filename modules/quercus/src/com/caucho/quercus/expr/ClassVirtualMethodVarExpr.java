@@ -50,7 +50,7 @@ public class ClassVirtualMethodVarExpr extends Expr {
   private static final L10N L
     = new L10N(ClassVirtualMethodVarExpr.class);
   
-  protected final Expr _nameExpr;
+  protected final Expr _methodName;
   protected final Expr []_args;
 
   protected Expr []_fullArgs;
@@ -59,30 +59,30 @@ public class ClassVirtualMethodVarExpr extends Expr {
   protected boolean _isMethod;
 
   public ClassVirtualMethodVarExpr(Location location,
-			                                  Expr nameExpr,
-			                                  ArrayList<Expr> args)
+                                   Expr methodName,
+                                   ArrayList<Expr> args)
   {
     super(location);
 
-    _nameExpr = nameExpr;
+    _methodName = methodName;
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
   public ClassVirtualMethodVarExpr(Location location,
-			                                  Expr nameExpr,
-			                                  Expr []args)
+                                   Expr methodName,
+                                   Expr []args)
   {
     super(location);
 
-    _nameExpr = nameExpr;
+    _methodName = methodName;
 
     _args = args;
   }
 
   public ClassVirtualMethodVarExpr(Expr nameExpr,
-			                                  ArrayList<Expr> args)
+                                   ArrayList<Expr> args)
   {
     this(Location.UNKNOWN, nameExpr, args);
   }
@@ -121,20 +121,30 @@ public class ClassVirtualMethodVarExpr extends Expr {
    */
   public Value eval(Env env)
   {
-    QuercusClass cl = env.getCallingClass();
+    Value qThis = env.getThis();
+    
+    QuercusClass cls = qThis.getQuercusClass();
 
-    if (cl == null) {
+    if (cls == null) {
       env.error(getLocation(), L.l("no calling class found"));
-
+      
       return NullValue.NULL;
     }
-
-    Value qThis = env.getThis();
-    StringValue methodName = _nameExpr.evalStringValue(env);
     
-    Value []args = evalArgs(env, _args);
+    StringValue methodName = _methodName.evalStringValue(env);
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    Value []values = evalArgs(env, _args);
 
-    return cl.callMethod(env, qThis, methodName, methodName.hashCode(), args);
+    env.pushCall(this, cls, values);
+
+    try {
+      env.checkTimeout();
+
+      return cls.callMethod(env, qThis, methodName, hash, values);
+    } finally {
+      env.popCall();
+    }
   }
   
   /**
@@ -156,7 +166,7 @@ public class ClassVirtualMethodVarExpr extends Expr {
 
     // qa/0954 - what appears to be a static call may be a call to a super constructor
     Value qThis = env.getThis();
-    StringValue methodName = _nameExpr.evalStringValue(env);
+    StringValue methodName = _methodName.evalStringValue(env);
     Value []args = evalArgs(env, _args);
 
     return cl.callMethodRef(env, qThis, 
@@ -165,7 +175,7 @@ public class ClassVirtualMethodVarExpr extends Expr {
   
   public String toString()
   {
-    return _nameExpr + "()";
+    return _methodName + "()";
   }
 }
 

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
 /**
@@ -69,12 +70,15 @@ public class ClassFieldExpr extends AbstractVarExpr {
    * Creates a function call expression
    */
   @Override
-  public Expr createCall(ExprFactory factory,
+  public Expr createCall(QuercusParser parser,
                          Location location,
                          ArrayList<Expr> args)
     throws IOException
   {
-    return factory.createClassMethodCall(location, _className, _varName, args);
+    Expr var = parser.createVar(_varName);
+    ExprFactory factory = parser.getExprFactory();
+    
+    return factory.createClassMethodCall(location, _className, var, args);
   }
   
   /**

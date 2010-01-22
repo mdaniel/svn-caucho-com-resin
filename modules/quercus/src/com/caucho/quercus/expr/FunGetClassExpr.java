@@ -29,63 +29,29 @@
 
 package com.caucho.quercus.expr;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
 /**
- * Represents a PHP parent::FOO constant call expression.
+ * Represents returns the current class.
  */
-public class ClassConstExpr extends Expr {
-  private static final L10N L = new L10N(ClassMethodExpr.class);
+public class FunGetClassExpr extends Expr {
+  private String _className;
 
-  protected final String _className;
-  protected final String _name;
-
-  public ClassConstExpr(Location location, String className, String name)
+  public FunGetClassExpr(QuercusParser parser)
   {
-    super(location);
+    super(parser.getLocation());
     
-    _className = className.intern();
-    _name = name.intern();
-  }
-
-  public ClassConstExpr(String className, String name)
-  {
-    _className = className.intern();
-    _name = name.intern();
+    _className = parser.getClassName();
   }
   
-  //
-  // function call creation
-  //
-
-  /**
-   * Creates a function call expression
-   */
-  @Override
-  public Expr createCall(QuercusParser parser,
-                         Location location,
-                         ArrayList<Expr> args)
-    throws IOException
+  protected String getClassName()
   {
-    /*
-    if (_className.equals(_name))
-      return factory.createClassConstructor(location, _className, _name, args);
-    else
-      return factory.createClassMethodCall(location, _className, _name, args);
-      */
-    ExprFactory factory = parser.getExprFactory();
-    
-    return factory.createClassMethodCall(location, _className, _name, args);
+    return _className;
   }
-  
+
   /**
    * Evaluates the expression.
    *
@@ -96,12 +62,12 @@ public class ClassConstExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    return env.getClass(_className).getConstant(env, _name);
+    return env.createString(_className);
   }
-  
+
   public String toString()
   {
-    return _className + "::" + _name;
+    return "get_class()";
   }
 }
 

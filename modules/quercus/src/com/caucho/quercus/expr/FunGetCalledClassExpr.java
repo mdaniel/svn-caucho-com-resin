@@ -31,6 +31,7 @@ package com.caucho.quercus.expr;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
@@ -39,7 +40,7 @@ import com.caucho.util.L10N;
  */
 public class FunGetCalledClassExpr extends Expr {
   private static final L10N L = new L10N(FunGetCalledClassExpr.class);
-
+  
   public FunGetCalledClassExpr(Location location)
   {
     super(location);
@@ -55,7 +56,7 @@ public class FunGetCalledClassExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    return env.getCallingClassName();
+    return env.createString(env.getThis().getClassName());
   }
 
   public String toString()

@@ -416,6 +416,17 @@ public class QuercusParser {
   }
 
   /**
+   * Returns the current class name
+   */
+  public String getClassName()
+  {
+    if (_classDef != null)
+      return _classDef.getName();
+    else
+      return null;
+  }
+  
+  /**
    * Returns the current line
    */
   public int getLine()
@@ -977,7 +988,7 @@ public class QuercusParser {
     ArrayList<Expr> args = new ArrayList<Expr>();
     args.add(parseTopExpr());
 
-    return _factory.createFunction(getLocation(), "print", args);
+    return _factory.createCall(this, "print", args);
   }
 
   /**
@@ -2259,7 +2270,7 @@ public class QuercusParser {
       args.add(_factory.createString(name));
       args.add(expr);
       
-      Expr fun = _factory.createFunction(getLocation(), "define", args);
+      Expr fun = _factory.createCall(this, "define", args);
       
       constList.add(_factory.createExpr(getLocation(), fun));
       // _scope.addConstant(name, expr);
@@ -3302,21 +3313,21 @@ public class QuercusParser {
       {
         ArrayList<Expr> args = new ArrayList<Expr>();
         args.add(createString(_lexeme));
-        return _factory.createFunction(getLocation(), "shell_exec", args);
+        return _factory.createCall(this, "shell_exec", args);
       }
 
     case SIMPLE_SYSTEM_STRING:
       {
         ArrayList<Expr> args = new ArrayList<Expr>();
         args.add(parseEscapedString(_lexeme, SIMPLE_STRING_ESCAPE, true));
-        return _factory.createFunction(getLocation(), "shell_exec", args);
+        return _factory.createCall(this, "shell_exec", args);
       }
 
     case COMPLEX_SYSTEM_STRING:
       {
         ArrayList<Expr> args = new ArrayList<Expr>();
         args.add(parseEscapedString(_lexeme, COMPLEX_STRING_ESCAPE, true));
-        return _factory.createFunction(getLocation(), "shell_exec", args);
+        return _factory.createCall(this, "shell_exec", args);
       }
 
     case SIMPLE_STRING_ESCAPE:
@@ -3724,6 +3735,11 @@ public class QuercusParser {
     return _factory.createVar(_function.createVar(_lexeme));
   }
   
+  public Expr createVar(String name)
+  {
+    return _factory.createVar(_function.createVar(name));    
+  }
+  
   /**
    * Parses the next function
    */
@@ -3736,7 +3752,7 @@ public class QuercusParser {
     ArrayList<Expr> args = parseArgs();
     
 
-    return _factory.createFunction(getLocation(), name, args);
+    return _factory.createCall(this, name, args);
 
     /*
      if (name.equals("each")) {
@@ -3798,7 +3814,7 @@ public class QuercusParser {
   private Expr parseFunction(Expr name)
     throws IOException
   {
-    return name.createCall(_factory, getLocation(), parseArgs());
+    return name.createCall(this, getLocation(), parseArgs());
   }
 
   private ArrayList<Expr> parseArgs()

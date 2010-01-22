@@ -373,11 +373,13 @@ abstract public class Expr {
   /**
    * Creates a function call expression
    */
-  public Expr createCall(ExprFactory factory,
+  public Expr createCall(QuercusParser parser,
                          Location location,
                          ArrayList<Expr> args)
     throws IOException
   {
+    ExprFactory factory = parser.getExprFactory();
+    
     return factory.createVarFunction(location, this, args);
   }
   

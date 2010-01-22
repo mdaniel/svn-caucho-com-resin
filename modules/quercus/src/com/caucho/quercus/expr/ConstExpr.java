@@ -87,7 +87,7 @@ public class ConstExpr extends Expr {
       return factory.createClassConst(className, name);
     }
     else if ("static".equals(specialClassName)) {
-      return factory.createClassConstLateStaticBinding(name);
+      return factory.createClassVirtualConst(name);
     }
     else {
       return factory.createClassConst(className, name);
@@ -116,7 +116,7 @@ public class ConstExpr extends Expr {
       return factory.createClassField(className, name);
     }
     else if ("static".equals(specialClassName)) {
-      return factory.createClassFieldLateStaticBinding(name);
+      return factory.createClassVirtualField(name);
     }
     else {
       return factory.createClassField(className, name);
@@ -145,7 +145,7 @@ public class ConstExpr extends Expr {
       return factory.createClassField(className, name);
     }
     else if ("static".equals(specialClassName)) {
-      return factory.createClassFieldLateStaticBinding(name);
+      return factory.createClassVirtualField(name);
     }
     else {
       return factory.createClassField(className, name);
