@@ -86,22 +86,10 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
-    return env.getStaticClassFieldValue(_className, _varName.evalString(env));
-  }
-
-  /**
-   * Evaluates the expression as a copy
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalCopy(Env env)
-  {
-    return env.getStaticClassFieldVar(_className,
-                                      _varName.evalString(env)).copy();
+    return env.getStaticValue(_className + "::" + _varName.evalString(env));
   }
   
   /**
@@ -111,45 +99,23 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    return env.getStaticClassFieldVar(_className, _varName.evalString(env));
+    return env.getStaticVar(_className + "::" + _varName.evalString(env));
   }
 
   /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArray(Env env)
-  {
-    return env.getStaticClassFieldVar(_className, _varName.evalString(env)).getArray();
-  }
-  
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalObject(Env env)
-  {
-    return env.getStaticClassFieldVar(_className, _varName.evalString(env)).getObject(env);
-  }
-  
-  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.
    *
    * @return the expression value.
    */
+  @Override
   public Value evalRef(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _varName.evalString(env));
+    return env.getStaticVar(_className + "::" + _varName.evalString(env));
   }
   
   /**
@@ -159,9 +125,10 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public void evalAssign(Env env, Value value)
   {
-    env.getStaticClassFieldVar(_className, _varName.evalString(env)).set(value);
+    env.getStaticVar(_className + "::" + _varName.evalString(env)).set(value);
   }
   
   /**
@@ -171,6 +138,7 @@ public class ClassFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public void evalUnset(Env env)
   {
     env.error(getLocation(),

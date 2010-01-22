@@ -710,7 +710,7 @@ public class QuercusClass extends NullValue {
 
 	String fullName = _className + "::" + field._name;
 	
-        env.setGlobalValue(fullName, val);
+        env.getStaticVar(fullName).set(val);
       }
       
       env.addInitializedClass(map.getKey());

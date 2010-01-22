@@ -2081,6 +2081,22 @@ public class Env {
    *
    * @param name the variable name
    */
+  public final Value getStaticValue(String name)
+  {
+    Var var = _staticMap.get(name);
+
+    if (var != null) {
+      return var.toValue();
+    }
+    else
+      return NullValue.NULL;
+  }
+
+  /**
+   * Gets a static variable
+   *
+   * @param name the variable name
+   */
   public final Var getStaticClassVar(Value qThis,
                                      String className,
                                      String name)

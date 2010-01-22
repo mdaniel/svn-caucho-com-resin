@@ -86,7 +86,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    return env.getStaticClassFieldValue(_className, _varName);
+    return env.getStaticValue(_className + "::" + _varName);
   }
 
   /**
@@ -98,7 +98,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
    */
   public Value evalCopy(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _varName).copy();
+    return env.getStaticValue(_className + "::" + _varName).copy();
   }
 
   /**
@@ -111,7 +111,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    return env.getStaticClassFieldVar(_className, _varName);
+    return env.getStaticVar(_className + "::" + _varName);
   }
 
   /**
@@ -123,7 +123,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
    */
   public Value evalArray(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _varName).getArray();
+    return env.getStaticVar(_className + "::" + _varName).getArray();
   }
   
   /**
@@ -135,7 +135,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
    */
   public Value evalObject(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _varName).getObject(env);
+    return env.getStaticVar(_className + "::" + _varName).getObject(env);
   }
   
   /**
@@ -147,7 +147,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
    */
   public Value evalRef(Env env)
   {
-    return env.getStaticClassFieldVar(_className, _varName);
+    return env.getStaticVar(_className + "::" + _varName);
   }
   
   /**
@@ -159,7 +159,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    env.getStaticClassFieldVar(_className, _varName).set(value);
+    env.getStaticVar(_className + "::" + _varName).set(value);
   }
   
   /**

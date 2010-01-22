@@ -81,7 +81,7 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
     String className = _className.evalString(env);
     String varName = _varName.evalString(env);
 
-    return env.getStaticClassFieldValue(className, varName);
+    return env.getStaticValue(className + "::" + varName);
   }
 
   /**
@@ -97,7 +97,7 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
     String className = _className.evalString(env);
     String varName = _varName.evalString(env);
 
-    return env.getStaticClassFieldVar(className, varName);
+    return env.getStaticVar(className + "::" + varName);
   }
 
   /**
@@ -112,7 +112,7 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
     String className = _className.evalString(env);
     String varName = _varName.evalString(env);
 
-    return env.getStaticClassFieldVar(className, varName);
+    return env.getStaticVar(className + "::" + varName);
   }
 
   /**
@@ -127,7 +127,7 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
     String className = _className.evalString(env);
     String varName = _varName.evalString(env);
 
-    env.getStaticClassFieldVar(className, varName).set(value);
+    env.getStaticVar(className + "::" + varName).set(value);
   }
 
   /**
