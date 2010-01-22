@@ -2998,7 +2998,20 @@ public class Env {
    */
   public QuercusClass getCallingClass()
   {
-    return getCallingClass(_this);
+    return _callingClass;
+  }
+  
+  public Value getCallingClassName()
+  {
+    QuercusClass qClass = _callingClass;
+  
+    if (qClass != null)
+      return createString(qClass.getName());
+    else {
+      warning(L.l("get_called_class() must be called from a class-context."));
+    
+      return NullValue.NULL;
+    }
   }
 
   /*

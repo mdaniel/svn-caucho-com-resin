@@ -88,40 +88,28 @@ public class ClassVirtualFieldVarExpr extends AbstractVarExpr {
   @Override
   public Value eval(Env env)
   {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found in static::${{0}} call",
-                                   _varName));
-      
-      return NullValue.NULL;
-    }
+    Value className = env.getCallingClassName();
+    String varName = _varName.evalString(env);
     
-    return cl.getStaticField(env, _varName.evalString(env)).toValue();
+    return env.getStaticValue(className.toString() + "::" + varName);
   }
-
+  
   /**
-   * Evaluates the expression as a copy
+   * Evaluates the expression.
    *
    * @param env the calling environment.
    *
    * @return the expression value.
    */
   @Override
-  public Value evalCopy(Env env)
+  public Value evalRef(Env env)
   {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found for {0} call",
-                                   this));
-      
-      return NullValue.NULL;
-    }
+    Value className = env.getCallingClassName();
+    String varName = _varName.evalString(env);
     
-    return cl.getStaticField(env, _varName.evalString(env)).copy();
+    return env.getStaticVar(className + "::" + varName);
   }
-
+  
   /**
    * Evaluates the expression.
    *
@@ -132,57 +120,9 @@ public class ClassVirtualFieldVarExpr extends AbstractVarExpr {
   @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cl.getStaticField(env, _varName.evalString(env));
+    return evalRef(env);
   }
-
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArray(Env env)
-  {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cl.getStaticField(env, _varName.evalString(env)).getArray();
-  }
-  
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalObject(Env env)
-  {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cl.getStaticField(env, _varName.evalString(env)).getObject(env);
-  }
-  
+   
   /**
    * Evaluates the expression.
    *
@@ -190,37 +130,10 @@ public class ClassVirtualFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
-  {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cl.getStaticField(env, _varName.evalString(env));
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
+  @Override
   public void evalAssign(Env env, Value value)
   {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return;
-    }
-    
-    cl.getStaticField(env, _varName.evalString(env)).set(value);
+    evalRef(env).set(value);
   }
   
   /**

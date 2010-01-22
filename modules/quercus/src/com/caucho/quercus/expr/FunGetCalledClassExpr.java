@@ -55,7 +55,7 @@ public class FunGetCalledClassExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    return env.getThis().getCalledClass(env);
+    return env.getCallingClassName();
   }
 
   public String toString()

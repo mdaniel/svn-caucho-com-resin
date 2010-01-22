@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
@@ -65,35 +66,35 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    QuercusClass cls = env.getCallingClass();
+    Value name = env.getCallingClassName();
     
-    if (cls == null) {
+    if (name.isNull()) {
       env.error(getLocation(), L.l("no calling class found"));
       
       return NullValue.NULL;
     }
     
-    return cls.getStaticFieldValue(env, _varName);
+    return env.getStaticValue(name.toString() + "::" + _varName);
   }
-
+  
   /**
-   * Evaluates the expression as a copy
+   * Evaluates the expression.
    *
    * @param env the calling environment.
    *
    * @return the expression value.
    */
-  public Value evalCopy(Env env)
+  public Value evalRef(Env env)
   {
-    QuercusClass cls = env.getCallingClass();
+    Value name = env.getCallingClassName();
     
-    if (cls == null) {
+    if (name.isNull()) {
       env.error(getLocation(), L.l("no calling class found"));
       
       return NullValue.NULL;
     }
     
-    return cls.getStaticField(env, _varName).copy();
+    return env.getStaticVar(name.toString() + "::" + _varName);
   }
 
   /**
@@ -106,77 +107,9 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    QuercusClass cls = env.getCallingClass();
-    
-    if (cls == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cls.getStaticField(env, _varName);
+    return evalRef(env);
   }
-
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArray(Env env)
-  {
-    QuercusClass cls = env.getCallingClass();
-    
-    if (cls == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cls.getStaticField(env, _varName).getArray();
-  }
-  
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalObject(Env env)
-  {
-    QuercusClass cls = env.getCallingClass();
-    
-    if (cls == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cls.getStaticField(env, _varName).getObject(env);
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalRef(Env env)
-  {
-    QuercusClass cls = env.getCallingClass();
-    
-    if (cls == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return NullValue.NULL;
-    }
-    
-    return cls.getStaticField(env, _varName);
-  }
-  
+   
   /**
    * Evaluates the expression.
    *
@@ -186,15 +119,7 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
    */
   public void evalAssign(Env env, Value value)
   {
-    QuercusClass cls = env.getCallingClass();
-    
-    if (cls == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-      
-      return;
-    }
-    
-    cls.getStaticField(env, _varName).set(value);
+    evalRef(env).set(value);
   }
   
   /**
