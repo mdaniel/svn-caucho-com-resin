@@ -218,7 +218,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       parentReq = (HttpServletRequest) request;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletRequest at `{0}'"));
+        "expected instance of ServletRequest at `{0}'", req));
     }
 
     HttpServletResponse parentRes;
@@ -237,7 +237,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       parentRes = (HttpServletResponse) response;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletResponse at `{0}'"));
+        "expected instance of ServletResponse at `{0}'", req));
     }
 
     ForwardRequest subRequest;
@@ -359,7 +359,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       parentReq = (HttpServletRequest) request;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletRequest at `{0}'"));
+        "expected instance of ServletRequest at `{0}'", res));
     }
 
     HttpServletResponse parentRes;
@@ -377,7 +377,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       parentRes = (HttpServletResponse) response;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletResponse at `{0}'"));
+        "expected instance of ServletResponse at `{0}'", res));
     }
 
     IncludeRequest subRequest
