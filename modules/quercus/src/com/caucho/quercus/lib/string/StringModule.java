@@ -682,13 +682,14 @@ public class StringModule extends AbstractQuercusModule {
     StringValue glue;
     ArrayValue pieces;
 
-    if (piecesV.isArray()) {
+    if ((piecesV.isArray() && glueV.isArray())
+         || glueV.isArray()) {
+      pieces = glueV.toArrayValue(env);
+      glue = piecesV.toStringValue();   
+    }
+    else if (piecesV.isArray()) {
       pieces = piecesV.toArrayValue(env);
       glue = glueV.toStringValue();
-    }
-    else if (glueV.isArray()) {
-      pieces = glueV.toArrayValue(env);
-      glue = piecesV.toStringValue();
     }
     else {
       env.warning(L.l("neither argument to implode is an array: {0}, {1}",
