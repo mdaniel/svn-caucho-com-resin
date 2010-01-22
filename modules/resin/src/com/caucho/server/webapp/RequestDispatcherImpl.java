@@ -205,24 +205,28 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     HttpServletRequest parentReq;
     ServletRequestWrapper reqWrapper = null;
-
-    if (req instanceof ServletRequestWrapper) {
+    if (req instanceof HttpServletRequest) {
+      parentReq = (HttpServletRequest) req;
+    } else if (req instanceof ServletRequestWrapper) {
       reqWrapper = (ServletRequestWrapper) req;
 
       ServletRequest request = reqWrapper.getRequest();
 
       while (request instanceof ServletRequestWrapper)
-        request = ((ServletRequestWrapper)request).getRequest();
+        request = ((ServletRequestWrapper) request).getRequest();
 
       parentReq = (HttpServletRequest) request;
     } else {
-      parentReq = (HttpServletRequest) req;
+      throw new IllegalStateException(L.l(
+        "expected instance of ServletRequest at `{0}'"));
     }
 
     HttpServletResponse parentRes;
     ServletResponseWrapper resWrapper = null;
 
-    if (res instanceof ServletResponseWrapper) {
+    if (res instanceof HttpServletResponse) {
+      parentRes = (HttpServletResponse) res;
+    } else if (res instanceof ServletResponseWrapper) {
       resWrapper = (ServletResponseWrapper) res;
 
       ServletResponse response = resWrapper.getResponse();
@@ -232,7 +236,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
       parentRes = (HttpServletResponse) response;
     } else {
-      parentRes = (HttpServletResponse) res;
+      throw new IllegalStateException(L.l(
+        "expected instance of ServletResponse at `{0}'"));
     }
 
     ForwardRequest subRequest;
@@ -333,42 +338,59 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   /**
    * Include a request into the current page.
    */
-  public void include(ServletRequest request, ServletResponse response,
+  public void include(ServletRequest req, ServletResponse res,
                       String method)
     throws ServletException, IOException
   {
-    HttpServletRequest req = (HttpServletRequest) request;
-    HttpServletResponse res = (HttpServletResponse) response;
-
     Invocation invocation = _includeInvocation;
 
-    HttpServletRequest parentReq = req;
-    HttpServletRequestWrapper reqWrapper = null;
+    HttpServletRequest parentReq;
+    ServletRequestWrapper reqWrapper = null;
 
-    if (req instanceof HttpServletRequestWrapper) {
-      reqWrapper = (HttpServletRequestWrapper)  req;
-      parentReq = (HttpServletRequest) reqWrapper.getRequest();
+    if (req instanceof HttpServletResponse) {
+      parentReq = (HttpServletRequest) req;
+    } else if (req instanceof ServletRequestWrapper) {
+      reqWrapper = (ServletRequestWrapper) req;
+
+      ServletRequest request = reqWrapper.getRequest();
+      while (request instanceof ServletRequestWrapper)
+        request = ((ServletRequestWrapper) request).getRequest();
+
+      parentReq = (HttpServletRequest) request;
+    } else {
+      throw new IllegalStateException(L.l(
+        "expected instance of ServletRequest at `{0}'"));
     }
 
-    HttpServletResponse parentRes = res;
-    HttpServletResponseWrapper resWrapper = null;
+    HttpServletResponse parentRes;
+    ServletResponseWrapper resWrapper = null;
 
-    if (res instanceof HttpServletResponseWrapper) {
-      resWrapper = (HttpServletResponseWrapper)  res;
-      parentRes = (HttpServletResponse) resWrapper.getResponse();
+    if (res instanceof HttpServletResponse) {
+      parentRes = (HttpServletResponse) res;
+    } else if (res instanceof ServletResponseWrapper) {
+      resWrapper = (ServletResponseWrapper) res;
+
+      ServletResponse response = resWrapper.getResponse();
+      while (response instanceof ServletResponseWrapper)
+        response = ((ServletResponseWrapper) response).getResponse();
+
+      parentRes = (HttpServletResponse) response;
+    } else {
+      throw new IllegalStateException(L.l(
+        "expected instance of ServletResponse at `{0}'"));
     }
-    
+
     IncludeRequest subRequest
       = new IncludeRequest(parentReq, parentRes, invocation);
     
     // server/10yf, jsp/15di
     if (subRequest.getRequestDepth(0) > MAX_DEPTH)
-      throw new ServletException(L.l("too many servlet includes `{0}'", req.getServletPath()));
+      throw new ServletException(L.l("too many servlet includes `{0}'", parentReq.getServletPath()));
 
     IncludeResponse subResponse = subRequest.getResponse();
 
-    HttpServletRequest topRequest = subRequest;
-    HttpServletResponse topResponse = subResponse;
+    ServletRequest topRequest = subRequest;
+    ServletResponse topResponse = subResponse;
 
     if (reqWrapper != null) {
       reqWrapper.setRequest(subRequest);
