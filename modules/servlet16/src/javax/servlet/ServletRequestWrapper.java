@@ -438,13 +438,34 @@ public class ServletRequestWrapper implements ServletRequest {
     return _request.getDispatcherType();
   }
 
+  /**
+   * @since Servlet 3.0
+   */
   public boolean isWrapperFor(ServletRequest wrapped)
   {
-    return _request == wrapped;
+    if (_request == wrapped)
+      return true;
+    else if (_request instanceof ServletRequestWrapper)
+      return ((ServletRequestWrapper) _request).isWrapperFor(wrapped);
+    else
+      return false;
   }
 
+  /**
+   * @since Servlet 3.0
+   */
   public boolean isWrapperFor(Class wrappedType)
   {
-    return wrappedType.equals(_request.getClass());
+    if (!ServletRequest.class.isAssignableFrom(wrappedType))
+      throw new IllegalArgumentException(
+        "expected instance of javax.servlet.ServletRequest at `"
+          + wrappedType
+          + "'");
+    else if (wrappedType.isAssignableFrom(_request.getClass()))
+      return true;
+    else if (_request instanceof ServletRequestWrapper)
+      return ((ServletRequestWrapper) _request).isWrapperFor(wrappedType);
+    else
+      return false;
   }
 }

@@ -230,12 +230,34 @@ public class ServletResponseWrapper implements ServletResponse {
     _response.setContentLength(len);
   }
 
-  public boolean isWrapperFor(ServletResponse wrapped) {
-    throw new UnsupportedOperationException("unimplemented");
+  /**
+   * @since Servlet 3.0
+   */
+  public boolean isWrapperFor(ServletResponse wrapped)
+  {
+    if (_response == wrapped)
+      return true;
+    else if (_response instanceof ServletResponseWrapper)
+      return ((ServletResponseWrapper) _response).isWrapperFor(wrapped);
+    else
+      return false;
   }
 
+  /**
+   * @since Servlet 3.0
+   */
   public boolean isWrapperFor(Class wrappedType)
   {
-    throw new UnsupportedOperationException("unimplemented");
+    if (!ServletResponse.class.isAssignableFrom(wrappedType))
+      throw new IllegalArgumentException(
+        "expected instance of javax.servlet.ServletResponse at `"
+          + wrappedType
+          + "'");
+    else if (wrappedType.isAssignableFrom(_response.getClass()))
+      return true;
+    else if (_response instanceof ServletResponseWrapper)
+      return ((ServletResponseWrapper) _response).isWrapperFor(wrappedType);
+    else
+      return false;
   }
 }
