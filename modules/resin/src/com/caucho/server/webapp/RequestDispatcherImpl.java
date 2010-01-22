@@ -38,11 +38,7 @@ import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.util.L10N;
 
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
+import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
@@ -119,7 +115,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   public void forward(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    forward((HttpServletRequest) request, (HttpServletResponse) response,
+    forward(request, response,
             null, _forwardInvocation, DispatcherType.FORWARD);
   }
 
@@ -151,7 +147,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
    * @param res the servlet response.
    * @param method special to tell if from error.
    */
-  public void forward(HttpServletRequest req, HttpServletResponse res,
+  public void forward(ServletRequest req, ServletResponse res,
                       String method, Invocation invocation,
                       DispatcherType type)
     throws ServletException, IOException
@@ -207,20 +203,36 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       }
     }
 
-    HttpServletRequest parentReq = req;
-    HttpServletRequestWrapper reqWrapper = null;
+    HttpServletRequest parentReq;
+    ServletRequestWrapper reqWrapper = null;
 
-    if (req instanceof HttpServletRequestWrapper) {
-      reqWrapper = (HttpServletRequestWrapper) req;
-      parentReq = (HttpServletRequest) reqWrapper.getRequest();
+    if (req instanceof ServletRequestWrapper) {
+      reqWrapper = (ServletRequestWrapper) req;
+
+      ServletRequest request = reqWrapper.getRequest();
+
+      while (request instanceof ServletRequestWrapper)
+        request = ((ServletRequestWrapper)request).getRequest();
+
+      parentReq = (HttpServletRequest) request;
+    } else {
+      parentReq = (HttpServletRequest) req;
     }
 
-    HttpServletResponse parentRes = res;
-    HttpServletResponseWrapper resWrapper = null;
+    HttpServletResponse parentRes;
+    ServletResponseWrapper resWrapper = null;
 
-    if (res instanceof HttpServletResponseWrapper) {
-      resWrapper = (HttpServletResponseWrapper) res;
-      parentRes = (HttpServletResponse) resWrapper.getResponse();
+    if (res instanceof ServletResponseWrapper) {
+      resWrapper = (ServletResponseWrapper) res;
+
+      ServletResponse response = resWrapper.getResponse();
+
+      while (response instanceof ServletResponseWrapper)
+        response = ((ServletResponseWrapper) response).getResponse();
+
+      parentRes = (HttpServletResponse) response;
+    } else {
+      parentRes = (HttpServletResponse) res;
     }
 
     ForwardRequest subRequest;
@@ -234,12 +246,12 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     // server/10ye
     if (subRequest.getRequestDepth(0) > MAX_DEPTH)
-      throw new ServletException(L.l("too many servlet forwards `{0}'", req.getServletPath()));
+      throw new ServletException(L.l("too many servlet forwards `{0}'", parentReq.getServletPath()));
 
     ForwardResponse subResponse = subRequest.getResponse();
 
-    HttpServletRequest topRequest = subRequest;
-    HttpServletResponse topResponse = subResponse;
+    ServletRequest topRequest = subRequest;
+    ServletResponse topResponse = subResponse;
 
     if (reqWrapper != null) {
       reqWrapper.setRequest(subRequest);
@@ -275,7 +287,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     }
   }
 
-  private void finishResponse(HttpServletResponse res)
+  private void finishResponse(ServletResponse res)
     throws ServletException, IOException
   {
     if (_webApp.isAllowForwardAfterFlush()) {
