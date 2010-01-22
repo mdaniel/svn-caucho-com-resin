@@ -29,15 +29,15 @@
 
 package com.caucho.quercus.expr;
 
+import java.util.ArrayList;
+
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.QuercusClass;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
-import com.caucho.quercus.function.AbstractFunction;
-import com.caucho.quercus.program.Arg;
 import com.caucho.util.L10N;
-
-import java.util.ArrayList;
 
 /**
  * Represents a PHP parent:: method call expression.
@@ -46,40 +46,37 @@ public class ClassMethodExpr extends Expr {
   private static final L10N L = new L10N(ClassMethodExpr.class);
 
   protected final String _className;
-  protected final String _name;
+  protected final StringValue _methodName;
+  protected final int _hash;
   protected final Expr []_args;
 
   protected boolean _isMethod;
 
-  public ClassMethodExpr(Location location, String className, String name, ArrayList<Expr> args)
+  public ClassMethodExpr(Location location, String className, 
+                         String methodName, 
+                         ArrayList<Expr> args)
   {
     super(location);
     _className = className.intern();
     
-    _name = name.intern();
+    _methodName = MethodIntern.intern(methodName);
+    _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = new Expr[args.size()];
     args.toArray(_args);
   }
 
-  public ClassMethodExpr(Location location, String className, String name, Expr []args)
+  public ClassMethodExpr(Location location, String className,
+                         String methodName, Expr []args)
   {
     super(location);
+    
     _className = className.intern();
     
-    _name = name.intern();
+    _methodName = MethodIntern.intern(methodName);
+    _hash = _methodName.hashCodeCaseInsensitive();
 
     _args = args;
-  }
-
-  public ClassMethodExpr(String className, String name, ArrayList<Expr> args)
-  {
-    this(Location.UNKNOWN, className, name, args);
-  }
-
-  public ClassMethodExpr(String className, String name, Expr []args)
-  {
-    this(Location.UNKNOWN, className, name, args);
   }
   
   /**
@@ -96,14 +93,7 @@ public class ClassMethodExpr extends Expr {
     if (cl == null)
       throw env.createErrorException(L.l("{0} is an unknown class", _className));
 
-    AbstractFunction fun = cl.getFunction(_name);
-    
-    Value []values = new Value[_args.length];
-    
-    for (int i = 0; i < values.length; i++) {
-      // php/09e1
-      values[i] = _args[i].evalArg(env, true);
-    }
+    Value []values = evalArgs(env, _args);
 
     Value obj = env.getThis();
     env.pushCall(this, cl, values);
@@ -111,8 +101,8 @@ public class ClassMethodExpr extends Expr {
 
     try {
       env.checkTimeout();
-
-      return fun.callMethod(env, cl, values);
+      
+      return cl.callMethod(env, obj, _methodName, _hash, values);
     } finally {
       env.popCall();
       // env.setCallingClass(oldClass);
@@ -121,7 +111,7 @@ public class ClassMethodExpr extends Expr {
   
   public String toString()
   {
-    return _className + "::" + _name + "()";
+    return _className + "::" + _methodName + "()";
   }
 }
 

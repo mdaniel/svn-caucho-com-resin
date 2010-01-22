@@ -436,7 +436,9 @@ public class QuercusParser {
   public QuercusProgram parse()
     throws IOException
   {
-    _function = getFactory().createFunctionInfo(_quercus, "");
+    ClassDef globalClass = null;
+    
+    _function = getFactory().createFunctionInfo(_quercus, globalClass, "");
     _function.setPageMain(true);
 
     // quercus/0b0d
@@ -465,7 +467,9 @@ public class QuercusParser {
   QuercusProgram parseCode()
     throws IOException
   {
-    _function = getFactory().createFunctionInfo(_quercus, "eval");
+    ClassDef globalClass = null;
+    
+    _function = getFactory().createFunctionInfo(_quercus, globalClass, "eval");
     // XXX: need param or better function name for non-global?
     _function.setGlobal(false);
 
@@ -485,7 +489,9 @@ public class QuercusParser {
   public Function parseFunction(String name, Path argPath, Path codePath)
     throws IOException
   {
-    _function = getFactory().createFunctionInfo(_quercus, name);
+    ClassDef globalClass = null;
+    
+    _function = getFactory().createFunctionInfo(_quercus, globalClass, name);
     _function.setGlobal(false);
     _function.setPageMain(true);
 
@@ -930,16 +936,16 @@ public class QuercusParser {
     if (expr == null) {
       // since AppendExpr.getNext() can be null.
     }
-    else if (expr instanceof AppendExpr) {
-      AppendExpr append = (AppendExpr) expr;
+    else if (expr instanceof BinaryAppendExpr) {
+      BinaryAppendExpr append = (BinaryAppendExpr) expr;
 
       // XXX: children of append print differently?
 
       createEchoStatements(location, statements, append.getValue());
       createEchoStatements(location, statements, append.getNext());
     }
-    else if (expr instanceof StringLiteralExpr) {
-      StringLiteralExpr string = (StringLiteralExpr) expr;
+    else if (expr instanceof LiteralStringExpr) {
+      LiteralStringExpr string = (LiteralStringExpr) expr;
 
       Statement statement
         = _factory.createText(location, string.evalConstant().toString());
@@ -1610,6 +1616,7 @@ public class QuercusParser {
     FunctionInfo oldFunction = _function;
 
     boolean isAbstract = (modifiers & M_ABSTRACT) != 0;
+    boolean isStatic = (modifiers & M_STATIC) != 0;
 
     if (_classDef != null && _classDef.isInterface())
       isAbstract = true;
@@ -1643,10 +1650,23 @@ public class QuercusParser {
           throw error(L.l("'{0}' may not be abstract.  Abstract functions are only allowed in abstract classes.",
                           name));
       }
+      
+      boolean isConstructor = false;
+      
+      if (_classDef != null
+          && (name.equals(_classDef.getName())
+              || name.equals("__constructor"))) {
+        if (isStatic) {
+          throw error(L.l("'{0}:{1}' may not be static because class constructors may not be static",
+                          _classDef.getName(), name));
+        }
+        
+        isConstructor = true;
+      }
 
-      _function = getFactory().createFunctionInfo(_quercus, name);
-      _function.setDeclaringClass(_classDef);
+      _function = getFactory().createFunctionInfo(_quercus, _classDef, name);
       _function.setPageStatic(oldTop);
+      _function.setConstructor(isConstructor);
 
       _function.setReturnsReference(_returnsReference);
 
@@ -1755,7 +1775,8 @@ public class QuercusParser {
       
       String name = "__quercus_closure_" + _functionsParsed;
 
-      _function = getFactory().createFunctionInfo(_quercus, name);
+      ClassDef classDef = null;
+      _function = getFactory().createFunctionInfo(_quercus, classDef, name);
       _function.setReturnsReference(_returnsReference);
       _function.setClosure(true);
 
@@ -3645,22 +3666,24 @@ public class QuercusParser {
     if (token == IDENTIFIER) {
       return classNameExpr.createClassConst(this, _lexeme);
     }
-    
-    _peekToken = token;
-    expect('$');
-    
-    token = parseToken();
-    if (token == IDENTIFIER) {
-      return classNameExpr.createClassField(this, _lexeme);
-    }
-    else if (token == '{') {
-      _peekToken = parseToken();
-
-      Expr nameExpr = parseExpr();
-
-      expect('}');
+    else if (token == '$') {
+      token = parseToken();
       
-      return classNameExpr.createClassField(this, nameExpr);
+      if (token == IDENTIFIER) {
+        return classNameExpr.createClassField(this, _lexeme);
+      }
+      else if (token == '{') {
+        Expr expr = parseExpr();
+        
+        expect('}');
+        
+        return classNameExpr.createClassField(this, expr);
+      }
+      else {
+        _peekToken = token;
+        
+        return classNameExpr.createClassField(this, parseTermBase());
+      }
     }
     
     throw error(L.l("unexpected token '{0}' in class scope expression",
@@ -3676,7 +3699,7 @@ public class QuercusParser {
     int token = parseToken();
 
     if (token == THIS) {
-      return _factory.createThis(getLocation(), _classDef);
+      return _factory.createThis(_classDef);
     }
     else if (token == '$') {
       _peekToken = token;
@@ -3903,7 +3926,7 @@ public class QuercusParser {
   private Expr parseList()
     throws IOException
   {
-    ListHeadExpr leftVars = parseListHead();
+    FunListHeadExpr leftVars = parseListHead();
 
     expect('=');
 
@@ -3915,7 +3938,7 @@ public class QuercusParser {
   /**
    * Parses the list(...) expression
    */
-  private ListHeadExpr parseListHead()
+  private FunListHeadExpr parseListHead()
     throws IOException
   {
     expect('(');
@@ -4911,7 +4934,7 @@ public class QuercusParser {
         String varName = _sb.toString();
 
         if (varName.equals("this"))
-          tail = _factory.createThis(getLocation(), _classDef);
+          tail = _factory.createThis(_classDef);
         else
           tail = _factory.createVar(_function.createVar(varName));
 

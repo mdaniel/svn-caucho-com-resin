@@ -29,6 +29,9 @@
 
 package com.caucho.quercus.expr;
 
+import java.io.IOException;
+import java.util.ArrayList;
+
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
@@ -42,25 +45,14 @@ import com.caucho.util.L10N;
 public class ThisFieldExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ThisFieldExpr.class);
 
-  protected final InterpretedClassDef _quercusClass;
+  protected final ThisExpr _qThis;
   
   protected final StringValue _name;
 
-  public ThisFieldExpr(Location location,
-		       InterpretedClassDef quercusClass,
+  public ThisFieldExpr(ThisExpr qThis,
 		       StringValue name)
   {
-    super(location);
-    _quercusClass = quercusClass;
-    
-    _name = name;
-  }
-
-  public ThisFieldExpr(InterpretedClassDef quercusClass,
-		       StringValue name)
-  {
-    _quercusClass = quercusClass;
-    
+    _qThis = qThis;
     _name = name;
   }
 
@@ -68,6 +60,21 @@ public class ThisFieldExpr extends AbstractVarExpr {
   {
     return env.error(getLocation(),
                      "Cannot use '$this' when not in object context.");
+  }
+  
+  //
+  // function call creation
+  //
+
+  /**
+   * Creates a function call expression
+   */
+  public Expr createCall(ExprFactory factory,
+                         Location location,
+                         ArrayList<Expr> args)
+    throws IOException
+  {
+    return factory.createThisMethod(location, _qThis, _name.toString(), args);
   }
 
   /**

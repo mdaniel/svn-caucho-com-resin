@@ -57,21 +57,17 @@ public class ClassesModule extends AbstractQuercusModule {
    * Calls an object method.
    */
   public static Value call_user_method(Env env,
-                                       String name,
+                                       StringValue name,
                                        Value obj,
                                        Value []args)
   {
     if (obj.isObject()) {
-      AbstractFunction fun = obj.findFunction(name);
-      
-      return fun.callMethod(env, obj, args).copyReturn();
+      return obj.callMethod(env, name, args);
     }
     else {
       QuercusClass cls = env.findClass(obj.toString());
       
-      AbstractFunction fun = cls.findFunction(name);
-      
-      return fun.call(env, args).copyReturn();
+      return cls.callMethod(env, env.getThis(), name, name.hashCode(), args).copyReturn();
     }
   }
 
@@ -79,7 +75,7 @@ public class ClassesModule extends AbstractQuercusModule {
    * Calls a object method with arguments in an array.
    */
   public static Value call_user_method_array(Env env,
-                                             String methodName,
+                                             StringValue methodName,
                                              Value obj,
                                              ArrayValue params)
   {

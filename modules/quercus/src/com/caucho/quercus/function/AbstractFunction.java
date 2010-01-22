@@ -31,7 +31,6 @@ package com.caucho.quercus.function;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
-import com.caucho.quercus.env.ObjectValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
@@ -43,6 +42,7 @@ import com.caucho.util.L10N;
 /**
  * Represents a function
  */
+@SuppressWarnings("serial")
 abstract public class AbstractFunction extends Value {
   private static final L10N L = new L10N(AbstractFunction.class);
 
@@ -374,56 +374,6 @@ abstract public class AbstractFunction extends Value {
   {
     return call(env, args).copyReturn();
   }
-  
-  /**
-   * Evaluates the function as a method call.
-   */
-  public Value callMethod(Env env, Value obj, Value []args)
-  {
-    Value oldThis = env.getThis();
-
-    try {
-      if (obj != null) {
-        env.setThis(obj);
-      }
-
-      return call(env, args);
-    } finally {
-      env.setThis(oldThis);
-    }
-  }
-  
-  protected Value errorProtectedAccess(Env env, Value oldThis)
-  {
-    return env.error(L.l("Cannot call protected method {0}::{1}() from '{2}' context",
-                         getDeclaringClassName(),
-                         getName(),
-                         oldThis != null ? oldThis.getClassName() : null));
-  }
-  
-  protected Value errorPrivateAccess(Env env, Value oldThis)
-  {
-    return env.error(L.l("Cannot call private method {0}::{1}() from '{2}' context",
-                         getDeclaringClassName(),
-                         getName(),
-                         oldThis != null ? oldThis.getClassName() : null));
-  }
-  
-  /**
-   * Evaluates the function as a method call, returning a reference.
-   */
-  public Value callMethodRef(Env env, Value obj, Value []args)
-  {
-    Value oldThis = env.getThis();
-
-    try {
-      env.setThis(obj);
-
-      return callRef(env, args);
-    } finally {
-      env.setThis(oldThis);
-    }
-  }
 
   /**
    * Evaluates the function.
@@ -567,62 +517,204 @@ abstract public class AbstractFunction extends Value {
 
     return callRef(env, argValues);
   }
-
+  
+  //
+  // method calls
+  //
+  
   /**
-   * Evaluates the function as a method call.
+   * Evaluates the method call.
    */
-  public Value callMethod(Env env, Value obj)
+  public Value callMethod(Env env, 
+                          QuercusClass qClass,
+                          Value qThis,
+                          Value []args)
   {
-    return callMethod(env, obj, NULL_ARG_VALUES);
+    throw new IllegalStateException(getClass().getName());
+
+    /*
+    Value oldThis = env.setThis(qThis);
+    QuercusClass oldClass = env.setCallingClass(qClass);
+
+    try {
+      return call(env, args);
+    } finally {
+      env.setThis(oldThis);
+      env.setCallingClass(oldClass);
+    }
+    */
+  }
+  
+  /**
+   * Evaluates the method call, returning a reference.
+   */
+  public Value callMethodRef(Env env, 
+                             QuercusClass qClass,
+                             Value qThis, 
+                             Value []args)
+  {
+    throw new IllegalStateException(getClass().getName());
+
+    /*
+    Value oldThis = env.setThis(qThis);
+    QuercusClass oldClass = env.setCallingClass(qClass);
+
+    try {
+      return callRef(env, args);
+    } finally {
+      env.setThis(oldThis);
+      env.setCallingClass(oldClass);
+    }
+    */
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value callMethod(Env env, Value obj, Value a1)
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis)
   {
-    return callMethod(env, obj, new Value[] { a1 });
+    return callMethod(env, qClass, qThis, NULL_ARG_VALUES);
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value callMethod(Env env, Value obj, Value a1, Value a2)
+  public Value callMethodRef(Env env,
+                             QuercusClass qClass,
+                             Value qThis)
   {
-    return callMethod(env, obj, new Value[] { a1, a2 });
+    return callMethodRef(env, qClass, qThis, NULL_ARG_VALUES);
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value callMethod(Env env, Value obj,
+  public Value callMethod(Env env, 
+                          QuercusClass qClass,
+                          Value qThis,
+                          Value a1)
+  {
+    return callMethod(env, qClass, qThis, 
+                      new Value[] { a1 });
+  }
+
+  /**
+   * Evaluates the function as a method call.
+   */
+  public Value callMethodRef(Env env, 
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value a1)
+  {
+    return callMethodRef(env, qClass, qThis, 
+                         new Value[] { a1 });
+  }
+
+  /**
+   * Evaluates the function as a method call.
+   */
+  public Value callMethod(Env env, 
+                          QuercusClass qClass,
+                          Value qThis,
+                          Value a1, Value a2)
+  {
+    return callMethod(env, qClass, qThis, 
+                      new Value[] { a1, a2 });
+  }
+
+  /**
+   * Evaluates the function as a method call.
+   */
+  public Value callMethodRef(Env env,
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value a1, Value a2)
+  {
+    return callMethodRef(env, qClass, qThis,
+                         new Value[] { a1, a2 });
+  }
+
+  /**
+   * Evaluates the function as a method call.
+   */
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis,
 			  Value a1, Value a2, Value a3)
   {
-    return callMethod(env, obj, new Value[] { a1, a2, a3 });
+    return callMethod(env, qClass, qThis, 
+                      new Value[] { a1, a2, a3 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value callMethod(Env env, Value obj,
+  public Value callMethodRef(Env env,
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value a1, Value a2, Value a3)
+  {
+    return callMethodRef(env, qClass, qThis,
+                         new Value[] { a1, a2, a3 });
+  }
+
+  /**
+   * Evaluates the function as a method call.
+   */
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis,
 			  Value a1, Value a2, Value a3, Value a4)
   {
-    return callMethod(env, obj, new Value[] { a1, a2, a3, a4 });
+    return callMethod(env, qClass, qThis, 
+                      new Value[] { a1, a2, a3, a4 });
   }
 
   /**
    * Evaluates the function as a method call.
    */
-  public Value callMethod(Env env, Value obj,
+  public Value callMethodRef(Env env,
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value a1, Value a2, Value a3, Value a4)
+  {
+    return callMethodRef(env, qClass, qThis, 
+                         new Value[] { a1, a2, a3, a4 });
+  }
+
+  /**
+   * Evaluates the function as a method call.
+   */
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return callMethod(env, obj, new Value[] { a1, a2, a3, a4, a5 });
+    return callMethod(env, qClass, qThis, 
+                      new Value[] { a1, a2, a3, a4, a5 });
+  }
+
+  /**
+   * Evaluates the function as a method call.
+   */
+  public Value callMethodRef(Env env, 
+                             QuercusClass qClass,
+                             Value qThis,
+                             Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return callMethodRef(env, qClass, qThis, 
+                         new Value[] { a1, a2, a3, a4, a5 });
   }
 
   /**
    * Evaluates the function.
    */
-  public Value callMethod(Env env, Value obj, Expr []exprs)
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis, 
+                          Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -635,64 +727,16 @@ abstract public class AbstractFunction extends Value {
         argValues[i] = exprs[i].eval(env);
     }
 
-    return callMethod(env, obj, argValues);
-  }
-
-  /**
-   * Evaluates the function as a method call.
-   */
-  public Value callMethodRef(Env env, Value obj)
-  {
-    return callMethodRef(env, obj, NULL_ARG_VALUES);
-  }
-
-  /**
-   * Evaluates the function as a method call.
-   */
-  public Value callMethodRef(Env env, Value obj, Value a1)
-  {
-    return callMethodRef(env, obj, new Value[] { a1 });
-  }
-
-  /**
-   * Evaluates the function as a method call.
-   */
-  public Value callMethodRef(Env env, Value obj, Value a1, Value a2)
-  {
-    return callMethodRef(env, obj, new Value[] { a1, a2 });
-  }
-
-  /**
-   * Evaluates the function as a method call.
-   */
-  public Value callMethodRef(Env env, Value obj,
-			     Value a1, Value a2, Value a3)
-  {
-    return callMethodRef(env, obj, new Value[] { a1, a2, a3 });
-  }
-
-  /**
-   * Evaluates the function as a method call.
-   */
-  public Value callMethodRef(Env env, Value obj,
-			     Value a1, Value a2, Value a3, Value a4)
-  {
-    return callMethodRef(env, obj, new Value[] { a1, a2, a3, a4 });
-  }
-
-  /**
-   * Evaluates the function as a method call.
-   */
-  public Value callMethodRef(Env env, Value obj,
-			     Value a1, Value a2, Value a3, Value a4, Value a5)
-  {
-    return callMethodRef(env, obj, new Value[] { a1, a2, a3, a4, a5 });
+    return callMethod(env, qClass, qThis, argValues);
   }
 
   /**
    * Evaluates the function.
    */
-  public Value callMethodRef(Env env, Value obj, Expr []exprs)
+  public Value callMethodRef(Env env, 
+                             QuercusClass qClass, 
+                             Value qThis, 
+                             Expr []exprs)
   {
     Value []argValues = new Value[exprs.length];
     Arg []args = getArgs();
@@ -704,7 +748,29 @@ abstract public class AbstractFunction extends Value {
 	argValues[i] = exprs[i].eval(env);
     }
 
-    return callMethodRef(env, obj, argValues);
+    return callMethodRef(env, qClass, qThis, argValues);
+  }
+  
+  protected Value errorProtectedAccess(Env env, Value oldThis)
+  {
+    return env.error(L.l("Cannot call protected method {0}::{1}() from '{2}' context",
+                         getDeclaringClassName(),
+                         getName(),
+                         oldThis != null ? oldThis.getClassName() : null));
+  }
+  
+  protected Value errorPrivateAccess(Env env, Value oldThis)
+  {
+    return env.error(L.l("Cannot call private method {0}::{1}() from '{2}' context",
+                         getDeclaringClassName(),
+                         getName(),
+                         oldThis != null ? oldThis.getClassName() : null));
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getName() + "]";
   }
 }
 

@@ -43,17 +43,7 @@ public class ConstArrayValue
   
   public ConstArrayValue(ArrayValueImpl source)
   {
-    if (! source._isDirty)
-      source._isDirty = true;
-    
-    _size = source._size;
-    _entries = source._entries;
-    _hashMask = source._hashMask;
-
-    _head = source._head;
-    _current = source._current;
-    _tail = source._tail;
-    _nextAvailableIndex = source._nextAvailableIndex;
+    super.copyFrom(source);
   }
   
   public ConstArrayValue(ArrayValueComponent[] components)

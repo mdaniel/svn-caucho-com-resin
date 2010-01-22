@@ -736,6 +736,15 @@ public class Var extends Value
   }
 
   /**
+   * Converts to a variable (needs to replace toVar)
+   */
+  @Override
+  public Var toSimpleVar()
+  {
+    return this;
+  }
+
+  /**
    * Converts to a reference variable
    */
   @Override
@@ -1660,54 +1669,16 @@ public class Var extends Value
   /**
    * Evaluates the function.
    */
+  @Override
   public Value call(Env env)
   {
     return _value.call(env);
   }
 
   /**
-   * Evaluates the function with an argument .
-   */
-  public Value call(Env env, Value a1)
-  {
-    return _value.call(env, a1);
-  }
-
-  /**
-   * Evaluates the function with arguments
-   */
-  public Value call(Env env, Value a1, Value a2)
-  {
-    return _value.call(env, a1, a2);
-  }
-
-  /**
-   * Evaluates the function with arguments
-   */
-  public Value call(Env env, Value a1, Value a2, Value a3)
-  {
-    return _value.call(env, a1, a2, a3);
-  }
-
-  /**
-   * Evaluates the function with arguments
-   */
-  public Value call(Env env, Value a1, Value a2, Value a3, Value a4)
-  {
-    return _value.call(env, a1, a2, a3, a4);
-  }
-
-  /**
-   * Evaluates the function with arguments
-   */
-  public Value call(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
-  {
-    return _value.call(env, a1, a2, a3, a4, a5);
-  }
-
-  /**
    * Evaluates the function.
    */
+  @Override
   public Value callRef(Env env)
   {
     return _value.callRef(env);
@@ -1716,6 +1687,16 @@ public class Var extends Value
   /**
    * Evaluates the function with an argument .
    */
+  @Override
+  public Value call(Env env, Value a1)
+  {
+    return _value.call(env, a1);
+  }
+
+  /**
+   * Evaluates the function with an argument .
+   */
+  @Override
   public Value callRef(Env env, Value a1)
   {
     return _value.callRef(env, a1);
@@ -1724,6 +1705,16 @@ public class Var extends Value
   /**
    * Evaluates the function with arguments
    */
+  @Override
+  public Value call(Env env, Value a1, Value a2)
+  {
+    return _value.call(env, a1, a2);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  @Override
   public Value callRef(Env env, Value a1, Value a2)
   {
     return _value.callRef(env, a1, a2);
@@ -1732,6 +1723,16 @@ public class Var extends Value
   /**
    * Evaluates the function with arguments
    */
+  @Override
+  public Value call(Env env, Value a1, Value a2, Value a3)
+  {
+    return _value.call(env, a1, a2, a3);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  @Override
   public Value callRef(Env env, Value a1, Value a2, Value a3)
   {
     return _value.callRef(env, a1, a2, a3);
@@ -1740,6 +1741,16 @@ public class Var extends Value
   /**
    * Evaluates the function with arguments
    */
+  @Override
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4)
+  {
+    return _value.call(env, a1, a2, a3, a4);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  @Override
   public Value callRef(Env env, Value a1, Value a2, Value a3, Value a4)
   {
     return _value.callRef(env, a1, a2, a3, a4);
@@ -1748,6 +1759,16 @@ public class Var extends Value
   /**
    * Evaluates the function with arguments
    */
+  @Override
+  public Value call(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    return _value.call(env, a1, a2, a3, a4, a5);
+  }
+
+  /**
+   * Evaluates the function with arguments
+   */
+  @Override
   public Value callRef(Env env,
                        Value a1, Value a2, Value a3, Value a4, Value a5)
   {
@@ -1762,29 +1783,38 @@ public class Var extends Value
    * Evaluates a method.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
-                          Expr []args)
-  {
-    return _value.callMethod(env, hash, name, nameLen, args);
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
+  public Value callMethod(Env env, StringValue methodName, int hash,
                           Value []args)
   {
-    return _value.callMethod(env, hash, name, nameLen, args);
+    return _value.callMethod(env, methodName, hash, args);
   }
 
   /**
    * Evaluates a method.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen)
+  public Value callMethodRef(Env env, StringValue methodName, int hash,
+                             Value []args)
   {
-    return _value.callMethod(env, hash, name, nameLen);
+    return _value.callMethodRef(env, methodName, hash, args);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  @Override
+  public Value callMethod(Env env, StringValue methodName, int hash)
+  {
+    return _value.callMethod(env, methodName, hash);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  @Override
+  public Value callMethodRef(Env env, StringValue methodName, int hash)
+  {
+    return _value.callMethodRef(env, methodName, hash);
   }
 
   /**
@@ -1792,10 +1822,21 @@ public class Var extends Value
    */
   @Override
   public Value callMethod(Env env,
-                          int hash, char []name, int nameLen,
-                          Value a0)
+                          StringValue methodName, int hash,
+                          Value a1)
   {
-    return _value.callMethod(env, hash, name, nameLen, a0);
+    return _value.callMethod(env, methodName, hash, a1);
+  }
+
+  /**
+   * Evaluates a method.
+   */
+  @Override
+  public Value callMethodRef(Env env,
+                             StringValue methodName, int hash,
+                             Value a1)
+  {
+    return _value.callMethodRef(env, methodName, hash, a1);
   }
 
   /**
@@ -1803,143 +1844,104 @@ public class Var extends Value
    */
   @Override
   public Value callMethod(Env env,
-                          int hash, char []name, int nameLen,
+                          StringValue methodName, int hash,
                           Value a1, Value a2)
   {
-    return _value.callMethod(env, hash, name, nameLen,
+    return _value.callMethod(env, methodName, hash,
                              a1, a2);
   }
 
   /**
+   * Evaluates a method.
+   */
+  @Override
+  public Value callMethodRef(Env env,
+                             StringValue methodName, int hash,
+                             Value a1, Value a2)
+  {
+    return _value.callMethodRef(env, methodName, hash,
+                                a1, a2);
+  }
+
+  /**
    * Evaluates a method with 3 args.
+   */
+  @Override
+  public Value callMethod(Env env,
+                          StringValue methodName, int hash,
+                          Value a1, Value a2, Value a3)
+  {
+    return _value.callMethod(env, methodName, hash,
+                             a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method with 3 args.
+   */
+  @Override
+  public Value callMethodRef(Env env,
+                             StringValue methodName, int hash,
+                             Value a1, Value a2, Value a3)
+  {
+    return _value.callMethodRef(env, methodName, hash,
+                                a1, a2, a3);
+  }
+
+  /**
+   * Evaluates a method with 4 args.
    */
   @Override
   public Value callMethod(Env env,
-                          int hash, char []name, int nameLen,
-                          Value a0, Value a1, Value a2)
+                          StringValue methodName, int hash,
+                          Value a1, Value a2, Value a3, Value a4)
   {
-    return _value.callMethod(env, hash, name, nameLen,
-                             a0, a1, a2);
+    return _value.callMethod(env, methodName, hash, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method with 4 args.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
-                          Value a0, Value a1, Value a2, Value a3)
+  public Value callMethodRef(Env env,
+                             StringValue methodName, int hash,
+                             Value a1, Value a2, Value a3, Value a4)
   {
-    return _value.callMethod(env, hash, name, nameLen,
-                             a0, a1, a2, a3);
+    return _value.callMethodRef(env, methodName, hash, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method with 5 args.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
-                          Value a0, Value a1, Value a2, Value a3, Value a4)
+  public Value callMethod(Env env,
+                          StringValue methodName, int hash,
+                          Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _value.callMethod(env, hash, name, nameLen,
-                             a0, a1, a2, a3, a4);
+    return _value.callMethod(env, methodName, hash,
+                             a1, a2, a3, a4, a5);
   }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
-  public Value callMethodRef(Env env,
-                             int hash, char []name, int nameLen,
-                             Expr []args)
-  {
-    return _value.callMethodRef(env, hash, name, nameLen, args);
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
-  public Value callMethodRef(Env env,
-                             int hash, char []name, int nameLen,
-                             Value []args)
-  {
-    return _value.callMethodRef(env, hash, name, nameLen, args);
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen)
-  {
-    return _value.callMethodRef(env, hash, name, nameLen);
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
-  public Value callMethodRef(Env env,
-                             int hash, char []name, int nameLen,
-                             Value a0)
-  {
-    return _value.callMethodRef(env, hash, name, nameLen,
-                                a0);
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
-  public Value callMethodRef(Env env,
-                             int hash, char []name, int nameLen,
-                             Value a0, Value a1)
-  {
-    return _value.callMethodRef(env, hash, name, nameLen, a0, a1);
-  }
-
-  /**
-   * Evaluates a method with 3 args.
-   */
-  @Override
-  public Value callMethodRef(Env env,
-                             int hash, char []name, int nameLen,
-                             Value a0, Value a1, Value a2)
-  {
-    return _value.callMethodRef(env, hash, name, nameLen,
-                                a0, a1, a2);
-  }
-
-  /**
-   * Evaluates a method with 4 args.
-   */
-  @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Value a0, Value a1, Value a2, Value a3)
-  {
-    return _value.callMethodRef(env, hash, name, nameLen,
-                                a0, a1, a2, a3);
-  }
-
   /**
    * Evaluates a method with 5 args.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Value a0, Value a1, Value a2, Value a3, Value a4)
+  public Value callMethodRef(Env env,
+                             StringValue methodName, int hash,
+                             Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    return _value.callMethodRef(env, hash, name, nameLen,
-                                a0, a1, a2, a3, a4);
+    return _value.callMethodRef(env, methodName, hash,
+                                a1, a2, a3, a4, a5);
   }
 
   /**
    * Evaluates a method.
    */
+  /*
   @Override
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     return _value.callClassMethod(env, fun, args);
   }
+  */
 
   /**
    * Prints the value.

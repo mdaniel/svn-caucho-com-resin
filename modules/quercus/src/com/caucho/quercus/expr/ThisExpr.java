@@ -42,17 +42,15 @@ public class ThisExpr extends AbstractVarExpr {
 
   protected final InterpretedClassDef _quercusClass;
   
-  public ThisExpr(Location location, InterpretedClassDef quercusClass)
-  {
-    super(location);
-    _quercusClass = quercusClass;
-  }
-  
   public ThisExpr(InterpretedClassDef quercusClass)
   {
     _quercusClass = quercusClass;
   }
 
+  public InterpretedClassDef getQuercusClass()
+  {
+    return _quercusClass;
+  }
   /**
    * Creates a field ref
    */
@@ -60,17 +58,17 @@ public class ThisExpr extends AbstractVarExpr {
   public Expr createFieldGet(ExprFactory factory,
                              StringValue name)
   {
-    return new ThisFieldExpr(_quercusClass, name);
+    return factory.createThisField(this, name);
   }
 
   /**
    * Creates a field ref
    */
+  @Override
   public Expr createFieldGet(ExprFactory factory,
-                             Location location,
                              Expr name)
   {
-    return new ThisFieldVarGetExpr(location, name);
+    return factory.createThisField(this, name);
   }
   
   /**

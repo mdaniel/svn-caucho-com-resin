@@ -706,5 +706,11 @@ public class NullValue extends Value
   {
     return NULL;
   }
+
+  @Override
+  public int hashCode()
+  {
+    return 17;
+  }
 }
 

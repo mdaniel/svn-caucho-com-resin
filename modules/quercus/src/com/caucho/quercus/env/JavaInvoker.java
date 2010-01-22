@@ -565,6 +565,7 @@ abstract public class JavaInvoker
     return cost;
   }
 
+  /*
   public Value callMethod(Env env, Value qThis, Expr []exprs)
   {
     if (! _isInit)
@@ -630,13 +631,19 @@ abstract public class JavaInvoker
 
     return _unmarshalReturn.unmarshal(env, result);
   }
+  */
 
+  @Override
   public Value call(Env env, Value []args)
   {
-    return callMethod(env, (Value) null, args);
+    return callMethod(env, (QuercusClass) null, (Value) null, args);
   }
 
-  public Value callMethod(Env env, Value qThis, Value []args)
+  @Override
+  public Value callMethod(Env env,
+                          QuercusClass qClass,
+                          Value qThis,
+                          Value []args)
   {
     if (! _isInit)
       init();
@@ -668,7 +675,7 @@ abstract public class JavaInvoker
         javaArgs[k] = _marshalArgs[i].marshal(env,
                                               _defaultExprs[i],
                                               _param[k]);
-      } else {        
+      } else {
         warnMessage = L.l("function '{0}' has {1} required arguments, but only {2} were provided",
                            _name, _minArgumentLength, args.length);
 
@@ -684,10 +691,10 @@ abstract public class JavaInvoker
 
       k++;
     }
-    
+
     if (warnMessage != null)
       env.warning(warnMessage);
-    
+
     if (_hasRestArgs) {
       Value []rest;
 

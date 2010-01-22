@@ -55,7 +55,7 @@ abstract public class ArrayValue extends Value {
 
   public static final StringValue ARRAY = new ConstStringValue("Array");
 
-  protected Entry _current;
+  private Entry _current;
 
   protected ArrayValue()
   {
@@ -182,6 +182,16 @@ abstract public class ArrayValue extends Value {
   public Object toJavaObject()
   {
     return this;
+  }
+  
+  protected Entry getCurrent()
+  {
+    return _current;
+  }
+  
+  protected void setCurrent(Entry entry)
+  {
+    _current = entry;
   }
 
   //
@@ -323,7 +333,7 @@ abstract public class ArrayValue extends Value {
 
     for (Entry entry = getHead(); entry != null; entry = entry._next) {
       map.put(entry.getKey().toJavaObject(),
-                  entry.getValue().toJavaObject());
+              entry.getValue().toJavaObject());
     }
 
     return map;
@@ -352,7 +362,7 @@ abstract public class ArrayValue extends Value {
    */
   @Override
   abstract public Value copy();
-  
+
   /**
    * Copy for serialization
    */
@@ -685,7 +695,7 @@ abstract public class ArrayValue extends Value {
     // php/0d40
     return value != null && value.isset();
   }
-  
+
   /**
    * Returns true if the key exists in the array.
    */
@@ -693,7 +703,7 @@ abstract public class ArrayValue extends Value {
   public boolean keyExists(Value key)
   {
     Value value = get(key);
-    
+
     // php/173m
     return value != UnsetValue.UNSET;
   }
@@ -1363,15 +1373,15 @@ abstract public class ArrayValue extends Value {
   public static final class Entry
     implements Map.Entry<Value,Value>, Serializable
   {
-    final Value _key;
+    private final Value _key;
 
-    Value _value;
-    Var _var;
+    private Value _value;
+    // Var _var;
 
     Entry _prev;
-    Entry _next;
+    private Entry _next;
 
-    Entry _nextHash;
+    private Entry _nextHash;
 
     public Entry(Value key)
     {
@@ -1389,25 +1399,55 @@ abstract public class ArrayValue extends Value {
     {
       _key = entry._key;
 
+      /*
       if (entry._var != null)
         _var = entry._var;
       else
         _value = entry._value.copyArrayItem();
+      */
+      _value = entry._value.copyArrayItem();
     }
 
-    public Entry getNext()
+    public final Entry getNext()
     {
       return _next;
+    }
+    
+    public final void setNext(final Entry next)
+    {
+      _next = next;
+    }
+
+    public final Entry getPrev()
+    {
+      return _prev;
+    }
+    
+    public final void setPrev(final Entry prev)
+    {
+      _prev = prev;
+    }
+    
+    public final Entry getNextHash()
+    {
+      return _nextHash;
+    }
+    
+    public final void setNextHash(Entry next)
+    {
+      _nextHash = next;
     }
 
     public Value getRawValue()
     {
-      return _var != null ? _var : _value;
+      // return _var != null ? _var : _value;
+      return _value;
     }
 
     public Value getValue()
     {
-      return _var != null ? _var.toValue() : _value;
+      // return _var != null ? _var.toValue() : _value;
+      return _value.toValue();
     }
 
     public Value getKey()
@@ -1419,9 +1459,19 @@ abstract public class ArrayValue extends Value {
     {
       // The value may be a var
       // XXX: need test
-      return _var != null ? _var.toValue() : _value;
+      // return _var != null ? _var.toValue() : _value;
+
+      return _value.toValue();
     }
 
+    public Var toVar()
+    {
+      Var var = _value.toSimpleVar();
+      _value = var;
+
+      return var;
+    }
+    
     /**
      * Argument used/declared as a ref.
      */
@@ -1429,6 +1479,12 @@ abstract public class ArrayValue extends Value {
     {
       // php/376a
 
+      Var var = _value.toSimpleVar();
+      _value = var;
+
+      return var;
+
+      /*
       if (_var != null)
         return _var;
       else {
@@ -1436,6 +1492,7 @@ abstract public class ArrayValue extends Value {
 
         return _var;
       }
+      */
     }
 
     /**
@@ -1443,7 +1500,9 @@ abstract public class ArrayValue extends Value {
      */
     public Value toArgValue()
     {
-      return _var != null ? _var.toValue() : _value;
+      // return _var != null ? _var.toValue() : _value;
+
+      return _value.toValue();
     }
 
     public Value setValue(Value value)
@@ -1451,7 +1510,7 @@ abstract public class ArrayValue extends Value {
       Value oldValue = _value;
 
       _value = value;
-      _var = null;
+      // _var = null;
 
       return oldValue;
     }
@@ -1460,12 +1519,21 @@ abstract public class ArrayValue extends Value {
     {
       Value oldValue = _value;
 
+      // XXX: make OO
+      /*
       if (value instanceof Var)
         _var = (Var) value;
       else if (_var != null)
         _var.set(value);
       else
         _value = value;
+      */
+
+      if (value instanceof Var)
+        _value = (Var) value;
+      else {
+        _value = _value.set(value);
+      }
 
       return oldValue;
     }
@@ -1475,10 +1543,19 @@ abstract public class ArrayValue extends Value {
      */
     public Value toRef()
     {
+      /*
       if (_var == null)
         _var = new Var(_value);
 
-      return new RefVar(_var);
+        return new RefVar(_var);
+
+      */
+
+      Var var = _value.toSimpleVar();
+
+      _value = var;
+
+      return new RefVar(var);
     }
 
     /**
@@ -1486,18 +1563,34 @@ abstract public class ArrayValue extends Value {
      */
     public Value toArgRef()
     {
+      Var var = _value.toSimpleVar();
+
+      _value = var;
+
+      return new RefVar(var);
+
+      /*
       if (_var == null)
         _var = new Var(_value);
 
       return new RefVar(_var);
+      */
     }
 
     public Value toArg()
     {
+      Var var = _value.toSimpleVar();
+
+      _value = var;
+
+      return new RefVar(var);
+
+      /*
       if (_var == null)
         _var = new Var(_value);
 
       return _var;
+      */
     }
 
     public void varDumpImpl(Env env,

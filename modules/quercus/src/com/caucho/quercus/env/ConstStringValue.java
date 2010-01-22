@@ -56,7 +56,7 @@ public class ConstStringValue
 
   public ConstStringValue(StringBuilderValue sb)
   {
-    super(sb._buffer, 0, sb._length);
+    super(sb.getBuffer(), 0, sb.getOffset());
   }
 
   public ConstStringValue(byte []buffer, int offset, int length)

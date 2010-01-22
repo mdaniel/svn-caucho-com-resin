@@ -37,7 +37,7 @@ import com.caucho.quercus.env.Value;
 /**
  * Converts to a boolean
  */
-public class ToBooleanExpr extends UnaryExpr {
+public class ToBooleanExpr extends AbstractUnaryExpr {
   public ToBooleanExpr(Location location, Expr expr)
   {
     super(location, expr);

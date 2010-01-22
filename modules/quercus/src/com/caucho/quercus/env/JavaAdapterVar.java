@@ -1278,69 +1278,59 @@ public class JavaAdapterVar extends Value
    * Evaluates a method.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
-                          Expr []args)
-  {
-    return getValue().callMethod(env, hash, name, nameLen, args);
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
+  public Value callMethod(Env env, StringValue methodName, int hash,
                           Value []args)
   {
-    return getValue().callMethod(env, hash, name, nameLen, args);
+    return getValue().callMethod(env, methodName, hash, args);
   }
 
   /**
    * Evaluates a method.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen)
+  public Value callMethod(Env env, StringValue methodName, int hash)
   {
-    return getValue().callMethod(env, hash, name, nameLen);
+    return getValue().callMethod(env, methodName, hash);
   }
 
   /**
    * Evaluates a method.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
+  public Value callMethod(Env env, StringValue methodName, int hash,
                           Value a0)
   {
-    return getValue().callMethod(env, hash, name, nameLen, a0);
+    return getValue().callMethod(env, methodName, hash, a0);
   }
 
   /**
    * Evaluates a method.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
+  public Value callMethod(Env env, StringValue methodName, int hash,
                           Value a0, Value a1)
   {
-    return getValue().callMethod(env, hash, name, nameLen, a0, a1);
+    return getValue().callMethod(env, methodName, hash, a0, a1);
   }
 
   /**
    * Evaluates a method with 3 args.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
+  public Value callMethod(Env env, StringValue methodName, int hash,
 			  Value a0, Value a1, Value a2)
   {
-    return getValue().callMethod(env, hash, name, nameLen, a0, a1, a2);
+    return getValue().callMethod(env, methodName, hash, a0, a1, a2);
   }
 
   /**
    * Evaluates a method with 4 args.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
+  public Value callMethod(Env env, StringValue methodName, int hash,
 			  Value a0, Value a1, Value a2, Value a3)
   {
-    return getValue().callMethod(env, hash, name, nameLen,
+    return getValue().callMethod(env, methodName, hash,
                                  a0, a1, a2, a3);
   }
 
@@ -1348,10 +1338,10 @@ public class JavaAdapterVar extends Value
    * Evaluates a method with 5 args.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen,
+  public Value callMethod(Env env, StringValue methodName, int hash,
 			  Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return getValue().callMethod(env, hash, name, nameLen,
+    return getValue().callMethod(env, methodName, hash,
                                  a0, a1, a2, a3, a4);
   }
 
@@ -1359,50 +1349,40 @@ public class JavaAdapterVar extends Value
    * Evaluates a method.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
-                             Expr []args)
-  {
-    return getValue().callMethodRef(env, hash, name, nameLen, args);
-  }
-
-  /**
-   * Evaluates a method.
-   */
-  @Override
   public Value callMethodRef(Env env,
-                             int hash, char []name, int nameLen,
+                             StringValue methodName, int hash,
                              Value []args)
   {
-    return getValue().callMethodRef(env, hash, name, nameLen, args);
+    return getValue().callMethodRef(env, methodName, hash, args);
   }
 
   /**
    * Evaluates a method.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen)
+  public Value callMethodRef(Env env, StringValue methodName, int hash)
   {
-    return getValue().callMethodRef(env, hash, name, nameLen);
+    return getValue().callMethodRef(env, methodName, hash);
   }
 
   /**
    * Evaluates a method.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+  public Value callMethodRef(Env env, StringValue methodName, int hash,
                              Value a0)
   {
-    return getValue().callMethodRef(env, hash, name, nameLen, a0);
+    return getValue().callMethodRef(env, methodName, hash, a0);
   }
 
   /**
    * Evaluates a method.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+  public Value callMethodRef(Env env, StringValue methodName, int hash,
                              Value a0, Value a1)
   {
-    return getValue().callMethodRef(env, hash, name, nameLen,
+    return getValue().callMethodRef(env, methodName, hash,
                                     a0, a1);
   }
 
@@ -1410,10 +1390,10 @@ public class JavaAdapterVar extends Value
    * Evaluates a method with 3 args.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+  public Value callMethodRef(Env env, StringValue methodName, int hash,
                              Value a0, Value a1, Value a2)
   {
-    return getValue().callMethodRef(env, hash, name, nameLen,
+    return getValue().callMethodRef(env, methodName, hash,
                                     a0, a1, a2);
   }
 
@@ -1421,10 +1401,10 @@ public class JavaAdapterVar extends Value
    * Evaluates a method with 4 args.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+  public Value callMethodRef(Env env, StringValue methodName, int hash,
                              Value a0, Value a1, Value a2, Value a3)
   {
-    return getValue().callMethodRef(env, hash, name, nameLen,
+    return getValue().callMethodRef(env, methodName, hash,
                                     a0, a1, a2, a3);
   }
 
@@ -1432,21 +1412,23 @@ public class JavaAdapterVar extends Value
    * Evaluates a method with 5 args.
    */
   @Override
-  public Value callMethodRef(Env env, int hash, char []name, int nameLen,
+  public Value callMethodRef(Env env, StringValue methodName, int hash,
                              Value a0, Value a1, Value a2, Value a3, Value a4)
   {
-    return getValue().callMethodRef(env, hash, name, nameLen,
+    return getValue().callMethodRef(env, methodName, hash,
                                     a0, a1, a2, a3, a4);
   }
 
   /**
    * Evaluates a method.
    */
+  /*
   @Override
   public Value callClassMethod(Env env, AbstractFunction fun, Value []args)
   {
     return getValue().callClassMethod(env, fun, args);
   }
+  */
 
   /**
    * Prints the value.

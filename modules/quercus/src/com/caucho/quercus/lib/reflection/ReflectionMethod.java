@@ -92,12 +92,13 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
   
   public Value invoke(Env env, ObjectValue object, Value []args)
   {
-    return getFunction().callMethod(env, object, args);
+    return getFunction().callMethod(env, object.getQuercusClass(), object, args);
   }
   
   public Value invokeArgs(Env env, ObjectValue object, ArrayValue args)
   {
-    return getFunction().callMethod(env, object, args.getValueArray(env));
+    return getFunction().callMethod(env, object.getQuercusClass(), object, 
+                                    args.getValueArray(env));
   }
   
   public boolean isFinal()

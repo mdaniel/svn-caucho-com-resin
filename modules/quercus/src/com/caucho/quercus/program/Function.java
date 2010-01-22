@@ -41,7 +41,7 @@ import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.ExprFactory;
-import com.caucho.quercus.expr.RequiredExpr;
+import com.caucho.quercus.expr.ParamRequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.statement.*;
 import com.caucho.util.L10N;
@@ -331,16 +331,19 @@ public class Function extends AbstractFunction {
     }
   }
 
+  @Override
   public Value call(Env env, Value []args)
   {
     return callImpl(env, args, false, null, null);
   }
 
+  @Override
   public Value callCopy(Env env, Value []args)
   {
     return callImpl(env, args, false, null, null);
   }
 
+  @Override
   public Value callRef(Env env, Value []args)
   {
     return callImpl(env, args, true, null, null);
@@ -374,7 +377,7 @@ public class Function extends AbstractFunction {
         Var var = args[i].copy().toVar();
 
         if (arg.getExpectedClass() != null
-            && arg.getDefault() instanceof RequiredExpr) {
+            && arg.getDefault() instanceof ParamRequiredExpr) {
           env.checkTypeHint(var,
                             arg.getExpectedClass(),
                             arg.getName(),
@@ -426,6 +429,39 @@ public class Function extends AbstractFunction {
       // env.setThis(oldThis);
     }
   }
+  
+  //
+  // method
+  //
+
+  @Override
+  public Value callMethod(Env env, QuercusClass qClass, Value qThis, Value []args)
+  {
+    Value oldThis = env.setThis(qThis);
+    QuercusClass oldClass = env.setCallingClass(qClass);
+    
+    try {
+      return callImpl(env, args, false, null, null);
+    } finally {
+      env.setThis(oldThis);
+      env.setCallingClass(oldClass);
+    }
+  }
+
+  @Override
+  public Value callMethodRef(Env env, QuercusClass qClass, Value qThis, Value []args)
+  {
+    Value oldThis = env.setThis(qThis);
+    QuercusClass oldClass = env.setCallingClass(qClass);
+    
+    try {
+      return callImpl(env, args, true, null, null);
+    } finally {
+      env.setThis(oldThis);
+      env.setCallingClass(oldClass);
+    }
+  }
+
 
   private boolean isVariableArgs()
   {

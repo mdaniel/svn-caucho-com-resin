@@ -37,7 +37,7 @@ import com.caucho.quercus.env.Value;
 /**
  * Converts to an array
  */
-public class ToArrayExpr extends UnaryExpr {
+public class ToArrayExpr extends AbstractUnaryExpr {
   public ToArrayExpr(Location location, Expr expr)
   {
     super(location, expr);

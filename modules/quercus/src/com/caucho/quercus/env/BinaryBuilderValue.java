@@ -255,12 +255,12 @@ public class BinaryBuilderValue
   @Override
   public Value charValueAt(long index)
   {
-    int len = _length;
+    int len = getOffset();
 
     if (index < 0 || len <= index)
       return UnsetBinaryValue.UNSET;
     else
-      return BinaryBuilderValue.create(_buffer[(int) index] & 0xff);
+      return BinaryBuilderValue.create(getBuffer()[(int) index] & 0xff);
   }
 
   /**
@@ -272,7 +272,7 @@ public class BinaryBuilderValue
     if (end <= start)
       return EMPTY;
 
-    return new BinaryBuilderValue(_buffer, start, end - start);
+    return new BinaryBuilderValue(getBuffer(), start, end - start);
   }
 
   /**
@@ -281,12 +281,12 @@ public class BinaryBuilderValue
   @Override
   public StringValue toLowerCase()
   {
-    int length = _length;
+    int length = getOffset();
 
     BinaryBuilderValue string = new BinaryBuilderValue(length);
 
-    byte []srcBuffer = _buffer;
-    byte []dstBuffer = string._buffer;
+    byte []srcBuffer = getBuffer();
+    byte []dstBuffer = string.getBuffer();
 
     for (int i = 0; i < length; i++) {
       byte ch = srcBuffer[i];
@@ -297,7 +297,7 @@ public class BinaryBuilderValue
         dstBuffer[i] = ch;
     }
 
-    string._length = length;
+    string.setOffset(length);
 
     return string;
   }
@@ -308,12 +308,12 @@ public class BinaryBuilderValue
   @Override
   public StringValue toUpperCase()
   {
-    int length = _length;
+    int length = getOffset();
 
-    BinaryBuilderValue string = new BinaryBuilderValue(_length);
+    BinaryBuilderValue string = new BinaryBuilderValue(getOffset());
 
-    byte []srcBuffer = _buffer;
-    byte []dstBuffer = string._buffer;
+    byte []srcBuffer = getBuffer();
+    byte []dstBuffer = string.getBuffer();
 
     for (int i = 0; i < length; i++) {
       byte ch = srcBuffer[i];
@@ -324,7 +324,7 @@ public class BinaryBuilderValue
         dstBuffer[i] = ch;
     }
 
-    string._length = length;
+    string.setOffset(length);
 
     return string;
   }
@@ -367,7 +367,7 @@ public class BinaryBuilderValue
   @Override
   public StringValue toStringBuilder(Env env)
   {
-    return new BinaryBuilderValue(_buffer, 0, _length);
+    return new BinaryBuilderValue(getBuffer(), 0, getOffset());
   }
 
   /**
@@ -420,13 +420,18 @@ public class BinaryBuilderValue
   public final StringValue append(BinaryBuilderValue sb, int head, int tail)
   {
     int length = tail - head;
+    
+    byte []buffer = getBuffer();
+    byte []sbBuffer = sb.getBuffer();
+    
+    int offset = getOffset();
 
-    if (_buffer.length < _length + length)
-      ensureCapacity(_length + length);
+    if (buffer.length < offset + length)
+      ensureCapacity(offset + length);
 
-    System.arraycopy(sb._buffer, head, _buffer, _length, tail - head);
+    System.arraycopy(sbBuffer, head, buffer, offset, tail - head);
 
-    _length += tail - head;
+    setOffset(offset + tail - head);
 
     return this;
   }
@@ -608,13 +613,13 @@ public class BinaryBuilderValue
     if (rValue instanceof BinaryBuilderValue) {
       BinaryBuilderValue value = (BinaryBuilderValue) rValue;
 
-      int length = _length;
+      int length = getOffset();
 
-      if (length != value._length)
+      if (length != value.getOffset())
         return false;
 
-      byte []bufferA = _buffer;
-      byte []bufferB = value._buffer;
+      byte []bufferA = getBuffer();
+      byte []bufferB = value.getBuffer();
 
       for (int i = length - 1; i >= 0; i--) {
         if (bufferA[i] != bufferB[i])
@@ -637,13 +642,13 @@ public class BinaryBuilderValue
     if (o instanceof BinaryBuilderValue) {
       BinaryBuilderValue value = (BinaryBuilderValue) o;
 
-      int length = _length;
+      int length = getOffset();
 
-      if (length != value._length)
+      if (length != value.getOffset())
         return false;
 
-      byte []bufferA = _buffer;
-      byte []bufferB = value._buffer;
+      byte []bufferA = getBuffer();
+      byte []bufferB = value.getBuffer();
 
       for (int i = length - 1; i >= 0; i--) {
         if (bufferA[i] != bufferB[i])
@@ -674,13 +679,13 @@ public class BinaryBuilderValue
     if (o instanceof BinaryBuilderValue) {
       BinaryBuilderValue value = (BinaryBuilderValue) o;
 
-      int length = _length;
+      int length = getOffset();
 
-      if (length != value._length)
+      if (length != value.getOffset())
         return false;
 
-      byte []bufferA = _buffer;
-      byte []bufferB = value._buffer;
+      byte []bufferA = getBuffer();
+      byte []bufferB = value.getBuffer();
 
       for (int i = length - 1; i >= 0; i--) {
         if (bufferA[i] != bufferB[i])

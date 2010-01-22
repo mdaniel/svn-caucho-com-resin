@@ -37,7 +37,7 @@ import com.caucho.quercus.env.Value;
 /**
  * Converts to a double
  */
-public class ToDoubleExpr extends UnaryExpr {
+public class ToDoubleExpr extends AbstractUnaryExpr {
   public ToDoubleExpr(Location location, Expr expr)
   {
     super(location, expr);

@@ -1263,7 +1263,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
       return null;
 
     SessionImpl session = _sessions.get(sessionId);
-
+    
     boolean isNew = false;
     boolean killSession = false;
 
@@ -1282,7 +1282,11 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     if (session != null) {
       if (session.load(isNew)) {
         session.addUse();
-        session.setAccess(now);
+        
+        if (isCreate) {
+          // TCK only set access on create
+          session.setAccess(now);
+        }
 
         return session;
       }

@@ -66,7 +66,7 @@ public class ConstExpr extends Expr {
   //
   
   /**
-   * Creates a class field $class::foo
+   * Creates a class field Foo::bar
    */
   @Override
   public Expr createClassConst(QuercusParser parser, String name)
@@ -94,22 +94,8 @@ public class ConstExpr extends Expr {
     }
   }
   
-  private String getSpecialClassName()
-  {
-    String className = _var;
-    
-    int ns = className.lastIndexOf('\\');
-    
-    if (ns >= 0) {
-      return className.substring(ns + 1);
-    }
-    else {
-      return className;
-    }
-  }
-  
   /**
-   * Creates a class field $class::foo
+   * Creates a class field Foo::$bar
    */
   @Override
   public Expr createClassField(QuercusParser parser, String name)
@@ -118,7 +104,7 @@ public class ConstExpr extends Expr {
     
     String className = _var;
     String specialClassName = getSpecialClassName();
-   
+
     if ("self".equals(specialClassName)) {
       className = parser.getSelfClassName();
       
@@ -134,6 +120,49 @@ public class ConstExpr extends Expr {
     }
     else {
       return factory.createClassField(className, name);
+    }
+  }
+  
+  /**
+   * Creates a class field Foo::${bar}
+   */
+  @Override
+  public Expr createClassField(QuercusParser parser, Expr name)
+  {
+    ExprFactory factory = parser.getExprFactory();
+    
+    String className = _var;
+    String specialClassName = getSpecialClassName();
+
+    if ("self".equals(specialClassName)) {
+      className = parser.getSelfClassName();
+      
+      return factory.createClassField(className, name);
+    }
+    else if ("parent".equals(specialClassName)) {
+      className = parser.getParentClassName();
+      
+      return factory.createClassField(className, name);
+    }
+    else if ("static".equals(specialClassName)) {
+      return factory.createClassFieldLateStaticBinding(name);
+    }
+    else {
+      return factory.createClassField(className, name);
+    }
+  }
+  
+  private String getSpecialClassName()
+  {
+    String className = _var;
+    
+    int ns = className.lastIndexOf('\\');
+    
+    if (ns >= 0) {
+      return className.substring(ns + 1);
+    }
+    else {
+      return className;
     }
   }
 

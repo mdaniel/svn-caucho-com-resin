@@ -29,14 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
+import java.io.IOException;
+
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.ResourceValue;
-import com.caucho.quercus.env.UnicodeValueImpl;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.vfs.Path;
-
-import java.io.IOException;
 
 /**
  * Represents a PHP directory listing
@@ -84,9 +84,9 @@ public class DirectoryValue extends ResourceValue {
    * Calls the given method.
    */
   @Override
-  public Value callMethod(Env env, int hash, char []name, int nameLen)
+  public Value callMethod(Env env, StringValue methodName, int hash)
   {
-    String method = new String(name, 0, nameLen);
+    String method = methodName.toString();
     
     if ("read".equals(method))
       return readdir();
@@ -101,7 +101,7 @@ public class DirectoryValue extends ResourceValue {
       return BooleanValue.TRUE;
     }
     else
-      return super.callMethod(env, hash, name, nameLen);
+      return super.callMethod(env, methodName, hash);
   }
 
   /**

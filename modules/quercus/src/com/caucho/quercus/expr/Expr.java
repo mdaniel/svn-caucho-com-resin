@@ -654,7 +654,7 @@ abstract public class Expr {
     Value []args = new Value[exprs.length];
     
     for (int i = 0; i < args.length; i++) {
-      args[i] = exprs[i].eval(env);
+      args[i] = exprs[i].evalArg(env, false);
     }
     
     return args;

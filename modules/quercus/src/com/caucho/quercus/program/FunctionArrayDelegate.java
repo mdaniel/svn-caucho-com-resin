@@ -64,10 +64,14 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   /**
    * Returns the value for the specified key.
    */
+  @Override
   public Value get(ObjectValue qThis, Value key)
   {
     if (_arrayGet != null) {
-      return _arrayGet.callMethod(Env.getInstance(), qThis, new Value[] { key });
+      return _arrayGet.callMethod(Env.getInstance(),
+                                  _arrayGet.getQuercusClass(),
+                                  qThis, 
+                                  new Value[] { key });
     }
     else
       return UnsetValue.UNSET;
@@ -79,7 +83,9 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   public Value put(ObjectValue qThis, Value key, Value value)
   {
     if (_arrayPut != null)
-      return _arrayPut.callMethod(Env.getInstance(), qThis, key, value);
+      return _arrayPut.callMethod(Env.getInstance(),
+                                  _arrayPut.getQuercusClass(),
+                                  qThis, key, value);
     else
       return UnsetValue.UNSET;
   }
@@ -90,7 +96,9 @@ public class FunctionArrayDelegate implements ArrayDelegate {
   public Value put(ObjectValue qThis, Value value)
   {
     if (_arrayPut != null)
-      return _arrayPut.callMethod(Env.getInstance(), qThis, value);
+      return _arrayPut.callMethod(Env.getInstance(), 
+                                  _arrayPut.getQuercusClass(),
+                                  qThis, value);
     else
       return UnsetValue.UNSET;
   }

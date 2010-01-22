@@ -34,7 +34,7 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.expr.RequiredExpr;
+import com.caucho.quercus.expr.ParamRequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
 
@@ -128,7 +128,7 @@ public abstract class ReflectionFunctionAbstract
     
     int requiredParams = 0;
     for (int i = 0; i < args.length; i++) {
-      if (args[i].getDefault() instanceof RequiredExpr)
+      if (args[i].getDefault() instanceof ParamRequiredExpr)
         requiredParams++;
     }
     

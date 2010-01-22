@@ -79,7 +79,7 @@ public class ExprFactory {
    */
   public Expr createNull()
   {
-    return NullLiteralExpr.NULL;
+    return LiteralNullExpr.NULL;
   }
 
   /**
@@ -87,7 +87,7 @@ public class ExprFactory {
    */
   public Expr createString(String lexeme)
   {
-    return new StringLiteralExpr(lexeme);
+    return new LiteralStringExpr(lexeme);
   }
 
   /**
@@ -95,7 +95,7 @@ public class ExprFactory {
    */
   public Expr createUnicode(String lexeme)
   {
-    return new UnicodeLiteralExpr(lexeme);
+    return new LiteralUnicodeExpr(lexeme);
   }
 
   /**
@@ -103,7 +103,7 @@ public class ExprFactory {
    */
   public Expr createBinary(byte []bytes)
   {
-    return new BinaryLiteralExpr(bytes);
+    return new LiteralBinaryStringExpr(bytes);
   }
 
   /**
@@ -111,7 +111,7 @@ public class ExprFactory {
    */
   public Expr createLong(long value)
   {
-    return new LongLiteralExpr(value);
+    return new LiteralLongExpr(value);
   }
 
   /**
@@ -145,17 +145,17 @@ public class ExprFactory {
   /**
    * Creates a __FILE__ expression.
    */
-  public FileNameExpr createFileNameExpr(String fileName)
+  public ConstFileExpr createFileNameExpr(String fileName)
   {
-    return new FileNameExpr(fileName);
+    return new ConstFileExpr(fileName);
   }
 
   /**
    * Creates a __DIR__ expression.
    */
-  public DirNameExpr createDirExpr(String dirName)
+  public ConstDirExpr createDirExpr(String dirName)
   {
-    return new DirNameExpr(dirName);
+    return new ConstDirExpr(dirName);
   }
 
   /**
@@ -164,14 +164,6 @@ public class ExprFactory {
   public ConstExpr createConst(String name)
   {
     return new ConstExpr(name);
-  }
-
-  /**
-   * Creates a this expression.
-   */
-  public ThisExpr createThis(Location location, InterpretedClassDef cl)
-  {
-    return new ThisExpr(location, cl);
   }
 
   //
@@ -186,12 +178,15 @@ public class ExprFactory {
                                      Expr base,
                                      Expr index)
   {
+    /* XXX:
     if (base instanceof ArrayGetExpr
-        || base instanceof FieldGetExpr
-        || base instanceof FieldVarGetExpr)
+        || base instanceof ObjectFieldExpr
+        || base instanceof ObjectFieldVarExpr)
       return new ArrayGetGetExpr(location, base, index);
     else
       return new ArrayGetExpr(location, base, index);
+      */
+    return new ArrayGetExpr(location, base, index);
   }
 
   /**
@@ -213,7 +208,7 @@ public class ExprFactory {
   public Expr createFieldGet(Expr base,
                              StringValue name)
   {
-    return new FieldGetExpr(base, name);
+    return new ObjectFieldExpr(base, name);
   }
 
   /**
@@ -222,7 +217,47 @@ public class ExprFactory {
   public Expr createFieldVarGet(Expr base,
                                 Expr name)
   {
-    return new FieldVarGetExpr(base, name);
+    return new ObjectFieldVarExpr(base, name);
+  }
+  
+  //
+  // $this expressions
+  //
+
+  /**
+   * Creates a this expression.
+   */
+  public ThisExpr createThis(InterpretedClassDef cl)
+  {
+    return new ThisExpr(cl);
+  }
+
+  /**
+   * Creates a "$this->foo" expression.
+   */
+  public ThisFieldExpr createThisField(ThisExpr qThis, 
+                                       StringValue name)
+  {
+    return new ThisFieldExpr(qThis, name);
+  }
+
+  /**
+   * Creates a "$this->$foo" expression.
+   */
+  public ThisFieldVarExpr createThisField(ThisExpr qThis, Expr name)
+  {
+    return new ThisFieldVarExpr(qThis, name);
+  }
+
+  /**
+   * Creates a $this method call $this->foo(...).
+   */
+  public Expr createThisMethod(Location loc,
+                               ThisExpr qThis,
+                               String methodName,
+                               ArrayList<Expr> args)
+  {
+    return new ThisMethodExpr(loc, qThis, methodName, args);
   }
 
   //
@@ -242,16 +277,16 @@ public class ExprFactory {
    */
   public Expr createClassConst(Expr className, String name)
   {
-    return new VarClassConstExpr(className, name);
+    return new ClassVarConstExpr(className, name);
   }
 
   /**
    * Creates a class const expression (static::FOO).
    */
-  public LateStaticBindingClassConstExpr
+  public ClassVirtualConstExpr
     createClassConstLateStaticBinding(String name)
   {
-    return new LateStaticBindingClassConstExpr(name);
+    return new ClassVirtualConstExpr(name);
   }
 
   //
@@ -264,7 +299,7 @@ public class ExprFactory {
   public Expr createClassField(String className,
                                String name)
   {
-    return new StaticFieldGetExpr(className, name);
+    return new ClassFieldExpr(className, name);
   }
 
   /**
@@ -273,7 +308,7 @@ public class ExprFactory {
   public Expr createClassField(Expr className,
                                String name)
   {
-    return new VarClassFieldExpr(className, name);
+    return new ClassVarFieldExpr(className, name);
   }
 
   /**
@@ -281,7 +316,7 @@ public class ExprFactory {
    */
   public Expr createClassFieldLateStaticBinding(String name)
   {
-    return new LateStaticBindingFieldGetExpr(name);
+    return new ClassVirtualFieldExpr(name);
   }
 
   /**
@@ -290,7 +325,7 @@ public class ExprFactory {
   public Expr createClassField(String className,
                                Expr name)
   {
-    return new StaticFieldVarGetExpr(className, name);
+    return new ClassFieldVarExpr(className, name);
   }
 
   /**
@@ -299,7 +334,7 @@ public class ExprFactory {
   public Expr createClassField(Expr className,
                                Expr name)
   {
-    return new VarClassVarFieldExpr(className, name);
+    return new ClassVarFieldVarExpr(className, name);
   }
 
   /**
@@ -307,7 +342,7 @@ public class ExprFactory {
    */
   public Expr createClassFieldLateStaticBinding(Expr name)
   {
-    return new LateStaticBindingFieldVarGetExpr(name);
+    return new ClassVirtualFieldVarExpr(name);
   }
 
   /**
@@ -328,31 +363,31 @@ public class ExprFactory {
    */
   public Expr createUnsetVar(AbstractVarExpr var)
   {
-    return new UnsetVarExpr(var);
+    return new VarUnsetExpr(var);
   }
 
   /**
    * Creates a char at 'a{0}' expression.
    */
-  public CharAtExpr createCharAt(Expr base, Expr index)
+  public BinaryCharAtExpr createCharAt(Expr base, Expr index)
   {
-    return new CharAtExpr(base, index);
+    return new BinaryCharAtExpr(base, index);
   }
 
   /**
    * Creates a post increment 'a++' expression.
    */
-  public PostIncrementExpr createPostIncrement(Expr expr, int incr)
+  public UnaryPostIncrementExpr createPostIncrement(Expr expr, int incr)
   {
-    return new PostIncrementExpr(expr, incr);
+    return new UnaryPostIncrementExpr(expr, incr);
   }
 
   /**
    * Creates a pre increment '++a' expression.
    */
-  public PreIncrementExpr createPreIncrement(Expr expr, int incr)
+  public UnaryPreIncrementExpr createPreIncrement(Expr expr, int incr)
   {
-    return new PreIncrementExpr(expr, incr);
+    return new UnaryPreIncrementExpr(expr, incr);
   }
 
   /**
@@ -360,7 +395,7 @@ public class ExprFactory {
    */
   public Expr createMinus(Expr expr)
   {
-    return new MinusExpr(expr);
+    return new UnaryMinusExpr(expr);
   }
 
   /**
@@ -368,7 +403,7 @@ public class ExprFactory {
    */
   public Expr createPlus(Expr expr)
   {
-    return new PlusExpr(expr);
+    return new UnaryPlusExpr(expr);
   }
 
   /**
@@ -376,7 +411,7 @@ public class ExprFactory {
    */
   public Expr createNot(Expr expr)
   {
-    return new NotExpr(expr);
+    return new UnaryNotExpr(expr);
   }
 
   /**
@@ -384,7 +419,7 @@ public class ExprFactory {
    */
   public Expr createBitNot(Expr expr)
   {
-    return new BitNotExpr(expr);
+    return new UnaryBitNotExpr(expr);
   }
 
   /**
@@ -392,7 +427,7 @@ public class ExprFactory {
    */
   public Expr createClone(Expr expr)
   {
-    return new CloneExpr(expr);
+    return new FunCloneExpr(expr);
   }
 
   /**
@@ -400,7 +435,7 @@ public class ExprFactory {
    */
   public Expr createCopy(Expr expr)
   {
-    return new CopyExpr(expr);
+    return new UnaryCopyExpr(expr);
   }
 
   /**
@@ -408,7 +443,7 @@ public class ExprFactory {
    */
   public Expr createSuppress(Expr expr)
   {
-    return new SuppressErrorExpr(expr);
+    return new UnarySuppressErrorExpr(expr);
   }
 
   /**
@@ -480,7 +515,7 @@ public class ExprFactory {
    */
   public Expr createDie(Expr expr)
   {
-    return new DieExpr(expr);
+    return new FunDieExpr(expr);
   }
 
   /**
@@ -488,7 +523,7 @@ public class ExprFactory {
    */
   public Expr createExit(Expr expr)
   {
-    return new ExitExpr(expr);
+    return new FunExitExpr(expr);
   }
 
   /**
@@ -496,7 +531,7 @@ public class ExprFactory {
    */
   public Expr createRequired()
   {
-    return RequiredExpr.REQUIRED;
+    return ParamRequiredExpr.REQUIRED;
   }
 
   /**
@@ -504,7 +539,7 @@ public class ExprFactory {
    */
   public Expr createDefault()
   {
-    return new DefaultExpr();
+    return new ParamDefaultExpr();
   }
 
   /**
@@ -512,7 +547,7 @@ public class ExprFactory {
    */
   public Expr createAdd(Expr left, Expr right)
   {
-    return new AddExpr(left, right);
+    return new BinaryAddExpr(left, right);
   }
 
   /**
@@ -520,7 +555,7 @@ public class ExprFactory {
    */
   public Expr createSub(Expr left, Expr right)
   {
-    return new SubExpr(left, right);
+    return new BinarySubExpr(left, right);
   }
 
   /**
@@ -528,7 +563,7 @@ public class ExprFactory {
    */
   public Expr createMul(Expr left, Expr right)
   {
-    return new MulExpr(left, right);
+    return new BinaryMulExpr(left, right);
   }
 
   /**
@@ -536,7 +571,7 @@ public class ExprFactory {
    */
   public Expr createDiv(Expr left, Expr right)
   {
-    return new DivExpr(left, right);
+    return new BinaryDivExpr(left, right);
   }
 
   /**
@@ -544,7 +579,7 @@ public class ExprFactory {
    */
   public Expr createMod(Expr left, Expr right)
   {
-    return new ModExpr(left, right);
+    return new BinaryModExpr(left, right);
   }
 
   /**
@@ -552,7 +587,7 @@ public class ExprFactory {
    */
   public Expr createLeftShift(Expr left, Expr right)
   {
-    return new LeftShiftExpr(left, right);
+    return new BinaryLeftShiftExpr(left, right);
   }
 
   /**
@@ -560,7 +595,7 @@ public class ExprFactory {
    */
   public Expr createRightShift(Expr left, Expr right)
   {
-    return new RightShiftExpr(left, right);
+    return new BinaryRightShiftExpr(left, right);
   }
 
   /**
@@ -568,7 +603,7 @@ public class ExprFactory {
    */
   public Expr createBitAnd(Expr left, Expr right)
   {
-    return new BitAndExpr(left, right);
+    return new BinaryBitAndExpr(left, right);
   }
 
   /**
@@ -576,7 +611,7 @@ public class ExprFactory {
    */
   public Expr createBitOr(Expr left, Expr right)
   {
-    return new BitOrExpr(left, right);
+    return new BinaryBitOrExpr(left, right);
   }
 
   /**
@@ -584,7 +619,7 @@ public class ExprFactory {
    */
   public Expr createBitXor(Expr left, Expr right)
   {
-    return new BitXorExpr(left, right);
+    return new BinaryBitXorExpr(left, right);
   }
 
   /**
@@ -592,7 +627,7 @@ public class ExprFactory {
    */
   public final Expr createAppend(Expr left, Expr right)
   {
-    AppendExpr leftAppend;
+    BinaryAppendExpr leftAppend;
 
     // XXX: i18n binary vs unicode issues
     /*
@@ -607,12 +642,12 @@ public class ExprFactory {
     }
     */
 
-    if (left instanceof AppendExpr)
-      leftAppend = (AppendExpr) left;
+    if (left instanceof BinaryAppendExpr)
+      leftAppend = (BinaryAppendExpr) left;
     else
       leftAppend = createAppendImpl(left, null);
 
-    AppendExpr next;
+    BinaryAppendExpr next;
 
     /*
     if (right instanceof ToStringExpr)
@@ -626,12 +661,12 @@ public class ExprFactory {
     }
     */
 
-    if (right instanceof AppendExpr)
-      next = (AppendExpr) right;
+    if (right instanceof BinaryAppendExpr)
+      next = (BinaryAppendExpr) right;
     else
       next = createAppendImpl(right, null);
 
-    AppendExpr result = append(leftAppend, next);
+    BinaryAppendExpr result = append(leftAppend, next);
 
     if (result.getNext() != null)
       return result;
@@ -643,17 +678,17 @@ public class ExprFactory {
    * Appends the tail to the current expression, combining
    * constant literals.
    */
-  private AppendExpr append(AppendExpr left, AppendExpr tail)
+  private BinaryAppendExpr append(BinaryAppendExpr left, BinaryAppendExpr tail)
   {
     if (left == null)
       return tail;
 
     tail = append(left.getNext(), tail);
 
-    if (left.getValue() instanceof BinaryLiteralExpr
-        && tail.getValue() instanceof BinaryLiteralExpr) {
-      BinaryLiteralExpr leftString = (BinaryLiteralExpr) left.getValue();
-      BinaryLiteralExpr rightString = (BinaryLiteralExpr) tail.getValue();
+    if (left.getValue() instanceof LiteralBinaryStringExpr
+        && tail.getValue() instanceof LiteralBinaryStringExpr) {
+      LiteralBinaryStringExpr leftString = (LiteralBinaryStringExpr) left.getValue();
+      LiteralBinaryStringExpr rightString = (LiteralBinaryStringExpr) tail.getValue();
 
       try {
         byte []bytes = (leftString.evalConstant().toString()
@@ -666,26 +701,26 @@ public class ExprFactory {
         throw new RuntimeException(e);
       }
     }
-    else if (left.getValue() instanceof BinaryLiteralExpr
-             || tail.getValue() instanceof BinaryLiteralExpr) {
+    else if (left.getValue() instanceof LiteralBinaryStringExpr
+             || tail.getValue() instanceof LiteralBinaryStringExpr) {
       left.setNext(tail);
 
       return left;
     }
-    else if (left.getValue() instanceof StringLiteralExpr
-             && tail.getValue() instanceof StringLiteralExpr) {
-      StringLiteralExpr leftString = (StringLiteralExpr) left.getValue();
-      StringLiteralExpr rightString = (StringLiteralExpr) tail.getValue();
+    else if (left.getValue() instanceof LiteralStringExpr
+             && tail.getValue() instanceof LiteralStringExpr) {
+      LiteralStringExpr leftString = (LiteralStringExpr) left.getValue();
+      LiteralStringExpr rightString = (LiteralStringExpr) tail.getValue();
 
       Expr value = createString(leftString.evalConstant().toString()
                                 + rightString.evalConstant().toString());
 
       return createAppendImpl(value, tail.getNext());
     }
-    else if (left.getValue() instanceof UnicodeLiteralExpr
-             && tail.getValue() instanceof UnicodeLiteralExpr) {
-      UnicodeLiteralExpr leftString = (UnicodeLiteralExpr) left.getValue();
-      UnicodeLiteralExpr rightString = (UnicodeLiteralExpr) tail.getValue();
+    else if (left.getValue() instanceof LiteralUnicodeExpr
+             && tail.getValue() instanceof LiteralUnicodeExpr) {
+      LiteralUnicodeExpr leftString = (LiteralUnicodeExpr) left.getValue();
+      LiteralUnicodeExpr rightString = (LiteralUnicodeExpr) tail.getValue();
 
       Expr value = createUnicode(leftString.evalConstant().toString()
                                  + rightString.evalConstant().toString());
@@ -699,9 +734,9 @@ public class ExprFactory {
     }
   }
 
-  protected AppendExpr createAppendImpl(Expr left, AppendExpr right)
+  protected BinaryAppendExpr createAppendImpl(Expr left, BinaryAppendExpr right)
   {
-    return new AppendExpr(left, right);
+    return new BinaryAppendExpr(left, right);
   }
 
   /**
@@ -709,7 +744,7 @@ public class ExprFactory {
    */
   public Expr createLt(Expr left, Expr right)
   {
-    return new LtExpr(left, right);
+    return new BinaryLtExpr(left, right);
   }
 
   /**
@@ -717,7 +752,7 @@ public class ExprFactory {
    */
   public Expr createLeq(Expr left, Expr right)
   {
-    return new LeqExpr(left, right);
+    return new BinaryLeqExpr(left, right);
   }
 
   /**
@@ -725,7 +760,7 @@ public class ExprFactory {
    */
   public Expr createGt(Expr left, Expr right)
   {
-    return new GtExpr(left, right);
+    return new BinaryGtExpr(left, right);
   }
 
   /**
@@ -733,7 +768,7 @@ public class ExprFactory {
    */
   public Expr createGeq(Expr left, Expr right)
   {
-    return new GeqExpr(left, right);
+    return new BinaryGeqExpr(left, right);
   }
 
   /**
@@ -741,7 +776,7 @@ public class ExprFactory {
    */
   public Expr createEq(Expr left, Expr right)
   {
-    return new EqExpr(left, right);
+    return new BinaryEqExpr(left, right);
   }
 
   /**
@@ -749,7 +784,7 @@ public class ExprFactory {
    */
   public Expr createNeq(Expr left, Expr right)
   {
-    return new NeqExpr(left, right);
+    return new BinaryNeqExpr(left, right);
   }
 
   /**
@@ -757,7 +792,7 @@ public class ExprFactory {
    */
   public Expr createEquals(Expr left, Expr right)
   {
-    return new EqualsExpr(left, right);
+    return new BinaryEqualsExpr(left, right);
   }
 
   /**
@@ -765,7 +800,7 @@ public class ExprFactory {
    */
   public Expr createAssign(AbstractVarExpr left, Expr right)
   {
-    return new AssignExpr(left, right);
+    return new BinaryAssignExpr(left, right);
   }
 
   /**
@@ -773,15 +808,15 @@ public class ExprFactory {
    */
   public Expr createAssignRef(AbstractVarExpr left, Expr right)
   {
-    return new AssignRefExpr(left, right);
+    return new BinaryAssignRefExpr(left, right);
   }
 
   /**
    * Creates a ref '&$a' expression.
    */
-  public RefExpr createRef(Expr base)
+  public UnaryRefExpr createRef(Expr base)
   {
-    return new RefExpr(base);
+    return new UnaryRefExpr(base);
   }
 
   /**
@@ -789,7 +824,7 @@ public class ExprFactory {
    */
   public Expr createAnd(Expr left, Expr right)
   {
-    return new AndExpr(left, right);
+    return new BinaryAndExpr(left, right);
   }
 
   /**
@@ -797,7 +832,7 @@ public class ExprFactory {
    */
   public Expr createOr(Expr left, Expr right)
   {
-    return new OrExpr(left, right);
+    return new BinaryOrExpr(left, right);
   }
 
   /**
@@ -805,7 +840,7 @@ public class ExprFactory {
    */
   public Expr createXor(Expr left, Expr right)
   {
-    return new XorExpr(left, right);
+    return new BinaryXorExpr(left, right);
   }
 
   /**
@@ -813,7 +848,7 @@ public class ExprFactory {
    */
   public Expr createComma(Expr left, Expr right)
   {
-    return new CommaExpr(left, right);
+    return new BinaryCommaExpr(left, right);
   }
 
   /**
@@ -821,7 +856,7 @@ public class ExprFactory {
    */
   public Expr createInstanceOf(Expr expr, String name)
   {
-    return new InstanceOfExpr(expr, name);
+    return new BinaryInstanceOfExpr(expr, name);
   }
 
   /**
@@ -829,7 +864,7 @@ public class ExprFactory {
    */
   public Expr createInstanceOfVar(Expr expr, Expr name)
   {
-    return new InstanceOfVarExpr(expr, name);
+    return new BinaryInstanceOfVarExpr(expr, name);
   }
 
   /**
@@ -837,27 +872,27 @@ public class ExprFactory {
    */
   public Expr createEach(Expr expr)
   {
-    return new EachExpr(expr);
+    return new FunEachExpr(expr);
   }
 
   /**
    * Creates a list expression.
    */
   public final Expr createList(QuercusParser parser,
-                               ListHeadExpr head, Expr value)
+                               FunListHeadExpr head, Expr value)
   {
-    boolean isSuppress = value instanceof SuppressErrorExpr;
+    boolean isSuppress = value instanceof UnarySuppressErrorExpr;
 
     if (isSuppress) {
-      SuppressErrorExpr suppressExpr = (SuppressErrorExpr) value;
+      UnarySuppressErrorExpr suppressExpr = (UnarySuppressErrorExpr) value;
 
       value = suppressExpr.getExpr();
     }
 
     Expr expr;
 
-    if (value instanceof EachExpr) {
-      expr = createListEach(head.getVarList(), (EachExpr) value);
+    if (value instanceof FunEachExpr) {
+      expr = createListEach(head.getVarList(), (FunEachExpr) value);
     }
     else
       expr = createList(head, value);
@@ -871,25 +906,25 @@ public class ExprFactory {
   /**
    * Creates a list expression.
    */
-  public ListHeadExpr createListHead(ArrayList<Expr> keys)
+  public FunListHeadExpr createListHead(ArrayList<Expr> keys)
   {
-    return new ListHeadExpr(keys);
+    return new FunListHeadExpr(keys);
   }
 
   /**
    * Creates a list expression.
    */
-  public Expr createList(ListHeadExpr head, Expr value)
+  public Expr createList(FunListHeadExpr head, Expr value)
   {
-    return new ListExpr(head, value);
+    return new FunListExpr(head, value);
   }
 
   /**
    * Creates a list expression.
    */
-  public Expr createListEach(Expr []varList, EachExpr value)
+  public Expr createListEach(Expr []varList, FunEachExpr value)
   {
-    return new ListEachExpr(varList, value);
+    return new FunListEachExpr(varList, value);
   }
 
   /**
@@ -905,7 +940,7 @@ public class ExprFactory {
    */
   public Expr createShortConditional(Expr test, Expr right)
   {
-    return new ShortConditionalExpr(test, right);
+    return new ConditionalShortExpr(test, right);
   }
 
   /**
@@ -913,7 +948,7 @@ public class ExprFactory {
    */
   public Expr createArrayFun(ArrayList<Expr> keys, ArrayList<Expr> values)
   {
-    return new ArrayFunExpr(keys, values);
+    return new FunArrayExpr(keys, values);
   }
 
   /**
@@ -924,21 +959,21 @@ public class ExprFactory {
                              ArrayList<Expr> args)
   {
     if ("isset".equals(name) && args.size() == 1)
-      return new IssetExpr(args.get(0));
+      return new FunIssetExpr(args.get(0));
     else if ("get_called_class".equals(name) && args.size() == 0)
-      return new GetCalledClassExpr(loc);
+      return new FunGetCalledClassExpr(loc);
     else
-      return new FunctionExpr(loc, name, args);
+      return new CallExpr(loc, name, args);
   }
 
   /**
    * Creates a new var function call.
    */
-  public VarFunctionExpr createVarFunction(Location loc,
+  public CallVarExpr createVarFunction(Location loc,
                                            Expr name,
                                            ArrayList<Expr> args)
   {
-    return new VarFunctionExpr(loc, name, args);
+    return new CallVarExpr(loc, name, args);
   }
 
   /**
@@ -963,7 +998,7 @@ public class ExprFactory {
                                String methodName,
                                ArrayList<Expr> args)
   {
-    return new MethodCallExpr(loc, objExpr, methodName, args);
+    return new ObjectMethodExpr(loc, objExpr, methodName, args);
   }
 
   /**
@@ -974,7 +1009,7 @@ public class ExprFactory {
                                Expr methodName,
                                ArrayList<Expr> args)
   {
-    return new VarMethodCallExpr(loc, objExpr, methodName, args);
+    return new ObjectMethodVarExpr(loc, objExpr, methodName, args);
   }
 
   /**
@@ -996,7 +1031,7 @@ public class ExprFactory {
                                     String methodName,
                                     ArrayList<Expr> args)
   {
-    return new VarClassMethodExpr(loc, className, methodName, args);
+    return new ClassVarMethodExpr(loc, className, methodName, args);
   }
 
   /**
@@ -1006,7 +1041,7 @@ public class ExprFactory {
                                                      String methodName,
                                                      ArrayList<Expr> args)
   {
-    return new LateStaticBindingClassMethodExpr(loc, methodName, args);
+    return new ClassVirtualMethodExpr(loc, methodName, args);
   }
 
   /**
@@ -1017,7 +1052,7 @@ public class ExprFactory {
                                     Expr methodName,
                                     ArrayList<Expr> args)
   {
-    return new StaticVarMethodExpr(loc, className, methodName, args);
+    return new ClassMethodVarExpr(loc, className, methodName, args);
   }
 
   /**
@@ -1028,17 +1063,28 @@ public class ExprFactory {
                                     Expr methodName,
                                     ArrayList<Expr> args)
   {
-    return new VarClassVarMethodExpr(loc, className, methodName, args);
+    return new ClassVarMethodVarExpr(loc, className, methodName, args);
   }
 
   /**
    * Creates a new method static::$f()
    */
-  public Expr createClassMethodCallLateStaticBinding(Location loc,
-                                                     Expr var,
-                                                     ArrayList<Expr> args)
+  public Expr createClassVirtualMethod(Location loc,
+                                       Expr var,
+                                       ArrayList<Expr> args)
   {
-    return new LateStaticBindingStaticVarMethodExpr(loc, var, args);
+    return new ClassVirtualMethodVarExpr(loc, var, args);
+  }
+
+  /**
+   * Creates a class method call A::foo(...)
+   */
+  public Expr createClassConstructor(Location loc,
+                                     String className,
+                                     String methodName,
+                                     ArrayList<Expr> args)
+  {
+    return new ClassConstructorExpr(loc, className, methodName, args);
   }
 
   /**
@@ -1084,21 +1130,21 @@ public class ExprFactory {
   /**
    * Creates a new function call new foo(...).
    */
-  public NewExpr createNew(Location loc,
+  public ObjectNewExpr createNew(Location loc,
                            String name,
                            ArrayList<Expr> args)
   {
-    return new NewExpr(loc, name, args);
+    return new ObjectNewExpr(loc, name, args);
   }
 
   /**
    * Creates a new function call.
    */
-  public VarNewExpr createVarNew(Location loc,
+  public ObjectNewVarExpr createVarNew(Location loc,
                                  Expr name,
                                  ArrayList<Expr> args)
   {
-    return new VarNewExpr(loc, name, args);
+    return new ObjectNewVarExpr(loc, name, args);
   }
 
   /**
@@ -1108,7 +1154,7 @@ public class ExprFactory {
                             Path source,
                             Expr expr)
   {
-    return new IncludeExpr(loc, source, expr, false);
+    return new FunIncludeExpr(loc, source, expr, false);
   }
 
   /**
@@ -1118,7 +1164,7 @@ public class ExprFactory {
                             Path source,
                             Expr expr)
   {
-    return new IncludeExpr(loc, source, expr, true);
+    return new FunIncludeExpr(loc, source, expr, true);
   }
 
   /**
@@ -1128,7 +1174,7 @@ public class ExprFactory {
                                 Path source,
                                 Expr expr)
   {
-    return new IncludeOnceExpr(loc, source, expr, false);
+    return new FunIncludeOnceExpr(loc, source, expr, false);
   }
 
   /**
@@ -1138,7 +1184,7 @@ public class ExprFactory {
                                 Path source,
                                 Expr expr)
   {
-    return new IncludeOnceExpr(loc, source, expr, true);
+    return new FunIncludeOnceExpr(loc, source, expr, true);
   }
 
   /**
@@ -1428,9 +1474,11 @@ public class ExprFactory {
   /**
    * Creates a new FunctionInfo
    */
-  public FunctionInfo createFunctionInfo(QuercusContext quercus, String name)
+  public FunctionInfo createFunctionInfo(QuercusContext quercus, 
+                                         ClassDef classDef,
+                                         String name)
   {
-    return new FunctionInfo(quercus, name);
+    return new FunctionInfo(quercus, classDef, name);
   }
 
   /**

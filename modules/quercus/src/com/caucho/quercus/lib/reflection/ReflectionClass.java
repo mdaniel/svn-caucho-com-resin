@@ -169,14 +169,14 @@ public class ReflectionClass
       return null;
   }
   
-  public boolean hasMethod(String name)
+  public boolean hasMethod(StringValue name)
   {
     MethodMap<AbstractFunction> map = _cls.getMethodMap();
     
     return map.get(name) != null;
   }
   
-  public ReflectionMethod getMethod(Env env, String name)
+  public ReflectionMethod getMethod(Env env, StringValue name)
   {
     AbstractFunction fun = _cls.findFunction(name);
     

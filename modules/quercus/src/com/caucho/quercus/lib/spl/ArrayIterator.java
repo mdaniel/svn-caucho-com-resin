@@ -36,6 +36,7 @@ import com.caucho.quercus.annotation.This;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.UnsetValue;
@@ -54,6 +55,9 @@ public class ArrayIterator
 {
   public static final int STD_PROP_LIST = 0x00000001;
   public static final int ARRAY_AS_PROPS = 0x00000002;
+  
+  private static final StringValue _rewind
+    = MethodIntern.intern("rewind");
 
   private Env _env;
   private Value _qThis;
@@ -65,10 +69,11 @@ public class ArrayIterator
   
   @Name("__construct")
   public Value __construct(Env env,
-			               @This Value qThis,
-			               @Optional Value value,
-			               @Optional int flags)
+                           @This Value qThis,
+                           @Optional Value value,
+                           @Optional int flags)
   {
+    
     _env = env;
     _qThis = qThis;
 
@@ -177,7 +182,7 @@ public class ArrayIterator
   public void rewindJava(Env env)
   {
     if (_qThis != null)
-      _qThis.findFunction("rewind").callMethod(env, _qThis);
+      _qThis.callMethod(env, _rewind);
     else
       rewind();
   }

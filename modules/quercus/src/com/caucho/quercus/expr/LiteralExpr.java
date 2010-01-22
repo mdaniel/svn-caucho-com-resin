@@ -44,6 +44,7 @@ public class LiteralExpr extends Expr {
   protected LiteralExpr(Location location, Value value)
   {
     super(location);
+
     _value = value;
   }
 
@@ -106,9 +107,9 @@ public class LiteralExpr extends Expr {
   {
     return _value.isDoubleConvertible();
   }
-  
+
   /*
-   * 
+   *
    */
   public boolean isBoolean()
   {

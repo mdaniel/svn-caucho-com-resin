@@ -2390,6 +2390,27 @@ abstract public class StringValue
 
     return hash;
   }
+  
+  /**
+   * Returns the case-insensitive hash code
+   */
+  public int hashCodeCaseInsensitive()
+  {
+    int hash = 37;
+
+    int length = length();
+
+    for (int i = length - 1; i >= 0; i--) {
+      int ch = charAt(i);
+      
+      if ('A' <= ch && ch <= 'Z')
+        ch = ch + 'a' - 'A';
+      
+      hash = 65521 * hash + ch;
+    }
+
+    return hash;
+  }
 
   /**
    * Test for equality
@@ -2417,6 +2438,48 @@ abstract public class StringValue
         return false;
     }
 
+    return true;
+  }
+
+  /**
+   * Test for equality
+   */
+  public boolean equalsIgnoreCase(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof StringValue))
+      return false;
+
+    StringValue s = (StringValue) o;
+
+    if (s.isUnicode() != isUnicode())
+      return false;
+
+    int aLength = length();
+    int bLength = s.length();
+
+    if (aLength != bLength)
+      return false;
+    
+    for (int i = aLength - 1; i >= 0; i--) {
+      int chA = charAt(i);
+      int chB = s.charAt(i);
+
+      if (chA == chB) {
+      }
+      else {
+        if ('A' <= chA && chA <= 'Z')
+          chA += 'a' - 'A';
+        
+        if ('A' <= chB && chB <= 'Z')
+          chB += 'a' - 'A';
+
+        if (chA != chB)
+          return false;
+      }
+    }
+    
     return true;
   }
 

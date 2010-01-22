@@ -105,6 +105,10 @@ public class SessionImpl implements HttpSession, CacheListener {
   public SessionImpl(SessionManager manager, String id, long creationTime)
   {
     _manager = manager;
+    
+    creationTime = Alarm.getExactTime();
+    // TCK now cares about exact time
+    creationTime = Alarm.getExactTime();
 
     _creationTime = creationTime;
     _accessTime = creationTime;
@@ -452,6 +456,9 @@ public class SessionImpl implements HttpSession, CacheListener {
     // e.g. server 'C' when 'A' and 'B' have no record of session
     if (_isValid)
       unbind();
+    
+    // TCK now cares about exact time
+    now = Alarm.getExactTime();
 
     _isValid = true;
     _isNew = true;
@@ -513,6 +520,8 @@ public class SessionImpl implements HttpSession, CacheListener {
     if (_clusterObject != null)
       _clusterObject.objectAccess();
     */
+    // TCK now cares about exact time
+    now = Alarm.getExactTime();
 
     _accessTime = now;
   }
@@ -526,7 +535,9 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void finishRequest()
   {
-    _accessTime = Alarm.getCurrentTime();
+    // XXX: TCK issues with the access time?
+    // _accessTime = Alarm.getCurrentTime();
+    
     // update cache access?
     if (_useCount.decrementAndGet() > 0)
       return;
@@ -684,6 +695,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (log.isLoggable(Level.FINER))
       log.fine(this + " reset");
+    // TCK now cares about exact time
+    now = Alarm.getExactTime();
 
     unbind();
     _isValid = true;

@@ -168,19 +168,20 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
    * Evaluates the function.
    */
   @Override
-  public Value callMethod(Env env, Value qThis, Value []args)
+  public Value callMethod(Env env, QuercusClass qClass, Value qThis,
+                          Value []args)
   {
     if (args.length < _methodTable.length) {
       AbstractJavaMethod []methods = _methodTable[args.length];
 
       if (methods != null) {
         if (methods.length == 1)
-          return methods[0].callMethod(env, qThis, args);
+          return methods[0].callMethod(env, qClass, qThis, args);
         else {
           AbstractJavaMethod method
             = getBestFitJavaMethod(methods, _restMethodTable, args);
 
-          return method.callMethod(env, qThis, args);
+          return method.callMethod(env, qClass, qThis, args);
         }
       }
       else {
@@ -193,7 +194,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
         AbstractJavaMethod method
           = getBestFitJavaMethod(methods, _restMethodTable, args);
 
-        return method.callMethod(env, qThis, args);
+        return method.callMethod(env, qClass, qThis, args);
       }
     }
     else {
@@ -206,7 +207,7 @@ public class JavaOverloadMethod extends AbstractJavaMethod {
         AbstractJavaMethod method
           = getBestFitJavaMethod(null, _restMethodTable, args);
 
-        return method.callMethod(env, qThis, args);
+        return method.callMethod(env, qClass, qThis, args);
       }
     }
   }

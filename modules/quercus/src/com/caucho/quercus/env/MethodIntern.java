@@ -26,7 +26,7 @@
  *
  * @author Scott Ferguson
  */
- 
+
 package com.caucho.quercus.env;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -36,22 +36,22 @@ import java.util.concurrent.ConcurrentHashMap;
  */
 public final class MethodIntern
 {
-  private static final ConcurrentHashMap<String,char[]> _internMap
-    = new ConcurrentHashMap<String,char[]>();
+  private static final ConcurrentHashMap<String,StringValue> _internMap
+    = new ConcurrentHashMap<String,StringValue>();
 
-  public static char[] intern(String name)
+  public static StringValue intern(String name)
   {
-    char []buffer = _internMap.get(name);
+    StringValue internName = _internMap.get(name);
 
-    if (buffer == null) {
-      buffer = name.toCharArray();
+    if (internName == null) {
+      StringValue string = new CompiledConstStringValue(name);
 
-      char []oldBuffer= _internMap.putIfAbsent(name, buffer);
-      
-      if (oldBuffer != null)
-        buffer = oldBuffer;
-   }
+      internName = _internMap.putIfAbsent(name, string);
 
-    return buffer;
+      if (internName == null)
+        internName = string;
+    }
+
+    return internName;
   }
 }

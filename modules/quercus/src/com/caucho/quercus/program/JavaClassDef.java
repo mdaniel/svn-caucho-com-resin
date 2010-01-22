@@ -454,7 +454,7 @@ public class JavaClassDef extends ClassDef {
 
     if (get != null) {
       try {
-        return get.callMethod(env, qThis);
+        return get.callMethod(env, getQuercusClass(), qThis);
       } catch (Exception e) {
         log.log(Level.FINE, L.l(e.getMessage()), e);
 	
@@ -477,12 +477,12 @@ public class JavaClassDef extends ClassDef {
     AbstractFunction phpGet = qThis.getQuercusClass().getFieldGet();
     
     if (phpGet != null) {
-      return phpGet.callMethod(env, qThis, name);    
+      return phpGet.callMethod(env, getQuercusClass(), qThis, name);
     }
     
     if (__fieldGet != null) {
       try {
-        return __fieldGet.callMethod(env, qThis, name);
+        return __fieldGet.callMethod(env, getQuercusClass(), qThis, name);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 
@@ -502,7 +502,7 @@ public class JavaClassDef extends ClassDef {
 
     if (setter != null) {
       try {
-        return setter.callMethod(env, qThis, value);
+        return setter.callMethod(env, getQuercusClass(), qThis, value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 	
@@ -533,7 +533,7 @@ public class JavaClassDef extends ClassDef {
         qThis.setFieldInit(true);
         
         try {
-          return phpSet.callMethod(env, qThis, name, value);          
+          return phpSet.callMethod(env, getQuercusClass(), qThis, name, value);          
           
         } finally {
           qThis.setFieldInit(false);
@@ -544,7 +544,7 @@ public class JavaClassDef extends ClassDef {
 
     if (__fieldSet != null) {
       try {
-        return __fieldSet.callMethod(env, qThis, name, value);
+        return __fieldSet.callMethod(env, getQuercusClass(), qThis, name, value);
       } catch (Exception e) {
         log.log(Level.FINE,  L.l(e.getMessage()), e);
 	
@@ -596,7 +596,7 @@ public class JavaClassDef extends ClassDef {
       if (__construct != null) {
         Value value = _cons.callMethod(env, null, Value.NULL_ARGS);
 
-        __construct.callMethod(env, value, args);
+        __construct.callMethod(env, __construct.getQuercusClass(), value, args);
         
         return value;
       }
@@ -610,14 +610,6 @@ public class JavaClassDef extends ClassDef {
   }
 
   /**
-   * Returns the matching method.
-   */
-  public AbstractFunction findFunction(String name)
-  {
-    return _functionMap.get(name);
-  }
-
-  /**
    * Returns the __call.
    */
   public AbstractFunction getCallMethod()
@@ -628,183 +620,92 @@ public class JavaClassDef extends ClassDef {
   /**
    * Eval a method
    */
-  public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen,
-                          Expr []args)
+  public AbstractFunction findFunction(StringValue methodName)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
-
-    if (method == null) {
-      env.warning(L.l("{0}::{1} is an unknown method.",
-                      _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
-
-    return method.callMethod(env, qThis, args);
+    return _functionMap.getRaw(methodName);
   }
 
   /**
    * Eval a method
    */
   public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen,
+                          StringValue methodName, int hash,
                           Value []args)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+    AbstractFunction fun = _functionMap.get(methodName, hash);
 
-    if (method != null)
-      return method.callMethod(env, qThis, args);
-    else if (__call != null) {
-      Value []extArgs = new Value[args.length + 1];
-
-      extArgs[0] = env.createString(name, nameLen);
-
-      System.arraycopy(args, 0, extArgs, 1, args.length);
-      
-      return __call.callMethod(env, qThis, extArgs);
-    }
-    else {
-      env.error(L.l("'{0}::{1}' is an unknown method",
-		    _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
+    return fun.callMethod(env, getQuercusClass(), qThis, args);
   }
 
   /**
    * Eval a method
    */
   public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen)
+                          StringValue methodName, int hash)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+    AbstractFunction fun = _functionMap.get(methodName, hash);
 
-    if (method != null)
-      return method.callMethod(env, qThis);
-    else if (__call != null)
-      return __call.callMethod(env, qThis, env.createString(name, nameLen));
-    else {
-      env.error(L.l("'{0}::{1}()' is an unknown method",
-		    _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
+    return fun.callMethod(env, getQuercusClass(), qThis);
   }
 
   /**
    * Eval a method
    */
   public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen,
+                          StringValue methodName, int hash,
                           Value a1)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+    AbstractFunction fun = _functionMap.get(methodName, hash);
 
-    if (method != null)
-      return method.callMethod(env, qThis, a1);
-    else if (__call != null)
-      return __call.callMethod(env, qThis, env.createString(name, nameLen), a1);
-    else {
-      env.error(L.l("'{0}::{1}(a1)' is an unknown method",
-		    _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
+    return fun.callMethod(env, getQuercusClass(), qThis, a1);
   }
 
   /**
    * Eval a method
    */
   public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen,
+                          StringValue methodName, int hash,
                           Value a1, Value a2)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+    AbstractFunction fun = _functionMap.get(methodName, hash);
 
-    if (method != null)
-      return method.callMethod(env, qThis, a1, a2);
-    else if (__call != null)
-      return __call.callMethod(env, qThis, env.createString(name, nameLen),
-                         a1, a2);
-    else {
-      env.error(L.l("'{0}::{1}(a1,a2)' is an unknown method",
-		    _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
+    return fun.callMethod(env, getQuercusClass(), qThis, a1, a2);
   }
 
   /**
    * Eval a method
    */
   public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen,
+                          StringValue methodName, int hash,
                           Value a1, Value a2, Value a3)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+    AbstractFunction fun = _functionMap.get(methodName, hash);
 
-    if (method != null)
-      return method.callMethod(env, qThis, a1, a2, a3);
-    else if (__call != null)
-      return __call.callMethod(env, qThis, env.createString(name, nameLen),
-                         a1, a2, a3);
-    else {
-      env.error(L.l("'{0}::{1}(a1,a2,a3)' is an unknown method",
-		    _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
+    return fun.callMethod(env, getQuercusClass(), qThis, a1, a2, a3);
   }
 
   /**
    * Eval a method
    */
   public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen,
+                          StringValue methodName, int hash,
                           Value a1, Value a2, Value a3, Value a4)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+    AbstractFunction fun = _functionMap.get(methodName, hash);
 
-    if (method != null)
-      return method.callMethod(env, qThis, a1, a2, a3, a4);
-    else if (__call != null)
-      return __call.callMethod(env, qThis, env.createString(name, nameLen),
-			       a1, a2, a3, a4);
-    else {
-      env.error(L.l("'{0}::{1}(a1,a2,a3,a4)' is an unknown method",
-		    _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
+    return fun.callMethod(env, getQuercusClass(), qThis, a1, a2, a3, a4);
   }
 
   /**
    * Eval a method
    */
   public Value callMethod(Env env, Value qThis,
-                          int hash, char []name, int nameLen,
+                          StringValue methodName, int hash,
                           Value a1, Value a2, Value a3, Value a4, Value a5)
   {
-    AbstractJavaMethod method = _functionMap.get(hash, name, nameLen);
+    AbstractFunction fun = _functionMap.get(methodName, hash);
 
-    if (method != null)
-      return method.callMethod(env, qThis, a1, a2, a3, a4, a5);
-    else if (__call != null)
-      return __call.callMethod(env, qThis,
-			       new Value[] { env.createString(name, nameLen),
-					     a1, a2, a3, a4, a5 });
-    else {
-      env.error(L.l("'{0}::{1}(a1,a2,a3,a4,a5)' is an unknown method",
-		    _name, toMethod(name, nameLen)));
-
-      return NullValue.NULL;
-    }
-  }
-
-  private String toMethod(char []name, int nameLen)
-  {
-    return new String(name, 0, nameLen);
+    return fun.callMethod(env, getQuercusClass(), qThis, a1, a2, a3, a4, a5);
   }
 
   public Set<? extends Map.Entry<Value,Value>> entrySet(Object obj)
@@ -830,16 +731,16 @@ public class JavaClassDef extends ClassDef {
 
     if (_cons != null) {
       cl.setConstructor(_cons);
-      cl.addMethod("__construct", _cons);
+      cl.addMethod(new StringBuilderValue("__construct"), _cons);
     }
     
     if (__construct != null) {
       cl.setConstructor(__construct);
-      cl.addMethod("__construct", __construct);
+      cl.addMethod(new StringBuilderValue("__construct"), __construct);
     }
 
     for (AbstractJavaMethod value : _functionMap.values()) {
-      cl.addMethod(value.getName(), value);
+      cl.addMethod(new StringBuilderValue(value.getName()), value);
     }
 
     if (__fieldGet != null)
@@ -852,7 +753,7 @@ public class JavaClassDef extends ClassDef {
       cl.setCall(__call);
     
     if (__toString != null) {
-      cl.addMethod("__toString", __toString);
+      cl.addMethod(new StringBuilderValue("__toString"), __toString);
     }
 
     if (_arrayDelegate != null)
@@ -1369,14 +1270,15 @@ public class JavaClassDef extends ClassDef {
           throw new UnsupportedOperationException(L.l("{0}: use @Name instead", method.getName()));
         
         JavaMethod newFun = new JavaMethod(moduleContext, method);
-        AbstractJavaMethod fun = _functionMap.getRaw(newFun.getName());
+        StringValue funName = new StringBuilderValue(newFun.getName());
+        AbstractJavaMethod fun = _functionMap.getRaw(funName);
 
         if (fun != null)
           fun = fun.overload(newFun);
         else
           fun = newFun;
 
-        _functionMap.put(fun.getName(), fun);
+        _functionMap.put(funName.toString(), fun);
       }
     }
     
@@ -1402,7 +1304,7 @@ public class JavaClassDef extends ClassDef {
     if (__toString == null)
       return null;
 
-    return __toString.callMethod(env, value, new Expr[0]).toStringValue();
+    return __toString.callMethod(env, getQuercusClass(), value, new Expr[0]).toStringValue();
   }
   
   public boolean jsonEncode(Env env, Object obj, StringValue sb)

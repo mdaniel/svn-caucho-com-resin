@@ -5080,7 +5080,7 @@ public class Env {
           throw new IllegalStateException(L.l("can't find class {0}",
                                               className));
 
-        return new CallbackFunction(cl.getFunction(methodName));
+        return new CallbackFunction(cl.getFunction(createString(methodName)));
       }
     }
     else if (value.isArray()) {
@@ -5088,7 +5088,8 @@ public class Env {
       Value nameV = value.get(LongValue.ONE);
 
       if (! nameV.isString())
-        throw new IllegalStateException(L.l("unknown callback name {0}", nameV));
+        throw new IllegalStateException(L.l("'{0}' ({1}) is an unknown callback name",
+                                            nameV, nameV.getClass().getSimpleName()));
 
       String name = nameV.toString();
 
@@ -5115,12 +5116,10 @@ public class Env {
             throw new IllegalStateException(L.l("can't find class '{0}'",
                                                 obj.toString()));
 
-          fun = cls.getFunction(name);
+          // fun = cls.getFunction(name);
         }
-        else
-          fun = obj.findFunction(name);
 
-        return new CallbackObjectMethod(this, obj, fun, name);
+        return new CallbackObjectMethod(this, obj, createString(name));
       }
       else {
         QuercusClass cl = findClass(obj.toString());
@@ -5132,7 +5131,7 @@ public class Env {
           return null;
         }
 
-        return new CallbackObjectMethod(this, cl, cl.getFunction(name), name);
+        return new CallbackObjectMethod(this, cl, createString(name));
       }
     }
     else
@@ -6652,6 +6651,7 @@ public class Env {
   /**
    * Calls a parent::name method.
    */
+  /*
   public Value callParentMethod(Value qThis,
                                 String parentName,
                                 String funName,
@@ -6667,10 +6667,12 @@ public class Env {
 
     return retValue;
   }
+  */
 
   /**
    * Calls a parent::name method.
    */
+  /*
   public Value callParentMethod(Value qThis,
                                 String parentName,
                                 int hash,
@@ -6689,6 +6691,7 @@ public class Env {
 
     return retValue;
   }
+  */
 
   public String toString()
   {

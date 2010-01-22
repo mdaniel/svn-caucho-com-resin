@@ -49,11 +49,11 @@ public class StringBuilderValue
   private static final int LARGE_BUILDER_THRESHOLD
     = LargeStringBuilderValue.SIZE;
 
-  protected byte []_buffer;
-  protected int _length;
-  protected boolean _isCopy;
+  private byte []_buffer;
+  private int _length;
+  private boolean _isCopy;
 
-  protected int _hashCode;
+  private int _hashCode;
 
   public StringBuilderValue()
   {
@@ -1141,7 +1141,7 @@ public class StringBuilderValue
 
     return this;
   }
-  
+
   @Override
   public final void write(int ch)
   {
@@ -1150,7 +1150,7 @@ public class StringBuilderValue
 
     _buffer[_length++] = (byte) ch;
   }
-  
+
 
   /**
    * Append a Java buffer to the value.
@@ -1587,7 +1587,7 @@ public class StringBuilderValue
   /**
    * Returns the current capacity.
    */
-  public int getLength()
+  public int getBufferLength()
   {
     return _buffer.length;
   }
@@ -1771,6 +1771,59 @@ public class StringBuilderValue
     _hashCode = hash;
 
     return hash;
+  }
+
+  /**
+   * Returns the hash code.
+   */
+  @Override
+  public int hashCodeCaseInsensitive()
+  {
+    int hash = 0;
+
+    if (hash != 0)
+      return hash;
+
+    hash = 37;
+
+    int length = _length;
+    byte []buffer = _buffer;
+
+    if (length > 256) {
+      for (int i = 127; i >= 0; i--) {
+        hash = 65521 * hash + toLower(buffer[i]);
+      }
+
+      for (int i = length - 128; i < length; i++) {
+        hash = 65521 * hash + toLower(buffer[i]);
+      }
+
+      _hashCode = hash;
+
+      return hash;
+    }
+
+    for (int i = length - 1; i >= 0; i--) {
+      int ch = toLower(buffer[i]);
+      
+      hash = 65521 * hash + ch;
+    }
+
+    return hash;
+  }
+  
+  private int toLower(int ch)
+  {
+    if ('A' <= ch && ch <= 'Z')
+      return ch + 'a' - 'A';
+    else
+      return ch;
+  }
+
+  @Override
+  public int getHashCode()
+  {
+    return hashCode();
   }
 
   /**

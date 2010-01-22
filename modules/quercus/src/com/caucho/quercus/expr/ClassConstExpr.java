@@ -74,6 +74,12 @@ public class ClassConstExpr extends Expr {
                          ArrayList<Expr> args)
     throws IOException
   {
+    /*
+    if (_className.equals(_name))
+      return factory.createClassConstructor(location, _className, _name, args);
+    else
+      return factory.createClassMethodCall(location, _className, _name, args);
+      */
     return factory.createClassMethodCall(location, _className, _name, args);
   }
   
