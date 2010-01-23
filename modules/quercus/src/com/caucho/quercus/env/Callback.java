@@ -32,7 +32,13 @@ package com.caucho.quercus.env;
 /**
  * Represents a call to a function.
  */
-abstract public class Callback extends Value {
+abstract public class Callback extends Value implements Callable {
+  
+  @Override
+  public Callable toCallable(Env env)
+  {
+    return this;
+  }
   
   /*
    * Evaluates a callback where the first argument is from an array.
@@ -135,50 +141,6 @@ abstract public class Callback extends Value {
 
     return result;
   }
-  
-  /**
-   * Evaluates the callback with no arguments.
-   *
-   * @param env the calling environment
-   */
-  abstract public Value call(Env env);
-
-  /**
-   * Evaluates the callback with 1 arguments.
-   *
-   * @param env the calling environment
-   */
-  abstract public Value call(Env env, Value a1);
-
-  /**
-   * Evaluates the callback with 2 arguments.
-   *
-   * @param env the calling environment
-   */
-  abstract public Value call(Env env, Value a1, Value a2);
-
-  /**
-   * Evaluates the callback with 3 arguments.
-   *
-   * @param env the calling environment
-   */
-  abstract public Value call(Env env, Value a1, Value a2, Value a3);
-
-  /**
-   * Evaluates the callback with 4 arguments.
-   *
-   * @param env the calling environment
-   */
-  abstract public Value call(Env env, Value a1, Value a2, Value a3,
-                             Value a4);
-
-  /**
-   * Evaluates the callback with 5 arguments.
-   *
-   * @param env the calling environment
-   */
-  abstract public Value call(Env env, Value a1, Value a2, Value a3,
-                             Value a4, Value a5);
 
   /**
    * Evaluates the callback with variable arguments.

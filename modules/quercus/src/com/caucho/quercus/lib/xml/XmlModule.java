@@ -299,13 +299,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param option
    * @return false if parser == null
    */
-  public Value xml_parser_get_option(@NotNull Xml parser,
+  public Value xml_parser_get_option(Env env,
+                                     @NotNull Xml parser,
                                      @NotNull int option)
   {
     if (parser == null)
       return BooleanValue.FALSE;
 
-    return parser.xml_parser_get_option(option);
+    return parser.xml_parser_get_option(env, option);
   }
 
   /**
@@ -316,14 +317,15 @@ public class XmlModule extends AbstractQuercusModule {
    * @param endElementHandler
    * @return false if parser == null
    */
-  public boolean xml_set_element_handler(@NotNull Xml parser,
+  public boolean xml_set_element_handler(Env env,
+                                         @NotNull Xml parser,
                                          @NotNull Value startElementHandler,
                                          @NotNull Value endElementHandler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_element_handler(startElementHandler, endElementHandler);
+    return parser.xml_set_element_handler(env, startElementHandler, endElementHandler);
   }
 
   /**
@@ -333,13 +335,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_character_data_handler(@NotNull Xml parser,
+  public boolean xml_set_character_data_handler(Env env,
+                                                @NotNull Xml parser,
                                                 @NotNull Value handler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_character_data_handler(handler);
+    return parser.xml_set_character_data_handler(env, handler);
   }
 
 
@@ -350,13 +353,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param startNamespaceDeclHandler
    * @return false if parser == null
    */
-  public boolean xml_set_start_namespace_decl_handler(@NotNull Xml parser,
+  public boolean xml_set_start_namespace_decl_handler(Env env,
+                                                      @NotNull Xml parser,
                                                       @NotNull Value startNamespaceDeclHandler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_start_namespace_decl_handler(startNamespaceDeclHandler);
+    return parser.xml_set_start_namespace_decl_handler(env, startNamespaceDeclHandler);
   }
 
   /**
@@ -380,13 +384,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_processing_instruction_handler(@NotNull Xml parser,
+  public boolean xml_set_processing_instruction_handler(Env env,
+                                                        @NotNull Xml parser,
                                                         @NotNull Value handler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_processing_instruction_handler(handler);
+    return parser.xml_set_processing_instruction_handler(env, handler);
   }
 
   /**
@@ -395,13 +400,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_default_handler(@NotNull Xml parser,
+  public boolean xml_set_default_handler(Env env,
+                                         @NotNull Xml parser,
                                          @NotNull Value handler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_default_handler(handler);
+    return parser.xml_set_default_handler(env, handler);
   }
 
   /**
@@ -411,13 +417,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false is parser == null
    */
-  public boolean xml_set_notation_decl_handler(@NotNull Xml parser,
+  public boolean xml_set_notation_decl_handler(Env env,
+                                               @NotNull Xml parser,
                                                @NotNull Value handler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_notation_decl_handler(handler);
+    return parser.xml_set_notation_decl_handler(env, handler);
   }
 
   /**
@@ -426,13 +433,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null
    */
-  public boolean xml_set_end_namespace_decl_handler(@NotNull Xml parser,
+  public boolean xml_set_end_namespace_decl_handler(Env env,
+                                                    @NotNull Xml parser,
                                                     @NotNull Value handler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_end_namespace_decl_handler(handler);
+    return parser.xml_set_end_namespace_decl_handler(env, handler);
   }
 
   /**
@@ -481,13 +489,14 @@ public class XmlModule extends AbstractQuercusModule {
    * @param handler
    * @return false if parser == null, otherwise true
    */
-  public boolean xml_set_unparsed_entity_decl_handler(@NotNull Xml parser,
+  public boolean xml_set_unparsed_entity_decl_handler(Env env,
+                                                      @NotNull Xml parser,
                                                       @NotNull Value handler)
   {
     if (parser == null)
       return false;
 
-    return parser.xml_set_unparsed_entity_decl_handler(handler);
+    return parser.xml_set_unparsed_entity_decl_handler(env, handler);
   }
 
   // @todo xml_error_string

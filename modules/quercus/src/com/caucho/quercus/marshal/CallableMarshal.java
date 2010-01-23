@@ -36,9 +36,9 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.expr.Expr;
 
-public class CallbackMarshal extends Marshal
+public class CallableMarshal extends Marshal
 {
-  public static final Marshal MARSHAL = new CallbackMarshal();
+  public static final Marshal MARSHAL = new CallableMarshal();
   
   public boolean isReadOnly()
   {
@@ -52,18 +52,9 @@ public class CallbackMarshal extends Marshal
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
-    Callback cb = env.createCallback(value);
-
-    return cb;
-
-    /*
-    if (cb != null)
-      return cb;
-    else if (value.isDefault())
-      return null;
-    else
-      return new CallbackFunction(env, value.toString()); //null;
-    */
+    Object callable = value.toCallable(env);
+    
+    return callable;
   }
 
   public Value unmarshal(Env env, Object value)

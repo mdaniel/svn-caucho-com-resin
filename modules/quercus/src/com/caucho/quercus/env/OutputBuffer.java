@@ -46,7 +46,7 @@ public class OutputBuffer {
 
   private int _state;
   private boolean _haveFlushed;
-  private Callback _callback;
+  private Callable _callback;
   
   private final boolean _erase;
   private final int _chunkSize;
@@ -59,7 +59,7 @@ public class OutputBuffer {
 
   private final Env _env;
 
-  OutputBuffer(OutputBuffer next, Env env, Callback callback, 
+  OutputBuffer(OutputBuffer next, Env env, Callable callback, 
                int chunkSize, boolean erase)
   {
     _next = next;
@@ -319,7 +319,7 @@ public class OutputBuffer {
   /**
    * Returns the callback for this output buffer.
    */
-  public Callback getCallback()
+  public Callable getCallback()
   {
     return _callback;
   }

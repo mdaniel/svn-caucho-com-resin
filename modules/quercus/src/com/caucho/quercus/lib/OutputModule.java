@@ -91,7 +91,7 @@ public class OutputModule extends AbstractQuercusModule
     if (handlerName != null
         && ! "".equals(handlerName)
         && env.getFunction(handlerName) != null) {
-      Callback callback = env.createCallback(env.createString(handlerName));
+      Callable callback = env.createString(handlerName).toCallable(env);
 
       ob_start(env, callback, 0, true);
     } else if (isOutputBuffering) {
@@ -141,7 +141,7 @@ public class OutputModule extends AbstractQuercusModule
     if (ob != null) {
       ob.clean();
 
-      Callback callback = ob.getCallback();
+      Callable callback = ob.getCallback();
 
       if (callback != null) {
         ob.setCallback(null);
@@ -265,7 +265,7 @@ public class OutputModule extends AbstractQuercusModule
 
     listHandlers(env, ob.getNext(), handlers);
 
-    Callback callback = ob.getCallback();
+    Callable callback = ob.getCallback();
 
     if (callback != null) 
       handlers.put(env.createString(callback.getCallbackName()));
@@ -294,10 +294,14 @@ public class OutputModule extends AbstractQuercusModule
                                       Env env, boolean fullStatus)
   {
     LongValue type = LongValue.ONE;
-    Callback callback = ob.getCallback();
+    Callable callback = ob.getCallback();
 
+    // XXX: need to replace logic because isInternal appears to be
+    // specific to ob_, not general to Callback
+    /*
     if (callback != null && callback.isInternal())
       type = LongValue.ZERO;
+      */
 
     element.put(env.createString("type"), type);
 
@@ -406,7 +410,7 @@ public class OutputModule extends AbstractQuercusModule
    * Pushes the output buffer
    */
   public static boolean ob_start(Env env,
-                                 @Optional Callback callback,
+                                 @Optional Callable callback,
                                  @Optional int chunkSize,
                                  @Optional("true") boolean erase)
   {
@@ -415,7 +419,7 @@ public class OutputModule extends AbstractQuercusModule
       OutputBuffer ob = env.getOutputBuffer();
 
       for (; ob != null; ob = ob.getNext()) {
-        Callback cb = ob.getCallback();
+        Callable cb = ob.getCallback();
 
         if (cb.getCallbackName().equals("ob_gzhandler")) {
           env.warning(L.l("output handler 'ob_gzhandler' cannot be used twice"));

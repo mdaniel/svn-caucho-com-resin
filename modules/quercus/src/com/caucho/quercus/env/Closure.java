@@ -35,7 +35,7 @@ import com.caucho.quercus.program.Function;
 /**
  * Represents a call to a function.
  */
-public class Closure extends Value {
+public class Closure extends Callback {
   private static final Value []NULL_ARGS = new Value[0];
   
   private Function _fun;
@@ -60,9 +60,51 @@ public class Closure extends Value {
     }
   }
   
+  public boolean isCallable(Env env, boolean isSyntax)
+  {
+    return true;
+  }
+  
+  @Override
+  public Callable toCallable(Env env)
+  {
+    return this;
+  }
+  
+  @Override
+  public boolean isObject()
+  {
+    return true;    
+  }
+  
+  @Override
+  public String getType()
+  {
+    return "object";
+  }
+  
+  @Override
   public Value call(Env env, Value []args)
   {
     return _fun.callImpl(env, args, false, _fun.getClosureUseArgs(), _args);
+  }
+
+  @Override
+  public String getCallbackName()
+  {
+    return _fun.getName();
+  }
+
+  @Override
+  public boolean isInternal()
+  {
+    return false;
+  }
+
+  @Override
+  public boolean isValid()
+  {
+    return true;
   }
 
   public String toString()

@@ -594,7 +594,7 @@ public class ArrayModule
     ArrayValue filteredArray = new ArrayValueImpl();
 
     if (! callbackName.isDefault()) {
-      Callback callback = env.createCallback(callbackName);
+      Callable callback = callbackName.toCallable(env);
       
       if (callback == null || ! callback.isValid()) {
         env.warning(L.l("The second argument, '{0}', is not a valid callback",
@@ -2844,24 +2844,10 @@ public class ArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp;
-
-    try {
-      cmp = env.createCallback(callbackValue);
-    }
-    catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackValue.toString());
-
+    Callable cmp = callbackValue.toCallable(env);
+    
+    if (! cmp.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmp == null) {
-      env.warning("Not a valid callback " + callbackValue.toString());
-
-      return NullValue.NULL;
-    }
 
     ArrayValue diffArray = new ArrayValueImpl();
 
@@ -2934,24 +2920,10 @@ public class ArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp;
-
-    try {
-      cmp = env.createCallback(callbackValue);
-    }
-    catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackValue.toString());
-
+    Callable cmp = callbackValue.toCallable(env);
+    
+    if (! cmp.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmp == null) {
-      env.warning("Not a valid callback " + callbackValue.toString());
-
-      return NullValue.NULL;
-    }
 
     ArrayValue diffArray = new ArrayValueImpl();
 
@@ -3032,45 +3004,17 @@ public class ArrayModule
 
     Value callbackValue = arrays[arrays.length - 2];
 
-    Callback cmpValue;
+    Callable cmpValue = callbackValue.toCallable(env);
 
-    try {
-      cmpValue = env.createCallback(callbackValue);
-    }
-    catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackValue.toString());
-
+    if (! cmpValue.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmpValue == null) {
-      env.warning("Not a valid callback " + callbackValue.toString());
-
-      return NullValue.NULL;
-    }
 
     Value callbackKey = arrays[arrays.length - 1];
 
-    Callback cmpKey;
+    Callable cmpKey = callbackKey.toCallable(env);
 
-    try {
-      cmpKey = env.createCallback(callbackKey);
-    }
-    catch (Exception t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackKey.toString());
-
+    if (! cmpKey.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmpKey == null) {
-      env.warning("Not a valid callback " + callbackKey.toString());
-
-      return NullValue.NULL;
-    }
 
     ArrayValue diffArray = new ArrayValueImpl();
 
@@ -3152,24 +3096,10 @@ public class ArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp;
-
-    try {
-      cmp = env.createCallback(callbackValue);
-    }
-    catch (Throwable t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackValue.toString());
-
+    Callable cmp = callbackValue.toCallable(env);
+    
+    if (! cmp.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmp == null) {
-      env.warning("Not a valid callback " + callbackValue.toString());
-
-      return NullValue.NULL;
-    }
 
     ArrayValue interArray = new ArrayValueImpl();
 
@@ -3241,24 +3171,10 @@ public class ArrayModule
 
     Value callbackValue = arrays[arrays.length - 1];
 
-    Callback cmp;
-
-    try {
-      cmp = env.createCallback(callbackValue);
-    }
-    catch (Throwable t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackValue.toString());
-
+    Callable cmp = callbackValue.toCallable(env);
+    
+    if (! cmp.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmp == null) {
-      env.warning("Not a valid callback " + callbackValue.toString());
-
-      return NullValue.NULL;
-    }
 
     ArrayValue interArray = new ArrayValueImpl();
 
@@ -3338,45 +3254,17 @@ public class ArrayModule
 
     Value callbackValue = arrays[arrays.length - 2];
 
-    Callback cmpValue;
-
-    try {
-      cmpValue = env.createCallback(callbackValue);
-    }
-    catch (Throwable t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackValue.toString());
-
+    Callable cmpValue = callbackValue.toCallable(env);
+    
+    if (! cmpValue.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmpValue == null) {
-      env.warning("Not a valid callback " + callbackValue.toString());
-
-      return NullValue.NULL;
-    }
 
     Value callbackKey = arrays[arrays.length - 1];
 
-    Callback cmpKey;
-
-    try {
-      cmpKey = env.createCallback(callbackKey);
-    }
-    catch (Throwable t) {
-      log.log(Level.WARNING, t.toString(), t);
-
-      env.warning("Not a valid callback " + callbackKey.toString());
-
+    Callable cmpKey = callbackKey.toCallable(env);
+    
+    if (! cmpKey.isValid())
       return NullValue.NULL;
-    }
-
-    if (cmpKey == null) {
-      env.warning("Not a valid callback " + callbackKey.toString());
-
-      return NullValue.NULL;
-    }
 
     ArrayValue interArray = new ArrayValueImpl();
 

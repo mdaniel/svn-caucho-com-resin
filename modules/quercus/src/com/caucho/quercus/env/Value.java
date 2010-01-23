@@ -745,7 +745,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a java Collection object.
    */
-  public Collection toJavaCollection(Env env, Class type)
+  public Collection<?> toJavaCollection(Env env, Class<?> type)
   {
     env.warning(L.l("Can't convert {0} to Java {1}",
             getClass().getName(), type.getName()));
@@ -756,7 +756,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a java List object.
    */
-  public List toJavaList(Env env, Class type)
+  public List<?> toJavaList(Env env, Class<?> type)
   {
     env.warning(L.l("Can't convert {0} to Java {1}",
             getClass().getName(), type.getName()));
@@ -767,7 +767,7 @@ abstract public class Value implements java.io.Serializable
   /**
    * Converts to a java Map object.
    */
-  public Map toJavaMap(Env env, Class type)
+  public Map<?,?> toJavaMap(Env env, Class<?> type)
   {
     env.warning(L.l("Can't convert {0} to Java {1}",
             getClass().getName(), type.getName()));
@@ -1103,6 +1103,16 @@ abstract public class Value implements java.io.Serializable
   public DoubleValue toDoubleValue()
   {
     return new DoubleValue(toDouble());
+  }
+  
+  /**
+   * Converts to a callable
+   */
+  public Callable toCallable(Env env)
+  {
+    env.warning(L.l("Callback: '{0}' is not a valid callback", toString()));
+
+    return new CallbackError(toString());
   }
 
   //

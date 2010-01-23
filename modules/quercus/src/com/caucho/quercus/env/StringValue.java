@@ -888,12 +888,46 @@ abstract public class StringValue
     else
       return this;
   }
+  
+  /**
+   * Converts to a callable object
+   */
+  @Override
+  public Callable toCallable(Env env)
+  {
+    // php/1h0o
+    if (isEmpty())
+      return super.toCallable(env);
+
+    String s = toString();
+
+    int p = s.indexOf("::");
+
+    if (p < 0)
+      return new CallbackFunction(env, s);
+    else {
+      String className = s.substring(0, p);
+      String methodName = s.substring(p + 2);
+
+      QuercusClass cl = env.findClass(className);
+
+      if (cl == null) {
+        env.warning(L.l("can't find class {0}",
+                        className));
+        
+        return super.toCallable(env);
+      }
+
+      return new CallbackFunction(cl.getFunction(env.createString(methodName)));
+    }
+  }
 
   /**
    * Sets the array value, returning the new array, e.g. to handle
    * string update ($a[0] = 'A').  Creates an array automatically if
    * necessary.
    */
+  @Override
   public Value append(Value index, Value value)
   {
     if (length() == 0)

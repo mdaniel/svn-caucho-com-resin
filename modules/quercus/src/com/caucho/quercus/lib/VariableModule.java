@@ -37,6 +37,7 @@ import com.caucho.quercus.annotation.Reference;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.annotation.UsesSymbolTable;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -359,6 +360,8 @@ public class VariableModule extends AbstractQuercusModule {
 				    @Optional boolean isSyntaxOnly,
 				    @Optional @Reference Value nameRef)
   {
+    // XXX: this needs to be made OO through Value
+    
     if (v instanceof StringValue) {
       if (nameRef != null)
 	nameRef.set(v);
@@ -397,6 +400,10 @@ public class VariableModule extends AbstractQuercusModule {
       else
 	return false;
     }
+    else if (v instanceof AbstractFunction)
+      return true;
+    else if (v instanceof Closure)
+      return true;
     else
       return false;
   }

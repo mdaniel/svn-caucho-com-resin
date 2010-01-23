@@ -89,23 +89,21 @@ public class Xml {
   private int _errorCode = XmlModule.XML_ERROR_NONE;
   private String _errorString;
 
-  private Callback _startElementHandler;
-  private Callback _endElementHandler;
-  private Callback _characterDataHandler;
-  private Callback _processingInstructionHandler;
-  private Callback _defaultHandler;
-  private Callback _startNamespaceDeclHandler;
-  private Callback _endNamespaceDeclHandler;
-  private Callback _notationDeclHandler;
-  private Callback _unparsedEntityDeclHandler;
+  private Callable _startElementHandler;
+  private Callable _endElementHandler;
+  private Callable _characterDataHandler;
+  private Callable _processingInstructionHandler;
+  private Callable _defaultHandler;
+  private Callable _startNamespaceDeclHandler;
+  private Callable _endNamespaceDeclHandler;
+  private Callable _notationDeclHandler;
+  private Callable _unparsedEntityDeclHandler;
 
   private Value _parser;
   private Value _obj;
 
   SAXParserFactory _factory = SAXParserFactory.newInstance();
   
-  Env _env; // XXX: need to remove
-
   private StringValue _xmlString;
   private XmlHandler _xmlHandler;
 
@@ -113,8 +111,6 @@ public class Xml {
              String outputEncoding,
              String separator)
   {
-    _env = env;
-    
     _xmlOptionTargetEncoding = outputEncoding;
     _parser = env.wrapJava(this);
     _separator = separator;
@@ -159,25 +155,26 @@ public class Xml {
    * @return true always even if handlers are disabled
    */
 
-  public boolean xml_set_element_handler(Value startElementHandler,
+  public boolean xml_set_element_handler(Env env,
+                                         Value startElementHandler,
                                          Value endElementHandler)
   {
     if (_obj == null) {
-      _startElementHandler = _env.createCallback(startElementHandler);
-      _endElementHandler = _env.createCallback(endElementHandler);
+      _startElementHandler = startElementHandler.toCallable(env);
+      _endElementHandler = endElementHandler.toCallable(env);
     } else {
       if (! startElementHandler.isEmpty()) {
         Value value = new ArrayValueImpl();
         value.put(_obj);
         value.put(startElementHandler);
-        _startElementHandler = _env.createCallback(value);
+        _startElementHandler = value.toCallable(env);
       }
 
       if (! endElementHandler.isEmpty()) {
         Value value = new ArrayValueImpl();
         value.put(_obj);
         value.put(endElementHandler);
-        _endElementHandler = _env.createCallback(value);
+        _endElementHandler = value.toCallable(env);
       }
     }
     return true;
@@ -189,15 +186,15 @@ public class Xml {
    * @param handler can be empty string or FALSE
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_character_data_handler(Value handler)
+  public boolean xml_set_character_data_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _characterDataHandler = _env.createCallback(handler);
+      _characterDataHandler = handler.toCallable(env);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _characterDataHandler = _env.createCallback(value);
+      _characterDataHandler = value.toCallable(env);
     }
 
     return true;
@@ -218,15 +215,15 @@ public class Xml {
    * @param handler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_default_handler(Value handler)
+  public boolean xml_set_default_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _defaultHandler = _env.createCallback(handler);
+      _defaultHandler = handler.toCallable(env);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _defaultHandler = _env.createCallback(value);
+      _defaultHandler = value.toCallable(env);
     }
     return true;
   }
@@ -237,15 +234,17 @@ public class Xml {
    * @param processingInstructionHandler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_processing_instruction_handler(Value processingInstructionHandler)
+  public boolean xml_set_processing_instruction_handler(Env env,
+                                                        Value processingInstructionHandler)
   {
     if (_obj == null) {
-      _processingInstructionHandler = _env.createCallback(processingInstructionHandler);
+      _processingInstructionHandler
+        = processingInstructionHandler.toCallable(env);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(processingInstructionHandler);
-      _processingInstructionHandler = _env.createCallback(value);
+      _processingInstructionHandler = value.toCallable(env);
     }
     return true;
   }
@@ -256,15 +255,16 @@ public class Xml {
    * @param startNamespaceDeclHandler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_start_namespace_decl_handler(Value startNamespaceDeclHandler)
+  public boolean xml_set_start_namespace_decl_handler(Env env,
+                                                      Value startNamespaceDeclHandler)
   {
     if (_obj == null) {
-      _startNamespaceDeclHandler = _env.createCallback(startNamespaceDeclHandler);
+      _startNamespaceDeclHandler = startNamespaceDeclHandler.toCallable(env);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(startNamespaceDeclHandler);
-      _startNamespaceDeclHandler = _env.createCallback(value);
+      _startNamespaceDeclHandler = value.toCallable(env);
     }
     return true;
   }
@@ -275,15 +275,15 @@ public class Xml {
    * @param handler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_unparsed_entity_decl_handler(Value handler)
+  public boolean xml_set_unparsed_entity_decl_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _unparsedEntityDeclHandler = _env.createCallback(handler);
+      _unparsedEntityDeclHandler = handler.toCallable(env);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _unparsedEntityDeclHandler = _env.createCallback(value);
+      _unparsedEntityDeclHandler = value.toCallable(env);
     }
     return true;
   }
@@ -294,15 +294,16 @@ public class Xml {
    * @param endNamespaceDeclHandler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_end_namespace_decl_handler(Value endNamespaceDeclHandler)
+  public boolean xml_set_end_namespace_decl_handler(Env env,
+                                                    Value endNamespaceDeclHandler)
   {
     if (_obj == null) {
-      _endNamespaceDeclHandler = _env.createCallback(endNamespaceDeclHandler);
+      _endNamespaceDeclHandler = endNamespaceDeclHandler.toCallable(env);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(endNamespaceDeclHandler);
-      _endNamespaceDeclHandler = _env.createCallback(value);
+      _endNamespaceDeclHandler = value.toCallable(env);
     }
     return true;
   }
@@ -313,15 +314,15 @@ public class Xml {
    * @param handler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_notation_decl_handler(Value handler)
+  public boolean xml_set_notation_decl_handler(Env env, Value handler)
   {
     if (_obj == null) {
-      _notationDeclHandler = _env.createCallback(handler);
+      _notationDeclHandler = handler.toCallable(env);
     } else {
       Value value = new ArrayValueImpl();
       value.put(_obj);
       value.put(handler);
-      _notationDeclHandler = _env.createCallback(value);
+      _notationDeclHandler = value.toCallable(env);
     }
     return true;
   }
@@ -384,7 +385,7 @@ public class Xml {
         _errorCode = XmlModule.XML_ERROR_NONE;
         _errorString = null;
 
-        _xmlHandler = new XmlHandler();
+        _xmlHandler = new XmlHandler(env);
 	
         SAXParser saxParser = _factory.newSAXParser();
         saxParser.parse(is, _xmlHandler);
@@ -406,7 +407,9 @@ public class Xml {
         
         log.log(Level.FINE, e.toString(), e);
         return 0;
-      } 
+      } finally {
+        _xmlHandler = null;
+      }
       
     }
 
@@ -448,7 +451,7 @@ public class Xml {
 
     try {
       SAXParser saxParser = _factory.newSAXParser();
-      saxParser.parse(is, new StructHandler(valueArray, indexArray));
+      saxParser.parse(is, new StructHandler(env, valueArray, indexArray));
     } catch (SAXException e) {
       _errorCode = XmlModule.XML_ERROR_SYNTAX;
       _errorString = e.toString();
@@ -514,7 +517,7 @@ public class Xml {
    * @param option
    * @return relevant value
    */
-  public Value xml_parser_get_option(int option)
+  public Value xml_parser_get_option(Env env, int option)
   {
     switch (option) {
     case XmlModule.XML_OPTION_CASE_FOLDING:
@@ -524,7 +527,7 @@ public class Xml {
     case XmlModule.XML_OPTION_SKIP_WHITE:
       return (_xmlOptionSkipWhite ? LongValue.ONE : LongValue.ZERO);
     case XmlModule.XML_OPTION_TARGET_ENCODING:
-      return _env.createString(_xmlOptionTargetEncoding);
+      return env.createString(_xmlOptionTargetEncoding);
     default:
       return BooleanValue.FALSE;
     }
@@ -557,8 +560,11 @@ public class Xml {
     private int _valueArrayIndex = 0;
 
     private Locator _locator;
+    
+    private Env _env;
 
-    public StructHandler(ArrayValueImpl valueArray,
+    public StructHandler(Env env,
+                         ArrayValueImpl valueArray,
                          ArrayValueImpl indexArray)
     {
       _valueArray = valueArray;
@@ -591,7 +597,7 @@ public class Xml {
      * @param attrs
      * @return array of attributes
      */
-    private ArrayValueImpl createAttributeArray(Attributes attrs)
+    private ArrayValueImpl createAttributeArray(Env env, Attributes attrs)
     {
       ArrayValueImpl result = new ArrayValueImpl();
 
@@ -600,7 +606,7 @@ public class Xml {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
         if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
-        result.put(_env.createString(aName), _env.createString(attrs.getValue(i)));
+        result.put(env.createString(aName), env.createString(attrs.getValue(i)));
       }
 
       return result;
@@ -632,7 +638,8 @@ public class Xml {
       _paramHashMap.put(_level, eName);
 
       if (attrs.getLength() > 0) {
-        elementArray.put(_env.createString("attributes"), createAttributeArray(attrs));
+        elementArray.put(_env.createString("attributes"), 
+                         createAttributeArray(_env, attrs));
       }
 
       _valueArray.put(LongValue.create(_valueArrayIndex), elementArray);
@@ -717,6 +724,13 @@ public class Xml {
 
   class XmlHandler extends DefaultHandler {
     private Locator _locator;
+    
+    private Env _env;
+    
+    XmlHandler(Env env)
+    {
+      _env = env;
+    }
 
     public void setDocumentLocator(Locator locator)
     {

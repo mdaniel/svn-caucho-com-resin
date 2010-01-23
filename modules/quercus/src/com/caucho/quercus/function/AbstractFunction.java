@@ -30,6 +30,7 @@
 package com.caucho.quercus.function;
 
 import com.caucho.quercus.Location;
+import com.caucho.quercus.env.Callback;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
@@ -43,7 +44,7 @@ import com.caucho.util.L10N;
  * Represents a function
  */
 @SuppressWarnings("serial")
-abstract public class AbstractFunction extends Value {
+abstract public class AbstractFunction extends Callback {
   private static final L10N L = new L10N(AbstractFunction.class);
 
   private static final Arg []NULL_ARGS = new Arg[0];
@@ -78,6 +79,28 @@ abstract public class AbstractFunction extends Value {
   public String getName()
   {
     return "unknown";
+  }
+  
+  //
+  // Callback values
+  //
+  
+  @Override
+  public String getCallbackName()
+  {
+    return getName();
+  }
+  
+  @Override
+  public boolean isInternal()
+  {
+    return false;
+  }
+  
+  @Override
+  public boolean isValid()
+  {
+    return true;
   }
   
   public final String getCompilationName()
@@ -353,15 +376,40 @@ abstract public class AbstractFunction extends Value {
 
     return values;
   }
+  
+  //
+  // Value methods
+  //
+  
+  //
+  // Value predicates
+  //
 
+  /**
+   * Returns true for an object
+   */
+  @Override
+  public boolean isObject()
+  {
+    return true;
+  }
+  
+  @Override
+  public String getType()
+  {
+    return "object";
+  }
+  
   /**
    * Evaluates the function.
    */
+  @Override
   abstract public Value call(Env env, Value []args);
 
   /**
    * Evaluates the function, returning a reference.
    */
+  @Override
   public Value callRef(Env env, Value []args)
   {
     return call(env, args);
@@ -370,6 +418,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function, returning a copy
    */
+  @Override
   public Value callCopy(Env env, Value []args)
   {
     return call(env, args).copyReturn();
@@ -378,6 +427,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function.
    */
+  @Override
   public Value call(Env env)
   {
     return call(env, NULL_ARG_VALUES);
@@ -386,6 +436,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with an argument .
    */
+  @Override
   public Value call(Env env, Value a1)
   {
     return call(env, new Value[] { a1 });
@@ -394,6 +445,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value call(Env env, Value a1, Value a2)
   {
     return call(env, new Value[] { a1, a2 });
@@ -402,6 +454,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3)
   {
     return call(env, new Value[] { a1, a2, a3 });
@@ -410,6 +463,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3, Value a4)
   {
     return call(env, new Value[] { a1, a2, a3, a4 });
@@ -418,6 +472,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     return call(env, new Value[] { a1, a2, a3, a4, a5 });
@@ -426,33 +481,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function.
    */
-  public Value call(Env env, Expr []exprs)
-  {
-    Value []argValues = new Value[exprs.length];
-    Arg []args = getArgs();
-
-    for (int i = 0; i < exprs.length; i++) {
-      // quercus/0d19
-      if (i < args.length && args[i].isReference())
-	argValues[i] = exprs[i].evalArg(env, true);
-      else
-	argValues[i] = exprs[i].eval(env);
-    }
-
-    return call(env, argValues);
-  }
-
-  /**
-   * Evaluates the function.
-   */
-  public Value callCopy(Env env, Expr []exprs)
-  {
-    return call(env, exprs).copy();
-  }
-
-  /**
-   * Evaluates the function.
-   */
+  @Override
   public Value callRef(Env env)
   {
     return callRef(env, NULL_ARG_VALUES);
@@ -461,6 +490,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with an argument .
    */
+  @Override
   public Value callRef(Env env, Value a1)
   {
     return callRef(env, new Value[] { a1 });
@@ -469,6 +499,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value callRef(Env env, Value a1, Value a2)
   {
     return callRef(env, new Value[] { a1, a2 });
@@ -477,6 +508,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value callRef(Env env, Value a1, Value a2, Value a3)
   {
     return callRef(env, new Value[] { a1, a2, a3 });
@@ -485,6 +517,7 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value callRef(Env env, Value a1, Value a2, Value a3, Value a4)
   {
     return callRef(env, new Value[] { a1, a2, a3, a4 });
@@ -493,29 +526,11 @@ abstract public class AbstractFunction extends Value {
   /**
    * Evaluates the function with arguments
    */
+  @Override
   public Value callRef(Env env,
 		       Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     return callRef(env, new Value[] { a1, a2, a3, a4, a5 });
-  }
-
-  /**
-   * Evaluates the function.
-   */
-  public Value callRef(Env env, Expr []exprs)
-  {
-    Value []argValues = new Value[exprs.length];
-    Arg []args = getArgs();
-
-    for (int i = 0; i < exprs.length; i++) {
-      // quercus/0d19
-      if (i < args.length && args[i].isReference())
-	argValues[i] = exprs[i].evalArg(env, true);
-      else
-	argValues[i] = exprs[i].eval(env);
-    }
-
-    return callRef(env, argValues);
   }
   
   //

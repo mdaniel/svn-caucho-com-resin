@@ -56,8 +56,6 @@ import java.util.Map;
  * Code for marshaling (PHP to Java) and unmarshaling (Java to PHP) arguments.
  */
 public class MarshalFactory {
-  private static final L10N L = new L10N(MarshalFactory.class);
-
   private static final HashMap<Class<?>,Marshal> _marshalMap
     = new HashMap<Class<?>,Marshal>();
   
@@ -68,18 +66,18 @@ public class MarshalFactory {
     _moduleContext = moduleContext;
   }
 
-  public Marshal create(Class argType)
+  public Marshal create(Class<?> argType)
   {
     return create(argType, false);
   }
 
-  public Marshal create(Class argType,
+  public Marshal create(Class<?> argType,
                         boolean isNotNull)
   {
     return create(argType, isNotNull, false);
   }
 
-  public Marshal create(Class argType,
+  public Marshal create(Class<?> argType,
                         boolean isNotNull,
                         boolean isNullAsFalse)
   {
@@ -155,9 +153,6 @@ public class MarshalFactory {
     }
     else if (Path.class.equals(argType)) {
       marshal = PathMarshal.MARSHAL;
-    }
-    else if (Callback.class.equals(argType)) {
-      marshal = CallbackMarshal.MARSHAL;
     }
     else if (StringValue.class.equals(argType)) {
       marshal = StringValueMarshal.MARSHAL;
@@ -305,6 +300,7 @@ public class MarshalFactory {
   
   static {
     _marshalMap.put(String.class, StringMarshal.MARSHAL);
+    _marshalMap.put(Callable.class, CallableMarshal.MARSHAL);
     _marshalMap.put(Class.class, ClassMarshal.MARSHAL);
   }
 }

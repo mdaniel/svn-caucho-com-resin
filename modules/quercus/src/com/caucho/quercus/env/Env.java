@@ -1262,7 +1262,7 @@ public class Env {
   /**
    * Returns the writer.
    */
-  public void pushOutputBuffer(Callback callback, int chunkSize, boolean erase)
+  public void pushOutputBuffer(Callable callback, int chunkSize, boolean erase)
   {
     if (_outputBuffer == null) {
       _outputBuffer =
@@ -5078,6 +5078,7 @@ public class Env {
   /**
    * Returns the appropriate callback.
    */
+  /*
   public Callback createCallback(Value value)
   {
     if (value == null || value.isNull())
@@ -5166,6 +5167,7 @@ public class Env {
     else
       return null;
   }
+  */
 
   /**
    * Evaluates an included file.

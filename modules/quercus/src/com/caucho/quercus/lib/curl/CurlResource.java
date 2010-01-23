@@ -104,10 +104,10 @@ public class CurlResource
   private BinaryInput _uploadFile;
   private int _uploadFileSize;
 
-  private Callback _headerCallback;
-  private Callback _passwordCallback;
-  private Callback _readCallback;
-  private Callback _writeCallback;
+  private Callable _headerCallback;
+  private Callable _passwordCallback;
+  private Callable _readCallback;
+  private Callable _writeCallback;
 
   public CurlResource()
   {
@@ -252,7 +252,7 @@ public class CurlResource
   /*
    * Returns the header callback.
    */
-  public Callback getHeaderCallback()
+  public Callable getHeaderCallback()
   {
     return _headerCallback;
   }
@@ -260,7 +260,7 @@ public class CurlResource
   /**
    * Sets the callback to read the header.
    */
-  public void setHeaderCallback(Callback callback)
+  public void setHeaderCallback(Callable callback)
   {
     _headerCallback = callback;
   }
@@ -419,7 +419,7 @@ public class CurlResource
   /**
    *
    */
-  public void setPasswordCallback(Callback callback)
+  public void setPasswordCallback(Callable callback)
   {
     _passwordCallback = callback;
   }
@@ -539,7 +539,7 @@ public class CurlResource
   /*
    * Returns the callback to read the body.
    */
-  public Callback getReadCallback()
+  public Callable getReadCallback()
   {
     return _readCallback;
   }
@@ -547,7 +547,7 @@ public class CurlResource
   /**
    * Sets the callback to read the body.
    */
-  public void setReadCallback(Callback callback)
+  public void setReadCallback(Callable callback)
   {
     _readCallback = callback;
   }
@@ -702,7 +702,7 @@ public class CurlResource
   /**
    *
    */
-  public void setWriteCallback(Callback callback)
+  public void setWriteCallback(Callable callback)
   {
     _writeCallback = callback;
   }

@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.marshal.Marshal;
 import com.caucho.quercus.marshal.MarshalFactory;
 import com.caucho.vfs.WriteStream;
@@ -339,6 +340,58 @@ abstract public class ArrayValue extends Value {
     return map;
   }
 
+  /**
+   * Converts to a callable object.
+   */
+  public Callable toCallable(Env env)
+  {
+    Value obj = get(LongValue.ZERO);
+    Value nameV = get(LongValue.ONE);
+
+    if (! nameV.isString()) {
+      env.warning(L.l("'{0}' ({1}) is an unknown callback name",
+                      nameV, nameV.getClass().getSimpleName()));
+    
+      return super.toCallable(env);
+    }
+
+    String name = nameV.toString();
+
+    if (obj.isObject()) {
+      AbstractFunction fun;
+
+      int p = name.indexOf("::");
+
+      // php/09lf
+      if (p > 0) {
+        String clsName = name.substring(0, p);
+        name = name.substring(p + 2);
+
+        QuercusClass cls = env.findClass(clsName);
+
+        if (cls == null) {
+          env.warning(L.l("Callback: '{0}' is not a valid callback class for {1}",
+                          clsName, name));
+
+          return super.toCallable(env);
+        }
+      }
+
+      return new CallbackObjectMethod(env, obj, env.createString(name));
+    }
+    else {
+      QuercusClass cl = env.findClass(obj.toString());
+
+      if (cl == null) {
+        env.warning(L.l("Callback: '{0}' is not a valid callback string for {1}",
+                        obj.toString(), obj));
+
+        return super.toCallable(env);
+      }
+
+      return new CallbackObjectMethod(env, cl, env.createString(name));
+    }
+  }
   /**
    * Returns true for an array.
    */
