@@ -89,15 +89,19 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
-    String name = env.getThis().getQuercusClass().getName();
+    Value qThis = env.getThis();
+    QuercusClass qClass = qThis != null ? qThis.getQuercusClass() : null;
     
-    if (name == null) {
-      env.error(getLocation(), L.l("no calling class found"));
+    if (qClass == null) {
+      env.error(L.l("No calling class found for '{0}'", this));
       
       return NullValue.NULL;
     }
+    
+    String name = qClass.getName();
     
     StringValue var = env.createStringBuilder();
     var.append(name);

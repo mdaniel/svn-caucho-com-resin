@@ -56,13 +56,13 @@ public class CallbackError extends Callback {
   }
 
   @Override
-  public boolean isValid()
+  public boolean isValid(Env env)
   {
     return false;
   }
   
   @Override
-  public boolean isInternal()
+  public boolean isInternal(Env env)
   {
     return false;
   }

@@ -38,6 +38,8 @@ import com.caucho.quercus.program.Function;
 public class Closure extends Callback {
   private static final Value []NULL_ARGS = new Value[0];
   
+  private static final StringValue INVOKE = MethodIntern.intern("__invoke");
+  
   private Function _fun;
   private Value []_args;
 
@@ -96,15 +98,30 @@ public class Closure extends Callback {
   }
 
   @Override
-  public boolean isInternal()
+  public boolean isInternal(Env env)
   {
     return false;
   }
 
   @Override
-  public boolean isValid()
+  public boolean isValid(Env env)
   {
     return true;
+  }
+  
+  //
+  // special methods
+  //
+  
+  @Override
+  public Value callMethod(Env env, 
+                          StringValue methodName, int hash, 
+                          Value []args)
+  {
+    if (methodName == INVOKE || INVOKE.equals(methodName))
+      return call(env, args);
+    else
+      return super.callMethod(env, methodName, hash, args);
   }
 
   public String toString()

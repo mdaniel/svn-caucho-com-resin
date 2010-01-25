@@ -918,7 +918,7 @@ abstract public class StringValue
         return super.toCallable(env);
       }
 
-      return new CallbackFunction(cl.getFunction(env.createString(methodName)));
+      return new CallbackClassMethod(cl, env.createString(methodName));
     }
   }
 

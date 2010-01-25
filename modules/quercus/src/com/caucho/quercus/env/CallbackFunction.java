@@ -37,7 +37,6 @@ import com.caucho.quercus.function.AbstractFunction;
 public class CallbackFunction extends Callback {
  // public static final CallbackFunction INVALID_CALLBACK = new CallbackFunction(null, "Invalid Callback");
 
-  private Env _env;
   private String _funName;
 
   private AbstractFunction _fun;
@@ -46,7 +45,6 @@ public class CallbackFunction extends Callback {
 
   public CallbackFunction(Env env, String funName)
   {
-    _env = env;
     _funName = funName;
   }
 
@@ -69,12 +67,13 @@ public class CallbackFunction extends Callback {
     _fun = fun;
   }
   
-  public boolean isValid()
+  @Override
+  public boolean isValid(Env env)
   {
     if (_fun != null)
       return true;
 
-    return _env.findFunction(_funName) != null;
+    return env.findFunction(_funName) != null;
 
     //return _isInvalid;
   }
@@ -103,9 +102,10 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env)
   {
-    return getFunction().call(env);
+    return getFunction(env).call(env);
   }
 
   /**
@@ -113,9 +113,10 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1)
   {
-    return getFunction().call(env, a1);
+    return getFunction(env).call(env, a1);
   }
 
   /**
@@ -123,9 +124,10 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2)
   {
-    return getFunction().call(env, a1, a2);
+    return getFunction(env).call(env, a1, a2);
   }
 
   /**
@@ -133,9 +135,10 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return getFunction().call(env, a1, a2, a3);
+    return getFunction(env).call(env, a1, a2, a3);
   }
 
   /**
@@ -143,10 +146,11 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3,
                     Value a4)
   {
-    return getFunction().call(env, a1, a2, a3, a4);
+    return getFunction(env).call(env, a1, a2, a3, a4);
   }
 
   /**
@@ -154,15 +158,17 @@ public class CallbackFunction extends Callback {
    *
    * @param env the calling environment
    */
+  @Override
   public Value call(Env env, Value a1, Value a2, Value a3,
                     Value a4, Value a5)
   {
-    return getFunction().call(env, a1, a2, a3, a4, a5);
+    return getFunction(env).call(env, a1, a2, a3, a4, a5);
   }
 
+  @Override
   public Value call(Env env, Value []args)
   {
-    return getFunction().call(env, args);
+    return getFunction(env).call(env, args);
   }
 
   public String getCallbackName()
@@ -170,22 +176,18 @@ public class CallbackFunction extends Callback {
     return _funName;
   }
 
-  public AbstractFunction getFunction()
+  public AbstractFunction getFunction(Env env)
   {
     if (_fun == null)
-      _fun = _env.getFunction(_funName);
+      _fun = env.getFunction(_funName);
 
     return _fun;
   }
 
-  public String toString()
+  @Override
+  public boolean isInternal(Env env)
   {
-    return getClass().getName() + '[' + _funName + ']';
-  }
-
-  public boolean isInternal()
-  {
-    return getFunction() instanceof JavaInvoker;
+    return getFunction(env) instanceof JavaInvoker;
   }
   
   /**
@@ -194,5 +196,10 @@ public class CallbackFunction extends Callback {
   public void varExport(StringBuilder sb)
   {
     sb.append("'' . \"\\0\" . '" + _funName.substring(1) + "'");
+  }
+
+  public String toString()
+  {
+    return getClass().getName() + '[' + _funName + ']';
   }
 }

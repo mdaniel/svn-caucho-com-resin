@@ -92,13 +92,13 @@ abstract public class AbstractFunction extends Callback {
   }
   
   @Override
-  public boolean isInternal()
+  public boolean isInternal(Env env)
   {
     return false;
   }
   
   @Override
-  public boolean isValid()
+  public boolean isValid(Env env)
   {
     return true;
   }

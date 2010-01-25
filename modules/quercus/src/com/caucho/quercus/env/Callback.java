@@ -153,7 +153,8 @@ abstract public class Callback extends Value implements Callable {
    * 
    * @return true if this is an invalid callback reference
    */
-  abstract public boolean isValid();
+  @Override
+  abstract public boolean isValid(Env env);
 
   /**
    * Returns the name of the callback.
@@ -165,7 +166,7 @@ abstract public class Callback extends Value implements Callable {
    * Returns true if this callback is implemented internally (i.e. in Java).
    *
    */
-  abstract public boolean isInternal();
+  abstract public boolean isInternal(Env env);
   
   public String toString()
   {

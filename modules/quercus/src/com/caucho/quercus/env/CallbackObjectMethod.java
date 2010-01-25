@@ -152,7 +152,7 @@ public class CallbackObjectMethod extends Callback {
   }
   
   @Override
-  public boolean isValid()
+  public boolean isValid(Env env)
   {
     return true;
   }
@@ -164,7 +164,7 @@ public class CallbackObjectMethod extends Callback {
   }
 
   @Override
-  public boolean isInternal()
+  public boolean isInternal(Env env)
   {
     // return _fun instanceof JavaInvoker;
     return false;

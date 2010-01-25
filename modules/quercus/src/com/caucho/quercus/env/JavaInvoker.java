@@ -187,10 +187,12 @@ abstract public class JavaInvoker
 
               if (opt.value().equals(Optional.NOT_SET))
                 _defaultExprs[i] = exprFactory.createDefault();
-              else if (opt.value().equals(""))
-                _defaultExprs[i] = QuercusParser.parseDefault("''");
-              else
-                _defaultExprs[i] = QuercusParser.parseDefault(opt.value());
+              else if (opt.value().equals("")) {
+                _defaultExprs[i] = exprFactory.createLiteral(StringValue.EMPTY);
+              }
+              else {
+                _defaultExprs[i] = QuercusParser.parseDefault(exprFactory, opt.value());
+              }
             } else if (Reference.class.isAssignableFrom(ann.annotationType())) {
               if (! Value.class.equals(argType)
                   && ! Var.class.equals(argType)) {

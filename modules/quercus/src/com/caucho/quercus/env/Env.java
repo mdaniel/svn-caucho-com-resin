@@ -3641,7 +3641,7 @@ public class Env {
     name = name.toValue();
 
     if (name instanceof CallbackFunction)
-      return ((CallbackFunction) name).getFunction();
+      return ((CallbackFunction) name).getFunction(this);
 
     return getFunction(name.toString());
   }
@@ -4690,7 +4690,7 @@ public class Env {
       String name = _quercus.getClassName(id);
 
       QuercusClass qcl = findClassExt(name, useAutoload, useImport);
-
+      
       if (qcl != null)
         _qClass[id] = qcl;
       else
@@ -4730,7 +4730,7 @@ public class Env {
           if (size == 0) {
             if (_autoload == null)
               _autoload = findFunction("__autoload");
-
+            
             if (_autoload != null) {
               _autoload.call(this, nameString);
 

@@ -596,7 +596,7 @@ public class ArrayModule
     if (! callbackName.isDefault()) {
       Callable callback = callbackName.toCallable(env);
       
-      if (callback == null || ! callback.isValid()) {
+      if (callback == null || ! callback.isValid(env)) {
         env.warning(L.l("The second argument, '{0}', is not a valid callback",
                         callbackName));
         return NullValue.NULL;
@@ -755,7 +755,7 @@ public class ArrayModule
     if (array == null)
       return NullValue.NULL;
 
-    if (callback == null || ! callback.isValid()) {
+    if (callback == null || ! callback.isValid(env)) {
       env.warning("The second argument, '" + callback +
                   "', should be a valid callback");
 
@@ -1159,7 +1159,7 @@ public class ArrayModule
                                    Callback callback,
                                    @Optional("NULL") Value userData)
   {
-    if (callback == null || ! callback.isValid()) {
+    if (callback == null || ! callback.isValid(env)) {
       env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
       return false;
     }
@@ -1211,7 +1211,7 @@ public class ArrayModule
                                              Callback callback,
                                              @Optional("NULL") Value extra)
   {
-    if (callback == null || ! callback.isValid()) {
+    if (callback == null || ! callback.isValid(env)) {
       env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
       return false;
     }
@@ -1596,7 +1596,7 @@ public class ArrayModule
     if (array == null)
       return false;
 
-    if (! func.isValid()) {
+    if (! func.isValid(env)) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }
@@ -1631,7 +1631,7 @@ public class ArrayModule
     if (array == null)
       return false;
 
-    if (! func.isValid()) {
+    if (! func.isValid(env)) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }
@@ -1663,7 +1663,7 @@ public class ArrayModule
     if (array == null)
       return false;
 
-    if (!func.isValid()) {
+    if (!func.isValid(env)) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }
@@ -2846,7 +2846,7 @@ public class ArrayModule
 
     Callable cmp = callbackValue.toCallable(env);
     
-    if (! cmp.isValid())
+    if (! cmp.isValid(env))
       return NullValue.NULL;
 
     ArrayValue diffArray = new ArrayValueImpl();
@@ -2922,7 +2922,7 @@ public class ArrayModule
 
     Callable cmp = callbackValue.toCallable(env);
     
-    if (! cmp.isValid())
+    if (! cmp.isValid(env))
       return NullValue.NULL;
 
     ArrayValue diffArray = new ArrayValueImpl();
@@ -3006,14 +3006,14 @@ public class ArrayModule
 
     Callable cmpValue = callbackValue.toCallable(env);
 
-    if (! cmpValue.isValid())
+    if (! cmpValue.isValid(env))
       return NullValue.NULL;
 
     Value callbackKey = arrays[arrays.length - 1];
 
     Callable cmpKey = callbackKey.toCallable(env);
 
-    if (! cmpKey.isValid())
+    if (! cmpKey.isValid(env))
       return NullValue.NULL;
 
     ArrayValue diffArray = new ArrayValueImpl();
@@ -3098,7 +3098,7 @@ public class ArrayModule
 
     Callable cmp = callbackValue.toCallable(env);
     
-    if (! cmp.isValid())
+    if (! cmp.isValid(env))
       return NullValue.NULL;
 
     ArrayValue interArray = new ArrayValueImpl();
@@ -3173,7 +3173,7 @@ public class ArrayModule
 
     Callable cmp = callbackValue.toCallable(env);
     
-    if (! cmp.isValid())
+    if (! cmp.isValid(env))
       return NullValue.NULL;
 
     ArrayValue interArray = new ArrayValueImpl();
@@ -3256,14 +3256,14 @@ public class ArrayModule
 
     Callable cmpValue = callbackValue.toCallable(env);
     
-    if (! cmpValue.isValid())
+    if (! cmpValue.isValid(env))
       return NullValue.NULL;
 
     Value callbackKey = arrays[arrays.length - 1];
 
     Callable cmpKey = callbackKey.toCallable(env);
     
-    if (! cmpKey.isValid())
+    if (! cmpKey.isValid(env))
       return NullValue.NULL;
 
     ArrayValue interArray = new ArrayValueImpl();

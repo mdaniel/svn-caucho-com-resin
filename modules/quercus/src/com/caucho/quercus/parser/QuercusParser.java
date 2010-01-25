@@ -397,8 +397,23 @@ public class QuercusParser {
   {
     try {
       Path path = new StringPath(str);
-
+      
       return new QuercusParser(null, path, path.openRead()).parseExpr();
+    } catch (IOException e) {
+      throw new QuercusRuntimeException(e);
+    }
+  }
+
+  public static Expr parseDefault(ExprFactory factory, String str)
+  {
+    try {
+      Path path = new StringPath(str);
+      
+      QuercusParser parser = new QuercusParser(null, path, path.openRead());
+      
+      parser._factory = factory;
+      
+      return parser.parseExpr();
     } catch (IOException e) {
       throw new QuercusRuntimeException(e);
     }
@@ -4431,6 +4446,20 @@ public class QuercusParser {
       throw error(L.l("expected identifier at {0}.", tokenName(token)));
   }
 
+  public String getSystemFunctionName(String name)
+  {
+    int p = name.lastIndexOf('\\');
+    
+    if (p < 0)
+      return name;
+    
+    String systemName = name.substring(p + 1);
+    
+    if (_quercus.findFunction(systemName) != null)
+      return systemName;
+    else
+      return null;
+  }
   private String resolveIdentifier(String id)
   {
     if (id.startsWith("\\"))

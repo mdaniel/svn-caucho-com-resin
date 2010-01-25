@@ -41,7 +41,7 @@ public interface Callable {
   /**
    * Checks for a valid callback.
    */
-  public boolean isValid();
+  public boolean isValid(Env env);
   
   /**
    * Evaluates the callback with no arguments.

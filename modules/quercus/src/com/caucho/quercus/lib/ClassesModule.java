@@ -125,14 +125,14 @@ public class ClassesModule extends AbstractQuercusModule {
   @ReturnNullAsFalse
   public String get_called_class(Env env)
   {
-    QuercusClass cls = env.getCallingClass();
+    Value qThis = env.getThis();
     
-    if (cls == null) {
+    if (qThis == null || qThis.getQuercusClass() == null) {
       env.warning("get_called_class was not called from a class method");
       return null;
     }
     
-    return cls.getName();
+    return qThis.getQuercusClass().getName();
   }
 
   /**
@@ -329,9 +329,19 @@ public class ClassesModule extends AbstractQuercusModule {
    * @param obj the object to test
    * @param methodName the name of the method
    */
-  public static boolean method_exists(Value obj, String methodName)
+  public static boolean method_exists(Env env, 
+                                      Value obj, 
+                                      StringValue methodName)
   {
-    return obj.findFunction(methodName.intern()) != null;
+    QuercusClass qClass = obj.getQuercusClass();
+
+    if (qClass == null)
+      qClass = env.findClass(obj.toString());
+    
+    if (qClass != null)
+      return qClass.findFunction(methodName) != null;
+    else
+      return false;
   }
   
   /**
