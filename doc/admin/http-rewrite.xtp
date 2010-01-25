@@ -350,29 +350,6 @@ be applied if the Dispatch rule matches.</p>
 </s2>
 </s1>
 
-</body>
-</document>
-
-<document>
-<header>
-  <product>resin</product>
-  <title>URL rewrite tags</title>
-  <version>Resin 3.0</version>
-
-  <description>
-<p>Resin's <a href="#rewrite-dispatch">&lt;rewrite-dispatch></a> tag allows
-configuration for URL aliasing, rewriting, dispatching, and redirection.</p>
-
-<p><a href="#rewrite-real-path">&lt;rewrite-real-path></a> configures an alias
-for files located on the filesystem, allowing for the mapping of a virtual directory.</p>
-
-  </description>
-</header>
-
-<body>
-
-<localtoc/>
-
 <defun title="&lt;and&gt;">
 <parents>when, unless</parents>
 

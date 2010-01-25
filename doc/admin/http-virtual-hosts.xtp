@@ -689,24 +689,6 @@ computer that the client is running on.</p>
 </s1>
 
 
-  </body>
-</document>
-
-<document>
-<header>
-  <title>&lt;host>: Virtual Host configuration</title>
-  <version>Resin 3.1</version>
-
-  <description>
-
-  <p>Describes the virtual host configuration tags.</p>
-
-  </description>
-</header>
-<body>
-
-<localtoc/>
-
 <s1 title="See Also">
 
 <ul>

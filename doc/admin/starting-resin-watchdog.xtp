@@ -354,35 +354,6 @@ you can view and manage the watchdog instances.</p>
 
 </s1>
 
-  </body>
-</document>
-
-<document>
-  <header>
-    <product>resin</product>
-    <title>Resin Watchdog</title>
-    <type>contents</type>
-
-    <description>
-<p>
-For reliability and security, Resin servers are started and monitored
-by a separate Resin watchdog process.  The watchdog continually checks
-the health of
-the Resin server and restarts the Resin instance if is becomes unresponsive.
-</p>
-
-<p>In most cases, the watchdog reads the resin.xml and configures itself
-automatically, so no extra configuration is required.  Certain specialized
-configurations like ISPs can configure the watchdog to isolate JVMs
-for protection and security.
-</p>
-    </description>
-  </header>
-
-<body>
-
-<localtoc/>
-
 <s1 title="Overview">
 
 <p>Because the watchdog runs quietly as a separate service, most of

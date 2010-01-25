@@ -699,34 +699,6 @@ generated code like JSP, XSL and EJB classes.</p>
 </s2>
 </s1>
 
-</body>
-</document>
-
-<document>
-<header>
-<product>resin</product>
-<title>Resources: class loaders, environment and IoC</title>
-<version>Resin 3.0</version>
-
-<description>
-<p>Environment tags configure class-loaders, logging, authentication
-and resources like databases, JMS queues, EJB servers, and web service
-clients.  Many of the resources are stored in JNDI or in EL variables
-for later assembly.</p>
-
-<p>Any environment resource can appear in any
-of Resin environments: &lt;resin>, &lt;cluster>, &lt;host> and &lt;web-app>.
-Resources configured at parent levels are shared among all children,
-so a database can share connection pools for all web-apps or an
-authenticator can provide single-signon.</p>
-
-</description>
-</header>
-
-<body>
-
-<localtoc/>
-
 <defun title="&lt;authenticator>" occur="*">
 <parents>resin, cluster, host, web-app, login-config</parents>
   <!-- com.caucho.config.types.Authenticator -->
@@ -4066,4 +4038,3 @@ element work-dir {
 
 </body>
 </document>
-[[Media:Example.ogg]]

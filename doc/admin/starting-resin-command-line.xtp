@@ -184,27 +184,6 @@
       </example>
 
       </s1>
-  </body>
-</document>
-
-<document>
-<header>
-<product>resin</product>
-<title>JVM Tuning</title>
-<description>
-
-<p>
-Better performance in production servers is possible with proper configuration
-of JVM parameters, particularily those related to memory usage and garbage
-collection.
-</p>
-
-</description>
-</header>
-
-<body>
-<summary/>
-
 
 <s1 name="memory" title="Heap size">
 
@@ -415,21 +394,6 @@ Thread 12689: (state = BLOCKED)
 
 </s1>
 
-</body>
-</document>
-
-<document>
-  <header>
-    <product>resin</product>
-    <version>Resin 3.1</version>
-    <title>Command-Line Configuration</title>
-    <description>
-      <p>While most configuration options have been made available in
-        resin.xml, this section describes some common command-line
-        options.</p>
-    </description>
-  </header>
-  <body>
     <s1 title="./configure options">
 
     <p>
@@ -594,27 +558,6 @@ Thread 12689: (state = BLOCKED)
       </example>
 
       </s1>
-  </body>
-</document>
-
-<document>
-<header>
-<product>resin</product>
-<title>JVM Tuning</title>
-<description>
-
-<p>
-Better performance in production servers is possible with proper configuration
-of JVM parameters, particularily those related to memory usage and garbage
-collection.
-</p>
-
-</description>
-</header>
-
-<body>
-<summary/>
-
 
 <s1 name="memory" title="Heap size">
 
@@ -824,18 +767,6 @@ Thread 12689: (state = BLOCKED)
 </example>
 
 </s1>
-
-</body>
-</document>
-
-<document>
-  <header>
-    <product>resin</product>
-    <title>How to start Resin when Linux Boots</title>
-  </header>
-
-  <body>
-    <localtoc/>
 
 <s1 title="Acknowledgements">
 <p><em>Thanks to Guy McArthur and Carlos Hanson for the examples and much

@@ -12,7 +12,8 @@ MBeans.
 </header>
 
 <body>
-<summary localtoc="true"/>
+
+<localtoc/>
 
 <s1 title="JDK 5.0 and JMX">
 
@@ -101,24 +102,6 @@ unix&gt; jconsole
 <i>Enter the username and password on the "Remote" tab</i>
 </p>
 </s1>
-
-</body>
-</document>
-
-<document>
-<header>
-<product>resin</product>
-<title>Instrumenting Resources</title>
-<description>
-<p>
-The facilities of JMX are a convenient way to provide an administration
-interface to objects and components in web applications.  
-</p>
-</description>
-</header>
-
-<body>
-<summary/>
 
 <s1 title="Instrumenting Resources">
 
@@ -228,26 +211,6 @@ a view of your servlets from /resin-status.
 </s2>
 
 </s1>
-
-  </body>
-</document>
-
-<document>
-  <header>
-    <product>resin</product>
-    <title>Information Servlet /resin-status </title>
-    <type>contents</type>
-    <description>
-      <p>Resin provides a primitive status servlet
-      /resin-status.  It's disabled by default to
-      avoid any security issues.
-      </p>
-    </description>
-  </header>
-
-  <body>
-    <summary/>
-
 
 <s1 title="Configure the /resin-status servlet">
 

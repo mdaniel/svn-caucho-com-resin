@@ -369,26 +369,6 @@ server is running.</p>
 
 </s1> <!-- startup-mode -->
 
-</body>
-</document>
-
-<document>
-<header>
-  <title>server: Server tag configuration</title>
-  <version>Resin 3.1</version>
-
-  <description>
-
-  <p>The &lt;server> tag configures a JVM instance in a cluster.  It
-configures HTTP and cluster sockets, keepalives and timeouts, thread pooling,
-load balancing, and JVM arguments.</p>
-
-  </description>
-</header>
-<body>
-
-<localtoc/>
-
 <s1 title="See Also">
 
 <ul>
@@ -1418,24 +1398,6 @@ address.</p>
 
 </defun>
 
-</body>
-</document>
-
-<document>
-<header>
-  <product>resin</product>
-  <title>Session tags</title>
-  <version>Resin 3.0</version>
-
-  <description>
-    <p>Resin adds a number of additions to the standard <var>session-config</var> tag.</p>
-  </description>
-</header>
-
-<body>
-
-<localtoc/>
-
 <defun title="&lt;cookie-domain>">
 <parents>session-config</parents>
 
@@ -1710,21 +1672,6 @@ idle session before invalidating it.  The value is specified in minutes.</p>
 
 </defun>
 
-</body>
-
-</document>
-
-<?xml version="1.0"?>
-<document>
-  <header>
-    <product>resin</product>
-    <title>Cluster Application Deployment</title>
-    <type>contents</type>
-    <description>
-      <p/>
-    </description>
-  </header>
-  <body>
     <s1 title="Maven Deploy Client">
       <example title="Configuring the Maven Plugin in a pom.xml file">
 &lt;?xml version="1.0"?>
@@ -2243,24 +2190,6 @@ idle session before invalidating it.  The value is specified in minutes.</p>
         </tr>
       </deftable>
     </s1>
-  </body>
-</document>
-
-<document>
-<header>
-  <title>port: Port tag configuration</title>
-  <version>Resin 3.1</version>
-
-  <description>
-
-  <p>The port tags configure &lt;http> ports, addresses, cluster-ports
-and custom protocol TCP ports.</p>
-
-  </description>
-</header>
-<body>
-
-<localtoc/>
 
 <s1 title="See Also">
 

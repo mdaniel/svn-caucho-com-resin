@@ -3,7 +3,7 @@
     <title>Logging</title>
     <type>contents</type>
   <description>
-  <p>Configuration for java.util and HTTP access logging including rollover.
+  <p>Configuration for java.util and HTTP access logging including rollover.</p>
   </description>
     
   </header>
