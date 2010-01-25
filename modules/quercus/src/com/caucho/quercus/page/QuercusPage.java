@@ -147,15 +147,15 @@ abstract public class QuercusPage
   {
     QuercusPage compile = getCompiledPage();
 
-    if (compile != null)
-      return compile.executeTop(env);
-    
     Path oldPwd = env.getPwd();
 
     Path pwd = getPwd(env);
 
     env.setPwd(pwd);
     try {
+      if (compile != null)
+        return compile.executeTop(env);
+      
       return execute(env);
     } catch (QuercusLanguageException e) {
       if (env.getExceptionHandler() != null) {

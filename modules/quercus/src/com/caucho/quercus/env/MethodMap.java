@@ -112,9 +112,15 @@ public final class MethodMap<V>
 
     Env env = Env.getCurrent();
     
-    env.error(L.l("Call to undefined method {0}::{1}",
-                  _quercusClass.getName(), key));
-
+    if (_quercusClass != null) {
+      env.error(L.l("Call to undefined method {0}::{1}",
+                    _quercusClass.getName(), key));
+    }
+    else {
+      env.error(L.l("Call to undefined function {0}",
+                    key));
+    }
+    
     throw new IllegalStateException();
   }
 
