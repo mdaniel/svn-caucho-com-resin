@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.statement.Statement;
 
@@ -61,7 +62,7 @@ abstract public class AbstractVarExpr extends Expr {
   @Override
   public Expr createAssign(QuercusParser parser, Expr value)
   {
-    return parser.getExprFactory().createAssign(this, value);
+    return value.createAssignFrom(parser, this);
   }
 
   /**
@@ -104,12 +105,13 @@ abstract public class AbstractVarExpr extends Expr {
   }
 
   /**
-   * Evaluates the expression.
+   * Evaluates the expression, returning a Value.
    *
    * @param env the calling environment.
    *
    * @return the expression value.
    */
+  @Override
   abstract public Value eval(Env env);
 
   /**
@@ -119,7 +121,21 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public Value evalRef(Env env);
+  @Override
+  abstract public Var evalVar(Env env);
+
+  /**
+   * Evaluates the expression as a reference when possible.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalRef(Env env)
+  {
+    return evalVar(env);
+  }
 
   /**
    * Evaluates the expression as an argument.
@@ -128,7 +144,50 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public Value evalArg(Env env, boolean isTop);
+  @Override
+  public Value evalArg(Env env, boolean isTop)
+  {
+    return evalVar(env);
+  }
+
+  /**
+   * Evaluates the expression and copies the result for an assignment.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalCopy(Env env)
+  {
+    return eval(env).copy();
+  }
+
+  /**
+   * Evaluates the expression as an array.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalArray(Env env)
+  {
+    return evalVar(env).toArray();
+  }
+
+  /**
+   * Evaluates the expression as an object.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalObject(Env env)
+  {
+    return evalVar(env).toObject(env);
+  }
 
   /**
    * Evaluates the expression as an argument.
@@ -146,6 +205,19 @@ abstract public class AbstractVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  abstract public void evalAssign(Env env, Value value);
+  @Override
+  public Value evalAssignValue(Env env, Value value)
+  {
+    return evalAssignRef(env, value);
+  }
+
+  /**
+   * Assign the variable with a new reference value.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  abstract public Value evalAssignRef(Env env, Value value);
 }
 

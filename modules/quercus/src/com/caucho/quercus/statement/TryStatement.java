@@ -84,9 +84,9 @@ public class TryStatement extends Statement {
         if (value != null && value.isA(item.getId()) ||
             item.getId().equals("Exception")) {
           if (value != null)
-            item.getExpr().evalAssign(env, value);
+            item.getExpr().evalAssignValue(env, value);
           else
-            item.getExpr().evalAssign(env, NullValue.NULL);
+            item.getExpr().evalAssignValue(env, NullValue.NULL);
               
           return item.getBlock().execute(env);
         }
@@ -99,7 +99,7 @@ public class TryStatement extends Statement {
         Catch item = _catchList.get(i);
 
         if (item.getId().equals("QuercusDieException")) {
-          item.getExpr().evalAssign(env, env.createException(e));
+          item.getExpr().evalAssignValue(env, env.createException(e));
 
           return item.getBlock().execute(env);
         }
@@ -112,7 +112,7 @@ public class TryStatement extends Statement {
         Catch item = _catchList.get(i);
 
         if (item.getId().equals("QuercusExitException")) {
-          item.getExpr().evalAssign(env, env.createException(e));
+          item.getExpr().evalAssignValue(env, env.createException(e));
 
           return item.getBlock().execute(env);
         }
@@ -125,7 +125,7 @@ public class TryStatement extends Statement {
         Catch item = _catchList.get(i);
 
         if (item.getId().equals("Exception")) {
-          item.getExpr().evalAssign(env, env.createException(e));
+          item.getExpr().evalAssignValue(env, env.createException(e));
 
           return item.getBlock().execute(env);
         }

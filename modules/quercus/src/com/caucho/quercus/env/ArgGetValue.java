@@ -78,7 +78,7 @@ public class ArgGetValue extends Value
   {
     // php/3d55, php/3d49, php/3921
     
-    return _obj.getRef(_index).toRefVar();
+    return _obj.getVar(_index).toRefVar();
   }
 
   /**
@@ -88,7 +88,7 @@ public class ArgGetValue extends Value
   public Value toRefValue()
   {
     // php/3a57
-    return _obj.getRef(_index);
+    return _obj.getVar(_index);
   }
 
   /**
@@ -129,10 +129,10 @@ public class ArgGetValue extends Value
   /**
    * Converts to a reference.
    */
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
     // php/3d1p
-    return _obj.getArray(_index).getRef(index);
+    return _obj.getArray(_index).getVar(index);
   }
 
   /**
@@ -146,10 +146,10 @@ public class ArgGetValue extends Value
   /**
    * Converts to a reference variable.
    */
-  public Var getFieldRef(Env env, StringValue index)
+  public Var getFieldVar(Env env, StringValue index)
   {
     // php/3d2p
-    return _obj.getObject(env, _index).getFieldRef(env, index);
+    return _obj.getObject(env, _index).getFieldVar(env, index);
   }
   
   //

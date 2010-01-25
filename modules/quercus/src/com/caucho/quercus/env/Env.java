@@ -135,13 +135,32 @@ public class Env {
   private static final int HTTP_SERVER_VARS = 15;
   private static final int HTTP_RAW_POST_DATA = 16;
 
-  private static final IntMap SPECIAL_VARS = new IntMap();
+  private static final IntMap SPECIAL_VARS
+    = new IntMap();
 
   private static final StringValue PHP_SELF_STRING
     = new ConstStringValue("PHP_SELF");
 
   private static final StringValue UTF8_STRING
     = new ConstStringValue("utf-8");
+  
+  private static final StringValue S_GET
+    = new ConstStringValue("_GET");
+  
+  private static final StringValue S_POST
+    = new ConstStringValue("_POST");
+  
+  private static final StringValue S_SESSION
+    = new ConstStringValue("_SESSION");
+  
+  private static final StringValue S_SERVER
+    = new ConstStringValue("_SERVER");
+  
+  private static final StringValue S_COOKIE
+    = new ConstStringValue("_COOKIE");
+  
+  private static final StringValue S_FILES
+    = new ConstStringValue("_FILES");
 
   public static final Value []EMPTY_VALUE = new Value[0];
 
@@ -189,17 +208,17 @@ public class Env {
   public Value []_const;
 
   // Globals
-  private Map<String, EnvVar> _globalMap
-    = new HashMap<String, EnvVar>();
+  private Map<StringValue, EnvVar> _globalMap
+    = new HashMap<StringValue, EnvVar>();
 
   private EnvVar []_globalList;
   
   // Statics
-  private Map<String, Var> _staticMap
-    = new HashMap<String, Var>();
+  private Map<StringValue, Var> _staticMap
+    = new HashMap<StringValue, Var>();
 
   // Current env
-  private Map<String, EnvVar> _map = _globalMap;
+  private Map<StringValue, EnvVar> _map = _globalMap;
 
   private HashMap<String, Value> _iniMap;
 
@@ -243,7 +262,7 @@ public class Env {
   private HashSet<String> _autoloadClasses
     = new HashSet<String>();
 
-  private ArrayList<Callback> _autoloadList;
+  private ArrayList<Callable> _autoloadList;
   private InternalAutoloadCallback _internalAutoload;
   private Location _location;
 
@@ -1530,11 +1549,11 @@ public class Env {
     _session = session;
 
     if (session != null) {
-      Value var = getGlobalVar("_SESSION");
+      Value var = getGlobalVar(S_SESSION);
 
       if (! (var instanceof SessionVar)) {
         var = new SessionVar();
-        setGlobalValue("_SESSION", var);
+        setGlobalValue(S_SESSION, var);
       }
 
       var.set(session);
@@ -1545,7 +1564,7 @@ public class Env {
     }
     else {
       // php/1k0v
-      Value v = getGlobalVar("_SESSION");
+      Value v = getGlobalVar(S_SESSION);
 
       if (v != null)
         v.set(UnsetValue.UNSET);
@@ -1759,7 +1778,7 @@ public class Env {
   /**
    * Gets a value.
    */
-  public Value getValue(String name)
+  public Value getValue(StringValue name)
   {
     return getValue(name, true, false);
   }
@@ -1767,7 +1786,7 @@ public class Env {
   /**
    * Gets a value.
    */
-  public Value getValue(String name,
+  public Value getValue(StringValue name,
                         boolean isAutoCreate,
                         boolean isOutputNotice)
   {
@@ -1799,10 +1818,15 @@ public class Env {
     return value;
   }
 
+  public Value getGlobalValue(String name)
+  {
+    return getGlobalValue(createString(name));
+  }
+  
   /**
    * Gets a global
    */
-  public Value getGlobalValue(String name)
+  public Value getGlobalValue(StringValue name)
   {
     EnvVar var = getGlobalEnvVar(name);
 
@@ -1824,7 +1848,7 @@ public class Env {
    * @param name the variable name
    * @param var the current value of the variable
    */
-  public final Var getVar(String name, Value value)
+  public final Var getVar(StringValue name, Value value)
   {
     if (value != null)
       return (Var) value;
@@ -1838,7 +1862,7 @@ public class Env {
    * @param name the variable name
    * @param value the current value of the variable
    */
-  public final Var getGlobalVar(String name, Value value)
+  public final Var getGlobalVar(StringValue name, Value value)
   {
     if (value != null)
       return (Var) value;
@@ -1849,13 +1873,13 @@ public class Env {
   /**
    * Gets a value.
    */
-  public Var getRef(String name)
+  public Var getRef(StringValue name)
   {
     EnvVar envVar = getEnvVar(name);
 
     // XXX: can return null?
 
-    return envVar.getRef();
+    return envVar.getVar();
 
     /*
     Var var = _map.get(name);
@@ -1874,12 +1898,12 @@ public class Env {
   /**
    * Gets a value.
    */
-  public Var getRef(String name, boolean isAutoCreate)
+  public Var getRef(StringValue name, boolean isAutoCreate)
   {
     EnvVar envVar = getEnvVar(name, isAutoCreate, true);
 
     if (envVar != null)
-      return envVar.getRef();
+      return envVar.getVar();
     else
       return null;
   }
@@ -1895,16 +1919,16 @@ public class Env {
   /**
    * Gets a global value.
    */
-  public Var getGlobalRef(String name)
+  public Var getGlobalRef(StringValue name)
   {
     EnvVar envVar = getGlobalEnvVar(name);
 
     // XXX: not create?
 
-    return envVar.getRef();
+    return envVar.getVar();
   }
 
-  public final EnvVar getEnvVar(String name)
+  public final EnvVar getEnvVar(StringValue name)
   {
     return getEnvVar(name, true, false);
   }
@@ -1915,7 +1939,7 @@ public class Env {
    * @param name the variable name
    * @param var the current value of the variable
    */
-  public final EnvVar getEnvVar(String name,
+  public final EnvVar getEnvVar(StringValue name,
                                 boolean isAutoCreate,
                                 boolean isOutputNotice)
   {
@@ -1954,7 +1978,7 @@ public class Env {
    *
    * @param name the variable name
    */
-  public final EnvVar getGlobalEnvVar(String name)
+  public final EnvVar getGlobalEnvVar(StringValue name)
   {
     return getGlobalEnvVar(name, true, false);
   }
@@ -1965,7 +1989,7 @@ public class Env {
    * @param name the variable name
    * @param isAutoCreate
    */
-  public final EnvVar getGlobalEnvVar(String name,
+  public final EnvVar getGlobalEnvVar(StringValue name,
                                       boolean isAutoCreate,
                                       boolean isOutputNotice)
   {
@@ -2000,7 +2024,7 @@ public class Env {
       }
 
       Var var = new Var();
-      var.setGlobal();
+      // var.setGlobal();
 
       envVar = new EnvVarImpl(var);
     }
@@ -2013,9 +2037,9 @@ public class Env {
   /**
    * Pushes a new environment.
    */
-  public Map<String,EnvVar> pushEnv(Map<String,EnvVar> map)
+  public Map<StringValue,EnvVar> pushEnv(Map<StringValue,EnvVar> map)
   {
-    Map<String,EnvVar> oldEnv = _map;
+    Map<StringValue,EnvVar> oldEnv = _map;
 
     _map = map;
 
@@ -2025,7 +2049,7 @@ public class Env {
   /**
    * Restores the old environment.
    */
-  public void popEnv(Map<String,EnvVar> oldEnv)
+  public void popEnv(Map<StringValue,EnvVar> oldEnv)
   {
     _map = oldEnv;
   }
@@ -2033,7 +2057,7 @@ public class Env {
   /**
    * Returns the current environment.
    */
-  public Map<String,EnvVar> getEnv()
+  public Map<StringValue,EnvVar> getEnv()
   {
     return _map;
   }
@@ -2041,7 +2065,7 @@ public class Env {
   /**
    * Returns the current environment.
    */
-  public Map<String,EnvVar> getGlobalEnv()
+  public Map<StringValue,EnvVar> getGlobalEnv()
   {
     return _globalMap;
   }
@@ -2064,7 +2088,7 @@ public class Env {
    *
    * @param name the variable name
    */
-  public final Var getStaticVar(String name)
+  public final Var getStaticVar(StringValue name)
   {
     Var var = _staticMap.get(name);
     
@@ -2081,7 +2105,7 @@ public class Env {
    *
    * @param name the variable name
    */
-  public final Value getStaticValue(String name)
+  public final Value getStaticValue(StringValue name)
   {
     Var var = _staticMap.get(name);
 
@@ -2090,6 +2114,33 @@ public class Env {
     }
     else
       return NullValue.NULL;
+  }
+
+  /**
+   * Gets a static variable
+   *
+   * @param name the variable name
+   */
+  public final Var setStaticRef(StringValue name, Value value)
+  {
+    if (value.isVar()) {
+      Var var = (Var) value;
+      
+      _staticMap.put(name, var);
+      
+      return var;
+    }
+    
+    Var var = _staticMap.get(name);
+    
+    if (var == null) {
+      var = new Var();
+      _staticMap.put(name, var);
+    }
+    
+    var.set(value);
+    
+    return var;
   }
 
   /**
@@ -2109,9 +2160,9 @@ public class Env {
     if (callingClass.isA(className))
       className = callingClass.getName();
 
-    name = className + "::" + name;
+    StringValue varName = createString(className).append("::").append(name);
     
-    return getStaticVar(name);
+    return getStaticVar(varName);
   }
 
   /**
@@ -2124,7 +2175,7 @@ public class Env {
     EnvVar envVar = _map.get(name);
     
     if (envVar != null)
-      envVar.setRef(new Var());
+      envVar.setVar(new Var());
 
     return null;
   }
@@ -2162,12 +2213,12 @@ public class Env {
    *
    * @param name the variable name
    */
-  public final Var unsetLocalVar(String name)
+  public final Var unsetLocalVar(StringValue name)
   {
     EnvVar envVar = _map.get(name);
 
     if (envVar != null)
-      envVar.setRef(new Var());
+      envVar.setVar(new Var());
 
     return null;
   }
@@ -2177,12 +2228,12 @@ public class Env {
    *
    * @param name the variable name
    */
-  public final Var unsetGlobalVar(String name)
+  public final Var unsetGlobalVar(StringValue name)
   {
     EnvVar envVar = _globalMap.get(name);
     
     if (envVar != null)
-      envVar.setRef(new Var());
+      envVar.setVar(new Var());
 
     return null;
   }
@@ -2228,7 +2279,7 @@ public class Env {
     return value;
   }
 
-  private EnvVar getSuperGlobalRef(String name, boolean isGlobal)
+  private EnvVar getSuperGlobalRef(StringValue name, boolean isGlobal)
   {
     return getSuperGlobalRef(name, false, isGlobal);
   }
@@ -2236,7 +2287,7 @@ public class Env {
   /**
    * Returns a superglobal.
    */
-  private EnvVar getSuperGlobalRef(String name,
+  private EnvVar getSuperGlobalRef(StringValue name,
                                    boolean isCheckGlobal,
                                    boolean isGlobal)
   {
@@ -2270,7 +2321,7 @@ public class Env {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar("_POST");
+          return getGlobalEnvVar(S_POST);
 
       case _POST: {
         var = new Var();
@@ -2296,7 +2347,7 @@ public class Env {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar("_FILES");
+          return getGlobalEnvVar(S_FILES);
 
       case _FILES: {
         var = new Var();
@@ -2323,7 +2374,7 @@ public class Env {
         else if (! isGlobal)
           return null;
         else
-          return getGlobalEnvVar("_GET");
+          return getGlobalEnvVar(S_GET);
 
       case _GET: {
         if (isCheckGlobal) {
@@ -2418,7 +2469,7 @@ public class Env {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar("_SERVER");
+          return getGlobalEnvVar(S_SERVER);
 
       case _SERVER: {
         var = new Var();
@@ -2479,7 +2530,7 @@ public class Env {
         if (! QuercusContext.INI_REGISTER_LONG_ARRAYS.getAsBoolean(this))
           return null;
         else
-          return getGlobalEnvVar("_COOKIE");
+          return getGlobalEnvVar(S_COOKIE);
 
       case _COOKIE: {
         var = new Var();
@@ -2576,7 +2627,7 @@ public class Env {
   /**
    * Gets a value.
    */
-  protected EnvVar getGlobalSpecialRef(String name)
+  protected EnvVar getGlobalSpecialRef(StringValue name)
   {
     if (QuercusContext.isSuperGlobal(name))
       return _globalMap.get(name);
@@ -2584,7 +2635,7 @@ public class Env {
       return null;
   }
 
-  protected EnvVar getGlobalScriptContextRef(String name)
+  protected EnvVar getGlobalScriptContextRef(StringValue name)
   {
     if (_scriptContext == null)
       return null;
@@ -2594,7 +2645,7 @@ public class Env {
     if (envVar != null)
       return envVar;
 
-    Object value = _scriptContext.getAttribute(name);
+    Object value = _scriptContext.getAttribute(name.toString());
 
     if (value == null) {
       Bindings bindings
@@ -2671,14 +2722,18 @@ public class Env {
     return sb.toString();
   }
 
+  public Var getVar(String name)
+  {
+    return getVar(createString(name));
+  }
   /**
    * Gets a value.
    */
-  public Var getVar(String name)
+  public Var getVar(StringValue name)
   {
     EnvVar envVar = getEnvVar(name);
 
-    return envVar.getRef();
+    return envVar.getVar();
   }
 
   /**
@@ -2686,39 +2741,58 @@ public class Env {
    */
   public Var getGlobalVar(String name)
   {
+    EnvVar envVar = getGlobalEnvVar(createString(name));
+
+    return envVar.getVar();
+  }
+
+  /**
+   * Gets a value.
+   */
+  public Var getGlobalVar(StringValue name)
+  {
     EnvVar envVar = getGlobalEnvVar(name);
 
-    return envVar.getRef();
+    return envVar.getVar();
   }
 
+  public void setValue(String name, Value value)
+  {
+    // XXX: update to Quercus
+    setValue(createString(name), value);
+  }
   /**
-   * Sets a value.
+   * Sets a value. value must not be a Var.
    */
-  public Value setValue(String name, Value value)
+  public Value setValue(StringValue name, Value value)
   {
     EnvVar envVar = getEnvVar(name);
 
-    if (value instanceof Var)
-      envVar.setRef((Var) value);
-    else
-      envVar.set(value);
+    envVar.set(value);
 
     return value;
   }
 
   /**
-   * Sets a value.
+   * Sets a variable.
    */
-  public Value setRef(String name, Value value)
+  public Var setVar(StringValue name, Var var)
   {
     EnvVar envVar = getEnvVar(name);
 
-    if (value instanceof Var)
-      envVar.setRef((Var) value);
-    else
-      envVar.set(value);
+    envVar.setVar(var);
 
-    return value;
+    return var;
+  }
+
+  /**
+   * Sets a value.
+   */
+  public Var setRef(StringValue name, Value value)
+  {
+    EnvVar envVar = getEnvVar(name);
+
+    return envVar.setRef(value);
   }
 
   /**
@@ -2762,6 +2836,14 @@ public class Env {
    * External calls to set a global value.
    */
   public Value setGlobalValue(String name, Value value)
+  {
+    return setGlobalValue(createString(name), value);
+  }
+
+  /**
+   * External calls to set a global value.
+   */
+  public Value setGlobalValue(StringValue name, Value value)
   {
     EnvVar envVar = getGlobalEnvVar(name);
 
@@ -2833,7 +2915,7 @@ public class Env {
     EnvVar envVar = getGlobalRaw(fieldName);
 
     if (envVar != null)
-      return envVar.getRef();
+      return envVar.getVar();
 
     QuercusClass cl = getClass(className);
 
@@ -4103,7 +4185,7 @@ public class Env {
    * Returns true for any special variables, i.e. which should not be
    * saved
    */
-  boolean isSpecialVar(String name)
+  boolean isSpecialVar(StringValue name)
   {
     if (_quercus.isSuperGlobal(name))
       return true;
@@ -4150,19 +4232,19 @@ public class Env {
     IntMap globalNameMap = saveState.getGlobalNameMap();
     Value []globalList = saveState.getGlobalList();
 
-    Map<String,EnvVar> oldGlobal = _globalMap;
+    Map<StringValue,EnvVar> oldGlobal = _globalMap;
 
     _globalMap = new LazySymbolMap(globalNameMap, globalList);
     _map = _globalMap;
 
     // php/4045 - set the vars for any active EnvVar entries
-    for (Map.Entry<String,EnvVar> oldEntry : oldGlobal.entrySet()) {
+    for (Map.Entry<StringValue,EnvVar> oldEntry : oldGlobal.entrySet()) {
       EnvVar oldEnvVar = oldEntry.getValue();
 
       EnvVar newEnvVar = _globalMap.get(oldEntry.getKey());
 
       if (newEnvVar != null)
-        oldEnvVar.setRef(newEnvVar.getRef());
+        oldEnvVar.setVar(newEnvVar.getVar());
     }
 
     // php/404j - include_once
@@ -4634,7 +4716,7 @@ public class Env {
           int size = _autoloadList != null ? _autoloadList.size() : 0;
 
           for (int i = 0; i < size; i++) {
-            Callback cb = _autoloadList.get(i);
+            Callable cb = _autoloadList.get(i);
 
             cb.call(this, nameString);
 
@@ -4845,13 +4927,13 @@ public class Env {
   /*
    * Registers an SPL autoload function.
    */
-  public void addAutoloadFunction(Callback fun)
+  public void addAutoloadFunction(Callable fun)
   {
     if (fun == null)
       throw new NullPointerException();
 
     if (_autoloadList == null)
-      _autoloadList = new ArrayList<Callback>();
+      _autoloadList = new ArrayList<Callable>();
 
     _autoloadList.add(fun);
   }
@@ -4873,7 +4955,7 @@ public class Env {
   /*
    * Returns the registered SPL autoload functions.
    */
-  public ArrayList<Callback> getAutoloadFunctions()
+  public ArrayList<Callable> getAutoloadFunctions()
   {
     return _autoloadList;
   }
@@ -7089,21 +7171,21 @@ public class Env {
   }
 
   static {
-    SPECIAL_VARS.put("GLOBALS", _GLOBAL);
-    SPECIAL_VARS.put("_SERVER", _SERVER);
-    SPECIAL_VARS.put("_GET", _GET);
-    SPECIAL_VARS.put("_POST", _POST);
-    SPECIAL_VARS.put("_FILES", _FILES);
-    SPECIAL_VARS.put("_REQUEST", _REQUEST);
-    SPECIAL_VARS.put("_COOKIE", _COOKIE);
-    SPECIAL_VARS.put("_SESSION", _SESSION);
-    SPECIAL_VARS.put("_ENV", _ENV);
-    SPECIAL_VARS.put("HTTP_GET_VARS", HTTP_GET_VARS);
-    SPECIAL_VARS.put("HTTP_POST_VARS", HTTP_POST_VARS);
-    SPECIAL_VARS.put("HTTP_POST_FILES", HTTP_POST_FILES);
-    SPECIAL_VARS.put("HTTP_COOKIE_VARS", HTTP_COOKIE_VARS);
-    SPECIAL_VARS.put("HTTP_SERVER_VARS", HTTP_SERVER_VARS);
-    SPECIAL_VARS.put("PHP_SELF", PHP_SELF);
-    SPECIAL_VARS.put("HTTP_RAW_POST_DATA", HTTP_RAW_POST_DATA);
+    SPECIAL_VARS.put(MethodIntern.intern("GLOBALS"), _GLOBAL);
+    SPECIAL_VARS.put(MethodIntern.intern("_SERVER"), _SERVER);
+    SPECIAL_VARS.put(MethodIntern.intern("_GET"), _GET);
+    SPECIAL_VARS.put(MethodIntern.intern("_POST"), _POST);
+    SPECIAL_VARS.put(MethodIntern.intern("_FILES"), _FILES);
+    SPECIAL_VARS.put(MethodIntern.intern("_REQUEST"), _REQUEST);
+    SPECIAL_VARS.put(MethodIntern.intern("_COOKIE"), _COOKIE);
+    SPECIAL_VARS.put(MethodIntern.intern("_SESSION"), _SESSION);
+    SPECIAL_VARS.put(MethodIntern.intern("_ENV"), _ENV);
+    SPECIAL_VARS.put(MethodIntern.intern("HTTP_GET_VARS"), HTTP_GET_VARS);
+    SPECIAL_VARS.put(MethodIntern.intern("HTTP_POST_VARS"), HTTP_POST_VARS);
+    SPECIAL_VARS.put(MethodIntern.intern("HTTP_POST_FILES"), HTTP_POST_FILES);
+    SPECIAL_VARS.put(MethodIntern.intern("HTTP_COOKIE_VARS"), HTTP_COOKIE_VARS);
+    SPECIAL_VARS.put(MethodIntern.intern("HTTP_SERVER_VARS"), HTTP_SERVER_VARS);
+    SPECIAL_VARS.put(MethodIntern.intern("PHP_SELF"), PHP_SELF);
+    SPECIAL_VARS.put(MethodIntern.intern("HTTP_RAW_POST_DATA"), HTTP_RAW_POST_DATA);
   }
 }

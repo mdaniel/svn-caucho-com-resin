@@ -34,7 +34,9 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 
 /**
  * Represents a PHP variable expression.
@@ -69,76 +71,9 @@ public class VarVarExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    String varName = _var.evalString(env);
+    StringValue varName = _var.evalStringValue(env);
 
     Value value = env.getValue(varName);
-
-    if (value != null)
-      return value;
-    else
-      return NULL;
-  }
-
-  /**
-   * Evaluates the expression, returning a copy as necessary.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalCopy(Env env)
-  {
-    String varName = _var.evalString(env).intern();
-
-    Value value = env.getValue(varName);
-
-    if (value != null)
-      return value.copy();
-    else
-      return NULL;
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public void evalAssign(Env env, Value value)
-  {
-    String varName = _var.evalString(env);
-
-    // php/0d63
-    env.getVar(varName).set(value.toValue());
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public void evalUnset(Env env)
-  {
-    String varName = _var.evalString(env).intern();
-
-    env.unsetVar(varName);
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalRef(Env env)
-  {
-    String varName = _var.evalString(env).intern();
-
-    Value value = env.getVar(varName);
 
     if (value != null)
       return value;
@@ -154,9 +89,57 @@ public class VarVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
+  public Value evalAssignRef(Env env, Value value)
+  {
+    StringValue varName = _var.evalStringValue(env);
+
+    // php/0d63
+    env.setRef(varName, value);
+    
+    return value;
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public void evalUnset(Env env)
+  {
+    String varName = _var.evalString(env).intern();
+
+    env.unsetVar(varName);
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Var evalVar(Env env)
+  {
+    StringValue varName = _var.evalStringValue(env);
+
+    return env.getVar(varName);
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    String varName = _var.evalString(env);
+    StringValue varName = _var.evalStringValue(env);
 
     Value value = env.getVar(varName);
 
@@ -175,7 +158,7 @@ public class VarVarExpr extends AbstractVarExpr {
    */
   public Value evalArray(Env env)
   {
-    String varName = _var.evalString(env).intern();
+    StringValue varName = _var.evalStringValue(env);
 
     Value value = env.getVar(varName);
 
@@ -184,7 +167,7 @@ public class VarVarExpr extends AbstractVarExpr {
     else {
       ArrayValue array = new ArrayValueImpl();
 
-      env.setVar(varName, array);
+      env.setRef(varName, array);
 
       return array;
     }

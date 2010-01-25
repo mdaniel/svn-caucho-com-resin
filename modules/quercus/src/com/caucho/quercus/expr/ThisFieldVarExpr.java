@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.util.L10N;
 
 /**
@@ -73,12 +74,13 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Var evalVar(Env env)
   {
     // quercus/0d1k
     Value value = env.getThis();
 
-    return value.getThisFieldRef(env, _nameExpr.evalStringValue(env));
+    return value.getThisFieldVar(env, _nameExpr.evalStringValue(env));
   }
   
   /**
@@ -88,6 +90,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     Value obj = env.getThis();
@@ -102,11 +105,31 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
+  @Override
+  public Value evalAssignValue(Env env, Value value)
   {
     Value obj = env.getThis();
 
     obj.putThisField(env, _nameExpr.evalStringValue(env), value);
+    
+    return value;
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalAssignRef(Env env, Value value)
+  {
+    Value obj = env.getThis();
+
+    obj.putThisField(env, _nameExpr.evalStringValue(env), value);
+    
+    return value;
   }
   
   /**

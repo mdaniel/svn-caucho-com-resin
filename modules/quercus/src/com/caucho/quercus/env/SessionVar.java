@@ -42,13 +42,13 @@ public class SessionVar extends Var
   public Value set(Value value)
   {
     if (value instanceof SessionArrayValue) {
-      _value = value;
+      super.set(value);
       
       return value;
     }
     else if (value instanceof ArrayValue) {
       ArrayValue arrayValue = (ArrayValue) value;
-      ArrayValue sessionValue = (ArrayValue) _value;
+      ArrayValue sessionValue = (ArrayValue) toValue();
 
       sessionValue.clear();
 
@@ -57,7 +57,7 @@ public class SessionVar extends Var
       return value;
     }
     else if (! value.isset()) {
-      _value = value;
+      super.set(value);
       
       return value;
     }

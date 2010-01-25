@@ -48,24 +48,25 @@ abstract public class EnvVar
   /**
    * Returns the current Var.
    */
-  abstract public Var getRef();
+  abstract public Var getVar();
 
   /**
    * Sets the var.
    */
-  abstract public Var setRef(Var var);
+  abstract public Var setVar(Var var);
 
   /**
-   * Sets the var.
+   * Sets the value as a reference. If the value is a Var, it replaces
+   * the current Var, otherwise it sets the value. 
    */
   public Var setRef(Value value)
   {
-    if (value instanceof Var)
-      setRef((Var) value);
+    if (value.isVar())
+      setVar((Var) value);
     else
       set(value);
     
-    return getRef();
+    return getVar();
   }
 }
 

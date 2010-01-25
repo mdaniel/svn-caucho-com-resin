@@ -35,6 +35,7 @@ import com.caucho.quercus.env.EnvVar;
 import com.caucho.quercus.env.EnvVarImpl;
 import com.caucho.quercus.env.NullThisValue;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.UnsetValue;
 import com.caucho.quercus.env.Value;
@@ -230,7 +231,7 @@ public class Function extends AbstractFunction {
       if (arg == null)
         values[i] = args[i].eval(env).copy();
       else if (arg.isReference())
-        values[i] = args[i].evalRef(env);
+        values[i] = args[i].evalVar(env);
       else {
         // php/0d04
         values[i] = args[i].eval(env);
@@ -257,7 +258,7 @@ public class Function extends AbstractFunction {
 
   private Value callImpl(Env env, Expr []args, boolean isRef)
   {
-    HashMap<String,EnvVar> map = new HashMap<String,EnvVar>();
+    HashMap<StringValue,EnvVar> map = new HashMap<StringValue,EnvVar>();
 
     Value []values = new Value[args.length];
 
@@ -272,7 +273,7 @@ public class Function extends AbstractFunction {
         values[i] = args[i].eval(env).copy();
       }
       else if (arg.isReference()) {
-        values[i] = args[i].evalRef(env);
+        values[i] = args[i].evalVar(env);
 
         map.put(arg.getName(), new EnvVarImpl(values[i].toRefVar()));
       }
@@ -297,14 +298,14 @@ public class Function extends AbstractFunction {
         return env.error("expected default expression");
       else if (arg.isReference())
         map.put(arg.getName(),
-                new EnvVarImpl(defaultExpr.evalRef(env).toVar()));
+                new EnvVarImpl(defaultExpr.evalVar(env).toVar()));
       else {
         map.put(arg.getName(),
                 new EnvVarImpl(defaultExpr.eval(env).copy().toVar()));
       }
     }
 
-    Map<String,EnvVar> oldMap = env.pushEnv(map);
+    Map<StringValue,EnvVar> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(values); // php/0476
     Value oldThis;
 
@@ -320,10 +321,14 @@ public class Function extends AbstractFunction {
 
       if (value == null)
         return NullValue.NULL;
+      else
+        return value;
+      /*
       else if (_isReturnsReference && isRef)
         return value;
       else
         return value.copyReturn();
+        */
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
@@ -340,7 +345,7 @@ public class Function extends AbstractFunction {
   @Override
   public Value callCopy(Env env, Value []args)
   {
-    return callImpl(env, args, false, null, null);
+    return callImpl(env, args, false, null, null).copy();
   }
 
   @Override
@@ -352,7 +357,7 @@ public class Function extends AbstractFunction {
   public Value callImpl(Env env, Value []args, boolean isRef,
                         Arg []useParams, Value []useArgs)
   {
-    HashMap<String,EnvVar> map = new HashMap<String,EnvVar>(8);
+    HashMap<StringValue,EnvVar> map = new HashMap<StringValue,EnvVar>(8);
 
     if (useParams != null) {
       for (int i = 0; i < useParams.length; i++) {
@@ -380,7 +385,7 @@ public class Function extends AbstractFunction {
             && arg.getDefault() instanceof ParamRequiredExpr) {
           env.checkTypeHint(var,
                             arg.getExpectedClass(),
-                            arg.getName(),
+                            arg.getName().toString(),
                             getName());
         }
 	  
@@ -397,13 +402,13 @@ public class Function extends AbstractFunction {
       if (defaultExpr == null)
         return env.error("expected default expression");
       else if (arg.isReference())
-        map.put(arg.getName(), new EnvVarImpl(defaultExpr.evalRef(env).toVar()));
+        map.put(arg.getName(), new EnvVarImpl(defaultExpr.evalVar(env).toVar()));
       else {
         map.put(arg.getName(), new EnvVarImpl(defaultExpr.eval(env).copy().toVar()));
       }
     }
 
-    Map<String,EnvVar> oldMap = env.pushEnv(map);
+    Map<StringValue,EnvVar> oldMap = env.pushEnv(map);
     Value []oldArgs = env.setFunctionArgs(args);
     Value oldThis;
 
@@ -419,10 +424,10 @@ public class Function extends AbstractFunction {
 
       if (value == null)
         return NullValue.NULL;
-      else if (_isReturnsReference && isRef)
+      else if (_isReturnsReference)
         return value;
       else
-        return value.copyReturn();
+        return value.toValue().copy();
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);

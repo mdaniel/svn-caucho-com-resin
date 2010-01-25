@@ -124,31 +124,6 @@ public class ClassVarMethodExpr extends Expr {
                          evalArgs(env, _args));
   }
 
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  @Override
-  public Value evalRef(Env env)
-  {
-    String className = _className.evalString(env);
-    
-    QuercusClass cl = env.findClass(className);
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", _className));
-    }
-    
-    int hash = _methodName.hashCodeCaseInsensitive();
-
-    return cl.callMethodRef(env, env.getThis(), 
-                            _methodName, hash,
-                            evalArgs(env, _args));
-  }
-
   public String toString()
   {
     return _className + "::" + _methodName + "()";

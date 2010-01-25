@@ -36,6 +36,8 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Var;
+import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.InterpretedClassDef;
 import com.caucho.util.L10N;
 
@@ -69,11 +71,14 @@ public class ThisFieldExpr extends AbstractVarExpr {
   /**
    * Creates a function call expression
    */
-  public Expr createCall(ExprFactory factory,
+  @Override
+  public Expr createCall(QuercusParser parser,
                          Location location,
                          ArrayList<Expr> args)
     throws IOException
   {
+    ExprFactory factory = parser.getExprFactory();
+    
     return factory.createThisMethod(location, _qThis, _name.toString(), args);
   }
 
@@ -118,14 +123,18 @@ public class ThisFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Var evalVar(Env env)
   {
     Value obj = env.getThis();
 
-    if (obj.isNull())
-      return cannotUseThisError(env);
+    if (obj.isNull()) {
+      cannotUseThisError(env);
+      
+      return new Var();
+    }
     
-    return obj.getThisFieldRef(env, _name);
+    return obj.getThisFieldVar(env, _name);
   }
   
   /**
@@ -153,7 +162,8 @@ public class ThisFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
+  @Override
+  public Value evalAssignValue(Env env, Value value)
   {
     Value obj = env.getThis();
 
@@ -161,6 +171,28 @@ public class ThisFieldExpr extends AbstractVarExpr {
       cannotUseThisError(env);
     
     obj.putThisField(env, _name, value);
+    
+    return value;
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalAssignRef(Env env, Value value)
+  {
+    Value obj = env.getThis();
+
+    if (obj.isNull())
+      cannotUseThisError(env);
+    
+    obj.putThisField(env, _name, value);
+    
+    return value;
   }
   
   /**

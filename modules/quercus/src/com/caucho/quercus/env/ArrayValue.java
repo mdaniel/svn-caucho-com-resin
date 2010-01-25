@@ -663,7 +663,7 @@ abstract public class ArrayValue extends Value {
    * Sets the array ref.
    */
   @Override
-  abstract public Var putRef();
+  abstract public Var putVar();
 
   /**
    * Creatse a tail index.
@@ -771,7 +771,7 @@ abstract public class ArrayValue extends Value {
    * Returns the array ref.
    */
   @Override
-  abstract public Var getRef(Value index);
+  abstract public Var getVar(Value index);
 
   /**
    * Returns an iterator of the entries.

@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.NullValue;
+import com.caucho.quercus.env.Var;
 
 /**
  * Represents a PHP array reference expression.
@@ -167,11 +168,12 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Var evalVar(Env env)
   {
     Value value = _expr.evalArray(env);
 
-    return value.getRef(_index.eval(env));
+    return value.getVar(_index.eval(env));
   }
 
   /**
@@ -181,11 +183,29 @@ public class ArrayGetExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
+  @Override
+  public Value evalAssignValue(Env env, Value value)
   {
     _expr.evalArrayAssign(env, _index.eval(env), value);
+    
+    return value;
   }
-  
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalAssignRef(Env env, Value value)
+  {
+    _expr.evalArrayAssign(env, _index.eval(env), value);
+    
+    return value;
+  }
+ 
   /**
    * Evaluates the expression as an isset().
    */

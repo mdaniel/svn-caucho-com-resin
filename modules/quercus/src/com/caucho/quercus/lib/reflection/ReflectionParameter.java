@@ -32,6 +32,7 @@ package com.caucho.quercus.lib.reflection;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.ParamRequiredExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.program.Arg;
@@ -89,7 +90,7 @@ public class ReflectionParameter
     return null;
   }
   
-  public String getName()
+  public StringValue getName()
   {
     return _arg.getName();
   }

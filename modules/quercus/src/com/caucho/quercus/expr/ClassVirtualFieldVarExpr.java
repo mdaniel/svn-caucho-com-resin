@@ -37,6 +37,8 @@ import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
@@ -91,10 +93,15 @@ public class ClassVirtualFieldVarExpr extends AbstractVarExpr {
   @Override
   public Value eval(Env env)
   {
-    Value className = env.getCallingClassName();
-    String varName = _varName.evalString(env);
+    String className = env.getThis().getQuercusClass().getName();
+    StringValue varName = _varName.evalStringValue(env);
     
-    return env.getStaticValue(className.toString() + "::" + varName);
+    StringValue sb = env.createStringBuilder();
+    sb.append(className);
+    sb.append("::");
+    sb.append(varName);
+    
+    return env.getStaticValue(sb);
   }
   
   /**
@@ -105,25 +112,17 @@ public class ClassVirtualFieldVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
-  public Value evalRef(Env env)
+  public Var evalVar(Env env)
   {
-    Value className = env.getCallingClassName();
-    String varName = _varName.evalString(env);
+    String className = env.getThis().getQuercusClass().getName();
+    StringValue varName = _varName.evalStringValue(env);
     
-    return env.getStaticVar(className + "::" + varName);
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  @Override
-  public Value evalArg(Env env, boolean isTop)
-  {
-    return evalRef(env);
+    StringValue var = env.createStringBuilder();
+    var.append(className);
+    var.append("::");
+    var.append(varName);
+    
+    return env.getStaticVar(var);
   }
    
   /**
@@ -134,9 +133,19 @@ public class ClassVirtualFieldVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
-  public void evalAssign(Env env, Value value)
+  public Value evalAssignRef(Env env, Value value)
   {
-    evalRef(env).set(value);
+    String className = env.getThis().getQuercusClass().getName();
+    StringValue varName = _varName.evalStringValue(env);
+    
+    StringValue var = env.createStringBuilder();
+    var.append(className);
+    var.append("::");
+    var.append(varName);
+    
+    env.setStaticRef(var, value);
+    
+    return value;
   }
   
   /**

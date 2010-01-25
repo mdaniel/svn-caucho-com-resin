@@ -694,7 +694,7 @@ public class QuercusClass extends NullValue {
       return;
 
     for (Map.Entry<String,ArrayList<StaticField>> map
-	   : _staticFieldExprMap.entrySet()) {
+          : _staticFieldExprMap.entrySet()) {
       if (env.isInitializedClass(map.getKey()))
         continue;
       
@@ -708,9 +708,11 @@ public class QuercusClass extends NullValue {
         else
           val = expr.eval(env);
 
-	String fullName = _className + "::" + field._name;
-	
-        env.getStaticVar(fullName).set(val);
+        StringValue fullName = env.createString(_className);
+        fullName.append("::");
+        fullName.append(field._name);
+        
+        env.setStaticRef(fullName, val);
       }
       
       env.addInitializedClass(map.getKey());
@@ -724,11 +726,12 @@ public class QuercusClass extends NullValue {
     if (var != null)
       return var;
 
-    String fullName = _className + "::" + name;
+    StringValue fullName
+      = env.createString(_className).append("::").append(name);
       
     EnvVar envVar = env.getGlobalEnvVar(fullName);
       
-    return envVar.getRef();
+    return envVar.getVar();
   }
 
   public Value getStaticFieldValue(Env env, String name)
@@ -756,7 +759,7 @@ public class QuercusClass extends NullValue {
     EnvVar envVar = env.getGlobalRaw(fullName);
 
     if (envVar != null)
-      return envVar.getRef();
+      return envVar.getVar();
     
     QuercusClass parent = getParent();
     
@@ -1114,7 +1117,7 @@ public class QuercusClass extends NullValue {
   {
     if (qThis.isNull())
       qThis = this;
-    
+
     AbstractFunction fun = _methodMap.get(methodName, hash);
 
     return fun.callMethod(env, this, qThis);

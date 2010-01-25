@@ -119,6 +119,7 @@ public class ClassVirtualMethodVarExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     Value qThis = env.getThis();
@@ -145,32 +146,6 @@ public class ClassVirtualMethodVarExpr extends Expr {
     } finally {
       env.popCall();
     }
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalRef(Env env)
-  {
-    QuercusClass cl = env.getCallingClass();
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no calling class found"));
-
-      return NullValue.NULL;
-    }
-
-    // qa/0954 - what appears to be a static call may be a call to a super constructor
-    Value qThis = env.getThis();
-    StringValue methodName = _methodName.evalStringValue(env);
-    Value []args = evalArgs(env, _args);
-
-    return cl.callMethodRef(env, qThis, 
-                            methodName, methodName.hashCode(), args);
   }
   
   public String toString()

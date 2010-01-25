@@ -246,7 +246,7 @@ public class ObjectExtValue extends ObjectValue
    * Returns the array ref.
    */
   @Override
-  public Var getFieldRef(Env env, StringValue name)
+  public Var getFieldVar(Env env, StringValue name)
   {
     Entry entry = getEntry(env, name);
 
@@ -290,7 +290,7 @@ public class ObjectExtValue extends ObjectValue
    * Returns the array ref.
    */
   @Override
-  public Var getThisFieldRef(Env env, StringValue name)
+  public Var getThisFieldVar(Env env, StringValue name)
   {
     Entry entry = getThisEntry(name);
 
@@ -447,7 +447,7 @@ public class ObjectExtValue extends ObjectValue
       Var var = (Var) value;
 
       // for function return optimization
-      var.setReference();
+      // var.setReference();
 
       entry._value = var;
     }
@@ -502,7 +502,7 @@ public class ObjectExtValue extends ObjectValue
       Var var = (Var) value;
 
       // for function return optimization
-      var.setReference();
+      // var.setReference();
 
       entry._value = var;
     }

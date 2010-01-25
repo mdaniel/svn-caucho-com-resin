@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
@@ -80,11 +82,16 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
-    String className = _className.evalString(env);
+    StringValue className = _className.evalStringValue(env);
 
-    return env.getStaticValue(className + "::" + _varName);
+    StringValue var = className.toStringBuilder();
+    var.append("::");
+    var.append(_varName);
+    
+    return env.getStaticValue(var);
   }
 
   /**
@@ -95,11 +102,15 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
-  public Value evalArg(Env env, boolean isTop)
+  public Var evalVar(Env env)
   {
-    String className = _className.evalString(env);
+    StringValue className = _className.evalStringValue(env);
+
+    StringValue var = className.toStringBuilder();
+    var.append("::");
+    var.append(_varName);
     
-    return env.getStaticVar(className + "::" + _varName);
+    return env.getStaticVar(var);
   }
 
   /**
@@ -109,11 +120,18 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Value evalAssignRef(Env env, Value value)
   {
-    String className = _className.evalString(env);
+    StringValue className = _className.evalStringValue(env);
+
+    StringValue var = className.toStringBuilder();
+    var.append("::");
+    var.append(_varName);
     
-    return env.getStaticVar(className + "::" + _varName);
+    env.setStaticRef(var, value);
+    
+    return value;
   }
 
   /**
@@ -123,20 +141,7 @@ public class ClassVarFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
-  {
-    String className = _className.evalString(env);
-    
-    env.getStaticVar(className + "::" + _varName).set(value);
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
+  @Override
   public void evalUnset(Env env)
   {
     env.error(getLocation(),

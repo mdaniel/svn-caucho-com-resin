@@ -314,7 +314,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Sets the array ref.
    */
-  public Var putRef()
+  public Var putVar()
   {
     throw new UnsupportedOperationException();
   }
@@ -345,7 +345,7 @@ abstract public class JavaAdapter extends ArrayValue
   /**
    * Returns the array ref.
    */
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
     // php/0ceg - Since Java does not support references, the adapter
     // just creates a new Var, but modifying the var will not modify

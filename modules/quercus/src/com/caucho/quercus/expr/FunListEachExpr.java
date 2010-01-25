@@ -82,10 +82,10 @@ public class FunListEachExpr extends Expr {
     */
 
     if (_keyVar != null)
-      _keyVar.evalAssign(env, array.key());
+      _keyVar.evalAssignValue(env, array.key());
 
     if (_valueVar != null)
-      _valueVar.evalAssign(env, array.current());
+      _valueVar.evalAssignValue(env, array.current());
 
     return array.each();
   }
@@ -110,10 +110,10 @@ public class FunListEachExpr extends Expr {
       return false;
 
     if (_keyVar != null)
-      _keyVar.evalAssign(env, array.key());
+      _keyVar.evalAssignValue(env, array.key());
 
     if (_valueVar != null)
-      _valueVar.evalAssign(env, array.current());
+      _valueVar.evalAssignValue(env, array.current());
 
     array.next();
 

@@ -29,13 +29,15 @@
 
 package com.caucho.quercus.program;
 
+import com.caucho.quercus.env.MethodIntern;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.Expr;
 
 /**
  * Represents a formal argument.
  */
 public class Arg {
-  private final String _name;
+  private final StringValue _name;
   private final Expr _default;
 
   private final boolean _isReference;
@@ -47,7 +49,7 @@ public class Arg {
 	     boolean isReference,
 	     String expectedClass)
   {
-    _name = name.intern();
+    _name = MethodIntern.intern(name);
     _default = defaultExpr;
     _isReference = isReference;
     _expectedClass = expectedClass;
@@ -59,7 +61,7 @@ public class Arg {
   /**
    * Returns the argument name.
    */
-  public String getName()
+  public StringValue getName()
   {
     return _name;
   }

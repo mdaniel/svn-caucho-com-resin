@@ -79,14 +79,16 @@ public class FunListHeadExpr extends Expr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
+  public Value evalAssignValue(Env env, Value value)
   {
     int len = _varList.length;
 
     for (int i = 0; i < len; i++) {
       if (_varList[i] != null)
-        _varList[i].evalAssign(env, value.get(_keyList[i]).copy());
+        _varList[i].evalAssignValue(env, value.get(_keyList[i]).copy());
     }
+    
+    return value;
   }
 }
 

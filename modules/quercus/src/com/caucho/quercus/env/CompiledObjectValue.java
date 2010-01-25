@@ -108,7 +108,7 @@ public class CompiledObjectValue extends ObjectValue
    * Returns the array ref.
    */
   @Override
-  public Var getFieldRef(Env env, StringValue key)
+  public Var getFieldVar(Env env, StringValue key)
   {
     if (_fields.length > 0) {
       int index = _quercusClass.findFieldIndex(key);
@@ -125,7 +125,7 @@ public class CompiledObjectValue extends ObjectValue
     if (_object == null)
       _object = new ObjectExtValue(_quercusClass);
     
-    return _object.getFieldRef(env, key);
+    return _object.getFieldVar(env, key);
   }
 
   /**

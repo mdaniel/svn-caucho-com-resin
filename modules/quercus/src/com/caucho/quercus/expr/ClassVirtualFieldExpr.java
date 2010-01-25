@@ -38,6 +38,7 @@ import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
@@ -90,15 +91,20 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
    */
   public Value eval(Env env)
   {
-    Value name = env.getCallingClassName();
+    String name = env.getThis().getQuercusClass().getName();
     
-    if (name.isNull()) {
+    if (name == null) {
       env.error(getLocation(), L.l("no calling class found"));
       
       return NullValue.NULL;
     }
     
-    return env.getStaticValue(name.toString() + "::" + _varName);
+    StringValue var = env.createStringBuilder();
+    var.append(name);
+    var.append("::");
+    var.append(_varName);
+    
+    return env.getStaticValue(var);
   }
   
   /**
@@ -108,19 +114,25 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Var evalVar(Env env)
   {
-    Value name = env.getCallingClassName();
+    String name = env.getThis().getQuercusClass().getName();
     
-    if (name.isNull()) {
+    if (name == null) {
       env.error(getLocation(), L.l("no calling class found"));
       
-      return NullValue.NULL;
+      return NullValue.NULL.toVar();
     }
     
-    return env.getStaticVar(name.toString() + "::" + _varName);
+    StringValue var = env.createStringBuilder();
+    var.append(name);
+    var.append("::");
+    var.append(_varName);
+    
+    return env.getStaticVar(var);
   }
-
+  
   /**
    * Evaluates the expression.
    *
@@ -129,21 +141,24 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
-  public Value evalArg(Env env, boolean isTop)
+  public Value evalAssignRef(Env env, Value value)
   {
-    return evalRef(env);
-  }
-   
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public void evalAssign(Env env, Value value)
-  {
-    evalRef(env).set(value);
+    String name = env.getThis().getQuercusClass().getName();
+    
+    if (name == null) {
+      env.error(getLocation(), L.l("no calling class found"));
+      
+      return value;
+    }
+    
+    StringValue var = env.createStringBuilder();
+    var.append(name);
+    var.append("::");
+    var.append(_varName);
+    
+    env.setStaticRef(var, value);
+    
+    return value;
   }
   
   /**

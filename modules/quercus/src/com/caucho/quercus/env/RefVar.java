@@ -453,9 +453,9 @@ public class RefVar extends Value
    * Returns the array ref.
    */
   @Override
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
-    return _var.getRef(index);
+    return _var.getVar(index);
   }
 
   /**

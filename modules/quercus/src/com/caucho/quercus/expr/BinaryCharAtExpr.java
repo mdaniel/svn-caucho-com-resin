@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.util.L10N;
 
 /**
@@ -63,28 +64,12 @@ public class BinaryCharAtExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     Value obj = _objExpr.eval(env);
 
     return obj.charValueAt(_indexExpr.evalLong(env));
-  }
-  
-  /**
-   * Evaluates the expression as an assignment.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public void evalAssign(Env env, Value value)
-  {
-    Value obj = _objExpr.eval(env);
-
-    Value result = obj.setCharValueAt(_indexExpr.evalLong(env),
-                                      value);
-
-    _objExpr.evalAssign(env, result);
   }
   
   /**
@@ -94,9 +79,10 @@ public class BinaryCharAtExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalUnset(Env env)
+  @Override
+  public Var evalVar(Env env)
   {
-    throw new UnsupportedOperationException();
+    return eval(env).toVar();
   }
   
   /**
@@ -113,15 +99,34 @@ public class BinaryCharAtExpr extends AbstractVarExpr {
   }
   
   /**
+   * Evaluates the expression as an assignment.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalAssignRef(Env env, Value value)
+  {
+    Value obj = _objExpr.eval(env);
+
+    Value result = obj.setCharValueAt(_indexExpr.evalLong(env),
+                                      value);
+
+    _objExpr.evalAssignValue(env, result);
+    
+    return value;
+  }
+  
+  /**
    * Evaluates the expression.
    *
    * @param env the calling environment.
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  public void evalUnset(Env env)
   {
-    return eval(env);
+    throw new UnsupportedOperationException();
   }
 
   public String toString()

@@ -2121,14 +2121,9 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns the field ref.
    */
-  public Var getFieldRef(Env env, StringValue name)
+  public Var getFieldVar(Env env, StringValue name)
   {
-    Value value = getField(env, name);
-
-    if (value instanceof Var)
-      return (Var) value;
-    else
-      return new Var(value);
+    return getField(env, name).toVar();
   }
 
   /**
@@ -2136,7 +2131,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value getFieldArg(Env env, StringValue name, boolean isTop)
   {
-    return getFieldRef(env, name);
+    return getFieldVar(env, name);
   }
 
   /**
@@ -2144,7 +2139,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value getFieldArgRef(Env env, StringValue name)
   {
-    return getFieldRef(env, name);
+    return getFieldVar(env, name);
   }
 
   /**
@@ -2242,7 +2237,7 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Returns the field value
+   * Returns the field as a Var or Value.
    */
   public Value getThisField(Env env, StringValue name)
   {
@@ -2250,16 +2245,11 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Returns the field ref.
+   * Returns the field as a Var.
    */
-  public Var getThisFieldRef(Env env, StringValue name)
+  public Var getThisFieldVar(Env env, StringValue name)
   {
-    Value value = getThisField(env, name);
-
-    if (value instanceof Var)
-      return (Var) value;
-    else
-      return new Var(value);
+    return getThisField(env, name).toVar();
   }
 
   /**
@@ -2267,7 +2257,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value getThisFieldArg(Env env, StringValue name)
   {
-    return getThisFieldRef(env, name);
+    return getThisFieldVar(env, name);
   }
 
   /**
@@ -2275,7 +2265,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value getThisFieldArgRef(Env env, StringValue name)
   {
-    return getThisFieldRef(env, name);
+    return getThisFieldVar(env, name);
   }
 
   /**
@@ -2384,11 +2374,11 @@ abstract public class Value implements java.io.Serializable
   /**
    * Returns a reference to the array value.
    */
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
     Value value = get(index);
 
-    if (value instanceof Var)
+    if (value.isVar())
       return (Var) value;
     else
       return new Var(value);
@@ -2446,6 +2436,11 @@ abstract public class Value implements java.io.Serializable
     return NullValue.NULL;
   }
 
+  public boolean isVar()
+  {
+    return false;
+  }
+  
   /**
    * Sets the value ref.
    */
@@ -2494,9 +2489,9 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Sets the array ref.
+   * Sets the array tail, returning the Var of the tail.
    */
-  public Var putRef()
+  public Var putVar()
   {
     return new Var();
   }

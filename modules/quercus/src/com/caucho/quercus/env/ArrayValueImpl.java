@@ -469,7 +469,7 @@ public class ArrayValueImpl extends ArrayValue
     if (value instanceof Var) {
       // php/0a59
       Var var = (Var) value;
-      var.setReference();
+      // var.setReference();
 
       // entry._var = var;
 
@@ -738,7 +738,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Sets the array ref.
    */
-  public Var putRef()
+  public Var putVar()
   {
     if (_isDirty)
       copyOnWrite();
@@ -746,7 +746,7 @@ public class ArrayValueImpl extends ArrayValue
     // 0d0d
     Value tailKey = createTailKey();
 
-    return getRef(tailKey);
+    return getVar(tailKey);
   }
 
   /**
@@ -994,7 +994,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Returns the array ref.
    */
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
     if (_isDirty)
       copyOnWrite();

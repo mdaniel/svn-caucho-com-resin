@@ -98,7 +98,7 @@ public class ForeachStatement
 
         value = value.copy(); // php/0662
 
-        _value.evalAssign(env, value);
+        _value.evalAssignValue(env, value);
 
         Value result = _block.execute(env);
 
@@ -135,11 +135,11 @@ public class ForeachStatement
         Value key = iter.next();
 
         if (_key != null)
-          _key.evalAssign(env, key);
+          _key.evalAssignValue(env, key);
 
-        Value value = origObj.getRef(key);
+        Value value = origObj.getVar(key);
 
-        _value.evalAssign(env, value);
+        _value.evalAssignValue(env, value);
 
         Value result = _block.execute(env);
 
@@ -178,9 +178,9 @@ public class ForeachStatement
 
         value = value.copy(); // php/066w
 
-        _key.evalAssign(env, key);
+        _key.evalAssignValue(env, key);
 
-        _value.evalAssign(env, value);
+        _value.evalAssignValue(env, value);
 
         Value result = _block.execute(env);
 

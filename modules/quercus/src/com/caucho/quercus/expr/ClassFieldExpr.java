@@ -35,6 +35,9 @@ import java.util.ArrayList;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.ConstStringValue;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
@@ -46,20 +49,15 @@ public class ClassFieldExpr extends AbstractVarExpr {
 
   protected final String _className;
   protected final String _varName;
-
-  public ClassFieldExpr(Location location, String className, String varName)
-  {
-    super(location);
-    _className = className;
-    
-    _varName = varName;
-  }
+  
+  private final StringValue _var;
 
   public ClassFieldExpr(String className, String varName)
   {
     _className = className;
-    
     _varName = varName;
+    
+    _var = new ConstStringValue(className + "::" + varName);
   }
   
   //
@@ -88,23 +86,12 @@ public class ClassFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
-    return env.getStaticValue(_className + "::" + _varName);
+    return env.getStaticValue(_var);
   }
-
-  /**
-   * Evaluates the expression as a copy
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalCopy(Env env)
-  {
-    return env.getStaticValue(_className + "::" + _varName).copy();
-  }
-
+   
   /**
    * Evaluates the expression.
    *
@@ -113,33 +100,9 @@ public class ClassFieldExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
-  public Value evalArg(Env env, boolean isTop)
+  public Var evalVar(Env env)
   {
-    return env.getStaticVar(_className + "::" + _varName);
-  }
-
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalArray(Env env)
-  {
-    return env.getStaticVar(_className + "::" + _varName).getArray();
-  }
-  
-  /**
-   * Evaluates the expression, creating an array for unassigned values.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalObject(Env env)
-  {
-    return env.getStaticVar(_className + "::" + _varName).getObject(env);
+    return env.getStaticVar(_var);
   }
   
   /**
@@ -149,9 +112,12 @@ public class ClassFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Value evalAssignRef(Env env, Value value)
   {
-    return env.getStaticVar(_className + "::" + _varName);
+    env.setStaticRef(_var, value);
+    
+    return value;
   }
   
   /**
@@ -161,18 +127,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
-  {
-    env.getStaticVar(_className + "::" + _varName).set(value);
-  }
-  
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
+  @Override
   public void evalUnset(Env env)
   {
     env.error(getLocation(),

@@ -448,7 +448,7 @@ abstract public class JavaInvoker
       if (i < _marshalArgs.length)
         arg = _marshalArgs[i];
       else if (_isRestReference) {
-        values[i] = args[i].evalRef(env);
+        values[i] = args[i].evalVar(env);
         continue;
       }
       else {

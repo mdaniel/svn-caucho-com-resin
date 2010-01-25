@@ -53,7 +53,7 @@ public class GlobalStatement extends Statement {
   public Value execute(Env env)
   {
     try {
-      env.setValue(_var.getName(), env.getGlobalVar(_var.getName()));
+      env.setRef(_var.getName(), env.getGlobalVar(_var.getName()));
     }
     catch (RuntimeException e) {
       rethrow(e, RuntimeException.class);

@@ -69,34 +69,15 @@ public class BinaryAssignRefExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
-    // indicates value should be a reference
+    // value can be a Value or Var
     Value value = _value.evalRef(env);
     
-    // php/090g
-    if (value.isObject())
-      _var.evalAssign(env, value);
-    else
-      _var.evalAssign(env, value.toRefVar());
+    _var.evalAssignRef(env, value);
 
     return value;
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalCopy(Env env)
-  {
-    Value value = _value.evalRef(env);
-
-    _var.evalAssign(env, value);
-
-    return value.copy();
   }
 
   public String toString()

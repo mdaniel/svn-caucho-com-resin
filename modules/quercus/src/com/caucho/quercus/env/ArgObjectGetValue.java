@@ -61,7 +61,7 @@ public class ArgObjectGetValue extends Value {
   public Var toRefVar()
   {
     // quercus/3d2t
-    return _obj.getRef(_index).toRefVar();
+    return _obj.getVar(_index).toRefVar();
   }
 
   /**

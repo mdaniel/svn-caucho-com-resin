@@ -36,6 +36,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
@@ -104,6 +105,21 @@ public class ObjectFieldExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
+  public Var evalVar(Env env)
+  {
+    Value obj = _objExpr.evalObject(env);
+
+    return obj.getFieldVar(env, _name);
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
   public Value evalArg(Env env, boolean isTop)
   {
     Value value = _objExpr.evalArg(env, false);
@@ -117,7 +133,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
     // php/0228
     Value obj = _objExpr.eval(env);
 
-    return obj.getFieldRef(env, _name).toValue();
+    return obj.getFieldVar(env, _name).toValue();
   }
 
   /**
@@ -128,42 +144,13 @@ public class ObjectFieldExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
-  public Value evalRef(Env env)
-  {
-    // quercus/0d1k
-    Value value = _objExpr.evalObject(env);
-
-    return value.getFieldRef(env, _name);
-  }
-
-  /**
-   * Evaluates the expression as a copyable  value.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  @Override
-  public Value evalCopy(Env env)
-  {
-    Value obj = _objExpr.eval(env);
-
-    return obj.getField(env, _name).copy();
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  @Override
-  public void evalAssign(Env env, Value value)
+  public Value evalAssignRef(Env env, Value value)
   {
     Value obj = _objExpr.evalObject(env);
 
     obj.putField(env, _name, value);
+    
+    return value;
   }
   
   /**
@@ -249,6 +236,7 @@ public class ObjectFieldExpr extends AbstractVarExpr {
   /**
    * Evaluates the expression as an array index unset
    */
+  @Override
   public void evalUnsetArray(Env env, Value index)
   {
     Value obj = _objExpr.eval(env);

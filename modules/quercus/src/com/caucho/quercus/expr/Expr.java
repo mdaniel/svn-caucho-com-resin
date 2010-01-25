@@ -225,6 +225,17 @@ abstract public class Expr {
     else
       throw new IOException(msg);
   }
+  
+  /**
+   * Creates an assignment using this value as the right hand side.
+   */
+  public Expr createAssignFrom(QuercusParser parser,
+                               AbstractVarExpr leftHandSide)
+  {
+    ExprFactory factory = parser.getExprFactory();
+    
+    return factory.createAssign(leftHandSide, this);
+  }
 
   /**
    * Mark as an assignment for a list()
@@ -418,13 +429,79 @@ abstract public class Expr {
   }
 
   /**
-   * Evaluates the expression.
+   * Evaluates the expression, returning a Value, never a Var.
    *
    * @param env the calling environment.
    *
    * @return the expression value.
    */
   abstract public Value eval(Env env);
+
+  /**
+   * Evaluates the expression, always returning a variable.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Var evalVar(Env env)
+  {
+    return eval(env).toVar();
+  }
+
+  /**
+   * Evaluates the expression, returning a Value.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalValue(Env env)
+  {
+    return eval(env);
+  }
+
+  /**
+   * Evaluates the expression, returning a Var for variables, and a Value
+   * for values.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalRef(Env env)
+  {
+    return eval(env);
+  }
+
+  /**
+   * Evaluates the expression as a copy.
+   * 
+   * The default is not to copy because the absence of copying is more
+   * testable.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  public Value evalCopy(Env env)
+  {
+    return eval(env);
+  }
+
+  /**
+   * Evaluates the expression as a function argument where it is unknown
+   * if the value will be used as a reference.
+   *
+   * @param env the calling environment.
+   * @param isTail true for the top expression
+   *
+   * @return the expression value.
+   */
+  public Value evalArg(Env env, boolean isTop)
+  {
+    return eval(env);
+  }
   
   /**
    * Evaluates the expression.
@@ -437,7 +514,6 @@ abstract public class Expr {
   {
     return eval(env);
   }
-  
 
   /**
    * Evaluates the expression, with the object expected to be modified,
@@ -477,47 +553,19 @@ abstract public class Expr {
   }
 
   /**
-   * Evaluates the expression as a reference.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
+   * Evaluates an assignment. The value must not be a Var.
    */
-  public Value evalRef(Env env)
+  public Value evalAssignValue(Env env, Value value)
   {
-    return eval(env);
+    throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
+                                   this));
   }
 
   /**
-   * Evaluates the expression as a copy
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
+   * Evaluates an assignment. If the value is a Var, it replaces the
+   * current Var.
    */
-  public Value evalCopy(Env env)
-  {
-    return eval(env);
-  }
-
-  /**
-   * Evaluates the expression as a function argument where it is unknown
-   * if the value is a reference.
-   *
-   * @param env the calling environment.
-   * @param isTail true for the top expression
-   *
-   * @return the expression value.
-   */
-  public Value evalArg(Env env, boolean isTop)
-  {
-    return eval(env);
-  }
-
-  /**
-   * Needed to handle list.
-   */
-  public void evalAssign(Env env, Value value)
+  public Value evalAssignRef(Env env, Value value)
   {
     throw new RuntimeException(L.l("{0} is an invalid left-hand side of an assignment.",
                                    this));
@@ -538,7 +586,7 @@ abstract public class Expr {
    */
   public Value evalPostIncrement(Env env, int incr)
   {
-    Value value = evalRef(env);
+    Value value = evalVar(env);
 
     return value.postincr(incr);
   }
@@ -548,7 +596,7 @@ abstract public class Expr {
    */
   public Value evalPreIncrement(Env env, int incr)
   {
-    Value value = evalRef(env);
+    Value value = evalVar(env);
 
     return value.preincr(incr);
   }

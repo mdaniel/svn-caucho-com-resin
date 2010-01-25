@@ -31,6 +31,8 @@ package com.caucho.quercus.program;
 
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.expr.VarInfo;
+import com.caucho.quercus.env.MethodIntern;
+import com.caucho.quercus.env.StringValue;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -46,8 +48,8 @@ public class FunctionInfo
   private final ClassDef _classDef;
   private final String _name;
   
-  private final HashMap<String,VarInfo> _varMap
-    = new HashMap<String,VarInfo>();
+  private final HashMap<StringValue,VarInfo> _varMap
+    = new HashMap<StringValue,VarInfo>();
 
   private final ArrayList<String> _tempVarList
     = new ArrayList<String>();
@@ -367,10 +369,15 @@ public class FunctionInfo
     _isReadOnly = false;
   }
 
+  public VarInfo createVar(String name)
+  {
+    return createVar(MethodIntern.intern(name));
+  }
+  
   /**
    * Returns the variable.
    */
-  public VarInfo createVar(String name)
+  public VarInfo createVar(StringValue name)
   {
     VarInfo var = _varMap.get(name);
 
@@ -383,7 +390,7 @@ public class FunctionInfo
     return var;
   }
   
-  protected VarInfo createVarInfo(String name)
+  protected VarInfo createVarInfo(StringValue name)
   {
     return new VarInfo(name, this);
   }

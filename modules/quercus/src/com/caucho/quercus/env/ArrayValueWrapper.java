@@ -156,9 +156,9 @@ public class ArrayValueWrapper extends ArrayValue {
    * Sets the array ref.
    */
   @Override
-  public Var putRef()
+  public Var putVar()
   {
-    return _array.putRef();
+    return _array.putVar();
   }
 
   /**
@@ -201,9 +201,9 @@ public class ArrayValueWrapper extends ArrayValue {
    * Returns the array ref.
    */
   @Override
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
-    return _array.getRef(index);
+    return _array.getVar(index);
   }
   
   /**

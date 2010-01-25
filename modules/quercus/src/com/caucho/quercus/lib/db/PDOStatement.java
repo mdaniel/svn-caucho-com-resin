@@ -683,7 +683,7 @@ public class PDOStatement
         int i = 0;
 
         for (Value key : argsArray.keySet())
-          ctorArgs[i++] = argsArray.getRef(key);
+          ctorArgs[i++] = argsArray.getVar(key);
       }
       else
         return fetchBoth();

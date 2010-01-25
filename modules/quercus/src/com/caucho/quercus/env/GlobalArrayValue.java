@@ -73,15 +73,15 @@ public class GlobalArrayValue extends ArrayValueImpl {
    */
   public Value get(Value key)
   {
-    return _env.getGlobalValue(key.toString());
+    return _env.getGlobalValue(key.toStringValue());
   }
   
   /**
    * Returns the array ref.
    */
-  public Var getRef(Value key)
+  public Var getVar(Value key)
   {
-    return _env.getGlobalRef(key.toString());
+    return _env.getGlobalRef(key.toStringValue());
   }
 
   /**
@@ -90,7 +90,7 @@ public class GlobalArrayValue extends ArrayValueImpl {
   @Override
   public Value getArg(Value index, boolean isTop)
   {
-    return getRef(index);
+    return getVar(index);
   }
 
   /**
@@ -98,7 +98,7 @@ public class GlobalArrayValue extends ArrayValueImpl {
    */
   public Value getArray(Value index)
   {
-    Value array = getRef(index).toAutoArray();
+    Value array = getVar(index).toAutoArray();
 
     return array;
   }
@@ -109,7 +109,7 @@ public class GlobalArrayValue extends ArrayValueImpl {
   @Override
   public Value remove(Value key)
   {
-    return _env.unsetGlobalVar(key.toString());
+    return _env.unsetGlobalVar(key.toStringValue());
   }
   
   /**
@@ -208,8 +208,8 @@ public class GlobalArrayValue extends ArrayValueImpl {
   {
     ArrayValue array = new ArrayValueImpl();
     
-    for(Map.Entry<String,EnvVar> entry : _env.getGlobalEnv().entrySet()) {
-      Value key = _env.createString(entry.getKey());
+    for(Map.Entry<StringValue,EnvVar> entry : _env.getGlobalEnv().entrySet()) {
+      Value key = entry.getKey();
       Value val = entry.getValue().get();
       
       array.put(key, val);

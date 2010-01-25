@@ -69,8 +69,8 @@ public class SaveState {
             ClassDef []classDef,
             QuercusClass []qClass,
             Value []constants,
-            Map<String,Var> staticMap,
-            Map<String,EnvVar> globalMap,
+            Map<StringValue,Var> staticMap,
+            Map<StringValue,EnvVar> globalMap,
             HashMap<Path,QuercusPage> includeMap,
             ImportMap importMap)
   {
@@ -180,22 +180,22 @@ public class SaveState {
     return false;
   }
   
-  private void saveStatics(Env env, Map<String,Var> staticMap)
+  private void saveStatics(Env env, Map<StringValue,Var> staticMap)
   {
     _staticValues = new Value[staticMap.size()];
 
-    for (Map.Entry<String,Var> entry : staticMap.entrySet()) {
+    for (Map.Entry<StringValue,Var> entry : staticMap.entrySet()) {
       int id = addStaticName(entry.getKey());
 
       _staticValues[id] = entry.getValue().toValue().copy(env);
     }
   }
 
-  private void saveGlobals(Env env, Map<String,EnvVar> globalMap)
+  private void saveGlobals(Env env, Map<StringValue,EnvVar> globalMap)
   {
     _globalValues = new Value[globalMap.size()];
 
-    for (Map.Entry<String,EnvVar> entry : globalMap.entrySet()) {
+    for (Map.Entry<StringValue,EnvVar> entry : globalMap.entrySet()) {
       if (env.isSpecialVar(entry.getKey()))
 	continue;
 
@@ -207,7 +207,7 @@ public class SaveState {
     }
   }
   
-  private int addStaticName(String name)
+  private int addStaticName(StringValue name)
   {
     int id = _staticNameMap.get(name);
 
@@ -220,7 +220,7 @@ public class SaveState {
     return id;
   }
 
-  private int addGlobalName(String name)
+  private int addGlobalName(StringValue name)
   {
     int id = _globalNameMap.get(name);
 

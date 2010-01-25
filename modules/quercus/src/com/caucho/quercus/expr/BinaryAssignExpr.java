@@ -32,6 +32,7 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 
 /**
  * Represents a PHP assignment expression.
@@ -81,13 +82,12 @@ public class BinaryAssignExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     Value value = _value.evalCopy(env);
 
-    _var.evalAssign(env, value);
-
-    return value;
+    return _var.evalAssignValue(env, value);
   }
 
   /**
@@ -97,10 +97,11 @@ public class BinaryAssignExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalCopy(Env env)
   {
     // php/0d9e
-    return eval(env).copy();
+    return eval(env);
   }
 
   /**
@@ -110,13 +111,15 @@ public class BinaryAssignExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value evalRef(Env env)
   {
-    Value value = _value.eval(env);
+    Value value = _value.evalCopy(env);
 
-    _var.evalAssign(env, value);
+    _var.evalAssignValue(env, value);
 
-    return value;
+    // php/03d9, php/03mk
+    return _var.eval(env);
   }
 
   public String toString()

@@ -1249,6 +1249,11 @@ public class QuercusContext implements AlarmListener
   {
     if (! isStrict())
       name = name.toLowerCase();
+    
+    if (name.startsWith("\\")) {
+      // php/0m18
+      name = name.substring(1);
+    }
 
     int id = _functionNameMap.get(name);
 
@@ -1296,6 +1301,9 @@ public class QuercusContext implements AlarmListener
   {
     if (! isStrict())
       name = name.toLowerCase();
+    
+    if (name.startsWith("\\"))
+      name = name.substring(1);
 
     // IntMap is internally synchronized
     return _functionNameMap.get(name);
@@ -1333,6 +1341,14 @@ public class QuercusContext implements AlarmListener
   {
     int id = _classNameMap.get(className);
 
+    if (id >= 0)
+      return id;
+    
+    if (className.startsWith("\\"))
+      className = className.substring(1);
+    
+    id = _classNameMap.get(className);
+    
     if (id >= 0)
       return id;
 
@@ -1562,9 +1578,9 @@ public class QuercusContext implements AlarmListener
   /**
    * Returns true if the variable is a superglobal.
    */
-  public static boolean isSuperGlobal(String name)
+  public static boolean isSuperGlobal(StringValue name)
   {
-    return _superGlobals.contains(name);
+    return _superGlobals.contains(name.toString());
   }
 
   /**

@@ -43,7 +43,7 @@ import java.util.ArrayList;
 /**
  * Represents a PHP function expression.
  */
-public class ObjectMethodExpr extends Expr {
+public class ObjectMethodExpr extends AbstractMethodExpr {
   private static final L10N L = new L10N(ObjectMethodExpr.class);
 
   protected final Expr _objExpr;
@@ -53,9 +53,9 @@ public class ObjectMethodExpr extends Expr {
   protected final Expr []_args;
 
   public ObjectMethodExpr(Location location,
-			Expr objExpr,
-			String name,
-			ArrayList<Expr> args)
+                          Expr objExpr,
+                          String name,
+                          ArrayList<Expr> args)
   {
     super(location);
     
@@ -84,56 +84,17 @@ public class ObjectMethodExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     env.checkTimeout();
 
     Value obj = _objExpr.eval(env);
-
-    Value []args = evalArgs(env, _args);
-
-    env.pushCall(this, obj, args);
-    QuercusClass oldCallingClass = env.setCallingClass(obj.getQuercusClass());
     
-    try {
-      env.checkTimeout();
-      
-      int hashCode = _methodName.hashCodeCaseInsensitive();
-
-      return obj.callMethod(env, _methodName, hashCode, args);
-    } finally {
-      env.popCall();
-      env.setCallingClass(oldCallingClass);
-    }
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public Value evalRef(Env env)
-  {
-    env.checkTimeout();
-
-    Value obj = _objExpr.eval(env);
-
-    Value []args = evalArgs(env, _args);
-
-    env.pushCall(this, obj, args);
+    StringValue methodName = _methodName;
+    int hash = methodName.hashCodeCaseInsensitive();
     
-    QuercusClass oldCallingClass = env.setCallingClass(obj.getQuercusClass());
-    
-    try {
-      env.checkTimeout();
-
-      return obj.callMethodRef(env, _methodName, _methodName.hashCode(), args);
-    } finally {
-      env.popCall();
-      env.setCallingClass(oldCallingClass);
-    }
+    return eval(env, obj, methodName, hash, _args);
   }
   
   public String toString()

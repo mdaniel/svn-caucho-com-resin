@@ -50,7 +50,7 @@ public class VarTempExpr extends VarExpr {
    */
   public String getJavaVar()
   {
-    return getName();
+    return getName().toString();
   }
 
   public String toString()

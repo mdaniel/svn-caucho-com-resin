@@ -71,7 +71,7 @@ public class ArgGetFieldValue extends Value {
   public Var toRefVar()
   {
     // php/3d2t
-    return _obj.getFieldRef(_env, _name).toRefVar();
+    return _obj.getFieldVar(_env, _name).toRefVar();
   }
 
   /**
@@ -107,7 +107,7 @@ public class ArgGetFieldValue extends Value {
   @Override
   public Value toRefValue()
   {
-    return _obj.getFieldRef(_env, _name);
+    return _obj.getFieldVar(_env, _name);
   }
 
   /**
@@ -122,19 +122,19 @@ public class ArgGetFieldValue extends Value {
    * Converts to a reference variable.
    */
   @Override
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
-    return _obj.getFieldArray(_env, _name).getRef(index);
+    return _obj.getFieldArray(_env, _name).getVar(index);
   }
 
   /**
    * Converts to a reference variable.
    */
   @Override
-  public Var getFieldRef(Env env, StringValue name)
+  public Var getFieldVar(Env env, StringValue name)
   {
     // php/3d2q
-    return _obj.getFieldObject(_env, _name).getFieldRef(_env, name);
+    return _obj.getFieldObject(_env, _name).getFieldVar(_env, name);
   }
 
   public StringValue toStringValue()

@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 
 /**
@@ -54,26 +55,22 @@ public class ReturnRefStatement extends Statement {
   /**
    * Executes the statement, returning the expression value.
    */
+  @Override
   public Value execute(Env env)
   {
-    try {
-      if (_expr != null) {
-        // php/0750
-        return _expr.evalRef(env);
-      }
-      else
-        return NullValue.NULL;
+    if (_expr != null) {
+      // php/0750
+      return _expr.evalVar(env);
     }
-    catch (RuntimeException e) {
-      rethrow(e, RuntimeException.class);
+    else {
+      return new Var();
     }
-
-    return null;
   }
 
   /**
    * Returns true if control can go past the statement.
    */
+  @Override
   public int fallThrough()
   {
     return RETURN;

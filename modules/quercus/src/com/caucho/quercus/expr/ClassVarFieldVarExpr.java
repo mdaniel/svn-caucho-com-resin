@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.util.L10N;
 
@@ -79,12 +81,15 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
-    String className = _className.evalString(env);
-    String varName = _varName.evalString(env);
+    StringValue className = _className.evalStringValue(env);
+    StringValue varName = _varName.evalStringValue(env);
+    
+    StringValue var = className.toStringBuilder().append("::").append(varName);
 
-    return env.getStaticValue(className + "::" + varName);
+    return env.getStaticValue(var);
   }
 
   /**
@@ -95,12 +100,14 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
    * @return the expression value.
    */
   @Override
-  public Value evalArg(Env env, boolean isTop)
+  public Var evalVar(Env env)
   {
-    String className = _className.evalString(env);
-    String varName = _varName.evalString(env);
+    StringValue className = _className.evalStringValue(env);
+    StringValue varName = _varName.evalStringValue(env);
+    
+    StringValue var = className.toStringBuilder().append("::").append(varName);
 
-    return env.getStaticVar(className + "::" + varName);
+    return env.getStaticVar(var);
   }
 
   /**
@@ -110,27 +117,17 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Value evalAssignRef(Env env, Value value)
   {
-    String className = _className.evalString(env);
-    String varName = _varName.evalString(env);
+    StringValue className = _className.evalStringValue(env);
+    StringValue varName = _varName.evalStringValue(env);
+    
+    StringValue var = className.toStringBuilder().append("::").append(varName);
 
-    return env.getStaticVar(className + "::" + varName);
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  public void evalAssign(Env env, Value value)
-  {
-    String className = _className.evalString(env);
-    String varName = _varName.evalString(env);
-
-    env.getStaticVar(className + "::" + varName).set(value);
+    env.setStaticRef(var, value);
+    
+    return value;
   }
 
   /**

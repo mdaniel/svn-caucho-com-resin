@@ -29,77 +29,75 @@
 
 package com.caucho.quercus.expr;
 
+import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.MethodIntern;
+import com.caucho.quercus.env.MethodMap;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
 
 /**
- * Represents a PHP list assignment expression.
+ * Represents a PHP function expression.
  */
-public class FunListExpr extends Expr {
-  protected final FunListHeadExpr _listHead;
-  protected final Expr _value;
-
-  protected FunListExpr(FunListHeadExpr head, Expr value)
+abstract public class AbstractMethodExpr extends Expr {
+  protected AbstractMethodExpr(Location location)
   {
-    _listHead = head;
-
-    _value = value;
+    super(location);
   }
-
-  /*
-  public static Expr create(QuercusParser parser,
-                            ListHeadExpr head, Expr value)
-    throws IOException
-  {
-    boolean isSuppress = value instanceof SuppressErrorExpr;
-
-    if (isSuppress) {
-      SuppressErrorExpr suppressExpr = (SuppressErrorExpr) value;
-
-      value = suppressExpr.getExpr();
-    }
-
-    Expr expr;
-
-    if (value instanceof EachExpr) {
-      expr = new ListEachExpr(parser.getLocation(), head.getVarList(), (EachExpr) value);
-    }
-    else
-      expr = new ListExpr(head, value);
-
-    if (isSuppress)
-      return new SuppressErrorExpr(expr.getLocation(), expr);
-    else
-      return expr;
-  }
-  */
+  
 
   /**
-   * Evaluates the expression.
+   * Evaluates the expression as a copy
    *
    * @param env the calling environment.
    *
    * @return the expression value.
    */
-  public Value eval(Env env)
-  {
-    Value value = _value.eval(env);
-
-    _listHead.evalAssignValue(env, value);
-
-    return value;
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
+  @Override
   public Value evalCopy(Env env)
   {
     return eval(env).copy();
+  }
+
+  /**
+   * Evaluates the expression as a copy
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalArg(Env env, boolean isTop)
+  {
+    return eval(env).copy();
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  protected Value eval(Env env, Value qThis,
+                       StringValue methodName, int hashCode,
+                       Expr []argExprs)
+  {
+    Value []args = evalArgs(env, argExprs);
+
+    env.pushCall(this, qThis, args);
+
+    try {
+      env.checkTimeout();
+
+      return qThis.callMethod(env, methodName, hashCode, args);
+    } finally {
+      env.popCall();
+    }
   }
 }
 

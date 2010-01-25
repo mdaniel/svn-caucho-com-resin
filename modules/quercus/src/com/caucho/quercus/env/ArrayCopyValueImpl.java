@@ -135,11 +135,11 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   /**
    * Sets the array ref.
    */
-  public Var putRef()
+  public Var putVar()
   {
     _root.setModified();
 
-    return super.putRef();
+    return super.putVar();
   }
 
   /**
@@ -156,11 +156,11 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
   /**
    * Returns the array ref.
    */
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
     _root.setModified();
 
-    return super.getRef(index);
+    return super.getVar(index);
   }
 
   /**

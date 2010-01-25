@@ -594,17 +594,18 @@ public class JavaClassDef extends ClassDef {
   {
     if (_cons != null) {
       if (__construct != null) {
-        Value value = _cons.callMethod(env, null, Value.NULL_ARGS);
+        Value value = _cons.call(env, Value.NULL_ARGS);
 
         __construct.callMethod(env, __construct.getQuercusClass(), value, args);
         
         return value;
       }
-      else
-        return _cons.callMethod(env, null, args);
+      else {
+        return _cons.call(env, args);
+      }
     }
     else if (__construct != null)
-      return __construct.callMethod(env, null, args);
+      return __construct.call(env, args);
     else
       return NullValue.NULL;
   }

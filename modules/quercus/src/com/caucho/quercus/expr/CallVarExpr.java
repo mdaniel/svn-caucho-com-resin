@@ -101,6 +101,7 @@ public class CallVarExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     Value value = _name.eval(env);
@@ -124,42 +125,6 @@ public class CallVarExpr extends Expr {
       // XXX: FunctionExpr also invokes callRef() and callCopy().
 
       return fun.call(env, args);
-    } finally {
-      env.popCall();
-    }
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  @Override
-  public Value evalRef(Env env)
-  {
-   Value value = _name.eval(env);
-    
-    Value []args = evalArgs(env, _args);
-
-    env.pushCall(this, NullValue.NULL, null);
-
-    try {
-      env.checkTimeout();
-
-      if (value instanceof Closure) {
-        return ((Closure) value).call(env, args);
-      }
-    
-      Value name = value;
-    
-      AbstractFunction fun;
-    
-      fun = env.getFunction(name);
-      // XXX: FunctionExpr also invokes callRef() and callCopy().
-
-      return fun.callRef(env, args);
     } finally {
       env.popCall();
     }

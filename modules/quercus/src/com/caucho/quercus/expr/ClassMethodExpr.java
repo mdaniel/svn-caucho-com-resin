@@ -40,9 +40,9 @@ import com.caucho.quercus.env.Value;
 import com.caucho.util.L10N;
 
 /**
- * Represents a PHP parent:: method call expression.
+ * A Foo::bar(...) method call expression.
  */
-public class ClassMethodExpr extends Expr {
+public class ClassMethodExpr extends AbstractMethodExpr {
   private static final L10N L = new L10N(ClassMethodExpr.class);
 
   protected final String _className;

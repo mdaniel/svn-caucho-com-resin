@@ -1894,7 +1894,7 @@ public class QuercusParser {
       token = parseToken();
       if (token == '=') {
         // XXX: actually needs to be primitive
-        defaultExpr = parseTerm();
+        defaultExpr = parseTerm(false);
 
         token = parseToken();
       }
@@ -2387,7 +2387,9 @@ public class QuercusParser {
   private void parseUse()
     throws IOException
   {
-    String name = parseNamespaceIdentifier();
+    int token = parseNamespaceIdentifier(read());
+    
+    String name = _lexeme;
     
     int ns = name.lastIndexOf('\\');
     
@@ -2400,7 +2402,7 @@ public class QuercusParser {
     if (name.startsWith("\\"))
       name = name.substring(1);
     
-    int token = parseToken();
+    token = parseToken();
     
     if (token == ';') {
       _namespaceUseMap.put(tail, name);
@@ -2887,7 +2889,7 @@ public class QuercusParser {
   private Expr parseAssignExpr()
     throws IOException
   {
-    Expr expr = parseTerm();
+    Expr expr = parseUnary();
 
     while (true) {
       int token = parseToken();
@@ -2904,9 +2906,9 @@ public class QuercusParser {
           else {
             _peekToken = token;
 
-        if (_isIfTest && _quercus.isStrict()) {
-          throw error("assignment without parentheses inside If/While/For test statement; please make sure whether equality was intended instead");
-        }
+            if (_isIfTest && _quercus.isStrict()) {
+              throw error("assignment without parentheses inside If/While/For test statement; please make sure whether equality was intended instead");
+            }
 
             expr = expr.createAssign(this, parseConditionalExpr());
           }
@@ -3016,12 +3018,105 @@ public class QuercusParser {
           expr = expr.createAssign(this, parseConditionalExpr());
         break;
 
+      case INSTANCEOF:
+        Expr classNameExpr = parseShiftExpr();
+
+        if (classNameExpr instanceof ConstExpr)
+          return _factory.createInstanceOf(expr, classNameExpr.toString());
+        else
+          return _factory.createInstanceOfVar(expr, classNameExpr);
+
       default:
         _peekToken = token;
         return expr;
       }
     }
   }
+
+
+  /**
+   * Parses unary term.
+   *
+   * <pre>
+   * unary ::= term
+   *       ::= '&' unary
+   *       ::= '-' unary
+   *       ::= '+' unary
+   *       ::= '!' unary
+   *       ::= '~' unary
+   *       ::= '@' unary
+   * </pre>
+   */
+  private Expr parseUnary()
+    throws IOException
+  {
+    int token = parseToken();
+    
+    switch (token) {
+
+    case '+':
+      {
+        Expr expr = parseAssignExpr();
+
+        return _factory.createPlus(expr);
+      }
+
+    case '-':
+      {
+        Expr expr = parseAssignExpr();
+
+        return _factory.createMinus(expr);
+      }
+
+    case '!':
+      {
+        Expr expr = parseAssignExpr();
+
+        return _factory.createNot(expr);
+      }
+
+    case '~':
+      {
+        Expr expr = parseAssignExpr();
+
+        return _factory.createBitNot(expr);
+      }
+
+    case '@':
+      {
+        Expr expr = parseAssignExpr();
+
+        return _factory.createSuppress(expr);
+      }
+
+    case CLONE:
+      {
+        Expr expr = parseAssignExpr();
+
+        return _factory.createClone(expr);
+      }
+
+    case INCR:
+      {
+        Expr expr = parseUnary();
+
+        return _factory.createPreIncrement(expr, 1);
+      }
+
+    case DECR:
+      {
+        Expr expr = parseUnary();
+
+        return _factory.createPreIncrement(expr, -1);
+      }
+      
+    default:
+      _peekToken = token;
+      
+      return parseTerm(true);
+    }
+  }
+
 
   /**
    * Parses a basic term.
@@ -3030,16 +3125,16 @@ public class QuercusParser {
    * term ::= termBase
    *      ::= term '[' index ']'
    *      ::= term '{' index '}'
-   *      ::= term '(' index ')'
    *      ::= term '->' name
    *      ::= term '::' name
+   *      ::= term '(' a1, ..., an ')'
    * </pre>
    */
-  private Expr parseTerm()
+  private Expr parseTerm(boolean isParseCall)
     throws IOException
   {
     Expr term = parseTermBase();
-
+    
     while (true) {
       int token = parseToken();
 
@@ -3089,10 +3184,15 @@ public class QuercusParser {
       case SCOPE:
         term = parseScope(term);
         break;
+        
 
       case '(':
         _peek = token;
-        term = parseFunction(term);
+        
+        if (isParseCall)
+          term = parseCall(term);
+        else
+          return term;
         break;
 
       default:
@@ -3158,77 +3258,6 @@ public class QuercusParser {
         term = _factory.createPostIncrement(term, -1);
         break;
 
-      default:
-        _peekToken = token;
-        return term;
-      }
-    }
-  }
-
-  /**
-   * Parses a basic term.
-   *
-   * <pre>
-   * term ::= termBase
-   *      ::= term '[' index ']'
-   *      ::= term '{' index '}'
-   *      ::= term '->' field;
-   * </pre>
-   *
-   * No function, though.
-   */
-  private Expr parseTermDeref()
-    throws IOException
-  {
-    Expr term = parseTermBase();
-
-    while (true) {
-      int token = parseToken();
-
-      switch (token) {
-      case '[':
-        {
-          token = parseToken();
-
-          if (token == ']') {
-            term = _factory.createArrayTail(getLocation(), term);
-          }
-          else {
-            _peekToken = token;
-            Expr index = parseExpr();
-            token = parseToken();
-
-            term = _factory.createArrayGet(getLocation(), term, index);
-          }
-
-          if (token != ']')
-            throw expect("']'", token);
-        }
-        break;
-
-      case '{':
-        {
-          Expr index = parseExpr();
-
-          expect('}');
-
-          term = _factory.createCharAt(term, index);
-        }
-        break;
-
-      case INCR:
-        term = _factory.createPostIncrement(term, 1);
-        break;
-
-      case DECR:
-        term = _factory.createPostIncrement(term, -1);
-        break;
-
-      case DEREF:
-      // php/0d6g
-        term = parseDeref(term);
-        break;
-        
       default:
         _peekToken = token;
         return term;
@@ -3363,136 +3392,6 @@ public class QuercusParser {
     case '$':
       return parseVariable();
 
-      /* quercus/0211
-    case '&':
-      {
-        Expr expr = parseTerm();
-
-        return expr.createRef();
-      }
-      */
-
-    case '-':
-      {
-        Expr expr = parseTerm();
-
-        token = parseToken();
-
-        if (token == '=') {
-          token = parseToken();
-
-          if (token == '&') {
-            return _factory.createMinus(expr.createAssignRef(this, parseBitOrExpr()));
-          }
-          else {
-            _peekToken = token;
-
-            return _factory.createMinus(expr.createAssign(this, parseConditionalExpr()));
-          }
-
-        }
-        else {
-          _peekToken = token;
-
-          return _factory.createMinus(expr);
-        }
-      }
-
-    case '+':
-    {
-      Expr expr = parseTerm();
-
-      token = parseToken();
-
-      if (token == '=') {
-        token = parseToken();
-
-        if (token == '&') {
-          return _factory.createPlus(expr.createAssignRef(this, parseBitOrExpr()));
-        }
-        else {
-          _peekToken = token;
-
-          return _factory.createPlus(expr.createAssign(this, parseConditionalExpr()));
-        }
-
-      }
-      else {
-        _peekToken = token;
-
-        return _factory.createPlus(expr);
-      }
-    }
-
-    case '!':
-      {
-        // XXX: quercus/03i3 vs quercus/03i4
-
-        Expr expr = parseTerm();
-
-        token = parseToken();
-
-        if (token == '=') {
-          token = parseToken();
-
-          // php/03i6
-          if (token == '&') {
-            return _factory.createNot(expr.createAssignRef(this, parseBitOrExpr()));
-          }
-          else {
-            _peekToken = token;
-
-            return _factory.createNot(expr.createAssign(this, parseConditionalExpr()));
-          }
-
-        }
-        else if (token == INSTANCEOF) {
-          // php/03p1
-          // php/
-          return _factory.createNot(_factory.createInstanceOfVar(expr, parseTermBase()));
-        }
-        else {
-          _peekToken = token;
-
-          return _factory.createNot(expr);
-        }
-      }
-
-    case '~':
-      {
-        Expr expr = parseTerm();
-
-        return _factory.createBitNot(expr);
-      }
-
-    case '@':
-      {
-        Expr expr = parseTerm();
-
-        return _factory.createSuppress(expr);
-      }
-
-    case CLONE:
-      {
-        Expr expr = parseTerm();
-
-        return _factory.createClone(expr);
-      }
-
-    case INCR:
-      {
-        Expr expr = parseTerm();
-
-        return _factory.createPreIncrement(expr, 1);
-      }
-
-    case DECR:
-      {
-        Expr expr = parseTerm();
-
-        return _factory.createPreIncrement(expr, -1);
-      }
-
     case NEW:
       return parseNew();
       
@@ -3533,7 +3432,7 @@ public class QuercusParser {
         if (token == '(' && ! _isNewExpr) {
           // shortcut for common case of static function
           
-          return parseFunction(name);
+          return parseCall(name);
         }
         else
           return parseConstant(name);
@@ -3588,7 +3487,7 @@ public class QuercusParser {
         if (token == '(') {
           _peekToken = token;
 
-          return parseFunction(importTokenString);
+          return parseCall(importTokenString);
         }
         else {
           _peekToken = token;
@@ -3743,7 +3642,7 @@ public class QuercusParser {
   /**
    * Parses the next function
    */
-  private Expr parseFunction(String name)
+  private Expr parseCall(String name)
     throws IOException
   {
     if (name.equalsIgnoreCase("array"))
@@ -3751,6 +3650,7 @@ public class QuercusParser {
 
     ArrayList<Expr> args = parseArgs();
     
+    name = resolveIdentifier(name);
 
     return _factory.createCall(this, name, args);
 
@@ -3811,7 +3711,7 @@ public class QuercusParser {
   /**
    * Parses the next function
    */
-  private Expr parseFunction(Expr name)
+  private Expr parseCall(Expr name)
     throws IOException
   {
     return name.createCall(this, getLocation(), parseArgs());
@@ -3880,7 +3780,7 @@ public class QuercusParser {
     _isNewExpr = true;
 
     //nameExpr = parseTermBase();
-    nameExpr = parseTermDeref();
+    nameExpr = parseTerm(false);
 
     _isNewExpr = isNewExpr;
 
@@ -3891,8 +3791,9 @@ public class QuercusParser {
       // php/0957
       if ("self".equals(name) && _classDef != null)
         name = _classDef.getName();
-      else
-        name = resolveIdentifier(name);
+      else {
+        // name = resolveIdentifier(name);
+      }
     }
 
     int token = parseToken();
@@ -3972,7 +3873,7 @@ public class QuercusParser {
       else if (peek != ',') {
         _peekToken = peek;
 
-        Expr left = parseTerm();
+        Expr left = parseTerm(true);
 
         leftVars.add(left);
 

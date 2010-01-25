@@ -1780,7 +1780,7 @@ public class ArrayModule
 
       entryValue = array.get(entryKey);
 
-      String symbolName = entryKey.toString();
+      StringValue symbolName = entryKey.toStringValue();
 
       if (validVariableName(symbolName)) {
         env.setValue(symbolName, entryValue);
@@ -1840,44 +1840,44 @@ public class ArrayModule
       Value entryValue;
 
       if (extrRefs)
-        entryValue = array.getRef(entryKey);
+        entryValue = array.getVar(entryKey);
       else
         entryValue = array.get(entryKey);
 
-      String symbolName = entryKey.toString();
+      StringValue symbolName = entryKey.toStringValue();
 
       Value tableValue = env.getValue(symbolName);
 
       switch ((int) extractType) {
       case EXTR_SKIP:
         if (! tableValue.isNull())
-          symbolName = "";
+          symbolName = env.createString("");
 
         break;
       case EXTR_PREFIX_SAME:
         if (! tableValue.isNull())
-          symbolName = prefix + symbolName;
+          symbolName = env.createString(prefix + symbolName);
 
         break;
       case EXTR_PREFIX_ALL:
-        symbolName = prefix + symbolName;
+        symbolName = env.createString(prefix + symbolName);
 
         break;
       case EXTR_PREFIX_INVALID:
         if (! validVariableName(symbolName))
-          symbolName = prefix + symbolName;
+          symbolName = env.createString(prefix + symbolName);
 
         break;
       case EXTR_IF_EXISTS:
         if (tableValue.isNull())
-          symbolName = "";//entryValue = tableValue;
+          symbolName = env.createString("");//entryValue = tableValue;
 
         break;
       case EXTR_PREFIX_IF_EXISTS:
         if (! tableValue.isNull())
-          symbolName = prefix + symbolName;
+          symbolName = env.createString(prefix + symbolName);
         else
-          symbolName = "";
+          symbolName = env.createString("");
 
         break;
       default:
@@ -1901,7 +1901,7 @@ public class ArrayModule
    * @param variableName the name to check
    * @return true if the name is valid, false otherwise
    */
-  private static boolean validVariableName(String variableName)
+  private static boolean validVariableName(StringValue variableName)
   {
     if (variableName.length() < 1)
       return false;
@@ -3330,7 +3330,7 @@ public class ArrayModule
 
     for (Value variableName : variables) {
       if (variableName.isString()) {
-        Var var = env.getRef(variableName.toString(), false);
+        Var var = env.getRef(variableName.toStringValue(), false);
 
         if (var != null)
           compactArray.put(variableName, var.toValue());

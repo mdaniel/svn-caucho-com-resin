@@ -187,7 +187,7 @@ public final class MethodMap<V>
       while (entry != null) {
         Entry<V> next = entry.getNext();
 
-        int hash = entry._key.hashCode();
+        int hash = entry._key.hashCodeCaseInsensitive();
         int bucket = (hash & 0x7fffffff) % newPrime;
 
         entry.setNext(newEntries[bucket]);

@@ -97,7 +97,7 @@ public class SplModule extends AbstractQuercusModule
   }
   
   public static boolean spl_autoload_register(Env env,
-                                              @Optional Callback fun)
+                                              @Optional Callable fun)
   {
     if (fun == null)
       fun = new CallbackFunction(env, "spl_autoload");
@@ -117,7 +117,7 @@ public class SplModule extends AbstractQuercusModule
   
   public static Value spl_autoload_functions(Env env)
   {
-    ArrayList<Callback> funList = env.getAutoloadFunctions();
+    ArrayList<Callable> funList = env.getAutoloadFunctions();
     
     if (funList == null)
       return BooleanValue.FALSE;
@@ -126,7 +126,7 @@ public class SplModule extends AbstractQuercusModule
 
     int size = funList.size();
     for (int i = 0; i < size; i++) {
-      Callback cb = funList.get(i);
+      Callable cb = funList.get(i);
       
       array.put(env.createString(cb.toString()));
     }

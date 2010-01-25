@@ -50,6 +50,8 @@ public class CallExpr extends Expr {
   protected final String _name;
   protected final String _nsName;
   protected final Expr []_args;
+  
+  protected boolean _isRef;
 
   public CallExpr(Location location, String name, ArrayList<Expr> args)
   {
@@ -116,11 +118,13 @@ public class CallExpr extends Expr {
    * Returns the reference of the value.
    * @param location
    */
+  /*
   @Override
   public Expr createRef(QuercusParser parser)
   {
-    return parser.getFactory().createRef(this);
+    return parser.getExprFactory().createCallRef(this);
   }
+  */
 
   /**
    * Returns the copy of the value.
@@ -139,6 +143,7 @@ public class CallExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     return evalImpl(env, false, false);
@@ -151,9 +156,10 @@ public class CallExpr extends Expr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  @Override
+  public Value evalCopy(Env env)
   {
-    return evalImpl(env, true, false);
+    return evalImpl(env, false, true);
   }
   
   /**
@@ -163,10 +169,12 @@ public class CallExpr extends Expr {
    *
    * @return the expression value.
    */
-  public Value evalCopy(Env env)
+  @Override
+  public Value evalRef(Env env)
   {
-    return evalImpl(env, false, true);
+    return evalImpl(env, true, true);
   }
+  
   
   /**
    * Evaluates the expression.
@@ -200,13 +208,22 @@ public class CallExpr extends Expr {
     // XXX: qa/1d14 Value oldThis = env.setThis(UnsetValue.NULL);
     try {
       env.checkTimeout();
-	
+
+      /*
       if (isRef)
         return fun.callRef(env, args);
       else if (isCopy)
         return fun.callCopy(env, args);
       else
         return fun.call(env, args);
+        */
+      
+      if (isRef)
+        return fun.callRef(env, args);
+      else if (isCopy)
+        return fun.call(env, args).copyReturn();
+      else
+        return fun.call(env, args).toValue();
     //} catch (Exception e) {
     //  throw QuercusException.create(e, env.getStackTrace());
     } finally {

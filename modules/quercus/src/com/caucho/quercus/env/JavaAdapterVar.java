@@ -908,11 +908,11 @@ public class JavaAdapterVar extends Value
    * Returns the array ref.
    */
   @Override
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
     setRaw(getValue());
     
-    Var value = super.getRef(index);
+    Var value = super.getVar(index);
     
     setValue(getRawValue());
     
@@ -1007,11 +1007,11 @@ public class JavaAdapterVar extends Value
    * Returns the array ref.
    */
   @Override
-  public Var putRef()
+  public Var putVar()
   {
     setRaw(getValue());
     
-    Var retValue = super.putRef();
+    Var retValue = super.putVar();
     
     setValue(getRawValue());
     
@@ -1056,11 +1056,11 @@ public class JavaAdapterVar extends Value
    * Returns the field ref.
    */
   @Override
-  public Var getFieldRef(Env env, StringValue index)
+  public Var getFieldVar(Env env, StringValue index)
   {
     setRaw(getValue());
     
-    Var retValue = super.getFieldRef(env, index);
+    Var retValue = super.getFieldVar(env, index);
     
     setValue(getRawValue());
 

@@ -47,11 +47,11 @@ import java.util.logging.Logger;
 /**
  * Represents the Quercus environment.
  */
-public class LazySymbolMap extends AbstractMap<String,EnvVar> {
+public class LazySymbolMap extends AbstractMap<StringValue,EnvVar> {
   private final IntMap _intMap;
   private final Value []_values;
   
-  private HashMap<String,EnvVar> _extMap = new HashMap<String,EnvVar>();
+  private HashMap<StringValue,EnvVar> _extMap = new HashMap<StringValue,EnvVar>();
 
   public LazySymbolMap(IntMap intMap, Value []values)
   {
@@ -64,13 +64,13 @@ public class LazySymbolMap extends AbstractMap<String,EnvVar> {
    */
   public EnvVar get(Object key)
   {
-    return (EnvVar) get((String) key);
+    return (EnvVar) get((StringValue) key);
   }
 
   /**
    * Returns the matching value, or null.
    */
-  public EnvVar get(String key)
+  public EnvVar get(StringValue key)
   {
     EnvVar envVar = _extMap.get(key);
 
@@ -79,7 +79,7 @@ public class LazySymbolMap extends AbstractMap<String,EnvVar> {
 
       if (id >= 0 && _values[id] != null) {
         Var var = new Var();
-        var.setGlobal();
+        // var.setGlobal();
         
         envVar = new EnvVarImpl(var);
         _extMap.put(key, envVar);
@@ -99,12 +99,12 @@ public class LazySymbolMap extends AbstractMap<String,EnvVar> {
    * Returns the matching value, or null.
    */
   @Override
-  public EnvVar put(String key, EnvVar newVar)
+  public EnvVar put(StringValue key, EnvVar newVar)
   {
     return _extMap.put(key, newVar);
   }
 
-  public Set<Map.Entry<String,EnvVar>> entrySet()
+  public Set<Map.Entry<StringValue,EnvVar>> entrySet()
   {
     return _extMap.entrySet();
   }

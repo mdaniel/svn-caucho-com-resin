@@ -32,8 +32,12 @@ package com.caucho.quercus.expr;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
+import com.caucho.quercus.env.ConstStringValue;
+import com.caucho.quercus.env.Var;
 import com.caucho.quercus.parser.QuercusParser;
 
 /**
@@ -43,13 +47,14 @@ public class VarExpr
   extends AbstractVarExpr
 {
   private final VarInfo _var;
-  protected final String _name;
+  protected final StringValue _name;
 
   private VarState _varState = VarState.INIT;
 
   protected VarExpr(Location location, VarInfo var)
   {
     super(location);
+    
     _var = var;
     _name = var.getName();
   }
@@ -71,7 +76,7 @@ public class VarExpr
   /**
    * Returns the variable name.
    */
-  public String getName()
+  public StringValue getName()
   {
     return _name;
   }
@@ -131,6 +136,7 @@ public class VarExpr
    * @param env the calling environment.
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     return env.getValue(_name, false, true);
@@ -246,12 +252,9 @@ public class VarExpr
    * @param env the calling environment.
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  public Var evalVar(Env env)
   {
-    //if (getVarInfo().isGlobal())
-      //return env.getGlobalVar(_name);
-    //else
-      return env.getVar(_name);
+    return env.getVar(_name);
   }
 
   /**
@@ -263,29 +266,24 @@ public class VarExpr
   @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    // quercus/043k
-    // quercus/0443
+    // php/043k
+    // php/0443
 
-    //if (getVarInfo().isGlobal())
-      //return env.getGlobalVar(_name);
-    //else
-      return env.getVar(_name);
+    return env.getVar(_name);
   }
 
   /**
-   * Evaluates the expression.
+   * Evaluates the expression. The value must not be a Var.
    *
    * @param env the calling environment.
    */
-  public void evalAssign(Env env, Value value)
+  @Override
+  public Value evalAssignValue(Env env, Value value)
   {
     // php/0232
-    /*
-    if (getVarInfo().isGlobal())
-      env.setGlobalValue(_name, value);
-    else
-    */
     env.setValue(_name, value);
+    
+    return value;
   }
 
   /**
@@ -293,6 +291,20 @@ public class VarExpr
    *
    * @param env the calling environment.
    */
+  @Override
+  public Value evalAssignRef(Env env, Value value)
+  {
+    env.setRef(_name, value);
+    
+    return value;
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   */
+  @Override
   public void evalUnset(Env env)
   {
     // php/023b

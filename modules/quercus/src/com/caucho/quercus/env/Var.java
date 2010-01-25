@@ -48,8 +48,7 @@ import java.util.*;
 public class Var extends Value
   implements Serializable
 {
-  Value _value;
-  private int _refCount;
+  private Value _value;
 
   public Var()
   {
@@ -59,22 +58,6 @@ public class Var extends Value
   public Var(Value value)
   {
     _value = value;
-  }
-
-  /**
-   * Adds a reference.
-   */
-  public void setReference()
-  {
-    _refCount = 1;
-  }
-
-  /**
-   * Sets as a global variable
-   */
-  public void setGlobal()
-  {
-    _refCount = 1;
   }
 
   /**
@@ -89,6 +72,29 @@ public class Var extends Value
 
     // php/151m
     return this;
+  }
+  
+  public boolean isVar()
+  {
+    return true;
+  }
+  
+  /**
+   * Sets the value, possibly replacing if a var and returning the resulting var
+   * 
+   * $a =& (...).
+   */
+  public Var setRef(Value value)
+  {
+    // php/078d-f
+    
+    if (value.isVar())
+      return (Var) value;
+    else {
+      _value = value;
+      
+      return this;
+    }
   }
 
   /**
@@ -195,6 +201,7 @@ public class Var extends Value
   /**
    * Returns true for a long-value.
    */
+  @Override
   public boolean isLong()
   {
     return _value.isLong();
@@ -203,6 +210,7 @@ public class Var extends Value
   /**
    * Returns true for a long-value.
    */
+  @Override
   public boolean isDouble()
   {
     return _value.isDouble();
@@ -367,6 +375,7 @@ public class Var extends Value
   /**
    * Converts to a java String object.
    */
+  @Override
   public String toJavaString()
   {
     if (_value.isObject())
@@ -459,6 +468,7 @@ public class Var extends Value
   /**
    * Converts to a Java BigDecimal.
    */
+  @Override
   public BigDecimal toBigDecimal()
   {
     return _value.toBigDecimal();
@@ -467,6 +477,7 @@ public class Var extends Value
   /**
    * Converts to a Java BigInteger.
    */
+  @Override
   public BigInteger toBigInteger()
   {
     return _value.toBigInteger();
@@ -519,6 +530,7 @@ public class Var extends Value
   /**
    * Cost to convert to a boolean
    */
+  @Override
   public int toBooleanMarshalCost()
   {
     return _value.toBooleanMarshalCost();
@@ -527,6 +539,7 @@ public class Var extends Value
   /**
    * Cost to convert to a byte
    */
+  @Override
   public int toByteMarshalCost()
   {
     return _value.toByteMarshalCost();
@@ -535,6 +548,7 @@ public class Var extends Value
   /**
    * Cost to convert to a short
    */
+  @Override
   public int toShortMarshalCost()
   {
     return _value.toShortMarshalCost();
@@ -543,6 +557,7 @@ public class Var extends Value
   /**
    * Cost to convert to an integer
    */
+  @Override
   public int toIntegerMarshalCost()
   {
     return _value.toIntegerMarshalCost();
@@ -551,6 +566,7 @@ public class Var extends Value
   /**
    * Cost to convert to a long
    */
+  @Override
   public int toLongMarshalCost()
   {
     return _value.toLongMarshalCost();
@@ -559,6 +575,7 @@ public class Var extends Value
   /**
    * Cost to convert to a double
    */
+  @Override
   public int toDoubleMarshalCost()
   {
     return _value.toDoubleMarshalCost();
@@ -567,6 +584,7 @@ public class Var extends Value
   /**
    * Cost to convert to a float
    */
+  @Override
   public int toFloatMarshalCost()
   {
     return _value.toFloatMarshalCost();
@@ -575,6 +593,7 @@ public class Var extends Value
   /**
    * Cost to convert to a character
    */
+  @Override
   public int toCharMarshalCost()
   {
     return _value.toCharMarshalCost();
@@ -610,6 +629,7 @@ public class Var extends Value
   /**
    * Cost to convert to a Java object
    */
+  @Override
   public int toJavaObjectMarshalCost()
   {
     return _value.toJavaObjectMarshalCost();
@@ -732,7 +752,8 @@ public class Var extends Value
   public Var toVar()
   {
     // php/3d04
-    return new Var(_value.toArgValue());
+    // return new Var(_value.toArgValue());
+    return this;
   }
 
   /**
@@ -750,8 +771,6 @@ public class Var extends Value
   @Override
   public Var toRefVar()
   {
-    _refCount = 2;
-
     return this;
   }
 
@@ -761,8 +780,6 @@ public class Var extends Value
   @Override
   public Value toRefArgument()
   {
-    _refCount = 2;
-
     return this;
   }
 
@@ -877,8 +894,6 @@ public class Var extends Value
   @Override
   public Value copyArrayItem()
   {
-    _refCount = 2;
-
     // php/041d
     return this;
   }
@@ -889,10 +904,7 @@ public class Var extends Value
   @Override
   public Value copyReturn()
   {
-    if (_refCount < 1)
-      return _value;
-    else
-      return _value.copy();
+    return _value.copy();
   }
 
   /**
@@ -901,8 +913,6 @@ public class Var extends Value
   @Override
   public Value toRef()
   {
-    _refCount = 2;
-
     return new RefVar(this);
   }
 
@@ -1227,13 +1237,13 @@ public class Var extends Value
    * Returns the array ref.
    */
   @Override
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
     // php/3d1a
     if (! _value.isset())
       _value = new ArrayValueImpl();
 
-    return _value.getRef(index);
+    return _value.getVar(index);
   }
 
   /**
@@ -1322,11 +1332,11 @@ public class Var extends Value
    * Returns the array ref.
    */
   @Override
-  public Var putRef()
+  public Var putVar()
   {
     _value = _value.toAutoArray();
 
-    return _value.putRef();
+    return _value.putVar();
   }
 
   /**
@@ -1364,12 +1374,12 @@ public class Var extends Value
    * Returns the field ref.
    */
   @Override
-  public Var getFieldRef(Env env, StringValue name)
+  public Var getFieldVar(Env env, StringValue name)
   {
     // php/3a0r
     _value = _value.toAutoObject(env);
 
-    return _value.getFieldRef(env, name);
+    return _value.getFieldVar(env, name);
   }
 
   /**
@@ -1452,9 +1462,9 @@ public class Var extends Value
    * Returns the field ref.
    */
   @Override
-  public Var getThisFieldRef(Env env, StringValue name)
+  public Var getThisFieldVar(Env env, StringValue name)
   {
-    return _value.getThisFieldRef(env, name);
+    return _value.getThisFieldVar(env, name);
   }
 
   /**

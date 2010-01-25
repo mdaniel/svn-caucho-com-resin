@@ -106,6 +106,7 @@ public class ClassVarMethodVarExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     String className = _className.evalString(env);
@@ -123,35 +124,6 @@ public class ClassVarMethodVarExpr extends Expr {
     return cl.callMethod(env, env.getThis(),
                          methodName, hash,
                          args);
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
-  @Override
-  public Value evalRef(Env env)
-  {
-    String className = _className.evalString(env);
-    
-    QuercusClass cl = env.findClass(className);
-
-    if (cl == null) {
-      env.error(getLocation(), L.l("no matching class {0}", className));
-    }
-
-    // qa/0954 - what appears to be a static call may be a call to a super constructor
-    Value qThis = env.getThis();
-    StringValue methodName = _methodName.evalStringValue(env);
-    int hash = methodName.hashCodeCaseInsensitive();
-    Value []args = evalArgs(env, _args);
-
-    return cl.callMethodRef(env, qThis, 
-                            methodName, hash,
-                            args);
   }
 
   public String toString()

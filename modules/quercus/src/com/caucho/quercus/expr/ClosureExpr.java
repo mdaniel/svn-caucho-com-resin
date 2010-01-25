@@ -78,6 +78,7 @@ public class ClosureExpr extends Expr {
   /**
    * Returns the location if known.
    */
+  @Override
   public String getFunctionLocation()
   {
     return " [" + getName() + "]";
@@ -110,6 +111,7 @@ public class ClosureExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
     return evalImpl(env);
@@ -122,18 +124,7 @@ public class ClosureExpr extends Expr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
-  {
-    return evalImpl(env);
-  }
-
-  /**
-   * Evaluates the expression.
-   *
-   * @param env the calling environment.
-   *
-   * @return the expression value.
-   */
+  @Override
   public Value evalCopy(Env env)
   {
     return evalImpl(env);

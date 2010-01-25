@@ -192,9 +192,9 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Sets the array ref.
    */
-  public Var putRef()
+  public Var putVar()
   {
-    return getCopyArray().putRef();
+    return getCopyArray().putVar();
   }
 
   /**
@@ -280,9 +280,9 @@ public class CopyArrayValue extends ArrayValue {
   /**
    * Returns the array ref.
    */
-  public Var getRef(Value index)
+  public Var getVar(Value index)
   {
-    return getCopyArray().getRef(index);
+    return getCopyArray().getVar(index);
   }
 
   /**

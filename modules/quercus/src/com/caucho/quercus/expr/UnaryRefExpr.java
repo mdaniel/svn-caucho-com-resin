@@ -35,6 +35,7 @@ import com.caucho.quercus.env.RefVar;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.lib.VariableModule;
+import com.caucho.quercus.parser.QuercusParser;
 
 /**
  * Represents a PHP reference argument.
@@ -57,6 +58,18 @@ public class UnaryRefExpr extends AbstractUnaryExpr {
   {
     return true;
   }
+  
+  /**
+   * Creates an assignment using this value as the right hand side.
+   */
+  @Override
+  public Expr createAssignFrom(QuercusParser parser,
+                               AbstractVarExpr leftHandSide)
+  {
+    ExprFactory factory = parser.getExprFactory();
+    
+    return factory.createAssignRef(leftHandSide, _expr);
+  }
 
   /**
    * Evaluates the expression.
@@ -68,7 +81,7 @@ public class UnaryRefExpr extends AbstractUnaryExpr {
   public Value eval(Env env)
   {
     // quercus/0d28
-    Value value = getExpr().evalRef(env);
+    Value value = getExpr().evalVar(env);
     
     return value.toRef();
   }
@@ -80,9 +93,9 @@ public class UnaryRefExpr extends AbstractUnaryExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  public Var evalVar(Env env)
   {
-    Value value = getExpr().evalRef(env);
+    Var value = getExpr().evalVar(env);
 
     // php/112d
     return value;

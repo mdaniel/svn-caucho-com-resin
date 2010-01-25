@@ -35,6 +35,7 @@ import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.Var;
 
 /**
  * Represents a PHP array[] reference expression.
@@ -91,7 +92,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
   @Override
   public Value evalArg(Env env, boolean isTop)
   {
-    return evalRef(env);
+    return evalVar(env);
   }
 
   /**
@@ -101,11 +102,11 @@ public class ArrayTailExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public Value evalRef(Env env)
+  public Var evalVar(Env env)
   {
     Value obj = _expr.evalArray(env);
 
-    return obj.putRef();
+    return obj.putVar();
   }
 
   /**
@@ -151,11 +152,31 @@ public class ArrayTailExpr extends AbstractVarExpr {
    *
    * @return the expression value.
    */
-  public void evalAssign(Env env, Value value)
+  @Override
+  public Value evalAssignValue(Env env, Value value)
   {
     Value array = _expr.evalArray(env);
 
     array.put(value);
+    
+    return value;
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalAssignRef(Env env, Value value)
+  {
+    Value array = _expr.evalArray(env);
+
+    array.put(value);
+    
+    return value;
   }
 
   /**

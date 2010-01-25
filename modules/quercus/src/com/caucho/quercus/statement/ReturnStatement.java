@@ -62,10 +62,11 @@ public class ReturnStatement extends Statement {
   /**
    * Executes the statement, returning the expression value.
    */
+  @Override
   public Value execute(Env env)
   {
     if (_expr != null)
-      return _expr.eval(env);
+      return _expr.evalValue(env);
     else
       return NullValue.NULL;
   }
@@ -73,6 +74,7 @@ public class ReturnStatement extends Statement {
   /**
    * Returns true if control can go past the statement.
    */
+  @Override
   public int fallThrough()
   {
     return RETURN;

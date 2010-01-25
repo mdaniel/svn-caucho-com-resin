@@ -63,17 +63,17 @@ public class LazySaveEnvVar extends EnvVar
   /**
    * Returns the current Var.
    */
-  public Var getRef()
+  public Var getVar()
   {
-    return getEnvVar().getRef();
+    return getEnvVar().getVar();
   }
 
   /**
    * Sets the var.
    */
-  public Var setRef(Var var)
+  public Var setVar(Var var)
   {
-    return getEnvVar().setRef(var);
+    return getEnvVar().setVar(var);
   }
 
   private EnvVar getEnvVar()

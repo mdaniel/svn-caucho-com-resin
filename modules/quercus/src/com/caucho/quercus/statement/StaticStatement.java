@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
@@ -43,7 +44,7 @@ import com.caucho.quercus.expr.VarExpr;
 public class StaticStatement extends Statement {
   protected VarExpr _var;
   protected Expr _initValue;
-  protected String _staticName;
+  protected StringValue _staticName;
   
   /**
    * Creates the echo statement.
@@ -60,9 +61,9 @@ public class StaticStatement extends Statement {
   {
     try {
       if (_staticName == null)
-        _staticName = env.createStaticName();
+        _staticName = env.createString(env.createStaticName());
 
-      String staticName = _staticName;
+      StringValue staticName = _staticName;
       
       Var var = env.getStaticVar(staticName);
       env.setValue(_var.getName(), var);

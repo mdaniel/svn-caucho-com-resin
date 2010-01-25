@@ -32,6 +32,7 @@ package com.caucho.quercus.statement;
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarVarExpr;
 
@@ -53,7 +54,7 @@ public class VarGlobalStatement extends Statement {
   
   public Value execute(Env env)
   {
-    String name = _varExpr.evalString(env);
+    StringValue name = _varExpr.evalStringValue(env);
     
     env.setValue(name, env.getGlobalVar(name));
 

@@ -222,12 +222,12 @@ public class ServerArrayValue extends ArrayValueImpl
   /**
    * Returns the array ref.
    */
-  public Var getRef(Value key)
+  public Var getVar(Value key)
   {
     if (! _isFilled)
       fillMap();
     
-    return super.getRef(key);
+    return super.getVar(key);
   }
   
   /**
