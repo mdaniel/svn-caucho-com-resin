@@ -296,12 +296,11 @@ public class Port extends TaskWorker
   /**
    * Sets the id.
    */
-  /*
+  // exists only for QA regressions
+  @Deprecated
   public void setId(String id)
   {
-    _serverId = id;
   }
-  */
 
   /**
    * Sets the server id.

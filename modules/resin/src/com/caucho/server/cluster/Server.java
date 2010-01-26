@@ -285,10 +285,11 @@ public class Server extends ProtocolDispatchServer
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
-    } catch (Throwable e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
 
-      _configException = e;
+      // exceptions here must throw to the top because they're non-recoverable
+      throw ConfigException.create(e);
     } finally {
       _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }

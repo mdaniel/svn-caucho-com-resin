@@ -964,7 +964,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       if (_stage != null)
         _server.setStage(_stage);
 
-      _server.start();
+      // _server.start();
     }
 
     return _server;
@@ -1032,6 +1032,8 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       */
 
       _server = createServer();
+      
+      _server.start();
 
       Environment.start(getClassLoader());
 

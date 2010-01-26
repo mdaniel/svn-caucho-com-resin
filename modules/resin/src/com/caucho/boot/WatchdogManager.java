@@ -185,7 +185,9 @@ class WatchdogManager implements AlarmListener {
     resin.addCluster(cluster);
 
     _server = resin.createServer();
-
+    
+    thread.setContextClassLoader(_server.getClassLoader());
+    
     _httpPort = _server.createHttp();
     if (_watchdogPort > 0)
       _httpPort.setPort(_watchdogPort);
@@ -199,8 +201,9 @@ class WatchdogManager implements AlarmListener {
 
     _httpPort.init();
     
+    
     _server.bindPorts();
-
+    
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
@@ -247,7 +250,7 @@ class WatchdogManager implements AlarmListener {
       _server.start();
 
       _lifecycle.toActive();
-
+      
       // valid checker
       new Alarm(this).queue(60000);
     } finally {
