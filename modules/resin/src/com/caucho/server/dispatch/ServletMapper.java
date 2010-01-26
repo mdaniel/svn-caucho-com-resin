@@ -267,7 +267,7 @@ public class ServletMapper {
     }
 
     if (servletName == null) {
-      servletName = matchWelcomeFileResource(invocation);
+      servletName = matchWelcomeFileResource(invocation, vars);
 
       if (servletName != null && ! contextURI.endsWith("/")
         && !(invocation instanceof SubInvocation)) {
@@ -278,7 +278,7 @@ public class ServletMapper {
     }
 
     if (servletName == null) {
-      servletName = matchWelcomeServlet(invocation);
+      servletName = matchWelcomeServlet(invocation, vars);
 
       if (servletName != null && ! contextURI.endsWith("/")
         && !(invocation instanceof SubInvocation)) {
@@ -364,12 +364,11 @@ public class ServletMapper {
     return chain;
   }
 
-  private String matchWelcomeFileResource(ServletInvocation invocation)
+  private String matchWelcomeFileResource(ServletInvocation invocation, ArrayList<String> vars)
   {
     String contextURI = invocation.getContextURI();
 
     String servletName = null;
-    ArrayList<String> vars = new ArrayList<String>();
 
     ArrayList<String> welcomeFileList = _welcomeFileList;
     int size = welcomeFileList.size();
@@ -418,12 +417,11 @@ public class ServletMapper {
     return null;
   }
 
-  private String matchWelcomeServlet(ServletInvocation invocation)
+  private String matchWelcomeServlet(ServletInvocation invocation, ArrayList<String> vars)
   {
     String contextURI = invocation.getContextURI();
 
     String servletName = null;
-    ArrayList<String> vars = new ArrayList<String>();
 
     ArrayList<String> welcomeFileList = _welcomeFileList;
     int size = welcomeFileList.size();
@@ -625,7 +623,7 @@ public class ServletMapper {
     @Override
     public boolean isMatch(ServletMapping item)
     {
-      return (item.isInFragmentMode() 
+      return (item.isInFragmentMode()
               && _servletName.equals(item.getServletName()));
     }
   }

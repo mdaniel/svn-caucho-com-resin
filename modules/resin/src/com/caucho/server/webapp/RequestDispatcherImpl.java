@@ -43,12 +43,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServletResponseWrapper;
-import javax.servlet.http.HttpSession;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
+import java.util.logging.Logger;
 
 public class RequestDispatcherImpl implements RequestDispatcher {
+  private final static Logger log
+    = Logger.getLogger(RequestDispatcherImpl.class.getName());
+
   private static final L10N L = new L10N(RequestDispatcherImpl.class);
 
   static final int MAX_DEPTH = 64;
@@ -424,8 +427,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
    * Dispatch the async resume request to the servlet
    * named by the request dispatcher.
    *
-   * @param req the servlet request.
-   * @param res the servlet response.
+   * @param request the servlet request.
+   * @param response the servlet response.
    * @param invocation current invocation
    */
   public void dispatchResume(HttpServletRequest request,
