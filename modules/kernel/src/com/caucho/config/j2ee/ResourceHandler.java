@@ -97,7 +97,7 @@ public class ResourceHandler extends JavaeeInjectionHandler {
     
     ValueGenerator gen;
 
-    if (lookup == null || ! "".equals(lookup))
+    if (lookup != null && ! "".equals(lookup))
       gen = new JndiValueGenerator(location, bindType, lookup);
     else
       gen = bindValueGenerator(location, bindType, name, mappedName);

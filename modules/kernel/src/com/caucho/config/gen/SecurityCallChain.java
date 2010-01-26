@@ -52,7 +52,7 @@ public class SecurityCallChain extends AbstractCallChain {
   private String _roleVar;
 
   private String _runAs;
-
+ 
   public SecurityCallChain(BusinessMethodGenerator bizMethod,
 			   EjbCallChain next)
   {
@@ -97,41 +97,39 @@ public class SecurityCallChain extends AbstractCallChain {
   @Override
   public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
   {
-    ApiClass cl = apiMethod.getDeclaringClass();
-    
-    RunAs runAs = cl.getAnnotation(RunAs.class);
+    ApiClass apiClass = apiMethod.getDeclaringClass();
+    ApiClass implClass = null;
 
+    if (implMethod != null) {
+      implClass = implMethod.getDeclaringClass();
+    }
+
+    RunAs runAs = getAnnotation(RunAs.class, apiClass, implClass);
+    
     if (runAs != null)
       _runAs = runAs.value();
     
-    RolesAllowed rolesAllowed = cl.getAnnotation(RolesAllowed.class);
-    
+    RolesAllowed rolesAllowed = getAnnotation(RolesAllowed.class, 
+                                              apiMethod, 
+                                              apiClass,
+                                              implMethod, 
+                                              implClass);
+
     if (rolesAllowed != null)
       _roles = rolesAllowed.value();
-    
-    PermitAll permitAll = cl.getAnnotation(PermitAll.class);
+
+    PermitAll permitAll = getAnnotation(PermitAll.class, 
+                                        apiMethod, 
+                                        apiClass,
+                                        implMethod, 
+                                        implClass);
 
     if (permitAll != null)
       _roles = null;
     
-    DenyAll denyAll = cl.getAnnotation(DenyAll.class);
-
-    if (denyAll != null)
-      _roles = new String[0];
-
-    // 
-    
-    rolesAllowed = apiMethod.getAnnotation(RolesAllowed.class);
-
-    if (rolesAllowed != null)
-      _roles = rolesAllowed.value();
-    
-    permitAll = apiMethod.getAnnotation(PermitAll.class);
-
-    if (permitAll != null)
-      _roles = null;
-    
-    denyAll = apiMethod.getAnnotation(DenyAll.class);
+    DenyAll denyAll = getAnnotation(DenyAll.class,
+                                    apiMethod,
+                                    implMethod);
 
     if (denyAll != null)
       _roles = new String[0];
@@ -155,12 +153,12 @@ public class SecurityCallChain extends AbstractCallChain {
       out.print("private static String []" + _roleVar + " = new String[] {");
 
       for (int i = 0; i < _roles.length; i++) {
-	if (i != 0)
-	  out.print(", ");
+        if (i != 0)
+          out.print(", ");
 
-	out.print("\"");
-	out.printJavaString(_roles[i]);
-	out.print("\"");
+        out.print("\"");
+        out.printJavaString(_roles[i]);
+        out.print("\"");
       }
 
       out.println("};");

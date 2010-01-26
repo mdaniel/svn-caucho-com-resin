@@ -112,8 +112,8 @@ public class SecurityContext {
 
     if (provider != null && roleSet != null) {
       for (int i = 0; i < roleSet.length; i++) {
-	if (provider.isUserInRole(roleSet[i]))
-	  return;
+        if (provider.isUserInRole(roleSet[i]))
+          return;
       }
 
       throw new AccessControlException(L.l("permission denied"));

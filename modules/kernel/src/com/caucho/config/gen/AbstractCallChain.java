@@ -29,6 +29,7 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
 import com.caucho.java.JavaWriter;
@@ -204,5 +205,60 @@ abstract public class AbstractCallChain implements EjbCallChain {
     throws IOException
   {
     _next.generateFinally(out);
+  }
+
+  protected <T extends Annotation> T getAnnotation(Class<T> annotationType,
+                                                   ApiMethod apiMethod, 
+                                                   ApiMethod implMethod)
+  {
+    Annotation annotation;
+
+    annotation = apiMethod.getAnnotation(annotationType);
+
+    if ((annotation == null) && (implMethod != null)) {
+      annotation = implMethod.getAnnotation(annotationType);
+    }
+
+    return (T) annotation;
+  }
+  
+  protected <T extends Annotation> T getAnnotation(Class<T> annotationType,
+                                                   ApiClass apiClass,
+                                                   ApiClass implClass)
+  {
+    Annotation annotation;
+
+    annotation = apiClass.getAnnotation(annotationType);
+  
+    if ((annotation == null) && (implClass != null)) {
+      annotation = implClass.getAnnotation(annotationType);
+    }
+
+    return (T) annotation;    
+  }
+  
+  protected <T extends Annotation> T getAnnotation(Class<T> annotationType,
+                                                   ApiMethod apiMethod, 
+                                                   ApiClass apiClass,
+                                                   ApiMethod implementationMethod, 
+                                                   ApiClass implementationClass) 
+  {
+    Annotation annotation;
+
+    annotation = apiMethod.getAnnotation(annotationType);
+
+    if (annotation == null) {
+      annotation = apiClass.getAnnotation(annotationType);
+    }
+
+    if ((annotation == null) && (implementationMethod != null)) {
+      annotation = implementationMethod.getAnnotation(annotationType);
+    }
+
+    if ((annotation == null) && (implementationClass != null)) {
+      annotation = implementationClass.getAnnotation(annotationType);
+    }
+
+    return (T) annotation;
   }
 }

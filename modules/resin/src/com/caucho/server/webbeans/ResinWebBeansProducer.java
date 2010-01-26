@@ -40,16 +40,20 @@ import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
+import com.caucho.security.SecurityContext;
+import com.caucho.security.SecurityContextException;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.*;
 import com.caucho.util.L10N;
 
 import java.lang.annotation.Annotation;
+import java.security.Principal;
 import java.util.Dictionary;
 import java.util.Hashtable;
 import java.util.Set;
 import java.util.concurrent.*;
 import java.util.logging.*;
+
 import javax.ejb.*;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Conversation;
@@ -135,5 +139,23 @@ public class ResinWebBeansProducer
   public ScheduledExecutorService getScheduledExecutorService()
   {
     return ScheduledThreadPool.getLocal();
+  }
+  
+
+  /**
+   * Returns the ScheduledExecutorService
+   */
+  @Produces
+  @CauchoDeployment
+  @ContextDependent
+  public Principal getPrincipal()
+  {
+    try {
+      return SecurityContext.getUserPrincipal();
+    } catch (SecurityContextException e) {
+      log.log(Level.WARNING, e.toString(), e);
+
+      return null;
+    }
   }
 }

@@ -62,10 +62,16 @@ abstract public class AbstractContext implements EJBContext {
       .getName());
 
   private boolean _isDead;
+  private String []_declaredRoles;
 
   @SuppressWarnings("unchecked")
   private Class _invokedBusinessInterface;
 
+  public void setDeclaredRoles(String[] roles)
+  {
+    _declaredRoles = roles;
+  }
+  
   /**
    * Returns true if the context is dead.
    */
@@ -228,7 +234,7 @@ abstract public class AbstractContext implements EJBContext {
    */
   public Identity getCallerIdentity()
   {
-    return null;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -250,7 +256,7 @@ abstract public class AbstractContext implements EJBContext {
    */
   public boolean isCallerInRole(Identity role)
   {
-    return false;
+    throw new UnsupportedOperationException();
   }
 
   /**
@@ -258,7 +264,12 @@ abstract public class AbstractContext implements EJBContext {
    */
   public boolean isCallerInRole(String roleName)
   {
-    return SecurityContext.isUserInRole(roleName);
+    for (String role : _declaredRoles) {
+      if (roleName.equals(role))
+        return SecurityContext.isUserInRole(roleName);
+    }
+    
+    return false;
   }
 
   public void remove() throws RemoveException

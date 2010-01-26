@@ -31,7 +31,6 @@ package com.caucho.config.gen;
 import static javax.ejb.ConcurrencyManagementType.CONTAINER;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
@@ -131,30 +130,6 @@ public class LockCallChain extends AbstractCallChain {
       _lockTimeout = accessTimeoutAttribute.timeout();
       _lockTimeoutUnit = accessTimeoutAttribute.unit();
     }
-  }
-
-  // TODO Should this be moved into the abstract super class?
-  private <T extends Annotation> T getAnnotation(Class<T> annotationType,
-                                                 ApiMethod apiMethod, ApiClass apiClass, ApiMethod implementationMethod,
-                                                 ApiClass implementationClass)
-  {
-    Annotation annotation;
-
-    annotation = apiMethod.getAnnotation(annotationType);
-
-    if (annotation == null) {
-      annotation = apiClass.getAnnotation(annotationType);
-    }
-
-    if ((annotation == null) && (implementationMethod != null)) {
-      annotation = implementationMethod.getAnnotation(annotationType);
-    }
-
-    if ((annotation == null) && (implementationClass != null)) {
-      annotation = implementationClass.getAnnotation(annotationType);
-    }
-
-    return (T) annotation;
   }
 
   /**

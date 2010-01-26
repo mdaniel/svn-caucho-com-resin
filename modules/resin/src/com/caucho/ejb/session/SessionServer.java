@@ -33,6 +33,8 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import javax.annotation.security.DeclareRoles;
+import javax.annotation.security.RolesAllowed;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.SessionContext;
@@ -63,10 +65,37 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
   private int _sessionIdleMax = 16;
   private int _sessionConcurrentMax = -1;
   private long _sessionConcurrentTimeout = -1;
+  
+  private String[] _declaredRoles;
 
   public SessionServer(EjbContainer manager, AnnotatedType<T> annotatedType)
   {
     super(manager, annotatedType);
+    
+    DeclareRoles declareRoles 
+      = annotatedType.getJavaClass().getAnnotation(DeclareRoles.class);
+
+    RolesAllowed rolesAllowed 
+      = annotatedType.getJavaClass().getAnnotation(RolesAllowed.class); 
+    
+    if (declareRoles != null && rolesAllowed != null) {
+      _declaredRoles = new String[declareRoles.value().length +
+                                  rolesAllowed.value().length];
+
+      System.arraycopy(declareRoles.value(), 0, 
+          _declaredRoles, 0, 
+          declareRoles.value().length);
+
+      System.arraycopy(rolesAllowed.value(), 0, 
+          _declaredRoles, declareRoles.value().length, 
+          rolesAllowed.value().length);
+    }
+    else if (declareRoles != null) {
+      _declaredRoles = declareRoles.value();
+    }
+    else if (rolesAllowed != null) {
+      _declaredRoles = rolesAllowed.value();
+    }
   }
 
   @Override
@@ -129,8 +158,11 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
 
       BeanFactory<?> factory
         = beanManager.createBeanFactory(SessionContext.class);
+      
+      AbstractContext context = getSessionContext();
+      context.setDeclaredRoles(_declaredRoles);
 
-      _component = factory.singleton(getSessionContext());
+      _component = factory.singleton(context);
 
       beanManager.addBean(_component);
     } finally {
