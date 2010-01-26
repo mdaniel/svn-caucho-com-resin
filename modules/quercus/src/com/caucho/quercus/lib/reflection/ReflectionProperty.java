@@ -176,7 +176,7 @@ public class ReflectionProperty
     { 
       if (cls.getClassField(nameV) != null)
         return new Property(cls, nameV);
-      else if (cls.getStaticField(env, nameV.toString()) != null)
+      else if (cls.getStaticFieldValue(env, nameV) != null)
         return new StaticProperty(cls, nameV);
       else
         throw new ReflectionException(L.l("Property {0}->${1} does not exist",
@@ -262,12 +262,13 @@ public class ReflectionProperty
   
   static class StaticProperty extends Property
   {
-    String _name;
+    private StringValue _name;
     
     public StaticProperty(QuercusClass cls, StringValue nameV)
     {
       super(cls, nameV);
-      _name = nameV.toString();
+      
+      _name = nameV;
     }
     
     @Override
@@ -279,13 +280,13 @@ public class ReflectionProperty
     @Override
     public Value getValue(Env env, ObjectValue obj)
     {
-      return _cls.getStaticField(env, _name).toValue();
+      return _cls.getStaticFieldValue(env, _name);
     }
     
     @Override
     public void setValue(Env env, ObjectValue obj, Value value)
     {
-      _cls.getStaticField(env, _name).set(value);
+      _cls.getStaticFieldVar(env, _name).set(value);
     }
     
     @Override
@@ -298,7 +299,7 @@ public class ReflectionProperty
 
       if (refClass != null)
         return refClass;
-      else if (cls.getStaticField(env, _name) != null)
+      else if (cls.getStaticFieldValue(env, _name) != null)
         return cls;
 
       return null;
@@ -310,7 +311,7 @@ public class ReflectionProperty
       
       ClassDef def = cls.getClassDef();
 
-      return def.getStaticFieldComment(_name);
+      return def.getStaticFieldComment(_name.toString());
     }
     
     public String toString()
@@ -318,7 +319,7 @@ public class ReflectionProperty
       if (_cls.getName() != null)
         return _cls.getName() + "::" + _name;
       else
-        return _name;
+        return _name.toString();
     }
   }
 }

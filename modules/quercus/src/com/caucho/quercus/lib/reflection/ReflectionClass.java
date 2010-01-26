@@ -232,11 +232,11 @@ public class ReflectionClass
       }
     }
     
-    ArrayList<String> staticFieldList = _cls.getStaticFieldNames();
+    ArrayList<StringValue> staticFieldList = _cls.getStaticFieldNames();
     
-    for (String field : staticFieldList) {
+    for (StringValue fieldName : staticFieldList) {
       ReflectionProperty prop
-        = ReflectionProperty.create(env, _cls, env.createString(field), true);
+        = ReflectionProperty.create(env, _cls, fieldName, true);
       
       array.put(env.wrapJava(prop));
     }
@@ -401,19 +401,19 @@ public class ReflectionClass
     if (cls == null)
       return;
     
-    for (String name : cls.getStaticFieldNames()) {
-      Var field = cls.getStaticField(env, name);
-      array.put(StringValue.create(name), field.toValue());
+    for (StringValue name : cls.getStaticFieldNames()) {
+      Value field = cls.getStaticFieldValue(env, name);
+      array.put(name, field.toValue());
     }
     
     getStaticFields(env, array, cls.getParent());
   }
   
   public Value getStaticPropertyValue(Env env,
-                                      String name,
+                                      StringValue name,
                                       @Optional Value defaultV)
   {
-    Var field = _cls.getStaticField(env, name);
+    Value field = _cls.getStaticFieldValue(env, name);
     
     if (field == null) {
       if (! defaultV.isDefault())
@@ -424,12 +424,12 @@ public class ReflectionClass
                                 L.l("Class '{0}' does not have a property named '{1}'", _name, name)));
     }
 
-    return field.toValue();
+    return field;
   }
   
-  public void setStaticPropertyValue(Env env, String name, Value value)
+  public void setStaticPropertyValue(Env env, StringValue name, Value value)
   {
-    _cls.getStaticField(env, name).set(value);
+    _cls.getStaticFieldVar(env, name).set(value);
   }
   
   public ArrayValue getDefaultProperties(Env env)

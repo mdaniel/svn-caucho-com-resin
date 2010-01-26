@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.QuercusClass;
@@ -48,18 +49,11 @@ import com.caucho.util.L10N;
 public class ClassVirtualFieldExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ClassVirtualFieldExpr.class);
 
-  protected final String _varName;
-
-  public ClassVirtualFieldExpr(Location location, String varName)
-  {
-    super(location);
-
-    _varName = varName;
-  }
+  protected final StringValue _varName;
 
   public ClassVirtualFieldExpr(String varName)
   {
-    _varName = varName;
+    _varName = MethodIntern.intern(varName);
   }
   
   //
@@ -77,7 +71,7 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   {
     ExprFactory factory = parser.getExprFactory();
     
-    Expr var = parser.createVar(_varName);
+    Expr var = parser.createVar(_varName.toString());
     
     return factory.createClassVirtualMethodCall(location, var, args);
   }
@@ -101,14 +95,7 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
       return NullValue.NULL;
     }
     
-    String name = qClass.getName();
-    
-    StringValue var = env.createStringBuilder();
-    var.append(name);
-    var.append("::");
-    var.append(_varName);
-    
-    return env.getStaticValue(var);
+    return qClass.getStaticFieldValue(env, _varName);
   }
   
   /**
@@ -121,20 +108,16 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    String name = env.getThis().getQuercusClass().getName();
+    Value qThis = env.getThis();
+    QuercusClass qClass = qThis != null ? qThis.getQuercusClass() : null;
     
-    if (name == null) {
-      env.error(getLocation(), L.l("no calling class found"));
+    if (qClass == null) {
+      env.error(L.l("No calling class found for '{0}'", this));
       
       return NullValue.NULL.toVar();
     }
     
-    StringValue var = env.createStringBuilder();
-    var.append(name);
-    var.append("::");
-    var.append(_varName);
-    
-    return env.getStaticVar(var);
+    return qClass.getStaticFieldVar(env, _varName);
   }
   
   /**
@@ -147,22 +130,16 @@ public class ClassVirtualFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignRef(Env env, Value value)
   {
-    String name = env.getThis().getQuercusClass().getName();
+    Value qThis = env.getThis();
+    QuercusClass qClass = qThis != null ? qThis.getQuercusClass() : null;
     
-    if (name == null) {
-      env.error(getLocation(), L.l("no calling class found"));
+    if (qClass == null) {
+      env.error(L.l("No calling class found for '{0}'", this));
       
-      return value;
+      return NullValue.NULL.toVar();
     }
     
-    StringValue var = env.createStringBuilder();
-    var.append(name);
-    var.append("::");
-    var.append(_varName);
-    
-    env.setStaticRef(var, value);
-    
-    return value;
+    return qClass.setStaticFieldRef(env, _varName, value);
   }
   
   /**

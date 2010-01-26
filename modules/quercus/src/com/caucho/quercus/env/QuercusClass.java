@@ -91,6 +91,7 @@ public class QuercusClass extends NullValue {
   private final HashMap<String,Expr> _constMap;
   private final LinkedHashMap<StringValue,ClassField> _fieldMap;
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
+  private final HashMap<StringValue,StringValue> _staticFieldNameMap;
 
   private final HashSet<String> _instanceofSet;
 
@@ -119,7 +120,15 @@ public class QuercusClass extends NullValue {
     _fieldMap = new LinkedHashMap<StringValue,ClassField>();
     _methodMap = new MethodMap<AbstractFunction>(this);
     _constMap = new HashMap<String,Expr>();
+    
     _staticFieldExprMap = new LinkedHashMap<String,ArrayList<StaticField>>();
+    
+    _staticFieldNameMap = new LinkedHashMap<StringValue,StringValue>();
+    
+    if (parent != null) {
+      _staticFieldNameMap.putAll(parent._staticFieldNameMap);
+      System.out.println("PUT: " + parent + " " + _staticFieldNameMap);
+    }
 
     JavaClassDef javaClassDef = null;
 
@@ -268,6 +277,7 @@ public class QuercusClass extends NullValue {
     _methodMap = cacheClass._methodMap;
     _constMap = cacheClass._constMap;
     _staticFieldExprMap = cacheClass._staticFieldExprMap;
+    _staticFieldNameMap = cacheClass._staticFieldNameMap;
     _instanceofSet = cacheClass._instanceofSet;
   }
 
@@ -616,6 +626,9 @@ public class QuercusClass extends NullValue {
       fieldList = new ArrayList<StaticField>();
 
       _staticFieldExprMap.put(className, fieldList);
+      _staticFieldNameMap.put(new ConstStringValue(name),
+                              new ConstStringValue(className + "::" + name));
+      System.out.println("ADD: " + (className + "::" + name) + " " + _staticFieldNameMap + " " + this);
     }
     
     fieldList.add(new StaticField(name, value));
@@ -624,18 +637,13 @@ public class QuercusClass extends NullValue {
   /**
    * Returns the static field names.
    */
-  public ArrayList<String> getStaticFieldNames()
+  public ArrayList<StringValue> getStaticFieldNames()
   {
-    ArrayList<String> names = new ArrayList<String>();
+    ArrayList<StringValue> names = new ArrayList<StringValue>();
 
     if (_staticFieldExprMap != null) {
-      for (Map.Entry<String,ArrayList<StaticField>> entry
-           : _staticFieldExprMap.entrySet()) {
-        ArrayList<StaticField> fieldList = entry.getValue();
-        
-        for (StaticField field : fieldList) {
-          names.add(field.getName());
-        }
+      for (StringValue fieldName : _staticFieldNameMap.keySet()) {
+        names.add(fieldName);
       }
     }
 
@@ -720,56 +728,48 @@ public class QuercusClass extends NullValue {
     }
   }
 
-  public Var getStaticField(Env env, String name)
+  public Value getStaticFieldValue(Env env, StringValue name)
   {
-    Var var = getStaticFieldRec(env, name);
-
-    if (var != null)
-      return var;
-
-    StringValue fullName
-      = env.createString(_className).append("::").append(name);
-      
-    EnvVar envVar = env.getGlobalEnvVar(fullName);
-      
-    return envVar.getVar();
-  }
-
-  public Value getStaticFieldValue(Env env, String name)
-  {
-    Var var = getStaticFieldRec(env, name);
-
-    if (var != null)
-      return var.toValue();;
-
-    /*
-    String fullName = _className + "::" + name;
-      
-    EnvVar envVar = env.getGlobalEnvVar(fullName);
-      
-    return envVar.getRef();
-    */
-
-    return NullValue.NULL;
-  }
-
-  protected Var getStaticFieldRec(Env env, String name)
-  {
-    String fullName = _className + "::" + name;
-      
-    EnvVar envVar = env.getGlobalRaw(fullName);
-
-    if (envVar != null)
-      return envVar.getVar();
+    StringValue staticName = _staticFieldNameMap.get(name);
     
-    QuercusClass parent = getParent();
+    if (staticName == null) {
+      env.error(L.l("{0}::{1} is an unknown static field",
+                    _className, name));
+      
+      return NullValue.NULL;
+    }
     
-    if (parent != null)
-      return parent.getStaticFieldRec(env, name);
-    else
-      return null;
+    return env.getStaticValue(staticName);
   }
-  
+
+  public Var getStaticFieldVar(Env env, StringValue name)
+  {
+    StringValue staticName = _staticFieldNameMap.get(name);
+    
+    if (staticName == null) {
+      env.error(L.l("{0}::{1} is an unknown static field",
+                    _className, name));
+      
+      throw new IllegalStateException();
+    }
+    
+    return env.getStaticVar(staticName);
+  }
+
+  public Value setStaticFieldRef(Env env, StringValue name, Value value)
+  {
+    StringValue staticName = _staticFieldNameMap.get(name);
+    
+    if (staticName == null) {
+      env.error(L.l("{0}::{1} is an unknown static field",
+                    _className, name));
+      
+      throw new IllegalStateException();
+    }
+    
+    return env.setStaticRef(staticName, value);
+  }
+    
   //
   // Constructors
   //
