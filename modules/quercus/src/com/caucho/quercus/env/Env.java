@@ -6776,7 +6776,7 @@ public class Env {
   /**
    * Registers a shutdown function.
    */
-  public void addShutdown(Callback callback, Value []args)
+  public void addShutdown(Callable callback, Value []args)
   {
     if (_shutdownList == null)
       _shutdownList = new ArrayList<Shutdown>();

@@ -33,10 +33,10 @@ package com.caucho.quercus.env;
  * Represents a PHP shutdown function.
  */
 public class Shutdown {
-  private final Callback _callback;
+  private final Callable _callback;
   private final Value []_args;
 
-  public Shutdown(Callback callback, Value []args)
+  public Shutdown(Callable callback, Value []args)
   {
     _callback = callback;
     _args = args;

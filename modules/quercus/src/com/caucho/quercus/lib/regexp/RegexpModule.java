@@ -1151,7 +1151,7 @@ public class RegexpModule
    */
   private static StringValue pregReplaceCallbackImpl(Env env,
                                                      Regexp regexp,
-                                                     Callback fun,
+                                                     Callable fun,
                                                      StringValue subject,
                                                      long limit,
                                                      Value countV)
@@ -1446,7 +1446,7 @@ public class RegexpModule
    */
   public static Value preg_replace_callback(Env env,
                                             Regexp regexp,
-                                            @NotNull Callback fun,
+                                            @NotNull Callable fun,
                                             Value subject,
                                             @Optional("-1") long limit,
                                             @Optional @Reference Value count)
@@ -1564,7 +1564,7 @@ public class RegexpModule
    */
   private static Value pregReplaceCallback(Env env,
                                            Regexp regexp,
-                                           Callback fun,
+                                           Callable fun,
                                            StringValue subject,
                                            @Optional("-1") long limit,
                                            @Optional @Reference Value countV)

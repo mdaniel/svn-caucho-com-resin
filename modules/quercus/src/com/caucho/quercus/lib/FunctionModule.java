@@ -189,8 +189,8 @@ public class FunctionModule extends AbstractQuercusModule {
    * Registers a shutdown function.
    */
   public static Value register_shutdown_function(Env env,
-						 Callback fun,
-						 Value []args)
+                                                 Callable fun,
+                                                 Value []args)
   {
     env.addShutdown(fun, args);
 

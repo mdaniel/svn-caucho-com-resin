@@ -1655,7 +1655,7 @@ public class ArrayModule
    */
   public static boolean uksort(Env env,
                                @Reference Value arrayVar,
-                               Callback func,
+                               Callable func,
                                @Optional long sortFlag)
   {
     ArrayValue array = arrayVar.toArrayValue(env);
@@ -2519,7 +2519,7 @@ public class ArrayModule
    * @param args the vector of array arguments
    * @return an array with all of the mapped values
    */
-  public static Value array_map(Env env, Callback fun,
+  public static Value array_map(Env env, Callable fun,
                                 ArrayValue arg, Value []args)
   {
     // XXX: drupal
@@ -3546,11 +3546,11 @@ public class ArrayModule
 
     private int _order;
 
-    private Callback _func;
+    private Callable _func;
 
     private Env _env;
 
-    CompareCallBack(AbstractGet getter, int order, Callback func,
+    CompareCallBack(AbstractGet getter, int order, Callable func,
                     Env env)
     {
       _getter = getter;

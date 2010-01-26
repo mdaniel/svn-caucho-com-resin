@@ -225,8 +225,8 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
       catch (QuercusLineRuntimeException e) {
         log.log(Level.FINE, e.toString(), e);
 
-    ws.println(e.getMessage());
-    //  return;
+        ws.println(e.getMessage());
+        //  return;
       }
       catch (QuercusValueException e) {
         log.log(Level.FINE, e.toString(), e);

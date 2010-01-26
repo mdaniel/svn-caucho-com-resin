@@ -431,7 +431,7 @@ public class Function extends AbstractFunction {
     } finally {
       env.restoreFunctionArgs(oldArgs);
       env.popEnv(oldMap);
-      // env.setThis(oldThis);
+      env.setThis(oldThis);
     }
   }
   
