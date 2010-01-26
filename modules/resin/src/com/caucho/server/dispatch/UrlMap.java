@@ -84,6 +84,16 @@ public class UrlMap<E> {
     _bestShort = bestShort;
   }
 
+  void remove(Filter<E> filter)
+  {
+    for (int i = _regexps.size() - 1; i >= 0; i--) {
+      RegexpEntry<E> regexp = _regexps.get(i);
+
+      if (filter.isMatch(regexp.getValue()))
+        _regexps.remove(i);
+    }
+  }
+
   int size()
   {
     return _regexps.size();
@@ -590,6 +600,11 @@ public class UrlMap<E> {
       return _pattern;
     }
 
+    E getValue()
+    {
+      return _value;
+    }
+
     public int hashCode()
     {
       if (_urlPattern != null)
@@ -624,5 +639,9 @@ public class UrlMap<E> {
       else
         return super.toString();
     }
+  }
+
+  public interface Filter<X> {
+    public boolean isMatch(X item);
   }
 }

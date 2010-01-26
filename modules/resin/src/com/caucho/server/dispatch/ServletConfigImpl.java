@@ -70,6 +70,8 @@ import java.util.logging.Logger;
 public class ServletConfigImpl
   implements ServletConfig, ServletRegistration.Dynamic, AlarmListener
 {
+  public enum FRAGMENT_MODE {IN_FRAGMENT, IN_WEBXML};
+
   static L10N L = new L10N(ServletConfigImpl.class);
   protected static final Logger log
     = Logger.getLogger(ServletConfigImpl.class.getName());
@@ -125,11 +127,18 @@ public class ServletConfigImpl
 
   private Principal _runAs;
 
+  private FRAGMENT_MODE _fragmentMode = FRAGMENT_MODE.IN_WEBXML;
+
   /**
    * Creates a new servlet configuration object.
    */
   public ServletConfigImpl()
   {
+  }
+
+  public ServletConfigImpl(FRAGMENT_MODE fragmentMode)
+  {
+    _fragmentMode = fragmentMode;
   }
 
   /**
@@ -734,6 +743,16 @@ public class ServletConfigImpl
         _nextInitTime = (Alarm.getCurrentTime() +
                          1000L * unExn.getUnavailableSeconds());
     }
+  }
+
+  public void setInFragmentMode()
+  {
+    _fragmentMode = FRAGMENT_MODE.IN_FRAGMENT;
+  }
+
+  public boolean isInFragmentMode()
+  {
+    return _fragmentMode == FRAGMENT_MODE.IN_FRAGMENT;
   }
 
   /**

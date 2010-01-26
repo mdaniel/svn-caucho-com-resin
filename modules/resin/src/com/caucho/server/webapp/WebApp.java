@@ -1325,6 +1325,9 @@ public class WebApp extends ServletContextImpl
   {
     ServletMapping servletMapping = new ServletMapping();
 
+    if (_isApplyingWebFragments)
+      servletMapping.setInFragmentMode();
+
     servletMapping.setWebApp(this);
     servletMapping.setServletContext(this);
     servletMapping.setServletMapper(_servletMapper);
