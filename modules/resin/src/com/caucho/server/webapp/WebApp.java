@@ -2497,21 +2497,8 @@ public class WebApp extends ServletContextImpl
                             new AnnotationLiteral<Initialized>() {});
       */
       
-      if (! _metadataComplete) {
-        loadWebFragments();
-
-        List<WebAppFragmentConfig> fragments = sortWebFragments();
-
-        _isApplyingWebFragments = true;
-
-        for (WebAppConfig fragment : fragments) {
-          fragment.getBuilderProgram().configure(this);
-        }
-
-        _isApplyingWebFragments = false;
-
-        _classLoader.addScanListener(this);
-      }
+      if (! _metadataComplete)
+        initWebFragments();
 
       WebAppController parent = null;
       if (_controller != null)
@@ -2549,6 +2536,23 @@ public class WebApp extends ServletContextImpl
     } finally {
       _lifecycle.toInit();
     }
+  }
+
+  public void initWebFragments()
+  {
+    loadWebFragments();
+
+    List<WebAppFragmentConfig> fragments = sortWebFragments();
+
+    _isApplyingWebFragments = true;
+
+    for (WebAppConfig fragment : fragments) {
+      fragment.getBuilderProgram().configure(this);
+    }
+
+    _isApplyingWebFragments = false;
+
+    _classLoader.addScanListener(this);
   }
 
   public boolean isApplyingWebFragments()

@@ -84,14 +84,15 @@ public class UrlMap<E> {
     _bestShort = bestShort;
   }
 
-  void remove(Filter<E> filter)
-  {
+  boolean constains(Filter<E> filter) {
     for (int i = _regexps.size() - 1; i >= 0; i--) {
       RegexpEntry<E> regexp = _regexps.get(i);
 
       if (filter.isMatch(regexp.getValue()))
-        _regexps.remove(i);
+        return true;
     }
+
+    return false;
   }
 
   int size()
@@ -414,7 +415,7 @@ public class UrlMap<E> {
    */
   public void addRegexp(int prefixLength, String pattern,
                         String regexp, String flags,
-                        E value, boolean isShort, 
+                        E value, boolean isShort,
                         boolean isIgnore,
                         boolean ifAbsent)
     throws PatternSyntaxException

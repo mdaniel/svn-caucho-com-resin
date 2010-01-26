@@ -131,9 +131,10 @@ public class ServletMapper {
     try {
       boolean isIgnore = false;
 
-      if (! mapping.isInFragmentMode())
-        _servletMap.remove(new FragmentFilter(servletName));
-      
+      if (mapping.isInFragmentMode()
+        && _servletMap.constains(new FragmentFilter(servletName)))
+        return;
+
       if (servletName == null) {
 	throw new ConfigException(L.l("servlets need a servlet-name."));
       }
