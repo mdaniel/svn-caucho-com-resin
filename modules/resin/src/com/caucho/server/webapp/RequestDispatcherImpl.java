@@ -347,7 +347,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletRequest parentReq;
     ServletRequestWrapper reqWrapper = null;
 
-    if (req instanceof HttpServletResponse) {
+    if (req instanceof CauchoRequest) {
       parentReq = (HttpServletRequest) req;
     } else if (req instanceof ServletRequestWrapper) {
       reqWrapper = (ServletRequestWrapper) req;
@@ -359,7 +359,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       parentReq = (HttpServletRequest) request;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletRequest at `{0}'", res));
+        "expected instance of ServletRequestWrapper at `{0}'", res));
     }
 
     HttpServletResponse parentRes;

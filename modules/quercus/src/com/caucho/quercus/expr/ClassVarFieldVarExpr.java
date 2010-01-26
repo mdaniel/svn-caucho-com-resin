@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Var;
@@ -84,12 +85,13 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
   @Override
   public Value eval(Env env)
   {
-    StringValue className = _className.evalStringValue(env);
+    String className = _className.evalString(env);
+    
+    QuercusClass qClass = env.getClass(className);
+    
     StringValue varName = _varName.evalStringValue(env);
     
-    StringValue var = className.toStringBuilder().append("::").append(varName);
-
-    return env.getStaticValue(var);
+    return qClass.getStaticFieldValue(env, varName);
   }
 
   /**
@@ -102,12 +104,13 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    StringValue className = _className.evalStringValue(env);
+    String className = _className.evalString(env);
+    
+    QuercusClass qClass = env.getClass(className);
+    
     StringValue varName = _varName.evalStringValue(env);
     
-    StringValue var = className.toStringBuilder().append("::").append(varName);
-
-    return env.getStaticVar(var);
+    return qClass.getStaticFieldVar(env, varName);
   }
 
   /**
@@ -120,14 +123,13 @@ public class ClassVarFieldVarExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignRef(Env env, Value value)
   {
-    StringValue className = _className.evalStringValue(env);
+    String className = _className.evalString(env);
+    
+    QuercusClass qClass = env.getClass(className);
+    
     StringValue varName = _varName.evalStringValue(env);
     
-    StringValue var = className.toStringBuilder().append("::").append(varName);
-
-    env.setStaticRef(var, value);
-    
-    return value;
+    return qClass.setStaticFieldRef(env, varName, value);
   }
 
   /**
