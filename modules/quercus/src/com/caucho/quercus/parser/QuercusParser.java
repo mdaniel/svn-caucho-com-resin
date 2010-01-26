@@ -1909,7 +1909,7 @@ public class QuercusParser {
       token = parseToken();
       if (token == '=') {
         // XXX: actually needs to be primitive
-        defaultExpr = parseTerm(false);
+        defaultExpr = parseUnary(); // parseTerm(false);
 
         token = parseToken();
       }

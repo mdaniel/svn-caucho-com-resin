@@ -173,7 +173,7 @@ abstract public class AbstractVarExpr extends Expr {
   @Override
   public Value evalArray(Env env)
   {
-    return evalVar(env).toArray();
+    return evalVar(env).toAutoArray();
   }
 
   /**

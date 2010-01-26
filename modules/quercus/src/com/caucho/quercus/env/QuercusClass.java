@@ -127,7 +127,6 @@ public class QuercusClass extends NullValue {
     
     if (parent != null) {
       _staticFieldNameMap.putAll(parent._staticFieldNameMap);
-      System.out.println("PUT: " + parent + " " + _staticFieldNameMap);
     }
 
     JavaClassDef javaClassDef = null;
@@ -628,7 +627,6 @@ public class QuercusClass extends NullValue {
       _staticFieldExprMap.put(className, fieldList);
       _staticFieldNameMap.put(new ConstStringValue(name),
                               new ConstStringValue(className + "::" + name));
-      System.out.println("ADD: " + (className + "::" + name) + " " + _staticFieldNameMap + " " + this);
     }
     
     fieldList.add(new StaticField(name, value));

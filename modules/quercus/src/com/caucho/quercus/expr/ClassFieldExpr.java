@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.MethodIntern;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.ConstStringValue;
@@ -48,14 +49,14 @@ public class ClassFieldExpr extends AbstractVarExpr {
   private static final L10N L = new L10N(ClassFieldExpr.class);
 
   protected final String _className;
-  protected final String _varName;
+  protected final StringValue _varName;
   
   private final StringValue _var;
 
   public ClassFieldExpr(String className, String varName)
   {
     _className = className;
-    _varName = varName;
+    _varName = MethodIntern.intern(varName);
     
     _var = new ConstStringValue(className + "::" + varName);
   }
@@ -73,7 +74,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
                          ArrayList<Expr> args)
     throws IOException
   {
-    Expr var = parser.createVar(_varName);
+    Expr var = parser.createVar(_varName.toString());
     ExprFactory factory = parser.getExprFactory();
     
     return factory.createClassMethodCall(location, _className, var, args);
@@ -89,7 +90,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
   @Override
   public Value eval(Env env)
   {
-    return env.getStaticValue(_var);
+    return env.getClass(_className).getStaticFieldValue(env, _varName);
   }
    
   /**
@@ -102,7 +103,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    return env.getStaticVar(_var);
+    return env.getClass(_className).getStaticFieldVar(env, _varName);
   }
   
   /**
@@ -115,7 +116,7 @@ public class ClassFieldExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignRef(Env env, Value value)
   {
-    env.setStaticRef(_var, value);
+    env.getClass(_className).setStaticFieldRef(env, _varName, value);
     
     return value;
   }
