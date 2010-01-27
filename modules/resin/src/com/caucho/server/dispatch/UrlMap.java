@@ -215,10 +215,8 @@ public class UrlMap<E> {
     if (cb.length() > 0 && cb.charAt(0) == '/')
       cb.insert(0, '^');
 
-    boolean isSimple = ! startsWithSlash && ! hasWildcard;
-
     addRegexp(prefixLength, pattern, cb.close(), flags, value,
-              isShort, isIgnore, ifAbsent, isSimple);
+              isShort, isIgnore, ifAbsent, ! hasWildcard);
   }
 
   public static String urlPatternToRegexpPattern(String pattern)
