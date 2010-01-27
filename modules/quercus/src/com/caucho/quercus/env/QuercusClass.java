@@ -625,11 +625,11 @@ public class QuercusClass extends NullValue {
       fieldList = new ArrayList<StaticField>();
 
       _staticFieldExprMap.put(className, fieldList);
-      _staticFieldNameMap.put(new ConstStringValue(name),
-                              new ConstStringValue(className + "::" + name));
     }
     
     fieldList.add(new StaticField(name, value));
+    _staticFieldNameMap.put(new ConstStringValue(name),
+                            new ConstStringValue(className + "::" + name));
   }
 
   /**

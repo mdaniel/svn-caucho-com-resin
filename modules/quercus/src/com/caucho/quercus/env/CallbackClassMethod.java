@@ -54,7 +54,7 @@ public class CallbackClassMethod extends Callback {
 
     _methodName = methodName;
 
-    _hash = methodName.hashCode();
+    _hash = methodName.hashCodeCaseInsensitive();
   }
 
   /**

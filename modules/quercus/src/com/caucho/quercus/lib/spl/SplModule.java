@@ -108,7 +108,7 @@ public class SplModule extends AbstractQuercusModule
   }
   
   public static boolean spl_autoload_unregister(Env env,
-                                                Callback fun)
+                                                Callable fun)
   {
     env.removeAutoloadFunction(fun);
     

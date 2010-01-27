@@ -869,6 +869,12 @@ public class Var extends Value
   {
     return _value.toInputStream();
   }
+  
+  @Override
+  public Callable toCallable(Env env)
+  {
+    return _value.toCallable(env);
+  }
 
   //
   // Operations

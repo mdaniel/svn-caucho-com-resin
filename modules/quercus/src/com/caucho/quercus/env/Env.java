@@ -4867,7 +4867,7 @@ public class Env {
   /*
    * Unregisters an SPL autoload function.
    */
-  public void removeAutoloadFunction(Callback fun)
+  public void removeAutoloadFunction(Callable fun)
   {
     if (_autoloadList != null) {
       _autoloadList.remove(fun);
