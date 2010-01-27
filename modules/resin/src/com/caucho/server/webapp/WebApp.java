@@ -1016,6 +1016,11 @@ public class WebApp extends ServletContextImpl
     return addServlet(servletName, cl.getName(), cl, servlet);
   }
 
+  /**
+   * Adds a new or augments existing registration
+   *
+   * @since 3.0
+   */
   private ServletRegistration.Dynamic addServlet(String servletName,
                                                  String servletClassName,
                                                  Class<? extends Servlet> servletClass,
@@ -1025,18 +1030,28 @@ public class WebApp extends ServletContextImpl
       throw new IllegalStateException(L.l("addServlet may only be called during initialization"));
 
     try {
-      ServletConfigImpl config = createServlet();
-      config.setServletName(servletName);
-      config.setServletClass(servletClassName);
+      ServletConfigImpl config
+        = (ServletConfigImpl) getServletRegistration(servletName);
 
-      if (servlet != null) {
-        config.setServlet(servlet);
-      }
-      else if (servletClass != null) {
+      if (config == null) {
+        config = createServlet();
+
+        config.setServletName(servletName);
+        config.setServletClass(servletClassName);
         config.setServletClass(servletClass);
-      }
+        config.setServlet(servlet);
 
-      addServlet(config);
+        addServlet(config);
+      } else {
+        if (config.getClassName() == null)
+          config.setServletClass(servletClassName);
+
+        if (config.getServletClass() == null)
+          config.setServletClass(servletClass);
+
+        if (config.getServlet() == null)
+          config.setServlet(servlet);
+      }
 
       return config;
     }

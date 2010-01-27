@@ -248,12 +248,29 @@ public class ServletConfigImpl
     return _multipartConfigElement;
   }
 
+  /**
+   * Maps or exists if any of the patterns in urlPatterns already map to a
+   * different servlet 
+   * @param urlPatterns
+   * @return a Set of patterns previously mapped to a different servlet
+   */
   public Set<String> addMapping(String... urlPatterns)
   {
     if (! _webApp.isInitializing())
       throw new IllegalStateException();
 
     try {
+      Set<String> result = new HashSet<String>();
+
+      for (String urlPattern : urlPatterns) {
+        String servletName = _servletMapper.getServletName(urlPattern);
+
+        if (! _servletName.equals(servletName) && servletName != null)
+          result.add(urlPattern);
+      }
+
+      if (result.size() > 0)
+        return result;
 
       ServletMapping mapping = _webApp.createServletMapping();
       mapping.setIfAbsent(true);
@@ -266,9 +283,7 @@ public class ServletConfigImpl
 
       _webApp.addServletMapping(mapping);
 
-      Set<String> patterns = _servletMapper.getUrlPatterns(_servletName);
-
-      return Collections.unmodifiableSet(new LinkedHashSet<String>(patterns));
+      return Collections.unmodifiableSet(result);
     }
     catch (ServletException e) {
       throw new RuntimeException(e.getMessage(), e);
