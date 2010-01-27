@@ -110,7 +110,7 @@ class RegexpSet {
   {
     // php/4es0
     // http://bugs.caucho.com/view.php?id=3811
-    if (low > high || low < 0 || high > 0x10ffff)
+    if (low > high || low < 0)
       throw new RuntimeException("Range out of range (" + low + ", " + high + ")");
 
     if (low < BITSET_CHARS) {
