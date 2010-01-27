@@ -61,7 +61,7 @@ abstract public class StatefulObject
     return getStatefulServer();
   }
 
-  public abstract StatefulServer getStatefulServer();
+  public abstract StatefulManager getStatefulServer();
 
   public String __caucho_getId()
   {

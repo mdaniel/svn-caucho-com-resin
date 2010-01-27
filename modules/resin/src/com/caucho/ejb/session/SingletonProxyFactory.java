@@ -27,51 +27,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.ejb.session;
 
-import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import javax.enterprise.inject.spi.AnnotatedType;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * Configuration for an ejb stateless session bean.
+ * Creates a new instance of a singleton bean
  */
-public class EjbStatelessBean extends EjbSessionBean {
-  private static final L10N L = new L10N(EjbStatelessBean.class);
-
-  /**
-   * Creates a new session bean configuration.
-   */
-  public EjbStatelessBean(EjbConfig ejbConfig, String ejbModuleName)
-  {
-    super(ejbConfig, ejbModuleName);
-  }
-
-  /**
-   * Creates a new session bean configuration.
-   */
-  public EjbStatelessBean(EjbConfig ejbConfig,
-			 AnnotatedType annType,
-			 Stateless stateless)
-  {
-    super(ejbConfig, annType, stateless.name());
-  }
-
-  /**
-   * Returns the kind of bean.
-   */
-  public String getEJBKind()
-  {
-    return "stateless";
-  }
-  
-  @Override
-  public Class<? extends Annotation> getSessionType()
-  {
-    return Stateless.class;
-  }
+public interface SingletonProxyFactory {
+  public <X> X __caucho_createNew(InjectionTarget<X> bean, 
+                                  CreationalContext<X> env);
 }

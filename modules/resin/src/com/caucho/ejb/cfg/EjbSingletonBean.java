@@ -29,49 +29,45 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
+import java.lang.annotation.Annotation;
 
-import javax.ejb.*;
+import javax.ejb.Singleton;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import com.caucho.util.L10N;
 
 /**
- * Configuration for an ejb stateless session bean.
+ * Configuration for an ejb singleton session bean.
  */
-public class EjbStatelessBean extends EjbSessionBean {
-  private static final L10N L = new L10N(EjbStatelessBean.class);
+public class EjbSingletonBean extends EjbSessionBean {
+  private static final L10N L = new L10N(EjbSingletonBean.class);
 
   /**
    * Creates a new session bean configuration.
    */
-  public EjbStatelessBean(EjbConfig ejbConfig, String ejbModuleName)
-  {
+  public EjbSingletonBean(EjbConfig ejbConfig, String ejbModuleName) {
     super(ejbConfig, ejbModuleName);
   }
 
   /**
    * Creates a new session bean configuration.
    */
-  public EjbStatelessBean(EjbConfig ejbConfig,
-			 AnnotatedType annType,
-			 Stateless stateless)
-  {
-    super(ejbConfig, annType, stateless.name());
+  public EjbSingletonBean(EjbConfig ejbConfig, AnnotatedType annType,
+                          Singleton singleton) {
+    super(ejbConfig, annType, singleton.name());
   }
 
   /**
    * Returns the kind of bean.
    */
-  public String getEJBKind()
-  {
-    return "stateless";
-  }
-  
   @Override
-  public Class<? extends Annotation> getSessionType()
+  public String getEJBKind() {
+    return "singleton";
+  }
+
+  @Override
+  public Class<? extends Annotation> getSessionType() 
   {
-    return Stateless.class;
+    return Singleton.class;
   }
 }

@@ -42,10 +42,10 @@ import com.caucho.util.*;
 abstract public class StatelessContext<T> extends AbstractSessionContext {
   private static final L10N L = new L10N(StatelessContext.class);
   
-  private transient StatelessServer _server;
+  private transient StatelessManager _server;
   private StatelessPool<T> _statelessPool;
 
-  public StatelessContext(StatelessServer server)
+  public StatelessContext(StatelessManager server)
   {
     assert(server != null);
 
@@ -55,7 +55,7 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public StatelessServer getStatelessServer()
+  public StatelessManager getStatelessServer()
   {
     return _server;
   }

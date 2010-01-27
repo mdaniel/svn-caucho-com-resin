@@ -35,33 +35,30 @@ import java.util.ArrayList;
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.View;
 import com.caucho.java.JavaWriter;
+import javax.ejb.Stateful;
 
 /**
  * Generates the skeleton for a session bean.
  */
 public class StatelessGenerator extends SessionGenerator {
-  public StatelessGenerator(String ejbName,
-                            ApiClass ejbClass,
+  public StatelessGenerator(String ejbName, ApiClass ejbClass,
                             ArrayList<ApiClass> localApi,
-                            ArrayList<ApiClass> remoteApi)
-  {
-    super(ejbName, ejbClass, localApi, remoteApi);
+                            ArrayList<ApiClass> remoteApi) {
+    super(ejbName, ejbClass, localApi, remoteApi, Stateful.class
+        .getSimpleName());
   }
 
-  public boolean isStateless()
-  {
+  public boolean isStateless() {
     return true;
   }
 
   @Override
-  protected View createLocalView(ApiClass api)
-  {
+  protected View createLocalView(ApiClass api) {
     return new StatelessView(this, api);
   }
 
   @Override
-  protected View createRemoteView(ApiClass api)
-  {
+  protected View createRemoteView(ApiClass api) {
     return new StatelessView(this, api);
   }
 
@@ -69,9 +66,7 @@ public class StatelessGenerator extends SessionGenerator {
    * Generates the stateful session bean
    */
   @Override
-  public void generate(JavaWriter out)
-    throws IOException
-  {
+  public void generate(JavaWriter out) throws IOException {
     generateTopComment(out);
 
     out.println();
@@ -102,9 +97,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("}");
   }
 
-  protected void generateCreateProvider(JavaWriter out)
-    throws IOException
-  {
+  protected void generateCreateProvider(JavaWriter out) throws IOException {
     out.println();
     out.println("public StatelessProvider getProvider(Class api)");
     out.println("{");
@@ -124,11 +117,12 @@ public class StatelessGenerator extends SessionGenerator {
   }
 
   @Override
-  protected void generateContext(JavaWriter out)
-    throws IOException
-  {
-    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
-    out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
+  protected void generateContext(JavaWriter out) throws IOException {
+    out
+        .println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\""
+            + getFullClassName() + "\");");
+    out
+        .println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
 
     out.println();
     out.println("public " + getClassName() + "(StatelessServer server)");
@@ -136,7 +130,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.pushDepth();
 
     out.println("super(server);");
-    //out.println("_xaManager = server.getTransactionManager();");
+    // out.println("_xaManager = server.getTransactionManager();");
 
     for (View view : getViews()) {
       view.generateContextHomeConstructor(out);
@@ -174,14 +168,14 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("}");
   }
 
-  protected void generateTimeoutCallback(JavaWriter out)
-    throws IOException
-  {
+  protected void generateTimeoutCallback(JavaWriter out) throws IOException {
     String beanClass = getBeanClass().getName();
-    
+
     out.println();
-    out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
-    out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
+    out
+        .println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
+    out
+        .println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
     out.println("{");
     out.pushDepth();
 
@@ -206,8 +200,10 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("}");
 
     out.println();
-    out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method)");
-    out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
+    out
+        .println("public void __caucho_timeout_callback(java.lang.reflect.Method method)");
+    out
+        .println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
     out.println("{");
     out.pushDepth();
 
@@ -223,9 +219,7 @@ public class StatelessGenerator extends SessionGenerator {
     out.println("}");
   }
 
-  public void generateViews(JavaWriter out)
-    throws IOException
-  {
+  public void generateViews(JavaWriter out) throws IOException {
     for (View view : getViews()) {
       out.println();
 
@@ -233,8 +227,6 @@ public class StatelessGenerator extends SessionGenerator {
     }
   }
 
-  protected void generateNewInstance(JavaWriter out)
-    throws IOException
-  {
+  protected void generateNewInstance(JavaWriter out) throws IOException {
   }
 }

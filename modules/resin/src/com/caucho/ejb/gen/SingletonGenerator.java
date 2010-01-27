@@ -35,16 +35,16 @@ import java.util.ArrayList;
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.View;
 import com.caucho.java.JavaWriter;
-import javax.ejb.Stateful;
+import javax.ejb.Singleton;
 
 /**
- * Generates the skeleton for a stateful bean.
+ * Generates the skeleton for a singleton bean.
  */
-public class StatefulGenerator extends SessionGenerator {
-  public StatefulGenerator(String ejbName, ApiClass ejbClass,
+public class SingletonGenerator extends SessionGenerator {
+  public SingletonGenerator(String ejbName, ApiClass ejbClass,
                            ArrayList<ApiClass> localApi,
                            ArrayList<ApiClass> remoteApi) {
-    super(ejbName, ejbClass, localApi, remoteApi, Stateful.class
+    super(ejbName, ejbClass, localApi, remoteApi, Singleton.class
         .getSimpleName());
   }
 
@@ -54,12 +54,12 @@ public class StatefulGenerator extends SessionGenerator {
 
   @Override
   protected View createLocalView(ApiClass api) {
-    return new StatefulView(this, api);
+    return new SingletonView(this, api);
   }
 
   @Override
   protected View createRemoteView(ApiClass api) {
-    return new StatefulView(this, api);
+    return new SingletonView(this, api);
   }
 
   /**
@@ -75,10 +75,10 @@ public class StatefulGenerator extends SessionGenerator {
   }
 
   /**
-   * Generates the stateful session bean
+   * Generates the singleton session bean
    */
   @Override
-  public void generate(JavaWriter out) throws IOException {
+  public void generate(JavaWriter out) throws IOException {    
     generateTopComment(out);
 
     out.println();
@@ -94,16 +94,16 @@ public class StatefulGenerator extends SessionGenerator {
 
     out.println();
     out.println("public class " + getClassName());
-    out.println("  extends StatefulContext");
+    out.println("  extends SingletonContext");
     out.println("{");
     out.pushDepth();
 
     out.println();
-    out.println("public " + getClassName() + "(StatefulServer server)");
+    out.println("public " + getClassName() + "(SingletonManager manager)");
     out.println("{");
     out.pushDepth();
 
-    out.println("super(server);");
+    out.println("super(manager);");
 
     for (View view : getViews()) {
       view.generateContextHomeConstructor(out);
@@ -119,7 +119,7 @@ public class StatefulGenerator extends SessionGenerator {
     out.println("{");
     out.pushDepth();
 
-    out.println("super(context.getStatefulServer());");
+    out.println("super(context.getServer());");
 
     generateContextObjectConstructor(out);
 
@@ -142,18 +142,18 @@ public class StatefulGenerator extends SessionGenerator {
   protected void generateCreateProvider(JavaWriter out) throws IOException {
     out.println();
     out.println("@Override");
-    out.println("public StatefulProvider getProvider(Class api)");
+    out.println("public SingletonProxyFactory getProxyFactory(Class api)");
     out.println("{");
     out.pushDepth();
 
     for (View view : getViews()) {
-      StatefulView sView = (StatefulView) view;
+      SingletonView sView = (SingletonView) view;
 
       sView.generateCreateProvider(out, "api");
     }
 
     out.println();
-    out.println("return super.getProvider(api);");
+    out.println("return super.getProxyFactory(api);");
 
     out.popDepth();
     out.println("}");

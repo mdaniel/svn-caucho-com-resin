@@ -46,10 +46,10 @@ abstract public class StatelessObject<T>
   private static final Logger log
     = Logger.getLogger(StatelessObject.class.getName());
   
-  protected final StatelessServer<T> _server;
+  protected final StatelessManager<T> _server;
   protected final Class<T> _api;
 
-  protected StatelessObject(StatelessServer<T> server, Class<T> api)
+  protected StatelessObject(StatelessManager<T> server, Class<T> api)
   {
     _server = server;
     _api = api;
@@ -58,7 +58,7 @@ abstract public class StatelessObject<T>
   /**
    * Returns the stateless server.
    */
-  public StatelessServer<T> getStatelessServer()
+  public StatelessManager<T> getStatelessServer()
   {
     return _server;
   }

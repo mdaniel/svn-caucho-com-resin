@@ -30,6 +30,7 @@
 package com.caucho.server.webbeans;
 
 import javax.ejb.MessageDriven;
+import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
@@ -55,16 +56,14 @@ import com.caucho.util.L10N;
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
-public class ResinStandardPlugin implements Extension
-{
+public class ResinStandardPlugin implements Extension {
   private static final L10N L = new L10N(ResinStandardPlugin.class);
-  public ResinStandardPlugin(InjectManager manager)
-  {
+
+  public ResinStandardPlugin(InjectManager manager) {
     Thread.currentThread().getContextClassLoader();
   }
 
-  public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> event)
-  {
+  public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> event) {
     AnnotatedType<T> annotatedType = event.getAnnotatedType();
 
     if (annotatedType == null)
@@ -76,22 +75,21 @@ public class ResinStandardPlugin implements Extension
     if (isXmlConfig
         && (annotatedType.isAnnotationPresent(Stateful.class)
             || annotatedType.isAnnotationPresent(Stateless.class)
-            || annotatedType.isAnnotationPresent(MessageDriven.class)
-            || annotatedType.isAnnotationPresent(JmsMessageListener.class))) {
+            || annotatedType.isAnnotationPresent(Singleton.class)
+            || annotatedType.isAnnotationPresent(MessageDriven.class) || annotatedType
+            .isAnnotationPresent(JmsMessageListener.class))) {
       EjbContainer ejbContainer = EjbContainer.create();
       ejbContainer.createBean(annotatedType, null);
       event.veto();
     }
   }
 
-  public <T> void processBean(@Observes ProcessBeanImpl<T> event)
-  {
+  public <T> void processBean(@Observes ProcessBeanImpl<T> event) {
     Annotated annotated = event.getAnnotated();
     Bean<T> bean = event.getBean();
 
-    if (annotated == null
-        || bean instanceof EjbGeneratedBean
-        || ! (bean instanceof AbstractBean<?>)) {
+    if (annotated == null || bean instanceof EjbGeneratedBean
+        || !(bean instanceof AbstractBean<?>)) {
       return;
     }
 
@@ -99,6 +97,7 @@ public class ResinStandardPlugin implements Extension
 
     if (annotated.isAnnotationPresent(Stateful.class)
         || annotated.isAnnotationPresent(Stateless.class)
+        || annotated.isAnnotationPresent(Singleton.class)
         || annotated.isAnnotationPresent(MessageDriven.class)
         || annotated.isAnnotationPresent(JmsMessageListener.class)) {
       EjbContainer ejbContainer = EjbContainer.create();
@@ -115,9 +114,8 @@ public class ResinStandardPlugin implements Extension
 
       HempBroker broker = HempBroker.getCurrent();
 
-      broker.addStartupActor(event.getBean(),
-                             service.name(),
-                             service.threadMax());
+      broker.addStartupActor(event.getBean(), service.name(), service
+          .threadMax());
     }
 
     if (annotated.isAnnotationPresent(AdminService.class)) {
@@ -126,23 +124,21 @@ public class ResinStandardPlugin implements Extension
       Server server = Server.getCurrent();
 
       if (server == null) {
-        throw new ConfigException(L.l("@AdminService requires an active Resin Server."));
+        throw new ConfigException(L
+            .l("@AdminService requires an active Resin Server."));
       }
 
-      if (! server.isWatchdog()) {
+      if (!server.isWatchdog()) {
         HempBroker broker = (HempBroker) server.getAdminBroker();
 
-
-        broker.addStartupActor(event.getBean(),
-                               service.name(),
-                               service.threadMax());
+        broker.addStartupActor(event.getBean(), service.name(), service
+            .threadMax());
       }
     }
   }
 
   @Override
-  public String toString()
-  {
+  public String toString() {
     return getClass().getSimpleName() + "[]";
   }
 }

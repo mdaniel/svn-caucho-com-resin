@@ -1547,9 +1547,16 @@ public class EjbBean extends DescriptionGroupConfig
 
     String ejbName = getEJBName();
 
-    String fullClassName = "_ejb." + ejbName + "." + className + "__EJB";
+    String fullClassName = "_ejb." + ejbName + "." + className + "__" + getBeanType() + "Context";
 
     return JavaClassGenerator.cleanClassName(fullClassName);
+  }
+
+  /**
+   * @return Type of bean (Stateful, Stateless, etc.)
+   */
+  protected String getBeanType() {
+    return "Bean";
   }
 
   /**

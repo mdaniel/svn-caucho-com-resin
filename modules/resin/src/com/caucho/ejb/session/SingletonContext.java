@@ -38,36 +38,26 @@ import com.caucho.util.*;
 /**
  * Abstract base class for an session context
  */
-abstract public class StatefulContext extends AbstractSessionContext {
-  private static final L10N L = new L10N(StatefulContext.class);
-    
-  private transient StatefulManager _server;
+abstract public class SingletonContext<X> extends AbstractSessionContext {
+  private transient SingletonManager<X> _manager;
 
-  public StatefulContext(StatefulManager server)
+  public SingletonContext(SingletonManager<X> server)
   {
     assert(server != null);
 
-    _server = server;
-  }
-
-  /**
-   * Returns the server which owns this bean.
-   */
-  public StatefulManager getStatefulServer()
-  {
-    return _server;
+    _manager = server;
   }
 
   /**
    * Returns the server which owns this bean.
    */
   @Override
-  public AbstractServer getServer()
+  public SingletonManager<X> getServer()
   {
-    return _server;
+    return _manager;
   }
   
-  public StatefulProvider getProvider(Class api)
+  public SingletonProxyFactory getProxyFactory(Class<?> api)
   {
     return null;
   }
@@ -79,7 +69,7 @@ abstract public class StatefulContext extends AbstractSessionContext {
   public TimerService getTimerService()
     throws IllegalStateException
   {
-    throw new IllegalStateException("Stateful session beans cannot call SessionContext.getTimerService()");
+    throw new IllegalStateException("Singleton session beans cannot call SessionContext.getTimerService()");
   }
 
   /**
@@ -99,25 +89,9 @@ abstract public class StatefulContext extends AbstractSessionContext {
   }
 
   /**
-   * Returns the new instance for EJB 2.1
-   */
-  protected Object _caucho_newInstance21()
-  {
-    return null;
-  }
-
-  /**
    * Returns the new remote instance for EJB 3.0
    */
   protected Object _caucho_newRemoteInstance()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the new remote instance for EJB 2.1
-   */
-  protected Object _caucho_newRemoteInstance21()
   {
     return null;
   }

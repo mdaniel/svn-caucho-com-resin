@@ -29,42 +29,42 @@
 
 package com.caucho.ejb.session;
 
+import java.lang.reflect.Constructor;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.logging.Logger;
+
+import javax.ejb.FinderException;
+import javax.ejb.NoSuchEJBException;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
+
 import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatefulBeanImpl;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.server.AbstractContext;
-import com.caucho.util.LruCache;
 import com.caucho.util.L10N;
-
-import java.util.*;
-
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
-import java.lang.reflect.Constructor;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.ejb.FinderException;
-import javax.ejb.NoSuchEJBException;
+import com.caucho.util.LruCache;
 
 /**
  * Server container for a session bean.
  */
-public class StatefulServer<T> extends SessionServer<T>
+public class StatefulManager<T> extends SessionServer<T>
 {
-  private static final L10N L = new L10N(StatefulServer.class);
+  private static final L10N L = new L10N(StatefulManager.class);
   private static final Logger log
-    = Logger.getLogger(StatefulServer.class.getName());
+    = Logger.getLogger(StatefulManager.class.getName());
   
   private StatefulContext _homeContext;
   
   // XXX: need real lifecycle
   private LruCache<String,StatefulObject> _remoteSessions;
 
-  public StatefulServer(EjbContainer ejbContainer,
+  public StatefulManager(EjbContainer ejbContainer,
 			AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);
@@ -87,7 +87,7 @@ public class StatefulServer<T> extends SessionServer<T>
     synchronized (this) {
       if (_homeContext == null) {
         try {
-          Class<?> []param = new Class[] { StatefulServer.class };
+          Class<?> []param = new Class[] { StatefulManager.class };
           Constructor<?> cons = _contextImplClass.getConstructor(param);
 
           _homeContext = (StatefulContext) cons.newInstance(this);

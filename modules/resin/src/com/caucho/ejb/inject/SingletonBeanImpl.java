@@ -29,6 +29,8 @@
 
 package com.caucho.ejb.inject;
 
+import com.caucho.ejb.session.SingletonManager;
+import com.caucho.ejb.session.SingletonProxyFactory;
 import com.caucho.ejb.session.StatefulProvider;
 import com.caucho.ejb.session.StatefulManager;
 import com.caucho.config.ConfigContext;
@@ -38,7 +40,6 @@ import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
 import javax.enterprise.inject.spi.*;
-import javax.enterprise.inject.spi.InjectionTarget;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
@@ -50,26 +51,26 @@ import javax.enterprise.context.spi.CreationalContext;
 /**
  * Internal implementation for a Bean
  */
-public class StatefulBeanImpl<X> extends SessionBeanImpl<X>
+public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
 {
-  private static final L10N L = new L10N(StatefulBeanImpl.class);
+  private static final L10N L = new L10N(SingletonBeanImpl.class);
 
-  private StatefulManager _server;
+  private SingletonManager<X> _manager;
   private String _name;
-  private StatefulProvider _producer;
+  private SingletonProxyFactory _factory;
 
-  private InjectionTarget _target;
+  private InjectionTarget<X> _target;
   
-  public StatefulBeanImpl(StatefulManager server,
-			  ManagedBeanImpl<X> bean,
-			  StatefulProvider producer)
+  public SingletonBeanImpl(SingletonManager<X> manager,
+                           ManagedBeanImpl<X> bean,
+                           SingletonProxyFactory factory)
   {
     super(bean);
 
-    _server = server;
-    _producer = producer;
+    _manager = manager;
+    _factory = factory;
 
-    if (producer == null)
+    if (factory == null)
       throw new NullPointerException();
 
     _target = bean.getInjectionTarget();
@@ -78,6 +79,6 @@ public class StatefulBeanImpl<X> extends SessionBeanImpl<X>
   @Override
   public X create(CreationalContext context)
   {
-    return (X) _producer.__caucho_createNew(getInjectionTarget(), context);
+    return (X) _factory.__caucho_createNew(getInjectionTarget(), context);
   }
 }

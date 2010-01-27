@@ -310,11 +310,11 @@ public class Env {
 
   private LocaleInfo _locale;
 
-  private Callback [] _prevErrorHandlers = new Callback[B_LAST + 1];
-  private Callback [] _errorHandlers = new Callback[B_LAST + 1];
+  private Callable [] _prevErrorHandlers = new Callback[B_LAST + 1];
+  private Callable [] _errorHandlers = new Callback[B_LAST + 1];
 
-  private Callback _prevExceptionHandler;
-  private Callback _exceptionHandler;
+  private Callable _prevExceptionHandler;
+  private Callable _exceptionHandler;
 
   private SessionCallback _sessionCallback;
 
@@ -6180,7 +6180,7 @@ public class Env {
   /**
    * Gets the exception handler
    */
-  public Callback getExceptionHandler()
+  public Callable getExceptionHandler()
   {
     return _exceptionHandler;
   }
@@ -6194,8 +6194,10 @@ public class Env {
 
     _exceptionHandler = fun;
 
-    if (_prevExceptionHandler != null)
-      return _prevExceptionHandler.toStringValue();
+    if (_prevExceptionHandler != null) {
+      // 
+      return ((Value) _prevExceptionHandler).toStringValue();
+    }
     else
       return NullValue.NULL;
   }
@@ -6244,7 +6246,7 @@ public class Env {
 
     if (code >= 0 && code < _errorHandlers.length
         && _errorHandlers[code] != null) {
-      Callback handler = _errorHandlers[code];
+      Callable handler = _errorHandlers[code];
 
       try {
         _errorHandlers[code] = null;
@@ -6274,7 +6276,7 @@ public class Env {
       catch (RuntimeException e) {
         throw e;
       }
-      catch (Throwable e) {
+      catch (Exception e) {
         throw new RuntimeException(e);
       }
       finally {

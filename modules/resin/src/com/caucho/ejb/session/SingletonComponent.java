@@ -27,51 +27,66 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.ejb.session;
 
-import com.caucho.util.L10N;
+import java.util.Set;
 
-import javax.ejb.*;
-import javax.enterprise.inject.spi.AnnotatedType;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
 
 /**
- * Configuration for an ejb stateless session bean.
+ * Component for session beans
  */
-public class EjbStatelessBean extends EjbSessionBean {
-  private static final L10N L = new L10N(EjbStatelessBean.class);
+public class SingletonComponent<X> implements InjectionTarget<X> {
+  private final SingletonProxyFactory _factory;
 
-  /**
-   * Creates a new session bean configuration.
-   */
-  public EjbStatelessBean(EjbConfig ejbConfig, String ejbModuleName)
+  public SingletonComponent(SingletonProxyFactory factory)
   {
-    super(ejbConfig, ejbModuleName);
+    _factory = factory;
   }
 
   /**
-   * Creates a new session bean configuration.
+   * Creates a new instance of the component
    */
-  public EjbStatelessBean(EjbConfig ejbConfig,
-			 AnnotatedType annType,
-			 Stateless stateless)
+  public X produce(CreationalContext<X> env)
   {
-    super(ejbConfig, annType, stateless.name());
-  }
-
-  /**
-   * Returns the kind of bean.
-   */
-  public String getEJBKind()
-  {
-    return "stateless";
+    return (X) _factory.__caucho_createNew(this, env);
   }
   
-  @Override
-  public Class<? extends Annotation> getSessionType()
+  /**
+   * Inject the bean.
+   */
+  public void inject(X instance, CreationalContext<X> ctx)
   {
-    return Stateless.class;
+  }
+  
+  /**
+   * PostConstruct initialization
+   */
+  public void postConstruct(X instance)
+  {
+  }
+  
+  /**
+   * Call pre-destroy
+   */
+  public void dispose(X instance)
+  {
+  }
+  
+  /**
+   * Call destroy
+   */
+  public void preDestroy(X instance)
+  {
+  }
+
+  /**
+   * Returns the injection points.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return null;
   }
 }

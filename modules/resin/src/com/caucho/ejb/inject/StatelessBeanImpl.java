@@ -35,7 +35,7 @@ import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.session.StatelessProvider;
-import com.caucho.ejb.session.StatelessServer;
+import com.caucho.ejb.session.StatelessManager;
 import com.caucho.util.L10N;
 
 import java.lang.annotation.Annotation;
@@ -55,13 +55,13 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
 {
   private static final L10N L = new L10N(StatelessBeanImpl.class);
 
-  private StatelessServer _server;
+  private StatelessManager _server;
   private String _name;
   private StatelessProvider _producer;
 
   private InjectionTarget _target;
   
-  public StatelessBeanImpl(StatelessServer server,
+  public StatelessBeanImpl(StatelessManager server,
 			   ManagedBeanImpl<X> bean,
                            StatelessProvider producer)
   {

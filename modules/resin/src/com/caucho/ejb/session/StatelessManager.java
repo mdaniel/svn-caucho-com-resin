@@ -53,11 +53,11 @@ import com.caucho.util.L10N;
 /**
  * Server home container for a stateless session bean
  */
-public class StatelessServer<T> extends SessionServer<T> {
-  private static final L10N L = new L10N(StatelessServer.class);
+public class StatelessManager<T> extends SessionServer<T> {
+  private static final L10N L = new L10N(StatelessManager.class);
 
   protected static Logger log
-    = Logger.getLogger(StatelessServer.class.getName());
+    = Logger.getLogger(StatelessManager.class.getName());
 
   private StatelessContext<T> _homeContext;
   private StatelessProvider<T> _remoteProvider;
@@ -72,7 +72,7 @@ public class StatelessServer<T> extends SessionServer<T> {
    * @param config
    *          the session configuration from the ejb.xml
    */
-  public StatelessServer(EjbContainer ejbContainer, 
+  public StatelessManager(EjbContainer ejbContainer, 
                          AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);
@@ -224,7 +224,7 @@ public class StatelessServer<T> extends SessionServer<T> {
     synchronized (this) {
       if (_homeContext == null) {
         try {
-          Class[] param = new Class[] { StatelessServer.class };
+          Class[] param = new Class[] { StatelessManager.class };
           Constructor cons = _contextImplClass.getConstructor(param);
 
           _homeContext = (StatelessContext) cons.newInstance(this);

@@ -43,24 +43,24 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
- * Represents a public interface to a stateful bean, e.g. a stateful view
+ * Represents a public interface to a singleton bean, e.g. a singleton view
  */
-public class StatefulView extends View {
-  private static final L10N L = new L10N(StatefulView.class);
+public class SingletonView extends View {
+  private static final L10N L = new L10N(SingletonView.class);
 
-  private StatefulGenerator _sessionBean;
+  private SingletonGenerator _sessionBean;
 
   private ArrayList<BusinessMethodGenerator> _businessMethods
     = new ArrayList<BusinessMethodGenerator>();
 
-  public StatefulView(StatefulGenerator bean, ApiClass api)
+  public SingletonView(SingletonGenerator bean, ApiClass api)
   {
     super(bean, api);
 
     _sessionBean = bean;
   }
 
-  public StatefulGenerator getSessionBean()
+  public SingletonGenerator getSessionBean()
   {
     return _sessionBean;
   }
@@ -142,7 +142,7 @@ public class StatefulView extends View {
   {
     out.println();
     out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "(getStatefulServer(), true);");
+    out.println("  return new " + getViewClassName() + "(getServer(), true);");
   }
 
   /**
@@ -158,12 +158,12 @@ public class StatefulView extends View {
 
     if (isProxy()) {
       generateExtends(out);
-      out.print("  implements StatefulProvider, ");
+      out.print("  implements SingletonProxyFactory, ");
       out.println(getViewClass().getName());
     }
     else {
       out.println("  extends " + getBeanClass().getName());
-      out.println("  implements StatefulProvider");
+      out.println("  implements SingletonProxyFactory");
     }
 
     out.println("{");
@@ -222,8 +222,8 @@ public class StatefulView extends View {
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
-    out.println("private transient StatefulContext _context;");
-    out.println("private transient StatefulServer _server;");
+    out.println("private transient SingletonContext _context;");
+    out.println("private transient SingletonManager _manager;");
 
     if (isProxy()) {
       out.println("private " + getBeanClassName() + " _bean;");
@@ -240,13 +240,13 @@ public class StatefulView extends View {
     //generateBusinessPrologue(out);
 
     out.println();
-    out.println(getViewClassName() + "(StatefulServer server)");
+    out.println(getViewClassName() + "(SingletonManager manager)");
     out.println("{");
     out.pushDepth();
 
-    generateSuper(out, "server");
+    generateSuper(out, "manager");
 
-    out.println("_server = server;");
+    out.println("_manager = manager;");
     out.println("_isValid = true;");
 
     // ejb/1143
@@ -258,58 +258,23 @@ public class StatefulView extends View {
     out.println("}");
 
     out.println();
-    out.println(getViewClassName() + "(StatefulServer server, boolean isProvider)");
+    out.println(getViewClassName()
+                + "(SingletonManager manager, boolean isProxyFactory)");
     out.println("{");
     out.pushDepth();
 
-    generateSuper(out, "server");
+    generateSuper(out, "manager");
 
-    out.println("_server = server;");
+    out.println("_manager = manager;");
     out.println("_isValid = true;");
 
     out.popDepth();
     out.println("}");
 
-    /*
-    out.println();
-    out.println("public " + getViewClassName() + "(StatefulServer server, javax.enterprise.context.spi.CreationalContext env)");
-    out.println("{");
-    out.pushDepth();
-
-    generateSuper(out, "server");
-    out.println("_server = server;");
-    out.println("_bean = new " + getBeanClassName() + "(this);");
-
-    out.popDepth();
-    out.println("}");
-    */
-
     generateSessionProvider(out);
 
-    /*
     out.println();
-    out.println("public " + getViewClassName()
-                + "(StatefulServer server, "
-                + getBeanClassName() + " bean)");
-    out.println("{");
-    generateSuper(out, "server");
-    out.println("  _server = server;");
-    out.println("  _bean = bean;");
-
-    // generateBusinessConstructor(out);
-
-    out.println("}");
-    */
-
-    out.println();
-    out.println("public StatefulServer getStatefulServer()");
-    out.println("{");
-    out.println("  return _server;");
-    out.println("}");
-    out.println();
-
-    out.println();
-    out.println("void __caucho_setContext(StatefulContext context)");
+    out.println("void __caucho_setContext(SingletonContext context)");
     out.println("{");
     out.println("  _context = context;");
     out.println("}");
@@ -324,12 +289,12 @@ public class StatefulView extends View {
     out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.InjectionTarget injectBean, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.println("  " + getViewClassName() + " bean"
-                + " = new " + getViewClassName() + "(_server);");
+                + " = new " + getViewClassName() + "(_manager);");
 
     if (isProxy())
-      out.println("  _server.initInstance(bean._bean, injectBean, bean, env);");
+      out.println("  _manager.initInstance(bean._bean, injectBean, bean, env);");
     else
-      out.println("  _server.initInstance(bean, injectBean, bean, env);");
+      out.println("  _manager.initInstance(bean, injectBean, bean, env);");
     out.println("  return bean;");
     out.println("}");
   }
@@ -342,8 +307,8 @@ public class StatefulView extends View {
     if (implMethod == null)
       return null;
 
-    StatefulMethod bizMethod
-      = new StatefulMethod(this,
+    SingletonMethod bizMethod
+      = new SingletonMethod(this,
                            apiMethod,
                            implMethod,
                            index);

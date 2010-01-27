@@ -44,6 +44,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Logger;
 
+import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.ejb.MessageDriven;
@@ -384,6 +385,14 @@ public class EjbConfig {
 
 	setBeanConfig(bean.getEJBName(), bean);
       }
+      else if (annType.isAnnotationPresent(Singleton.class)) {
+        Singleton singleton = annType.getAnnotation(Singleton.class);
+        
+        EjbSingletonBean bean = new EjbSingletonBean(this, annType, singleton);
+        bean.setInjectionTarget(injectTarget);
+
+        setBeanConfig(bean.getEJBName(), bean);
+      }      
       else if (annType.isAnnotationPresent(MessageDriven.class)) {
 	MessageDriven message = annType.getAnnotation(MessageDriven.class);
 	EjbMessageBean bean = new EjbMessageBean(this, annType, message);

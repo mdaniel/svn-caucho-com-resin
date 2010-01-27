@@ -202,7 +202,7 @@ public class BeanConfig {
   public void setScope(String scope)
   {
     if ("singleton".equals(scope))
-      _scope = Singleton.class;
+      _scope = javax.inject.Singleton.class;
     else if ("dependent".equals(scope))
       _scope = Dependent.class;
     else if ("request".equals(scope))
