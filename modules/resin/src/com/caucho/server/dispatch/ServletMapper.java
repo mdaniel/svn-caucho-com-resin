@@ -266,8 +266,13 @@ public class ServletMapper {
       }
     }
 
+    MatchResult matchResult = null;
+
     if (servletName == null) {
-      servletName = matchWelcomeFileResource(invocation, vars);
+      matchResult = matchWelcomeFileResource(invocation, vars);
+
+      if (matchResult != null)
+        servletName = matchResult.getServletName();
 
       if (servletName != null && ! contextURI.endsWith("/")
         && !(invocation instanceof SubInvocation)) {
@@ -277,8 +282,13 @@ public class ServletMapper {
       }
     }
 
-    if (servletName == null) {
-      servletName = matchWelcomeServlet(invocation, vars);
+    if (servletName == null && matchResult == null) {
+      vars.clear();
+      
+      matchResult = matchWelcomeServlet(invocation, vars);
+
+      if (matchResult != null)
+        servletName = matchResult.getServletName();
 
       if (servletName != null && ! contextURI.endsWith("/")
         && !(invocation instanceof SubInvocation)) {
@@ -295,7 +305,11 @@ public class ServletMapper {
     if (servletName == null) {
       servletName = _defaultServlet;
       vars.clear();
-      vars.add(contextURI);
+
+      if (matchResult != null)
+        vars.add(matchResult.getContextUri());
+      else
+        vars.add(contextURI);
 
       addWelcomeFileDependency(invocation);
     }
@@ -364,7 +378,8 @@ public class ServletMapper {
     return chain;
   }
 
-  private String matchWelcomeFileResource(ServletInvocation invocation, ArrayList<String> vars)
+  private MatchResult matchWelcomeFileResource(ServletInvocation invocation,
+                                          ArrayList<String> vars)
   {
     String contextURI = invocation.getContextURI();
 
@@ -406,7 +421,7 @@ public class ServletMapper {
                 // inv.setRawURI(inv.getRawURI() + file);
               }
 
-              return servletName;
+              return new MatchResult(servletName, contextURI);
             }
           }
         } catch (Exception e) {
@@ -417,7 +432,8 @@ public class ServletMapper {
     return null;
   }
 
-  private String matchWelcomeServlet(ServletInvocation invocation, ArrayList<String> vars)
+  private MatchResult matchWelcomeServlet(ServletInvocation invocation,
+                                     ArrayList<String> vars)
   {
     String contextURI = invocation.getContextURI();
 
@@ -436,12 +452,12 @@ public class ServletMapper {
       else
         welcomeURI = contextURI + '/' + file;
 
-      ServletMapping servletMap = _servletMap.map(welcomeURI, vars);
+      ServletMapping servletMap = _servletMap.map(welcomeURI, vars, true);
 
       if (servletMap != null)
         servletName = servletMap.getServletName();
 
-      if (servletName != null || _defaultServlet != null) {
+      if (servletName != null) {
         contextURI = welcomeURI;
 
         if (invocation instanceof Invocation) {
@@ -452,7 +468,7 @@ public class ServletMapper {
           // inv.setRawURI(inv.getRawURI() + file);
         }
 
-        return servletName;
+        return new MatchResult(servletName, contextURI);
       }
     }
 
@@ -628,5 +644,26 @@ public class ServletMapper {
     }
   }
 
+  private static class MatchResult {
+    String _servletName;
+    String _contextUri;
 
+    private MatchResult(String servletName, String contextUri)
+    {
+      _servletName = servletName;
+      _contextUri = contextUri;
+    }
+
+    public String getServletName()
+    {
+      return _servletName;
+    }
+
+    public String getContextUri()
+    {
+      return _contextUri;
+    }
+  }
 }
+
+
