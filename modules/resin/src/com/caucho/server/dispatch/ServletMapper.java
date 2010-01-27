@@ -132,7 +132,7 @@ public class ServletMapper {
       boolean isIgnore = false;
 
       if (mapping.isInFragmentMode()
-        && _servletMap.contains(new FragmentFilter(servletName)))
+         && _servletMap.contains(new FragmentFilter(servletName)))
         return;
 
       if (servletName == null) {
@@ -646,8 +646,7 @@ public class ServletMapper {
     @Override
     public boolean isMatch(ServletMapping item)
     {
-      return (item.isInFragmentMode()
-              && _servletName.equals(item.getServletName()));
+      return _servletName.equals(item.getServletName());
     }
   }
 
