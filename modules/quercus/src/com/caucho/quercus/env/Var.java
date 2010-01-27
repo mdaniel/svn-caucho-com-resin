@@ -66,8 +66,8 @@ public class Var extends Value
   @Override
   public Value set(Value value)
   {
-    // _value = value.toValue();
-
+    // assert(! value.isVar());
+    
     _value = value;
 
     // php/151m
@@ -1312,9 +1312,10 @@ public class Var extends Value
    */
   public Value append(Value index, Value value)
   {
+    // php/323g
     _value = _value.append(index, value);
 
-    return this;
+    return _value;
   }
 
   /**

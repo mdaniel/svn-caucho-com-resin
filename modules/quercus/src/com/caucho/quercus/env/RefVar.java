@@ -104,6 +104,13 @@ public class RefVar extends Value
     return _var.isDouble();
   }
 
+  @Override
+  public ArrayValue toArrayValue(Env env) 
+  {
+    // php/3co1
+    return _var.toArrayValue(env);
+  }
+  
   /**
    * Converts to a boolean.
    */
