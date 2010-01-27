@@ -387,7 +387,22 @@ public class ArrayValueImpl extends ArrayValue
    * Convert to an argument value.
    */
   @Override
-  public Value toArgValue()
+  public Value toLocalValue()
+  {
+    // php/1708
+
+    Value copy = new ArrayValueImpl(this);
+
+    copy.reset();
+
+    return copy;
+  }
+
+  /**
+   * Convert to an argument value.
+   */
+  @Override
+  public Value toLocalRef()
   {
     // php/1708
 
@@ -505,7 +520,7 @@ public class ArrayValueImpl extends ArrayValue
 
     Value key = createTailKey();
 
-    Entry entry = new Entry(key, value.toArgValue());
+    Entry entry = new Entry(key, value.toLocalValue());
 
     addEntry(entry);
 

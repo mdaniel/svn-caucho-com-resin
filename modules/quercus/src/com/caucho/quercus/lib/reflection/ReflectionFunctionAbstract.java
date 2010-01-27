@@ -45,6 +45,9 @@ public abstract class ReflectionFunctionAbstract
   protected ReflectionFunctionAbstract(AbstractFunction fun)
   {
     _fun = fun;
+    
+    if (fun == null)
+      throw new NullPointerException();
   }
   
   protected AbstractFunction getFunction()

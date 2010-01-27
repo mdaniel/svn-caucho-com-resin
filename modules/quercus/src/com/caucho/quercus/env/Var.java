@@ -720,7 +720,7 @@ public class Var extends Value
    * Converts to a function argument value that is never assigned or modified.
    */
   @Override
-  public Value toArgValueReadOnly()
+  public Value toLocalValueReadOnly()
   {
     return _value;
   }
@@ -729,9 +729,22 @@ public class Var extends Value
    * Converts to a raw value.
    */
   @Override
-  public Value toArgValue()
+  public Value toLocalValue()
   {
-    return _value.toArgValue();
+    return _value.copy();
+  }
+
+  /**
+   * Convert to a function argument value, e.g. for
+   *
+   * function foo($a)
+   *
+   * where $a may be assigned.
+   */
+  @Override
+  public Value toLocalRef()
+  {
+    return _value;
   }
 
   /**
@@ -755,21 +768,21 @@ public class Var extends Value
     // return new Var(_value.toArgValue());
     return this;
   }
-
+  
   /**
-   * Converts to a variable (needs to replace toVar)
+   * Converts to a local argument variable
    */
   @Override
-  public Var toSimpleVar()
+  public Var toLocalVar()
   {
-    return this;
+    return new Var(_value.toLocalValue());
   }
 
   /**
    * Converts to a reference variable
    */
   @Override
-  public Var toRefVar()
+  public Var toLocalVarDeclAsRef()
   {
     return this;
   }
@@ -1310,6 +1323,7 @@ public class Var extends Value
    * Sets the array value, returning the new array, e.g. to handle
    * string update ($a[0] = 'A').
    */
+  @Override
   public Value append(Value index, Value value)
   {
     // php/323g

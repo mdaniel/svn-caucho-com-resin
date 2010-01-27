@@ -2148,6 +2148,7 @@ public class Env {
    *
    * @param name the variable name
    */
+  /*
   public final Var getStaticClassVar(Value qThis,
                                      String className,
                                      String name)
@@ -2164,13 +2165,14 @@ public class Env {
     
     return getStaticVar(varName);
   }
+  */
 
   /**
    * Unsets variable
    *
    * @param name the variable name
    */
-  public final Var unsetVar(String name)
+  public final Var unsetVar(StringValue name)
   {
     EnvVar envVar = _map.get(name);
     

@@ -373,7 +373,7 @@ public class ErrorModule extends AbstractQuercusModule {
 
     if (argsValues != null) {
       for (int index=0; index < argsValues.length; index++) {
-        Value ref = argsValues[index].toRefVar();
+        Value ref = argsValues[index].toLocalVarDeclAsRef();
         args.put(ref);
       }
     }

@@ -119,7 +119,7 @@ public class FunArrayExpr extends Expr {
       value = value.toRefValue();
 
       if (keyExpr != null) {
-        Value key = keyExpr.evalArg(env, true).toArgValue();
+        Value key = keyExpr.evalArg(env, true).toLocalValue();
 
         array.put(key, value);
       }

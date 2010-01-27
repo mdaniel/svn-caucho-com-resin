@@ -114,7 +114,7 @@ public class CompiledObjectValue extends ObjectValue
       int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
-	Var var = _fields[index].toRefVar();
+	Var var = _fields[index].toLocalVarDeclAsRef();
 	
 	_fields[index] = var;
 
@@ -138,7 +138,7 @@ public class CompiledObjectValue extends ObjectValue
       int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
-	Var var = _fields[index].toRefVar();
+	Var var = _fields[index].toLocalVarDeclAsRef();
 	
 	_fields[index] = var;
 
@@ -162,7 +162,7 @@ public class CompiledObjectValue extends ObjectValue
       int index = _quercusClass.findFieldIndex(key);
 
       if (index >= 0) {
-	Var var = _fields[index].toRefVar();
+	Var var = _fields[index].toLocalVarDeclAsRef();
 	
 	_fields[index] = var;
 

@@ -101,7 +101,7 @@ public class BinaryAssignExpr extends Expr {
   public Value evalCopy(Env env)
   {
     // php/0d9e
-    return eval(env);
+    return eval(env).copy();
   }
 
   /**

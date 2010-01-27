@@ -109,7 +109,7 @@ public class VarVarExpr extends AbstractVarExpr {
   @Override
   public void evalUnset(Env env)
   {
-    String varName = _var.evalString(env).intern();
+    StringValue varName = _var.evalStringValue(env);
 
     env.unsetVar(varName);
   }

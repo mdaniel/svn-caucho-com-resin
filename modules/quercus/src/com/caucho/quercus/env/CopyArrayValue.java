@@ -175,9 +175,9 @@ public class CopyArrayValue extends ArrayValue {
    * Convert to an argument value.
    */
   @Override
-  public Value toArgValue()
+  public Value toLocalValue()
   {
-    return getCopyArray().toArgValue();
+    return getCopyArray().toLocalValue();
   }
 
   /**

@@ -1715,7 +1715,7 @@ public class ObjectExtValue extends ObjectValue
      */
     public Var toRefVar()
     {
-      Var var = _value.toRefVar();
+      Var var = _value.toLocalVarDeclAsRef();
 
       _value = var;
 

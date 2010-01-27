@@ -1048,7 +1048,7 @@ public class QuercusClass extends NullValue {
    */
   public final AbstractFunction getFunction(StringValue methodName)
   {
-    return _methodMap.get(methodName, methodName.hashCode());
+    return _methodMap.get(methodName, methodName.hashCodeCaseInsensitive());
   }
 
 

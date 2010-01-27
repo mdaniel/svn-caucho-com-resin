@@ -867,7 +867,7 @@ abstract public class Value implements java.io.Serializable
    *
    * where $a is never assigned or modified
    */
-  public Value toArgValueReadOnly()
+  public Value toLocalValueReadOnly()
   {
     return this;
   }
@@ -879,9 +879,45 @@ abstract public class Value implements java.io.Serializable
    *
    * where $a is never assigned, but might be modified, e.g. $a[3] = 9
    */
-  public Value toArgValue()
+  public Value toLocalValue()
   {
     return this;
+  }
+
+  /**
+   * Convert to a function argument value, e.g. for
+   *
+   * function foo($a)
+   *
+   * where $a may be assigned.
+   */
+  public Value toLocalRef()
+  {
+    return this;
+  }
+
+  /**
+   * Convert to a function argument value, e.g. for
+   *
+   * function foo($a)
+   *
+   * where $a is used as a variable in the function
+   */
+  public Var toLocalVar()
+  {
+    return toLocalRef().toVar();
+  }
+
+  /**
+   * Convert to a function argument reference value, e.g. for
+   *
+   * function foo(&$a)
+   *
+   * where $a is used as a variable in the function
+   */
+  public Var toLocalVarDeclAsRef()
+  {
+    return new Var(this);
   }
 
   /**
@@ -897,33 +933,9 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Convert to a function argument value, e.g. for
-   *
-   * function foo($a)
-   *
-   * where $a is used as a variable in the function
+   * Converts to a Var.
    */
   public Var toVar()
-  {
-    return new Var(toArgValue());
-  }
-
-  /**
-   * XXX: toSimpleVar needs to replace toVar when cleaned up
-   */
-  public Var toSimpleVar()
-  {
-    return new Var(this);
-  }
-
-  /**
-   * Convert to a function argument reference value, e.g. for
-   *
-   * function foo(&$a)
-   *
-   * where $a is used as a variable in the function
-   */
-  public Var toRefVar()
   {
     return new Var(this);
   }
@@ -2415,7 +2427,15 @@ abstract public class Value implements java.io.Serializable
    */
   public Value getArray(Value index)
   {
-    return NullValue.NULL;
+    Value var = getVar(index);
+    
+    if (var.isset())
+      return var.toValue();
+    else {
+      var.set(new ArrayValueImpl());
+      
+      return var.toValue();
+    }
   }
 
   /**
@@ -2433,7 +2453,15 @@ abstract public class Value implements java.io.Serializable
    */
   public Value getObject(Env env, Value index)
   {
-    return NullValue.NULL;
+    Value var = getVar(index);
+    
+    if (var.isset())
+      return var.toValue();
+    else {
+      var.set(env.createObject());
+      
+      return var.toValue();
+    }
   }
 
   public boolean isVar()

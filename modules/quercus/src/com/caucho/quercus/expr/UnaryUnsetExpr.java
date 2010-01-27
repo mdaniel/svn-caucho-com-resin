@@ -65,49 +65,6 @@ public class UnaryUnsetExpr extends Expr {
     return NullValue.NULL;
   }
 
-  //
-  // Java code generation
-  //
-
-  /**
-   * Analyze the expression
-   */
-  /*
-  public void analyze(AnalyzeInfo info)
-  {
-  }
-  */
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  /*
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    String name = _var.getName();
-    
-    VarState state = _var.getVarState();
-
-    if (state == VarState.UNSET) {
-    }
-    else {
-      if (_var.getVarInfo().isGlobal()) {
-	out.print(_var.getJavaVar());
-	out.print(" = env.unsetVar(\"");
-	out.printJavaString(name);
-	out.print("\")");
-      }
-      else {
-	out.print(_var.getJavaVar());
-	out.print(" = null");
-      }
-    }
-  }
-  */
-
   public String toString()
   {
     return "unset(" + _var + ")";

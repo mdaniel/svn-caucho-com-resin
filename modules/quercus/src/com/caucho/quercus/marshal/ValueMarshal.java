@@ -69,7 +69,7 @@ public class ValueMarshal extends Marshal
   {
     if (_isPassThru) {
       // php/0433
-      return value;
+      return value.toLocalRef();
     }
     else {
       // php/3c81

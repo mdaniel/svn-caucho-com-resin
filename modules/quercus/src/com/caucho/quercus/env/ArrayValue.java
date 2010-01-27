@@ -416,6 +416,12 @@ abstract public class ArrayValue extends Value {
   @Override
   abstract public Value copy();
 
+  @Override
+  public Value toLocalRef()
+  {
+    return copy();
+  }
+
   /**
    * Copy for serialization
    */
@@ -1519,7 +1525,7 @@ abstract public class ArrayValue extends Value {
 
     public Var toVar()
     {
-      Var var = _value.toSimpleVar();
+      Var var = _value.toVar();
       _value = var;
 
       return var;
@@ -1532,7 +1538,7 @@ abstract public class ArrayValue extends Value {
     {
       // php/376a
 
-      Var var = _value.toSimpleVar();
+      Var var = _value.toVar();
       _value = var;
 
       return var;
@@ -1547,7 +1553,6 @@ abstract public class ArrayValue extends Value {
       }
       */
     }
-
     /**
      * Converts to an argument value.
      */
@@ -1604,7 +1609,7 @@ abstract public class ArrayValue extends Value {
 
       */
 
-      Var var = _value.toSimpleVar();
+      Var var = _value.toVar();
 
       _value = var;
 
@@ -1616,7 +1621,7 @@ abstract public class ArrayValue extends Value {
      */
     public Value toArgRef()
     {
-      Var var = _value.toSimpleVar();
+      Var var = _value.toVar();
 
       _value = var;
 
@@ -1632,11 +1637,13 @@ abstract public class ArrayValue extends Value {
 
     public Value toArg()
     {
-      Var var = _value.toSimpleVar();
+      Var var = _value.toVar();
 
       _value = var;
 
-      return new RefVar(var);
+      // php/0d14
+      return var;
+      // return new RefVar(var);
 
       /*
       if (_var == null)

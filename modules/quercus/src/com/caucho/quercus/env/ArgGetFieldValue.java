@@ -68,10 +68,10 @@ public class ArgGetFieldValue extends Value {
    * Converts to a reference variable.
    */
   @Override
-  public Var toRefVar()
+  public Var toLocalVarDeclAsRef()
   {
     // php/3d2t
-    return _obj.getFieldVar(_env, _name).toRefVar();
+    return _obj.toAutoObject(_env).getFieldVar(_env, _name).toLocalVarDeclAsRef();
   }
 
   /**
@@ -87,7 +87,7 @@ public class ArgGetFieldValue extends Value {
    * Converts to a read-only function argument.
    */
   @Override
-  public Value toArgValueReadOnly()
+  public Value toLocalValueReadOnly()
   {
     return toValue();
   }
@@ -96,9 +96,30 @@ public class ArgGetFieldValue extends Value {
    * Converts to a function argument.
    */
   @Override
-  public Value toArgValue()
+  public Value toLocalValue()
   {
     return toValue();
+  }
+
+  /**
+   * Converts to a reference variable.
+   */
+  @Override
+  public Value toLocalRef()
+  {
+    return _obj.getField(_env, _name);
+  }
+  
+  @Override
+  public Value toAutoArray()
+  {
+    return _obj.toAutoObject(_env).getFieldVar(_env, _name).toAutoArray();
+  }
+  
+  @Override
+  public Value toAutoObject(Env env)
+  {
+    return _obj.toAutoObject(env).getFieldVar(env, _name).toAutoObject(env);
   }
 
   /**

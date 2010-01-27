@@ -31,6 +31,7 @@ package com.caucho.quercus.statement;
 
 import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
@@ -65,6 +66,7 @@ public class ClassStaticStatement
   public Value execute(Env env)
   {
     try {
+      // XXX: this isn't reliable, needs to be Quercus-based
       if (_staticName == null)
         _staticName = env.createStaticName();
 
@@ -73,7 +75,9 @@ public class ClassStaticStatement
 
       Value qThis = env.getThis();
       
-      Var var = env.getStaticClassVar(qThis, className, staticName);
+      QuercusClass qClass = env.getClass(className);
+      
+      Var var = qClass.getStaticFieldVar(env, env.createString(staticName));
       
       env.setValue(_var.getName(), var);
 

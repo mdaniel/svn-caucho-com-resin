@@ -53,6 +53,11 @@ public class ReferenceMarshal extends Marshal
     return expr.evalRef(env);
   }
 
+  public Object marshal(Env env, Value value, Class argClass)
+  {
+    return value.toLocalVarDeclAsRef();
+  }
+
   public Value unmarshal(Env env, Object value)
   {
     throw new UnsupportedOperationException();

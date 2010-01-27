@@ -74,37 +74,30 @@ public class ArgGetValue extends Value
    * Converts to a reference variable.
    */
   @Override
-  public Var toRefVar()
+  public Var toLocalVarDeclAsRef()
   {
     // php/3d55, php/3d49, php/3921
     
-    return _obj.getVar(_index).toRefVar();
+    return _obj.toAutoArray().getVar(_index).toLocalVarDeclAsRef();
   }
-
-  /**
-   * Converts to a reference variable.
-   */
+  
   @Override
-  public Value toRefValue()
+  public Value toAutoArray()
   {
-    // php/3a57
-    return _obj.getVar(_index);
+    return _obj.toAutoArray().getVar(_index).toAutoArray();
   }
-
-  /**
-   * Converts to a value.
-   */
+  
   @Override
-  public Value toValue()
+  public Value toAutoObject(Env env)
   {
-    return _obj.get(_index);
+    return _obj.toAutoArray().getVar(_index).toAutoObject(env);
   }
 
   /**
    * Converts to a read-only value.
    */
   @Override
-  public Value toArgValueReadOnly()
+  public Value toLocalValueReadOnly()
   {
     return _obj.get(_index);
   }
@@ -113,43 +106,18 @@ public class ArgGetValue extends Value
    * Converts to a value.
    */
   @Override
-  public Value toArgValue()
+  public Value toLocalValue()
   {
-    return toValue();
+    return _obj.get(_index);
   }
 
   /**
-   * Converts to a variable.
+   * Converts to a value.
    */
-  public Var toVar()
+  @Override
+  public Value toLocalRef()
   {
-    return new Var(toValue());
-  }
-
-  /**
-   * Converts to a reference.
-   */
-  public Var getVar(Value index)
-  {
-    // php/3d1p
-    return _obj.getArray(_index).getVar(index);
-  }
-
-  /**
-   * Converts to a reference variable.
-   */
-  public Value getFieldObject(Env env, StringValue index)
-  {
-    return _obj.getObject(env, _index).getFieldObject(env, index);
-  }
-
-  /**
-   * Converts to a reference variable.
-   */
-  public Var getFieldVar(Env env, StringValue index)
-  {
-    // php/3d2p
-    return _obj.getObject(env, _index).getFieldVar(env, index);
+    return _obj.get(_index);
   }
   
   //

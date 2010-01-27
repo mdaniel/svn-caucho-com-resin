@@ -275,7 +275,7 @@ public class Function extends AbstractFunction {
       else if (arg.isReference()) {
         values[i] = args[i].evalVar(env);
 
-        map.put(arg.getName(), new EnvVarImpl(values[i].toRefVar()));
+        map.put(arg.getName(), new EnvVarImpl(values[i].toLocalVarDeclAsRef()));
       }
       else {
         // php/0d04
@@ -375,11 +375,11 @@ public class Function extends AbstractFunction {
       if (arg == null) {
       }
       else if (arg.isReference()) {
-        map.put(arg.getName(), new EnvVarImpl(args[i].toRefVar()));
+        map.put(arg.getName(), new EnvVarImpl(args[i].toLocalVarDeclAsRef()));
       }
       else {
         // XXX: php/1708, toVar() may be doing another copy()
-        Var var = args[i].copy().toVar();
+        Var var = args[i].toLocalVar();
 
         if (arg.getExpectedClass() != null
             && arg.getDefault() instanceof ParamRequiredExpr) {
@@ -404,7 +404,7 @@ public class Function extends AbstractFunction {
       else if (arg.isReference())
         map.put(arg.getName(), new EnvVarImpl(defaultExpr.evalVar(env).toVar()));
       else {
-        map.put(arg.getName(), new EnvVarImpl(defaultExpr.eval(env).copy().toVar()));
+        map.put(arg.getName(), new EnvVarImpl(defaultExpr.eval(env).toLocalVar()));
       }
     }
 

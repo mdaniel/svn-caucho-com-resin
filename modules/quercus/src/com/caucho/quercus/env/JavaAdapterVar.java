@@ -504,7 +504,7 @@ public class JavaAdapterVar extends Value
    * Converts to a function argument value that is never assigned or modified.
    */
   @Override
-  public Value toArgValueReadOnly()
+  public Value toLocalValueReadOnly()
   {
     return getValue();
   }
@@ -513,9 +513,9 @@ public class JavaAdapterVar extends Value
    * Converts to a raw value.
    */
   @Override
-  public Value toArgValue()
+  public Value toLocalValue()
   {
-    return getValue().toArgValue();
+    return getValue().toLocalValue();
   }
 
   /**

@@ -198,7 +198,7 @@ public class CallExpr extends Expr {
       }
     }
 
-    Value []args = fun.evalArguments(env, this, _args);
+    Value []args = evalArgs(env, _args);
 
     env.pushCall(this, NullValue.NULL, args);
     

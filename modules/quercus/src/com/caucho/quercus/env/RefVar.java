@@ -207,7 +207,7 @@ public class RefVar extends Value
    * Converts to an argument value.
    */
   @Override
-  public Value toArgValueReadOnly()
+  public Value toLocalValueReadOnly()
   {
     return _var;
   }
@@ -216,11 +216,19 @@ public class RefVar extends Value
    * Converts to an argument value.
    */
   @Override
-  public Value toArgValue()
+  public Value toLocalValue()
   {
-    Thread.dumpStack();
     // php/0471, php/3d4a
-    return _var.toArgValue();
+    return _var.toLocalValue();
+  }
+
+  /**
+   * Converts to an argument value.
+   */
+  @Override
+  public Value toLocalRef()
+  {
+    return _var;
   }
 
   /**
@@ -245,7 +253,7 @@ public class RefVar extends Value
    * Converts to a reference variable
    */
   @Override
-  public Var toRefVar()
+  public Var toLocalVarDeclAsRef()
   {
     return _var;
   }
