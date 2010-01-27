@@ -66,7 +66,7 @@ public class StaticStatement extends Statement {
       StringValue staticName = _staticName;
       
       Var var = env.getStaticVar(staticName);
-      env.setValue(_var.getName(), var);
+      env.setRef(_var.getName(), var);
 
       if (! var.isset() && _initValue != null)
         var.set(_initValue.eval(env));

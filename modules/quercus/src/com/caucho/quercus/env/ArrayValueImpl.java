@@ -481,23 +481,7 @@ public class ArrayValueImpl extends ArrayValue
     // php/0434
     // Var oldVar = entry._var;
 
-    if (value instanceof Var) {
-      // php/0a59
-      Var var = (Var) value;
-      // var.setReference();
-
-      // entry._var = var;
-
-      entry.setValue (value);
-    }
-    /*
-    else if (oldVar != null) {
-      oldVar.set(value);
-    }
-    */
-    else {
-      entry.setValue(value);
-    }
+    entry.set(value);
 
     return this;
   }
