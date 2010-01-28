@@ -582,11 +582,11 @@ abstract public class Expr {
   /**
    * Evaluates as an array index assign ($a[index] = value).
    */
-  public Value evalArrayAssign(Env env, Value index, Value value)
+  public void evalArrayAssign(Env env, Value index, Value value)
   {
     Value array = evalArray(env);
 
-    return array.put(index, value);
+    array.put(index, value);
   }
 
   /**
