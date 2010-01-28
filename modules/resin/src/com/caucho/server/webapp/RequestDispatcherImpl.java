@@ -132,14 +132,13 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   public void error(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    forward((HttpServletRequest) request, (HttpServletResponse) response,
-            "error", _errorInvocation, DispatcherType.ERROR);
+    forward(request, response, "error", _errorInvocation, DispatcherType.ERROR);
   }
 
   public void dispatch(ServletRequest request, ServletResponse response)
     throws ServletException, IOException
   {
-    forward((HttpServletRequest) request, (HttpServletResponse) response,
+    forward(request, response,
             "error", _dispatchInvocation, DispatcherType.REQUEST);
   }
 
@@ -208,9 +207,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     HttpServletRequest parentReq;
     ServletRequestWrapper reqWrapper = null;
-    if (req instanceof HttpServletRequest) {
-      parentReq = (HttpServletRequest) req;
-    } else if (req instanceof ServletRequestWrapper) {
+    if (req instanceof ServletRequestWrapper) {
       reqWrapper = (ServletRequestWrapper) req;
 
       ServletRequest request = reqWrapper.getRequest();
@@ -219,6 +216,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         request = ((ServletRequestWrapper) request).getRequest();
 
       parentReq = (HttpServletRequest) request;
+    } else if (req instanceof HttpServletRequest) {
+      parentReq = (HttpServletRequest) req;
     } else {
       throw new IllegalStateException(L.l(
         "expected instance of ServletRequest at `{0}'", req));
@@ -227,9 +226,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletResponse parentRes;
     ServletResponseWrapper resWrapper = null;
 
-    if (res instanceof HttpServletResponse) {
-      parentRes = (HttpServletResponse) res;
-    } else if (res instanceof ServletResponseWrapper) {
+    if (res instanceof ServletResponseWrapper) {
       resWrapper = (ServletResponseWrapper) res;
 
       ServletResponse response = resWrapper.getResponse();
@@ -238,6 +235,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         response = ((ServletResponseWrapper) response).getResponse();
 
       parentRes = (HttpServletResponse) response;
+    } else if (res instanceof HttpServletResponse) {
+      parentRes = (HttpServletResponse) res;
     } else {
       throw new IllegalStateException(L.l(
         "expected instance of ServletResponse at `{0}'", req));
@@ -350,9 +349,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletRequest parentReq;
     ServletRequestWrapper reqWrapper = null;
 
-    if (req instanceof CauchoRequest) {
-      parentReq = (HttpServletRequest) req;
-    } else if (req instanceof ServletRequestWrapper) {
+    if (req instanceof ServletRequestWrapper) {
       reqWrapper = (ServletRequestWrapper) req;
 
       ServletRequest request = reqWrapper.getRequest();
@@ -360,6 +357,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         request = ((ServletRequestWrapper) request).getRequest();
 
       parentReq = (HttpServletRequest) request;
+    } else if (req instanceof HttpServletRequest) {
+      parentReq = (HttpServletRequest) req;
     } else {
       throw new IllegalStateException(L.l(
         "expected instance of ServletRequestWrapper at `{0}'", res));
@@ -368,9 +367,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletResponse parentRes;
     ServletResponseWrapper resWrapper = null;
 
-    if (res instanceof HttpServletResponse) {
-      parentRes = (HttpServletResponse) res;
-    } else if (res instanceof ServletResponseWrapper) {
+    if (res instanceof ServletResponseWrapper) {
       resWrapper = (ServletResponseWrapper) res;
 
       ServletResponse response = resWrapper.getResponse();
@@ -378,6 +375,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         response = ((ServletResponseWrapper) response).getResponse();
 
       parentRes = (HttpServletResponse) response;
+    } else if (res instanceof HttpServletResponse) {
+      parentRes = (HttpServletResponse) res;
     } else {
       throw new IllegalStateException(L.l(
         "expected instance of ServletResponse at `{0}'", res));
