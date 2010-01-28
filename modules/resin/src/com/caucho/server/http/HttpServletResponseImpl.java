@@ -960,7 +960,8 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
 
     _responseStream.clearBuffer();
-    resetBuffer();
+    
+    reset();
 
     setStatus(SC_MOVED_TEMPORARILY);
     String path = getAbsolutePath(url);
