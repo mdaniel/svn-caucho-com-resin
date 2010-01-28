@@ -132,6 +132,8 @@ public interface HttpServletRequest extends ServletRequest {
    * Returns the URI part corresponding to the selected servlet.
    * The URI is relative to the application.
    *
+   * Returns an emtpy string for a servlet matched on /*
+   *
    * <p/>Corresponds to CGI's <code>SCRIPT_NAME</code>
    *
    * <code>getServletPath()</code> is /servlet/Hello for the uri

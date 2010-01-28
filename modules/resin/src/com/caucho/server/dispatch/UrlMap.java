@@ -514,7 +514,10 @@ public class UrlMap<E> {
         if (vars != null) {
           vars.clear();
 
-          vars.add(uri.substring(0, end));
+          if ("/*".equals(entry.getPattern()))
+            vars.add("");
+          else
+            vars.add(uri.substring(0, end));
 
           for (int j = 1; j <= matcher.groupCount(); j++)
             vars.add(matcher.group(j));
