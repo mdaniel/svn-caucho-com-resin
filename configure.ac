@@ -982,9 +982,9 @@ if test -r "$JNI_INCLUDE_DIR/jvmti.h"; then
   
   CFLAGS="$CFLAGS -DHAS_JVMTI"
 else
-  AC_MSG_WARN([Can't find JVMTI directory ${JNI_INCLUDE_DIR}/jvmti.h])
+  AC_MSG_ERROR([Can't find JVMTI directory ${JNI_INCLUDE_DIR}/jvmti.h])
 fi
-	
+
 if test -n "$JNI"; then
   plugins="$plugins resin_os"
 else

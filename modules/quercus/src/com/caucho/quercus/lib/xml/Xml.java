@@ -567,6 +567,8 @@ public class Xml {
                          ArrayValueImpl valueArray,
                          ArrayValueImpl indexArray)
     {
+      _env = env;
+      
       _valueArray = valueArray;
       _indexArray = indexArray;
     }

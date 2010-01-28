@@ -956,6 +956,15 @@ public class ExprFactory {
       return new FunGetCalledClassExpr(loc);
     else if ("get_class".equals(name) && args.size() == 0)
       return new FunGetClassExpr(parser);
+    else if ("each".equals(name) && args.size() == 1) {
+      Expr arg = args.get(0);
+      
+      if (! arg.isVar()) {
+        parser.error(L.l("each() argument must be a variable at '{0}'", arg));
+      }
+
+      return new FunEachExpr(arg);
+    }
     else
       return new CallExpr(loc, name, args);
   }

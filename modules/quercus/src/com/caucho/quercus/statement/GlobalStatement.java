@@ -62,4 +62,3 @@ public class GlobalStatement extends Statement {
     return null;
   }
 }
-

@@ -141,6 +141,11 @@ public class Function extends AbstractFunction {
     return _info;
   }
   
+  protected boolean isMethod()
+  {
+    return getDeclaringClassName() != null;
+  }
+  
   /*
    * Returns the declaring class
    */

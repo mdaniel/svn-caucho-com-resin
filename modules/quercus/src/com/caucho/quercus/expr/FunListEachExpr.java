@@ -33,14 +33,19 @@ import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
 /**
  * Represents a PHP list() = each() assignment expression.
  */
 public class FunListEachExpr extends Expr {
+  private static final L10N L = new L10N(FunListEachExpr.class);
+  
   protected final AbstractVarExpr _keyVar;
   protected final AbstractVarExpr _valueVar;
   protected final Expr _value;
+  
+  private boolean _isVar;
 
   public FunListEachExpr(Expr []varList, FunEachExpr each)
   {
@@ -59,6 +64,8 @@ public class FunListEachExpr extends Expr {
       _valueVar = null;
 
     _value = each.getExpr();
+    
+    _isVar = _value.isVar();
   }
 
   /**
@@ -70,6 +77,12 @@ public class FunListEachExpr extends Expr {
    */
   public Value eval(Env env)
   {
+    if (! _isVar) {
+      env.error(L.l("each() argument must be a variable"));
+      
+      return NullValue.NULL;
+    }
+    
     Value value = _value.eval(env);
 
     if (! (value instanceof ArrayValue))
@@ -99,6 +112,12 @@ public class FunListEachExpr extends Expr {
    */
   public boolean evalBoolean(Env env)
   {
+    if (! _isVar) {
+      env.error(L.l("each() argument must be a variable at '{0}'", _value));
+      
+      return false;
+    }
+    
     Value value = _value.eval(env);
 
     if (! (value instanceof ArrayValue))

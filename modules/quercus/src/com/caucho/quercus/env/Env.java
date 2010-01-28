@@ -5937,7 +5937,7 @@ public class Env {
   public QuercusRuntimeException createErrorException(Location location, String msg)
     throws QuercusRuntimeException
   {
-    if (location == null)
+    if (location == null || location.isUnknown())
       location = getLocation();
 
     String prefix = location.getMessagePrefix();
@@ -6253,7 +6253,7 @@ public class Env {
 
         Value fileNameV = NullValue.NULL;
 
-        if (location == null)
+        if (location == null || location.isUnknown())
           location = getLocation();
 
         String fileName = location.getFileName();
@@ -6348,7 +6348,7 @@ public class Env {
     if (loc != null && ! "".equals(loc))
       return loc;
 
-    if (location == null)
+    if (location == null || location.isUnknown())
       location = getLocation();
 
     return location.getMessagePrefix();
@@ -6404,60 +6404,28 @@ public class Env {
       // XXX: not too pretty
       return null;
     }
-
+    
     ReadStream is = null;
 
     try {
       is = path.openRead();
-      int ch;
-      boolean hasCr = false;
+
       int line = 1;
+      String lineString;
 
       while (line < sourceLine) {
-        ch = is.read();
-
-        if (ch < 0)
+        lineString = is.readLine();
+        
+        if (lineString == null)
           return null;
-        else if (ch == '\r') {
-          hasCr = true;
-          line++;
-        }
-        else if (ch == '\n') {
-          if (! hasCr)
-            line++;
-          hasCr = false;
-        }
-        else
-          hasCr = false;
       }
 
       String []result = new String[length];
 
       int i = 0;
-      StringBuilder sb = new StringBuilder();
-      while (i < length && (ch = is.read()) > 0) {
-        if (ch == '\n' && hasCr) {
-          hasCr = false;
-          continue;
-        }
-        else if (ch == '\r') {
-          hasCr = true;
-          result[i++] = sb.toString();
-          sb.setLength(0);
-        }
-        else if (ch == '\n') {
-          hasCr = false;
-          result[i++] = sb.toString();
-          sb.setLength(0);
-        }
-        else {
-          hasCr = false;
-          sb.append((char) ch);
-        }
+      while (i < length && (lineString = is.readLine()) != null) {
+        result[i++] = lineString;
       }
-
-      if (i < length)
-        result[i] = sb.toString();
 
       return result;
     }

@@ -62,7 +62,7 @@ public class ExprStatement extends Statement {
   {
     // php/0d92
     Location oldLocation = env.setLocation(getLocation());
-System.out.println("LOCATION: " + getLocation());
+
     // php/1a08
     _expr.evalTop(env);
 

@@ -67,6 +67,8 @@ public class WhileStatement extends Statement {
   public Value execute(Env env)
   {
     try {
+      env.setLocation(getLocation());
+      
       while (_test.evalBoolean(env)) {
         env.checkTimeout();
 
@@ -95,6 +97,8 @@ public class WhileStatement extends Statement {
         }
         else
           return value;
+        
+        env.setLocation(getLocation());
       }
     }
     catch (RuntimeException e) {

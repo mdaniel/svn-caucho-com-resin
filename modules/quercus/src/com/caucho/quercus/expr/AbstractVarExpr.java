@@ -48,6 +48,17 @@ abstract public class AbstractVarExpr extends Expr {
   public AbstractVarExpr()
   {
   }
+  
+  
+  /**
+   * Returns true if the expression is a var/left-hand-side.
+   */
+  @Override
+  public boolean isVar()
+  {
+    return true;
+  }
+  
   /**
    * Marks the value as assigned
    */

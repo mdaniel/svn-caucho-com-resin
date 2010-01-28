@@ -35,6 +35,7 @@ import java.io.PrintWriter;
 /**
  * Represents a PHP default value.
  */
+@SuppressWarnings("serial")
 public class DefaultValue extends NullValue {
   public static final DefaultValue DEFAULT
     = new DefaultValue();
@@ -63,6 +64,7 @@ public class DefaultValue extends NullValue {
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return false;
@@ -71,6 +73,7 @@ public class DefaultValue extends NullValue {
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return 0;
@@ -79,6 +82,7 @@ public class DefaultValue extends NullValue {
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     return 0;
@@ -93,9 +97,19 @@ public class DefaultValue extends NullValue {
   }
   
   /**
+   * Converts to a callable
+   */
+  @Override
+  public Callable toCallable(Env env)
+  {
+    return null;
+  }
+  
+  /**
    * Prints the value.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
   }
@@ -104,6 +118,7 @@ public class DefaultValue extends NullValue {
    * Converts to a string.
    * @param env
    */
+  @Override
   public String toString()
   {
     return "";
@@ -114,6 +129,7 @@ public class DefaultValue extends NullValue {
    *
    * @param out the writer to the Java source code.
    */
+  @Override
   public void generate(PrintWriter out)
     throws IOException
   {

@@ -210,6 +210,14 @@ abstract public class Expr {
     return false;
   }
   
+  /**
+   * Returns true if the expression is a var/left-hand-side.
+   */
+  public boolean isVar()
+  {
+    return false;
+  }
+  
   //
   // expression creation functions
   //
@@ -574,11 +582,11 @@ abstract public class Expr {
   /**
    * Evaluates as an array index assign ($a[index] = value).
    */
-  public void evalArrayAssign(Env env, Value index, Value value)
+  public Value evalArrayAssign(Env env, Value index, Value value)
   {
     Value array = evalArray(env);
 
-    array.put(index, value);
+    return array.put(index, value);
   }
 
   /**

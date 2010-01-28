@@ -56,7 +56,7 @@ public class VarGlobalStatement extends Statement {
   {
     StringValue name = _varExpr.evalStringValue(env);
     
-    env.setValue(name, env.getGlobalVar(name));
+    env.setRef(name, env.getGlobalVar(name));
 
     return null;
   }

@@ -902,7 +902,7 @@ abstract public class StringValue
     String s = toString();
 
     int p = s.indexOf("::");
-    System.out.println("CALLABLE: " + s);
+
     if (p < 0)
       return new CallbackFunction(env, s);
     else {

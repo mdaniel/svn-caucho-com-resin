@@ -33,7 +33,9 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Env;
+import com.caucho.quercus.env.NullValue;
 import com.caucho.quercus.env.Value;
+import com.caucho.util.L10N;
 
 import java.io.IOException;
 
@@ -41,15 +43,23 @@ import java.io.IOException;
  * Represents a PHP each expression.
  */
 public class FunEachExpr extends AbstractUnaryExpr {
+  private final L10N L = new L10N(FunEachExpr.class);
+  
+  private boolean _isVar;
+  
   public FunEachExpr(Location location, Expr expr)
     throws IOException
   {
     super(location, expr);
+    
+    _isVar = expr.isVar();
   }
 
   public FunEachExpr(Expr expr)
   {
     super(expr);
+    
+    _isVar = expr.isVar();
   }
 
   /**
@@ -61,6 +71,12 @@ public class FunEachExpr extends AbstractUnaryExpr {
    */
   public Value eval(Env env)
   {
+    if (! _isVar) {
+      env.error(L.l("each() argument must be a variable at '{0}'", getExpr()));
+      
+      return NullValue.NULL;
+    }
+    
     Value value = getExpr().eval(env);
 
     if (value instanceof ArrayValue) {
@@ -71,27 +87,5 @@ public class FunEachExpr extends AbstractUnaryExpr {
     else
       return BooleanValue.FALSE;
   }
-
-  //
-  // Java code generation
-  //
-
-  /**
-   * Generates code to evaluate the expression
-   *
-   * @param out the writer to the Java source code.
-   */
-  /*
-  public void generate(PhpWriter out)
-    throws IOException
-  {
-    String var = "_quercus_list";
-    
-    out.print("env.first(" + var + " = ");
-    _value.generate(out);
-
-    out.print(")");
-  }
-  */
 }
 

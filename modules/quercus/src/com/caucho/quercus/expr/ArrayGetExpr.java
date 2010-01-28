@@ -188,6 +188,8 @@ public class ArrayGetExpr extends AbstractVarExpr {
   {
     _expr.evalArrayAssign(env, _index.eval(env), value);
     
+    // php/03mk
+    
     return value;
   }
 

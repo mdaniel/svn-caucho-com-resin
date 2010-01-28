@@ -26,7 +26,6 @@
  * @author Sam
  */
 
-
 package com.caucho.quercus;
 
 /**
@@ -40,9 +39,7 @@ public class Location {
   private final String _className;
   private final String _functionName;
 
-  public Location(String fileName,
-                  int lineNumber,
-                  String className,
+  public Location(String fileName, int lineNumber, String className,
                   String functionName)
   {
     _fileName = fileName;
@@ -89,6 +86,11 @@ public class Location {
       return "";
     else
       return _fileName + ":" + _lineNumber + ": ";
+  }
+
+  public boolean isUnknown()
+  {
+    return _fileName == null || _lineNumber <= 0; 
   }
 
   public String toString()

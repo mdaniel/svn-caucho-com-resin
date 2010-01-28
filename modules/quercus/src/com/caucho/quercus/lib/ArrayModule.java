@@ -597,8 +597,6 @@ public class ArrayModule
       Callable callback = callbackName.toCallable(env);
       
       if (callback == null || ! callback.isValid(env)) {
-        env.warning(L.l("The second argument, '{0}', is not a valid callback",
-                        callbackName));
         return NullValue.NULL;
       }
 
@@ -616,7 +614,8 @@ public class ArrayModule
           else
             value = entry.getValue();
 
-          boolean isMatch = callback.call(env, array, key, value).toBoolean();
+          // boolean isMatch = callback.call(env, array, key, value).toBoolean();
+          boolean isMatch = callback.call(env, value).toBoolean();
 
           if (isMatch) {
             filteredArray.put(key, value);
@@ -749,15 +748,15 @@ public class ArrayModule
    */
   public static Value array_reduce(Env env,
                                    ArrayValue array,
-                                   Callback callback,
+                                   Callable callable,
                                    @Optional("NULL") Value initialValue)
   {
     if (array == null)
       return NullValue.NULL;
 
-    if (callback == null || ! callback.isValid(env)) {
-      env.warning("The second argument, '" + callback +
-                  "', should be a valid callback");
+    if (callable == null || ! callable.isValid(env)) {
+      env.warning("The second argument, '" + callable
+                  + "', should be a valid callable");
 
       return NullValue.NULL;
     }
@@ -767,7 +766,7 @@ public class ArrayModule
     for (Map.Entry<Value, Value> entry : array.entrySet()) {
       try {
         // XXX: will this callback modify the array?
-        result = callback.call(env, result, entry.getValue());
+        result = callable.call(env, result, entry.getValue());
       }
       catch (Exception t) {
         // XXX: may be used for error checking later
@@ -1156,7 +1155,7 @@ public class ArrayModule
    */
   public static boolean array_walk(Env env,
                                    @Reference Value arrayVar,
-                                   Callback callback,
+                                   Callable callback,
                                    @Optional("NULL") Value userData)
   {
     if (callback == null || ! callback.isValid(env)) {
@@ -1177,13 +1176,13 @@ public class ArrayModule
         
         Value key = entry.getKey();
         Value value;
-        
+       
         if (entry instanceof ArrayValue.Entry)
           value = ((ArrayValue.Entry) entry).getRawValue();
         else
           value = entry.getValue();
         
-        callback.call(env, array, key, value, key, userData);
+        callback.call(env, value, key, userData);
       }
       
       return true;
@@ -1208,7 +1207,7 @@ public class ArrayModule
    */
   public static boolean array_walk_recursive(Env env,
                                              @Reference Value arrayVar,
-                                             Callback callback,
+                                             Callable callback,
                                              @Optional("NULL") Value extra)
   {
     if (callback == null || ! callback.isValid(env)) {
@@ -1245,7 +1244,7 @@ public class ArrayModule
             return false;
         }
         else
-          callback.call(env, array, key, value, key, extra);
+          callback.call(env, value, key, extra);
       }
 
       return true;
@@ -1588,7 +1587,7 @@ public class ArrayModule
    */
   public static boolean usort(Env env,
                               @Reference Value arrayVar,
-                              Callback func,
+                              Callable func,
                               @Optional long sortFlag)
   {
     ArrayValue array = arrayVar.toArrayValue(env);
@@ -1596,7 +1595,9 @@ public class ArrayModule
     if (array == null)
       return false;
 
-    if (! func.isValid(env)) {
+    if (func == null)
+      return false;
+    else if (! func.isValid(env)) {
       env.warning(L.l("Invalid comparison function"));
       return false;
     }
@@ -1623,12 +1624,15 @@ public class ArrayModule
    */
   public static boolean uasort(Env env,
                                @Reference Value arrayVar,
-                               Callback func,
+                               Callable func,
                                @Optional long sortFlag)
   {
     ArrayValue array = arrayVar.toArrayValue(env);
     
     if (array == null)
+      return false;
+    
+    if (func == null)
       return false;
 
     if (! func.isValid(env)) {

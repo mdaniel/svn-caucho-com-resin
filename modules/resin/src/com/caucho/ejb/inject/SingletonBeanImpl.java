@@ -82,3 +82,4 @@ public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
     return (X) _factory.__caucho_createNew(getInjectionTarget(), context);
   }
 }
+

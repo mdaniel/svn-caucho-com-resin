@@ -185,6 +185,7 @@ public class QuercusParser {
   private QuercusContext _quercus;
 
   private Path _sourceFile;
+  private int _sourceOffset; // offset into the source file for the first line
 
   private ParserLocation _parserLocation = new ParserLocation();
 
@@ -285,6 +286,8 @@ public class QuercusParser {
   {
     _parserLocation.setFileName(fileName);
     _parserLocation.setLineNumber(line);
+    
+    _sourceOffset = -line;
   }
 
   public static QuercusProgram parse(QuercusContext quercus,
@@ -5527,7 +5530,9 @@ public class QuercusParser {
   {
     int lineNumber = _parserLocation.getLineNumber();
 
-    String []sourceLines = Env.getSourceLine(_sourceFile, lineNumber - 1, 3);
+    String []sourceLines = Env.getSourceLine(_sourceFile, 
+                                             lineNumber - 2 + _sourceOffset,
+                                             5);
 
     if (sourceLines != null &&
         sourceLines.length > 0 &&
