@@ -284,6 +284,10 @@ public class ServletMapper {
       }
     }
 
+    if (servletName == null && contextURI.endsWith("j_security_check")) {
+      servletName = "j_security_check";
+    }
+
     if (servletName == null && matchResult == null) {
       vars.clear();
       
@@ -298,10 +302,6 @@ public class ServletMapper {
 
         return new RedirectFilterChain(contextPath + contextURI + "/");
       }
-    }
-
-    if (servletName == null && contextURI.endsWith("j_security_check")) {
-      servletName = "j_security_check";
     }
 
     if (servletName == null) {
