@@ -1466,12 +1466,17 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     setAttribute(Login.LOGIN_PASSWORD, password);
 
     try {
-      login.login(this, getResponse(), true);
+      login.login(this, getResponse(), false);
     }
     finally {
       removeAttribute(Login.LOGIN_USER);
       removeAttribute(Login.LOGIN_PASSWORD);
     }
+
+    principal = login.getUserPrincipal(this);
+
+    if (principal == null)
+      throw new ServletException("can't authenticate a user");
   }
 
   /**
