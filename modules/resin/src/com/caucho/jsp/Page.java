@@ -67,10 +67,8 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   private WebApp _webApp;
 
   private DependencyContainer _depends = new DependencyContainer();
-  private ArrayList<PersistentDependency> _dependList;
   private ArrayList<Depend> _cacheDepends;
   
-  private String _media;
   protected String _contentType;
 
   private PageManager.Entry _entry;
@@ -360,7 +358,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     return _config.getInitParameter(name);
   }
 
-  public Enumeration getInitParameterNames()
+  public Enumeration<String> getInitParameterNames()
   {
     return _config.getInitParameterNames();
   }
@@ -516,13 +514,13 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
       
       String ifMatch = req.getHeader("If-None-Match");
       if (etag.equals(ifMatch)) {
-	res.sendError(res.SC_NOT_MODIFIED);
+	res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
 	return;
       }
 
       String ifModifiedSince = req.getHeader("If-Modified-Since");
       if (_lastModifiedString.equals(ifModifiedSince)) {
-	res.sendError(res.SC_NOT_MODIFIED);
+	res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
 	return;
       }
 

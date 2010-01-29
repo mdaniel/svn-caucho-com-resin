@@ -33,6 +33,7 @@ import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.LiteralStringExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.Primes;
+import com.caucho.util.Alarm;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -49,6 +50,7 @@ import java.util.TreeSet;
 /**
  * Represents a PHP object value.
  */
+@SuppressWarnings("serial")
 public class ObjectExtValue extends ObjectValue
   implements Serializable
 {
@@ -941,6 +943,7 @@ public class ObjectExtValue extends ObjectValue
     return this;
   }
 
+  /*
   @Override
   public Value getObject(Env env, Value index)
   {
@@ -950,6 +953,7 @@ public class ObjectExtValue extends ObjectValue
 
     return NullValue.NULL;
   }
+  */
 
   /**
    * Copy for assignment.
@@ -1401,7 +1405,10 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "@" + System.identityHashCode(this) +  "[" + _className + "]";
+    if (Alarm.isTest())
+      return getClass().getSimpleName() +  "[" + _className + "]";
+    else
+      return getClass().getSimpleName() + "@" + System.identityHashCode(this) +  "[" + _className + "]";
   }
 
   public class EntrySet extends AbstractSet<Map.Entry<Value,Value>> {

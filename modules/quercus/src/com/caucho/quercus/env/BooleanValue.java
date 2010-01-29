@@ -40,6 +40,7 @@ import java.util.IdentityHashMap;
 /**
  * Represents a PHP boolean value.
  */
+@SuppressWarnings("serial")
 public class BooleanValue extends Value
   implements Serializable
 {
@@ -73,6 +74,7 @@ public class BooleanValue extends Value
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return "boolean";
@@ -107,6 +109,7 @@ public class BooleanValue extends Value
   /**
    * Converts to a boolean.
    */
+  @Override
   public final boolean toBoolean()
   {
     return this == TRUE;
@@ -141,6 +144,7 @@ public class BooleanValue extends Value
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return _value ? 1 : 0;
@@ -149,6 +153,7 @@ public class BooleanValue extends Value
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     return _value ? 1 : 0;
@@ -157,6 +162,7 @@ public class BooleanValue extends Value
   /**
    * Converts to a string.
    */
+  @Override
   public String toString()
   {
     return _value ? "1" : "";
@@ -187,6 +193,7 @@ public class BooleanValue extends Value
   /**
    * Converts to a java object.
    */
+  @Override
   public Object toJavaObject()
   {
     return _value ? Boolean.TRUE : Boolean.FALSE;
@@ -195,23 +202,25 @@ public class BooleanValue extends Value
   /**
    * Converts to an array if null.
    */
+  @Override
   public Value toAutoArray()
   {
     if (! _value)
       return new ArrayValueImpl();
     else
-      return this;
+      return super.toAutoArray();
   }
 
   /**
    * Converts to an object if null.
    */
+  @Override
   public Value toAutoObject(Env env)
   {
     if (! _value)
       return env.createObject();
     else
-      return this;
+      return super.toAutoObject(env);
   }
 
   /**
@@ -219,10 +228,11 @@ public class BooleanValue extends Value
    * string update ($a[0] = 'A').  Creates an array automatically if
    * necessary.
    */
+  @Override
   public Value append(Value index, Value value)
   {
     if (_value)
-      return this;
+      return super.append(index, value);
     else
       return new ArrayValueImpl().append(index, value);
   }
@@ -230,6 +240,7 @@ public class BooleanValue extends Value
   /**
    * Converts to a key.
    */
+  @Override
   public Value toKey()
   {
     return _value ? LongValue.ONE : LongValue.ZERO;
@@ -238,6 +249,7 @@ public class BooleanValue extends Value
   /**
    * Returns true for equality
    */
+  @Override
   public boolean eq(Value rValue)
   {
     return _value == rValue.toBoolean();
@@ -246,6 +258,7 @@ public class BooleanValue extends Value
   /**
    * Returns true for equality
    */
+  @Override
   public int cmp(Value rValue)
   {
     boolean rBool = rValue.toBoolean();
@@ -271,6 +284,7 @@ public class BooleanValue extends Value
    * Prints the value.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
     env.print(_value ? "1" : "");
@@ -285,6 +299,7 @@ public class BooleanValue extends Value
    *
    * @param out the writer to the Java source code.
    */
+  @Override
   public void generate(PrintWriter out)
     throws IOException
   {
@@ -311,6 +326,7 @@ public class BooleanValue extends Value
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(Env env, StringBuilder sb)
   {
     sb.append("b:");
@@ -333,6 +349,7 @@ public class BooleanValue extends Value
   /**
    * Exports the value.
    */
+  @Override
   public void varExport(StringBuilder sb)
   {
     sb.append(_value ? "true" : "false");
@@ -341,6 +358,7 @@ public class BooleanValue extends Value
   /**
    * Returns the hash code
    */
+  @Override
   public int hashCode()
   {
     return _value ? 17 : 37;
@@ -349,6 +367,7 @@ public class BooleanValue extends Value
   /**
    * Compare for equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
@@ -370,6 +389,7 @@ public class BooleanValue extends Value
       return "false";
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,

@@ -80,6 +80,7 @@ public class QuercusClass extends NullValue {
   private AbstractFunction _fieldSet;
   
   private AbstractFunction _call;
+  private AbstractFunction _invoke;
 
   private ArrayDelegate _arrayDelegate;
   private TraversableDelegate _traversableDelegate;
@@ -265,6 +266,7 @@ public class QuercusClass extends NullValue {
     _fieldSet = cacheClass._fieldSet;
   
     _call = cacheClass._call;
+    _invoke = cacheClass._invoke;
 
     _arrayDelegate = cacheClass._arrayDelegate;
     _traversableDelegate = cacheClass._traversableDelegate;
@@ -515,6 +517,22 @@ public class QuercusClass extends NullValue {
   public AbstractFunction getCall()
   {
     return _call;
+  }
+
+  /**
+   * Sets the __invoke
+   */
+  public void setInvoke(AbstractFunction fun)
+  {
+    _invoke = fun;
+  }
+
+  /**
+   * Gets the __invoke
+   */
+  public AbstractFunction getInvoke()
+  {
+    return _invoke;
   }
 
   /**

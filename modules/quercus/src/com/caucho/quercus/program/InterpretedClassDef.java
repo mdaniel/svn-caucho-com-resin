@@ -72,6 +72,7 @@ public class InterpretedClassDef extends ClassDef
   protected AbstractFunction _getField;
   protected AbstractFunction _setField;
   protected AbstractFunction _call;
+  protected AbstractFunction _invoke;
   
   protected int _parseIndex;
   
@@ -205,6 +206,9 @@ public class InterpretedClassDef extends ClassDef
     if (_call != null)
       cl.setCall(_call);
     
+    if (_invoke != null)
+      cl.setInvoke(_invoke);
+
     cl.addInitializer(this);
     
     for (Map.Entry<String,AbstractFunction> entry : _functionMap.entrySet()) {
@@ -260,6 +264,8 @@ public class InterpretedClassDef extends ClassDef
       _setField = fun;
     else if (name.equals("__call"))
       _call = fun;
+    else if (name.equals("__invoke"))
+      _invoke = fun;
     else if (name.equalsIgnoreCase(getName()) && _constructor == null)
       _constructor = fun;
   }

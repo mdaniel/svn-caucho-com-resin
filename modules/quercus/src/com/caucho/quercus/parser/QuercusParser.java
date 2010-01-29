@@ -287,7 +287,8 @@ public class QuercusParser {
     _parserLocation.setFileName(fileName);
     _parserLocation.setLineNumber(line);
     
-    _sourceOffset = -line;
+    if (line > 0)
+      _sourceOffset = -line;
   }
 
   public static QuercusProgram parse(QuercusContext quercus,
@@ -3300,40 +3301,22 @@ public class QuercusParser {
     int token = parseToken();
 
     if (token == '$') {
-      _peekToken = token;
-      nameExpr = parseTermBase();
-
       // php/09e0
-      token = parseToken();
-      switch (token) {
-      case '[':
-        Expr index = parseExpr();
-
-        token = parseToken();
-        if (token != ']')
-          throw expect("']'", token);
-
-        nameExpr = _factory.createArrayGet(getLocation(), nameExpr, index);
-        break;
-
-      default:
-        _peekToken = token;
-        break;
-      }
+      _peekToken = token;
+      nameExpr = parseTerm(false);
+      
+      return term.createFieldGet(_factory, nameExpr);
     }
     else if (token == '{') {
       nameExpr = parseExpr();
       expect('}');
+      
+      return term.createFieldGet(_factory, nameExpr);
     }
     else {
       _peekToken = token;
       name = parseIdentifier();
-    }
-
-    if (nameExpr != null) {
-      return term.createFieldGet(_factory, nameExpr);
-    }
-    else {
+      
       return term.createFieldGet(_factory, createStringValue(name));
     }
   }
@@ -5529,14 +5512,16 @@ public class QuercusParser {
   public QuercusParseException error(String msg)
   {
     int lineNumber = _parserLocation.getLineNumber();
+    int lines = 5;
+    int first = lines / 2;
 
     String []sourceLines = Env.getSourceLine(_sourceFile, 
-                                             lineNumber - 2 + _sourceOffset,
-                                             5);
+                                             lineNumber - first + _sourceOffset,
+                                             lines);
 
-    if (sourceLines != null &&
-        sourceLines.length > 0 &&
-        sourceLines[0] != null) {
+    if (sourceLines != null
+        && sourceLines.length > 0
+        && sourceLines[0] != null) {
       StringBuilder sb = new StringBuilder();
 
       String shortFile = _parserLocation.getFileName();
@@ -5552,7 +5537,7 @@ public class QuercusParser {
         sb.append("\n");
         sb.append(shortFile)
           .append(":")
-          .append(lineNumber - 1 + i)
+          .append(lineNumber - first + i)
           .append(": ")
           .append(sourceLines[i]);
       }

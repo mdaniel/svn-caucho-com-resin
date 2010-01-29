@@ -177,6 +177,15 @@ abstract public class ArrayValue extends Value {
   }
 
   /**
+   * Converts to an array if null.
+   */
+  @Override
+  public Value toAutoArray()
+  {
+    return this;
+  }
+
+  /**
    * Converts to a java object.
    */
   @Override
@@ -340,9 +349,51 @@ abstract public class ArrayValue extends Value {
     return map;
   }
 
+  @Override
+  public boolean isCallable(Env env)
+  {
+    Value obj = get(LongValue.ZERO);
+    Value nameV = get(LongValue.ONE);
+
+    if (! nameV.isString()) {
+      return false;
+    }
+
+    String name = nameV.toString();
+
+    if (obj.isObject()) {
+      AbstractFunction fun;
+
+      int p = name.indexOf("::");
+
+      // php/09lf
+      if (p > 0) {
+        String clsName = name.substring(0, p);
+        name = name.substring(p + 2);
+
+        QuercusClass cls = env.findClass(clsName);
+
+        if (cls == null) {
+          return false;
+        }
+      }
+
+      return true;
+    }
+    else {
+      QuercusClass cl = env.findClass(obj.toString());
+
+      if (cl == null) {
+        return false;
+      }
+
+      return true;
+    }
+  }
   /**
    * Converts to a callable object.
    */
+  @Override
   public Callable toCallable(Env env)
   {
     Value obj = get(LongValue.ZERO);

@@ -46,34 +46,6 @@ public class FunListExpr extends Expr {
     _value = value;
   }
 
-  /*
-  public static Expr create(QuercusParser parser,
-                            ListHeadExpr head, Expr value)
-    throws IOException
-  {
-    boolean isSuppress = value instanceof SuppressErrorExpr;
-
-    if (isSuppress) {
-      SuppressErrorExpr suppressExpr = (SuppressErrorExpr) value;
-
-      value = suppressExpr.getExpr();
-    }
-
-    Expr expr;
-
-    if (value instanceof EachExpr) {
-      expr = new ListEachExpr(parser.getLocation(), head.getVarList(), (EachExpr) value);
-    }
-    else
-      expr = new ListExpr(head, value);
-
-    if (isSuppress)
-      return new SuppressErrorExpr(expr.getLocation(), expr);
-    else
-      return expr;
-  }
-  */
-
   /**
    * Evaluates the expression.
    *

@@ -6413,7 +6413,7 @@ public class Env {
       int line = 1;
       String lineString;
 
-      while (line < sourceLine) {
+      while (line++ < sourceLine) {
         lineString = is.readLine();
         
         if (lineString == null)

@@ -360,6 +360,10 @@ public class VariableModule extends AbstractQuercusModule {
 				    @Optional boolean isSyntaxOnly,
 				    @Optional @Reference Value nameRef)
   {
+    if (v.isCallable(env)) {
+      return true;
+    }
+    
     // XXX: this needs to be made OO through Value
     
     if (v instanceof StringValue) {

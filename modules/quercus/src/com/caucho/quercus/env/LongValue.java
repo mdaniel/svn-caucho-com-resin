@@ -39,6 +39,7 @@ import java.util.IdentityHashMap;
 /**
  * Represents a PHP long value.
  */
+@SuppressWarnings("serial")
 public class LongValue extends NumberValue
 {
   public static final LongValue MINUS_ONE = new LongValue(-1);
@@ -76,6 +77,7 @@ public class LongValue extends NumberValue
   /**
    * Returns the type.
    */
+  @Override
   public String getType()
   {
     return "integer";
@@ -93,6 +95,7 @@ public class LongValue extends NumberValue
   /**
    * Returns true for a long.
    */
+  @Override
   public boolean isLongConvertible()
   {
     return true;
@@ -194,6 +197,7 @@ public class LongValue extends NumberValue
   /**
    * Converts to a boolean.
    */
+  @Override
   public boolean toBoolean()
   {
     return _value != 0;
@@ -202,6 +206,7 @@ public class LongValue extends NumberValue
   /**
    * Converts to a long.
    */
+  @Override
   public long toLong()
   {
     return _value;
@@ -210,6 +215,7 @@ public class LongValue extends NumberValue
   /**
    * Converts to a double.
    */
+  @Override
   public double toDouble()
   {
     return _value;
@@ -218,6 +224,7 @@ public class LongValue extends NumberValue
   /**
    * Converts to a string.
    */
+  @Override
   public String toString()
   {
     return String.valueOf(_value);
@@ -235,6 +242,7 @@ public class LongValue extends NumberValue
   /**
    * Converts to a long value
    */
+  @Override
   public LongValue toLongValue()
   {
     return this;
@@ -243,6 +251,7 @@ public class LongValue extends NumberValue
   /**
    * Converts to a key.
    */
+  @Override
   public Value toKey()
   {
     return this;
@@ -259,14 +268,27 @@ public class LongValue extends NumberValue
   /**
    * Converts to a java object.
    */
+  @Override
   public Object toJavaObject()
   {
     return new Long(_value);
   }
+  
+  /*
+  @Override
+  public Value toAutoArray()
+  {
+    if (_value == 0)
+      return new ArrayValueImpl();
+    else
+      return super.toAutoArray();
+  }
+  */
 
   /**
    * Negates the value.
    */
+  @Override
   public Value neg()
   {
     return LongValue.create(- _value);
@@ -275,6 +297,7 @@ public class LongValue extends NumberValue
   /**
    * Negates the value.
    */
+  @Override
   public Value pos()
   {
     return this;
@@ -283,6 +306,7 @@ public class LongValue extends NumberValue
   /**
    * Post-increment the following value.
    */
+  @Override
   public Value increment(int incr)
   {
     long newValue = _value + incr;
@@ -332,6 +356,7 @@ public class LongValue extends NumberValue
   /**
    * Absolute value.
    */
+  @Override
   public Value abs()
   {
     if (_value >= 0)
@@ -343,6 +368,7 @@ public class LongValue extends NumberValue
   /**
    * Returns true for equality
    */
+  @Override
   public boolean eql(Value rValue)
   {
     rValue = rValue.toValue();
@@ -357,6 +383,7 @@ public class LongValue extends NumberValue
   /**
    * Returns true for equality
    */
+  @Override
   public int cmp(Value rValue)
   {
     if (rValue.isBoolean()) {
@@ -398,6 +425,7 @@ public class LongValue extends NumberValue
    * Prints the value.
    * @param env
    */
+  @Override
   public void print(Env env)
   {
     env.print(_value);
@@ -442,6 +470,7 @@ public class LongValue extends NumberValue
   /**
    * Serializes the value.
    */
+  @Override
   public void serialize(Env env, StringBuilder sb)
   {
     sb.append("i:");
@@ -452,6 +481,7 @@ public class LongValue extends NumberValue
   /**
    * Exports the value.
    */
+  @Override
   public void varExport(StringBuilder sb)
   {
     sb.append(_value);
@@ -466,6 +496,7 @@ public class LongValue extends NumberValue
    *
    * @param out the writer to the Java source code.
    */
+  @Override
   public void generate(PrintWriter out)
     throws IOException
   {
@@ -484,6 +515,7 @@ public class LongValue extends NumberValue
   /**
    * Returns the hash code
    */
+  @Override
   public final int hashCode()
   {
     long v = _value;
@@ -494,6 +526,7 @@ public class LongValue extends NumberValue
   /**
    * Compare for equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
@@ -506,6 +539,7 @@ public class LongValue extends NumberValue
     return _value == value._value;
   }
 
+  @Override
   public void varDumpImpl(Env env,
                           WriteStream out,
                           int depth,

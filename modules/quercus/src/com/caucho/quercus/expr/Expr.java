@@ -584,9 +584,9 @@ abstract public class Expr {
    */
   public void evalArrayAssign(Env env, Value index, Value value)
   {
-    Value array = evalArray(env);
+    Value var = evalVar(env);
 
-    array.put(index, value);
+    var.put(index, value);
   }
 
   /**

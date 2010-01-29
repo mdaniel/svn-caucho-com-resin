@@ -113,18 +113,7 @@ public class CallVarExpr extends Expr {
     try {
       env.checkTimeout();
 
-      if (value instanceof Closure) {
-        return ((Closure) value).call(env, args);
-      }
-    
-      Value name = value;
-    
-      AbstractFunction fun;
-    
-      fun = env.getFunction(name);
-      // XXX: FunctionExpr also invokes callRef() and callCopy().
-
-      return fun.call(env, args);
+      return value.call(env, args);
     } finally {
       env.popCall();
     }

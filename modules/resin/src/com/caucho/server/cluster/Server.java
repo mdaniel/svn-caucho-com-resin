@@ -1828,6 +1828,8 @@ public class Server extends ProtocolDispatchServer
       _lifecycle.toStarting();
 
       startClusterNetwork();
+      
+      startImpl();
 
       if (_resin != null && _resin.getManagement() != null)
         _resin.getManagement().start(this);
@@ -1903,6 +1905,10 @@ public class Server extends ProtocolDispatchServer
     }
   }
 
+  protected void startImpl()
+  {  
+  }
+  
   /**
    * Display activated modules
    */

@@ -64,15 +64,7 @@ public class ProtocolDispatchServer extends DispatchServer {
    */
   public AbstractSelectManager getSelectManager()
   {
-    return _selectManager;
-  }
-
-  /**
-   * Sets the select manager.
-   */
-  public void initSelectManager(AbstractSelectManager manager)
-  {
-    _selectManager = manager;
+    return null;
   }
 
   /**

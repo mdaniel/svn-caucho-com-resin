@@ -689,6 +689,9 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value getArray(Value index)
   {
+    if (true)
+      throw new IllegalStateException();
+    
     // php/3482, php/3483
 
     if (_isDirty)

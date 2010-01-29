@@ -121,26 +121,6 @@ public class Port extends TaskWorker
   private boolean _isSecure;
 
   private InetAddress _socketAddress;
-  /*
-  private int _acceptListenBacklog = 100;
-
-  private int _acceptThreadMin = 4;
-  private int _acceptThreadMax = 8;
-
-  private int _connectionMax = 1024 * 1024;
-
-  // default is in Port
-  private int _keepaliveMax = -1;
-
-  private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
-
-  private boolean _keepaliveSelectEnable = true;
-  private int _keepaliveSelectMax = -1;
-  private long _keepaliveSelectThreadTimeout = 1000;
-  
-  private long _suspendTimeMax = 600000L;
-  */
-  
 
   private int _idleThreadMin = 2;
   private int _idleThreadMax = 8;
@@ -225,75 +205,6 @@ public class Port extends TaskWorker
   }
 
   /**
-   * Sets the containing server.
-   */
-  /*
-  public void setParent(ProtocolDispatchServer parent)
-  {
-    setServer(parent);
-  }
-  */
-
-  /**
-   * Sets the server.
-   */
-  /*
-  public void setServer(ProtocolDispatchServer protocolServer)
-  {
-    _server = protocolServer;
-
-    if (_protocol != null)
-      _protocol.setServer(protocolServer);
-
-    if (protocolServer instanceof Server) {
-      Server server = (Server) protocolServer;
-
-      if (_idleThreadMax == DEFAULT)
-        _idleThreadMax = server.getAcceptThreadMax();
-
-      if (_idleThreadMin == DEFAULT)
-        _idleThreadMin = server.getAcceptThreadMin();
-
-      if (_acceptListenBacklog == DEFAULT)
-        _acceptListenBacklog = server.getAcceptListenBacklog();
-
-      if (_connectionMax == DEFAULT)
-        _connectionMax = server.getConnectionMax();
-
-      if (_keepaliveMax == DEFAULT)
-        _keepaliveMax = server.getKeepaliveMax();
-
-      if (_keepaliveTimeMax == DEFAULT)
-        _keepaliveTimeMax = server.getKeepaliveConnectionTimeMax();
-
-      if (_keepaliveTimeout == DEFAULT)
-        _keepaliveTimeout = server.getKeepaliveTimeout();
-
-      if (_keepaliveSelectThreadTimeout == DEFAULT) {
-        _keepaliveSelectThreadTimeout
-          = server.getKeepaliveSelectThreadTimeout();
-      }
-
-      if (_suspendTimeMax == DEFAULT)
-        _suspendTimeMax = server.getSuspendTimeMax();
-
-      if (_socketTimeout == DEFAULT)
-        _socketTimeout = server.getSocketTimeout();
-    }
-  }
-  */
-
-  /**
-   * Gets the server.
-   */
-  /*
-  public ProtocolDispatchServer getServer()
-  {
-    return _server;
-  }
-  */
-
-  /**
    * Sets the id.
    */
   // exists only for QA regressions
@@ -301,37 +212,6 @@ public class Port extends TaskWorker
   public void setId(String id)
   {
   }
-
-  /**
-   * Sets the server id.
-   */
-  /*
-  public void setServerId(String id)
-  {
-    _serverId = id;
-  }
-  */
-
-  /**
-   * Gets the server id.
-   */
-  /*
-  public String getServerId()
-  {
-    return _serverId;
-  }
-  */
-
-  /*
-  public void setType(Class<?> cl)
-  {
-    setClass(cl);
-  }
-
-  public void setClass(Class<?> cl)
-  {
-  }
-  */
   
   public String getDebugId()
   {
@@ -1129,13 +1009,17 @@ public class Port extends TaskWorker
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
-    if (_serverSocket.isJNI() && _isSelectManagerEnabled) {
-      // XXX:
-      // _selectManager = _server.getSelectManager();
+    if (_serverSocket.isJNI()) {
+      Server server = Server.getCurrent();
+      
+      if (server != null)
+        _selectManager = server.getSelectManager();
 
+      /*
       if (_selectManager == null) {
         throw new IllegalStateException(L.l("Cannot load select manager"));
       }
+      */
     }
 
     /*

@@ -32,10 +32,12 @@ package com.caucho.quercus.env;
 /**
  * Represents a PHP number value (double or long).
  */
+@SuppressWarnings("serial")
 public abstract class NumberValue extends Value {
   /**
    * Returns true for equality
    */
+  @Override
   public int cmp(Value rValue)
   {
     if (rValue.isBoolean() || rValue.isNull()) {

@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.lib.ArrayModule;
 import com.caucho.vfs.WriteStream;
 
@@ -140,6 +141,15 @@ abstract public class ObjectValue extends Value {
     return true;
   }
 
+  /**
+   * The object is callable if it has an __invoke method
+   */
+  @Override
+  public boolean isCallable(Env env)
+  {
+    return _quercusClass.getInvoke() != null;
+  }
+  
   /**
    * Returns the type.
    */
@@ -495,6 +505,20 @@ abstract public class ObjectValue extends Value {
       // should never reach this
       return 0;
     }
+  }
+  
+  /**
+   * Call for callable.
+   */
+  @Override
+  public Value call(Env env, Value []args)
+  {
+    AbstractFunction fun = _quercusClass.getInvoke();
+    
+    if (fun != null)
+      return fun.callMethod(env, _quercusClass, this, args);
+    else
+      return super.call(env, args);
   }
 
   public void varDumpObject(Env env,

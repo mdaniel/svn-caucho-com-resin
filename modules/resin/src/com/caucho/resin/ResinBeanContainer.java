@@ -161,12 +161,12 @@ public class ResinBeanContainer
   }
 
   /**
-   * Adds a Resin context configuration file, allowing creation of
+   * Adds a Resin beans configuration file, allowing creation of
    * databases, or bean configuration.
    *
    * @param pathName URL/path to the configuration file
    */
-  public void addContextConfig(String pathName)
+  public void addBeansXml(String pathName)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

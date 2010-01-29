@@ -886,7 +886,7 @@ abstract public class StringValue
     if (length() == 0)
       return new ArrayValueImpl();
     else
-      return this;
+      return super.toAutoArray();
   }
   
   /**

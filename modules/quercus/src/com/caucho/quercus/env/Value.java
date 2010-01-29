@@ -606,6 +606,9 @@ abstract public class Value implements java.io.Serializable
    */
   public Value toAutoArray()
   {
+    Env.getCurrent().warning(L.l("'{0}' cannot be used as an array.", 
+                                 toDebugString()));
+    
     return this;
   }
 
@@ -1118,11 +1121,28 @@ abstract public class Value implements java.io.Serializable
   }
   
   /**
+   * Returns true for a callable object.
+   */
+  public boolean isCallable(Env env)
+  {
+    return false;
+  }
+  
+  /**
+   * Returns the callable's name for is_callable()
+   */
+  public String getCallableName()
+  {
+    return null;
+  }
+  
+  /**
    * Converts to a callable
    */
   public Callable toCallable(Env env)
   {
-    env.warning(L.l("Callback: '{0}' is not a valid callback", toString()));
+    env.warning(L.l("Callable: '{0}' is not a valid callable argument",
+                    toString()));
 
     return new CallbackError(toString());
   }
@@ -1328,10 +1348,10 @@ abstract public class Value implements java.io.Serializable
    */
   public Value call(Env env, Value []args)
   {
-    AbstractFunction fun = env.getFunction(this);
+    Callable call = toCallable(env);
 
-    if (fun != null)
-      return fun.call(env, args);
+    if (call != null)
+      return call.call(env, args);
     else
       return env.warning(L.l("{0} is not a valid function",
                              this));
@@ -2397,6 +2417,14 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Returns a reference to the array value.
+   */
+  public Value getRef(Value index)
+  {
+    return get(index);
+  }
+
+  /**
    * Returns the array ref as a function argument.
    */
   public Value getArg(Value index, boolean isTop)
@@ -2429,13 +2457,7 @@ abstract public class Value implements java.io.Serializable
   {
     Value var = getVar(index);
     
-    if (var.isset())
-      return var.toValue();
-    else {
-      var.set(new ArrayValueImpl());
-      
-      return var.toValue();
-    }
+    return var.toAutoArray();
   }
 
   /**
@@ -2482,6 +2504,9 @@ abstract public class Value implements java.io.Serializable
    */
   public Value put(Value index, Value value)
   {
+    Env.getCurrent().warning(L.l("{0} cannot be used as an array",
+                                 toDebugString()));
+    
     return value;
   }
 
@@ -2503,6 +2528,9 @@ abstract public class Value implements java.io.Serializable
    */
   public Value put(Value value)
   {
+    Env.getCurrent().warning(L.l("{0} cannot be used as an array",
+                                 toDebugString()));
+    
     return value;
   }
 
@@ -2513,6 +2541,9 @@ abstract public class Value implements java.io.Serializable
    */
   public Value append(Value index, Value value)
   {
+    Env.getCurrent().warning(L.l("{0} cannot be used as an array",
+                                 toDebugString()));
+    
     return this;
   }
 
