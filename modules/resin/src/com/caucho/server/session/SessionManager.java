@@ -1282,7 +1282,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     if (session != null) {
       if (session.load(isNew)) {
         session.addUse();
-        
+
         if (isCreate) {
           // TCK only set access on create
           session.setAccess(now);
@@ -1413,8 +1413,8 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
     }
     else if (isNew)
       handleCreateListeners(session);
-    else
-      session.setAccess(now);
+    //else
+      //session.setAccess(now);
 
     return session;
   }

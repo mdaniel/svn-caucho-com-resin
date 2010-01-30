@@ -400,7 +400,10 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     throws IOException
   {
     SessionImpl session = _session;
-
+    //
+    if (session == null && getSessionId() != null)
+      session = (SessionImpl) getSession(false);
+      
     if (session != null)
       session.finishRequest();
   }

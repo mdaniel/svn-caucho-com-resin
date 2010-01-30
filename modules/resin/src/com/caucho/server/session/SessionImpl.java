@@ -188,7 +188,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       _idleTimeout = Long.MAX_VALUE / 2;
     else
       _idleTimeout = ((long) value) * 1000;
-    
+
     _isIdleSet = true;
   }
 
@@ -521,9 +521,9 @@ public class SessionImpl implements HttpSession, CacheListener {
       _clusterObject.objectAccess();
     */
     // TCK now cares about exact time
-    now = Alarm.getExactTime();
+    /*now = Alarm.getExactTime();
 
-    _accessTime = now;
+    _accessTime = now;*/
   }
 
   /**
@@ -535,8 +535,8 @@ public class SessionImpl implements HttpSession, CacheListener {
    */
   public void finishRequest()
   {
-    // XXX: TCK issues with the access time?
-    // _accessTime = Alarm.getCurrentTime();
+    // server/0122
+    _accessTime = Alarm.getExactTime();
     
     // update cache access?
     if (_useCount.decrementAndGet() > 0)

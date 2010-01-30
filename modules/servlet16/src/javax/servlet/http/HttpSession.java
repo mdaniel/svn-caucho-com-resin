@@ -75,7 +75,8 @@ public interface HttpSession {
    */
   public long getCreationTime();
   /**
-   * Returns the time when the session was last accessed.
+   * Returns the time of last request associated with a session
+   * before the current request
    */
   public long getLastAccessedTime();
   /**
