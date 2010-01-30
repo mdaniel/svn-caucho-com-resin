@@ -91,7 +91,7 @@ public final class ClusterServer {
   // private long _keepaliveTimeout = 75000L;
 
   private int _loadBalanceConnectionMin = 0;
-  private long _loadBalanceIdleTime = 15000L;
+  private long _loadBalanceIdleTime = 60000L;
   private long _loadBalanceRecoverTime = 15000L;
   private long _loadBalanceSocketTimeout = 600000L;
   private long _loadBalanceWarmupTime = 60000L;
@@ -494,6 +494,14 @@ public final class ClusterServer {
    * Sets the select-based keepalive timeout
    */
   public void setKeepaliveSelectThreadTimeout(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
+
+  /**
+   * Sets the suspend timeout
+   */
+  public void setSocketTimeout(ConfigProgram program)
   {
     _portDefaults.addProgram(program);
   }

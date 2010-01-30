@@ -202,6 +202,10 @@ public class Port extends TaskWorker
 
   public Port()
   {
+    if ("64".equals(System.getProperty("sun.arch.data.model"))) {
+      // on 64-bit machines we can use more threads before parking in nio 
+      _keepaliveSelectThreadTimeout = 60000;
+    }
   }
 
   /**
@@ -292,13 +296,11 @@ public class Port extends TaskWorker
   /**
    * @deprecated
    */
-  /*
   public void setHost(String address)
     throws UnknownHostException
   {
     setAddress(address);
   }
-  */
 
   /**
    * Sets the port.
@@ -718,6 +720,11 @@ public class Port extends TaskWorker
   public long getKeepaliveSelectThreadTimeout()
   {
     return _keepaliveSelectThreadTimeout;
+  }
+
+  public void setKeepaliveSelectThreadTimeout(Period period)
+  {
+    _keepaliveSelectThreadTimeout = period.getPeriod();
   }
 
   public long getBlockingTimeoutForSelect()
