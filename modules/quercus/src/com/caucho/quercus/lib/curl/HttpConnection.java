@@ -93,7 +93,10 @@ public class HttpConnection
   {
     Proxy proxy = getProxy();
 
-    _conn = (HttpURLConnection)_URL.openConnection(proxy);
+    if (proxy != null)
+      _conn = (HttpURLConnection)_URL.openConnection(proxy);
+    else
+      _conn = (HttpURLConnection)_URL.openConnection();
     
   }
   
@@ -185,13 +188,18 @@ public class HttpConnection
   
   protected final Proxy getProxy()
   {
-    if (_proxyURL == null)
-      return Proxy.NO_PROXY;
+    try {
+      if (_proxyURL == null)
+        return null;
 
-    InetSocketAddress address
-      = new InetSocketAddress(_proxyURL.getHost(), _proxyURL.getPort());
+      InetSocketAddress address
+        = new InetSocketAddress(_proxyURL.getHost(), _proxyURL.getPort());
 
-    return new Proxy(Proxy.Type.valueOf(_proxyType), address);
+      return new Proxy(Proxy.Type.valueOf(_proxyType), address);
+    } catch (Exception e) {
+      // java.net.Proxy prohibited on GAE
+      return null;
+    }
   }
   
   protected final URL getURL()
