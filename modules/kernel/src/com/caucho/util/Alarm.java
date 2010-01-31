@@ -96,7 +96,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   {
     _name = name;
 
-    Environment.addClassLoaderListener(this);
+    addEnvironmentListener();
   }
 
   /**
@@ -336,6 +336,14 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   }
 
   /**
+   * Registers the alarm with the environment listener for auto-close
+   */
+  protected void addEnvironmentListener()
+  {
+    // Environment.addClassLoaderListener(this);
+  }
+
+  /**
    * Queue the alarm for wakeup.
    *
    * @param delta time in milliseconds to wake
@@ -455,7 +463,6 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
    */
   public void close()
   {
-
     dequeue();
 
     // server/16a{0,1}

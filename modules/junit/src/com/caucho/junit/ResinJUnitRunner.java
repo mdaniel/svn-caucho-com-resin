@@ -91,7 +91,7 @@ public class ResinJUnitRunner extends BlockJUnit4ClassRunner {
         }
 
         for (String conf : _resinDescription.contextConfig()) {
-          _resinContext.addContextConfig(conf);
+          _resinContext.addBeansXml(conf);
         }
       }
 

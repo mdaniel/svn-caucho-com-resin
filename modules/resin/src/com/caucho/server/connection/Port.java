@@ -97,7 +97,7 @@ public class Port extends TaskWorker
 
   private ClassLoader _classLoader
     = Thread.currentThread().getContextClassLoader();
-  
+
   // The id
   private String _serverId = "";
 
@@ -108,7 +108,7 @@ public class Port extends TaskWorker
 
   // URL for debugging
   private String _url;
-  
+
   private String _debugId;
 
   // The protocol
@@ -203,7 +203,7 @@ public class Port extends TaskWorker
   public Port()
   {
     if ("64".equals(System.getProperty("sun.arch.data.model"))) {
-      // on 64-bit machines we can use more threads before parking in nio 
+      // on 64-bit machines we can use more threads before parking in nio
       _keepaliveSelectThreadTimeout = 60000;
     }
   }
@@ -216,12 +216,12 @@ public class Port extends TaskWorker
   public void setId(String id)
   {
   }
-  
+
   public String getDebugId()
   {
     return _debugId;
   }
-  
+
   public ClassLoader getClassLoader()
   {
     return _classLoader;
@@ -244,7 +244,7 @@ public class Port extends TaskWorker
     */
 
     _protocol = protocol;
-    
+
     // protocol.setPort(this);
     // _protocol.setServer(_server);
   }
@@ -280,7 +280,7 @@ public class Port extends TaskWorker
       address = null;
 
     _address = address;
-    
+
     if (address != null)
       _socketAddress = InetAddress.getByName(address);
   }
@@ -706,15 +706,20 @@ public class Port extends TaskWorker
   {
     return _keepaliveTimeout;
   }
-  
+
   public boolean isKeepaliveSelectEnabled()
   {
     return _isSelectManagerEnabled;
   }
-  
+
   public void setKeepaliveSelectEnabled(boolean isKeepaliveSelect)
   {
     _isSelectManagerEnabled = isKeepaliveSelect;
+  }
+
+  public void setKeepaliveSelectEnable(boolean isKeepaliveSelect)
+  {
+    setKeepaliveSelectEnabled(isKeepaliveSelect);
   }
 
   public long getKeepaliveSelectThreadTimeout()
@@ -908,7 +913,7 @@ public class Port extends TaskWorker
     }
 
     _url = url.toString();
-    
+
     _debugId = _url;
   }
 
@@ -1018,7 +1023,7 @@ public class Port extends TaskWorker
 
     if (_serverSocket.isJNI()) {
       Server server = Server.getCurrent();
-      
+
       if (server != null)
         _selectManager = server.getSelectManager();
 
@@ -1104,7 +1109,7 @@ public class Port extends TaskWorker
     boolean isValid = false;
     try {
       Environment.addEnvironmentListener(this);
-      
+
       bind();
       postBind();
 
@@ -1258,7 +1263,7 @@ public class Port extends TaskWorker
   void startConnection(TcpConnection conn)
   {
     _startThreadCount.decrementAndGet();
-    
+
     wake();
   }
 
@@ -1276,13 +1281,13 @@ public class Port extends TaskWorker
   void threadEnd(TcpConnection conn)
   {
     _threadCount.decrementAndGet();
-    
+
     wake();
   }
 
   /**
    * Allocates a keepalive for the connection.
-   * 
+   *
    * @param connectionStartTime - when the connection's accept occurred.
    */
   boolean isKeepaliveAllowed(long connectionStartTime)
@@ -1298,7 +1303,7 @@ public class Port extends TaskWorker
   }
 
   /**
-   * Marks the keepalive allocation as starting. 
+   * Marks the keepalive allocation as starting.
    * Only called from ConnectionState.
    */
   void keepaliveAllocate()
@@ -1307,7 +1312,7 @@ public class Port extends TaskWorker
   }
 
   /**
-   * Marks the keepalive allocation as ending. 
+   * Marks the keepalive allocation as ending.
    * Only called from ConnectionState.
    */
   void keepaliveFree()
@@ -1353,11 +1358,11 @@ public class Port extends TaskWorker
     } catch (IOException e) {
       if (isClosed()) {
         log.log(Level.FINEST, e.toString(), e);
-        
+
         return false;
       }
-      
-      throw e; 
+
+      throw e;
     } finally {
       _keepaliveThreadCount.decrementAndGet();
     }
@@ -1375,7 +1380,7 @@ public class Port extends TaskWorker
     }
     else {
       _suspendConnectionSet.add(conn);
-      
+
       // XXX: wake
     }
   }
@@ -1401,11 +1406,11 @@ public class Port extends TaskWorker
     else
       return false;
   }
-  
+
   void duplexKeepaliveBegin()
-  {  
+  {
   }
-  
+
   void duplexKeepaliveEnd()
   {
   }
@@ -1619,7 +1624,7 @@ public class Port extends TaskWorker
   {
     _activeConnectionSet.remove(conn);
     _activeConnectionCount.decrementAndGet();
-    
+
     // wake the start thread
     wake();
   }
@@ -1803,7 +1808,7 @@ public class Port extends TaskWorker
 
           if (log.isLoggable(Level.FINE))
             log.fine(this + " suspend idle timeout " + conn);
-          
+
           conn.toCometTimeout();
         }
 

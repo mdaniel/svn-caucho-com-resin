@@ -611,28 +611,6 @@ distributed locking.</p>
 </s2>
 
 </s1> <!-- persistent sessions -->
-
-  </body>
-</document>
-
-<document>
-<header>
-<product>resin</product>
-<title>Dynamic Servers</title>
-<description>
-<p>Resin includes the ability to add servers to clusters dynamically.  These
-dynamic servers are able to use distributed sessions and the distributed
-object cache.  The triad also updates these servers with applications
-that are deployed via the remote deployment server.  The Resin load balancer
-is also able to dispatch requests to them as with any static server.
-</p>
-</description>
-</header>
-
-<body>
-
-<localtoc/>
-
 <s1 title="Overview">
 <p>
 Adding a dynamic server to a cluster is a simple two-step process:
