@@ -171,7 +171,9 @@ public class ArrayGetExpr extends AbstractVarExpr {
   @Override
   public Var evalVar(Env env)
   {
-    Value value = _expr.evalArray(env);
+    Value value = _expr.evalVar(env);
+    
+    value = value.toAutoArray();
 
     return value.getVar(_index.eval(env));
   }

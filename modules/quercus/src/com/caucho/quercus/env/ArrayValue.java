@@ -1662,7 +1662,7 @@ abstract public class ArrayValue extends Value {
 
       _value = var;
 
-      return new RefVar(var);
+      return new ArgRef(var);
     }
 
     /**
@@ -1674,7 +1674,7 @@ abstract public class ArrayValue extends Value {
 
       _value = var;
 
-      return new RefVar(var);
+      return new ArgRef(var);
 
       /*
       if (_var == null)

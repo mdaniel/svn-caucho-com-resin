@@ -922,6 +922,14 @@ abstract public class Value implements java.io.Serializable
   {
     return new Var(this);
   }
+  
+  /**
+   * Converts to a local $this, which can depend on the calling class
+   */
+  public Value toLocalThis(QuercusClass qClass)
+  {
+    return this;
+  }
 
   /**
    * Convert to a function argument reference value, e.g. for
@@ -950,7 +958,7 @@ abstract public class Value implements java.io.Serializable
    *
    * where $a is used as a variable in the function
    */
-  public Value toRefArgument()
+  public Value toArgRef()
   {
     Env.getCurrent().warning(L.l("'{0}' is an invalid reference, because only variables may be passed by reference.",
                                  this));
@@ -1769,13 +1777,13 @@ abstract public class Value implements java.io.Serializable
   /**
    * Evaluates a method with 5 args.
    */
-  public Value callMethodRef(Env env,
+  public final Value callMethod(Env env,
                              StringValue methodName,
                              Value a1, Value a2, Value a3, Value a4, Value a5)
   {
     int hash = methodName.hashCodeCaseInsensitive();
     
-    return callMethodRef(env, methodName, hash,
+    return callMethod(env, methodName, hash,
                          a1, a2, a3, a4, a5);
   }
 
@@ -1788,6 +1796,19 @@ abstract public class Value implements java.io.Serializable
   {
     return callMethodRef(env, methodName, hash,
                          new Value[] { a1, a2, a3, a4, a5 });
+  }
+
+  /**
+   * Evaluates a method with 5 args.
+   */
+  public final Value callMethodRef(Env env,
+                             StringValue methodName,
+                             Value a1, Value a2, Value a3, Value a4, Value a5)
+  {
+    int hash = methodName.hashCodeCaseInsensitive();
+    
+    return callMethodRef(env, methodName, hash,
+                         a1, a2, a3, a4, a5);
   }
 
   //

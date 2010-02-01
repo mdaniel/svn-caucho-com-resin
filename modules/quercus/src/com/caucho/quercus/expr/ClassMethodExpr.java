@@ -108,7 +108,7 @@ public class ClassMethodExpr extends AbstractMethodExpr {
       qThis = oldThis;
       */
     // php/024b
-    qThis = cl;
+    // qThis = cl;
     
     env.pushCall(this, cl, values);
     // QuercusClass oldClass = env.setCallingClass(cl);

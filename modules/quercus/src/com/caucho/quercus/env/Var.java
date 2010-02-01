@@ -791,9 +791,9 @@ public class Var extends Value
    * Converts to a reference variable
    */
   @Override
-  public Value toRefArgument()
+  public Value toArgRef()
   {
-    return this;
+    return new ArgRef(this);
   }
 
   /**
@@ -932,7 +932,7 @@ public class Var extends Value
   @Override
   public Value toRef()
   {
-    return new RefVar(this);
+    return new ArgRef(this);
   }
 
   /**

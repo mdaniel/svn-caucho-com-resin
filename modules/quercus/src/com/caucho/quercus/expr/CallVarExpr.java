@@ -94,6 +94,26 @@ public class CallVarExpr extends Expr {
     return this;
   }
   
+  @Override
+  public Value eval(Env env)
+  {
+    return evalImpl(env, false, false);
+  }
+  
+  
+  @Override
+  public Value evalRef(Env env)
+  {
+    return evalImpl(env, true, false);
+  }
+  
+  
+  @Override
+  public Value evalCopy(Env env)
+  {
+    return evalImpl(env, false, true);
+  }
+  
   /**
    * Evaluates the expression.
    *
@@ -101,8 +121,7 @@ public class CallVarExpr extends Expr {
    *
    * @return the expression value.
    */
-  @Override
-  public Value eval(Env env)
+  public Value evalImpl(Env env, boolean isRef, boolean isCopy)
   {
     Value value = _name.eval(env);
     
@@ -112,8 +131,13 @@ public class CallVarExpr extends Expr {
 
     try {
       env.checkTimeout();
-
-      return value.call(env, args);
+      
+      if (isRef)
+        return value.callRef(env, args);
+      else if (isCopy)
+        return value.call(env, args).copyReturn();
+      else
+        return value.call(env, args).toValue();
     } finally {
       env.popCall();
     }

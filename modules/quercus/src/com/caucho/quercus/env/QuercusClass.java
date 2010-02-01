@@ -81,6 +81,7 @@ public class QuercusClass extends NullValue {
   
   private AbstractFunction _call;
   private AbstractFunction _invoke;
+  private AbstractFunction _toString;
 
   private ArrayDelegate _arrayDelegate;
   private TraversableDelegate _traversableDelegate;
@@ -267,6 +268,7 @@ public class QuercusClass extends NullValue {
   
     _call = cacheClass._call;
     _invoke = cacheClass._invoke;
+    _toString = cacheClass._toString;
 
     _arrayDelegate = cacheClass._arrayDelegate;
     _traversableDelegate = cacheClass._traversableDelegate;
@@ -536,6 +538,22 @@ public class QuercusClass extends NullValue {
   }
 
   /**
+   * Sets the __toString
+   */
+  public void setToString(AbstractFunction fun)
+  {
+    _toString = fun;
+  }
+
+  /**
+   * Gets the __toString
+   */
+  public AbstractFunction getToString()
+  {
+    return _toString;
+  }
+
+  /**
    * Adds an initializer
    */
   public void addInitializer(InstanceInitializer init)
@@ -749,7 +767,7 @@ public class QuercusClass extends NullValue {
     StringValue staticName = _staticFieldNameMap.get(name);
     
     if (staticName == null) {
-      env.error(L.l("{0}::{1} is an unknown static field",
+      env.error(L.l("{0}::${1} is an undeclared static field",
                     _className, name));
       
       return NullValue.NULL;
@@ -763,7 +781,7 @@ public class QuercusClass extends NullValue {
     StringValue staticName = _staticFieldNameMap.get(name);
     
     if (staticName == null) {
-      env.error(L.l("{0}::{1} is an unknown static field",
+      env.error(L.l("{0}::${1} is an undeclared static field",
                     _className, name));
       
       throw new IllegalStateException();

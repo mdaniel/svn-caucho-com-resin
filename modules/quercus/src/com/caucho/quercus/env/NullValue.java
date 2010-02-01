@@ -494,7 +494,7 @@ public class NullValue extends Value
    * Converts to a reference variable
    */
   @Override
-  public Value toRefArgument()
+  public Value toArgRef()
   {
     return this;
   }

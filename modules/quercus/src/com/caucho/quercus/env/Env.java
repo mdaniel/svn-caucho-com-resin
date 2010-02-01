@@ -6135,7 +6135,7 @@ public class Env {
   /**
    * Sets an error handler
    */
-  public void setErrorHandler(int mask, Callback fun)
+  public void setErrorHandler(int mask, Callable fun)
   {
     for (int i = 0; i < _errorHandlers.length; i++)
       _prevErrorHandlers[i] = _errorHandlers[i];
@@ -6188,7 +6188,7 @@ public class Env {
   /**
    * Sets an exception handler
    */
-  public Value setExceptionHandler(Callback fun)
+  public Value setExceptionHandler(Callable fun)
   {
     _prevExceptionHandler = _exceptionHandler;
 
@@ -6413,7 +6413,7 @@ public class Env {
       int line = 1;
       String lineString;
 
-      while (line++ < sourceLine) {
+      for (; line < sourceLine; line++) {
         lineString = is.readLine();
         
         if (lineString == null)
@@ -6422,9 +6422,9 @@ public class Env {
 
       String []result = new String[length];
 
-      int i = 0;
-      while (i < length && (lineString = is.readLine()) != null) {
-        result[i++] = lineString;
+      int i = line - sourceLine;
+      for (; i < length && (lineString = is.readLine()) != null; i++) {
+        result[i] = lineString;
       }
 
       return result;

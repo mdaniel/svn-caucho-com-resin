@@ -155,8 +155,10 @@ public class ArrayTailExpr extends AbstractVarExpr {
   @Override
   public Value evalAssignValue(Env env, Value value)
   {
-    Value array = _expr.evalArray(env);
+    Value array = _expr.evalVar(env);
 
+    array = array.toAutoArray();
+    
     array.put(value);
     
     return value;

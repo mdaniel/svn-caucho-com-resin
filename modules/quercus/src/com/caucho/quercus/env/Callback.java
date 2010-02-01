@@ -57,7 +57,7 @@ abstract public class Callback extends Value implements Callable {
     Value result;  
 
     if (a1 instanceof Var) {
-      a1 = new RefVar((Var)a1);
+      a1 = new ArgRef((Var)a1);
 
       result = call(env, a1);
     }
@@ -91,7 +91,7 @@ abstract public class Callback extends Value implements Callable {
     Value result;  
 
     if (a1 instanceof Var) {
-      a1 = new RefVar((Var)a1);
+      a1 = new ArgRef((Var)a1);
 
       result = call(env, a1, a2);
     }
@@ -127,7 +127,7 @@ abstract public class Callback extends Value implements Callable {
     Value result;  
 
     if (a1 instanceof Var) {
-      a1 = new RefVar((Var)a1);
+      a1 = new ArgRef((Var)a1);
 
       result = call(env, a1, a2, a3);
     }

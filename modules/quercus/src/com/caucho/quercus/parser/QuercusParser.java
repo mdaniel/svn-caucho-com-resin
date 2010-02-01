@@ -5520,8 +5520,7 @@ public class QuercusParser {
                                              lines);
 
     if (sourceLines != null
-        && sourceLines.length > 0
-        && sourceLines[0] != null) {
+        && sourceLines.length > 0) {
       StringBuilder sb = new StringBuilder();
 
       String shortFile = _parserLocation.getFileName();
@@ -5533,7 +5532,10 @@ public class QuercusParser {
         .append(msg)
         .append(" in");
 
-      for (int i = 0; i < sourceLines.length && sourceLines[i] != null; i++) {
+      for (int i = 0; i < sourceLines.length; i++) {
+        if (sourceLines[i] == null)
+          continue;
+        
         sb.append("\n");
         sb.append(shortFile)
           .append(":")

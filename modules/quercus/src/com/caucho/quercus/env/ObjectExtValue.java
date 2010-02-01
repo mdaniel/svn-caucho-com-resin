@@ -54,9 +54,6 @@ import java.util.TreeSet;
 public class ObjectExtValue extends ObjectValue
   implements Serializable
 {
-  private static final StringValue TO_STRING
-    = new ConstStringValue("__toString");
-
   private static final int DEFAULT_SIZE = 16;
   private static final int DEFAULT_PRIME = Primes.getBiggestPrime(DEFAULT_SIZE);
 
@@ -1174,18 +1171,12 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public StringValue toString(Env env)
   {
-    QuercusClass oldClass = env.setCallingClass(_quercusClass);
-
-    try {
-      AbstractFunction fun = _quercusClass.findFunction("__toString");
-
-      if (fun != null)
-        return fun.callMethod(env, _quercusClass, this).toStringValue();
-      else
-        return env.createString(_className + "[]");
-    } finally {
-      env.setCallingClass(oldClass);
-    }
+    AbstractFunction toString = _quercusClass.getToString();
+    
+    if (toString != null)
+      return toString.callMethod(env, _quercusClass, this).toStringValue();
+    else
+      return env.createString(_className + "[]");
   }
 
   /**
@@ -1754,13 +1745,13 @@ public class ObjectExtValue extends ObjectValue
       Value value = _value;
 
       if (value instanceof Var)
-        return new RefVar((Var) value);
+        return new ArgRef((Var) value);
       else {
         Var var = new Var(_value);
 
         _value = var;
 
-        return new RefVar(var);
+        return new ArgRef(var);
       }
     }
 
@@ -1772,13 +1763,13 @@ public class ObjectExtValue extends ObjectValue
       Value value = _value;
 
       if (value instanceof Var)
-        return new RefVar((Var) value);
+        return new ArgRef((Var) value);
       else {
         Var var = new Var(_value);
 
         _value = var;
 
-        return new RefVar(var);
+        return new ArgRef(var);
       }
     }
 

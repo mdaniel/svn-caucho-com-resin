@@ -32,6 +32,7 @@ package com.caucho.quercus.env;
 import java.util.*;
 
 import com.caucho.quercus.function.AbstractFunction;
+import com.caucho.quercus.function.FunSpecialCall;
 import com.caucho.util.L10N;
 import com.caucho.util.Primes;
 
@@ -60,7 +61,6 @@ public final class MethodMap<V>
     if (_entries.length <= _size * 4)
       resize();
     
-
     int hash = name.hashCodeCaseInsensitive();
       
     int bucket = (hash & 0x7fffffff) % _prime;
@@ -108,7 +108,7 @@ public final class MethodMap<V>
       call = _quercusClass.getCall();
     
     if (call != null)
-      return (V) call;
+      return (V) new FunSpecialCall(call, key);
 
     Env env = Env.getCurrent();
     

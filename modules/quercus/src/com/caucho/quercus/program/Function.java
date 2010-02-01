@@ -316,7 +316,7 @@ public class Function extends AbstractFunction {
 
     if (isStatic()) {
       // php/0967
-      oldThis = env.setThis(NullThisValue.NULL);
+      oldThis = env.setThis(env.getCallingClass());
     }
     else
       oldThis = env.getThis();
@@ -324,10 +324,12 @@ public class Function extends AbstractFunction {
     try {
       Value value = _statement.execute(env);
 
-      if (value == null)
-        return NullValue.NULL;
-      else
+      if (value != null)
         return value;
+      else if (_info.isReturnsReference())
+        return new Var();
+      else
+        return NullValue.NULL;
       /*
       else if (_isReturnsReference && isRef)
         return value;
@@ -428,8 +430,12 @@ public class Function extends AbstractFunction {
     try {
       Value value = _statement.execute(env);
 
-      if (value == null)
-        return NullValue.NULL;
+      if (value == null) {
+        if (_isReturnsReference)
+          return new Var();
+        else
+          return NullValue.NULL;
+      }
       else if (_isReturnsReference)
         return value;
       else

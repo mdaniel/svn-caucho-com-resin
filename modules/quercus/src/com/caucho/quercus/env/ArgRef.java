@@ -42,12 +42,12 @@ import java.util.Map;
 /**
  * Represents a reference to a PHP variable in a function call.
  */
-public class RefVar extends Value
+public class ArgRef extends Value
   implements Serializable
 {
   private Var _var;
 
-  public RefVar(Var var)
+  public ArgRef(Var var)
   {
     _var = var;
   }
@@ -227,6 +227,15 @@ public class RefVar extends Value
    */
   @Override
   public Value toLocalRef()
+  {
+    return _var;
+  }
+
+  /**
+   * Converts to an argument value.
+   */
+  @Override
+  public Var toLocalVar()
   {
     return _var;
   }
