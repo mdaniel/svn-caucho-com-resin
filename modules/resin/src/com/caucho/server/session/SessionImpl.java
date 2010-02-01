@@ -558,7 +558,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (! _isValid)
       return false;
-    else if (_isIdleSet && _accessTime + _idleTimeout < Alarm.getCurrentTime()) {
+    else if (_isIdleSet && _accessTime + _idleTimeout < Alarm.getExactTime()) {
       // server/01o2 (tck)
     
       return false;
