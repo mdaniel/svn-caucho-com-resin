@@ -260,6 +260,17 @@ public class ExprFactory {
     return new ThisMethodExpr(loc, qThis, methodName, args);
   }
 
+  /**
+   * Creates a $this method call $this->foo(...).
+   */
+  public Expr createThisMethod(Location loc,
+                               ThisExpr qThis,
+                               Expr methodName,
+                               ArrayList<Expr> args)
+  {
+    return new ThisMethodVarExpr(loc, qThis, methodName, args);
+  }
+
   //
   // class scope foo::bar
   //

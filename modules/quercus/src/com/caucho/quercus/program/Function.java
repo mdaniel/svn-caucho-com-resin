@@ -417,12 +417,13 @@ public class Function extends AbstractFunction {
     Value []oldArgs = env.setFunctionArgs(args);
     Value oldThis;
 
-    if (! _info.isMethod()) {
+    if (_info.isMethod()) {
+      oldThis = env.getThis();
+    }
+    else {
       // php/0967, php/091i
       oldThis = env.setThis(NullThisValue.NULL);
     }
-    else
-      oldThis = env.getThis();
 
     try {
       Value value = _statement.execute(env);
@@ -447,6 +448,9 @@ public class Function extends AbstractFunction {
   @Override
   public Value callMethod(Env env, QuercusClass qClass, Value qThis, Value []args)
   {
+    if (isStatic())
+      qThis = qClass;
+    
     Value oldThis = env.setThis(qThis);
     QuercusClass oldClass = env.setCallingClass(qClass);
     

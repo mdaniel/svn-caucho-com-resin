@@ -982,6 +982,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
    * Starts the server.
    */
   public void start()
+    throws Exception
   {
     preConfigureInit();
 
@@ -1032,6 +1033,14 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       */
 
       _server = createServer();
+
+      for (int i = 0; i < _boundPortList.size(); i++) {
+        BoundPort port = _boundPortList.get(i);
+
+        _server.bind(port.getAddress(),
+                     port.getPort(),
+                     port.getServerSocket());
+      }
       
       _server.start();
 
@@ -1568,14 +1577,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     config.configure(this, resinConf, getSchema());
 
     ClusterServer clusterServer = findClusterServer(_serverId);
-
-    for (int i = 0; i < _boundPortList.size(); i++) {
-      BoundPort port = _boundPortList.get(i);
-
-      _server.bind(port.getAddress(),
-                   port.getPort(),
-                   port.getServerSocket());
-    }
 
     start();
   }

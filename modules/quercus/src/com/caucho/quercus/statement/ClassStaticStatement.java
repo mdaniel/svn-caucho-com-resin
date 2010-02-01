@@ -70,17 +70,18 @@ public class ClassStaticStatement
       if (_staticName == null)
         _staticName = env.createStaticName();
 
-      String className = _className;
+      // String className = _className;
       String staticName = _staticName;
 
       Value qThis = env.getThis();
       
-      QuercusClass qClass = env.getClass(className);
+      QuercusClass qClass = qThis.getQuercusClass();
+      String className = qClass.getName();
       
       // Var var = qClass.getStaticFieldVar(env, env.createString(staticName));
       Var var = env.getStaticVar(env.createString(className + "::" + staticName));
       
-      env.setValue(_var.getName(), var);
+      env.setVar(_var.getName(), var);
 
       if (! var.isset() && _initValue != null)
         var.set(_initValue.eval(env));

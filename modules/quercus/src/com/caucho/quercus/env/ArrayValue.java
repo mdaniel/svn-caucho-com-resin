@@ -362,8 +362,6 @@ abstract public class ArrayValue extends Value {
     String name = nameV.toString();
 
     if (obj.isObject()) {
-      AbstractFunction fun;
-
       int p = name.indexOf("::");
 
       // php/09lf

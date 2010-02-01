@@ -199,6 +199,11 @@ abstract public class ObjectValue extends Value {
   // array delegate methods
   //
 
+  @Override
+  public Value toAutoArray()
+  {
+    return this;
+  }
   /**
    * Returns the array value with the given key.
    */
