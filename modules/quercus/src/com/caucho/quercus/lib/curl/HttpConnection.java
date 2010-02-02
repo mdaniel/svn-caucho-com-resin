@@ -188,18 +188,13 @@ public class HttpConnection
   
   protected final Proxy getProxy()
   {
-    try {
-      if (_proxyURL == null)
-        return null;
-
-      InetSocketAddress address
-        = new InetSocketAddress(_proxyURL.getHost(), _proxyURL.getPort());
-
-      return new Proxy(Proxy.Type.valueOf(_proxyType), address);
-    } catch (Exception e) {
-      // java.net.Proxy prohibited on GAE
+    if (_proxyURL == null)
       return null;
-    }
+
+    InetSocketAddress address
+      = new InetSocketAddress(_proxyURL.getHost(), _proxyURL.getPort());
+
+    return new Proxy(Proxy.Type.valueOf(_proxyType), address);
   }
   
   protected final URL getURL()
