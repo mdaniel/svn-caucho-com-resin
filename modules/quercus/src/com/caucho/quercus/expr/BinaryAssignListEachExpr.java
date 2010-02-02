@@ -38,34 +38,16 @@ import com.caucho.util.L10N;
 /**
  * Represents a PHP list() = each() assignment expression.
  */
-public class FunListEachExpr extends Expr {
-  private static final L10N L = new L10N(FunListEachExpr.class);
+public class BinaryAssignListEachExpr extends Expr {
+  private static final L10N L = new L10N(BinaryAssignListEachExpr.class);
   
-  protected final AbstractVarExpr _keyVar;
-  protected final AbstractVarExpr _valueVar;
+  protected final ListHeadExpr _listHead;
   protected final Expr _value;
   
-  private boolean _isVar;
-
-  public FunListEachExpr(Expr []varList, FunEachExpr each)
+  public BinaryAssignListEachExpr(ListHeadExpr listHead, Expr value)
   {
-    if (varList.length > 0) {
-      // XXX: need test
-      _keyVar = (AbstractVarExpr) varList[0];
-    }
-    else
-      _keyVar = null;
-
-    if (varList.length > 1) {
-      // XXX: need test
-      _valueVar = (AbstractVarExpr) varList[1];
-    }
-    else
-      _valueVar = null;
-
-    _value = each.getExpr();
-    
-    _isVar = _value.isVar();
+    _listHead = listHead;
+    _value = value;
   }
 
   /**
@@ -75,34 +57,21 @@ public class FunListEachExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public Value eval(Env env)
   {
-    if (! _isVar) {
-      env.error(L.l("each() argument must be a variable"));
-      
+    if (! _value.isVar()) {
+      env.error(L.l("each() argument must be a variable at '{0}'", _value));
       return NullValue.NULL;
     }
-    
+
     Value value = _value.eval(env);
 
-    if (! (value instanceof ArrayValue))
-      return NullValue.NULL;
+    _listHead.evalAssignEachValue(env, value);
 
-    ArrayValue array = (ArrayValue) value;
-    /*
-    if (! array.hasCurrent())
-      return BooleanValue.FALSE;
-    */
-
-    if (_keyVar != null)
-      _keyVar.evalAssignValue(env, array.key());
-
-    if (_valueVar != null)
-      _valueVar.evalAssignValue(env, array.current());
-
-    return array.each();
+    return value;
   }
-
+  
   /**
    * Evaluates the expression.
    *
@@ -110,33 +79,17 @@ public class FunListEachExpr extends Expr {
    *
    * @return the expression value.
    */
+  @Override
   public boolean evalBoolean(Env env)
   {
-    if (! _isVar) {
+    if (! _value.isVar()) {
       env.error(L.l("each() argument must be a variable at '{0}'", _value));
-      
       return false;
     }
-    
+
     Value value = _value.eval(env);
 
-    if (! (value instanceof ArrayValue))
-      return false;
-
-    ArrayValue array = (ArrayValue) value;
-
-    if (! array.hasCurrent())
-      return false;
-
-    if (_keyVar != null)
-      _keyVar.evalAssignValue(env, array.key());
-
-    if (_valueVar != null)
-      _valueVar.evalAssignValue(env, array.current());
-
-    array.next();
-
-    return true;
+    return _listHead.evalEachBoolean(env, value);
   }
 }
 

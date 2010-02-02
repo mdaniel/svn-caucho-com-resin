@@ -3844,7 +3844,7 @@ public class QuercusParser {
   private Expr parseList()
     throws IOException
   {
-    FunListHeadExpr leftVars = parseListHead();
+    ListHeadExpr leftVars = parseListHead();
 
     expect('=');
 
@@ -3856,7 +3856,7 @@ public class QuercusParser {
   /**
    * Parses the list(...) expression
    */
-  private FunListHeadExpr parseListHead()
+  private ListHeadExpr parseListHead()
     throws IOException
   {
     expect('(');

@@ -880,7 +880,7 @@ public class ExprFactory {
    * Creates a list expression.
    */
   public final Expr createList(QuercusParser parser,
-                               FunListHeadExpr head, Expr value)
+                               ListHeadExpr head, Expr value)
   {
     boolean isSuppress = value instanceof UnarySuppressErrorExpr;
 
@@ -893,7 +893,9 @@ public class ExprFactory {
     Expr expr;
 
     if (value instanceof FunEachExpr) {
-      expr = createListEach(head.getVarList(), (FunEachExpr) value);
+      Expr arg = ((FunEachExpr) value).getExpr();
+
+      expr = createListEach(head, arg);
     }
     else
       expr = createList(head, value);
@@ -907,25 +909,25 @@ public class ExprFactory {
   /**
    * Creates a list expression.
    */
-  public FunListHeadExpr createListHead(ArrayList<Expr> keys)
+  public ListHeadExpr createListHead(ArrayList<Expr> keys)
   {
-    return new FunListHeadExpr(keys);
+    return new ListHeadExpr(keys);
   }
 
   /**
    * Creates a list expression.
    */
-  public Expr createList(FunListHeadExpr head, Expr value)
+  public Expr createList(ListHeadExpr head, Expr value)
   {
-    return new FunListExpr(head, value);
+    return new BinaryAssignListExpr(head, value);
   }
 
   /**
    * Creates a list expression.
    */
-  public Expr createListEach(Expr []varList, FunEachExpr value)
+  public Expr createListEach(ListHeadExpr head, Expr value)
   {
-    return new FunListEachExpr(varList, value);
+    return new BinaryAssignListEachExpr(head, value);
   }
 
   /**

@@ -35,11 +35,11 @@ import com.caucho.quercus.env.Value;
 /**
  * Represents a PHP list assignment expression.
  */
-public class FunListExpr extends Expr {
-  protected final FunListHeadExpr _listHead;
+public class BinaryAssignListExpr extends Expr {
+  protected final ListHeadExpr _listHead;
   protected final Expr _value;
 
-  protected FunListExpr(FunListHeadExpr head, Expr value)
+  protected BinaryAssignListExpr(ListHeadExpr head, Expr value)
   {
     _listHead = head;
 
