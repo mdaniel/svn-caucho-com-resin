@@ -33,6 +33,7 @@ import com.caucho.quercus.Location;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusClass;
 import com.caucho.quercus.env.Value;
+import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Var;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.expr.VarExpr;
@@ -46,7 +47,7 @@ public class ClassStaticStatement
   protected final String _className;
   protected final VarExpr _var;
   protected final Expr _initValue;
-  protected String _staticName;
+  protected StringValue _staticName;
   
   /**
    * Creates the echo statement.
@@ -71,7 +72,7 @@ public class ClassStaticStatement
         _staticName = env.createStaticName();
 
       // String className = _className;
-      String staticName = _staticName;
+      StringValue staticName = _staticName;
 
       Value qThis = env.getThis();
       
@@ -79,7 +80,7 @@ public class ClassStaticStatement
       String className = qClass.getName();
       
       // Var var = qClass.getStaticFieldVar(env, env.createString(staticName));
-      Var var = env.getStaticVar(env.createString(className + "::" + staticName));
+      Var var = qClass.getStaticFieldVar(env, staticName);
       
       env.setVar(_var.getName(), var);
 

@@ -1860,9 +1860,9 @@ public class QuercusContext implements AlarmListener
     return _constantMap[id];
   }
 
-  public String createStaticName()
+  public StringValue createStaticName()
   {
-    return ("s" + _staticId++).intern();
+    return MethodIntern.intern("s" + _staticId++);
   }
 
   public Map getSessionCache()

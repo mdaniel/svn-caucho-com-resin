@@ -61,7 +61,7 @@ public class StaticStatement extends Statement {
   {
     try {
       if (_staticName == null)
-        _staticName = env.createString(env.createStaticName());
+        _staticName = env.createStaticName();
 
       StringValue staticName = _staticName;
       

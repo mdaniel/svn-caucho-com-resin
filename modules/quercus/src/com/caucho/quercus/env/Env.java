@@ -2078,7 +2078,7 @@ public class Env {
   /**
    * Gets a static variable name.
    */
-  public final String createStaticName()
+  public final StringValue createStaticName()
   {
     return _quercus.createStaticName();
   }
