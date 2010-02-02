@@ -459,8 +459,10 @@ r_session-config = element session-config {
   &amp; (attribute always-save-session { r_boolean-Type }
      | element always-save-session { r_boolean-Type })?
 
-  &amp; (attribute cookie-domain { string }
-     | element cookie-domain { string })?
+  &amp; ((attribute cookie-domain { string }
+          | element cookie-domain { string })
+         |(attribute cookie-domain-regexp { string }
+          | element cookie-domain-regexp { string }))?
 
   &amp; (attribute cookie-length { r_int }
      | element cookie-length { r_int })?

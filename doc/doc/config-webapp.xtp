@@ -698,6 +698,7 @@ to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
 </td></tr><tr><td>enable-url-rewriting</td><td>Enable URL rewriting for sessions. (resin 1.1)</td><td>true
 </td></tr><tr><td>cookie-version</td><td>Version of the cookie spec for sessions. (resin 1.2)</td><td>1.0
 </td></tr><tr><td>cookie-domain</td><td>Domain for session cookies. (resin 1.2)</td><td>none
+</td></tr><tr><td>cookie-domain-regexp</td><td>Domain for session cookies e.g. '[^.]*\.[^.]*$'. (resin 4.0)</td><td>none
 </td></tr><tr><td>cookie-max-age</td><td>Max age for persistent session cookies. (resin 2.0)</td><td>none
 </td></tr>
 <tr>

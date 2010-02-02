@@ -136,6 +136,7 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   // default cookie version
   private int _cookieVersion;
   private String _cookieDomain;
+  private String _cookieDomainRegexp;
   private boolean _isCookieUseContextPath;
   private String _cookiePath;
   private long _cookieMaxAge;
@@ -934,6 +935,15 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   public void setCookieDomain(String domain)
   {
     _cookieDomain = domain;
+  }
+
+  public String getCookieDomainRegexp() {
+    return _cookieDomainRegexp;
+  }
+
+  public void setCookieDomainRegexp(String regexp)
+  {
+    _cookieDomainRegexp = regexp;
   }
 
   /**

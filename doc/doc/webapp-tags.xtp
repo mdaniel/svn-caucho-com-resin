@@ -2091,7 +2091,12 @@ information about distributed sessions and persistence.</p>
   <td>Domain for session cookies</td>
   <td>none</td>
 </tr>
-<tr> 
+  <tr>
+    <td>cookie-domain-regexp</td>
+    <td>Domain Regexp for session cookies</td>
+    <td>none</td>
+  </tr>
+<tr>
   <td>cookie-max-age</td>
   <td>Max age for persistent session cookies</td>
   <td>none</td>
@@ -2149,7 +2154,8 @@ element session-config {
   always-load-session?
   &amp; always-save-session?
   &amp; cookie-append-server-index?
-  &amp; cookie-domain?
+  &amp; (cookie-domain | cookie-domain-regexp) ?
+  &amp; cookie-domain-regexp?
   &amp; cookie-length?
   &amp; cookie-max-age?
   &amp; cookie-port?

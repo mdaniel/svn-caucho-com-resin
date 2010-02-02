@@ -100,11 +100,11 @@ import javax.servlet.*;
 import javax.servlet.annotation.*;
 import javax.servlet.http.*;
 import javax.enterprise.inject.InjectionException;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.context.spi.CreationalContext;
 import java.io.File;
 import java.io.IOException;
 import java.util.*;
+import java.util.regex.Pattern;
+import java.util.regex.Matcher;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -327,6 +327,7 @@ public class WebApp extends ServletContextImpl
 
   private final AtomicInteger _requestCount = new AtomicInteger();
   private long _lastRequestTime = Alarm.getCurrentTime();
+  private Pattern _cookieDomainPattern = null;
 
   //
   // statistics
@@ -2527,6 +2528,11 @@ public class WebApp extends ServletContextImpl
           sessionManager.close();
       }
 
+      if (_sessionManager.getCookieDomainRegexp() != null) {
+        _cookieDomainPattern
+          = Pattern.compile(_sessionManager.getCookieDomainRegexp());
+      }
+
       if (_server != null) {
         if (getSessionManager() != null)
           getSessionManager().init();
@@ -3832,6 +3838,25 @@ public class WebApp extends ServletContextImpl
       return manager.getActiveSessionCount();
     else
       return 0;
+  }
+
+  public String generateCookieDomain(HttpServletRequest request) {
+    String serverName = request.getServerName();
+    
+    if (_cookieDomainPattern == null)
+      return _sessionManager.getCookieDomain();
+
+    String domain;
+    Matcher matcher = _cookieDomainPattern.matcher(serverName);
+
+    // XXX: performance?
+    if (matcher.find()) {
+      domain = matcher.group();
+    } else {
+      domain = null;
+    }
+
+    return domain;
   }
 
   void updateStatistics(long time,

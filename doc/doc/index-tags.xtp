@@ -185,6 +185,11 @@ state information.</d>
       <d><i>As a child of <a config-tag="session-config"/></i>.
         Domain for session cookies. (resin 1.2)</d>
     </ix>
+
+    <ix id="cookie-domain-regexp" h="webapp-tags.xtp#session-config">
+      <d><i>As a child of <a config-tag="session-config"/></i>.
+        Domain Regexp for session cookies. (resin 4.0)</d>
+    </ix>
     
     <ix id="cookie-max-age" h="webapp-tags.xtp#session-config">
       <d><i>As a child of <a config-tag="session-config"/></i>.

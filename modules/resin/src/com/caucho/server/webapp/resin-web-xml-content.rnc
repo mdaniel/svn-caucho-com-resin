@@ -924,8 +924,11 @@ r_session-config = element session-config {
   & (attribute cookie-append-server-index { r_boolean-Type }
      | element cookie-append-server-index { r_boolean-Type })?
 
-  & (attribute cookie-domain { string }
-     | element cookie-domain { string })?
+  & ((attribute cookie-domain { string }
+      | element cookie-domain { string })
+     |
+     (attribute cookie-domain-regexp { string }
+      | element cookie-domain-regexp { string }))?
 
   & (attribute cookie-length { r_int }
      | element cookie-length { r_int })?

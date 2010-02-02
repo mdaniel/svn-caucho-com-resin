@@ -1280,7 +1280,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     CookieImpl cookie = new CookieImpl(cookieName, _sessionId);
     cookie.setVersion(manager.getCookieVersion());
-    String domain = manager.getCookieDomain();
+    String domain = webApp.generateCookieDomain(_request);
     if (domain != null)
       cookie.setDomain(domain);
     long maxAge = manager.getCookieMaxAge();

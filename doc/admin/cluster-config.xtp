@@ -1433,6 +1433,43 @@ the <code>cookie-domain</code> would be set to <var>caucho.com</var>.</p>
 
 </defun>
 
+<defun title="&lt;cookie-domain-regexp>">
+<parents>session-config</parents>
+
+<p>&lt;cookie-domain-regexp> configures the host domain to use for sessions,
+i.e. value of the Domain cookie attributes.</p>
+
+<p>
+  This setting serves a case when a single web-app is accessed via a number of domains
+  while session cookie must belong to the domain at requested URI.
+
+  e.g. domains www.foo.com zoo.xyz.foo.com must have cookie set to foo.com
+       while domains www.1-foo.com zoo.xyz.1-foo.com must have cookie set to 1-foo.com
+</p>
+
+<example title="cookie-domain-regexp for foo.com && 1-foo.com">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;cluster id="app-tier">
+
+  &lt;host id="caucho.com">
+    &lt;host-alias>gryffindor.foo.com&lt;/host-alias>
+    &lt;host-alias>slytherin.foo.com&lt;/host-alias>
+    &lt;host-alias>gryffindor.1-foo.com&lt;/host-alias>
+    &lt;host-alias>slytherin.1-foo.com&lt;/host-alias>
+
+    &lt;web-app-default>
+
+      &lt;session-config cookie-domain-regexp="[^.]*\.[^.]*$"/>
+
+    &lt;/web-app-default>
+  &lt;/host>
+
+&lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
 <defun title="&lt;cookie-length>">
 <parents>session-config</parents>
 
