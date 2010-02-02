@@ -109,7 +109,14 @@ javaee_jsp-property-group = element jsp-property-group {
 
   element deferred-syntax-allowed-as-literal { javaee_boolean }?,
 
-  element trim-directive-whitespaces { javaee_boolean }?
+  element trim-directive-whitespaces { javaee_boolean }?,
+
+  element default-content-type { javaee_string }?,
+
+  element buffer { javaee_string }?,
+
+  element error-on-undeclared-namespace { javaee_boolean }?
+
 }
 
 javaee_listener = element listener {

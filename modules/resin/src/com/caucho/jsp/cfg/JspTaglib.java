@@ -29,10 +29,12 @@
 
 package com.caucho.jsp.cfg;
 
+import javax.servlet.descriptor.TaglibDescriptor;
+
 /**
  * Configuration for the taglib in the web.xml
  */
-public class JspTaglib {
+public class JspTaglib implements TaglibDescriptor {
   private String _id;
   private String _taglibUri;
   private String _taglibLocation;
@@ -69,6 +71,12 @@ public class JspTaglib {
     return _taglibUri;
   }
 
+  @Override
+  public String getTaglibURI()
+  {
+    return _taglibUri;
+  }
+
   /**
    * Sets the taglib location.
    */
@@ -83,5 +91,16 @@ public class JspTaglib {
   public String getTaglibLocation()
   {
     return _taglibLocation;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getName()
+      + '['
+      + _taglibUri
+      + "->"
+      + _taglibLocation
+      + ']';
   }
 }

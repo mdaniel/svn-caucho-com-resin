@@ -97,6 +97,9 @@ import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 import javax.naming.NamingException;
 import javax.servlet.*;
+import javax.servlet.descriptor.JspConfigDescriptor;
+import javax.servlet.descriptor.TaglibDescriptor;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import javax.servlet.annotation.*;
 import javax.servlet.http.*;
 import javax.enterprise.inject.InjectionException;
@@ -116,7 +119,8 @@ import java.net.URL;
 @Configurable
 public class WebApp extends ServletContextImpl
   implements Dependency, EnvironmentBean, SchemaBean, DispatchBuilder,
-             EnvironmentDeployInstance, ScanListener, java.io.Serializable
+             EnvironmentDeployInstance, ScanListener, JspConfigDescriptor,
+             java.io.Serializable
 {
   private static final String DEFAULT_VERSION = "2.5";
 
@@ -2100,9 +2104,8 @@ public class WebApp extends ServletContextImpl
   @Configurable
   public void addTaglib(JspTaglib taglib)
   {
-    if (_taglibList == null) {
+    if (_taglibList == null)
       _taglibList = new ArrayList<JspTaglib>();
-    }
 
     _taglibList.add(taglib);
   }
@@ -2113,6 +2116,44 @@ public class WebApp extends ServletContextImpl
   public ArrayList<JspTaglib> getTaglibList()
   {
     return _taglibList;
+  }
+
+  @Override
+  public Collection<TaglibDescriptor> getTaglibs()
+  {
+    ArrayList<TaglibDescriptor> taglibs
+      = new ArrayList<TaglibDescriptor>();
+
+    for (int i = 0; _taglibList != null && i < _taglibList.size(); i++)
+      taglibs.add(_taglibList.get(i));
+
+    JspConfig jspConfig = (JspConfig) _extensions.get("jsp-config");
+
+    if (jspConfig != null) {
+      ArrayList<JspTaglib> taglibList = jspConfig.getTaglibList();
+      for (int i = 0; i < taglibList.size(); i++)
+        taglibs.add(taglibList.get(i));
+    }
+
+    return taglibs;
+  }
+
+  @Override
+  public Collection<JspPropertyGroupDescriptor> getJspPropertyGroups()
+  {
+    JspConfig jspConfig = (JspConfig) _extensions.get("jsp-config");
+
+    Collection<JspPropertyGroupDescriptor> propertyGroups
+      = new ArrayList<JspPropertyGroupDescriptor>();
+
+    if (jspConfig != null) {
+      ArrayList<JspPropertyGroup> groups = jspConfig.getJspPropertyGroupList();
+      for (JspPropertyGroup group : groups) {
+        propertyGroups.add(group);
+      }
+    }
+
+    return propertyGroups;
   }
 
   public JspConfig createJspConfig()
@@ -2126,6 +2167,12 @@ public class WebApp extends ServletContextImpl
   public void addJspConfig(JspConfig config)
   {
     _extensions.put("jsp-config", config);
+  }
+
+  @Override
+  public JspConfigDescriptor getJspConfigDescriptor()
+  {
+    return this;
   }
 
   /**
@@ -3434,7 +3481,7 @@ public class WebApp extends ServletContextImpl
    */
   public void accessLog(HttpServletRequest req, HttpServletResponse res)
     throws IOException
-  {
+  {                            
     AbstractAccessLog log = getAccessLog();
 
     if (log != null)

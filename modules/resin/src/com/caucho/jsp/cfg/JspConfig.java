@@ -85,7 +85,7 @@ public class JspConfig {
   /**
    * Returns the JspPropertyGroup list from the configuration.
    */
-  public ArrayList getJspPropertyGroupList()
+  public ArrayList<JspPropertyGroup> getJspPropertyGroupList()
   {
     return _propertyGroupList;
   }

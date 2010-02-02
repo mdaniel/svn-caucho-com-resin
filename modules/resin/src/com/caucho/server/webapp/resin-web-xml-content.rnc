@@ -355,7 +355,13 @@ r_jsp-property-group = element jsp-property-group {
 
   element include-prelude { j2ee_path }*,
 
-  element include-coda { j2ee_path }*
+  element include-coda { j2ee_path }*,
+
+  element default-content-type { j2ee_string }?,
+
+  element buffer { j2ee_string }?,
+
+  element error-on-undeclared-namespace { j2ee_boolean }?
 }
 
 r_lazy-init =

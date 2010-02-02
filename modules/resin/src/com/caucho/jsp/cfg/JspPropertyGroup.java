@@ -42,13 +42,15 @@ import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.ServletException;
+import javax.servlet.descriptor.JspPropertyGroupDescriptor;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.regex.Pattern;
 
 /**
  * Configuration for the jsp-property-group.
  */
-public class JspPropertyGroup {
+public class JspPropertyGroup implements JspPropertyGroupDescriptor {
   private static final L10N L = new L10N(JspPropertyGroup.class);
 
   private static int _gId;
@@ -59,7 +61,7 @@ public class JspPropertyGroup {
   private ArrayList<String> _urlPatterns = new ArrayList<String>();
   private String _pageEncoding;
   private Boolean _isELIgnored;
-  private boolean _isScriptingInvalid = false;
+  private Boolean _isScriptingInvalid = null;
   private Boolean _isXml = null;
   private ArrayList<String> _includePrelude = new ArrayList<String>();
   private ArrayList<String> _includeCoda = new ArrayList<String>();
@@ -89,10 +91,14 @@ public class JspPropertyGroup {
   private boolean _recompileOnError = false;
   private FileSetType _tldFileSet;
 
-  private boolean _isTrimWhitespace = false;
-  private boolean _isDeferredSyntaxAllowedAsLiteral = false;
-
+  private Boolean _isTrimWhitespace = null;
+  private Boolean _isDeferredSyntaxAllowedAsLiteral = null;
   private boolean _isELIgnoredForOldWebApp = false;
+
+  // servlet 3.0
+  private String _defaultContentType;
+  private String _buffer;
+  private Boolean _isErrorOnUndeclaredNamespace;
 
   public JspPropertyGroup()
   {
@@ -141,6 +147,12 @@ public class JspPropertyGroup {
     _urlPatterns.add(urlPattern);
   }
 
+  @Override
+  public Collection<String> getUrlPatterns()
+  {
+    return _urlPatterns;
+  }
+
   /**
    * Sets the default page encoding.
    */
@@ -171,6 +183,12 @@ public class JspPropertyGroup {
   public Boolean isELIgnored()
   {
     return _isELIgnored;
+  }
+
+  @Override
+  public String getElIgnored()
+  {
+    return _isELIgnored == null ? null : _isELIgnored.toString();
   }
 
   /**
@@ -218,7 +236,16 @@ public class JspPropertyGroup {
    */
   public boolean isScriptingInvalid()
   {
+    if (_isScriptingInvalid == null)
+      return false;
+
     return _isScriptingInvalid;
+  }
+
+  @Override
+  public String getScriptingInvalid()
+  {
+    return _isScriptingInvalid == null ? null : _isScriptingInvalid.toString();
   }
 
   /**
@@ -237,6 +264,12 @@ public class JspPropertyGroup {
     return _isXml;
   }
 
+  @Override
+  public String getIsXml()
+  {
+    return _isXml == null ? null : _isXml.toString(); 
+  }
+
   /**
    * Adds a new prelude inclusion.
    */
@@ -253,6 +286,12 @@ public class JspPropertyGroup {
     return _includePrelude;
   }
 
+  @Override
+  public Collection<String> getIncludePreludes()
+  {
+    return _includePrelude;
+  }
+
   /**
    * Adds a new coda inclusion.
    */
@@ -265,6 +304,12 @@ public class JspPropertyGroup {
    * Returns the coda inclusion.
    */
   public ArrayList<String> getIncludeCodaList()
+  {
+    return _includeCoda;
+  }
+
+  @Override
+  public Collection<String> getIncludeCodas()
   {
     return _includeCoda;
   }
@@ -515,7 +560,57 @@ public class JspPropertyGroup {
    */
   public boolean isDeferredSyntaxAllowedAsLiteral()
   {
-    return _isDeferredSyntaxAllowedAsLiteral;
+    return _isDeferredSyntaxAllowedAsLiteral == null ?
+      false :
+      _isDeferredSyntaxAllowedAsLiteral;
+  }
+
+  @Override
+  public String getDeferredSyntaxAllowedAsLiteral()
+  {
+    return _isDeferredSyntaxAllowedAsLiteral == null ?
+      null :
+      _isDeferredSyntaxAllowedAsLiteral.toString();
+  }
+
+  public String getDefaultContentType()
+  {
+    return _defaultContentType;
+  }
+
+  public void setDefaultContentType(String defaultContentType)
+  {
+    _defaultContentType = defaultContentType;
+  }
+
+  public String getBuffer()
+  {
+    return _buffer;
+  }
+
+  public void setBuffer(String buffer)
+  {
+    _buffer = buffer;
+  }
+
+  public boolean isErrorOnUndeclaredNamespace()
+  {
+    return _isErrorOnUndeclaredNamespace == null ?
+      true :
+      _isErrorOnUndeclaredNamespace.booleanValue();
+  }
+
+  @Override
+  public String getErrorOnUndeclaredNamespace()
+  {
+    return _isErrorOnUndeclaredNamespace == null ?
+      null :
+      _isErrorOnUndeclaredNamespace.toString();
+  }
+
+  public void setErrorOnUndeclaredNamespace(Boolean errorOnUndeclaredNamespace)
+  {
+    _isErrorOnUndeclaredNamespace = errorOnUndeclaredNamespace;
   }
 
   /**
@@ -596,7 +691,7 @@ public class JspPropertyGroup {
    */
   public boolean isTrimDirectiveWhitespaces()
   {
-    return _isTrimWhitespace;
+    return _isTrimWhitespace == null ? false : _isTrimWhitespace.booleanValue();
   }
 
   /**
@@ -605,6 +700,12 @@ public class JspPropertyGroup {
   public void setTrimDirectiveWhitespaces(boolean isTrim)
   {
     _isTrimWhitespace = isTrim;
+  }
+
+  @Override
+  public String getTrimDirectiveWhitespaces()
+  {
+    return _isTrimWhitespace == null ? null : _isTrimWhitespace.toString();
   }
 
   @PostConstruct
