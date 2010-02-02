@@ -1452,7 +1452,7 @@ public class RegexpModule
                                             @Optional @Reference Value count)
   {
     if (fun == null) {
-      env.warning(L.l("callback argument can't be null in preg_replace_callback"));
+      env.warning(L.l("callable argument can't be null in preg_replace_callback"));
       return subject;
     }
 
@@ -1507,7 +1507,7 @@ public class RegexpModule
    */
   public static Value preg_replace_callback(Env env,
                                             Value regexpValue,
-                                            Callback fun,
+                                            Callable fun,
                                             Value subject,
                                             @Optional("-1") long limit,
                                             @Optional @Reference Value count)
@@ -1591,7 +1591,7 @@ public class RegexpModule
    */
   private static Value pregReplaceCallback(Env env,
                                            Regexp []regexpList,
-                                           Callback fun,
+                                           Callable fun,
                                            StringValue subject,
                                            @Optional("-1") long limit,
                                            @Optional @Reference Value countV)

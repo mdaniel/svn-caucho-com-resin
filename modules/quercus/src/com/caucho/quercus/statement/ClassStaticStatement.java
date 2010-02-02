@@ -80,7 +80,8 @@ public class ClassStaticStatement
       String className = qClass.getName();
       
       // Var var = qClass.getStaticFieldVar(env, env.createString(staticName));
-      Var var = qClass.getStaticFieldVar(env, staticName);
+      // Var var = qClass.getStaticFieldVar(env, staticName);
+      Var var = env.getStaticVar(staticName);
       
       env.setVar(_var.getName(), var);
 
