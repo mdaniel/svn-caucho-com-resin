@@ -30,12 +30,13 @@
 package com.caucho.server.webapp;
 
 import com.caucho.config.Configurable;
+import com.caucho.config.SchemaBean;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;
 
-public class WebAppFragmentConfig
-  extends WebAppConfig {
+public class WebAppFragmentConfig extends WebAppConfig
+  implements SchemaBean {
 
   private static final L10N L = new L10N(WebApp.class);
   private static final Logger log
@@ -103,6 +104,12 @@ public class WebAppFragmentConfig
     log.finer(L.l("'{0}' absolute-ordering tag should not be used inside web application descriptor.", this));
 
     return new Ordering();
+  }
+
+  @Override
+  public String getSchema()
+  {
+    return "com/caucho/server/webapp/resin-web-xml.rnc";
   }
 
   public String toString() {
