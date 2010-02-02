@@ -91,6 +91,10 @@ public class HttpEmbed extends PortEmbed
 
       _port.setPort(getPort());
       _port.setAddress(getAddress());
+      
+      _port.init();
+      
+      // server.addPort(_port);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

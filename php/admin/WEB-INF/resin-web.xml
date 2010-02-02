@@ -13,11 +13,16 @@
   <!--
      - Security configuration
     -->
+    <!--
   <resin:LoginList>
     <resin:FormLogin login-page="/login.php"
                      error-page="/error.php"/>
     <resin:BasicLogin/>
   </resin:LoginList>
+  -->
+    <resin:FormLogin login-page="/login.php"
+                     error-page="/error.php"/>
+<!--
 
   <resin:Allow url-pattern="*.php">
     <resin:if test="${! resin_admin_external}">
@@ -30,8 +35,7 @@
     <resin:if test="${! resin_admin_insecure}">
       <resin:IfSecure/>
     </resin:if>
-
     <resin:IfUserInRole role="resin-admin"/>
   </resin:Allow>
-  
+-->  
 </web-app>

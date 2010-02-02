@@ -104,6 +104,9 @@ public class ResinEmbed
 
   private final ArrayList<WebAppEmbed> _webAppList
     = new ArrayList<WebAppEmbed>();
+  
+  private final ArrayList<PortEmbed> _portList
+    = new ArrayList<PortEmbed>();
 
   private Lifecycle _lifecycle = new Lifecycle();
   private boolean _isConfig;
@@ -142,11 +145,18 @@ public class ResinEmbed
    */
   public void addPort(PortEmbed port)
   {
+    _portList.add(port);
+    
+    if (_server != null)
+      port.bindTo(_server);
+    
+    /*
     // server/1e00
     if (_clusterServer == null)
       initConfig(_configFile);
     
     // XXX: port.bindTo(_clusterServer);
+     */
   }
 
   /**
@@ -262,6 +272,10 @@ public class ResinEmbed
 
       for (BeanEmbed beanEmbed : _beanList) {
         beanEmbed.configure();
+      }
+      
+      for (PortEmbed port : _portList) {
+        port.bindTo(_server);
       }
 
       HostConfig hostConfig = new HostConfig();

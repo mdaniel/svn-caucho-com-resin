@@ -51,6 +51,8 @@ public class CallExpr extends Expr {
   protected final String _nsName;
   protected final Expr []_args;
   
+  private int _funId;
+  
   protected boolean _isRef;
 
   public CallExpr(Location location, String name, ArrayList<Expr> args)
@@ -185,18 +187,22 @@ public class CallExpr extends Expr {
    */
   private Value evalImpl(Env env, boolean isRef, boolean isCopy)
   {
-    AbstractFunction fun = env.findFunction(_name);
-
-    if (fun == null) {
-      if (_nsName != null)
-        fun = env.findFunction(_nsName);
+    if (_funId <= 0) {
+      _funId = env.findFunctionId(_name);
+    
+      if (_funId <= 0) {
+        if (_nsName != null)
+          _funId = env.findFunctionId(_nsName);
       
-      if (fun == null) {
-        env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
+        if (_funId <= 0) {
+          env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
 
-        return NullValue.NULL;
+          return NullValue.NULL;
+        }
       }
     }
+    
+    AbstractFunction fun = env.findFunction(_funId);
 
     Value []args = evalArgs(env, _args);
 

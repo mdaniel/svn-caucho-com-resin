@@ -67,8 +67,6 @@ public class Var extends Value
   public Value set(Value value)
   {
     // assert(! value.isVar());
-    if (value instanceof ArgRef)
-      Thread.dumpStack();
     _value = value;
 
     // php/151m
@@ -88,9 +86,6 @@ public class Var extends Value
   public Var setRef(Value value)
   {
     // php/078d-f
-    
-    if (value instanceof ArgRef)
-      Thread.dumpStack();
     
     if (value.isVar())
       return (Var) value;
@@ -719,9 +714,6 @@ public class Var extends Value
   @Override
   public final Value toValue()
   {
-    if (_value instanceof Var)
-      Thread.dumpStack();
-    
     return _value;
   }
 

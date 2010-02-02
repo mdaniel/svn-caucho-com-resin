@@ -3333,10 +3333,8 @@ public class ArrayModule
     ArrayValue compactArray = new ArrayValueImpl();
 
     for (Value variableName : variables) {
-      System.out.println("VN: " + variableName);
       if (variableName.isString()) {
         Var var = env.getRef(variableName.toStringValue(), false);
-        System.out.println("REF: " + var + " " + variableName);
 
         if (var != null)
           compactArray.put(variableName, var.toValue());

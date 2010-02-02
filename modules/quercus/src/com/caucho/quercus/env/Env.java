@@ -3462,6 +3462,17 @@ public class Env {
    * Compiled mode normally uses the _fun array directly, so this call
    * is rare.
    */
+  public int findFunctionId(String name)
+  {
+    return _quercus.findFunctionId(name);
+  }
+
+  /**
+   * Returns the function with a given name.
+   *
+   * Compiled mode normally uses the _fun array directly, so this call
+   * is rare.
+   */
   public AbstractFunction findFunction(String name)
   {
     int id = _quercus.findFunctionId(name);
@@ -3505,6 +3516,26 @@ public class Env {
       return _anonymousFunMap.get(name);
     else
       return null;
+  }
+
+  /**
+   * Returns the function with a given name.
+   *
+   * Compiled mode normally uses the _fun array directly, so this call
+   * is rare.
+   */
+  public AbstractFunction findFunction(int id)
+  {
+    if (id >= 0) {
+      if (id < _fun.length && ! (_fun[id] instanceof UndefinedFunction)) {
+        return _fun[id];
+      }
+      else {
+        return null;
+      }
+    }
+
+    return null;
   }
 
   public AbstractFunction getFunction(String name)
