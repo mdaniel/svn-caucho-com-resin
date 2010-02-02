@@ -33,6 +33,7 @@ import java.util.*;
 
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.function.FunSpecialCall;
+import com.caucho.quercus.program.ClassDef;
 import com.caucho.util.L10N;
 import com.caucho.util.Primes;
 
@@ -44,14 +45,16 @@ public final class MethodMap<V>
   private static final L10N L = new L10N(MethodMap.class);
   
   private final QuercusClass _quercusClass;
+  private final ClassDef _classDef;
   
   private Entry<V> []_entries = new Entry[16];
   private int _prime = Primes.getBiggestPrime(_entries.length);
   private int _size;
   
-  public MethodMap(QuercusClass quercusClass)
+  public MethodMap(QuercusClass quercusClass, ClassDef classDef)
   {
     _quercusClass = quercusClass;
+    _classDef = classDef;
   }
     
   public void put(String methodName, V value)
@@ -106,6 +109,9 @@ public final class MethodMap<V>
     
     if (_quercusClass != null)
       call = _quercusClass.getCall();
+    else if (_classDef != null) {
+      call = _classDef.getCall();
+    }
     
     if (call != null)
       return (V) new FunSpecialCall(call, key);

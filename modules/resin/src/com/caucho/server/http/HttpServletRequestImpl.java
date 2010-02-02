@@ -1887,8 +1887,9 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not support asynchronous mode.  The servlet should be annotated with a @WebServlet(asyncSupported=true) annotation or have a <async-supported> tag in the web.xml.",
                                           getServletName(), getServletPath()));
 
-    if (_asyncContext != null)
+    if (_request.isCometActive()) {
       throw new IllegalStateException(L.l("startAsync may not be called twice on the same dispatch."));
+    }
 
     boolean isOriginal = (request == this && response == _response);
       

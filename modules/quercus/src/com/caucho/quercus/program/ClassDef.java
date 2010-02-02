@@ -115,6 +115,11 @@ abstract public class ClassDef {
   {
     return this;
   }
+  
+  public AbstractFunction getCall()
+  {
+    return null;
+  }
 
   public void init()
   {

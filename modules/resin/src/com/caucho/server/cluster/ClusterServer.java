@@ -811,6 +811,11 @@ public final class ClusterServer {
 
     return pool != null && pool.isActive();
   }
+  
+  public void addPortDefault(ContainerProgram program)
+  {
+    _portDefaults.addProgram(program);
+  }
 
   /**
    * Adds a program.

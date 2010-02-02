@@ -2575,14 +2575,15 @@ public class WebApp extends ServletContextImpl
           sessionManager.close();
       }
 
-      if (_sessionManager.getCookieDomainRegexp() != null) {
-        _cookieDomainPattern
-          = Pattern.compile(_sessionManager.getCookieDomainRegexp());
-      }
-
       if (_server != null) {
-        if (getSessionManager() != null)
+        if (getSessionManager() != null) {
           getSessionManager().init();
+
+          if (_sessionManager.getCookieDomainRegexp() != null) {
+            _cookieDomainPattern
+              = Pattern.compile(_sessionManager.getCookieDomainRegexp());
+          }
+        }
       }
 
       _roleMapManager = RoleMapManager.create();

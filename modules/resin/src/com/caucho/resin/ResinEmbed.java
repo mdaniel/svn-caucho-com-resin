@@ -262,8 +262,7 @@ public class ResinEmbed
 
       initConfig(_configFile);
 
-      _resin.start();
-      _server = _resin.getServer();
+      _server = _resin.createServer();
 
       thread.setContextClassLoader(_server.getClassLoader());
 
@@ -297,6 +296,8 @@ public class ResinEmbed
 
         _host.addWebApp(config);
       }
+      
+      _server.start();
     } catch (Exception e) {
       throw ConfigException.create(e);
     } finally {

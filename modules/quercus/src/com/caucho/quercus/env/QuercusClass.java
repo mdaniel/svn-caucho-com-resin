@@ -120,7 +120,7 @@ public class QuercusClass extends NullValue {
     _initializers = new ArrayList<InstanceInitializer>();
   
     _fieldMap = new LinkedHashMap<StringValue,ClassField>();
-    _methodMap = new MethodMap<AbstractFunction>(this);
+    _methodMap = new MethodMap<AbstractFunction>(this, null);
     _constMap = new HashMap<String,Expr>();
     
     _staticFieldExprMap = new LinkedHashMap<String,ArrayList<StaticField>>();

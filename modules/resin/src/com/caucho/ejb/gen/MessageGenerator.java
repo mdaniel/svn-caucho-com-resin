@@ -78,7 +78,7 @@ public class MessageGenerator extends BeanGenerator {
 
     sb.append(".");
     sb.append(className);
-    sb.append("__EJB");
+    sb.append("__BeanContext");
 
     return sb.toString();
   }

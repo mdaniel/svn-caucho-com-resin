@@ -205,6 +205,9 @@ public class Server extends ProtocolDispatchServer
   private int _threadExecutorTaskMax = -1;
   private int _threadIdleMin = -1;
   private int _threadIdleMax = -1;
+  
+  private ContainerProgram _portDefaults
+    = new ContainerProgram();
 
   // <cluster> configuration
 
@@ -968,9 +971,20 @@ public class Server extends ProtocolDispatchServer
     return port;
   }
 
-  void addProtocolPort(Port port)
+  public void addProtocolPort(Port port)
   {
-    _ports.add(port);
+    try {
+      if (! _ports.contains(port))
+        _ports.add(port);
+    
+      if (_lifecycle.isAfterStarting()) {
+        // server/1e00
+        port.bind();
+        port.start();
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
   public void add(ProtocolPort protocolPort)
@@ -992,6 +1006,8 @@ public class Server extends ProtocolDispatchServer
     ConfigProgram program = _selfServer.getPortDefaults();
     
     program.configure(port);
+    
+    _portDefaults.configure(port);
   }
 
   //
@@ -1094,6 +1110,14 @@ public class Server extends ProtocolDispatchServer
   public int getUrlLengthMax()
   {
     return _urlLengthMax;
+  }
+
+  /**
+   * Adds a port-default
+   */
+  public void addPortDefault(ConfigProgram program)
+  {
+    _portDefaults.addProgram(program);
   }
 
   /**

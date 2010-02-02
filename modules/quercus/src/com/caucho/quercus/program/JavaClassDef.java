@@ -92,7 +92,7 @@ public class JavaClassDef extends ClassDef {
     = new HashMap<String, Value>();
 
   private final MethodMap<AbstractJavaMethod> _functionMap
-    = new MethodMap<AbstractJavaMethod>(null);
+    = new MethodMap<AbstractJavaMethod>(null, this);
 
   private final HashMap<StringValue, AbstractJavaMethod> _getMap
     = new HashMap<StringValue, AbstractJavaMethod>();
@@ -614,6 +614,12 @@ public class JavaClassDef extends ClassDef {
    * Returns the __call.
    */
   public AbstractFunction getCallMethod()
+  {
+    return __call;
+  }
+  
+  @Override
+  public AbstractFunction getCall()
   {
     return __call;
   }
