@@ -44,13 +44,6 @@ import com.caucho.vfs.WriteStream;
 public class CgiQuercus
   extends CliQuercus
 {
-  public CgiQuercus()  
-  {
-    super();
-    
-    init();
-  }
-  
   @Override
   public Env createEnv(QuercusPage page,
                        WriteStream out,

@@ -1085,19 +1085,7 @@ class Regcomp {
       return parseUnicodeProperty(pattern, true);
       
     case 'Q':
-      throw new UnsupportedOperationException();
-      /*
-      while ((ch = pattern.read()) >= 0) {
-        if (ch == '\\' && pattern.peek() == 'E') {
-          pattern.read();
-          break;
-        }
-
-        last = parseString(ch, pattern);
-      }
-
-      return last;
-      */
+      return parseQuotedString(pattern);
       
     case '#':
       return parseString('#', pattern, true);
@@ -1378,6 +1366,24 @@ class Regcomp {
       }
     }
 
+    return createString(cb);
+  }
+  
+  private RegexpNode parseQuotedString(PeekStream pattern)
+  {
+    CharBuffer cb = new CharBuffer();
+    
+    int ch;
+    
+    while ((ch = pattern.read()) >= 0) {
+      if (ch == '\\' && pattern.peek() == 'E') {
+        pattern.read();
+        break;
+      }
+      
+      cb.append((char) ch);
+    }
+    
     return createString(cb);
   }
 
