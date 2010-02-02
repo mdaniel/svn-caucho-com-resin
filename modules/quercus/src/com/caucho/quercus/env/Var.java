@@ -67,7 +67,8 @@ public class Var extends Value
   public Value set(Value value)
   {
     // assert(! value.isVar());
-    
+    if (value instanceof ArgRef)
+      Thread.dumpStack();
     _value = value;
 
     // php/151m
@@ -88,9 +89,14 @@ public class Var extends Value
   {
     // php/078d-f
     
+    if (value instanceof ArgRef)
+      Thread.dumpStack();
+    
     if (value.isVar())
       return (Var) value;
     else {
+      // XXX:
+      
       _value = value;
       
       return this;
@@ -508,7 +514,7 @@ public class Var extends Value
   public Value toAutoArray()
   {
     _value = _value.toAutoArray();
-
+    
     // php/03mg
 
     return this;
@@ -713,6 +719,9 @@ public class Var extends Value
   @Override
   public final Value toValue()
   {
+    if (_value instanceof Var)
+      Thread.dumpStack();
+    
     return _value;
   }
 
@@ -932,7 +941,8 @@ public class Var extends Value
   @Override
   public Value toRef()
   {
-    return new ArgRef(this);
+    // return new ArgRef(this);
+    return this;
   }
 
   /**

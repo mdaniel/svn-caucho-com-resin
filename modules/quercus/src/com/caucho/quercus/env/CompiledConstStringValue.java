@@ -36,7 +36,7 @@ package com.caucho.quercus.env;
 public final class CompiledConstStringValue
   extends ConstStringValue
 {
-  private final int _hashCode;
+  private final int _compiledHashCode;
 
   public CompiledConstStringValue(StringValue s)
   {
@@ -47,7 +47,7 @@ public final class CompiledConstStringValue
     _string = s.toString();
 
     _valueType = s.getValueType();
-    _hashCode = s.hashCode();
+    _compiledHashCode = s.hashCode();
     _key = s.toKey();
   }
 
@@ -59,7 +59,7 @@ public final class CompiledConstStringValue
     _doubleValue = super.toDoubleValue();
     _string = s;
     _valueType = super.getValueType();
-    _hashCode = super.hashCode();
+    _compiledHashCode = super.hashCode();
     _key = super.toKey();
   }
 
@@ -78,7 +78,7 @@ public final class CompiledConstStringValue
 
     _valueType = valueType;
     _key = key;
-    _hashCode = hashCode;
+    _compiledHashCode = hashCode;
   }
 
   public CompiledConstStringValue(char ch,
@@ -95,7 +95,7 @@ public final class CompiledConstStringValue
 
     _valueType = valueType;
     _key = super.toKey();
-    _hashCode = hashCode;
+    _compiledHashCode = hashCode;
   }
 
   public CompiledConstStringValue(String s,
@@ -113,7 +113,7 @@ public final class CompiledConstStringValue
     _valueType = valueType;
 
     _key = key;
-    _hashCode = hashCode;
+    _compiledHashCode = hashCode;
   }
 
   public CompiledConstStringValue(String s,
@@ -130,7 +130,7 @@ public final class CompiledConstStringValue
     _valueType = valueType;
 
     _key = super.toKey();
-    _hashCode = hashCode;
+    _compiledHashCode = hashCode;
   }
 
   public boolean isStatic()
@@ -195,7 +195,7 @@ public final class CompiledConstStringValue
   @Override
   public final int hashCode()
   {
-    return _hashCode;
+    return _compiledHashCode;
   }
 
   public final String toString()

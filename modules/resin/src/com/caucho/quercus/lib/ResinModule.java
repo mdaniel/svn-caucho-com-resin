@@ -359,8 +359,9 @@ public class ResinModule
 
       if (args != null) {
         for (Value v : args) {
-          if (v != null)
+          if (v != null) {
             v.varDump(env, out, 0, new IdentityHashMap<Value,String>());
+          }
 
           out.println();
         }
