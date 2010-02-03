@@ -89,7 +89,20 @@ public final class MethodMap<V>
 
   public boolean containsKey(StringValue key)
   {
-    return get(key) != null;
+    int hash = key.hashCodeCaseInsensitive();
+    
+    final int bucket = (hash & 0x7fffffff) % _prime;
+    
+    for (Entry<V> entry = _entries[bucket];
+         entry != null;
+         entry = entry.getNext()) {
+      final StringValue entryKey = entry.getKey();
+
+      if (key == entryKey || key.equalsIgnoreCase(entryKey))
+        return true;
+    }
+    
+    return false;
   }
 
   public final V get(final StringValue key, int hash)

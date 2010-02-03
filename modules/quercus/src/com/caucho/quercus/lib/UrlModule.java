@@ -116,33 +116,31 @@ public class UrlModule
   /**
    * Encodes base64
    */
-  public static String base64_encode(InputStream is)
+  public static String base64_encode(StringValue s)
   {
     CharBuffer cb = new CharBuffer();
 
-    TempBuffer tb = TempBuffer.allocate();
-    byte []buffer = tb.getBuffer();
+    byte []buffer = new byte[3];
 
-    int len;
+    int strlen = s.length();
     int offset = 0;
     
-    try {
-      while ((len = is.read(buffer, offset, buffer.length - offset)) >= 0) {
-        int tail = len % 3;
-
-        Base64.encode(cb, buffer, 0, len - tail);
-
-        System.arraycopy(buffer, len - tail, buffer, 0, tail);
-        offset = tail;
-      }
-
-      if (offset > 0)
-        Base64.encode(cb, buffer, 0, offset);
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    } finally {
-      TempBuffer.free(tb);
+    for (; offset + 3 <= strlen; offset += 3) {
+      buffer[0] = (byte) s.charAt(offset);
+      buffer[1] = (byte) s.charAt(offset + 1);
+      buffer[2] = (byte) s.charAt(offset + 2);
+        
+      Base64.encode(cb, buffer, 0, 3);
     }
+
+    if (offset < strlen)
+      buffer[0] = (byte) s.charAt(offset);
+    if (offset + 1 < strlen)
+      buffer[1] = (byte) s.charAt(offset + 1);
+    if (offset + 2 < strlen)
+      buffer[2] = (byte) s.charAt(offset + 2);
+      
+    Base64.encode(cb, buffer, 0, strlen - offset);
 
     return cb.toString();
   }

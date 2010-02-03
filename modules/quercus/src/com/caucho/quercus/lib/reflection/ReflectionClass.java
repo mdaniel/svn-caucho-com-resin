@@ -173,7 +173,7 @@ public class ReflectionClass
   {
     MethodMap<AbstractFunction> map = _cls.getMethodMap();
     
-    return map.get(name) != null;
+    return map.containsKey(name);
   }
   
   public ReflectionMethod getMethod(Env env, StringValue name)

@@ -288,7 +288,7 @@ public class QuercusParser {
     _parserLocation.setLineNumber(line);
     
     if (line > 0)
-      _sourceOffset = -line;
+      _sourceOffset = 1 - line;
   }
 
   public static QuercusProgram parse(QuercusContext quercus,
@@ -3792,6 +3792,8 @@ public class QuercusParser {
       // php/0957
       if ("self".equals(name) && _classDef != null)
         name = _classDef.getName();
+      else if ("parent".equals(name) && getParentClassName() != null)
+        name = getParentClassName().toString();
       else {
         // name = resolveIdentifier(name);
       }

@@ -92,16 +92,16 @@ public class IteratorDelegate implements TraversableDelegate
       _obj = obj;
 
       if (! obj.isA("iterator"))
-	throw new IllegalStateException(L.l("'{0}' is an invalid iterator",
-					    obj));
-
-      _currentFun = _obj.findFunction("current");
-      _keyFun = _obj.findFunction("key");
-      _nextFun = _obj.findFunction("next");
-      _rewindFun = _obj.findFunction("rewind");
-      _validFun = _obj.findFunction("valid");
+        throw new IllegalStateException(L.l("'{0}' is an invalid iterator",
+                                            obj));
+      _currentFun = _qClass.getFunction(env.createString("current"));
+      _keyFun = _qClass.getFunction(env.createString("key"));
+      _nextFun = _qClass.getFunction(env.createString("next"));
+      _rewindFun = _qClass.getFunction(env.createString("rewind"));
+      _validFun = _qClass.getFunction(env.createString("valid"));
 
       _rewindFun.callMethod(_env, _qClass, _obj);
+      
       _needNext = false;
     }
 

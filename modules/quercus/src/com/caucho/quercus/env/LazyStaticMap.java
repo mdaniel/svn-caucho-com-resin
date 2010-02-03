@@ -53,7 +53,7 @@ public class LazyStaticMap extends AbstractMap<StringValue,Var> {
    */
   public Var get(Object key)
   {
-    return (Var) get((String) key);
+    return (Var) get((StringValue) key);
   }
 
   /**

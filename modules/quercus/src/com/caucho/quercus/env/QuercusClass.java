@@ -1091,6 +1091,15 @@ public class QuercusClass extends NullValue {
   /**
    * Finds the matching function.
    */
+  @Override
+  public final AbstractFunction findFunction(String methodName)
+  {
+    return _methodMap.getRaw(new StringBuilderValue(methodName));
+  }
+
+  /**
+   * Finds the matching function.
+   */
   public final AbstractFunction findFunction(StringValue methodName)
   {
     return _methodMap.getRaw(methodName);

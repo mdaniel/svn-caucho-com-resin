@@ -1999,6 +1999,7 @@ public class StringModule extends AbstractQuercusModule {
                                                ch == 'C',
                                                format.substring(head, j).toString(),
                                                index++));
+
             sb.setLength(0);
             i = j;
             break loop;
@@ -5486,14 +5487,14 @@ public class StringModule extends AbstractQuercusModule {
     }
 
     @Override
-      public boolean apply(Env env, StringValue sb, Value []args)
+    public boolean apply(Env env, StringValue sb, Value []args)
     {
       sb.append(_prefix, 0, _prefix.length);
 
       String value;
 
       if (_index < args.length)
-        value = args[_index].toString();
+        value = toValue(args);
       else {
         env.warning(L.l("printf(): not enough arguments to match format."));
 
@@ -5526,6 +5527,11 @@ public class StringModule extends AbstractQuercusModule {
 
       return true;
     }
+    
+    String toValue(Value []args)
+    {
+      return args[_index].toString();
+    }
   }
 
   static class CharPrintfSegment extends StringPrintfSegment {
@@ -5536,6 +5542,7 @@ public class StringModule extends AbstractQuercusModule {
       super(prefix, isLeft, pad, isUpper, format, index);
     }
 
+    @Override
     String toValue(Value []args)
     {
       if (args.length <= _index)
