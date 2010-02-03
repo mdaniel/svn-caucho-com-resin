@@ -55,7 +55,7 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public StatelessManager getStatelessServer()
+  public StatelessManager getStatelessManager()
   {
     return _server;
   }
@@ -98,7 +98,7 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
    */
   public EJBObject getEJBObject()
   {
-    return (EJBObject) getStatelessServer().getRemoteObject();
+    return (EJBObject) getStatelessManager().getRemoteObject();
   }
 
   /**

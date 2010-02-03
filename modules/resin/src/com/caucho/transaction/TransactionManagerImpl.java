@@ -173,7 +173,7 @@ public class TransactionManagerImpl implements TransactionManager,
    * Returns the transaction for the current thread.
    */
   @Override
-  public Transaction getTransaction()
+  public TransactionImpl getTransaction()
   {
     TransactionImpl trans = _threadTransaction.get();
 

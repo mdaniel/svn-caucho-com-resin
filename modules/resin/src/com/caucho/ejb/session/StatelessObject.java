@@ -58,7 +58,7 @@ abstract public class StatelessObject<T>
   /**
    * Returns the stateless server.
    */
-  public StatelessManager<T> getStatelessServer()
+  public StatelessManager<T> getStatelessManager()
   {
     return _server;
   }

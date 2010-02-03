@@ -53,7 +53,7 @@ abstract public class StatefulContext extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public StatefulManager getStatefulServer()
+  public StatefulManager getStatefulManager()
   {
     return _server;
   }

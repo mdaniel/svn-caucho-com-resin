@@ -123,14 +123,14 @@ public class ConnectionPool extends AbstractManagedObject
   // If true, close dangling connections
   private boolean _isCloseDanglingConnections = true;
 
-  private final ArrayList<PoolItem> _connectionPool
-    = new ArrayList<PoolItem>();
+  private final ArrayList<ManagedPoolItem> _connectionPool
+    = new ArrayList<ManagedPoolItem>();
 
   private IdlePoolSet _idlePool;
 
   // temporary connection list for the alarm callback
-  private final ArrayList<PoolItem> _alarmConnections
-    = new ArrayList<PoolItem>();
+  private final ArrayList<ManagedPoolItem> _alarmConnections
+    = new ArrayList<ManagedPoolItem>();
 
   private Alarm _alarm;
 
@@ -727,7 +727,7 @@ public class ConnectionPool extends AbstractManagedObject
       // if no item in pool, try to create one
       if (startCreateConnection()) {
         try {
-          return createConnection(mcf, subject, info);
+          return createConnection(mcf, subject, info, oldPoolItem);
         } finally {
           finishCreateConnection();
         }
@@ -748,7 +748,7 @@ public class ConnectionPool extends AbstractManagedObject
 
     if (startCreateOverflow()) {
       try {
-        return createConnection(mcf, subject, info);
+        return createConnection(mcf, subject, info, oldPoolItem);
       } finally {
         finishCreateConnection();
       }
@@ -783,7 +783,7 @@ public class ConnectionPool extends AbstractManagedObject
         }
       }
 
-      PoolItem poolItem = null;
+      ManagedPoolItem poolItem = null;
 
       while (true) {
         // asks the Driver's ManagedConnectionFactory to match an
@@ -826,11 +826,11 @@ public class ConnectionPool extends AbstractManagedObject
     return null;
   }
 
-  private PoolItem findPoolItem(ManagedConnection mConn)
+  private ManagedPoolItem findPoolItem(ManagedConnection mConn)
   {
     synchronized (_connectionPool) {
       for (int i = _connectionPool.size() - 1; i >= 0; i--) {
-        PoolItem testPoolItem = _connectionPool.get(i);
+        ManagedPoolItem testPoolItem = _connectionPool.get(i);
 
         if (testPoolItem.getManagedConnection() == mConn) {
           return testPoolItem;
@@ -857,11 +857,12 @@ public class ConnectionPool extends AbstractManagedObject
    */
   private UserPoolItem createConnection(ManagedConnectionFactory mcf,
                                         Subject subject,
-                                        ConnectionRequestInfo info)
+                                        ConnectionRequestInfo info,
+                                        UserPoolItem oldPoolItem)
     throws ResourceException
   {
     boolean isValid = false;
-    PoolItem poolItem = null;
+    ManagedPoolItem poolItem = null;
 
     try {
       ManagedConnection mConn = mcf.createManagedConnection(subject, info);
@@ -870,11 +871,10 @@ public class ConnectionPool extends AbstractManagedObject
         throw new ResourceException(L.l("'{0}' did not return a connection from createManagedConnection",
                                         mcf));
 
-      poolItem = new PoolItem(this, mcf, mConn);
+      poolItem = new ManagedPoolItem(this, mcf, mConn);
 
       UserPoolItem userPoolItem;
 
-      UserPoolItem oldPoolItem = null;
       // Ensure the connection is still valid
       userPoolItem = poolItem.toActive(subject, info, oldPoolItem);
       
@@ -1016,7 +1016,7 @@ public class ConnectionPool extends AbstractManagedObject
   {
     synchronized (_connectionPool) {
       for (int i = _connectionPool.size() - 1; i >= 0; i--) {
-        PoolItem poolItem = _connectionPool.get(i);
+        ManagedPoolItem poolItem = _connectionPool.get(i);
 
         if (poolItem.getManagedConnection() == mConn) {
           poolItem.setConnectionError();
@@ -1029,7 +1029,7 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Adds a connection to the idle pool.
    */
-  void toIdle(PoolItem item)
+  void toIdle(ManagedPoolItem item)
   {
     try {
       if (_maxConnections < _connectionPool.size()
@@ -1039,8 +1039,9 @@ public class ConnectionPool extends AbstractManagedObject
 
       ManagedConnection mConn = item.getManagedConnection();
 
-      if (mConn == null)
+      if (mConn == null) {
         return;
+      }
 
       mConn.cleanup();
 
@@ -1055,9 +1056,8 @@ public class ConnectionPool extends AbstractManagedObject
       }
       else if (_idlePool.add(mConn)) {
         item = null;
-        
         return;
-       }
+      }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
@@ -1071,7 +1071,7 @@ public class ConnectionPool extends AbstractManagedObject
   /**
    * Removes a connection
    */
-  void removeItem(PoolItem item, ManagedConnection mConn)
+  void removeItem(ManagedPoolItem item, ManagedConnection mConn)
   {
     synchronized (_connectionPool) {
       _idlePool.remove(mConn);
@@ -1092,12 +1092,12 @@ public class ConnectionPool extends AbstractManagedObject
    */
   public void clear()
   {
-    ArrayList<PoolItem> pool = _connectionPool;
+    ArrayList<ManagedPoolItem> pool = _connectionPool;
 
     if (pool == null)
       return;
 
-    ArrayList<PoolItem> clearItems = new ArrayList<PoolItem>();
+    ArrayList<ManagedPoolItem> clearItems = new ArrayList<ManagedPoolItem>();
 
     synchronized (_connectionPool) {
       _idlePool.clear();
@@ -1108,7 +1108,7 @@ public class ConnectionPool extends AbstractManagedObject
     }
 
     for (int i = 0; i < clearItems.size(); i++) {
-      PoolItem poolItem = clearItems.get(i);
+      ManagedPoolItem poolItem = clearItems.get(i);
 
       try {
         poolItem.destroy();
@@ -1134,7 +1134,7 @@ public class ConnectionPool extends AbstractManagedObject
       }
 
       for (int i = _alarmConnections.size() - 1; i >= 0; i--) {
-        PoolItem item = _alarmConnections.get(i);
+        ManagedPoolItem item = _alarmConnections.get(i);
 
         if (! item.isValid())
           item.destroy();
@@ -1175,10 +1175,10 @@ public class ConnectionPool extends AbstractManagedObject
     if (! _lifecycle.toDestroy())
       return;
 
-    ArrayList<PoolItem> pool;
+    ArrayList<ManagedPoolItem> pool;
 
     synchronized (_connectionPool) {
-      pool = new ArrayList<PoolItem>(_connectionPool);
+      pool = new ArrayList<ManagedPoolItem>(_connectionPool);
       _connectionPool.clear();
 
       if (_idlePool != null)
@@ -1186,7 +1186,7 @@ public class ConnectionPool extends AbstractManagedObject
     }
 
     for (int i = 0; i < pool.size(); i++) {
-      PoolItem poolItem = pool.get(i);
+      ManagedPoolItem poolItem = pool.get(i);
 
       try {
         poolItem.destroy();

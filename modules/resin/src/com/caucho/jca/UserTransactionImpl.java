@@ -55,7 +55,7 @@ public class UserTransactionImpl
   private TransactionManagerImpl _transactionManager;
 
   private ArrayList<UserPoolItem> _resources = new ArrayList<UserPoolItem>();
-  private ArrayList<PoolItem> _poolItems = new ArrayList<PoolItem>();
+  private ArrayList<ManagedPoolItem> _poolItems = new ArrayList<ManagedPoolItem>();
   private ArrayList<BeginResource> _beginResources
     = new ArrayList<BeginResource>();
   private ArrayList<CloseResource> _closeResources
@@ -117,9 +117,9 @@ public class UserTransactionImpl
     if (_resources.contains(resource))
       return;
     
-    Transaction xa = _transactionManager.getTransaction();
-    if (xa != null) {
-      PoolItem poolItem = resource.getXAPoolItem();
+    TransactionImpl xa = _transactionManager.getTransaction();
+    if (xa != null && xa.isActive()) {
+      ManagedPoolItem poolItem = resource.getXAPoolItem();
 
       enlistPoolItem(xa, poolItem);
     }
@@ -127,7 +127,7 @@ public class UserTransactionImpl
     _resources.add(resource);
   }
 
-  private void enlistPoolItem(Transaction xa, PoolItem poolItem)
+  private void enlistPoolItem(Transaction xa, ManagedPoolItem poolItem)
     throws SystemException, RollbackException
   {
     if (poolItem == null)
@@ -160,7 +160,7 @@ public class UserTransactionImpl
   /**
    * Delist a pool item
    */
-  void delistPoolItem(PoolItem poolItem, int flags)
+  void delistPoolItem(ManagedPoolItem poolItem, int flags)
     throws SystemException, RollbackException
   {
     Transaction xa = _transactionManager.getTransaction();
@@ -216,11 +216,11 @@ public class UserTransactionImpl
     if (! _isTransactionActive)
       return null;
     
-    ArrayList<PoolItem> poolItems = _poolItems;
+    ArrayList<ManagedPoolItem> poolItems = _poolItems;
     int length = poolItems.size();
     
     for (int i = 0; i < length; i++) {
-      PoolItem poolItem = poolItems.get(i);
+      ManagedPoolItem poolItem = poolItems.get(i);
 
       UserPoolItem item = poolItem.allocateXA(mcf, subject, info);
 
@@ -235,16 +235,16 @@ public class UserTransactionImpl
    * Finds the pool item joined to this one.
    * return null.
    */
-  PoolItem findJoin(PoolItem item)
+  ManagedPoolItem findJoin(ManagedPoolItem item)
   {
     if (! _isTransactionActive)
       return null;
     
-    ArrayList<PoolItem> poolItems = _poolItems;
+    ArrayList<ManagedPoolItem> poolItems = _poolItems;
     int length = poolItems.size();
     
     for (int i = 0; i < length; i++) {
-      PoolItem poolItem = poolItems.get(i);
+      ManagedPoolItem poolItem = poolItems.get(i);
 
       if (poolItem.isJoin(item))
 	return poolItem;
@@ -307,20 +307,20 @@ public class UserTransactionImpl
 	UserPoolItem userPoolItem = _resources.get(i);
 
 	for (int j = _poolItems.size() - 1; j >= 0; j--) {
-	  PoolItem poolItem = _poolItems.get(j);
+	  ManagedPoolItem poolItem = _poolItems.get(j);
 
 	  if (poolItem.share(userPoolItem)) {
 	    break;
 	  }
 	}
 
-	PoolItem xaPoolItem = userPoolItem.getXAPoolItem();
+	ManagedPoolItem xaPoolItem = userPoolItem.getXAPoolItem();
 	if (! _poolItems.contains(xaPoolItem))
 	  _poolItems.add(xaPoolItem);
       }
 
       for (int i = 0; i < _poolItems.size(); i++) {
-	PoolItem poolItem = _poolItems.get(i);
+	ManagedPoolItem poolItem = _poolItems.get(i);
 
 	poolItem.enableLocalTransactionOptimization(_poolItems.size() == 1);
 
@@ -355,13 +355,13 @@ public class UserTransactionImpl
 	// something has gone very wrong
 	_isTransactionActive = false;
 
-	ArrayList<PoolItem> recoveryList = new ArrayList<PoolItem>(_poolItems);
+	ArrayList<ManagedPoolItem> recoveryList = new ArrayList<ManagedPoolItem>(_poolItems);
 	_poolItems.clear();
 	_resources.clear();
 
 	for (int i = 0; i < recoveryList.size(); i++) {
 	  try {
-	    PoolItem item = recoveryList.get(i);
+	    ManagedPoolItem item = recoveryList.get(i);
 
 	    item.abortConnection();
 	    

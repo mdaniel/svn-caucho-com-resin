@@ -65,11 +65,12 @@ public class ThreadRequestFactory {
 
   static {
     try {
-      String className = "com.caucho.server.connection.ThreadServerRequestFactory";
-      Class cl = Class.forName(className);
+      String className = "com.caucho.server.http.ThreadServerRequestFactory";
+      Class<?> cl = Class.forName(className);
 
       _factory = (ThreadRequestFactory) cl.newInstance();
     } catch (Exception e) {
+      e.printStackTrace();
       // log.log(Level.FINEST, e.toString(), e);
     }
   }

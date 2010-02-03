@@ -47,8 +47,8 @@ public class ThreadConnectionManager {
   private static final ThreadLocal<ThreadConnectionManager> _threadManager
     = new ThreadLocal<ThreadConnectionManager>();
 
-  private ArrayList<SoftReference<PoolItem>> _activeConnections
-    = new ArrayList<SoftReference<PoolItem>>();
+  private ArrayList<SoftReference<ManagedPoolItem>> _activeConnections
+    = new ArrayList<SoftReference<ManagedPoolItem>>();
 
   /**
    * Returns the manager for the current thread.
@@ -84,7 +84,7 @@ public class ThreadConnectionManager {
   /**
    * Adds a pooled connection to the current thread.
    */
-  public static void addConnection(PoolItem conn)
+  public static void addConnection(ManagedPoolItem conn)
   {
     createThreadManager().add(conn);
   }
@@ -92,7 +92,7 @@ public class ThreadConnectionManager {
   /**
    * Removes a pooled connection from the current thread.
    */
-  public static void removeConnection(PoolItem conn)
+  public static void removeConnection(ManagedPoolItem conn)
   {
     createThreadManager().remove(conn);
   }
@@ -100,18 +100,18 @@ public class ThreadConnectionManager {
   /**
    * Adds the connection.
    */
-  private void add(PoolItem conn)
+  private void add(ManagedPoolItem conn)
   {
-    _activeConnections.add(new SoftReference<PoolItem>(conn));
+    _activeConnections.add(new SoftReference<ManagedPoolItem>(conn));
   }
 
   /**
    * Removes the connection.
    */
-  private void remove(PoolItem conn)
+  private void remove(ManagedPoolItem conn)
   {
     for (int i = _activeConnections.size() - 1; i >= 0; i--) {
-      PoolItem aConn = _activeConnections.get(i).get();
+      ManagedPoolItem aConn = _activeConnections.get(i).get();
 
       if (aConn == null || aConn == conn)
 	_activeConnections.remove(i);

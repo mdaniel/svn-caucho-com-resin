@@ -36,6 +36,7 @@ import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.View;
 import com.caucho.java.JavaWriter;
 import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 
 /**
  * Generates the skeleton for a session bean.
@@ -43,9 +44,10 @@ import javax.ejb.Stateful;
 public class StatelessGenerator extends SessionGenerator {
   public StatelessGenerator(String ejbName, ApiClass ejbClass,
                             ArrayList<ApiClass> localApi,
-                            ArrayList<ApiClass> remoteApi) {
-    super(ejbName, ejbClass, localApi, remoteApi, Stateful.class
-        .getSimpleName());
+                            ArrayList<ApiClass> remoteApi)
+  {
+    super(ejbName, ejbClass, localApi, remoteApi, 
+          Stateless.class.getSimpleName());
   }
 
   public boolean isStateless() {
@@ -125,7 +127,7 @@ public class StatelessGenerator extends SessionGenerator {
         .println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
 
     out.println();
-    out.println("public " + getClassName() + "(StatelessServer server)");
+    out.println("public " + getClassName() + "(StatelessManager server)");
     out.println("{");
     out.pushDepth();
 

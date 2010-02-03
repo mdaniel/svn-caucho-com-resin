@@ -41,12 +41,12 @@ public class UserTransactionSuspendState {
     = Logger.getLogger(UserTransactionSuspendState.class.getName());
   private static final L10N L = new L10N(UserTransactionSuspendState.class);
 
-  private ArrayList<PoolItem> _poolItems = new ArrayList<PoolItem>();
+  private ArrayList<ManagedPoolItem> _poolItems = new ArrayList<ManagedPoolItem>();
   
   /**
    * Creates the suspend state.
    */
-  public UserTransactionSuspendState(ArrayList<PoolItem> poolItems)
+  public UserTransactionSuspendState(ArrayList<ManagedPoolItem> poolItems)
   {
     _poolItems.addAll(poolItems);
   }
@@ -54,7 +54,7 @@ public class UserTransactionSuspendState {
   /**
    * Returns the pooled items.
    */
-  public ArrayList<PoolItem> getPoolItems()
+  public ArrayList<ManagedPoolItem> getPoolItems()
   {
     return _poolItems;
   }

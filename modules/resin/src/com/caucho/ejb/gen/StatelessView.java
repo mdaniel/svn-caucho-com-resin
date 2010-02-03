@@ -402,7 +402,7 @@ public class StatelessView extends View {
         + " context)");
     out.println("{");
     out.pushDepth();
-    generateSuper(out, "context.getStatelessServer(), "
+    generateSuper(out, "context.getStatelessManager(), "
         + getViewClass().getName() + ".class");
     out.println("_context = context;");
 
@@ -443,7 +443,7 @@ public class StatelessView extends View {
      * out.println("Thread thread = Thread.currentThread();");
      * out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
      * out.println(); out.println("try {"); out.pushDepth();out.println(
-     * "thread.setContextClassLoader(getStatelessServer().getClassLoader());");
+     * "thread.setContextClassLoader(getStatelessManager().getClassLoader());");
      * out.println();
      *
      * generateProxyCall(out, bizMethod.getImplMethod());
@@ -490,7 +490,7 @@ public class StatelessView extends View {
       out.println("  bean.setSessionContext(_context);");
     }
 
-    out.println("  getStatelessServer().initInstance(bean);");
+    out.println("  getStatelessManager().initInstance(bean);");
 
     if (getBean().hasMethod("ejbCreate", new Class[0])) {
       // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");

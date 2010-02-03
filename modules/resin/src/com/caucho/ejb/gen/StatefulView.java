@@ -142,7 +142,7 @@ public class StatefulView extends View {
   {
     out.println();
     out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "(getStatefulServer(), true);");
+    out.println("  return new " + getViewClassName() + "(getStatefulManager(), true);");
   }
 
   /**
@@ -223,7 +223,7 @@ public class StatefulView extends View {
     throws IOException
   {
     out.println("private transient StatefulContext _context;");
-    out.println("private transient StatefulServer _server;");
+    out.println("private transient StatefulManager _server;");
 
     if (isProxy()) {
       out.println("private " + getBeanClassName() + " _bean;");
@@ -240,7 +240,7 @@ public class StatefulView extends View {
     //generateBusinessPrologue(out);
 
     out.println();
-    out.println(getViewClassName() + "(StatefulServer server)");
+    out.println(getViewClassName() + "(StatefulManager server)");
     out.println("{");
     out.pushDepth();
 
@@ -258,7 +258,7 @@ public class StatefulView extends View {
     out.println("}");
 
     out.println();
-    out.println(getViewClassName() + "(StatefulServer server, boolean isProvider)");
+    out.println(getViewClassName() + "(StatefulManager server, boolean isProvider)");
     out.println("{");
     out.pushDepth();
 
@@ -272,7 +272,7 @@ public class StatefulView extends View {
 
     /*
     out.println();
-    out.println("public " + getViewClassName() + "(StatefulServer server, javax.enterprise.context.spi.CreationalContext env)");
+    out.println("public " + getViewClassName() + "(StatefulManager server, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
     out.pushDepth();
 
@@ -289,7 +289,7 @@ public class StatefulView extends View {
     /*
     out.println();
     out.println("public " + getViewClassName()
-                + "(StatefulServer server, "
+                + "(StatefulManager server, "
                 + getBeanClassName() + " bean)");
     out.println("{");
     generateSuper(out, "server");
@@ -302,7 +302,7 @@ public class StatefulView extends View {
     */
 
     out.println();
-    out.println("public StatefulServer getStatefulServer()");
+    out.println("public StatefulManager getStatefulManager()");
     out.println("{");
     out.println("  return _server;");
     out.println("}");

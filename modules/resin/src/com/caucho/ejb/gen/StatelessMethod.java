@@ -128,7 +128,7 @@ public class StatelessMethod extends BusinessMethodGenerator
   public void generatePreCall(JavaWriter out)
     throws IOException
   {
-    out.println("thread.setContextClassLoader(_context.getStatelessServer().getClassLoader());");
+    out.println("thread.setContextClassLoader(_context.getStatelessManager().getClassLoader());");
     
     super.generatePreCall(out);
   }

@@ -71,7 +71,7 @@ public class FunSpecialCall extends AbstractFunction {
                           Value []args)
   {
     ArrayValueImpl arrayArgs = new ArrayValueImpl(args);
-    
+   
     return _call.callMethod(env, qClass, qThis,
                             _name, arrayArgs);
   }

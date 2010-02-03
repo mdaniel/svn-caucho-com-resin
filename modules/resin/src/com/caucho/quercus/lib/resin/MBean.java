@@ -31,6 +31,7 @@
 package com.caucho.quercus.lib.resin;
 
 import com.caucho.quercus.annotation.Name;
+import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.Value;
 
 import javax.management.Attribute;
@@ -120,17 +121,19 @@ public class MBean {
   /**
    * Calls a method.
    */
-  public Object __call(String name, Value []values)
+  public Object __call(String name, Value values)
   {
     try {
-      Object []args = new Object[values.length];
+      int size = values.getSize();
+      
+      Object []args = new Object[values.getSize()];
 
-      for (int i = 0; i < values.length; i++) {
-	args[i] = values[i].toJavaObject();
+      for (int i = 0; i < size; i++) {
+	args[i] = values.get(LongValue.create(i)).toJavaObject();
       }
 
       MBeanOperationInfo opInfo = findClosestOperation(name, args);
-
+      
       if (opInfo != null) {
 	String []mbeanSig = createMBeanSig(opInfo);
 	

@@ -64,9 +64,9 @@ public class JavaArrayMarshal extends Marshal
     }
     */
 
-    Class componentType = expectedClass.getComponentType();
+    Class<?> componentType = expectedClass.getComponentType();
     Object array = value.valuesToArray(env, componentType);
-    
+    System.out.println("VTA: " + array + " " + value);
     /*
     if (array == null && _isNotNull) {
       env.warning(L.l("null is an unexpected argument, expected {0}", shortName(expectedClass)));

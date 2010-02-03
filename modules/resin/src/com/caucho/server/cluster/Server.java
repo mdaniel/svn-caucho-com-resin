@@ -172,27 +172,7 @@ public class Server extends ProtocolDispatchServer
   // <server> configuration
   
   private ClusterPort _clusterPort;
-  private ArrayList<Port> _ports = new ArrayList<Port>();
-  
-  /*
-  private int _acceptListenBacklog = 100;
-
-  private int _acceptThreadMin = 4;
-  private int _acceptThreadMax = 8;
-
-  private int _connectionMax = 1024 * 1024;
-
-  // default is in Port
-  private int _keepaliveMax = -1;
-
-  private long _keepaliveConnectionTimeMax = 10 * 60 * 1000L;
-
-  private boolean _keepaliveSelectEnable = true;
-  private int _keepaliveSelectMax = -1;
-  private long _keepaliveSelectThreadTimeout = 1000;
-  
-  private long _suspendTimeMax = 600000L;
-  */
+  private final ArrayList<Port> _ports = new ArrayList<Port>();
   
   private Management _management;
 
@@ -284,6 +264,8 @@ public class Server extends ProtocolDispatchServer
 
         _serverIdLocal.set(_selfServer.getId());
         
+        _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+        
         preInit();
       } finally {
         thread.setContextClassLoader(oldLoader);
@@ -293,8 +275,6 @@ public class Server extends ProtocolDispatchServer
 
       // exceptions here must throw to the top because they're non-recoverable
       throw ConfigException.create(e);
-    } finally {
-      _lifecycle = new Lifecycle(log, toString(), Level.INFO);
     }
   }
   

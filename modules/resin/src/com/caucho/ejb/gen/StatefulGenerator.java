@@ -99,7 +99,7 @@ public class StatefulGenerator extends SessionGenerator {
     out.pushDepth();
 
     out.println();
-    out.println("public " + getClassName() + "(StatefulServer server)");
+    out.println("public " + getClassName() + "(StatefulManager server)");
     out.println("{");
     out.pushDepth();
 
@@ -119,7 +119,7 @@ public class StatefulGenerator extends SessionGenerator {
     out.println("{");
     out.pushDepth();
 
-    out.println("super(context.getStatefulServer());");
+    out.println("super(context.getStatefulManager());");
 
     generateContextObjectConstructor(out);
 

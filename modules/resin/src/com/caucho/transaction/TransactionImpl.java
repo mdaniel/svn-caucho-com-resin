@@ -152,6 +152,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
   {
     return _isDead;
   }
+  
+  public boolean isActive()
+  {
+    return _status == Status.STATUS_ACTIVE;
+  }
 
   /**
    * Return true if the transaction has no resources.

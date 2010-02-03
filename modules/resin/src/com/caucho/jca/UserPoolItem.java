@@ -40,7 +40,13 @@ import javax.transaction.RollbackException;
 import java.util.logging.Logger;
 
 /**
- * Pool item representing the user connection.
+ * Pool item representing the user connection, i.e. matching to a Connection
+ * object.
+ * 
+ * Because of XA sharing of connections, it's possible for multiple
+ * UserPoolItems to be associated with a single ManagedPoolItem during the
+ * XA. When the XA completes, the UserPoolItem will be reassociated with
+ * the original ManagedPoolItem.
  *
  * The UserPoolItem is responsible for the lifecycle of an
  * associated PoolItem (ownPoolItem).
@@ -60,7 +66,7 @@ class UserPoolItem {
   private String _id;
 
   // the pool item associated with this connection
-  private PoolItem _ownPoolItem;
+  private ManagedPoolItem _ownPoolItem;
 
   private ManagedConnectionFactory _mcf;
   private Subject _subject;
@@ -70,7 +76,7 @@ class UserPoolItem {
   private UserTransactionImpl _transaction;
   
   // The head PoolItem for the transaction
-  private PoolItem _sharePoolItem;
+  private ManagedPoolItem _sharePoolItem;
   
   // The next shared UserPoolItem in the chain
   private UserPoolItem _shareNext;
@@ -96,7 +102,7 @@ class UserPoolItem {
     }
   }
 
-  public UserPoolItem(ConnectionPool cm, PoolItem poolItem)
+  public UserPoolItem(ConnectionPool cm, ManagedPoolItem poolItem)
   {
     this(cm);
 
@@ -203,15 +209,26 @@ class UserPoolItem {
   /**
    * Returns the pool item.
    */
-  public PoolItem getOwnPoolItem()
+  public ManagedPoolItem getOwnPoolItem()
   {
     return _ownPoolItem;
   }
   
   /**
+   * Returns the pool item.
+   */
+  void setOwnPoolItem(ManagedPoolItem poolItem)
+  {
+    assert(_ownPoolItem == null);
+    
+    _ownPoolItem = poolItem;
+    _sharePoolItem = poolItem;
+  }
+  
+  /**
    * Returns the xa item.
    */
-  public PoolItem getXAPoolItem()
+  public ManagedPoolItem getXAPoolItem()
   {
     return _sharePoolItem;
   }
@@ -253,9 +270,17 @@ class UserPoolItem {
   }
 
   /**
+   * Returns the next share.
+   */
+  void setShareNext(UserPoolItem next)
+  {
+    _shareNext = next;
+  }
+
+  /**
    * Associates the UserPoolItem with a pool item
    */
-  void associatePoolItem(PoolItem poolItem)
+  void associatePoolItem(ManagedPoolItem poolItem)
   {
     if (_ownPoolItem != null)
       throw new IllegalStateException(L.l("associating with old pool item."));
@@ -271,7 +296,7 @@ class UserPoolItem {
   /**
    * Associates the UserPoolItem with a pool item
    */
-  void associate(PoolItem poolItem,
+  void associate(ManagedPoolItem poolItem,
 		 ManagedConnectionFactory mcf,
 		 Subject subject,
 		 ConnectionRequestInfo info)
@@ -306,7 +331,7 @@ class UserPoolItem {
   }
 
   /**
-   * Reassociates with the an own pool item.
+   * Reassociates with the own pool item.
    */
   void reassociatePoolItem()
     throws ResourceException
@@ -332,7 +357,7 @@ class UserPoolItem {
   void abortConnection()
     throws ResourceException
   {
-    PoolItem poolItem = _ownPoolItem;
+    ManagedPoolItem poolItem = _ownPoolItem;
     _ownPoolItem = null;
 
     removeFromShareList();
@@ -346,18 +371,15 @@ class UserPoolItem {
    */
   void close()
   {
-    PoolItem ownPoolItem = _ownPoolItem;
+    ManagedPoolItem ownPoolItem = _ownPoolItem;
     _ownPoolItem = null;
-    
+
     _userConn = null;
 
     if (_transaction != null)
       _transaction.delistResource(this);
 
     removeFromShareList();
-
-    if (ownPoolItem != null)
-      ownPoolItem.toIdle();
   }
 
   /**
@@ -365,7 +387,7 @@ class UserPoolItem {
    */
   void removeFromShareList()
   {
-    PoolItem poolItem = _sharePoolItem;
+    ManagedPoolItem poolItem = _sharePoolItem;
     _sharePoolItem = null;
     
     if (poolItem == null)
@@ -391,7 +413,7 @@ class UserPoolItem {
   /**
    * Removes from the current list.
    */
-  void addToShareList(PoolItem poolItem)
+  void addToShareList(ManagedPoolItem poolItem)
   {
     if (_sharePoolItem != null)
       throw new IllegalStateException();

@@ -668,7 +668,7 @@ abstract public class JavaInvoker
     else if (! isStatic() && ! isConstructor()) {
       obj = qThis != null ? qThis.toJavaObject() : null;
     }
-
+    
     String warnMessage = null;
     for (int i = 0; i < _marshalArgs.length; i++) {
       if (i < args.length && args[i] != null)
