@@ -164,9 +164,7 @@ public class ThisFieldVarExpr extends AbstractVarExpr {
     StringValue name = _nameExpr.evalStringValue(env);
     
     Value field = obj.getThisField(env, name);
-    Value result = field.put(index, value);
-    
-    obj.putThisField(env, name, result);
+    field.put(index, value);
   }
 
   /**
