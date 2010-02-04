@@ -455,8 +455,8 @@
   </target>
 
   <target name="version">
-    <copy file="${modules}/resin/src/com/caucho/Version.tmpl"
-          tofile="${modules}/resin/src/com/caucho/Version.java"
+    <copy file="${modules}/kernel/src/com/caucho/Version.tmpl"
+          tofile="${modules}/kernel/src/com/caucho/Version.java"
           preservelastmodified="true"
           overwrite="true">
       <filterset>

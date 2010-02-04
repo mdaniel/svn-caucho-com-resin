@@ -52,6 +52,12 @@ public class ArgRef extends Value
     _var = var;
   }
 
+  @Override
+  public boolean hasCurrent()
+  {
+    return _var.hasCurrent();
+  }
+
   /**
    * Returns true for an implementation of a class
    */
@@ -301,6 +307,78 @@ public class ArgRef extends Value
   public java.io.InputStream toInputStream()
   {
     return _var.toInputStream();
+  }
+
+  @Override
+  public Value append(Value index, Value value)
+  {
+    return _var.append(index, value);
+  }
+
+  @Override
+  public Value containsKey(Value key)
+  {
+    return _var.containsKey(key);
+  }
+
+  @Override
+  public Value copyArrayItem()
+  {
+    return _var.copyArrayItem();
+  }
+
+  @Override
+  public Value current()
+  {
+    return _var.current();
+  }
+
+  @Override
+  public Value getArray()
+  {
+    return _var.getArray();
+  }
+
+  @Override
+  public Value getArray(Value index)
+  {
+    return _var.getArray(index);
+  }
+
+  @Override
+  public int getCount(Env env)
+  {
+    return _var.getCount(env);
+  }
+
+  @Override
+  public Value[] getKeyArray(Env env)
+  {
+    return _var.getKeyArray(env);
+  }
+
+  @Override
+  public Value key()
+  {
+    return _var.key();
+  }
+
+  @Override
+  public Value next()
+  {
+    return _var.next();
+  }
+
+  @Override
+  public Value toArray()
+  {
+    return _var.toArray();
+  }
+
+  @Override
+  public Value toAutoArray()
+  {
+    return _var.toAutoArray();
   }
 
   /**

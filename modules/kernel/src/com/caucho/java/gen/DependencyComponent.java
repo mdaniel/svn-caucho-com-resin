@@ -142,7 +142,7 @@ public class DependencyComponent extends ClassComponent {
     out.println("{");
     out.pushDepth();
 
-    printVersionChange(out);
+    //printVersionChange(out);
 
     out.println("for (int i = _caucho_depend.length - 1; i >= 0; i--) {");
     out.println("  if (_caucho_depend[i].isModified())");

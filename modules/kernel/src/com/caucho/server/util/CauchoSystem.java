@@ -29,6 +29,7 @@
 
 package com.caucho.server.util;
 
+import com.caucho.VersionFactory;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
@@ -215,16 +216,7 @@ public class CauchoSystem {
   public static String getVersion()
   {
     if (_resinVersion == null) {
-      try {
-	Class cl = Class.forName("com.caucho.Version");
-	Field field = cl.getField("VERSION");
-	
-	_resinVersion = (String) field.get(null);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-	_resinVersion = "unknown";
-      }
+      _resinVersion = VersionFactory.getVersion();
     }
     
     return _resinVersion;
@@ -233,16 +225,7 @@ public class CauchoSystem {
   public static String getFullVersion()
   {
     if (_resinFullVersion == null) {
-      try {
-	Class cl = Class.forName("com.caucho.Version");
-	Field field = cl.getField("FULL_VERSION");
-	
-	_resinFullVersion = (String) field.get(null);
-      } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
-	
-	_resinFullVersion = "unknown";
-      }
+      _resinFullVersion = VersionFactory.getFullVersion();
     }
     
     return _resinFullVersion;
@@ -253,7 +236,7 @@ public class CauchoSystem {
     if (_version == 0) {
       _version = Crc64.generate(getFullVersion());
     }
-
+    
     return _version;
   }
 

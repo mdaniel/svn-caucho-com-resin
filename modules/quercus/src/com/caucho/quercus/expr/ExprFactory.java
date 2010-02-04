@@ -62,7 +62,7 @@ public class ExprFactory {
       return new ExprFactory();
 
     try {
-      Class cl = Class.forName("com.caucho.quercus.expr.ProExprFactory");
+      Class cl = Class.forName("com.caucho.quercus.expr.ExprFactoryPro");
 
       return (ExprFactory) cl.newInstance();
     } catch (Exception e) {

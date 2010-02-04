@@ -41,10 +41,6 @@ final public class VersionFactory {
   public static final String COPYRIGHT =
     "Copyright(c) 1998-2010 Caucho Technology.  All rights reserved.";
 
-  public static String FULL_VERSION = "Resin-4.0.s091130 (built Mon, 30 Nov 2009 11:06:01 PST)";
-  public static String VERSION = "4.0.s091130";
-  public static String VERSION_DATE = "20091130T110601";
-
   public static String getFullVersion()
   {
     try {

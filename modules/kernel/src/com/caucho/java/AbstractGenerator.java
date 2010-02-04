@@ -298,17 +298,6 @@ public abstract class AbstractGenerator {
   }
 
   /**
-   * Prints code to detect a version change.
-   */
-  protected void printVersionChange()
-    throws IOException
-  {
-    println("if (com.caucho.server.util.CauchoSystem.getVersionId() != " +
-            CauchoSystem.getVersionId() + ")");
-    println("  return true;");
-  }
-
-  /**
    * Prints a method header.
    *
    * @param method the method to print
