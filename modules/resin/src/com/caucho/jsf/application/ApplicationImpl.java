@@ -121,11 +121,11 @@ public class ApplicationImpl
   private HashMap<String, Class> _converterIdMap
     = new HashMap<String, Class>();
 
-  private HashMap<Class, String> _converterClassNameMap
-    = new HashMap<Class, String>();
+  private HashMap<Class<?>, String> _converterClassNameMap
+    = new HashMap<Class<?>, String>();
 
-  private HashMap<Class, Class> _converterClassMap
-    = new HashMap<Class, Class>();
+  private HashMap<Class<?>, Class<?>> _converterClassMap
+    = new HashMap<Class<?>, Class<?>>();
 
   private String _defaultRenderKitId = "HTML_BASIC";
 
@@ -875,7 +875,7 @@ public class ApplicationImpl
     return findConverter(type.getSuperclass());
   }
 
-  public Iterator<Class> getConverterTypes()
+  public Iterator<Class<?>> getConverterTypes()
   {
     return _converterClassMap.keySet().iterator();
   }

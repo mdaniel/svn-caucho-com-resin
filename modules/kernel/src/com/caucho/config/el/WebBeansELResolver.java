@@ -46,8 +46,14 @@ public class WebBeansELResolver extends ELResolver {
 
   public WebBeansELResolver()
   {
-    _webBeans = InjectManager.create();
+    this(InjectManager.create());
+    
     _webBeans.update();
+  }
+
+  public WebBeansELResolver(InjectManager beanManager)
+  {
+    _webBeans = beanManager;
   }
 
   public Class<?> getCommonPropertyType(ELContext context,

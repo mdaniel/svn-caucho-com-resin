@@ -383,7 +383,7 @@ public class ServletConfigImpl
     _servletClassName = servletClassName;
 
     // JSF is special
-    if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
+    if (isFacesServlet()) {
       // ioc/0566
 
       if (_loadOnStartup < 0)
@@ -395,6 +395,11 @@ public class ServletConfigImpl
 
     InjectManager beanManager = InjectManager.create();
     beanManager.addConfiguredBean(servletClassName);
+  }
+  
+  private boolean isFacesServlet()
+  {
+    return "javax.faces.webapp.FacesServlet".equals(_servletClassName);
   }
 
   @DisableConfig

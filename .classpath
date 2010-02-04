@@ -26,7 +26,7 @@
 	<classpathentry kind="lib" path="modules/ext/activation.jar"/>
 	<classpathentry kind="lib" path="modules/ext/javamail-141.jar"/>
 	<classpathentry kind="lib" path="modules/ext/jsf-api.jar"/>
-	<classpathentry kind="lib" path="modules/ext/jsf-impl.jar"/>
+	<classpathentry kind="lib" path="modules/ext/jsf-impl.jar" sourcepath="/src"/>
 	<classpathentry kind="lib" path="modules/ext/jsr173_1.0_api.jar"/>
 	<classpathentry kind="lib" path="modules/ext/jsr88.jar"/>
 	<classpathentry kind="lib" path="modules/ext/trang.jar"/>

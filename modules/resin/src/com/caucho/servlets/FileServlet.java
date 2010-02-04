@@ -144,7 +144,7 @@ public class FileServlet extends GenericServlet {
     }
     else
       req = (HttpServletRequest) request;
-
+    Thread.dumpStack();
     res = (HttpServletResponse) response;
 
     String method = req.getMethod();
@@ -412,7 +412,7 @@ public class FileServlet extends GenericServlet {
         last = 10 * last + ch - '0';
         hasLast = true;
       }
-      
+
       // #3766 - browser errors in range
       if (off < length && ch != ' ' && ch != ',')
         return false;

@@ -31,8 +31,17 @@ package com.caucho.server.dispatch;
 
 import com.caucho.util.L10N;
 import com.caucho.config.*;
+import com.caucho.config.inject.InjectManager;
 
 import javax.annotation.PostConstruct;
+import javax.el.ELContext;
+import javax.el.ELContextEvent;
+import javax.el.ELContextListener;
+import javax.el.ELResolver;
+import javax.faces.FactoryFinder;
+import javax.faces.application.Application;
+import javax.faces.application.ApplicationFactory;
+import javax.faces.context.FacesContextFactory;
 import javax.servlet.FilterChain;
 import javax.servlet.Servlet;
 import javax.servlet.ServletException;
@@ -49,7 +58,7 @@ import java.util.logging.Logger;
 public class ServletManager {
   static final Logger log = Logger.getLogger(ServletManager.class.getName());
   static final L10N L = new L10N(ServletManager.class);
-
+  
   private HashMap<String,ServletConfigImpl> _servlets
     = new HashMap<String,ServletConfigImpl>();
   
@@ -65,6 +74,11 @@ public class ServletManager {
 
   private boolean _isLazyValidate;
 
+
+  public ServletManager()
+  {
+  }
+  
   /**
    * Sets true if validation is lazy.
    */
@@ -298,5 +312,24 @@ public class ServletManager {
         log.log(Level.FINE, e.toString(), e);
       }
     }
+  }
+  
+  class Listener implements ELContextListener {
+
+    /* (non-Javadoc)
+     * @see javax.el.ELContextListener#contextCreated(javax.el.ELContextEvent)
+     */
+    @Override
+    public void contextCreated(ELContextEvent event)
+    {
+      // TODO Auto-generated method stub
+     System.out.println("CREATE!: " + event); 
+     ELContext elContext = event.getELContext();
+     ELResolver resolver = elContext.getELResolver();
+     System.out.println("REV: " + resolver);
+     System.out.println("VAL: " + resolver.getValue(elContext, null, "credentials"));
+     Thread.dumpStack();
+    }
+    
   }
 }
