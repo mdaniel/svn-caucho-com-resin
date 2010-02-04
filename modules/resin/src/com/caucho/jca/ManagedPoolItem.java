@@ -48,12 +48,17 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Implementation of the connection manager manager.
+ * Manages a ManagedConnection in the pool. Each ManagedPoolItem corresponds
+ * one-to-one to a ManagedConnection.
+ * 
+ * The user's view of the pool item is a UserPoolItem. Because of transaction
+ * sharing, it's possible for several UserPoolItems to refer to the same
+ * ManagedPoolItem.
  */
-class PoolItem implements ConnectionEventListener, XAResource {
-  private static final L10N L = new L10N(PoolItem.class);
+class ManagedPoolItem implements ConnectionEventListener, XAResource {
+  private static final L10N L = new L10N(ManagedPoolItem.class);
   private static final Logger log
-    = Logger.getLogger(PoolItem.class.getName());
+    = Logger.getLogger(ManagedPoolItem.class.getName());
 
   private ConnectionPool _cm;
   
@@ -79,8 +84,8 @@ class PoolItem implements ConnectionEventListener, XAResource {
   UserPoolItem _shareHead;
   
   // The other pool items joined transaction
-  private PoolItem _xaHead;
-  private PoolItem _xaNext;
+  private ManagedPoolItem _xaHead;
+  private ManagedPoolItem _xaNext;
   
   private boolean _hasConnectionError;
 
@@ -106,7 +111,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
   private long _idleStartTime;
   private long _activeStartTime;
 
-  public PoolItem(ConnectionPool cm,
+  public ManagedPoolItem(ConnectionPool cm,
 		  ManagedConnectionFactory mcf,
 		  ManagedConnection conn)
   {
@@ -378,7 +383,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
   /**
    * Returns true if the tested pool item is the Xid leader.
    */
-  boolean isJoin(PoolItem item)
+  boolean isJoin(ManagedPoolItem item)
   {
     if (this == item)
       return false;
@@ -444,7 +449,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
   Object allocateConnection()
     throws ResourceException
   {
-    return _mConn.getConnection(_subject, _requestInfo);
+    Object conn = _mConn.getConnection(_subject, _requestInfo);
+    
+    return conn;
   }
 
   /**
@@ -520,34 +527,44 @@ class PoolItem implements ConnectionEventListener, XAResource {
 
   /**
    * Notifies that an application has closed the connection.
+   * 
+   * Remove and close the UserPoolItem associated with the PoolItem. If it's
+   * the last UserPoolItem, move to the idle state.
    */
   public void connectionClosed(ConnectionEvent event)
   {
-    boolean addIdle = false;
-
     Object handle = event.getConnectionHandle();
 
     if (! _hasConnectionError && handle == null && _shareHead != null) {
       log.fine(L.l("JCA close event '{0}' for {1} did not have a connection handle.  Please notify the JCA resource provider.",
 		  event, _mConn));
     }
+   
+    UserPoolItem ptr = _shareHead;
+    UserPoolItem prev = null; 
+
+    while (ptr != null) {
+      UserPoolItem next = ptr.getShareNext();
+
+      Object userConn = ptr.getUserConnection();
+
+      if (userConn == handle || handle == null) {
+        if (prev != null)
+          prev.setShareNext(next);
+        else
+          _shareHead = next;
+        
+	ptr.close();
+      }
+      else
+        prev = ptr;
+
+      ptr = next;
+    }
 
     if (_shareHead == null) {
       toIdle();
       return;
-    }
-    
-    UserPoolItem userPoolItem = _shareHead;
-
-    while (userPoolItem != null) {
-      UserPoolItem next = userPoolItem.getShareNext();
-
-      Object userConn = userPoolItem.getUserConnection();
-
-      if (userConn == handle || handle == null)
-	userPoolItem.close();
-
-      userPoolItem = next;
     }
   }
   
@@ -637,10 +654,10 @@ class PoolItem implements ConnectionEventListener, XAResource {
   public boolean isSameRM(XAResource resource)
     throws XAException
   {
-    if (! (resource instanceof PoolItem))
+    if (! (resource instanceof ManagedPoolItem))
       return false;
 
-    PoolItem poolItem = (PoolItem) resource;
+    ManagedPoolItem poolItem = (ManagedPoolItem) resource;
     
     //if (_cm == poolItem._cm)
     //  return true;
@@ -679,7 +696,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
       UserTransactionImpl trans = _cm.getTransaction();
 
       if (trans != null) {
-	PoolItem xaHead = trans.findJoin(this);
+	ManagedPoolItem xaHead = trans.findJoin(this);
 
 	if (xaHead != null) {
 	  _xaNext = xaHead._xaNext;
@@ -948,7 +965,7 @@ class PoolItem implements ConnectionEventListener, XAResource {
   private void endResource(Xid xid, int flags)
     throws XAException
   {
-    PoolItem xaPtr = this;
+    ManagedPoolItem xaPtr = this;
 
     for (; xaPtr != null; xaPtr = xaPtr._xaNext) {
       if (xaPtr._xaResource != null)
@@ -964,32 +981,35 @@ class PoolItem implements ConnectionEventListener, XAResource {
     _xid = null;
     
     UserPoolItem shareHead = _shareHead;
-    // _shareHead is nullified at end for timing reasons
+    _shareHead = null;
 
-    PoolItem xaPtr = _xaNext;
+    ManagedPoolItem xaPtr = _xaNext;
     _xaHead = null;
     _xaNext = null;
 
-    boolean isClosed = true;
-
-    UserPoolItem ptr = shareHead;
-    while (ptr != null) {
-      UserPoolItem next = ptr.getShareNext();
-      
-      if (ptr.getOwnPoolItem() == this)
-	isClosed = false;
-
-      try {
-	ptr.reassociatePoolItem();
-      } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+    UserPoolItem assignedUserItem = null;
+    for (UserPoolItem ptr = shareHead; ptr != null; ptr = ptr.getShareNext()) {
+      if (ptr.getOwnPoolItem() == this) {
+        assignedUserItem = ptr;
+        break;
+      }
+    }
+    
+    for (UserPoolItem ptr = shareHead; ptr != null; ptr = ptr.getShareNext()) {
+      if (assignedUserItem == null && ptr.getOwnPoolItem() == null) {
+        ptr.associatePoolItem(this);
+        assignedUserItem = ptr;
       }
 
-      ptr = next;
+      try {
+        ptr.reassociatePoolItem();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
     }
 
     while (xaPtr != null) {
-      PoolItem next = xaPtr._xaNext;
+      ManagedPoolItem next = xaPtr._xaNext;
       xaPtr._xaNext = null;
       xaPtr._xaHead = null;
 
@@ -998,7 +1018,9 @@ class PoolItem implements ConnectionEventListener, XAResource {
       xaPtr = next;
     }
 
-    if (! isClosed) {
+    if (assignedUserItem != null) {
+      //_shareHead = assignedUserItem;
+      //_shareHead.setShareNext(null);
     }
     else if (_hasConnectionError) {
       destroy();
