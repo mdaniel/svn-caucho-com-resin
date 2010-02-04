@@ -74,8 +74,7 @@ abstract public class AbstractCondition
       if (currentValue != null) {
         if (currentValue.equals(value)
             || (currentValue.contains(value + ","))
-            || (currentValue.contains(", " + value)))
-        {
+            || (currentValue.contains(", " + value))) {
         }
         else {
           res.setHeader(header, currentValue + ", " + value);

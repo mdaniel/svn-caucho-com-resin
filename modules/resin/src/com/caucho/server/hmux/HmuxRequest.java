@@ -915,11 +915,12 @@ public class HmuxRequest extends AbstractHttpRequest
         boolean isUnidir = code == HMUX_TO_UNIDIR_HMTP;
 
         ServerLinkService linkService
-          = new ServerLinkService(_linkStream,
-                                  _server.getAdminBroker(),
-                                  _server.getServerLinkManager(),
-                                  getRemoteAddr(),
-                                  isUnidir);
+          = new HmuxLinkService(_linkStream,
+                                _server.getAdminBroker(),
+                                _server.getServerLinkManager(),
+                                getRemoteAddr(),
+                                isUnidir,
+                                _server);
 
         _brokerStream = linkService.getBrokerStream();
 

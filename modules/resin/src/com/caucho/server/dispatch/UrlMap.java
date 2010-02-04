@@ -84,12 +84,14 @@ public class UrlMap<E> {
     _bestShort = bestShort;
   }
 
-  boolean contains(Filter<E> filter) {
+  boolean contains(Filter<E> filter)
+  {
     for (int i = _regexps.size() - 1; i >= 0; i--) {
       RegexpEntry<E> regexp = _regexps.get(i);
 
-      if (filter.isMatch(regexp.getValue()))
+      if (filter.isMatch(regexp.getValue())) {
         return true;
+      }
     }
 
     return false;

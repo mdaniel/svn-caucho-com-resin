@@ -162,7 +162,13 @@ public class ServerLinkService extends SimpleActor {
     if (_serverPassStream != null)
       _serverPassStream.setJid(jid);
     
+    notifyValidLogin(from);
+    
     AuthResult result = new AuthResult(jid);
     getLinkStream().queryResult(id, from, to, result);
+  }
+  
+  protected void notifyValidLogin(String jid)
+  {
   }
 }

@@ -287,8 +287,9 @@ abstract public class AbstractHttpResponse {
     if (value == null)
       throw new NullPointerException();
 
-    if (setSpecial(key, value))
+    if (setSpecial(key, value)) {
       return;
+    }
 
     // server/05e8 (tck)
     // XXX: server/13w0 for _isHeaderWritten because the Expires in caching
@@ -312,7 +313,7 @@ abstract public class AbstractHttpResponse {
   {
     int i = 0;
     boolean hasHeader = false;
-
+    
     ArrayList<String> keys = _headerKeys;
     ArrayList<String> values = _headerValues;
 

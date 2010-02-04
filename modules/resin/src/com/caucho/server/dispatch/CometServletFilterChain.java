@@ -30,8 +30,10 @@
 package com.caucho.server.dispatch;
 
 import javax.servlet.*;
+
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
 
 import com.caucho.servlet.comet.CometServlet;
 import com.caucho.servlet.comet.CometController;
@@ -102,36 +104,24 @@ public class CometServletFilterChain implements FilterChain {
       }
     }
 
-    ConnectionCometController controller = null;
+    ServletCometController controller = null;
 
     try {
-      ServletRequest reqPtr = request;
-
-      while (reqPtr instanceof ServletRequestWrapper) {
-        reqPtr = ((ServletRequestWrapper) request).getRequest();
-      }
-
-      HttpServletRequestImpl requestImpl = (HttpServletRequestImpl) reqPtr;
-
-      // XXX: temp refactor
-      // controller = requestImpl.getCometController();
+      controller = (ServletCometController) request.getAttribute("caucho.comet.controller");
 
       if (controller != null) {
+        controller.suspend();
+        
         if (_servlet.resume(request, response, controller)) {
-          // requestImpl.suspend();
-          controller = null;
-        }
-        else {
-          controller.complete();
           controller = null;
         }
       }
       else {
-        // XXX: temp refactor
-        // controller = requestImpl.toComet();
+        controller = new ServletCometController(request, response);
+        request.setAttribute("caucho.comet.controller", controller);
+        controller.suspend();
 
         if (_servlet.service(request, response, controller)) {
-          // requestImpl.suspend();
           controller = null;
         }
       }
@@ -153,6 +143,163 @@ public class CometServletFilterChain implements FilterChain {
     } finally {
       if (controller != null)
         controller.close();
+    }
+  }
+  
+  @SuppressWarnings("deprecation")
+  static class ServletCometController implements CometController, AsyncListener {
+    private ServletRequest _request;
+    private ServletResponse _response;
+    
+    private AsyncContext _context;
+    private AtomicBoolean _isWake = new AtomicBoolean();
+    
+    ServletCometController(ServletRequest request, ServletResponse response)
+    {
+      _request = request;
+      _response = response;
+    }
+    
+    void suspend()
+    {
+      if (_request == null)
+        return;
+      
+      _context = _request.startAsync();
+      _context.addListener(this);
+      
+      _isWake.set(false);
+    }
+
+    @Override
+    public long getMaxIdleTime()
+    {
+      return 0;
+    }
+
+    @Override
+    public boolean isClosed()
+    {
+      return _request == null;
+    }
+
+    @Override
+    public Object getAttribute(String name)
+    {
+      ServletRequest request = _request;
+      
+      if (request != null) {
+        synchronized (request) {
+          return request.getAttribute("caucho.comet." + name);
+        }
+      }
+      
+      return null;
+    }
+
+    @Override
+    public void removeAttribute(String name)
+    {
+      ServletRequest request = _request;
+      
+      if (request != null) {
+        synchronized (request) {
+          request.removeAttribute("caucho.comet." + name);
+        }
+      }
+    }
+
+    @Override
+    public void setAttribute(String name, Object value)
+    {
+      ServletRequest request = _request;
+      
+      if (request != null) {
+        synchronized (request) {
+          request.setAttribute("caucho.comet." + name, value);
+        }
+      }
+    }
+
+    @Override
+    public void setMaxIdleTime(long idleTime)
+    {
+      if (_context != null)
+        _context.setTimeout(idleTime);
+    }
+
+    public boolean isActive()
+    {
+      return _context != null;
+    }
+    
+    @Override
+    public boolean wake()
+    {
+      if (! _isWake.getAndSet(true)) {
+        AsyncContext context = _context;
+        
+        if (context != null)
+          context.dispatch();
+        
+        return true;
+      }
+      
+      return false;
+    }
+
+    @Override
+    public void close()
+    {
+      ServletRequest request = _request;
+      _request = null;
+    
+      ServletResponse response = _response;
+      _response = null;
+    
+      AsyncContext context = _context;
+      _context = null;
+      
+      if (context != null) {
+        context.complete();
+      }
+    }
+
+    @Override
+    public void onComplete(AsyncEvent event) throws IOException
+    {
+      _request = null;
+      _response = null;
+      _context = null;
+    }
+
+    @Override
+    public void onError(AsyncEvent event) throws IOException
+    {
+
+    }
+
+    @Override
+    public void onStartAsync(AsyncEvent event) throws IOException
+    {
+      // TODO Auto-generated method stub
+      
+    }
+
+    /* (non-Javadoc)
+     * @see javax.servlet.AsyncListener#onTimeout(javax.servlet.AsyncEvent)
+     */
+    @Override
+    public void onTimeout(AsyncEvent event) throws IOException
+    {
+      _request = null;
+      _response = null;
+      _context = null;
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _context + "]";
     }
   }
 }

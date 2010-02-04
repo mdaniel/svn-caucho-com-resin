@@ -1376,6 +1376,8 @@ public class Port extends TaskWorker
   void cometSuspend(TcpConnection conn)
   {
     if (conn.isWakeRequested()) {
+      conn.toCometResume();
+      
       _threadPool.schedule(conn.getResumeTask());
     }
     else {
@@ -1399,6 +1401,8 @@ public class Port extends TaskWorker
   boolean cometResume(TcpConnection conn)
   {
     if (_suspendConnectionSet.remove(conn)) {
+      conn.toCometResume();
+      
       _threadPool.schedule(conn.getResumeTask());
 
       return true;

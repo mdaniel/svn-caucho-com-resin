@@ -149,7 +149,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
    * @param res the servlet response.
    * @param method special to tell if from error.
    */
-  public void forward(ServletRequest req, ServletResponse res,
+  public void forward(ServletRequest topRequest, ServletResponse topResponse,
                       String method, Invocation invocation,
                       DispatcherType type)
     throws ServletException, IOException
@@ -158,14 +158,14 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     boolean allowForward = _webApp.isAllowForwardAfterFlush();
 
-    if (res instanceof CauchoResponse) {
-      cauchoRes = (CauchoResponse) res;
+    if (topResponse instanceof CauchoResponse) {
+      cauchoRes = (CauchoResponse) topResponse;
 
       cauchoRes.setForwardEnclosed(! allowForward);
     }
 
     // jsp/15m8
-    if (res.isCommitted() && method == null && ! allowForward) {
+    if (topResponse.isCommitted() && method == null && ! allowForward) {
       IllegalStateException exn;
       exn = new IllegalStateException(L.l("forward() not allowed after buffer has committed."));
 
@@ -182,7 +182,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       // server/10yg
       
       // } else if ("error".equals(method) || (method == null && ! allowForward)) {
-      res.resetBuffer();
+      topResponse.resetBuffer();
 
       if (cauchoRes != null) {
         ServletResponse resp = cauchoRes.getResponse();
@@ -207,39 +207,43 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     HttpServletRequest parentReq;
     ServletRequestWrapper reqWrapper = null;
-    if (req instanceof ServletRequestWrapper) {
-      reqWrapper = (ServletRequestWrapper) req;
+    if (topRequest instanceof ServletRequestWrapper) {
+      // reqWrapper = (ServletRequestWrapper) req;
 
-      ServletRequest request = reqWrapper.getRequest();
+      ServletRequest request = topRequest; // reqWrapper.getRequest();
 
-      while (request instanceof ServletRequestWrapper)
+      while (request instanceof ServletRequestWrapper) {
+        reqWrapper = (ServletRequestWrapper) request;
+      
         request = ((ServletRequestWrapper) request).getRequest();
+      }
 
       parentReq = (HttpServletRequest) request;
-    } else if (req instanceof HttpServletRequest) {
-      parentReq = (HttpServletRequest) req;
+    } else if (topRequest instanceof HttpServletRequest) {
+      parentReq = (HttpServletRequest) topRequest;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletRequest at `{0}'", req));
+        "expected instance of ServletRequest at `{0}'", topRequest));
     }
 
     HttpServletResponse parentRes;
     ServletResponseWrapper resWrapper = null;
 
-    if (res instanceof ServletResponseWrapper) {
-      resWrapper = (ServletResponseWrapper) res;
+    if (topResponse instanceof ServletResponseWrapper) {
+      ServletResponse response = topResponse;
 
-      ServletResponse response = resWrapper.getResponse();
+      while (response instanceof ServletResponseWrapper) {
+        resWrapper = (ServletResponseWrapper) topResponse;
 
-      while (response instanceof ServletResponseWrapper)
         response = ((ServletResponseWrapper) response).getResponse();
+      }
 
       parentRes = (HttpServletResponse) response;
-    } else if (res instanceof HttpServletResponse) {
-      parentRes = (HttpServletResponse) res;
+    } else if (topResponse instanceof HttpServletResponse) {
+      parentRes = (HttpServletResponse) topResponse;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletResponse at `{0}'", req));
+        "expected instance of ServletResponse at `{0}'", topResponse));
     }
 
     ForwardRequest subRequest;
@@ -257,17 +261,18 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     ForwardResponse subResponse = subRequest.getResponse();
 
-    ServletRequest topRequest = subRequest;
-    ServletResponse topResponse = subResponse;
-
     if (reqWrapper != null) {
       reqWrapper.setRequest(subRequest);
-      topRequest = reqWrapper;
+    }
+    else {
+      topRequest = subRequest;
     }
 
     if (resWrapper != null) {
       resWrapper.setResponse(subResponse);
-      topResponse = resWrapper;
+    }
+    else {
+      topResponse = subResponse;
     }
     
     boolean isValid = false;
@@ -289,7 +294,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       
       // server/106r, ioc/0310
       if (isValid) {
-        finishResponse(res);
+        finishResponse(topResponse);
       }
     }
   }
@@ -340,7 +345,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   /**
    * Include a request into the current page.
    */
-  public void include(ServletRequest req, ServletResponse res,
+  public void include(ServletRequest topRequest, ServletResponse topResponse,
                       String method)
     throws ServletException, IOException
   {
@@ -349,37 +354,41 @@ public class RequestDispatcherImpl implements RequestDispatcher {
     HttpServletRequest parentReq;
     ServletRequestWrapper reqWrapper = null;
 
-    if (req instanceof ServletRequestWrapper) {
-      reqWrapper = (ServletRequestWrapper) req;
-
-      ServletRequest request = reqWrapper.getRequest();
-      while (request instanceof ServletRequestWrapper)
+    if (topRequest instanceof ServletRequestWrapper) {
+      ServletRequest request = topRequest;
+      
+      while (request instanceof ServletRequestWrapper) {
+        reqWrapper = (ServletRequestWrapper) request;
+        
         request = ((ServletRequestWrapper) request).getRequest();
+      }
 
       parentReq = (HttpServletRequest) request;
-    } else if (req instanceof HttpServletRequest) {
-      parentReq = (HttpServletRequest) req;
+    } else if (topRequest instanceof HttpServletRequest) {
+      parentReq = (HttpServletRequest) topRequest;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletRequestWrapper at `{0}'", res));
+        "expected instance of ServletRequestWrapper at `{0}'", topResponse));
     }
 
     HttpServletResponse parentRes;
     ServletResponseWrapper resWrapper = null;
 
-    if (res instanceof ServletResponseWrapper) {
-      resWrapper = (ServletResponseWrapper) res;
-
-      ServletResponse response = resWrapper.getResponse();
-      while (response instanceof ServletResponseWrapper)
+    if (topResponse instanceof ServletResponseWrapper) {
+      ServletResponse response = topResponse;
+      
+      while (response instanceof ServletResponseWrapper) {
+        resWrapper = (ServletResponseWrapper) response;
+        
         response = ((ServletResponseWrapper) response).getResponse();
+      }
 
       parentRes = (HttpServletResponse) response;
-    } else if (res instanceof HttpServletResponse) {
-      parentRes = (HttpServletResponse) res;
+    } else if (topResponse instanceof HttpServletResponse) {
+      parentRes = (HttpServletResponse) topResponse;
     } else {
       throw new IllegalStateException(L.l(
-        "expected instance of ServletResponse at `{0}'", res));
+        "expected instance of ServletResponse at `{0}'", topResponse));
     }
 
     IncludeRequest subRequest
@@ -391,17 +400,18 @@ public class RequestDispatcherImpl implements RequestDispatcher {
 
     IncludeResponse subResponse = subRequest.getResponse();
 
-    ServletRequest topRequest = subRequest;
-    ServletResponse topResponse = subResponse;
-
     if (reqWrapper != null) {
       reqWrapper.setRequest(subRequest);
-      topRequest = reqWrapper;
+    }
+    else {
+      topRequest = subRequest;
     }
 
     if (resWrapper != null) {
       resWrapper.setResponse(subResponse);
-      topResponse = resWrapper;
+    }
+    else {
+      topResponse = subResponse;
     }
     
     // jsp/15lf, jsp/17eg - XXX: integrated with ResponseStream?

@@ -342,7 +342,7 @@ with the &lt;use-persistent-store&gt;.</p>
 <example>
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
   &lt;session-config&gt;
-    &lt;use-persistent-store="true"/&gt;
+    &lt;use-persistent-store>true&lt;/use-persistent-store&gt;
   &lt;/session-config&gt;
 &lt;/web-app&gt;
 </example>
@@ -369,7 +369,7 @@ own version of the persistent store.
   &lt;web-app id=''&gt;
 
   &lt;session-config&gt;
-    &lt;use-persistent-store="true"/&gt;
+    &lt;use-persistent-store>true&lt;/use-persistent-store>
   &lt;/session-config&gt;
 
   &lt;/web-app&gt;

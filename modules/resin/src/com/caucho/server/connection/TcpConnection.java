@@ -85,7 +85,9 @@ public class TcpConnection extends AbstractTransportConnection
 
   private ConnectionState _state = ConnectionState.INIT;
   private AsyncController _controller;
+  
   private boolean _isWakeRequested;
+  private boolean _isCompleteRequested;
 
   private long _idleTimeout;
 
@@ -765,6 +767,11 @@ public class TcpConnection extends AbstractTransportConnection
 
     _port.cometSuspend(this);
   }
+  
+  void toCometResume()
+  {
+    _state = _state.toCometResume();
+  }
 
   /**
    * Wakes the connection (comet-style).
@@ -790,6 +797,7 @@ public class TcpConnection extends AbstractTransportConnection
   {
     _state = _state.toCometResume();
     // _state = _state.toCometComplete();
+    _isCompleteRequested = true;
 
     AsyncController async = getAsyncController();
 
@@ -801,14 +809,17 @@ public class TcpConnection extends AbstractTransportConnection
 
   public void toCometComplete()
   {
+    _isCompleteRequested = true;
+    
     ConnectionState state = _state;
+
     
     if (state.isCometSuspend()) {
       // XXX: timing issues, need to have isComplete flag
       wake();
     }
     
-    _state = _state.toCometComplete();
+    // _state = _state.toCometComplete();
   }
 
   //
@@ -848,7 +859,7 @@ public class TcpConnection extends AbstractTransportConnection
    */
   protected void closeControllerImpl()
   {
-    _state = _state.toCometComplete();
+    _isCompleteRequested = true;
 
     getPort().cometResume(this);
   }
@@ -1176,7 +1187,7 @@ public class TcpConnection extends AbstractTransportConnection
       boolean isValid = false;
 
       try {
-        _state = _state.toCometResume();
+        // _state = _state.toCometResume();
 
         _isWakeRequested = false;
         
