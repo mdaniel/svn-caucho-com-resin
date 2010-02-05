@@ -1323,8 +1323,9 @@ public class Var extends Value
     // php/33m{g,h}
     // _value = _value.toAutoArray().append(index, value);
     _value = _value.append(index, value);
-
-    return value;
+    
+    // this is slow, but ok because put() is only used for slow ops
+    return _value.get(index);
   }
 
   /**

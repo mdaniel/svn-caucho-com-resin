@@ -2521,7 +2521,7 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
-   * Sets the array ref.
+   * Sets the array ref and returns the value
    */
   public Value put(Value index, Value value)
   {

@@ -51,8 +51,7 @@ public class ThisFieldExpr extends AbstractVarExpr {
   
   protected final StringValue _name;
 
-  public ThisFieldExpr(ThisExpr qThis,
-		       StringValue name)
+  public ThisFieldExpr(ThisExpr qThis, StringValue name)
   {
     _qThis = qThis;
     _name = name;
@@ -198,17 +197,18 @@ public class ThisFieldExpr extends AbstractVarExpr {
   /**
    * Evaluates as an array index assign ($a[index] = value).
    */
-  public void evalArrayAssign(Env env, Value index, Value value)
+  @Override
+  public Value evalArrayAssign(Env env, Value index, Value value)
   {
     Value obj = env.getThis();
 
     if (obj.isNull())
       cannotUseThisError(env);
     
-    Value field = obj.getThisField(env, _name);
-    Value result = field.append(index, value);
-    
-    obj.putThisField(env, _name, result);
+    Value fieldVar = obj.getThisFieldVar(env, _name);
+
+    // php/03mm
+    return fieldVar.put(index, value);
   }
 
   /**
