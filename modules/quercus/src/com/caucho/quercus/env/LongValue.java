@@ -42,14 +42,14 @@ import java.util.IdentityHashMap;
 @SuppressWarnings("serial")
 public class LongValue extends NumberValue
 {
-  public static final LongValue MINUS_ONE = new LongValue(-1);
-  public static final LongValue ZERO = new LongValue(0);
-  public static final LongValue ONE = new LongValue(1);
+  public static final LongValue MINUS_ONE;
+  public static final LongValue ZERO;
+  public static final LongValue ONE;
 
   public static final int STATIC_MIN = -1024;
   public static final int STATIC_MAX = 16 * 1024;
 
-  public static final LongValue[]STATIC_VALUES;
+  public static final LongCacheValue[]STATIC_VALUES;
 
   private final long _value;
 
@@ -301,6 +301,72 @@ public class LongValue extends NumberValue
   public Value pos()
   {
     return this;
+  }
+
+  /**
+   * The next integer
+   */
+  @Override
+  public Value addOne()
+  {
+    long newValue = _value + 1;
+    
+    return LongValue.create(newValue);
+  }
+
+  /**
+   * The previous integer
+   */
+  @Override
+  public Value subOne()
+  {
+    long newValue = _value - 1;
+    
+    return LongValue.create(newValue);
+  }
+
+  /**
+   * Pre-increment the following value.
+   */
+  @Override
+  public Value preincr()
+  {
+    long newValue = _value + 1;
+    
+    return LongValue.create(newValue);
+  }
+
+  /**
+   * Pre-increment the following value.
+   */
+  @Override
+  public Value predecr()
+  {
+    long newValue = _value - 1;
+    
+    return LongValue.create(newValue);
+  }
+
+  /**
+   * Post-increment the following value.
+   */
+  @Override
+  public Value postincr()
+  {
+    long newValue = _value + 1;
+    
+    return LongValue.create(newValue);
+  }
+
+  /**
+   * Post-decrement the following value.
+   */
+  @Override
+  public Value postdecr()
+  {
+    long newValue = _value - 1;
+    
+    return LongValue.create(newValue);
   }
 
   /**
@@ -562,10 +628,26 @@ public class LongValue extends NumberValue
   }
 
   static {
-    STATIC_VALUES = new LongValue[STATIC_MAX - STATIC_MIN + 1];
+    STATIC_VALUES = new LongCacheValue[STATIC_MAX - STATIC_MIN + 1];
+    
+    try {
 
-    for (int i = STATIC_MIN; i <= STATIC_MAX; i++) {
-      STATIC_VALUES[i - STATIC_MIN] = new LongValue(i);
+    for (int i = STATIC_MAX; i >= STATIC_MIN; i--) {
+      LongCacheValue value = new LongCacheValue(i, create(i + 1));
+
+      STATIC_VALUES[i - STATIC_MIN] = value;
+      
+      if (i < STATIC_MAX)
+        STATIC_VALUES[i - STATIC_MIN + 1].setPrev(value);
     }
+    
+    STATIC_VALUES[0].setPrev(create(STATIC_MIN - 1));
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    
+    ZERO = create(0);
+    ONE = create(1);
+    MINUS_ONE = create(-1);
   }
 }

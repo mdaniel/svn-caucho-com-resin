@@ -998,6 +998,72 @@ public class Var extends Value
   }
 
   /**
+   * Pre-increment the following value.
+   */
+  @Override
+  public Value addOne()
+  {
+    return _value.addOne();
+  }
+
+  /**
+   * Pre-increment the following value.
+   */
+  @Override
+  public Value subOne()
+  {
+    return _value.subOne();
+  }
+
+  /**
+   * Pre-increment the following value.
+   */
+  @Override
+  public Value preincr()
+  {
+    _value = _value.preincr();
+
+    return _value;
+  }
+
+  /**
+   * Pre-increment the following value.
+   */
+  @Override
+  public Value predecr()
+  {
+    _value = _value.predecr();
+
+    return _value;
+  }
+
+  /**
+   * Post-increment the following value.
+   */
+  @Override
+  public Value postincr()
+  {
+    Value value = _value;
+
+    _value = value.postincr();
+
+    return value;
+  }
+
+  /**
+   * Post-increment the following value.
+   */
+  @Override
+  public Value postdecr()
+  {
+    Value value = _value;
+
+    _value = value.postdecr();
+
+    return value;
+  }
+
+  /**
    * Increment the following value.
    */
   @Override

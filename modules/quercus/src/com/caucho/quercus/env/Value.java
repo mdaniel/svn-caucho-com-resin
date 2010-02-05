@@ -1890,6 +1890,54 @@ abstract public class Value implements java.io.Serializable
   }
 
   /**
+   * Return the next integer
+   */
+  public Value addOne()
+  {
+    return add(1);
+  }
+
+  /**
+   * Return the previous integer
+   */
+  public Value subOne()
+  {
+    return sub(1);
+  }
+
+  /**
+   * Pre-increment the following value.
+   */
+  public Value preincr()
+  {
+    return increment(1);
+  }
+
+  /**
+   * Post-increment the following value.
+   */
+  public Value postincr()
+  {
+    return increment(1);
+  }
+
+  /**
+   * Pre-increment the following value.
+   */
+  public Value predecr()
+  {
+    return increment(-1);
+  }
+
+  /**
+   * Post-increment the following value.
+   */
+  public Value postdecr()
+  {
+    return increment(-1);
+  }
+
+  /**
    * Increment the following value.
    */
   public Value increment(int incr)

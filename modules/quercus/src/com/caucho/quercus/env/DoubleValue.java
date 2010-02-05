@@ -287,6 +287,67 @@ public class DoubleValue extends NumberValue
   /**
    * Increment the following value.
    */
+  @Override
+  public Value addOne()
+  {
+    return new DoubleValue(_value + 1);
+  }
+
+  /**
+   * Increment the following value.
+   */
+  @Override
+  public Value subOne()
+  {
+    double next = _value - 1;
+    
+    /*
+    if (next == (long) next)
+      return LongValue.create(next);
+    else
+    */
+    return new DoubleValue(next);
+  }
+
+  /**
+   * Increment the following value.
+   */
+  @Override
+  public Value preincr()
+  {
+    return new DoubleValue(_value + 1);
+  }
+
+  /**
+   * Increment the following value.
+   */
+  @Override
+  public Value predecr()
+  {
+    return new DoubleValue(_value - 1);
+  }
+
+  /**
+   * Increment the following value.
+   */
+  @Override
+  public Value postincr()
+  {
+    return new DoubleValue(_value + 1);
+  }
+
+  /**
+   * Increment the following value.
+   */
+  @Override
+  public Value postdecr()
+  {
+    return new DoubleValue(_value - 1);
+  }
+
+  /**
+   * Increment the following value.
+   */
   public Value increment(int incr)
   {
     return new DoubleValue(_value + incr);
