@@ -144,7 +144,7 @@ public class FileServlet extends GenericServlet {
     }
     else
       req = (HttpServletRequest) request;
-    Thread.dumpStack();
+
     res = (HttpServletResponse) response;
 
     String method = req.getMethod();

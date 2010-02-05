@@ -880,6 +880,23 @@ cse_read_string(stream_t *s, char *buf, int length)
  * JVM owns it.
  */
 static int
+decode_backup(char *tail)
+{
+  int hash = 37;
+  int ch;
+
+  while ((ch = *tail++) != 0) {
+    hash = 65521 * hash + ch;
+  }
+
+  return hash & 0x7fffffff;
+}
+
+/**
+ * Decodes the first 3 characters of the session to see which
+ * JVM owns it.
+ */
+static int
 decode(char code)
 {
   if ('a' <= code && code <= 'z')
@@ -910,7 +927,7 @@ cse_session_from_string(char *source, char *cookie, int *backup)
     if (match[len] == '=')
       len++;
 
-    *backup = decode(match[len + 1]);
+    *backup = decode_backup(&match[len]);
     
     return decode(match[len]);
   }
@@ -1512,6 +1529,10 @@ open_session_host(stream_t *s, cluster_t *cluster,
   if (size > 0) {
     session_index = session_index % size;
     backup_index = backup_index % size;
+
+    if (backup_index == session_index) {
+      backup_index = (backup_index + 1) % size;
+    }
   }
 
   for (host = 0; host < size; host++) {

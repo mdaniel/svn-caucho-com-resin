@@ -527,8 +527,10 @@ public class TcpConnection extends AbstractTransportConnection
     } finally {
       thread.setContextClassLoader(_loader);
 
-      if (result == null)
+      if (result == null) {
         destroy();
+        return RequestState.EXIT;
+      }
     }
 
     if (result == RequestState.DUPLEX)

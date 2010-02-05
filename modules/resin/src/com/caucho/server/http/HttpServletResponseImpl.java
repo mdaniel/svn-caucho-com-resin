@@ -961,7 +961,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
     _responseStream.clearBuffer();
     
-    reset();
+    // server/10c4
+    // reset();
+    resetBuffer();
 
     setStatus(SC_MOVED_TEMPORARILY);
     String path = getAbsolutePath(url);
@@ -1551,7 +1553,6 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
 
   public int getStatus()
   {
-    // XXX: test
     return _status;
   }
 

@@ -28,7 +28,7 @@
 
 package com.caucho.es;
 
-import com.caucho.Version;
+import com.caucho.VersionFactory;
 import com.caucho.es.parser.Parser;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.MergePath;
@@ -115,7 +115,7 @@ public class Resin {
 	  resinConf = argv[shift + 1];
 	  shift += 2;
 	} else if (argv[shift].equals("--version")) {
-	  System.out.println(Version.VERSION);
+	  System.out.println(VersionFactory.getVersion());
 	  System.exit(0);
 	} else
 	  break;

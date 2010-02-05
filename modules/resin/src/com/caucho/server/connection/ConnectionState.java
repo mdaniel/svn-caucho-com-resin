@@ -473,7 +473,7 @@ enum ConnectionState {
     {
       conn.getPort().duplexKeepaliveBegin();
 
-      return REQUEST_KEEPALIVE;
+      return DUPLEX_KEEPALIVE;
     }
 
     @Override

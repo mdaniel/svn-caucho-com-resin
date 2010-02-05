@@ -217,7 +217,15 @@ public class ServletConfigImpl
 
   public ServletSecurityElement getSecurityElement()
   {
-    return _servletManager.getSecurityElement(getServletClass());
+    // server/10ds - servlets are allowed to be lazy loaded. It's not an
+    // error in this case for a class not found.
+    try {
+      return _servletManager.getSecurityElement(getServletClass());
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      return null;
+    }
   }
 
   public void setMultipartConfig(MultipartConfigElement multipartConfig)

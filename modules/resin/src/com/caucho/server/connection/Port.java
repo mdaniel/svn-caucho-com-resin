@@ -1308,7 +1308,7 @@ public class Port extends TaskWorker
    */
   void keepaliveAllocate()
   {
-    _keepaliveAllocateCount.decrementAndGet();
+    _keepaliveAllocateCount.incrementAndGet();
   }
 
   /**
@@ -1317,7 +1317,7 @@ public class Port extends TaskWorker
    */
   void keepaliveFree()
   {
-    _keepaliveAllocateCount.incrementAndGet();
+    _keepaliveAllocateCount.decrementAndGet();
   }
 
   /**

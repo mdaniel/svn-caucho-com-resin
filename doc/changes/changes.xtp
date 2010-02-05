@@ -13,6 +13,7 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>mod_caucho: backup needs to hash the entire cookie for the new clustering (#3877)</li>
 <li>quercus: remove java_bean and java_lookup Resin dependencies (rep by domdom)</li>
 <li>junit: add com.caucho.junit.ResinJUnitRunner for junit</li>
 <li>embed: add com.caucho.resin.ResinContext for non-server embedding, e.g. testing.</li>

@@ -1092,7 +1092,8 @@ public class WebApp extends ServletContextImpl
     _servletManager.addSecurityElement(servletClass, securityElement);
   }
 
-  private void initSecurityConstraints() {
+  private void initSecurityConstraints()
+  {
     Map<String, ServletConfigImpl> servlets = _servletManager.getServlets();
 
     for (Map.Entry<String, ServletConfigImpl> entry : servlets.entrySet()) {
@@ -1103,6 +1104,11 @@ public class WebApp extends ServletContextImpl
         continue;
 
       final Set<String> patterns = _servletMapper.getUrlPatterns(entry.getKey());
+      final Collection<HttpMethodConstraintElement> constraints
+        = securityElement.getHttpMethodConstraints();
+      
+      if (constraints == null)
+        continue;
 
       for (HttpMethodConstraintElement httpMethodConstraintElement
         : securityElement.getHttpMethodConstraints()) {
