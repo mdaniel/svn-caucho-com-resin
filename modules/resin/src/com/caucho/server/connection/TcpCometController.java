@@ -61,7 +61,9 @@ public class TcpCometController extends AsyncController {
   public void setMaxIdleTime(long idleTime)
   {
     if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
-      _maxIdleTime = Long.MAX_VALUE / 2;
+      idleTime = Long.MAX_VALUE / 2;
+    
+    _conn.setIdleTimeout(idleTime);
   }
 
   /**
@@ -69,7 +71,7 @@ public class TcpCometController extends AsyncController {
    */
   public long getMaxIdleTime()
   {
-    return _maxIdleTime;
+    return _conn.getIdleTimeout();
   }
 
   /**

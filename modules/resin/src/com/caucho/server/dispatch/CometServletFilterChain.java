@@ -270,7 +270,7 @@ public class CometServletFilterChain implements FilterChain {
     {
       _request = null;
       _response = null;
-      _context = null;
+      // _context = null;
     }
 
     @Override

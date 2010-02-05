@@ -30,6 +30,7 @@
 package com.caucho.config.j2ee;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
@@ -55,6 +56,7 @@ import com.caucho.config.inject.InjectionPointHandler;
 import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldGeneratorProgram;
+import com.caucho.config.program.MethodGeneratorProgram;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.util.L10N;
 
@@ -77,34 +79,57 @@ public class ResourceHandler extends JavaeeInjectionHandler {
   {
     Resource resource = field.getAnnotation(Resource.class);
     
-    return generateContext(field, resource);
+    Field javaField = field.getJavaMember();
+    
+    String loc = getLocation(javaField);
+    
+    String jndiName = javaField.getDeclaringClass().getName() + "/" + javaField.getName();
+    Class<?> bindType = javaField.getType();
+    
+    ValueGenerator gen = generateContext(loc, bindType, jndiName, resource);
+    
+    return new FieldGeneratorProgram(field.getJavaMember(), gen);
   }
-  // InjectIntrospector.introspect(_injectProgramList, field);
+  
+  @Override
+  public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
+  {
+    Resource resource = method.getAnnotation(Resource.class);
+    
+    Method javaMethod = method.getJavaMember();
+    
+    String loc = getLocation(method.getJavaMember());
+    
+    String jndiName = (javaMethod.getDeclaringClass().getName()
+                       + "/" + javaMethod.getName());
+    
+    Class<?> bindType = javaMethod.getParameterTypes()[0];
+    
+    ValueGenerator gen = generateContext(loc, bindType, jndiName, resource);
+    
+    return new MethodGeneratorProgram(method.getJavaMember(), gen);
+  }
 
-  private ConfigProgram generateContext(AnnotatedField<?> field,
-                                        Resource resource)
+  private ValueGenerator generateContext(String loc,
+                                         Class<?> bindType,
+                                         String fullJndiName,
+                                         Resource resource)
     throws ConfigException
   {
     String name = resource.name();
     String mappedName = resource.mappedName();
     String lookup = null; // resource.lookup();
 
-    Field javaField = field.getJavaMember();
-    
-    String location = getLocation(javaField);
-
-    Class<?> bindType = javaField.getType();
-    
     ValueGenerator gen;
 
     if (lookup != null && ! "".equals(lookup))
-      gen = new JndiValueGenerator(location, bindType, lookup);
+      gen = new JndiValueGenerator(loc, bindType, lookup);
     else
-      gen = bindValueGenerator(location, bindType, name, mappedName);
+      gen = bindValueGenerator(loc, bindType, name, mappedName);
       
-    bindJndi(name, gen, javaField);
+    bindJndi(name, gen, fullJndiName);
     
-    return new FieldGeneratorProgram(javaField, gen);
+    return gen;
   }
 
   private ValueGenerator bindValueGenerator(String location, 

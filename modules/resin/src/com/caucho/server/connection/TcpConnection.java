@@ -563,9 +563,7 @@ public class TcpConnection extends AbstractTransportConnection
 
       getWriteStream().flush();
 
-      if (_state.isCometActive()) {
-        toSuspend();
-
+      if (_state.isCometActive() && toSuspend()) {
         return RequestState.THREAD_DETACHED;
       }
     } while (_state.isKeepaliveAllocated());
@@ -748,6 +746,9 @@ public class TcpConnection extends AbstractTransportConnection
   @Override
   public AsyncController toComet(CometHandler cometHandler)
   {
+    if (_isCompleteRequested)
+      throw new IllegalStateException("Comet cannot be requested after complete().");
+    
     _state = _state.toComet();
     
     _controller = new TcpCometController(this, cometHandler);
@@ -758,14 +759,22 @@ public class TcpConnection extends AbstractTransportConnection
     return _controller;
   }
 
-  private void toSuspend()
+  private boolean toSuspend()
   {
     _idleStartTime = Alarm.getCurrentTime();
     _idleExpireTime = _idleStartTime + _idleTimeout;
 
     _state = _state.toCometSuspend();
 
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " suspending comet");
+    
     _port.cometSuspend(this);
+    
+    if (_isCompleteRequested)
+      wake();
+    
+    return true;
   }
   
   void toCometResume()
@@ -784,7 +793,7 @@ public class TcpConnection extends AbstractTransportConnection
     _isWakeRequested = true;
 
     // comet
-    if (getPort().cometResume(this)) {
+    if (_state.isCometSuspend() && getPort().cometResume(this)) {
       log.fine(dbgId() + " wake");
       return true;
     }
@@ -795,8 +804,6 @@ public class TcpConnection extends AbstractTransportConnection
 
   void toCometTimeout()
   {
-    _state = _state.toCometResume();
-    // _state = _state.toCometComplete();
     _isCompleteRequested = true;
 
     AsyncController async = getAsyncController();
@@ -952,6 +959,7 @@ public class TcpConnection extends AbstractTransportConnection
 
     ConnectionState state = _state;
     _state = state.toIdle();
+    _isCompleteRequested = false;
 
     if (state.isAllowIdle()) {
       _port.free(this);
@@ -1201,12 +1209,11 @@ public class TcpConnection extends AbstractTransportConnection
 
         getRequest().handleResume();
         
-        if (_state.isCometActive()) {
-          toSuspend();
-
+        if (_state.isCometActive() && toSuspend()) {
           isValid = true;
         } else if (_state.isKeepaliveAllocated()) {
           isValid = true;
+          _isCompleteRequested = false;
           _keepaliveTask.run();
         }
      } catch (IOException e) {

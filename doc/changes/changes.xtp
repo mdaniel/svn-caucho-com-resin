@@ -13,6 +13,7 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>quercus: remove java_bean and java_lookup Resin dependencies (rep by domdom)</li>
 <li>junit: add com.caucho.junit.ResinJUnitRunner for junit</li>
 <li>embed: add com.caucho.resin.ResinContext for non-server embedding, e.g. testing.</li>
 <li>javaee: refactor @PersistenceContext, @PersistenceUnit, @Resource (#3708, rep by Wesley)</li>

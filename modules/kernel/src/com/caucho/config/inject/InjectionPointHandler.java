@@ -41,16 +41,16 @@ import com.caucho.config.program.ConfigProgram;
 abstract public class InjectionPointHandler {
   public ConfigProgram introspectType(AnnotatedType<?> type)
   {
-    return null;
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public ConfigProgram introspectField(AnnotatedField<?> field)
   {
-    return null;
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
   {
-    return null;
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

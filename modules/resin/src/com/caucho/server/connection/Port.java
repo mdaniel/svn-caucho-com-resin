@@ -1795,13 +1795,16 @@ public class Port extends TaskWorker
 
         for (int i = _suspendSet.size() - 1; i >= 0; i--) {
           TcpConnection conn = _suspendSet.get(i);
-
-          if (conn.getIdleStartTime() + _suspendTimeMax < now) {
+          
+          if (conn.getIdleExpireTime() < now) {
             _timeoutSet.add(conn);
+            continue;
           }
 
+          long idleStartTime = conn.getIdleStartTime();
+
           // check periodically for end of file
-          if (conn.getIdleStartTime() + _suspendCloseTimeMax < now
+          if (idleStartTime + _suspendCloseTimeMax < now
               && conn.isReadEof()) {
             _completeSet.add(conn);
           }

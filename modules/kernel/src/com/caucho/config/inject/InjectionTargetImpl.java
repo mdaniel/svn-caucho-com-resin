@@ -750,8 +750,14 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
                                                        args));
       }
       else {
-        // XXX:
-        // InjectIntrospector.introspect(_injectProgramList, method);
+        InjectionPointHandler handler
+          = getBeanManager().getInjectionPointHandler(method);
+        
+        if (handler != null) {
+          ConfigProgram program = new MethodHandlerProgram(method, handler);
+          
+          _injectProgramList.add(program);
+        }
       }
     }
 
@@ -877,6 +883,31 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     {
       _boundProgram = _handler.introspectField(_field);
     }
+  }
+  
+  class MethodHandlerProgram extends ConfigProgram {
+    private final AnnotatedMethod<?> _method;
+    private final InjectionPointHandler _handler;
+    private ConfigProgram _boundProgram;
+    
+    MethodHandlerProgram(AnnotatedMethod<?> method,
+                         InjectionPointHandler handler)
+    {
+      _method = method;
+      _handler = handler;
+    }
+  
+    public void inject(Object instance, ConfigContext env)
+    {
+      if (_boundProgram == null)
+        bind();
       
+      _boundProgram.inject(instance, env);
+    }
+    
+    private void bind()
+    {
+      _boundProgram = _handler.introspectMethod(_method);
+    }
   }
 }

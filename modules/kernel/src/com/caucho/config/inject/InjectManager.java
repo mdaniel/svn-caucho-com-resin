@@ -1508,6 +1508,23 @@ public class InjectManager
     
     return null;
   }
+  
+  InjectionPointHandler getInjectionPointHandler(AnnotatedMethod<?> method)
+  {
+    // InjectIntrospector.introspect(_injectProgramList, field);
+    
+    for (Annotation ann : method.getAnnotations()) {
+      Class<? extends Annotation> annType = ann.annotationType();
+      
+      InjectionPointHandler handler = _injectionMap.get(annType);
+      
+      if (handler != null) {
+        return handler;
+      }
+    }
+    
+    return null;
+  }
 
   /**
    * Internal callback during creation to get a new injection instance.

@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.management.MalformedObjectNameException;
 import javax.management.ObjectName;
 import javax.naming.Context;
@@ -92,6 +93,8 @@ public class ResinModule
   public final static int XA_STATUS_ROLLING_BACK = 9;
 
   private static LruCache<String,SaveState> _saveState;
+  
+  private BeanManager _beanManager;
 
   /**
    * Converts a string into its binary representation, according to the
@@ -118,19 +121,28 @@ public class ResinModule
   /**
    * Returns the matchding webbeans.
    */
-  public static Object java_bean(String name)
+  public Object java_bean(String name)
   {
-    InjectManager beanManager = InjectManager.create();
+    if (_beanManager == null) {
+      try {
+        _beanManager = (BeanManager) new InitialContext().lookup("java:comp/BeanManager");
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+      
+      if (_beanManager == null)
+        return null;
+    }
 
-    Set<Bean<?>> beans = beanManager.getBeans(name);
+    Set<Bean<?>> beans = _beanManager.getBeans(name);
 
     if (beans.size() == 0)
       return null;
 
-    Bean bean = beanManager.resolve(beans);
-    CreationalContext env = beanManager.createCreationalContext(bean);
+    Bean<?> bean = _beanManager.resolve(beans);
+    CreationalContext<?> env = _beanManager.createCreationalContext(bean);
 
-    return beanManager.getReference(bean, bean.getBeanClass(), env);
+    return _beanManager.getReference(bean, bean.getBeanClass(), env);
   }
 
   /**
@@ -143,7 +155,18 @@ public class ResinModule
    */
   public static Object jndi_lookup(String name)
   {
-    return Jndi.lookup(name);
+    if (! name.startsWith("java:") && ! name.startsWith("/"))
+      name = "java:comp/env/" + name;
+    
+    try {
+      Context ic = new InitialContext();
+      
+      return ic.lookup(name);
+    } catch (NamingException e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
+    
+    return null;
   }
 
 

@@ -30,6 +30,7 @@
 package com.caucho.config.j2ee;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Set;
 
 import javax.enterprise.inject.Any;
@@ -94,10 +95,10 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     return null;
   }
   
-  protected void bindJndi(String name, ValueGenerator gen, Field field)
+  protected void bindJndi(String name, ValueGenerator gen, String fullJndiName)
   {
     if (name == null || "".equals(name)) {
-      name = field.getDeclaringClass().getName() + "/" + field.getName();
+      name = fullJndiName;
     }
     
     if (! name.startsWith("java:")) {
@@ -115,5 +116,11 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
   {
     return (javaField.getDeclaringClass().getName() 
             + "." + javaField.getName() + " ");
+  }
+
+  protected String getLocation(Method javaMethod)
+  {
+    return (javaMethod.getDeclaringClass().getName() 
+            + "." + javaMethod.getName() + " ");
   }
 }
