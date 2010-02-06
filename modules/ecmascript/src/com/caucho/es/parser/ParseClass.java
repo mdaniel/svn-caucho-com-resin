@@ -28,6 +28,7 @@
 
 package com.caucho.es.parser;
 
+import com.caucho.VersionFactory;
 import com.caucho.es.*;
 import com.caucho.java.LineMap;
 import com.caucho.util.CharBuffer;
