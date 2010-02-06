@@ -73,6 +73,11 @@ public class StreamConnection extends AbstractTransportConnection {
     return _localPort;
   }
 
+  public boolean isPortActive()
+  {
+    return true;
+  }
+
   public InetAddress getRemoteAddress()
   {
     return _remoteAddress;
@@ -149,24 +154,24 @@ public class StreamConnection extends AbstractTransportConnection {
   {
     _remoteAddress = addr;
   }
-  
+
   @Override
   public AsyncController toComet(CometHandler handler)
   {
     StreamAsyncController asyncController
       = new StreamAsyncController(handler);
-    
+
     return asyncController;
   }
-  
+
   class StreamAsyncController extends AsyncController {
     private CometHandler _handler;
-    
+
     StreamAsyncController(CometHandler handler)
     {
       _handler = handler;
     }
-    
+
     public String toString()
     {
       return getClass().getSimpleName() + "[]";
