@@ -279,8 +279,16 @@ public class ServletMapper {
       if (matchResult != null && ! contextURI.endsWith("/")
           && ! (invocation instanceof SubInvocation)) {
         String contextPath = invocation.getContextPath();
-
+        
         return new RedirectFilterChain(contextPath + contextURI + "/");
+      }
+
+      if (matchResult != null && invocation instanceof Invocation) {
+        Invocation inv = (Invocation) invocation;
+
+        inv.setContextURI(matchResult.getContextUri());
+        // server/10r9
+        // inv.setRawURI(inv.getRawURI() + file);
       }
     }
 
@@ -414,15 +422,6 @@ public class ServletMapper {
 
             if (servletName != null || _defaultServlet != null) {
               contextURI = welcomeURI;
-
-              if (invocation instanceof Invocation) {
-                Invocation inv = (Invocation) invocation;
-
-                inv.setContextURI(contextURI);
-                // server/10r9
-                // inv.setRawURI(inv.getRawURI() + file);
-              }
-
               return new MatchResult(servletName, contextURI);
             }
           }

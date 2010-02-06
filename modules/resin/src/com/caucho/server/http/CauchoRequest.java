@@ -77,6 +77,7 @@ public interface CauchoRequest extends HttpServletRequest {
   public void clientDisconnect();
 
   public boolean isLoginRequested();
+  public void requestLogin();
   public boolean login(boolean isFail);
 
   // public HashMap<String,String> setRoleMap(HashMap<String,String> roleMap);

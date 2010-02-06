@@ -65,6 +65,8 @@ public class AsyncRequest extends CauchoRequestWrapper {
 		      Invocation invocation)
   {
     super(request);
+    
+    setResponse(response);
 
     _invocation = invocation;
   }

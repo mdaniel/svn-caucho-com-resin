@@ -1391,49 +1391,25 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return null;
   }
-
   /**
    * Returns true if any authentication is requested
    */
+  @Override
   public boolean isLoginRequested()
   {
     return _isLoginRequested;
   }
-
-  /**
-   * @since Servlet 3.0
-   */
+  
   @Override
-  public boolean authenticate(HttpServletResponse response)
-    throws IOException, ServletException
+  public void requestLogin()
   {
-    WebApp webApp = getWebApp();
-
-    if (webApp == null)
-      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
-
-    // server/1aj{0,1}
-    Authenticator auth = webApp.getConfiguredAuthenticator();
-
-    if (auth == null)
-      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
-
-    Login login = webApp.getLogin();
-
-    if (login == null)
-      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
-
-    Principal principal = login.login(this, response, true);
-
-    if (principal != null)
-      return true;
-
-    return false;
+    _isLoginRequested = true;
   }
 
   /**
    * @since Servlet 3.0
    */
+  /*
   @Override
   public void login(String username, String password)
     throws ServletException
@@ -1478,23 +1454,18 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     if (principal == null)
       throw new ServletException("can't authenticate a user");
   }
+  */
 
   /**
    * Authenticate the user.
    */
+  /*
   @Override
   public boolean login(boolean isFail)
   {
     try {
-      /*
-      Principal user = null;
-      user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
-
-      if (user != null)
-        return true;
-      */
-
       WebApp webApp = getWebApp();
+      
       if (webApp == null) {
         if (log.isLoggable(Level.FINE))
           log.finer("authentication failed, no web-app found");
@@ -1511,14 +1482,6 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
         Principal user = login.login(this, getResponse(), isFail);
 
         return user != null;
-        /*
-        if (user == null)
-          return false;
-
-        setAttribute(AbstractLogin.LOGIN_NAME, user);
-
-        return true;
-        */
       }
       else if (isFail) {
         if (log.isLoggable(Level.FINE))
@@ -1540,6 +1503,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       return false;
     }
   }
+  */
 
   /**
    * Gets the remote user from the authorization type
@@ -1574,42 +1538,6 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       return user.getName();
     else
       return null;
-  }
-
-  /**
-   * Returns the Principal representing the logged in user.
-   */
-  public Principal getUserPrincipal()
-  {
-    _isLoginRequested = true;
-
-    Principal user;
-    user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
-
-    if (user != null)
-      return user;
-
-    WebApp app = getWebApp();
-    if (app == null)
-      return null;
-
-    // If the authenticator can find the user, return it.
-    Login login = app.getLogin();
-
-    if (login != null) {
-      user = login.getUserPrincipal(this);
-
-      if (user != null) {
-        _response.setPrivateCache(true);
-      }
-      else {
-        // server/123h, server/1920
-        // distinguishes between setPrivateCache and setPrivateOrResinCache
-        // _response.setPrivateOrResinCache(true);
-      }
-    }
-
-    return user;
   }
 
   /**

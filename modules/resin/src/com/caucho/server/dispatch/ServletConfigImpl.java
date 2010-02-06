@@ -211,8 +211,7 @@ public class ServletConfigImpl
   {
     _servletManager.addSecurityElement(getServletClass(), securityElement);
     
-    // XXX:
-    throw new UnsupportedOperationException(getClass().getName());
+    return new HashSet<String>();
   }
 
   public ServletSecurityElement getSecurityElement()

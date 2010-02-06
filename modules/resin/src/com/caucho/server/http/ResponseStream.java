@@ -723,6 +723,10 @@ abstract public class ResponseStream extends ToByteResponseStream {
         || res.isDisableCache()) {
       return;
     }
+    
+    // server/13de
+    if (_cacheInvocation != null)
+      return;
 
     AbstractCacheFilterChain cacheInvocation = res.getCacheInvocation();
 

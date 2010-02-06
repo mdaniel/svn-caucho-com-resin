@@ -34,6 +34,8 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.Resource;
 import javax.enterprise.inject.Any;
@@ -42,6 +44,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.AnnotationLiteral;
+import javax.naming.NamingException;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
@@ -58,6 +61,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldGeneratorProgram;
 import com.caucho.config.program.MethodGeneratorProgram;
 import com.caucho.config.program.ValueGenerator;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
 /**
@@ -65,6 +69,8 @@ import com.caucho.util.L10N;
  */
 public class ResourceHandler extends JavaeeInjectionHandler {
   private static final L10N L = new L10N(ResourceHandler.class);
+  private static final Logger log 
+    = Logger.getLogger(ResourceHandler.class.getName());
   
   private static HashMap<Class<?>,Class<?>> _boxingMap
     = new HashMap<Class<?>,Class<?>>();
@@ -118,18 +124,39 @@ public class ResourceHandler extends JavaeeInjectionHandler {
   {
     String name = resource.name();
     String mappedName = resource.mappedName();
-    String lookup = null; // resource.lookup();
+    String lookupName; // = resource.lookup();
 
-    ValueGenerator gen;
-
-    if (lookup != null && ! "".equals(lookup))
-      gen = new JndiValueGenerator(loc, bindType, lookup);
-    else
+    lookupName = name;
+    ValueGenerator gen = lookupJndi(loc, bindType, lookupName);
+    
+    if (gen != null) {
+      bindJndi(null, gen, fullJndiName);
+    }
+    else {
       gen = bindValueGenerator(loc, bindType, name, mappedName);
       
-    bindJndi(name, gen, fullJndiName);
+      bindJndi(name, gen, fullJndiName);
+    }
     
     return gen;
+  }
+  
+  private ValueGenerator lookupJndi(String loc,
+                                    Class<?> bindType,
+                                    String lookupName)
+  {
+    if (lookupName == null)
+      return null;
+    
+    if (! lookupName.startsWith("java:") && ! lookupName.startsWith("/"))
+      lookupName = "java:comp/env/" + lookupName;
+    
+    Object value = Jndi.lookup(lookupName);
+
+    if (value != null)
+      return new JndiValueGenerator(loc, bindType, lookupName);
+    
+    return null;
   }
 
   private ValueGenerator bindValueGenerator(String location, 

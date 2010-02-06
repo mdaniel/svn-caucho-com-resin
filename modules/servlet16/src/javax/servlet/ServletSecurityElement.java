@@ -37,13 +37,12 @@ import javax.servlet.annotation.HttpMethodConstraint;
  */
 public class ServletSecurityElement extends HttpConstraintElement {
 
-  private Collection<String> _methodNames;
-  private Collection<HttpMethodConstraintElement> _httpMethodConstraints;
+  private Collection<String> _methodNames = new HashSet<String>(0);
+  private Collection<HttpMethodConstraintElement> _httpMethodConstraints
+    = new HashSet<HttpMethodConstraintElement>(0);
 
   public ServletSecurityElement()
   {
-    _methodNames = new HashSet<String>(0);
-    _httpMethodConstraints = new HashSet<HttpMethodConstraintElement>(0);
   }
 
   public ServletSecurityElement(HttpConstraintElement constraint)
@@ -77,7 +76,7 @@ public class ServletSecurityElement extends HttpConstraintElement {
         _methodNames.add(httpMethod);
     }
 
-    _httpMethodConstraints = methodConstraints;
+    _httpMethodConstraints.addAll(methodConstraints);
   }
 
   public ServletSecurityElement(ServletSecurity annotation)
@@ -88,10 +87,6 @@ public class ServletSecurityElement extends HttpConstraintElement {
 
     HttpMethodConstraint []methodConstraints
       = annotation.httpMethodConstraints();
-
-    _methodNames = new HashSet<String>(methodConstraints.length);
-    _httpMethodConstraints = new HashSet<HttpMethodConstraintElement>(
-      methodConstraints.length);
 
     for (HttpMethodConstraint methodConstraint : methodConstraints) {
       String httpMethod = methodConstraint.value();

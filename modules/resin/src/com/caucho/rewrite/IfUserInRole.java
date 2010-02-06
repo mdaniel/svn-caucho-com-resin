@@ -34,6 +34,9 @@ import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 
 import java.security.Principal;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.annotation.PostConstruct;
 
@@ -53,6 +56,9 @@ import javax.annotation.PostConstruct;
 @Configurable
 public class IfUserInRole implements RequestPredicate
 {
+  private static final Logger log
+    = Logger.getLogger(IfUserInRole.class.getName());
+
   private String []_roles = new String[0];
 
   /**
@@ -75,7 +81,7 @@ public class IfUserInRole implements RequestPredicate
   public boolean isMatch(HttpServletRequest request)
   {
     Principal user = request.getUserPrincipal();
-
+    
     if (user == null)
       return false;
     
@@ -83,11 +89,21 @@ public class IfUserInRole implements RequestPredicate
       if (role.equals("*"))
         return true;
 
-      if (request.isUserInRole(role))
+      if (request.isUserInRole(role)) {
+        if (log.isLoggable(Level.FINER))
+          log.finer("IfUserInRole[" + role + "] " + user);
+
         return true;
+      }
     }
 
-    return _roles.length == 0;
+    if (_roles.length == 0)
+      return true;
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " does not match " + user);
+    
+    return false;
   }
 
   @Override

@@ -84,6 +84,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
     super(request);
 
     _response = new ForwardResponse(this, response);
+    setResponse(_response);
 
     _invocation = invocation;
   }
@@ -110,7 +111,7 @@ public class ForwardRequest extends CauchoRequestWrapper {
       _response.finishRequest();
   }
 
-  ForwardResponse getResponse()
+  public ForwardResponse getResponse()
   {
     return _response;
   }

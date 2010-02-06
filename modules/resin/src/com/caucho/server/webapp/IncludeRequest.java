@@ -86,11 +86,12 @@ public class IncludeRequest extends CauchoRequestWrapper {
     super(request);
 
     _response = new IncludeResponse(this, response);
+    setResponse(_response);
 
     _invocation = invocation;
   }
 
-  IncludeResponse getResponse()
+  public IncludeResponse getResponse()
   {
     return _response;
   }

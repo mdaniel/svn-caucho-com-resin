@@ -181,7 +181,7 @@ public class FormLoginServlet extends GenericServlet {
   {
     if (login == null)
       throw new ServletException(L.l("j_security_check requires a login"));
-    
+
     if (login instanceof FormLogin)
       return (FormLogin) login;
     else if (login instanceof LoginList) {

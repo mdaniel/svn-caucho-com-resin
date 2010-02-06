@@ -1102,52 +1102,53 @@ public class WebApp extends ServletContextImpl
 
       if (securityElement == null)
         continue;
+      
+      ServletSecurity.EmptyRoleSemantic rootRoleSemantic
+        = securityElement.getEmptyRoleSemantic();
 
       final Set<String> patterns = _servletMapper.getUrlPatterns(entry.getKey());
       final Collection<HttpMethodConstraintElement> constraints
         = securityElement.getHttpMethodConstraints();
-      
-      if (constraints == null)
-        continue;
+     
+      if (constraints != null) {
+        for (HttpMethodConstraintElement httpMethodConstraintElement : securityElement
+            .getHttpMethodConstraints()) {
+          ServletSecurity.EmptyRoleSemantic emptyRoleSemantic =
+            httpMethodConstraintElement.getEmptyRoleSemantic();
 
-      for (HttpMethodConstraintElement httpMethodConstraintElement
-        : securityElement.getHttpMethodConstraints()) {
-        ServletSecurity.EmptyRoleSemantic emptyRoleSemantic
-          = httpMethodConstraintElement.getEmptyRoleSemantic();
+          ServletSecurity.TransportGuarantee transportGuarantee =
+            httpMethodConstraintElement.getTransportGuarantee();
 
-        ServletSecurity.TransportGuarantee transportGuarantee
-          = httpMethodConstraintElement.getTransportGuarantee();
+          String[] roles = httpMethodConstraintElement.getRolesAllowed();
 
-        String []roles = httpMethodConstraintElement.getRolesAllowed();
+          SecurityConstraint constraint = new SecurityConstraint();
+          constraint.setFallthrough(false);
 
-        SecurityConstraint constraint = new SecurityConstraint();
-        constraint.setFallthrough(false);
+          if (emptyRoleSemantic == ServletSecurity.EmptyRoleSemantic.DENY) {
+            constraint.addConstraint(new PermitEmptyRolesConstraint(false));
+          } else if (roles.length == 0
+                     && transportGuarantee == ServletSecurity.TransportGuarantee.NONE) {
+            constraint.addConstraint(new PermitEmptyRolesConstraint(true));
+          } else {
+            for (String role : roles)
+              constraint.addRoleName(role);
 
-        if (emptyRoleSemantic == ServletSecurity.EmptyRoleSemantic.DENY) {
-          constraint.addConstraint(new PermitEmptyRolesConstraint(false));
-        } else if (roles.length == 0
-          && transportGuarantee == ServletSecurity.TransportGuarantee.NONE) {
-          constraint.addConstraint(new PermitEmptyRolesConstraint(true));
-        } else {
-          for (String role : roles)
-            constraint.addRoleName(role);
+            if (transportGuarantee == ServletSecurity.TransportGuarantee.CONFIDENTIAL)
+              constraint.addConstraint(new TransportConstraint("CONFIDENTIAL"));
+          }
 
-          if (transportGuarantee
-            == ServletSecurity.TransportGuarantee.CONFIDENTIAL)
-            constraint.addConstraint(new TransportConstraint("CONFIDENTIAL"));
+          WebResourceCollection resources = new WebResourceCollection();
+          resources.addHttpMethod(httpMethodConstraintElement.getMethodName());
+
+          for (String pattern : patterns) {
+            resources.addURLPattern(pattern);
+            constraint.addURLPattern(pattern);
+          }
+
+          constraint.addWebResourceCollection(resources);
+
+          _constraintManager.addConstraint(constraint);
         }
-
-        WebResourceCollection resources = new WebResourceCollection();
-        resources.addHttpMethod(httpMethodConstraintElement.getMethodName());
-        
-        for (String pattern: patterns) {
-          resources.addURLPattern(pattern);
-          constraint.addURLPattern(pattern);
-        }
-        
-        constraint.addWebResourceCollection(resources);
-
-        _constraintManager.addConstraint(constraint);
       }
 
       ServletSecurity.EmptyRoleSemantic emptyRoleSemantic
@@ -1724,7 +1725,7 @@ public class WebApp extends ServletContextImpl
    */
   public void setLoginConfig(LoginConfig loginConfig)
   {
-    _login = loginConfig.getLogin();
+    setLogin(loginConfig.getLogin());
   }
 
   /**
@@ -2546,7 +2547,7 @@ public class WebApp extends ServletContextImpl
         if (_login == null) {
           _login = _beanManager.getReference(Login.class);
         }
-
+        
         if (_login == null) {
           _beanManager.addBean(_beanManager.createManagedBean(BasicLogin.class));
           // server/1aj0
@@ -2557,6 +2558,8 @@ public class WebApp extends ServletContextImpl
 
         setAttribute("caucho.login", _login);
       } catch (Exception e) {
+        e.printStackTrace();
+        
         log.log(Level.FINEST, e.toString(), e);
       }
 

@@ -721,6 +721,11 @@ public class Port extends TaskWorker
   {
     setKeepaliveSelectEnabled(isKeepaliveSelect);
   }
+  
+  public void setKeepaliveSelectMax(int max)
+  {
+    
+  }
 
   public long getKeepaliveSelectThreadTimeout()
   {

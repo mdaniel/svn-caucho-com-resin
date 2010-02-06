@@ -44,6 +44,7 @@ import javax.servlet.http.*;
 public class CauchoRequestWrapper extends AbstractCauchoRequest {
   // the wrapped request
   private HttpServletRequest _request;
+  private CauchoResponse _response;
 
   //
   // ServletRequest
@@ -69,11 +70,24 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     _request = request;
   }
   
+  @Override
   public HttpServletRequest getRequest()
   {
     return _request;
   }
   
+  public void setResponse(CauchoResponse response)
+  {
+    _response = response;
+  }
+  
+  @Override
+  public CauchoResponse getResponse()
+  {
+    return _response;
+  }
+  
+  @Override
   public String getProtocol()
   {
     return _request.getProtocol();
@@ -471,21 +485,25 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     return _request.getRemoteUser();
   }
   
+  /*
   public Principal getUserPrincipal()
   {
     return _request.getUserPrincipal();
   }
+  */
   
   public boolean isRequestedSessionIdFromUrl()
   {
     return _request.isRequestedSessionIdFromUrl();
   }
 
+  /*
   public boolean authenticate(HttpServletResponse response)
     throws IOException, ServletException
   {
     return _request.authenticate(response);
   }
+  */
 
   public Part getPart(String name)
     throws IOException, ServletException
@@ -498,19 +516,21 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   {
     return _request.getParts();
   }
-
+  
+  /*
   public void login(String username, String password)
     throws ServletException
   {
     _request.login(username, password);
   }
+  */
 
   public void logout()
     throws ServletException
   {
     _request.logout();
   }
-
+  
   //
   // CauchoRequest
   //
@@ -702,19 +722,31 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     cRequest.clientDisconnect();
   }
 
+  @Override
   public boolean isLoginRequested()
   {
     CauchoRequest cRequest = (CauchoRequest) _request;
 
     return cRequest.isLoginRequested();
   }
-  
+
+  @Override
+  public void requestLogin()
+  {
+    CauchoRequest cRequest = (CauchoRequest) _request;
+
+    if (cRequest != null)
+      cRequest.requestLogin();
+  }
+ 
+  /*
   public boolean login(boolean isFail)
   {
     CauchoRequest cRequest = (CauchoRequest) _request;
 
     return cRequest.login(isFail);
   }
+  */
   
   public ServletResponse getServletResponse()
   {

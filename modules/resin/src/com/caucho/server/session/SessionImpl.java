@@ -525,6 +525,12 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     _accessTime = now;*/
   }
+  
+  public void setAccessTime(long now)
+  {
+    // server/0123 (vs TCK?)
+    _accessTime = now;
+  }
 
   /**
    * Cleaning up session stuff at the end of a request.
@@ -537,6 +543,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     // server/0122
     _accessTime = Alarm.getExactTime();
+    _isNew = false;
     
     // update cache access?
     if (_useCount.decrementAndGet() > 0)

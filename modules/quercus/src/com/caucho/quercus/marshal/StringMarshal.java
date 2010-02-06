@@ -57,9 +57,11 @@ public class StringMarshal extends Marshal {
 
   public Object marshal(Env env, Value value, Class expectedClass)
   {
+
     return value.toJavaString();
   }
 
+  @Override
   public Value unmarshal(Env env, Object value)
   {
     if (value == null)

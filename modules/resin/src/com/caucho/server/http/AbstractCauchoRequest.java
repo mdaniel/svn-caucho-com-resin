@@ -30,6 +30,7 @@
 package com.caucho.server.http;
 
 import com.caucho.util.CharBuffer;
+import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.server.session.SessionImpl;
@@ -37,6 +38,8 @@ import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.servlet.DuplexListener;
+import com.caucho.security.AbstractLogin;
+import com.caucho.security.Authenticator;
 import com.caucho.security.RoleMapManager;
 import com.caucho.security.Login;
 import com.caucho.util.Alarm;
@@ -45,10 +48,12 @@ import java.io.*;
 import java.util.*;
 import java.util.logging.*;
 import java.security.*;
+
 import javax.servlet.*;
 import javax.servlet.http.*;
 
 abstract public class AbstractCauchoRequest implements CauchoRequest {
+  private static final L10N L = new L10N(AbstractCauchoRequest.class);
   private static final Logger log
     = Logger.getLogger(AbstractCauchoRequest.class.getName());
   
@@ -56,6 +61,8 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
   private boolean _sessionIsLoaded;
   private SessionImpl _session;
+  
+  abstract public CauchoResponse getResponse();
 
   public RequestDispatcher getRequestDispatcher(String path)
   {
@@ -254,6 +261,10 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         && manager.enableSessionCookies()) {
       setSessionId(session.getId());
     }
+    
+    // server/0123
+    if (session != null)
+      session.setAccessTime(now);
 
     return session;
   }
@@ -314,6 +325,179 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   protected HttpServletRequest getRequest()
   {
     return null;
+  }
+
+  /**
+   * @since Servlet 3.0
+   */
+  @Override
+  public void login(String username, String password)
+    throws ServletException
+  {
+    WebApp webApp = getWebApp();
+
+    Authenticator auth = webApp.getConfiguredAuthenticator();
+
+    if (auth == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+
+    // server/1aj0
+    Login login = webApp.getLogin();
+
+    if (login == null)
+      throw new ServletException(L.l("No login mechanism is configured for '{0}'", getWebApp()));
+
+    if (! login.isPasswordBased())
+      throw new ServletException(L.l("Authentication mechanism '{0}' does not support password authentication", login));
+
+    removeAttribute(Login.LOGIN_USER);
+    removeAttribute(Login.LOGIN_PASSWORD);
+
+    Principal principal = login.getUserPrincipal(this);
+
+    if (principal != null)
+      throw new ServletException(L.l("UserPrincipal object has already been established"));
+
+    setAttribute(Login.LOGIN_USER, username);
+    setAttribute(Login.LOGIN_PASSWORD, password);
+
+    try {
+      login.login(this, getResponse(), false);
+    }
+    finally {
+      removeAttribute(Login.LOGIN_USER);
+      removeAttribute(Login.LOGIN_PASSWORD);
+    }
+
+    principal = login.getUserPrincipal(this);
+
+    if (principal == null)
+      throw new ServletException("can't authenticate a user");
+  }
+  @Override
+  public boolean login(boolean isFail)
+  {
+    try {
+      WebApp webApp = getWebApp();
+      
+      if (webApp == null) {
+        if (log.isLoggable(Level.FINE))
+          log.finer("authentication failed, no web-app found");
+
+        getResponse().sendError(HttpServletResponse.SC_FORBIDDEN);
+
+        return false;
+      }
+
+      // If the authenticator can find the user, return it.
+      Login login = webApp.getLogin();
+
+      if (login != null) {
+        Principal user = login.login(this, getResponse(), isFail);
+
+        return user != null;
+        /*
+        if (user == null)
+          return false;
+
+        setAttribute(AbstractLogin.LOGIN_NAME, user);
+
+        return true;
+        */
+      }
+      else if (isFail) {
+        if (log.isLoggable(Level.FINE))
+          log.finer("authentication failed, no login module found for "
+                    + webApp);
+
+        getResponse().sendError(HttpServletResponse.SC_FORBIDDEN);
+
+        return false;
+      }
+      else {
+        // if a non-failure, then missing login is fine
+
+        return false;
+      }
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
+    }
+  }
+
+  /**
+   * Returns true if any authentication is requested
+   */
+  abstract public boolean isLoginRequested();
+  
+  abstract public void requestLogin();
+
+  /**
+   * @since Servlet 3.0
+   */
+  @Override
+  public boolean authenticate(HttpServletResponse response)
+    throws IOException, ServletException
+  {
+    WebApp webApp = getWebApp();
+
+    if (webApp == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+
+    // server/1aj{0,1}
+    Authenticator auth = webApp.getConfiguredAuthenticator();
+
+    if (auth == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+
+    Login login = webApp.getLogin();
+
+    if (login == null)
+      throw new ServletException(L.l("No authentication mechanism is configured for '{0}'", getWebApp()));
+
+    Principal principal = login.login(this, response, true);
+
+    if (principal != null)
+      return true;
+
+    return false;
+  }
+
+  /**
+   * Returns the Principal representing the logged in user.
+   */
+  public Principal getUserPrincipal()
+  {
+    requestLogin();
+
+    Principal user;
+    user = (Principal) getAttribute(AbstractLogin.LOGIN_NAME);
+
+    if (user != null)
+      return user;
+
+    WebApp webApp = getWebApp();
+    if (webApp == null)
+      return null;
+
+    // If the authenticator can find the user, return it.
+    Login login = webApp.getLogin();
+    
+    if (login != null) {
+      user = login.getUserPrincipal(this);
+
+      if (user != null) {
+        getResponse().setPrivateCache(true);
+      }
+      else {
+        // server/123h, server/1920
+        // distinguishes between setPrivateCache and setPrivateOrResinCache
+        // _response.setPrivateOrResinCache(true);
+      }
+    }
+
+    return user;
   }
 
   /**

@@ -590,12 +590,19 @@ public class RequestAdapter extends RequestWrapper
 
     return super.isUserInRole(role);
   }
-  
+
+  @Override
   public boolean isLoginRequested()
   {
     return false;
   }
   
+  @Override
+  public void requestLogin()
+  {
+  }
+  
+  @Override
   public boolean login(boolean isFail)
   {
     return true;

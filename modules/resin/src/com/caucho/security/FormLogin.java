@@ -336,7 +336,7 @@ public class FormLogin extends AbstractLogin
       path = request.getPathInfo();
     else if (request.getPathInfo() != null)
       path = path + request.getPathInfo();
-
+    
     if (path.equals("")) {
       // Forward?
       path = request.getContextPath() + "/";
@@ -393,7 +393,7 @@ public class FormLogin extends AbstractLogin
       response.setHeader("Cache-Control", "no-cache");
     }
 
-    // In case where the authenticator is somethin like https:/
+    // In case where the authenticator is something like https:/
     if (! _loginPage.startsWith("/")) {
       response.sendRedirect(response.encodeRedirectURL(_loginPage));
       return;

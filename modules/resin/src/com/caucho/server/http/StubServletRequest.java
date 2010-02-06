@@ -216,6 +216,11 @@ public class StubServletRequest implements CauchoRequest {
   {
     return false;
   }
+
+  @Override
+  public void requestLogin()
+  {
+  }
   
   public boolean isClientDisconnect()
   {

@@ -226,7 +226,7 @@ public class ResinBeanContainer
       thread.setContextClassLoader(_classLoader);
 
       Class<?> cl = Class.forName(className, false, _classLoader);
-
+      
       return getInstance(cl, qualifiers);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
@@ -244,15 +244,20 @@ public class ResinBeanContainer
     if (type == null)
       throw new NullPointerException();
 
-    Set<Bean<?>> beans = _injectManager.getBeans(type, qualifiers);
-
-    if (beans.size() > 0) {
-      Bean<?> bean = _injectManager.resolve(beans);
-
-      return (T) _injectManager.getReference(bean);
-    }
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      thread.setContextClassLoader(_classLoader);
+
+      Set<Bean<?>> beans = _injectManager.getBeans(type, qualifiers);
+
+      if (beans.size() > 0) {
+        Bean<?> bean = _injectManager.resolve(beans);
+
+        return (T) _injectManager.getReference(bean);
+      }
+
       return type.newInstance();
     } catch (InstantiationException e) {
       // XXX: proper exception
@@ -260,6 +265,8 @@ public class ResinBeanContainer
     } catch (IllegalAccessException e) {
       // XXX: proper exception
       throw new RuntimeException(e);
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
 
