@@ -73,7 +73,8 @@ public class ValueMarshal extends Marshal
     }
     else {
       // php/3c81
-      return value.toLocalValue();
+      // return value.toLocalValue();
+      return value.toLocalValueReadOnly(); // non-copy
     }
   }
 

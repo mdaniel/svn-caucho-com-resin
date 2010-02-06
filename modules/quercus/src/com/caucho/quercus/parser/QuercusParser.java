@@ -5916,7 +5916,8 @@ public class QuercusParser {
     _insensitiveReserved.put("implements", IMPLEMENTS);
 
     _insensitiveReserved.put("import", IMPORT);
-    _insensitiveReserved.put("namespace", NAMESPACE);
+    // backward compatibility issues
+    // _insensitiveReserved.put("namespace", NAMESPACE);
     _insensitiveReserved.put("use", USE);
   }
 }

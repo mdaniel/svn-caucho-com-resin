@@ -608,7 +608,7 @@ abstract public class Value implements java.io.Serializable
   {
     Env.getCurrent().warning(L.l("'{0}' cannot be used as an array.", 
                                  toDebugString()));
-    
+
     return this;
   }
 
@@ -2597,8 +2597,11 @@ abstract public class Value implements java.io.Serializable
    */
   public Value put(Value value)
   {
+    /*
     Env.getCurrent().warning(L.l("{0} cannot be used as an array",
                                  toDebugString()));
+                                 */
+
     
     return value;
   }
@@ -2610,10 +2613,7 @@ abstract public class Value implements java.io.Serializable
    */
   public Value append(Value index, Value value)
   {
-    Env.getCurrent().warning(L.l("{0} cannot be used as an array",
-                                 toDebugString()));
-    
-    return this;
+    return toAutoArray().append(index, value);
   }
 
   /**

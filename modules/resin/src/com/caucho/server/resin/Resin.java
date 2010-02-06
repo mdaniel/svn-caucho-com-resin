@@ -34,6 +34,7 @@ import java.io.InputStream;
 import java.io.InterruptedIOException;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.net.BindException;
 import java.net.InetAddress;
@@ -265,13 +266,29 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       log().log(Level.FINER, e.toString(), e);
 
       licenseErrorMessage = e.getMessage();
+    } catch (InvocationTargetException e) {
+      Throwable cause = e.getCause();
+      
+      log().log(Level.FINER, cause.toString(), cause);
+
+      if (cause instanceof ConfigException) {
+        licenseErrorMessage = cause.getMessage();
+      }
+      else {
+        String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n"
+                           + "\n"
+                           + "  See http://www.caucho.com for information on Resin Professional,\n"
+                           + "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n"
+                           + "  Exception=" + cause);
+      }
     } catch (Throwable e) {
       log().log(Level.FINER, e.toString(), e);
 
-      String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n" +
-                         "\n" +
-                         "  See http://www.caucho.com for information on Resin Professional,\n" +
-                         "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n");
+      String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n"
+                         + "\n"
+                         + "  See http://www.caucho.com for information on Resin Professional,\n"
+                         + "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n"
+                         + "  Exception=" + e);
 
       licenseErrorMessage = msg;
     }

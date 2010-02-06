@@ -46,27 +46,29 @@ public class S1 extends Section {
     addItem(s2);
     return s2;
   }
- 
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
     out.writeCharacters("\n");
     out.writeStartElement("div");
     out.writeAttribute("class", "s1");
-    
-    out.writeStartElement("a");
-    out.writeAttribute("name", getHref());
-    out.writeEndElement();
-    
+
+    if (getHref() != null) {
+      out.writeStartElement("a");
+      out.writeAttribute("name", getHref());
+      out.writeEndElement();
+    }
+
     if (_title != null) {
       out.writeStartElement("h1");
       out.writeAttribute("class", "section");
       out.writeCharacters(_title);
       out.writeEndElement();
     }
-    
+
     out.writeEndElement();
-    
+
     super.writeHtml(out);
   }
 
@@ -75,7 +77,7 @@ public class S1 extends Section {
   {
     if (isWebOnly())
       return;
-    
+
     if (_type != null && _type.equals("defun"))
       out.println("\\newpage");
 
@@ -91,14 +93,14 @@ public class S1 extends Section {
   {
     if (isWebOnly())
       return;
-    
+
     if (_title != null) {
       if (isArticle())
-	out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+        out.println("\\section{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
       else
-	out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
+        out.println("\\subsubsection{" + LaTeXUtil.escapeForLaTeX(_title) + "}");
     }
-    
+
     super.writeLaTeX(out);
   }
 

@@ -56,7 +56,7 @@ public class CallbackObjectMethod extends Callback {
     _methodName = methodName;
     _obj = obj;
     
-    _hash = methodName.hashCode();
+    _hash = methodName.hashCodeCaseInsensitive();
   }
 
   /**

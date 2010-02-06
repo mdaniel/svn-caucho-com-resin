@@ -974,7 +974,11 @@ elif test -r "$JAVA_HOME/include/jni.h"; then
   echo "checking for JNI in $JAVA_HOME/include ... found"
 else
   JNI=""
-  AC_MSG_WARN([Can't find JNI directory ${JAVA_HOME}/include/$jni_os])
+  AC_MSG_ERROR([
+
+  *** Can't find JNI directory in JAVA_HOME=${JAVA_HOME}
+  *** JNI is expected in ${JAVA_HOME}/include/$jni_os
+])
 fi
 
 if test -r "$JNI_INCLUDE_DIR/jvmti.h"; then
@@ -1300,33 +1304,39 @@ fi
 
 echo ""
 
-if test -n "$epoll"; then
-  echo "  + epoll() for keepalives"
-elif test -n "$poll"; then
-  echo "  + poll() for keepalives"
-else
-  echo "  + select() for keepalives"
-fi
-
-if test -n "$OPENSSL_INCLUDE"; then
-  echo "  + ${openssl_version}"
-  echo "      OpenSSL include: ${OPENSSL_INCLUDE}"
-  echo "      OpenSSL lib: ${OPENSSL_LIB}"
-  echo "      OpenSSL libraries: ${SSL_LIBS}"
-else
-  echo "  + not using OpenSSL"
-fi
-
-echo ""
-echo "  JAVA_HOME: ${JAVA_HOME}"
-
-if test -n "$b64_jni"; then
-  echo "    + 64-bit JNI in ${JNI_INCLUDE}"
+if test -z "JNI"; then
+  echo "  *** No JNI has been found in JAVA_HOME=${JAVA_HOME}"
+  echo "  *** JNI libraries cannot be compiled"
 else  
-  echo "    + 32-bit JNI in ${JNI_INCLUDE}"
-fi
 
-echo "      JNI CFLAGS: ${CFLAGS}"
+  echo "  JAVA_HOME: ${JAVA_HOME}"
+  echo ""
+
+  if test -n "$b64_jni"; then
+    echo "    + 64-bit JNI in ${JNI_INCLUDE}"
+  else  
+    echo "    + 32-bit JNI in ${JNI_INCLUDE}"
+  fi
+
+  echo "    + JNI CFLAGS: ${CFLAGS}"
+
+  if test -n "$epoll"; then
+    echo "    + epoll() for keepalives"
+  elif test -n "$poll"; then
+    echo "    + poll() for keepalives"
+  else
+    echo "    + select() for keepalives"
+  fi
+
+  if test -n "$OPENSSL_INCLUDE"; then
+    echo "    + ${openssl_version}"
+    echo "        OpenSSL include: ${OPENSSL_INCLUDE}"
+    echo "        OpenSSL lib: ${OPENSSL_LIB}"
+    echo "        OpenSSL libraries: ${SSL_LIBS}"
+  else
+    echo "    + not using OpenSSL"
+  fi
+fi
 
 if test -n "${apache}"; then
   echo ""
