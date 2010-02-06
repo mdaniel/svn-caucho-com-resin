@@ -99,6 +99,12 @@ public interface TransportConnection {
   public int getRemotePort();
   
   //
+  // checks for Port enable/disable
+  //
+  
+  public boolean isPortActive();
+  
+  //
   // keepalive support
   //
 

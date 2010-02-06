@@ -433,7 +433,8 @@ public class HmuxRequest extends AbstractHttpRequest
     try {
       _hasRequest = false;
 
-      if (! scanHeaders()) {
+      if (! scanHeaders() || ! _conn.isPortActive()) {
+        _hasRequest = false;
         killKeepalive();
         return false;
       }

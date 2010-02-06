@@ -206,6 +206,16 @@ public class TcpConnection extends AbstractTransportConnection
   }
 
   //
+  // port information
+  //
+  
+  @Override
+  public boolean isPortActive()
+  {
+    return _port.isActive();
+  }
+  
+  //
   // state information
   //
 
