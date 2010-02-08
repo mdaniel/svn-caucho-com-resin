@@ -2099,6 +2099,9 @@ public class InjectManager
 
     if (bindings == null || bindings.length == 0)
       bindings = CURRENT_ANN;
+    
+    if (_decoratorList == null)
+      return decorators;
 
     for (DecoratorEntry entry : _decoratorList) {
       Decorator decorator = entry.getDecorator();

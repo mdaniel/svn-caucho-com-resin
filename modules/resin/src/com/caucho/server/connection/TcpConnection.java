@@ -362,10 +362,7 @@ public class TcpConnection extends AbstractTransportConnection
   @Override
   public boolean isSecure()
   {
-    if (_state.isClosed())
-      return false;
-    else
-      return _socket.isSecure() || _port.isSecure();
+    return _socket.isSecure() || _port.isSecure();
   }
 
   /**

@@ -744,9 +744,9 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     sb.append(getServerName());
     int port = getServerPort();
 
-    if (port > 0 &&
-        port != 80 &&
-        port != 443) {
+    if (port > 0
+        && port != 80
+        && port != 443) {
       sb.append(":");
       sb.append(port);
     }

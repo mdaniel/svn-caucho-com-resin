@@ -2643,10 +2643,8 @@ public class WebApp extends ServletContextImpl
     return _servletVersion == null || ! _servletVersion.startsWith("3");
   }
 
-  private void loadWebFragments() {
-    if (log.isLoggable(Level.FINER))
-      log.finer(L.l("Loading web-fragments for '{0}'.", this));
-
+  private void loadWebFragments()
+  {
     if (_webFragments == null)
       _webFragments = new ArrayList<WebAppFragmentConfig>();
 
@@ -2656,6 +2654,9 @@ public class WebApp extends ServletContextImpl
 
       Config config = new Config();
       config.setEL(_servletAllowEL);
+      
+      if (log.isLoggable(Level.FINER) && fragments.hasMoreElements())
+        log.finer(L.l("{0} loading web-fragments", this));
 
       while (fragments.hasMoreElements()) {
         URL url = fragments.nextElement();

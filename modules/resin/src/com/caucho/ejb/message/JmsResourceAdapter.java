@@ -33,7 +33,21 @@ import java.util.*;
 import java.util.logging.*;
 import java.lang.reflect.*;
 
-import javax.jms.*;
+import javax.enterprise.inject.spi.Bean;
+import javax.inject.Named;
+import javax.jms.Connection;
+import javax.jms.ConnectionFactory;
+import javax.jms.Destination;
+import javax.jms.JMSException;
+import javax.jms.Message;
+import javax.jms.MessageConsumer;
+import javax.jms.MessageListener;
+import javax.jms.Session;
+import javax.jms.Topic;
+import javax.jms.XAConnection;
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.resource.*;
 import javax.resource.spi.*;
 import javax.resource.spi.endpoint.*;
@@ -41,16 +55,23 @@ import javax.resource.spi.work.*;
 import javax.transaction.xa.*;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.ejb.cfg.JmsActivationConfig;
+import com.caucho.util.L10N;
 
 public class JmsResourceAdapter implements ResourceAdapter {
+  private static final L10N L = new L10N(JmsResourceAdapter.class);
   private static final Logger
     log = Logger.getLogger(JmsResourceAdapter.class.getName());
   
   private static final Method _onMessage;
 
+  private final JmsActivationConfig _config;
+  
   private final String _ejbName;
-  private final ConnectionFactory _connectionFactory;
-  private final Destination _destination;
+  
+  private ConnectionFactory _connectionFactory;
+  private Destination _destination;
 
   private int _consumerMax = 5;
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
@@ -64,16 +85,16 @@ public class JmsResourceAdapter implements ResourceAdapter {
   private ArrayList<Consumer> _consumers;
 
   public JmsResourceAdapter(String ejbName,
-			    ConnectionFactory factory,
-			    Destination destination)
+                            JmsActivationConfig config)
   {
-    assert(factory != null);
-    assert(destination != null);
-    
     _ejbName = ejbName;
+    
+    _config = config;
+    /*
     _connectionFactory = factory;
     
     _destination = destination;
+    */
   }
 
   public void setMessageSelector(String selector)
@@ -96,9 +117,24 @@ public class JmsResourceAdapter implements ResourceAdapter {
     _acknowledgeMode = acknowledgeMode;
   }
   
+  @Override
   public void start(BootstrapContext ctx)
     throws ResourceAdapterInternalException
   {
+    _connectionFactory = getResource(ConnectionFactory.class,
+                                     _config.getConnectionFactoryName());
+    
+    if (_connectionFactory == null)
+      throw new ConfigException(L.l("connection-factory must be specified for @MessageDriven bean"));
+    
+    if (_config.getDestinationType() == null)
+      throw new ConfigException(L.l("destination-type must be specified for @MessageDriven bean"));
+    
+    _destination = getResource(_config.getDestinationType(),
+                               _config.getDestinationName());
+    
+    if (_destination== null)
+      throw new ConfigException(L.l("destination must be specified for @MessageDriven bean"));
   }
   
   /**
@@ -106,6 +142,45 @@ public class JmsResourceAdapter implements ResourceAdapter {
    */
   public void stop()
   {
+  }
+  
+  private <T> T getResource(Class<T> type, String name)
+  {
+    if (name.startsWith("java:comp")) {
+      try {
+        Context ic = new InitialContext();
+        
+        return (T) ic.lookup(name);
+      } catch (NamingException e) {
+        throw ConfigException.create(L.l("{0} is an unknown JNDI name for {1}\n  {2}",
+                                         name, type.getName(), e.toString()),
+                                     e);
+      }
+    }
+    else {
+      String jndiName = "java:comp/env/" + name;
+      
+      try {
+        Context ic = new InitialContext();
+        
+        T value = (T) ic.lookup(jndiName);
+        
+        if (value != null)
+          return value;
+      } catch (NamingException e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+    
+    InjectManager beanManager = InjectManager.create();
+    
+    Named named = Names.create(name);
+    
+    Set<Bean<?>> beans = beanManager.getBeans(type, named);
+    
+    Bean<?> bean = beanManager.resolve(beans);
+    
+    return (T) beanManager.getReference(bean);
   }
 
   /**

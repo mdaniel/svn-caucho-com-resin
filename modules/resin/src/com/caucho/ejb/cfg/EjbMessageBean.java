@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.cfg;
 
+import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.gen.ApiClass;
@@ -82,15 +83,19 @@ public class EjbMessageBean extends EjbBean {
   private ConnectionFactory _connectionFactory;
 
   private ActivationSpec _activationSpec;
+  
+  private JmsActivationConfig _jmsActivationConfig
+    = new JmsActivationConfig();
+  
   private Destination _destination;
   private String _messageSelector;
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
   private String _selector;
   private String _subscriptionName;
-  private int _consumerMax = -1;
+  // private int _consumerMax = -1;
   private String _messageDestinationLink;
-  private Class _messagingType;
-
+  private Class<?> _messagingType;
+  
   private MessageGenerator _messageBean;
 
   /**
@@ -105,7 +110,7 @@ public class EjbMessageBean extends EjbBean {
    * Creates a new session bean configuration.
    */
   public EjbMessageBean(EjbConfig ejbConfig,
-                        AnnotatedType annType,
+                        AnnotatedType<?> annType,
                         MessageDriven messageDriven)
   {
     super(ejbConfig, annType, messageDriven.name());
@@ -116,7 +121,7 @@ public class EjbMessageBean extends EjbBean {
    * Creates a new session bean configuration.
    */
   public EjbMessageBean(EjbConfig ejbConfig,
-                        AnnotatedType annType,
+                        AnnotatedType<?> annType,
                         String ejbName)
   {
     super(ejbConfig, annType, ejbName);
@@ -351,37 +356,25 @@ public class EjbMessageBean extends EjbBean {
   private void addActivationConfigProperty(String name, Object value)
   {
     if ("destination".equals(name)) {
-      if (value instanceof Destination)
+      if (value instanceof Destination) {
         setDestination((Destination) value);
+      }
       else {
-        String destinationName = String.valueOf(value);
-
-        InjectManager webBeans = InjectManager.create();
-
-        Destination dest = null;
-
-        Set<Bean<?>> beans = webBeans.getBeans(Destination.class,
-                                               Names.create(destinationName));
-
-        if (beans.size() > 0) {
-          Bean bean = webBeans.resolve(beans);
-
-          dest = (Destination) webBeans.getReference(bean);
-        }
-
-        setDestination(dest);
+        Config.setAttribute(_jmsActivationConfig, "destinationName", value);
       }
     }
     else if ("messageSelector".equals(name)) {
       _messageSelector = (String) value;
     }
+    /*
     else if ("message-consumer-max".equals(name)
              || "consumer-max".equals(name)) {
       setMessageConsumerMax(Integer.parseInt(String.valueOf(value)));
     }
-    else
-      log.log(Level.FINE, L.l("activation-config-property '{0}' is unknown, ignored",
-                              name));
+    */
+    else {
+      Config.setAttribute(_jmsActivationConfig, name, value);
+    }
   }
 
   /**
@@ -390,7 +383,7 @@ public class EjbMessageBean extends EjbBean {
   public void setMessageConsumerMax(int consumerMax)
     throws ConfigException
   {
-    _consumerMax = consumerMax;
+    _jmsActivationConfig.setMaxPoolSize(consumerMax);
   }
 
   /**
@@ -465,7 +458,7 @@ public class EjbMessageBean extends EjbBean {
         }
       }
 
-      Class type = messageDriven.messageListenerInterface();
+      Class<?> type = messageDriven.messageListenerInterface();
       if (type != null && ! Object.class.equals(type))
         _messagingType = type;
     }
@@ -582,6 +575,7 @@ public class EjbMessageBean extends EjbBean {
                                          JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
+    /*
     ConnectionFactory factory;
     Destination destination = null;
 
@@ -613,9 +607,10 @@ public class EjbMessageBean extends EjbBean {
     if (factory == null)
       throw new ConfigException(L.l("ejb-message-bean '{0}' does not have a configured JMS connection factory",
                                     getEJBName()));
+                                    */
 
     JmsResourceAdapter ra
-      = new JmsResourceAdapter(getEJBName(), factory, destination);
+      = new JmsResourceAdapter(getEJBName(), _jmsActivationConfig);
 
     JmsActivationSpec spec
       = new JmsActivationSpec();
@@ -624,8 +619,8 @@ public class EjbMessageBean extends EjbBean {
     ra.setMessageSelector(_messageSelector);
     ra.setSubscriptionName(_subscriptionName);
 
-    if (_consumerMax > 0)
-      ra.setConsumerMax(_consumerMax);
+    if (_jmsActivationConfig.getMaxPoolSize() > 0)
+      ra.setConsumerMax(_jmsActivationConfig.getMaxPoolSize());
     else
       ra.setConsumerMax(getEjbContainer().getMessageConsumerMax());
 

@@ -589,17 +589,17 @@ public class Config {
            }
          }
 
-    if (zeroArgsConstructor == null &&
-             singleArgConstructor == null)
-           if (type != null)
-             throw new ConfigException(L.l(
-               "Custom bean class '{0}' doesn't have a zero-arg constructor, or a constructor accepting parameter of type '{1}'.  Bean class '{0}' must have a zero-argument constructor, or a constructor accepting parameter of type '{1}'",
-               beanClass.getName(),
-               type.getName()));
-           else
-             throw new ConfigException(L.l(
-               "Custom bean class '{0}' doesn't have a zero-arg constructor.  Bean classes must have a zero-argument constructor.",
-               beanClass.getName()));
+    if (zeroArgsConstructor == null
+        && singleArgConstructor == null)
+      if (type != null)
+        throw new ConfigException(L.l(
+                                      "Custom bean class '{0}' doesn't have a zero-arg constructor, or a constructor accepting parameter of type '{1}'.  Bean class '{0}' must have a zero-argument constructor, or a constructor accepting parameter of type '{1}'",
+                                      beanClass.getName(),
+                                      type.getName()));
+      else
+        throw new ConfigException(L.l(
+                                      "Custom bean class '{0}' doesn't have a zero-arg constructor.  Bean classes must have a zero-argument constructor.",
+                                      beanClass.getName()));
 
 
     if (singleArgConstructor != null) {
@@ -639,9 +639,8 @@ public class Config {
    * @param value the attribute value
    */
   public static void setAttribute(Object obj, String attr, Object value)
-    throws Exception
   {
-    ConfigType type = TypeFactory.getType(obj.getClass());
+    ConfigType<?> type = TypeFactory.getType(obj.getClass());
 
     QName attrName = new QName(attr);
     Attribute attrStrategy = type.getAttribute(attrName);

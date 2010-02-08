@@ -27,11 +27,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.junit;
 
 import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.ElementType.FIELD;
-import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
 import java.lang.annotation.Documented;
@@ -39,17 +37,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * @Configurable documents a class or method as configurable by Resin's
- * dependency injection or configured as part of Resin's normal
- * configuration.
- *
- * The purpose of the annotation is to help the JavaDoc distinguish between
- * configurable parameters and internal parameters.
+ * Describes additional configuration for the runner.
  */
-
-@Documented  
+@Documented
 @Retention(RUNTIME)
-@Target({TYPE, FIELD, METHOD})
-public @interface Configurable {
-  public String []value() default {};
+@Target({TYPE})
+public @interface CandiConfiguration {
+  String []modules() default {};
+
+  String []beansXml() default {};
 }

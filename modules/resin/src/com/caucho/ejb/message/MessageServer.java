@@ -127,7 +127,7 @@ public class MessageServer<T> extends AbstractServer<T>
 			getEJBName()));
 
       try {
-	Class beanClass = getBeanSkelClass();
+	Class<?> beanClass = getBeanSkelClass();
 
 	_ejbCreate = beanClass.getMethod("ejbCreate", new Class[0]);
 	  
@@ -146,7 +146,7 @@ public class MessageServer<T> extends AbstractServer<T>
     super.bindContext();
     
     InjectManager manager = InjectManager.create();
-    BeanFactory factory = manager.createBeanFactory(_context.getClass());
+    BeanFactory<?> factory = manager.createBeanFactory(_context.getClass());
 
     manager.addBean(factory.singleton(_context));
   }
@@ -158,8 +158,10 @@ public class MessageServer<T> extends AbstractServer<T>
   public boolean start()
     throws Exception
   {
-     if (! super.start())
+    if (! super.start())
       return false;
+     
+    _ra.start(ResourceManagerImpl.create());
      
     _ra.endpointActivation(this, _activationSpec);
 

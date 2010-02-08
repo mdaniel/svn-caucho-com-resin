@@ -396,10 +396,15 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
    */
   public boolean isRootScannable(Path root)
   {
-    if (! _ejbUrls.contains(root.getURL())
-        &&  ! root.lookup("META-INF/ejb-jar.xml").canRead()) {
+    if (! root.lookup("META-INF/ejb-jar.xml").canRead()) {
       return false;
     }
+    else if (_ejbUrls.contains(root.getURL())) {
+      return false;
+    }
+    
+    if (log.isLoggable(Level.FINE))
+      log.fine("EJB scanning '" + root.getFullPath() + "'");
 
     EjbRootConfig context = _configManager.createRootConfig(root);
 

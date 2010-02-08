@@ -72,7 +72,7 @@ import com.caucho.xml.QNode;
 /**
  * Represents an introspected bean type for configuration.
  */
-public class BeanType<T> extends ConfigType
+public class BeanType<T> extends ConfigType<T>
 {
   private static final L10N L = new L10N(BeanType.class);
   private static final Logger log
@@ -771,40 +771,19 @@ public class BeanType<T> extends ConfigType
 	Class<?> type = paramTypes[0];
 
 	String className = name.substring(3);
-	String propName = toXmlName(name.substring(3));
+	String xmlName = toXmlName(name.substring(3));
 
         TagName tagName = method.getAnnotation(TagName.class);
 
-        if (tagName != null)
-          propName = tagName.value();
+        if (tagName != null) {
+          for (String propName : tagName.value()) {
+            addProp(propName, method);
+          }
+        }
+        else
+          addProp(xmlName, method);
 
-        Attribute attr;
-	
-	if (propName.equals("text")
-	    && (paramTypes[0].equals(String.class)
-		|| paramTypes[0].equals(RawString.class))) {
-	  attr = new TextAttribute(method, type);
-	  _addText = attr;
-	  _attributeMap.put("#text", attr);
-	}
-	else
-	  attr = new SetterAttribute(method, type);
-
-	_attributeMap.put(propName, attr);
-	// server/2e28 vs jms/2193
-	// _attributeMap.put(className, attr);
-
-	if (propName.equals("value")) {
-	  _attributeMap.put("#text", attr);
-
-	  // server/12aa
-	  if (_addText == null)
-	    _addText = attr;
-	}
-
-	propName = toCamelName(className);
-	
-	_attributeMap.put(propName, attr);
+	addProp(toCamelName(className), method);
       }
       else if ((name.startsWith("create")
 		&& paramTypes.length == 0
@@ -815,17 +794,53 @@ public class BeanType<T> extends ConfigType
 
 	CreateAttribute attr = new CreateAttribute(method, type, setter);
 
-	String propName = toXmlName(name.substring(6));
+	String xmlName = toXmlName(name.substring(6));
 
         TagName tagName = method.getAnnotation(TagName.class);
 
-        if (tagName != null)
-          propName = tagName.value();
-
-        _attributeMap.put(propName, attr);
+        if (tagName != null) {
+          for (String propName : tagName.value()) {
+            _attributeMap.put(propName, attr);
+          }
+        }
+        else {
+          _attributeMap.put(xmlName, attr);
+        }
       }
     }
   }
+  
+  private void addProp(String propName, 
+                       Method method)
+  {
+    Attribute attr;
+    
+    Class<?> []paramTypes = method.getParameterTypes();
+    Class<?> type = paramTypes[0];
+  
+    if (propName.equals("text")
+        && (type.equals(String.class)
+            || type.equals(RawString.class))) {
+      attr = new TextAttribute(method, type);
+      _addText = attr;
+      _attributeMap.put("#text", attr);
+    }
+    else
+      attr = new SetterAttribute(method, type);
+
+    _attributeMap.put(propName, attr);
+    // server/2e28 vs jms/2193
+    // _attributeMap.put(className, attr);
+
+    if (propName.equals("value")) {
+      _attributeMap.put("#text", attr);
+
+      // server/12aa
+      if (_addText == null)
+        _addText = attr;
+    }
+  }
+
 
   /**
    * Introspect the bean for configuration
