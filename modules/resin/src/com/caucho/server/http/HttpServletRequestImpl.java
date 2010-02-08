@@ -109,7 +109,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
   private final HttpServletResponseImpl _response;
 
-  private boolean _isSecure;
+  private Boolean _isSecure;
 
   private Invocation _invocation;
 
@@ -157,8 +157,6 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
 
     _response = new HttpServletResponseImpl(this,
                                             request.getAbstractHttpResponse());
-
-    _isSecure = request.isSecure();
   }
 
   public HttpServletResponseImpl getResponse()
@@ -409,7 +407,10 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public boolean isSecure()
   {
-    return _isSecure;
+    if (_isSecure != null)
+      return _isSecure;
+    else
+      return _request.isSecure();
   }
 
   //

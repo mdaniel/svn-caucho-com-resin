@@ -268,7 +268,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       licenseErrorMessage = e.getMessage();
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
-      
+
       log().log(Level.FINER, cause.toString(), cause);
 
       if (cause instanceof ConfigException) {
@@ -1058,7 +1058,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
                      port.getPort(),
                      port.getServerSocket());
       }
-      
+
       _server.start();
 
       Environment.start(getClassLoader());
@@ -1634,13 +1634,13 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
   {
 
   }
-  
+
   public void memoryShutdown(String msg)
   {
     _isDumpHeapOnExit = true;
-    
+
     startShutdown(msg);
-    
+
     try {
       Thread.sleep(10 * 60 * 1000L);
     } catch (Exception e) {

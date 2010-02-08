@@ -64,16 +64,16 @@ public class QuercusView
     super();
   }
 
-	protected void initServletContext(ServletContext servletContext) 
+        protected void initServletContext(ServletContext servletContext)
   {
     _servletContext = servletContext;
 
     checkServletAPIVersion();
-    
+
     getQuercus().setPwd(new FilePath(_servletContext.getRealPath("/")));
 
     getQuercus().init();
-	}
+  }
 
   protected void checkServletAPIVersion()
   {
@@ -83,15 +83,15 @@ public class QuercusView
     if (major < 2 || major == 2 && minor < 4)
       throw new QuercusRuntimeException(L.l("Quercus requires Servlet API 2.4+."));
   }
-  
-	protected void renderMergedOutputModel(Map model, 
-                                         HttpServletRequest request, 
-                                         HttpServletResponse response) 
+
+  protected void renderMergedOutputModel(Map model,
+                                         HttpServletRequest request,
+                                         HttpServletResponse response)
     throws Exception
   {
     Env env = null;
     WriteStream ws = null;
-    
+
     try {
       Path path = getPath(request);
 
@@ -110,24 +110,24 @@ public class QuercusView
       }
 
       StreamImpl out;
-      
+
       try {
         out = new VfsStream(null, response.getOutputStream());
       }
       catch (IllegalStateException e) {
         WriterStreamImpl writer = new WriterStreamImpl();
         writer.setWriter(response.getWriter());
-        
+
         out = writer;
       }
-      
+
       ws = new WriteStream(out);
-      
+
       ws.setNewlineString("\n");
 
       QuercusContext quercus = getQuercus();
       quercus.setServletContext(_servletContext);
-      
+
       env = quercus.createEnv(page, ws, request, response);
 
       // retro... thanks, Spring
@@ -138,7 +138,7 @@ public class QuercusView
 
       try {
         env.start();
-        
+
         env.setScriptGlobal("request", request);
         env.setScriptGlobal("response", response);
         env.setScriptGlobal("servletContext", _servletContext);
@@ -147,7 +147,7 @@ public class QuercusView
           = quercus.getIniValue("auto_prepend_file").toStringValue(env);
         if (prepend.length() > 0) {
           Path prependPath = env.lookup(prepend);
-          
+
           if (prependPath == null)
             env.error(L.l("auto_prepend_file '{0}' not found.", prepend));
           else {
@@ -162,7 +162,7 @@ public class QuercusView
           = quercus.getIniValue("auto_append_file").toStringValue(env);
         if (append.length() > 0) {
           Path appendPath = env.lookup(append);
-          
+
           if (appendPath == null)
             env.error(L.l("auto_append_file '{0}' not found.", append));
           else {
@@ -185,7 +185,7 @@ public class QuercusView
       }
       catch (QuercusValueException e) {
         log.log(Level.FINE, e.toString(), e);
-	
+
         ws.println(e.toString());
 
       //  return;
@@ -201,7 +201,7 @@ public class QuercusView
       finally {
         if (env != null)
           env.close();
-        
+
         // don't want a flush for a thrown exception
         if (ws != null)
           ws.close();

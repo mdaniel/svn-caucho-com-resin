@@ -825,6 +825,9 @@ public class Environment {
     ClassLoader oldLoader = thread.getContextClassLoader();
     try {
       thread.setContextClassLoader(systemLoader);
+      
+      if ("1.6.".compareTo(System.getProperty("java.runtime.version")) > 0)
+        throw new ConfigException("Resin requires JDK 1.6 or later");
 
       // #2281
       // PolicyImpl.init();

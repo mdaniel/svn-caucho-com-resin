@@ -13,6 +13,9 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>load-balance: setting of isSecure was not properly cleared (rep by Matt Pangaro)</li>
+<li>boot: check for Java 1.6 or later before start (#3862, rep by Tom Howard)</li>
+<li>ejb: MessageDriven updated to understand ConnectionFactoryJndiName</li>
 <li>mod_caucho: backup needs to hash the entire cookie for the new clustering (#3877)</li>
 <li>quercus: remove java_bean and java_lookup Resin dependencies (rep by domdom)</li>
 <li>junit: add com.caucho.junit.ResinJUnitRunner for junit</li>
