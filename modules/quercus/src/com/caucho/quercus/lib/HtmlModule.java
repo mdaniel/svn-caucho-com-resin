@@ -400,11 +400,14 @@ public class HtmlModule extends AbstractQuercusModule {
     }
     else
       htmlEntities = HTML_ENTITIES_ARRAY_ENTITY_KEY;
+
+    if (charset == null || charset.length() == 0)
+      charset = env.getRuntimeEncoding();
     
     EncodingWriter out = Encoding.getWriteEncoding(charset);
 
     int len = string.length();
-    int htmlEntityStart = -1;    
+    int htmlEntityStart = -1;
     StringValue result = env.createStringBuilder();
     
     try {
