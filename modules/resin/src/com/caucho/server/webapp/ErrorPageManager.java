@@ -607,12 +607,16 @@ public class ErrorPageManager {
       }
 
       response.setContentType("text/html; charset=utf-8");
+      boolean isOutputStreamWrapper = false;
       PrintWriter out;
       
       try {
         out = response.getWriter();
       } catch (IllegalStateException e) {
+        log.log(Level.ALL, e.toString(), e);
+        
         out = Vfs.openWrite(response.getOutputStream()).getPrintWriter();
+        isOutputStreamWrapper = true;
       }
 
       out.println("<html>");
@@ -664,8 +668,10 @@ public class ErrorPageManager {
         out.write(MSIE_PADDING, 0, MSIE_PADDING.length);
       }
       
-      out.flush();
-      out.close();
+      if (isOutputStreamWrapper) {
+        out.flush();
+        out.close();
+      }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
