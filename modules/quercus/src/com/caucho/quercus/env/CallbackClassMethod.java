@@ -46,7 +46,7 @@ public class CallbackClassMethod extends Callback {
 
   private final StringValue _methodName;
   private final int _hash;
-  
+
   private final Value _qThis;
 
   public CallbackClassMethod(QuercusClass qClass,
@@ -58,8 +58,14 @@ public class CallbackClassMethod extends Callback {
     _methodName = methodName;
 
     _hash = methodName.hashCodeCaseInsensitive();
-    
+
     _qThis = qThis;
+  }
+
+  public CallbackClassMethod(QuercusClass qClass,
+                             StringValue methodName)
+  {
+    this(qClass, methodName, qClass);
   }
 
   /**
