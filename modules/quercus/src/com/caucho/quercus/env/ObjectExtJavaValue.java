@@ -52,6 +52,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
 
     _object = object;
     _javaClassDef = javaClassDef;
+    Thread.dumpStack();
   }
   
   public ObjectExtJavaValue(QuercusClass cl,
@@ -60,6 +61,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
     super(cl);
 
     _javaClassDef = javaClassDef;
+    Thread.dumpStack();
   }
   
   //

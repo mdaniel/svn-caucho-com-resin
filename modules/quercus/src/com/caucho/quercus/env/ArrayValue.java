@@ -424,6 +424,8 @@ abstract public class ArrayValue extends Value {
 
           return super.toCallable(env);
         }
+        
+        return new CallbackClassMethod(cls, env.createString(name), obj);
       }
 
       return new CallbackObjectMethod(env, obj, env.createString(name));

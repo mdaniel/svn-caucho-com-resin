@@ -933,7 +933,6 @@ public class QuercusClass extends NullValue {
       }
 
       return objectValue;
-
     } finally {
       env.setCallingClass(oldCallingClass);
     }

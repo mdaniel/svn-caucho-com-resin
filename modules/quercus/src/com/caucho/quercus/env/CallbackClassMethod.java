@@ -46,15 +46,20 @@ public class CallbackClassMethod extends Callback {
 
   private final StringValue _methodName;
   private final int _hash;
+  
+  private final Value _qThis;
 
   public CallbackClassMethod(QuercusClass qClass,
-                             StringValue methodName)
+                             StringValue methodName,
+                             Value qThis)
   {
     _qClass = qClass;
 
     _methodName = methodName;
 
     _hash = methodName.hashCodeCaseInsensitive();
+    
+    _qThis = qThis;
   }
 
   /**
@@ -65,7 +70,7 @@ public class CallbackClassMethod extends Callback {
   @Override
   public Value call(Env env)
   {
-    return _qClass.callMethod(env, _methodName, _hash);
+    return _qClass.callMethod(env, _qThis, _methodName, _hash);
   }
 
   /**
@@ -76,7 +81,7 @@ public class CallbackClassMethod extends Callback {
   @Override
   public Value call(Env env, Value a1)
   {
-    return _qClass.callMethod(env, _methodName, _hash,
+    return _qClass.callMethod(env, _qThis, _methodName, _hash,
                               a1);
   }
 
@@ -88,7 +93,7 @@ public class CallbackClassMethod extends Callback {
   @Override
   public Value call(Env env, Value a1, Value a2)
   {
-    return _qClass.callMethod(env, _methodName, _hash,
+    return _qClass.callMethod(env, _qThis, _methodName, _hash,
                               a1, a2);
   }
 
@@ -100,7 +105,7 @@ public class CallbackClassMethod extends Callback {
   @Override
   public Value call(Env env, Value a1, Value a2, Value a3)
   {
-    return _qClass.callMethod(env, _methodName, _hash,
+    return _qClass.callMethod(env, _qThis, _methodName, _hash,
                               a1, a2, a3);
   }
 
@@ -113,7 +118,7 @@ public class CallbackClassMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
                              Value a4)
   {
-    return _qClass.callMethod(env, _methodName, _hash,
+    return _qClass.callMethod(env, _qThis, _methodName, _hash,
                               a1, a2, a3, a4);
   }
 
@@ -126,14 +131,14 @@ public class CallbackClassMethod extends Callback {
   public Value call(Env env, Value a1, Value a2, Value a3,
                     Value a4, Value a5)
   {
-    return _qClass.callMethod(env, _methodName, _hash,
+    return _qClass.callMethod(env, _qThis, _methodName, _hash,
                               a1, a2, a3, a4, a5);
   }
 
   @Override
   public Value call(Env env, Value []args)
   {
-    return _qClass.callMethod(env, _methodName, _hash, args);
+    return _qClass.callMethod(env, _qThis, _methodName, _hash, args);
   }
 
   @Override

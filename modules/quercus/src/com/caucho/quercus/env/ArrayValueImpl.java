@@ -689,9 +689,6 @@ public class ArrayValueImpl extends ArrayValue
    */
   public Value getArray(Value index)
   {
-    if (true)
-      throw new IllegalStateException();
-    
     // php/3482, php/3483
 
     if (_isDirty)
@@ -996,7 +993,23 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Returns the array ref.
    */
+  @Override
   public Var getVar(Value index)
+  {
+    if (_isDirty)
+      copyOnWrite();
+
+    Entry entry = createEntry(index);
+    // quercus/0431
+
+    return entry.toVar(); // _value.toSimpleVar();
+  }
+
+  /**
+   * Returns the array ref.
+   */
+  @Override
+  public Var getRef(Value index)
   {
     if (_isDirty)
       copyOnWrite();

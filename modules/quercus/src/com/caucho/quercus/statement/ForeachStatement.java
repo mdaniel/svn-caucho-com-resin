@@ -139,7 +139,8 @@ public class ForeachStatement
 
         Value value = origObj.getVar(key);
 
-        _value.evalAssignValue(env, value);
+        // php/0667
+        _value.evalAssignRef(env, value);
 
         Value result = _block.execute(env);
 

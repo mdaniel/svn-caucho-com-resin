@@ -2613,7 +2613,12 @@ abstract public class Value implements java.io.Serializable
    */
   public Value append(Value index, Value value)
   {
-    return toAutoArray().append(index, value);
+    Value array = toAutoArray();
+    
+    if (array.isArray())
+      return array.append(index, value);
+    else
+      return array;
   }
 
   /**

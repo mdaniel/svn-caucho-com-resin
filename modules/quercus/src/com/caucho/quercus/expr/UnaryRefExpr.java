@@ -93,6 +93,21 @@ public class UnaryRefExpr extends AbstractUnaryExpr {
    *
    * @return the expression value.
    */
+  @Override
+  public Value evalArg(Env env, boolean isTop)
+  {
+    Value value = getExpr().evalVar(env);
+    
+    return value.toArgRef();
+  }
+
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
   public Var evalVar(Env env)
   {
     Var value = getExpr().evalVar(env);

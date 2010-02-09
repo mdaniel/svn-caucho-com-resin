@@ -3421,6 +3421,7 @@ public class QuercusParser {
       return parseDie();
 
     case IDENTIFIER:
+    case NAMESPACE:
       {
         if (_lexeme.equals("new"))
           return parseNew();
@@ -3574,13 +3575,13 @@ public class QuercusParser {
   {
     int token = parseToken();
 
-    if (token == IDENTIFIER) {
+    if (isIdentifier(token)) {
       return classNameExpr.createClassConst(this, _lexeme);
     }
     else if (token == '$') {
       token = parseToken();
       
-      if (token == IDENTIFIER) {
+      if (isIdentifier(token)) {
         return classNameExpr.createClassField(this, _lexeme);
       }
       else if (token == '{') {
@@ -3599,6 +3600,11 @@ public class QuercusParser {
     
     throw error(L.l("unexpected token '{0}' in class scope expression",
                     tokenName(token)));
+  }
+  
+  private boolean isIdentifier(int token)
+  {
+    return token == IDENTIFIER || FIRST_IDENTIFIER_LEXEME <= token;
   }
 
   /**
@@ -5917,7 +5923,7 @@ public class QuercusParser {
 
     _insensitiveReserved.put("import", IMPORT);
     // backward compatibility issues
-    // _insensitiveReserved.put("namespace", NAMESPACE);
+    _insensitiveReserved.put("namespace", NAMESPACE);
     _insensitiveReserved.put("use", USE);
   }
 }
