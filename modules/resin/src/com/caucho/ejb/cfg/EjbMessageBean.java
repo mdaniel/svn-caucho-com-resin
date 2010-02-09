@@ -87,7 +87,7 @@ public class EjbMessageBean extends EjbBean {
   private JmsActivationConfig _jmsActivationConfig
     = new JmsActivationConfig();
   
-  private Destination _destination;
+  // private Destination _destination;
   private String _messageSelector;
   private int _acknowledgeMode = Session.AUTO_ACKNOWLEDGE;
   private String _selector;
@@ -187,7 +187,7 @@ public class EjbMessageBean extends EjbBean {
   public void setDestination(Destination destination)
     throws ConfigException
   {
-    _destination = destination;
+      _jmsActivationConfig.setDestinationObject(destination);
   }
 
   /**
@@ -195,7 +195,7 @@ public class EjbMessageBean extends EjbBean {
    */
   public void setDestinationValue(Destination destination)
   {
-    _destination = destination;
+    _jmsActivationConfig.setDestinationObject(destination);
   }
 
   public void setMessagingType(Class messagingType)
@@ -209,7 +209,7 @@ public class EjbMessageBean extends EjbBean {
    */
   public Destination getDestination()
   {
-    return _destination;
+    return _jmsActivationConfig.getDestinationObject();
   }
 
   /**

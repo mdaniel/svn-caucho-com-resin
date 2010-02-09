@@ -174,13 +174,13 @@ public class ArrayObject
     _iteratorClass = _env.findClass(iteratorClass);
   }
 
-  public void uasort(Callback func)
+  public void uasort(Callable func)
   {
     if (_value instanceof ArrayValue)
       ArrayModule.uasort(_env, (ArrayValue) _value, func,  0);
   }
 
-  public void uksort(Callback func, @Optional long sortFlag)
+  public void uksort(Callable func, @Optional long sortFlag)
   {
     if (_value instanceof ArrayValue)
       ArrayModule.uksort(_env, (ArrayValue) _value, func, sortFlag);

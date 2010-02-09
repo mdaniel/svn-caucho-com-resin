@@ -13,6 +13,7 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>logging: Logger.getHandlers() must return empty array instead of null (#3882, rep by Knut Forkalsrud)</li>
 <li>load-balance: setting of isSecure was not properly cleared (rep by Matt Pangaro)</li>
 <li>boot: check for Java 1.6 or later before start (#3862, rep by Tom Howard)</li>
 <li>ejb: MessageDriven updated to understand ConnectionFactoryJndiName</li>

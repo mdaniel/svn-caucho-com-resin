@@ -987,7 +987,10 @@ public class InjectManager
   {
     ArrayList<Bean<?>> beanList = findByName(name);
 
-    return new LinkedHashSet<Bean<?>>(beanList);
+    if (beanList != null)
+      return new LinkedHashSet<Bean<?>>(beanList);
+    else
+      return new LinkedHashSet<Bean<?>>();
   }
 
   /**

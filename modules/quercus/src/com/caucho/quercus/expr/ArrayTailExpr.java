@@ -104,7 +104,7 @@ public class ArrayTailExpr extends AbstractVarExpr {
    */
   public Var evalVar(Env env)
   {
-    Value obj = _expr.evalArray(env);
+    Value obj = _expr.evalVar(env);
 
     return obj.putVar();
   }

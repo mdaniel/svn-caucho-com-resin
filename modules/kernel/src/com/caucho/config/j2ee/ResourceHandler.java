@@ -145,7 +145,7 @@ public class ResourceHandler extends JavaeeInjectionHandler {
                                     Class<?> bindType,
                                     String lookupName)
   {
-    if (lookupName == null)
+    if (lookupName == null || "".equals(lookupName))
       return null;
     
     if (! lookupName.startsWith("java:") && ! lookupName.startsWith("/"))

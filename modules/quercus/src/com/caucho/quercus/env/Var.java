@@ -1391,7 +1391,10 @@ public class Var extends Value
     _value = _value.append(index, value);
     
     // this is slow, but ok because put() is only used for slow ops
-    return _value.get(index);
+    if (_value.isArray())
+      return value;
+    else
+      return _value.get(index);
   }
 
   /**

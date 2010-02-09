@@ -826,13 +826,24 @@ abstract public class StringValue
   }
 
   /**
+   * Converts to an array if null.
+   */
+  public Value toAutoArray()
+  {
+    if (length() == 0)
+      return new ArrayValueImpl();
+    else
+      return this;
+  }
+
+  /**
    * Converts to a Java object.
    */
   public Object toJavaObject()
   {
     return toString();
   }
-
+  
   /**
    * Takes the values of this array, unmarshalls them to objects of type
    * <i>elementType</i>, and puts them in a java array.
@@ -876,17 +887,6 @@ abstract public class StringValue
       env.error(L.l("Can't assign {0} with type {1} to {2}", this, this.getClass(), elementType));
       return null;
     }
-  }
-
-  /**
-   * Converts to an array if null.
-   */
-  public Value toAutoArray()
-  {
-    if (length() == 0)
-      return new ArrayValueImpl();
-    else
-      return super.toAutoArray();
   }
   
   /**

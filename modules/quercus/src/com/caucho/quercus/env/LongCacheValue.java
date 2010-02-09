@@ -42,8 +42,8 @@ import java.util.IdentityHashMap;
 @SuppressWarnings("serial")
 public class LongCacheValue extends LongValue
 {
-  private LongValue _prev;
-  private final LongValue _next;
+  private transient LongValue _prev;
+  private transient final LongValue _next;
   
   public LongCacheValue(long value, LongValue next)
   {
@@ -109,5 +109,13 @@ public class LongCacheValue extends LongValue
   public Value postdecr()
   {
     return _prev;
+  }
+
+  /**
+   * serialization override
+   */
+  private Object writeReplace()
+  {
+    return new LongValue(toLong());
   }
 }

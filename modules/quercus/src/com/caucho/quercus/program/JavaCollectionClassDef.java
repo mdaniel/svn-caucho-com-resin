@@ -52,7 +52,7 @@ public class JavaCollectionClassDef extends JavaClassDef {
     if (! _isInit)
       init();
 
-    return new JavaCollectionAdapter(env, (Collection) obj, this);
+    return new JavaCollectionAdapter((Collection) obj, this);
   }
 }
 

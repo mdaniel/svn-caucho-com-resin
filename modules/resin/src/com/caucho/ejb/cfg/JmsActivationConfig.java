@@ -83,9 +83,10 @@ import java.util.Set;
 public class JmsActivationConfig {
   private static final L10N L = new L10N(JmsActivationConfig.class);
   private String _connectionFactoryName;
-  private String _destinationName;
   
   private Class<?> _destinationType = Queue.class;
+  private String _destinationName;
+  private Destination _destinationObject;
   
   private int _maxPoolSize = 1;
   
@@ -161,6 +162,16 @@ public class JmsActivationConfig {
   public Class <? extends Destination> getDestinationType()
   {
     return (Class<? extends Destination>) _destinationType;
+  }
+  
+  public Destination getDestinationObject()
+  {
+    return _destinationObject;
+  }
+  
+  public void setDestinationObject(Destination destination)
+  {
+    _destinationObject = destination;
   }
   
   /**

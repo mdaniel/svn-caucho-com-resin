@@ -92,10 +92,10 @@ public class JmsResourceAdapter implements ResourceAdapter {
     _config = config;
     /*
     _connectionFactory = factory;
-    
-    _destination = destination;
     */
-  }
+    
+    _destination = config.getDestinationObject();
+    }
 
   public void setMessageSelector(String selector)
   {
@@ -129,9 +129,11 @@ public class JmsResourceAdapter implements ResourceAdapter {
     
     if (_config.getDestinationType() == null)
       throw new ConfigException(L.l("destination-type must be specified for @MessageDriven bean"));
-    
-    _destination = getResource(_config.getDestinationType(),
-                               _config.getDestinationName());
+
+    if (_destination == null) {
+      _destination = getResource(_config.getDestinationType(),
+                                 _config.getDestinationName());
+    }
     
     if (_destination== null)
       throw new ConfigException(L.l("destination must be specified for @MessageDriven bean"));
@@ -146,7 +148,9 @@ public class JmsResourceAdapter implements ResourceAdapter {
   
   private <T> T getResource(Class<T> type, String name)
   {
-    if (name.startsWith("java:comp")) {
+    if (name == null) {
+    }    
+    else if (name.startsWith("java:comp")) {
       try {
         Context ic = new InitialContext();
         
@@ -174,11 +178,23 @@ public class JmsResourceAdapter implements ResourceAdapter {
     
     InjectManager beanManager = InjectManager.create();
     
-    Named named = Names.create(name);
-    
-    Set<Bean<?>> beans = beanManager.getBeans(type, named);
+    Set<Bean<?>> beans;
+
+    if (name != null) {
+      Named named = Names.create(name);
+
+      beans = beanManager.getBeans(type, named);
+    }
+    else {
+      beans = beanManager.getBeans(type);
+    }
     
     Bean<?> bean = beanManager.resolve(beans);
+    
+    if (bean == null) {
+      throw new ConfigException(L.l("'{0}' with name='{1}' is an unknown JMS resource",
+                                    type.getName(), name));
+    }
     
     return (T) beanManager.getReference(bean);
   }

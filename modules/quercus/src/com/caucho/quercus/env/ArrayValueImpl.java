@@ -255,7 +255,7 @@ public class ArrayValueImpl extends ArrayValue
       entries = new Entry[entries.length];
     else
       entries = null;
-
+    
     Entry prev = null;
     for (Entry ptr = _head; ptr != null; ptr = ptr.getNext()) {
       // Entry ptrCopy = new Entry(ptr._key, ptr._value.copyArrayItem());
@@ -333,9 +333,12 @@ public class ArrayValueImpl extends ArrayValue
   public Value copy()
   {
     // php/1704
-    reset();
+    // reset();
 
-    return new ArrayValueImpl(this);
+    Value copy = new ArrayValueImpl(this);
+    copy.reset();
+    
+    return copy;
   }
 
   /**
@@ -392,7 +395,6 @@ public class ArrayValueImpl extends ArrayValue
     // php/1708
 
     Value copy = new ArrayValueImpl(this);
-
     copy.reset();
 
     return copy;
@@ -407,9 +409,8 @@ public class ArrayValueImpl extends ArrayValue
     // php/1708
 
     Value copy = new ArrayValueImpl(this);
-
     copy.reset();
-
+    
     return copy;
   }
 

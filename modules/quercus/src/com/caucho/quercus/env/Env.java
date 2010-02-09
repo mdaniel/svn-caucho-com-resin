@@ -2654,7 +2654,7 @@ public class Env {
         = _scriptContext.getBindings(ScriptContext.ENGINE_SCOPE);
 
       if (bindings != null)
-        value = bindings.get(name);
+        value = bindings.get(name.toString());
     }
 
     if (value == null) {
@@ -2662,7 +2662,7 @@ public class Env {
       = _scriptContext.getBindings(ScriptContext.GLOBAL_SCOPE);
 
       if (bindings != null)
-        value = bindings.get(name);
+        value = bindings.get(name.toString());
     }
 
     if (value != null) {

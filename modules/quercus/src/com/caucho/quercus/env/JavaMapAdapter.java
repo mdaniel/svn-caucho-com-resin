@@ -53,12 +53,13 @@ public class JavaMapAdapter
 
   public JavaMapAdapter(Env env, Map map)
   {
-    this(env, map, env.getJavaClassDefinition(map.getClass()));
+    this(map, env.getJavaClassDefinition(map.getClass()));
   }
   
-  public JavaMapAdapter(Env env, Map map, JavaClassDef def)
+  public JavaMapAdapter(Map map, JavaClassDef def)
   {
-    super(env, map, def);
+    super(map, def);
+    
     _map = map;
     
     updateNextAvailableIndex();
@@ -104,7 +105,7 @@ public class JavaMapAdapter
   public Value copy()
   {
     try {
-      return new JavaMapAdapter(getEnv(), _map, getClassDef());
+      return new JavaMapAdapter(_map, getClassDef());
     }
     catch (Exception e) {
       throw new QuercusRuntimeException(e);
@@ -117,7 +118,7 @@ public class JavaMapAdapter
   @Override
   public Value copy(Env env, IdentityHashMap<Value,Value> map)
   {
-    return new JavaMapAdapter(env, _map, getClassDef());
+    return new JavaMapAdapter(_map, getClassDef());
   }
   
   /**

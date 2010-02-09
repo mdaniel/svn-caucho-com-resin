@@ -50,7 +50,7 @@ public class JavaMapClassDef extends JavaClassDef {
     if (!_isInit)
       init();
     
-    return new JavaMapAdapter(env, (Map) obj, this);
+    return new JavaMapAdapter((Map) obj, this);
   }
 }
 

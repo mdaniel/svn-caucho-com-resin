@@ -109,7 +109,7 @@ public class ListHeadExpr extends Expr {
       _varList[0].evalAssignValue(env, array.key());
 
     if (_varList.length > 1 && _varList[1] != null)
-      _varList[1].evalAssignValue(env, array.current());
+      _varList[1].evalAssignValue(env, array.current().copy());
       
     return array.each();
   }
@@ -130,7 +130,7 @@ public class ListHeadExpr extends Expr {
       _varList[0].evalAssignValue(env, array.key());
 
     if (_varList.length > 1 && _varList[1] != null)
-      _varList[1].evalAssignValue(env, array.current());
+      _varList[1].evalAssignValue(env, array.current().copy());
 
     array.next();
 

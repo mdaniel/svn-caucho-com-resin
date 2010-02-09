@@ -61,11 +61,8 @@ abstract public class JavaAdapter extends ArrayValue
   
   private JavaClassDef _classDef;
 
-  protected JavaAdapter(Env env, Object object, JavaClassDef def)
+  protected JavaAdapter(Object object, JavaClassDef def)
   {
-    if (env != null)
-      _envRef = new WeakReference<Env>(env);
-    
     _object = object;
     _classDef = def;
   }
@@ -77,12 +74,12 @@ abstract public class JavaAdapter extends ArrayValue
 
   public Env getEnv()
   {
-    return _envRef.get();
+    return Env.getCurrent();
   }
   
   public Value wrapJava(Object obj)
   {
-    return _envRef.get().wrapJava(obj);
+    return getEnv().wrapJava(obj);
   }
   
   /**

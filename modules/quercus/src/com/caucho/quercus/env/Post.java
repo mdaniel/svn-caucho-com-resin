@@ -487,7 +487,7 @@ public class Post
         else if (! existingValue.isArray()) {
           //existing is overwritten
           // php/115g
-          
+
           existingValue = new ArrayValueImpl();
           array.put(keyValue, existingValue);
         }
@@ -561,9 +561,9 @@ public class Post
   }
 
   private static void put(ArrayValue array,
-			              Value key,
-			              Value value,
-			              boolean addSlashes)
+                          Value key,
+                          Value value,
+                          boolean addSlashes)
   {
     if (addSlashes && value.isString()) {
       value = StringModule.addslashes(value.toStringValue());

@@ -1012,10 +1012,17 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     else
       setHeader("Content-Type", "text/html; charset=utf-8");
 
+    String msg = "The URL has moved <a href=\"" + path + "\">here</a>";
+    
     // The data is required for some WAP devices that can't handle an
     // empty response.
-    ServletOutputStream out = getOutputStream();
-    out.println("The URL has moved <a href=\"" + path + "\">here</a>");
+    if (_writer != null) {
+      _writer.println(msg);
+    }
+    else {
+      ServletOutputStream out = getOutputStream();
+      out.println(msg);
+    }
     // closeConnection();
 
     _request.saveSession(); // #503

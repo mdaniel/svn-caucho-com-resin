@@ -63,7 +63,7 @@ public class GlobalArrayValue extends ArrayValueImpl {
    */
   public ArrayValue append(Value key, Value value)
   {
-    _env.setGlobalValue(key.toString(), value);
+    _env.setGlobalValue(key.toStringValue(), value);
 
     return this;
   }
@@ -133,7 +133,7 @@ public class GlobalArrayValue extends ArrayValueImpl {
    */
   public Value containsKey(Value key)
   {
-    EnvVar var = _env.getGlobalEnv().get(key.toString());
+    EnvVar var = _env.getGlobalEnv().get(key.toStringValue());
 
     if (var != null)
       return var.get();
@@ -155,7 +155,7 @@ public class GlobalArrayValue extends ArrayValueImpl {
    */
   public boolean keyExists(Value key)
   {
-    EnvVar var = _env.getGlobalEnv().get(key.toString());
+    EnvVar var = _env.getGlobalEnv().get(key.toStringValue());
     
     return var != null;
   }

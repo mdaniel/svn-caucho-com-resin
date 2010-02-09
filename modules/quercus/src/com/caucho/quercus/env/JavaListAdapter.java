@@ -52,12 +52,12 @@ public class JavaListAdapter
 
   public JavaListAdapter(Env env, List list)
   {
-    this(env, list, env.getJavaClassDefinition(list.getClass()));
+    this(list, env.getJavaClassDefinition(list.getClass()));
   }
   
-  public JavaListAdapter(Env env, List list, JavaClassDef def)
+  public JavaListAdapter(List list, JavaClassDef def)
   {
-    super(env, list, def);
+    super(list, def);
     _list = list;
   }
 
@@ -236,5 +236,24 @@ public class JavaListAdapter
     _next = _list.size();
     
     return current();
+  }
+  
+
+  /**
+   * Copy for assignment.
+   */
+  @Override
+  public Value copy()
+  {
+    return new JavaListAdapter(_list, getClassDef());
+  }
+
+  /**
+   * Copy for serialization
+   */
+  @Override
+  public Value copy(Env env, IdentityHashMap<Value,Value> map)
+  {
+    return new JavaListAdapter(_list, getClassDef());
   }
 }

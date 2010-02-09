@@ -1178,7 +1178,7 @@ public class ArrayModule
         Value value;
        
         if (entry instanceof ArrayValue.Entry)
-          value = ((ArrayValue.Entry) entry).getRawValue();
+          value = ((ArrayValue.Entry) entry).toVar();
         else
           value = entry.getValue();
         
@@ -1230,7 +1230,7 @@ public class ArrayModule
         Value value;
         
         if (entry instanceof ArrayValue.Entry)
-          value = ((ArrayValue.Entry) entry).getRawValue();
+          value = ((ArrayValue.Entry) entry).toVar();
         else
           value = entry.getValue();
 

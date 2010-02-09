@@ -77,8 +77,10 @@ public class FieldGeneratorProgram extends ConfigProgram
   public void inject(Object bean, ConfigContext env)
     throws ConfigException
   {
+    Object value = null;
+    
     try {
-      Object value = _gen.create();
+      value = _gen.create();
 
       // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1, needs QA
       if (value != null
@@ -90,6 +92,10 @@ public class FieldGeneratorProgram extends ConfigProgram
       _field.set(bean, value);
     } catch (ConfigException e) {
       throw e;
+    } catch (ClassCastException e) {
+      throw ConfigException.create(L.l("{0}: value {1} be cast to {2}",
+                                       location(), value, _field.getType().getName()),
+                                   e);
     } catch (Exception e) {
       throw ConfigException.create(location(), e);
     }

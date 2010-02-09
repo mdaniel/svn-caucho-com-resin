@@ -77,15 +77,19 @@ public class FunEachExpr extends AbstractUnaryExpr {
       return NullValue.NULL;
     }
     
-    Value value = getExpr().eval(env);
+    Value var = getExpr().evalRef(env);
+    Value value = var.toValue();
 
     if (value instanceof ArrayValue) {
       ArrayValue array = (ArrayValue) value;
 
       return array.each();
     }
-    else
+    else {
+      env.warning(L.l("each() argument must be an array at '{0}'", value.getClass().getSimpleName()));
+    
       return BooleanValue.FALSE;
+    }
   }
 }
 

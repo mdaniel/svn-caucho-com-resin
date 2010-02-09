@@ -42,9 +42,9 @@ public class JavaCollectionAdapter extends JavaAdapter
 {
   private Collection<Object> _collection;
 
-  public JavaCollectionAdapter(Env env, Collection<Object> coll, JavaClassDef def)
+  public JavaCollectionAdapter(Collection<Object> coll, JavaClassDef def)
   {
-    super(env, coll, def);
+    super(coll, def);
     
     _collection = coll;
   }
@@ -68,7 +68,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   @Override
   public Value copy()
   {
-    return new JavaCollectionAdapter(getEnv(), _collection, getClassDef());
+    return new JavaCollectionAdapter(_collection, getClassDef());
   }
 
   /**
@@ -77,7 +77,7 @@ public class JavaCollectionAdapter extends JavaAdapter
   @Override
   public Value copy(Env env, IdentityHashMap<Value,Value> map)
   {
-    return new JavaCollectionAdapter(env, _collection, getClassDef());
+    return new JavaCollectionAdapter(_collection, getClassDef());
   }
 
   /**
