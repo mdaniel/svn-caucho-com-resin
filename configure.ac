@@ -752,6 +752,10 @@ if test -z "${LD_SHLIB}"; then
    	fi
         ;;
 
+    *freebsd*)
+        CFLAGS="$CFLAGS -fPIC"
+        ;;
+
     *aix*)
 	if test -z "$is_gcc"; then
 	   CFLAGS_SHLIB="-bexpall"
@@ -879,7 +883,7 @@ case "$target_os" in
 	PROXY_LIBS='-lnsl -lsocket -lthread'
 	;;
 
-  *freebsd*5*)
+  *freebsd*)
 	PROXY_LIBS='-lpthread'
         jni_os=freebsd        
         
@@ -902,11 +906,6 @@ case "$target_os" in
 		echo "Using -lpthread as default"
 		;;
 	esac	
-	;;
-
-  *freebsd*)
-	PROXY_LIBS='-lc_r'
-        jni_os=freebsd
 	;;
 
   *darwin*)
