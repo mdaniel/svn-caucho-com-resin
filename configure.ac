@@ -101,14 +101,10 @@ AC_SUBST(resin_pro)
 #
 # --with-java-home
 #
-JAVA_EXE=java
-
 AC_ARG_WITH(java-home,
 [  --with-java-home=DIR  java home
 ], [
 JAVA_HOME=${withval}
-
-JAVA_EXE="$JAVA_HOME/bin/java"
 ])
 
 if test -z "$JAVA_HOME"; then
@@ -150,6 +146,10 @@ if test ! -d "$JAVA_HOME"; then
 fi
 
 AC_SUBST(JAVA_HOME)
+
+JAVA_EXE="$JAVA_HOME/bin/java"
+
+AC_SUBST(JAVA_EXE)
 
 #
 # libtool stuff
@@ -582,6 +582,25 @@ if test -z "${LD_SHLIB}"; then
     echo "Using shared library flags from ${apxs}"
   fi
 fi
+
+#
+# Java 1.6 check
+#
+
+echo -n "checking if ${JAVA_EXE} is Java 1.6... "
+
+tmpname="/tmp/java$$.out"
+	       	
+$JAVA_EXE -version 2> $tmpname
+
+grep "1\.6" $tmpname 1> /dev/null
+if test "$?" != "0"; then
+  echo "no"
+  java_version=`cat $tmpname`
+  AC_MSG_ERROR([Java 1.6 required. ${JAVA_EXE} returned: ${java_version}])
+fi
+
+echo "yes"
 
 #
 # 64bit heuristics
