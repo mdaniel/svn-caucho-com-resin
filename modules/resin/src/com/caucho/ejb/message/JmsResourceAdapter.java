@@ -57,6 +57,7 @@ import javax.transaction.xa.*;
 import com.caucho.config.*;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.cfg.JmsActivationConfig;
+import com.caucho.lifecycle.Lifecycle;
 import com.caucho.util.L10N;
 
 public class JmsResourceAdapter implements ResourceAdapter {
@@ -83,6 +84,8 @@ public class JmsResourceAdapter implements ResourceAdapter {
   private MessageEndpointFactory _endpointFactory;
 
   private ArrayList<Consumer> _consumers;
+  
+  private Lifecycle _lifecycle = new Lifecycle();
 
   public JmsResourceAdapter(String ejbName,
                             JmsActivationConfig config)
@@ -121,6 +124,13 @@ public class JmsResourceAdapter implements ResourceAdapter {
   public void start(BootstrapContext ctx)
     throws ResourceAdapterInternalException
   {
+  }
+  
+  private void init()
+  {
+    if (! _lifecycle.toActive())
+      return;
+    
     _connectionFactory = getResource(ConnectionFactory.class,
                                      _config.getConnectionFactoryName());
     
@@ -206,6 +216,8 @@ public class JmsResourceAdapter implements ResourceAdapter {
 				 ActivationSpec spec)
     throws NotSupportedException, ResourceException
   {
+    init();
+    
     synchronized (this) {
       if (_consumers != null)
 	throw new java.lang.IllegalStateException();

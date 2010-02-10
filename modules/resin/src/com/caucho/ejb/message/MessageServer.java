@@ -161,7 +161,7 @@ public class MessageServer<T> extends AbstractServer<T>
     if (! super.start())
       return false;
      
-    _ra.start(ResourceManagerImpl.create());
+    // _ra.start(ResourceManagerImpl.create());
      
     _ra.endpointActivation(this, _activationSpec);
 
