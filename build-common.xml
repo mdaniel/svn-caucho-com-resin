@@ -182,7 +182,6 @@
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
         <dirset dir="${resin.modules}">
-           <exclude name="servlet15/**"/>
            <include name="*/classes"/>
         </dirset>
         <dirset dir="${modules}">
@@ -263,7 +262,6 @@
            memoryMaximumSize="${javac.memoryMaximumSize}">
       <classpath>
         <dirset dir="${modules}">
-          <exclude name="servlet15/**"/>
           <include name="*/classes"/>
        </dirset>
         <fileset dir="${artifacts}/${artifact.name}">
@@ -357,7 +355,6 @@
         <classpath>
           <pathelement location="${java.home}/../lib/tools.jar"/>
           <dirset dir="${modules}">
-            <exclude name="servlet15/**"/>
             <include name="*/classes"/>
           </dirset>
           <fileset dir="${modules}/ext">
@@ -501,56 +498,6 @@
       </fileset>
     </jar>
 
-    <!--
-       - javaee-15.jar
-      -->
-    <jar destfile="${dist}/${dist.name}/compat/javaee-15.jar">
-      <fileset dir="${resin.modules}/ejb/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jca/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jcache/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jms/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jpa/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/servlet15/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-
-      <!--
-      <fileset dir="${resin.modules}/jsf/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      -->
-      
-      <fileset dir="${resin.modules}/jstl/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jta/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/jws/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-      
-      <fileset dir="${resin.modules}/webbeans/classes">
-        <exclude name="**/.*"/>
-      </fileset>
-    </jar>
 
     <!--
        - resin.jar
