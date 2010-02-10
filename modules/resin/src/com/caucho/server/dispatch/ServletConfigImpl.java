@@ -1124,9 +1124,11 @@ public class ServletConfigImpl
     if (Alarm.getCurrentTime() < _nextInitTime)
       throw _initException;
 
+    /*
     if ("javax.faces.webapp.FacesServlet".equals(_servletClassName)) {
       addFacesResolvers();
     }
+    */
 
     try {
       synchronized (this) {
@@ -1176,6 +1178,7 @@ public class ServletConfigImpl
     }
   }
 
+  /*
   private void addFacesResolvers()
   {
     ApplicationFactory appFactory = (ApplicationFactory)
@@ -1191,6 +1194,7 @@ public class ServletConfigImpl
       }
     }
   }
+  */
 
   Servlet createProtocolServlet()
     throws ServletException

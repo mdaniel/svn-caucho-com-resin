@@ -32,10 +32,12 @@ package com.caucho.quercus.lib;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.lang.ref.SoftReference;
 import java.util.Hashtable;
 import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -94,7 +96,12 @@ public class ResinModule
 
   private static LruCache<String,SaveState> _saveState;
   
-  private BeanManager _beanManager;
+  private static WeakHashMap<ClassLoader,SoftReference<BeanManager>> _beanManagerMap
+    = new WeakHashMap<ClassLoader,SoftReference<BeanManager>>();
+  
+  public ResinModule()
+  {
+  }
 
   /**
    * Converts a string into its binary representation, according to the
@@ -123,26 +130,48 @@ public class ResinModule
    */
   public Object java_bean(String name)
   {
-    if (_beanManager == null) {
-      try {
-        _beanManager = (BeanManager) new InitialContext().lookup("java:comp/BeanManager");
-      } catch (Exception e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
-      
-      if (_beanManager == null)
-        return null;
-    }
+    BeanManager beanManager = getBeanManager();
+    
+    if (beanManager == null)
+      return null;
 
-    Set<Bean<?>> beans = _beanManager.getBeans(name);
+    Set<Bean<?>> beans = beanManager.getBeans(name);
 
     if (beans.size() == 0)
       return null;
 
-    Bean<?> bean = _beanManager.resolve(beans);
-    CreationalContext<?> env = _beanManager.createCreationalContext(bean);
+    Bean<?> bean = beanManager.resolve(beans);
+    CreationalContext<?> env = beanManager.createCreationalContext(bean);
 
-    return _beanManager.getReference(bean, bean.getBeanClass(), env);
+    return beanManager.getReference(bean, bean.getBeanClass(), env);
+  }
+  
+  private BeanManager getBeanManager()
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    SoftReference<BeanManager> beanManagerRef = _beanManagerMap.get(loader);
+
+    BeanManager beanManager;
+    
+    if (beanManagerRef != null)
+      beanManager = beanManagerRef.get();
+    else
+      beanManager = null;
+    
+    if (beanManager == null) {
+      try {
+        beanManager = (BeanManager) new InitialContext().lookup("java:comp/BeanManager");
+        
+        beanManagerRef = new SoftReference<BeanManager>(beanManager);
+        
+        _beanManagerMap.put(loader, beanManagerRef);
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+
+    return beanManager;
   }
 
   /**
