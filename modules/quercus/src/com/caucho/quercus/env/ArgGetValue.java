@@ -38,7 +38,7 @@ import com.caucho.quercus.Location;
  *
  * foo($a[0]), where is not known if foo is defined as foo($a) or foo(&amp;$a)
  */
-public class ArgGetValue extends Value
+public class ArgGetValue extends ArgValue
   implements Serializable
 {
   private final Value _obj;

@@ -41,19 +41,19 @@ public class SessionCallback extends Value {
   private static final Logger log
     = Logger.getLogger(SessionCallback.class.getName());
 
-  private Callback _open;
-  private Callback _close;
-  private Callback _read;
-  private Callback _write;
-  private Callback _destroy;
-  private Callback _gc;
+  private Callable _open;
+  private Callable _close;
+  private Callable _read;
+  private Callable _write;
+  private Callable _destroy;
+  private Callable _gc;
 
-  public SessionCallback(Callback open,
-                         Callback close,
-                         Callback read,
-                         Callback write,
-                         Callback destroy,
-                         Callback gc)
+  public SessionCallback(Callable open,
+                         Callable close,
+                         Callable read,
+                         Callable write,
+                         Callable destroy,
+                         Callable gc)
   {
     _open = open;
     _close = close;
@@ -61,6 +61,9 @@ public class SessionCallback extends Value {
     _write = write;
     _destroy = destroy;
     _gc = gc;
+    
+    if (open == null)
+      throw new NullPointerException("open cannot be null");
   }
 
   public void open(Env env, String savePath, String sessionName)

@@ -364,12 +364,12 @@ public class SessionModule extends AbstractQuercusModule
    * Sets the session save handler
    */
   public boolean session_set_save_handler(Env env,
-                                          Callback open,
-                                          Callback close,
-                                          Callback read,
-                                          Callback write,
-                                          Callback directory,
-                                          Callback gc)
+                                          Callable open,
+                                          Callable close,
+                                          Callable read,
+                                          Callable write,
+                                          Callable directory,
+                                          Callable gc)
 
   {
     SessionCallback cb

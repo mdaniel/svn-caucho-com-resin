@@ -32,7 +32,7 @@ package com.caucho.quercus.env;
 /**
  * Represents an field-get argument which might be a call to a reference.
  */
-public class ArgGetFieldValue extends Value {
+public class ArgGetFieldValue extends ArgValue {
   private final Env _env;
   private final Value _obj;
   private final StringValue _name;

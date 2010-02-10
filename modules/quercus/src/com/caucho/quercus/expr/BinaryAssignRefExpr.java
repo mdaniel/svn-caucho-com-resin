@@ -77,6 +77,42 @@ public class BinaryAssignRefExpr extends Expr {
     
     _var.evalAssignRef(env, value);
 
+    return value.toValue();
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalCopy(Env env)
+  {
+    // value can be a Value or Var
+    Value value = _value.evalRef(env);
+    
+    _var.evalAssignRef(env, value);
+
+    return value.toValue().copy();
+  }
+  
+  /**
+   * Evaluates the expression.
+   *
+   * @param env the calling environment.
+   *
+   * @return the expression value.
+   */
+  @Override
+  public Value evalRef(Env env)
+  {
+    // value can be a Value or Var
+    Value value = _value.evalRef(env);
+    
+    _var.evalAssignRef(env, value);
+
     return value;
   }
 

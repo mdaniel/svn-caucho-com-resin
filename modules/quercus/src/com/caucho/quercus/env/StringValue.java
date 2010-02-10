@@ -2392,6 +2392,7 @@ abstract public class StringValue
   //
   // ByteAppendable methods
   //
+  
   public void write(int value)
   {
     throw new UnsupportedOperationException(getClass().getName());

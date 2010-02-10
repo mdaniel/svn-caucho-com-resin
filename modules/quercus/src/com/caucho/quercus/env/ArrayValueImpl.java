@@ -333,10 +333,10 @@ public class ArrayValueImpl extends ArrayValue
   public Value copy()
   {
     // php/1704
-    // reset();
+    reset();
 
     Value copy = new ArrayValueImpl(this);
-    copy.reset();
+    // copy.reset();
     
     return copy;
   }

@@ -138,15 +138,16 @@ public class XmlReader
    *
    * @return the count if it exists, otherwise null
    */
-  public Value getAttributeCount()  {
+  public Value getAttributeCount() 
+  {
     if (! streamIsOpen())
       return NullValue.NULL;
 
     try {
-      if (_currentNodeType == XMLStreamConstants.CHARACTERS)
+      if (_currentNodeType == XMLStreamConstants.START_ELEMENT)
+        return LongValue.create(_streamReader.getAttributeCount());
+      else
         return LongValue.create(0);
-
-      return LongValue.create(_streamReader.getAttributeCount());
     }
     catch (IllegalStateException ex) {
       log.log(Level.WARNING, ex.toString(), ex);

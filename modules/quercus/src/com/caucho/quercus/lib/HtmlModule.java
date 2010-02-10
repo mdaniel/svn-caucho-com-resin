@@ -391,8 +391,10 @@ public class HtmlModule extends AbstractQuercusModule {
       return env.getEmptyString();
 
     ArrayValue htmlEntities = null;
+    
+    boolean isUnicode = env.isUnicodeSemantics();
 
-    if (env.isUnicodeSemantics()) {
+    if (isUnicode) {
       if (HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY == null)
         HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY = toUnicodeArray(env, HTML_ENTITIES_ARRAY_ENTITY_KEY);
       
@@ -401,10 +403,14 @@ public class HtmlModule extends AbstractQuercusModule {
     else
       htmlEntities = HTML_ENTITIES_ARRAY_ENTITY_KEY;
 
-    if (charset == null || charset.length() == 0)
-      charset = env.getRuntimeEncoding();
-    
-    EncodingWriter out = Encoding.getWriteEncoding(charset);
+    EncodingWriter out = null;
+
+    if (! isUnicode) {
+      if (charset == null || charset.length() == 0)
+        charset = env.getRuntimeEncoding();
+
+      out = Encoding.getWriteEncoding(charset);
+    }
 
     int len = string.length();
     int htmlEntityStart = -1;
@@ -428,10 +434,14 @@ public class HtmlModule extends AbstractQuercusModule {
           StringValue entity = string.substring(htmlEntityStart, i + 1);
           Value value = htmlEntities.get(entity);
           
-          if (!value.isNull()) {
-            out.write(result, (char)value.toInt());            
-          } else {
+          if (value.isNull()) {
             result.append(entity);
+          }
+          else if (isUnicode) {
+            result.append((char)value.toInt());            
+          }
+          else {
+            out.write(result, (char)value.toInt());            
           }
           
           htmlEntityStart = -1; 

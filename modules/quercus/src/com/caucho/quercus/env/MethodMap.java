@@ -154,7 +154,7 @@ public final class MethodMap<V>
          entry = entry.getNext()) {
       StringValue entryKey = entry.getKey();
 
-      if (key == entryKey || key.equals(entryKey))
+      if (key == entryKey || key.equalsIgnoreCase(entryKey))
         return entry.getValue();
     }
     
