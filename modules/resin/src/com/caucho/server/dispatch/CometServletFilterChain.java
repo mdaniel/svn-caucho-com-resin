@@ -148,22 +148,24 @@ public class CometServletFilterChain implements FilterChain {
   
   @SuppressWarnings("deprecation")
   static class ServletCometController implements CometController, AsyncListener {
-    private ServletRequest _request;
+    private HttpServletRequestImpl _request;
     private ServletResponse _response;
-    
+   
     private AsyncContext _context;
     private AtomicBoolean _isWake = new AtomicBoolean();
     
     ServletCometController(ServletRequest request, ServletResponse response)
     {
-      _request = request;
+      _request = (HttpServletRequestImpl) request;
       _response = response;
     }
     
     void suspend()
     {
+      /*
       if (_request == null)
         return;
+        */
       
       _context = _request.startAsync();
       _context.addListener(this);
@@ -180,7 +182,7 @@ public class CometServletFilterChain implements FilterChain {
     @Override
     public boolean isClosed()
     {
-      return _request == null;
+      return _request.isClosed();
     }
 
     @Override
@@ -251,12 +253,6 @@ public class CometServletFilterChain implements FilterChain {
     @Override
     public void close()
     {
-      ServletRequest request = _request;
-      _request = null;
-    
-      ServletResponse response = _response;
-      _response = null;
-    
       AsyncContext context = _context;
       _context = null;
       
@@ -268,15 +264,14 @@ public class CometServletFilterChain implements FilterChain {
     @Override
     public void onComplete(AsyncEvent event) throws IOException
     {
-      _request = null;
-      _response = null;
+      //_request = null;
+      //_response = null;
       // _context = null;
     }
 
     @Override
     public void onError(AsyncEvent event) throws IOException
     {
-
     }
 
     @Override

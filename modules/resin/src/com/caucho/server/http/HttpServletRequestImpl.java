@@ -1978,6 +1978,8 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
         }
       }
     }
+    
+    _request = null;
   }
 
   public void cleanup()
@@ -2025,6 +2027,11 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
       return _invocation.getWebApp();
     else
       return null;
+  }
+  
+  public boolean isClosed()
+  {
+    return _request == null;
   }
 
   @Override

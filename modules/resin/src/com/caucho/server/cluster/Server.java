@@ -303,6 +303,8 @@ public class Server extends ProtocolDispatchServer
     
     _clusterPort = new ClusterPort(_selfServer.getAddress(),
                                    _selfServer.getPort());
+    
+    _ports.add(_clusterPort);
 
     _selfServer.getServerProgram().configure(this);
   }
