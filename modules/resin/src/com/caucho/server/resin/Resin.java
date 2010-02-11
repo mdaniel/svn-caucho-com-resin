@@ -116,7 +116,7 @@ import com.caucho.vfs.WriteStream;
  */
 public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 {
-  private static Log  ger _log;
+  private static Logger _log;
   private static L10N _L;
 
   public static final int EXIT_OK = 0;
