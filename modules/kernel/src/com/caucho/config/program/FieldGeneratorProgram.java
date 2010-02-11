@@ -37,6 +37,7 @@ import com.caucho.config.scope.DependentScope;
 import com.caucho.util.L10N;
 
 import javax.rmi.PortableRemoteObject;
+import javax.enterprise.context.spi.CreationalContext;
 import java.lang.reflect.Field;
 import java.util.logging.Logger;
 
@@ -63,18 +64,18 @@ public class FieldGeneratorProgram extends ConfigProgram
     return _field.getName();
   }
 
-  Class getType()
+  Class<?> getType()
   {
     return _field.getType();
   }
 
-  Class getDeclaringClass()
+  Class<?> getDeclaringClass()
   {
     return _field.getDeclaringClass();
   }
 
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
     throws ConfigException
   {
     Object value = null;

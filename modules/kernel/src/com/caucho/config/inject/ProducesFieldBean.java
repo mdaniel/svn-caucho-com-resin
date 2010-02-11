@@ -142,15 +142,16 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
    */
   public T produce(CreationalContext<T> cxt)
   {
-    ConfigContext env = (ConfigContext) cxt;
-    Class type = _producerBean.getBeanClass();
+    Class<?> type = _producerBean.getBeanClass();
 
-    X factory = (X) getBeanManager().getReference(_producerBean, type, env);
+    X factory = (X) getBeanManager().getReference(_producerBean, type, cxt);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
                                           this, _producerBean));
     }
+    
+    CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
 
     return produce(factory, env.getInjectionPoint());
   }

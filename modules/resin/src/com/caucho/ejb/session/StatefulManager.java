@@ -42,6 +42,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatefulBeanImpl;
@@ -124,8 +125,10 @@ public class StatefulManager<T> extends SessionServer<T>
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
     if (provider != null) {
+      CreationalContextImpl<?> env = CreationalContextImpl.create();
+      
       // XXX: should be bean
-      return provider.__caucho_createNew(null, new ConfigContext());
+      return provider.__caucho_createNew(null, env);
     }
     else
       return null;
@@ -188,10 +191,10 @@ public class StatefulManager<T> extends SessionServer<T>
   /**
    * Initialize an instance
    */
-  public void initInstance(T instance,
-                           InjectionTarget<T> target,
-                           Object proxy,
-                           CreationalContext<T> cxt)
+  public <X> void initInstance(T instance,
+                               InjectionTarget<T> target,
+                               X proxy,
+                               CreationalContext<X> cxt)
   {
     getProducer().initInstance(instance, target, proxy, cxt);
   }

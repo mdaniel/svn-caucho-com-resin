@@ -36,6 +36,7 @@ import com.caucho.config.program.*;
 import com.caucho.jca.*;
 import com.caucho.util.*;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.resource.spi.*;
 
 /**
@@ -80,7 +81,8 @@ public class ResourceAdapterAssociationProgram extends ConfigProgram {
    * @param bean the bean to configure
    * @param env the Config environment
    */
-  public void inject(Object bean, ConfigContext env)
+  @Override
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
     try {
       ResourceAdapterAssociation association

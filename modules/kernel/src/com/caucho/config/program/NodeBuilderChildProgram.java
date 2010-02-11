@@ -29,6 +29,8 @@
 
 package com.caucho.config.program;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.inject.ConfigContext;
@@ -69,9 +71,11 @@ public class NodeBuilderChildProgram extends FlowProgram {
   }
 
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> cxt)
     throws ConfigException
   {
+    ConfigContext env = ConfigContext.create();
+    
     env.configureAttribute(bean, _node);
   }
 

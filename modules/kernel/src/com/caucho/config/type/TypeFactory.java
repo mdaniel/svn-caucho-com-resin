@@ -136,7 +136,7 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns the appropriate strategy.
    */
-  public static ConfigType getType(Object bean)
+  public static ConfigType<?> getType(Object bean)
   {
     if (bean instanceof CustomBeanConfig)
       return ((CustomBeanConfig) bean).getConfigType();
@@ -149,7 +149,7 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns the appropriate strategy.
    */
-  public static ConfigType getType(Class type)
+  public static <T> ConfigType<T> getType(Class<T> type)
   {
     TypeFactory factory = getFactory(type.getClassLoader());
 
@@ -159,7 +159,7 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns the appropriate strategy.
    */
-  public static ConfigType getType(Type type)
+  public static ConfigType<?> getType(Type type)
   {
     return getType((Class) type);
   }
@@ -167,7 +167,7 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns the appropriate strategy.
    */
-  public static Class loadClass(String pkg, String name)
+  public static Class<?> loadClass(String pkg, String name)
   {
     return getFactory().loadClassImpl(pkg, name);
   }

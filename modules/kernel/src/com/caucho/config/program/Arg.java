@@ -29,11 +29,7 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.type.*;
-import com.caucho.xml.QName;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * A saved program for creating a constructor argument
@@ -43,5 +39,5 @@ public abstract class Arg {
   {
   }
     
-  abstract public Object eval(ConfigContext env);
+  abstract public Object eval(CreationalContext<?> env);
 }

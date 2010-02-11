@@ -31,6 +31,8 @@ package com.caucho.config.program;
 
 import java.lang.reflect.*;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 import com.caucho.config.*;
 import com.caucho.config.inject.ConfigContext;
 import com.caucho.util.*;
@@ -64,7 +66,7 @@ public class MethodValueProgram extends NamedProgram {
    * Injects the bean with the dependencies
    */
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
     try {
       _method.invoke(bean, _value);

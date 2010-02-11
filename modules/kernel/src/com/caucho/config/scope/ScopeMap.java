@@ -35,21 +35,22 @@ import javax.enterprise.context.spi.Contextual;
 /**
  * The singleton scope value
  */
-public class ScopeMap<T> {
-  private transient final HashMap<Contextual<T>,T> _map
-    = new HashMap<Contextual<T>,T>(8);
+public class ScopeMap {
+  private transient final HashMap<Contextual<?>,Object> _map
+    = new HashMap<Contextual<?>,Object>(8);
   
-  public T get(Contextual<T> bean)
+  @SuppressWarnings("unchecked")
+  public <T> T get(Contextual<T> bean)
   {
-    return _map.get(bean);
+    return (T) _map.get(bean);
   }
   
-  public void put(Contextual<T> bean, T value)
+  public <T> void put(Contextual<T> bean, T value)
   {
     _map.put(bean, value);
   }
   
-  public void remove(Contextual<T> bean)
+  public void remove(Contextual<?> bean)
   {
     _map.remove(bean);
   }

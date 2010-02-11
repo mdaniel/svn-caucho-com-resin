@@ -51,19 +51,19 @@ import javax.enterprise.inject.spi.InjectionTarget;
  * manager.addBean(new SingletonBean(myValue));
  * </pre></code>
  */
-public class InjectionBean extends AbstractSingletonBean
+public class InjectionBean<T> extends AbstractSingletonBean<T>
   implements Closeable
 {
-  private InjectionTarget _target;
+  private InjectionTarget<T> _target;
 
-  InjectionBean(ManagedBeanImpl managedBean,
+  InjectionBean(ManagedBeanImpl<T> managedBean,
                 Set<Type> types,
                 Annotated annotated,
                 Set<Annotation> bindings,
                 Set<Class<? extends Annotation>> stereotypes,
                 Class<? extends Annotation> scopeType,
                 String name,
-                InjectionTarget target)
+                InjectionTarget<T> target)
   {
     super(managedBean, types, annotated, bindings, stereotypes,
           scopeType, name);
@@ -75,19 +75,17 @@ public class InjectionBean extends AbstractSingletonBean
   }
 
   @Override
-  public InjectionTarget getInjectionTarget()
+  public InjectionTarget<T> getInjectionTarget()
   {
     return _target;
   }
 
   @Override
-  public Object create(CreationalContext ctx)
+  public T create(CreationalContext<T> cxt)
   {
-    ConfigContext env = (ConfigContext) ctx;
-
-    Object value = _target.produce(env);
-    env.put(this, value);
-    _target.inject(value, env);
+    T value = _target.produce(cxt);
+    cxt.push(value);
+    _target.inject(value, cxt);
     _target.postConstruct(value);
 
     return value;

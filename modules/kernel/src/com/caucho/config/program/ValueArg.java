@@ -45,6 +45,7 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
@@ -60,9 +61,9 @@ public class ValueArg extends Arg {
   
   private InjectManager _beanManager;
   private Type _type;
-  private ConfigType _configType;
+  private ConfigType<?> _configType;
 
-  private Bean _bean;
+  private Bean<?> _bean;
   private RuntimeException _bindException;
 
   public ValueArg(Type type)
@@ -73,6 +74,7 @@ public class ValueArg extends Arg {
     _configType = TypeFactory.getType(_type);
   }
 
+  @Override
   public void bind()
   {
     if (_bean == null) {
@@ -86,7 +88,8 @@ public class ValueArg extends Arg {
     }
   }
     
-  public Object eval(ConfigContext env)
+  @Override
+  public Object eval(CreationalContext<?> env)
   {
     if (_bean == null && _bindException == null)
       bind();

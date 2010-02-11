@@ -66,7 +66,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 /**
  * The ConfigContext contains the state of the current configuration.
  */
-public class ConfigContext implements CreationalContext {
+public class ConfigContext {
   private final static L10N L = new L10N(ConfigContext.class);
   private final static Logger log
     = Logger.getLogger(ConfigContext.class.getName());
@@ -88,7 +88,7 @@ public class ConfigContext implements CreationalContext {
   private Contextual<?> _bean;
   private InjectionPoint _ij;
   
-  private ConfigBeanStack _beanStack;
+  private CreationalContextImpl _beanStack;
 
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
@@ -225,7 +225,7 @@ public class ConfigContext implements CreationalContext {
    */
   public Object get(Bean<?> bean)
   {
-    return ConfigBeanStack.find(_beanStack, bean);
+    return CreationalContextImpl.find(_beanStack, bean);
   }
 
   public Config getConfig()

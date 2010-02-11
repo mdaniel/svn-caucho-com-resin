@@ -29,23 +29,18 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.loader.*;
-import com.caucho.util.L10N;
+import java.lang.reflect.Method;
 
-import java.lang.reflect.*;
-import java.util.logging.Logger;
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.loader.Environment;
 
 
 public class PreDestroyProgram extends ConfigProgram
 {
-  private static final Logger log
-    = Logger.getLogger(PreDestroyProgram.class.getName());
-  private static final L10N L = new L10N(PreDestroyProgram.class);
-
-  private Method _method;
+  private final Method _method;
 
   public PreDestroyProgram(Method method)
   {
@@ -54,7 +49,7 @@ public class PreDestroyProgram extends ConfigProgram
   }
 
   @Override
-  public void inject(Object bean, ConfigContext builder)
+  public <T> void inject(T bean, CreationalContext<T> env)
     throws ConfigException
   {
     Environment.addEnvironmentListener(new DestroyListener(bean, _method));

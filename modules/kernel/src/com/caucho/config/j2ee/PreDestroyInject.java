@@ -37,6 +37,8 @@ import com.caucho.util.*;
 import java.lang.reflect.*;
 import java.util.logging.Logger;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 
 public class PreDestroyInject extends ConfigProgram
 {
@@ -53,7 +55,7 @@ public class PreDestroyInject extends ConfigProgram
   }
 
   @Override
-  public void inject(Object value, ConfigContext env)
+  public <T> void inject(T value, CreationalContext<T> env)
     throws ConfigException
   {
     try {

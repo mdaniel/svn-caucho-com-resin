@@ -191,15 +191,16 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
    */
   public T produce(CreationalContext<T> cxt)
   {
-    ConfigContext env = (ConfigContext) cxt;
-    Class type = _producerBean.getBeanClass();
+    Class<X> type = _producerBean.getBeanClass();
 
-    X factory = (X) getBeanManager().getReference(_producerBean, type, env);
+    X factory = (X) getBeanManager().getReference(_producerBean, type, cxt);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
                                           this, _producerBean));
     }
+    
+    CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
 
     return produce(factory, env.getInjectionPoint());
   }
@@ -217,8 +218,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
         InjectManager inject = getBeanManager();
 
-        ConfigContext env
-          = (ConfigContext) inject.createCreationalContext(_producerBean);
+        CreationalContext<?> env = inject.createCreationalContext(_producerBean);
 
         for (int i = 0; i < args.length; i++) {
           if (_args[i] instanceof InjectionPointArg)
@@ -269,7 +269,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
       String loc = InjectManager.location(method);
 
-      Type []param = method.getGenericParameterTypes();
       // Annotation [][]paramAnn = _method.getParameterAnnotations();
       List<AnnotatedParameter> beanParams = _beanMethod.getParameters();
 

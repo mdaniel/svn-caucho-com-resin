@@ -53,17 +53,15 @@ import javax.enterprise.inject.spi.PassivationCapable;
 public class XmlBean<X> extends BeanWrapper<X>
   implements InjectionTarget<X>, ScopeAdapterBean, PassivationCapable
 {
-  private static final L10N L = new L10N(XmlBean.class);
-
-  ManagedBeanImpl _bean;
-  private Constructor _ctor;
+  ManagedBeanImpl<X> _bean;
+  private Constructor<X> _ctor;
   private Arg []_newProgram;
   private ConfigProgram []_injectProgram;
 
   private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
 
-  public XmlBean(ManagedBeanImpl bean,
-                 Constructor ctor,
+  public XmlBean(ManagedBeanImpl<X> bean,
+                 Constructor<X> ctor,
                  Arg []newProgram,
                  ConfigProgram []injectProgram)
   {
@@ -76,7 +74,7 @@ public class XmlBean<X> extends BeanWrapper<X>
     _injectProgram = injectProgram;
   }
 
-  public ManagedBeanImpl getBean()
+  public ManagedBeanImpl<X> getBean()
   {
     return _bean;
   }
@@ -88,11 +86,12 @@ public class XmlBean<X> extends BeanWrapper<X>
   }
 
   @Override
-  public AnnotatedType getAnnotatedType()
+  public AnnotatedType<X> getAnnotatedType()
   {
     return _bean.getAnnotatedType();
   }
 
+  @Override
   public InjectionTarget<X> getInjectionTarget()
   {
     return this;
@@ -100,7 +99,7 @@ public class XmlBean<X> extends BeanWrapper<X>
 
   public Object getScopeAdapter(CreationalContext context)
   {
-    Bean bean = getBean();
+    Bean<X> bean = getBean();
 
     if (bean instanceof ScopeAdapterBean)
       return ((ScopeAdapterBean) bean).getScopeAdapter(context);
@@ -109,7 +108,7 @@ public class XmlBean<X> extends BeanWrapper<X>
   }
 
   @Override
-  public X create(CreationalContext context)
+  public X create(CreationalContext<X> context)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -127,17 +126,16 @@ public class XmlBean<X> extends BeanWrapper<X>
     }
   }
 
-  public X produce(CreationalContext context)
+  @Override
+  public X produce(CreationalContext<X> context)
   {
-    ConfigContext env = (ConfigContext) context;
-
     if (_ctor == null)
-      return (X) getBean().getInjectionTarget().produce(env);
+      return (X) getBean().getInjectionTarget().produce(context);
     else {
       Object []args = new Object[_newProgram.length];
 
       for (int i = 0; i < args.length; i++) {
-        args[i] = _newProgram[i].eval(env);
+        args[i] = _newProgram[i].eval(context);
       }
 
       try {
@@ -157,7 +155,7 @@ public class XmlBean<X> extends BeanWrapper<X>
 
     if (_injectProgram.length > 0) {
       for (ConfigProgram program : _injectProgram) {
-        program.inject(instance, (ConfigContext) env);
+        program.inject(instance, env);
       }
     }
   }

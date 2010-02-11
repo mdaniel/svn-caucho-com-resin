@@ -39,6 +39,8 @@ import com.caucho.server.webapp.*;
 
 import java.util.*;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 /**
  * Abstract base class for bean-like embedding objects.
  */
@@ -58,7 +60,7 @@ abstract class AbstractBeanEmbed
   /**
    * Configures the object
    */
-  protected void configure(Object bean, ConfigContext env)
+  protected <T> void configure(T bean, CreationalContext<T> env)
   {
     for (ConfigProgram program : _propertyList) {
       program.inject(bean, env);

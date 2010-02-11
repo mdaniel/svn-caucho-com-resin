@@ -29,21 +29,18 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.program.ValueGenerator;
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.L10N;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.rmi.PortableRemoteObject;
-import java.lang.reflect.*;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 
 public class MethodGeneratorProgram extends ConfigProgram
 {
-  private static final Logger log
-    = Logger.getLogger(MethodGeneratorProgram.class.getName());
   private static final L10N L = new L10N(MethodGeneratorProgram.class);
 
   private Method _method;
@@ -62,22 +59,22 @@ public class MethodGeneratorProgram extends ConfigProgram
     return _method.getName();
   }
 
-  Class getType()
+  Class<?> getType()
   {
     return _method.getParameterTypes()[0];
   }
 
-  Class getDeclaringClass()
+  Class<?> getDeclaringClass()
   {
     return _method.getDeclaringClass();
   }
 
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
     throws ConfigException
   {
     try {
-      Class type = getType();
+      Class<?> type = getType();
       
       Object value = _gen.create();
       

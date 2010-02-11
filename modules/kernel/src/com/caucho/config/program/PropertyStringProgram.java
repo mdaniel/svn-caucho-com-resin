@@ -36,6 +36,8 @@ import com.caucho.config.inject.ConfigContext;
 import com.caucho.util.*;
 import com.caucho.xml.*;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 /**
  * A saved program for configuring an object.
  */
@@ -84,10 +86,10 @@ public class PropertyStringProgram extends ConfigProgram {
    * Injects the bean with the dependencies
    */
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
     try {
-      ConfigType type = TypeFactory.getType(bean.getClass());
+      ConfigType<?> type = TypeFactory.getType(bean.getClass());
 
       Attribute attr = type.getAttribute(_qName);
 

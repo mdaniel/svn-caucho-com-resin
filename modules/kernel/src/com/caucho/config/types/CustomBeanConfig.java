@@ -516,10 +516,10 @@ public class CustomBeanConfig {
 
   class BeanArg extends Arg {
     private String _loc;
-    private Constructor _ctor;
+    private Constructor<?> _ctor;
     private Type _type;
     private Set<Annotation> _bindings;
-    private Bean _bean;
+    private Bean<?> _bean;
 
     BeanArg(String loc, Type type, Set<Annotation> bindings)
     {
@@ -540,7 +540,7 @@ public class CustomBeanConfig {
       }
     }
 
-    public Object eval(ConfigContext env)
+    public Object eval(CreationalContext<?> env)
     {
       if (_bean == null)
         bind();
@@ -552,17 +552,21 @@ public class CustomBeanConfig {
   }
 
   static class ProgramArg extends Arg {
-    private ConfigType _type;
+    private ConfigType<?> _type;
     private ConfigProgram _program;
 
-    ProgramArg(ConfigType type, ConfigProgram program)
+    ProgramArg(ConfigType<?> type, ConfigProgram program)
     {
       _type = type;
       _program = program;
     }
 
-    public Object eval(ConfigContext env)
+    public Object eval(CreationalContext<?> creationalContext)
     {
+      ConfigContext env = ConfigContext.create();
+      
+      // env.setCreationalContext(creationalContext);
+      
       return _program.configure(_type, env);
     }
   }

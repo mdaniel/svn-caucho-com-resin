@@ -148,31 +148,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return false;
   }
 
-  private void validateType(Class type)
-  {
-    if (type.isInterface())
-      throw new ConfigException(L.l("'{0}' is an invalid SimpleBean because it is an interface",
-                                    type));
-
-    /*
-    Type []typeParam = type.getTypeParameters();
-    if (typeParam != null && typeParam.length > 0) {
-      StringBuilder sb = new StringBuilder();
-      sb.append(type.getName());
-      sb.append("<");
-      for (int i = 0; i < typeParam.length; i++) {
-        if (i > 0)
-          sb.append(",");
-        sb.append(typeParam[i]);
-      }
-      sb.append(">");
-
-      throw new ConfigException(L.l("'{0}' is an invalid SimpleBean class because it defines type variables",
-                                    sb));
-    }
-    */
-  }
-
   public void setConstructor(Constructor ctor)
   {
     // XXX: handled differently now
@@ -233,13 +208,14 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   }
 
   @Override
-  public X produce(CreationalContext contextEnv)
+  public X produce(CreationalContext<X> contextEnv)
   {
     try {
       if (! _isBound)
         bind();
 
-      ConfigContext env = (ConfigContext) contextEnv;
+      CreationalContextImpl<X> env
+        = (CreationalContextImpl<X>) contextEnv;
 
       if (_args == null)
         throw new IllegalStateException(L.l("Can't instantiate bean because it is not a valid ManagedBean: '{0}'", toString()));
@@ -280,13 +256,11 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return new SingletonHandle(getId());
   }
 
-  public void inject(X instance, CreationalContext<X> createEnv)
+  public void inject(X instance, CreationalContext<X> env)
   {
     try {
       if (! _isBound)
         bind();
-
-      ConfigContext env = (ConfigContext) createEnv;
 
       for (ConfigProgram program : _injectProgram) {
         program.inject(instance, env);
@@ -304,7 +278,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (! _isBound)
         bind();
 
-      ConfigContext env = (ConfigContext) null;
+      CreationalContext<X> env = null;
 
       for (ConfigProgram program : _initProgram) {
         program.inject(instance, env);
@@ -413,7 +387,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   public static void
     introspectInit(ArrayList<ConfigProgram> initList,
-                   Class type,
+                   Class<?> type,
                    HashMap<Method,Annotation[]> methodAnnotationMap)
     throws ConfigException
   {
@@ -507,7 +481,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (!_isBound)
         bind();
 
-      ConfigContext env = (ConfigContext) null;
+      CreationalContext<X> env = null;
 
       for (ConfigProgram program : _destroyProgram) {
         program.inject(instance, env);
@@ -524,6 +498,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   /**
    * Call pre-destroy
    */
+  @Override
   public void destroy(X instance)
   {
 
@@ -532,6 +507,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   /**
    * Returns the injection points.
    */
+  @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -819,12 +795,13 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       _ij = ij;
     }
 
-    public void inject(Object instance, ConfigContext env)
+    @Override
+    public <T> void inject(T instance, CreationalContext<T> env)
     {
       try {
         // server/30i1
         InjectManager beanManager = InjectManager.getCurrent();
-
+        
         Object value = beanManager.getInjectableReference(_ij, env);
  
         _field.set(instance, value);
@@ -845,7 +822,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       _args = args;
     }
 
-    public void inject(Object instance, ConfigContext env)
+    @Override
+    public <T> void inject(T instance, CreationalContext<T> env)
     {
       try {
         Object []args = new Object[_args.length];
@@ -871,7 +849,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       _handler = handler;
     }
   
-    public void inject(Object instance, ConfigContext env)
+    @Override
+    public <T> void inject(T instance, CreationalContext<T> env)
     {
       if (_boundProgram == null)
         bind();
@@ -897,7 +876,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       _handler = handler;
     }
   
-    public void inject(Object instance, ConfigContext env)
+    @Override
+    public <T> void inject(T instance, CreationalContext<T> env)
     {
       if (_boundProgram == null)
         bind();

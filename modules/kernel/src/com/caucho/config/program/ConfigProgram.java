@@ -29,8 +29,11 @@
 
 package com.caucho.config.program;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 import com.caucho.config.*;
 import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.config.type.*;
 import com.caucho.xml.QName;
@@ -53,7 +56,8 @@ public abstract class ConfigProgram {
    * @param bean the bean to configure
    * @param env the Config environment
    */
-  abstract public void inject(Object bean, ConfigContext env);
+  abstract public <T> void inject(T bean, 
+                                  CreationalContext<T> createContext);
 
   public void addProgram(ConfigProgram program)
   {
@@ -68,11 +72,11 @@ public abstract class ConfigProgram {
     throws ConfigException
   {
     // ioc/23e7
-    inject(bean, ConfigContext.create());
+    inject(bean, CreationalContextImpl.create());
   }
 
   final
-  public Object configure(Class type)
+  public <T> T configure(Class<T> type)
     throws ConfigException
   {
     return configure(type, ConfigContext.create());
@@ -83,15 +87,15 @@ public abstract class ConfigProgram {
    * Configures a bean given a class to instantiate.
    */
   final
-  protected Object configure(Class type, ConfigContext env)
+  protected <T> T configure(Class<T> type, ConfigContext env)
     throws ConfigException
   {
     try {
-      Object bean = type.newInstance();
+      T value = type.newInstance();
 
-      inject(bean, env);
+      inject(value, new CreationalContextImpl<T>());
 
-      return bean;
+      return value;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

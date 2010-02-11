@@ -28,12 +28,12 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.L10N;
-
 import java.util.ArrayList;
+
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 public class ContainerProgram extends ConfigProgram {
   static final L10N L = new L10N(ContainerProgram.class);
@@ -75,7 +75,7 @@ public class ContainerProgram extends ConfigProgram {
    * 
    * @throws com.caucho.config.ConfigException
    */
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
     throws ConfigException
   {
     int size = _programList.size();

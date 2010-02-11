@@ -57,6 +57,6 @@ public class StatefulProviderProxy implements ObjectProxy
   public Object createObject(Hashtable env)
   {
     // XXX: should be the bean
-    return _provider.__caucho_createNew(null, new ConfigContext());
+    return _provider.__caucho_createNew(null, null);
   }
 }

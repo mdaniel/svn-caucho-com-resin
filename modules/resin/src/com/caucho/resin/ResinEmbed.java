@@ -39,6 +39,8 @@ import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.logging.LogManager;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.ConfigContext;
@@ -659,7 +661,7 @@ public class ResinEmbed
      * Configures the object.
      */
     @Override
-    public void inject(Object bean, ConfigContext env)
+    public <T> void inject(T bean, CreationalContext<T> env)
       throws ConfigException
     {
       _config.configure((WebApp) bean);

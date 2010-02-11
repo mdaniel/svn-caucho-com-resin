@@ -875,7 +875,7 @@ public class ApplicationImpl
     return findConverter(type.getSuperclass());
   }
 
-  public Iterator<Class<?>> getConverterTypes()
+  public Iterator getConverterTypes()
   {
     return _converterClassMap.keySet().iterator();
   }

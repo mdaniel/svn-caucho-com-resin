@@ -162,15 +162,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   /**
    * Creates a new instance of the component.
    */
+  @Override
   public X create(CreationalContext<X> context)
   {
     X instance = _injectionTarget.produce(context);
 
-    // ioc/0150
-    // context.push(instance);
-    // XXX:
-    
-    ((ConfigContext) context).put(this, context);
+    context.push(instance);
 
     _injectionTarget.inject(instance, context);
     _injectionTarget.postConstruct(instance);

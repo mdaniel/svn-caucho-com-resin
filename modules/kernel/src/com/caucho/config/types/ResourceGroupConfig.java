@@ -39,6 +39,7 @@ import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
 import java.util.logging.Level;
@@ -116,7 +117,7 @@ abstract public class ResourceGroupConfig extends ConfigProgram {
    * @param bean the bean to configure
    * @param env the Config environment
    */
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
   }
 

@@ -79,7 +79,7 @@ public class InjectionTargetFilter<T> implements InjectionTarget<T>,
     _next.inject(instance, ctx);
 
     if (_init != null)
-      _init.inject(instance, (ConfigContext) ctx);
+      _init.inject(instance, ctx);
   }
 
   public void postConstruct(T instance)

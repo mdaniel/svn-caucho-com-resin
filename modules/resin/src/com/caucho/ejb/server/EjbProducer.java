@@ -45,6 +45,7 @@ import com.caucho.config.gen.BeanProducer;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
@@ -271,54 +272,48 @@ public class EjbProducer<T> {
    */
   public void initInstance(T instance)
   {
-    initInstance(instance, null, null, new ConfigContext());
+    initInstance(instance, null, null, CreationalContextImpl.create());
   }
 
   /**
    * Initialize an instance
    */
-  public void initInstance(T instance,
-                           InjectionTarget<T> target,
-                           Object proxy,
-                           CreationalContext<T> cxt)
+  public <X> void initInstance(T instance,
+                               InjectionTarget<T> target,
+                               X proxy,
+                               CreationalContext<X> env)
   {
-    ConfigContext env = (ConfigContext) cxt;
-
     Bean<T> bean = _bean;
 
     if (env != null && bean != null) {
       // server/4762
-      env.put((AbstractBean) bean, proxy);
-      // env.push(proxy);
+      // env.put((AbstractBean) bean, proxy);
+      env.push(proxy);
     }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    CreationalContextImpl<T> cxt = new CreationalContextImpl<T>(bean, env);
 
     try {
       thread.setContextClassLoader(_envLoader);
 
       if (target != null) {
-        target.inject(instance, env);
+        target.inject(instance, cxt);
       }
 
       if (getInjectionTarget() != null && target != getInjectionTarget()) {
-        getInjectionTarget().inject(instance, env);
+        getInjectionTarget().inject(instance, cxt);
       }
 
       if (_initInject != null) {
-        if (env == null)
-          env = new ConfigContext();
-
         for (ConfigProgram inject : _initInject)
-          inject.inject(instance, env);
+          inject.inject(instance, cxt);
       }
 
       if (_initProgram != null) {
-        if (env == null)
-          env = new ConfigContext();
-
-        _initProgram.inject(instance, env);
+        _initProgram.inject(instance, cxt);
       }
       
       if (getInjectionTarget() != null) {
@@ -344,8 +339,10 @@ public class EjbProducer<T> {
       thread.setContextClassLoader(oldLoader);
     }
 
-    if (env != null && bean != null)
-      env.remove(bean);
+    /*
+    if (cxt != null && bean != null)
+      cxt.remove(bean);
+      */
   }
   
   /**

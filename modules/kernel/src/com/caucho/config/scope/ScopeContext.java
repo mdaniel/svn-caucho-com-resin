@@ -64,7 +64,7 @@ abstract public class ScopeContext implements Context {
     ScopeMap scopeMap = getScopeMap();
 
     if (scopeMap != null) {
-      return (T) scopeMap.get(bean);
+      return scopeMap.get(bean);
     }
 
     return null;
@@ -78,7 +78,7 @@ abstract public class ScopeContext implements Context {
     T instance = null;
 
     if (scopeMap != null) {
-      instance = (T) scopeMap.get(bean);
+      instance = scopeMap.get(bean);
 
       if (instance != null)
         return instance;
@@ -87,9 +87,9 @@ abstract public class ScopeContext implements Context {
     if (creationalContext == null)
       return null;
 
-    ConfigContext env = (ConfigContext) creationalContext;
+    // ConfigContext env = (ConfigContext) creationalContext;
 
-    env.setScope(this, bean);
+    // env.setScope(this, bean);
 
     if (scopeMap == null)
       scopeMap = createScopeMap();

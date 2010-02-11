@@ -66,27 +66,85 @@ import javax.enterprise.inject.spi.InjectionPoint;
 /**
  * Stack of partially constructed beans.
  */
-public class ConfigBeanStack {
-  private final ConfigBeanStack _next;
-  private final Contextual<?> _bean;
-  private final Object _value;
+public class CreationalContextImpl<T> implements CreationalContext<T> {
+  private final CreationalContextImpl<?> _next;
+  private final Contextual<T> _bean;
+  private final InjectionPoint _injectionPoint;
+  private T _value;
   
-  ConfigBeanStack(ConfigBeanStack next,
-                  Contextual<?> bean,
-                  Object value)
+  public CreationalContextImpl(Contextual<T> bean,
+                               CreationalContext<?> next,
+                               InjectionPoint ij)
   {
-    _next = next;
+    _next = (CreationalContextImpl<?>) next;
     _bean = bean;
-    _value = value;
+    _injectionPoint = ij;
   }
   
-  static Object find(ConfigBeanStack ptr, Contextual<?> bean)
+  public CreationalContextImpl()
+  {
+    _next = null;
+    _bean = null;
+    _injectionPoint = null;
+  }
+  
+  public CreationalContextImpl(Contextual<T> bean,
+                               CreationalContext<?> next)
+  {
+    _bean = bean;
+    _next = (CreationalContextImpl<?>) next;
+    _injectionPoint = null;
+  }
+  
+  CreationalContextImpl(Contextual<T> bean)
+  {
+    _next = null;
+    _bean = bean;
+    _injectionPoint = null;
+  }
+  
+  public static CreationalContextImpl create()
+  {
+    return new CreationalContextImpl();
+  }
+  
+  <X> X get(Contextual<X> bean)
+  {
+    return find(this, bean);    
+  }
+  
+  @SuppressWarnings("unchecked")
+  static <X> X find(CreationalContextImpl<?> ptr, Contextual<X> bean)
   {
     for (; ptr != null; ptr = ptr._next){
-      if (ptr._bean == bean)
-        return ptr._value;
+      if (ptr._bean == bean) {
+        return (X) ptr._value;
+      }
     }
     
     return null;
+  }
+  
+  public InjectionPoint getInjectionPoint()
+  {
+    return null;
+  }
+
+  @Override
+  public void push(T value)
+  {
+    _value = value;
+  }
+
+  @Override
+  public void release()
+  {
+    // Bean.remove?
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _bean + "," + _value + ",next=" + _next + "]";
   }
 }

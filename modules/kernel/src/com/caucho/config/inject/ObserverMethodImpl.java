@@ -208,13 +208,14 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
 
     Object []args = new Object[_args.length];
 
-    CreationalContext env
+    CreationalContext<?> env
       = _beanManager.createCreationalContext(getParentBean());
+    
     for (int i = 0; i < _args.length; i++) {
       BeanArg arg = _args[i];
 
       if (arg != null)
-        args[i] = arg.eval((ConfigContext) env);
+        args[i] = arg.eval(env);
       else
         args[i] = event;
     }
@@ -222,6 +223,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
     return args;
   }
 
+  @Override
   public Reception getReception()
   {
     return Reception.ALWAYS;

@@ -29,22 +29,20 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.event.EventImpl;
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.util.*;
-
-import java.util.ArrayList;
-import java.util.logging.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Event;
-//import javax.enterprise.event.Observable;
-import javax.enterprise.inject.spi.Bean;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.event.EventImpl;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.util.L10N;
 
 public class FieldEventProgram extends ConfigProgram
 {
@@ -96,7 +94,8 @@ public class FieldEventProgram extends ConfigProgram
     _eventType = (Class) pType.getActualTypeArguments()[0];
   }
 
-  public void inject(Object bean, ConfigContext env)
+  @Override
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
     Object value = new EventImpl(_manager, _eventType, _bindings);
     

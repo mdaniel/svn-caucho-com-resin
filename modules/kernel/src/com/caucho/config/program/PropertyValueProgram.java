@@ -29,6 +29,8 @@
 
 package com.caucho.config.program;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.attribute.*;
@@ -82,13 +84,13 @@ public class PropertyValueProgram extends ConfigProgram {
    * Injects the bean with the dependencies
    */
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
     try {
       Attribute attr = _attr;
 
       if (attr == null) {
-	ConfigType type = TypeFactory.getType(bean.getClass());
+	ConfigType<?> type = TypeFactory.getType(bean.getClass());
 
 	attr = type.getAttribute(_qName);
       }

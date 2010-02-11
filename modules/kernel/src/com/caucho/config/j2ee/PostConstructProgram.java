@@ -43,6 +43,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Logger;
 import javax.inject.Qualifier;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
 
@@ -104,7 +105,7 @@ public class PostConstructProgram extends ConfigProgram
   }
 
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
     throws ConfigException
   {
     try {
@@ -142,8 +143,8 @@ public class PostConstructProgram extends ConfigProgram
     if (! _init.getName().equals(init.getName()))
       return false;
 
-    Class []aParam = _init.getParameterTypes();
-    Class []bParam = init.getParameterTypes();
+    Class<?> []aParam = _init.getParameterTypes();
+    Class<?> []bParam = init.getParameterTypes();
 
     if (aParam.length != bParam.length)
       return false;
@@ -162,7 +163,7 @@ public class PostConstructProgram extends ConfigProgram
     return getClass().getSimpleName() + "[" + _init + "]";
   }
 
-  static class ParamProgram {
+  private static class ParamProgram {
     private final InjectManager _inject;
     private final Type _type;
     private final Annotation []_bindings;
@@ -177,7 +178,7 @@ public class PostConstructProgram extends ConfigProgram
       _type = type;
       _bindings = bindings;
 
-      Bean bean = null;
+      Bean<?> bean = null;
       Member member = null;
       HashSet<Annotation> bindingSet = new HashSet<Annotation>();
 
@@ -193,7 +194,7 @@ public class PostConstructProgram extends ConfigProgram
 						   bindingSet, annList);
     }
 
-    public Object eval(ConfigContext env)
+    public Object eval(CreationalContext<?> env)
     {
       return _inject.getInjectableReference(_injectionPoint, env);
     }

@@ -29,6 +29,8 @@
 
 package com.caucho.config.inject;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 import com.caucho.config.*;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.config.type.*;
@@ -39,7 +41,7 @@ import com.caucho.xml.QName;
  * A saved program for creating a constructor argument
  */
 public class InjectionPointArg extends Arg {
-  public Object eval(ConfigContext env)
+  public Object eval(CreationalContext<?> env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

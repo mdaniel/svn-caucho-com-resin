@@ -31,6 +31,8 @@ package com.caucho.config.attribute;
 
 import java.lang.reflect.*;
 
+import javax.enterprise.context.spi.CreationalContext;
+
 import com.caucho.config.*;
 import com.caucho.config.type.*;
 import com.caucho.config.inject.ConfigContext;
@@ -107,15 +109,16 @@ public class CustomBeanNewAttribute extends Attribute {
       _arg = arg;
     }
     
-    public void inject(Object bean, ConfigContext env)
+    @Override
+    public <T> void inject(T bean, CreationalContext<T> env)
     {
       throw new UnsupportedOperationException(getClass().getName());
     }
 
-    public Object configure(ConfigType type, ConfigContext env)
+    public <T> T configure(ConfigType<T> type, CreationalContext<T> env)
       throws ConfigException
     {
-      return type.valueOf(_arg);
+      return (T) type.valueOf(_arg);
     }
   }
 }

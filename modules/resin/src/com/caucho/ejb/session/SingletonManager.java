@@ -42,6 +42,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.SingletonBeanImpl;
@@ -116,8 +117,9 @@ public class SingletonManager<T> extends SessionServer<T> {
     SingletonProxyFactory factory = getSessionContext().getProxyFactory(api);
 
     if (factory != null) {
+      CreationalContextImpl env = new CreationalContextImpl();
       // XXX: should be bean
-      return (T) factory.__caucho_createNew(null, new ConfigContext());
+      return (T) factory.__caucho_createNew(null, env);
     } else
       return null;
   }
@@ -173,8 +175,8 @@ public class SingletonManager<T> extends SessionServer<T> {
   /**
    * Initialize an instance
    */
-  public void initInstance(T instance, InjectionTarget<T> target, Object proxy,
-                           CreationalContext<T> cxt)
+  public <X> void initInstance(T instance, InjectionTarget<T> target, 
+                               X proxy, CreationalContext<X> cxt)
   {
     getProducer().initInstance(instance, target, proxy, cxt);
   }

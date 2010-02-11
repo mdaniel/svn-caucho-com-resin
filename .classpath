@@ -37,5 +37,6 @@
 			<accessrule kind="discouraged" pattern="**/Unsafe*"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry kind="lib" path="/srv/nfs4/home/ferg/ws/resin/modules/ext/junit-4.7.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>

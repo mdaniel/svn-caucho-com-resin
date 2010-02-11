@@ -29,12 +29,12 @@
 
 package com.caucho.config.attribute;
 
-import java.lang.reflect.*;
+import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
+import com.caucho.config.type.ConfigType;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
@@ -106,7 +106,8 @@ public class CustomBeanProgramAttribute extends Attribute {
       _arg = arg;
     }
     
-    public void inject(Object bean, ConfigContext env)
+    @Override
+    public <T> void inject(T bean, CreationalContext<T> env)
     {
       throw new UnsupportedOperationException(getClass().getName());
     }

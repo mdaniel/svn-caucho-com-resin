@@ -39,6 +39,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.logging.Logger;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import org.w3c.dom.Node;
@@ -113,21 +114,19 @@ public class BeanType<T> extends ConfigType<T>
   private Attribute _addBean; // add(Object)
   private Attribute _setProperty;
 
-  private HashMap<Class,Attribute> _addMethodMap
-    = new HashMap<Class,Attribute>();
+  private HashMap<Class<?>,Attribute> _addMethodMap
+    = new HashMap<Class<?>,Attribute>();
 
   private Attribute _addCustomBean;
-  private Attribute _addAnnotation;
-  
-  private ManagedBeanImpl _component;
+  private ManagedBeanImpl<T> _bean;
 
   private ArrayList<ConfigProgram> _injectList;
   private ArrayList<ConfigProgram> _initList;
 
   private boolean _isIntrospecting;
   private boolean _isIntrospected;
-  private boolean _isIntrospectComplete;
-  private ArrayList<BeanType> _pendingChildList = new ArrayList<BeanType>();
+  private ArrayList<BeanType<?>> _pendingChildList
+    = new ArrayList<BeanType<?>>();
 
   public BeanType(Class<T> beanClass)
   {
@@ -137,7 +136,7 @@ public class BeanType<T> extends ConfigType<T>
   /**
    * Returns the given type.
    */
-  public Class getType()
+  public Class<T> getType()
   {
     return _beanClass;
   }
@@ -149,7 +148,6 @@ public class BeanType<T> extends ConfigType<T>
 
   protected void setAddAnnotation(Attribute addAnnotation)
   {
-    _addAnnotation = addAnnotation;
   }
 
   /**
@@ -159,21 +157,21 @@ public class BeanType<T> extends ConfigType<T>
   public Object create(Object parent, QName name)
   {
     try {
-      if (_component == null) {
+      InjectManager webBeans
+        = InjectManager.create(_beanClass.getClassLoader());
+      
+      if (_bean == null) {
 	if (_beanClass.isInterface())
 	  throw new ConfigException(L.l("{0} cannot be instantiated because it is an interface",
 					_beanClass.getName()));
 
-	InjectManager webBeans
-	  = InjectManager.create(_beanClass.getClassLoader());
-
-	_component = webBeans.createManagedBean(_beanClass);
+	_bean = webBeans.createManagedBean(_beanClass);
       }
 
-      InjectionTarget injection = _component.getInjectionTarget();
-      ConfigContext env = ConfigContext.create();
+      InjectionTarget<T> injection = _bean.getInjectionTarget();
+      CreationalContext<T> env = webBeans.createCreationalContext(_bean);
 
-      Object bean = injection.produce(env);
+      T bean = injection.produce(env);
       injection.inject(bean, env);
 
       if (_setParent != null
@@ -201,11 +199,11 @@ public class BeanType<T> extends ConfigType<T>
    * Returns a constructor with a given number of arguments
    */
   @Override
-  public Constructor getConstructor(int count)
+  public Constructor<T> getConstructor(int count)
   {
-    for (Constructor ctor : _beanClass.getConstructors()) {
+    for (Constructor<?> ctor : _beanClass.getConstructors()) {
       if (ctor.getParameterTypes().length == count)
-	return ctor;
+	return (Constructor<T>) ctor;
     }
     
     throw new ConfigException(L.l("{0} does not have any constructor with {1} arguments",
@@ -314,6 +312,7 @@ public class BeanType<T> extends ConfigType<T>
   /**
    * Returns any add attributes to add arbitrary content
    */
+  @Override
   public Attribute getAddAttribute(Class cl)
   {
     if (cl == null)

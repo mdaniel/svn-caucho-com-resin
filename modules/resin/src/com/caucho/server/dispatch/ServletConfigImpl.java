@@ -32,6 +32,7 @@ package com.caucho.server.dispatch;
 import com.caucho.config.*;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
@@ -51,6 +52,7 @@ import com.caucho.servlet.comet.CometServlet;
 import com.caucho.util.*;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.faces.*;
@@ -1229,11 +1231,13 @@ public class ServletConfigImpl
     throws Exception
   {
     if (_bean != null) {
-      ConfigContext env = ConfigContext.create();
+      // XXX: need to ask manager?
+      CreationalContext env = CreationalContextImpl.create();
+      
       return _bean.create(env);
     }
 
-    Class servletClass = getServletClass();
+    Class<?> servletClass = getServletClass();
 
     Object servlet;
     if (_jspFile != null) {
@@ -1249,7 +1253,8 @@ public class ServletConfigImpl
 
       _comp = inject.createInjectionTarget(servletClass);
 
-      ConfigContext env = ConfigContext.create();
+      CreationalContext env = CreationalContextImpl.create();
+      
       // server/1b40
       servlet = _comp.produce(env);
       _comp.inject(servlet, env);

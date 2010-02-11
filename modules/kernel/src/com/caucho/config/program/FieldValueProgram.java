@@ -29,12 +29,12 @@
 
 package com.caucho.config.program;
 
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.util.*;
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 /**
  * Injects a field with a constant value
@@ -65,7 +65,7 @@ public class FieldValueProgram extends NamedProgram {
    * Injects the bean with the dependencies
    */
   @Override
-  public void inject(Object bean, ConfigContext env)
+  public <T> void inject(T bean, CreationalContext<T> env)
   {
     try {
       _field.set(bean, _value);
