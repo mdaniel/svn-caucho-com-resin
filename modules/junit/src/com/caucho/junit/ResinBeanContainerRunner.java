@@ -42,8 +42,8 @@ import com.caucho.resin.*;
 public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
   private Class<?> _testClass;
 
-  private ResinBeanContainer _resinContext;
-  private CandiConfiguration _resinDescription;
+  private ResinBeanContainer _beanContainer;
+  private ResinBeanConfiguration _beanConfiguration;
 
   public ResinBeanContainerRunner(Class<?> testClass)
     throws Throwable
@@ -52,14 +52,14 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
 
     _testClass = testClass;
 
-    _resinDescription = testClass.getAnnotation(CandiConfiguration.class);
+    _beanConfiguration = testClass.getAnnotation(ResinBeanConfiguration.class);
   }
 
   @Override
   protected void runChild(FrameworkMethod method, RunNotifier notifier)
   {
-    ResinBeanContainer resinContext = getResinContext();
-    RequestContext request = resinContext.beginRequest();
+    ResinBeanContainer beanContainer = getResinContext();
+    RequestContext request = beanContainer.beginRequest();
 
     try {
       super.runChild(method, notifier);
@@ -77,27 +77,27 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
 
   protected ResinBeanContainer getResinContext()
   {
-    if (_resinContext == null) {
-      _resinContext = new ResinBeanContainer();
+    if (_beanContainer == null) {
+      _beanContainer = new ResinBeanContainer();
 
       String userName = System.getProperty("user.name");
       String workDir = "file:/tmp/" + userName;
 
-      _resinContext.setWorkDirectory(workDir);
+      _beanContainer.setWorkDirectory(workDir);
 
-      if (_resinDescription != null) {
-        for (String module : _resinDescription.modules()) {
-          _resinContext.addModule(module);
+      if (_beanConfiguration != null) {
+        for (String module : _beanConfiguration.modules()) {
+          _beanContainer.addModule(module);
         }
 
-        for (String conf : _resinDescription.beansXml()) {
-          _resinContext.addBeansXml(conf);
+        for (String conf : _beanConfiguration.beansXml()) {
+          _beanContainer.addBeansXml(conf);
         }
       }
 
-      _resinContext.start();
+      _beanContainer.start();
     }
 
-    return _resinContext;
+    return _beanContainer;
   }
 }
