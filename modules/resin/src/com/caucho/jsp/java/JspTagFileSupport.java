@@ -28,8 +28,38 @@
 
 package com.caucho.jsp.java;
 
+import javax.servlet.jsp.JspException;
+import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.Tag;
+
 /**
  * Represents the body for a tag file with no scripting.
  */
-abstract public class JspTagFileSupport extends JspTagSupport {
+abstract public class JspTagFileSupport extends JspTagSupport implements Tag {
+  public void setPageContext(PageContext page)
+  {
+  }
+
+  public void setParent(Tag t)
+  {
+  }
+
+  public Tag getParent()
+  {
+    return null;
+  }
+
+  public int doStartTag() throws JspException
+  {
+    return SKIP_PAGE;
+  }
+
+  public int doEndTag() throws JspException
+  {
+    return SKIP_PAGE;
+  }
+
+  public void release()
+  {
+  }
 }

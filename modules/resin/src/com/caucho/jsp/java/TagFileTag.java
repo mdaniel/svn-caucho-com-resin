@@ -102,6 +102,10 @@ public class TagFileTag extends GenericTag {
   @Override
   public boolean hasCustomTag()
   {
+    return true;
+    /*
+    if (true) return true;
+    
     if (Boolean.TRUE.equals(_hasCustomTag))
       return true;
 
@@ -120,7 +124,43 @@ public class TagFileTag extends GenericTag {
     }
 
     return super.hasCustomTag() || (_body != null && _body.hasCustomTag());
+    */
   }
+  /**
+   * Generates code before the actual JSP.
+   */
+  @Override
+  public void generateTagState(JspJavaWriter out)
+    throws Exception
+  {
+    out.print("private ");
+    out.printClass(_tagClass);
+    out.println(" " + _tag.getId() + ";");
+                                           
+    out.println();
+    out.print("final ");
+    out.printClass(_tagClass);
+//  out.println(" get" + _tag.getId() + "(PageContext pageContext, javax.servlet.jsp.tagext.JspTag _jsp_parent_tag) throws Throwable");
+    out.println(" get" + _tag.getId() + "() throws Throwable");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("if (" + _tag.getId() + " == null) {");
+    out.pushDepth();
+    
+    out.println(_tag.getId() + " = new " + _tagClass.getName() + "();");
+
+    out.popDepth();
+    out.println("}");
+    out.println();
+    out.println("return " + _tag.getId() + ";");
+    
+    out.popDepth();
+    out.println("}");
+
+    super.generateTagState(out);
+  }
+  
 
   /**
    * Generates the code for a custom tag.
@@ -142,6 +182,7 @@ public class TagFileTag extends GenericTag {
   /**
    * Returns true if the tag file invocation contains a child tag.
    */
+  @Override
   public boolean hasTag()
   {
     return super.hasTag() || _body != null && _body.hasTag();
@@ -149,10 +190,12 @@ public class TagFileTag extends GenericTag {
   /**
    * Returns null, since tag files aren't parent tags.
    */
+  /*
   public String getCustomTagName()
   {
     return null;
   }
+  */
   
   /**
    * Generates code before the actual JSP.
@@ -166,6 +209,8 @@ public class TagFileTag extends GenericTag {
       _body.setJspFragment(true);
       _body.generateFragmentPrologue(out);
     }
+    
+    out.println(_tagInfo.getTagClassName() + " " + getCustomTagName() + ";");
   }
   
   /**
@@ -180,11 +225,6 @@ public class TagFileTag extends GenericTag {
     Class cl = _tagClass;
 
     _gen.addTagFileClass(className);
-    
-    String name = className;
-
-    String childContext = fillTagFileAttributes(out, name);
-
 
     String parentTagName;
     
@@ -204,8 +244,17 @@ public class TagFileTag extends GenericTag {
     else {
       parentTagName = parentTagNode.getCustomTagName();
     }
+    
+    String customTagName = getCustomTagName();
+    
+    String name = className;
 
-    out.print(name + ".doTag(pageContext, " + childContext + ", out, ");
+    out.println(customTagName + " = _jsp_state.get" + _tag.getId() + "();");
+    
+    String childContext = fillTagFileAttributes(out, name, customTagName);
+
+    out.print(customTagName + ".doTag(pageContext, " + childContext + ", out, ");
+    
     if (_body != null)
       generateFragment(out, _body, "pageContext");
     else
@@ -218,7 +267,9 @@ public class TagFileTag extends GenericTag {
     printVarDeclaration(out, VariableInfo.AT_END);
   }
   
-  public String fillTagFileAttributes(JspJavaWriter out, String tagName)
+  public String fillTagFileAttributes(JspJavaWriter out, 
+                                      String tagName,
+                                      String customTagName)
     throws Exception
   {
     _contextVarName = "_jsp_context" + _gen.uniqueId();
@@ -314,6 +365,11 @@ public class TagFileTag extends GenericTag {
 
 	out.println(toObject(cl, convValue) + ");");
       }
+      
+
+      generateSetAttribute(out, customTagName, attrName, value,
+                           rtexprvalue,
+                           false, attribute);
     }
     
     return name;

@@ -1014,7 +1014,7 @@ public abstract class JspNode {
 
     String fragmentVar = frag.getFragmentName();
 
-    cb.append(fragmentVar + " = _CauchoFragment.create(" + fragmentVar
+    cb.append(fragmentVar + " = createFragment(" + fragmentVar
 	      + ", " + index
 	      + ", _jsp_parentContext"
 	      + ", " + contextVar

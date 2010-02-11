@@ -292,8 +292,10 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
     generateDoTag(out, _rootNode);
 
-    if (isStaticDoTag())
-      generateStaticDoTag(out, _rootNode);
+    // if (isStaticDoTag())
+    //  generateStaticDoTag(out, _rootNode);
+    
+    generateDoTagImpl(out, _rootNode);
 
     generateTagInfo(out);
     
@@ -302,7 +304,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
   protected boolean isStaticDoTag()
   {
-    return ! hasScripting();
+    // return ! hasScripting();
+    return false;
   }
 
   /**
@@ -564,11 +567,11 @@ public class JavaTagGenerator extends JavaJspGenerator {
   /**
    * Prints the _jspService header
    */
-  protected void generateStaticDoTag(JspJavaWriter out, JspNode node)
+  protected void generateDoTagImpl(JspJavaWriter out, JspNode node)
     throws Exception
   {
     out.println();
-    out.println("public static void doTag(javax.servlet.jsp.JspContext _jsp_parentContext,");
+    out.println("public void doTag(javax.servlet.jsp.JspContext _jsp_parentContext,");
     out.println("                         com.caucho.jsp.PageContextWrapper pageContext,");
     out.println("                         javax.servlet.jsp.JspWriter out,");
     out.println("                         javax.servlet.jsp.tagext.JspFragment _jspBody,");
@@ -585,6 +588,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("javax.servlet.http.HttpSession session = pageContext.getSession();");
       out.println("javax.servlet.ServletContext application = pageContext.getServletContext();");
       out.println("javax.servlet.ServletConfig config = pageContext.getServletConfig();");
+      out.println("com.caucho.jsp.PageContextWrapper jspContext = pageContext;");
     }
     
     out.println("TagState _jsp_state = new TagState();");
@@ -914,7 +918,14 @@ public class JavaTagGenerator extends JavaJspGenerator {
 
   private String toFieldName(String name)
   {
+    /*n
     if (hasScripting() && ! _reserved.contains(name))
+      return name;
+    else
+      return "_" + name;
+      */
+    
+    if (! _reserved.contains(name))
       return name;
     else
       return "_" + name;
