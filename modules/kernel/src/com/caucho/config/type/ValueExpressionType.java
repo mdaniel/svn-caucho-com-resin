@@ -31,6 +31,7 @@ package com.caucho.config.type;
 
 import javax.el.*;
 import com.caucho.config.*;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.el.*;
 
 /**

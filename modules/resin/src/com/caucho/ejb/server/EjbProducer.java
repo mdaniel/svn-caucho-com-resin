@@ -41,10 +41,10 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.ConfigContext;
 import com.caucho.config.gen.BeanProducer;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetImpl;
 import com.caucho.config.inject.ManagedBeanImpl;

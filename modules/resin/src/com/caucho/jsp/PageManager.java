@@ -47,7 +47,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
-import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;

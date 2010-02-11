@@ -29,8 +29,8 @@
 
 package com.caucho.config.program;
 
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ValueGenerator;
-import com.caucho.config.ConfigContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;

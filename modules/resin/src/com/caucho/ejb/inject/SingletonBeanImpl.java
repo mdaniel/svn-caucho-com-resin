@@ -33,7 +33,7 @@ import com.caucho.ejb.session.SingletonManager;
 import com.caucho.ejb.session.SingletonProxyFactory;
 import com.caucho.ejb.session.StatefulProvider;
 import com.caucho.ejb.session.StatefulManager;
-import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;

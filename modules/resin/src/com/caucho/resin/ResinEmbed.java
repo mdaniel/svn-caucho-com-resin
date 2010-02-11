@@ -40,8 +40,8 @@ import java.util.ArrayList;
 import java.util.logging.LogManager;
 
 import com.caucho.config.Config;
-import com.caucho.config.ConfigContext;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.RawString;
 import com.caucho.lifecycle.Lifecycle;

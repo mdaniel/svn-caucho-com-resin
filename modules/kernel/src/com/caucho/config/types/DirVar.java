@@ -29,6 +29,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 

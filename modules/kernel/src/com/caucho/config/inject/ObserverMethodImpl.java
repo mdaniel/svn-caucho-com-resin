@@ -29,7 +29,6 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.BeanArg;
 

@@ -29,8 +29,8 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.ConfigContext;
 import com.caucho.config.inject.BeanWrapper;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;

@@ -33,7 +33,7 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
-import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 
 /**

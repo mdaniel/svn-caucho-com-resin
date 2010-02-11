@@ -30,6 +30,7 @@
 package com.caucho.config;
 
 import com.caucho.config.attribute.*;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.type.*;
 import com.caucho.config.types.*;

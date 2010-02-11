@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 
 import java.lang.annotation.*;

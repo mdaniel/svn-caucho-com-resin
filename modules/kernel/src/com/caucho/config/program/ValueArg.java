@@ -32,6 +32,7 @@ package com.caucho.config.program;
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.AnnotatedTypeImpl;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.config.type.*;

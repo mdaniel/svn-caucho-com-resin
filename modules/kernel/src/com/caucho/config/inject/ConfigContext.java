@@ -25,11 +25,12 @@
  *   Boston, MA 02111-1307  USA
  */
 
-package com.caucho.config;
+package com.caucho.config.inject;
 
-import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.Destructor;
-import com.caucho.config.inject.InjectManager;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigELContext;
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
 import com.caucho.config.program.NodeBuilderChildProgram;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
@@ -86,6 +87,8 @@ public class ConfigContext implements CreationalContext {
   private ScopeContext _scope;
   private Contextual<?> _bean;
   private InjectionPoint _ij;
+  
+  private ConfigBeanStack _beanStack;
 
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
@@ -119,7 +122,7 @@ public class ConfigContext implements CreationalContext {
     _dependentScope = new DependentScope(scope);
   }
 
-  ConfigContext(Config config)
+  public ConfigContext(Config config)
   {
     this();
 
@@ -220,15 +223,9 @@ public class ConfigContext implements CreationalContext {
    * @param aThis
    * @return
    */
-  public Object get(Bean comp)
+  public Object get(Bean<?> bean)
   {
-    if (_dependentScope != null && comp instanceof AbstractBean) {
-      Object value = _dependentScope.get((AbstractBean) comp);
-
-      return value;
-    }
-    else
-      return null;
+    return ConfigBeanStack.find(_beanStack, bean);
   }
 
   public Config getConfig()

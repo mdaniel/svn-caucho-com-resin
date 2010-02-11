@@ -31,6 +31,7 @@ package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.event.EventImpl;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;

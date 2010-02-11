@@ -36,7 +36,7 @@ import javax.enterprise.context.spi.*;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.HandleAware;
 
 /**

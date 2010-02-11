@@ -35,6 +35,7 @@ import java.util.logging.*;
 
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.loader.*;
 import com.caucho.make.*;
 import com.caucho.el.*;

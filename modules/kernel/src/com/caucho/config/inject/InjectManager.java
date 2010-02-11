@@ -294,7 +294,7 @@ public class InjectManager
       // DEFAULT_PRIORITY
       _deploymentMap.put(Configured.class, 2);
 
-      BeanFactory factory = createBeanFactory(InjectManager.class);
+      BeanFactory<InjectManager> factory = createBeanFactory(InjectManager.class);
       // factory.deployment(Standard.class);
       factory.type(InjectManager.class);
       factory.type(BeanManager.class);
@@ -663,7 +663,7 @@ public class InjectManager
    */
   public <T> BeanFactory<T> createBeanFactory(ManagedBeanImpl<T> managedBean)
   {
-    return new BeanFactory(managedBean);
+    return new BeanFactory<T>(managedBean);
   }
 
   /**
@@ -812,8 +812,8 @@ public class InjectManager
    */
   public <T> AnnotatedType<T> processAnnotatedType(AnnotatedType<T> type)
   {
-    ProcessAnnotatedTypeImpl processType
-      = new ProcessAnnotatedTypeImpl(type);
+    ProcessAnnotatedTypeImpl<T> processType
+      = new ProcessAnnotatedTypeImpl<T>(type);
 
     fireExtensionEvent(processType);
 
@@ -1431,7 +1431,7 @@ public class InjectManager
     // ioc/0b10
     if (bean instanceof InjectBean)
       bean = ((InjectBean) bean).getBean();
-
+    
     return context.get(bean, createContext);
   }
 
@@ -1535,8 +1535,8 @@ public class InjectManager
   public Object getInjectableReference(InjectionPoint ij,
                                        CreationalContext<?> cxt)
   {
-    Bean bean = resolveByInjectionPoint(ij);
-
+    Bean<?> bean = resolveByInjectionPoint(ij);
+    
     if (bean instanceof ScopeAdapterBean) {
       ScopeAdapterBean simpleBean = (ScopeAdapterBean) bean;
 
@@ -1572,7 +1572,7 @@ public class InjectManager
     return resolveByInjectionPoint(type, qualifiers);
   }
 
-  public Bean resolveByInjectionPoint(Type type, Set<Annotation> bindingSet)
+  public Bean<?> resolveByInjectionPoint(Type type, Set<Annotation> bindingSet)
   {
     Annotation []bindings;
 
@@ -1589,7 +1589,7 @@ public class InjectManager
       bindings = new Annotation[] { CurrentLiteral.CURRENT };
 
     Set<Bean<?>> set = getBeans(type, bindings);
-
+    
     if (set == null || set.size() == 0) {
       throw unsatisfiedException(type, bindings);
     }
@@ -3339,7 +3339,7 @@ public class InjectManager
       _loader = Thread.currentThread().getContextClassLoader();
 
       if (bean instanceof AbstractBean) {
-        AbstractBean absBean = (AbstractBean) bean;
+        AbstractBean<X> absBean = (AbstractBean<X>) bean;
         Annotated annotated = absBean.getAnnotated();
 
         if (annotated != null

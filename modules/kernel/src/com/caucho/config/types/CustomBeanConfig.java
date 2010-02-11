@@ -34,6 +34,7 @@ import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.AnnotatedElementImpl;
 import com.caucho.config.inject.AnnotatedTypeImpl;
 import com.caucho.config.inject.AnnotatedMethodImpl;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ProducesBean;

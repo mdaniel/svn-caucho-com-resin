@@ -30,6 +30,7 @@
 package com.caucho.config.program;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.config.type.*;
 import com.caucho.xml.QName;

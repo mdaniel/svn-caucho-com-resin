@@ -41,7 +41,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.SingletonBeanImpl;

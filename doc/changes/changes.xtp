@@ -13,6 +13,7 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>ioc: issues with CDI "diamond" creation (#3863, rep by Wesley Wu)</li>
 <li>jsp: TeamCity JSP related fixes (#3115)</li>
 <li>(2010-02-10) proxy-cache: missing write Lock on cache deallocation (#3885, rep by KovIS)</li>
 <li>logging: Logger.getHandlers() must return empty array instead of null (#3882, rep by Knut Forkalsrud)</li>

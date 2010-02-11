@@ -29,7 +29,7 @@
 
 package com.caucho.ejb.inject;
 
-import com.caucho.config.ConfigContext;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
@@ -44,7 +44,6 @@ import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.enterprise.inject.spi.*;
-import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 

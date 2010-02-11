@@ -32,6 +32,7 @@ package com.caucho.config.program;
 import java.lang.reflect.*;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.util.*;
 
 /**

@@ -43,7 +43,6 @@ import javax.enterprise.inject.spi.InjectionTarget;
 
 import org.w3c.dom.Node;
 
-import com.caucho.config.ConfigContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.TagName;
@@ -56,6 +55,7 @@ import com.caucho.config.attribute.ProgramAttribute;
 import com.caucho.config.attribute.PropertyAttribute;
 import com.caucho.config.attribute.SetterAttribute;
 import com.caucho.config.attribute.TextAttribute;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetImpl;
 import com.caucho.config.inject.ManagedBeanImpl;

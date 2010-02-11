@@ -33,6 +33,7 @@ import java.lang.reflect.*;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;
+import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.CustomBeanConfig;
