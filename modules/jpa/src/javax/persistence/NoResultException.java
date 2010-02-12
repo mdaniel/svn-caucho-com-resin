@@ -35,6 +35,7 @@ package javax.persistence;
  * This exception will not cause the transaction, if one
  * is active, to be marked for roll back.
  */
+@SuppressWarnings("serial")
 public class NoResultException extends PersistenceException
 {
   public NoResultException()

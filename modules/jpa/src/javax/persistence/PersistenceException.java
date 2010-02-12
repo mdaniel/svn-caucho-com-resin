@@ -32,6 +32,7 @@ package javax.persistence;
 /**
  * Thrown by the persistence provider when a problem occurs.
  */
+@SuppressWarnings("serial")
 public class PersistenceException extends RuntimeException
 {
   public PersistenceException()

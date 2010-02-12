@@ -42,6 +42,7 @@ public @interface NamedNativeQuery {
   String name();
   String query();
   QueryHint[] hints() default {};
+  @SuppressWarnings("unchecked")
   Class resultClass() default void.class;
   String resultSetMapping() default "";
 }

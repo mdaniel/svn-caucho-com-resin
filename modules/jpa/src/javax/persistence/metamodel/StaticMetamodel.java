@@ -27,20 +27,19 @@
  * @author Scott Ferguson
  */
 
-package javax.persistence;
+package javax.persistence.metamodel;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * The @NamedQuery annotation.
+ * Marks a class as a metamodel class.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface NamedQuery {
-  String name();
-  String query();
-  LockModeType lockMode() default LockModeType.NONE;
-  QueryHint[] hints() default {};
+@Target({TYPE})
+@Retention(RUNTIME)
+public @interface StaticMetamodel {
+  Class<?> value();
 }

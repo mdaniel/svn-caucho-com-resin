@@ -41,6 +41,7 @@ import java.lang.annotation.Target;
 @Target({METHOD,FIELD})
 @Retention(RUNTIME)
 public @interface ManyToMany {
+  @SuppressWarnings("unchecked")
   Class targetEntity() default void.class;
   CascadeType []cascade() default {};
   FetchType fetch() default FetchType.LAZY;

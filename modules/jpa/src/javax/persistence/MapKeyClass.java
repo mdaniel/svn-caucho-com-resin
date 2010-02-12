@@ -43,5 +43,6 @@ import java.lang.annotation.Target;
 @Target({METHOD,FIELD})
 @Retention(RUNTIME)
 public @interface MapKeyClass {
-  Class value() default void.class;
+  @SuppressWarnings("unchecked")
+  Class value();
 }

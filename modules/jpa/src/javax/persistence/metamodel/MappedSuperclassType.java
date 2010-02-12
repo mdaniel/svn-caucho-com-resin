@@ -27,20 +27,14 @@
  * @author Scott Ferguson
  */
 
-package javax.persistence;
+package javax.persistence.metamodel;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
 
 /**
- * The @NamedQuery annotation.
+ * Model of a basic type
+ *
+ * @since JPA 2.0
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface NamedQuery {
-  String name();
-  String query();
-  LockModeType lockMode() default LockModeType.NONE;
-  QueryHint[] hints() default {};
+public interface MappedSuperclassType<X> extends IdentifiableType<X> {
+
 }

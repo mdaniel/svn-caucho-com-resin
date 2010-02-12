@@ -48,7 +48,4 @@ public @interface OrderColumn {
   boolean insertable() default true;
   boolean updatable() default true;
   String columnDefinition() default "";
-  boolean contiguous() default true;
-  int base() default 0;
-  String table() default "";
 }

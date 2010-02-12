@@ -30,7 +30,6 @@
 package javax.persistence;
 
 import java.util.Map;
-import java.util.Set;
 
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
@@ -47,6 +46,7 @@ public interface EntityManagerFactory {
   /**
    * Create a new EntityManager with the given properties.
    */
+  @SuppressWarnings("unchecked")
   public EntityManager createEntityManager(Map map);
   
   public CriteriaBuilder getCriteriaBuilder();

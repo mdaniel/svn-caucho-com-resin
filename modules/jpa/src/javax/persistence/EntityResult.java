@@ -39,6 +39,7 @@ import java.lang.annotation.Target;
 @Target({})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EntityResult {
+  @SuppressWarnings("unchecked")
   Class entityClass();
   FieldResult []fields() default {};
   String discriminatorColumn() default "";

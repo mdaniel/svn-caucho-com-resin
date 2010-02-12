@@ -40,6 +40,7 @@ public interface Cache {
    *
    * @since JPA 2.0
    */
+  @SuppressWarnings("unchecked")
   public boolean contains(Class cl, Object key);
   
   /**
@@ -47,6 +48,7 @@ public interface Cache {
    *
    * @since JPA 2.0
    */
+  @SuppressWarnings("unchecked")
   public void evict(Class cl, Object key);
   
   /**
@@ -54,6 +56,7 @@ public interface Cache {
    *
    * @since JPA 2.0
    */
+  @SuppressWarnings("unchecked")
   public void evict(Class cl);
   
   /**

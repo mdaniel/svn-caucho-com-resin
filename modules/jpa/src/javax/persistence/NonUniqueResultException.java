@@ -35,6 +35,7 @@ package javax.persistence;
  * query. This exception will not cause the transaction, if one
  * is active, to be marked for roll back.
  */
+@SuppressWarnings("serial")
 public class NonUniqueResultException extends PersistenceException
 {
   public NonUniqueResultException()

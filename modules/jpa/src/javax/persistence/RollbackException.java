@@ -33,6 +33,7 @@ package javax.persistence;
  * Thrown by the persistence provider when a
  * transaction is required but is not active.
  */
+@SuppressWarnings("serial")
 public class RollbackException extends PersistenceException
 {
   public RollbackException()

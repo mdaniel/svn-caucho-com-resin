@@ -41,6 +41,7 @@ import java.lang.annotation.Target;
 @Target({METHOD, FIELD})
 @Retention(RUNTIME)
 public @interface ElementCollection {
+  @SuppressWarnings("unchecked")
   Class targetClass() default void.class;
   FetchType fetch() default FetchType.LAZY;
 }

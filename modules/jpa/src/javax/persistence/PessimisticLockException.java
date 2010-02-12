@@ -33,9 +33,10 @@ package javax.persistence;
  * Thrown by the persistence provider when an
  * pessimistic locking conflict occurs.
  */
+@SuppressWarnings("serial")
 public class PessimisticLockException extends PersistenceException
 {
-  Object _entity;
+  private Object entity;
 
   public PessimisticLockException()
   {
@@ -43,7 +44,7 @@ public class PessimisticLockException extends PersistenceException
 
   public PessimisticLockException(Object entity)
   {
-    _entity = entity;
+    this.entity = entity;
   }
 
   public PessimisticLockException(String message)
@@ -63,7 +64,7 @@ public class PessimisticLockException extends PersistenceException
   {
     super(message, cause);
 
-    _entity = entity;
+    this.entity = entity;
   }
 
   public PessimisticLockException(Throwable cause)
@@ -73,6 +74,6 @@ public class PessimisticLockException extends PersistenceException
 
   public Object getEntity()
   {
-    return _entity;
+    return this.entity;
   }
 }

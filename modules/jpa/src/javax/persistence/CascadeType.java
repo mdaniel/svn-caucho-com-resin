@@ -37,5 +37,5 @@ public enum CascadeType {
   MERGE,
   REMOVE,
   REFRESH,
-  CLEAR
+  DETACH
 }

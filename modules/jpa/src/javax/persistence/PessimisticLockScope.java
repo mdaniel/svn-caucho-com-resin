@@ -29,18 +29,11 @@
 
 package javax.persistence;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * The @NamedQuery annotation.
+ * The type of the persistence context.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface NamedQuery {
-  String name();
-  String query();
-  LockModeType lockMode() default LockModeType.NONE;
-  QueryHint[] hints() default {};
+public enum PessimisticLockScope {
+  NORMAL,
+
+  EXTENDED
 }

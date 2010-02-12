@@ -24,23 +24,54 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Rodrigo Westrupp
  */
 
 package javax.persistence;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * The @NamedQuery annotation.
+ * Thrown by the persistence provider when
+ * a pessimistic locking conflict occurs, without forcing a rollback.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface NamedQuery {
-  String name();
-  String query();
-  LockModeType lockMode() default LockModeType.NONE;
-  QueryHint[] hints() default {};
+@SuppressWarnings("serial")
+public class LockTimeoutException extends PersistenceException
+{
+  private Object entity;
+  
+  public LockTimeoutException()
+  {
+  }
+  
+  public LockTimeoutException(Object entity)
+  {
+    this.entity = entity;
+  }
+
+  public LockTimeoutException(String message)
+  {
+    super(message);
+  }
+
+  public LockTimeoutException(String message, Throwable cause)
+  {
+    super(message, cause);
+  }
+
+  public LockTimeoutException(String message, Throwable cause,
+                              Object entity)
+  {
+    super(message, cause);
+    
+    this.entity = entity;
+  }
+
+  public LockTimeoutException(Throwable cause)
+  {
+    super(cause);
+  }
+  
+  public Object getObject()
+  {
+    return this.entity;
+  }
 }

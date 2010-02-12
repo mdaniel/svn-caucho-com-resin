@@ -29,18 +29,19 @@
 
 package javax.persistence;
 
-import java.lang.annotation.ElementType;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
 import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Target;
 
 /**
- * The @NamedQuery annotation.
+ * The @MapKey annotation.
+ *
+ * @since JPA 2.0
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface NamedQuery {
-  String name();
-  String query();
-  LockModeType lockMode() default LockModeType.NONE;
-  QueryHint[] hints() default {};
+@Target({METHOD,FIELD})
+@Retention(RUNTIME)
+public @interface MapsId {
+  String value() default "";
 }

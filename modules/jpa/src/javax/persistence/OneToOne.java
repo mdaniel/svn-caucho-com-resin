@@ -40,6 +40,7 @@ import java.lang.annotation.Target;
 @Target({ElementType.METHOD,ElementType.FIELD})
 @Retention(RetentionPolicy.RUNTIME)
 public @interface OneToOne {
+  @SuppressWarnings("unchecked")
   Class targetEntity() default void.class;
   CascadeType []cascade() default {};
   FetchType fetch() default FetchType.EAGER;

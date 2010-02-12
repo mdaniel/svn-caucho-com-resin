@@ -237,6 +237,7 @@ public interface EntityManager {
   /**
    * Creates a native SQL query.
    */
+  @SuppressWarnings("unchecked")
   public Query createNativeQuery(String sql, Class resultClass);
 
   /**

@@ -37,6 +37,7 @@ package javax.persistence;
  * exists in the database. The current transaction, if one is active
  * will be marked for rollback.
  */
+@SuppressWarnings("serial")
 public class EntityNotFoundException extends PersistenceException
 {
   public EntityNotFoundException()

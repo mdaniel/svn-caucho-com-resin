@@ -40,7 +40,7 @@ import java.lang.annotation.Target;
 @Target({TYPE})
 @Retention(RUNTIME)
 public @interface DiscriminatorColumn {
-  String name() default "";
+  String name() default "DTYPE";
   DiscriminatorType discriminatorType() default DiscriminatorType.STRING;
   String columnDefinition() default "";
   int length() default 31;

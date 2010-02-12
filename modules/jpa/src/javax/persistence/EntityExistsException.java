@@ -36,6 +36,7 @@ package javax.persistence;
  * transaction, if one is active will be
  * marked for rollback.
  */
+@SuppressWarnings("serial")
 public class EntityExistsException extends PersistenceException
 {
   public EntityExistsException()

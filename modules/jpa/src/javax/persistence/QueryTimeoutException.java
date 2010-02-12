@@ -29,18 +29,50 @@
 
 package javax.persistence;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
-
 /**
- * The @NamedQuery annotation.
+ * Thrown by the persistence provider when a query times out.
  */
-@Target(ElementType.TYPE) @Retention(RetentionPolicy.RUNTIME)
-public @interface NamedQuery {
-  String name();
-  String query();
-  LockModeType lockMode() default LockModeType.NONE;
-  QueryHint[] hints() default {};
+@SuppressWarnings("serial")
+public class QueryTimeoutException extends PersistenceException
+{
+  private Query query;
+
+  public QueryTimeoutException()
+  {
+  }
+
+  public QueryTimeoutException(Query entity)
+  {
+    this.query = query;
+  }
+
+  public QueryTimeoutException(String message)
+  {
+    super(message);
+  }
+
+  public QueryTimeoutException(String message,
+                                 Throwable cause)
+  {
+    super(message, cause);
+  }
+
+  public QueryTimeoutException(String message,
+                               Throwable cause,
+                               Query query)
+  {
+    super(message, cause);
+
+    this.query = query;
+  }
+
+  public QueryTimeoutException(Throwable cause)
+  {
+    super(cause);
+  }
+
+  public Query getQuery()
+  {
+    return this.query;
+  }
 }

@@ -91,8 +91,9 @@ public class Persistence {
    * @param name - the name of the persistence unit
    * @param props - persistence unit properties
    */
-  public static EntityManagerFactory createEntityManagerFactory(String name,
-                                                                Map props)
+  @SuppressWarnings("unchecked")
+  public static EntityManagerFactory 
+  createEntityManagerFactory(String name, Map props)
   {
     for (PersistenceProvider provider : getProviderList()) {
       EntityManagerFactory factory;
@@ -125,7 +126,7 @@ public class Persistence {
     ArrayList<PersistenceProvider> list = new ArrayList<PersistenceProvider>();
 
     try {
-      Class cl = Class.forName(AMBER_PROVIDER, false, loader);
+      Class<?> cl = Class.forName(AMBER_PROVIDER, false, loader);
 
       PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
 
@@ -135,10 +136,10 @@ public class Persistence {
     }
 
     try {
-      Enumeration e = loader.getResources(SERVICE);
+      Enumeration<URL> e = loader.getResources(SERVICE);
 
       while (e.hasMoreElements()) {
-        URL url = (URL) e.nextElement();
+        URL url = e.nextElement();
 
         PersistenceProvider provider = loadProvider(url, loader);
 
