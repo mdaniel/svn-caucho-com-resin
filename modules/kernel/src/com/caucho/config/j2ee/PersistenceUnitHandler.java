@@ -99,9 +99,20 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
       jndiName = pContext.name();
       */
 
-    Bean<?> bean;
+    Bean<?> bean = null;
     
-    bean = bind(location, EntityManagerFactory.class, unitName);
+    if (! "".equals(unitName)) {
+      bean = bind(location, EntityManagerFactory.class, unitName);
+      
+      if (bean == null) {
+        Set<Bean<?>> beans = getManager().getBeans(EntityManagerFactory.class,
+                                                   new AnnotationLiteral<Any>() {});
+        
+        throw new ConfigException(location + L.l("unitName='{0}' is an unknown @PersistenceUnit.\n  {1}",
+                                                 unitName,
+                                                 beans));
+      }
+    }
     
     if (bean == null)
       bean = bind(location, EntityManagerFactory.class, name);
@@ -110,8 +121,6 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
       // valid bean
     }
     else if (! "".equals(unitName)) {
-      throw new ConfigException(location + L.l("unitName='{0}' is an unknown @PersistenceUnit.",
-                                               unitName));
     }
     else if (! "".equals(name)) {
       throw new ConfigException(location + L.l("name='{0}' is an unknown @PersistenceUnit.",

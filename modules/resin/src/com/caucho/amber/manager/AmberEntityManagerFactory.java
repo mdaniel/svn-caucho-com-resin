@@ -33,6 +33,10 @@ import com.caucho.config.inject.HandleAware;
 import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import javax.persistence.PersistenceUnitUtil;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.metamodel.Metamodel;
+
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Logger;
@@ -139,6 +143,36 @@ public class AmberEntityManagerFactory
   public String toString()
   {
     return "AmberEntityManagerFactory[" + _unit.getName() + "]";
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
+   */
+  @Override
+  public CriteriaBuilder getCriteriaBuilder()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManagerFactory#getMetamodel()
+   */
+  @Override
+  public Metamodel getMetamodel()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
+   */
+  @Override
+  public PersistenceUnitUtil getPersistenceUnitUtil()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }
 

@@ -46,4 +46,6 @@ public interface PersistenceProvider {
    */
   public EntityManagerFactory
     createContainerEntityManagerFactory(PersistenceUnitInfo info, Map map);
+  
+  public ProviderUtil getProviderUtil();
 }

@@ -34,6 +34,8 @@ import com.caucho.util.L10N;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.ProviderUtil;
+
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -80,6 +82,16 @@ public class AmberPersistenceProvider implements PersistenceProvider {
     createContainerEntityManagerFactory(PersistenceUnitInfo info,
                                         Map map)
   {
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.spi.PersistenceProvider#getProviderUtil()
+   */
+  @Override
+  public ProviderUtil getProviderUtil()
+  {
+    // TODO Auto-generated method stub
     return null;
   }
 }

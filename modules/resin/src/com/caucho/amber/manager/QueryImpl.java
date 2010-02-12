@@ -53,6 +53,7 @@ import javax.persistence.FlushModeType;
 import javax.persistence.LockModeType;
 import javax.persistence.NonUniqueResultException;
 import javax.persistence.NoResultException;
+import javax.persistence.Parameter;
 import javax.persistence.Query;
 import javax.persistence.TemporalType;
 import java.lang.reflect.Constructor;
@@ -1251,5 +1252,137 @@ public class QueryImpl implements Query {
   public LockModeType getLockMode()
   {
     throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameter(java.lang.String)
+   */
+  @Override
+  public Parameter<?> getParameter(String name)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameter(java.lang.String, java.lang.Class)
+   */
+  @Override
+  public <T> Parameter<T> getParameter(String name, Class<T> type)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameter(int)
+   */
+  @Override
+  public Parameter<?> getParameter(int pos)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameter(int, java.lang.Class)
+   */
+  @Override
+  public <T> Parameter<T> getParameter(int position, Class<T> type)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameterValue(javax.persistence.Parameter)
+   */
+  @Override
+  public <T> T getParameterValue(Parameter<T> param)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameterValue(java.lang.String)
+   */
+  @Override
+  public Object getParameterValue(String name)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameterValue(int)
+   */
+  @Override
+  public Object getParameterValue(int position)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#getParameters()
+   */
+  @Override
+  public Set<Parameter<?>> getParameters()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#isBound(javax.persistence.Parameter)
+   */
+  @Override
+  public boolean isBound(Parameter<?> param)
+  {
+    // TODO Auto-generated method stub
+    return false;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#setParameter(javax.persistence.Parameter, java.lang.Object)
+   */
+  @Override
+  public <T> Query setParameter(Parameter<T> param, T value)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#setParameter(javax.persistence.Parameter, java.util.Calendar, javax.persistence.TemporalType)
+   */
+  @Override
+  public Query setParameter(Parameter<Calendar> param, Calendar date,
+                            TemporalType type)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#setParameter(javax.persistence.Parameter, java.util.Date, javax.persistence.TemporalType)
+   */
+  @Override
+  public Query setParameter(Parameter<Calendar> param, Date date,
+                            TemporalType type)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.Query#unwrap(java.lang.Class)
+   */
+  @Override
+  public <T> T unwrap(Class<T> cl)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

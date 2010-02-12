@@ -32,6 +32,13 @@ package com.caucho.amber.manager;
 import com.caucho.util.L10N;
 
 import javax.persistence.EntityManager;
+import javax.persistence.LockModeType;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.Metamodel;
+
+import java.util.Map;
 import java.util.logging.Logger;
 
 /**

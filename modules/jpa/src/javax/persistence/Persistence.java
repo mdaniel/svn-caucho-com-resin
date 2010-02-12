@@ -49,15 +49,18 @@ public class Persistence {
 
   private static final String SERVICE
     = "META-INF/services/javax.persistence.spi.PersistenceProvider";
+  
   private static WeakHashMap<ClassLoader,PersistenceProvider[]>
     _providerMap = new WeakHashMap<ClassLoader,PersistenceProvider[]>();
   
   private static final String AMBER_PROVIDER
     = "com.caucho.amber.manager.AmberPersistenceProvider";
 
+  @Deprecated
   protected static final java.util.Set<PersistenceProvider> providers
     = new HashSet<PersistenceProvider>();
 
+  @Deprecated
   public static final String PERSISTENCE_PROVIDER
     = "javax.persistence.spi.PeristenceProvider";
 
@@ -101,6 +104,13 @@ public class Persistence {
     }
 
     return null;
+  }
+  
+  public static PersistenceUtil getPersistenceUtil()
+  {
+    // XXX:
+    
+    throw new UnsupportedOperationException();
   }
 
   private static PersistenceProvider []getProviderList()

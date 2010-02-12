@@ -85,7 +85,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
     _destination = destination;
 
     if (destination == null)
-      throw new NullPointerException();
+      throw new ConfigException(L.l("'destination' attribute may not be null"));
   }
 
   public void setMessageConsumerMax(int messageConsumerMax)

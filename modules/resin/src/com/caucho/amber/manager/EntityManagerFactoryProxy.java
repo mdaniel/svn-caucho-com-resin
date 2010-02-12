@@ -35,6 +35,8 @@ import com.caucho.jca.*;
 import com.caucho.util.L10N;
 
 import javax.persistence.*;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.metamodel.Metamodel;
 import javax.transaction.*;
 import java.util.*;
 import java.util.logging.Logger;
@@ -103,16 +105,6 @@ public class EntityManagerFactoryProxy
   }
 
   /**
-   * Returns the supported properties
-   *
-   * @since JPA 2.0
-   */
-  public Set<String> getSupportedProperties()
-  {
-    return getFactory().getSupportedProperties();
-  }
-
-  /**
    * Returns the entity manager cache
    *
    * @since JPA 2.0
@@ -134,5 +126,35 @@ public class EntityManagerFactoryProxy
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _unitName + "," + getFactory() + "]";
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
+   */
+  @Override
+  public CriteriaBuilder getCriteriaBuilder()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManagerFactory#getMetamodel()
+   */
+  @Override
+  public Metamodel getMetamodel()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
+   */
+  @Override
+  public PersistenceUnitUtil getPersistenceUnitUtil()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

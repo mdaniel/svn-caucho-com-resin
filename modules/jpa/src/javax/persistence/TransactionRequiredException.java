@@ -29,6 +29,7 @@
 
 package javax.persistence;
 
+@SuppressWarnings("serial")
 public class TransactionRequiredException extends PersistenceException
 {
   public TransactionRequiredException()

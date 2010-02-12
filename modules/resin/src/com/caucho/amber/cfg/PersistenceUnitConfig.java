@@ -41,7 +41,10 @@ import com.caucho.vfs.*;
 import javax.annotation.PostConstruct;
 import javax.sql.DataSource;
 import javax.naming.*;
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.persistence.spi.*;
+
 import java.lang.instrument.*;
 import java.security.*;
 import java.net.URL;
@@ -520,5 +523,35 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
 				    domain,
 				    classFileBuffer);
     }
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.spi.PersistenceUnitInfo#getPersistenceXMLSchemaVersion()
+   */
+  @Override
+  public String getPersistenceXMLSchemaVersion()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.spi.PersistenceUnitInfo#getSharedCacheMode()
+   */
+  @Override
+  public SharedCacheMode getSharedCacheMode()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.spi.PersistenceUnitInfo#getValidationMode()
+   */
+  @Override
+  public ValidationMode getValidationMode()
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

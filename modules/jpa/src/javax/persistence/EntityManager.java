@@ -32,6 +32,10 @@ package javax.persistence;
 import java.util.Map;
 import java.util.Set;
 
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.Metamodel;
+
 /**
  * The main application interface to the persistence context.
  */
@@ -62,6 +66,15 @@ public interface EntityManager {
    * @since JPA 2.0
    */
   public <T> T find(Class<T> entityCLass,
+                    Object primaryKey,
+                    Map<String,Object> properties);
+
+  /**
+   * Find based on the primary key.
+   *
+   * @since JPA 2.0
+   */
+  public <T> T find(Class<T> entityCLass,
 		    Object primaryKey,
 		    LockModeType lockMode);
 
@@ -73,7 +86,7 @@ public interface EntityManager {
   public <T> T find(Class<T> entityCLass,
 		    Object primaryKey,
 		    LockModeType lockMode,
-		    Map properties);
+		    Map<String,Object> properties);
 
   /**
    * Gets an instance whose state may be lazily fetched.
@@ -107,12 +120,20 @@ public interface EntityManager {
    */
   public void lock(Object entity,
 		   LockModeType lockMode,
-		   Map properties);
+		   Map<String,Object> properties);
 
   /**
    * Update the state of the instance from the database.
    */
   public void refresh(Object entity);
+
+  /**
+   * Update the state of the instance from the database.
+   *
+   * @since JPA 2.0
+   */
+  public void refresh(Object entity,
+                      Map<String,Object> properties);
 
   /**
    * Update the state of the instance from the database.
@@ -127,8 +148,8 @@ public interface EntityManager {
    * @since JPA 2.0
    */
   public void refresh(Object entity,
-		      LockModeType lockMode,
-		      Map properties);
+                      LockModeType lockMode,
+                      Map<String,Object> properties);
 
   /**
    * Clears the context, causing all entities to become detached.
@@ -140,7 +161,7 @@ public interface EntityManager {
    *
    * @since JPA 2.0
    */
-  public void clear(Object entity);
+  public void detach(Object entity);
 
   /**
    * Check if the instance belongs to the current context.
@@ -155,11 +176,18 @@ public interface EntityManager {
   public LockModeType getLockMode(Object entity);
 
   /**
+   * Sets properties for the entity manager
+   *
+   * @since JPA 2.0
+   */
+  public void setProperty(String propertyName, Object value);
+
+  /**
    * Returns the properties for the entity manager
    *
    * @since JPA 2.0
    */
-  public Map getProperties();
+  public Map<String,Object> getProperties();
 
   /**
    * Returns the supported properties for the entity manager
@@ -172,11 +200,34 @@ public interface EntityManager {
    * Creates a new query.
    */
   public Query createQuery(String ql);
+  
+  /**
+   * Creates a TypedQuery for a criteria
+   * 
+   * @since JPA 2.0
+   */
+  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery);
+  
+  /**
+   * Creates a TypedQuery for a criteria
+   * 
+   * @since JPA 2.0
+   */
+  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery,
+                                       Class<T> resultClass);
 
   /**
    * Creates a named query.
    */
   public Query createNamedQuery(String name);
+
+  /**
+   * Creates a named query.
+   * 
+   * @since JPA 2.0
+   */
+  public <T> TypedQuery<T> createNamedQuery(String name,
+                                            Class<T> resultClass);
 
   /**
    * Creates a native SQL query.
@@ -197,6 +248,11 @@ public interface EntityManager {
    * Joins the transaction.
    */
   public void joinTransaction();
+  
+  /**
+   * Returns the object of the type for a provider-specific API
+   */
+  public <T> T unwrap(Class<T> cls);
 
   /**
    * Gets the delegate.
@@ -224,4 +280,18 @@ public interface EntityManager {
    * @since JPA 2.0
    */
   public EntityManagerFactory getEntityManagerFactory();
+  
+  /**
+   * Returns a CriteriaBuilder to create CriteriaQuery objects.
+   * 
+   * @since JPA 2.0
+   */
+  public CriteriaBuilder getCriteriaBuilder();
+  
+  /**
+   * Returns the Metamodel interface for the persistence unit.
+   * 
+   * @since JPA 2.0
+   */
+  public Metamodel getMetamodel();
 }

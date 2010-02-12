@@ -612,8 +612,13 @@ public class ConfigContext {
       // ioc/2410
       if (elValue != NULL)
         attrStrategy.setValue(bean, qName, elValue);
-      else
-        attrStrategy.setValue(bean, qName, null);
+      else {
+        try {
+          attrStrategy.setValue(bean, qName, null);
+        } catch (Exception e) {
+          throw ConfigException.create(L.l("{0} value must not be null.\n  ", text), e);
+        }
+      }
 
       return true;
     }

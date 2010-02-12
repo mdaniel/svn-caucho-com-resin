@@ -55,6 +55,7 @@ import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 
 import javax.persistence.EntityExistsException;
+import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.EntityTransaction;
@@ -64,6 +65,10 @@ import javax.persistence.Query;
 import javax.persistence.PersistenceException;
 import javax.persistence.RollbackException;
 import javax.persistence.TransactionRequiredException;
+import javax.persistence.TypedQuery;
+import javax.persistence.criteria.CriteriaBuilder;
+import javax.persistence.criteria.CriteriaQuery;
+import javax.persistence.metamodel.Metamodel;
 import javax.sql.DataSource;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
@@ -86,7 +91,7 @@ import java.util.logging.Logger;
  * The entity manager from a entity manager proxy.
  */
 public class AmberConnection
-  implements BeginResource, CloseResource, Synchronization
+  implements BeginResource, CloseResource, Synchronization, EntityManager
 {
   private static final L10N L = new L10N(AmberConnection.class);
   private static final Logger log
@@ -2820,115 +2825,6 @@ public class AmberConnection
   }
 
   /**
-   * Find based on the primary key.
-   *
-   * @since JPA 2.0
-   */
-  public <T> T find(Class<T> entityCLass,
-		    Object primaryKey,
-		    LockModeType lockMode)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Find based on the primary key.
-   *
-   * @since JPA 2.0
-   */
-  public <T> T find(Class<T> entityCLass,
-		    Object primaryKey,
-		    LockModeType lockMode,
-		    Map properties)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Sets the lock mode for an entity.
-   *
-   * @since JPA 2.0
-   */
-  public void lock(Object entity,
-		   LockModeType lockMode,
-		   Map properties)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Update the state of the instance from the database.
-   *
-   * @since JPA 2.0
-   */
-  public void refresh(Object entity, LockModeType lockMode)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Update the state of the instance from the database.
-   *
-   * @since JPA 2.0
-   */
-  public void refresh(Object entity,
-		      LockModeType lockMode,
-		      Map properties)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Clears the entity
-   *
-   * @since JPA 2.0
-   */
-  public void clear(Object entity)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the lock mode for the entity
-   *
-   * @since JPA 2.0
-   */
-  public LockModeType getLockMode(Object entity)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the properties for the entity manager
-   *
-   * @since JPA 2.0
-   */
-  public Map getProperties()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the supported properties for the entity manager
-   *
-   * @since JPA 2.0
-   */
-  public Set<String> getSupportedProperties()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the owning factory
-   *
-   * @since JPA 2.0
-   */
-  public EntityManagerFactory getEntityManagerFactory()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
    * Flush managed entities.
    */
   private void flushInternal()
@@ -3498,5 +3394,201 @@ public class AmberConnection
     {
       return _isInTransaction;
     }
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#createNamedQuery(java.lang.String, java.lang.Class)
+   */
+  @Override
+  public <T> TypedQuery<T> createNamedQuery(String name, Class<T> resultClass)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#createQuery(javax.persistence.criteria.CriteriaQuery)
+   */
+  @Override
+  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#createQuery(javax.persistence.criteria.CriteriaQuery, java.lang.Class)
+   */
+  @Override
+  public <T> TypedQuery<T> createQuery(CriteriaQuery<T> criteriaQuery,
+                                       Class<T> resultClass)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#detach(java.lang.Object)
+   */
+  @Override
+  public void detach(Object entity)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, java.util.Map)
+   */
+  @Override
+  public <T> T find(Class<T> entityCLass, Object primaryKey,
+                    Map<String, Object> properties)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType)
+   */
+  @Override
+  public <T> T find(Class<T> entityCLass, Object primaryKey,
+                    LockModeType lockMode)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#find(java.lang.Class, java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+   */
+  @Override
+  public <T> T find(Class<T> entityCLass, Object primaryKey,
+                    LockModeType lockMode, Map<String, Object> properties)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#getCriteriaBuilder()
+   */
+  @Override
+  public CriteriaBuilder getCriteriaBuilder()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#getEntityManagerFactory()
+   */
+  @Override
+  public EntityManagerFactory getEntityManagerFactory()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#getLockMode(java.lang.Object)
+   */
+  @Override
+  public LockModeType getLockMode(Object entity)
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#getMetamodel()
+   */
+  @Override
+  public Metamodel getMetamodel()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#getProperties()
+   */
+  @Override
+  public Map<String, Object> getProperties()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#getSupportedProperties()
+   */
+  @Override
+  public Set<String> getSupportedProperties()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#lock(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+   */
+  @Override
+  public void lock(Object entity, LockModeType lockMode,
+                   Map<String, Object> properties)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#refresh(java.lang.Object, java.util.Map)
+   */
+  @Override
+  public void refresh(Object entity, Map<String, Object> properties)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType)
+   */
+  @Override
+  public void refresh(Object entity, LockModeType lockMode)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#refresh(java.lang.Object, javax.persistence.LockModeType, java.util.Map)
+   */
+  @Override
+  public void refresh(Object entity, LockModeType lockMode,
+                      Map<String, Object> properties)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#setProperty(java.lang.String, java.lang.Object)
+   */
+  @Override
+  public void setProperty(String propertyName, Object value)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
+  /* (non-Javadoc)
+   * @see javax.persistence.EntityManager#unwrap(java.lang.Class)
+   */
+  @Override
+  public <T> T unwrap(Class<T> cls)
+  {
+    // TODO Auto-generated method stub
+    return null;
   }
 }

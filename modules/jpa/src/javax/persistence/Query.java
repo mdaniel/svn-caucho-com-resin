@@ -88,34 +88,50 @@ public interface Query {
    *
    * @Since JPA 2.0
    */
-  public Map getHints();
-
-  /**
-   * Returns the supported hints
-   *
-   * @Since JPA 2.0
-   */
-  public Set<String> getSupportedHints();
+  public Map<String,Object> getHints();
 
   /**
    * Binds a named parameter.
    */
-  public Query setParameter(String name, Object value);
-
-  /**
-   * Sets a date parameter.
-   */
-  public Query setParameter(String name, Date date, TemporalType type); 
+  public <T> Query setParameter(Parameter<T> param, T value);
 
   /**
    * Sets a calendar parameter.
    */
-  public Query setParameter(String name, Calendar date, TemporalType type); 
+  public Query setParameter(Parameter<Calendar> param,
+                            Calendar date, 
+                            TemporalType type); 
+
+  /**
+   * Sets a date parameter.
+   */
+  public Query setParameter(Parameter<Calendar> param,
+                            java.util.Date date,
+                            TemporalType type); 
+
+  /**
+   * Binds a position parameter.
+   */
+  public Query setParameter(String name, Object value);
 
   /**
    * Binds a position parameter.
    */
   public Query setParameter(int pos, Object value);
+
+  /**
+   * Sets a calendar parameter.
+   */
+  public Query setParameter(String name,
+                            Calendar date, 
+                            TemporalType type); 
+
+  /**
+   * Sets a date parameter.
+   */
+  public Query setParameter(String name,
+                            java.util.Date date,
+                            TemporalType type); 
 
   /**
    * Sets a date parameter.
@@ -126,21 +142,25 @@ public interface Query {
    * Sets a calendar parameter.
    */
   public Query setParameter(int pos, Calendar date, TemporalType type);
+  
+  public Set<Parameter<?>> getParameters();
+  
+  public Parameter<?> getParameter(String name);
+  
+  public <T> Parameter<T> getParameter(String name, Class<T> type);
+  
+  public Parameter<?> getParameter(int pos);
+  
+  public <T> Parameter<T> getParameter(int position, Class<T> type);
 
-  /**
-   * Returns the named parameters as a map
-   *
-   * @since JPA 2.0
-   */
-  public Map getNamedParameters();
-
-  /**
-   * Returns the positional parameters as a list
-   *
-   * @since JPA 2.0
-   */
-  public List getPositionalParameters();
-
+  public boolean isBound(Parameter<?> param);
+  
+  public <T> T getParameterValue(Parameter<T> param);
+  
+  public Object getParameterValue(String name);
+  
+  public Object getParameterValue(int position);
+  
   /**
    * Sets the flush type.
    */
@@ -166,4 +186,6 @@ public interface Query {
    * @since JPA 2.0
    */
   public LockModeType getLockMode();
+  
+  public <T> T unwrap(Class<T> cl);
 }

@@ -29,6 +29,8 @@
 
 package javax.persistence.spi;
 
+import javax.persistence.SharedCacheMode;
+import javax.persistence.ValidationMode;
 import javax.sql.DataSource;
 import java.net.URL;
 import java.util.List;
@@ -88,11 +90,23 @@ public interface PersistenceUnitInfo {
    * Returns true if only listed classes are allowed.
    */
   public boolean excludeUnlistedClasses();
+  
+  /**
+   * @since JPA 2.0
+   */
+  public SharedCacheMode getSharedCacheMode();
+  
+  /**
+   * @since JPA 2.0
+   */
+  public ValidationMode getValidationMode();
 
   /**
    * Returns a properties object.
    */
   public Properties getProperties();
+  
+  public String getPersistenceXMLSchemaVersion();
 
   /**
    * Returns the classloader the provider should use to load classes,
