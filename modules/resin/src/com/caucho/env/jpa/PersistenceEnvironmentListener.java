@@ -27,15 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
+package com.caucho.env.jpa;
 
-import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.AddLoaderListener;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import java.net.URL;
+import com.caucho.loader.EnvironmentClassLoader;
 
 /**
  * Listener for environment start to detect and load persistence.xml
@@ -46,6 +41,7 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
   {
   }
 
+  @Override
   public boolean isEnhancer()
   {
     return true;
@@ -54,13 +50,14 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
   /**
    * Handles the case where the environment is starting (after init).
    */
+  @Override
   public void addLoader(EnvironmentClassLoader loader)
   {
-    AmberContainer amber = AmberContainer.create(loader);
+    PersistenceManager manager = PersistenceManager.create(loader);
 
     // called to configure the enhancer when the classloader updates before
     // any loading of the class
-    amber.configurePersistenceRoots();
+    manager.configurePersistenceRoots();
   }
 
   /**
@@ -70,11 +67,13 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
   {
   }
 
+  @Override
   public int hashCode()
   {
     return getClass().hashCode();
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == null)

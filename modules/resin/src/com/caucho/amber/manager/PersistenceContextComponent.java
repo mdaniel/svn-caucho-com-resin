@@ -39,6 +39,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionPoint;
 
 import com.caucho.config.inject.*;
+import com.caucho.env.jpa.EntityManagerTransactionProxy;
 
 /**
  * The @PersistenceContext webbeans component

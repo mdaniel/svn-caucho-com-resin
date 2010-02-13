@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
+package com.caucho.env.jpa;
 
 import com.caucho.amber.*;
+import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
@@ -53,7 +54,7 @@ public class EntityManagerTransactionProxy
   private static final Logger log
     = Logger.getLogger(EntityManagerTransactionProxy.class.getName());
 
-  private final AmberContainer _amber;
+  private final PersistenceManager _manager;
   private final String _unitName;
   private final Map _props;
   private EntityManagerFactory _emf;
@@ -65,11 +66,11 @@ public class EntityManagerTransactionProxy
 
   private Object _serializationHandle;
 
-  public EntityManagerTransactionProxy(AmberContainer amber,
+  public EntityManagerTransactionProxy(PersistenceManager manager,
                                        String unitName,
                                        Map props)
   {
-    _amber = amber;
+    _manager = manager;
     _unitName = unitName;
     _props = props;
 
@@ -272,7 +273,7 @@ public class EntityManagerTransactionProxy
 
     try {
       if (_emf == null) {
-        _emf = _amber.getEntityManagerFactory(_unitName);
+        _emf = _manager.getEntityManagerFactory(_unitName);
       }
 
       Transaction xa = _ut.getTransaction();
@@ -311,7 +312,7 @@ public class EntityManagerTransactionProxy
   private EntityManagerFactory getFactory()
   {
     if (_emf == null) {
-      _emf = _amber.getEntityManagerFactory(_unitName);
+      _emf = _manager.getEntityManagerFactory(_unitName);
     }
 
     return _emf;

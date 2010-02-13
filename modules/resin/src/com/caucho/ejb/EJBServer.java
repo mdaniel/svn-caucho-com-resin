@@ -30,7 +30,6 @@
 package com.caucho.ejb;
 
 import com.caucho.amber.manager.AmberContainer;
-import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.JndiBuilder;
@@ -39,6 +38,7 @@ import com.caucho.config.types.Period;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.ejb.metadata.Bean;
+import com.caucho.env.jpa.PersistenceEnvironmentListener;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;

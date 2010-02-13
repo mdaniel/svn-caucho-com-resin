@@ -29,12 +29,12 @@
 
 package com.caucho.resin;
 
-import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.EJBServer;
+import com.caucho.env.jpa.PersistenceEnvironmentListener;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;

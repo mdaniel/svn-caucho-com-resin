@@ -27,33 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.env.jpa;
 
-import com.caucho.amber.manager.AmberContainer;
-import com.caucho.config.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.vfs.*;
-
-import java.net.*;
+import java.net.URL;
 import java.util.ArrayList;
+
+import com.caucho.config.ConfigException;
+import com.caucho.vfs.Path;
 
 /**
  * Top <persistence> tag for the persistence.xml
  */
-public class PersistenceConfig {
-  private AmberContainer _manager;
+public class ConfigPersistence {
+  private final Path _root;
   
-  private Path _root;
-  
-  private ArrayList<PersistenceUnitConfig> _unitList
-    = new ArrayList<PersistenceUnitConfig>();
+  private ArrayList<ConfigPersistenceUnit> _unitList
+    = new ArrayList<ConfigPersistenceUnit>();
 
-  public PersistenceConfig(AmberContainer manager)
-  {
-    _manager = manager;
-  }
-
-  public void setRoot(Path root)
+  public ConfigPersistence(Path root)
   {
     _root = root;
   }
@@ -74,26 +65,13 @@ public class PersistenceConfig {
   /**
    * Adds a new <persistence-unit>.
    */
-  public PersistenceUnitConfig createPersistenceUnit()
+  public ConfigPersistenceUnit createPersistenceUnit()
   {
     try {
-      URL rootUrl;
-
-      // need to return the base url
-      if (_root instanceof JarPath)
-	rootUrl = new URL(((JarPath) _root).getContainer().getURL());
-      else
-	rootUrl = new URL(_root.getURL());
-      
-      PersistenceUnitConfig unit
-	= new PersistenceUnitConfig(_manager, rootUrl);
-
-      for (ConfigProgram program : _manager.getPersistenceUnitDefaultList()) {
-	program.configure(unit);
-      }
+      ConfigPersistenceUnit unit = new ConfigPersistenceUnit(new URL(_root.getURL()));
     
       _unitList.add(unit);
-
+    
       return unit;
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -103,7 +81,7 @@ public class PersistenceConfig {
   /**
    * Returns the unit list.
    */
-  public ArrayList<PersistenceUnitConfig> getUnitList()
+  public ArrayList<ConfigPersistenceUnit> getUnitList()
   {
     return _unitList;
   }

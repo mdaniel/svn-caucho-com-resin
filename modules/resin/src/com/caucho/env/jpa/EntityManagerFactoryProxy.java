@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
+package com.caucho.env.jpa;
 
 import com.caucho.amber.*;
+import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.inject.HandleAware;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
@@ -52,14 +53,14 @@ public class EntityManagerFactoryProxy
   private static final Logger log
     = Logger.getLogger(EntityManagerFactoryProxy.class.getName());
 
-  private final AmberContainer _amber;
+  private final PersistenceManager _manager;
   private final String _unitName;
   private EntityManagerFactory _emf;
 
-  public EntityManagerFactoryProxy(AmberContainer amber,
+  public EntityManagerFactoryProxy(PersistenceManager manager,
                                    String unitName)
   {
-    _amber = amber;
+    _manager = manager;
     _unitName = unitName;
   }
 
@@ -117,7 +118,7 @@ public class EntityManagerFactoryProxy
   private EntityManagerFactory getFactory()
   {
     if (_emf == null)
-      _emf = _amber.getEntityManagerFactory(_unitName);
+      _emf = _manager.getEntityManagerFactory(_unitName);
 
     return _emf;
   }

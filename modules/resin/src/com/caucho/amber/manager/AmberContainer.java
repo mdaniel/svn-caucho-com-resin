@@ -45,8 +45,6 @@ import javax.sql.DataSource;
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.amber.cfg.EntityMappingsConfig;
 import com.caucho.amber.cfg.MappedSuperclassConfig;
-import com.caucho.amber.cfg.PersistenceConfig;
-import com.caucho.amber.cfg.PersistenceUnitConfig;
 import com.caucho.amber.gen.AmberEnhancer;
 import com.caucho.amber.gen.AmberGenerator;
 import com.caucho.amber.type.EmbeddableType;
@@ -61,6 +59,10 @@ import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.env.jpa.EntityManagerFactoryProxy;
+import com.caucho.env.jpa.EntityManagerTransactionProxy;
+import com.caucho.env.jpa.ConfigPersistence;
+import com.caucho.env.jpa.ConfigPersistenceUnit;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -102,8 +104,8 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   private HashMap<String, ArrayList<ConfigProgram>> _unitDefaultMap
     = new HashMap<String, ArrayList<ConfigProgram>>();
 
-  private ArrayList<PersistenceUnitConfig> _unitConfigList
-    = new ArrayList<PersistenceUnitConfig>();
+  private ArrayList<ConfigPersistenceUnit> _unitConfigList
+    = new ArrayList<ConfigPersistenceUnit>();
 
   private HashMap<String, AmberPersistenceUnit> _unitMap
     = new HashMap<String, AmberPersistenceUnit>();
@@ -171,7 +173,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     if (_parentAmberContainer != null)
       copyContainerDefaults(_parentAmberContainer);
 
-    _parentLoader.addScanListener(this);
+    // _parentLoader.addScanListener(this);
 
     Environment.addEnvironmentListener(this, _parentLoader);
 
@@ -619,7 +621,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
   public void start()
   {
-    configurePersistenceRoots();
+    // configurePersistenceRoots();
     startPersistenceUnits();
   }
 
@@ -640,8 +642,10 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     if (factory != null)
       return factory;
 
+    /*
     if (_pendingRootList.size() > 0)
       configurePersistenceRoots();
+      */
 
     factory = _factoryMap.get(name);
     if (factory != null)
@@ -683,8 +687,10 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     if (context != null)
       return context;
 
+    /*
     if (_pendingRootList.size() > 0)
       configurePersistenceRoots();
+      */
 
     if ("".equals(name) && _unitConfigList.size() > 0)
       name = _unitConfigList.get(0).getName();
@@ -712,8 +718,10 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     if ("".equals(name) && _unitConfigList.size() > 0)
       name = _unitConfigList.get(0).getName();
 
+    /*
     if (_pendingRootList.size() > 0)
       configurePersistenceRoots();
+      */
 
     if ("".equals(name) && _unitConfigList.size() > 0)
       name = _unitConfigList.get(0).getName();
@@ -737,152 +745,6 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     RootContext context = new RootContext(root);
     _persistenceRootMap.put(root, context);
     _pendingRootList.add(context);
-  }
-
-  /**
-   * Adds the URLs for the classpath.
-   */
-  public void configurePersistenceRoots()
-  {
-    Thread thread = Thread.currentThread();
-    ClassLoader oldLoader = thread.getContextClassLoader();
-
-    try {
-      // jpa/1630
-      // thread.setContextClassLoader(_tempLoader);
-      thread.setContextClassLoader(_parentLoader);
-
-      ArrayList<RootContext> rootList = new ArrayList<RootContext>(
-          _pendingRootList);
-      _pendingRootList.clear();
-
-      for (RootContext rootContext : rootList) {
-        configureRoot(rootContext);
-      }
-    } finally {
-      thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  private void configureRoot(RootContext rootContext)
-  {
-    Path root = rootContext.getRoot();
-
-    try {
-      Path ormXml = root.lookup("META-INF/orm.xml");
-
-      EntityMappingsConfig entityMappings = configureMappingFile(root, ormXml);
-
-      ArrayList<PersistenceUnitConfig> unitList = parsePersistenceConfig(root);
-
-      if (unitList == null)
-        return;
-
-      HashMap<String, Class> classMap = new HashMap<String, Class>();
-
-      for (PersistenceUnitConfig unitConfig : unitList) {
-        Class provider = unitConfig.getProvider();
-
-        if (provider == null)
-          provider = getServiceProvider();
-
-        if (provider != null
-            && ! AmberPersistenceProvider.class.equals(provider)) {
-          addProviderUnit(unitConfig);
-
-          continue;
-        }
-
-        if (log.isLoggable(Level.CONFIG))
-          log.config("Amber PersistenceUnit[" + unitConfig.getName()
-              + "] configuring " + rootContext.getRoot().getURL());
-
-        if (! unitConfig.isExcludeUnlistedClasses()) {
-          classMap.clear();
-
-          for (String className : rootContext.getClassNameList())
-            lookupClass(className, classMap, entityMappings);
-
-          unitConfig.addAllClasses(classMap);
-        }
-
-        ArrayList<EntityMappingsConfig> entityMappingsList = new ArrayList<EntityMappingsConfig>();
-
-        if (entityMappings != null)
-          entityMappingsList.add(entityMappings);
-
-        // jpa/0s2n: <jar-file>
-        for (String fileName : unitConfig.getJarFiles()) {
-          JarPath jarFile;
-
-          Path parent = root;
-
-          if (root instanceof JarPath) {
-            parent = ((JarPath) root).getContainer().getParent();
-          }
-
-          jarFile = JarPath.create(parent.lookup(fileName));
-
-          classMap.clear();
-
-          // lookupJarClasses(jarFile, classMap, entityMappings);
-
-          unitConfig.addAllClasses(classMap);
-        }
-
-        // jpa/0s2l: custom mapping-file.
-        for (String fileName : unitConfig.getMappingFiles()) {
-          Path mappingFile = root.lookup(fileName);
-
-          EntityMappingsConfig mappingFileConfig = configureMappingFile(root,
-              mappingFile);
-
-          if (mappingFileConfig != null) {
-            entityMappingsList.add(mappingFileConfig);
-
-            classMap.clear();
-            /*
-             * lookupClasses(root.getPath().length(), root, classMap,
-             * mappingFileConfig);
-             */
-            unitConfig.addAllClasses(classMap);
-          }
-        }
-
-        AmberPersistenceUnit unit = unitConfig.init(this, entityMappingsList);
-
-        _pendingUnitList.add(unit);
-
-        _unitMap.put(unit.getName(), unit);
-      }
-    } catch (Exception e) {
-      addException(e);
-
-      throw ConfigException.create(e);
-    }
-  }
-
-  private Class getServiceProvider()
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    try {
-      Enumeration e = loader.getResources("META-INF/services/" + PersistenceProvider.class.getName());
-      while (e.hasMoreElements()) {
-        URL url  = (URL) e.nextElement();
-
-        Class providerClass = loadProvider(url);
-
-        if (providerClass != null
-            && ! providerClass.equals(AmberPersistenceProvider.class)) {
-          return providerClass;
-        }
-      }
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-    }
-
-    return null;
   }
 
   private Class loadProvider(URL url)
@@ -941,115 +803,6 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
-    }
-  }
-
-  private void addProviderUnit(PersistenceUnitConfig unit)
-  {
-    try {
-      Class cl = unit.getProvider();
-
-      if (cl == null)
-        cl = getServiceProvider();
-
-      if (cl == null)
-        cl = AmberPersistenceProvider.class;
-
-      if (log.isLoggable(Level.CONFIG)) {
-        log.config("JPA PersistenceUnit[" + unit.getName() + "] handled by "
-            + cl.getName());
-      }
-
-      PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
-
-      String unitName = unit.getName();
-      Map props = null;
-
-      synchronized (this) {
-        LazyEntityManagerFactory lazyFactory
-          = new LazyEntityManagerFactory(unit, provider, props);
-
-        _pendingFactoryList.add(lazyFactory);
-      }
-
-      EntityManagerTransactionProxy persistenceContext
-        = new EntityManagerTransactionProxy(this, unitName, props);
-
-      _persistenceContextMap.put(unitName, persistenceContext);
-
-      InjectManager manager = InjectManager.create(_parentLoader);
-      BeanFactory factory;
-      factory = manager.createBeanFactory(EntityManagerFactory.class);
-      /*
-      EntityManagerFactoryComponent emf
-        = new EntityManagerFactoryComponent(manager, this, provider, unit);
-      */
-
-      EntityManagerFactoryProxy emf
-        = new EntityManagerFactoryProxy(this, unitName);
-
-      factory.binding(CurrentLiteral.CURRENT);
-      factory.binding(Names.create(unitName));
-      manager.addBean(factory.singleton(emf));
-
-      factory = manager.createBeanFactory(EntityManager.class);
-      factory.binding(CurrentLiteral.CURRENT);
-      factory.binding(Names.create(unitName));
-
-      /*
-      PersistenceContextComponent pcComp
-        = new PersistenceContextComponent(unitName, persistenceContext);
-      */
-
-      manager.addBean(factory.singleton(persistenceContext));
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
-  /**
-   * Adds a persistence root.
-   */
-  private ArrayList<PersistenceUnitConfig> parsePersistenceConfig(Path root)
-  {
-    Path persistenceXml = root.lookup("META-INF/persistence.xml");
-
-    if (!persistenceXml.canRead())
-      return null;
-
-    persistenceXml.setUserPath(persistenceXml.getURL());
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " parsing " + persistenceXml.getURL());
-
-    InputStream is = null;
-
-    try {
-      is = persistenceXml.openRead();
-
-      PersistenceConfig persistence = new PersistenceConfig(this);
-      persistence.setRoot(root);
-
-      new Config().configure(persistence, is,
-          "com/caucho/amber/cfg/persistence-30.rnc");
-
-      ArrayList<PersistenceUnitConfig> unitList = persistence.getUnitList();
-
-      _unitConfigList.addAll(unitList);
-
-      return unitList;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw LineConfigException.create(e);
-    } finally {
-      try {
-        if (is != null)
-          is.close();
-      } catch (Exception e) {
-      }
     }
   }
 
@@ -1200,7 +953,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
    */
   public void environmentConfigure(EnvironmentClassLoader loader)
   {
-    configurePersistenceRoots();
+    // configurePersistenceRoots();
   }
 
   /**
@@ -1232,11 +985,11 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   }
 
   class LazyEntityManagerFactory {
-    private final PersistenceUnitConfig _unit;
+    private final ConfigPersistenceUnit _unit;
     private final PersistenceProvider _provider;
     private final Map _props;
 
-    LazyEntityManagerFactory(PersistenceUnitConfig unit,
+    LazyEntityManagerFactory(ConfigPersistenceUnit unit,
                              PersistenceProvider provider, Map props)
     {
       _unit = unit;

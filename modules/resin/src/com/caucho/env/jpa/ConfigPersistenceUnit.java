@@ -27,42 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.cfg;
+package com.caucho.env.jpa;
 
-import com.caucho.amber.manager.AmberContainer;
-import com.caucho.amber.manager.AmberPersistenceUnit;
-import com.caucho.naming.*;
-import com.caucho.config.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.instrument.IllegalClassFormatException;
+import java.net.URL;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Properties;
 
 import javax.annotation.PostConstruct;
-import javax.sql.DataSource;
-import javax.naming.*;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
-import javax.persistence.spi.*;
+import javax.persistence.spi.ClassTransformer;
+import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitInfo;
+import javax.persistence.spi.PersistenceUnitTransactionType;
+import javax.sql.DataSource;
 
-import java.lang.instrument.*;
-import java.security.*;
-import java.net.URL;
-import java.util.*;
-import java.util.logging.*;
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.naming.Jndi;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
 
 /**
  * <persistence-unit> tag in the persistence.xml
  */
-public class PersistenceUnitConfig implements PersistenceUnitInfo {
-  private static final L10N L = new L10N(PersistenceUnitConfig.class);
-  private static final Logger log
-    = Logger.getLogger(PersistenceUnitConfig.class.getName());
-
-  private AmberContainer _manager;
+public class ConfigPersistenceUnit implements PersistenceUnitInfo {
+  private static final L10N L = new L10N(ConfigPersistenceUnit.class);
   
   private String _name;
-  private Class _provider;
+  private String _description;
+  private Class<?> _provider;
   private String _jtaDataSourceName;
   private String _nonJtaDataSourceName;
   private DataSource _jtaDataSource;
@@ -78,8 +79,8 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private Properties _properties = new Properties();
 
   // className -> type
-  private HashMap<String,Class> _classMap
-    = new HashMap<String,Class>();
+  private HashMap<String,Class<?>> _classMap
+    = new HashMap<String,Class<?>>();
 
   private ArrayList<String> _mappingFiles
     = new ArrayList<String>();
@@ -90,14 +91,8 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   private ArrayList<URL> _jarFileUrls
     = new ArrayList<URL>();
 
-  public PersistenceUnitConfig(AmberContainer manager, URL rootUrl)
+  public ConfigPersistenceUnit(URL rootUrl)
   {
-    _manager = manager;
-    
-    Thread thread = Thread.currentThread();
-
-    _loader = (DynamicClassLoader) thread.getContextClassLoader();
-
     _rootUrl = rootUrl;
   }
 
@@ -118,6 +113,44 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   }
 
   /**
+   * Sets the description.
+   */
+  public void setDescription(String description)
+  {
+    _description = description;
+  }
+
+  /**
+   * Sets the provider class name.
+   */
+  public void setProvider(Class<?> provider)
+  {
+    _provider = provider;
+
+    Config.validate(provider, PersistenceProvider.class);
+  }
+
+  /**
+   * Sets the provider class name.
+   */
+  public Class<?> getProvider()
+  {
+    return _provider;
+  }
+
+  /**
+   * Sets the provider class name.
+   */
+  @Override
+  public String getPersistenceProviderClassName()
+  {
+    if (_provider != null)
+      return _provider.getName();
+    else
+      return null;
+  }
+
+  /**
    * Sets the transaction type.
    */
   public void setTransactionType(String type)
@@ -128,43 +161,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
       _transactionType = PersistenceUnitTransactionType.RESOURCE_LOCAL;
     else
       throw new ConfigException(L.l("'{0}' is an unknown JPA transaction-type.",
-				    type));
-  }
-
-  /**
-   * Sets the description.
-   */
-  public void setDescription(String description)
-  {
-  }
-
-  /**
-   * Sets the provider class name.
-   */
-  public void setProvider(Class provider)
-  {
-    _provider = provider;
-
-    Config.validate(provider, PersistenceProvider.class);
-  }
-
-  /**
-   * Sets the provider class name.
-   */
-  public Class getProvider()
-  {
-    return _provider;
-  }
-
-  /**
-   * Sets the provider class name.
-   */
-  public String getPersistenceProviderClassName()
-  {
-    if (_provider != null)
-      return _provider.getName();
-    else
-      return null;
+                                    type));
   }
 
   /**
@@ -178,6 +175,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Gets the transactional data source.
    */
+  @Override
   public DataSource getJtaDataSource()
   {
     if (_jtaDataSourceName == null)
@@ -208,6 +206,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Sets the non-transactional data source.
    */
+  @Override
   public DataSource getNonJtaDataSource()
   {
     if (_nonJtaDataSourceName == null)
@@ -272,11 +271,11 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Adds a map of configured classes.
    */
-  public void addAllClasses(Map<String,Class> classMap)
+  public void addAllClasses(Map<String,Class<?>> classMap)
   {
-    for (Map.Entry<String,Class> entry : classMap.entrySet()) {
+    for (Map.Entry<String,Class<?>> entry : classMap.entrySet()) {
       String k = entry.getKey();
-      Class v = entry.getValue();
+      Class<?> v = entry.getValue();
 
       if (! _classMap.containsKey(k))
         _classMap.put(k, v);
@@ -310,53 +309,8 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   @PostConstruct
   public void init()
   {
-    ArrayList<ConfigProgram> defaultList = _manager.getProxyProgram(_name);
-
-    if (defaultList != null) {
-      for (ConfigProgram program : defaultList) {
-	program.configure(this);
-      }
-    }
   }
-    
-  public AmberPersistenceUnit init(AmberContainer container,
-                                   ArrayList<EntityMappingsConfig> entityMappings)
-    throws Exception
-  {
-    try {
-      AmberPersistenceUnit unit
-	= new AmberPersistenceUnit(container, _name);
-
-      unit.setJPA(true);
-
-      if (_jtaDataSourceName != null)
-	unit.setJtaDataSourceName(_jtaDataSourceName);
-    
-      if (_nonJtaDataSourceName != null)
-	unit.setNonJtaDataSourceName(_nonJtaDataSourceName);
-
-      unit.setEntityMappingsList(entityMappings);
-
-      unit.init();
-
-      for (Map.Entry<String,Class> entry : _classMap.entrySet()) {
-	String className = entry.getKey();
-	Class type = entry.getValue();
-
-	unit.addEntityClass(className, type);
-      }
-
-      unit.generate();
-
-      return unit;
-    } catch (Exception e) {
-      if (_rootUrl != null)
-	throw ConfigException.createLine(_rootUrl.toString() + ":\n", e);
-      else
-	throw e;
-    }
-  }
-
+  
   //
   // PersistenceUnitInfo api
   //
@@ -364,6 +318,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns the name.
    */
+  @Override
   public String getPersistenceUnitName()
   {
     return getName();
@@ -372,6 +327,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns the transaction handling.
    */
+  @Override
   public PersistenceUnitTransactionType getTransactionType()
   {
     return _transactionType;
@@ -381,6 +337,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    * Returns the mapping file names.  The files are resource-loadable
    * from the classpath.
    */
+  @Override
   public List<String> getMappingFileNames()
   {
     return _mappingFiles;
@@ -389,6 +346,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns the list of jars for the managed classes.
    */
+  @Override
   public List<URL> getJarFileUrls()
   {
     return _jarFileUrls;
@@ -397,6 +355,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns the root persistence unit.
    */
+  @Override
   public URL getPersistenceUnitRootUrl()
   {
     return _rootUrl;
@@ -405,6 +364,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns the list of managed classes.
    */
+  @Override
   public List<String> getManagedClassNames()
   {
     ArrayList<String> names = new ArrayList<String>();
@@ -416,6 +376,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns true if only listed classes are allowed.
    */
+  @Override
   public boolean excludeUnlistedClasses()
   {
     return _isExcludeUnlistedClasses;
@@ -424,6 +385,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns a properties object.
    */
+  @Override
   public Properties getProperties()
   {
     return _properties;
@@ -433,6 +395,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
    * Returns the classloader the provider should use to load classes,
    * resources or URLs.
    */
+  @Override
   public ClassLoader getClassLoader()
   {
     return _loader;
@@ -441,6 +404,7 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Adds a class transformer.
    */
+  @Override
   public void addTransformer(ClassTransformer transformer)
   {
     _loader.addTransformer(new TransformerAdapter(transformer));
@@ -449,15 +413,10 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
   /**
    * Returns a temporary class loader.
    */
+  @Override
   public ClassLoader getNewTempClassLoader()
   {
     return _loader.getNewTempClassLoader();
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _name + "]";
   }
 
   protected DataSource loadDataSource(String name)
@@ -468,6 +427,12 @@ public class PersistenceUnitConfig implements PersistenceUnitInfo {
       return ds;
 
     return null;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 
   public class PropertiesConfig {

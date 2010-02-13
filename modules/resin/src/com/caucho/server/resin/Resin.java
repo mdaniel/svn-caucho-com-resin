@@ -54,7 +54,6 @@ import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
 
 import com.caucho.VersionFactory;
-import com.caucho.amber.manager.PersistenceEnvironmentListener;
 import com.caucho.bam.Broker;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -68,6 +67,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
+import com.caucho.env.jpa.PersistenceEnvironmentListener;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.license.LicenseCheck;

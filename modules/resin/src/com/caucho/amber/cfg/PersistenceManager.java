@@ -33,6 +33,7 @@ import com.caucho.amber.manager.*;
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.env.jpa.PersistenceEnvironmentListener;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 
