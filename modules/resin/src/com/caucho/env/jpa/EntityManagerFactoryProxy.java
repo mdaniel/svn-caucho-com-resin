@@ -53,15 +53,13 @@ public class EntityManagerFactoryProxy
   private static final Logger log
     = Logger.getLogger(EntityManagerFactoryProxy.class.getName());
 
-  private final PersistenceManager _manager;
-  private final String _unitName;
-  private EntityManagerFactory _emf;
+  private final ManagerPersistenceUnit _persistenceUnit;
+  
+  private EntityManagerFactory _emfDelegate;
 
-  public EntityManagerFactoryProxy(PersistenceManager manager,
-                                   String unitName)
+  public EntityManagerFactoryProxy(ManagerPersistenceUnit persistenceUnit)
   {
-    _manager = manager;
-    _unitName = unitName;
+    _persistenceUnit = persistenceUnit;
   }
 
   /**
@@ -69,7 +67,7 @@ public class EntityManagerFactoryProxy
    */
   public EntityManager createEntityManager()
   {
-    return getFactory().createEntityManager();
+    return getDelegate().createEntityManager();
   }
 
   /**
@@ -77,7 +75,7 @@ public class EntityManagerFactoryProxy
    */
   public EntityManager createEntityManager(Map map)
   {
-    return getFactory().createEntityManager(map);
+    return getDelegate().createEntityManager(map);
   }
 
   /**
@@ -92,7 +90,7 @@ public class EntityManagerFactoryProxy
    */
   public boolean isOpen()
   {
-    return getFactory().isOpen();
+    return getDelegate().isOpen();
   }
 
   /**
@@ -102,7 +100,7 @@ public class EntityManagerFactoryProxy
    */
   public Map getProperties()
   {
-    return getFactory().getProperties();
+    return getDelegate().getProperties();
   }
 
   /**
@@ -112,21 +110,15 @@ public class EntityManagerFactoryProxy
    */
   public Cache getCache()
   {
-    return getFactory().getCache();
+    return getDelegate().getCache();
   }
 
-  private EntityManagerFactory getFactory()
+  private EntityManagerFactory getDelegate()
   {
-    if (_emf == null)
-      _emf = _manager.getEntityManagerFactory(_unitName);
+    if (_emfDelegate == null)
+      _emfDelegate = _persistenceUnit.getEntityManagerFactoryDelegate();
 
-    return _emf;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _unitName + "," + getFactory() + "]";
+    return _emfDelegate;
   }
 
   /* (non-Javadoc)
@@ -157,5 +149,13 @@ public class EntityManagerFactoryProxy
   {
     // TODO Auto-generated method stub
     return null;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[" + _persistenceUnit.getName()
+            + "," + _emfDelegate + "]");
   }
 }

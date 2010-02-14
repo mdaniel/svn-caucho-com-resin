@@ -38,7 +38,7 @@ import com.caucho.config.types.Period;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.ejb.metadata.Bean;
-import com.caucho.env.jpa.PersistenceEnvironmentListener;
+import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -526,7 +526,7 @@ public class EJBServer
   public void init()
   {
     try {
-      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+      Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
     
       // _ejbContainer.start();
 
@@ -551,7 +551,7 @@ public class EJBServer
                + " remote-jndi="
 	       + _ejbContainer.getProtocolManager().getRemoteJndiPrefix());
 
-      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+      Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);

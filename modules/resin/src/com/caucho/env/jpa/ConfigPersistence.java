@@ -41,6 +41,8 @@ import com.caucho.vfs.Path;
 public class ConfigPersistence {
   private final Path _root;
   
+  private String _version;
+  
   private ArrayList<ConfigPersistenceUnit> _unitList
     = new ArrayList<ConfigPersistenceUnit>();
 
@@ -56,6 +58,7 @@ public class ConfigPersistence {
 
   public void setVersion(String version)
   {
+    _version = version;
   }
 
   public void setSchemaLocation(String location)
@@ -69,6 +72,8 @@ public class ConfigPersistence {
   {
     try {
       ConfigPersistenceUnit unit = new ConfigPersistenceUnit(new URL(_root.getURL()));
+      
+      unit.setVersion(_version);
     
       _unitList.add(unit);
     

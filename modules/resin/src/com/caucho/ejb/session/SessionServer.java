@@ -156,15 +156,13 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
         
       }
 
-      BeanFactory<?> factory
+      BeanFactory<SessionContext> factory
         = beanManager.createBeanFactory(SessionContext.class);
       
       AbstractContext context = getSessionContext();
       context.setDeclaredRoles(_declaredRoles);
 
-      _component = factory.singleton(context);
-
-      beanManager.addBean(_component);
+      beanManager.addBean(factory.singleton(context));
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

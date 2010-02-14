@@ -70,7 +70,7 @@ public class XmppProtocol extends AbstractHttpProtocol
   {
     InjectManager manager = InjectManager.create();
     
-    BeanFactory<?> factory = manager.createBeanFactory(getClass());
+    BeanFactory<? extends XmppProtocol> factory = manager.createBeanFactory(getClass());
     manager.addBean(factory.singleton(this));
 
     _marshalFactory = new XmppMarshalFactory();

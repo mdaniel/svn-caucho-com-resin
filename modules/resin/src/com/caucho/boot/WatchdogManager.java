@@ -216,7 +216,7 @@ class WatchdogManager implements AlarmListener {
         auth = _management.getAdminAuthenticator();
 
       if (auth != null) {
-        BeanFactory<?> factory = webBeans.createBeanFactory(Authenticator.class);
+        BeanFactory<Authenticator> factory = webBeans.createBeanFactory(Authenticator.class);
 
         factory.type(Authenticator.class);
         factory.type(AdminAuthenticator.class);

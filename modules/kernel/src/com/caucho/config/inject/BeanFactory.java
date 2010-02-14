@@ -29,16 +29,18 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.program.*;
-
-import java.io.Closeable;
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.*;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.*;
+import java.util.Collection;
+import java.util.LinkedHashSet;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
+
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -52,8 +54,6 @@ import javax.enterprise.inject.spi.*;
 public class BeanFactory<T>
 {
   private ManagedBeanImpl<T> _managedBean;
-
-  private Object _value;
 
   private Set<Type> _types;
   private AnnotatedElementImpl _annotated;
@@ -71,19 +71,19 @@ public class BeanFactory<T>
     _injectionTarget = managedBean.getInjectionTarget();
   }
 
-  public AnnotatedType getAnnotatedType()
+  public AnnotatedType<T> getAnnotatedType()
   {
     return _managedBean.getAnnotatedType();
   }
 
-  public BeanFactory name(String name)
+  public BeanFactory<T> name(String name)
   {
     _name = name;
 
     return this;
   }
 
-  public BeanFactory binding(Annotation ann)
+  public BeanFactory<T> binding(Annotation ann)
   {
     if (_bindings == null)
       _bindings = new LinkedHashSet<Annotation>();
@@ -93,7 +93,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory binding(Collection<Annotation> list)
+  public BeanFactory<T> binding(Collection<Annotation> list)
   {
     if (_bindings == null)
       _bindings = new LinkedHashSet<Annotation>();
@@ -103,7 +103,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory stereotype(Class annType)
+  public BeanFactory<T> stereotype(Class<? extends Annotation> annType)
   {
     if (_stereotypes == null)
       _stereotypes = new LinkedHashSet<Class<? extends Annotation>>();
@@ -113,7 +113,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory stereotype(Collection<Class<? extends Annotation>> list)
+  public BeanFactory<T> stereotype(Collection<Class<? extends Annotation>> list)
   {
     if (_stereotypes == null)
       _stereotypes = new LinkedHashSet<Class<? extends Annotation>>();
@@ -123,7 +123,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory annotation(Annotation ann)
+  public BeanFactory<T> annotation(Annotation ann)
   {
     if (_annotated == null)
       _annotated = new AnnotatedElementImpl(_managedBean.getAnnotated());
@@ -133,7 +133,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory annotation(Collection<Annotation> list)
+  public BeanFactory<T> annotation(Collection<Annotation> list)
   {
     if (_annotated == null)
       _annotated = new AnnotatedElementImpl(_managedBean.getAnnotated());
@@ -145,14 +145,14 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory scope(Class<? extends Annotation> scopeType)
+  public BeanFactory<T> scope(Class<? extends Annotation> scopeType)
   {
     _scopeType = scopeType;
 
     return this;
   }
 
-  public BeanFactory type(Type ...types)
+  public BeanFactory<T> type(Type ...types)
   {
     if (_types == null)
       _types = new LinkedHashSet<Type>();
@@ -166,12 +166,12 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory init(ConfigProgram init)
+  public BeanFactory<T> init(ConfigProgram init)
   {
     if (init != null) {
       if (_init == null) {
         _init = new ContainerProgram();
-        _injectionTarget = new InjectionTargetFilter(_injectionTarget, _init);
+        _injectionTarget = new InjectionTargetFilter<T>(_injectionTarget, _init);
       }
 
       _init.addProgram(init);
@@ -180,39 +180,39 @@ public class BeanFactory<T>
     return this;
   }
 
-  public Bean singleton(Object value)
+  public Bean<T> singleton(Object value)
   {
-    return new SingletonBean(_managedBean,
-                             _types,
-                             _annotated,
-                             _bindings,
-                             _stereotypes,
-                             _scopeType,
-                             _name,
-                             value);
+    return new SingletonBean<T>(_managedBean,
+                               _types,
+                               _annotated,
+                               _bindings,
+                               _stereotypes,
+                               _scopeType,
+                               _name,
+                               (T) value);
   }
 
-  public Bean injection(InjectionTarget injection)
+  public Bean<T> injection(InjectionTarget<T> injection)
   {
-    return new InjectionBean(_managedBean,
-                             _types,
-                             _annotated,
-                             _bindings,
-                             _stereotypes,
-                             _scopeType,
-                             _name,
-                             injection);
+    return new InjectionBean<T>(_managedBean,
+                               _types,
+                               _annotated,
+                               _bindings,
+                               _stereotypes,
+                               _scopeType,
+                               _name,
+                               injection);
   }
 
-  public Bean bean()
+  public Bean<T> bean()
   {
-    return new InjectionBean(_managedBean,
-                             _types,
-                             _annotated,
-                             _bindings,
-                             _stereotypes,
-                             _scopeType,
-                             _name,
-                             _injectionTarget);
+    return new InjectionBean<T>(_managedBean,
+                               _types,
+                               _annotated,
+                               _bindings,
+                               _stereotypes,
+                               _scopeType,
+                               _name,
+                               _injectionTarget);
   }
 }

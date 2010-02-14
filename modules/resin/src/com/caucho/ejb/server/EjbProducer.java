@@ -200,7 +200,7 @@ public class EjbProducer<T> {
       _injectionTarget = inject.createInjectionTarget(_ejbClass);
 
     if (_timerService != null) {
-      BeanFactory<?> factory = inject.createBeanFactory(TimerService.class);
+      BeanFactory<TimerService> factory = inject.createBeanFactory(TimerService.class);
       inject.addBean(factory.singleton(_timerService));
     }
     /*

@@ -29,17 +29,13 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.ApplicationScope;
-
 import java.io.Closeable;
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
+
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -50,19 +46,19 @@ import javax.enterprise.inject.spi.InjectionPoint;
  * manager.addBean(new SingletonBean(myValue));
  * </pre></code>
  */
-public class SingletonBean extends AbstractSingletonBean
+public class SingletonBean<T> extends AbstractSingletonBean<T>
   implements Closeable
 {
-  private Object _value;
+  private T _value;
 
-  SingletonBean(ManagedBeanImpl managedBean,
+  SingletonBean(ManagedBeanImpl<T> managedBean,
                 Set<Type> types,
                 Annotated annotated,
                 Set<Annotation> bindings,
                 Set<Class<? extends Annotation>> stereotypes,
                 Class<? extends Annotation> scopeType,
                 String name,
-                Object value)
+                T value)
   {
     super(managedBean, types, annotated, bindings,
           stereotypes, scopeType, name);
@@ -79,7 +75,7 @@ public class SingletonBean extends AbstractSingletonBean
   }
 
   @Override
-  public Object create(CreationalContext env)
+  public T create(CreationalContext<T> env)
   {
     return _value;
   }
@@ -87,10 +83,11 @@ public class SingletonBean extends AbstractSingletonBean
   /**
    * Frees the singleton on environment shutdown
    */
+  @Override
   public void close()
   {
     if (_value != null) {
-      CreationalContext env = null;
+      CreationalContext<T> env = null;
 
       destroy(_value, env);
     }

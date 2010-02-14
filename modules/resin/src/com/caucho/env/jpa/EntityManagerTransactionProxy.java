@@ -54,7 +54,7 @@ public class EntityManagerTransactionProxy
   private static final Logger log
     = Logger.getLogger(EntityManagerTransactionProxy.class.getName());
 
-  private final PersistenceManager _manager;
+  private final ManagerPersistence _manager;
   private final String _unitName;
   private final Map _props;
   private EntityManagerFactory _emf;
@@ -66,7 +66,7 @@ public class EntityManagerTransactionProxy
 
   private Object _serializationHandle;
 
-  public EntityManagerTransactionProxy(PersistenceManager manager,
+  public EntityManagerTransactionProxy(ManagerPersistence manager,
                                        String unitName,
                                        Map props)
   {

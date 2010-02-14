@@ -35,9 +35,9 @@ import com.caucho.loader.EnvironmentClassLoader;
 /**
  * Listener for environment start to detect and load persistence.xml
  */
-public class PersistenceEnvironmentListener implements AddLoaderListener
+public class ListenerPersistenceEnvironment implements AddLoaderListener
 {
-  public PersistenceEnvironmentListener()
+  public ListenerPersistenceEnvironment()
   {
   }
 
@@ -53,7 +53,7 @@ public class PersistenceEnvironmentListener implements AddLoaderListener
   @Override
   public void addLoader(EnvironmentClassLoader loader)
   {
-    PersistenceManager manager = PersistenceManager.create(loader);
+    ManagerPersistence manager = ManagerPersistence.create(loader);
 
     // called to configure the enhancer when the classloader updates before
     // any loading of the class

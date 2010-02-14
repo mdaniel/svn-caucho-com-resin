@@ -69,16 +69,19 @@ import com.caucho.vfs.Vfs;
 /**
  * Manages the JPA persistence contexts.
  */
-public class PersistenceManager implements ScanListener, EnvironmentListener {
-  private static final L10N L = new L10N(PersistenceManager.class);
+public class ManagerPersistence implements ScanListener, EnvironmentListener {
+  private static final L10N L = new L10N(ManagerPersistence.class);
   private static final Logger log
-    = Logger.getLogger(PersistenceManager.class.getName());
+    = Logger.getLogger(ManagerPersistence.class.getName());
 
-  private static final EnvironmentLocal<PersistenceManager> _localManager
-    = new EnvironmentLocal<PersistenceManager>();
+  private static final EnvironmentLocal<ManagerPersistence> _localManager
+    = new EnvironmentLocal<ManagerPersistence>();
 
   private EnvironmentClassLoader _classLoader;
   private ClassLoader _tempLoader;
+  
+  private HashMap<String, ManagerPersistenceUnit> _persistenceUnitMap
+    = new HashMap<String, ManagerPersistenceUnit>();
   
   private ArrayList<ConfigProgram> _unitDefaultList
     = new ArrayList<ConfigProgram>();
@@ -90,6 +93,9 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   
   private ArrayList<ConfigPersistenceUnit> _unitConfigList
     = new ArrayList<ConfigPersistenceUnit>();
+  
+  private HashMap<String, ConfigJpaPersistenceUnit> _unitConfigMap
+    = new HashMap<String, ConfigJpaPersistenceUnit>();
 
   private HashMap<String, EntityManagerFactory> _factoryMap
     = new HashMap<String, EntityManagerFactory>();
@@ -97,20 +103,12 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   private HashMap<String, EntityManager> _persistenceContextMap
     = new HashMap<String, EntityManager>();
 
-  /*
-  private HashMap<Path, RootContext> _persistenceRootMap
-    = new HashMap<Path, RootContext>();
-
-  private ArrayList<RootContext> _pendingRootList
-    = new ArrayList<RootContext>();
-    */
-
   private ArrayList<LazyEntityManagerFactory> _pendingFactoryList
     = new ArrayList<LazyEntityManagerFactory>();
 
   private HashSet<URL> _persistenceURLSet = new HashSet<URL>();
 
-  private PersistenceManager(ClassLoader loader)
+  private ManagerPersistence(ClassLoader loader)
   {
     _classLoader = Environment.getEnvironmentClassLoader(loader);
     _localManager.set(this, _classLoader);
@@ -139,7 +137,7 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   /**
    * Returns the local container.
    */
-  public static PersistenceManager create()
+  public static ManagerPersistence create()
   {
     return create(Thread.currentThread().getContextClassLoader());
   }
@@ -147,13 +145,13 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   /**
    * Returns the local container.
    */
-  public static PersistenceManager create(ClassLoader loader)
+  public static ManagerPersistence create(ClassLoader loader)
   {
     synchronized (_localManager) {
-      PersistenceManager container = _localManager.getLevel(loader);
+      ManagerPersistence container = _localManager.getLevel(loader);
 
       if (container == null) {
-        container = new PersistenceManager(loader);
+        container = new ManagerPersistence(loader);
 
         _localManager.set(container, loader);
       }
@@ -165,7 +163,7 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   /**
    * Returns the local container.
    */
-  public static PersistenceManager getCurrent()
+  public static ManagerPersistence getCurrent()
   {
     return getCurrent(Thread.currentThread().getContextClassLoader());
   }
@@ -173,7 +171,7 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   /**
    * Returns the current environment container.
    */
-  public static PersistenceManager getCurrent(ClassLoader loader)
+  public static ManagerPersistence getCurrent(ClassLoader loader)
   {
     synchronized (_localManager) {
       return _localManager.get(loader);
@@ -181,19 +179,19 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   }
 
   /**
-   * Returns the parent loader
+   * Returns the environment's class loader
    */
-  public ClassLoader getParentClassLoader()
+  public EnvironmentClassLoader getClassLoader()
   {
     return _classLoader;
   }
 
   /**
-   * Returns the parent loader
+   * Returns the JClassLoader.
    */
-  public ClassLoader getEnhancedLoader()
+  public ClassLoader getTempClassLoader()
   {
-    return _classLoader;
+    return _tempLoader;
   }
 
   /**
@@ -207,9 +205,20 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   /**
    * Returns the persistence-unit default list.
    */
-  public ArrayList<ConfigProgram> getPersistenceUnitDefaultList()
+  public ArrayList<ConfigProgram> getPersistenceUnitDefaults()
   {
     return _unitDefaultList;
+  }
+
+  void addPersistenceUnit(String name,
+                          ConfigJpaPersistenceUnit configJpaPersistenceUnit)
+  {
+    ManagerPersistenceUnit pUnit = createPersistenceUnit(name);
+    
+    if (pUnit.getRoot() == null)
+      pUnit.setRoot(configJpaPersistenceUnit.getPath());
+    
+    pUnit.addOverrideProgram(configJpaPersistenceUnit.getProgram());
   }
 
   /**
@@ -231,14 +240,6 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
   public ArrayList<ConfigProgram> getProxyProgram(String name)
   {
     return _unitDefaultMap.get(name);
-  }
-
-  /**
-   * Returns the JClassLoader.
-   */
-  public ClassLoader getTempClassLoader()
-  {
-    return _tempLoader;
   }
 
   public Class<?> loadTempClass(String name) throws ClassNotFoundException
@@ -296,21 +297,19 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
     }
     
     for (Path root : rootList) {
-      for (ConfigPersistenceUnit unit : parsePersistenceConfig(root)) {
-        activateUnit(unit);
-      }
+      parsePersistenceConfig(root);
     }
   }
 
   /**
    * Adds a persistence root.
    */
-  private ArrayList<ConfigPersistenceUnit> parsePersistenceConfig(Path root)
+  private void parsePersistenceConfig(Path root)
   {
     Path persistenceXml = root.lookup("META-INF/persistence.xml");
 
     if (! persistenceXml.canRead())
-      return null;
+      return;
 
     persistenceXml.setUserPath(persistenceXml.getURL());
 
@@ -325,13 +324,20 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
       ConfigPersistence persistence = new ConfigPersistence(root);
 
       new Config().configure(persistence, is,
-          "com/caucho/amber/cfg/persistence-30.rnc");
+          "com/caucho/amber/cfg/persistence-31.rnc");
 
-      ArrayList<ConfigPersistenceUnit> unitList = persistence.getUnitList();
-
-      _unitConfigList.addAll(unitList);
-
-      return unitList;
+      for (ConfigPersistenceUnit unitConfig : persistence.getUnitList()) {
+        ManagerPersistenceUnit pUnit
+          = createPersistenceUnit(unitConfig.getName());
+        
+        if (pUnit.getRoot() == null)
+          pUnit.setRoot(unitConfig.getRoot());
+        
+        if (unitConfig.getVersion() != null)
+          pUnit.setVersion(unitConfig.getVersion());
+        
+        pUnit.setPersistenceXmlProgram(unitConfig.getProgram());
+      }
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -343,6 +349,25 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
       } catch (Exception e) {
       }
     }
+  }
+  
+  private ManagerPersistenceUnit createPersistenceUnit(String name)
+  {
+    ManagerPersistenceUnit unit;
+    
+    synchronized (_persistenceUnitMap) {
+      unit = _persistenceUnitMap.get(name);
+      
+      if (unit != null)
+        return unit;
+      
+      unit = new ManagerPersistenceUnit(this, name);
+      _persistenceUnitMap.put(name, unit);
+    }
+    
+    registerPersistenceUnit(unit);
+      
+    return unit;
   }
 
   /**
@@ -357,12 +382,15 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
       // jpa/1630
       thread.setContextClassLoader(_classLoader);
 
-      ArrayList<LazyEntityManagerFactory> lazyEmfList
-        = new ArrayList<LazyEntityManagerFactory>(_pendingFactoryList);
-      _pendingFactoryList.clear();
-
-      for (LazyEntityManagerFactory lazyEmf : lazyEmfList) {
-        lazyEmf.init();
+      ArrayList<ManagerPersistenceUnit> pUnitList
+        = new ArrayList<ManagerPersistenceUnit>();
+      
+      synchronized (_persistenceUnitMap) {
+        pUnitList.addAll(_persistenceUnitMap.values());
+      }
+      
+      for (ManagerPersistenceUnit pUnit : pUnitList) {
+        pUnit.start();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -414,7 +442,7 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
       EntityManagerFactoryComponent emf
         = new EntityManagerFactoryComponent(manager, this, provider, unit);
       */
-
+      /*
       EntityManagerFactoryProxy emf
         = new EntityManagerFactoryProxy(this, unitName);
 
@@ -425,13 +453,13 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
       factory = manager.createBeanFactory(EntityManager.class);
       factory.binding(CurrentLiteral.CURRENT);
       factory.binding(Names.create(unitName));
-
+*/
       /*
       PersistenceContextComponent pcComp
         = new PersistenceContextComponent(unitName, persistenceContext);
       */
 
-      manager.addBean(factory.singleton(persistenceContext));
+  //    manager.addBean(factory.singleton(persistenceContext));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -439,7 +467,44 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
     }
   }
 
-  private void addProviderUnit(ConfigPersistenceUnit unit)
+  private void registerPersistenceUnit(ManagerPersistenceUnit pUnit)
+  {
+    try {
+      /*
+      EntityManagerTransactionProxy persistenceContext
+        = new EntityManagerTransactionProxy(this, unitName, props);
+
+      _persistenceContextMap.put(unitName, persistenceContext);
+      */
+
+      InjectManager manager = InjectManager.create(_classLoader);
+      BeanFactory<EntityManagerFactory> emfFactory;
+      emfFactory = manager.createBeanFactory(EntityManagerFactory.class);
+
+      emfFactory.binding(CurrentLiteral.CURRENT);
+      emfFactory.binding(Names.create(pUnit.getName()));
+      manager.addBean(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
+
+      /*
+      factory = manager.createBeanFactory(EntityManager.class);
+      factory.binding(CurrentLiteral.CURRENT);
+      factory.binding(Names.create(unitName));
+      */
+
+      /*
+      PersistenceContextComponent pcComp
+        = new PersistenceContextComponent(unitName, persistenceContext);
+      */
+
+      // manager.addBean(factory.singleton(persistenceContext));
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  void addProviderUnit(ConfigPersistenceUnit unit)
   {
     try {
       Class<?> cl = unit.getProvider();
@@ -479,7 +544,7 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
       EntityManagerFactoryComponent emf
         = new EntityManagerFactoryComponent(manager, this, provider, unit);
       */
-
+/*
       EntityManagerFactoryProxy emf
         = new EntityManagerFactoryProxy(this, unitName);
 
@@ -490,13 +555,13 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
       factory = manager.createBeanFactory(EntityManager.class);
       factory.binding(CurrentLiteral.CURRENT);
       factory.binding(Names.create(unitName));
-
+*/
       /*
       PersistenceContextComponent pcComp
         = new PersistenceContextComponent(unitName, persistenceContext);
       */
 
-      manager.addBean(factory.singleton(persistenceContext));
+//      manager.addBean(factory.singleton(persistenceContext));
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -504,7 +569,7 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
     }
   }
 
-  private Class<?> getServiceProvider()
+  Class<?> getServiceProvider()
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
@@ -668,7 +733,8 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
 
     void init()
     {
-      synchronized (PersistenceManager.this) {
+      /*
+      synchronized (ManagerPersistence.this) {
         String unitName = _unit.getName();
 
         EntityManagerFactory factory = _factoryMap.get(unitName);
@@ -689,6 +755,8 @@ public class PersistenceManager implements ScanListener, EnvironmentListener {
           _factoryMap.put(unitName, factory);
         }
       }
+      */
     }
   }
+
 }

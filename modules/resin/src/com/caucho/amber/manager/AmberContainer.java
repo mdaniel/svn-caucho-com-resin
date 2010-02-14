@@ -999,6 +999,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
 
     void init()
     {
+      /*
       synchronized (AmberContainer.this) {
         String unitName = _unit.getName();
 
@@ -1020,6 +1021,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
           _factoryMap.put(unitName, factory);
         }
       }
+      */
     }
   }
 }

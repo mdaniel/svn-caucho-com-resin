@@ -34,7 +34,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.EJBServer;
-import com.caucho.env.jpa.PersistenceEnvironmentListener;
+import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
@@ -133,7 +133,7 @@ public class ResinBeanContainer
       EJBServer ejbServer = new EJBServer();
       ejbServer.init();
 
-      Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+      Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
 
       _classLoader.scanRoot();
     } finally {

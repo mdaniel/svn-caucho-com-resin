@@ -33,7 +33,7 @@ import com.caucho.amber.manager.*;
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.env.jpa.PersistenceEnvironmentListener;
+import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 
@@ -80,7 +80,7 @@ public class PersistenceManager
   @PostConstruct
   public void init()
   {
-    Environment.addChildLoaderListener(new PersistenceEnvironmentListener());
+    Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
   }
 }
 
