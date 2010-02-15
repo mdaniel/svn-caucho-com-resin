@@ -764,6 +764,11 @@ public class LargeStringBuilderValue
 
   private void ensureCapacity(int newCapacity)
   {
+    if (newCapacity > 10000000) {
+      Thread.dumpStack();
+      throw new IllegalStateException();
+    }
+    
     int chunk = _length / SIZE;
     int endChunk = newCapacity / SIZE;
 
