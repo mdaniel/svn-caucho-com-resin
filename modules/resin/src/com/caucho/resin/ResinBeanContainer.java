@@ -32,6 +32,7 @@ package com.caucho.resin;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.EJBServer;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
@@ -40,6 +41,7 @@ import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.server.webbeans.ResinWebBeansProducer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -121,7 +123,9 @@ public class ResinBeanContainer
     _classLoader = EnvironmentClassLoader.create("resin-context");
     _injectManager = InjectManager.create(_classLoader);
     _injectManager.addContext(new RequestScope());
-
+    
+    _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
+    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 

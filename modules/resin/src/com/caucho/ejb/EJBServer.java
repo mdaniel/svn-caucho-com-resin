@@ -114,7 +114,7 @@ public class EJBServer
     throws ConfigException
   {
     _ejbContainer = EjbContainer.create();
-    _amberContainer = AmberContainer.create();
+    // _amberContainer = AmberContainer.create();
     
     _urlPrefix = _localURL.get();
 

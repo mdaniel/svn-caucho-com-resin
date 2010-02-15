@@ -49,10 +49,6 @@ import java.util.logging.Logger;
 public class EntityManagerFactoryProxy
   implements EntityManagerFactory
 {
-  private static final L10N L = new L10N(EntityManagerFactoryProxy.class);
-  private static final Logger log
-    = Logger.getLogger(EntityManagerFactoryProxy.class.getName());
-
   private final ManagerPersistenceUnit _persistenceUnit;
   
   private EntityManagerFactory _emfDelegate;
@@ -65,6 +61,7 @@ public class EntityManagerFactoryProxy
   /**
    * Create a new EntityManager with TRANSACTION type.
    */
+  @Override
   public EntityManager createEntityManager()
   {
     return getDelegate().createEntityManager();
@@ -73,6 +70,8 @@ public class EntityManagerFactoryProxy
   /**
    * Create a new EntityManager with the given properties.
    */
+  @SuppressWarnings("unchecked")
+  @Override
   public EntityManager createEntityManager(Map map)
   {
     return getDelegate().createEntityManager(map);
@@ -81,36 +80,54 @@ public class EntityManagerFactoryProxy
   /**
    * Close the factory an any resources.
    */
+  @Override
   public void close()
   {
+  }
+  
+  void closeImpl()
+  {
+    _emfDelegate = null;
   }
 
   /**
    * Returns true if the factory is open.
    */
+  @Override
   public boolean isOpen()
   {
-    return getDelegate().isOpen();
+    return _persistenceUnit.isOpen();
   }
 
-  /**
-   * Returns the properties and values for the factory
-   *
-   * @since JPA 2.0
-   */
+  @SuppressWarnings("unchecked")
+  @Override
   public Map getProperties()
   {
     return getDelegate().getProperties();
   }
 
-  /**
-   * Returns the entity manager cache
-   *
-   * @since JPA 2.0
-   */
+  @Override
   public Cache getCache()
   {
     return getDelegate().getCache();
+  }
+
+  @Override
+  public CriteriaBuilder getCriteriaBuilder()
+  {
+    return getDelegate().getCriteriaBuilder();
+  }
+
+  @Override
+  public Metamodel getMetamodel()
+  {
+    return getDelegate().getMetamodel();
+  }
+
+  @Override
+  public PersistenceUnitUtil getPersistenceUnitUtil()
+  {
+    return getDelegate().getPersistenceUnitUtil();
   }
 
   private EntityManagerFactory getDelegate()
@@ -119,36 +136,6 @@ public class EntityManagerFactoryProxy
       _emfDelegate = _persistenceUnit.getEntityManagerFactoryDelegate();
 
     return _emfDelegate;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.persistence.EntityManagerFactory#getCriteriaBuilder()
-   */
-  @Override
-  public CriteriaBuilder getCriteriaBuilder()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.persistence.EntityManagerFactory#getMetamodel()
-   */
-  @Override
-  public Metamodel getMetamodel()
-  {
-    // TODO Auto-generated method stub
-    return null;
-  }
-
-  /* (non-Javadoc)
-   * @see javax.persistence.EntityManagerFactory#getPersistenceUnitUtil()
-   */
-  @Override
-  public PersistenceUnitUtil getPersistenceUnitUtil()
-  {
-    // TODO Auto-generated method stub
-    return null;
   }
   
   @Override

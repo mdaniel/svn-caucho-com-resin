@@ -731,6 +731,17 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     int size = listeners.size();
     for (int i = 0; listeners != null && i < size; i++) {
       EnvironmentListener listener = listeners.get(i);
+      
+      if (listener instanceof EnvironmentEnhancerListener) {
+        EnvironmentEnhancerListener enhancerListener
+          = (EnvironmentEnhancerListener) listener;
+        
+        enhancerListener.environmentConfigureEnhancer(this);
+      }
+    }
+
+    for (int i = 0; listeners != null && i < size; i++) {
+      EnvironmentListener listener = listeners.get(i);
 
       listener.environmentConfigure(this);
     }

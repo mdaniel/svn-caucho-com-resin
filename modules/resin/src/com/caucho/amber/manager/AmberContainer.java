@@ -60,7 +60,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.env.jpa.EntityManagerFactoryProxy;
-import com.caucho.env.jpa.EntityManagerTransactionProxy;
+import com.caucho.env.jpa.EntityManagerJtaProxy;
 import com.caucho.env.jpa.ConfigPersistence;
 import com.caucho.env.jpa.ConfigPersistenceUnit;
 import com.caucho.loader.DynamicClassLoader;
@@ -1024,4 +1024,5 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       */
     }
   }
+
 }

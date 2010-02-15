@@ -1622,9 +1622,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       bBuf = buffer.getBuffer();
       bLen = buffer.length();
-
+      
       if (_classFileTransformerList != null) {
-        Class redefineClass = null;
+        Class<?> redefineClass = null;
         String className = name.replace('.', '/');
 
         if (bBuf.length != bLen) {

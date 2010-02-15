@@ -116,7 +116,9 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
     = new ArrayList<ConfigProgram>();
   
   private final Lifecycle _lifecycle;
+  
   private final EntityManagerFactoryProxy _entityManagerFactoryProxy;
+  private final EntityManagerJtaProxy _entityManagerJtaProxy;
   
   private EntityManagerFactory _emfDelegate;
   
@@ -129,6 +131,7 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
     _lifecycle = new Lifecycle(log, "PersistenceUnit[" + name + "]");
     
     _entityManagerFactoryProxy = new EntityManagerFactoryProxy(this);
+    _entityManagerJtaProxy = new EntityManagerJtaProxy(this);
   }
   
   public String getName()
@@ -140,8 +143,6 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   {
     if (_location == null)
       _location = location;
-    
-    System.out.println("LOC: " + location);
   }
   
   /**
@@ -325,6 +326,14 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   }
   
   /**
+   * Returns the EntityManager transactional proxy for this persistence unit.
+   */
+  EntityManager getEntityManagerJtaProxy()
+  {
+    return _entityManagerJtaProxy;
+  }
+  
+  /**
    * Starts the persistence unit.
    */
   void start()
@@ -375,8 +384,23 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
     }
   }
   
+  boolean isOpen()
+  {
+    return _lifecycle.isActive();
+  }
+  
   void close()
   {
+    if (! _lifecycle.toDestroy())
+      return;
+    
+    _entityManagerFactoryProxy.closeImpl();
+    
+    EntityManagerFactory emfDelegate = _emfDelegate;
+    _emfDelegate = null;
+    
+    if (emfDelegate != null)
+      emfDelegate.close();
   }
   
   //
@@ -534,7 +558,7 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   public void addTransformer(ClassTransformer transformer)
   {
     EnvironmentClassLoader loader = _persistenceManager.getClassLoader();
-    
+
     loader.addTransformer(new TransformerAdapter(transformer));
   }
 
@@ -570,6 +594,12 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
 
     throw new ConfigException(L.l("'{0}' is an unknown or unconfigured JDBC DataSource.",
                                   name));
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "," + _emfDelegate + "]";
   }
 
   public class PropertiesConfig {

@@ -146,7 +146,7 @@ JSP resource: ${testResource}
 <s1 title="Using the resource from a Servlet">
 
 <p>The example uses a servlet to demonstrate the resource, but any
-injectable class could use <code>@javax.inject.Current</code> to look up
+injectable class could use <code>@javax.inject.Inject</code> to look up
 and use the
 resource.  Because resources are stored globally in Java Injection,
 they can avoid the complexity of passing objects around or storing in the
@@ -171,10 +171,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import javax.inject.Current;
+import javax.inject.Inject;
 
 public class TestServlet extends HttpServlet {
-  @Current private TestResource _resource;
+  @Inject private TestResource _resource;
   
   public void doGet(HttpServletRequest req, HttpServletResponse res)
     throws ServletException, IOException

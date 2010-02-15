@@ -58,7 +58,7 @@ public interface EntityManager {
   /**
    * Find based on the primary key.
    */
-  public <T> T find(Class<T> entityCLass, Object primaryKey);
+  public <T> T find(Class<T> entityClass, Object primaryKey);
 
   /**
    * Find based on the primary key.

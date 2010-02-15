@@ -55,6 +55,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentEnhancerListener;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.enhancer.ScanListener;
@@ -69,7 +70,9 @@ import com.caucho.vfs.Vfs;
 /**
  * Manages the JPA persistence contexts.
  */
-public class ManagerPersistence implements ScanListener, EnvironmentListener {
+public class ManagerPersistence 
+  implements ScanListener, EnvironmentEnhancerListener
+{
   private static final L10N L = new L10N(ManagerPersistence.class);
   private static final Logger log
     = Logger.getLogger(ManagerPersistence.class.getName());
@@ -91,22 +94,11 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
   
   private ArrayList<Path> _pendingRootList = new ArrayList<Path>();
   
-  private ArrayList<ConfigPersistenceUnit> _unitConfigList
-    = new ArrayList<ConfigPersistenceUnit>();
-  
-  private HashMap<String, ConfigJpaPersistenceUnit> _unitConfigMap
-    = new HashMap<String, ConfigJpaPersistenceUnit>();
-
-  private HashMap<String, EntityManagerFactory> _factoryMap
-    = new HashMap<String, EntityManagerFactory>();
-
   private HashMap<String, EntityManager> _persistenceContextMap
     = new HashMap<String, EntityManager>();
 
   private ArrayList<LazyEntityManagerFactory> _pendingFactoryList
     = new ArrayList<LazyEntityManagerFactory>();
-
-  private HashSet<URL> _persistenceURLSet = new HashSet<URL>();
 
   private ManagerPersistence(ClassLoader loader)
   {
@@ -114,11 +106,6 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
     _localManager.set(this, _classLoader);
 
     _tempLoader = _classLoader.getNewTempClassLoader();
-
-    /*
-    if (_parentAmberContainer != null)
-      copyContainerDefaults(_parentAmberContainer);
-      */
 
     _classLoader.addScanListener(this);
 
@@ -247,38 +234,9 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
     return Class.forName(name, false, getTempClassLoader());
   }
 
-  /*
-  private void copyContainerDefaults(PersistenceManager parent)
-  {
-    _dataSource = parent._dataSource;
-    _xaDataSource = parent._xaDataSource;
-    _readDataSource = parent._readDataSource;
-    _createDatabaseTables = parent._createDatabaseTables;
-  }
-  */
-
   public void init()
   {
   }
-  
-  /**
-   * Adds an entity for an introspected class.
-   */
-  /*
-  public void addException(Throwable e)
-  {
-    if (_exception == null) {
-      _exception = e;
-
-      Environment.setConfigException(e);
-    }
-  }
-
-  public Throwable getConfigException()
-  {
-    return _exception;
-  }
-  */
 
   public void start()
   {
@@ -397,93 +355,24 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
     }
   }
 
-  private void activateUnit(ConfigPersistenceUnit unit)
-  {
-    try {
-      Class<?> cl = unit.getProvider();
-
-      if (cl == null)
-        cl = getServiceProvider();
-
-      if (cl == null) {
-        if (log.isLoggable(Level.WARNING)) {
-          log.warning("JPA PersistenceUnit[" + unit.getName() + "] does not have a valid <provider>");
-          
-          return;
-        }
-      }
-      
-      if (log.isLoggable(Level.CONFIG)) {
-        log.config("JPA PersistenceUnit[" + unit.getName() + "] handled by "
-                   + cl.getName());
-      }
-
-      PersistenceProvider provider = (PersistenceProvider) cl.newInstance();
-
-      String unitName = unit.getName();
-      Map<String,Object> props = null;
-
-      synchronized (this) {
-        LazyEntityManagerFactory lazyFactory
-          = new LazyEntityManagerFactory(unit, provider, props);
-
-        _pendingFactoryList.add(lazyFactory);
-      }
-
-      EntityManagerTransactionProxy persistenceContext
-        = new EntityManagerTransactionProxy(this, unitName, props);
-
-      _persistenceContextMap.put(unitName, persistenceContext);
-
-      InjectManager manager = InjectManager.create(_classLoader);
-      BeanFactory<?> factory;
-      factory = manager.createBeanFactory(EntityManagerFactory.class);
-      /*
-      EntityManagerFactoryComponent emf
-        = new EntityManagerFactoryComponent(manager, this, provider, unit);
-      */
-      /*
-      EntityManagerFactoryProxy emf
-        = new EntityManagerFactoryProxy(this, unitName);
-
-      factory.binding(CurrentLiteral.CURRENT);
-      factory.binding(Names.create(unitName));
-      manager.addBean(factory.singleton(emf));
-
-      factory = manager.createBeanFactory(EntityManager.class);
-      factory.binding(CurrentLiteral.CURRENT);
-      factory.binding(Names.create(unitName));
-*/
-      /*
-      PersistenceContextComponent pcComp
-        = new PersistenceContextComponent(unitName, persistenceContext);
-      */
-
-  //    manager.addBean(factory.singleton(persistenceContext));
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
   private void registerPersistenceUnit(ManagerPersistenceUnit pUnit)
   {
     try {
-      /*
-      EntityManagerTransactionProxy persistenceContext
-        = new EntityManagerTransactionProxy(this, unitName, props);
-
-      _persistenceContextMap.put(unitName, persistenceContext);
-      */
-
-      InjectManager manager = InjectManager.create(_classLoader);
+      InjectManager beanManager = InjectManager.create(_classLoader);
+      
       BeanFactory<EntityManagerFactory> emfFactory;
-      emfFactory = manager.createBeanFactory(EntityManagerFactory.class);
+      emfFactory = beanManager.createBeanFactory(EntityManagerFactory.class);
 
       emfFactory.binding(CurrentLiteral.CURRENT);
       emfFactory.binding(Names.create(pUnit.getName()));
-      manager.addBean(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
+      beanManager.addBean(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
+
+      BeanFactory<EntityManager> emFactory;
+      emFactory = beanManager.createBeanFactory(EntityManager.class);
+
+      emFactory.binding(CurrentLiteral.CURRENT);
+      emFactory.binding(Names.create(pUnit.getName()));
+      beanManager.addBean(emFactory.singleton(pUnit.getEntityManagerJtaProxy()));
 
       /*
       factory = manager.createBeanFactory(EntityManager.class);
@@ -525,13 +414,16 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
       String unitName = unit.getName();
       Map props = null;
 
+      /*
       synchronized (this) {
         LazyEntityManagerFactory lazyFactory
           = new LazyEntityManagerFactory(unit, provider, props);
 
         _pendingFactoryList.add(lazyFactory);
       }
+      */
 
+      /*
       EntityManagerTransactionProxy persistenceContext
         = new EntityManagerTransactionProxy(this, unitName, props);
 
@@ -540,6 +432,7 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
       InjectManager manager = InjectManager.create(_classLoader);
       BeanFactory factory;
       factory = manager.createBeanFactory(EntityManagerFactory.class);
+      */
       /*
       EntityManagerFactoryComponent emf
         = new EntityManagerFactoryComponent(manager, this, provider, unit);
@@ -671,6 +564,19 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
   /**
    * Handles the environment config phase
    */
+  @Override
+  public void environmentConfigureEnhancer(EnvironmentClassLoader loader)
+  {
+    configurePersistenceRoots();
+    
+    // env/0h31
+    startPersistenceUnits();
+  }
+
+  /**
+   * Handles the environment config phase
+   */
+  @Override
   public void environmentConfigure(EnvironmentClassLoader loader)
   {
     configurePersistenceRoots();
@@ -706,7 +612,7 @@ public class ManagerPersistence implements ScanListener, EnvironmentListener {
    * @param unitName
    * @return
    */
-  public EntityManagerFactory getEntityManagerFactory(String unitName)
+  private EntityManagerFactory getEntityManagerFactory(String unitName)
   {
     // TODO Auto-generated method stub
     return null;
