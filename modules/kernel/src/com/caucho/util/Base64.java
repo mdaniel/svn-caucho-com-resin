@@ -368,11 +368,11 @@ public class Base64 {
       int ch3 = r.read();
 
       if (ch1 < 0)
-	break;
+        break;
       if (ch2 < 0)
-	ch2 = '=';
+        ch2 = '=';
       if (ch3 < 0)
-	ch3 = '=';
+        ch3 = '=';
       
       int chunk = ((_decode[ch0] << 18)
 		   + (_decode[ch1] << 12)
@@ -382,11 +382,47 @@ public class Base64 {
       os.write((byte) ((chunk >> 16) & 0xff));
       
       if (ch2 != '='  && ch2 != -1)
-	os.write((byte) ((chunk >> 8) & 0xff));
+        os.write((byte) ((chunk >> 8) & 0xff));
       if (ch3 != '=' && ch3 != -1)
-	os.write((byte) ((chunk & 0xff)));
+        os.write((byte) ((chunk & 0xff)));
       else
-	break;
+        break;
+    }
+    os.flush();
+  }
+  
+  /**
+   * XXX: decode() vs decodeIgnoreWhitespace(), check RFC
+   */
+  public static void decodeIgnoreWhitespace(Reader r, OutputStream os)
+    throws IOException
+  {
+    while (true) {
+      int ch0 = readNonWhitespace(r);
+      int ch1 = readNonWhitespace(r);
+      int ch2 = readNonWhitespace(r);
+      int ch3 = readNonWhitespace(r);
+
+      if (ch1 < 0)
+        break;
+      if (ch2 < 0)
+        ch2 = '=';
+      if (ch3 < 0)
+        ch3 = '=';
+
+      int chunk = ((_decode[ch0] << 18)
+          + (_decode[ch1] << 12)
+          + (_decode[ch2] << 6)
+          + (_decode[ch3]));
+
+      os.write((byte) ((chunk >> 16) & 0xff));
+
+      if (ch2 != '='  && ch2 != -1)
+        os.write((byte) ((chunk >> 8) & 0xff));
+      if (ch3 != '=' && ch3 != -1)
+        os.write((byte) ((chunk & 0xff)));
+      else
+        break;
     }
     os.flush();
   }
