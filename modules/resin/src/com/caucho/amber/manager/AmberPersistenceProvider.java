@@ -82,7 +82,12 @@ public class AmberPersistenceProvider implements PersistenceProvider {
     createContainerEntityManagerFactory(PersistenceUnitInfo info,
                                         Map map)
   {
-    return null;
+    AmberContainer container = AmberContainer.create();
+    
+    if (container == null)
+      return null;
+    
+    return container.createEntityManagerFactory(info);
   }
 
   /* (non-Javadoc)

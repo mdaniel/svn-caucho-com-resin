@@ -34,10 +34,10 @@ import javax.enterprise.context.spi.CreationalContext;
 /**
  * A saved program for creating a constructor argument
  */
-public abstract class Arg {
+public abstract class Arg<T> {
   public void bind()
   {
   }
     
-  abstract public Object eval(CreationalContext<?> env);
+  abstract public Object eval(CreationalContext<T> env);
 }

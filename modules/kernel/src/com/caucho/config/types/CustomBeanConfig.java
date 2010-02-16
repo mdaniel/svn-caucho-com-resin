@@ -514,12 +514,12 @@ public class CustomBeanConfig {
     return getClass().getSimpleName() + "[" + _class.getSimpleName() + "]";
   }
 
-  class BeanArg extends Arg {
+  class BeanArg<T> extends Arg<T> {
     private String _loc;
-    private Constructor<?> _ctor;
+    private Constructor<T> _ctor;
     private Type _type;
     private Set<Annotation> _bindings;
-    private Bean<?> _bean;
+    private Bean<T> _bean;
 
     BeanArg(String loc, Type type, Set<Annotation> bindings)
     {
@@ -540,7 +540,7 @@ public class CustomBeanConfig {
       }
     }
 
-    public Object eval(CreationalContext<?> env)
+    public Object eval(CreationalContext<T> env)
     {
       if (_bean == null)
         bind();
@@ -551,23 +551,23 @@ public class CustomBeanConfig {
     }
   }
 
-  static class ProgramArg extends Arg {
-    private ConfigType<?> _type;
+  static class ProgramArg<T> extends Arg<T> {
+    private ConfigType<T> _type;
     private ConfigProgram _program;
 
-    ProgramArg(ConfigType<?> type, ConfigProgram program)
+    ProgramArg(ConfigType<T> type, ConfigProgram program)
     {
       _type = type;
       _program = program;
     }
 
-    public Object eval(CreationalContext<?> creationalContext)
+    public Object eval(CreationalContext<T> creationalContext)
     {
-      ConfigContext env = ConfigContext.create();
+      // ConfigContext env = ConfigContext.create();
       
       // env.setCreationalContext(creationalContext);
       
-      return _program.configure(_type, env);
+      return _program.create(_type, creationalContext);
     }
   }
 }

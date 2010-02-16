@@ -117,8 +117,28 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   static <X> X find(CreationalContextImpl<?> ptr, Contextual<X> bean)
   {
     for (; ptr != null; ptr = ptr._next){
-      if (ptr._bean == bean) {
+      Contextual<?> testBean = ptr._bean;
+      
+      if (testBean == bean) {
         return (X) ptr._value;
+      }
+    }
+    
+    return null;
+  }
+  
+  static Object findByName(CreationalContextImpl<?> ptr, String name)
+  {
+    for (; ptr != null; ptr = ptr._next) {
+      Contextual<?> testBean = ptr._bean;
+      
+      if (! (testBean instanceof Bean))
+        continue;
+      
+      Bean<?> bean = (Bean<?>) testBean;
+      
+      if (name.equals(bean.getName())) {
+        return ptr._value;
       }
     }
     
@@ -127,7 +147,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   
   public InjectionPoint getInjectionPoint()
   {
-    return null;
+    return _injectionPoint;
   }
 
   @Override

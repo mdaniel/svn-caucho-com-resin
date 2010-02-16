@@ -31,6 +31,8 @@ package com.caucho.ejb;
 
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.config.ConfigException;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.config.types.PathPatternType;
@@ -39,6 +41,7 @@ import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.ejb.metadata.Bean;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
+import com.caucho.env.jpa.ManagerPersistence;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -91,7 +94,9 @@ public class EJBServer
   private ArrayList<FileSetType> _configFileSetList =
     new ArrayList<FileSetType>();
 
-  private DataSource _dataSource;
+  private ContainerProgram _jpaProgram = new ContainerProgram();
+  
+  // private DataSource _dataSource;
   private boolean _validateDatabaseSchema = true;
 
   private String _resinIsolation;
@@ -319,12 +324,12 @@ public class EJBServer
   public void setDataSource(DataSource dataSource)
     throws ConfigException
   {
-    _dataSource = dataSource;
-
-    if (_dataSource == null)
+    if (dataSource == null)
       throw new ConfigException(L.l("<ejb-server> data-source must be a valid DataSource."));
 
-    _amberContainer.setDataSource(_dataSource);
+    _jpaProgram.addProgram(new PropertyValueProgram("jta-data-source-value", dataSource));
+
+    // _amberContainer.setDataSource(_dataSource);
   }
 
   /**
@@ -333,7 +338,12 @@ public class EJBServer
   public void setReadDataSource(DataSource dataSource)
     throws ConfigException
   {
-    _amberContainer.setReadDataSource(dataSource);
+    if (dataSource == null)
+      throw new ConfigException(L.l("<ejb-server> data-source must be a valid DataSource."));
+
+    _jpaProgram.addProgram(new PropertyValueProgram("non-jta-data-source-value", dataSource));
+
+    // _amberContainer.setReadDataSource(dataSource);
   }
 
   /**
@@ -342,7 +352,7 @@ public class EJBServer
   public void setXADataSource(DataSource dataSource)
     throws ConfigException
   {
-    _amberContainer.setXADataSource(dataSource);
+    setDataSource(dataSource); // _amberContainer.setXADataSource(dataSource);
   }
 
   /**
@@ -350,7 +360,7 @@ public class EJBServer
    */
   public void setCreateDatabaseSchema(boolean create)
   {
-    _amberContainer.setCreateDatabaseTables(create);
+    // _amberContainer.setCreateDatabaseTables(create);
   }
 
   /**
@@ -358,7 +368,9 @@ public class EJBServer
    */
   public boolean getCreateDatabaseSchema()
   {
-    return _amberContainer.getCreateDatabaseTables();
+    //
+    // return _amberContainer.getCreateDatabaseTables();
+    return false;
   }
 
   /**
@@ -529,6 +541,11 @@ public class EJBServer
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
     
       // _ejbContainer.start();
+      
+      ManagerPersistence persistenceManager = ManagerPersistence.create();
+      
+      if (persistenceManager != null)
+        persistenceManager.addPersistenceUnitDefault(_jpaProgram);
 
       if ("manual".equals(_startupMode))
         return;

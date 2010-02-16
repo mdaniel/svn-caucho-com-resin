@@ -31,49 +31,48 @@ package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.inject.Scope;
 
 /**
  * Abstract introspected view of a Bean
  */
-public class AnnotatedTypeImpl extends AnnotatedElementImpl implements AnnotatedType
+public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
+  implements AnnotatedType<X>
 {
   private static final Logger log
     = Logger.getLogger(AnnotatedTypeImpl.class.getName());
 
-  private Class _javaClass;
+  private Class<X> _javaClass;
 
-  private Set<AnnotatedConstructor> _constructorSet
-    = new LinkedHashSet<AnnotatedConstructor>();
+  private Set<AnnotatedConstructor<X>> _constructorSet
+    = new LinkedHashSet<AnnotatedConstructor<X>>();
 
-  private Set<AnnotatedField> _fieldSet
-    = new LinkedHashSet<AnnotatedField>();
+  private Set<AnnotatedField<? super X>> _fieldSet
+    = new LinkedHashSet<AnnotatedField<? super X>>();
 
-  private Set<AnnotatedMethod> _methodSet
-    = new LinkedHashSet<AnnotatedMethod>();
+  private Set<AnnotatedMethod<? super X>> _methodSet
+    = new LinkedHashSet<AnnotatedMethod<? super X>>();
 
-  public AnnotatedTypeImpl(Class javaClass)
+  public AnnotatedTypeImpl(Class<X> javaClass)
   {
     this(javaClass, javaClass);
   }
 
-  public AnnotatedTypeImpl(Type type, Class javaClass)
+  public AnnotatedTypeImpl(Type type, Class<X> javaClass)
   {
     super(type, null, javaClass.getDeclaredAnnotations());
 
@@ -85,7 +84,7 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   /**
    * Returns the concrete Java class
    */
-  public Class<?> getJavaClass()
+  public Class<X> getJavaClass()
   {
     return _javaClass;
   }
@@ -93,7 +92,7 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   /**
    * Returns the abstract introspected constructors
    */
-  public Set<AnnotatedConstructor> getConstructors()
+  public Set<AnnotatedConstructor<X>> getConstructors()
   {
     return _constructorSet;
   }
@@ -101,7 +100,7 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   /**
    * Returns the abstract introspected methods
    */
-  public Set<AnnotatedMethod> getMethods()
+  public Set<AnnotatedMethod<? super X>> getMethods()
   {
     return _methodSet;
   }
@@ -127,12 +126,12 @@ public class AnnotatedTypeImpl extends AnnotatedElementImpl implements Annotated
   /**
    * Returns the abstract introspected fields
    */
-  public Set<AnnotatedField> getFields()
+  public Set<AnnotatedField<? super X>> getFields()
   {
     return _fieldSet;
   }
 
-  private void introspect(Class cl)
+  private void introspect(Class<X> cl)
   {
     introspectInheritedAnnotations(cl.getSuperclass());
 

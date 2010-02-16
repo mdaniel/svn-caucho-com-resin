@@ -59,12 +59,13 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
+import javax.inject.Singleton;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
 public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
-  implements ScopeAdapterBean
+  implements ScopeAdapterBean<X>
 {
   private static final L10N L = new L10N(ManagedBeanImpl.class);
   private static final Logger log
@@ -190,13 +191,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   }
   */
 
-  public Object getScopeAdapter(CreationalContext cxt)
+  public X getScopeAdapter(CreationalContext<X> cxt)
   {
-    if (! (cxt instanceof ConfigContext))
-      return null;
-
-    ConfigContext env = (ConfigContext) cxt;
-
     NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
 
     // ioc/0520
@@ -213,7 +209,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
         value = _scopeAdapter;
       }
 
-      return value;
+      return (X) value;
     }
 
     return null;

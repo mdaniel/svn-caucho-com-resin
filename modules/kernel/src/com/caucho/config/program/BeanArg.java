@@ -42,7 +42,7 @@ import com.caucho.config.inject.InjectManager;
 /**
  * Custom bean configured by namespace
  */
-public class BeanArg extends Arg {
+public class BeanArg<T> extends Arg<T> {
   private InjectManager _beanManager;
   private Type _type;
   private Annotation []_bindings;
@@ -80,12 +80,12 @@ public class BeanArg extends Arg {
   }
 
   @Override
-  public Object eval(CreationalContext<?> parentEnv)
+  public Object eval(CreationalContext<T> parentEnv)
   {
     if (_bean == null)
       bind();
 
-    CreationalContext<?> beanEnv = new CreationalContextImpl(_bean, parentEnv);
+    CreationalContext<T> beanEnv = new CreationalContextImpl(_bean, parentEnv);
     
     // XXX: getInstance for injection?
     return _beanManager.getReference(_bean, _type, beanEnv);

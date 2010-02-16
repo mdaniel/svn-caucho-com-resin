@@ -103,7 +103,10 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   private ValidationMode _validationMode = ValidationMode.NONE;
   
   private String _jtaDataSourceName;
+  private DataSource _jtaDataSourceValue;
+  
   private String _nonJtaDataSourceName;
+  private DataSource _nonJtaDataSourceValue;
   
   private Properties _properties = new Properties();
   
@@ -281,9 +284,19 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
     _jtaDataSourceName = name;
   }
   
+  public void setJtaDataSourceValue(DataSource dataSource)
+  {
+    _jtaDataSourceValue = dataSource;
+  }
+  
   public void setNonJtaDataSource(String name)
   {
     _nonJtaDataSourceName = name;
+  }
+  
+  public void setNonJtaDataSourceValue(DataSource dataSource)
+  {
+    _nonJtaDataSourceValue = dataSource;
   }
   
   public PropertiesConfig createProperties()
@@ -379,6 +392,10 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
       HashMap<String,Object> map = null;
       
       _emfDelegate = provider.createContainerEntityManagerFactory(this, map);
+      
+      if (_emfDelegate == null)
+        throw new IllegalStateException(L.l("{0} did not return an EntityManagerFactory",
+                                            provider));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -524,8 +541,13 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   @Override
   public DataSource getJtaDataSource()
   {
-    if (_jtaDataSourceName != null)
-      return loadDataSource(_jtaDataSourceName);
+    if (_jtaDataSourceValue != null)
+      return _jtaDataSourceValue;
+    else if (_jtaDataSourceName != null) {
+      _jtaDataSourceValue = loadDataSource(_jtaDataSourceName);
+      
+      return _jtaDataSourceValue;
+    }
     else
       return null;
   }
@@ -536,8 +558,13 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   @Override
   public DataSource getNonJtaDataSource()
   {
-    if (_nonJtaDataSourceName != null)
-      return loadDataSource(_nonJtaDataSourceName);
+    if (_nonJtaDataSourceValue != null)
+      return _nonJtaDataSourceValue;
+    else if (_nonJtaDataSourceName != null) {
+      _nonJtaDataSourceValue = loadDataSource(_nonJtaDataSourceName);
+      
+      return _nonJtaDataSourceValue;
+    }
     else
       return null;
   }

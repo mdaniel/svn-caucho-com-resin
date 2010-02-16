@@ -226,6 +226,7 @@ public class AmberPersistenceUnit {
   private void bindProxy()
     throws Exception
   {
+    /*
     String name = getName();
 
     // XXX: is "default" appropriate?
@@ -253,6 +254,7 @@ public class AmberPersistenceUnit {
       = AmberContainer.getPersistenceContextJndiPrefix() + '/' + name;
 
     Jndi.bindDeepShort(jndiName, factory);
+    */
   }
 
   public EntityManager getEntityManager()

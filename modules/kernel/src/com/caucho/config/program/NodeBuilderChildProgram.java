@@ -76,14 +76,22 @@ public class NodeBuilderChildProgram extends FlowProgram {
   {
     ConfigContext env = ConfigContext.create();
     
-    env.configureAttribute(bean, _node);
+    CreationalContext<?> oldCxt = env.setCreationalContext(cxt);
+    
+    try {
+      env.configureAttribute(bean, _node);
+    } finally {
+      env.setCreationalContext(oldCxt);
+    }
   }
 
   @Override
-  public Object configure(ConfigType type, ConfigContext env)
+  public <T> T create(ConfigType<T> type, CreationalContext<T> cxt)
     throws ConfigException
   {
-    return env.create(_node, type);
+    ConfigContext env = ConfigContext.create();
+    
+    return (T) env.create(_node, type);
   }
 
   public String toString()

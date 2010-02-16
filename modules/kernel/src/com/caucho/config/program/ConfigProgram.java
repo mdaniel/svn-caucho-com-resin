@@ -103,14 +103,34 @@ public abstract class ConfigProgram {
     }
   }
 
+  /**
+   * Configures a bean given a class to instantiate.
+   */
   final
-  public Object configure(ConfigType type)
+  protected <T> T create(Class<T> type, CreationalContext<T> env)
     throws ConfigException
   {
-    return configure(type, ConfigContext.create());
+    try {
+      T value = type.newInstance();
+
+      inject(value, env);
+
+      return value;
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
   }
 
-  public Object configure(ConfigType type, ConfigContext env)
+  final
+  public <T> T create(ConfigType<T> type)
+    throws ConfigException
+  {
+    return create(type, new CreationalContextImpl<T>());
+  }
+
+  public <T> T create(ConfigType<T> type, CreationalContext<T> env)
     throws ConfigException
   {
     throw new UnsupportedOperationException(getClass().getName());

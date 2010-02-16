@@ -199,6 +199,8 @@ public class InjectManager
 
   private ArrayList<DecoratorEntry> _decoratorList
     = new ArrayList<DecoratorEntry>();
+  
+  private HashSet<Bean<?>> _beanSet = new HashSet<Bean<?>>();
 
   private boolean _isUpdateNeeded = true;
 
@@ -911,7 +913,9 @@ public class InjectManager
 
     _version.incrementAndGet();
 
-    bean = new InjectBean<T>(bean, this);
+    // bean = new InjectBean<T>(bean, this);
+    
+    _beanSet.add(bean);
 
     for (Type type : bean.getTypes()) {
       addBeanByType(type, bean);

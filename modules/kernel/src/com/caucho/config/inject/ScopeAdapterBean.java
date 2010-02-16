@@ -29,37 +29,12 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.gen.*;
-import com.caucho.config.type.TypeFactory;
-import com.caucho.config.type.ConfigType;
-import com.caucho.util.*;
-import com.caucho.config.bytecode.*;
-import com.caucho.config.cfg.*;
-import com.caucho.config.event.*;
-
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.CreationException;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
-public interface ScopeAdapterBean
+public interface ScopeAdapterBean<X>
 {
-  public Object getScopeAdapter(CreationalContext cxt);
+  public X getScopeAdapter(CreationalContext<X> cxt);
 }

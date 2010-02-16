@@ -40,6 +40,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
 import javax.persistence.PersistenceContext;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.PersistenceUnitInfo;
 import javax.sql.DataSource;
 
 import com.caucho.amber.AmberRuntimeException;
@@ -51,6 +52,7 @@ import com.caucho.amber.type.EmbeddableType;
 import com.caucho.amber.type.EntityType;
 import com.caucho.amber.type.ListenerType;
 import com.caucho.amber.type.MappedSuperclassType;
+import com.caucho.bytecode.JClassWrapper;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
@@ -173,7 +175,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     if (_parentAmberContainer != null)
       copyContainerDefaults(_parentAmberContainer);
 
-    // _parentLoader.addScanListener(this);
+    _parentLoader.addScanListener(this);
 
     Environment.addEnvironmentListener(this, _parentLoader);
 
@@ -347,7 +349,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
    * Adds a persistence-unit default
    */
   public void addPersistenceUnitProxy(String name,
-      ArrayList<ConfigProgram> program)
+                                      ArrayList<ConfigProgram> program)
   {
     ArrayList<ConfigProgram> oldProgram = _unitDefaultMap.get(name);
 
@@ -589,7 +591,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
    * Adds an entity listener.
    */
   public void addEntityListener(String entityClassName,
-      ListenerType listenerType)
+                                ListenerType listenerType)
   {
     ArrayList<ListenerType> listenerList
       = _entityListenerMap.get(entityClassName);
@@ -610,11 +612,30 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     throw new UnsupportedOperationException();
   }
 
+  public EntityManagerFactory createEntityManagerFactory(PersistenceUnitInfo info)
+  {
+    Path path = Vfs.lookup(info.getPersistenceUnitRootUrl());
+
+    addPersistenceUnit(path);
+
+    String name = info.getPersistenceUnitName();
+
+    configurePersistenceRoot(info);
+
+    AmberPersistenceUnit pUnit = createPersistenceUnit(name);
+
+    return getEntityManagerFactory(name);
+  }
+
   public AmberPersistenceUnit createPersistenceUnit(String name)
   {
-    AmberPersistenceUnit unit = new AmberPersistenceUnit(this, name);
+    AmberPersistenceUnit unit = _unitMap.get(name);
+    
+    if (unit == null) {
+      unit = new AmberPersistenceUnit(this, name);
 
-    _unitMap.put(unit.getName(), unit);
+      _unitMap.put(unit.getName(), unit);
+    }
 
     return unit;
   }
@@ -773,6 +794,129 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
     return null;
   }
 
+  private void configurePersistenceRoot(PersistenceUnitInfo info)
+  {
+    URL rootUrl = info.getPersistenceUnitRootUrl();
+    String pUnitName = info.getPersistenceUnitName();
+
+    Path root = Vfs.lookup(rootUrl);
+
+    try {
+      Path ormXml = root.lookup("META-INF/orm.xml");
+
+      EntityMappingsConfig entityMappings
+        = configureMappingFile(root, ormXml);
+
+      // HashMap<String, JClass> classMap = new HashMap<String, JClass>();
+
+      try {
+        if (log.isLoggable(Level.CONFIG))
+          log.config("Amber PersistenceUnit[" + pUnitName + "] configuring " + rootUrl);
+        
+        ArrayList<String> classes = new ArrayList<String>();
+
+        if (! info.excludeUnlistedClasses()) {
+          /*
+          for (String className : rootContext.getClassNameList())
+            lookupClass(className, classMap, entityMappings);
+            */
+
+          // unitConfig.addAllClasses(classMap);
+        }
+
+        ArrayList<EntityMappingsConfig> entityMappingsList
+        = new ArrayList<EntityMappingsConfig>();
+
+        if (entityMappings != null)
+          entityMappingsList.add(entityMappings);
+
+        /*
+        // jpa/0s2n: <jar-file>
+        for (String fileName : unitConfig.getJarFiles()) {
+          JarPath jarFile;
+
+          Path parent = root;
+
+          if (root instanceof JarPath) {
+            parent = ((JarPath) root).getContainer().getParent();
+          }
+
+          jarFile = JarPath.create(parent.lookup(fileName));
+
+          classMap.clear();
+
+          unitConfig.addAllClasses(classMap);
+        }
+        */
+
+        // jpa/0s2l: custom mapping-file.
+        /*
+        for (String fileName : unitConfig.getMappingFiles()) {
+          Path mappingFile = root.lookup(fileName);
+
+          EntityMappingsConfig mappingFileConfig
+          = configureMappingFile(root, mappingFile);
+
+          if (mappingFileConfig != null) {
+            entityMappingsList.add(mappingFileConfig);
+
+            classMap.clear();
+
+            unitConfig.addAllClasses(classMap);
+          }
+        }
+        */
+
+        AmberPersistenceUnit unit = init(info);
+
+        _pendingUnitList.add(unit);
+
+        _unitMap.put(unit.getName(), unit);
+      } catch (Exception e) {
+        addException(e);
+
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  private AmberPersistenceUnit init(PersistenceUnitInfo info)
+    throws Exception
+  {
+    String name = info.getPersistenceUnitName();
+
+    AmberPersistenceUnit unit
+      = new AmberPersistenceUnit(this, name);
+
+    unit.setJPA(true);
+
+    if (info.getJtaDataSource() != null)
+      unit.setJtaDataSource(info.getJtaDataSource());
+
+    if (info.getNonJtaDataSource() != null)
+      unit.setNonJtaDataSource(info.getNonJtaDataSource());
+
+    // unit.setEntityMappingsList(entityMappings);
+
+    unit.init();
+    
+    ClassLoader tempLoader = info.getNewTempClassLoader();
+    
+    for (String className : info.getManagedClassNames()) {
+      Class type = Class.forName(className, false, tempLoader);
+
+      unit.addEntityClass(className, type);//JClassWrapper.create(type));
+    }
+
+    unit.generate();
+
+    return unit;
+  }
+
   /**
    * Adds the URLs for the classpath.
    */
@@ -786,8 +930,8 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       // thread.setContextClassLoader(_tempLoader);
       thread.setContextClassLoader(_parentLoader);
 
-      ArrayList<AmberPersistenceUnit> unitList = new ArrayList<AmberPersistenceUnit>(
-          _pendingUnitList);
+      ArrayList<AmberPersistenceUnit> unitList
+        = new ArrayList<AmberPersistenceUnit>(_pendingUnitList);
       _pendingUnitList.clear();
 
       ArrayList<LazyEntityManagerFactory> lazyEmfList = new ArrayList<LazyEntityManagerFactory>(
@@ -832,7 +976,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   }
 
   private void lookupClass(String className, HashMap<String, Class> classMap,
-      EntityMappingsConfig entityMappings) throws Exception
+                           EntityMappingsConfig entityMappings) throws Exception
   {
     Class type = loadTempClass(className);
 

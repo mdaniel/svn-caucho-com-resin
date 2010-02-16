@@ -33,7 +33,11 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
+import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
+
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
 /**
@@ -91,8 +95,17 @@ public class WebBeansContextResolver extends ELResolver {
     if (beans.size() == 0)
       return null;
 
-    Bean bean = webBeans.resolve(beans);
-    Object result = webBeans.getReference(bean);
+    Bean<?> bean = webBeans.resolve(beans);
+    
+    CreationalContext<?> cxt = null;
+    
+    ConfigContext env = ConfigContext.getCurrent();
+    
+    if (env != null) {
+      cxt = new CreationalContextImpl(bean, env.getCreationalContext());
+    }
+    
+    Object result = webBeans.getReference(bean, bean.getBeanClass(), cxt);
 
     if (result != null) {
       context.setPropertyResolved(true);

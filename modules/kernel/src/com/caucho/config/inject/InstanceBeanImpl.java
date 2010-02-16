@@ -152,4 +152,10 @@ public class InstanceBeanImpl<T> implements Bean<T>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _instance + "]";
+  }
 }

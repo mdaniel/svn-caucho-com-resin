@@ -56,14 +56,14 @@ import org.w3c.dom.Node;
 /**
  * Custom bean configured by namespace
  */
-public class ValueArg extends Arg {
+public class ValueArg<T> extends Arg<T> {
   private static final L10N L = new L10N(ValueArg.class);
   
   private InjectManager _beanManager;
   private Type _type;
-  private ConfigType<?> _configType;
+  private ConfigType<T> _configType;
 
-  private Bean<?> _bean;
+  private Bean<T> _bean;
   private RuntimeException _bindException;
 
   public ValueArg(Type type)
@@ -71,7 +71,7 @@ public class ValueArg extends Arg {
     _beanManager = InjectManager.create();
     
     _type = type;
-    _configType = TypeFactory.getType(_type);
+    _configType = (ConfigType<T>) TypeFactory.getType(_type);
   }
 
   @Override
@@ -81,7 +81,7 @@ public class ValueArg extends Arg {
       HashSet<Annotation> bindings = new HashSet<Annotation>();
       
       try {
-	_bean = _beanManager.resolveByInjectionPoint(_type, bindings);
+	_bean = (Bean<T>) _beanManager.resolveByInjectionPoint(_type, bindings);
       } catch (RuntimeException e) {
 	_bindException = e;
       }
@@ -89,7 +89,7 @@ public class ValueArg extends Arg {
   }
     
   @Override
-  public Object eval(CreationalContext<?> env)
+  public Object eval(CreationalContext<T> env)
   {
     if (_bean == null && _bindException == null)
       bind();

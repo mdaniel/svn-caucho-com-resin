@@ -31,7 +31,9 @@ package com.caucho.env.jpa;
 
 import com.caucho.amber.*;
 import com.caucho.amber.manager.AmberContainer;
+import com.caucho.config.Names;
 import com.caucho.config.inject.HandleAware;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.jca.*;
 import com.caucho.util.L10N;
 
@@ -39,6 +41,8 @@ import javax.persistence.*;
 import javax.persistence.criteria.CriteriaBuilder;
 import javax.persistence.metamodel.Metamodel;
 import javax.transaction.*;
+
+import java.io.Serializable;
 import java.util.*;
 import java.util.logging.Logger;
 
@@ -46,12 +50,13 @@ import java.util.logging.Logger;
  * The @PersistenceUnit, container managed entity manager proxy, used
  * for third-party providers.
  */
+@SuppressWarnings("serial")
 public class EntityManagerFactoryProxy
-  implements EntityManagerFactory
+  implements EntityManagerFactory, Serializable
 {
-  private final ManagerPersistenceUnit _persistenceUnit;
+  private transient final ManagerPersistenceUnit _persistenceUnit;
   
-  private EntityManagerFactory _emfDelegate;
+  private transient EntityManagerFactory _emfDelegate;
 
   public EntityManagerFactoryProxy(ManagerPersistenceUnit persistenceUnit)
   {
@@ -138,11 +143,37 @@ public class EntityManagerFactoryProxy
     return _emfDelegate;
   }
   
+  private Object writeReplace()
+  {
+    return new Handle(_persistenceUnit.getName());
+  }
+  
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
             + "[" + _persistenceUnit.getName()
             + "," + _emfDelegate + "]");
+  }
+  
+  public static class Handle implements Serializable {
+    private String _name;
+    
+    private Handle()
+    {
+    }
+    
+    private Handle(String name)
+    {
+      _name = name;
+    }
+    
+    private Object readResolve()
+    {
+      InjectManager beanManager = InjectManager.getCurrent();
+      
+      return beanManager.getReference(EntityManagerFactory.class, 
+                                      Names.create(_name));
+    }
   }
 }

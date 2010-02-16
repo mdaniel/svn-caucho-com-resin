@@ -803,7 +803,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         InjectManager beanManager = InjectManager.getCurrent();
         
         Object value = beanManager.getInjectableReference(_ij, env);
- 
+
         _field.set(instance, value);
       } catch (Exception e) {
         throw ConfigException.create(_field, e);

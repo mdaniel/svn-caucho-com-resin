@@ -227,6 +227,43 @@ public class ConfigContext {
   {
     return CreationalContextImpl.find(_beanStack, bean);
   }
+  
+  public Object findByName(String name)
+  {
+    return CreationalContextImpl.findByName(_beanStack, name);
+  }
+
+  /*
+  public Object findByName(String name)
+  {
+    if (_dependentScope != null) {
+      Object value = _dependentScope.findByName(name);
+
+      if (value != null)
+        return value;
+      else if (_parent != null)
+        return _parent.findByName(name);
+      else
+        return null;
+    }
+    else
+      return null;
+  }
+  */
+  
+  public CreationalContext<?> setCreationalContext(CreationalContext<?> cxt)
+  {
+    CreationalContext<?> oldCxt = _beanStack;
+    
+    _beanStack = (CreationalContextImpl<?>) cxt;
+    
+    return oldCxt;
+  }
+  
+  public CreationalContext<?> getCreationalContext()
+  {
+    return _beanStack;
+  }
 
   public Config getConfig()
   {
@@ -248,22 +285,6 @@ public class ConfigContext {
 
     if (_scope != null)
       _scope.put(comp, obj);
-  }
-
-  public Object findByName(String name)
-  {
-    if (_dependentScope != null) {
-      Object value = _dependentScope.findByName(name);
-
-      if (value != null)
-        return value;
-      else if (_parent != null)
-        return _parent.findByName(name);
-      else
-        return null;
-    }
-    else
-      return null;
   }
 
   public void remove(Bean comp)
