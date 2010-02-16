@@ -93,5 +93,56 @@ public interface Callable {
    * @param env the calling environment
    */
   abstract public Value call(Env env, Value []args);
+  
+  /**
+   * Evaluates a callback where the first argument is from an array.
+   * The callback may be modifying that array element.
+   * For ArrayModule.
+   * 
+   * @param env
+   * @param array from which a1 came from
+   * @param key index of a1 in the array
+   * @param a1 need to make a reference to this variable
+   */
+  abstract public Value callArray(Env env,
+                                  ArrayValue array,
+                                  Value key,
+                                  Value a1);
+
+  /**
+   * Evaluates a callback where the first argument is from an array.
+   * The callback may be modifying that array element.
+   * For ArrayModule.
+   * 
+   * @param env
+   * @param array from which a1 came from
+   * @param key index of a1 in the array
+   * @param a1 need to make a reference to this variable
+   * @param a2 additional argument to pass to the callback
+   */
+  abstract public Value callArray(Env env,
+                                  ArrayValue array,
+                                  Value key,
+                                  Value a1,
+                                  Value a2);
+  
+  /**
+   * Evaluates a callback where the first argument is from an array.
+   * The callback may be modifying that array element.
+   * For ArrayModule.
+   * 
+   * @param env
+   * @param array from which a1 came from
+   * @param key index of a1 in the array
+   * @param a1 need to make a reference to this variable
+   * @param a2 additional argument to pass to the callback
+   * @param a3 additional argument to pass to the callback
+   */
+  abstract public Value callArray(Env env,
+                                  ArrayValue array,
+                                  Value key,
+                                  Value a1,
+                                  Value a2,
+                                  Value a3);
 }
 

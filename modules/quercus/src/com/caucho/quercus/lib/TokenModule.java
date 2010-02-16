@@ -207,8 +207,8 @@ public class TokenModule extends AbstractQuercusModule {
   }
 
   public static Value highlight_string(Env env,
-				       StringValue s,
-				       @Optional boolean isReturn)
+                                       StringValue s,
+                                       @Optional boolean isReturn)
   {
     try {
       StringValue sb = isReturn ? env.createUnicodeBuilder() : null;
@@ -221,50 +221,50 @@ public class TokenModule extends AbstractQuercusModule {
 
       highlight(sb, out, "<code>");
       highlight(sb, out, "<span style=\"color: #000000\">\n");
-      
+
       while ((token = lexer.nextToken()) >= 0) {
-	StringValue color = getColor(env, token);
+        StringValue color = getColor(env, token);
 
-	if (color != null && ! color.equals(lastColor)) {
-	  if (! topColor.equals(lastColor))
-	    highlight(sb, out, "</span>");
-	  
-	  if (! topColor.equals(color))
-	    highlight(sb, out, "<span style=\"color: " + color + "\">");
-	  
-	  lastColor = color;
-	}
-	
-	if (0x20 <= token && token <= 0x7f) {
-	  if (sb != null)
-	    sb.append((char) token);
-	  else
-	    out.print((char) token);
-	}
-	else {
-	  StringValue lexeme = lexer.getLexeme();
+        if (color != null && ! color.equals(lastColor)) {
+          if (! topColor.equals(lastColor))
+            highlight(sb, out, "</span>");
 
-	  highlight(sb, out, lexeme);
-	}
+          if (! topColor.equals(color))
+            highlight(sb, out, "<span style=\"color: " + color + "\">");
+
+          lastColor = color;
+        }
+
+        if (0x20 <= token && token <= 0x7f) {
+          if (sb != null)
+            sb.append((char) token);
+          else
+            out.print((char) token);
+        }
+        else {
+          StringValue lexeme = lexer.getLexeme();
+
+          highlight(sb, out, lexeme);
+        }
       }
-      
+
       if (! topColor.equals(lastColor))
-	highlight(sb, out, "</span>\n");
+        highlight(sb, out, "</span>\n");
       highlight(sb, out, "</span>\n");
       highlight(sb, out, "</code>");
 
       if (sb != null)
-	return sb;
+        return sb;
       else
-	return BooleanValue.TRUE;
+        return BooleanValue.TRUE;
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     }
   }
 
   private static void highlight(StringValue sb,
-				WriteStream out,
-				String string)
+                                WriteStream out,
+                                String string)
     throws IOException
   {
     if (sb != null) {
@@ -276,50 +276,50 @@ public class TokenModule extends AbstractQuercusModule {
   }
 
   private static void highlight(StringValue sb,
-				WriteStream out,
-				StringValue string)
+                                WriteStream out,
+                                StringValue string)
     throws IOException
   {
     if (sb != null) {
       int len = string.length();
       for (int i = 0; i < len; i++) {
-	char ch = string.charAt(i);
+        char ch = string.charAt(i);
 
-	switch (ch) {
-	case '<':
-	  sb.append("&lt;");
-	  break;
-	case '>':
-	  sb.append("&gt;");
-	  break;
-    case ' ':
-       sb.append("&nbsp;");
-       break;	  
-	default:
-	  sb.append(ch);
-	  break;
-	}
+        switch (ch) {
+          case '<':
+            sb.append("&lt;");
+            break;
+          case '>':
+            sb.append("&gt;");
+            break;
+          case ' ':
+            sb.append("&nbsp;");
+            break;	  
+          default:
+            sb.append(ch);
+          break;
+        }
       }
     }
     else {
       int len = string.length();
       for (int i = 0; i < len; i++) {
-	char ch = string.charAt(i);
+        char ch = string.charAt(i);
 
-	switch (ch) {
-	case '<':
-	  out.print("&lt;");
-	  break;
-	case '>':
-	  out.print("&gt;");
-	  break;
-    case ' ':
-       out.print("&nbsp;");
-       break;	  
-	default:
-	  out.print(ch);
-	  break;
-	}
+        switch (ch) {
+          case '<':
+            out.print("&lt;");
+            break;
+          case '>':
+            out.print("&gt;");
+            break;
+          case ' ':
+            out.print("&nbsp;");
+            break;	  
+          default:
+            out.print(ch);
+          break;
+        }
       }
     }
   }

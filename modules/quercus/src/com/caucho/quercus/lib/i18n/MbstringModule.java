@@ -1048,34 +1048,34 @@ public class MbstringModule
    * Multibyte version of strpos.
    */
   public static Value mb_strpos(Env env,
-                              StringValue haystack,
-                              StringValue needle,
-                              @Optional("0") int offset,
-                              @Optional("") String encoding)
+                                StringValue haystack,
+                                StringValue needle,
+                                @Optional("0") int offset,
+                                @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
 
     haystack = haystack.convertToUnicode(env, encoding);
     needle = needle.convertToUnicode(env, encoding);
 
-    return StringModule.strpos(haystack, needle, offset);
+    return StringModule.strpos(env, haystack, needle, offset);
   }
 
   /**
    * Multibyte version of strrpos.
    */
   public static Value mb_strrpos(Env env,
-                              StringValue haystack,
-                              StringValue needle,
-                              @Optional Value offsetV,
-                              @Optional("") String encoding)
+                                 StringValue haystack,
+                                 StringValue needle,
+                                 @Optional Value offsetV,
+                                 @Optional("") String encoding)
   {
     encoding = getEncoding(env, encoding);
 
     haystack = haystack.convertToUnicode(env, encoding);
     needle = needle.convertToUnicode(env, encoding);
 
-    return StringModule.strrpos(haystack, needle, offsetV);
+    return StringModule.strrpos(env, haystack, needle, offsetV);
   }
 
   /**

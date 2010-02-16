@@ -613,13 +613,13 @@ public class ArrayModule
             value = ((ArrayValue.Entry) entry).getRawValue();
           else
             value = entry.getValue();
-
-          // boolean isMatch = callback.call(env, array, key, value).toBoolean();
-          boolean isMatch = callback.call(env, value).toBoolean();
-
-          if (isMatch) {
+ 
+          // php/1740          
+          boolean isMatch 
+            = callback.callArray(env, array, key, value).toBoolean();
+          
+          if (isMatch)
             filteredArray.put(key, value);
-          }
         }
       }
       catch (Exception t) {
@@ -1176,13 +1176,14 @@ public class ArrayModule
         
         Value key = entry.getKey();
         Value value;
-       
+        
+        // php/1741
         if (entry instanceof ArrayValue.Entry)
-          value = ((ArrayValue.Entry) entry).toVar();
+          value = ((ArrayValue.Entry) entry).getRawValue();
         else
           value = entry.getValue();
         
-        callback.call(env, value, key, userData);
+        callback.callArray(env, array, key, value, userData);
       }
       
       return true;
@@ -1229,8 +1230,9 @@ public class ArrayModule
         Value key = entry.getKey();
         Value value;
         
+        // php/1742
         if (entry instanceof ArrayValue.Entry)
-          value = ((ArrayValue.Entry) entry).toVar();
+          value = ((ArrayValue.Entry) entry).getRawValue();
         else
           value = entry.getValue();
 
@@ -1244,7 +1246,7 @@ public class ArrayModule
             return false;
         }
         else
-          callback.call(env, value, key, extra);
+          callback.callArray(env, array, key, value, key, extra);
       }
 
       return true;

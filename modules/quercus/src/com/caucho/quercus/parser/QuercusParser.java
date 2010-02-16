@@ -5070,9 +5070,18 @@ public class QuercusParser {
         case '\\':
           _sb.append((char) ch);
           break;
-        case 'x':
-          _sb.append((char) parseHexEscape());
+        case 'x': {
+          int value = parseHexEscape();
+          
+          if (value >= 0)
+            _sb.append((char) value);
+          else {
+            _sb.append('\\');
+            _sb.append('x');
+          }
+            
           break;
+        }
         case 'u':
           if (isUnicode)
             _sb.append(Character.toChars(parseUnicodeEscape(false)));
@@ -5233,7 +5242,7 @@ public class QuercusParser {
       value = 16 * value + 10 + ch - 'A';
     else {
       _peek = ch;
-      return value;
+      return -1;
     }
 
     ch = read();
@@ -5255,10 +5264,26 @@ public class QuercusParser {
   private int parseUnicodeEscape(boolean isLongForm)
     throws IOException
   {
-    int codePoint = parseHexEscape() * 256 + parseHexEscape();
+    int codePoint = parseHexEscape();
+    
+    if (codePoint < 0)
+      return -1;
+    
+    int low = parseHexEscape();
+    
+    if (low < 0)
+      return codePoint;
+    
+    codePoint = codePoint * 256 + low;
 
-    if (isLongForm)
-      codePoint = codePoint * 256 + parseHexEscape();
+    if (isLongForm) {
+      low = parseHexEscape();
+      
+      if (low < 0)
+        return codePoint;
+      
+      codePoint = codePoint * 256 + low;
+    }
 
     return codePoint;
   }

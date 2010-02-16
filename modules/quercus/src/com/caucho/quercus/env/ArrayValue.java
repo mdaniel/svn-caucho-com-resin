@@ -443,6 +443,81 @@ abstract public class ArrayValue extends Value {
       return new CallbackObjectMethod(env, cl, env.createString(name));
     }
   }
+  
+  public final Value callCallback(Env env, Callable callback, Value key)
+  {
+    Value result;
+    Value value = getRaw(key);
+    
+    if (value instanceof Var) {
+      value = new ArgRef((Var) value);
+
+      result = call(env, value);
+    }
+    else {
+      Value aVar = new Var(value);
+
+      result = callback.call(env, aVar);
+
+      Value aNew = aVar.toValue();
+      
+      if (aNew != value)
+        put(key, aNew);
+    }
+
+    return result;
+  }
+  
+  public final Value callCallback(Env env, Callable callback, Value key,
+                                  Value a2)
+  {
+    Value result;
+    Value value = getRaw(key);
+    
+    if (value instanceof Var) {
+      value = new ArgRef((Var) value);
+
+      result = callback.call(env, value, a2);
+    }
+    else {
+      Value aVar = new Var(value);
+
+      result = callback.call(env, aVar, a2);
+
+      Value aNew = aVar.toValue();
+      
+      if (aNew != value)
+        put(key, aNew);
+    }
+
+    return result;
+  }
+  
+  public final Value callCallback(Env env, Callable callback, Value key,
+                                  Value a2, Value a3)
+  {
+    Value result;
+    Value value = getRaw(key);
+    
+    if (value instanceof Var) {
+      value = new ArgRef((Var) value);
+
+      result = callback.call(env, value, a2, a3);
+    }
+    else {
+      Value aVar = new Var(value);
+
+      result = callback.call(env, aVar, a2, a3);
+
+      Value aNew = aVar.toValue();
+      
+      if (aNew != value)
+        put(key, aNew);
+    }
+
+    return result;
+  }
+  
   /**
    * Returns true for an array.
    */

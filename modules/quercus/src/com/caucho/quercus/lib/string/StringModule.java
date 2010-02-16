@@ -3772,7 +3772,7 @@ public class StringModule extends AbstractQuercusModule {
     int len = haystack.length();
 
     if (len < offset) {
-      env.warning(L.l("offset can not be greater than length of String"));
+      env.warning(L.l("offset cannot exceed string length"));
       return BooleanValue.FALSE;
     }
 
@@ -4074,11 +4074,18 @@ public class StringModule extends AbstractQuercusModule {
    * @param haystack the string to search in
    * @param needleV the string to search for
    */
-  public static Value strpos(StringValue haystack,
+  public static Value strpos(Env env,
+                             StringValue haystack,
                              Value needleV,
                              @Optional int offset)
   {
     StringValue needle;
+    
+    if (offset > haystack.length()) {
+      env.warning(L.l("offset cannot exceed string length"));
+      
+      return BooleanValue.FALSE;
+    }
 
     if (needleV.isString())
       needle = needleV.toStringValue();
@@ -4140,7 +4147,8 @@ public class StringModule extends AbstractQuercusModule {
    * @param needleV the substring string to test
    * @param offsetV the optional offset to start searching
    */
-  public static Value strripos(String haystack,
+  public static Value strripos(Env env,
+                               String haystack,
                                Value needleV,
                                @Optional Value offsetV)
   {
@@ -4158,8 +4166,15 @@ public class StringModule extends AbstractQuercusModule {
 
     if (offsetV instanceof DefaultValue)
       offset = haystack.length();
-    else
+    else {
       offset = offsetV.toInt();
+      
+      if (haystack.length() < offset) {
+        env.warning(L.l("offset cannot exceed string length"));
+        
+        return BooleanValue.FALSE;
+      }
+    }
 
     haystack = haystack.toLowerCase();
     needle = needle.toLowerCase();
@@ -4178,7 +4193,8 @@ public class StringModule extends AbstractQuercusModule {
    * @param haystack the string to search in
    * @param needleV the string to search for
    */
-  public static Value strrpos(StringValue haystack,
+  public static Value strrpos(Env env,
+                              StringValue haystack,
                               Value needleV,
                               @Optional Value offsetV)
   {
@@ -4193,8 +4209,15 @@ public class StringModule extends AbstractQuercusModule {
 
     if (offsetV instanceof DefaultValue)
       offset = haystack.length();
-    else
+    else {
       offset = offsetV.toInt();
+      
+      if (haystack.length() < offset) {
+        env.warning(L.l("offset cannot exceed string length"));
+        
+        return BooleanValue.FALSE;
+      }
+    }
 
     int pos = haystack.lastIndexOf(needle, offset);
 
@@ -4654,7 +4677,7 @@ public class StringModule extends AbstractQuercusModule {
   public static Value substr_count(Env env,
                                    StringValue haystackV,
                                    StringValue needleV,
-                                   @Optional("0") int offset,
+                                   @Optional int offset,
                                    @Optional("-1") int length)
   {
     String haystack = haystackV.toString();
@@ -4667,19 +4690,21 @@ public class StringModule extends AbstractQuercusModule {
     }
 
     int haystackLength = haystack.length();
-
+    
     if (offset < 0 || offset > haystackLength) {
-      env.warning(L.l("offset `{0}' out of range", offset));
+      env.warning(L.l("offset cannot exceed string length", offset));
       return BooleanValue.FALSE;
     }
-
-    if (length > -1) {
-      if (offset + length > haystackLength) {
-        env.warning(L.l("length `{0}' out of range", length));
+    
+    if (length >= 0) {
+      int newLength = offset + length;
+      
+      if (newLength < 0 || newLength > haystackLength) {
+        env.warning(L.l("length cannot exceed string length", length));
         return BooleanValue.FALSE;
       }
-      else
-        haystackLength = offset + length;
+      
+      haystackLength = newLength;
     }
 
     int needleLength = needle.length();
@@ -5367,6 +5392,9 @@ public class StringModule extends AbstractQuercusModule {
     {
       int length = format.length();
       int offset = 1;
+      
+      if (format.charAt(offset) == '+')
+        offset++;
 
       char pad = ' ';
 
@@ -5388,7 +5416,7 @@ public class StringModule extends AbstractQuercusModule {
         else
           return null;
       }
-
+      
       return new UnsignedPrintfSegment(index, min, pad);
     }
 
@@ -5407,7 +5435,7 @@ public class StringModule extends AbstractQuercusModule {
 
       char []buf = new char[32];
       int digits = buf.length;
-
+      
       if (value == 0) {
         buf[--digits] = '0';
       }
@@ -5433,14 +5461,14 @@ public class StringModule extends AbstractQuercusModule {
           bigInt = bigInt.divide(BIG_TEN);
         }
       }
-
-      for (int i = digits + 1; i < _min; i++)
+      
+      for (int i = buf.length - digits; i < _min; i++)
         sb.append(_pad);
 
       for (; digits < buf.length; digits++) {
         sb.append(buf[digits]);
       }
-
+      
       return true;
     }
   }

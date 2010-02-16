@@ -848,7 +848,7 @@ public class StringBuilderValue
     if (end <= start)
       return StringBuilderValue.EMPTY;
     else if (end - start == 1)
-      return CHAR_STRINGS[_buffer[start]];
+      return CHAR_STRINGS[_buffer[start] & 0xff];
 
     return createStringBuilder(_buffer, start, end - start);
   }

@@ -160,7 +160,7 @@ public class UrlModule
     OutputStream os = new StringBuilderOutputStream(sb);
 
     try {
-      Base64.decode(str.toSimpleReader(), os);
+      Base64.decodeIgnoreWhitespace(str.toSimpleReader(), os);
     } catch (IOException e) {
       
       env.warning(e);

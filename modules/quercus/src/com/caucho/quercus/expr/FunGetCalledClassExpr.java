@@ -56,7 +56,15 @@ public class FunGetCalledClassExpr extends Expr {
   @Override
   public Value eval(Env env)
   {
-    return env.createString(env.getThis().getClassName());
+    Value qThis = env.getThis();
+    
+    if (qThis.isNull()) {
+      env.warning(L.l("get_called_class() must be called in a class context"));
+      return BooleanValue.FALSE;
+    }
+    else {
+      return env.createString(qThis.getClassName());
+    }
   }
 
   public String toString()

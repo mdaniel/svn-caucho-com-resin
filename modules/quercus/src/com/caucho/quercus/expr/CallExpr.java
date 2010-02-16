@@ -203,6 +203,12 @@ public class CallExpr extends Expr {
     }
     
     AbstractFunction fun = env.findFunction(_funId);
+    
+    if (fun == null) {
+      env.error(getLocationLine(), L.l("'{0}' is an unknown function.", _name));
+
+      return NullValue.NULL;
+    }
 
     Value []args = evalArgs(env, _args);
 
@@ -228,8 +234,9 @@ public class CallExpr extends Expr {
         return fun.callRef(env, args);
       else if (isCopy)
         return fun.call(env, args).copyReturn();
-      else
+      else {
         return fun.call(env, args).toValue();
+      }
     //} catch (Exception e) {
     //  throw QuercusException.create(e, env.getStackTrace());
     } finally {

@@ -225,6 +225,9 @@ public class ErrorModule extends AbstractQuercusModule {
                && name.equals("eval")) {
         addInterpreted(env, result, depth++);
       }
+      else if (className.equals("com.caucho.quercus.expr.CallExpr")) {
+        addInterpreted(env, result, depth++);
+      }
       else if (className.equals("com.caucho.quercus.env.Env")
                && name.equals("close")) {
         return result;

@@ -1702,6 +1702,12 @@ public class QuercusClass extends NullValue {
   //
   // Value methods
   //
+  
+  @Override
+  public boolean isNull()
+  {
+    return false;
+  }
 
   /**
    * Returns the value's class name.
