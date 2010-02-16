@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -73,6 +73,14 @@ namespace Caucho
         return new String(buf, 0, buf.Length - 1);
       else
         return new String(buf, 0, buf.Length);
+    }
+
+    public static bool IsResinHome(String dir)
+    {
+      if (File.Exists(dir + "\\lib\\resin.jar"))
+        return true;
+
+      return false;
     }
 
     public static String GetResinHome(String resinHome, String path) {
