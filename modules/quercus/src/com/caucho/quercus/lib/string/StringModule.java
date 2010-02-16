@@ -601,7 +601,6 @@ public class StringModule extends AbstractQuercusModule {
       env.warning(L.l("Delimiter is empty"));
       return BooleanValue.FALSE;
     }
-      
     
     int head = 0;    
     ArrayValue array = new ArrayValueImpl();

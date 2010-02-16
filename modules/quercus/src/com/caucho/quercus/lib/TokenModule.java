@@ -340,6 +340,7 @@ public class TokenModule extends AbstractQuercusModule {
     case T_LNUMBER:
     case T_OPEN_TAG:
     case T_OPEN_TAG_WITH_ECHO:
+    case T_STRING:
       return env.getIni("highlight.default");
       
     case T_COMMENT:
@@ -348,7 +349,7 @@ public class TokenModule extends AbstractQuercusModule {
       return env.getIni("highlight.comment");
       
     case T_CONSTANT_ENCAPSED_STRING:
-    case T_STRING:
+    //case T_STRING:
       return env.getIni("highlight.string");
 
     case T_ENCAPSED_AND_WHITESPACE:
