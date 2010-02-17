@@ -187,10 +187,11 @@ public class CustomBeanAttribute extends Attribute {
       throw new UnsupportedOperationException(getClass().getName());
     }
 
-    public Object configure(ConfigType type, ConfigContext env)
+    @Override
+    public <T> T create(ConfigType<T> type, CreationalContext<T> env)
       throws ConfigException
     {
-      return type.valueOf(_arg);
+      return (T) type.valueOf(_arg);
     }
   }
 }

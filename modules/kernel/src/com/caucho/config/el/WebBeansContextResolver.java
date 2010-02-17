@@ -104,6 +104,9 @@ public class WebBeansContextResolver extends ELResolver {
     if (env != null) {
       cxt = new CreationalContextImpl(bean, env.getCreationalContext());
     }
+    else {
+      cxt = new CreationalContextImpl(bean, null);
+    }
     
     Object result = webBeans.getReference(bean, bean.getBeanClass(), cxt);
 

@@ -106,10 +106,11 @@ public class PropertyStringProgram extends ConfigProgram {
     }
   }
 
-  public Object configure(ConfigType type, ConfigContext env)
+  @Override
+  public <T> T create(ConfigType<T> type, CreationalContext<T> env)
     throws ConfigException
   {
-    return type.valueOf(_value);
+    return (T) type.valueOf(_value);
   }
 
   public String toString()
