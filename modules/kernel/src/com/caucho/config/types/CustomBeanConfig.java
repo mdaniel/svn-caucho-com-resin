@@ -79,7 +79,7 @@ public class CustomBeanConfig {
   private InjectManager _beanManager;
 
   private Class _class;
-  private AnnotatedTypeImpl _annotatedType;
+  private AnnotatedTypeImpl<?> _annotatedType;
   private Bean _bean;
   private ConfigType _configType;
 
@@ -116,7 +116,7 @@ public class CustomBeanConfig {
     // clearAnnotations(_annotatedType, DeploymentType.class);
     _annotatedType.addAnnotation(ConfiguredLiteral.create());
 
-    for (AnnotatedMethod method : _annotatedType.getMethods()) {
+    for (AnnotatedMethod<?> method : _annotatedType.getMethods()) {
       // ioc/0614
 
       AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) method;
