@@ -118,6 +118,8 @@ public class ExistsExpr extends SubSelectExpr {
 
     data.setBoolean(exists);
     
+    subcontext.close();
+    
     QueryContext.free(subcontext);
   }
 

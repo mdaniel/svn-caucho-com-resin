@@ -73,8 +73,10 @@ final class EqExpr extends Expr {
     else if (newRight.isLong() && (newLeft.isLong() || newLeft.isParam()))
       return new LongEqExpr(newLeft, newRight);
 
-    if (newLeft.isDouble() || newRight.isDouble())
-      return new DoubleEqExpr(newLeft, newRight);
+    if (newLeft.isDouble() && (newRight.isDouble() || newRight.isParam()))
+        return new DoubleEqExpr(newLeft, newRight);
+    if (newRight.isDouble() && (newLeft.isDouble() || newLeft.isParam()))
+        return new DoubleEqExpr(newLeft, newRight);
 
     if (_left == newLeft && _right == newRight)
       return this;

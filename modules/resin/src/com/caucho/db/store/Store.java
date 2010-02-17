@@ -183,7 +183,7 @@ public class Store {
   private boolean _isCorrupted;
 
   private final Lifecycle _lifecycle = new Lifecycle();
-
+  
   public Store(Database database, String name, Lock tableLock)
   {
     this(database, name, tableLock, database.getPath().lookup(name + ".db"));
