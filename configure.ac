@@ -42,7 +42,7 @@ resin_root=${withval}
 ])
 
 if test -z "$resin_root"; then
-  resin_root="${resin_home}"
+  resin_root="/var/www"
 fi
 
 AC_SUBST(resin_root)
@@ -59,7 +59,7 @@ resin_conf=${withval}
 ])
 
 if test -z "$resin_conf"; then
-  resin_conf="${resin_root}/conf"
+  resin_conf="/etc/resin"
 fi
 
 #
@@ -74,7 +74,7 @@ resin_log=${withval}
 ])
 
 if test -z "$resin_log"; then
-  resin_log="${resin_root}/log"
+  resin_log="/var/log/resin"
 fi
 
 if test -d "/etc/init.d/rc.d"; then

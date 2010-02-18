@@ -32,6 +32,7 @@ install	:
 	  cp -r $(CP_U_FLAG) webapps/* $(resin_root)/webapps; \
 	  mkdir -p $(resin_root)/doc; \
 	  cp -r $(CP_U_FLAG) doc/* $(resin_root)/doc; \
+	  mkdir -p $(resin_log); \
 	fi; \
 	if test $(resin_conf) != `pwd`/conf; then \
 	  mkdir -p $(resin_conf); \
