@@ -109,7 +109,6 @@ poll_read(int fd, int s)
 static int
 std_read(stream_t *s, void *buf, int length)
 {
-#ifdef WIN32
   {
     /* windows can hang the socket even when the opposite side has closed */
     int timeout = s->cluster_srun->srun->read_timeout;
@@ -117,7 +116,6 @@ std_read(stream_t *s, void *buf, int length)
     if (poll_read(s->socket, timeout) <= 0)
       return -1;
   }
-#endif
 
   return recv(s->socket, buf, length, 0);
 }

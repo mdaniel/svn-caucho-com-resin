@@ -90,9 +90,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private static final int SAVE_BEFORE_FLUSH = 0x2;
   private static final int SAVE_AFTER_REQUEST = 0x4;
   private static final int SAVE_ON_SHUTDOWN = 0x8;
-  
+
   private static final int DECODE[];
-  
+
   private WebApp _webApp;
   private final SessionManagerAdmin _admin;
 
@@ -103,7 +103,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private LruCache<String,SessionImpl> _sessions;
   // total sessions
   private int _totalSessions;
-  
+
   // iterator to purge sessions (to reduce gc)
   private Iterator<SessionImpl> _sessionIter;
   // array list for session timeout
@@ -116,7 +116,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private boolean _isModuloSessionId = false;
   private boolean _isAppendServerIndex = false;
   private boolean _isTwoDigitSessionIndex = false;
-  
+
   // invalidate the session after the listeners have been called
   private boolean _isInvalidateAfterListener;
 
@@ -127,11 +127,11 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
   private String _cookieName = "JSESSIONID";
   private String _sslCookieName;
-  
+
   // Rewriting strings.
   private String _sessionSuffix = ";jsessionid=";
   private String _sessionPrefix;
-  
+
   // default cookie version
   private int _cookieVersion;
   private String _cookieDomain;
@@ -154,17 +154,17 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionListener> _listeners;
-  
+
   // List of the HttpSessionListeners from the configuration file
   private ArrayList<HttpSessionActivationListener> _activationListeners;
-  
+
   // List of the HttpSessionAttributeListeners from the configuration file
   private ArrayList<HttpSessionAttributeListener> _attributeListeners;
 
   //
   // Compatibility fields
   //
-  
+
   private boolean _isWebAppStore; // i.e. for old-style compatibility
   private Store _sessionStore;
   private int _alwaysLoadSession;
@@ -213,13 +213,13 @@ public final class SessionManager implements ObjectManager, AlarmListener
       _cookieName = decoder.getSessionCookie();
       _sslCookieName = decoder.getSSLSessionCookie();
     }
-    
+
     // this.server = app.getVirtualHost().getServer();
     // this.srunIndex = server.getSrunIndex();
 
     String hostName = app.getHostName();
     String contextPath = app.getContextPath();
-    
+
     if (hostName == null || hostName.equals(""))
       hostName = "default";
 
@@ -248,21 +248,21 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     synchronized (this) {
       if (_cluster == null) {
-	_cluster = Cluster.getLocal();
-	ClusterServer selfServer = null;
+        _cluster = Cluster.getLocal();
+        ClusterServer selfServer = null;
 
-	if (_cluster != null) {
-	  _machineLength = _cluster.getMachineList().size();
-	  _srunLength = _cluster.getServerList().length;
-	  
-	  selfServer = _cluster.getSelfServer();
-	  _selfServer = selfServer;
+        if (_cluster != null) {
+          _machineLength = _cluster.getMachineList().size();
+          _srunLength = _cluster.getServerList().length;
 
-	  if (selfServer != null) {
-	    _srunGroup = _cluster.getServerList();
-	    _srunIndex = selfServer.getIndex();
-	  }
-	}
+          selfServer = _cluster.getSelfServer();
+          _selfServer = selfServer;
+
+          if (selfServer != null) {
+            _srunGroup = _cluster.getServerList();
+            _srunIndex = selfServer.getIndex();
+          }
+        }
       }
     }
 
@@ -351,7 +351,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (_storeManager == null)
       throw new ConfigException(L.l("{0} is an unknown persistent store.",
-				    store.getJndiName()));
+                                    store.getJndiName()));
   }
 
   /**
@@ -436,27 +436,27 @@ public final class SessionManager implements ObjectManager, AlarmListener
     /* XXX: probably don't want to implement this.
     if ("before-flush".equals(mode)) {
       _sessionSaveMode = (SAVE_BEFORE_FLUSH|
-			  SAVE_BEFORE_HEADERS|
-			  SAVE_AFTER_REQUEST|
-			  SAVE_ON_SHUTDOWN);
+                          SAVE_BEFORE_HEADERS|
+                          SAVE_AFTER_REQUEST|
+                          SAVE_ON_SHUTDOWN);
     }
     else
     */
-    
+
     if ("before-headers".equals(mode)) {
       _sessionSaveMode = (SAVE_BEFORE_HEADERS|
-			  SAVE_ON_SHUTDOWN);
+                          SAVE_ON_SHUTDOWN);
     }
     else if ("after-request".equals(mode)) {
       _sessionSaveMode = (SAVE_AFTER_REQUEST|
-			  SAVE_ON_SHUTDOWN);
+                          SAVE_ON_SHUTDOWN);
     }
     else if ("on-shutdown".equals(mode)) {
       _sessionSaveMode = (SAVE_ON_SHUTDOWN);
     }
     else
       throw new ConfigException(L.l("'{0}' is an unknown session save-mode.  Values are: before-headers, after-request, and on-shutdown.",
-				    mode));
+                                    mode));
 
   }
 
@@ -483,7 +483,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   public void setSaveOnlyOnShutdown(boolean save)
   {
     log.warning("<save-only-on-shutdown> is deprecated.  Use <save-mode>on-shutdown</save-mode> instead");
-    
+
     if (save)
       _sessionSaveMode = SAVE_ON_SHUTDOWN;
   }
@@ -509,7 +509,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
       _isHessianSerialization = false;
     else
       throw new ConfigException(L.l("'{0}' is an unknown valud for serialization-type.  The valid types are 'hessian' and 'java'.",
-				    type));
+                                    type));
   }
 
   /**
@@ -668,7 +668,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   public boolean reuseSessionId(boolean fromCookie)
   {
     int reuseSessionId = _reuseSessionId;
-    
+
     return reuseSessionId == TRUE || fromCookie && reuseSessionId == COOKIE;
   }
 
@@ -682,8 +682,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (reuse == null)
       _reuseSessionId = COOKIE;
     else if (reuse.equalsIgnoreCase("true") ||
-	     reuse.equalsIgnoreCase("yes") ||
-	     reuse.equalsIgnoreCase("cookie"))
+             reuse.equalsIgnoreCase("yes") ||
+             reuse.equalsIgnoreCase("cookie"))
       _reuseSessionId = COOKIE;
     else if (reuse.equalsIgnoreCase("false") || reuse.equalsIgnoreCase("no"))
       _reuseSessionId = FALSE;
@@ -691,7 +691,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
       _reuseSessionId = TRUE;
     else
       throw new ConfigException(L.l("'{0}' is an invalid value for reuse-session-id.  'true' or 'false' are the allowed values.",
-				    reuse));
+                                    reuse));
   }
 
   /**
@@ -700,13 +700,13 @@ public final class SessionManager implements ObjectManager, AlarmListener
   ClusterServer getServer(int index)
   {
     Cluster cluster = getCluster();
-    
+
     if (cluster != null)
       return cluster.getServer(index);
     else
       return null;
   }
-  
+
   /**
    * Returns the index of this JVM in the ring.
    */
@@ -714,7 +714,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     return _srunIndex;
   }
-  
+
   /**
    * Returns the number of sruns in the cluster
    */
@@ -741,12 +741,12 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (cluster == null)
       throw new ConfigException(L.l("<file-store> needs a defined <cluster>."));
-    
+
     if (cluster.getStore() != null)
       throw new ConfigException(L.l("<file-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
 
     StoreManager fileStore = cluster.createPrivateFileStore();
-    
+
     _storeManager = fileStore;
 
     _isWebAppStore = true;
@@ -764,10 +764,10 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (cluster == null)
       throw new ConfigException(L.l("<jdbc-store> needs a defined <cluster>."));
-    
+
     if (cluster.getStore() != null)
       throw new ConfigException(L.l("<jdbc-store> may not be used with a defined <persistent-store>.  Use <use-persistent-store> instead."));
-    
+
     _storeManager = cluster.createJdbcStore();
 
     _isWebAppStore = true;
@@ -792,17 +792,17 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     if (! isEnable)
       return;
-    
+
     Cluster cluster = getCluster();
 
     if (cluster == null)
       throw new ConfigException(L.l("<cluster-store> needs a defined <cluster>."));
-    
+
     StoreManager store = cluster.getStore();
 
     if (store == null)
       throw new ConfigException(L.l("cluster-store in <session-config> requires a configured cluster-store in the <cluster>"));
-    
+
     _storeManager = store;
   }
 
@@ -819,15 +819,15 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (cluster == null)
       throw new ConfigException(L.l("<use-persistent-store> needs a defined <cluster>."));
-    
+
     StoreManager store = cluster.getStore();
 
     if (store == null) {
       try {
-	Context ic = new InitialContext();
-	store = (StoreManager) ic.lookup("java:comp/env/caucho/persistent-store");
+        Context ic = new InitialContext();
+        store = (StoreManager) ic.lookup("java:comp/env/caucho/persistent-store");
       } catch (Throwable e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
 
@@ -838,10 +838,10 @@ public final class SessionManager implements ObjectManager, AlarmListener
     }
     else
       throw new ConfigException(L.l("use-persistent-store in <session-config> requires a configured <persistent-store> in the <server>"));
-    
+
     if (_isWebAppStore)
       throw new ConfigException(L.l("use-persistent-store may not be used with <jdbc-store> or <file-store>."));
-    
+
     _storeManager = store;
   }
 
@@ -905,7 +905,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     if (max < 1)
       throw new ConfigException(L.l("session-max '{0}' is too small.  session-max must be a positive number", max));
-    
+
     _sessionMax = max;
   }
 
@@ -924,7 +924,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     _enableSessionCookies = enableCookies;
   }
-  
+
   /**
    * Returns true if sessions can use the session rewriting.
    */
@@ -932,7 +932,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     return _enableSessionUrls;
   }
-  
+
   /**
    * Returns true if sessions can use the session rewriting.
    */
@@ -1078,8 +1078,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
   public void init()
   {
     if (_sessionSaveMode == SAVE_ON_SHUTDOWN
-	&& (_alwaysSaveSession == SET_TRUE
-	    || _alwaysLoadSession == SET_TRUE))
+        && (_alwaysSaveSession == SET_TRUE
+            || _alwaysLoadSession == SET_TRUE))
       throw new ConfigException(L.l("save-mode='on-shutdown' cannot be used with <always-save-session/> or <always-load-session/>"));
   }
 
@@ -1094,16 +1094,16 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     if (_isWebAppStore) {
       // for backward compatibility
-      
+
       if (_alwaysLoadSession == SET_TRUE)
-	_storeManager.setAlwaysLoad(true);
+        _storeManager.setAlwaysLoad(true);
       else if (_alwaysLoadSession == SET_FALSE)
-	_storeManager.setAlwaysLoad(false);
-      
+        _storeManager.setAlwaysLoad(false);
+
       if (_alwaysSaveSession == SET_TRUE)
-	_storeManager.setAlwaysSave(true);
+        _storeManager.setAlwaysSave(true);
       else if (_alwaysSaveSession == SET_FALSE)
-	_storeManager.setAlwaysSave(false);
+        _storeManager.setAlwaysSave(false);
 
       _storeManager.init();
 
@@ -1113,16 +1113,16 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (_storeManager != null) {
       _sessionStore = _storeManager.createStore(_distributionId, this);
       _sessionStore.setMaxIdleTime(_sessionTimeout);
-      
+
       if (_alwaysLoadSession == SET_TRUE)
-	_sessionStore.setAlwaysLoad(true);
+        _sessionStore.setAlwaysLoad(true);
       else if (_alwaysLoadSession == SET_FALSE)
-	_sessionStore.setAlwaysLoad(false);
-      
+        _sessionStore.setAlwaysLoad(false);
+
       if (_alwaysSaveSession == SET_TRUE)
-	_sessionStore.setAlwaysSave(true);
+        _sessionStore.setAlwaysSave(true);
       else if (_alwaysSaveSession == SET_FALSE)
-	_sessionStore.setAlwaysSave(false);
+        _sessionStore.setAlwaysSave(false);
     }
 
     _alarm.queue(60000);
@@ -1153,12 +1153,12 @@ public final class SessionManager implements ObjectManager, AlarmListener
    */
   public SessionImpl createSession(String oldId, long now,
                                    HttpServletRequest request,
-				   boolean fromCookie)
+                                   boolean fromCookie)
   {
     String id = oldId;
 
     if (id == null || id.length() < 4
-	|| ! isInSessionGroup(id) || ! reuseSessionId(fromCookie)) {
+        || ! isInSessionGroup(id) || ! reuseSessionId(fromCookie)) {
       id = createSessionId(request, true);
     }
 
@@ -1174,15 +1174,16 @@ public final class SessionManager implements ObjectManager, AlarmListener
     }
 
     synchronized (session) {
-      if (_sessionStore != null && id.equals(oldId))
+      if (_sessionStore != null && id.equals(oldId)) {
         load(session, now);
+      }
       else
-	session.create(now);
+        session.create(now);
     }
 
     // after load so a reset doesn't clear any setting
     handleCreateListeners(session);
-    
+
     return session;
   }
 
@@ -1234,13 +1235,13 @@ public final class SessionManager implements ObjectManager, AlarmListener
     else if (owner instanceof Number) {
       index = ((Number) owner).intValue();
       if (_srunLength <= index)
-	index = _srunIndex;
+        index = _srunIndex;
     }
     else if (owner instanceof String) {
       ClusterServer server = _cluster.getServer((String) owner);
 
       if (server != null)
-	index = server.getIndex();
+        index = server.getIndex();
     }
 
     if (index < 0)
@@ -1294,7 +1295,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
       backupCode = _selfServer.getCluster().generateBackupCode(index);
     else
       backupCode = 0x000200010000L;
-    
+
     addDigit(cb, (int) (backupCode & 0xffff));
     addDigit(cb, (int) ((backupCode >> 16) & 0xffff));
     addDigit(cb, (int) ((backupCode >> 32) & 0xffff));
@@ -1320,7 +1321,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
    * @return the cached session.
    */
   public SessionImpl getSession(String key, long now,
-				boolean create, boolean fromCookie)
+                                boolean create, boolean fromCookie)
   {
     SessionImpl session;
     boolean isNew = false;
@@ -1340,21 +1341,21 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (session != null && ! session.addUse()) {
       session = null;
     }
-    
+
     if (session == null && _sessionStore != null) {
       if (! isInSessionGroup(key))
-	return null;
+        return null;
 
       session = create(key, now, create);
 
       if (! session.addUse())
-	session = null;
+        session = null;
       isNew = true;
     }
 
     if (session == null)
       return null;
-    
+
     if (isNew) {
       killSession = ! load(session, now);
       isNew = killSession;
@@ -1362,6 +1363,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
     else if (! session.load()) {
       // if the load failed, then the session died out from underneath
       session.reset(now);
+      killSession = true;
       isNew = true;
     }
 
@@ -1371,14 +1373,14 @@ public final class SessionManager implements ObjectManager, AlarmListener
       _sessions.remove(key);
       // XXX:
       session._isValid = false;
-        
+
       return null;
     }
     else if (isNew)
       handleCreateListeners(session);
     else
       session.setAccess(now);
-    
+
     return session;
   }
 
@@ -1391,11 +1393,11 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     for (int i = _srunGroup.length - 1; i >= 0; i--) {
       ClusterServer server = _srunGroup[i];
-      
+
       if (server != null && group == server.getIndex())
         return true;
     }
-    
+
     return false;
   }
 
@@ -1447,7 +1449,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   private static char convert(long code)
   {
     code = code & 0x3f;
-    
+
     if (code < 26)
       return (char) ('a' + code);
     else if (code < 52)
@@ -1469,7 +1471,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
   {
     if (_listeners != null) {
       HttpSessionEvent event = new HttpSessionEvent(session);
-      
+
       for (int i = 0; i < _listeners.size(); i++) {
         HttpSessionListener listener = _listeners.get(i);
 
@@ -1492,8 +1494,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
       /*
       if (session.getUseCount() > 1) {
-	// if used by more than just us, 
-	return true;
+        // if used by more than just us,
+        return true;
       }
       else*/ if (now <= 0) {
         return false;
@@ -1509,7 +1511,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
       log.log(Level.FINE, e.toString(), e);
       session.reset(now);
     }
-    
+
     return false;
   }
 
@@ -1603,63 +1605,63 @@ public final class SessionManager implements ObjectManager, AlarmListener
       int liveSessions = 0;
 
       if (_isClosed)
-	return;
+        return;
 
       long now = Alarm.getCurrentTime();
       long accessWindow = 0;
 
       if (_sessionStore != null)
-	accessWindow = _sessionStore.getAccessWindowTime();
-      
+        accessWindow = _sessionStore.getAccessWindowTime();
+
       synchronized (_sessions) {
-	_sessionIter = _sessions.values(_sessionIter);
-	while (_sessionIter.hasNext()) {
-	  SessionImpl session = _sessionIter.next();
+        _sessionIter = _sessions.values(_sessionIter);
+        while (_sessionIter.hasNext()) {
+          SessionImpl session = _sessionIter.next();
 
-	  long maxIdleTime = session._maxInactiveInterval + accessWindow;
+          long maxIdleTime = session._maxInactiveInterval + accessWindow;
 
-	  if (session.inUse())
-	    liveSessions++;
-	  else if (session._accessTime + maxIdleTime < now)
-	    _sessionList.add(session);
-	  else
-	    liveSessions++;
-	}
+          if (session.inUse())
+            liveSessions++;
+          else if (session._accessTime + maxIdleTime < now)
+            _sessionList.add(session);
+          else
+            liveSessions++;
+        }
       }
-      
+
       synchronized (_statisticsLock) {
-	_sessionTimeoutCount += _sessionList.size();
+        _sessionTimeoutCount += _sessionList.size();
       }
 
       for (int i = 0; i < _sessionList.size(); i++) {
-	SessionImpl session = _sessionList.get(i);
+        SessionImpl session = _sessionList.get(i);
 
-	try {
-	  if (! session.isValid())
-	    continue;
+        try {
+          if (! session.isValid())
+            continue;
 
-	  if (_storeManager == null) {
-	    // if no persistent store then invalidate
-	    // XXX: server/12cg - single signon shouldn't logout
-     	    session.invalidateTimeout();
-	  }
-	  else if (session.getSrunIndex() != _srunIndex && _srunIndex >= 0) {
+          if (_storeManager == null) {
+            // if no persistent store then invalidate
+            // XXX: server/12cg - single signon shouldn't logout
+            session.invalidateTimeout();
+          }
+          else if (session.getSrunIndex() != _srunIndex && _srunIndex >= 0) {
             if (log.isLoggable(Level.FINE))
               log.fine(session + " timeout (backup)");
-            
-	    // if not the owner, then just remove
-	    _sessions.remove(session.getId());
-	  }
-	  else {
-	    session.invalidateTimeout();
-	  }
-	} catch (Throwable e) {
-	  log.log(Level.FINE, e.toString(), e);
-	}
+
+            // if not the owner, then just remove
+            _sessions.remove(session.getId());
+          }
+          else {
+            session.invalidateTimeout();
+          }
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     } finally {
       if (! _isClosed)
-	_alarm.queue(60000);
+        _alarm.queue(60000);
     }
   }
 
@@ -1678,9 +1680,9 @@ public final class SessionManager implements ObjectManager, AlarmListener
       return;
 
     _alarm.dequeue();
-    
+
     ArrayList<SessionImpl> list = new ArrayList<SessionImpl>();
-    
+
     boolean isError = false;
     // XXX: messy way of dealing with saveOnlyOnShutdown
     synchronized (_sessions) {
@@ -1698,16 +1700,16 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
     for (int i = list.size() - 1; i >= 0; i--) {
       SessionImpl session = list.get(i);
-      
+
       if (log.isLoggable(Level.FINE))
         log.fine("close session " + session.getId());
-      
+
       try {
         if (session.isValid()) {
           synchronized (session) {
-	    // server/016i, server/018x
-	    if (! session.isEmpty())
-	      session.saveOnShutdown();
+            // server/016i, server/018x
+            if (! session.isEmpty())
+              session.saveOnShutdown();
           }
         }
 
@@ -1741,7 +1743,7 @@ public final class SessionManager implements ObjectManager, AlarmListener
 
   static class DistributedObjectInputStream extends ObjectInputStream {
     private ClassLoader _loader;
-    
+
     DistributedObjectInputStream(InputStream is)
       throws IOException
     {

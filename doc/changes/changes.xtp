@@ -12,6 +12,8 @@
 
 <s2 title="3.1 snapshot">
 <ul>
+<li>session: check reuse-session-id with always-save-session="true" (#3715, rep by Nobuaki Shinomiya)</li>
+<li>mod_caucho: allow socket-timeout for non-windows (#3749, rep by Nobuaki Shinomiya)</li>
 <li>scheduled-task: cron not properly handing weeks (#3736, rep by tweihs)</li>
 <li>database-pool: connection pool timing issue with multiple clients (#3837, rep by Bryant Harris)</li>
 <li>session: boundary issues over 4M session (rep by Chris Pratt)</li>

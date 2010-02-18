@@ -978,6 +978,7 @@ jvm_status(cluster_t *cluster, request_rec *r)
   ap_rputs("    <th>Connect<br>Timeout</th>\n", r);
   ap_rputs("    <th>Idle<br>Timeout</th>\n", r);
   ap_rputs("    <th>Recover<br>Timeout</th>\n", r);
+  ap_rputs("    <th>Socket<br>Timeout</th>\n", r);
   ap_rputs("</tr>\n", r);
 
   for (; cluster; cluster = cluster->next) {
@@ -1015,8 +1016,10 @@ jvm_status(cluster_t *cluster, request_rec *r)
 
       ap_rprintf(r, "<td align=right>%d</td><td align=right>%d</td>",
 		 srun->active_sockets, pool_count);
-      ap_rprintf(r, "<td align=right>%d</td><td align=right>%d</td><td align=right>%d</td>",
-		 srun->connect_timeout, srun->live_time, srun->dead_time);
+      ap_rprintf(r, "<td align=right>%d</td><td align=right>%d</td>"
+                 "<td align=right>%d</td><td align=right>%d</td>",
+		 srun->connect_timeout, srun->live_time,
+                 srun->dead_time, srun->read_timeout);
       ap_rputs("</tr>\n", r);
     }
   }
