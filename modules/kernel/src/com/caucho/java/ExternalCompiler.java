@@ -297,42 +297,44 @@ public class ExternalCompiler extends AbstractJavaCompiler {
     throws IOException
   {
     byte []buffer = new byte[256];
-    int stderrLen;
-    int stdoutLen;
+    int stderrLen = 0;
+    int stdoutLen = 0;
 
     if (inputStream == null || errorStream == null)
       return;
     
     do {
-      while ((stderrLen = errorStream.available()) > 0) {
+      if ((stderrLen = errorStream.available()) > 0) {
         stderrLen = errorStream.read(buffer, 0, buffer.length);
-        if (stderrLen <= 0)
-          break;
-
-        error.write(buffer, 0, stderrLen);
+        
+        if (stderrLen > 0) {
+          error.write(buffer, 0, stderrLen);
+          continue;
+        }
       }
       
-      while ((stdoutLen = inputStream.available()) > 0) {
+      if ((stdoutLen = inputStream.available()) > 0) {
         stdoutLen = inputStream.read(buffer, 0, buffer.length);
-        if (stdoutLen <= 0)
-          break;
-
-        error.write(buffer, 0, stdoutLen);
+        
+        if (stdoutLen > 0) {
+          error.write(buffer, 0, stdoutLen);
+          continue;
+        }
       }
 
       if (stderrLen < 0 && stdoutLen < 0)
         return;
 
-      if (stderrLen == 0) {
-        stderrLen = errorStream.read(buffer, 0, buffer.length);
-        if (stderrLen > 0)
-          error.write(buffer, 0, stderrLen);
+      stderrLen = errorStream.read(buffer, 0, buffer.length);
+      if (stderrLen > 0) {
+        error.write(buffer, 0, stderrLen);
+        continue;
       }
 
-      if (stderrLen < 0 && stdoutLen == 0) {
-        stdoutLen = inputStream.read(buffer, 0, buffer.length);
-        if (stdoutLen > 0)
-          error.write(buffer, 0, stdoutLen);
+      stdoutLen = inputStream.read(buffer, 0, buffer.length);
+      if (stdoutLen > 0) {
+        error.write(buffer, 0, stdoutLen);
+        continue;
       }
     } while (! _isDead && (stderrLen >= 0 || stdoutLen >= 0));
   }

@@ -13,6 +13,8 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>cdi: @ServiceType (@HessianService) was removing the bean from CDI (#3852, rep by Scott Hernandez)</li>
+<li>javac: external javac was busy-looping on the output causing heavy load (#3847, rep by mocospace)</li>
 <li>session: persistent sessions were not properly timed out (#3872, rep by chiefgeek)</li>
 <li>jpa 2.0: add com.caucho.env.jpa.DisabledPersistenceProvider (#3760, rep by Georg Busch Bech)</li>
 <li>jpa 2.0: api and CanDI integration</li>

@@ -132,7 +132,7 @@ public class WebAppInjectExtension implements Extension
 
 	  _webApp.addServletMapping(mapping);
 
-	  event.veto();
+	  // event.veto();
 	}
 	else if (annType.isAnnotationPresent(ProxyType.class)) {
 	  ProxyType proxyType

@@ -355,13 +355,15 @@ public class TagFileTag extends GenericTag {
 	cl = String.class;
 
       if (attribute == null) {
+        /*
 	if (mapName == null) {
 	  mapName = "_jsp_map_" + _gen.uniqueId();
 	  out.println("java.util.HashMap " + mapName + " = new java.util.HashMap(8);");
 	  out.println(name + ".setAttribute(\"" + mapAttribute + "\", " + mapName + ");");
 	}
+	*/
 
-	out.print(mapName + ".put(\"" + attrName.getName() + "\", ");
+	out.print(customTagName + ".setDynamicAttribute(null, \"" + attrName.getName() + "\", ");
       }
       else
 	out.print(name + ".setAttribute(\"" + attrName.getName() + "\", ");
@@ -389,9 +391,14 @@ public class TagFileTag extends GenericTag {
 
 	String localName = attrName.getLocalName();
 	String upperName = Character.toUpperCase(localName.charAt(0)) + localName.substring(1);
-	
-	// needed by TeamCity
-	out.println(customTagName + ".set" + upperName + "(" + convValue + ");");
+
+	if (attribute != null) {
+	  // needed by TeamCity
+          out.println(customTagName + ".set" + upperName + "(" + convValue + ");");
+	}
+	else {
+	 // out.println(customTagName + ".set" + upperName + "(" + convValue + ");");
+	}
       }
       
       /*

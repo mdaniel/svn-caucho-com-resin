@@ -473,7 +473,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     // jsp/1056
     out.println("setJspContext(pageContext);");
 
-    if (hasScripting()) {
+    if (false && hasScripting()) {
       out.println("javax.servlet.http.HttpServletRequest request = (javax.servlet.http.HttpServletRequest) pageContext.getRequest();");
       out.println("javax.servlet.http.HttpServletResponse response = (javax.servlet.http.HttpServletResponse) pageContext.getResponse();");
       out.println("javax.servlet.http.HttpSession session = pageContext.getSession();");
@@ -484,7 +484,8 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("com.caucho.jsp.PageContextWrapper jspContext = pageContext;");
     out.println("javax.el.ELContext _jsp_env = pageContext.getELContext();");
     out.println("javax.servlet.jsp.JspWriter out = pageContext.getOut();");
-    generateTagAttributes(out);
+    
+    // generateTagAttributes(out);
     
     //if (hasScripting())
     //  generatePrologue(out);
@@ -517,7 +518,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("finally {");
       out.pushDepth();
       
-      generateTagVariablesAtEnd(out);
+      // generateTagVariablesAtEnd(out);
       
       out.println("setJspContext(_jsp_parentContext);");
       out.println("_jsp_pageManager.freePageContextWrapper(pageContext);");
@@ -602,23 +603,25 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("TagState _jsp_state = new TagState();");
     out.println("javax.servlet.jsp.tagext.JspTag _jsp_parent_tag = jsp_parent_tag;");
 
+    generateTagAttributes(out);
+    
     generatePrologue(out);
 
-    out.println("try {");
-    out.pushDepth();
+    //out.println("try {");
+    //out.pushDepth();
     
     node.generate(out);
 
-    out.popDepth();
-    out.println("} finally {");
-    out.pushDepth();
+    //out.popDepth();
+    //out.println("} finally {");
+    //out.pushDepth();
       
     generateTagVariablesAtEnd(out);
       
-    out.println("_jsp_pageManager.freePageContextWrapper(pageContext);");
+    //out.println("_jsp_pageManager.freePageContextWrapper(pageContext);");
       
-    out.popDepth();
-    out.println("}");
+    //out.popDepth();
+    //out.println("}");
 
     out.popDepth();
     out.println("}");
