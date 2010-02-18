@@ -197,10 +197,23 @@ public class CustomSimpleTag extends GenericTag
 
     String var = _tag.getId();
     String className = _tag.getTagClass().getName();
-      
+    
+    if (_tag.getAnalyzedTag().getHasInjection()) {
+      // out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
+      out.print(var + " = com.caucho.config.inject.InjectManager.create().createTransientObject(");
+      out.printClass(_tag.getTagClass());
+      out.println(".class);");
+    }
+    else {
+      out.print(var + " = new ");
+      out.printClass(_tag.getTagClass());
+      out.println("();");
+    }
+/*      
     out.print(var + " = new ");
     out.printClass(_tag.getTagClass());
     out.println("();");
+    */
 
     if (JspIdConsumer.class.isAssignableFrom(_tag.getTagClass())) {
       String shortName = className;
@@ -217,10 +230,12 @@ public class CustomSimpleTag extends GenericTag
       out.println(var + ".setParent(" + parentNode.getCustomTagName() + ");");
     }
 
+    /*
     if (_tag.getAnalyzedTag() != null
 	&& _tag.getAnalyzedTag().getHasInjection()) {
       out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
     }
+    */
 
     if (hasCustomTag()) {
       out.println(var + "_adapter = new javax.servlet.jsp.tagext.TagAdapter(" + var + ");");

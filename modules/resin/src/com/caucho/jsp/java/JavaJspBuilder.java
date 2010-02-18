@@ -208,8 +208,8 @@ public class JavaJspBuilder extends JspBuilder {
   public void startElement(QName qname)
     throws JspParseException
   {
-    Class cl = null;
-
+    Class<?> cl = null;
+    
     _elementDepth++;
     
     if (! _isTagDependent) {

@@ -403,13 +403,18 @@ public class CustomTag extends GenericTag
     String var = _tag.getId();
     String className = _tag.getTagClass().getName();
       
-    out.print(var + " = new ");
-    out.printClass(_tag.getTagClass());
-    out.println("();");
-
     if (_tag.getAnalyzedTag().getHasInjection()) {
-      out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
+      // out.println("_jsp_inject_" + _tag.getId() + ".configure(" + var + ");");
+      out.print(var + " = com.caucho.config.inject.InjectManager.create().createTransientObject(");
+      out.printClass(_tag.getTagClass());
+      out.println(".class);");
     }
+    else {
+      out.print(var + " = new ");
+      out.printClass(_tag.getTagClass());
+      out.println("();");
+    }
+
     
     AnalyzedTag analyzedTag = _tag.getAnalyzedTag();
 

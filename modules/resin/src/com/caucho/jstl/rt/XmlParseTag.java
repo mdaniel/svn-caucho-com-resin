@@ -42,8 +42,10 @@ import org.xml.sax.XMLReader;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.tagext.BodyTagSupport;
+import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.SAXParserFactory;
+import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.dom.DOMResult;
 import javax.xml.transform.sax.SAXTransformerFactory;
 import javax.xml.transform.sax.TransformerHandler;
@@ -179,8 +181,15 @@ public class XmlParseTag extends BodyTagSupport {
 
       XMLFilter filter = (XMLFilter) _filter;
 
-      if (xmlReader == null)
-        xmlReader = SAXParserFactory.newInstance().newSAXParser().getXMLReader();
+      if (xmlReader == null) {
+        SAXParserFactory parserFactory = SAXParserFactory.newInstance();
+        
+        // jsp/1m14
+        parserFactory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+        parserFactory.setFeature("http://xml.org/sax/features/namespaces", true);
+        
+        xmlReader = parserFactory.newSAXParser().getXMLReader();
+      }
 
       // jsp/1g05
       if (_filter != null && _var == null && _varDom == null) {
@@ -188,13 +197,25 @@ public class XmlParseTag extends BodyTagSupport {
         
         filter.parse(is);
       } else {
-        Document doc = DocumentBuilderFactory.newInstance()
-            .newDocumentBuilder()
-            .newDocument();
-
-        TransformerHandler handler =
-            ((SAXTransformerFactory) SAXTransformerFactory.newInstance()).newTransformerHandler();
-
+        DocumentBuilderFactory domFactory
+          = DocumentBuilderFactory.newInstance();
+        
+        domFactory.setNamespaceAware(true);
+        DocumentBuilder builder = domFactory.newDocumentBuilder();
+        
+        Document doc = builder.newDocument();
+        
+        SAXTransformerFactory saxFactory
+          = (SAXTransformerFactory) SAXTransformerFactory.newInstance();
+        
+        //saxFactory.setAttribute("http://xml.org/sax/features/namespace-prefixes", false);
+        // saxFactory.setAttribute("http://xml.org/sax/features/namespaces", false);
+        //saxFactory.setFeature("http://xml.org/sax/features/namespace-prefixes", true);
+        // xmlReader.setFeature("http://xml.org/sax/features/namespace-prefixes", false);
+        
+        TransformerHandler handler
+          = saxFactory.newTransformerHandler();
+        
         handler.setResult(new DOMResult(doc));
 
         if (filter != null) {

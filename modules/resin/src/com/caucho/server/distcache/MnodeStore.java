@@ -625,7 +625,7 @@ public class MnodeStore implements AlarmListener {
   public void removeExpiredData()
   {
     CacheMapConnection conn = null;
-
+ 
     try {
       conn = getConnection();
       PreparedStatement pstmt = conn.prepareExpire();

@@ -133,13 +133,16 @@ public class TagFileTag extends GenericTag {
   public void generateTagState(JspJavaWriter out)
     throws Exception
   {
+    if (! isDeclaringInstance())
+      return;
+    
     out.print("private ");
-    out.printClass(_tagClass);
+    out.print(getTagClassName());
     out.println(" " + _tag.getId() + ";");
                                            
     out.println();
     out.print("final ");
-    out.printClass(_tagClass);
+    out.print(getTagClassName());
 //  out.println(" get" + _tag.getId() + "(PageContext pageContext, javax.servlet.jsp.tagext.JspTag _jsp_parent_tag) throws Throwable");
     out.println(" get" + _tag.getId() + "() throws Throwable");
     out.println("{");
@@ -148,7 +151,7 @@ public class TagFileTag extends GenericTag {
     out.println("if (" + _tag.getId() + " == null) {");
     out.pushDepth();
     
-    out.println(_tag.getId() + " = new " + _tagClass.getName() + "();");
+    out.println(_tag.getId() + " = new " + getTagClassName() + "();");
 
     out.popDepth();
     out.println("}");
@@ -197,6 +200,11 @@ public class TagFileTag extends GenericTag {
   }
   */
   
+  public String getTagClassName()
+  {
+    return _tagInfo.getTagClassName();
+  }
+  
   /**
    * Generates code before the actual JSP.
    */
@@ -209,8 +217,10 @@ public class TagFileTag extends GenericTag {
       _body.setJspFragment(true);
       _body.generateFragmentPrologue(out);
     }
-    
-    out.println(_tagInfo.getTagClassName() + " " + getCustomTagName() + ";");
+
+    if (isDeclaringInstance()) {
+      out.println(getTagClassName() + " " + getCustomTagName() + ";");
+    }
   }
   
   /**
@@ -221,9 +231,8 @@ public class TagFileTag extends GenericTag {
   public void generate(JspJavaWriter out)
     throws Exception
   {
-    String className = _tagInfo.getTagClassName();
-    Class cl = _tagClass;
-
+    String className = getTagClassName();
+ 
     _gen.addTagFileClass(className);
 
     String parentTagName;
@@ -252,13 +261,26 @@ public class TagFileTag extends GenericTag {
     out.println(customTagName + " = _jsp_state.get" + _tag.getId() + "();");
     
     String childContext = fillTagFileAttributes(out, name, customTagName);
+    
+    if (true || _body != null) {
+      // jsp/1025      
+      out.print(customTagName + ".setJspBody(");
+      if (_body != null)
+        generateFragment(out, _body, "pageContext");
+      else
+        out.print("null");
+      out.println(");");
+    }
 
     out.print(customTagName + ".doTag(pageContext, " + childContext + ", out, ");
     
+    /*
     if (_body != null)
       generateFragment(out, _body, "pageContext");
     else
       out.print("null");
+      */
+    out.print(customTagName + ".getJspBody()");
 
     out.print(", " + parentTagName);
 
@@ -364,12 +386,19 @@ public class TagFileTag extends GenericTag {
 	//					attribute.allowRtexpr());
 
 	out.println(toObject(cl, convValue) + ");");
+
+	String localName = attrName.getLocalName();
+	String upperName = Character.toUpperCase(localName.charAt(0)) + localName.substring(1);
+	
+	// needed by TeamCity
+	out.println(customTagName + ".set" + upperName + "(" + convValue + ");");
       }
       
-
+      /*
       generateSetAttribute(out, customTagName, attrName, value,
                            rtexprvalue,
                            false, attribute);
+      */
     }
     
     return name;

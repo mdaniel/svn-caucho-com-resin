@@ -30,6 +30,7 @@ package com.caucho.jsp.java;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.PageContext;
+import javax.servlet.jsp.tagext.JspFragment;
 import javax.servlet.jsp.tagext.Tag;
 
 /**
@@ -43,10 +44,17 @@ abstract public class JspTagFileSupport extends JspTagSupport implements Tag {
   public void setParent(Tag t)
   {
   }
-
+  
   public Tag getParent()
   {
     return null;
+  }
+  
+  @Override
+  public JspFragment getJspBody()
+  {
+    // XXX: temp for jsp/102-
+    return super.getJspBody();
   }
 
   public int doStartTag() throws JspException

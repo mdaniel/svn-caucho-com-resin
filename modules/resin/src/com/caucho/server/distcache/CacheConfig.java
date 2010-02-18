@@ -45,6 +45,7 @@ import javax.cache.CacheStatistics;
 public class CacheConfig
 {
   public static final long TIME_INFINITY  = Long.MAX_VALUE / 2;
+  public static final long TIME_HOUR  = 3600 * 1000L;
   public static final int FLAG_EPHEMERAL  = 0x01;
   public static final int FLAG_BACKUP = 0x02;
   public static final int FLAG_TRIPLICATE = 0x04;
@@ -57,11 +58,11 @@ public class CacheConfig
 
   private int _flags = (FLAG_BACKUP | FLAG_TRIPLICATE);
 
-  private long _expireTimeout = TIME_INFINITY;
+  private long _expireTimeout = 24 * TIME_HOUR;
 
   private long _expireTimeoutWindow = 0;
 
-  private long _idleTimeout = TIME_INFINITY;
+  private long _idleTimeout = 24 * TIME_HOUR;
   private long _idleTimeoutWindow = -1;
 
   private long _localReadTimeout

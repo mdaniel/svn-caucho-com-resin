@@ -387,8 +387,8 @@ abstract public class GenericTag extends JspContainerNode
 	out.printClass(_tagClass);
 	out.println(" " + _tag.getId() + " = null;");
 
-	_isDeclaringInstance = true;
       }
+      _isDeclaringInstance = true;
 
       /*
       if (SimpleTag.class.isAssignableFrom(_tagClass) && hasCustomTag())

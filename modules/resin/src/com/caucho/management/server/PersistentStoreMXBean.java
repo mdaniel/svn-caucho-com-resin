@@ -43,6 +43,16 @@ public interface PersistentStoreMXBean extends ManagedObjectMXBean {
   public String getStoreType();
   
   /**
+   * Returns the total current mnodes
+   */
+  public long getMnodeCount();
+  
+  /**
+   * Returns the total current data objects
+   */
+  public long getDataCount();
+  
+  /**
    * Returns the total current objects
    */
   public long getObjectCount();

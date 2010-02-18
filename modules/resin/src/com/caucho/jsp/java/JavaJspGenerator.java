@@ -1654,8 +1654,9 @@ public class JavaJspGenerator extends JspGenerator {
       if (frag.isStatic())
 	continue;
 
-      if (frag.isValueFragment())
-	frag.generateValueMethod(out);
+      if (frag.isValueFragment()) {
+	continue; // frag.generateValueMethod(out);
+      }
       else {
 	out.println();
 	out.println("private void " + frag.getFragmentName() + "(JspWriter out)");
@@ -1702,6 +1703,17 @@ public class JavaJspGenerator extends JspGenerator {
     
     out.popDepth();
     out.println("}");
+    
+    for (int i = 0; i < _fragmentList.size(); i++) {
+      JspFragmentNode frag = _fragmentList.get(i);
+
+      if (frag.isStatic())
+        continue;
+
+      if (frag.isValueFragment()) {
+        frag.generateValueMethod(out);
+      }
+    }
   }
 
   /**
@@ -2190,10 +2202,11 @@ public class JavaJspGenerator extends JspGenerator {
   private void generateTagInjectDecl(JspJavaWriter out, TagInstance tag)
     throws IOException
   {
+    /*
     if (tag.getAnalyzedTag() != null
 	&& tag.getAnalyzedTag().getHasInjection()) {
       out.println("private static com.caucho.config.j2ee.InjectProgram _jsp_inject_" + tag.getId() + ";");
-    }
+    }*/
 
     Iterator<TagInstance> iter = tag.iterator();
     while (iter.hasNext()) {
@@ -2208,13 +2221,13 @@ public class JavaJspGenerator extends JspGenerator {
    */
   private void generateTagInject(JspJavaWriter out, TagInstance tag)
     throws IOException
-  {
+  {/*
     if (tag.getAnalyzedTag() != null
 	&& tag.getAnalyzedTag().getHasInjection()) {
       out.print("_jsp_inject_" + tag.getId() + " = ");
-      out.println("com.caucho.config.j2ee.InjectIntrospector.introspectProgram("
-		  + tag.getTagClass().getName() + ".class, null);");
-    }
+      out.println("com.caucho.config.inject.InjectManager.create().getReference("
+		  + tag.getTagClass().getName() + ".class);");
+    }*/
 
     Iterator<TagInstance> iter = tag.iterator();
     while (iter.hasNext()) {

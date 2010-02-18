@@ -52,6 +52,7 @@ abstract public class JspFragmentNode extends JspContainerNode
   /**
    * Called after all the attributes from the tag.
    */
+  @Override
   public void endAttributes()
     throws JspParseException
   {
@@ -198,7 +199,8 @@ abstract public class JspFragmentNode extends JspContainerNode
 
     CharBuffer cb = new CharBuffer();
 
-    cb.append("_CauchoFragment." + _fragmentName + "(pageContext, ");
+    // cb.append("_CauchoFragment.");
+    cb.append(_fragmentName + "(pageContext, ");
 
     for (;
 	 parent != null && parent.isTagFileTag();
@@ -250,7 +252,11 @@ abstract public class JspFragmentNode extends JspContainerNode
     }
     
     out.println();
-    out.println("static String " + _fragmentName + "(");
+    // jsp/1c0o - non-static
+    
+    //if (_isValueFragment)
+    // out.print("static ");
+    out.println("String " + _fragmentName + "(");
     out.println("  com.caucho.jsp.PageContextImpl pageContext,");
     out.println("  javax.servlet.jsp.tagext.JspTag _jsp_parent_tag,");
     out.println("  javax.servlet.jsp.tagext.JspFragment _jspBody,");

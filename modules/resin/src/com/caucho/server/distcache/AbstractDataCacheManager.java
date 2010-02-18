@@ -70,9 +70,11 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
 
   private final MnodeStore _mnodeStore;
   private final DataStore _dataStore;
-
+  
   private final LruCache<HashKey, E> _entryCache
     = new LruCache<HashKey, E>(64 * 1024);
+  
+  private final AdminPersistentStore _admin;
 
   public AbstractDataCacheManager(Server server)
   {
@@ -87,11 +89,18 @@ abstract public class AbstractDataCacheManager<E extends DistCacheEntry>
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+    
+    _admin = new AdminPersistentStore(this);
   }
 
   protected DataStore getDataStore()
   {
     return _dataStore;
+  }
+
+  protected MnodeStore getMnodeStore()
+  {
+    return _mnodeStore;
   }
 
   /**

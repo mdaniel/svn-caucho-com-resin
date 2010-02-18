@@ -13,6 +13,7 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>session: persistent sessions were not properly timed out (#3872, rep by chiefgeek)</li>
 <li>jpa 2.0: add com.caucho.env.jpa.DisabledPersistenceProvider (#3760, rep by Georg Busch Bech)</li>
 <li>jpa 2.0: api and CanDI integration</li>
 <li>ioc: issues with circular references (#3886, rep by Hontvari Jozsef)</li>
