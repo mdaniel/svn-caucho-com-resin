@@ -12,6 +12,8 @@
 
 <s2 title="3.1 snapshot">
 <ul>
+<li>scheduled-task: cron not properly handing weeks (#3736, rep by tweihs)</li>
+<li>database-pool: connection pool timing issue with multiple clients (#3837, rep by Bryant Harris)</li>
 <li>session: boundary issues over 4M session (rep by Chris Pratt)</li>
 <li>comet: cookies cleared before resume</li>
 <li>cache: jsp/include/html was not properly cached (#3379, rep by Driss Louriagli)</li>

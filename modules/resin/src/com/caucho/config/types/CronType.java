@@ -46,7 +46,7 @@ public class CronType implements Trigger {
   private final QDate _localCalendar = QDate.createLocal();
 
   private String _text;
-  
+
   private boolean []_minutes;
   private boolean []_hours;
   private boolean []_days;
@@ -61,7 +61,7 @@ public class CronType implements Trigger {
   {
     addText(cron);
   }
-  
+
   /**
    * Sets the text.
    */
@@ -70,23 +70,23 @@ public class CronType implements Trigger {
   {
     text = text.trim();
     _text = text;
-    
+
     String []split = Pattern.compile("\\s+").split(text);
 
     if (split.length > 0)
       _minutes = parseRange(split[0], 0, 59);
-    
+
     if (split.length > 1)
       _hours = parseRange(split[1], 0, 23);
     else
       _hours = parseRange("*", 0, 23);
-    
+
     if (split.length > 2)
       _days = parseRange(split[2], 1, 31);
-    
+
     if (split.length > 3)
       _months = parseRange(split[3], 1, 12);
-    
+
     if (split.length > 4)
       _daysOfWeek = parseRange(split[4], 0, 7);
   }
@@ -98,7 +98,7 @@ public class CronType implements Trigger {
     throws ConfigException
   {
     boolean []values = new boolean[rangeMax + 1];
-    
+
     int j = 0;
     while (j < range.length()) {
       char ch = range.charAt(j);
@@ -106,65 +106,65 @@ public class CronType implements Trigger {
       int min = 0;
       int max = 0;
       int step = 1;
-      
+
       if (ch == '*') {
-	min = rangeMin;
-	max = rangeMax;
-	j++;
+        min = rangeMin;
+        max = rangeMax;
+        j++;
       }
       else if ('0' <= ch && ch <= '9') {
-	for (;
-	     j < range.length() && '0' <= (ch = range.charAt(j)) && ch <= '9';
-	     j++) {
-	  min = 10 * min + ch - '0';
-	}
+        for (;
+             j < range.length() && '0' <= (ch = range.charAt(j)) && ch <= '9';
+             j++) {
+          min = 10 * min + ch - '0';
+        }
 
-	if (j < range.length() && ch == '-') {
-	  for (j++;
-	       j < range.length() && '0' <= (ch = range.charAt(j)) && ch <= '9';
-	       j++) {
-	    max = 10 * max + ch - '0';
-	  }
-	}
-	else
-	  max = min;
+        if (j < range.length() && ch == '-') {
+          for (j++;
+               j < range.length() && '0' <= (ch = range.charAt(j)) && ch <= '9';
+               j++) {
+            max = 10 * max + ch - '0';
+          }
+        }
+        else
+          max = min;
       }
       else
-	throw new ConfigException(L.l("'{0}' is an illegal cron range",
-				      range));
+        throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                                      range));
 
       if (min < rangeMin)
-	throw new ConfigException(L.l("'{0}' is an illegal cron range (min value is too small)",
-				      range));
+        throw new ConfigException(L.l("'{0}' is an illegal cron range (min value is too small)",
+                                      range));
       else if (rangeMax < max)
-	throw new ConfigException(L.l("'{0}' is an illegal cron range (max value is too large)",
-				      range));
+        throw new ConfigException(L.l("'{0}' is an illegal cron range (max value is too large)",
+                                      range));
 
       if (j < range.length() && (ch = range.charAt(j)) == '/') {
-	step = 0;
-	
-	for (j++;
-	     j < range.length() && '0' <= (ch = range.charAt(j)) && ch <= '9';
-	     j++) {
-	  step = 10 * step + ch - '0';
-	}
+        step = 0;
 
-	if (step == 0)
-	  throw new ConfigException(L.l("'{0}' is an illegal cron range",
-					range));
+        for (j++;
+             j < range.length() && '0' <= (ch = range.charAt(j)) && ch <= '9';
+             j++) {
+          step = 10 * step + ch - '0';
+        }
+
+        if (step == 0)
+          throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                                        range));
       }
 
       if (range.length() <= j) {
       }
       else if (ch == ',')
-	j++;
+        j++;
       else {
-	throw new ConfigException(L.l("'{0}' is an illegal cron range",
-				      range));
+        throw new ConfigException(L.l("'{0}' is an illegal cron range",
+                                      range));
       }
 
       for (; min <= max; min += step)
-	values[min] = true;
+        values[min] = true;
     }
 
     return values;
@@ -175,71 +175,71 @@ public class CronType implements Trigger {
     QDate cal = _localCalendar;
 
     long time = now + 60000 - now % 60000;
-    
+
     synchronized (cal) {
       cal.setGMTTime(time);
 
       int minute = nextInterval(_minutes, cal.getMinute());
 
       if (minute < 0) {
-	minute = nextInterval(_minutes, 0);
-	
-	cal.setHour(cal.getHour() + 1);
+        minute = nextInterval(_minutes, 0);
+
+        cal.setHour(cal.getHour() + 1);
       }
 
       int hour = nextInterval(_hours, cal.getHour());
       if (hour < 0) {
-	hour = nextInterval(_hours, 0);
-	minute = nextInterval(_minutes, 0);
-	
-	cal.setDayOfMonth(cal.getDayOfMonth() + 1);
+        hour = nextInterval(_hours, 0);
+        minute = nextInterval(_minutes, 0);
+
+        cal.setDayOfMonth(cal.getDayOfMonth() + 1);
       }
 
       int day = cal.getDayOfMonth();
 
       if (_days != null) {
-	day = nextInterval(_days, cal.getDayOfMonth());
+        day = nextInterval(_days, cal.getDayOfMonth());
 
-	if (day < 0) {
-	  cal.setMonth(cal.getMonth() + 1);
-	  cal.setDayOfMonth(1);
+        if (day < 0) {
+          cal.setMonth(cal.getMonth() + 1);
+          cal.setDayOfMonth(1);
 
-	  day = nextInterval(_days, cal.getDayOfMonth());
-	  hour = nextInterval(_hours, 0);
-	  minute = nextInterval(_minutes, 0);
-	}
+          day = nextInterval(_days, cal.getDayOfMonth());
+          hour = nextInterval(_hours, 0);
+          minute = nextInterval(_minutes, 0);
+        }
       }
 
       if (_daysOfWeek != null) {
-	int oldDayOfWeek = cal.getDayOfWeek() - 1;
-	int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
+        int oldDayOfWeek = cal.getDayOfWeek() - 1;
+        int dayOfWeek = nextInterval(_daysOfWeek, oldDayOfWeek);
 
-	if (dayOfWeek > 0) {
-	  day += (dayOfWeek - oldDayOfWeek);
-	}
-	else {
-	  dayOfWeek = nextInterval(_daysOfWeek, 0);
-	  
-	  day += (dayOfWeek - oldDayOfWeek + 7);
-	}
+        if (dayOfWeek >= 0) {
+          day += (dayOfWeek - oldDayOfWeek);
+        }
+        else {
+          dayOfWeek = nextInterval(_daysOfWeek, 0);
+
+          day += (dayOfWeek - oldDayOfWeek + 7);
+        }
       }
 
       int month = cal.getMonth();
       int year = (int) cal.getYear();
-      
+
       long nextTime = nextTime(year, month, day, hour, minute);
 
       if (now < nextTime)
-	return nextTime;
+        return nextTime;
       else
-	return nextTime(now + 3600000L); // DST
+        return nextTime(now + 3600000L); // DST
     }
   }
 
   private long nextTime(int year, int month, int day, int hour, int minute)
   {
     QDate cal = _localCalendar;
-    
+
     cal.setLocalTime(0);
 
     cal.setYear(year);
@@ -250,12 +250,12 @@ public class CronType implements Trigger {
 
     return cal.getGMTTime();
   }
-    
+
   public int nextInterval(boolean []values, int now)
   {
     for (; now < values.length; now++) {
       if (values[now])
-	return now;
+        return now;
     }
 
     return -1;

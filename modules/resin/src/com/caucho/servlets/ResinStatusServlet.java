@@ -147,7 +147,7 @@ public class ResinStatusServlet extends GenericServlet {
       printPorts(out);
       printSrun(out);
       /*
-	printJNDI(out, _server.getJndiContext());
+        printJNDI(out, _server.getJndiContext());
       */
       printApplicationSummary(out, req.getRequestURI());
       printFooter(out);
@@ -228,7 +228,7 @@ public class ResinStatusServlet extends GenericServlet {
                 (freeMemory / 100000) % 10 +
                 (freeMemory / 10000) % 10 +
                 "Meg");
-    
+
     long invocationHitCount = _server.getInvocationCacheHitCountTotal();
     long invocationMissCount = _server.getInvocationCacheMissCountTotal();
 
@@ -250,14 +250,14 @@ public class ResinStatusServlet extends GenericServlet {
 
       totalCount = proxyHitCount + proxyMissCount;
       if (totalCount == 0)
-	totalCount = 1;
+        totalCount = 1;
 
       hitRatio = (10000 * proxyHitCount) / totalCount;
 
       out.print("<tr><td><b>Proxy Cache Hit Ratio:</b><td> " +
-		(hitRatio / 100) + "." +
-		(hitRatio / 10) % 10 +
-		(hitRatio) % 10 + "%");
+                (hitRatio / 100) + "." +
+                (hitRatio / 10) % 10 +
+                (hitRatio) % 10 + "%");
       out.println(" (" + proxyHitCount + "/" + totalCount + ")");
     }
 
@@ -415,8 +415,8 @@ public class ResinStatusServlet extends GenericServlet {
         ServerConnectorMXBean []servers = cluster.getServers();
 
         for (int j = 0; j < servers.length; j++) {
-	  ServerConnectorMXBean client = servers[j];
-	  
+          ServerConnectorMXBean client = servers[j];
+
           String host = client.getAddress();
           String port = String.valueOf(client.getPort());
 
@@ -774,7 +774,7 @@ public class ResinStatusServlet extends GenericServlet {
 
       for (int j = 0; j < apps.size(); j++) {
         WebAppMXBean app = apps.get(j);
-	SessionManagerMXBean session = app.getSessionManager();
+        SessionManagerMXBean session = app.getSessionManager();
 
         String contextPath = app.getContextPath();
 
