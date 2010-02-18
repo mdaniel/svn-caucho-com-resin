@@ -827,6 +827,23 @@ if test -z "${LD_SHLIB}"; then
   fi
 fi
 
+#
+# Check if cp accepts -u
+#
+CP=`which cp`
+echo -n "checking if $CP accepts -u... "
+
+touch /tmp/cp.test.$$.src
+$CP -u /tmp/cp.test.$$.src /tmp/cp.test.$$.dest
+if test $? = "0"; then
+  CP_U_FLAG=-u
+  AC_SUBST(CP_U_FLAG)
+  echo "yes"
+else
+  echo "no"
+fi
+rm -f /tmp/cp.test.$$.src /tmp/cp.test.$$.dest
+
 #if test -z "${LD_SHLIB}"; then
 #  AC_MSG_ERROR([Can't determine compilation flags.]);
 #fi
