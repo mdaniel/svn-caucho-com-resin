@@ -23,6 +23,7 @@
 	<classpathentry kind="src" path="modules/servlet16/src"/>
 	<classpathentry kind="src" path="modules/webbeans/src"/>
 	<classpathentry kind="src" path="modules/webutil/src"/>
+	<classpathentry kind="src" path="modules/ecmascript/src"/>
 	<classpathentry kind="lib" path="modules/ext/activation.jar"/>
 	<classpathentry kind="lib" path="modules/ext/javamail-141.jar"/>
 	<classpathentry kind="lib" path="modules/ext/jsf-api.jar"/>
@@ -32,11 +33,11 @@
 	<classpathentry kind="lib" path="modules/ext/trang.jar"/>
 	<classpathentry kind="lib" path="modules/ext/webservices-api.jar"/>
 	<classpathentry kind="lib" path="modules/ext/webservices-extra-api.jar"/>
+	<classpathentry kind="lib" path="modules/ext/junit-4.7.jar"/>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER">
 		<accessrules>
 			<accessrule kind="discouraged" pattern="**/Unsafe*"/>
 		</accessrules>
 	</classpathentry>
-	<classpathentry kind="lib" path="/srv/nfs4/home/ferg/ws/resin/modules/ext/junit-4.7.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
