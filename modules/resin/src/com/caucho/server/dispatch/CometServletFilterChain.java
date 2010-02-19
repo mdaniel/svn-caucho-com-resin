@@ -182,7 +182,9 @@ public class CometServletFilterChain implements FilterChain {
     @Override
     public boolean isClosed()
     {
-      return _request.isClosed();
+      HttpServletRequestImpl request = _request;
+      
+      return request == null || request.isClosed() || ! isActive();
     }
 
     @Override

@@ -9,7 +9,7 @@ plugins	:
 	for dir in $(plugins); do (cd $$dir; $(MAKE)); done
 
 clean	:
-	for dir in common apache1 apache2 $(plugins); do \
+	for dir in common apache2 $(plugins); do \
 	  (cd $$dir; $(MAKE) clean); \
         done
 

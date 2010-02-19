@@ -270,7 +270,7 @@ public class TcpConnection extends AbstractTransportConnection
   @Override
   public boolean isCometActive()
   {
-    return _state.isCometActive();
+    return _state.isCometActive() && ! _isCompleteRequested;
   }
 
   public boolean isCometSuspend()
@@ -755,9 +755,13 @@ public class TcpConnection extends AbstractTransportConnection
   @Override
   public AsyncController toComet(CometHandler cometHandler)
   {
+    // XXX: TCK
     if (_isCompleteRequested)
-      throw new IllegalStateException("Comet cannot be requested after complete().");
-    
+       throw new IllegalStateException("Comet cannot be requested after complete().");
+    /*
+    if (_isCompleteRequested)
+      return null;
+    */
     _state = _state.toComet();
     
     _controller = new TcpCometController(this, cometHandler);
@@ -829,7 +833,6 @@ public class TcpConnection extends AbstractTransportConnection
     
     ConnectionState state = _state;
 
-    
     if (state.isCometSuspend()) {
       // XXX: timing issues, need to have isComplete flag
       wake();

@@ -103,8 +103,10 @@ public class AsyncContextImpl
     
     _cometController = httpConn.getConnection().toComet(this);
     
+    /* XXX: tck
     if (_cometController == null)
       throw new NullPointerException();
+      */
 
     _isOriginal = isOriginal;
   }
@@ -271,6 +273,7 @@ public class AsyncContextImpl
                       ServletResponse response)
   {
     AsyncEvent event = new AsyncEvent(this, request, response);
+    Thread.dumpStack();
     
     for (AsyncListenerNode node = _listenerNode;
          node != null;

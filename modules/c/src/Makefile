@@ -1,7 +1,7 @@
 SHELL=/bin/bash
 srcdir = .
 top_srcdir = ../../..
-plugins=common apache2 resin_os
+plugins=common resin_os
 
 all	: plugins
 
@@ -9,7 +9,7 @@ plugins	:
 	for dir in $(plugins); do (cd $$dir; $(MAKE)); done
 
 clean	:
-	for dir in common apache1 apache2 $(plugins); do \
+	for dir in common apache2 $(plugins); do \
 	  (cd $$dir; $(MAKE) clean); \
         done
 

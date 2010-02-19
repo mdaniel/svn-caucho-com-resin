@@ -1480,6 +1480,9 @@ public abstract class AbstractHttpRequest
       if (! request.isAsyncStarted())
         return false;
         */
+      
+      if (request == null)
+        return false;
 
       AsyncContextImpl asyncContext = request.getAsyncContext();
 
@@ -1489,8 +1492,8 @@ public abstract class AbstractHttpRequest
       HttpServletRequest asyncRequest = getRequestFacade();
       HttpServletResponse asyncResponse = getResponseFacade();
       
-      asyncContext.onStart(webApp, asyncRequest, asyncResponse);
-
+      // asyncContext.onStart(webApp, asyncRequest, asyncResponse);
+      
       if (url != null) {
         if (webApp == null)
           webApp = getWebApp();
@@ -1515,7 +1518,8 @@ public abstract class AbstractHttpRequest
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
 
-      _responseFacade.killCache();
+      if (_responseFacade != null)
+        _responseFacade.killCache();
       killKeepalive();
 
       return false;
