@@ -191,7 +191,7 @@ public class WebAppSingleDeployGenerator
     if (_controller != null)
       return;
 
-    String appDir = _config.getDocumentDirectory();
+    String rootDir = _config.getRootDirectory();
     String archivePath = _config.getArchivePath();
 
     if (archivePath != null) {
@@ -199,22 +199,21 @@ public class WebAppSingleDeployGenerator
                                             _container.getRootDirectory());
     }
 
-
-    if (appDir == null) {
-      appDir = "./" + _urlPrefix;
-    }
-
     if (_rootDirectory == null) {
-      if (_archivePath != null
-          && (_urlPrefix.equals("/") || _urlPrefix.equals(""))
-          && _container != null) {
+      if (rootDir != null) {
+      }
+      else if (_archivePath != null
+               && (_urlPrefix.equals("/") || _urlPrefix.equals(""))
+               && _container != null) {
         log.warning(L.l("web-app's root-directory '{0}' must be outside of the '{1}' root-directory when using 'archive-path",
                         _rootDirectory, _container));
 
-        appDir = "./ROOT";
+        rootDir = "./ROOT";
       }
+      else
+        rootDir = "./" + _urlPrefix;
       
-      _rootDirectory = PathBuilder.lookupPath(appDir, null,
+      _rootDirectory = PathBuilder.lookupPath(rootDir, null,
                                               _container.getDocumentDirectory());
     }
     
