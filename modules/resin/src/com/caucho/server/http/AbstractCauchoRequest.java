@@ -262,9 +262,11 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       setSessionId(session.getId());
     }
     
-    // server/0123
+    // server/0123 vs TCK
+    /*
     if (session != null)
       session.setAccessTime(now);
+      */
 
     return session;
   }

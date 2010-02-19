@@ -104,6 +104,9 @@
 
   <bean name="jpa-persistence-unit"
         class="com.caucho.env.jpa.ConfigJpaPersistenceUnit"/>
+
+  <bean name="jpa-persistence-unit-default"
+        class="com.caucho.env.jpa.ConfigJpaPersistenceUnitDefault"/>
     
   <bean name="list"
         class="com.caucho.config.type.ListType"/>

@@ -87,8 +87,11 @@
     <bean name="jpa-persistence"
           class="com.caucho.amber.cfg.PersistenceManager"/>
 
-    <bean name="jpa-persistence-default"
-          class="com.caucho.amber.cfg.PersistenceDefault"/>
+    <bean name="jpa-persistence-unit"
+          class="com.caucho.env.jpa.ConfigJpaPersistenceUnit"/>
+
+    <bean name="jpa-persistence-unit-default"
+          class="com.caucho.env.jpa.ConfigJpaPersistenceUnitDefault"/>
     
     <bean name="list"
           class="com.caucho.config.type.ListType"/>

@@ -58,6 +58,8 @@ public class Environment {
 
   private static ArrayList<ClassLoaderListener> _globalLoaderListeners
     = new ArrayList<ClassLoaderListener>();
+
+  private static boolean _isInitComplete;
   
   // private static EnvironmentClassLoader _envSystemClassLoader;
 
@@ -810,6 +812,14 @@ public class Environment {
   }
 
   /**
+   * @return
+   */
+  public static boolean isLoggingInitialized()
+  {
+    return _isInitComplete;
+  }
+
+  /**
    * Initializes the environment
    */
   public static synchronized void initializeEnvironment()
@@ -932,6 +942,8 @@ public class Environment {
       e.printStackTrace();
     } finally {
       thread.setContextClassLoader(oldLoader);
+      
+      _isInitComplete = true;
     }
   }
 

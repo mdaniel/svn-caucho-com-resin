@@ -31,6 +31,7 @@ package com.caucho.util;
 
 import com.caucho.vfs.*;
 import com.caucho.util.*;
+import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
 
 import java.util.logging.*;
@@ -42,7 +43,7 @@ public class JniTroubleshoot {
   private static final Logger log
     = Logger.getLogger(JniTroubleshoot.class.getName());
   private static final L10N L = new L10N(JniTroubleshoot.class);
-
+  
   private String _className;
   private String _libraryName;
 
@@ -69,7 +70,7 @@ public class JniTroubleshoot {
 
   public void log()
   {
-    if (! _isValid && ! _isLogged) {
+    if (! _isValid && ! _isLogged && Environment.isLoggingInitialized()) {
       log.log(Level.WARNING, getMessage(), _cause);
 
       _isLogged = true;

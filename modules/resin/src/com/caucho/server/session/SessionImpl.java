@@ -106,8 +106,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     _manager = manager;
     
-    creationTime = Alarm.getExactTime();
-    // TCK now cares about exact time
+    // TCK requires exact time
     creationTime = Alarm.getExactTime();
 
     _creationTime = creationTime;
@@ -458,7 +457,7 @@ public class SessionImpl implements HttpSession, CacheListener {
       unbind();
     
     // TCK now cares about exact time
-    now = Alarm.getExactTime();
+    now = Alarm.getCurrentTime();
 
     _isValid = true;
     _isNew = true;
@@ -542,7 +541,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   public void finishRequest()
   {
     // server/0122
-    _accessTime = Alarm.getExactTime();
+    _accessTime = Alarm.getCurrentTime();
     _isNew = false;
     
     // update cache access?
@@ -565,7 +564,7 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (! _isValid)
       return false;
-    else if (_isIdleSet && _accessTime + _idleTimeout < Alarm.getExactTime()) {
+    else if (_isIdleSet && _accessTime + _idleTimeout < Alarm.getCurrentTime()) {
       // server/01o2 (tck)
     
       return false;
@@ -702,8 +701,8 @@ public class SessionImpl implements HttpSession, CacheListener {
   {
     if (log.isLoggable(Level.FINER))
       log.fine(this + " reset");
-    // TCK now cares about exact time
-    now = Alarm.getExactTime();
+
+    now = Alarm.getCurrentTime();
 
     unbind();
     _isValid = true;

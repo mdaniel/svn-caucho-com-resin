@@ -66,6 +66,7 @@ public class FileServlet extends GenericServlet {
   private QDate _calendar = new QDate();
   private boolean _isCaseInsensitive;
   private boolean _isEnableRange = true;
+  private boolean _isGenerateSession;
   private String _characterEncoding;
 
   public FileServlet()
@@ -87,6 +88,14 @@ public class FileServlet extends GenericServlet {
   public void setEnableRange(boolean isEnable)
   {
     _isEnableRange = isEnable;
+  }
+  
+  /**
+   * Flag to generate sessions on requests.
+   */
+  public void setGenerateSession(boolean isGenerateSession)
+  {
+    _isGenerateSession = isGenerateSession;
   }
 
   /**
@@ -252,6 +261,9 @@ public class FileServlet extends GenericServlet {
     }
 
     cache.update();
+    
+    if (_isGenerateSession)
+      req.getSession(true);
 
     if (cache.isDirectory()) {
       if (_dir != null)
