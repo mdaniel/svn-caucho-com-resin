@@ -83,7 +83,7 @@ public class JniServerSocketImpl extends QServerSocket {
 
   public static String getInitMessage()
   {
-    if (! _jniTroubleshoot.isValid())
+    if (! _jniTroubleshoot.isEnabled())
       return _jniTroubleshoot.getMessage();
     else
       return null;
@@ -281,10 +281,10 @@ public class JniServerSocketImpl extends QServerSocket {
 
     try {
       System.loadLibrary("resin_os");
-      jniTroubleshoot 
+      jniTroubleshoot
         = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os");
     } catch (Throwable e) {
-      jniTroubleshoot 
+      jniTroubleshoot
         = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os", e);
     }
 
