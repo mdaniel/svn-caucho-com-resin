@@ -32,8 +32,10 @@ package com.caucho.loader;
 import com.caucho.make.DependencyContainer;
 import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;
+import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.JarPath;
@@ -57,6 +59,7 @@ public class ClassEntry implements Dependency {
   
   private static boolean _hasJNIReload;
   private static boolean _hasAnnotations;
+  private static final JniTroubleshoot _jniTroubleshoot;
 
   private DynamicClassLoader _loader;
   private String _name;
@@ -89,7 +92,7 @@ public class ClassEntry implements Dependency {
   public ClassEntry(DynamicClassLoader loader,
                     String name, Path sourcePath,
                     Path classPath,
-		    CodeSource codeSource)
+                    CodeSource codeSource)
   {
     _loader = loader;
     _name = name;
@@ -106,19 +109,6 @@ public class ClassEntry implements Dependency {
     }
 
     _codeSource = codeSource;
-
-    /*
-    if (codePath == null)
-      codePath = classPath;
-
-    if (_loader.getSecurityManager() != null) {
-      try {
-        _codeSource = new CodeSource(new URL(codePath.getURL()), null);
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-    }
-    */
   }
 
   /**
@@ -133,7 +123,7 @@ public class ClassEntry implements Dependency {
                     Path classPath)
   {
     this(loader.getLoader(), name, sourcePath, classPath,
-	 loader.getCodeSource(classPath));
+         loader.getCodeSource(classPath));
   }
 
   public String getName()
@@ -234,7 +224,7 @@ public class ClassEntry implements Dependency {
                  " new:" + QDate.formatLocal(_sourcePath.getLastModified()));
 
       if (! compileIsModified()) {
-	return false;
+        return false;
       }
       
       boolean isModified = reloadIsModified();
@@ -248,7 +238,7 @@ public class ClassEntry implements Dependency {
                  " new:" + _sourcePath.getLength());
 
       if (! compileIsModified())
-	return false;
+        return false;
 
       return reloadIsModified();
     }
@@ -312,36 +302,36 @@ public class ClassEntry implements Dependency {
       long length = _classPath.getLength();
 
       Class cl = _clRef != null ? _clRef.get() : null;
-	
+
       if (cl == null) {
-	return false;
+        return false;
       }
 
       if (_hasAnnotations && requireReload(cl))
-	return true;
-	    
+        return true;
+
       ReadStream is = _classPath.openRead();
 
       byte []bytecode = new byte[(int) length];
-	    
+
       try {
-	is.readAll(bytecode, 0, bytecode.length);
+        is.readAll(bytecode, 0, bytecode.length);
       } finally {
-	is.close();
+        is.close();
       }
 
       int result = reloadNative(cl, bytecode, 0, bytecode.length);
-	
+
       if (result != 0) {
-	_classIsModified = true;
-	return true;
+        _classIsModified = true;
+        return true;
       }
 
       setDependPath(_classPath);
-      
+
       if (_sourcePath != null) {
-	_sourceLastModified = _sourcePath.getLastModified();
-	_sourceLength = _sourcePath.getLength();
+        _sourceLastModified = _sourcePath.getLastModified();
+        _sourceLength = _sourcePath.getLength();
       }
 
       log.info("Reloading " + cl.getName());
@@ -394,30 +384,30 @@ public class ClassEntry implements Dependency {
 
       int retry = 3;
       for (int i = 0; i < retry; i++) {
-	long length = classPath.getLength();
-	long lastModified = classPath.getLastModified();
-      
-	if (length < 0)
-	  throw new IOException("class loading failed because class file '" + classPath + "' does not have a positive length.  Possibly the file has been overwritten");
-      
-	ReadStream is = classPath.openRead();
-      
-	try {
-	  buffer.setLength((int) length);
+        long length = classPath.getLength();
+        long lastModified = classPath.getLastModified();
 
-	  int results = is.readAll(buffer.getBuffer(), 0, (int) length);
+        if (length < 0)
+          throw new IOException("class loading failed because class file '" + classPath + "' does not have a positive length.  Possibly the file has been overwritten");
 
-	  if (results == length
-	      && length == classPath.getLength()
-	      && lastModified == classPath.getLastModified()) {
-	    return;
-	  }
-	
-	  log.warning(L.l("{0}: class file length mismatch expected={1} received={2}.  The class file may have been modified concurrently.",
-			  this, length, results));
-	} finally {
-	  is.close();
-	}
+        ReadStream is = classPath.openRead();
+
+        try {
+          buffer.setLength((int) length);
+
+          int results = is.readAll(buffer.getBuffer(), 0, (int) length);
+
+          if (results == length
+              && length == classPath.getLength()
+              && lastModified == classPath.getLastModified()) {
+            return;
+          }
+
+          log.warning(L.l("{0}: class file length mismatch expected={1} received={2}.  The class file may have been modified concurrently.",
+                this, length, results));
+        } finally {
+          is.close();
+        }
       }
     }
   }
@@ -430,7 +420,7 @@ public class ClassEntry implements Dependency {
     return false;
   }
 
-  public static boolean hasJNIReload()
+  public static boolean isReloadEnabled()
   {
     return _hasJNIReload;
   }
@@ -451,7 +441,7 @@ public class ClassEntry implements Dependency {
   public static native boolean canReloadNative();
 
   public static native int reloadNative(Class cl,
-		  		        byte []bytes, int offset, int length);
+                                        byte []bytes, int offset, int length);
 
   class ReloadThread implements Runnable {
     private volatile boolean _isDone;
@@ -467,6 +457,8 @@ public class ClassEntry implements Dependency {
   }
   
   static {
+    JniTroubleshoot jniTroubleshoot = null;
+
     try {
       System.loadLibrary("resin_os");
       _hasJNIReload = canReloadNative();
@@ -475,19 +467,23 @@ public class ClassEntry implements Dependency {
         // skip logging for test
       }
       else if (_hasJNIReload)
-	log.config("In-place class redefinition (HotSwap) is available.");
+        log.config("In-place class redefinition (HotSwap) is available.");
       else
-	log.config("In-place class redefinition (HotSwap) is not available.  In-place class reloading during development requires a compatible JDK and -Xdebug.");
-    } catch (Throwable e) {
-      log.fine(e.toString());
-      
-      log.log(Level.FINEST, e.toString(), e);
-      // log.config("In-place class redefinition (HotSwap) is not available.\n" + e);
+        log.config("In-place class redefinition (HotSwap) is not available.  In-place class reloading during development requires a compatible JDK and -Xdebug.");
+
+      jniTroubleshoot = new JniTroubleshoot(ClassEntry.class, "resin_os");
+    } 
+    catch (Throwable e) {
+      jniTroubleshoot = new JniTroubleshoot(ClassEntry.class, "resin_os", e);
     }
-    
+
+    _jniTroubleshoot = jniTroubleshoot;
+
+    _jniTroubleshoot.log();
+
     try {
       Class reloadClass = Class.forName("com.caucho.loader.RequireReload");
-      
+
       Object.class.getAnnotation(reloadClass);
 
       _hasAnnotations = true;

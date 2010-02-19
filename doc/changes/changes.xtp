@@ -13,6 +13,10 @@
 
 <s2 title="4.0.4 - snapshot">
 <ul>
+<li>jni: improved error messages</li>
+<li>hessian: custom deserializer (#3632, rep by era)</li>
+<li>configure: check for cp -u (#3888, rep by Kaminsky, Leonid)</li>
+<li>configure: standardize default resin root, conf, and log directories</li>
 <li>web-app: web-app deploy with archive-and root-directory was not propery set (#3887, #3873, rep by chiefgeen)</li>
 <li>cdi: @ServiceType (@HessianService) was removing the bean from CDI (#3852, rep by Scott Hernandez)</li>
 <li>javac: external javac was busy-looping on the output causing heavy load (#3847, rep by mocospace)</li>

@@ -28,6 +28,9 @@
 
 package com.caucho.vfs;
 
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.JniTroubleshoot;
+
 /**
  * Stream which writes to syslog.
  */
@@ -62,8 +65,9 @@ public class Syslog {
   public static final int LOG_INFO = 6;
   public static final int LOG_DEBUG = 7;
 
-  private static boolean _hasSyslog;
   private static boolean _isOpen;
+
+  private static final JniTroubleshoot _jniTroubleshoot;
 
   public Syslog()
   {
@@ -74,6 +78,8 @@ public class Syslog {
    */
   public static void syslog(int facility, int severity, String text)
   {
+    _jniTroubleshoot.checkIsValid();
+
     if (! _isOpen) {
       _isOpen = true;
       nativeOpenSyslog();
@@ -89,11 +95,17 @@ public class Syslog {
   private static native void nativeSyslog(int priority, String text);
 
   static {
+    JniTroubleshoot jniTroubleshoot = null;
+
     try {
       System.loadLibrary("resin");
-      _hasSyslog = true;
+
+      jniTroubleshoot = new JniTroubleshoot(Syslog.class, "resin");
     } catch (Throwable e) {
+      jniTroubleshoot = new JniTroubleshoot(Syslog.class, "resin", e);
     }
+
+    _jniTroubleshoot = jniTroubleshoot;
   }
 }
 

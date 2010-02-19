@@ -30,12 +30,13 @@
 package com.caucho.server.util;
 
 import com.caucho.VersionFactory;
+import com.caucho.config.ConfigRuntimeException;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.CpuUsage;
 import com.caucho.util.Crc64;
+import com.caucho.util.L10N;
 import com.caucho.util.ThreadDump;
 import com.caucho.vfs.CaseInsensitive;
 import com.caucho.vfs.Path;
@@ -43,7 +44,7 @@ import com.caucho.vfs.Vfs;
 
 import java.io.File;
 import java.io.IOException;
-import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.logging.Level;
@@ -57,6 +58,7 @@ import java.util.regex.Pattern;
 public class CauchoSystem {
   private static Logger log
     = Logger.getLogger("com.caucho.util.CauchoSystem");
+  private static final L10N L = new L10N(CauchoSystem.class);
 
   static EnvironmentLocal<String> _serverIdLocal
     = new EnvironmentLocal<String>("caucho.server-id");
@@ -77,6 +79,7 @@ public class CauchoSystem {
   static boolean _isTestWindows;
 
   static boolean _hasJni;
+  static boolean _isResin;
   
   static String _resinVersion;
   static String _resinFullVersion;
@@ -92,8 +95,6 @@ public class CauchoSystem {
   private static String _classPath;
   private static ArrayList<String> _classPathList;
 
-  static CpuUsage _cpuUsage;
-  
   private CauchoSystem()
   {
   }
@@ -171,48 +172,9 @@ public class CauchoSystem {
     if (_resinHome != null && _resinHome.isDirectory())
       return _resinHome;
 
-    /*
-    String userHome = System.getProperty("user.home");
-    if (userHome != null)
-      resinHome = Pwd.lookupNative(userHome).lookup(".resin-home");
-
-    if (resinHome != null && resinHome.isDirectory())
-      return resinHome;
-    */
-
     return Vfs.lookup();
   }
 
-  /**
-   * Gets the Path used as root directory
-   */
-  /**
-  public static Path getRootDirectory()
-  {
-    if (_rootDirectory != null)
-      return _rootDirectory;
-
-    String path = System.getProperty("server.root");
-
-    if (path != null) {
-      _rootDirectory = Vfs.lookupNative(path);
-      return _rootDirectory;
-    }
-
-    path = System.getProperty("resin.home");
-
-    if (path != null) {
-      _rootDirectory = Vfs.lookupNative(path);
-
-      return _rootDirectory;
-    }
-
-    _rootDirectory = getResinHome();
-
-    return _rootDirectory;
-  }
-   */
-  
   public static String getVersion()
   {
     if (_resinVersion == null) {
@@ -310,17 +272,17 @@ public class CauchoSystem {
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-	thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
-	
-	_newline = System.getProperty("line.separator");
-	if (_newline != null) {
-	}
-	else if (isWindows())
-	  _newline = "\r\n";
-	else
-	  _newline = "\n";
+        thread.setContextClassLoader(ClassLoader.getSystemClassLoader());
+
+        _newline = System.getProperty("line.separator");
+        if (_newline != null) {
+        }
+        else if (isWindows())
+          _newline = "\r\n";
+        else
+          _newline = "\n";
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
     }
 
@@ -413,11 +375,6 @@ public class CauchoSystem {
     return _isDetailedStatistics;
   }
 
-  public static CpuUsage getCpuUsage()
-  {
-    return CpuUsage.create();
-  }
-
   /**
    * Loads a class from the context class loader.
    *
@@ -505,7 +462,7 @@ public class CauchoSystem {
 
     for (int i = 0; i < classPathArray.length; i++) {
       if (! list.contains(classPathArray[i]))
-	list.add(classPathArray[i]);
+        list.add(classPathArray[i]);
     }
 
     _classPathList = list;
@@ -521,21 +478,6 @@ public class CauchoSystem {
     return _jniCauchoSystem.getLoadAvg();
   }
 
-  /**
-   * Sets the runtime user so we don't need to run as root.
-   */
-  public static int setUser(String user, String group)
-    throws Exception
-  {
-    _user = user;
-    _group = group;
-
-    if (_hasJni && user != null)
-      return setUserNative(_user, _group);
-    else
-      return -1;
-  }
-
   public static void exitOom(Class cl, Throwable e)
   {
     try {
@@ -543,18 +485,6 @@ public class CauchoSystem {
       ThreadDump.dumpThreads();
     } finally {
       Runtime.getRuntime().halt(EXIT_OOM);
-    }
-  }
-
-  private static native int setUserNative(String user, String group)
-    throws IOException;
-
-  static {
-    try {
-      System.loadLibrary("resin");
-      _hasJni = true;
-    } catch (Throwable e) {
-      log.log(Level.FINEST, e.toString(), e);
     }
   }
 }

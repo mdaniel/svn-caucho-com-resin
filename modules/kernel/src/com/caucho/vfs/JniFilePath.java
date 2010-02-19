@@ -40,20 +40,20 @@ public class JniFilePath {
     try {
       Thread thread = Thread.currentThread();
       ClassLoader loader = thread.getContextClassLoader();
-      
+
       Class pathClass
-	= Class.forName("com.caucho.vfs.JniFilePathImpl", false, loader);
+        = Class.forName("com.caucho.vfs.JniFilePathImpl", false, loader);
 
       Method isEnabled = pathClass.getMethod("isEnabled", new Class[0]);
 
       Object result = isEnabled.invoke(null);
 
       if (Boolean.TRUE.equals(result))
-	return (FilesystemPath) pathClass.newInstance();
+        return (FilesystemPath) pathClass.newInstance();
     } catch (ClassNotFoundException e) {
     } catch (Throwable e) {
     }
-    
+
     return null;
   }
 }

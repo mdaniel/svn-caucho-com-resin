@@ -1,6 +1,29 @@
 /*
  * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
  * @author Scott Ferguson
  */
 
@@ -8,6 +31,9 @@ package com.caucho.vfs;
 
 import java.io.IOException;
 import java.util.logging.*;
+
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.JniTroubleshoot;
 
 /**
  * Stream using with JNI.
@@ -18,7 +44,7 @@ public class JniFileStream extends StreamImpl
   private static final Logger log
     = Logger.getLogger(JniFileStream.class.getName());
 
-  private static boolean _isJni;
+  private static final JniTroubleshoot _jniTroubleshoot;
   
   private int _fd;
   private long _pos;
@@ -31,6 +57,8 @@ public class JniFileStream extends StreamImpl
    */
   public JniFileStream(int fd, boolean canRead, boolean canWrite)
   {
+    _jniTroubleshoot.checkIsValid();
+
     init(fd, canRead, canWrite);
   }
 
@@ -43,9 +71,9 @@ public class JniFileStream extends StreamImpl
     _canWrite = canWrite;
   }
 
-  public static boolean isJni()
+  public static boolean isEnabled()
   {
-    return _isJni;
+    return _jniTroubleshoot.isEnabled();
   }
 
   public static JniFileStream openRead(byte []name, int length)
@@ -59,8 +87,8 @@ public class JniFileStream extends StreamImpl
   }
 
   public static JniFileStream openWrite(byte []name,
-					int length,
-					boolean isAppend)
+                                        int length,
+                                        boolean isAppend)
   {
     int fd = nativeOpenWrite(name, length, isAppend);
     
@@ -292,13 +320,16 @@ public class JniFileStream extends StreamImpl
   }
 
   static {
+    JniTroubleshoot jniTroubleshoot = null;
+
     try {
       System.loadLibrary("resin_os");
-      _isJni = true;
+      jniTroubleshoot = new JniTroubleshoot(JniFileStream.class, "resin_os");
     } catch (Throwable e) {
-      e.printStackTrace();
-      log.log(Level.FINE, e.toString(), e);
+      jniTroubleshoot = new JniTroubleshoot(JniFileStream.class, "resin_os", e);
     }
+
+    _jniTroubleshoot = jniTroubleshoot;
   }
 }
 

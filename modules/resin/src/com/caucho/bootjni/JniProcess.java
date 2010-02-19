@@ -1,6 +1,29 @@
 /*
  * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
  * @author Scott Ferguson
  */
 
@@ -9,6 +32,7 @@ package com.caucho.bootjni;
 import com.caucho.boot.*;
 import com.caucho.config.ConfigException;
 import com.caucho.util.*;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.*;
 
 import java.io.IOException;
@@ -25,17 +49,14 @@ import java.util.logging.Logger;
  * Resin's bootstrap class.
  */
 public class JniProcess extends Process
- implements JniProcessAPI
 {
   private static final L10N L
     = new L10N(JniProcess.class);
   private static final Logger log
     = Logger.getLogger(JniProcess.class.getName());
 
-  private static RuntimeException _jniLoadException;
+  private static final JniTroubleshoot _jniTroubleshoot;
   
-  private static boolean _hasJni;
-
   private int _stdoutFd = -1;
   private int _pid = -1;
   private int _exitValue = -1;
@@ -46,20 +67,15 @@ public class JniProcess extends Process
 
   public JniProcess()
   {
-    if (_jniLoadException == null)
-      _hasJni = isNativeBootAvailable();
   }
 
   private JniProcess(ArrayList<String> args,
-		     HashMap<String,String> env,
-		     String chroot,
-		     String pwd,
-		     String user,
-		     String group)
+                     HashMap<String,String> env,
+                     String chroot,
+                     String pwd,
+                     String user,
+                     String group)
   {
-    if (! _hasJni)
-      throw new UnsupportedOperationException("No JNI available");
-
     String []argv = new String[args.size()];
     args.toArray(argv);
 
@@ -101,15 +117,16 @@ public class JniProcess extends Process
                            String user,
                            String group)
   {
-    if (_hasJni)
-      return new JniProcess(args, env, chroot, pwd, user, group);
-    else
-      throw new UnsupportedOperationException("No JNI available");
+    _jniTroubleshoot.checkIsValid();
+
+    assert(isNativeBootAvailable());
+
+    return new JniProcess(args, env, chroot, pwd, user, group);
   }
 
-  public boolean isValid()
+  public boolean isEnabled()
   {
-    return _hasJni;
+    return _jniTroubleshoot.isEnabled() && isNativeBootAvailable();
   }
   
   public OutputStream getOutputStream()
@@ -134,8 +151,7 @@ public class JniProcess extends Process
 
   public void chown(String path, String user, String group)
   {
-    if (_jniLoadException != null)
-      throw _jniLoadException;
+    _jniTroubleshoot.checkIsValid();
     
     byte []name = path.getBytes();
     int len = name.length;
@@ -164,7 +180,7 @@ public class JniProcess extends Process
       int result = waitpid(_pid, false);
 
       if (result < 0)
-	throw new IllegalThreadStateException("Pid " + _pid + " not yet closed");
+        throw new IllegalThreadStateException("Pid " + _pid + " not yet closed");
       _pid = 0;
       _status = result;
     }
@@ -198,27 +214,28 @@ public class JniProcess extends Process
   public native static int setFdMax();
   
   private native boolean exec(String []argv,
-			      String []envp,
-			      String chroot,
-			      String pwd,
-			      String user,
-			      String group);
+                              String []envp,
+                              String chroot,
+                              String pwd,
+                              String user,
+                              String group);
   
   private native void nativeChown(byte []name, int length,
-				  String user, String group);
+                                  String user, String group);
   
   private native int waitpid(int pid, boolean isBlock);
 
   static {
+    JniTroubleshoot jniTroubleshoot = null;
+
     try {
       System.loadLibrary("resin_os");
-    } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
 
-      if (e instanceof RuntimeException)
-	_jniLoadException = (RuntimeException) e;
-      else
-	_jniLoadException = new RuntimeException(e);
+      jniTroubleshoot = new JniTroubleshoot(JniProcess.class, "resin_os");
+    } catch (Throwable e) {
+      jniTroubleshoot = new JniTroubleshoot(JniProcess.class, "resin_os", e);
     }
+
+    _jniTroubleshoot = jniTroubleshoot;
   }
 }

@@ -50,16 +50,16 @@ public class JniCauchoSystem {
   {
     synchronized (JniCauchoSystem.class) {
       if (_system == null) {
-	try {
-	  Class cl = Class.forName("com.caucho.server.util.JniCauchoSystemImpl");
+        try {
+          Class cl = Class.forName("com.caucho.server.util.JniCauchoSystemImpl");
 
-	  _system = (JniCauchoSystem) cl.newInstance();
-	} catch (Throwable e) {
-	  log.log(Level.FINEST, e.toString(), e);
-	}
+          _system = (JniCauchoSystem) cl.newInstance();
+        } catch (Throwable e) {
+          log.log(Level.FINEST, e.toString(), e);
+        }
 
-	if (_system == null)
-	  _system = new JniCauchoSystem();
+        if (_system == null)
+          _system = new JniCauchoSystem();
       }
 
       return _system;

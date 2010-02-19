@@ -1,6 +1,29 @@
 /*
  * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
  * @author Scott Ferguson
  */
 
@@ -9,6 +32,8 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.net.InetAddress;
 
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.L10N;
 
 /**
@@ -16,8 +41,7 @@ import com.caucho.util.L10N;
  */
 public class JniServerSocketImpl extends QServerSocket {
   private static final L10N L = new L10N(JniServerSocketImpl.class);
-  private static boolean _hasInitJni;
-  private static Throwable _jniInitException;
+  private static final JniTroubleshoot _jniTroubleshoot;
 
   private long _fd;
   private String _id;
@@ -54,13 +78,13 @@ public class JniServerSocketImpl extends QServerSocket {
 
   public static boolean isEnabled()
   {
-    return _hasInitJni;
+    return _jniTroubleshoot.isEnabled();
   }
 
   public static String getInitMessage()
   {
-    if (_jniInitException != null)
-      return _jniInitException.getMessage();
+    if (! _jniTroubleshoot.isValid())
+      return _jniTroubleshoot.getMessage();
     else
       return null;
   }
@@ -74,9 +98,9 @@ public class JniServerSocketImpl extends QServerSocket {
     return _fd;
   }
 
-  public boolean isJNI()
+  public boolean isJniValid()
   {
-    return _hasInitJni;
+    return isEnabled();
   }
 
   public boolean setSaveOnExec()
@@ -101,7 +125,7 @@ public class JniServerSocketImpl extends QServerSocket {
   public static QServerSocket create(String host, int port)
     throws IOException
   {
-    checkJni(host, port);
+    _jniTroubleshoot.checkIsValid();
 
     return new JniServerSocketImpl(host, port);
   }
@@ -109,20 +133,9 @@ public class JniServerSocketImpl extends QServerSocket {
   public static QServerSocket open(int fd, int port)
     throws IOException
   {
-    checkJni("fd=" + fd, port);
+    _jniTroubleshoot.checkIsValid();
 
     return new JniServerSocketImpl(fd, port, true);
-  }
-
-  private static void checkJni(String host, int port)
-    throws IOException
-  {
-    if (! _hasInitJni) {
-      throw new IOException(L.l("Socket JNI is not available"
-                                + " because JNI support has not been compiled.\n"
-                                + "  On Unix, run ./configure; make; make install.  On Windows, check for resin.dll.\n  {2}",
-                                host, port, _jniInitException));
-    }
   }
 
   /**
@@ -264,12 +277,18 @@ public class JniServerSocketImpl extends QServerSocket {
     throws IOException;
 
   static {
+    JniTroubleshoot jniTroubleshoot = null;
+
     try {
       System.loadLibrary("resin_os");
-      _hasInitJni = true;
+      jniTroubleshoot 
+        = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os");
     } catch (Throwable e) {
-      _jniInitException = e;
+      jniTroubleshoot 
+        = new JniTroubleshoot(JniServerSocketImpl.class, "resin_os", e);
     }
+
+    _jniTroubleshoot = jniTroubleshoot;
   }
 }
 
