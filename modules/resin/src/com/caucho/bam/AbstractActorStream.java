@@ -51,6 +51,7 @@ abstract public class AbstractActorStream implements ActorStream
   /**
    * Returns the jid at the end of the stream.
    */
+  @Override
   abstract public String getJid();
 
   /**
@@ -71,6 +72,7 @@ abstract public class AbstractActorStream implements ActorStream
    * @param from the source actor's JID
    * @param payload the message payload
    */
+  @Override
   public void message(String to,
 		      String from,
 		      Serializable payload)
@@ -104,6 +106,7 @@ abstract public class AbstractActorStream implements ActorStream
    * @param payload the original message payload
    * @param error the message error
    */
+  @Override
   public void messageError(String to,
 			   String from,
 			   Serializable payload,
@@ -133,6 +136,7 @@ abstract public class AbstractActorStream implements ActorStream
    *
    * @return true if this stream understand the query, false otherwise
    */
+  @Override
   public void queryGet(long id,
 		       String to,
 		       String from,
@@ -154,7 +158,7 @@ abstract public class AbstractActorStream implements ActorStream
     ActorStream linkStream = getLinkStream();
 
     if (linkStream == null)
-      throw new IllegalStateException(this + " brokerStream is missing and required to send an error for a QueryGet");
+      throw new IllegalStateException(this + ".getLinkStream() did not return an ActorStream, which is needed to send an error for a QueryGet");
     
     linkStream.queryError(id, from, to, payload, error);
   }
@@ -173,6 +177,7 @@ abstract public class AbstractActorStream implements ActorStream
    *
    * @return true if this stream understand the query, false otherwise
    */
+  @Override
   public void querySet(long id,
 		       String to,
 		       String from,
@@ -196,8 +201,8 @@ abstract public class AbstractActorStream implements ActorStream
     ActorStream linkStream = getLinkStream();
 
     if (linkStream == null)
-      throw new IllegalStateException(this + " brokerStream is missing and required to send an error for a QueryGet");
-    
+      throw new IllegalStateException(this + ".getLinkStream() did not return an ActorStream, which is needed to send an error for a QuerySet");
+        
     linkStream.queryError(id, from, to, payload, error);
   }
   
@@ -210,6 +215,7 @@ abstract public class AbstractActorStream implements ActorStream
    * @param from the service actor's JID
    * @param payload the result payload
    */
+  @Override
   public void queryResult(long id,
 			  String to,
 			  String from,
@@ -231,6 +237,7 @@ abstract public class AbstractActorStream implements ActorStream
    * @param from the service actor's JID
    * @param payload the result payload
    */
+  @Override
   public void queryError(long id,
 			 String to,
 			 String from,
@@ -242,14 +249,11 @@ abstract public class AbstractActorStream implements ActorStream
 		+ " {id:" + id + ", from:" + from + ", to:" + to + "}");
     }
   }
-
-  //
-  // presence - publish/subscribe messages
-  //
   
   /**
    * Tests if the stream is closed.
    */
+  @Override
   public boolean isClosed()
   {
     return false;
@@ -258,6 +262,7 @@ abstract public class AbstractActorStream implements ActorStream
   /**
    * Closes the stream
    */
+  @Override
   public void close()
   {
   }

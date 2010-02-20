@@ -45,8 +45,6 @@ public class QueryManager {
 
   private final QueryMap _queryMap = new QueryMap();
 
-  private long _timeout = 10000L;
-
   public QueryManager()
   {
   }
