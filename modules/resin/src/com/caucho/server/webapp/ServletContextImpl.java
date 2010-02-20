@@ -140,8 +140,7 @@ public class ServletContextImpl extends ServletContextCompat
    */
   public boolean setInitParameter(String name, String value)
   {
-    System.out.println("SET INIT-PARAM: " + name + " " + value);
-    
+
     if (isActive())
       throw new IllegalStateException(L.l("setInitParameter must be called before the web-app has been initialized, because it's required by the servlet spec."));
 
@@ -237,7 +236,7 @@ public class ServletContextImpl extends ServletContextCompat
             listener.attributeReplaced(event);
           else
             listener.attributeAdded(event);
-        } catch (Throwable e) {
+        } catch (Exception e) {
           log.log(Level.FINE, e.toString(), e);
         }
       }

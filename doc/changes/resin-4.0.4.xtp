@@ -11,11 +11,27 @@
 <s1 title="Resin 4.0.4 Overview">
 
 <ul>
-<li>com.caucho.resin.ResinContext for embedded Resin use.</li>
-<li>com.caucho.junit.ResinJUnitRunner for embedded junit use.</li>
+<li>Pass Servlet 3.0 TCK for  JavaEE 6 web profile</li>
+<li>com.caucho.resin.ResinBeanContainer for embedded Resin use</li>
+<li>com.caucho.junit.ResinJUnitRunner for embedded junit use</li>
+<li>Quercus support for PHP 5.3 Namespaces</li>
+<li>Quercus support for PHP 5.3 Closures</li>
 </ul>
 
 <p>Resin 4.0.x is the active development branch.</p>
+</s1>
+
+<s1 title="Servlet 3.0 TCK for Web Profile">
+
+<p>Passing the Servlet 3.0 TCK in 4.0.4 is the first step for Resin to complete
+the JavaEE-6 Web Profile. The web profile is our primary focus for the 
+next few months. It's the "good bits" of JavaEE-6: all the specifications
+aimed at developing web applications without the legacy enterprise
+requirements like CORBA that only specialized applications use.</p>
+
+<p>Our plan is to continue passing new TCKs for each of the next 
+few 4.0.x releases until we are done with the web profile.</p>
+
 </s1>
 
 <s1 title="Embedded ResinContext">
@@ -30,13 +46,13 @@ request scope.</p>
 
 <s2 title="Embedded Requests">
 
-<code><pre>
+<example title="Example: ResinBeanContainer">
 import com.caucho.resin.*;
 
 public class MyMain {
   static void main(String []argv)
   {
-    ResinContext resinContext = new ResinContext();
+    ResinBeanContainer resinContext = new ResinBeanContainer();
 
     // scan classpath and initialize @Startup beans
     resinContext.start();
@@ -49,23 +65,23 @@ public class MyMain {
 
       bean.doStuff();
     } finally {
-      resinContext.completeRequest(cxt);
+      cxt.close();
     }
   }
 }
-</pre></code>
+</example>
 
 </s2>
 
-<s2 title="Configuring resin-context">
+<s2 title="Configuring beans">
 
-<p>You can configure the resin-context using the same environment
+<p>You can configure the beans XML using the same environment
 tags as are available to the resin.xml and resin-web.xml like
 &lt;mypkg:MyBean> for CanDI, &lt;database> for databases, and
 &lt;resin:import> to include files.</p>
 
-<code><pre>
-&lt;resin-context xmlns="http://caucho.com/ns/resin"
+<example title="Example: beans.xml">
+&lt;beans xmlns="http://caucho.com/ns/resin"
    xmlns:lang="urn:java:java.lang"
    xmlns:ee="urn:java:ee">
 
@@ -82,88 +98,54 @@ tags as are available to the resin.xml and resin-web.xml like
     &lt;driver type="..." url="..."/>
   &lt;/database>
     
-&lt;/resin-context>
-</pre></code>
+&lt;/beans>
+</example>
 
 </s2>
 
 </s1>
 
-<s1 title="Java Injection (JSR-299, JSR-330, CanDI)">
+<s1 title="ResinBeanContainerRunner">
 
-<p>The Java Injection specification has changed significantly between 4.0.1
-and 4.0.2. Resin now supports the JSR-330 annotations for Java Injection.</p>
+<p>The ResinBeanContainer has an associated JUnit @RunWith runner, letting
+you create JUnit tests for your model code in Resin's CDI environment.</p>
 
-<p>The main changes are repackaging and renaming of the key injection
-annotations to match JSR-299.  The
-<a href="../examples/ioc-binding/index.xtp">Java Injection Tutorial</a>
-has been updated for the new injections.</p>
+<example title="Example: test junit">
+package qa;
 
-</s1>
+import org.junit.*;
+import org.junit.runner.RunWith;
+import static org.junit.Assert.*;
+import com.caucho.junit.ResinBeanContainerRunner;
+import javax.inject.*;
 
-<s1 title="Clustered JMS Queues and Topics">
-
-<p>Resin's clustering now includes support for clustered queues and topics.
-The primary clustered queue is a singleton queue with failover. The clustered
-topics notify all servers in a cluster pod.</p>
-
-</s1>
-
-<s1 title="/resin-admin">
-
-<p>We've added /resin-admin features to improve visibility to the server, 
-  development and debugging, and adminstration.</p>
-
-<p>The "summary" tab now includes statistical gathered as the server is
-running including request counts, request times, CPU time, netstat reports,
-and database activity.</p>
-
-<p>A "postmortem" tab helps debugging of a server crash by displaying
-the server state at the time just before a restart.</p>
-
-<p>Customized statistics gathering based on JMX is now available through
-the &lt;jmx> and &lt;jmx-delta> tags of the &lt;resin:StatManager> service.</p>
-
-<p>Customizable REST pages are now available through /resin-admin using PHP
-to script the gathered data. The REST capability is intended for integration
-with administration tools like Nagios.</p>
+@RunWith(ResinBeanContainerRunner.class)
+@ResinBeanConfiguration(beansXml="test.xml")
+public class MyTest {
+  @Inject MyBean _myBean;
+  
+  @Test public void simpleTest()
+  {
+    assertTrue(_myBean != null);
+  }
+}
+</example>
 
 </s1>
 
-<s1 title="Distributed Deployment">
+<s1 title="PHP 5.3 Namespaces and Closures">
 
-<p>Distributed deployment has been enhanced with staging and versioning
-capabilities, and integrated with the development flow with ant and maven
-tasks.</p>
+<p>Quercus in 4.0.4 has implemented the namespaces and closures capabilities
+of PHP 5.3. Namespaces finally give PHP the ability to isolate functions
+and classes with unique names.</p>
 
-<p>A new application version can be deployed with the following process:</p>
+<p>Closures add functional programming capabilities to PHP, giving power to
+more powerful event-driven frameworks.</p>
 
-<ol>
-<li>Upload the .war contents transactionally to the server (but not activated yet)</li>
-<li>Deploy and test a "staging" version on a single machine.</li>
-<li>Activate the .war for the production servers.</li>
-</ol>
-
-</s1>
-
-<s1 title="Quercus: Availability on other Application Servers">
-
-<p>Quercus development in 4.0.2 has focused on bugs fixes and QA regression
-cleanup.</p>
-
-</s1>
-
-<s1 title="WebSocket, HMTP, and JMTP support">
-
-<p>Resin 4.0.2 now includes support for the HTML 5 WebSocket protocol, which
-is a fully-bidirectional TCP connection established using HTTP handshaking,
-allowing for true interactive applications with HTML 5 browsers.</p>
-
-<p>On top of WebSockets, we've created JMTP and HMTP as a programmable
-messaging layer. JMTP (JSON Message Transport Prototocol) and
-HMTP (Hessian Message Transport Protocol) provide general
-messaging, RPC, and publish/subscribe capabilities in a clean, simple
-interface.</p>
+<p>In addition to the major language changes, Quercus has completed its
+support for variable class methods and late static binding, both features
+are used in new-generation PHP frameworks to improve templating power and
+clarity.</p>
 
 </s1>
 

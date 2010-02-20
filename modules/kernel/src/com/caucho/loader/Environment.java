@@ -34,6 +34,7 @@ import com.caucho.jmx.Jmx;
 import java.lang.management.ManagementFactory;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.log.EnvironmentStream;
+import com.caucho.log.LogManagerImpl;
 import com.caucho.naming.Jndi;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.*;
@@ -816,7 +817,9 @@ public class Environment {
    */
   public static boolean isLoggingInitialized()
   {
-    return _isInitComplete;
+    String logManager = System.getProperty("java.util.logging.manager");
+    
+    return _isInitComplete && LogManagerImpl.class.getName().equals(logManager);
   }
 
   /**

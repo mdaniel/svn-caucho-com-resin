@@ -197,6 +197,9 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   {
     // test avoids extra writes on multicore machines
     if (! _isCurrentTimeUsed) {
+      if (_testTime > 0)
+        return _testTime;
+      
       if (_alarmThread == null)
         return System.currentTimeMillis();
       
