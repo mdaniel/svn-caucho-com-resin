@@ -279,16 +279,22 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
                            + "\n"
                            + "  See http://www.caucho.com for information on Resin Professional,\n"
                            + "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n"
-                           + "  Exception=" + cause);
+                           + "\n  Exception=" + cause + "\n");
       }
     } catch (Throwable e) {
       log().log(Level.FINER, e.toString(), e);
+      
+      String causeMsg = "";
+      if (! (e instanceof ClassNotFoundException)) {
+        causeMsg = "\n  Exception=" + e + "\n";
+      }
+      
 
       String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n"
                          + "\n"
                          + "  See http://www.caucho.com for information on Resin Professional,\n"
                          + "  including caching, clustering, JNI acceleration, and OpenSSL integration.\n"
-                         + "  Exception=" + e);
+                         + causeMsg);
 
       licenseErrorMessage = msg;
     }

@@ -65,16 +65,16 @@ public class TldManager {
   private static ArrayList<TldPreload> _cauchoTaglibs;
   private static ArrayList<TldPreload> _globalTaglibs;
   private static ArrayList<Path> _globalPaths;
-  
+
   private static EnvironmentLocal<TldManager> _localManager
     = new EnvironmentLocal<TldManager>();
-  
+
   private JspResourceManager _resourceManager;
   private WebApp _webApp;
-  
+
   private HashMap<Path,SoftReference<TldTaglib>> _tldMap
     = new HashMap<Path,SoftReference<TldTaglib>>();
-  
+
   private JspParseException _loadAllTldException;
   private String _tldDir;
   private FileSetType _tldFileSet;
@@ -87,7 +87,7 @@ public class TldManager {
   private ArrayList<TldPreload> _preloadTaglibs;
 
   private TldManager(JspResourceManager resourceManager,
-		     WebApp app)
+                     WebApp app)
     throws JspParseException, IOException
   {
     _resourceManager = resourceManager;
@@ -96,7 +96,7 @@ public class TldManager {
     if (app != null) {
       JspPropertyGroup jsp = app.getJsp();
       if (jsp != null)
-	_tldFileSet = jsp.getTldFileSet();
+        _tldFileSet = jsp.getTldFileSet();
 
 
       JsfPropertyGroup jsf = app.getJsf();
@@ -110,18 +110,18 @@ public class TldManager {
   }
 
   static TldManager create(JspResourceManager resourceManager,
-			   WebApp app)
+                           WebApp app)
     throws JspParseException, IOException
   {
-    
+
     TldManager manager = null;
-    
+
     synchronized (_localManager) {
       manager = _localManager.getLevel();
 
       if (manager != null)
-	return manager;
-      
+        return manager;
+
       manager = new TldManager(resourceManager, app);
       _localManager.set(manager);
     }
@@ -141,12 +141,12 @@ public class TldManager {
   {
     return "com/caucho/jsp/cfg/jsp-tld.rnc";
   }
-    
+
   public void setTldDir(String tldDir)
   {
     _tldDir = tldDir;
   }
-    
+
   public void setTldFileSet(FileSetType tldFileSet)
   {
     _tldFileSet = tldFileSet;
@@ -164,7 +164,7 @@ public class TldManager {
     _isInit = true;
 
     log.fine("Loading .tld files");
-    
+
     String dir;
 
     if (_tldDir == null)
@@ -175,20 +175,20 @@ public class TldManager {
       dir = _tldDir;
     else
       dir = "WEB-INF/" + _tldDir;
-      
+
     FileSetType fileSet = _tldFileSet;
     if (fileSet == null) {
       fileSet = new FileSetType();
       fileSet.setDir(_resourceManager.resolvePath(dir));
       try {
-	fileSet.init();
+        fileSet.init();
       } catch (Exception e) {
-	log.config(e.toString());
+        log.config(e.toString());
       }
     }
-      
+
     ArrayList<TldPreload> taglibs = new ArrayList<TldPreload>();
-    
+
     taglibs.addAll(_globalTaglibs);
 
     ArrayList<Path> paths = getClassPath();
@@ -197,17 +197,17 @@ public class TldManager {
       Path subPath = paths.get(i);
 
       if (_globalPaths.contains(subPath))
-	continue;
+        continue;
 
       if (subPath instanceof JarPath)
-	loadJarTlds(taglibs, ((JarPath) subPath).getContainer(), "META-INF");
+        loadJarTlds(taglibs, ((JarPath) subPath).getContainer(), "META-INF");
       else if (subPath.getPath().endsWith(".jar")) {
-	loadJarTlds(taglibs, subPath, "META-INF");
+        loadJarTlds(taglibs, subPath, "META-INF");
       }
       else
-	loadAllTlds(taglibs, subPath.lookup("META-INF"), 64, "META-INF");
+        loadAllTlds(taglibs, subPath.lookup("META-INF"), 64, "META-INF");
     }
-    
+
     if (fileSet != null)
       loadAllTlds(taglibs, fileSet);
 
@@ -216,8 +216,8 @@ public class TldManager {
       TldTaglib taglib = taglibs.get(i);
 
       if (taglib.getConfigException() != null &&
-	  taglib.getURI() == null) {
-	_loadAllTldException = JspParseException.create(taglib.getConfigException());
+          taglib.getURI() == null) {
+        _loadAllTldException = JspParseException.create(taglib.getConfigException());
       }
     }
     */
@@ -227,9 +227,9 @@ public class TldManager {
 
     for (int i = 0; i < taglibs.size(); i++) {
       try {
-	taglibs.get(i).initListeners(_webApp);
+        taglibs.get(i).initListeners(_webApp);
       } catch (Exception e) {
-	throw new JspParseException(e);
+        throw new JspParseException(e);
       }
     }
   }
@@ -240,9 +240,9 @@ public class TldManager {
     // need to reparse the jars for each web-app
     if (_globalTaglibs == null) {
       if (! Alarm.isTest()) {
-	log.info("Loading .tld files from global classpath");
+        log.info("Loading .tld files from global classpath");
       }
-      
+
       ArrayList<TldPreload> globalTaglibs = new ArrayList<TldPreload>();
       ArrayList<TldPreload> cauchoTaglibs = new ArrayList<TldPreload>();
 
@@ -251,27 +251,27 @@ public class TldManager {
       ClassLoader globalLoader = TldManager.class.getClassLoader();
       thread.setContextClassLoader(globalLoader);
       try {
-	ArrayList<Path> paths = getClassPath(globalLoader);
-	_globalPaths = paths;
+        ArrayList<Path> paths = getClassPath(globalLoader);
+        _globalPaths = paths;
 
-	loadClassPathTlds(globalTaglibs, paths, "");
+        loadClassPathTlds(globalTaglibs, paths, "");
 
-	for (int i = globalTaglibs.size() - 1; i >= 0; i--) {
-	  TldPreload tld = globalTaglibs.get(i);
+        for (int i = globalTaglibs.size() - 1; i >= 0; i--) {
+          TldPreload tld = globalTaglibs.get(i);
 
-	  if (tld.getPath() == null || tld.getPath().getPath() == null)
-	    continue;
-	  
-	  String tldPathName = tld.getPath().getPath();
+          if (tld.getPath() == null || tld.getPath().getPath() == null)
+            continue;
 
-	  if (tldPathName.startsWith("/com/caucho")) {
-	    cauchoTaglibs.add(globalTaglibs.remove(i));
-	  }
-	}
+          String tldPathName = tld.getPath().getPath();
+
+          if (tldPathName.startsWith("/com/caucho")) {
+            cauchoTaglibs.add(globalTaglibs.remove(i));
+          }
+        }
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       } finally {
-	thread.setContextClassLoader(oldLoader);
+        thread.setContextClassLoader(oldLoader);
       }
 
       _globalTaglibs = globalTaglibs;
@@ -280,8 +280,8 @@ public class TldManager {
   }
 
   private void loadClassPathTlds(ArrayList<TldPreload> taglibs,
-				 ArrayList<Path> paths,
-				 String prefix)
+                                 ArrayList<Path> paths,
+                                 String prefix)
     throws JspParseException, IOException
   {
     for (int i = 0; i < paths.size(); i++) {
@@ -296,12 +296,12 @@ public class TldManager {
       }
 
       if (subPath.getPath().endsWith(".jar")) {
-	loadJarTlds(taglibs, subPath, prefix);
+        loadJarTlds(taglibs, subPath, prefix);
       }
       else if (prefix != null && ! prefix.equals(""))
-	loadAllTlds(taglibs, subPath.lookup(prefix), 64, prefix);
+        loadAllTlds(taglibs, subPath.lookup(prefix), 64, prefix);
       else
-	loadAllTlds(taglibs, subPath.lookup("META-INF"), 64, "META-INF");
+        loadAllTlds(taglibs, subPath.lookup("META-INF"), 64, "META-INF");
     }
   }
 
@@ -313,70 +313,70 @@ public class TldManager {
   */
 
   private void loadAllTlds(ArrayList<TldPreload> taglibs,
-			   FileSetType fileSet)
+                           FileSetType fileSet)
     throws JspParseException, IOException
   {
     for (Path path : fileSet.getPaths()) {
       if (path.getPath().startsWith(".")) {
       }
       else if ((path.getPath().endsWith(".tld")
-		|| path.getPath().endsWith(".ftld"))
-	       && path.isFile() && path.canRead()) {
-	try {
-	  TldPreload taglib = parseTldPreload(path);
+                || path.getPath().endsWith(".ftld"))
+               && path.isFile() && path.canRead()) {
+        try {
+          TldPreload taglib = parseTldPreload(path);
 
-	  taglibs.add(taglib);
+          taglibs.add(taglib);
 
-	  if (taglib.getURI() == null &&
-	      taglib.getConfigException() != null &&
-	      _loadAllTldException == null)
-	    _loadAllTldException = new JspLineParseException(taglib.getConfigException());
-	} catch (Exception e) {
-	  log.warning(e.getMessage());
-	}
+          if (taglib.getURI() == null &&
+              taglib.getConfigException() != null &&
+              _loadAllTldException == null)
+            _loadAllTldException = new JspLineParseException(taglib.getConfigException());
+        } catch (Exception e) {
+          log.warning(e.getMessage());
+        }
       }
     }
   }
-  
+
   private void loadAllTlds(ArrayList<TldPreload> taglibs,
-			   Path path, int depth, String userPath)
+                           Path path, int depth, String userPath)
     throws JspParseException, IOException
   {
     if (depth < 0)
       throw new JspParseException(L.l("max depth exceeded while reading .tld files.  Probable loop in filesystem detected at `{0}'.", path));
 
     path.setUserPath(userPath);
-    
+
     if (path.getPath().startsWith(".")) {
     }
     else if ((path.getPath().endsWith(".tld")
-	      || path.getPath().endsWith(".ftld"))
-	     && path.isFile() && path.canRead()) {
+              || path.getPath().endsWith(".ftld"))
+             && path.isFile() && path.canRead()) {
       try {
-	TldPreload taglib = parseTldPreload(path);
+        TldPreload taglib = parseTldPreload(path);
 
-	taglibs.add(taglib);
+        taglibs.add(taglib);
 
-	if (taglib.getURI() == null &&
-	    taglib.getConfigException() != null &&
-	    _loadAllTldException == null)
-	  _loadAllTldException = new JspLineParseException(taglib.getConfigException());
+        if (taglib.getURI() == null &&
+            taglib.getConfigException() != null &&
+            _loadAllTldException == null)
+          _loadAllTldException = new JspLineParseException(taglib.getConfigException());
       } catch (Exception e) {
-	/*
-	if (_loadAllTldException == null) {
-	}
-	else if (e instanceof JspParseException)
-	  _loadAllTldException = (JspParseException) e;
-	else
-	  _loadAllTldException = new JspParseException(e);
-	*/
-	
-	log.warning(e.getMessage());
+        /*
+        if (_loadAllTldException == null) {
+        }
+        else if (e instanceof JspParseException)
+          _loadAllTldException = (JspParseException) e;
+        else
+          _loadAllTldException = new JspParseException(e);
+        */
+
+        log.warning(e.getMessage());
       }
     }
     else if (path.isDirectory()) {
       String []fileNames = path.list();
-      
+
       for (int i = 0; fileNames != null && i < fileNames.length; i++) {
         String name = fileNames[i];
 
@@ -392,13 +392,13 @@ public class TldManager {
   }
 
   private void loadJarTlds(ArrayList<TldPreload> taglibs,
-			   Path jarBacking,
-			   String prefix)
+                           Path jarBacking,
+                           String prefix)
     throws JspParseException, IOException
   {
     if (! jarBacking.canRead())
       return;
-    
+
     String nativePath = jarBacking.getNativePath();
     ZipFile zipFile;
     JarPath jar = JarPath.create(jarBacking);
@@ -415,19 +415,19 @@ public class TldManager {
     ZipScanner scan = null;
     try {
       if (true)
-	scan = new ZipScanner(jarBacking);
-	
+        scan = new ZipScanner(jarBacking);
+
       if (scan != null && scan.open()) {
-	while (scan.next()) {
-	  String name = scan.getName();
+        while (scan.next()) {
+          String name = scan.getName();
 
-	  if (name.startsWith(prefix)
-	      && name.endsWith(".tld") || name.endsWith(".ftld")) {
-	    tldPaths.add(jar.lookup(name));
-	  }
-	}
+          if (name.startsWith(prefix)
+              && name.endsWith(".tld") || name.endsWith(".ftld")) {
+            tldPaths.add(jar.lookup(name));
+          }
+        }
 
-	isValidScan = true;
+        isValidScan = true;
       }
     } catch (Exception e) {
       log.log(Level.INFO, e.toString(), e);
@@ -435,42 +435,42 @@ public class TldManager {
 
     if (! isValidScan) {
       try {
-	Enumeration<? extends ZipEntry> en = zipFile.entries();
-	while (en.hasMoreElements()) {
-	  ZipEntry entry = en.nextElement();
-	  String name = entry.getName();
+        Enumeration<? extends ZipEntry> en = zipFile.entries();
+        while (en.hasMoreElements()) {
+          ZipEntry entry = en.nextElement();
+          String name = entry.getName();
 
-	  if (name.startsWith(prefix)
-	      && (name.endsWith(".tld") || name.endsWith(".ftld"))) {
-	    tldPaths.add(jar.lookup(name));
-	  }
-	}
+          if (name.startsWith(prefix)
+              && (name.endsWith(".tld") || name.endsWith(".ftld"))) {
+            tldPaths.add(jar.lookup(name));
+          }
+        }
       } finally {
-	zipFile.close();
+        zipFile.close();
       }
     }
 
     for (Path path : tldPaths) {
       try {
-	TldPreload taglib = parseTldPreload(path);
+        TldPreload taglib = parseTldPreload(path);
 
-	taglibs.add(taglib);
+        taglibs.add(taglib);
 
-	if (taglib.getURI() == null
-	    && taglib.getConfigException() != null
-	    && _loadAllTldException == null)
-	  _loadAllTldException = new JspLineParseException(taglib.getConfigException());
+        if (taglib.getURI() == null
+            && taglib.getConfigException() != null
+            && _loadAllTldException == null)
+          _loadAllTldException = new JspLineParseException(taglib.getConfigException());
       } catch (Exception e) {
-	/*
-	  if (_loadAllTldException == null) {
-	  }
-	  else if (e instanceof JspParseException)
-	  _loadAllTldException = (JspParseException) e;
-	  else
-	  _loadAllTldException = new JspParseException(e);
-	*/
-	
-	log.warning(e.getMessage());
+        /*
+          if (_loadAllTldException == null) {
+          }
+          else if (e instanceof JspParseException)
+          _loadAllTldException = (JspParseException) e;
+          else
+          _loadAllTldException = new JspParseException(e);
+        */
+
+        log.warning(e.getMessage());
       }
     }
   }
@@ -482,23 +482,23 @@ public class TldManager {
     throws JspParseException, IOException
   {
     init();
-    
+
     TldTaglib taglib = null;
     TldTaglib jsfTaglib = null;
-    
+
     for (int i = 0; i < _preloadTaglibs.size(); i++) {
       TldPreload preload = _preloadTaglibs.get(i);
 
       if (uri.equals(preload.getURI())
-	  && (mapLocation == null
-	      || mapLocation.equals(preload.getLocation())
-	      || mapLocation.equals(uri))) {
-	if (preload.isJsf()) {
-	  if (_isFastJsf)
-	    jsfTaglib = parseTld(preload.getPath());
-	}
-	else if (taglib == null)
-	  taglib = parseTld(preload.getPath());
+          && (mapLocation == null
+              || mapLocation.equals(preload.getLocation())
+              || mapLocation.equals(uri))) {
+        if (preload.isJsf()) {
+          if (_isFastJsf)
+            jsfTaglib = parseTld(preload.getPath());
+        }
+        else if (taglib == null)
+          taglib = parseTld(preload.getPath());
       }
     }
 
@@ -509,10 +509,10 @@ public class TldManager {
     }
     else if (taglib != null)
       return taglib;
-    
+
     return parseTld(location);
   }
-	   
+
   /**
    * Returns the tld parsed at the given location.
    */
@@ -520,15 +520,15 @@ public class TldManager {
     throws JspParseException, IOException
   {
     init();
-    
+
     TldTaglib tld = findTld(location);
 
     /* XXX: jsp/18n0 handled on init
     if (tld != null) {
       try {
-	tld.init(_webApp);
+        tld.init(_webApp);
       } catch (Exception e) {
-	throw new JspParseException(e);
+        throw new JspParseException(e);
       }
     }
     */
@@ -550,13 +550,13 @@ public class TldManager {
       path = _resourceManager.resolvePath(location);
     }
     else if (location.indexOf(':') >= 0 && ! location.startsWith("file:")
-	     && location.indexOf(':') < location.indexOf('/')) {
+             && location.indexOf(':') < location.indexOf('/')) {
       if (_loadAllTldException != null)
-	throw _loadAllTldException;
-      
+        throw _loadAllTldException;
+
       return null;
       /* XXX: jsp/0316
-      throw new JspParseException(L.l("Unknown taglib `{0}'.  Taglibs specified with an absolute URI must either be:\n1) specified in the web.xml\n2) defined in a jar's .tld in META-INF\n3) defined in a .tld in WEB-INF\n4) predefined by Resin", 
+      throw new JspParseException(L.l("Unknown taglib `{0}'.  Taglibs specified with an absolute URI must either be:\n1) specified in the web.xml\n2) defined in a jar's .tld in META-INF\n3) defined in a .tld in WEB-INF\n4) predefined by Resin",
                                       location));
       */
     }
@@ -568,7 +568,7 @@ public class TldManager {
     path.setUserPath(location);
 
     Path jar = null;
-      
+
     if (location.endsWith(".jar")) {
       path = findJar(location);
 
@@ -611,19 +611,19 @@ public class TldManager {
       taglib = taglibRef.get();
 
       if (taglib != null && ! taglib.isModified())
-	return taglib;
+        return taglib;
     }
-    
+
     ReadStream is = path.openRead();
 
     try {
       taglib = parseTld(is);
 
       if (path instanceof JarPath)
-	taglib.setJarPath(path.lookup("/"));
+        taglib.setJarPath(path.lookup("/"));
 
       _tldMap.put(path, new SoftReference<TldTaglib>(taglib));
-      
+
       return taglib;
     } finally {
       is.close();
@@ -645,11 +645,11 @@ public class TldManager {
 
       path.setUserPath(path.getURL());
     }
-      
+
     String schema = null;
 
     if (_webApp.getJsp() == null
-	|| _webApp.getJsp().isValidateTaglibSchema()) {
+        || _webApp.getJsp().isValidateTaglibSchema()) {
       schema = getSchema();
     }
 
@@ -678,7 +678,7 @@ public class TldManager {
       throw new JspParseException(e);
     }
     */
-    
+
     return taglib;
   }
 
@@ -700,7 +700,7 @@ public class TldManager {
       String tagPath = path.getPath();
 
       if (tagPath.startsWith(appDir))
-	taglib.setLocation(tagPath.substring(appDir.length()));
+        taglib.setLocation(tagPath.substring(appDir.length()));
 
       return taglib;
     } finally {
@@ -717,7 +717,7 @@ public class TldManager {
     throws JspParseException, IOException
   {
     boolean isJsfTld = false;
-    
+
     if (is instanceof ReadStream) {
       Path path = ((ReadStream) is).getPath();
 
@@ -725,7 +725,7 @@ public class TldManager {
 
       path.setUserPath(path.getURL());
     }
-      
+
     String schema = null;
 
     if (_webApp.getJsp() == null
@@ -755,7 +755,7 @@ public class TldManager {
     } finally {
       is.close();
     }
-    
+
     return taglib;
   }
 
@@ -787,12 +787,12 @@ public class TldManager {
 
     int head = 0;
     int tail = 0;
-    
+
     while ((tail = classPath.indexOf(sep, head)) >= 0) {
       String sub = classPath.substring(head, tail);
 
       path = Vfs.lookup(sub);
-      
+
       if (sub.endsWith(location) && path.exists())
         return path;
 
@@ -801,11 +801,11 @@ public class TldManager {
 
     if (classPath.length() <= head)
       return null;
-    
+
     String sub = classPath.substring(head);
 
     path = Vfs.lookup(sub);
-      
+
     if (sub.endsWith(location) && path.exists())
       return path;
     else
@@ -819,7 +819,7 @@ public class TldManager {
   {
     return getClassPath(Thread.currentThread().getContextClassLoader());
   }
-  
+
   /**
    * Adds the classpath for the loader as paths in the MergePath.
    *
@@ -828,7 +828,7 @@ public class TldManager {
   private ArrayList<Path> getClassPath(ClassLoader loader)
   {
     String classpath = null;
-    
+
     if (loader instanceof DynamicClassLoader)
       classpath = ((DynamicClassLoader) loader).getClassPath();
     else
@@ -836,7 +836,7 @@ public class TldManager {
 
     return getClassPath(classpath);
   }
-  
+
   /**
    * Adds the classpath for the loader as paths in the MergePath.
    *
@@ -845,7 +845,7 @@ public class TldManager {
   private ArrayList<Path> getClassPath(String classpath)
   {
     ArrayList<Path> list = new ArrayList<Path>();
-    
+
     char sep = CauchoSystem.getPathSeparatorChar();
     int head = 0;
     int tail = 0;
@@ -863,10 +863,10 @@ public class TldManager {
       }
 
       if (! segment.equals("")) {
-	Path path = Vfs.lookup(segment);
+        Path path = Vfs.lookup(segment);
 
-	if (! list.contains(path))
-	  list.add(path);
+        if (! list.contains(path))
+          list.add(path);
       }
     }
 

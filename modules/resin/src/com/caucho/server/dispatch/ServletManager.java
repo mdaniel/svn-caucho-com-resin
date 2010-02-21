@@ -58,13 +58,13 @@ import java.util.logging.Logger;
 public class ServletManager {
   static final Logger log = Logger.getLogger(ServletManager.class.getName());
   static final L10N L = new L10N(ServletManager.class);
-  
+
   private HashMap<String,ServletConfigImpl> _servlets
     = new HashMap<String,ServletConfigImpl>();
-  
+
   private ArrayList<ServletConfigImpl> _servletList
     = new ArrayList<ServletConfigImpl>();
-  
+
   private ArrayList<ServletConfigImpl> _cronList
   = new ArrayList<ServletConfigImpl>();
 
@@ -78,7 +78,7 @@ public class ServletManager {
   public ServletManager()
   {
   }
-  
+
   /**
    * Sets true if validation is lazy.
    */
@@ -91,7 +91,7 @@ public class ServletManager {
   {
     for (ServletConfigImpl servletConfig : _servletList) {
       String className = servletConfig.getServletClass().getName();
-      
+
       if ("javax.faces.webapp.FacesServlet".equals(className))
         return true;
     }
@@ -195,7 +195,7 @@ public class ServletManager {
   {
     ArrayList<ServletConfigImpl> loadOnStartup;
     loadOnStartup = new ArrayList<ServletConfigImpl>();
-    
+
     for (int j = 0; j < _servletList.size(); j++) {
       ServletConfigImpl config = _servletList.get(j);
 
@@ -211,7 +211,7 @@ public class ServletManager {
           break;
         }
       }
-      
+
       if (i == loadOnStartup.size())
         loadOnStartup.add(config);
 
@@ -240,7 +240,7 @@ public class ServletManager {
    * Creates the servlet chain for the servlet.
    */
   public FilterChain createServletChain(String servletName,
-					ServletConfigImpl config,
+                                        ServletConfigImpl config,
                                         ServletInvocation invocation)
     throws ServletException
   {
@@ -296,7 +296,7 @@ public class ServletManager {
   {
     ArrayList<ServletConfigImpl> servletList;
     servletList = new ArrayList<ServletConfigImpl>();
-    
+
     if (_servletList != null) {
       synchronized (_servletList) {
         servletList.addAll(_servletList);
@@ -307,13 +307,13 @@ public class ServletManager {
       ServletConfigImpl config = servletList.get(i);
 
       try {
-	config.close();
+        config.close();
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
       }
     }
   }
-  
+
   class Listener implements ELContextListener {
 
     /* (non-Javadoc)
@@ -323,13 +323,10 @@ public class ServletManager {
     public void contextCreated(ELContextEvent event)
     {
       // TODO Auto-generated method stub
-     System.out.println("CREATE!: " + event); 
+
      ELContext elContext = event.getELContext();
      ELResolver resolver = elContext.getELResolver();
-     System.out.println("REV: " + resolver);
-     System.out.println("VAL: " + resolver.getValue(elContext, null, "credentials"));
-     Thread.dumpStack();
     }
-    
+
   }
 }

@@ -40,7 +40,7 @@ import java.util.ArrayList;
  */
 public class TldPreload {
   private boolean _isInit;
-  
+
   private String _uri;
   private String _location;
 
@@ -120,7 +120,7 @@ public class TldPreload {
   {
     return _configException;
   }
-  
+
   /**
    * Ignores unknown options.
    */
@@ -144,7 +144,7 @@ public class TldPreload {
       listener.register(app);
     }
   }
-  
+
   public boolean isJsf()
   {
     return false;

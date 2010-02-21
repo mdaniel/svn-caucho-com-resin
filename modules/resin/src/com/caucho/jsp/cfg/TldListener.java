@@ -85,7 +85,7 @@ public class TldListener {
 
     String className = _listenerClass.getName();
 
-    
+
     if ("com.sun.faces.config.ConfigureListener".equals(className)
         && ! webApp.isFacesServletConfigured()) {
       // avoid initializing JSF if it's not used.
@@ -96,7 +96,7 @@ public class TldListener {
       Listener listener = new Listener();
       listener.setListenerClass(_listenerClass);
       //listener.init();
-    
+
       webApp.addListener(listener);
     } catch (RuntimeException e) {
       throw e;

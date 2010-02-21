@@ -3,35 +3,35 @@ package example;
 import javax.servlet.*;
 
 public class CometState {
-  private final AsyncContext _async;
+  private ServletRequest _request;
 
   private int _count;
 
-  public CometState(AsyncContext async)
+  public CometState(ServletRequest request)
   {
-    _async = async;
+    _request = request;
   }
 
   public boolean isClosed()
   {
-    ServletRequest request = _async.getRequest();
-
-    return request == null || ! request.isAsyncStarted();
+    return _request == null || ! _request.isAsyncStarted();
   }
 
   public boolean wake()
   {
-    _async.getRequest().setAttribute("comet.count", ++_count);
+    _request.setAttribute("comet.count", ++_count);
 
-    if (_count <= 10) {
-      _async.dispatch();
+    AsyncContext async = _request.getAsyncContext();
+
+    if (_count <= 10 && async != null) {
+      async.dispatch();
 
       return ! isClosed();
     }
-    else {
-      _async.complete();
-
-      return false;
+    else if (async != null) {
+      async.complete();
     }
+
+    return false;
   }
 }

@@ -1383,6 +1383,8 @@ select_host(cluster_t *cluster, time_t now)
   int i;
   int best_srun;
   int best_cost = 0x7fffffff;
+  cluster_srun_t *cluster_srun;
+  srun_t *srun;
   
   size = cluster->srun_size;  
   if (size < 1)
@@ -1409,12 +1411,24 @@ select_host(cluster_t *cluster, time_t now)
   }
   
   cluster->round_robin_index = round_robin;
+
+  /* if round-robin server is failing, choose one randomly */
+  for (i = 0; i < size; i++) {
+    cluster_srun = &cluster->srun_list[round_robin];
+    srun = cluster_srun->srun;
+
+    if (! srun->is_fail)
+      break;
+
+    round_robin = (rand() & 0x7fffffff) % size;
+  }
+
   best_srun = round_robin;
 
   for (i = 0; i < size; i++) {
     int index = (i + round_robin) % size;
-    cluster_srun_t *cluster_srun = &cluster->srun_list[index];
-    srun_t *srun = cluster_srun->srun;
+    cluster_srun = &cluster->srun_list[index];
+    srun = cluster_srun->srun;
     /* int tail; */
     int cost;
 

@@ -53,10 +53,10 @@ public class ServletMapping extends ServletConfigImpl {
 
   private ArrayList<Mapping> _mappingList
     = new ArrayList<Mapping>();
-  
+
   private boolean _isStrictMapping;
   private boolean _ifAbsent;
-  
+
   /**
    * Creates a new servlet mapping object.
    */
@@ -68,7 +68,7 @@ public class ServletMapping extends ServletConfigImpl {
   {
     _ifAbsent = ifAbsent;
   }
-  
+
   /**
    * Sets the url pattern
    */
@@ -127,29 +127,29 @@ public class ServletMapping extends ServletConfigImpl {
       String urlRegexp = mapping.getUrlRegexp();
 
       if (getServletName() == null
-	  && getServletClassName() != null
-	  && urlPattern != null) {
-	setServletName(urlPattern);
+          && getServletClassName() != null
+          && urlPattern != null) {
+        setServletName(urlPattern);
       }
 
       if (urlPattern != null && ! hasInit) {
-	hasInit = true;
-	super.init();
+        hasInit = true;
+        super.init();
 
-	if (getServletClassName() != null)
-	  mapper.getServletManager().addServlet(this);
+        if (getServletClassName() != null)
+          mapper.getServletManager().addServlet(this);
       }
 
       if (urlPattern != null)
-	mapper.addUrlMapping(urlPattern, getServletName(), this, _ifAbsent);
+        mapper.addUrlMapping(urlPattern, getServletName(), this, _ifAbsent);
       else
-	mapper.addUrlRegexp(urlRegexp, getServletName(), this);
+        mapper.addUrlRegexp(urlRegexp, getServletName(), this);
     }
 
     /*
     if (_urlRegexp == null) {
       if (getServletName() == null && getServletClassName() != null) {
-	// server/13f4
+        // server/13f4
       }
 
     }
@@ -160,8 +160,8 @@ public class ServletMapping extends ServletConfigImpl {
    * Initialize for a regexp.
    */
   String initRegexp(ServletContext webApp,
-		    ServletManager manager,
-		    ArrayList<String> vars)
+                    ServletManager manager,
+                    ArrayList<String> vars)
     throws ServletException
   {
     ELContext env = EL.getEnvironment();
@@ -183,18 +183,18 @@ public class ServletMapping extends ServletConfigImpl {
       String servletName = EL.evalString(rawName, mapEnv);
 
       if (manager.getServletConfig(servletName) != null)
-	return servletName;
-      
+        return servletName;
+
       String className = EL.evalString(rawClassName, mapEnv);
 
       try {
-	WebApp app = (WebApp) getServletContext();
+        WebApp app = (WebApp) getServletContext();
 
-	Class cl = Class.forName(className, false, app.getClassLoader());
+        Class cl = Class.forName(className, false, app.getClassLoader());
       } catch (ClassNotFoundException e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
 
-	return null;
+        return null;
       }
 
       ServletConfigImpl config = new ServletConfigImpl();
@@ -206,7 +206,7 @@ public class ServletMapping extends ServletConfigImpl {
       ContainerProgram program = getInit();
 
       if (program != null)
-	config.setInit(program);
+        config.setInit(program);
 
       config.init();
 
@@ -246,8 +246,15 @@ public class ServletMapping extends ServletConfigImpl {
       }
     }
 
-    builder.append(", name=");
+    builder.append("name=");
     builder.append(getServletName());
+
+    if (getServletClass() != null) {
+      builder.append(", class=");
+      builder.append(getServletClass().getName());
+
+    }
+
     builder.append("]");
 
     return builder.toString();

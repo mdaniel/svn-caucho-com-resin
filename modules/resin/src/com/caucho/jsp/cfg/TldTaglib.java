@@ -97,7 +97,7 @@ public class TldTaglib implements DependencyBean
   public void setIcon(com.caucho.config.types.Icon icon)
   {
   }
-  
+
   /**
    * Sets the taglib version.
    */
@@ -105,7 +105,7 @@ public class TldTaglib implements DependencyBean
   {
     _tlibVersion = tlibVersion;
   }
-  
+
   /**
    * Sets the taglib version (backwards compat).
    */
@@ -394,14 +394,14 @@ public class TldTaglib implements DependencyBean
   {
     if (app == null)
       return;
-    
+
     for (int i = 0; i < _listeners.size(); i++) {
       TldListener listener = _listeners.get(i);
 
       listener.register(app);
     }
   }
-  
+
   public void mergeJsf(TldTaglib jsfTaglib)
   {
     ArrayList<TldTag> jsfTags = jsfTaglib.getTagList();
@@ -410,22 +410,22 @@ public class TldTaglib implements DependencyBean
       JsfTag jsfTag = (JsfTag) jsfTags.get(i);
 
       if (jsfTag.getBaseTag() != null)
-	continue;
+        continue;
 
       int p = _tags.indexOf(jsfTag);
 
       if (p >= 0) {
-	TldTag tag = _tags.remove(p);
+        TldTag tag = _tags.remove(p);
 
-	jsfTag.setBaseTag(tag);
+        jsfTag.setBaseTag(tag);
       }
       else
-	throw new IllegalStateException("No matching tag for : " + jsfTag);
-      
+        throw new IllegalStateException("No matching tag for : " + jsfTag);
+
       _tags.add(jsfTag);
     }
   }
-  
+
 
   /**
    * Checks for modification.
@@ -434,7 +434,7 @@ public class TldTaglib implements DependencyBean
   {
     for (int i = 0; i < _dependList.size(); i++) {
       if (_dependList.get(i).isModified())
-	return true;
+        return true;
     }
 
     return false;

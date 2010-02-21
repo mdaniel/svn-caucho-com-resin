@@ -587,6 +587,9 @@
         <exclude name="**/lib/jace.jar"/>
         <exclude name="**/*.o"/>
         <exclude name="**/*.so"/>
+        <exclude name="**/*.jnilib"/>
+        <exclude name="**/*.pdf"/>
+        <exclude name="**/*.graffle"/>
         <exclude name="**/*.lo"/>
         <exclude name="**/*.svnignore"/>
         <exclude name="**/*.svn"/>
@@ -736,6 +739,9 @@
       <exclude name="**/Makefile"/>
       <exclude name="**/*.o"/>
       <exclude name="**/*.so"/>
+      <exclude name="**/*.jnilib"/>
+      <exclude name="**/*.pdf"/>
+      <exclude name="**/*.graffle"/>
       <exclude name="**/*.lo"/>
       <exclude name="**/*.svnignore"/>
       <exclude name="**/*.svn"/>
@@ -790,6 +796,9 @@
       <exclude name="**/*.lo"/>
       <exclude name="**/*.o"/>
       <exclude name="**/*.so"/>
+      <exclude name="**/*.jnilib"/>
+      <exclude name="**/*.pdf"/>
+      <exclude name="**/*.graffle"/>
     </patternset>
 
     <delete file="${dist}/${shortproduct}-${version}.zip"/>

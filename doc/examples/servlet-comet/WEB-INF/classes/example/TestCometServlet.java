@@ -27,10 +27,12 @@ public class TestCometServlet extends GenericServlet
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    if (req.isAsyncStarted()) {
+    if (req.getAttribute("comet") != null) {
       resume(request, response, req.getAsyncContext());
       return;
     }
+
+    req.setAttribute("comet", true);
 
     PrintWriter out = res.getWriter();
     res.setHeader("Cache-Control", "no-cache, must-revalidate");
@@ -51,7 +53,7 @@ public class TestCometServlet extends GenericServlet
     out.println("</script>");
 
     AsyncContext async = request.startAsync();
-    CometState state = new CometState(async);
+    CometState state = new CometState(request);
 
     // Add the comet state to the controller
     _timerService.addCometState(state);
@@ -72,5 +74,14 @@ public class TestCometServlet extends GenericServlet
     out.println("<script type='text/javascript'>");
     out.println("comet_update(" + count + ");");
     out.println("</script>");
+
+    if (count instanceof Number) {
+      int value = ((Number) count).intValue();
+
+      if (value >= 10)
+        return;
+    }
+
+    req.startAsync();
   }
 }
