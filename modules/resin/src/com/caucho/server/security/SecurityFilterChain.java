@@ -94,6 +94,8 @@ public class SecurityFilterChain implements FilterChain {
 
     AuthorizationResult result = AuthorizationResult.NONE;
 
+    // XXX: better logging on failure
+
     boolean isPrivateCache = false;
     if (constraints != null) {
       for (AbstractConstraint constraint : constraints) {

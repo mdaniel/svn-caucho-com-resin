@@ -23,6 +23,7 @@
     <resin:if test="${! resin_admin_external}">
       <resin:IfNetwork>
         <value>127.0.0.1</value>
+        <value>0::1</value>
         <value>192.168/16</value>
       </resin:IfNetwork>
     </resin:if>
