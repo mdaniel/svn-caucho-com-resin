@@ -1327,7 +1327,8 @@ public class Var extends Value
   public Var getVar(Value index)
   {
     // php/3d1a
-    if (! _value.isset())
+    // php/34ab
+    if (! _value.toBoolean())
       _value = new ArrayValueImpl();
 
     return _value.getVar(index);
