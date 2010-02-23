@@ -589,7 +589,7 @@
     <mkdir dir="${build}/javadoc/web-app"/>
 
     <javadoc destdir="${build}/javadoc/web-app/" 
-      maxmemory="256m"
+      maxmemory="512m"
       use="true" 
       author="true"
       version="true"
@@ -710,7 +710,7 @@
     
     <java classname="com.thaiopensource.relaxng.translate.Driver" fork='true'>
        <classpath>
-          <fileset dir="lib">
+          <fileset dir="${basedir}/lib">
             <include name="*.jar" />
           </fileset>
        </classpath>
@@ -720,7 +720,7 @@
     
     <java classname="com.thaiopensource.relaxng.translate.Driver" fork='true'>
        <classpath>
-          <fileset dir="lib">
+          <fileset dir="${basedir}/lib">
             <include name="*.jar" />
           </fileset>
        </classpath>
