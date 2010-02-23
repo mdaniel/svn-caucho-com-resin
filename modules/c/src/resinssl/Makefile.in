@@ -1,0 +1,39 @@
+CC=@CC@
+CFLAGS_SHLIB=@CFLAGS_SHLIB@
+CFLAGS_OPENSSL=@CFLAGS_OPENSSL@
+LD=@LD@
+OS=@OS@
+SO=@SO@
+CPU=@CPU@
+LDFLAGS=@LDFLAGS@
+LDFLAGS_SHLIB=@LDFLAGS_SHLIB@
+PROXY_LIBS=@PROXY_LIBS@ @SSL_LIBS@
+APACHE_INC=@APACHE_INC@
+resin_conf=@apache_conf@
+resin_libexec=@apache_libexec@
+LIBEXEC=@LIBEXEC@
+resin_home=@resin_home@
+JNI_INCLUDE=@JNI_INCLUDE@
+INCLUDES = @INCLUDES@ $(JNI_INCLUDE) -I../common -I../resin
+CFLAGS = @CFLAGS@ -DRESIN_HOME=\"$(resin_home)\" $(INCLUDES) -DCPU=\"$(CPU)\" -DOS=$(OS) @CFLAGS_JNI@ @CFLAGS_SHLIB@ @CFLAGS_OPENSSL@
+OBJ=@SSL_OBJ@ ../resin/memory.o ../resin/std.o ../resin/java.o
+
+all	: libresinssl.$(SO)
+
+libresinssl.so	: $(OBJ)
+	$(LD) $(LDFLAGS_SHLIB) -o $@ $(OBJ) $(PROXY_LIBS)
+
+libresinssl.jnilib	: $(OBJ)
+	$(LD) $(LDFLAGS_SHLIB) -framework JavaVM -o $@ $(OBJ) $(PROXY_LIBS)
+
+$(OBJ)	: ../resin/resin.h Makefile
+
+clean	:
+	rm -f *.o *.$(SO)
+
+install	: libresinssl.$(SO)
+	- mkdir $(resin_home)/$(LIBEXEC)
+	cp libresinssl.$(SO) $(resin_home)/$(LIBEXEC)
+
+
+
