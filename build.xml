@@ -732,18 +732,18 @@
   <target name="dist" depends="configure, dist.build, dist.package"/>
   
   <target name="configure">
-     <mkdir dir="automake"/>
-     <exec executable="aclocal"/>
-     <exec executable="libtoolize">
+     <mkdir dir="${install}/automake"/>
+     <exec executable="aclocal" dir="${install}"/>
+     <exec executable="libtoolize" dir="${install}">
         <arg line="-f -c"/>
      </exec>
-     <exec executable="automake">
+     <exec executable="automake" dir="${install}">
         <arg line="-a -i -c"/>
      </exec>
-     <exec executable="automake">
+     <exec executable="automake" dir="${install}">
         <arg line="-a -i -c --foreign"/>
      </exec>
-     <exec executable="autoconf"/>
+     <exec executable="autoconf" dir="${install}"/>
   </target>
 
   <target name="dist.build" 
