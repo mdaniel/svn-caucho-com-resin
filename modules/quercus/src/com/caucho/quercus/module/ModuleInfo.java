@@ -235,7 +235,6 @@ public class ModuleInfo {
 
         String functionName = function.getName();
 
-
         AbstractJavaMethod oldFunction
           = (AbstractJavaMethod) _staticFunctions.get(functionName);
 

@@ -346,9 +346,9 @@ public class ApcModule extends AbstractQuercusModule
     public long getTTL()
     {
       if (_expire >= Long.MAX_VALUE / 2)
-	return 0;
+        return 0;
       else
-	return (_expire - Alarm.getCurrentTime()) / 1000L;
+        return (_expire - Alarm.getCurrentTime()) / 1000L;
     }
 
     public long getHitCount()
@@ -361,7 +361,7 @@ public class ApcModule extends AbstractQuercusModule
       if (Alarm.getCurrentTime() <= _expire)
         return true;
       else {
-	clear();
+        clear();
 
         return false;
       }
@@ -370,8 +370,8 @@ public class ApcModule extends AbstractQuercusModule
     public Value getValue(Env env)
     {
       if (Alarm.getCurrentTime() <= _expire) {
-	_accessTime = Alarm.getCurrentTime();
-	_hitCount++;
+        _accessTime = Alarm.getCurrentTime();
+        _hitCount++;
 	
         return super.getValue(env);
       }

@@ -4204,18 +4204,12 @@ public class StringModule extends AbstractQuercusModule {
     else
       needle = StringValue.create((char) needleV.toInt());
 
-    int offset;
-
-    if (offsetV instanceof DefaultValue)
-      offset = haystack.length();
-    else {
-      offset = offsetV.toInt();
+    int offset = haystack.length() - offsetV.toInt();
       
-      if (haystack.length() < offset) {
-        env.warning(L.l("offset cannot exceed string length"));
-        
-        return BooleanValue.FALSE;
-      }
+    if (offset < 0) {
+      env.warning(L.l("offset cannot exceed string length"));
+      
+      return BooleanValue.FALSE;
     }
 
     int pos = haystack.lastIndexOf(needle, offset);

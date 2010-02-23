@@ -303,6 +303,17 @@ public class OutputModule extends AbstractQuercusModule
       type = LongValue.ZERO;
       */
 
+    String name;
+
+    if (callback != null)
+      name = callback.getCallbackName();
+    else
+      name = "default output handler".intern();
+    
+    // XXX: there appears to be only one "internal" callback
+    if (name.equals("URL-Rewriter"))
+      type = LongValue.ZERO;
+    
     element.put(env.createString("type"), type);
 
     // the rewriter is a special case where it includes a field
@@ -326,17 +337,13 @@ public class OutputModule extends AbstractQuercusModule
     LongValue status = ob.haveFlushed() ? LongValue.ONE : LongValue.ZERO;
     element.put(env.createString("status"), status);
 
-    StringValue name;
+    StringValue nameV = env.createString(name);
 
-    if (callback != null)
-      name = env.createString(callback.getCallbackName());
-    else
-      name = env.createString("default output handler".intern());
-
-    element.put(env.createString("name".intern()), name);
+    element.put(env.createString("name".intern()), nameV);
 
     Value del = ob.getEraseFlag() ? BooleanValue.TRUE : 
-      BooleanValue.FALSE;
+                                    BooleanValue.FALSE;
+    
     element.put(env.createString("del"), del);
   }
 

@@ -344,6 +344,7 @@ public class ArrayValueImpl extends ArrayValue
   /**
    * Copy for return.
    */
+  @Override
   public Value copyReturn()
   {
     return new ArrayValueImpl(this);

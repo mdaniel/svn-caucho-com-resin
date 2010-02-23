@@ -413,7 +413,7 @@ public class ReflectionClass
                                       StringValue name,
                                       @Optional Value defaultV)
   {
-    Value field = _cls.getStaticFieldValue(env, name);
+    Value field = _cls.getStaticField(env, name);
     
     if (field == null) {
       if (! defaultV.isDefault())

@@ -29,6 +29,8 @@
 
 package com.caucho.quercus.env;
 
+import java.util.IdentityHashMap;
+
 /**
  * Represents a PHP array value copied as part of deserialization or APC.
  *
@@ -172,5 +174,39 @@ public class ArrayCopyValueImpl extends ArrayValueImpl
     _root.setModified();
 
     return super.shuffle();
+  }
+  
+  /**
+   * Copy the value.
+   */
+  public Value copy()
+  {
+    return copy(Env.getInstance());
+  }
+  
+  /**
+   * Convert to an argument value.
+   */
+  @Override
+  public Value toLocalRef()
+  {
+    return copy();
+  }
+  
+  /**
+   * Copy for return.
+   */
+  @Override
+  public Value copyReturn()
+  {
+    return copy();
+  }
+  
+  /**
+   * Copy for saving a method's arguments.
+   */
+  public Value copySaveFunArg()
+  {
+    return copy();
   }
 }

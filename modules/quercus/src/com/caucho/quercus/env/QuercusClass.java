@@ -803,6 +803,19 @@ public class QuercusClass extends NullValue {
     
     return env.setStaticRef(staticName, value);
   }
+  
+  /**
+   * For Reflection.
+   */
+  public Value getStaticField(Env env, StringValue name)
+  {
+    StringValue staticName = _staticFieldNameMap.get(name);
+    
+    if (staticName != null)
+      return env.getStaticValue(staticName);
+    else
+      return null;
+  }
     
   //
   // Constructors
@@ -831,7 +844,7 @@ public class QuercusClass extends NullValue {
   }
   */
   
-  /*
+  /**
    * Creates a new object without calling the constructor.  This is used
    * for unserializing classes.
    */
@@ -871,7 +884,7 @@ public class QuercusClass extends NullValue {
     return objectValue;
   }
   
-  /*
+  /**
    * Initializes the object's methods and fields.
    */
   public void initObject(Env env, ObjectValue obj)

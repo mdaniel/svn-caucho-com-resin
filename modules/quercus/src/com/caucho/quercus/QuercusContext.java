@@ -1266,7 +1266,9 @@ public class QuercusContext implements AlarmListener
       if (id >= 0)
         return id;
 
-      id = _functionNameMap.size();
+      // 0 is used for an undefined function
+      // php/1p0g
+      id = _functionNameMap.size() + 1;
 
       _functionNameMap.put(name, id);
       
