@@ -45,6 +45,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import org.w3c.dom.Node;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.TagName;
 import com.caucho.config.annotation.DisableConfig;
@@ -799,11 +800,11 @@ public class BeanType<T> extends ConfigType<T>
 
         if (tagName != null) {
           for (String propName : tagName.value()) {
-            _attributeMap.put(propName, attr);
+            addProp(propName, attr);
           }
         }
         else {
-          _attributeMap.put(xmlName, attr);
+          addProp(xmlName, attr);
         }
       }
     }
@@ -816,7 +817,7 @@ public class BeanType<T> extends ConfigType<T>
     
     Class<?> []paramTypes = method.getParameterTypes();
     Class<?> type = paramTypes[0];
-  
+    
     if (propName.equals("text")
         && (type.equals(String.class)
             || type.equals(RawString.class))) {
@@ -826,8 +827,27 @@ public class BeanType<T> extends ConfigType<T>
     }
     else
       attr = new SetterAttribute(method, type);
-
-    _attributeMap.put(propName, attr);
+    
+    addProp(propName, attr);
+  }
+  
+  private void addProp(String propName, Attribute attr)
+  {
+    Attribute oldAttr = _attributeMap.get(propName);
+    
+    if (oldAttr == null) {
+      _attributeMap.put(propName, attr);
+    }
+    else if (oldAttr.isConfigurable() && ! attr.isConfigurable()) {
+    }
+    else if (attr.isConfigurable() && ! oldAttr.isConfigurable()) {
+      _attributeMap.put(propName, attr);
+    }
+    else {
+      log.fine(L.l("{0}: conflicting attribute for '{1}' between {2} and {3}",
+                   this, propName, attr, oldAttr));    
+    }
+    
     // server/2e28 vs jms/2193
     // _attributeMap.put(className, attr);
 

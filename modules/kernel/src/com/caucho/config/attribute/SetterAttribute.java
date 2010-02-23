@@ -91,6 +91,15 @@ public class SetterAttribute extends Attribute {
   }
   
   /**
+   * Returns true if the setter is marked with @Configurable
+   */
+  @Override
+  public boolean isConfigurable()
+  {
+    return _setter.isAnnotationPresent(Configurable.class);
+  }
+  
+  /**
    * Sets the value of the attribute
    */
   @Override

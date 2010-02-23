@@ -97,6 +97,14 @@ public abstract class Attribute {
   {
     return true;
   }
+
+  /**
+   * True if the attribute is annotated with a @Configurable
+   */
+  public boolean isConfigurable()
+  {
+    return false;
+  }
   
   /**
    * Sets the value of the attribute as text
