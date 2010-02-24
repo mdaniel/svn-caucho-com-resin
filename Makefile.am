@@ -1,3 +1,4 @@
+ACLOCAL_AMFLAGS=-I m4
 resin_home=@resin_home@
 resin_conf=@resin_conf@
 resin_root=@resin_root@
@@ -44,4 +45,5 @@ install	:
 	if test -n "${resin_init_d}"; then \
 	  cp $(CP_U_FLAG) init.d/resin $(resin_init_d); \
 	  chmod +x $(resin_init_d); \
-	fi; \
+	fi;
+

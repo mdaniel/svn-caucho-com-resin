@@ -8,6 +8,7 @@ AC_SUBST(FULL_VERSION)
 dnl Get os info
 AC_CANONICAL_SYSTEM
 
+AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE(resin, 4.0.2)
 
 dnl Checks for programs.
@@ -64,9 +65,9 @@ resin_conf=${withval}
 
 if test -z "$resin_conf"; then
   if test "$prefix" == "NONE"; then
-    resin_conf="/etc/resin
+    resin_conf="/etc/resin"
   else
-    resin_root="$prefix/conf"
+    resin_conf="$prefix/conf"
   fi
 fi
 
@@ -85,7 +86,7 @@ if test -z "$resin_log"; then
   if test "$prefix" == "NONE"; then
     resin_log="/var/log/resin"
   else
-    resin_root="$prefix/log"
+    resin_log="$prefix/log"
   fi
 fi
 
