@@ -64,19 +64,21 @@ import javax.enterprise.inject.spi.Bean;
  * <code><pre>
  * static void main(String []args)
  * {
- *   ResinCdiContainer cdi = new ResinCdiContainer();
+ *   ResinBeanContainer beans = new ResinBeanContainer();
  *
- *   cdi.addModule("test.jar");
- *   cdi.start();
+ *   beans.addModule("test.jar");
+ *   beans.start();
  *
- *   RequestContext req = cxt.beginRequest();
+ *   RequestContext req = beans.beginRequest();
  *   try {
- *     MyMain main = cxt.getInstance(MyMain.class);
+ *     MyMain main = beans.getInstance(MyMain.class);
  *
  *     main.main(args);
  *   } finally {
  *     req.close();
  *   }
+ *   
+ *   beans.close();
  * }
  * </pre></code>
  *
