@@ -24,8 +24,6 @@ install	:
 	  mkdir -p $(resin_home)/lib; \
 	  mkdir -p $(resin_home)/$(LIBEXEC); \
 	  cp lib/*.jar $(resin_home)/lib; \
-	  mkdir -p $(resin_home)/bin; \
-	  cp $(CP_U_FLAG) bin/* $(resin_home)/bin; \
 	fi; \
 	if test $(resin_root) != `pwd`; then \
 	  mkdir -p $(resin_root)/webapps; \
@@ -39,11 +37,11 @@ install	:
 	  cp $(CP_U_FLAG) conf/app-default.xml $(resin_conf)/app-default.xml; \
 	  cp $(CP_U_FLAG) conf/resin.xml $(resin_conf)/resin.xml; \
 	fi; \
-	if test -n "${resin_init_d}"; then \
-	  cp $(CP_U_FLAG) init.d/resin $(resin_init_d); \
-	  chmod +x $(resin_init_d); \
-	fi; \
 	(cd modules/c/src; $(MAKE) install)
 	if test -r $(resin_pro)/modules/c/src/Makefile; then \
 	  cd $(resin_pro)/modules/c/src; $(MAKE) install; \
 	fi
+	if test -n "${resin_init_d}"; then \
+	  cp $(CP_U_FLAG) init.d/resin $(resin_init_d); \
+	  chmod +x $(resin_init_d); \
+	fi; \

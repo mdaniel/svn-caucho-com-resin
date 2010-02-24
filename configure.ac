@@ -42,7 +42,11 @@ resin_root=${withval}
 ])
 
 if test -z "$resin_root"; then
-  resin_root="/var/www"
+  if test "$prefix" == "NONE"; then
+    resin_root="/var/www"
+  else
+    resin_root="$prefix"
+  fi
 fi
 
 AC_SUBST(resin_root)
@@ -59,7 +63,11 @@ resin_conf=${withval}
 ])
 
 if test -z "$resin_conf"; then
-  resin_conf="/etc/resin"
+  if test "$prefix" == "NONE"; then
+    resin_conf="/etc/resin
+  else
+    resin_root="$prefix/conf"
+  fi
 fi
 
 #
@@ -74,7 +82,11 @@ resin_log=${withval}
 ])
 
 if test -z "$resin_log"; then
-  resin_log="/var/log/resin"
+  if test "$prefix" == "NONE"; then
+    resin_log="/var/log/resin"
+  else
+    resin_root="$prefix/log"
+  fi
 fi
 
 if test -d "/etc/init.d/rc.d"; then
