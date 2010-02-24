@@ -42,22 +42,22 @@ import java.util.logging.Logger;
 public class Alarm implements ThreadTask {
   static private final Logger log
     = Logger.getLogger(Alarm.class.getName());
-  
+
   static private final Integer timeLock = new Integer(0);
 
   static private volatile long _currentTime = System.currentTimeMillis();
 
   static private int _concurrentAlarmThrottle = 5;
-  
+
   static private Object _queueLock = new Object();
-  
+
   static private AlarmThread _alarmThread;
 
   static private Alarm []_heap = new Alarm[256];
   static private int _heapTop;
-  
+
   static private volatile int _runningAlarmCount;
-  
+
   static private long _testTime;
   static private int _testCount;
 
@@ -67,7 +67,7 @@ public class Alarm implements ThreadTask {
   private AlarmListener _listener;
   private ClassLoader _contextLoader;
   private String _name;
-  
+
   private int _heapIndex = 0;
 
   private volatile boolean _isRunning;
@@ -88,7 +88,7 @@ public class Alarm implements ThreadTask {
 
     _nanoTimeMethod = nanoTimeMethod;
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
@@ -99,55 +99,55 @@ public class Alarm implements ThreadTask {
 
     init();
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
-  public Alarm(AlarmListener listener) 
+  public Alarm(AlarmListener listener)
   {
     this("alarm[" + listener + "]", listener);
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
-  public Alarm(String name, AlarmListener listener) 
+  public Alarm(String name, AlarmListener listener)
   {
     this(name, listener, Thread.currentThread().getContextClassLoader());
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
-  public Alarm(String name, AlarmListener listener, ClassLoader loader) 
+  public Alarm(String name, AlarmListener listener, ClassLoader loader)
   {
     _name = name;
-    
+
     setListener(listener);
     setContextLoader(loader);
-    
+
     init();
   }
-    
+
   /**
    * Create a new wakeup alarm with a designated listener as a callback.
    * The alarm is not scheduled.
    */
   public Alarm(String name,
-	       AlarmListener listener,
-	       long delta,
-	       ClassLoader loader) 
+               AlarmListener listener,
+               long delta,
+               ClassLoader loader)
   {
     _name = name;
-    
+
     setListener(listener);
     setContextLoader(loader);
 
     queue(delta);
-    
+
     init();
   }
 
@@ -158,13 +158,13 @@ public class Alarm implements ThreadTask {
    * @param listener the object prepared to receive the callback
    * @param delta the time in milliseconds to wake up
    */
-  public Alarm(String name, AlarmListener listener, long delta) 
+  public Alarm(String name, AlarmListener listener, long delta)
   {
     this(listener);
 
     _name = name;
     queue(delta);
-    
+
     init();
   }
   /**
@@ -173,12 +173,12 @@ public class Alarm implements ThreadTask {
    * @param listener the object prepared to receive the callback
    * @param delta the time in milliseconds to wake up
    */
-  public Alarm(AlarmListener listener, long delta) 
+  public Alarm(AlarmListener listener, long delta)
   {
     this(listener);
 
     queue(delta);
-    
+
     init();
   }
 
@@ -186,9 +186,9 @@ public class Alarm implements ThreadTask {
   {
     synchronized (Alarm.class) {
       if (_alarmThread == null) {
-	_currentTime = System.currentTimeMillis();
-	_alarmThread = new AlarmThread();
-	_alarmThread.start();
+        _currentTime = System.currentTimeMillis();
+        _alarmThread = new AlarmThread();
+        _alarmThread.start();
       }
     }
   }
@@ -262,7 +262,7 @@ public class Alarm implements ThreadTask {
   {
     return _testTime > 0;
   }
-  
+
   /**
    * Returns the wake time of this alarm.
    */
@@ -270,7 +270,7 @@ public class Alarm implements ThreadTask {
   {
     return _wakeTime;
   }
-  
+
   /**
    * Return the alarm's listener.
    */
@@ -278,7 +278,7 @@ public class Alarm implements ThreadTask {
   {
     return _listener;
   }
-  
+
   /**
    * Sets the alarm's listener.
    */
@@ -286,7 +286,7 @@ public class Alarm implements ThreadTask {
   {
     _listener = listener;
   }
-  
+
   /**
    * Sets the alarm's context loader
    */
@@ -294,7 +294,7 @@ public class Alarm implements ThreadTask {
   {
     _contextLoader = loader;
   }
-  
+
   /**
    * Sets the alarm's context loader
    */
@@ -328,7 +328,7 @@ public class Alarm implements ThreadTask {
   {
     synchronized (_queueLock) {
       if (_heapIndex > 0)
-	dequeueImpl(this);
+        dequeueImpl(this);
 
       long wakeTime = delta + getCurrentTime();
       _wakeTime = wakeTime;
@@ -344,7 +344,7 @@ public class Alarm implements ThreadTask {
   {
     synchronized (_queueLock) {
       if (_heapIndex > 0)
-	dequeueImpl(this);
+        dequeueImpl(this);
     }
   }
 
@@ -359,8 +359,8 @@ public class Alarm implements ThreadTask {
       log.log(Level.WARNING, e.toString(), e);
     } finally {
       synchronized (_queueLock) {
-	_isRunning = false;
-	_runningAlarmCount--;
+        _isRunning = false;
+        _runningAlarmCount--;
       }
     }
   }
@@ -371,13 +371,13 @@ public class Alarm implements ThreadTask {
   private void handleAlarm()
   {
     AlarmListener listener = getListener();
-    
+
     if (listener == null)
       return;
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader loader = getContextLoader();
-    
+
     if (loader != null)
       thread.setContextClassLoader(loader);
     else
@@ -405,17 +405,18 @@ public class Alarm implements ThreadTask {
    */
   static Alarm extractAlarm()
   {
-    long now = getCurrentTime();
-
     synchronized (_queueLock) {
+      // #3548 - getCurrentTime for consistency
+      long now = getCurrentTime();
+
       Alarm []heap = _heap;
 
       Alarm alarm = heap[1];
 
       if (alarm == null)
-	return null;
+        return null;
       else if (now < alarm._wakeTime)
-	return null;
+        return null;
 
       dequeueImpl(alarm);
 
@@ -430,7 +431,7 @@ public class Alarm implements ThreadTask {
   {
     if (item._heapIndex != 0)
       throw new IllegalStateException();
-    
+
     // resize if necessary
     if (_heap.length <= _heapTop + 2) {
       Alarm []newHeap = new Alarm[2 * _heap.length];
@@ -467,7 +468,7 @@ public class Alarm implements ThreadTask {
 
     if (i < 1)
       return;
-    
+
     if (_heapTop < i)
       throw new IllegalStateException("bad heap: " + _heapTop + " index:" + i);
 
@@ -477,11 +478,11 @@ public class Alarm implements ThreadTask {
       throw new IllegalStateException();
 
     int size = _heapTop--;
-    
+
     heap[i] = heap[size];
     heap[i]._heapIndex = i;
     heap[size] = null;
-    
+
     item._heapIndex = 0;
 
     if (size == i)
@@ -489,30 +490,30 @@ public class Alarm implements ThreadTask {
 
     if (item._wakeTime < heap[i]._wakeTime) {
       while (i < size) {
-	item = heap[i];
+        item = heap[i];
 
-	int minIndex = i;
-	long minWakeTime = item._wakeTime;
-      
-	int left = i << 1;
-	if (left < size && heap[left]._wakeTime < minWakeTime) {
-	  minIndex = left;
-	  minWakeTime = heap[left]._wakeTime;
-	}
-      
-	int right = left + 1;
-	if (right < size && heap[right]._wakeTime < minWakeTime)
-	  minIndex = right;
+        int minIndex = i;
+        long minWakeTime = item._wakeTime;
 
-	if (i == minIndex)
-	  return;
+        int left = i << 1;
+        if (left < size && heap[left]._wakeTime < minWakeTime) {
+          minIndex = left;
+          minWakeTime = heap[left]._wakeTime;
+        }
 
-	heap[i] = heap[minIndex];
-	heap[i]._heapIndex = i;
-	heap[minIndex] = item;
-	item._heapIndex = minIndex;
-      
-	i = minIndex;
+        int right = left + 1;
+        if (right < size && heap[right]._wakeTime < minWakeTime)
+          minIndex = right;
+
+        if (i == minIndex)
+          return;
+
+        heap[i] = heap[minIndex];
+        heap[i]._heapIndex = i;
+        heap[minIndex] = item;
+        item._heapIndex = minIndex;
+
+        i = minIndex;
       }
     }
     else {
@@ -522,9 +523,9 @@ public class Alarm implements ThreadTask {
       long wakeTime = item._wakeTime;
 
       while (i > 1 && wakeTime < (alarm = heap[parent = (i >> 1)])._wakeTime) {
-	heap[i] = alarm;
-	alarm._heapIndex = i;
-	i = parent;
+        heap[i] = alarm;
+        alarm._heapIndex = i;
+        i = parent;
       }
 
       heap[i] = item;
@@ -542,14 +543,14 @@ public class Alarm implements ThreadTask {
       _heap[_heapTop] = null;
     }
   }
-  
+
   static void setTestTime(long time)
   {
     _testTime = time;
-    
+
     if (_testTime > 0) {
       if (time < _currentTime) {
-	testClear();
+        testClear();
       }
 
       _currentTime = time;
@@ -564,12 +565,12 @@ public class Alarm implements ThreadTask {
 
     try {
       while ((alarm = Alarm.extractAlarm()) != null) {
-	alarm.run();
+        alarm.run();
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-    
+
     try {
       Thread.currentThread().sleep(10);
     } catch (Exception e) {
@@ -587,17 +588,17 @@ public class Alarm implements ThreadTask {
     public void run()
     {
       while (true) {
-	try {
-	  if (_testTime > 0)
-	    _currentTime = _testTime;
-	  else
-	    _currentTime = System.currentTimeMillis();
+        try {
+          if (_testTime > 0)
+            _currentTime = _testTime;
+          else
+            _currentTime = System.currentTimeMillis();
 
-	  _coordinator.schedule();
-	
-	  Thread.sleep(500);
-	} catch (Throwable e) {
-	}
+          _coordinator.schedule();
+
+          Thread.sleep(500);
+        } catch (Throwable e) {
+        }
       }
     }
 
@@ -610,7 +611,7 @@ public class Alarm implements ThreadTask {
 
   private static class CoordinatorTask implements ThreadTask {
     private boolean _isRunning;
-    
+
     /**
      * schedules the task.
      */
@@ -619,43 +620,43 @@ public class Alarm implements ThreadTask {
       boolean isRunning;
 
       synchronized (this) {
-	isRunning = _isRunning;
-	_isRunning = true;
+        isRunning = _isRunning;
+        _isRunning = true;
       }
-      
+
       if (! isRunning)
-	ThreadPool.getThreadPool().schedulePriority(this);
+        ThreadPool.getThreadPool().schedulePriority(this);
     }
-    
+
     /**
      * Runs the coordinator task.
      */
     public void run()
     {
       try {
-	Thread thread = Thread.currentThread();
-	// String oldName = thread.getName();
-      
-	// thread.setName("alarm-coordinator");
-      
-	Alarm alarm;
+        Thread thread = Thread.currentThread();
+        // String oldName = thread.getName();
 
-	while ((alarm = Alarm.extractAlarm()) != null) {
-	  // throttle alarm invocations by 5ms so quick alarms don't need
-	  // extra threads
-	  if (_concurrentAlarmThrottle < _runningAlarmCount) {
-	    try {
-	      Thread.sleep(5);
-	    } catch (Throwable e) {
-	    }
-	  }
+        // thread.setName("alarm-coordinator");
 
-	  ThreadPool.getThreadPool().startPriority(alarm);
-	}
+        Alarm alarm;
 
-	// thread.setName(oldName);
+        while ((alarm = Alarm.extractAlarm()) != null) {
+          // throttle alarm invocations by 5ms so quick alarms don't need
+          // extra threads
+          if (_concurrentAlarmThrottle < _runningAlarmCount) {
+            try {
+              Thread.sleep(5);
+            } catch (Throwable e) {
+            }
+          }
+
+          ThreadPool.getThreadPool().startPriority(alarm);
+        }
+
+        // thread.setName(oldName);
       } finally {
-	_isRunning = false;
+        _isRunning = false;
       }
     }
   }
