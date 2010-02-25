@@ -30,8 +30,6 @@ package com.caucho.env.sample;
 
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.caucho.env.jpa.ActiveTimeProbe;
-
 public class ProbeManager {
   private static ProbeManager _manager = new ProbeManager();
 

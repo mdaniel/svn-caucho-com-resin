@@ -29,22 +29,13 @@
 
 package com.caucho.jca;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.Period;
-import com.caucho.env.jpa.ActiveTimeProbe;
-import com.caucho.env.sample.ProbeManager;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.ConnectionPoolMXBean;
-import com.caucho.server.resin.Resin;
-import com.caucho.sql.ManagedConnectionImpl;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.L10N;
-import com.caucho.util.FifoSet;
-import com.caucho.util.WeakAlarm;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.Set;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;
@@ -55,14 +46,19 @@ import javax.resource.spi.ManagedConnectionFactory;
 import javax.resource.spi.ValidatingManagedConnectionFactory;
 import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.Date;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Period;
+import com.caucho.env.sample.ActiveTimeProbe;
+import com.caucho.env.sample.ProbeManager;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.ConnectionPoolMXBean;
+import com.caucho.server.resin.Resin;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.L10N;
+import com.caucho.util.WeakAlarm;
 
 /**
  * Implementation of the connection manager.

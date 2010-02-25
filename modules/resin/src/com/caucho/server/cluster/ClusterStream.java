@@ -30,13 +30,12 @@
 package com.caucho.server.cluster;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.bam.ActorException;
-import com.caucho.env.jpa.ActiveTimeProbe;
 import com.caucho.env.sample.ActiveProbe;
+import com.caucho.env.sample.ActiveTimeProbe;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.Hessian2StreamingInput;
 import com.caucho.server.hmux.HmuxRequest;

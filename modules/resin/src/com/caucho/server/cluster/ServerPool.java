@@ -37,7 +37,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.jpa.ActiveTimeProbe;
+import com.caucho.env.sample.ActiveTimeProbe;
 import com.caucho.env.sample.ActiveProbe;
 import com.caucho.env.sample.CountProbe;
 import com.caucho.env.sample.ProbeManager;
