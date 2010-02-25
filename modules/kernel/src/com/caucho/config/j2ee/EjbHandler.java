@@ -99,7 +99,7 @@ public class EjbHandler extends JavaeeInjectionHandler {
 
     }
     else {
-      throw new ConfigException(location + L.l("@EJB cannot find any persistence contexts.  No @EJB with type='{0}'",
+      throw new ConfigException(location + L.l("@EJB cannot find any defined EJBs.  No @EJB with type='{0}'",
 					       bindType));
     }
 
