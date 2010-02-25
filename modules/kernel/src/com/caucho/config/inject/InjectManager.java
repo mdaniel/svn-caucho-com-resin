@@ -2321,15 +2321,15 @@ public class InjectManager
     return false;
   }
 
-  private void discoverBean(AnnotatedType type)
+  private <T> void discoverBean(AnnotatedType<T> type)
   {
     if (_specializedClasses.contains(type.getJavaClass()))
       return;
 
-    InjectionTarget target = createInjectionTarget(type);
+    InjectionTarget<T> target = createInjectionTarget(type);
 
-    if (target instanceof InjectionTargetImpl) {
-      InjectionTargetImpl targetImpl = (InjectionTargetImpl) target;
+    if (target instanceof InjectionTargetImpl<?>) {
+      InjectionTargetImpl<?> targetImpl = (InjectionTargetImpl<?>) target;
       
       targetImpl.setGenerateInterception(true);
     }
@@ -2339,10 +2339,18 @@ public class InjectManager
     if (target == null)
       return;
 
-    ManagedBeanImpl bean = new ManagedBeanImpl(this, type, target);
-
+    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type, target);
     
     bean.introspect();
+    
+    AnnotatedType<T> annType = bean.getAnnotatedType();
+    
+    // ioc/0i04
+    if (annType.isAnnotationPresent(javax.decorator.Decorator.class))
+      return;
+    // ioc/0c1a
+    if (annType.isAnnotationPresent(javax.interceptor.Interceptor.class))
+      return;
 
     addDiscoveredBean(bean);
 

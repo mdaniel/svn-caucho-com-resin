@@ -470,8 +470,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   protected void introspectDefault()
   {
-    if (_qualifiers.size() == 0)
-      _qualifiers.add(CurrentLiteral.CURRENT);
+    // if (_qualifiers.size() == 0)
+    
+    _qualifiers.add(DefaultLiteral.DEFAULT);
 
     if (_scope == null)
       _scope = Dependent.class;
