@@ -11,7 +11,13 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.4 - snapshot">
+<s2 title="4.0.4 - Feb 23, 2010">
+<ul>
+<li>hessian: writeReplace should be allowed to return itself (rep by Jamison Novak, #3911)</li>
+</ul>
+</s2>
+
+<s2 title="4.0.4 - Feb 23, 2010">
 <ul>
 <li>jni: improved error messages</li>
 <li>hessian: custom deserializer (#3632, rep by era)</li>

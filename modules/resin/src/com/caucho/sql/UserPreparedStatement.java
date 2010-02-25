@@ -29,7 +29,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.admin.ActiveTimeSample;
+import com.caucho.env.sample.ActiveTimeSample;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 

@@ -26,9 +26,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
 import java.util.concurrent.atomic.AtomicLong;
+
 
 public final class SemaphoreProbe extends Probe implements SemaphoreSample {
   // sample data

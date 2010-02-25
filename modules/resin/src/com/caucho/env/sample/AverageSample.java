@@ -26,37 +26,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
-
-public final class TimeProbe extends Probe implements TimeSample {
-  private final AtomicLong _count = new AtomicLong();
-  private final AtomicLong _time = new AtomicLong();
-
-  public TimeProbe(String name)
-  {
-    super(name);
-  }
-
-  public final void add(long time)
-  {
-    _count.incrementAndGet();
-    _time.addAndGet(time);
-  }
-  
+public interface AverageSample {
   /**
-   * Return the probe's next sample.
+   * Adds a data sample to the probe
    */
-  public final double sample()
-  {
-    long count = _count.getAndSet(0);
-    long time = _time.getAndSet(0);
-
-    if (count == 0)
-      return 0;
-    else
-      return time / (double) count;
-  }
+  public void add(long value);
 }

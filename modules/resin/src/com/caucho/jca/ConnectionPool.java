@@ -29,10 +29,10 @@
 
 package com.caucho.jca;
 
-import com.caucho.admin.ActiveTimeProbe;
-import com.caucho.admin.ProbeManager;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.env.jpa.ActiveTimeProbe;
+import com.caucho.env.sample.ProbeManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ConnectionPoolMXBean;

@@ -26,40 +26,19 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
-abstract public class Probe {
-  private final String _name;
-
-  protected Probe(String name)
-  {
-    _name = name;
-  }
-
+/**
+ * SemaphoreSample tracks resource allocations from a pool.
+ */
+public interface SemaphoreSample {
   /**
-   * Returns the probe's name.
+   * Acquire a resource from the semaphore.
    */
-  public final String getName()
-  {
-    return _name;
-  }
+  public void acquire();
   
   /**
-   * Return the probe's next sample.
+   * Free a resource
    */
-  abstract public double sample();
-
-  /**
-   * Returns the current value.
-   */
-  public double peek()
-  {
-    return 0;
-  }
-
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _name + "]";
-  }
+  public void release();
 }

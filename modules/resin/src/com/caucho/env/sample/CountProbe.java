@@ -26,55 +26,36 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
-
-import com.caucho.config.ConfigException;
-import com.caucho.jmx.Jmx;
+package com.caucho.env.sample;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.management.*;
-import java.util.logging.*;
 
-public final class JmxAttributeProbe extends Probe {
-    private static final Logger log
-	= Logger.getLogger(JmxAttributeProbe.class.getName());
 
-  private MBeanServer _server;
-  private String _name;
-    private ObjectName _objectName;
-    private String _attribute;
+public final class CountProbe extends Probe {
+  // sample data
+  private final AtomicLong _totalCount = new AtomicLong();
 
-    public JmxAttributeProbe(String name, String objectName, String attribute)
+  private long _lastTotal;
+
+  public CountProbe(String name)
   {
     super(name);
+  }
 
-    try {
-	_objectName = new ObjectName(objectName);
-    } catch (Exception e) {
-	throw ConfigException.create(e);
-    }
-
-    _attribute = attribute;
-    _server = Jmx.getGlobalMBeanServer();
+  public final void start()
+  {
+    _totalCount.incrementAndGet();
   }
 
   /**
-   * Polls the statistics attribute.
+   * Sample the total count
    */
-  public double sample()
+  public final double sample()
   {
-    try {
-      Object value = _server.getAttribute(_objectName, _attribute);
+    long totalCount = _totalCount.get();
+    long lastTotal = _lastTotal;
+    _lastTotal = totalCount;
 
-      if (value == null)
-	return 0;
-      
-      return ((Number) value).doubleValue();
-    } catch (Exception e) {
-      log.log(Level.FINE, e.toString(), e);
-
-      return 0;
-    }
+    return totalCount - lastTotal;
   }
 }

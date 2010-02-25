@@ -26,42 +26,40 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
+abstract public class Probe {
+  private final String _name;
 
-public final class AverageTimeProbe extends Probe {
-  private final AtomicLong _sum = new AtomicLong();
-  private final AtomicInteger _count = new AtomicInteger();
-
-  public AverageTimeProbe(String name)
+  protected Probe(String name)
   {
-    super(name);
+    _name = name;
   }
 
-  public final void addData(long time)
+  /**
+   * Returns the probe's name.
+   */
+  public final String getName()
   {
-    long oldValue;
-
-    do {
-      oldValue = _sum.get();
-    } while (! _sum.compareAndSet(oldValue, oldValue + time));
-
-    _count.incrementAndGet();
+    return _name;
   }
   
   /**
    * Return the probe's next sample.
    */
-  public final double sample()
-  {
-    long sum = _sum.getAndSet(0);
-    int count = _count.getAndSet(0);
+  abstract public double sample();
 
-    if (count != 0)
-      return sum / (double) count;
-    else
-      return 0;
+  /**
+   * Returns the current value.
+   */
+  public double peek()
+  {
+    return 0;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "]";
   }
 }

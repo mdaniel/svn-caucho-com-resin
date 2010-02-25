@@ -26,16 +26,33 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
-abstract public class TotalProbe extends Probe {
-  protected TotalProbe(String name)
+import java.util.concurrent.atomic.AtomicLong;
+
+
+public final class SampleCountProbe extends Probe {
+  private final AtomicLong _count = new AtomicLong();
+  private final AtomicLong _lastCount = new AtomicLong();
+
+  public SampleCountProbe(String name)
   {
     super(name);
   }
 
+  public final void addData()
+  {
+    _count.incrementAndGet();
+  }
+  
   /**
-   * Return the total count
+   * Return the probe's next sample.
    */
-  abstract public double getTotal();
+  public final double sample()
+  {
+    long count = _count.get();
+    long lastCount = _lastCount.getAndSet(count);
+    
+    return count - lastCount;
+  }
 }

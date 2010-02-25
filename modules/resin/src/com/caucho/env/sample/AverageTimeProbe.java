@@ -26,22 +26,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public final class SampleCountProbe extends Probe {
-  private final AtomicLong _count = new AtomicLong();
-  private final AtomicLong _lastCount = new AtomicLong();
 
-  public SampleCountProbe(String name)
+public final class AverageTimeProbe extends Probe {
+  private final AtomicLong _sum = new AtomicLong();
+  private final AtomicInteger _count = new AtomicInteger();
+
+  public AverageTimeProbe(String name)
   {
     super(name);
   }
 
-  public final void addData()
+  public final void addData(long time)
   {
+    long oldValue;
+
+    do {
+      oldValue = _sum.get();
+    } while (! _sum.compareAndSet(oldValue, oldValue + time));
+
     _count.incrementAndGet();
   }
   
@@ -50,9 +57,12 @@ public final class SampleCountProbe extends Probe {
    */
   public final double sample()
   {
-    long count = _count.get();
-    long lastCount = _lastCount.getAndSet(count);
-    
-    return count - lastCount;
+    long sum = _sum.getAndSet(0);
+    int count = _count.getAndSet(0);
+
+    if (count != 0)
+      return sum / (double) count;
+    else
+      return 0;
   }
 }

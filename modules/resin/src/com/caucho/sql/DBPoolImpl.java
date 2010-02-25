@@ -29,11 +29,11 @@
 
 package com.caucho.sql;
 
-import com.caucho.admin.ActiveTimeSample;
-import com.caucho.admin.ProbeManager;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.Period;
+import com.caucho.env.sample.ActiveTimeSample;
+import com.caucho.env.sample.ProbeManager;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;

@@ -26,87 +26,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
 import java.util.concurrent.atomic.AtomicLong;
-import com.caucho.util.Alarm;
 
-public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
+
+public final class AverageProbe extends TotalProbe implements AverageSample {
   private final double _scale;
 
   private final Object _lock = new Object();
 
   // sample data
-  private final AtomicLong _activeCount = new AtomicLong();
-  private final AtomicLong _activeCountMax = new AtomicLong();
-  private final AtomicLong _totalCount = new AtomicLong();
+  private final AtomicLong _count = new AtomicLong();
   private final AtomicLong _sum = new AtomicLong();
   private final AtomicLong _max = new AtomicLong();
   private double _sumSquare;
-  
-  private long _lastTotalCount;
 
-  private long _lastAvgTotalCount;
+  private long _lastCount;
+
+  private long _lastAvgCount;
   private long _lastAvgSum;
 
   // for 95%
-  private long _lastStdTotalCount;
+  private long _lastStdCount;
   private double _lastStdSum;
-  
-  public ActiveTimeProbe(String name)
+
+  public AverageProbe(String name)
   {
     super(name);
 
     _scale = 1.0;
   }
 
-  public final long start()
+  public TotalProbe createCount(String name)
   {
-    long startTime = Alarm.getCurrentTime();
-    
-    long activeCount = _activeCount.incrementAndGet();
-
-    long max;
-    
-    while ((max = _activeCountMax.get()) < activeCount
-           && ! _activeCountMax.compareAndSet(max, activeCount)) {
-    }
-
-    return startTime;
-  }
-  
-  public final void end(long startTime)
-  {
-    _totalCount.incrementAndGet();
-    _activeCount.decrementAndGet();
-
-    long endTime = Alarm.getCurrentTime();
-
-    long value = endTime - startTime;
-    
-    double sqValue = value * value;
-    _sum.addAndGet(value);
-    _sumSquare += sqValue;
-
-    long max;
-    while ((max = _max.get()) < value
-           && ! _max.compareAndSet(max, value)) {
-    }
-  }
-
-  public Probe createActiveCount(String name)
-  {
-    return new ActiveCountProbe(name);
-  }
-
-  public Probe createActiveCountMax(String name)
-  {
-    return new ActiveCountMaxProbe(name);
-  }
-
-  public Probe createTotalCount(String name)
-  {
-    return new TotalCountProbe(name);
+    return new AverageCountProbe(name);
   }
 
   public Probe createMax(String name)
@@ -118,17 +72,31 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
   {
     return new SigmaProbe(name, n);
   }
-  
+
+  public final void add(long value)
+  {
+    double sqValue = value * value;
+
+    _count.incrementAndGet();
+    _sum.addAndGet(value);
+    _sumSquare += sqValue;
+
+    long max;
+    while ((max = _max.get()) < value
+           && ! _max.compareAndSet(max, value)) {
+    }
+  }
+
   /**
    * Return the probe's next average.
    */
   public final double sample()
   {
     synchronized (_lock) {
-      long count = _totalCount.get();
-      long lastCount = _lastAvgTotalCount;
-      _lastAvgTotalCount = count;
-    
+      long count = _count.get();
+      long lastCount = _lastAvgCount;
+      _lastAvgCount = count;
+
       long sum = _sum.get();
       double lastSum = _lastAvgSum;
       _lastAvgSum = sum;
@@ -139,45 +107,37 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
         return _scale * (sum - lastSum) / (double) (count - lastCount);
     }
   }
-  
-  /**
-   * Sample the active count
-   */
-  public final double sampleActiveCount()
-  {
-    return _activeCount.get();
-  }
-  
-  /**
-   * Sample the active count
-   */
-  public final double sampleActiveCountMax()
-  {
-    return _activeCountMax.getAndSet(_activeCount.get());
-  }
-  
-  /**
-   * Sample the total count
-   */
-  public final double sampleTotalCount()
-  {
-    long count = _totalCount.get();
-    long lastCount = _lastTotalCount;
-    _lastTotalCount = count;
 
-    return count - lastCount;
+  @Override
+  public double getTotal()
+  {
+    return _sum.get();
   }
-  
+
+  /**
+   * Return the probe's next sample.
+   */
+  public final double sampleCount()
+  {
+    synchronized (_lock) {
+      long count = _count.get();
+      long lastCount = _lastCount;
+      _lastCount = count;
+
+      return count - lastCount;
+    }
+  }
+
   /**
    * Return the probe's next 2-sigma
    */
   public final double sampleSigma(int n)
   {
     synchronized (_lock) {
-      long count = _totalCount.get();
-      long lastCount = _lastStdTotalCount;
-      _lastStdTotalCount = count;
-    
+      long count = _count.get();
+      long lastCount = _lastStdCount;
+      _lastStdCount = count;
+
       double sum = _sum.get();
       double lastSum = _lastStdSum;
       _lastStdSum = sum;
@@ -190,59 +150,43 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
 
       double avg = (sum - lastSum) / (count - lastCount);
       double part = (count - lastCount) * sumSquare - sum * sum;
-    
+
       if (part < 0)
         part = 0;
-    
+
       double std = Math.sqrt(part) / (count - lastCount);
 
       return _scale * (avg + n * std);
     }
   }
-  
+
   /**
    * Return the probe's next sample.
    */
   public final double sampleMax()
   {
-    long max = _max.getAndSet(0);
+    synchronized (_lock) {
+      long max = _max.getAndSet(0);
 
-    return _scale * max;
+      return _scale * max;
+    }
   }
 
-  class ActiveCountProbe extends Probe {
-    ActiveCountProbe(String name)
+  class AverageCountProbe extends TotalProbe {
+    AverageCountProbe(String name)
     {
       super(name);
     }
 
     public double sample()
     {
-      return sampleActiveCount();
-    }
-  }
-
-  class ActiveCountMaxProbe extends Probe {
-    ActiveCountMaxProbe(String name)
-    {
-      super(name);
+      return sampleCount();
     }
 
-    public double sample()
+    @Override
+    public double getTotal()
     {
-      return sampleActiveCountMax();
-    }
-  }
-
-  class TotalCountProbe extends Probe {
-    TotalCountProbe(String name)
-    {
-      super(name);
-    }
-
-    public double sample()
-    {
-      return sampleTotalCount();
+      return _count.get();
     }
   }
 
@@ -260,7 +204,7 @@ public final class ActiveTimeProbe extends Probe implements ActiveTimeSample {
 
   class SigmaProbe extends Probe {
     private final int _n;
-    
+
     SigmaProbe(String name, int n)
     {
       super(name);

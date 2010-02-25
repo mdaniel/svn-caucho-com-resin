@@ -26,22 +26,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
 
-/**
- * SemaphoreSample tracks resource allocations from a pool.
- */
-public interface SemaphoreSample {
+abstract public class TotalProbe extends Probe {
+  protected TotalProbe(String name)
+  {
+    super(name);
+  }
+
   /**
-   * Acquire a resource from the semaphore.
+   * Return the total count
    */
-  public void acquire();
-  
-  /**
-   * Free a resource
-   */
-  public void release();
+  abstract public double getTotal();
 }

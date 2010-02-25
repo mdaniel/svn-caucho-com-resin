@@ -29,9 +29,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.admin.TotalProbe;
-import com.caucho.admin.Probe;
-import com.caucho.admin.ProbeManager;
+import com.caucho.env.sample.Probe;
+import com.caucho.env.sample.ProbeManager;
+import com.caucho.env.sample.TotalProbe;
 import com.caucho.management.server.AbstractEmitterObject;
 import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.ClusterServerMXBean;

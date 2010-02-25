@@ -26,14 +26,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
-
-public interface AverageSample {
+public interface TimeSample {
   /**
-   * Adds a data sample to the probe
+   * Adds a time sample to the probe
    */
-  public void add(long value);
+  public void add(long time);
 }

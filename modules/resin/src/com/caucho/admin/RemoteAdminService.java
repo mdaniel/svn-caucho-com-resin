@@ -29,20 +29,19 @@
 
 package com.caucho.admin;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.ConfigException;
-import com.caucho.config.Service;
 import com.caucho.config.types.RawString;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.ServletMapping;
 import com.caucho.server.host.HostConfig;
-import com.caucho.server.host.Host;
-import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.server.webapp.WebApp;
+import com.caucho.server.webapp.WebAppConfig;
 import com.caucho.util.L10N;
-import com.caucho.vfs.NotFoundPath;
-
-import java.util.logging.*;
-import javax.annotation.PostConstruct;
 
 /**
  * Enables remote administration

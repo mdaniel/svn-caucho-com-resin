@@ -29,10 +29,10 @@
 
 package com.caucho.server.http;
 
-import com.caucho.admin.ActiveTimeProbe;
-import com.caucho.admin.AverageProbe;
-import com.caucho.admin.SampleCountProbe;
-import com.caucho.admin.ProbeManager;
+import com.caucho.env.jpa.ActiveTimeProbe;
+import com.caucho.env.sample.AverageProbe;
+import com.caucho.env.sample.ProbeManager;
+import com.caucho.env.sample.SampleCountProbe;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.connection.*;
 import com.caucho.server.dispatch.BadRequestException;

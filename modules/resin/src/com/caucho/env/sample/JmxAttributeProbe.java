@@ -26,28 +26,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.management.MBeanServer;
+import javax.management.ObjectName;
 
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
 
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
-import javax.management.*;
-import java.util.logging.*;
-
-public final class JmxDeltaProbe extends Probe {
+public final class JmxAttributeProbe extends Probe {
     private static final Logger log
-	= Logger.getLogger(JmxDeltaProbe.class.getName());
+	= Logger.getLogger(JmxAttributeProbe.class.getName());
 
   private MBeanServer _server;
-  private String _name;
-    private ObjectName _objectName;
-    private String _attribute;
+  private ObjectName _objectName;
+  private String _attribute;
 
-    private double _lastValue;
-
-    public JmxDeltaProbe(String name, String objectName, String attribute)
+  public JmxAttributeProbe(String name, String objectName, String attribute)
   {
     super(name);
 
@@ -67,17 +65,12 @@ public final class JmxDeltaProbe extends Probe {
   public double sample()
   {
     try {
-      Object objValue = _server.getAttribute(_objectName, _attribute);
+      Object value = _server.getAttribute(_objectName, _attribute);
 
-      if (objValue == null)
+      if (value == null)
 	return 0;
       
-      double lastValue = _lastValue;
-      _lastValue = lastValue;
-      double value = ((Number) objValue).doubleValue();
-      
-      return value - lastValue;
-      
+      return ((Number) value).doubleValue();
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
 

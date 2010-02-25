@@ -37,10 +37,10 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.admin.ActiveProbe;
-import com.caucho.admin.ActiveTimeProbe;
-import com.caucho.admin.CountProbe;
-import com.caucho.admin.ProbeManager;
+import com.caucho.env.jpa.ActiveTimeProbe;
+import com.caucho.env.sample.ActiveProbe;
+import com.caucho.env.sample.CountProbe;
+import com.caucho.env.sample.ProbeManager;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;

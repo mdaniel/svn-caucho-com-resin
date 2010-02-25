@@ -26,9 +26,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
+package com.caucho.env.sample;
 
 import java.util.concurrent.ConcurrentHashMap;
+
+import com.caucho.env.jpa.ActiveTimeProbe;
 
 public class ProbeManager {
   private static ProbeManager _manager = new ProbeManager();
@@ -45,8 +47,6 @@ public class ProbeManager {
     if (manager == null)
       manager = new ProbeManager();
     else {
-      ProbeManager oldManager = _manager;
-
       manager._probeMap.putAll(_probeMap);
     }
 

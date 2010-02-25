@@ -26,10 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.admin;
-
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.concurrent.atomic.AtomicInteger;
+package com.caucho.env.sample;
 
 public interface ActiveSample {
   /**

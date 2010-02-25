@@ -29,8 +29,8 @@
 
 package com.caucho.server.log;
 
-import com.caucho.admin.ProbeManager;
-import com.caucho.admin.SemaphoreProbe;
+import com.caucho.env.sample.ProbeManager;
+import com.caucho.env.sample.SemaphoreProbe;
 import com.caucho.log.AbstractRolloverLog;
 import com.caucho.util.Alarm;
 import com.caucho.util.FreeList;
