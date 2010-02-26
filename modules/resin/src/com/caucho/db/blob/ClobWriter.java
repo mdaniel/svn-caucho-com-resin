@@ -27,15 +27,18 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.blob;
 
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.RawTransaction;
+import com.caucho.db.xa.StoreTransaction;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
 import java.io.Writer;
 
 class ClobWriter extends Writer {
-  private Store _store;
+  private BlockStore _store;
 
   private StoreTransaction _xa;
   
@@ -56,7 +59,7 @@ class ClobWriter extends Writer {
    *
    * @param store the output store
    */
-  ClobWriter(StoreTransaction xa, Store store, byte []inode, int inodeOffset)
+  ClobWriter(StoreTransaction xa, BlockStore store, byte []inode, int inodeOffset)
   {
     init(xa, store, inode, inodeOffset);
   }
@@ -76,7 +79,7 @@ class ClobWriter extends Writer {
   /**
    * Initialize the output stream.
    */
-  public void init(StoreTransaction xa, Store store,
+  public void init(StoreTransaction xa, BlockStore store,
 		   byte []inode, int inodeOffset)
   {
     if (xa == null)

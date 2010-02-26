@@ -27,9 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.xa;
 
 import java.io.IOException;
+
+import com.caucho.db.store.Block;
+import com.caucho.db.store.BlockStore;
 
 /**
  * Represents a raw-single transaction.
@@ -49,7 +52,7 @@ public class RawTransaction extends StoreTransaction {
   /**
    * Returns a read block.
    */
-  public Block readBlock(Store store, long blockAddress)
+  public Block readBlock(BlockStore store, long blockAddress)
     throws IOException
   {
     return store.readBlock(blockAddress);

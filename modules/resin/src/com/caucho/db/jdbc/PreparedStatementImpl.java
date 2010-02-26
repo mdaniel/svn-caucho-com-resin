@@ -30,7 +30,7 @@ package com.caucho.db.jdbc;
 
 import com.caucho.db.sql.Query;
 import com.caucho.db.sql.QueryContext;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.xa.Transaction;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;

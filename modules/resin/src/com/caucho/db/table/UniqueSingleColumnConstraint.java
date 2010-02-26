@@ -31,8 +31,8 @@ package com.caucho.db.table;
 
 import com.caucho.db.index.BTree;
 import com.caucho.db.sql.QueryContext;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
@@ -153,8 +153,8 @@ public class UniqueSingleColumnConstraint extends Constraint {
 						    sourceOffset),
 				   table.getName(),
 				   column.getName(),
-				   ("" + (value / Store.BLOCK_SIZE)
-				    + "." + (value % Store.BLOCK_SIZE))));
+				   ("" + (value / BlockStore.BLOCK_SIZE)
+				    + "." + (value % BlockStore.BLOCK_SIZE))));
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);

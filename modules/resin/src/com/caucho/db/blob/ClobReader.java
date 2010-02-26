@@ -27,15 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.blob;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.Reader;
 
-public class BlobInputStream extends InputStream {
+import com.caucho.db.store.BlockStore;
+
+public class ClobReader extends Reader {
   private static final int INODE_DIRECT_BLOCKS = 14;
     
-  private Store _store;
+  private BlockStore _store;
 
   private long _length;
   private long _offset;
@@ -46,24 +48,24 @@ public class BlobInputStream extends InputStream {
   private long _lastOffset;
   private long _fragmentId;
 
-  private byte []_buffer;
+  private char []_buffer;
 
   /**
-   * Creates a blob output stream.
+   * Creates a clob reader.
    *
-   * @param store the output store
+   * @param store the backing store
    */
-  public BlobInputStream(Store store, byte []inode, int inodeOffset)
+  public ClobReader(BlockStore store, byte []inode, int inodeOffset)
   {
     init(store, inode, inodeOffset);
   }
   
   /**
-   * Creates a blob output stream.
+   * Creates a clob reader.
    *
-   * @param store the output store
+   * @param store the backing store
    */
-  public BlobInputStream(Inode inode)
+  public ClobReader(Inode inode)
   {
     init(inode.getStore(), inode.getBuffer(), 0);
   }
@@ -71,7 +73,7 @@ public class BlobInputStream extends InputStream {
   /**
    * Initialize the output stream.
    */
-  public void init(Store store, byte []inode, int inodeOffset)
+  public void init(BlockStore store, byte []inode, int inodeOffset)
   {
     if (store == null)
       throw new NullPointerException();
@@ -89,26 +91,26 @@ public class BlobInputStream extends InputStream {
   }
 
   /**
-   * Reads a byte.
+   * Reads a char.
    */
   public int read()
     throws IOException
   {
     if (_buffer == null)
-      _buffer = new byte[1];
+      _buffer = new char[1];
 
     int len = read(_buffer, 0, 1);
 
     if (len < 0)
       return -1;
     else
-      return (_buffer[0] & 0xff);
+      return _buffer[0];
   }
 
   /**
    * Reads a buffer.
    */
-  public int read(byte []buf, int offset, int length)
+  public int read(char []buf, int offset, int length)
     throws IOException
   {
     int sublen = Inode.read(_inode, _inodeOffset,
@@ -116,7 +118,7 @@ public class BlobInputStream extends InputStream {
 			    buf, offset, length);
 
     if (sublen > 0)
-      _offset += sublen;
+      _offset += 2 * sublen;
 
     return sublen;
   }

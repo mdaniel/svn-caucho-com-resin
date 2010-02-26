@@ -29,7 +29,7 @@
 
 package com.caucho.db.debug;
 
-import com.caucho.db.store.Store;
+import com.caucho.db.store.BlockStore;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Path;
@@ -48,14 +48,14 @@ public class DebugStore {
   private static final L10N L = new L10N(DebugStore.class);
 
   Path _path;
-  Store _store;
+  BlockStore _store;
   
   public DebugStore(Path path)
     throws Exception
   {
     _path = path;
 
-    _store = Store.create(path);
+    _store = BlockStore.create(path);
   }
 
   public static void main(String []args)
@@ -97,22 +97,22 @@ public class DebugStore {
       int code = v & 0xf;
 
       switch (code) {
-      case Store.ALLOC_FREE:
+      case BlockStore.ALLOC_FREE:
 	out.print('.');
 	break;
-      case Store.ALLOC_ROW:
+      case BlockStore.ALLOC_ROW:
 	out.print('r');
 	break;
-      case Store.ALLOC_USED:
+      case BlockStore.ALLOC_USED:
 	out.print('u');
 	break;
-      case Store.ALLOC_FRAGMENT:
+      case BlockStore.ALLOC_FRAGMENT:
 	out.print('f');
 	break;
-      case Store.ALLOC_MINI_FRAG:
+      case BlockStore.ALLOC_MINI_FRAG:
 	out.print('m');
 	break;
-      case Store.ALLOC_INDEX:
+      case BlockStore.ALLOC_INDEX:
 	out.print('i');
 	break;
       default:
@@ -133,12 +133,12 @@ public class DebugStore {
   {
     long totalUsed = 0;
     
-    byte []block = new byte[Store.BLOCK_SIZE];
+    byte []block = new byte[BlockStore.BLOCK_SIZE];
     
     for (int i = 0; i < 2 * count; i += 2) {
       int code = allocTable[i];
 
-      if (code == Store.ALLOC_FRAGMENT) {
+      if (code == BlockStore.ALLOC_FRAGMENT) {
 	int fragCount = 0;
 	
 	for (int j = 0; j < 8; j++) {
@@ -170,7 +170,7 @@ public class DebugStore {
     ReadStream is = _path.openRead();
 
     try {
-      is.skip(count * Store.BLOCK_SIZE);
+      is.skip(count * BlockStore.BLOCK_SIZE);
 
       is.read(block, 0, block.length);
     } finally {

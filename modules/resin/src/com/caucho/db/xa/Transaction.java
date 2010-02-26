@@ -27,19 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
-
-import com.caucho.db.jdbc.ConnectionImpl;
-import com.caucho.sql.SQLExceptionWrapper;
-import com.caucho.util.L10N;
-import com.caucho.util.LongKeyHashMap;
+package com.caucho.db.xa;
 
 import java.io.IOException;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.db.blob.Inode;
+import com.caucho.db.jdbc.ConnectionImpl;
+import com.caucho.db.lock.Lock;
+import com.caucho.db.store.Block;
+import com.caucho.db.store.BlockStore;
+import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.L10N;
 
 /**
  * Represents a single transaction.
@@ -56,8 +58,6 @@ public class Transaction extends StoreTransaction {
   
   private ArrayList<Lock> _readLocks;
   private ArrayList<Lock> _writeLocks;
-  
-  private LongKeyHashMap<WriteBlock> _writeBlocks;
   
   private ArrayList<Block> _updateBlocks;
 
@@ -253,43 +253,6 @@ public class Transaction extends StoreTransaction {
 
     return false;
   }
-  /**
-   * Acquires a new write lock.
-   */
-  /*
-  public void lockWrite(Lock lock)
-    throws SQLException
-  {
-    if (_isRollbackOnly) {
-      if (_rollbackExn != null)
-	throw _rollbackExn;
-      else
-	throw new SQLException(L.l("can't get lock with rollback transaction"));
-    }
-
-    try {
-      if (_readLocks == null)
-	_readLocks = new ArrayList<Lock>();
-      if (_writeLocks == null)
-	_writeLocks = new ArrayList<Lock>();
-
-      if (! _readLocks.contains(lock)) {
-	Thread.dumpStack();
-	throw new SQLException(L.l("lockWrite must already have a read lock"));
-      }
-
-      if (_writeLocks.contains(lock))
-	throw new SQLException(L.l("lockWrite cannot already have a write lock"));
-      
-      lock.lockWrite(this, _timeout);
-      _writeLocks.add(lock);
-    } catch (SQLException e) {
-      setRollbackOnly(e);
-      
-      throw e;
-    }
-  }
-  */
 
   /**
    * Adds a block for update.
@@ -351,30 +314,15 @@ public class Transaction extends StoreTransaction {
     }
   }
 
-  /*
-  public void unlockWrite(Lock lock)
-    throws SQLException
-  {
-    if (_writeLocks.remove(lock)) {
-      lock.unlockWrite();
-    }
-  }
-  */
-
   /**
    * Returns a read block.
    */
-  public Block readBlock(Store store, long blockAddress)
+  public Block readBlock(BlockStore store, long blockAddress)
     throws IOException
   {
     long blockId = store.addressToBlockId(blockAddress);
       
-    Block block;
-    
-    if (_writeBlocks != null)
-      block = _writeBlocks.get(blockId);
-    else
-      block = null;
+    Block block = null;
 
     if (block != null)
       block.allocate();
@@ -387,22 +335,12 @@ public class Transaction extends StoreTransaction {
   /**
    * Returns a read block.
    */
-  public Block loadBlock(Store store, long blockAddress)
+  public Block loadBlock(BlockStore store, long blockAddress)
     throws IOException
   {
     long blockId = store.addressToBlockId(blockAddress);
       
-    Block block;
-    
-    if (_writeBlocks != null)
-      block = _writeBlocks.get(blockId);
-    else
-      block = null;
-
-    if (block != null)
-      block.allocate();
-    else
-      block = store.loadBlock(blockId);
+    Block block = store.loadBlock(blockId);
 
     return block;
   }
@@ -410,74 +348,7 @@ public class Transaction extends StoreTransaction {
   /**
    * Returns a modified block.
    */
-  public WriteBlock getWriteBlock(long blockId)
-  {
-    if (_writeBlocks == null)
-      return null;
-
-    return _writeBlocks.get(blockId);
-  }
-
-  /**
-   * Returns a modified block.
-   */
-  public WriteBlock createWriteBlock(Block block)
-    throws IOException
-  {
-    if (block instanceof WriteBlock)
-      return (WriteBlock) block;
-
-    WriteBlock writeBlock = getWriteBlock(block.getBlockId());
-
-    if (writeBlock != null) {
-      block.free();
-      writeBlock.allocate();
-      return writeBlock;
-    }
-    
-    if (isAutoCommit())
-      writeBlock = new AutoCommitWriteBlock(block);
-    else {
-      // XXX: locking
-      writeBlock = new XAWriteBlock(block);
-      setBlock(writeBlock);
-    }
-
-
-    return writeBlock;
-  }
-
-  /**
-   * Returns a modified block.
-   */
-  public Block createAutoCommitWriteBlock(Block block)
-    throws IOException
-  {
-    if (block instanceof WriteBlock) {
-      return block;
-    }
-    else {
-      WriteBlock writeBlock = getWriteBlock(block.getBlockId());
-
-      if (writeBlock != null) {
-	block.free();
-	writeBlock.allocate();
-
-	return writeBlock;
-      }
-      
-      writeBlock = new AutoCommitWriteBlock(block);
-
-      // setBlock(writeBlock);
-
-      return writeBlock;
-    }
-  }
-
-  /**
-   * Returns a modified block.
-   */
-  public Block allocateRow(Store store)
+  public Block allocateRow(BlockStore store)
     throws IOException
   {
     return store.allocateRow();
@@ -497,30 +368,6 @@ public class Transaction extends StoreTransaction {
       
       _deallocateBlocks.add(block);
     }
-  }
-
-  /**
-   * Returns a modified block.
-   */
-  public Block createWriteBlock(Store store, long blockAddress)
-    throws IOException
-  {
-    Block block = readBlock(store, blockAddress);
-
-    return createWriteBlock(block);
-  }
-
-  /**
-   * Returns a modified block.
-   */
-  private void setBlock(WriteBlock block)
-  {
-    // block.setDirty();
-
-    if (_writeBlocks == null)
-      _writeBlocks = new LongKeyHashMap<WriteBlock>(8);
-
-    _writeBlocks.put(block.getBlockId(), block);
   }
 
   /**
@@ -566,9 +413,6 @@ public class Transaction extends StoreTransaction {
     _isRollbackOnly = true;
 
     releaseLocks();
-
-    // XXX: release write blocks
-    _writeBlocks = null;
   }
 
   public void setRollbackOnly()
@@ -591,8 +435,6 @@ public class Transaction extends StoreTransaction {
   public void writeData()
     throws SQLException
   {
-    LongKeyHashMap<WriteBlock> writeBlocks = _writeBlocks;
-
     if (_deleteInodes != null) {
       while (_deleteInodes.size() > 0) {
 	Inode inode = _deleteInodes.remove(0);
@@ -621,28 +463,6 @@ public class Transaction extends StoreTransaction {
 	  log.log(Level.WARNING, e.toString(), e);
 	}
       }
-    }
-
-    if (writeBlocks != null) {
-      Iterator<WriteBlock> blockIter = writeBlocks.valueIterator();
-
-      while (blockIter.hasNext()) {
-	WriteBlock block = blockIter.next();
-
-        try {
-          block.getStore().saveAllocation();
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-        }
-
-	try {
-	  block.commit();
-	} catch (IOException e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
-      }
-      
-      // writeBlocks.clear();
     }
 
     if (_deallocateBlocks != null) {
@@ -703,21 +523,6 @@ public class Transaction extends StoreTransaction {
 
   void close()
   {
-    LongKeyHashMap<WriteBlock> writeBlocks = _writeBlocks;
-    _writeBlocks = null;
-
-    if (writeBlocks != null) {
-      Iterator<WriteBlock> blockIter = writeBlocks.valueIterator();
-
-      while (blockIter.hasNext()) {
-	WriteBlock block = blockIter.next();
-
-	block.destroy();
-      }
-      
-      // writeBlocks.clear();
-    }
-
     _isRollbackOnly = false;
     _rollbackExn = null;
   }

@@ -29,7 +29,7 @@
 package com.caucho.db.table;
 
 import com.caucho.config.ConfigException;
-import com.caucho.db.store.Store;
+import com.caucho.db.store.BlockStore;
 import com.caucho.util.L10N;
 
 class Row {
@@ -116,9 +116,9 @@ class Row {
 
     _rowLength += column.getLength();
 
-    if (Store.BLOCK_SIZE <= _rowLength) {
+    if (BlockStore.BLOCK_SIZE <= _rowLength) {
       throw new ConfigException(L.l("database row max length {0} exceeded at column {1}",
-                                    Store.BLOCK_SIZE, column.getName()));
+                                    BlockStore.BLOCK_SIZE, column.getName()));
     }
 
     return column;

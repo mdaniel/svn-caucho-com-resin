@@ -1059,6 +1059,8 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
 
     if (log.isLoggable(Level.FINE))
       log.fine("idle " + this);
+    
+    Thread.dumpStack();
 
     _poolEventTime = Alarm.getCurrentTime();
     _cm.toIdle(this);
@@ -1120,11 +1122,11 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
   public String toString()
   {
     if (_mConn != null) {
-      return ("PoolItem[" + _cm.getName() + "," + _id + ","
+      return (getClass().getSimpleName() + "[" + _cm.getName() + "," + _id + ","
               + _mConn.getClass().getSimpleName() + "]");
     }
     else {
-      return ("PoolItem[" + _cm.getName() + "," + _id + ",null]");
+      return (getClass().getSimpleName() + "[" + _cm.getName() + "," + _id + ",null]");
     }
   }
 }

@@ -30,6 +30,7 @@
 package com.caucho.db.store;
 
 import com.caucho.db.Database;
+import com.caucho.db.lock.Lock;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
@@ -80,16 +81,11 @@ import java.util.logging.Logger;
  *
  * Fragments are stored in 8k chunks with a single byte prefix indicating
  * its use.
- *
- * <h3>Transactions</h3>
- *
- * Fragments are not associated with transactions.  The rollback is
- * associated with a transaction.
  */
-public class Store {
+public class BlockStore {
   private final static Logger log
-    = Logger.getLogger(Store.class.getName());
-  private final static L10N L = new L10N(Store.class);
+    = Logger.getLogger(BlockStore.class.getName());
+  private final static L10N L = new L10N(BlockStore.class);
 
   // 8k block size
   public final static int BLOCK_BITS = 13;
@@ -161,10 +157,6 @@ public class Store {
   private int _allocDirtyMin = Integer.MAX_VALUE;
   private int _allocDirtyMax;
 
-  private final Object _fragmentLock = new Object();
-  private final Object _miniFragLock = new Object();
-
-  private final Object _statLock = new Object();
   // number of fragments currently used
   private long _fragmentUseCount;
 
@@ -184,7 +176,7 @@ public class Store {
 
   private final Lifecycle _lifecycle = new Lifecycle();
   
-  public Store(Database database, String name, Lock tableLock)
+  public BlockStore(Database database, String name, Lock tableLock)
   {
     this(database, name, tableLock, database.getPath().lookup(name + ".db"));
   }
@@ -197,7 +189,7 @@ public class Store {
    * @param lock the table lock
    * @param path the path to the files
    */
-  public Store(Database database, String name, Lock rowLock, Path path)
+  public BlockStore(Database database, String name, Lock rowLock, Path path)
   {
     _database = database;
     _blockManager = _database.getBlockManager();
@@ -219,13 +211,13 @@ public class Store {
   /**
    * Creates an independent store.
    */
-  public static Store create(Path path)
+  public static BlockStore create(Path path)
     throws IOException, SQLException
   {
     Database db = new Database();
     db.init();
 
-    Store store = new Store(db, "temp", null, path);
+    BlockStore store = new BlockStore(db, "temp", null, path);
 
     if (path.canRead())
       store.init();
@@ -503,7 +495,7 @@ public class Store {
     long blockIndex = blockId >> BLOCK_BITS;
     long blockCount = _blockCount;
 
-    for (; blockIndex < _blockCount; blockIndex++) {
+    for (; blockIndex < blockCount; blockIndex++) {
       if (getAllocation(blockIndex) == type)
         return blockIndexToBlockId(blockIndex);
     }
@@ -514,12 +506,12 @@ public class Store {
   /**
    * Returns the matching block.
    */
-  public final ReadBlock readBlock(long blockAddress)
+  public final Block readBlock(long blockAddress)
     throws IOException
   {
     long blockId = addressToBlockId(blockAddress);
 
-    ReadBlock block = (ReadBlock) _blockManager.getBlock(this, blockId);
+    Block block = _blockManager.getBlock(this, blockId);
 
     boolean isValid = false;
 
@@ -601,7 +593,7 @@ public class Store {
    *
    * @return the block id of the allocated block.
    */
-  private Block allocateMiniFragmentBlock()
+  private Block allocateBlockMiniFragment()
     throws IOException
   {
     boolean isSave = true;
@@ -637,7 +629,6 @@ public class Store {
     throws IOException
   {
     long blockIndex;
-    boolean isFileExtended = false;
 
     while ((blockIndex = findFreeBlock()) == 0) {
       if (_freeAllocIndex == _blockCount && _freeAllocCount == 0) {
@@ -825,7 +816,7 @@ public class Store {
    *
    * @return the block id of the allocated block.
    */
-  protected void freeBlock(long blockId)
+  public void freeBlock(long blockId)
     throws IOException
   {
     if (blockId == 0)
@@ -969,7 +960,7 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1017,7 +1008,7 @@ public class Store {
                                              blockOffset, length));
     }
 
-    ReadBlock block = readBlock(blockId);
+    Block block = readBlock(blockId);
 
     try {
       Lock lock = block.getLock();
@@ -1056,7 +1047,7 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1095,7 +1086,7 @@ public class Store {
                                int fragmentOffset)
     throws IOException
   {
-    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1136,7 +1127,7 @@ public class Store {
                                              blockOffset, length));
     }
 
-    ReadBlock block = readBlock(addressToBlockId(blockAddress));
+    Block block = readBlock(addressToBlockId(blockAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1214,7 +1205,7 @@ public class Store {
                             int offset)
     throws IOException
   {
-    ReadBlock block = readBlock(addressToBlockId(blockAddress));
+    Block block = readBlock(addressToBlockId(blockAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1237,7 +1228,7 @@ public class Store {
    *
    * @return the fragment address
    */
-  public long allocateFragment(StoreTransaction xa)
+  public long allocateFragment()
     throws IOException
   {
     while (true) {
@@ -1310,7 +1301,6 @@ public class Store {
   /**
    * Writes a fragment.
    *
-   * @param xa the owning transaction
    * @param fragmentAddress the fragment to write
    * @param fragmentOffset the offset into the fragment
    * @param buffer the write buffer
@@ -1319,24 +1309,21 @@ public class Store {
    *
    * @return the fragment id
    */
-  public void writeFragment(StoreTransaction xa,
-                            long fragmentAddress, int fragmentOffset,
-                            byte []buffer, int offset, int length)
+  public Block writeFragment(long fragmentAddress, int fragmentOffset,
+                             byte []buffer, int offset, int length)
     throws IOException
   {
     if (FRAGMENT_SIZE - fragmentOffset < length)
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
                                              fragmentOffset, length));
 
-    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
       lock.lockReadAndWrite(_blockLockTimeout);
 
       try {
-        xa.addUpdateFragmentBlock(block);
-
         int blockOffset = getFragmentOffset(fragmentAddress);
 
         byte []blockBuffer = block.getBuffer();
@@ -1348,6 +1335,8 @@ public class Store {
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
+        
+        return block;
       } finally {
         lock.unlockReadAndWrite();
       }
@@ -1365,20 +1354,17 @@ public class Store {
    * @param offset offset into the write buffer
    * @param length the number of bytes to write
    */
-  public void writeFragment(StoreTransaction xa,
-                            long fragmentAddress, int fragmentOffset,
-                            char []buffer, int offset, int length)
+  public Block writeFragment(long fragmentAddress, int fragmentOffset,
+                             char []buffer, int offset, int length)
     throws IOException
   {
     if (FRAGMENT_SIZE - fragmentOffset < length)
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
                                              fragmentOffset, length));
 
-    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      block = xa.createAutoCommitWriteBlock(block);
-
       Lock lock = block.getLock();
       lock.lockReadAndWrite(_blockLockTimeout);
 
@@ -1401,41 +1387,8 @@ public class Store {
         }
 
         block.setDirty(blockOffset, blockTail);
-      } finally {
-        lock.unlockReadAndWrite();
-      }
-    } finally {
-      block.free();
-    }
-  }
-
-  /**
-   * Writes a long value to a fragment.
-   *
-   * @return the long value
-   */
-  public void writeFragmentLong(StoreTransaction xa,
-                                long fragmentAddress, int fragmentOffset,
-                                long value)
-    throws IOException
-  {
-    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
-
-    try {
-      Lock lock = block.getLock();
-      lock.lockReadAndWrite(_blockLockTimeout);
-
-      try {
-        xa.addUpdateBlock(block);
-
-        int blockOffset = getFragmentOffset(fragmentAddress);
-
-        byte []blockBuffer = block.getBuffer();
-        int offset = blockOffset + fragmentOffset;
-
-        writeLong(blockBuffer, offset, value);
-
-        block.setDirty(offset, offset + 8);
+        
+        return block;
       } finally {
         lock.unlockReadAndWrite();
       }
@@ -1447,7 +1400,6 @@ public class Store {
   /**
    * Writes a blockfragment.
    *
-   * @param xa the owning transaction
    * @param blockAddress the block to write
    * @param blockOffset the offset into the block
    * @param buffer the write buffer
@@ -1456,24 +1408,21 @@ public class Store {
    *
    * @return the fragment id
    */
-  public void writeBlock(StoreTransaction xa,
-                         long blockAddress, int blockOffset,
-                         byte []buffer, int offset, int length)
+  public Block writeBlock(long blockAddress, int blockOffset,
+                          byte []buffer, int offset, int length)
     throws IOException
   {
     if (BLOCK_SIZE - blockOffset < length)
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
                                              blockOffset, length));
 
-    Block block = xa.readBlock(this, addressToBlockId(blockAddress));
+    Block block = readBlock(addressToBlockId(blockAddress));
 
     try {
       Lock lock = block.getLock();
       lock.lockReadAndWrite(_blockLockTimeout);
 
       try {
-        xa.addUpdateBlock(block);
-
         byte []blockBuffer = block.getBuffer();
 
         System.arraycopy(buffer, offset,
@@ -1481,6 +1430,8 @@ public class Store {
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
+        
+        return block;
       } finally {
         lock.unlockReadAndWrite();
       }
@@ -1498,9 +1449,8 @@ public class Store {
    * @param offset offset into the write buffer
    * @param length the number of bytes to write
    */
-  public void writeBlock(StoreTransaction xa,
-                         long blockAddress, int blockOffset,
-                         char []buffer, int offset, int charLength)
+  public Block writeBlock(long blockAddress, int blockOffset,
+                          char []buffer, int offset, int charLength)
     throws IOException
   {
     int length = 2 * charLength;
@@ -1509,15 +1459,13 @@ public class Store {
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
                                              blockOffset, length));
 
-    Block block = xa.readBlock(this, addressToBlockId(blockAddress));
+    Block block = readBlock(addressToBlockId(blockAddress));
 
     try {
       Lock lock = block.getLock();
       lock.lockReadAndWrite(_blockLockTimeout);
 
       try {
-        block = xa.createAutoCommitWriteBlock(block);
-
         byte []blockBuffer = block.getBuffer();
 
         int blockTail = blockOffset;
@@ -1532,6 +1480,8 @@ public class Store {
         }
 
         block.setDirty(blockOffset, blockTail);
+        
+        return block;
       } finally {
         lock.unlockReadAndWrite();
       }
@@ -1545,25 +1495,24 @@ public class Store {
    *
    * @return the long value
    */
-  public void writeBlockLong(StoreTransaction xa,
-                             long blockAddress, int offset,
-                             long value)
+  public Block writeBlockLong(long blockAddress, int offset,
+                              long value)
     throws IOException
   {
-    Block block = xa.readBlock(this, addressToBlockId(blockAddress));
+    Block block = readBlock(addressToBlockId(blockAddress));
 
     try {
       Lock lock = block.getLock();
       lock.lockReadAndWrite(_blockLockTimeout);
 
       try {
-        xa.addUpdateBlock(block);
-
         byte []blockBuffer = block.getBuffer();
 
         writeLong(blockBuffer, offset, value);
 
         block.setDirty(offset, offset + 8);
+        
+        return block;
       } finally {
         lock.unlockReadAndWrite();
       }
@@ -1594,7 +1543,7 @@ public class Store {
    * @return the number of bytes read
    */
   public int readMiniFragment(long fragmentAddress, int fragmentOffset,
-                          byte []buffer, int offset, int length)
+                              byte []buffer, int offset, int length)
     throws IOException
   {
     if (MINI_FRAG_SIZE - fragmentOffset < length) {
@@ -1602,7 +1551,7 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1637,7 +1586,7 @@ public class Store {
    * @return the number of characters read
    */
   public int readMiniFragment(long fragmentAddress, int fragmentOffset,
-                          char []buffer, int offset, int length)
+                              char []buffer, int offset, int length)
     throws IOException
   {
     if (MINI_FRAG_SIZE - fragmentOffset < 2 * length) {
@@ -1645,7 +1594,7 @@ public class Store {
                                              fragmentOffset, length));
     }
 
-    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1684,7 +1633,7 @@ public class Store {
                                    int fragmentOffset)
     throws IOException
   {
-    ReadBlock block = readBlock(addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
@@ -1709,11 +1658,11 @@ public class Store {
    *
    * @return the fragment address
    */
-  public long allocateMiniFragment(StoreTransaction xa)
+  public long allocateMiniFragment()
     throws IOException
   {
     while (true) {
-      long blockAddr = allocateMiniFragmentBlock(xa);
+      long blockAddr = allocateMiniFragmentBlock();
 
       Block block = readBlock(blockAddr);
       int fragOffset = -1;
@@ -1742,7 +1691,6 @@ public class Store {
           if (fragOffset < 0)
             continue;
 
-          boolean hasFree = false;
           for (int i = 0; i < MINI_FRAG_PER_BLOCK; i++) {
             int offset = i / 8 + MINI_FRAG_ALLOC_OFFSET;
             int mask = 1 << (i % 8);
@@ -1776,7 +1724,7 @@ public class Store {
    *
    * @return the fragment address
    */
-  private long allocateMiniFragmentBlock(StoreTransaction xa)
+  private long allocateMiniFragmentBlock()
     throws IOException
   {
     while (true) {
@@ -1818,7 +1766,7 @@ public class Store {
           count = 1;
 
         for (int i = 0; i < count; i++) {
-          Block block = allocateMiniFragmentBlock();
+          Block block = allocateBlockMiniFragment();
           block.free();
         }
       }
@@ -1831,7 +1779,7 @@ public class Store {
   /**
    * Deletes a miniFragment.
    */
-  public void deleteMiniFragment(StoreTransaction xa, long fragmentAddress)
+  public void deleteMiniFragment(long fragmentAddress)
     throws IOException
   {
     Block block = readBlock(fragmentAddress);
@@ -1876,7 +1824,6 @@ public class Store {
   /**
    * Writes a miniFragment.
    *
-   * @param xa the owning transaction
    * @param fragmentAddress the fragment to write
    * @param fragmentOffset the offset into the fragment
    * @param buffer the write buffer
@@ -1885,24 +1832,21 @@ public class Store {
    *
    * @return the fragment id
    */
-  public void writeMiniFragment(StoreTransaction xa,
-                            long fragmentAddress, int fragmentOffset,
-                            byte []buffer, int offset, int length)
+  public Block writeMiniFragment(long fragmentAddress, int fragmentOffset,
+                                 byte []buffer, int offset, int length)
     throws IOException
   {
     if (MINI_FRAG_SIZE - fragmentOffset < length)
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
                                              fragmentOffset, length));
 
-    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
       Lock lock = block.getLock();
       lock.lockReadAndWrite(_blockLockTimeout);
 
       try {
-        xa.addUpdateBlock(block);
-
         int blockOffset = getMiniFragmentOffset(fragmentAddress);
 
         byte []blockBuffer = block.getBuffer();
@@ -1914,6 +1858,8 @@ public class Store {
                          length);
 
         block.setDirty(blockOffset, blockOffset + length);
+        
+        return block;
       } finally {
         lock.unlockReadAndWrite();
       }
@@ -1931,20 +1877,17 @@ public class Store {
    * @param offset offset into the write buffer
    * @param length the number of bytes to write
    */
-  public void writeMiniFragment(StoreTransaction xa,
-                            long fragmentAddress, int fragmentOffset,
-                            char []buffer, int offset, int length)
+  public Block writeMiniFragment(long fragmentAddress, int fragmentOffset,
+                                 char []buffer, int offset, int length)
     throws IOException
   {
     if (MINI_FRAG_SIZE - fragmentOffset < length)
       throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
                                              fragmentOffset, length));
 
-    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
+    Block block = readBlock(addressToBlockId(fragmentAddress));
 
     try {
-      // block = xa.createAutoCommitWriteBlock(block);
-
       Lock lock = block.getLock();
       lock.lockReadAndWrite(_blockLockTimeout);
 
@@ -1967,41 +1910,8 @@ public class Store {
         }
 
         block.setDirty(blockOffset, blockTail);
-      } finally {
-        lock.unlockReadAndWrite();
-      }
-    } finally {
-      block.free();
-    }
-  }
-
-  /**
-   * Writes a long value to a miniFragment.
-   *
-   * @return the long value
-   */
-  public void writeMiniFragmentLong(StoreTransaction xa,
-                                    long fragmentAddress, int fragmentOffset,
-                                    long value)
-    throws IOException
-  {
-    Block block = xa.readBlock(this, addressToBlockId(fragmentAddress));
-
-    try {
-      Lock lock = block.getLock();
-      lock.lockReadAndWrite(_blockLockTimeout);
-
-      try {
-        xa.addUpdateBlock(block);
-
-        int blockOffset = getMiniFragmentOffset(fragmentAddress);
-
-        byte []blockBuffer = block.getBuffer();
-        int offset = blockOffset + fragmentOffset;
-
-        writeLong(blockBuffer, offset, value);
-
-        block.setDirty(offset, offset + 8);
+        
+        return block;
       } finally {
         lock.unlockReadAndWrite();
       }
@@ -2202,24 +2112,6 @@ public class Store {
   }
 
   /**
-   * Writes the short.
-   */
-  private static void writeShort(byte []buffer, int offset, int v)
-  {
-    buffer[offset + 0] = (byte) (v >> 8);
-    buffer[offset + 1] = (byte) (v);
-  }
-
-  /**
-   * Reads a short.
-   */
-  private static int readShort(byte []buffer, int offset)
-  {
-    return (((buffer[offset + 0] & 0xff) << 8)
-            | ((buffer[offset + 1] & 0xff)));
-  }
-
-  /**
    * Flush the store.
    */
   public void flush()
@@ -2288,14 +2180,6 @@ public class Store {
     System.arraycopy(_allocationTable, 0, table, 0, table.length);
 
     return table;
-  }
-
-  private static IllegalStateException stateError(String msg)
-  {
-    IllegalStateException e = new IllegalStateException(msg);
-    e.fillInStackTrace();
-    log.log(Level.WARNING, e.toString(), e);
-    return e;
   }
 
   /**

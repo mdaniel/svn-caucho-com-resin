@@ -13,6 +13,8 @@
 
 <s2 title="4.0.4 - Feb 23, 2010">
 <ul>
+<li>admin: added HealthJvmDeadlock in com.caucho.env.health (#3912, rep by Jamison Novak, #3912)</li>
+<li>admin: refactored Sample and Probe to com.caucho.env.sample</li>
 <li>hessian: writeReplace should be allowed to return itself (rep by Jamison Novak, #3911)</li>
 </ul>
 </s2>

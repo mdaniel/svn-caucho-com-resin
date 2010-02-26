@@ -44,7 +44,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 public class LongKeyLruCache<V> {
   private static final Logger log
     = Logger.getLogger(LongKeyLruCache.class.getName());
-  private static final Integer NULL = new Integer(0);
   
   // maximum allowed entries
   private final int _capacity;
@@ -139,7 +138,7 @@ public class LongKeyLruCache<V> {
   /**
    * Ensure the cache can contain the given value.
    */
-  public LongKeyLruCache ensureCapacity(int newCapacity)
+  public LongKeyLruCache<V> ensureCapacity(int newCapacity)
   {
     int capacity = calculateCapacity(newCapacity);
 
@@ -149,21 +148,20 @@ public class LongKeyLruCache<V> {
       return setCapacity(newCapacity);
   }
 
-  public LongKeyLruCache setCapacity(int newCapacity)
+  public LongKeyLruCache<V> setCapacity(int newCapacity)
   {
     int capacity = calculateCapacity(newCapacity);
 
     if (capacity == _entries.length)
       return this;
-
-    LongKeyLruCache newCache = new LongKeyLruCache(newCapacity);
-
+    
+    LongKeyLruCache<V> newCache = new LongKeyLruCache<V>(newCapacity);
 
     for (int i = 0; i < _entries.length; i++) {
       Object lock = getLock(i);
       
       synchronized (lock) {
-	for (CacheItem item = _entries[i];
+	for (CacheItem<V> item = _entries[i];
 	     item != null;
 	     item = item._nextHash) {
 	  newCache.put(item._key, (V) item._value);

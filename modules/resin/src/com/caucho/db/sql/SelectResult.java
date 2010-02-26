@@ -29,8 +29,8 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.db.store.BlobInputStream;
-import com.caucho.db.store.Store;
+import com.caucho.db.blob.BlobInputStream;
+import com.caucho.db.store.BlockStore;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.TableIterator;
 import com.caucho.sql.SQLExceptionWrapper;
@@ -61,7 +61,7 @@ public class SelectResult {
   private byte []_blob = new byte[128];
   
   private Expr []_exprs;
-  private Store []_stores = new Store[32];
+  private BlockStore []_stores = new BlockStore[32];
 
   private TableIterator []_rows = new TableIterator[16];
 
@@ -127,7 +127,7 @@ public class SelectResult {
       _orderIndex = new IntArray();
     
     if (_stores.length < _exprs.length) {
-      _stores = new Store[exprs.length];
+      _stores = new BlockStore[exprs.length];
     }
 
     for (int i = 0; i < exprs.length; i++)

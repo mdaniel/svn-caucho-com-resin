@@ -30,7 +30,7 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.Database;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.xa.Transaction;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;

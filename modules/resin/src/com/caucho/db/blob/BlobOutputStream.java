@@ -27,8 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.blob;
 
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.RawTransaction;
+import com.caucho.db.xa.StoreTransaction;
+import com.caucho.db.xa.Transaction;
 import com.caucho.vfs.TempBuffer;
 
 import java.io.IOException;
@@ -41,7 +45,7 @@ public class BlobOutputStream extends OutputStream {
     = Logger.getLogger(BlobOutputStream.class.getName());
 
   private StoreTransaction _xa;
-  private Store _store;
+  private BlockStore _store;
   
   private TempBuffer _tempBuffer;
   private byte []_buffer;
@@ -58,7 +62,7 @@ public class BlobOutputStream extends OutputStream {
    *
    * @param store the output store
    */
-  public BlobOutputStream(Transaction xa, Store store,
+  public BlobOutputStream(Transaction xa, BlockStore store,
 			  byte []inode, int inodeOffset)
   {
     init(store, inode, inodeOffset);
@@ -71,7 +75,7 @@ public class BlobOutputStream extends OutputStream {
    *
    * @param store the output store
    */
-  public BlobOutputStream(Store store, byte []inode, int inodeOffset)
+  public BlobOutputStream(BlockStore store, byte []inode, int inodeOffset)
   {
     init(store, inode, inodeOffset);
   }
@@ -91,7 +95,7 @@ public class BlobOutputStream extends OutputStream {
   /**
    * Initialize the output stream.
    */
-  public void init(Store store, byte []inode, int inodeOffset)
+  public void init(BlockStore store, byte []inode, int inodeOffset)
   {
     _store = store;
     _xa = RawTransaction.create();

@@ -31,9 +31,9 @@ package com.caucho.server.cache;
 
 import com.caucho.config.ConfigException;
 import com.caucho.db.Database;
-import com.caucho.db.store.RawTransaction;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.StoreTransaction;
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.RawTransaction;
+import com.caucho.db.xa.StoreTransaction;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
 import com.caucho.vfs.OutputStreamWithBuffer;
@@ -56,7 +56,7 @@ public class TempFileManager
   private static final Logger log
     = Logger.getLogger(TempFileManager.class.getName());
 
-  private final Store _store;
+  private final BlockStore _store;
 
   public TempFileManager(Path path)
   {
@@ -87,7 +87,7 @@ public class TempFileManager
 				      storePath.getNativePath()));
       }
     
-      _store = new Store(database, name, null, storePath);
+      _store = new BlockStore(database, name, null, storePath);
       _store.setFlushDirtyBlocksOnCommit(false);
       _store.create();
     } catch (Exception e) {

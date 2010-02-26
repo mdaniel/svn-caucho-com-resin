@@ -29,8 +29,8 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.ResultSetImpl;
-import com.caucho.db.store.BlobInputStream;
-import com.caucho.db.store.Store;
+import com.caucho.db.blob.BlobInputStream;
+import com.caucho.db.store.BlockStore;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.TableIterator;
 import com.caucho.sql.SQLExceptionWrapper;
@@ -65,7 +65,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
   private int []_types = new int[32];
   private int []_offsets = new int[32];
   private int []_lengths = new int[32];
-  private Store []_stores = new Store[32];
+  private BlockStore []_stores = new BlockStore[32];
 
   private TableIterator []_rows;
 
@@ -120,7 +120,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
       _offsets = new int[exprs.length];
       _lengths = new int[exprs.length];
       _types = new int[exprs.length];
-      _stores = new Store[exprs.length];
+      _stores = new BlockStore[exprs.length];
     }
 
     for (int i = 0; i < exprs.length; i++) {

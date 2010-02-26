@@ -32,8 +32,8 @@ package com.caucho.db.table;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.store.Block;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.Transaction;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -313,7 +313,7 @@ public class TableIterator {
       _buffer = _block.getBuffer();
     }
     
-    _rowOffset = (int) (rowAddr & Store.BLOCK_OFFSET_MASK);
+    _rowOffset = (int) (rowAddr & BlockStore.BLOCK_OFFSET_MASK);
   }
 
   /**

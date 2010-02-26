@@ -108,7 +108,7 @@ public final class BlockManager
     if (memorySize < minSize)
       memorySize = minSize;
 
-    return memorySize / Store.BLOCK_SIZE;
+    return memorySize / BlockStore.BLOCK_SIZE;
   }
 
   private static long getMaxMemory()
@@ -150,7 +150,7 @@ public final class BlockManager
    */
   public void setCapacity(int minCapacity)
   {
-    if (minCapacity > 1024 * 1024 / Store.BLOCK_SIZE)
+    if (minCapacity > 1024 * 1024 / BlockStore.BLOCK_SIZE)
       _blockCache = _blockCache.setCapacity(minCapacity);
   }
 
@@ -181,7 +181,7 @@ public final class BlockManager
   /**
    * Frees blocks with the given store.
    */
-  public void flush(Store store)
+  public void flush(BlockStore store)
   {
     ArrayList<Block> dirtyBlocks = null;
 
@@ -218,7 +218,7 @@ public final class BlockManager
   /**
    * Frees blocks with the given store.
    */
-  public void freeStore(Store store)
+  public void freeStore(BlockStore store)
   {
     ArrayList<Block> removeBlocks = new ArrayList<Block>();
 
@@ -265,7 +265,7 @@ public final class BlockManager
     }
   }
 
-  private boolean hasPendingStore(Store store)
+  private boolean hasPendingStore(BlockStore store)
   {
     synchronized (_writeQueue) {
       for (int i = _writeQueue.size() - 1; i >= 0; i--) {
@@ -296,12 +296,12 @@ public final class BlockManager
   /**
    * Gets the table's block.
    */
-  Block getBlock(Store store, long blockId)
+  Block getBlock(BlockStore store, long blockId)
   {
     // XXX: proper handling of the synchronized is tricky because
     // the LRU dirty write might have timing issues
 
-    long storeId = blockId & Store.BLOCK_INDEX_MASK;
+    long storeId = blockId & BlockStore.BLOCK_INDEX_MASK;
     if (storeId != store.getId()) {
       throw stateError("illegal block: " + Long.toHexString(blockId));
     }
@@ -316,7 +316,7 @@ public final class BlockManager
         block = dirtyBlock;
       }
       else {
-        block = new ReadBlock(store, blockId);
+        block = new Block(store, blockId);
 
         if (dirtyBlock != null) {
           dirtyBlock.copyToBlock(block);
@@ -344,7 +344,7 @@ public final class BlockManager
     }
 
     if (blockId != block.getBlockId()
-        || (blockId & Store.BLOCK_INDEX_MASK) != store.getId()
+        || (blockId & BlockStore.BLOCK_INDEX_MASK) != store.getId()
         || block.getStore() != store) {
       System.out.println("BLOCK: " + Long.toHexString(blockId) + " " + Long.toHexString(block.getBlockId()) + " " + store + " " + block.getStore());
       Thread.dumpStack();
@@ -353,7 +353,7 @@ public final class BlockManager
     return block;
   }
 
-  private Block getDirtyBlock(Store store, long blockId)
+  private Block getDirtyBlock(BlockStore store, long blockId)
   {
     synchronized (_writeQueue) {
       int size = _writeQueue.size();

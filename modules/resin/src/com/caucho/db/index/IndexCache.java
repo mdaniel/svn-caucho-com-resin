@@ -30,7 +30,8 @@
 package com.caucho.db.index;
 
 import com.caucho.util.*;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.xa.Transaction;
+
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicReference;

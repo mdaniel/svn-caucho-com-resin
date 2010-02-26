@@ -27,48 +27,35 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.xa;
 
-import com.caucho.java.WorkDir;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.Path;
+import java.io.IOException;
+
+import com.caucho.db.store.Block;
+import com.caucho.db.store.BlockStore;
 
 /**
- * The swap store is a singleton Store to manage buffered data that might
- * need to swap to a backing store.
+ * Represents a single transaction.
  */
-public final class SwapStore {
-  private static SwapStore _swap;
-
-  private final Store _store;
-
-  private SwapStore()
-  {
-    ClassLoader loader = ClassLoader.getSystemClassLoader();
-    
-    Path workDir = WorkDir.getLocalWorkDir(loader);
-
-    String serverId = CauchoSystem.getServerId();
-
-    Path path = workDir.lookup("tmp-" + serverId + ".swap");
-
-    try {
-      _store = Store.create(path);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-  
+abstract public class StoreTransaction {
   /**
-   * Returns the swap store.
+   * Returns a read block.
    */
-  public static SwapStore create()
-  {
-    synchronized (SwapStore.class) {
-      if (_swap == null)
-	_swap = new SwapStore();
+  abstract public Block readBlock(BlockStore store, long blockAddress)
+    throws IOException;
 
-      return _swap;
-    }
+  /**
+   * Adds an updated block.
+   */
+  abstract public void addUpdateBlock(Block block)
+    throws IOException;
+
+  /**
+   * Add an update fragment block.
+   */
+  public void addUpdateFragmentBlock(Block block)
+    throws IOException
+  {
+    addUpdateBlock(block);
   }
 }

@@ -27,8 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.blob;
 
+import com.caucho.db.store.Block;
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.RawTransaction;
+import com.caucho.db.xa.StoreTransaction;
 import com.caucho.util.L10N;
 import com.caucho.util.FreeList;
 import com.caucho.vfs.OutputStreamWithBuffer;
@@ -84,9 +88,9 @@ public class Inode {
 
   public static final int INODE_SIZE = 128;
   public static final int INLINE_BLOB_SIZE = INODE_SIZE - 8;
-  public static final int BLOCK_SIZE = Store.BLOCK_SIZE;
+  public static final int BLOCK_SIZE = BlockStore.BLOCK_SIZE;
 
-  public static final int MINI_FRAG_SIZE = Store.MINI_FRAG_SIZE;
+  public static final int MINI_FRAG_SIZE = BlockStore.MINI_FRAG_SIZE;
 
   public static final int MINI_FRAG_BLOB_SIZE
     = (INLINE_BLOB_SIZE / 8) * MINI_FRAG_SIZE;
@@ -122,7 +126,7 @@ public class Inode {
   
   private static final FreeList<byte[]> _freeBytes = new FreeList<byte[]>(16);
 
-  private Store _store;
+  private BlockStore _store;
   private StoreTransaction _xa;
 
   private final byte []_bytes = new byte[INODE_SIZE];
@@ -131,13 +135,13 @@ public class Inode {
   {
   }
 
-  public Inode(Store store, StoreTransaction xa)
+  public Inode(BlockStore store, StoreTransaction xa)
   {
     _store = store;
     _xa = xa;
   }
 
-  public Inode(Store store)
+  public Inode(BlockStore store)
   {
     this(store, RawTransaction.create());
   }
@@ -145,7 +149,7 @@ public class Inode {
   /**
    * Returns the backing store.
    */
-  public Store getStore()
+  public BlockStore getStore()
   {
     return _store;
   }
@@ -166,7 +170,7 @@ public class Inode {
     return readLong(_bytes, 0);
   }
 
-  public void init(Store store, StoreTransaction xa,
+  public void init(BlockStore store, StoreTransaction xa,
                    byte []buffer, int offset)
   {
     _store = store;
@@ -274,7 +278,7 @@ public class Inode {
    * @return the number of bytes read
    */
   static int read(byte []inode, int inodeOffset,
-                  Store store,
+                  BlockStore store,
                   long fileOffset,
                   byte []buffer, int bufferOffset, int bufferLength)
     throws IOException
@@ -323,7 +327,7 @@ public class Inode {
    * Updates the buffer.  Called only from the blob classes.
    */
   static void append(byte []inode, int inodeOffset,
-                     Store store, StoreTransaction xa,
+                     BlockStore store, StoreTransaction xa,
                      byte []buffer, int offset, int length)
     throws IOException
   {
@@ -348,7 +352,7 @@ public class Inode {
         if (MINI_FRAG_SIZE < sublen)
           sublen = MINI_FRAG_SIZE;
 
-        long miniFragAddr = store.allocateMiniFragment(xa);
+        long miniFragAddr = store.allocateMiniFragment();
 
         if (miniFragAddr == 0) {
           store.setCorrupted(true);
@@ -361,7 +365,9 @@ public class Inode {
                           store, xa,
                           currentLength, miniFragAddr);
 
-        store.writeMiniFragment(xa, miniFragAddr, 0, buffer, offset, sublen);
+        Block writeBlock = store.writeMiniFragment(miniFragAddr, 0,
+                                                   buffer, offset, sublen);
+        xa.addUpdateBlock(writeBlock);
 
         offset += sublen;
         length -= sublen;
@@ -379,7 +385,7 @@ public class Inode {
   }
 
   private static void appendBlock(byte []inode, int inodeOffset,
-                                  Store store, StoreTransaction xa,
+                                  BlockStore store, StoreTransaction xa,
                                   byte []buffer, int offset, int length,
                                   long currentLength)
     throws IOException
@@ -403,7 +409,9 @@ public class Inode {
         if (BLOCK_SIZE - blockOffset < sublen)
           sublen = BLOCK_SIZE - blockOffset;
 
-        store.writeBlock(xa, addr, blockOffset, buffer, offset, sublen);
+        Block block = store.writeBlock(addr, blockOffset,
+                                       buffer, offset, sublen);
+        xa.addUpdateBlock(block);
 
         offset += sublen;
         length -= sublen;
@@ -418,7 +426,7 @@ public class Inode {
 
         Block block = store.allocateBlock();
 
-        long blockAddr = Store.blockIdToAddress(block.getBlockId());
+        long blockAddr = BlockStore.blockIdToAddress(block.getBlockId());
 
         block.free();
 
@@ -433,7 +441,9 @@ public class Inode {
                        store, xa,
                        currentLength, blockAddr);
 
-        store.writeBlock(xa, blockAddr, 0, buffer, offset, sublen);
+        Block writeBlock = store.writeBlock(blockAddr, 0,
+                                            buffer, offset, sublen);
+        xa.addUpdateBlock(writeBlock);
 
         offset += sublen;
         length -= sublen;
@@ -456,7 +466,7 @@ public class Inode {
    *
    * @return the number of characters read
    */
-  static int read(byte []inode, int inodeOffset, Store store,
+  static int read(byte []inode, int inodeOffset, BlockStore store,
                   long fileOffset,
                   char []buffer, int bufferOffset, int bufferLength)
     throws IOException
@@ -513,7 +523,7 @@ public class Inode {
    * Updates the buffer.  Called only from the clob classes.
    */
   static void append(byte []inode, int inodeOffset,
-                     Store store, StoreTransaction xa,
+                     BlockStore store, StoreTransaction xa,
                      char []buffer, int offset, int charLength)
     throws IOException
   {
@@ -543,7 +553,7 @@ public class Inode {
         if (MINI_FRAG_SIZE < sublen)
           sublen = MINI_FRAG_SIZE;
 
-        long miniFragAddr = store.allocateMiniFragment(xa);
+        long miniFragAddr = store.allocateMiniFragment();
 
         if (miniFragAddr == 0) {
           store.setCorrupted(true);
@@ -558,8 +568,10 @@ public class Inode {
 
         int charSublen = sublen / 2;
 
-        store.writeMiniFragment(xa, miniFragAddr, 0,
-                                buffer, offset, charSublen);
+        // XXX: store in XA?
+        Block writeBlock = store.writeMiniFragment(miniFragAddr, 0,
+                                                   buffer, offset, charSublen);
+        xa.addUpdateBlock(writeBlock);
 
         offset += charSublen;
         charLength -= charSublen;
@@ -577,7 +589,7 @@ public class Inode {
   }
 
   static void appendBlock(byte []inode, int inodeOffset,
-                          Store store, StoreTransaction xa,
+                          BlockStore store, StoreTransaction xa,
                           char []buffer, int offset, int charLength,
                           long currentLength)
     throws IOException
@@ -605,7 +617,9 @@ public class Inode {
 
         int charSublen = sublen / 2;
 
-        store.writeBlock(xa, addr, blockOffset, buffer, offset, charSublen);
+        Block writeBlock = store.writeBlock(addr, blockOffset,
+                                            buffer, offset, charSublen);
+        xa.addUpdateBlock(writeBlock);
 
         offset += charSublen;
         charLength -= charSublen;
@@ -624,7 +638,10 @@ public class Inode {
         long blockAddr = block.getBlockId();
         block.free();
 
-        store.writeBlock(xa, blockAddr, 0, buffer, offset, charSublen);
+        Block writeBlock = store.writeBlock(blockAddr, 0,
+                                            buffer, offset, charSublen);
+        
+        xa.addUpdateBlock(writeBlock);
 
         writeBlockAddr(inode, inodeOffset,
                        store, xa,
@@ -698,7 +715,7 @@ public class Inode {
         for (; length > 0; length -= MINI_FRAG_SIZE) {
           long fragAddr = readMiniFragAddr(bytes, 0, _store, length - 1);
 
-          if ((fragAddr & Store.BLOCK_MASK) == 0) {
+          if ((fragAddr & BlockStore.BLOCK_MASK) == 0) {
             _store.setCorrupted(true);
 
             String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 fragment";
@@ -713,7 +730,7 @@ public class Inode {
             throw stateError(msg);
           }
 
-          _store.deleteMiniFragment(_xa, fragAddr);
+          _store.deleteMiniFragment(fragAddr);
         }
       }
       else {
@@ -772,7 +789,7 @@ public class Inode {
 
   private boolean validateBlockAddr(long blockAddr, long length)
   {
-    if ((blockAddr & Store.BLOCK_MASK) == 0) {
+    if ((blockAddr & BlockStore.BLOCK_MASK) == 0) {
       String msg = _store + ": inode block " + Long.toHexString(length) + " has 0 block";
       log.warning(msg);
       _store.setCorrupted(true);
@@ -806,7 +823,7 @@ public class Inode {
    * Returns the fragment id for the given offset.
    */
   static long readMiniFragAddr(byte []inode, int inodeOffset,
-                                   Store store, long fileOffset)
+                                   BlockStore store, long fileOffset)
     throws IOException
   {
     long fragCount = fileOffset / MINI_FRAG_SIZE;
@@ -818,13 +835,13 @@ public class Inode {
    * Writes the block id into the inode.
    */
   private static void writeMiniFragAddr(byte []inode, int offset,
-                                        Store store, StoreTransaction xa,
+                                        BlockStore store, StoreTransaction xa,
                                         long fragLength, long fragAddr)
     throws IOException
   {
     int fragCount = (int) (fragLength / MINI_FRAG_SIZE);
 
-    if ((fragAddr & Store.BLOCK_MASK) == 0) {
+    if ((fragAddr & BlockStore.BLOCK_MASK) == 0) {
       store.setCorrupted(true);
 
       throw new IllegalStateException(store + ": inode block " + fragLength + " has zero value " + fragAddr);
@@ -837,7 +854,7 @@ public class Inode {
    * Returns the fragment id for the given offset.
    */
   static long readBlockAddr(byte []inode, int inodeOffset,
-                            Store store,
+                            BlockStore store,
                             long fileOffset)
     throws IOException
   {
@@ -894,14 +911,14 @@ public class Inode {
    * Writes the block id into the inode.
    */
   private static void writeBlockAddr(byte []inode, int inodeOffset,
-                                     Store store, StoreTransaction xa,
+                                     BlockStore store, StoreTransaction xa,
                                      long fileOffset, long blockAddr)
     throws IOException
   {
     int blockCount = (int) (fileOffset / BLOCK_SIZE);
 
     // XXX: not sure if correct, needs XA?
-    if ((blockAddr & Store.BLOCK_MASK) == 0) {
+    if ((blockAddr & BlockStore.BLOCK_MASK) == 0) {
       store.setCorrupted(true);
 
       String msg = store + ": inode block " + blockCount + " writing 0 fragment";
@@ -924,7 +941,8 @@ public class Inode {
 
       int blockOffset = 8 * (blockCount - DIRECT_BLOCKS);
 
-      store.writeBlockLong(xa, indAddr, blockOffset, blockAddr);
+      Block writeBlock = store.writeBlockLong(indAddr, blockOffset, blockAddr);
+      xa.addUpdateBlock(writeBlock);
     }
     else if (fileOffset < DOUBLE_INDIRECT_MAX) {
       long indAddr = readLong(inode, inodeOffset + (DIRECT_BLOCKS + 1) * 8);
@@ -946,16 +964,18 @@ public class Inode {
       if (dblIndAddr == 0) {
         Block block = store.allocateBlock();
 
-        dblIndAddr = Store.blockIdToAddress(block.getBlockId());
+        dblIndAddr = BlockStore.blockIdToAddress(block.getBlockId());
 
         block.free();
 
-        store.writeBlockLong(xa, indAddr, dblBlockIndex, dblIndAddr);
+        Block writeBlock = store.writeBlockLong(indAddr, dblBlockIndex, dblIndAddr);
+        xa.addUpdateBlock(writeBlock);
       }
 
       int blockOffset = 8 * (blockCount % INDIRECT_BLOCKS);
 
-      store.writeBlockLong(xa, dblIndAddr, blockOffset, blockAddr);
+      Block writeBlock = store.writeBlockLong(dblIndAddr, blockOffset, blockAddr);
+      xa.addUpdateBlock(writeBlock);
     }
     else {
       store.setCorrupted(true);

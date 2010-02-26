@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.lock;
 
 /**
  * Wraps an exception in a SQLException wrapper.

@@ -32,14 +32,14 @@ package com.caucho.db.table;
 import com.caucho.db.Database;
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
+import com.caucho.db.lock.Lock;
 import com.caucho.db.sql.CreateQuery;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.store.Block;
-import com.caucho.db.store.Lock;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.TaskWorker;
@@ -72,7 +72,7 @@ import java.util.logging.Logger;
  * Block 3: first data
  * </pre>
  */
-public class Table extends Store {
+public class Table extends BlockStore {
   private final static Logger log
     = Logger.getLogger(Table.class.getName());
   private final static L10N L = new L10N(Table.class);
@@ -112,7 +112,7 @@ public class Table extends Store {
 
   // top of file counters for row insert allocation
   private final Object _rowTailLock = new Object();
-  private long _rowTailTop = Store.BLOCK_SIZE * 256;
+  private long _rowTailTop = BlockStore.BLOCK_SIZE * 256;
   private final AtomicLong _rowTailOffset = new AtomicLong();
 
   private final Object _rowClockLock = new Object();
@@ -952,7 +952,7 @@ public class Table extends Store {
         count = 256;
 
       if (count > 0) {
-        _rowTailTop = _rowTailOffset.get() + count * Store.BLOCK_SIZE;
+        _rowTailTop = _rowTailOffset.get() + count * BlockStore.BLOCK_SIZE;
       }
 
       _rowClockOffset = 0;
@@ -988,7 +988,7 @@ public class Table extends Store {
 
         rowClockOffset = _rowClockTop;
       } finally {
-        _rowClockOffset = rowClockOffset + Store.BLOCK_SIZE;
+        _rowClockOffset = rowClockOffset + BlockStore.BLOCK_SIZE;
       }
     }
   }

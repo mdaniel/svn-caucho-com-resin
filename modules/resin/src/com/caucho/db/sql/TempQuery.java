@@ -29,7 +29,7 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.db.store.Transaction;
+import com.caucho.db.xa.Transaction;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;

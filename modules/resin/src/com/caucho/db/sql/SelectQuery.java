@@ -30,8 +30,8 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.Database;
-import com.caucho.db.store.Transaction;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 

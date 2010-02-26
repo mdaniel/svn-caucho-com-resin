@@ -32,7 +32,7 @@ import com.caucho.db.Database;
 import com.caucho.db.sql.Query;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectQuery;
-import com.caucho.db.store.Transaction;
+import com.caucho.db.xa.Transaction;
 import com.caucho.util.L10N;
 
 import java.sql.SQLException;

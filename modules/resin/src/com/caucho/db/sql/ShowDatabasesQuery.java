@@ -30,10 +30,10 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.Database;
-import com.caucho.db.store.Transaction;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.xa.Transaction;
 
 import java.sql.SQLException;
 import java.util.logging.Logger;

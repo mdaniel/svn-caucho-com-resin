@@ -29,9 +29,10 @@
 
 package com.caucho.server.cache;
 
-import com.caucho.db.store.RawTransaction;
-import com.caucho.db.store.Store;
-import com.caucho.db.store.StoreTransaction;
+import com.caucho.db.store.Block;
+import com.caucho.db.store.BlockStore;
+import com.caucho.db.xa.RawTransaction;
+import com.caucho.db.xa.StoreTransaction;
 import com.caucho.util.L10N;
 import com.caucho.vfs.OutputStreamWithBuffer;
 import com.caucho.vfs.TempCharBuffer;
@@ -52,14 +53,14 @@ public class TempFileInode {
   private static final Logger log
     = Logger.getLogger(TempFileInode.class.getName());
 
-  private final Store _store;
+  private final BlockStore _store;
   private int _useCount = 1;
 
   private ArrayList<Long> _fragmentList = new ArrayList<Long>();
   private long []_fragmentArray;
   private long _length;
 
-  TempFileInode(Store store)
+  TempFileInode(BlockStore store)
   {
     _store = store;
   }
@@ -141,11 +142,11 @@ public class TempFileInode {
       if (length < sublen)
         sublen = (int) length;
 
-      long fragmentAddress = fragmentArray[(int) (offset / Store.FRAGMENT_SIZE)];
-      int fragmentOffset = (int) (offset % Store.FRAGMENT_SIZE);
+      long fragmentAddress = fragmentArray[(int) (offset / BlockStore.FRAGMENT_SIZE)];
+      int fragmentOffset = (int) (offset % BlockStore.FRAGMENT_SIZE);
 
-      if (Store.FRAGMENT_SIZE - fragmentOffset < sublen)
-        sublen = Store.FRAGMENT_SIZE - fragmentOffset;
+      if (BlockStore.FRAGMENT_SIZE - fragmentOffset < sublen)
+        sublen = BlockStore.FRAGMENT_SIZE - fragmentOffset;
 
       int len = _store.readFragment(fragmentAddress, fragmentOffset,
                                     buffer, writeOffset, sublen);
@@ -185,10 +186,10 @@ public class TempFileInode {
 
     while (length > 0) {
       long fragmentAddress
-        = _fragmentArray[(int) (offset / Store.FRAGMENT_SIZE)];
-      int fragmentOffset = (int) (offset % Store.FRAGMENT_SIZE);
+        = _fragmentArray[(int) (offset / BlockStore.FRAGMENT_SIZE)];
+      int fragmentOffset = (int) (offset % BlockStore.FRAGMENT_SIZE);
 
-      int sublen = (Store.FRAGMENT_SIZE - fragmentOffset) / 2;
+      int sublen = (BlockStore.FRAGMENT_SIZE - fragmentOffset) / 2;
 
       if (buffer.length < sublen)
         sublen = buffer.length;
@@ -293,23 +294,25 @@ public class TempFileInode {
       long inodeOffset = _length;
 
       while (length > 0) {
-        while (_fragmentList.size() <= _length / Store.FRAGMENT_SIZE) {
-          long fragment = _store.allocateFragment(_xa);
+        while (_fragmentList.size() <= _length / BlockStore.FRAGMENT_SIZE) {
+          long fragment = _store.allocateFragment();
 
           _fragmentList.add(fragment);
         }
 
-        int fragmentOffset = (int) (_length % Store.FRAGMENT_SIZE);
+        int fragmentOffset = (int) (_length % BlockStore.FRAGMENT_SIZE);
         long fragmentAddress = _fragmentList.get(_fragmentList.size() - 1);
 
-        int sublen = Store.FRAGMENT_SIZE - fragmentOffset;
+        int sublen = BlockStore.FRAGMENT_SIZE - fragmentOffset;
         if (length < sublen)
           sublen = length;
 
         _length += sublen;
-        _store.writeFragment(_xa,
-                             fragmentAddress, fragmentOffset,
-                             buffer, offset, sublen);
+        
+        Block block = _store.writeFragment(fragmentAddress, fragmentOffset,
+                                           buffer, offset, sublen);
+        
+        _xa.addUpdateFragmentBlock(block);
 
         length -= sublen;
         offset += sublen;
@@ -365,13 +368,13 @@ public class TempFileInode {
 
       while (length > 0) {
         long fragmentAddress
-          = fragmentArray[(int) (_offset / Store.FRAGMENT_SIZE)];
-        int fragmentOffset = (int) (_offset % Store.FRAGMENT_SIZE);
+          = fragmentArray[(int) (_offset / BlockStore.FRAGMENT_SIZE)];
+        int fragmentOffset = (int) (_offset % BlockStore.FRAGMENT_SIZE);
 
         int sublen = length;
 
-        if (Store.FRAGMENT_SIZE - fragmentOffset < sublen)
-          sublen = Store.FRAGMENT_SIZE - fragmentOffset;
+        if (BlockStore.FRAGMENT_SIZE - fragmentOffset < sublen)
+          sublen = BlockStore.FRAGMENT_SIZE - fragmentOffset;
 
         int len = _store.readFragment(fragmentAddress, fragmentOffset,
                                       buffer, offset, sublen);
@@ -413,24 +416,25 @@ public class TempFileInode {
       throws IOException
     {
       while (length > 0) {
-        while (_fragmentList.size() <= _length / Store.FRAGMENT_SIZE) {
-          long fragment = _store.allocateFragment(_xa);
+        while (_fragmentList.size() <= _length / BlockStore.FRAGMENT_SIZE) {
+          long fragment = _store.allocateFragment();
 
           _fragmentList.add(fragment);
         }
 
-        int fragmentOffset = (int) (_length % Store.FRAGMENT_SIZE);
+        int fragmentOffset = (int) (_length % BlockStore.FRAGMENT_SIZE);
         long fragmentAddress = _fragmentList.get(_fragmentList.size() - 1);
 
-        int sublen = (Store.FRAGMENT_SIZE - fragmentOffset) / 2;
+        int sublen = (BlockStore.FRAGMENT_SIZE - fragmentOffset) / 2;
         if (length < sublen)
           sublen = length;
 
         _length += 2 * sublen;
-        _store.writeFragment(_xa,
-                             fragmentAddress, fragmentOffset,
-                             buffer, offset, sublen);
+        Block block = _store.writeFragment(fragmentAddress, fragmentOffset,
+                                           buffer, offset, sublen);
 
+        _xa.addUpdateFragmentBlock(block);
+        
         length -= sublen;
         offset += sublen;
       }

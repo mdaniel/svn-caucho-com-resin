@@ -29,11 +29,11 @@
 
 package com.caucho.db;
 
+import com.caucho.db.lock.Lock;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.Query;
 import com.caucho.db.store.BlockManager;
-import com.caucho.db.store.Lock;
-import com.caucho.db.store.Store;
+import com.caucho.db.store.BlockStore;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
 import com.caucho.lifecycle.Lifecycle;
@@ -121,8 +121,8 @@ public class Database
    */
   public void ensureMemoryCapacity(long minCapacity)
   {
-    int minBlocks = (int) ((minCapacity + Store.BLOCK_SIZE - 1) /
-                           Store.BLOCK_SIZE);
+    int minBlocks = (int) ((minCapacity + BlockStore.BLOCK_SIZE - 1) /
+                           BlockStore.BLOCK_SIZE);
 
     _blockManager.ensureCapacity(minBlocks);
   }

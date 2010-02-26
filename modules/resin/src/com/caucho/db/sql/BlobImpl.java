@@ -28,8 +28,8 @@
  */
 package com.caucho.db.sql;
 
-import com.caucho.db.store.BlobInputStream;
-import com.caucho.db.store.Store;
+import com.caucho.db.blob.BlobInputStream;
+import com.caucho.db.store.BlockStore;
 import com.caucho.util.L10N;
 
 import java.io.InputStream;
@@ -45,14 +45,14 @@ import java.sql.SQLException;
 public class BlobImpl implements java.sql.Blob {
   private static final L10N L = new L10N(BlobImpl.class);
 
-  private Store _store;
+  private BlockStore _store;
   private byte []_inode = new byte[128];
     
   BlobImpl()
   {
   }
 
-  void setStore(Store store)
+  void setStore(BlockStore store)
   {
     _store = store;
   }

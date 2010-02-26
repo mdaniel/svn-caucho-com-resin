@@ -19,25 +19,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.blob;
 
 import java.io.IOException;
 import java.io.InputStream;
 
-/**
- * Directly reading the blob from the inode.
- */
-public class InodeBlobInputStream extends InputStream {
+import com.caucho.db.store.BlockStore;
+
+public class BlobInputStream extends InputStream {
   private static final int INODE_DIRECT_BLOCKS = 14;
     
-  private Store _store;
+  private BlockStore _store;
 
   private long _length;
   private long _offset;
@@ -45,17 +45,17 @@ public class InodeBlobInputStream extends InputStream {
   private byte []_inode;
   private int _inodeOffset;
 
-  private Block _block;
+  private long _lastOffset;
+  private long _fragmentId;
+
   private byte []_buffer;
-  private int _bufferOffset;
-  private int _bufferEnd;
-  
+
   /**
    * Creates a blob output stream.
    *
    * @param store the output store
    */
-  public InodeBlobInputStream(Store store, byte []inode, int inodeOffset)
+  public BlobInputStream(BlockStore store, byte []inode, int inodeOffset)
   {
     init(store, inode, inodeOffset);
   }
@@ -65,7 +65,7 @@ public class InodeBlobInputStream extends InputStream {
    *
    * @param store the output store
    */
-  public InodeBlobInputStream(Inode inode)
+  public BlobInputStream(Inode inode)
   {
     init(inode.getStore(), inode.getBuffer(), 0);
   }
@@ -73,7 +73,7 @@ public class InodeBlobInputStream extends InputStream {
   /**
    * Initialize the output stream.
    */
-  public void init(Store store, byte []inode, int inodeOffset)
+  public void init(BlockStore store, byte []inode, int inodeOffset)
   {
     if (store == null)
       throw new NullPointerException();
@@ -85,19 +85,9 @@ public class InodeBlobInputStream extends InputStream {
 
     _length = readLong(inode, inodeOffset);
     _offset = 0;
-    
-    _block = null;
 
-    if (_length <= Inode.INLINE_BLOB_SIZE) {
-      _buffer = inode;
-      _bufferOffset = inodeOffset + 8;
-      _bufferEnd = (int) (_bufferOffset + _length);
-    }
-    else {
-      _buffer = null;
-      _bufferOffset = 0;
-      _bufferEnd = 0;
-    }
+    _fragmentId = 0;
+    _lastOffset = 0;
   }
 
   /**
@@ -106,15 +96,15 @@ public class InodeBlobInputStream extends InputStream {
   public int read()
     throws IOException
   {
-    if (_length <= _offset)
+    if (_buffer == null)
+      _buffer = new byte[1];
+
+    int len = read(_buffer, 0, 1);
+
+    if (len < 0)
       return -1;
-
-    if (_bufferEnd <= _bufferOffset)
-      readBlock();
-
-    _offset++;
-
-    return _buffer[_bufferOffset++] & 0xff;
+    else
+      return (_buffer[0] & 0xff);
   }
 
   /**
@@ -123,21 +113,12 @@ public class InodeBlobInputStream extends InputStream {
   public int read(byte []buf, int offset, int length)
     throws IOException
   {
-    if (_length <= _offset)
-      return -1;
+    int sublen = Inode.read(_inode, _inodeOffset,
+			    _store, _offset,
+			    buf, offset, length);
 
-    if (_bufferEnd <= _bufferOffset)
-      readBlock();
-
-    int sublen = _bufferEnd - _bufferOffset;
-    if (length < sublen)
-      sublen = length;
-
-    _offset += sublen;
-
-    System.arraycopy(_buffer, _bufferOffset, buf, offset, sublen);
-
-    _bufferOffset += sublen;
+    if (sublen > 0)
+      _offset += sublen;
 
     return sublen;
   }
@@ -147,56 +128,6 @@ public class InodeBlobInputStream extends InputStream {
    */
   public void close()
   {
-    if (_block != null) {
-      Block block = _block;
-      _block = null;
-      block.free();
-    }
-  }
-
-  /**
-   * Updates the buffer.
-   */
-  public void readBlock()
-    throws IOException
-  {
-    if (_block != null) {
-      Block block = _block;
-      _block = null;
-      block.free();
-    }
-
-    long addr;
-
-    int blockCount = (int) (_offset / Store.BLOCK_SIZE);
-      
-    if (blockCount < INODE_DIRECT_BLOCKS) {
-      addr = readLong(_inode, _inodeOffset + 8 * (blockCount + 1));
-    }
-    else {
-      long ptrAddr = readLong(_inode,
-			      _inodeOffset + 8 * (INODE_DIRECT_BLOCKS + 1));
-
-      Block ptr = _store.readBlock(_store.addressToBlockId(ptrAddr));
-
-      addr = readLong(ptr.getBuffer(), 8 * (blockCount - INODE_DIRECT_BLOCKS));
-
-      ptr.free();
-    }
-
-    _block = _store.readBlock(_store.addressToBlockId(addr));
-    _buffer = _block.getBuffer();
-
-    int offset = (int) (addr & Store.BLOCK_OFFSET_MASK);
-
-    if (offset > 0) {
-      _bufferOffset = readShort(_buffer, offset);
-      _bufferEnd = _bufferOffset + readShort(_buffer, offset + 2);
-    }
-    else {
-      _bufferOffset = 0;
-      _bufferEnd = _buffer.length;
-    }
   }
 
   /**

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.lock;
 
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;

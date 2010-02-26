@@ -139,6 +139,7 @@ public class SpyStatement implements java.sql.Statement {
     }
   }
 
+  @Override
   public void close()
     throws SQLException
   {
@@ -146,10 +147,18 @@ public class SpyStatement implements java.sql.Statement {
       if (log.isLoggable(Level.FINE))
 	log.fine(getId() + ":close()");
       
-      _stmt.close();
-    } catch (Throwable e) {
+      Statement stmt = _stmt;
+      _stmt = null;
+      
+      if (stmt != null)
+        stmt.close();
+    } catch (RuntimeException e) {
       if (log.isLoggable(Level.FINE))
-	log.fine(getId() + ":exn-close(" + e + ")");
+        log.fine(getId() + ":exn-close(" + e + ")");
+      
+    } catch (Exception e) {
+      if (log.isLoggable(Level.FINE))
+        log.fine(getId() + ":exn-close(" + e + ")");
       
       throw SQLExceptionWrapper.create(e);
     }

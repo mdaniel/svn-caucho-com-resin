@@ -29,6 +29,7 @@
 
 package com.caucho.db.store;
 
+import com.caucho.db.lock.Lock;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.util.SyncCacheListener;
@@ -43,7 +44,7 @@ import java.util.logging.Logger;
 /**
  * Represents a versioned row
  */
-abstract public class Block implements SyncCacheListener, CacheListener {
+public final class Block implements SyncCacheListener, CacheListener {
   private static final Logger log
     = Logger.getLogger(Block.class.getName());
   private static final L10N L = new L10N(Block.class);
@@ -51,7 +52,7 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   private static final FreeList<byte[]> _freeBuffers
     = new FreeList<byte[]>(64);
 
-  private final Store _store;
+  private final BlockStore _store;
   private final long _blockId;
 
   private final Lock _lock;
@@ -65,11 +66,16 @@ abstract public class Block implements SyncCacheListener, CacheListener {
 
   private boolean _isFlushDirtyOnCommit;
   private boolean _isValid;
+  
+  // used when the block is a copy of a following block for LRU purposes
+  private Block _writeNext;
+  
+  private byte []_buffer;
 
-  private int _dirtyMin = Store.BLOCK_SIZE;
+  private int _dirtyMin = BlockStore.BLOCK_SIZE;
   private int _dirtyMax;
 
-  Block(Store store, long blockId)
+  Block(BlockStore store, long blockId)
   {
     store.validateBlockId(blockId);
 
@@ -80,6 +86,8 @@ abstract public class Block implements SyncCacheListener, CacheListener {
 
     _isFlushDirtyOnCommit = _store.isFlushDirtyBlocksOnCommit();
 
+    _buffer = allocateBuffer();
+    
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " create");
   }
@@ -158,7 +166,7 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   /**
    * Returns the block's table.
    */
-  Store getStore()
+  public BlockStore getStore()
   {
     return _store;
   }
@@ -177,11 +185,6 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   }
 
   /**
-   * Returns the block's buffer.
-   */
-  abstract public byte []getBuffer();
-
-  /**
    * Reads into the block.
    */
   public void read()
@@ -195,8 +198,8 @@ abstract public class Block implements SyncCacheListener, CacheListener {
         if (log.isLoggable(Level.FINEST))
           log.finest("read db-block " + this);
 
-        _store.readBlock(_blockId & Store.BLOCK_MASK,
-                         getBuffer(), 0, Store.BLOCK_SIZE);
+        _store.readBlock(_blockId & BlockStore.BLOCK_MASK,
+                         getBuffer(), 0, BlockStore.BLOCK_SIZE);
         _isValid = true;
 
         clearDirty();
@@ -282,10 +285,10 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   /**
    * Write the dirty block.
    */
-  protected void writeImpl(int offset, int length, boolean isPriority)
+  private void writeImpl(int offset, int length, boolean isPriority)
     throws IOException
   {
-    _store.writeBlock((_blockId & Store.BLOCK_MASK) + offset,
+    _store.writeBlock((_blockId & BlockStore.BLOCK_MASK) + offset,
                       getBuffer(), offset, length,
                       isPriority);
   }
@@ -322,7 +325,7 @@ abstract public class Block implements SyncCacheListener, CacheListener {
    */
   public void setDirty(int min, int max)
   {
-    if (Store.BLOCK_SIZE < max)
+    if (BlockStore.BLOCK_SIZE < max)
       Thread.dumpStack();
 
     synchronized (this) {
@@ -350,7 +353,7 @@ abstract public class Block implements SyncCacheListener, CacheListener {
     return _dirtyMin;
   }
 
-  protected int getDirtyMax()
+  private int getDirtyMax()
   {
     return _dirtyMax;
   }
@@ -358,10 +361,10 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   /**
    * Callable only by the block itself, and must synchronize the Block.
    */
-  protected void clearDirty()
+  private void clearDirty()
   {
     _dirtyMax = 0;
-    _dirtyMin = Store.BLOCK_SIZE;
+    _dirtyMin = BlockStore.BLOCK_SIZE;
   }
 
   public void deallocate()
@@ -379,7 +382,7 @@ abstract public class Block implements SyncCacheListener, CacheListener {
 
   public boolean isIndex()
   {
-    return getStore().getAllocation(Store.blockIdToIndex(getBlockId())) == Store.ALLOC_INDEX;
+    return getStore().getAllocation(BlockStore.blockIdToIndex(getBlockId())) == BlockStore.ALLOC_INDEX;
   }
 
   /**
@@ -447,12 +450,57 @@ abstract public class Block implements SyncCacheListener, CacheListener {
   }
 
   /**
+   * Returns the block's buffer.
+   */
+  public final byte []getBuffer()
+  {
+    return _buffer;
+  }
+
+  /**
    * Copies the contents to a target block. Used by the BlockManager
    * for LRU'd blocks
    */
-  protected boolean copyToBlock(Block block)
+  boolean copyToBlock(Block block)
   {
-    return false;
+    synchronized (this) {
+      byte []buffer = _buffer;
+
+      if (buffer == null || ! isValid()) {
+        // System.out.println(block + " COPY FROM FAIL " + this);
+        return false;
+      }
+
+      System.arraycopy(buffer, 0, block.getBuffer(), 0, buffer.length);
+      block.validate();
+
+      // The new block takes over responsibility for the writing, because
+      // it may modify the block before the write completes
+      block.setDirty(getDirtyMin(), getDirtyMax());
+
+      clearDirty();
+      // System.out.println(block + " COPY FROM " + this);
+
+      return true;
+    }
+  }
+
+  /**
+   * Called when the block is removed from the cache.
+   */
+  protected void freeImpl()
+  {
+    //System.out.println(this + " FREE-IMPL");
+    synchronized (this) {
+      // timing for block reuse. The useCount can be reactivated from
+      // the BlockManager writeQueue
+      if (isFree()) {
+        byte []buffer = _buffer;
+        _buffer = null;
+
+        freeBuffer(buffer);
+      }
+    }
   }
 
   /**
@@ -481,21 +529,12 @@ abstract public class Block implements SyncCacheListener, CacheListener {
       log.finest("db-block remove " + this);
   }
 
-  /**
-   * Frees any resources.
-   */
-  protected void freeImpl()
-  {
-    if (_dirtyMin < _dirtyMax)
-      Thread.dumpStack();
-  }
-
   protected byte []allocateBuffer()
   {
     byte []buffer = _freeBuffers.allocate();
 
     if (buffer == null) {
-      buffer = new byte[Store.BLOCK_SIZE];
+      buffer = new byte[BlockStore.BLOCK_SIZE];
     }
 
     return buffer;
