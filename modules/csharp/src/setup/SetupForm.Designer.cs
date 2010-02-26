@@ -58,7 +58,7 @@ namespace Caucho
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetupForm));
       this._tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
       this._generalGrp = new System.Windows.Forms.GroupBox();
-      this._resinDir = new System.Windows.Forms.TextBox();
+      this._resinCmbBox = new System.Windows.Forms.ComboBox();
       this._selectResinBtn = new System.Windows.Forms.Button();
       this._resinLogoImg = new System.Windows.Forms.PictureBox();
       this._resinLbl = new System.Windows.Forms.Label();
@@ -76,7 +76,7 @@ namespace Caucho
       this._serviceNameTxtBox = new System.Windows.Forms.TextBox();
       this._logDirTxtBox = new System.Windows.Forms.TextBox();
       this._resinRootTxtBox = new System.Windows.Forms.TextBox();
-      this._javaHomeTxtBox = new System.Windows.Forms.TextBox();
+      this._javaHomeCmbBox = new System.Windows.Forms.ComboBox();
       this._resinConfLbl = new System.Windows.Forms.Label();
       this._previewCmbBox = new System.Windows.Forms.ComboBox();
       this._previewLbl = new System.Windows.Forms.Label();
@@ -135,7 +135,7 @@ namespace Caucho
       // 
       this._generalGrp.AutoSize = true;
       this._generalGrp.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
-      this._generalGrp.Controls.Add(this._resinDir);
+      this._generalGrp.Controls.Add(this._resinCmbBox);
       this._generalGrp.Controls.Add(this._selectResinBtn);
       this._generalGrp.Controls.Add(this._resinLogoImg);
       this._generalGrp.Controls.Add(this._resinLbl);
@@ -147,12 +147,13 @@ namespace Caucho
       this._generalGrp.TabStop = false;
       this._generalGrp.Text = "General";
       // 
-      // _resinDir
+      // _resinCmbBox
       // 
-      this._resinDir.Location = new System.Drawing.Point(91, 34);
-      this._resinDir.Name = "_resinDir";
-      this._resinDir.Size = new System.Drawing.Size(295, 20);
-      this._resinDir.TabIndex = 1;
+      this._resinCmbBox.Location = new System.Drawing.Point(91, 34);
+      this._resinCmbBox.Name = "_resinCmbBox";
+      this._resinCmbBox.Size = new System.Drawing.Size(295, 21);
+      this._resinCmbBox.TabIndex = 1;
+      this._resinCmbBox.SelectedValueChanged += new System.EventHandler(this.ResinSelectectionChanged);
       // 
       // _selectResinBtn
       // 
@@ -210,7 +211,7 @@ namespace Caucho
       this._servicesTab.Controls.Add(this._serviceNameTxtBox);
       this._servicesTab.Controls.Add(this._logDirTxtBox);
       this._servicesTab.Controls.Add(this._resinRootTxtBox);
-      this._servicesTab.Controls.Add(this._javaHomeTxtBox);
+      this._servicesTab.Controls.Add(this._javaHomeCmbBox);
       this._servicesTab.Controls.Add(this._resinConfLbl);
       this._servicesTab.Controls.Add(this._previewCmbBox);
       this._servicesTab.Controls.Add(this._previewLbl);
@@ -240,17 +241,10 @@ namespace Caucho
       // _serverCmbBox
       // 
       this._serverCmbBox.FormattingEnabled = true;
-      this._serverCmbBox.Items.AddRange(new object[] {
-            "Default",
-            "Server: node-1",
-            "Server: node-2",
-            "Server: node-3",
-            "dynamic:127.0.0.1:6800"});
       this._serverCmbBox.Location = new System.Drawing.Point(101, 268);
       this._serverCmbBox.Name = "_serverCmbBox";
       this._serverCmbBox.Size = new System.Drawing.Size(281, 21);
       this._serverCmbBox.TabIndex = 40;
-      this._serverCmbBox.Text = "Choose existing server or specify a dynamic server";
       // 
       // _serverLbl
       // 
@@ -276,7 +270,6 @@ namespace Caucho
       this._debugPortTxtBox.Name = "_debugPortTxtBox";
       this._debugPortTxtBox.Size = new System.Drawing.Size(281, 20);
       this._debugPortTxtBox.TabIndex = 37;
-      this._debugPortTxtBox.Text = "Unspecified";
       // 
       // _jmxPortLbl
       // 
@@ -293,7 +286,6 @@ namespace Caucho
       this._jmxPortTxtBox.Name = "_jmxPortTxtBox";
       this._jmxPortTxtBox.Size = new System.Drawing.Size(281, 20);
       this._jmxPortTxtBox.TabIndex = 35;
-      this._jmxPortTxtBox.Text = "Unspecified";
       // 
       // _selectResinConfBtn
       // 
@@ -303,6 +295,7 @@ namespace Caucho
       this._selectResinConfBtn.TabIndex = 28;
       this._selectResinConfBtn.Text = "...";
       this._selectResinConfBtn.UseVisualStyleBackColor = true;
+      this._selectResinConfBtn.Click += new System.EventHandler(this.SelectResinConf);
       // 
       // _resinConfTxtBox
       // 
@@ -315,8 +308,10 @@ namespace Caucho
       // 
       this._servicePassTxtBox.Location = new System.Drawing.Point(101, 213);
       this._servicePassTxtBox.Name = "_servicePassTxtBox";
+      this._servicePassTxtBox.PasswordChar = '*';
       this._servicePassTxtBox.Size = new System.Drawing.Size(281, 20);
       this._servicePassTxtBox.TabIndex = 22;
+      this._servicePassTxtBox.UseSystemPasswordChar = true;
       // 
       // _serviceNameTxtBox
       // 
@@ -338,13 +333,14 @@ namespace Caucho
       this._resinRootTxtBox.Name = "_resinRootTxtBox";
       this._resinRootTxtBox.Size = new System.Drawing.Size(281, 20);
       this._resinRootTxtBox.TabIndex = 7;
+      this._resinRootTxtBox.TextChanged += new System.EventHandler(this.ResinRootChanged);
       // 
-      // _javaHomeTxtBox
+      // _javaHomeCmbBox
       // 
-      this._javaHomeTxtBox.Location = new System.Drawing.Point(101, 51);
-      this._javaHomeTxtBox.Name = "_javaHomeTxtBox";
-      this._javaHomeTxtBox.Size = new System.Drawing.Size(281, 20);
-      this._javaHomeTxtBox.TabIndex = 4;
+      this._javaHomeCmbBox.Location = new System.Drawing.Point(101, 49);
+      this._javaHomeCmbBox.Name = "_javaHomeCmbBox";
+      this._javaHomeCmbBox.Size = new System.Drawing.Size(281, 21);
+      this._javaHomeCmbBox.TabIndex = 4;
       // 
       // _resinConfLbl
       // 
@@ -358,11 +354,13 @@ namespace Caucho
       // _previewCmbBox
       // 
       this._previewCmbBox.FormattingEnabled = true;
+      this._previewCmbBox.Items.AddRange(new object[] {
+            "Yes",
+            "No"});
       this._previewCmbBox.Location = new System.Drawing.Point(101, 241);
       this._previewCmbBox.Name = "_previewCmbBox";
       this._previewCmbBox.Size = new System.Drawing.Size(281, 21);
       this._previewCmbBox.TabIndex = 25;
-      this._previewCmbBox.Text = "Yes";
       // 
       // _previewLbl
       // 
@@ -451,7 +449,7 @@ namespace Caucho
       this._servicesCmbBox.Name = "_servicesCmbBox";
       this._servicesCmbBox.Size = new System.Drawing.Size(281, 21);
       this._servicesCmbBox.TabIndex = 12;
-      this._servicesCmbBox.Text = "Choose existing service to modify ...";
+      this._servicesCmbBox.SelectedValueChanged += new System.EventHandler(this.ServiceSelectionChanged);
       // 
       // _selectLogDirBtn
       // 
@@ -479,6 +477,7 @@ namespace Caucho
       this._selectResinRootBtn.TabIndex = 8;
       this._selectResinRootBtn.Text = "...";
       this._selectResinRootBtn.UseVisualStyleBackColor = true;
+      this._selectResinRootBtn.Click += new System.EventHandler(this.SelectResinRoot);
       // 
       // _resinRootLbl
       // 
@@ -497,6 +496,7 @@ namespace Caucho
       this._selectJavaHomeBtn.TabIndex = 5;
       this._selectJavaHomeBtn.Text = "...";
       this._selectJavaHomeBtn.UseVisualStyleBackColor = true;
+      this._selectJavaHomeBtn.Click += new System.EventHandler(this.SelectJavaHome);
       // 
       // _javaHomeLbl
       // 
@@ -655,7 +655,7 @@ namespace Caucho
     private System.Windows.Forms.TextBox _serviceNameTxtBox;
     private System.Windows.Forms.TextBox _logDirTxtBox;
     private System.Windows.Forms.TextBox _resinRootTxtBox;
-    private System.Windows.Forms.TextBox _javaHomeTxtBox;
+    private System.Windows.Forms.ComboBox _javaHomeCmbBox;
     private System.Windows.Forms.Label _resinConfLbl;
     private System.Windows.Forms.ComboBox _previewCmbBox;
     private System.Windows.Forms.Label _previewLbl;
@@ -686,7 +686,7 @@ namespace Caucho
     private System.Windows.Forms.GroupBox _generalGrp;
     private System.Windows.Forms.Button _selectResinBtn;
     private System.Windows.Forms.PictureBox _resinLogoImg;
-    private System.Windows.Forms.TextBox _resinDir;
+    private System.Windows.Forms.ComboBox _resinCmbBox;
     private System.Windows.Forms.Label _resinLbl;
     private System.Windows.Forms.Label _debugPortLbl;
     private System.Windows.Forms.TextBox _debugPortTxtBox;
