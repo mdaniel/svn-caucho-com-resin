@@ -1370,9 +1370,8 @@ public final class SessionManager implements ObjectManager, AlarmListener
     if (killSession && (! create || ! reuseSessionId(fromCookie))) {
       // XXX: session.setClosed();
       session.endUse();
-      _sessions.remove(key);
-      // XXX:
       session._isValid = false;
+      _sessions.remove(key);
 
       return null;
     }
