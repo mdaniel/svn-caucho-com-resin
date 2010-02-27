@@ -27,19 +27,17 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
-
-import com.caucho.db.lock.Lock;
-import com.caucho.util.FreeList;
-import com.caucho.util.L10N;
-import com.caucho.util.SyncCacheListener;
-import com.caucho.util.CacheListener;
+package com.caucho.db.block;
 
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.db.lock.Lock;
+import com.caucho.util.CacheListener;
+import com.caucho.util.FreeList;
+import com.caucho.util.SyncCacheListener;
 
 /**
  * Represents a versioned row
@@ -47,8 +45,6 @@ import java.util.logging.Logger;
 public final class Block implements SyncCacheListener, CacheListener {
   private static final Logger log
     = Logger.getLogger(Block.class.getName());
-  private static final L10N L = new L10N(Block.class);
-
   private static final FreeList<byte[]> _freeBuffers
     = new FreeList<byte[]>(64);
 
@@ -60,10 +56,7 @@ public final class Block implements SyncCacheListener, CacheListener {
   private final AtomicInteger _useCount = new AtomicInteger(1);
 
   private final Object _writeLock = new Object();
-  private final AtomicBoolean _isWriting = new AtomicBoolean();
   private final AtomicInteger _writeCount = new AtomicInteger();
-  private volatile boolean _isWriteRequired;
-
   private boolean _isFlushDirtyOnCommit;
   private boolean _isValid;
   
@@ -198,8 +191,10 @@ public final class Block implements SyncCacheListener, CacheListener {
         if (log.isLoggable(Level.FINEST))
           log.finest("read db-block " + this);
 
-        _store.readBlock(_blockId & BlockStore.BLOCK_MASK,
-                         getBuffer(), 0, BlockStore.BLOCK_SIZE);
+        BlockReadWrite readWrite = _store.getReadWrite();
+        
+        readWrite.readBlock(_blockId & BlockStore.BLOCK_MASK,
+                            getBuffer(), 0, BlockStore.BLOCK_SIZE);
         _isValid = true;
 
         clearDirty();
@@ -288,9 +283,11 @@ public final class Block implements SyncCacheListener, CacheListener {
   private void writeImpl(int offset, int length, boolean isPriority)
     throws IOException
   {
-    _store.writeBlock((_blockId & BlockStore.BLOCK_MASK) + offset,
-                      getBuffer(), offset, length,
-                      isPriority);
+    BlockReadWrite readWrite = _store.getReadWrite();
+    
+    readWrite.writeBlock((_blockId & BlockStore.BLOCK_MASK) + offset,
+                         getBuffer(), offset, length,
+                         isPriority);
   }
 
   public final boolean isValid()

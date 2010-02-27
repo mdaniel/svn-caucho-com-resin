@@ -29,11 +29,11 @@
 
 package com.caucho.db;
 
+import com.caucho.db.block.BlockManager;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.lock.Lock;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.Query;
-import com.caucho.db.store.BlockManager;
-import com.caucho.db.store.BlockStore;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
 import com.caucho.lifecycle.Lifecycle;

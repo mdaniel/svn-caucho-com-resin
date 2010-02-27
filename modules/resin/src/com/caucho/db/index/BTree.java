@@ -30,10 +30,10 @@
 package com.caucho.db.index;
 
 import com.caucho.db.Database;
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockManager;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.lock.Lock;
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockManager;
-import com.caucho.db.store.BlockStore;
 import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;

@@ -31,8 +31,8 @@ package com.caucho.db.blob;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
 
 /**
  * Directly reading the blob from the inode.

@@ -29,8 +29,8 @@
 
 package com.caucho.db.blob;
 
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.xa.RawTransaction;
 import com.caucho.db.xa.StoreTransaction;
 import com.caucho.util.L10N;

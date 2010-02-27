@@ -29,9 +29,9 @@
 
 package com.caucho.db.table;
 
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.index.BTree;
 import com.caucho.db.sql.QueryContext;
-import com.caucho.db.store.BlockStore;
 import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;

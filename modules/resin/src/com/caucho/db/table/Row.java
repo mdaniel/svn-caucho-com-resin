@@ -29,7 +29,7 @@
 package com.caucho.db.table;
 
 import com.caucho.config.ConfigException;
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.BlockStore;
 import com.caucho.util.L10N;
 
 class Row {

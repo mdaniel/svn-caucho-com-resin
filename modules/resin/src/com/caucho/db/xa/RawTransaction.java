@@ -31,8 +31,8 @@ package com.caucho.db.xa;
 
 import java.io.IOException;
 
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
 
 /**
  * Represents a raw-single transaction.

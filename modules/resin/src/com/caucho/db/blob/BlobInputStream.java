@@ -32,7 +32,7 @@ package com.caucho.db.blob;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.BlockStore;
 
 public class BlobInputStream extends InputStream {
   private static final int INODE_DIRECT_BLOCKS = 14;

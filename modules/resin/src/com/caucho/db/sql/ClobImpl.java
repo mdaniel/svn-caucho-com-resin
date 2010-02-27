@@ -29,7 +29,7 @@
 package com.caucho.db.sql;
 
 import com.caucho.db.blob.BlobInputStream;
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.BlockStore;
 import com.caucho.util.L10N;
 
 import java.io.InputStream;

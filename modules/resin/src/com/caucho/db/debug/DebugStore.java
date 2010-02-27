@@ -29,7 +29,7 @@
 
 package com.caucho.db.debug;
 
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.BlockStore;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 import com.caucho.vfs.Path;
@@ -106,9 +106,11 @@ public class DebugStore {
       case BlockStore.ALLOC_USED:
 	out.print('u');
 	break;
+	/*
       case BlockStore.ALLOC_FRAGMENT:
 	out.print('f');
 	break;
+	*/
       case BlockStore.ALLOC_MINI_FRAG:
 	out.print('m');
 	break;
@@ -138,6 +140,7 @@ public class DebugStore {
     for (int i = 0; i < 2 * count; i += 2) {
       int code = allocTable[i];
 
+      /*
       if (code == BlockStore.ALLOC_FRAGMENT) {
 	int fragCount = 0;
 	
@@ -158,6 +161,7 @@ public class DebugStore {
 	    out.print(".");
 	}
       }
+      */
     }
 
     out.println();

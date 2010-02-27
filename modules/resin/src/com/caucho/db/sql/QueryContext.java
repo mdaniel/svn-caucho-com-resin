@@ -29,8 +29,8 @@
 
 package com.caucho.db.sql;
 
+import com.caucho.db.block.Block;
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
-import com.caucho.db.store.Block;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.xa.Transaction;
 import com.caucho.util.FreeList;

@@ -30,6 +30,8 @@
 package com.caucho.db.table;
 
 import com.caucho.db.Database;
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
 import com.caucho.db.lock.Lock;
@@ -37,8 +39,6 @@ import com.caucho.db.sql.CreateQuery;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.QueryContext;
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockStore;
 import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
@@ -343,7 +343,7 @@ public class Table extends BlockStore {
 
     byte []tempBuffer = new byte[BLOCK_SIZE];
 
-    readBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE);
+    getReadWrite().readBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE);
 
     TempStream ts = new TempStream();
 
@@ -378,7 +378,7 @@ public class Table extends BlockStore {
       tempBuffer[offset] = 0;
 
     boolean isPriority = false;
-    writeBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE, isPriority);
+    getReadWrite().writeBlock(BLOCK_SIZE, tempBuffer, 0, BLOCK_SIZE, isPriority);
 
     _database.addTable(this);
   }

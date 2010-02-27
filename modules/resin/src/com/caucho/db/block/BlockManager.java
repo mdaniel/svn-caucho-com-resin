@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.block;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.BlockManagerMXBean;
@@ -62,7 +62,6 @@ public final class BlockManager
   private final byte []_storeMask = new byte[8192];
   private LongKeyLruCache<Block> _blockCache;
 
-  private final Object _copyLock = new Object();
   private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
   private int _writeQueueMax = 256;
 
@@ -544,8 +543,6 @@ public final class BlockManager
     {
       synchronized (_writeQueue) {
         int size = _writeQueue.size();
-        boolean isMax = _writeQueueMax <= size;
-
         for (int i = size - 1; i >= 0; i--) {
           Block writeBlock = _writeQueue.get(i);
 

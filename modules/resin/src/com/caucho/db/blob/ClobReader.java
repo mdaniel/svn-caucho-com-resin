@@ -32,7 +32,7 @@ package com.caucho.db.blob;
 import java.io.IOException;
 import java.io.Reader;
 
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.BlockStore;
 
 public class ClobReader extends Reader {
   private static final int INODE_DIRECT_BLOCKS = 14;

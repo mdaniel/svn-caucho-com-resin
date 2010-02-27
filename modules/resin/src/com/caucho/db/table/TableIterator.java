@@ -29,10 +29,10 @@
 
 package com.caucho.db.table;
 
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockStore;
 import com.caucho.db.xa.Transaction;
 import com.caucho.util.L10N;
 

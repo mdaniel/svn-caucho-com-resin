@@ -36,10 +36,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.db.blob.Inode;
+import com.caucho.db.block.Block;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.jdbc.ConnectionImpl;
 import com.caucho.db.lock.Lock;
-import com.caucho.db.store.Block;
-import com.caucho.db.store.BlockStore;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 

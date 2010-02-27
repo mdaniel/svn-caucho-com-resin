@@ -27,25 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db.store;
+package com.caucho.db.block;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.sql.SQLException;
+import java.util.concurrent.atomic.AtomicInteger;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import com.caucho.db.Database;
 import com.caucho.db.lock.Lock;
 import com.caucho.lifecycle.Lifecycle;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
-import com.caucho.util.FreeList;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.RandomAccessStream;
-
-import java.io.OutputStream;
-import java.io.IOException;
-import java.lang.ref.SoftReference;
-import java.sql.SQLException;
-import java.util.concurrent.Semaphore;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The store manages the block-based persistent store file.  Each table
@@ -108,14 +103,16 @@ public class BlockStore {
   public final static int ALLOC_FREE      = 0x00;
   public final static int ALLOC_ROW       = 0x01;
   public final static int ALLOC_USED      = 0x02;
-  public final static int ALLOC_FRAGMENT  = 0x03;
+  // public final static int ALLOC_FRAGMENT  = 0x03;
   public final static int ALLOC_INDEX     = 0x04;
   public final static int ALLOC_MINI_FRAG = 0x05;
   public final static int ALLOC_MASK      = 0x0f;
 
+  /*
   public final static int FRAGMENT_SIZE = BLOCK_SIZE / 4; // 16 * 1024;
   public final static int FRAGMENT_PER_BLOCK
     = (int) (BLOCK_SIZE / FRAGMENT_SIZE);
+    */
 
   public final static int MINI_FRAG_SIZE = 256;
   public final static int MINI_FRAG_PER_BLOCK
@@ -134,13 +131,12 @@ public class BlockStore {
 
   private int _id;
 
-  private Path _path;
+  private final BlockReadWrite _readWrite;
 
   // If true, dirty blocks are written at the end of the transaction.
   // Otherwise, they are buffered
   private boolean _isFlushDirtyBlocksOnCommit = true;
 
-  private long _fileSize;
   private long _blockCount;
 
   private final Object _allocationLock = new Object();
@@ -158,16 +154,10 @@ public class BlockStore {
   private int _allocDirtyMax;
 
   // number of fragments currently used
-  private long _fragmentUseCount;
+  // private long _fragmentUseCount;
 
   // number of minifragments currently used
   private long _miniFragmentUseCount;
-
-  private Object _fileLock = new Object();
-  private FreeList<SoftReference<RandomAccessWrapper>> _cachedRowFile
-    = new FreeList<SoftReference<RandomAccessWrapper>>(4);
-
-  private final Semaphore _rowFileSemaphore = new Semaphore(8);
 
   private Lock _rowLock;
   private long _blockLockTimeout = 120000;
@@ -195,12 +185,13 @@ public class BlockStore {
     _blockManager = _database.getBlockManager();
 
     _name = name;
-    _path = path;
+
+    _id = _blockManager.allocateStoreId();
 
     if (path == null)
       throw new NullPointerException();
-
-    _id = _blockManager.allocateStoreId();
+    
+    _readWrite = new BlockReadWrite(this, path);
 
     if (rowLock == null)
       rowLock = new Lock("row-lock:" + _name + ":" + _id);
@@ -274,6 +265,11 @@ public class BlockStore {
   {
     return _blockManager;
   }
+  
+  protected BlockReadWrite getReadWrite()
+  {
+    return _readWrite;
+  }
 
   public void setCorrupted(boolean isCorrupted)
   {
@@ -290,7 +286,7 @@ public class BlockStore {
    */
   public long getFileSize()
   {
-    return _fileSize;
+    return _readWrite.getFileSize();
   }
 
   /**
@@ -305,7 +301,7 @@ public class BlockStore {
    * Converts from the block index to the address for database
    * storage.
    */
-  private static long blockIndexToAddr(long blockIndex)
+  public static long blockIndexToAddr(long blockIndex)
   {
     return blockIndex << BLOCK_BITS;
   }
@@ -352,14 +348,6 @@ public class BlockStore {
   }
 
   /**
-   * Returns the current number of fragments used.
-   */
-  public long getTotalFragmentSize()
-  {
-    return _fragmentUseCount * FRAGMENT_SIZE;
-  }
-
-  /**
    * Creates the store.
    */
   public void create()
@@ -370,12 +358,7 @@ public class BlockStore {
 
     log.finer(this + " create");
 
-    _path.getParent().mkdirs();
-
-    if (_path.exists()) {
-      throw new SQLException(L.l("CREATE '{0}' for path '{1}' failed, because the file already exists.  CREATE can not override an existing table.",
-                                 _name, _path.getNativePath()));
-    }
+    _readWrite.create();
 
     _allocationTable = new byte[ALLOC_CHUNK_SIZE];
 
@@ -387,10 +370,10 @@ public class BlockStore {
     boolean isPriority = true;
 
     byte []buffer = new byte[BLOCK_SIZE];
-    writeBlock(0, buffer, 0, BLOCK_SIZE, isPriority);
-    writeBlock(BLOCK_SIZE, buffer, 0, BLOCK_SIZE, isPriority);
+    _readWrite.writeBlock(0, buffer, 0, BLOCK_SIZE, isPriority);
+    _readWrite.writeBlock(BLOCK_SIZE, buffer, 0, BLOCK_SIZE, isPriority);
 
-    writeBlock(0, _allocationTable, 0, _allocationTable.length, isPriority);
+    _readWrite.writeBlock(0, _allocationTable, 0, _allocationTable.length, isPriority);
 
     _blockCount = 2;
   }
@@ -403,19 +386,9 @@ public class BlockStore {
 
     log.finer(this + " init");
 
-    boolean isPriority = true;
+    _readWrite.init();
 
-    RandomAccessWrapper wrapper = openRowFile(true);
-
-    try {
-      RandomAccessStream file = wrapper.getFile();
-
-      _fileSize = file.getLength();
-    } finally {
-      closeRowFile(wrapper, isPriority);
-    }
-
-    _blockCount = ((_fileSize + BLOCK_SIZE - 1) / BLOCK_SIZE);
+    _blockCount = ((getFileSize() + BLOCK_SIZE - 1) / BLOCK_SIZE);
 
     int allocCount = (int) _blockCount;
 
@@ -438,25 +411,17 @@ public class BlockStore {
       System.out.println("READ: " + Long.toHexString(allocGroup * ALLOC_GROUP_SIZE) + " " + allocGroup * ALLOC_GROUP_SIZE);
       */
 
-      readBlock((long) allocGroup * ALLOC_GROUP_SIZE,
-                _allocationTable, i, len);
+      _readWrite.readBlock((long) allocGroup * ALLOC_GROUP_SIZE,
+                           _allocationTable, i, len);
     }
   }
 
   public void remove()
     throws SQLException
   {
-    try {
-      Path path = _path;
-      _path = null;
+    close();
 
-      close();
-
-      if (path != null)
-        path.remove();
-    } catch (IOException e) {
-      throw new SQLExceptionWrapper(e);
-    }
+    _readWrite.remove();
   }
 
   /**
@@ -468,17 +433,6 @@ public class BlockStore {
     throws IOException
   {
     return firstBlock(blockId, ALLOC_ROW);
-  }
-
-  /**
-   * Returns the first block id which contains a fragment.
-   *
-   * @return the block id of the first row block
-   */
-  public long firstFragment(long blockId)
-    throws IOException
-  {
-    return firstBlock(blockId, ALLOC_FRAGMENT);
   }
 
   /**
@@ -574,18 +528,6 @@ public class BlockStore {
   {
     boolean isSave = true;
     return allocateBlock(ALLOC_USED, isSave);
-  }
-
-  /**
-   * Allocates a new block for a fragment
-   *
-   * @return the block id of the allocated block.
-   */
-  private Block allocateFragmentBlock()
-    throws IOException
-  {
-    boolean isSave = true;
-    return allocateBlock(ALLOC_FRAGMENT, isSave);
   }
 
   /**
@@ -929,57 +871,8 @@ public class BlockStore {
         length = dirtyMax - dirtyMin;
 
       boolean isPriority = true;
-      writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
-                 _allocationTable, dirtyMin, length, isPriority);
-    }
-  }
-
-  /**
-   * Reads a fragment.
-   *
-   * @param fragmentAddress the address of the fragment
-   * @param fragmentOffset the offset inside the fragment to start reading
-   * @param buffer the result buffer
-   * @param offset offset into the result buffer
-   * @param length the number of bytes to read
-   *
-   * @return the number of bytes read
-   */
-  public int readFragment(long fragmentAddress, int fragmentOffset,
-                          byte []buffer, int offset, int length)
-    throws IOException
-  {
-    if (fragmentAddress <= 0) {
-      log.warning(this + " illegal fragment read with fragment-address=0");
-      return 0;
-    }
-
-    if (FRAGMENT_SIZE - fragmentOffset < length) {
-      // server/13df
-      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
-                                             fragmentOffset, length));
-    }
-
-    Block block = readBlock(addressToBlockId(fragmentAddress));
-
-    try {
-      Lock lock = block.getLock();
-      lock.lockRead(_blockLockTimeout);
-
-      try {
-        int blockOffset = getFragmentOffset(fragmentAddress);
-
-        byte []blockBuffer = block.getBuffer();
-
-        System.arraycopy(blockBuffer, blockOffset + fragmentOffset,
-                         buffer, offset, length);
-
-        return length;
-      } finally {
-        lock.unlockRead();
-      }
-    } finally {
-      block.free();
+      _readWrite.writeBlock((long) allocGroup * ALLOC_GROUP_SIZE + offset,
+                            _allocationTable, dirtyMin, length, isPriority);
     }
   }
 
@@ -994,7 +887,7 @@ public class BlockStore {
    * @return the number of bytes read
    */
   public void readBlock(long blockId, int blockOffset,
-                           OutputStream os, int length)
+                        OutputStream os, int length)
     throws IOException
   {
     if (blockId <= 0) {
@@ -1018,86 +911,6 @@ public class BlockStore {
         byte []blockBuffer = block.getBuffer();
 
         os.write(blockBuffer, blockOffset, length);
-      } finally {
-        lock.unlockRead();
-      }
-    } finally {
-      block.free();
-    }
-  }
-
-  /**
-   * Reads a fragment for a clob.
-   *
-   * @param fragmentAddress the address of the fragment
-   * @param fragmentOffset the offset inside the fragment to start reading
-   * @param buffer the result buffer
-   * @param offset offset into the result buffer
-   * @param length the length of the fragment in characters
-   *
-   * @return the number of characters read
-   */
-  public int readFragment(long fragmentAddress, int fragmentOffset,
-                          char []buffer, int offset, int length)
-    throws IOException
-  {
-    if (FRAGMENT_SIZE - fragmentOffset < 2 * length) {
-      // server/13df
-      throw new IllegalArgumentException(L.l("read offset {0} length {1} too long",
-                                             fragmentOffset, length));
-    }
-
-    Block block = readBlock(addressToBlockId(fragmentAddress));
-
-    try {
-      Lock lock = block.getLock();
-      lock.lockRead(_blockLockTimeout);
-
-      try {
-        int blockOffset = getFragmentOffset(fragmentAddress);
-        blockOffset += fragmentOffset;
-
-        byte []blockBuffer = block.getBuffer();
-
-        for (int i = 0; i < length; i++) {
-          int ch1 = blockBuffer[blockOffset] & 0xff;
-          int ch2 = blockBuffer[blockOffset + 1] & 0xff;
-
-          buffer[offset + i] = (char) ((ch1 << 8) + ch2);
-
-          blockOffset += 2;
-        }
-      } finally {
-        lock.unlockRead();
-      }
-
-      return length;
-    } finally {
-      block.free();
-    }
-  }
-
-  /**
-   * Reads a long value from a fragment.
-   *
-   * @return the long value
-   */
-  public long readFragmentLong(long fragmentAddress,
-                               int fragmentOffset)
-    throws IOException
-  {
-    Block block = readBlock(addressToBlockId(fragmentAddress));
-
-    try {
-      Lock lock = block.getLock();
-      lock.lockRead(_blockLockTimeout);
-
-      try {
-        int blockOffset = getFragmentOffset(fragmentAddress);
-
-        byte []blockBuffer = block.getBuffer();
-
-        return readLong(blockBuffer, blockOffset + fragmentOffset);
       } finally {
         lock.unlockRead();
       }
@@ -1224,181 +1037,7 @@ public class BlockStore {
   }
 
   /**
-   * Allocates a new fragment.
-   *
-   * @return the fragment address
-   */
-  public long allocateFragment()
-    throws IOException
-  {
-    while (true) {
-      synchronized (_allocationLock) {
-        byte []allocationTable = _allocationTable;
-
-        for (int i = 0;
-             i < allocationTable.length;
-             i += ALLOC_BYTES_PER_BLOCK) {
-          int fragMask = allocationTable[i + 1] & 0xff;
-
-          if (allocationTable[i] == ALLOC_FRAGMENT && fragMask != 0xff) {
-            for (int j = 0; j < FRAGMENT_PER_BLOCK; j++) {
-              if ((fragMask & (1 << j)) == 0) {
-                allocationTable[i + 1] = (byte) (fragMask | (1 << j));
-
-                setAllocDirty(i + 1, i + 2);
-
-                _fragmentUseCount++;
-
-                long fragmentAddress
-                  = BLOCK_SIZE * ((long) i / ALLOC_BYTES_PER_BLOCK) + j;
-
-                //System.out.println((fragmentAddress / BLOCK_SIZE) + ":" + j + " ALLOCATE");
-                return fragmentAddress;
-              }
-            }
-          }
-        }
-      }
-
-      // if no fragment, allocate a new one.
-
-      Block block = allocateFragmentBlock();
-      block.free();
-    }
-  }
-
-  /**
-   * Deletes a fragment.
-   */
-  public void deleteFragment(long fragmentAddress)
-    throws IOException
-  {
-    synchronized (_allocationLock) {
-      int i = (int) (ALLOC_BYTES_PER_BLOCK * (fragmentAddress / BLOCK_SIZE));
-      int j = (int) (fragmentAddress & 0xff);
-
-      int fragMask = _allocationTable[i + 1] & 0xff;
-      //System.out.println((fragmentAddress / BLOCK_SIZE) + ":" + j + " DELETE");
-
-      if (_allocationTable[i] != ALLOC_FRAGMENT)
-        System.out.println("BAD ENTRY: " + fragMask);
-
-      if (j >= 8)
-        System.out.println("BAD J: " + fragMask);
-
-      if ((fragMask & (1 << j)) == 0) {
-        log.fine("BAD J-MASK: " + fragMask + " " + j);
-      }
-
-      _allocationTable[i + 1] = (byte) (fragMask & ~(1 << j));
-
-      _fragmentUseCount--;
-
-      setAllocDirty(i + 1, i + 2);
-    }
-  }
-
-  /**
-   * Writes a fragment.
-   *
-   * @param fragmentAddress the fragment to write
-   * @param fragmentOffset the offset into the fragment
-   * @param buffer the write buffer
-   * @param offset offset into the write buffer
-   * @param length the number of bytes to write
-   *
-   * @return the fragment id
-   */
-  public Block writeFragment(long fragmentAddress, int fragmentOffset,
-                             byte []buffer, int offset, int length)
-    throws IOException
-  {
-    if (FRAGMENT_SIZE - fragmentOffset < length)
-      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
-                                             fragmentOffset, length));
-
-    Block block = readBlock(addressToBlockId(fragmentAddress));
-
-    try {
-      Lock lock = block.getLock();
-      lock.lockReadAndWrite(_blockLockTimeout);
-
-      try {
-        int blockOffset = getFragmentOffset(fragmentAddress);
-
-        byte []blockBuffer = block.getBuffer();
-
-        blockOffset += fragmentOffset;
-
-        System.arraycopy(buffer, offset,
-                         blockBuffer, blockOffset,
-                         length);
-
-        block.setDirty(blockOffset, blockOffset + length);
-        
-        return block;
-      } finally {
-        lock.unlockReadAndWrite();
-      }
-    } finally {
-      block.free();
-    }
-  }
-
-  /**
-   * Writes a character based
-   *
-   * @param fragmentAddress the fragment to write
-   * @param fragmentOffset the offset into the fragment
-   * @param buffer the write buffer
-   * @param offset offset into the write buffer
-   * @param length the number of bytes to write
-   */
-  public Block writeFragment(long fragmentAddress, int fragmentOffset,
-                             char []buffer, int offset, int length)
-    throws IOException
-  {
-    if (FRAGMENT_SIZE - fragmentOffset < length)
-      throw new IllegalArgumentException(L.l("write offset {0} length {1} too long",
-                                             fragmentOffset, length));
-
-    Block block = readBlock(addressToBlockId(fragmentAddress));
-
-    try {
-      Lock lock = block.getLock();
-      lock.lockReadAndWrite(_blockLockTimeout);
-
-      try {
-        int blockOffset = getFragmentOffset(fragmentAddress);
-
-        byte []blockBuffer = block.getBuffer();
-
-        blockOffset += fragmentOffset;
-
-        int blockTail = blockOffset;
-
-        for (int i = 0; i < length; i++) {
-          char ch = buffer[offset + i];
-
-          blockBuffer[blockTail] = (byte) (ch >> 8);
-          blockBuffer[blockTail + 1] = (byte) (ch);
-
-          blockTail += 2;
-        }
-
-        block.setDirty(blockOffset, blockTail);
-        
-        return block;
-      } finally {
-        lock.unlockReadAndWrite();
-      }
-    } finally {
-      block.free();
-    }
-  }
-
-  /**
-   * Writes a blockfragment.
+   * Writes a block.
    *
    * @param blockAddress the block to write
    * @param blockOffset the offset into the block
@@ -1519,16 +1158,6 @@ public class BlockStore {
     } finally {
       block.free();
     }
-  }
-
-  /**
-   * Returns the fragment offset for an id.
-   */
-  private int getFragmentOffset(long fragmentAddress)
-  {
-    int id = (int) (fragmentAddress & BLOCK_OFFSET_MASK);
-
-    return (int) (FRAGMENT_SIZE * id);
   }
 
   /**
@@ -1798,7 +1427,7 @@ public class BlockStore {
         block.setDirty(offset, offset + 1);
 
         int i = (int) (ALLOC_BYTES_PER_BLOCK * (fragmentAddress / BLOCK_SIZE));
-        int j = (int) (fragmentAddress & 0xff);
+        // int j = (int) (fragmentAddress & 0xff);
 
         synchronized (_allocationLock) {
           int fragMask = _allocationTable[i + 1] & 0xff;
@@ -1929,188 +1558,7 @@ public class BlockStore {
 
     return (int) (MINI_FRAG_SIZE * id);
   }
-
-  /**
-   * Reads a block into the buffer.
-   */
-  public void readBlock(long blockId, byte []buffer, int offset, int length)
-    throws IOException
-  {
-    boolean isPriority = false;
-    RandomAccessWrapper wrapper = openRowFile(isPriority);
-
-    try {
-      RandomAccessStream is = wrapper.getFile();
-
-      long blockAddress = blockId & BLOCK_MASK;
-
-      if (blockAddress < 0 || _fileSize < blockAddress + length) {
-        throw new IllegalStateException(L.l("block at 0x{0} is invalid for file {1} (length 0x{2})",
-                                            Long.toHexString(blockAddress),
-                                            _path,
-                                            Long.toHexString(_fileSize)));
-      }
-
-      // System.out.println("READ: " + Long.toHexString(blockAddress));
-      int readLen = is.read(blockAddress, buffer, offset, length);
-
-      if (readLen < 0) {
-        throw new IllegalStateException("Error reading " + is + " for block " + Long.toHexString(blockAddress) + " result=" + readLen);
-      }
-
-      if (readLen < length) {
-        System.out.println("BAD-READ: " + Long.toHexString(blockAddress));
-        if (readLen < 0)
-          readLen = 0;
-
-        for (int i = readLen; i < BLOCK_SIZE; i++)
-          buffer[i] = 0;
-      }
-
-      _blockManager.addBlockRead();
-
-      freeRowFile(wrapper, isPriority);
-      wrapper = null;
-    } finally {
-      closeRowFile(wrapper, isPriority);
-    }
-  }
-
-  /**
-   * Saves the buffer to the database.
-   */
-  public void writeBlock(long blockAddress,
-                         byte []buffer, int offset, int length,
-                         boolean isPriority)
-    throws IOException
-  {
-    RandomAccessWrapper wrapper;
-
-    wrapper = openRowFile(isPriority);
-
-    try {
-      RandomAccessStream os = wrapper.getFile();
-      /*
-      if (blockAddress > 2 * 0x2000000) {
-      System.out.println("BLOCK: " + Long.toHexString(blockAddress) + " " + offset);
-      Thread.dumpStack();
-      }
-      */
-      os.write(blockAddress, buffer, offset, length);
-
-      freeRowFile(wrapper, isPriority);
-      wrapper = null;
-
-      synchronized (_fileLock) {
-        if (_fileSize < blockAddress + length) {
-          _fileSize = blockAddress + length;
-        }
-      }
-
-      _blockManager.addBlockWrite();
-    } finally {
-      closeRowFile(wrapper, isPriority);
-    }
-  }
-
-  /**
-   * Opens the underlying file to the database.
-   */
-  private RandomAccessWrapper openRowFile(boolean isPriority)
-    throws IOException
-  {
-    // limit number of active row files
-
-    if (! isPriority) {
-      try {
-        Thread.interrupted();
-        _rowFileSemaphore.acquire();
-      } catch (InterruptedException e) {
-        log.log(Level.FINE, e.toString(), e);
-
-        return null;
-      }
-    }
-
-    RandomAccessWrapper wrapper = null;
-    try {
-      wrapper = openRowFileImpl();
-
-      return wrapper;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (IOException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new IOException(e);
-    } finally {
-      if (wrapper == null)
-        _rowFileSemaphore.release();
-    }
-  }
-
-  /**
-   * Opens the underlying file to the database.
-   */
-  private RandomAccessWrapper openRowFileImpl()
-    throws IOException
-  {
-    RandomAccessStream file = null;
-    RandomAccessWrapper wrapper = null;
-
-    SoftReference<RandomAccessWrapper> ref = _cachedRowFile.allocate();
-
-    if (ref != null) {
-      wrapper = ref.get();
-    }
-
-    if (wrapper != null)
-      file = wrapper.getFile();
-
-    if (file == null) {
-      Path path = _path;
-
-      if (path != null) {
-        file = path.openRandomAccess();
-
-        wrapper = new RandomAccessWrapper(file);
-      }
-    }
-
-    return wrapper;
-  }
-
-  private void freeRowFile(RandomAccessWrapper wrapper, boolean isPriority)
-    throws IOException
-  {
-    if (wrapper == null)
-      return;
-
-    if (! isPriority)
-      _rowFileSemaphore.release();
-
-    SoftReference<RandomAccessWrapper> fileRef
-      = new SoftReference<RandomAccessWrapper>(wrapper);
-
-    if (_cachedRowFile.free(fileRef)) {
-      return;
-    }
-
-    wrapper.close();
-  }
-
-  private void closeRowFile(RandomAccessWrapper wrapper, boolean isPriority)
-    throws IOException
-  {
-    if (wrapper == null)
-      return;
-
-    if (! isPriority)
-      _rowFileSemaphore.release();
-
-    wrapper.close();
-  }
-
+ 
   /**
    * Flush the store.
    */
@@ -2148,21 +1596,7 @@ public class BlockStore {
     int id = _id;
     _id = 0;
 
-    _path = null;
-
-    RandomAccessWrapper wrapper = null;
-
-    SoftReference<RandomAccessWrapper> ref = _cachedRowFile.allocate();
-
-    if (ref != null)
-      wrapper = ref.get();
-
-    if (wrapper != null) {
-      try {
-        wrapper.close();
-      } catch (Throwable e) {
-      }
-    }
+    _readWrite.close();
 
     if (_blockManager != null) {
       _blockManager.freeStoreId(id);
@@ -2225,8 +1659,6 @@ public class BlockStore {
       return "row";
     case ALLOC_USED:
       return "used";
-    case ALLOC_FRAGMENT:
-      return "fragment";
     case ALLOC_MINI_FRAG:
       return "mini-fragment";
     case ALLOC_INDEX:
@@ -2236,40 +1668,9 @@ public class BlockStore {
     }
   }
 
+  @Override
   public String toString()
   {
-    return "Store[" + _id + "]";
-  }
-
-  static class RandomAccessWrapper {
-    private RandomAccessStream _file;
-
-    RandomAccessWrapper(RandomAccessStream file)
-    {
-      _file = file;
-    }
-
-    RandomAccessStream getFile()
-    {
-      return _file;
-    }
-
-    void close()
-      throws IOException
-    {
-      RandomAccessStream file = _file;
-      _file = null;
-
-      if (file != null)
-        file.close();
-    }
-
-    protected void finalize()
-      throws Throwable
-    {
-      super.finalize();
-
-      close();
-    }
+    return getClass().getSimpleName() + "[" + _id + "]";
   }
 }

@@ -29,7 +29,7 @@
 
 package com.caucho.db.index;
 
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.BlockStore;
 import com.caucho.util.Hex;
 import com.caucho.util.LruListener;
 

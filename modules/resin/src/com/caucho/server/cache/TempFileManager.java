@@ -31,7 +31,7 @@ package com.caucho.server.cache;
 
 import com.caucho.config.ConfigException;
 import com.caucho.db.Database;
-import com.caucho.db.store.BlockStore;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.xa.RawTransaction;
 import com.caucho.db.xa.StoreTransaction;
 import com.caucho.server.resin.Resin;
