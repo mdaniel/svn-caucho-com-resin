@@ -365,13 +365,5 @@ public class BlockReadWrite {
       if (file != null)
         file.close();
     }
-
-    protected void finalize()
-      throws Throwable
-    {
-      super.finalize();
-
-      close();
-    }
   }
 }

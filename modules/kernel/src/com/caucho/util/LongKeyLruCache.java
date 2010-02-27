@@ -45,6 +45,8 @@ public class LongKeyLruCache<V> {
   private static final Logger log
     = Logger.getLogger(LongKeyLruCache.class.getName());
   
+  private static final int LRU_MASK = 0x3fffffff;
+  
   // maximum allowed entries
   private final int _capacity;
   // size 1 capacity is half the actual capacity
@@ -341,10 +343,11 @@ public class LongKeyLruCache<V> {
 
 	  oldValue = item._value;
 
-          if (replace && oldValue instanceof SyncCacheListener)
-            ((SyncCacheListener) oldValue).syncRemoveEvent();
+          if (replace) {
+            if (oldValue instanceof SyncCacheListener) {
+              ((SyncCacheListener) oldValue).syncRemoveEvent();
+            }
 
-	  if (replace) {
 	    item._value = value;
           }
 
@@ -376,7 +379,7 @@ public class LongKeyLruCache<V> {
   private void addNewLruItem(CacheItem<V> item)
   {
     synchronized (_lruLock) {
-      _lruCounter = (_lruCounter + 1) & 0x3fffffff;
+      _lruCounter = (_lruCounter + 1) & LRU_MASK;
       item._lruCounter = _lruCounter;
           
       _size1++;
@@ -400,7 +403,7 @@ public class LongKeyLruCache<V> {
     long lruCounter = _lruCounter;
     long itemCounter = item._lruCounter;
 
-    long delta = (lruCounter - itemCounter) & 0x3fffffff;
+    long delta = (lruCounter - itemCounter) & LRU_MASK;
 
     if (_lruTimeout < delta || delta < 0) {
       // update LRU only if not used recently
@@ -415,7 +418,7 @@ public class LongKeyLruCache<V> {
   private void updateLruImpl(CacheItem<V> item)
   {
     synchronized (_lruLock) {
-      _lruCounter = (_lruCounter + 1) & 0x3fffffff;
+      _lruCounter = (_lruCounter + 1) & LRU_MASK;
 
       item._lruCounter = _lruCounter;
       
@@ -519,31 +522,12 @@ public class LongKeyLruCache<V> {
       }
     }
 
-    for (int max = 0; max < 32; max++) {
-      if (tail == null)
-	return false;
+    if (tail == null)
+      return false;
 
-      Object value = tail._value;
-
-      // check the item for its use
-      if (value instanceof ClockCacheItem) {
-        ClockCacheItem item = (ClockCacheItem) value;
-        item.clearUsed();
-
-        if (item.isUsed()) {
-          tail = tail._prevLru;
-          continue;
-        }
-      }
-      
-      value = remove(tail._key);
+    Object value = remove(tail._key);
     
-      return value != null;
-    }
-
-    log.fine("LRU-Cache can't remove tail because the tail values are busy.");
-
-    return false;
+    return value != null;
   }
 
   /**

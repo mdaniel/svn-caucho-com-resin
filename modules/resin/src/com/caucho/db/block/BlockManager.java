@@ -29,22 +29,19 @@
 
 package com.caucho.db.block;
 
-import com.caucho.management.server.AbstractManagedObject;
-import com.caucho.management.server.BlockManagerMXBean;
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-import com.caucho.util.LongKeyLruCache;
-import com.caucho.util.TaskWorker;
-
-import java.io.IOException;
+import java.lang.management.ManagementFactory;
+import java.lang.management.MemoryMXBean;
+import java.lang.management.MemoryUsage;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.management.ManagementFactory;
-import java.lang.management.MemoryMXBean;
-import java.lang.management.MemoryUsage;
+
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.BlockManagerMXBean;
+import com.caucho.util.L10N;
+import com.caucho.util.LongKeyLruCache;
 
 /**
  * Manages the block cache
@@ -62,13 +59,8 @@ public final class BlockManager
   private final byte []_storeMask = new byte[8192];
   private LongKeyLruCache<Block> _blockCache;
 
-  private final ArrayList<Block> _writeQueue = new ArrayList<Block>();
-  private int _writeQueueMax = 256;
-
   private final AtomicLong _blockWriteCount = new AtomicLong();
   private final AtomicLong _blockReadCount = new AtomicLong();
-
-  private final BlockManagerWriter _writer;
 
   private BlockManager(int capacity)
   {
@@ -80,8 +72,6 @@ public final class BlockManager
     _storeMask[0] |= 1;
 
     registerSelf();
-
-    _writer = new BlockManagerWriter();
   }
 
   /**
@@ -182,7 +172,7 @@ public final class BlockManager
    */
   public void flush(BlockStore store)
   {
-    ArrayList<Block> dirtyBlocks = null;
+    ArrayList<Block> dirtyBlocks = new ArrayList<Block>();
 
     synchronized (_blockCache) {
       Iterator<Block> values = _blockCache.values();
@@ -192,25 +182,14 @@ public final class BlockManager
 
         if (block != null && block.getStore() == store) {
           if (block.isDirty()) {
-            if (dirtyBlocks == null)
-              dirtyBlocks = new ArrayList<Block>();
-
             dirtyBlocks.add(block);
           }
         }
       }
     }
-
-    for (int i = 0; dirtyBlocks != null && i < dirtyBlocks.size(); i++) {
-      Block block = dirtyBlocks.get(i);
-
-      try {
-        synchronized (block) {
-          block.write();
-        }
-      } catch (IOException e) {
-        log.log(Level.FINER, e.toString(), e);
-      }
+    
+    for (Block block : dirtyBlocks) {
+      store.getWriter().addDirtyBlock(block);
     }
   }
 
@@ -235,48 +214,6 @@ public final class BlockManager
     for (Block block : removeBlocks) {
       _blockCache.remove(block.getBlockId());
     }
-
-    long timeout;
-
-    if (Alarm.isTest())
-      timeout = 1000L;
-    else
-      timeout = 60000L;
-
-    long expires = Alarm.getCurrentTimeActual() + timeout;
-
-    while (hasPendingStore(store)) {
-      wakeWriter();
-
-      synchronized (_writeQueue) {
-        try {
-          long delta = expires - Alarm.getCurrentTimeActual();
-
-          if (delta > 0)
-            _writeQueue.wait(delta);
-          else {
-            log.warning(this + " block close for " + store + " timeout");
-            break;
-          }
-        } catch (InterruptedException e) {
-        }
-      }
-    }
-  }
-
-  private boolean hasPendingStore(BlockStore store)
-  {
-    synchronized (_writeQueue) {
-      for (int i = _writeQueue.size() - 1; i >= 0; i--) {
-        Block block = _writeQueue.get(i);
-
-        if (block.getStore() == store && block.isDirty()) {
-          return true;
-        }
-      }
-    }
-
-    return false;
   }
 
   /**
@@ -297,9 +234,6 @@ public final class BlockManager
    */
   Block getBlock(BlockStore store, long blockId)
   {
-    // XXX: proper handling of the synchronized is tricky because
-    // the LRU dirty write might have timing issues
-
     long storeId = blockId & BlockStore.BLOCK_INDEX_MASK;
     if (storeId != store.getId()) {
       throw stateError("illegal block: " + Long.toHexString(blockId));
@@ -308,18 +242,13 @@ public final class BlockManager
     Block block = _blockCache.get(blockId);
 
     while (block == null || ! block.allocate()) {
+      block = new Block(store, blockId);
+
       // Find any matching block in the process of being written
-      Block dirtyBlock = getDirtyBlock(store, blockId);
+      Block dirtyBlock = store.getWriter().getDirtyBlock(blockId);
 
-      if (dirtyBlock != null && dirtyBlock.allocateDirty()) {
-        block = dirtyBlock;
-      }
-      else {
-        block = new Block(store, blockId);
-
-        if (dirtyBlock != null) {
-          dirtyBlock.copyToBlock(block);
-        }
+      if (dirtyBlock != null) {
+        dirtyBlock.copyToBlock(block);
       }
 
       // needs to be outside the synchronized because the put
@@ -328,17 +257,8 @@ public final class BlockManager
 
       if (oldBlock != null) {
         block.free();
-
-        if (block == dirtyBlock) {
-          wakeWriter();
-          dirtyBlock = null;
-        }
-
+        
         block = oldBlock;
-      }
-
-      if (dirtyBlock != null) {
-        removeDirtyBlock(dirtyBlock);
       }
     }
 
@@ -350,68 +270,6 @@ public final class BlockManager
     }
 
     return block;
-  }
-
-  private Block getDirtyBlock(BlockStore store, long blockId)
-  {
-    synchronized (_writeQueue) {
-      int size = _writeQueue.size();
-
-      for (int i = size - 1; i >= 0; i--) {
-        Block block = _writeQueue.get(i);
-
-        if (block.getBlockId() == blockId
-            && block.getStore() == store) {
-          // System.out.println("FOUND-DIRTY: " + block + " " + _writeQueue.size());
-          return block;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  private Block removeDirtyBlock(Block block)
-  {
-    synchronized (_writeQueue) {
-      int size = _writeQueue.size();
-
-      for (int i = size - 1; i >= 0; i--) {
-        Block dirtyBlock = _writeQueue.get(i);
-
-        if (dirtyBlock == block) {
-          _writeQueue.remove(i);
-
-          return dirtyBlock;
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Adds a block that's needs to be flushed.
-   */
-  void addLruDirtyWriteBlock(Block block)
-  {
-    synchronized (_writeQueue) {
-      if (_writeQueueMax < _writeQueue.size()) {
-        try {
-          _writeQueue.wait(100);
-        } catch (InterruptedException e) {
-        }
-      }
-
-      _writeQueue.add(block);
-    }
-
-    wakeWriter();
-  }
-
-  void wakeWriter()
-  {
-    _writer.wake();
   }
 
   //
@@ -490,69 +348,5 @@ public final class BlockManager
     e.fillInStackTrace();
     log.log(Level.WARNING, e.toString(), e);
     return e;
-  }
-
-  class BlockManagerWriter extends TaskWorker {
-    public void runTask()
-    {
-      try {
-        int retryMax = 10;
-        int retry = retryMax;
-
-        while (true) {
-          Block block = getNextFreeBlock();
-
-          if (block != null) {
-            retry = retryMax;
-
-            block.closeWrite();
-
-            removeBlock(block);
-          }
-          else if (retry-- <= 0) {
-            return;
-          }
-        }
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-    }
-
-    private Block getNextFreeBlock()
-    {
-      int unfree = 0;
-
-      synchronized (_writeQueue) {
-        for (int i = 0; i < _writeQueue.size(); i++) {
-          Block block = _writeQueue.get(i);
-
-          if (block == null) {
-          }
-          else if (block.isFree())
-            return block;
-          else {
-            unfree++;
-          }
-        }
-      }
-
-      return null;
-    }
-
-    private void removeBlock(Block block)
-    {
-      synchronized (_writeQueue) {
-        int size = _writeQueue.size();
-        for (int i = size - 1; i >= 0; i--) {
-          Block writeBlock = _writeQueue.get(i);
-
-          if (block == writeBlock || writeBlock == null) {
-            _writeQueue.remove(i);
-          }
-        }
-
-        _writeQueue.notifyAll();
-      }
-    }
   }
 }

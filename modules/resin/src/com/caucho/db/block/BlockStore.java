@@ -108,12 +108,6 @@ public class BlockStore {
   public final static int ALLOC_MINI_FRAG = 0x05;
   public final static int ALLOC_MASK      = 0x0f;
 
-  /*
-  public final static int FRAGMENT_SIZE = BLOCK_SIZE / 4; // 16 * 1024;
-  public final static int FRAGMENT_PER_BLOCK
-    = (int) (BLOCK_SIZE / FRAGMENT_SIZE);
-    */
-
   public final static int MINI_FRAG_SIZE = 256;
   public final static int MINI_FRAG_PER_BLOCK
     = (int) ((BLOCK_SIZE - 64) / MINI_FRAG_SIZE);
@@ -124,14 +118,15 @@ public class BlockStore {
 
   public final static int STORE_CREATE_END = 1024;
 
-  protected final Database _database;
-  protected final BlockManager _blockManager;
-
   private final String _name;
 
   private int _id;
 
+  protected final Database _database;
+  protected final BlockManager _blockManager;
+
   private final BlockReadWrite _readWrite;
+  private final BlockWriter _writer;
 
   // If true, dirty blocks are written at the end of the transaction.
   // Otherwise, they are buffered
@@ -192,6 +187,8 @@ public class BlockStore {
       throw new NullPointerException();
     
     _readWrite = new BlockReadWrite(this, path);
+    
+    _writer = new BlockWriter(this);
 
     if (rowLock == null)
       rowLock = new Lock("row-lock:" + _name + ":" + _id);
@@ -269,6 +266,11 @@ public class BlockStore {
   protected BlockReadWrite getReadWrite()
   {
     return _readWrite;
+  }
+  
+  BlockWriter getWriter()
+  {
+    return _writer;
   }
 
   public void setCorrupted(boolean isCorrupted)
@@ -702,7 +704,7 @@ public class BlockStore {
 
     // if extending file, write the contents now
     try {
-      block.write();
+      block.writeImpl();
     } catch (IOException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
