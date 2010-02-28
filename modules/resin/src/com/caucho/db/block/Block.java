@@ -43,7 +43,7 @@ import com.caucho.util.SyncCacheListener;
 /**
  * Represents a versioned row
  */
-public final class Block implements SyncCacheListener, CacheListener {
+public final class Block implements SyncCacheListener {
   private static final Logger log
     = Logger.getLogger(Block.class.getName());
   private static final FreeList<byte[]> _freeBuffers
@@ -279,16 +279,17 @@ public final class Block implements SyncCacheListener, CacheListener {
     if (! _isFlushDirtyOnCommit)
       return;
     else
-      write();
+      save();
   }
 
   /**
    * Forces a write of the data (should be private?)
    */
-  public void write()
+  public void save()
   {
     if (_dirtyMin < _dirtyMax
         && _isWriteQueued.compareAndSet(false, true)) {
+      _useCount.incrementAndGet();
       _store.getWriter().addDirtyBlock(this);
     }
   }
@@ -381,7 +382,7 @@ public final class Block implements SyncCacheListener, CacheListener {
       return;
     }
     else if (_dirtyMin < _dirtyMax) {
-      write();
+      save();
     }
     else {
       // If the block is clean, just discard it
@@ -396,19 +397,8 @@ public final class Block implements SyncCacheListener, CacheListener {
   @Override
   public final void syncRemoveEvent()
   {
+    save();
     free();
-  }
-
-  /**
-   * Called when the block is removed from the cache.
-   */
-  @Override
-  public final void removeEvent()
-  {
-    /*
-    if (_useCount.get() > 0)
-      System.out.println("REMOVE with live: " + this + " " + _useCount);
-    */
   }
 
   /**

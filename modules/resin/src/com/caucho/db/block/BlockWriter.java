@@ -78,6 +78,7 @@ public class BlockWriter extends TaskWorker {
     synchronized (_writeQueue) {
       int size = _writeQueue.size();
 
+      // search from newest to oldest in case multiple writes
       for (int i = size - 1; i >= 0; i--) {
         Block block = _writeQueue.get(i);
 
@@ -100,12 +101,16 @@ public class BlockWriter extends TaskWorker {
       int retry = retryMax;
 
       while (true) {
-        Block block = getNextBlock();
+        Block block = peekFirstBlock();
 
         if (block != null) {
           retry = retryMax;
 
           block.writeImpl();
+          
+          block.free();
+          
+          removeFirstBlock();
         }
         else if (retry-- <= 0) {
           return;
@@ -116,19 +121,28 @@ public class BlockWriter extends TaskWorker {
     }
   }
 
-  private Block getNextBlock()
+  private Block peekFirstBlock()
   {
     synchronized (_writeQueue) {
       if (_writeQueue.size() > 0) {
-        Block block = _writeQueue.remove(0);
-        
-        _writeQueue.notifyAll();
+        Block block = _writeQueue.get(0);
         
         return block;
       }
     }
     
     return null;
+  }
+
+  private void removeFirstBlock()
+  {
+    synchronized (_writeQueue) {
+      if (_writeQueue.size() > 0) {
+        _writeQueue.remove(0);
+        
+        _writeQueue.notifyAll();
+      }
+    }
   }
   
   @Override
