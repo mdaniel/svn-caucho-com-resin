@@ -139,13 +139,14 @@ public class ResinBoot {
     }
 
     // XXX: needs to be changed for setuid issues
+    /*
     JniBoot boot = new JniBoot();
 
     Path logDirectory = _client.getLogDirectory();
-    if (! logDirectory.exists()) {
-      logDirectory.mkdirs();
+    if (boot.isValid()) {
+      if (! logDirectory.exists()) {
+        logDirectory.mkdirs();
 
-      if (boot.isValid()) {
         boot.chown(logDirectory, _client.getUserName(), _client.getGroupName());
       }
     }
@@ -159,6 +160,7 @@ public class ResinBoot {
                    _client.getUserName(), _client.getGroupName());
       }
     }
+    */
   }
 
   boolean start()

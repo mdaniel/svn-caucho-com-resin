@@ -189,6 +189,7 @@ public final class BlockManager
     }
     
     for (Block block : dirtyBlocks) {
+      block.allocate();
       store.getWriter().addDirtyBlock(block);
     }
   }

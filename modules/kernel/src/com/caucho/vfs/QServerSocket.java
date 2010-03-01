@@ -46,7 +46,7 @@ abstract public class QServerSocket {
     return false;
   }
   
-  public boolean isJNI()
+  public boolean isJni()
   {
     return false;
   }

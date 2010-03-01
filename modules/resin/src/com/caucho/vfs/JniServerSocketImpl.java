@@ -98,16 +98,28 @@ public class JniServerSocketImpl extends QServerSocket {
     return _fd;
   }
 
+  /**
+   * Returns true if this is a JNI socket, to distinguish between
+   * file-descriptors we have extra control over.
+   */
+  @Override
+  public boolean isJni()
+  {
+    return true;
+  }
+  
   public boolean isJniValid()
   {
     return isEnabled();
   }
 
+  @Override
   public boolean setSaveOnExec()
   {
     return nativeSetSaveOnExec(_fd);
   }
 
+  @Override
   public int getSystemFD()
   {
     return nativeGetSystemFD(_fd);
@@ -154,6 +166,7 @@ public class JniServerSocketImpl extends QServerSocket {
    *
    * @return true if the accept returns a new socket.
    */
+  @Override
   public boolean accept(QSocket socket)
     throws IOException
   {
@@ -174,12 +187,14 @@ public class JniServerSocketImpl extends QServerSocket {
   /**
    * Factory method creating an instance socket.
    */
+  @Override
   public QSocket createSocket()
     throws IOException
   {
     return new JniSocketImpl();
   }
 
+  @Override
   public InetAddress getLocalAddress()
   {
     try {
@@ -189,6 +204,7 @@ public class JniServerSocketImpl extends QServerSocket {
     }
   }
 
+  @Override
   public int getLocalPort()
   {
     return getLocalPort(_fd);
@@ -202,6 +218,7 @@ public class JniServerSocketImpl extends QServerSocket {
   /**
    * Closes the socket.
    */
+  @Override
   public void close()
     throws IOException
   {

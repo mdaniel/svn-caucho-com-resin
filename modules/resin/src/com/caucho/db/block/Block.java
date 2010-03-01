@@ -36,7 +36,6 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.db.lock.Lock;
-import com.caucho.util.CacheListener;
 import com.caucho.util.FreeList;
 import com.caucho.util.SyncCacheListener;
 
@@ -46,6 +45,7 @@ import com.caucho.util.SyncCacheListener;
 public final class Block implements SyncCacheListener {
   private static final Logger log
     = Logger.getLogger(Block.class.getName());
+  
   private static final FreeList<byte[]> _freeBuffers
     = new FreeList<byte[]>(64);
 
@@ -56,7 +56,6 @@ public final class Block implements SyncCacheListener {
 
   private final AtomicInteger _useCount = new AtomicInteger(1);
 
-  private final Object _writeLock = new Object();
   private final AtomicBoolean _isWriteQueued = new AtomicBoolean();
   private boolean _isFlushDirtyOnCommit;
   private boolean _isValid;
@@ -73,7 +72,8 @@ public final class Block implements SyncCacheListener {
     _store = store;
     _blockId = blockId;
 
-    _lock = new Lock("block:" + store.getName() + ":" + Long.toHexString(_blockId));
+    // _lock = new Lock("block:" + store.getName() + ":" + Long.toHexString(_blockId));
+    _lock = new Lock("block-lock");
 
     _isFlushDirtyOnCommit = _store.isFlushDirtyBlocksOnCommit();
 
@@ -383,11 +383,13 @@ public final class Block implements SyncCacheListener {
     if (useCount > 0) {
       return;
     }
-    else if (_dirtyMin < _dirtyMax) {
+    
+    if (_dirtyMin < _dirtyMax) {
       save();
     }
-    else {
-      // If the block is clean, just discard it
+    
+    if (_useCount.get() == 0) {
+      // If the block is clean, discard it
       
       freeImpl();
     }
@@ -414,22 +416,19 @@ public final class Block implements SyncCacheListener {
   /**
    * Called when the block is removed from the cache.
    */
-  protected void freeImpl()
+  private void freeImpl()
   {
-    //System.out.println(this + " FREE-IMPL");
-    synchronized (this) {
-      // timing for block reuse. The useCount can be reactivated from
-      // the BlockManager writeQueue
-      if (isFree()) {
-        byte []buffer = _buffer;
-        _buffer = null;
+    byte []buffer = _buffer;
+    _buffer = null;
 
-        freeBuffer(buffer);
-      }
-    }
+    if (_dirtyMin < _dirtyMax)
+      Thread.dumpStack();
+
+    if (buffer != null)
+      _freeBuffers.free(buffer);
   }
 
-  protected byte []allocateBuffer()
+  private byte []allocateBuffer()
   {
     byte []buffer = _freeBuffers.allocate();
 
@@ -440,15 +439,7 @@ public final class Block implements SyncCacheListener {
     return buffer;
   }
 
-  protected void freeBuffer(byte []buffer)
-  {
-    if (_dirtyMin < _dirtyMax)
-      Thread.dumpStack();
-
-    if (buffer != null)
-      _freeBuffers.freeCareful(buffer);
-  }
-
+  @Override
   public String toString()
   {
     return (getClass().getSimpleName()

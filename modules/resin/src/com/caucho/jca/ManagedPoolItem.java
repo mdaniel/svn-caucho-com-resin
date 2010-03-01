@@ -1060,8 +1060,6 @@ class ManagedPoolItem implements ConnectionEventListener, XAResource {
     if (log.isLoggable(Level.FINE))
       log.fine("idle " + this);
     
-    Thread.dumpStack();
-
     _poolEventTime = Alarm.getCurrentTime();
     _cm.toIdle(this);
   }

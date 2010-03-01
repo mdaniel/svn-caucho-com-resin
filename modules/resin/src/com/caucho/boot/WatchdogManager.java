@@ -103,6 +103,8 @@ class WatchdogManager implements AlarmListener {
     _args = new WatchdogArgs(argv);
 
     Vfs.setPwd(_args.getRootDirectory());
+    
+    boolean isLogDirectoryExists = getLogDirectory().exists();
 
     Path logPath = getLogDirectory().lookup("watchdog-manager.log");
 
@@ -160,6 +162,19 @@ class WatchdogManager implements AlarmListener {
     if (server == null)
       throw new IllegalStateException(L().l("'{0}' is an unknown server",
                                             _args.getServerId()));
+    
+    JniBoot boot = new JniBoot();
+    Path logDirectory = getLogDirectory();
+    System.out.println("BOOT: " + boot + " " + boot.isValid());
+    if (boot.isValid()) {
+      System.out.println("LOG: " + logDirectory.exists() + " " + logDirectory);
+      if (! isLogDirectoryExists) {
+        logDirectory.mkdirs();
+
+        boot.chown(logDirectory, server.getUserName(), server.getGroupName());
+      }
+    }
+
 
     server.getConfig().logInit(logStream);
 

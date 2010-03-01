@@ -1026,7 +1026,7 @@ public class Port extends TaskWorker
 
     _serverSocket.setConnectionSocketTimeout((int) getSocketTimeout());
 
-    if (_serverSocket.isJNI()) {
+    if (_serverSocket.isJni()) {
       Server server = Server.getCurrent();
 
       if (server != null)
@@ -1061,10 +1061,18 @@ public class Port extends TaskWorker
   {
     QServerSocket ss;
 
+    // use same method for ports for testability reasons
+    /*
     if (_port >= 1024)
       return null;
-    else if (_sslFactory instanceof JsseSSLFactory) {
-      log.warning(this + " cannot bind jsse in watchdog");
+    else
+    */
+    
+    if (_sslFactory instanceof JsseSSLFactory) {
+      if (_port < 1024) {
+        log.warning(this + " cannot bind jsse in watchdog");
+      }
+      
       return null;
     }
 
@@ -1085,7 +1093,7 @@ public class Port extends TaskWorker
       log.fine(this + " watchdog binding to *:" + _port);
     }
 
-    if (! ss.isJNI()) {
+    if (! ss.isJni()) {
       ss.close();
 
       return ss;

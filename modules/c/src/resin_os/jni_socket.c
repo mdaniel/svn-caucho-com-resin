@@ -868,6 +868,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetSaveOnExec(JNIEnv *env,
   else {
     int fd = socket->fd;
     int arg = 0;
+    int result = 0;
 
     if (fd < 0)
       return 0;
@@ -875,7 +876,10 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeSetSaveOnExec(JNIEnv *env,
     /* sets the close on exec flag */
     arg = fcntl(fd, F_GETFD, 0);
     arg &= ~FD_CLOEXEC;
-    return fcntl(fd, F_SETFD, arg) >= 0;
+
+    result = fcntl(fd, F_SETFD, arg);
+
+    return result >= 0;
   }
 #endif
 }

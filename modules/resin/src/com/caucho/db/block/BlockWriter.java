@@ -106,11 +106,13 @@ public class BlockWriter extends TaskWorker {
         if (block != null) {
           retry = retryMax;
 
-          block.writeImpl();
+          try {
+            block.writeImpl();
+          } finally {
+            removeFirstBlock();
           
-          block.free();
-          
-          removeFirstBlock();
+            block.free();
+          }
         }
         else if (retry-- <= 0) {
           return;

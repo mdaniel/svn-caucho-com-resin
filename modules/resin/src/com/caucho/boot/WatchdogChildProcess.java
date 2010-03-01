@@ -109,7 +109,7 @@ class WatchdogChildProcess
   {
     if (! _lifecycle.toActive())
       return;
-
+    
     WriteStream jvmOut = null;
     ServerSocket ss = null;
     Socket s = null;
@@ -366,6 +366,9 @@ class WatchdogChildProcess
               jvmArgs.add(String.valueOf(ss.getSystemFD()));
               jvmArgs.add(String.valueOf(port.getAddress()));
               jvmArgs.add(String.valueOf(port.getPort()));
+            }
+            else {
+              ss.close();
             }
           }
         }
