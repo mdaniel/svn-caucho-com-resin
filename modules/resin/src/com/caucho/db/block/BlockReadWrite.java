@@ -200,6 +200,9 @@ public class BlockReadWrite {
       Thread.dumpStack();
       }
       */
+      if (buffer == null || offset < 0 || length < 0 || buffer.length < offset + length)
+        System.out.println("BUFFER: " + buffer + " " + offset + " " + length);
+      
       os.write(blockAddress, buffer, offset, length);
 
       freeRowFile(wrapper, isPriority);

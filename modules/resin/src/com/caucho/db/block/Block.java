@@ -311,13 +311,15 @@ public final class Block implements SyncCacheListener {
 
         clearDirty();
       }
-    
-      if (log.isLoggable(Level.FINEST))
-        log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
       
-      boolean isPriority = false;
+      if (dirtyMin < dirtyMax) {
+        if (log.isLoggable(Level.FINEST))
+          log.finest("write db-block " + this + " [" + dirtyMin + ", " + dirtyMax + "]");
+      
+        boolean isPriority = false;
 
-      writeImpl(dirtyMin, dirtyMax - dirtyMin, isPriority);
+        writeImpl(dirtyMin, dirtyMax - dirtyMin, isPriority);
+      }
     } finally {
       free();
     }

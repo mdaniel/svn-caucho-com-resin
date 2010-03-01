@@ -163,8 +163,10 @@ public final class Lock {
         addLock(- (READ|READ_LOCK));
       }
 
+      /*
       if (unparkNode == null && _lockCount.get() != 0)
         Thread.dumpStack();
+        */
     }
 
     if (unparkNode != null)
@@ -282,7 +284,7 @@ public final class Lock {
 
       if (unparkNode == null && lock != 0) {
         System.out.println("LOCK2: " + Long.toHexString(lock) + " " + unparkNode + " " + _lockHead);
-        Thread.dumpStack();
+//        Thread.dumpStack();
       }
     }
 
