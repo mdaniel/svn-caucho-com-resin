@@ -248,12 +248,12 @@ public class ReflectionClass
   {
     ArrayValue array = new ArrayValueImpl();
     
-    HashMap<String, Expr> _constMap = _cls.getConstantMap();
+    HashMap<String, Value> _constMap = _cls.getConstantMap(env);
     
-    for (Map.Entry<String, Expr> entry : _constMap.entrySet()) {
-      Value name = StringValue.create(entry.getKey());
+    for (Map.Entry<String, Value> entry : _constMap.entrySet()) {
+      Value name = env.createString(entry.getKey());
       
-      array.put(name, entry.getValue().eval(env));
+      array.put(name, entry.getValue());
     }
 
     return array;

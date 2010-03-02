@@ -91,6 +91,7 @@ public class QuercusClass extends NullValue {
   
   private final MethodMap<AbstractFunction> _methodMap;
   private final HashMap<String,Expr> _constMap;
+  private final HashMap<String,Object> _constJavaMap;
   private final LinkedHashMap<StringValue,ClassField> _fieldMap;
   private final HashMap<String,ArrayList<StaticField>> _staticFieldExprMap;
   private final HashMap<StringValue,StringValue> _staticFieldNameMap;
@@ -122,6 +123,7 @@ public class QuercusClass extends NullValue {
     _fieldMap = new LinkedHashMap<StringValue,ClassField>();
     _methodMap = new MethodMap<AbstractFunction>(this, null);
     _constMap = new HashMap<String,Expr>();
+    _constJavaMap = new HashMap<String,Object>();
     
     _staticFieldExprMap = new LinkedHashMap<String,ArrayList<StaticField>>();
     
@@ -279,6 +281,8 @@ public class QuercusClass extends NullValue {
     _fieldMap = cacheClass._fieldMap;
     _methodMap = cacheClass._methodMap;
     _constMap = cacheClass._constMap;
+    _constJavaMap = cacheClass._constJavaMap;
+    
     _staticFieldExprMap = cacheClass._staticFieldExprMap;
     _staticFieldNameMap = cacheClass._staticFieldNameMap;
     _instanceofSet = cacheClass._instanceofSet;
@@ -690,6 +694,14 @@ public class QuercusClass extends NullValue {
   public void addConstant(String name, Expr expr)
   {
     _constMap.put(name, expr);
+  }
+  
+  /**
+   * Adds a constant definition
+   */
+  public void addJavaConstant(String name, Object obj)
+  {
+    _constJavaMap.put(name, obj);
   }
 
   /**
@@ -1691,6 +1703,11 @@ public class QuercusClass extends NullValue {
 
     if (expr != null)
       return expr.eval(env);
+    
+    Object obj = _constJavaMap.get(name);
+    
+    if (obj != null)
+      return env.wrapJava(obj);
 
     throw new QuercusRuntimeException(L.l("{0}::{1} is an unknown constant",
                                           getName(), name));
@@ -1701,15 +1718,28 @@ public class QuercusClass extends NullValue {
    */
   public final boolean hasConstant(String name)
   {
-    return _constMap.get(String.valueOf(name)) != null;
+    if (_constMap.get(name) != null)
+      return true;
+    else
+      return _constJavaMap.get(name) != null;
   }
   
-  /*
+  /**
    * Returns the constants defined in this class.
    */
-  public final HashMap<String, Expr> getConstantMap()
+  public final HashMap<String, Value> getConstantMap(Env env)
   {
-    return _constMap;
+    HashMap<String, Value> map = new HashMap<String, Value>();
+    
+    for (Map.Entry<String, Expr> entry : _constMap.entrySet()) {
+      map.put(entry.getKey(), entry.getValue().eval(env));
+    }
+    
+    for (Map.Entry<String, Object> entry : _constJavaMap.entrySet()) {
+      map.put(entry.getKey(), env.wrapJava(entry.getValue()));
+    }
+    
+    return map;
   }
   
   //

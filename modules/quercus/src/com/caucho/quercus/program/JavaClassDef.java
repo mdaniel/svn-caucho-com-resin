@@ -90,6 +90,9 @@ public class JavaClassDef extends ClassDef {
 
   private final HashMap<String, Value> _constMap
     = new HashMap<String, Value>();
+  
+  private final HashMap<String, Object> _constJavaMap
+    = new HashMap<String, Object>();
 
   private final MethodMap<AbstractJavaMethod> _functionMap
     = new MethodMap<AbstractJavaMethod>(null, this);
@@ -783,6 +786,10 @@ public class JavaClassDef extends ClassDef {
     for (Map.Entry<String,Value> entry : _constMap.entrySet()) {
       cl.addConstant(entry.getKey(), new LiteralExpr(entry.getValue()));
     }
+    
+    for (Map.Entry<String,Object> entry : _constJavaMap.entrySet()) {
+      cl.addJavaConstant(entry.getKey(), entry.getValue());
+    }
   }
 
   /**
@@ -1211,6 +1218,8 @@ public class JavaClassDef extends ClassDef {
     for (Field field : fields) {
       if (_constMap.get(field.getName()) != null)
         continue;
+      else if (_constJavaMap.get(field.getName()) != null)
+        continue;
       else if (! Modifier.isPublic(field.getModifiers()))
         continue;
       else if (! Modifier.isStatic(field.getModifiers()))
@@ -1221,10 +1230,14 @@ public class JavaClassDef extends ClassDef {
         continue;
 
       try {
-        Value value = QuercusContext.objectToValue(field.get(null));
+        Object obj = field.get(null);
+        
+        Value value = QuercusContext.objectToValue(obj);
 
         if (value != null)
           _constMap.put(field.getName().intern(), value);
+        else
+          _constJavaMap.put(field.getName().intern(), obj);
       } catch (Throwable e) {
         log.log(Level.FINER, e.toString(), e);
       }

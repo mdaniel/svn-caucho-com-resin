@@ -4426,7 +4426,7 @@ public class Env {
       throw createErrorException(L.l("'{0}' class definition not found", className));
   }
 
-  /*
+  /**
    * Returns an introspected Java class definition.
    */
   public JavaClassDef getJavaClassDefinition(Class type)
