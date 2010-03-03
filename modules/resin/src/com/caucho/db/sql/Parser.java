@@ -195,7 +195,7 @@ public class Parser {
       //return parseShow();
 
     default:
-      throw new SQLParseException(L.l("unknown query at `{0}'",
+      throw new SQLParseException(L.l("unknown query at {0}",
 				      tokenName(token)));
     }
   }
@@ -1989,15 +1989,18 @@ public class Parser {
     case ASC: return "ASC";
     case DESC: return "DESC";
     case LIMIT: return "LIMIT";
+    
+    case INSERT: return "INSERT";
+    case DELETE: return "DELETE";
 
     case -1:
       return L.l("end of query");
 
     default:
       if (token < 128)
-        return "'" + String.valueOf((char) token) + "'";
+        return "'" + String.valueOf((char) token) + "' (" + token + ")";
       else
-        return "'" + _lexeme + "'";
+        return "'" + _lexeme + "' (" + token + ", '" + _lexeme.toLowerCase() + "')";
     }
   }
 

@@ -46,8 +46,9 @@ class ParamExpr extends Expr {
   private static final int BINARY = DATE + 1;
   private static final int BYTES = BINARY + 1;
 
-  private int _index;
+  private final int _index;
 
+  /*
   private int _type = NULL;
 
   private String _stringValue;
@@ -57,10 +58,11 @@ class ParamExpr extends Expr {
   private InputStream _binaryStream;
   private int _streamLength;
   private byte []_bytes;
+  */
 
   ParamExpr(int index)
   {
-    _index = index;
+    _index = index + 1;
   }
 
   /**
@@ -68,6 +70,9 @@ class ParamExpr extends Expr {
    */
   public Class getType()
   {
+    return Object.class;
+    
+    /*
     switch (_type) {
     case NULL:
       return Object.class;
@@ -96,6 +101,7 @@ class ParamExpr extends Expr {
     default:
       return Object.class;
     }
+    */
   }
 
   /**
@@ -130,12 +136,13 @@ class ParamExpr extends Expr {
    */
   public void clear()
   {
-    _type = NULL;
+    // _type = NULL;
   }
 
   /**
    * Sets the value as a string.
    */
+  /*
   public void setString(String value)
   {
     if (value == null)
@@ -145,60 +152,86 @@ class ParamExpr extends Expr {
       _stringValue = value;
     }
   }
+  */
 
   /**
    * Sets the value as a boolean.
    */
+  /*
   public void setBoolean(boolean value)
   {
     _type = BOOLEAN;
     _longValue = value ? 1 : 0;
   }
+  */
 
   /**
    * Sets the value as a long.
    */
+  /*
   public void setLong(long value)
   {
     _type = LONG;
     _longValue = value;
   }
+  */
 
   /**
    * Sets the value as a double.
    */
+  /*
   public void setDouble(double value)
   {
     _type = DOUBLE;
     _doubleValue = value;
   }
+  */
 
   /**
    * Sets the value as a date.
    */
+  /*
   public void setDate(long value)
   {
     _type = DATE;
     _longValue = value;
   }
+  */
 
   /**
    * Sets the value as a stream.
    */
+  /*
   public void setBinaryStream(InputStream is, int length)
   {
     _type = BINARY;
     _binaryStream = is;
     _streamLength = length;
   }
+  */
 
   /**
    * Sets the value as a stream.
    */
+  /*
   public void setBytes(byte []bytes)
   {
     _type = BYTES;
     _bytes = bytes;
+  }
+  */
+
+  /**
+   * Checks if the value is null
+   *
+   * @param rows the current database tuple
+   *
+   * @return the string value
+   */
+  @Override
+  public boolean isBinaryStream(QueryContext context)
+  {
+    return context.isBinaryStream(_index);
   }
 
   /**
@@ -208,10 +241,11 @@ class ParamExpr extends Expr {
    *
    * @return the string value
    */
+  @Override
   public boolean isNull(QueryContext context)
     throws SQLException
   {
-    return _type == NULL;
+    return context.isNull(_index);
   }
 
   /**
@@ -221,9 +255,12 @@ class ParamExpr extends Expr {
    *
    * @return the string value
    */
+  @Override
   public String evalString(QueryContext context)
     throws SQLException
   {
+    return context.getString(_index);
+    /*
     switch (_type) {
     case NULL:
       return null;
@@ -257,6 +294,7 @@ class ParamExpr extends Expr {
     default:
       throw new UnsupportedOperationException(String.valueOf(_type));
     }
+    */
   }
 
   /**
@@ -269,6 +307,8 @@ class ParamExpr extends Expr {
   public int evalBoolean(QueryContext context)
     throws SQLException
   {
+    return context.getBoolean(_index);
+    /*
     switch (_type) {
     case NULL:
       return UNKNOWN;
@@ -283,6 +323,7 @@ class ParamExpr extends Expr {
     default:
       throw new UnsupportedOperationException();
     }
+    */
   }
 
   /**
@@ -292,9 +333,13 @@ class ParamExpr extends Expr {
    *
    * @return the long value
    */
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {
+    return context.getLong(_index);
+    
+    /*
     switch (_type) {
     case NULL:
       return 0;
@@ -313,6 +358,7 @@ class ParamExpr extends Expr {
     default:
       throw new UnsupportedOperationException("" + _type);
     }
+    */
   }
 
   /**
@@ -322,9 +368,13 @@ class ParamExpr extends Expr {
    *
    * @return the double value
    */
+  @Override
   public double evalDouble(QueryContext context)
     throws SQLException
   {
+    return context.getDouble(_index);
+    
+    /*
     switch (_type) {
     case NULL:
       return 0;
@@ -342,6 +392,7 @@ class ParamExpr extends Expr {
     default:
       throw new UnsupportedOperationException(_index + ":" + _type + " " + toString());
     }
+    */
   }
 
   /**
@@ -351,9 +402,13 @@ class ParamExpr extends Expr {
    *
    * @return the date value
    */
+  @Override
   public long evalDate(QueryContext context)
     throws SQLException
   {
+    return context.getDate(_index);
+    
+    /*
     switch (_type) {
     case NULL:
       return 0;
@@ -368,6 +423,7 @@ class ParamExpr extends Expr {
     default:
       throw new UnsupportedOperationException();
     }
+    */
   }
 
   /**
@@ -377,9 +433,13 @@ class ParamExpr extends Expr {
    *
    * @return the string value
    */
-  public InputStream evalStream(QueryContext context)
+  @Override
+  public byte []evalBytes(QueryContext context)
     throws SQLException
   {
+    return context.getBytes(_index);
+    
+    /*
     switch (_type) {
     case NULL:
       return null;
@@ -390,6 +450,13 @@ class ParamExpr extends Expr {
     default:
       throw new UnsupportedOperationException();
     }
+    */
+  }
+  
+  @Override
+  public InputStream evalStream(QueryContext context)
+  {
+    return context.getBinaryStream(_index);
   }
 
   /**
@@ -404,38 +471,8 @@ class ParamExpr extends Expr {
                           int offset)
     throws SQLException
   {
-    if (_type == BYTES) {
-      System.arraycopy(_bytes, 0, buffer, offset, _bytes.length);
-
-      return _bytes.length;
-    }
-    else
-      return evalToBuffer(context, buffer, offset, _type);
-  }
-
-  /**
-   * Evaluates the expression to a buffer
-   *
-   * @param result the result buffer
-   *
-   * @return the length of the result
-   */
-  public int evalToBuffer(QueryContext context,
-                          byte []buffer,
-                          int offset,
-                          int typecode)
-    throws SQLException
-  {
-    if (_type == BYTES) {
-      System.arraycopy(_bytes, 0, buffer, offset, _bytes.length);
-
-      return _bytes.length;
-    }
-    else if (_type == NULL) {
-      return -1;
-    }
-    else
-      return super.evalToBuffer(context, buffer, offset, typecode);
+    // context.evalToBuffer(_index, buffer, offset);
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public String toString()

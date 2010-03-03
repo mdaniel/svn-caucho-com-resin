@@ -707,7 +707,7 @@
     <mkdir dir="${build}/javadoc/web-app"/>
 
     <javadoc destdir="${build}/javadoc/web-app/" 
-      maxmemory="256m"
+      maxmemory="512m"
       use="true" 
       author="true"
       version="true"

@@ -84,9 +84,6 @@ public final class BTree {
   private final static int IS_LEAF = 0x01;
   private final static int IS_NODE = 0x02;
 
-  private BlockManager _blockManager;
-
-  private final Lock _lock;
   private BlockStore _store;
   
   private long _rootBlockId;
@@ -99,7 +96,6 @@ public final class BTree {
   
   private KeyCompare _keyCompare;
 
-  private int _blockCount;
   private long _timeout = 120000L;
 
   private volatile boolean _isStarted;
@@ -119,12 +115,12 @@ public final class BTree {
       throw new NullPointerException();
     
     _store = store;
-    _blockManager = _store.getBlockManager();
+    _store.getBlockManager();
     
     _rootBlockId = rootBlockId;
     _rootBlock = store.readBlock(rootBlockId);
       
-    _lock = new Lock("index:" + store.getName());
+    new Lock("index:" + store.getName());
     
     if (BLOCK_SIZE < keySize + HEADER_SIZE)
       throw new IOException(L.l("BTree key size '{0}' is too large.",
@@ -164,17 +160,15 @@ public final class BTree {
   
   public long lookup(byte []keyBuffer,
 		     int keyOffset,
-		     int keyLength,
-		     Transaction xa)
+		     int keyLength)
     throws IOException, SQLException
   {
-    return lookup(keyBuffer, keyOffset, keyLength, xa, _rootBlockId);
+    return lookup(keyBuffer, keyOffset, keyLength, _rootBlockId);
   }
   
   private long lookup(byte []keyBuffer,
 		     int keyOffset,
 		     int keyLength,
-		     Transaction xa,
 		     long blockId)
     throws IOException, SQLException
   {
@@ -208,8 +202,7 @@ public final class BTree {
 	if (isLeaf || value == FAIL)
 	  return value;
 	else
-	  return lookup(keyBuffer, keyOffset, keyLength,
-			xa, value);
+	  return lookup(keyBuffer, keyOffset, keyLength, value);
       } finally {
         blockLock.unlockRead();
       }

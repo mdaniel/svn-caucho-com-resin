@@ -78,15 +78,15 @@ public class DataStore implements AlarmListener {
 
   private DataSource _dataSource;
 
-  private String _insertQuery;
-  private String _loadQuery;
-  private String _dataAvailableQuery;
-  private String _selectAllLimitQuery;
-  private String _updateExpiresQuery;
-  private String _deleteTimeoutQuery;
-  private String _validateQuery;
+  private final String _insertQuery;
+  private final String _loadQuery;
+  private final String _dataAvailableQuery;
+  private final String _selectAllLimitQuery;
+  private final String _updateExpiresQuery;
+  private final String _deleteTimeoutQuery;
+  private final String _validateQuery;
 
-  private String _countQuery;
+  private final String _countQuery;
 
   private Alarm _alarm;
 
@@ -102,18 +102,6 @@ public class DataStore implements AlarmListener {
     if (_tableName == null)
       throw new NullPointerException();
 
-
-    init();
-  }
-
-  DataSource getDataSource()
-  {
-    return _dataSource;
-  }
-
-  private void init()
-    throws Exception
-  {
     _loadQuery = ("SELECT data"
                   + " FROM " + _tableName
                   + " WHERE id=?");
@@ -131,15 +119,6 @@ public class DataStore implements AlarmListener {
                            + " SET expire_time=?"
                            + " WHERE id=?");
 
-    // XXX: add random component to expire time?
-    /*
-    _updateAllExpiresQuery = ("UPDATE " + _tableName
-                              + " SET expire_time=?"
-                              + " WHERE expire_time<? AND EXISTS "
-                              + "      (SELECT * FROM " + _mnodeTableName
-                              +   "       WHERE " + _tableName + ".id = " + _mnodeTableName + ".value)");
-    */
-
     _selectAllLimitQuery = ("SELECT value, resin_oid FROM " + _mnodeTableName
                             + " WHERE resin_oid > ?");
 
@@ -149,6 +128,18 @@ public class DataStore implements AlarmListener {
     _validateQuery = ("VALIDATE " + _tableName);
 
     _countQuery = "SELECT count(*) FROM " + _tableName;
+
+    init();
+  }
+
+  DataSource getDataSource()
+  {
+    return _dataSource;
+  }
+
+  private void init()
+    throws Exception
+  {
 
     initDatabase();
 

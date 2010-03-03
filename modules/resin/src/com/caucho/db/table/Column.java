@@ -49,15 +49,17 @@ abstract public class Column {
   
   public final static int NONE = 0;
   public final static int VARCHAR = 1;
-  public final static int INT = 2;
-  public final static int LONG = 3;
-  public final static int DOUBLE = 4;
-  public final static int DATE = 5;
-  public final static int BLOB = 6;
-  public final static int NUMERIC = 7;
-  public final static int BINARY = 8;
-  public final static int VARBINARY = 9;
-  public final static int SHORT = 10;
+  public final static int BOOLEAN = 2;
+  public final static int BYTE = 3;
+  public final static int SHORT = 4;
+  public final static int INT = 5;
+  public final static int LONG = 6;
+  public final static int DOUBLE = 7;
+  public final static int DATE = 8;
+  public final static int BLOB = 9;
+  public final static int NUMERIC = 10;
+  public final static int BINARY = 11;
+  public final static int VARBINARY = 12;
   
   private final Row _row;
   private final String _name;
@@ -573,7 +575,7 @@ abstract public class Column {
       return;
 
     long value
-      = index.lookup(block, rowOffset + getColumnOffset(), getLength(), xa);
+      = index.lookup(block, rowOffset + getColumnOffset(), getLength());
 
     if (value != rowAddr)
       throw new IllegalStateException(L.l("invalid index '{0}' at {1}",

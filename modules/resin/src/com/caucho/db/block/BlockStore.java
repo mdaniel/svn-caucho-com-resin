@@ -1594,6 +1594,8 @@ public class BlockStore {
     if (_blockManager != null) {
       _blockManager.freeStore(this);
     }
+    
+    _writer.waitForComplete();
 
     int id = _id;
     _id = 0;

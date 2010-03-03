@@ -37,6 +37,7 @@ import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -52,7 +53,7 @@ public class QueryContext {
   private static final L10N L = new L10N(QueryContext.class);
 
   private static final long LOCK_TIMEOUT = 120000;
-
+  
   private static final FreeList<QueryContext> _freeList
     = new FreeList<QueryContext>(64);
 
@@ -60,7 +61,7 @@ public class QueryContext {
   private TableIterator []_tableIterators;
   private boolean _isWrite;
 
-  private Data []_parameters = new Data[8];
+  private Data []_parameters = new Data[16];
 
   private GroupItem _tempGroupItem;
   private GroupItem _groupItem;
@@ -353,7 +354,7 @@ public class QueryContext {
    */
   public void setNull(int index)
   {
-    _parameters[index].setString(null);
+    _parameters[index - 1].setString(null);
   }
 
   /**
@@ -361,7 +362,7 @@ public class QueryContext {
    */
   public boolean isNull(int index)
   {
-    return _parameters[index].isNull();
+    return _parameters[index - 1].isNull();
   }
 
   /**
@@ -369,7 +370,7 @@ public class QueryContext {
    */
   public void setLong(int index, long value)
   {
-    _parameters[index].setLong(value);
+    _parameters[index - 1].setLong(value);
   }
 
   /**
@@ -377,7 +378,7 @@ public class QueryContext {
    */
   public int getBoolean(int index)
   {
-    return _parameters[index].getBoolean();
+    return _parameters[index - 1].getBoolean();
   }
 
   /**
@@ -385,7 +386,7 @@ public class QueryContext {
    */
   public void setBoolean(int index, boolean value)
   {
-    _parameters[index].setBoolean(value);
+    _parameters[index - 1].setBoolean(value);
   }
 
   /**
@@ -393,15 +394,23 @@ public class QueryContext {
    */
   public long getLong(int index)
   {
-    return _parameters[index].getLong();
+    return _parameters[index - 1].getLong();
   }
 
   /**
-   * Returns the long parameter.
+   * Returns the date parameter.
    */
   public long getDate(int index)
   {
-    return _parameters[index].getDate();
+    return _parameters[index - 1].getDate();
+  }
+
+  /**
+   * Returns the date parameter.
+   */
+  public void setDate(int index, long date)
+  {
+    _parameters[index - 1].setDate(date);
   }
 
   /**
@@ -409,7 +418,7 @@ public class QueryContext {
    */
   public void setDouble(int index, double value)
   {
-    _parameters[index].setDouble(value);
+    _parameters[index - 1].setDouble(value);
   }
 
   /**
@@ -417,7 +426,7 @@ public class QueryContext {
    */
   public double getDouble(int index)
   {
-    return _parameters[index].getDouble();
+    return _parameters[index - 1].getDouble();
   }
 
   /**
@@ -425,7 +434,7 @@ public class QueryContext {
    */
   public void setString(int index, String value)
   {
-    _parameters[index].setString(value);
+    _parameters[index - 1].setString(value);
   }
 
   /**
@@ -433,7 +442,49 @@ public class QueryContext {
    */
   public String getString(int index)
   {
-    return _parameters[index].getString();
+    return _parameters[index - 1].getString();
+  }
+
+  public boolean isBinaryStream(int index)
+  {
+    return _parameters[index - 1].isBinaryStream();
+  }
+  
+  /**
+   * Set a binary stream parameter.
+   */
+  public void setBinaryStream(int index, InputStream is, int length)
+  {
+    _parameters[index - 1].setBinaryStream(is, length);
+  }
+
+  /**
+   * Returns the binary stream parameter.
+   */
+  public InputStream getBinaryStream(int index)
+  {
+    return _parameters[index - 1].getBinaryStream();
+  }
+
+  /**
+   * Set a binary stream parameter.
+   */
+  public void setBytes(int index, byte []bytes)
+  {
+    _parameters[index - 1].setBytes(bytes);
+  }
+
+  /**
+   * Returns the binary stream parameter.
+   */
+  public byte []getBytes(int index)
+  {
+    return _parameters[index - 1].getBytes();
+  }
+
+  public int getType(int index)
+  {
+    return _parameters[index - 1].getType();
   }
 
   /**
@@ -594,20 +645,9 @@ public class QueryContext {
       throw new IllegalStateException();
     }
   }
-
-  /**
-   * Returns a new query context.
-   */
-  public static void free(QueryContext queryContext)
+  
+  public static void free(QueryContext cxt)
   {
-    if (queryContext._isLocked)
-      throw new IllegalStateException();
-
-    queryContext._groupMap = null;
-
-    if (queryContext._thread != null)
-      throw new IllegalStateException();
-
-    _freeList.freeCareful(queryContext);
+    _freeList.free(cxt);
   }
 }

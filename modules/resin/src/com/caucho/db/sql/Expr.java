@@ -103,7 +103,7 @@ abstract public class Expr {
   /**
    * Returns true if the expression returns a binary stream.
    */
-  public boolean isBinaryStream()
+  public boolean isBinaryStream(QueryContext context)
   {
     Class type = getType();
 
@@ -325,13 +325,26 @@ abstract public class Expr {
   }
 
   /**
-   * Evaluates the expression as a string.
+   * Evaluates the expression as a stream.
    *
    * @param rows the current database tuple
    *
    * @return the string value
    */
   public InputStream evalStream(QueryContext context)
+    throws SQLException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Evaluates the expression as a stream.
+   *
+   * @param rows the current database tuple
+   *
+   * @return the string value
+   */
+  public byte []evalBytes(QueryContext context)
     throws SQLException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -359,10 +372,10 @@ abstract public class Expr {
    *
    * @return the length of the result
    */
-  protected int evalToBuffer(QueryContext context,
-                             byte []buffer,
-                             int off,
-                             int columnType)
+  public int evalToBuffer(QueryContext context,
+                          byte []buffer,
+                          int off,
+                          int columnType)
     throws SQLException
   {
     switch (columnType) {
@@ -448,7 +461,17 @@ abstract public class Expr {
       }
 
     case Column.BINARY:
-      return evalToBuffer(context, buffer, off);
+      {
+        byte []bytes = evalBytes(context);
+        
+        if (bytes != null) {
+          System.arraycopy(bytes, 0, buffer, off, bytes.length);
+        
+          return bytes.length;
+        }
+        else
+          return 0;
+      }
 
     default:
       throw new UnsupportedOperationException(getClass().getName() + " unknown column: " + columnType);

@@ -105,7 +105,7 @@ public final class IndexCache
     long btreeValue;
     
     try {
-      btreeValue = btree.lookup(buffer, offset, length, xa);
+      btreeValue = btree.lookup(buffer, offset, length);
     } catch (IOException e) {
       throw new SQLException(e);
     }
@@ -137,7 +137,7 @@ public final class IndexCache
     long btreeValue;
     
     try {
-      btreeValue = btree.lookup(buffer, offset, length, xa);
+      btreeValue = btree.lookup(buffer, offset, length);
     } catch (IOException e) {
       throw new SQLException(e);
     }

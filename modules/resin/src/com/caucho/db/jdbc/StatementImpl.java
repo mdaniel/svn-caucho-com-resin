@@ -50,8 +50,6 @@ public class StatementImpl implements java.sql.Statement {
   protected ResultSetImpl _rs;
   private QueryContext _queryContext;
 
-  private boolean _isClosed;
-
   StatementImpl(ConnectionImpl conn)
   {
     _conn = conn;
@@ -59,31 +57,19 @@ public class StatementImpl implements java.sql.Statement {
 
     if (_db == null)
       throw new NullPointerException();
+    
+    _queryContext = QueryContext.allocate();
 
     init();
   }
 
   protected void init()
   {
-    if (_queryContext == null)
-      _queryContext = QueryContext.allocate();
   }
-
+  
   protected QueryContext getQueryContext()
   {
-    if (_queryContext == null)
-      _queryContext = QueryContext.allocate();
-
     return _queryContext;
-  }
-
-  protected void closeQueryContext(QueryContext context)
-    throws SQLException
-  {
-    if (context != null) {
-      context.close();
-      // QueryContext.free(context);
-    }
   }
 
   public void addBatch(String sql)
@@ -102,6 +88,7 @@ public class StatementImpl implements java.sql.Statement {
   {
   }
 
+  @Override
   public java.sql.ResultSet executeQuery(String sql)
     throws SQLException
   {
@@ -109,18 +96,21 @@ public class StatementImpl implements java.sql.Statement {
       throw new SQLException(L.l("statement is closed"));
 
     Query query = _db.parseQuery(sql);
+    
+    java.sql.ResultSet rs = executeQuery(query, _queryContext);
 
-    return executeQuery(query);
+    return rs;
   }
 
-  private java.sql.ResultSet executeQuery(Query query)
+  private java.sql.ResultSet executeQuery(Query query, 
+                                          QueryContext queryContext)
     throws SQLException
   {
     Transaction xa = _conn.getTransaction();
 
     boolean isOkay = false;
     try {
-      query.execute(_queryContext, xa);
+      query.execute(queryContext, xa);
       isOkay = true;
     } finally {
       if (! xa.isAutoCommit()) {
@@ -131,7 +121,7 @@ public class StatementImpl implements java.sql.Statement {
         xa.rollback();
     }
 
-    _rs = new ResultSetImpl(this, _queryContext.getResult());
+    _rs = new ResultSetImpl(this, queryContext.getResult());
 
     return _rs;
   }
@@ -192,22 +182,17 @@ public class StatementImpl implements java.sql.Statement {
     Transaction xa = _conn.getTransaction();
     boolean isOkay = false;
 
-    QueryContext queryContext = null;
     int rowUpdateCount = 0;
 
     try {
-      queryContext = getQueryContext();
+      _queryContext.setTransaction(xa);
 
-      queryContext.setTransaction(xa);
+      query.execute(_queryContext, xa);
 
-      query.execute(queryContext, xa);
-
-      rowUpdateCount = queryContext.getRowUpdateCount();
+      rowUpdateCount = _queryContext.getRowUpdateCount();
 
       isOkay = true;
     } finally {
-      closeQueryContext(queryContext);
-
       if (! xa.isAutoCommit()) {
       }
       else if (isOkay)
@@ -235,7 +220,7 @@ public class StatementImpl implements java.sql.Statement {
     Query query = _db.parseQuery(sql);
 
     if (query instanceof SelectQuery) {
-      executeQuery(query);
+      executeQuery(query, _queryContext);
 
       return true;
     }
@@ -375,35 +360,41 @@ public class StatementImpl implements java.sql.Statement {
     ResultSetImpl rs = _rs;
     _rs = null;
 
-    QueryContext queryContext = _queryContext;
-    _queryContext = null;
-
     if (rs != null)
       rs.close();
 
-    _conn.closeStatement(this);
-
+    QueryContext queryContext = _queryContext;
+    _queryContext = null;
+    
     if (queryContext != null)
       QueryContext.free(queryContext);
+    
+    _conn.closeStatement(this);
+    
   }
 
-    public boolean isClosed() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isClosed() throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public void setPoolable(boolean poolable) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public void setPoolable(boolean poolable) throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isPoolable() throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isPoolable() throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public <T> T unwrap(Class<T> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public <T> T unwrap(Class<T> iface) throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 
-    public boolean isWrapperFor(Class<?> iface) throws SQLException {
-        throw new UnsupportedOperationException("Not supported yet.");
-    }
+  public boolean isWrapperFor(Class<?> iface) throws SQLException
+  {
+    throw new UnsupportedOperationException("Not supported yet.");
+  }
 }

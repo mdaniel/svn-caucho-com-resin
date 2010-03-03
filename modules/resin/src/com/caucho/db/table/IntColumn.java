@@ -210,7 +210,7 @@ class IntColumn extends Column {
 	       Expr expr, QueryContext context)
     throws SQLException
   {
-    if (expr.isNull(null))
+    if (expr.isNull(context))
       setNull(block, rowOffset);
     else
       setInteger(xa, block, rowOffset, (int) expr.evalLong(context));

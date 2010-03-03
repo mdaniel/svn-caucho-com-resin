@@ -187,10 +187,11 @@ class BinaryColumn extends Column {
 	       Expr expr, QueryContext context)
     throws SQLException
   {
-    if (expr.isNull(null))
+    if (expr.isNull(context))
       setNull(block, rowOffset);
     else {
-      expr.evalToBuffer(context, block, rowOffset + _columnOffset);
+      expr.evalToBuffer(context, block, rowOffset + _columnOffset,
+                        getTypeCode());
       setNonNull(block, rowOffset);
     }
   }
@@ -318,7 +319,8 @@ class BinaryColumn extends Column {
     throws SQLException
   {
     if (expr.evalToBuffer(context, iter.getBuffer(),
-			  iter.getRowOffset() + _columnOffset) >= 0) {
+			  iter.getRowOffset() + _columnOffset,
+			  getTypeCode()) >= 0) {
       setNonNull(iter.getBuffer(), iter.getRowOffset());
     }
     else

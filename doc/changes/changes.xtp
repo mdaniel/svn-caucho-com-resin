@@ -11,8 +11,9 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.4 - Feb 23, 2010">
+<s2 title="4.0.5 - snapshot">
 <ul>
+<li>watchdog: permissions issues with ports and log files (rep by Jamison Novak)</li>
 <li>admin: added HealthJvmDeadlock in com.caucho.env.health (#3912, rep by Jamison Novak, #3912)</li>
 <li>admin: refactored Sample and Probe to com.caucho.env.sample</li>
 <li>hessian: writeReplace should be allowed to return itself (rep by Jamison Novak, #3911)</li>

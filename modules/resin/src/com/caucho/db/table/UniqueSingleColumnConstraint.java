@@ -142,8 +142,7 @@ public class UniqueSingleColumnConstraint extends Constraint {
       // currently this is a static length.  See StringColumn.
       int length = column.getLength();
       int offset = sourceOffset + _uniqueColumn.getColumnOffset();
-      long value = index.lookup(sourceBuffer, offset, length,
-				context.getTransaction());
+      long value = index.lookup(sourceBuffer, offset, length);
 
       if (value != 0) {
 	Table table = sourceRow.getTable();

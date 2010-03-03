@@ -796,6 +796,7 @@ public class Table extends BlockStore {
 
     boolean isOkay = false;
     queryContext.lock();
+    
     try {
       iter.setRow(block, rowOffset);
 

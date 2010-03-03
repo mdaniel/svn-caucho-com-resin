@@ -675,8 +675,7 @@ public class MnodeStore implements AlarmListener {
     } catch (SQLException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
-      if (conn != null)
-        conn.close();
+      conn.close();
     }
 
     return -1;

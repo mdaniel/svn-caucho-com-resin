@@ -72,62 +72,62 @@ public class PreparedStatementImpl extends StatementImpl
   public void clearParameters()
     throws SQLException
   {
-    _query.clearParameters();
+    getQueryContext().clearParameters();
     // throw new UnsupportedOperationException();
   }
 
   public void setNull(int parameter, int sqlType)
     throws SQLException
   {
-    _query.setString(parameter, null);
+    getQueryContext().setString(parameter, null);
   }
 
   public void setNull(int parameter, int sqlType, String typeName)
     throws SQLException
   {
-    _query.setString(parameter, null);
+    getQueryContext().setString(parameter, null);
   }
 
   public void setBoolean(int parameter, boolean x)
     throws SQLException
   {
-    _query.setBoolean(parameter, x);
+    getQueryContext().setBoolean(parameter, x);
   }
 
   public void setByte(int parameter, byte x)
     throws SQLException
   {
-    _query.setLong(parameter, x);
+    getQueryContext().setLong(parameter, x);
   }
 
   public void setShort(int parameter, short x)
     throws SQLException
   {
-    _query.setLong(parameter, x);
+    getQueryContext().setLong(parameter, x);
   }
 
   public void setInt(int parameter, int x)
     throws SQLException
   {
-    _query.setLong(parameter, x);
+    getQueryContext().setLong(parameter, x);
   }
 
   public void setLong(int parameter, long x)
     throws SQLException
   {
-    _query.setLong(parameter, x);
+    getQueryContext().setLong(parameter, x);
   }
 
   public void setFloat(int parameter, float x)
     throws SQLException
   {
-    _query.setDouble(parameter, x);
+    getQueryContext().setDouble(parameter, x);
   }
 
   public void setDouble(int parameter, double x)
     throws SQLException
   {
-    _query.setDouble(parameter, x);
+    getQueryContext().setDouble(parameter, x);
   }
 
   public void setBigDecimal(int parameter, java.math.BigDecimal x)
@@ -139,14 +139,14 @@ public class PreparedStatementImpl extends StatementImpl
   public void setString(int parameter, String x)
     throws SQLException
   {
-    _query.setString(parameter, x);
+    getQueryContext().setString(parameter, x);
   }
 
   public void setBytes(int parameter, byte []x)
     throws SQLException
   {
     if (x != null) {
-      _query.setBytes(parameter, x);
+      getQueryContext().setBytes(parameter, x);
     }
     else
       setNull(parameter, 0);
@@ -200,7 +200,7 @@ public class PreparedStatementImpl extends StatementImpl
   private void setTime(int parameter, long now)
     throws SQLException
   {
-    _query.setDate(parameter, now);
+    getQueryContext().setDate(parameter, now);
   }
 
   public void setAsciiStream(int parameter, InputStream is, int len)
@@ -218,7 +218,7 @@ public class PreparedStatementImpl extends StatementImpl
   public void setBinaryStream(int parameter, InputStream is, int len)
     throws SQLException
   {
-    _query.setBinaryStream(parameter, is, len);
+    getQueryContext().setBinaryStream(parameter, is, len);
   }
 
   public void setCharacterStream(int parameter, Reader is, int len)
@@ -348,8 +348,6 @@ public class PreparedStatementImpl extends StatementImpl
       }
     } finally {
       _count--;
-
-      closeQueryContext(queryContext);
 
       if (xa != null && xa.isAutoCommit())
         xa.rollback();

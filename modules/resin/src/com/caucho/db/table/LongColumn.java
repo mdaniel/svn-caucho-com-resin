@@ -230,7 +230,7 @@ class LongColumn extends Column {
 	       Expr expr, QueryContext context)
     throws SQLException
   {
-    if (expr.isNull(null))
+    if (expr.isNull(context))
       setNull(block, rowOffset);
     else
       setLong(xa, block, rowOffset, expr.evalLong(context));

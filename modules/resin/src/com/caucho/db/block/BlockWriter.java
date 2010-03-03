@@ -93,6 +93,19 @@ public class BlockWriter extends TaskWorker {
     return null;
   }
   
+  void waitForComplete()
+  {
+    synchronized (_writeQueue) {
+      while (_writeQueue.size() > 0) {
+        try {
+          _writeQueue.wait(2000);
+        } catch (Exception e) {
+          
+        }
+      }
+    }
+  }
+  
   @Override
   public void runTask()
   {

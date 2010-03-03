@@ -603,15 +603,18 @@ abstract public class Query {
   /**
    * Clears the paramters.
    */
+  /*
   public void clearParameters()
   {
     for (int i = 0; i < _params.length; i++)
       _params[i].clear();
   }
+  */
 
   /**
    * Sets the indexed parameter as a boolean.
    */
+  /*
   public void setBoolean(int index, boolean value)
   {
     if (index < 1 || _params.length < index) {
@@ -621,10 +624,12 @@ abstract public class Query {
 
     _params[index - 1].setBoolean(value);
   }
+  */
 
   /**
    * Sets the indexed parameter as a string.
    */
+  /*
   public void setString(int index, String value)
   {
     if (index < 1 || _params.length < index) {
@@ -634,10 +639,12 @@ abstract public class Query {
 
     _params[index - 1].setString(value);
   }
+  */
 
   /**
    * Sets the indexed parameter as a long.
    */
+  /*
   public void setLong(int index, long value)
   {
     if (index < 1 || _params.length < index) {
@@ -647,10 +654,12 @@ abstract public class Query {
 
     _params[index - 1].setLong(value);
   }
+  */
 
   /**
    * Sets the indexed parameter as a double.
    */
+  /*
   public void setDouble(int index, double value)
   {
     if (index < 1 || _params.length < index) {
@@ -660,10 +669,12 @@ abstract public class Query {
 
     _params[index - 1].setDouble(value);
   }
+  */
 
   /**
    * Sets the indexed parameter as a date value.
    */
+  /*
   public void setDate(int index, long value)
   {
     if (index < 1 || _params.length < index) {
@@ -673,10 +684,12 @@ abstract public class Query {
 
     _params[index - 1].setDate(value);
   }
+  */
 
   /**
    * Sets the indexed parameter as a binary stream
    */
+  /*
   public void setBinaryStream(int index, InputStream is, int length)
   {
     if (index < 1 || _params.length < index) {
@@ -686,10 +699,12 @@ abstract public class Query {
 
     _params[index - 1].setBinaryStream(is, length);
   }
+  */
 
   /**
    * Sets the indexed parameter as a bytes
    */
+  /*
   public void setBytes(int index, byte []bytes)
   {
     if (index < 1 || _params.length < index) {
@@ -699,6 +714,7 @@ abstract public class Query {
 
     _params[index - 1].setBytes(bytes);
   }
+  */
 
   /**
    * Executes the query.
