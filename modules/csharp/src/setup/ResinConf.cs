@@ -58,8 +58,86 @@ namespace Caucho
 
       return rootDirectory;
     }
-  }
 
+    public String GetJmxPort(String cluster, String server)
+    {
+      XPathNodeIterator jvmArgs
+        = _docNavigator.Select("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server[@id='" + server + "']/caucho:jvm-arg/text()", _xmlnsMgr);
+      while (jvmArgs.MoveNext()) {
+        String value = jvmArgs.Current.Value;
+        if (value.StartsWith("-Dcom.sun.management.jmxremote.port="))
+          return value.Substring(36);
+      }
+
+      jvmArgs = _docNavigator.Select("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server-default/caucho:jvm-arg/text()", _xmlnsMgr);
+      while (jvmArgs.MoveNext()) {
+        String value = jvmArgs.Current.Value;
+        if (value.StartsWith("-Dcom.sun.management.jmxremote.port="))
+          return value.Substring(36);
+      }
+
+      return null;
+    }
+
+    public String GetWatchDogPort(String cluster, String server)
+    {
+      XPathNavigator nav = _docNavigator.SelectSingleNode( "caucho:resin/caucho:cluster[@id='"+cluster+"']/caucho:server[@id='"+server+"']/caucho:watchdog-port/text()",_xmlnsMgr);
+      if (nav != null)
+        return nav.Value;
+
+      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server[@id='" + server + "']/@watchdog-port", _xmlnsMgr);
+      if (nav != null)
+        return nav.Value;
+
+      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server-default/caucho:watchdog-port/text()", _xmlnsMgr);
+      if (nav != null)
+        return nav.Value;
+
+      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server-default/@watchdog-port", _xmlnsMgr);
+      if (nav != null)
+        return nav.Value;
+
+      return null;
+    }
+    public String GetDebugPort(String cluster, String server)
+    {
+      XPathNodeIterator jvmArgs
+        = _docNavigator.Select("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server[@id='" + server + "']/caucho:jvm-arg/text()", _xmlnsMgr);
+      String debug = null;
+      int addressIndex = -1;
+      while (jvmArgs.MoveNext()) {
+        String value = jvmArgs.Current.Value;
+        addressIndex = value.IndexOf("address=");
+        if (addressIndex > -1)
+          debug = value;
+      }
+
+      if (debug == null) {
+        jvmArgs = _docNavigator.Select("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server-default/caucho:jvm-arg/text()", _xmlnsMgr);
+        while (jvmArgs.MoveNext()) {
+          String value = jvmArgs.Current.Value;
+          addressIndex = value.IndexOf("address=");
+          if (addressIndex > -1)
+            debug = value;
+        }
+      }
+      if (debug == null)
+        return debug;
+
+      StringBuilder sb = new StringBuilder();
+      for (int i = addressIndex + 8; i < debug.Length; i++) {
+        if (Char.IsDigit(debug[i]))
+          sb.Append(debug[i]);
+        else if (sb.Length > 0)
+          break;
+      }
+
+      if (sb.Length > 0)
+        return sb.ToString();
+      else
+        return null;
+    }
+  }
 
   public class ResinConfServer
   {

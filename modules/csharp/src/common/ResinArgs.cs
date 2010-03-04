@@ -103,12 +103,12 @@ namespace Caucho
     public String ResinHome { get; private set; }
     public String ResinRoot { get; private set; }
     public String DisplayName { get; private set; }
-    public String ServiceArgs { get; private set; }
     public String Command { get; private set; }
     public String ResinDataDir { get; private set; }
     public String ServiceName { get; private set; }
     public String ResinExe { get; private set; }
     public String Server { get; private set; }
+    public String DynamicServer { get; private set; }
     public String LogDirectory { get; private set; }
     public String JmxPort { get; private set; }
     public String DebugPort { get; private set; }
@@ -155,7 +155,6 @@ namespace Caucho
     {
       StringBuilder jvmArgs = new StringBuilder();
       StringBuilder resinArgs = new StringBuilder();
-      StringBuilder passToServiceArgs = new StringBuilder();
 
       int argsIdx = 1;
       while (argsIdx < arguments.Count) {
@@ -236,14 +235,10 @@ namespace Caucho
                   "-java-home".Equals(arguments[argsIdx])) {
           JavaHome = arguments[argsIdx + 1];
 
-          passToServiceArgs.Append("-java_home ").Append(JavaHome).Append(' ');
-
           argsIdx += 2;
         } else if ("-java_exe".Equals(arguments[argsIdx]) ||
                    "-java-exe".Equals(arguments[argsIdx])) {
           JavaExe = arguments[argsIdx + 1];
-
-          passToServiceArgs.Append("-java_exe ").Append(JavaExe).Append(' ');
 
           argsIdx += 2;
         } else if ("-msjava".Equals(arguments[argsIdx])) {
@@ -255,16 +250,12 @@ namespace Caucho
                    "--resin-home".Equals(arguments[argsIdx])) {
           ResinHome = arguments[argsIdx + 1];
 
-          passToServiceArgs.Append("-resin_home ").Append(ResinHome).Append(' ');
-
           argsIdx += 2;
         } else if ("-server-root".Equals(arguments[argsIdx]) ||
                    "-server_root".Equals(arguments[argsIdx]) ||
                    "--root-directory".Equals(arguments[argsIdx]) ||
                    "-root-directory".Equals(arguments[argsIdx])) {
           ResinRoot = arguments[argsIdx + 1];
-
-          passToServiceArgs.Append("-server-root ").Append(ResinRoot);
 
           argsIdx += 2;
         } else if ("-classpath".Equals(arguments[argsIdx]) ||
@@ -318,7 +309,11 @@ namespace Caucho
                    "--server".Equals(arguments[argsIdx])) {
           Server = arguments[argsIdx + 1];
 
-          resinArgs.Append("-server ").Append(Server).Append(' ');
+          argsIdx += 2;
+        } else if ("-dynamic-server".Equals(arguments[argsIdx]) ||
+                   "--dynamic-server".Equals(arguments[argsIdx])) {
+          DynamicServer = arguments[argsIdx + 1];
+
           argsIdx += 2;
         } else if ("-log-directory".Equals(arguments[argsIdx]) ||
                    "--log-directory".Equals(arguments[argsIdx])) {
@@ -370,7 +365,6 @@ namespace Caucho
 
       JvmArgs = jvmArgs.ToString();
       ResinArguments = resinArgs.ToString();
-      ServiceArgs = passToServiceArgs.ToString();
     }
 
     public bool isValid()

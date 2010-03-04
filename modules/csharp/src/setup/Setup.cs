@@ -35,6 +35,9 @@ using System.Text;
 using System.ServiceProcess;
 using System.Diagnostics;
 using System.DirectoryServices;
+using System.Configuration.Install;
+using System.Runtime.Serialization.Formatters.Binary;
+using System.Xml.Serialization;
 
 namespace Caucho
 {
@@ -44,9 +47,20 @@ namespace Caucho
 
     private String _resinHome;
     private String _apacheHome;
-    public Resin Resin { get; set; }
+    private Resin _resin;
+    public Resin Resin
+    {
+      get { return _resin; }
+      set
+      {
+        if (_resin != null)
+          throw new ApplicationException();
+        _resin = value;
+      }
+    }
     private List<Resin> _resinList = new List<Resin>();
     private List<ResinService> _resinServices = new List<ResinService>();
+    private List<String> _users = null;
 
     private Apache _apache;
     private HashSet<Apache> _apacheSet;
@@ -162,7 +176,6 @@ namespace Caucho
 
       services.Close();
 
-      //check self
       String path = Util.Canonicalize(System.Reflection.Assembly.GetExecutingAssembly().Location);
       while (path.LastIndexOf('\\') > 0) {
         path = path.Substring(0, path.LastIndexOf('\\'));
@@ -234,13 +247,9 @@ namespace Caucho
       services.Close();
     }
 
-    public ResinConf GetResinConf(Resin resin, String conf)
+    public ResinConf GetResinConf(String conf)
     {
-      if (conf.StartsWith("\\\\") || (conf[1] == ':' && conf[2] == '\\') && Char.IsLetter(conf[0])) {
-        return new ResinConf(conf);
-      } else {
-        return new ResinConf(resin.Home + "\\" + conf);
-      }
+      return new ResinConf(conf);
     }
 
     public bool HasResin(Resin resin)
@@ -255,17 +264,27 @@ namespace Caucho
 
     public IList GetResinList()
     {
-      return _resinList;
+      IList result = new List<Resin>(_resinList);
+      return result;
     }
 
-    public void SelectResin(String home)
+    public Resin SelectResin(String home)
     {
       home = Util.Canonicalize(home);
 
-      Resin = new Resin(home);
+      Resin result = null;
 
-      if (!HasResin(Resin))
-        AddResin(Resin);
+      foreach (Resin resin in _resinList) {
+        if (home.Equals(resin.Home))
+          result = resin;
+      }
+
+      if (result == null) {
+        result = new Resin(home);
+        AddResin(result);
+      }
+
+      return result;
     }
 
     public bool HasResinService(ResinService service)
@@ -294,12 +313,7 @@ namespace Caucho
       return _resinServices;
     }
 
-    public bool IsValidResinHome(String dir)
-    {
-      return File.Exists(dir + "\\lib\\resin.jar");
-    }
-
-    public String getConfFile(Resin resin)
+    public String GetResinConfFile(Resin resin)
     {
       if (File.Exists(resin.Home + "\\conf\\resin.xml"))
         return "conf\\resin.xml";
@@ -307,6 +321,26 @@ namespace Caucho
         return "conf\\resin.conf";
       else
         return null;
+    }
+
+    public List<String> GetUsers()
+    {
+      if (_users == null) {
+        List<String> users = new List<String>();
+        users.Add("Local Service");
+        DirectoryEntry groupEntry = new DirectoryEntry("WinNT://.");
+        groupEntry.Children.SchemaFilter.Add("User");
+        IEnumerator e = groupEntry.Children.GetEnumerator();
+        while (e.MoveNext()) {
+          String name = ((DirectoryEntry)e.Current).Name;
+          if (!"Guest".Equals(name))
+            users.Add(name);
+        }
+
+        _users = users;
+      }
+
+      return _users;
     }
 
     public ConfigureInfo SetupIIS(String resinHome, String iisScripts)
@@ -482,19 +516,147 @@ namespace Caucho
       sc.Close();
     }
 
+    private void InstallService(String serviceName, String user, String password)
+    {
+      if (Util.ServiceExists(serviceName)) {
+        //Info(String.Format("\nService {0} appears to be already installed", ServiceName), writer, true);
+      } else {
+        Installer installer = InitInstaller(serviceName, user, password);
+        Hashtable installState = new Hashtable();
+        installer.Install(installState);
+
+        RegistryKey system = Registry.LocalMachine.OpenSubKey("System");
+        RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet");
+        RegistryKey servicesKey = currentControlSet.OpenSubKey("Services");
+        RegistryKey serviceKey = servicesKey.OpenSubKey(serviceName, true);
+
+        StringBuilder builder = new StringBuilder((String)serviceKey.GetValue("ImagePath"));
+        builder.Append(" -service -name ").Append(serviceName).Append(' ');
+
+
+        serviceKey.SetValue("ImagePath", builder.ToString());
+
+        StoreState(installState, serviceName);
+
+        //Info(String.Format("\nInstalled {0} as Windows Service", ServiceName), writer, true);
+      }
+    }
+
+    private void UninstallService(String serviceName)
+    {
+      if (!Util.ServiceExists(serviceName)) {
+        //Info(String.Format("\nService {0} does not appear to be installed", ServiceName), writer, true);
+      } else {
+        Hashtable state = LoadState(serviceName);
+
+        Installer installer = InitInstaller(serviceName, null, null);
+
+        installer.Uninstall(state);
+
+        //Info(String.Format("\nRemoved {0} as Windows Service", ServiceName), writer, true);
+      }
+    }
+
+    private Installer InitInstaller(String serviceName, String user, String password)
+    {
+      TransactedInstaller txInst = new TransactedInstaller();
+      txInst.Context = new InstallContext(null, new String[] { });
+      txInst.Context.Parameters["assemblypath"] = System.Reflection.Assembly.GetExecutingAssembly().Location;
+
+      ServiceProcessInstaller spInst = new ServiceProcessInstaller();
+      if (user != null) {
+        spInst.Username = user;
+        spInst.Password = password;
+        spInst.Account = ServiceAccount.User;
+      } else {
+        spInst.Account = ServiceAccount.LocalSystem;
+      }
+
+      txInst.Installers.Add(spInst);
+
+      ServiceInstaller srvInst = new ServiceInstaller();
+      srvInst.ServiceName = serviceName;
+      srvInst.DisplayName = serviceName;
+      srvInst.StartType = ServiceStartMode.Manual;
+
+      txInst.Installers.Add(srvInst);
+
+      return txInst;
+    }
+
+    private void StoreState(Hashtable state, String serviceName)
+    {
+      String dir = Environment.SpecialFolder.CommonApplicationData.ToString() + @"\Caucho\services";
+      DirectoryInfo info;
+      if ((info = Directory.CreateDirectory(dir)) != null && info.Exists) {
+        String file = dir + @"\" + serviceName + ".srv";
+
+        FileStream fs = new FileStream(file, FileMode.Create, FileAccess.Write);
+        BinaryFormatter serializer = new BinaryFormatter();
+        serializer.Serialize(fs, state);
+        fs.Flush();
+        fs.Close();
+      }
+    }
+
+    private Hashtable LoadState(String serviceName)
+    {
+      String file = Environment.SpecialFolder.CommonApplicationData.ToString() + @"\Caucho\services\" + serviceName + ".srv";
+      if (File.Exists(file)) {
+        Hashtable state = null;
+        FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
+        BinaryFormatter serializer = new BinaryFormatter();
+        state = (Hashtable)serializer.Deserialize(fs);
+        fs.Close();
+        return state;
+      } else {
+        return FakeState();
+      }
+    }
+
     [STAThread]
     public static void Main(String[] args)
     {
+      /*      Hashtable state = null;
+            FileStream fs = new FileStream(@"C:\apservers\resin-pro-4.0.3\resin-data\Resin.srv", FileMode.Open, FileAccess.Read);
+            BinaryFormatter serializer = new BinaryFormatter();
+            state = (Hashtable)serializer.Deserialize(fs);
+            FakeState();
+            new XmlSerializer(typeof(Hashtable)).Serialize(new StreamWriter(@"C:\apservers\resin-pro-4.0.3\resin-data\Resin.srv.xml"), state);
+            fs.Close();*/
       Application.EnableVisualStyles();
       Application.SetCompatibleTextRenderingDefault(false);
       SetupForm setupForm = new SetupForm(new Setup());
       Application.Run(setupForm);
     }
+
+    public static Hashtable FakeState()
+    {
+      Hashtable state = new Hashtable();
+      IDictionary[] states = new IDictionary[2];
+      states[0] = new Hashtable();
+      states[0]["_reserved_nestedSavedStates"] = new IDictionary[0];
+      states[0]["Account"] = ServiceAccount.LocalSystem;
+
+      states[1] = new Hashtable();
+      IDictionary[] substates = new IDictionary[1];
+      substates[0] = new Hashtable();
+      substates[0]["_reserved_nestedSavedStates"] = new IDictionary[0];
+      substates[0]["alreadyRegistered"] = false;
+      substates[0]["logExists"] = true;
+      substates[0]["baseInstalledAndPlatformOK"] = true;
+
+      states[1]["_reserved_nestedSavedStates"] = substates;
+      states[1]["installed"] = true;
+
+      state["_reserved_nestedSavedStates"] = states;
+
+      return state;
+    }
   }
 
   class DirSet : ArrayList
   {
-    //perf doesn't matter
     public override int Add(object value)
     {
       int index = base.IndexOf(value);
@@ -559,19 +721,20 @@ namespace Caucho
       return Home.GetHashCode();
     }
 
+    #region IEquatable Members
     public bool Equals(Resin obj)
     {
       return Home.Equals(obj.Home);
     }
+    #endregion
 
     public override string ToString()
     {
       return Home;
     }
-
   }
 
-  public class ResinService : IEquatable<ResinService>
+  public class ResinService : IEquatable<ResinService>, ICloneable
   {
     public String Home { get; set; }
     public String Root { get; set; }
@@ -584,15 +747,46 @@ namespace Caucho
     public String JavaHome { get; set; }
     public String JavaExe { get; set; }
     public String Server { get; set; }
+    public String DynamicServer { get; set; }
     public int DebugPort { get; set; }
     public int JmxPort { get; set; }
+    public int WatchdogPort { get; set; }
     public String ExtraParams { get; set; }
 
     public ResinService()
     {
       JmxPort = -1;
       DebugPort = -1;
+      WatchdogPort = -1;
       IsPreview = false;
+    }
+
+    public String GetCommandLine()
+    {
+      StringBuilder sb = new StringBuilder();
+      sb.Append("-conf ").Append(Conf);
+      sb.Append(" -resin-home ").Append(Home);
+      sb.Append(" -root-directory ").Append(Root);
+      sb.Append(" -log-directory ").Append(LogDirectory);
+
+      if (Server != null && !"".Equals(Server))
+        sb.Append(" -server ").Append(Server);
+      else if (DynamicServer != null)
+        sb.Append(" -dynamic-server ").Append(DynamicServer);
+      
+      if (IsPreview)
+        sb.Append(" -preview");
+
+      if (DebugPort > 0)
+        sb.Append(" -debug-port ").Append(DebugPort.ToString());
+
+      if(JmxPort > 0)
+        sb.Append(" -jmx-port ").Append(JmxPort.ToString());
+
+      if (WatchdogPort > 0)
+        sb.Append(" -watchdog-port ").Append(WatchdogPort.ToString());
+
+      return sb.ToString();
     }
 
     public override int GetHashCode()
@@ -623,5 +817,18 @@ namespace Caucho
 
       return result.ToString();
     }
+
+    #region ICloneable Members
+
+    public object Clone()
+    {
+      return this.MemberwiseClone();
+    }
+
+    #endregion
+  }
+
+  class StateNofFoundException : Exception
+  {
   }
 }

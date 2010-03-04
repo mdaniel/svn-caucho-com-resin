@@ -35,7 +35,6 @@ using System.Diagnostics;
 using System.Windows.Forms;
 using System.ServiceProcess;
 using System.Threading;
-using System.Configuration.Install;
 using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Principal;
 
@@ -176,9 +175,7 @@ namespace Caucho
       if (!Directory.Exists(_resinDataDir))
         Directory.CreateDirectory(_resinDataDir);
 
-      if (ResinArgs.IsInstall || ResinArgs.IsUnInstall) {
-        return InstallOrRemoveService();
-      } else if (ResinArgs.IsService) {
+      if (ResinArgs.IsService) {
         ServiceBase.Run(new ServiceBase[] { this });
 
         return 0;
@@ -205,213 +202,7 @@ namespace Caucho
       }
     }
 
-    private int InstallOrRemoveService()
-    {
-      Exception exception = null;
-      int exitCode = 1;
-
-      TextWriter stdOut = Console.Out;
-      TextWriter stdErr = Console.Error;
-
-      //buffer all the output of the Installer for use in case of error only.
-      StringWriter output = new StringWriter();
-
-      Console.SetOut(output);
-      Console.SetError(output);
-
-      bool success = false;
-
-      try {
-        if (ResinArgs.IsInstall)
-          InstallService(stdOut);
-        else
-          UninstallService(stdOut);
-
-        success = true;
-      }
-      catch (StateNofFoundException) {
-        //
-      }
-      catch (Exception e) {
-        exception = e;
-
-        Exception cause = e.GetBaseException();
-
-        if (cause is System.Security.SecurityException) {
-          try {
-            //occurs on Vista and supposedly Server 2008 when user is an administrator
-            //but program is started using the 'user' (secondary) security token with
-            //all the administrative privileges stripped away
-            //this should not occur when the UAC is disabled.
-            Info("Starting service installation with elevated security privileges...", stdOut, true);
-
-            ProcessStartInfo psi = new ProcessStartInfo();
-            psi.FileName = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
-            _args.Append("--child");
-            psi.Arguments = _args.ToString();
-
-            psi.Verb = "runas";
-            psi.UseShellExecute = true;
-            psi.WindowStyle = ProcessWindowStyle.Hidden;
-            psi.LoadUserProfile = false;
-
-            Process process = Process.Start(psi);
-
-            while (!process.HasExited)
-              process.WaitForExit(500);
-
-            exitCode = process.ExitCode;
-
-            if (exitCode == 0)
-              success = true;
-          }
-          catch (Exception pe) {
-            Error("Failed to install using elevated security privileges due to:", pe);
-          }
-        } else {
-          Info("Service installation requires administrative privileges.");
-        }
-      }
-      finally {
-        Console.SetOut(stdOut);
-        Console.SetError(stdErr);
-      }
-
-      if (success) {
-        return 0;
-      } else {
-        if (exception != null)
-          Error("ServiceInstaller failed with due to:", exception);
-
-        Info(output.ToString());
-      }
-
-      return exitCode;
-    }
-
-    private bool ServiceExists(String serviceName)
-    {
-      ServiceController[] services = ServiceController.GetServices();
-
-      foreach (ServiceController service in services) {
-        if (ServiceName.Equals(service.ServiceName)) {
-          return true;
-        }
-      }
-
-      return false;
-    }
-
-    private void InstallService(TextWriter writer)
-    {
-      if (ServiceExists(ServiceName)) {
-        Info(String.Format("\nService {0} appears to be already installed", ServiceName), writer, true);
-      } else {
-        Installer installer = InitInstaller();
-        Hashtable installState = new Hashtable();
-        installer.Install(installState);
-
-        RegistryKey system = Registry.LocalMachine.OpenSubKey("System");
-        RegistryKey currentControlSet = system.OpenSubKey("CurrentControlSet");
-        RegistryKey servicesKey = currentControlSet.OpenSubKey("Services");
-        RegistryKey serviceKey = servicesKey.OpenSubKey(ServiceName, true);
-
-        StringBuilder builder = new StringBuilder((String)serviceKey.GetValue("ImagePath"));
-        builder.Append(" -service -name ").Append(ServiceName).Append(' ');
-
-        if (ResinArgs.ServiceArgs.Length > 0)
-          builder.Append(ResinArgs.ServiceArgs).Append(' ');
-
-        if (ResinArgs.JvmArgs.Length > 0)
-          builder.Append(ResinArgs.JvmArgs).Append(' ');
-
-        if (ResinArgs.ResinArguments.Length > 0)
-          builder.Append(ResinArgs.ResinArguments).Append(' ');
-
-        serviceKey.SetValue("ImagePath", builder.ToString());
-
-        StoreState(installState, ServiceName);
-
-        Info(String.Format("\nInstalled {0} as Windows Service", ServiceName), writer, true);
-      }
-    }
-
-    private void UninstallService(TextWriter writer)
-    {
-      if (!ServiceExists(ServiceName)) {
-        Info(String.Format("\nService {0} does not appear to be installed", ServiceName), writer, true);
-      } else {
-        Hashtable state = LoadState(ServiceName);
-
-        Installer installer = InitInstaller();
-
-        installer.Uninstall(state);
-
-        Info(String.Format("\nRemoved {0} as Windows Service", ServiceName), writer, true);
-      }
-    }
-
-    private Installer InitInstaller()
-    {
-      TransactedInstaller txInst = new TransactedInstaller();
-      txInst.Context = new InstallContext(null, new String[] { });
-      txInst.Context.Parameters["assemblypath"] = System.Reflection.Assembly.GetExecutingAssembly().Location;
-
-      ServiceProcessInstaller spInst = new ServiceProcessInstaller();
-      if (ResinArgs.User != null) {
-        spInst.Username = ResinArgs.User;
-        spInst.Password = ResinArgs.Password;
-        spInst.Account = ServiceAccount.User;
-      } else {
-        spInst.Account = ServiceAccount.LocalSystem;
-      }
-
-      txInst.Installers.Add(spInst);
-
-      ServiceInstaller srvInst = new ServiceInstaller();
-      srvInst.ServiceName = ServiceName;
-      srvInst.DisplayName = _displayName;
-      srvInst.StartType = ServiceStartMode.Manual;
-
-      txInst.Installers.Add(srvInst);
-
-      return txInst;
-    }
-
-    private void StoreState(Hashtable state, String serviceName)
-    {
-      FileStream fs = new FileStream(_resinDataDir + '\\' + serviceName + ".srv", FileMode.Create, FileAccess.Write);
-      BinaryFormatter serializer = new BinaryFormatter();
-      serializer.Serialize(fs, state);
-      fs.Flush();
-      fs.Close();
-    }
-
-    private Hashtable LoadState(String serviceName)
-    {
-      String stateFile = _resinDataDir + '\\' + serviceName + ".srv";
-
-      if (!File.Exists(stateFile))
-        stateFile = GetResinAppDataDir() + '\\' + serviceName + ".srv";
-
-      Hashtable state = null;
-      try {
-        FileStream fs = new FileStream(stateFile, FileMode.Open, FileAccess.Read);
-        BinaryFormatter serializer = new BinaryFormatter();
-        state = (Hashtable)serializer.Deserialize(fs);
-        fs.Close();
-      }
-      catch (Exception e) {
-        Error(String.Format("Cannot load service installation state file '{0}' due to:", stateFile), e);
-
-        throw new StateNofFoundException();
-      }
-
-      return state;
-    }
-
-    private static String GetResinAppDataDir()
+   private static String GetResinAppDataDir()
     {
       return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + '\\' + CAUCHO_APP_DATA;
     }
@@ -721,9 +512,5 @@ namespace Caucho
     {
       Info(String.Format(ResinArgs.USAGE, name));
     }
-  }
-
-  class StateNofFoundException : Exception
-  {
   }
 }

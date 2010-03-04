@@ -33,6 +33,7 @@ using System.DirectoryServices;
 using System.Text;
 using System.IO;
 using Microsoft.Win32;
+using System.ServiceProcess;
 
 namespace Caucho
 {
@@ -82,7 +83,7 @@ namespace Caucho
 
     public static bool IsResinHome(String dir)
     {
-      if (File.Exists(dir + "\\lib\\resin.jar"))
+      if (File.Exists(dir + @"\lib\resin.jar"))
         return true;
 
       return false;
@@ -236,11 +237,11 @@ namespace Caucho
 
     public static bool IsAbsolutePath(String path)
     {
-      if (Char.IsLetter(path[0]) && ':'.Equals(path[1]) && '\\'.Equals(path[2]))
+      if (path.Length > 2 && Char.IsLetter(path[0]) && ':'.Equals(path[1]) && '\\'.Equals(path[2]))
         return true;
-      else if ('\\'.Equals(path[0]) && '\\'.Equals(path[1]))
+      else if (path.Length > 1 && '\\'.Equals(path[0]) && '\\'.Equals(path[1]))
         return true;
-      else if ('/'.Equals(path[0]))
+      else if (path.Length > 0 && '/'.Equals(path[0]))
         return true;
       else 
         return false;
@@ -254,6 +255,18 @@ namespace Caucho
       }
 
       throw new ArgumentOutOfRangeException("depth is out of range");
+    }
+    public static bool ServiceExists(String serviceName)
+    {
+      ServiceController[] services = ServiceController.GetServices();
+
+      foreach (ServiceController service in services) {
+        if (serviceName.Equals(service.ServiceName)) {
+          return true;
+        }
+      }
+
+      return false;
     }
   }
 }

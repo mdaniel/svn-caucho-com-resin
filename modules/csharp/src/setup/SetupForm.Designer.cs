@@ -107,6 +107,10 @@ namespace Caucho
       this._selectApacheBtn = new System.Windows.Forms.Button();
       this._folderDlg = new System.Windows.Forms.FolderBrowserDialog();
       this._fileDlg = new System.Windows.Forms.OpenFileDialog();
+      this._extraParams = new System.Windows.Forms.Label();
+      this._extraParamsTxbBox = new System.Windows.Forms.TextBox();
+      this._watchDogPortLbl = new System.Windows.Forms.Label();
+      this._watchdogPortTxtBox = new System.Windows.Forms.TextBox();
       this._tableLayoutPanel1.SuspendLayout();
       this._generalGrp.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this._resinLogoImg)).BeginInit();
@@ -126,9 +130,9 @@ namespace Caucho
       this._tableLayoutPanel1.Name = "_tableLayoutPanel1";
       this._tableLayoutPanel1.RowCount = 2;
       this._tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this._tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 421F));
+      this._tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 486F));
       this._tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this._tableLayoutPanel1.Size = new System.Drawing.Size(472, 507);
+      this._tableLayoutPanel1.Size = new System.Drawing.Size(472, 569);
       this._tableLayoutPanel1.TabIndex = 0;
       // 
       // _generalGrp
@@ -142,7 +146,7 @@ namespace Caucho
       this._generalGrp.Dock = System.Windows.Forms.DockStyle.Fill;
       this._generalGrp.Location = new System.Drawing.Point(3, 3);
       this._generalGrp.Name = "_generalGrp";
-      this._generalGrp.Size = new System.Drawing.Size(466, 80);
+      this._generalGrp.Size = new System.Drawing.Size(466, 77);
       this._generalGrp.TabIndex = 0;
       this._generalGrp.TabStop = false;
       this._generalGrp.Text = "General";
@@ -153,7 +157,8 @@ namespace Caucho
       this._resinCmbBox.Name = "_resinCmbBox";
       this._resinCmbBox.Size = new System.Drawing.Size(295, 21);
       this._resinCmbBox.TabIndex = 1;
-      this._resinCmbBox.SelectedValueChanged += new System.EventHandler(this.ResinSelectectionChanged);
+      this._resinCmbBox.Validating += new System.ComponentModel.CancelEventHandler(this.ResinCmbBoxValidating);
+      this._resinCmbBox.SelectionChangeCommitted += new System.EventHandler(this.ResinSelectectionCommitted);
       // 
       // _selectResinBtn
       // 
@@ -191,14 +196,18 @@ namespace Caucho
       this._tabControl.Controls.Add(this._servicesTab);
       this._tabControl.Controls.Add(this._pluginsTab);
       this._tabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-      this._tabControl.Location = new System.Drawing.Point(3, 89);
+      this._tabControl.Location = new System.Drawing.Point(3, 86);
       this._tabControl.Name = "_tabControl";
       this._tabControl.SelectedIndex = 0;
-      this._tabControl.Size = new System.Drawing.Size(466, 415);
+      this._tabControl.Size = new System.Drawing.Size(466, 480);
       this._tabControl.TabIndex = 1;
       // 
       // _servicesTab
       // 
+      this._servicesTab.Controls.Add(this._watchDogPortLbl);
+      this._servicesTab.Controls.Add(this._watchdogPortTxtBox);
+      this._servicesTab.Controls.Add(this._extraParamsTxbBox);
+      this._servicesTab.Controls.Add(this._extraParams);
       this._servicesTab.Controls.Add(this._serverCmbBox);
       this._servicesTab.Controls.Add(this._serverLbl);
       this._servicesTab.Controls.Add(this._debugPortLbl);
@@ -233,7 +242,7 @@ namespace Caucho
       this._servicesTab.Location = new System.Drawing.Point(4, 22);
       this._servicesTab.Name = "_servicesTab";
       this._servicesTab.Padding = new System.Windows.Forms.Padding(3);
-      this._servicesTab.Size = new System.Drawing.Size(458, 389);
+      this._servicesTab.Size = new System.Drawing.Size(458, 454);
       this._servicesTab.TabIndex = 0;
       this._servicesTab.Text = "Resin Windows Service Install";
       this._servicesTab.UseVisualStyleBackColor = true;
@@ -245,11 +254,12 @@ namespace Caucho
       this._serverCmbBox.Name = "_serverCmbBox";
       this._serverCmbBox.Size = new System.Drawing.Size(281, 21);
       this._serverCmbBox.TabIndex = 40;
+      this._serverCmbBox.SelectedValueChanged += new System.EventHandler(this.ServerSelectionChanged);
       // 
       // _serverLbl
       // 
       this._serverLbl.AutoSize = true;
-      this._serverLbl.Location = new System.Drawing.Point(16, 271);
+      this._serverLbl.Location = new System.Drawing.Point(15, 274);
       this._serverLbl.Name = "_serverLbl";
       this._serverLbl.Size = new System.Drawing.Size(38, 13);
       this._serverLbl.TabIndex = 39;
@@ -258,7 +268,7 @@ namespace Caucho
       // _debugPortLbl
       // 
       this._debugPortLbl.AutoSize = true;
-      this._debugPortLbl.Location = new System.Drawing.Point(18, 326);
+      this._debugPortLbl.Location = new System.Drawing.Point(15, 354);
       this._debugPortLbl.Name = "_debugPortLbl";
       this._debugPortLbl.Size = new System.Drawing.Size(61, 13);
       this._debugPortLbl.TabIndex = 38;
@@ -266,7 +276,7 @@ namespace Caucho
       // 
       // _debugPortTxtBox
       // 
-      this._debugPortTxtBox.Location = new System.Drawing.Point(101, 322);
+      this._debugPortTxtBox.Location = new System.Drawing.Point(101, 349);
       this._debugPortTxtBox.Name = "_debugPortTxtBox";
       this._debugPortTxtBox.Size = new System.Drawing.Size(281, 20);
       this._debugPortTxtBox.TabIndex = 37;
@@ -274,7 +284,7 @@ namespace Caucho
       // _jmxPortLbl
       // 
       this._jmxPortLbl.AutoSize = true;
-      this._jmxPortLbl.Location = new System.Drawing.Point(18, 300);
+      this._jmxPortLbl.Location = new System.Drawing.Point(16, 327);
       this._jmxPortLbl.Name = "_jmxPortLbl";
       this._jmxPortLbl.Size = new System.Drawing.Size(50, 13);
       this._jmxPortLbl.TabIndex = 36;
@@ -282,7 +292,7 @@ namespace Caucho
       // 
       // _jmxPortTxtBox
       // 
-      this._jmxPortTxtBox.Location = new System.Drawing.Point(101, 296);
+      this._jmxPortTxtBox.Location = new System.Drawing.Point(101, 322);
       this._jmxPortTxtBox.Name = "_jmxPortTxtBox";
       this._jmxPortTxtBox.Size = new System.Drawing.Size(281, 20);
       this._jmxPortTxtBox.TabIndex = 35;
@@ -303,6 +313,8 @@ namespace Caucho
       this._resinConfTxtBox.Name = "_resinConfTxtBox";
       this._resinConfTxtBox.Size = new System.Drawing.Size(281, 20);
       this._resinConfTxtBox.TabIndex = 27;
+      this._resinConfTxtBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this._resinConfTxtBox_KeyPress);
+      this._resinConfTxtBox.Validating += new System.ComponentModel.CancelEventHandler(this.ResinConfTxtBoxValidating);
       // 
       // _servicePassTxtBox
       // 
@@ -326,6 +338,7 @@ namespace Caucho
       this._logDirTxtBox.Name = "_logDirTxtBox";
       this._logDirTxtBox.Size = new System.Drawing.Size(281, 20);
       this._logDirTxtBox.TabIndex = 10;
+      this._logDirTxtBox.Validating += new System.ComponentModel.CancelEventHandler(this.LogDirTxtBoxValidating);
       // 
       // _resinRootTxtBox
       // 
@@ -333,7 +346,8 @@ namespace Caucho
       this._resinRootTxtBox.Name = "_resinRootTxtBox";
       this._resinRootTxtBox.Size = new System.Drawing.Size(281, 20);
       this._resinRootTxtBox.TabIndex = 7;
-      this._resinRootTxtBox.TextChanged += new System.EventHandler(this.ResinRootChanged);
+      this._resinRootTxtBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ResinRootTxtBoxKeyPress);
+      this._resinRootTxtBox.Validating += new System.ComponentModel.CancelEventHandler(this.ResinRootTxtBoxValidating);
       // 
       // _javaHomeCmbBox
       // 
@@ -341,6 +355,8 @@ namespace Caucho
       this._javaHomeCmbBox.Name = "_javaHomeCmbBox";
       this._javaHomeCmbBox.Size = new System.Drawing.Size(281, 21);
       this._javaHomeCmbBox.TabIndex = 4;
+      this._javaHomeCmbBox.Validating += new System.ComponentModel.CancelEventHandler(this.JavaHomeCmbBoxValidating);
+      this._javaHomeCmbBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.JavaHomeCmbBoxKeyPress);
       // 
       // _resinConfLbl
       // 
@@ -355,12 +371,14 @@ namespace Caucho
       // 
       this._previewCmbBox.FormattingEnabled = true;
       this._previewCmbBox.Items.AddRange(new object[] {
-            "Yes",
-            "No"});
+            "No",
+            "Yes"});
       this._previewCmbBox.Location = new System.Drawing.Point(101, 241);
       this._previewCmbBox.Name = "_previewCmbBox";
       this._previewCmbBox.Size = new System.Drawing.Size(281, 21);
       this._previewCmbBox.TabIndex = 25;
+      this._previewCmbBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PreviewCmbBoxKeyPress);
+      this._previewCmbBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this._previewCmbBox_KeyDown);
       // 
       // _previewLbl
       // 
@@ -399,16 +417,17 @@ namespace Caucho
       // 
       // _serviceRefreshBtn
       // 
-      this._serviceRefreshBtn.Location = new System.Drawing.Point(391, 359);
+      this._serviceRefreshBtn.Location = new System.Drawing.Point(391, 422);
       this._serviceRefreshBtn.Name = "_serviceRefreshBtn";
       this._serviceRefreshBtn.Size = new System.Drawing.Size(61, 22);
       this._serviceRefreshBtn.TabIndex = 18;
       this._serviceRefreshBtn.Text = "Refresh";
       this._serviceRefreshBtn.UseVisualStyleBackColor = true;
+      this._serviceRefreshBtn.Click += new System.EventHandler(this.ServiceRefreshBtnClick);
       // 
       // _serviceRemoveBtn
       // 
-      this._serviceRemoveBtn.Location = new System.Drawing.Point(293, 359);
+      this._serviceRemoveBtn.Location = new System.Drawing.Point(293, 422);
       this._serviceRemoveBtn.Name = "_serviceRemoveBtn";
       this._serviceRemoveBtn.Size = new System.Drawing.Size(93, 22);
       this._serviceRemoveBtn.TabIndex = 17;
@@ -417,12 +436,13 @@ namespace Caucho
       // 
       // serviceInstallBtn
       // 
-      this.serviceInstallBtn.Location = new System.Drawing.Point(195, 359);
+      this.serviceInstallBtn.Location = new System.Drawing.Point(195, 422);
       this.serviceInstallBtn.Name = "serviceInstallBtn";
       this.serviceInstallBtn.Size = new System.Drawing.Size(93, 22);
       this.serviceInstallBtn.TabIndex = 16;
       this.serviceInstallBtn.Text = "Install/Change";
       this.serviceInstallBtn.UseVisualStyleBackColor = true;
+      this.serviceInstallBtn.Click += new System.EventHandler(this.ServiceInstallBtnClick);
       // 
       // _serviceNameLbl
       // 
@@ -436,7 +456,7 @@ namespace Caucho
       // _servicesLbl
       // 
       this._servicesLbl.AutoSize = true;
-      this._servicesLbl.Location = new System.Drawing.Point(16, 13);
+      this._servicesLbl.Location = new System.Drawing.Point(15, 10);
       this._servicesLbl.Name = "_servicesLbl";
       this._servicesLbl.Size = new System.Drawing.Size(48, 13);
       this._servicesLbl.TabIndex = 13;
@@ -449,6 +469,7 @@ namespace Caucho
       this._servicesCmbBox.Name = "_servicesCmbBox";
       this._servicesCmbBox.Size = new System.Drawing.Size(281, 21);
       this._servicesCmbBox.TabIndex = 12;
+      this._servicesCmbBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ServicesCmbBoxKeyPress);
       this._servicesCmbBox.SelectedValueChanged += new System.EventHandler(this.ServiceSelectionChanged);
       // 
       // _selectLogDirBtn
@@ -459,6 +480,7 @@ namespace Caucho
       this._selectLogDirBtn.TabIndex = 11;
       this._selectLogDirBtn.Text = "...";
       this._selectLogDirBtn.UseVisualStyleBackColor = true;
+      this._selectLogDirBtn.Click += new System.EventHandler(this.SelectLogDirectory);
       // 
       // _logDirLbl
       // 
@@ -521,7 +543,7 @@ namespace Caucho
       this._pluginsTab.Location = new System.Drawing.Point(4, 22);
       this._pluginsTab.Name = "_pluginsTab";
       this._pluginsTab.Padding = new System.Windows.Forms.Padding(3);
-      this._pluginsTab.Size = new System.Drawing.Size(458, 389);
+      this._pluginsTab.Size = new System.Drawing.Size(458, 431);
       this._pluginsTab.TabIndex = 1;
       this._pluginsTab.Text = "Web Server Plugins";
       this._pluginsTab.UseVisualStyleBackColor = true;
@@ -566,7 +588,7 @@ namespace Caucho
       // 
       // _refreshWebBtn
       // 
-      this._refreshWebBtn.Location = new System.Drawing.Point(391, 359);
+      this._refreshWebBtn.Location = new System.Drawing.Point(394, 394);
       this._refreshWebBtn.Name = "_refreshWebBtn";
       this._refreshWebBtn.Size = new System.Drawing.Size(61, 22);
       this._refreshWebBtn.TabIndex = 26;
@@ -575,7 +597,7 @@ namespace Caucho
       // 
       // _removeWebBtn
       // 
-      this._removeWebBtn.Location = new System.Drawing.Point(293, 359);
+      this._removeWebBtn.Location = new System.Drawing.Point(296, 394);
       this._removeWebBtn.Name = "_removeWebBtn";
       this._removeWebBtn.Size = new System.Drawing.Size(93, 22);
       this._removeWebBtn.TabIndex = 25;
@@ -584,7 +606,7 @@ namespace Caucho
       // 
       // _installWebBtn
       // 
-      this._installWebBtn.Location = new System.Drawing.Point(194, 359);
+      this._installWebBtn.Location = new System.Drawing.Point(197, 394);
       this._installWebBtn.Name = "_installWebBtn";
       this._installWebBtn.Size = new System.Drawing.Size(93, 22);
       this._installWebBtn.TabIndex = 24;
@@ -617,6 +639,40 @@ namespace Caucho
       // 
       this._fileDlg.FileName = "openFileDialog1";
       // 
+      // _extraParams
+      // 
+      this._extraParams.AutoSize = true;
+      this._extraParams.Location = new System.Drawing.Point(15, 379);
+      this._extraParams.Name = "_extraParams";
+      this._extraParams.Size = new System.Drawing.Size(69, 13);
+      this._extraParams.TabIndex = 41;
+      this._extraParams.Text = "Extra Params";
+      // 
+      // _extraParamsTxbBox
+      // 
+      this._extraParamsTxbBox.Location = new System.Drawing.Point(101, 376);
+      this._extraParamsTxbBox.Name = "_extraParamsTxbBox";
+      this._extraParamsTxbBox.Size = new System.Drawing.Size(281, 20);
+      this._extraParamsTxbBox.TabIndex = 42;
+      // 
+      // _watchDogPortLbl
+      // 
+      this._watchDogPortLbl.AutoSize = true;
+      this._watchDogPortLbl.Location = new System.Drawing.Point(15, 300);
+      this._watchDogPortLbl.Name = "_watchDogPortLbl";
+      this._watchDogPortLbl.Size = new System.Drawing.Size(81, 13);
+      this._watchDogPortLbl.TabIndex = 44;
+      this._watchDogPortLbl.Text = "WatchDog Port";
+      this._watchDogPortLbl.Click += new System.EventHandler(this.label1_Click);
+      // 
+      // _watchdogPortTxtBox
+      // 
+      this._watchdogPortTxtBox.Location = new System.Drawing.Point(101, 295);
+      this._watchdogPortTxtBox.Name = "_watchdogPortTxtBox";
+      this._watchdogPortTxtBox.Size = new System.Drawing.Size(281, 20);
+      this._watchdogPortTxtBox.TabIndex = 43;
+      this._watchdogPortTxtBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+      // 
       // SetupForm
       // 
       this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
@@ -629,6 +685,7 @@ namespace Caucho
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "SetupForm";
       this.Text = "Resin Setup";
+      this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SetupFormClosing);
       this._tableLayoutPanel1.ResumeLayout(false);
       this._tableLayoutPanel1.PerformLayout();
       this._generalGrp.ResumeLayout(false);
@@ -697,5 +754,9 @@ namespace Caucho
     private System.Windows.Forms.FolderBrowserDialog _folderDlg;
     private System.Windows.Forms.OpenFileDialog _fileDlg;
     private System.Windows.Forms.ComboBox _apacheDirs;
+    private System.Windows.Forms.Label _extraParams;
+    private System.Windows.Forms.TextBox _extraParamsTxbBox;
+    private System.Windows.Forms.Label _watchDogPortLbl;
+    private System.Windows.Forms.TextBox _watchdogPortTxtBox;
   }
 }
