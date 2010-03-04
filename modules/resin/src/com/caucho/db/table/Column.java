@@ -553,8 +553,7 @@ abstract public class Column {
 		   xa);
     */
 
-    index.remove(block, rowOffset + getColumnOffset(), getLength(),
-		 xa);
+    index.remove(block, rowOffset + getColumnOffset(), getLength());
   }
   
   /**

@@ -740,8 +740,7 @@ public final class BTree {
   
   public void remove(byte []keyBuffer,
 		      int keyOffset,
-		      int keyLength,
-		      Transaction xa)
+		      int keyLength)
     throws SQLException
   {
     try {

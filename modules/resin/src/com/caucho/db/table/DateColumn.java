@@ -379,6 +379,6 @@ class DateColumn extends Column {
     BTree index = getIndex();
 
     if (index != null)
-      index.remove(block, rowOffset + _columnOffset, 8, xa);
+      index.remove(block, rowOffset + _columnOffset, 8);
   }
 }

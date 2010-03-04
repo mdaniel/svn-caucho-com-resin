@@ -89,6 +89,7 @@ class StringExpr extends Expr {
    *
    * @return the length of the result
    */
+  @Override
   public int evalToBuffer(QueryContext context,
 			  byte []buffer,
 			  int offset)
@@ -96,11 +97,38 @@ class StringExpr extends Expr {
   {
     String v = evalString(context);
 
-    for (int i = 0; i < v.length(); i++) {
+    int len = v.length();
+    for (int i = 0; i < len; i++) {
       buffer[offset + i] = (byte) v.charAt(i);
     }
 
-    return v.length();
+    return len;
+  }
+
+  /**
+   * Evaluates the expression to a buffer
+   *
+   * @param result the result buffer
+   *
+   * @return the length of the result
+   */
+  @Override
+  public byte []evalBytes(QueryContext context)
+    throws SQLException
+  {
+    String v = evalString(context);
+    
+    if (v == null)
+      return null;
+    
+    int len = v.length();
+    byte []value = new byte[v.length()];
+    
+    for (int i = 0; i < len; i++) {
+      value[i] = (byte) v.charAt(i);
+    }
+
+    return value;
   }
 
   public String toString()

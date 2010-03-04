@@ -166,7 +166,7 @@ public final class IndexCache
       value.setValue(0); // any updates will get written by the thread
     }
     else {
-      btree.remove(buffer, offset, length, xa);
+      btree.remove(buffer, offset, length);
     }
   }
 
@@ -258,8 +258,7 @@ public final class IndexCache
                          value, true);
           }
           else {
-            btree.remove(key.getBuffer(), key.getOffset(), key.getLength(),
-                         xa);
+            btree.remove(key.getBuffer(), key.getOffset(), key.getLength());
           }
         }
 	  

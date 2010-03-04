@@ -282,11 +282,13 @@ public class SelectResult {
       {
 	int len = read();
 	
-	byte []bytes = new byte[len];
+	char []chars = new char[len];
+	
+	for (int i = 0; i < len; i++) {
+	  chars[i] = (char) (read() & 0xff);
+	}
 
-	read(bytes, 0, len);
-
-	return toHex(bytes);
+	return new String(chars);
       }
 
 

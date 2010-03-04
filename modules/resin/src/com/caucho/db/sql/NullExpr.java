@@ -65,10 +65,27 @@ class NullExpr extends Expr {
   /**
    * Evaluates the literal as a string.
    */
+  @Override
   public String evalString(QueryContext context)
     throws SQLException
   {
     return null;
+  }
+
+  /**
+   * Evaluates the expression to a buffer
+   *
+   * @param result the result buffer
+   *
+   * @return the length of the result
+   */
+  @Override
+  public int evalToBuffer(QueryContext context,
+                          byte []buffer,
+                          int offset)
+    throws SQLException
+  {
+    return -1;
   }
 
   public String toString()

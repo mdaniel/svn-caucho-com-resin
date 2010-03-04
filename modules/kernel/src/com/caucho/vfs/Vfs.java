@@ -450,7 +450,7 @@ public final class Vfs {
     
     /*
     DEFAULT_SCHEME_MAP.put("config", new ConfigPath());
-    DEFAULT_SCHEME_MAP.put("spy", new SpyScheme()); 
     */
+    DEFAULT_SCHEME_MAP.put("spy", new SpyScheme()); 
   }
 }
