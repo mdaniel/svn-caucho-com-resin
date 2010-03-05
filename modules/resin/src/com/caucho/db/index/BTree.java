@@ -120,7 +120,7 @@ public final class BTree {
     _rootBlockId = rootBlockId;
     _rootBlock = store.readBlock(rootBlockId);
       
-    new Lock("index:" + store.getName());
+    // new Lock("index:" + store.getName());
     
     if (BLOCK_SIZE < keySize + HEADER_SIZE)
       throw new IOException(L.l("BTree key size '{0}' is too large.",
@@ -855,6 +855,9 @@ public final class BTree {
           isJoin = ! removeWrite(childBlock, keyBuffer, keyOffset, keyLength);
 
           if (isJoin && joinBlocks(block, childBlock)) {
+            if (childBlock.getUseCount() > 2) {
+              System.out.println("USE: " + childBlock.getUseCount() + " " + block + " " + block.getLock());
+            }
             childBlock.deallocate();
           }
 
@@ -868,15 +871,6 @@ public final class BTree {
     } finally {
       blockLock.unlockReadAndWrite();
     }
-  }
-
-  private void validateIndex(Block block)
-  {
-    if (block == _rootBlock)
-      return;
-    
-    if (! block.isIndex())
-      throw new IllegalStateException("Block " + block + " is not an index");
   }
 
   /**
@@ -1704,6 +1698,14 @@ public final class BTree {
   private void validate(Block block)
   {
     isLeaf(block.getBuffer(), block);
+  }
+
+  private void validateIndex(Block block)
+  {
+    if (block == _rootBlock)
+      return;
+    
+    block.validateIsIndex();
   }
 
   private boolean isLeaf(byte []buffer)

@@ -525,7 +525,7 @@ public class LongKeyLruCache<V> {
     if (tail == null)
       return false;
 
-    Object value = remove(tail._key);
+    Object value = remove(tail._key, true);
     
     return value != null;
   }
@@ -538,6 +538,18 @@ public class LongKeyLruCache<V> {
    * @return the value removed
    */
   public V remove(long key)
+  {
+    return remove(key, false);
+  }
+
+  /**
+   * Removes an item from the cache
+   *
+   * @param key the key to remove
+   *
+   * @return the value removed
+   */
+  private V remove(long key, boolean isTail)
   {
     int hash = hash(key) % _prime;
 
@@ -552,13 +564,26 @@ public class LongKeyLruCache<V> {
 	   item != null;
 	   item = item._nextHash) {
 	if (item._key == key) {
-          removeLruItem(item);
-
-	  value = item._value;
+          value = item._value;
+          
+          SyncCacheListener syncListener = null;
 
           // sync must occur before remove because get() is non-locking
-          if (value instanceof SyncCacheListener)
-            ((SyncCacheListener) value).syncRemoveEvent();
+          if (value instanceof SyncCacheListener) {
+            syncListener = (SyncCacheListener) value;
+            
+            if (isTail && ! syncListener.startLruRemove()) {
+              item._lruCounter = _lruCounter - _lruTimeout - 2;
+              updateLruImpl(item);
+              return null;
+            }
+          }
+          
+          removeLruItem(item);
+
+          // sync must occur before remove because get() is non-locking
+          if (syncListener != null)
+            syncListener.syncRemoveEvent();
           
 	  CacheItem<V> nextHash = item._nextHash;
 

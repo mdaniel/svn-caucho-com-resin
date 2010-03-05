@@ -28,15 +28,26 @@
  */
 package com.caucho.db.jdbc;
 
+import java.io.InputStream;
+import java.io.Reader;
+import java.sql.Array;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.NClob;
+import java.sql.ParameterMetaData;
+import java.sql.PreparedStatement;
+import java.sql.Ref;
+import java.sql.ResultSet;
+import java.sql.RowId;
+import java.sql.SQLException;
+import java.sql.SQLXML;
+import java.sql.Time;
+import java.sql.Timestamp;
+import java.util.Calendar;
+
 import com.caucho.db.sql.Query;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
-
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.io.Reader;
-import java.sql.*;
-import java.util.Calendar;
 
 /**
  * The JDBC statement implementation.
@@ -45,7 +56,6 @@ public class PreparedStatementImpl extends StatementImpl
   implements PreparedStatement {
 
   private Query _query;
-  private int _updateCount;
   private boolean _wasResultSet;
   private ResultSet _resultSet;
 
@@ -319,18 +329,15 @@ public class PreparedStatementImpl extends StatementImpl
     _count++;
 
     Transaction xa = null;
-    QueryContext queryContext = null;
 
     try {
       if (_count != 1)
         throw new IllegalStateException("Multithreading execute");
 
       xa = _conn.getTransaction();
-      queryContext = getQueryContext();
+      QueryContext queryContext = getQueryContext();
 
       if (_query.isSelect()) {
-        com.caucho.db.ResultSetImpl rs = null;
-
         _query.execute(queryContext, xa);
 
         _wasResultSet = true;

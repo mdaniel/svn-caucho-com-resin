@@ -234,8 +234,14 @@ public final class Lock {
       addLock(WRITE|WRITE_LOCK);
     }
 
-    if (_writeLock != null)
+    Thread writeLock = _writeLock;
+    if (writeLock != null) {
       Thread.dumpStack();
+      System.out.println("---");
+      for (StackTraceElement stack : writeLock.getStackTrace()) {
+        System.out.println("stack: " + stack);
+      }
+    }
     _writeLock = Thread.currentThread();
     //_writeExn = new IllegalStateException("alloc");
     //_writeExn.fillInStackTrace();

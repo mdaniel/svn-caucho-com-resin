@@ -29,16 +29,6 @@
 
 package com.caucho.server.distcache;
 
-import com.caucho.db.jdbc.DataSourceImpl;
-import com.caucho.util.Alarm;
-import com.caucho.util.AlarmListener;
-import com.caucho.util.FreeList;
-import com.caucho.util.HashKey;
-import com.caucho.util.JdbcUtil;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-
-import javax.sql.DataSource;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
@@ -49,12 +39,21 @@ import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sql.DataSource;
+
+import com.caucho.db.jdbc.DataSourceImpl;
+import com.caucho.util.Alarm;
+import com.caucho.util.AlarmListener;
+import com.caucho.util.FreeList;
+import com.caucho.util.HashKey;
+import com.caucho.util.JdbcUtil;
+import com.caucho.vfs.Path;
+
 
 /**
  * Manages backing for the cache map.
  */
 public class MnodeStore implements AlarmListener {
-  private static final L10N L = new L10N(MnodeStore.class);
   private static final Logger log
     = Logger.getLogger(MnodeStore.class.getName());
 
@@ -519,7 +518,7 @@ public class MnodeStore implements AlarmListener {
       int count = stmt.executeUpdate();
 
       if (log.isLoggable(Level.FINER))
-        log.finer(this + " insert key=" + id + " value=" + value);
+        log.finer(this + " insert key=" + id + " value=" + value + " count=" + count);
 
       return true;
     } catch (SQLException e) {
@@ -761,8 +760,6 @@ public class MnodeStore implements AlarmListener {
     private PreparedStatement _insertStatement;
     private PreparedStatement _updateSaveStatement;
     private PreparedStatement _updateUpdateTimeStatement;
-
-    private PreparedStatement _removeStatement;
 
     private PreparedStatement _updateVersionStatement;
 

@@ -58,8 +58,9 @@ public class BlockReadWrite {
   private long _fileSize;
 
   private Object _fileLock = new Object();
-  private FreeList<SoftReference<RandomAccessWrapper>> _cachedRowFile
-    = new FreeList<SoftReference<RandomAccessWrapper>>(4);
+  
+  private FreeList<RandomAccessWrapper> _cachedRowFile
+    = new FreeList<RandomAccessWrapper>(4);
 
   private final Semaphore _rowFileSemaphore = new Semaphore(8);
 
@@ -265,11 +266,14 @@ public class BlockReadWrite {
     RandomAccessStream file = null;
     RandomAccessWrapper wrapper = null;
 
-    SoftReference<RandomAccessWrapper> ref = _cachedRowFile.allocate();
+    // SoftReference<RandomAccessWrapper> ref = _cachedRowFile.allocate();
+    wrapper = _cachedRowFile.allocate();
 
+    /*
     if (ref != null) {
       wrapper = ref.get();
     }
+    */
 
     if (wrapper != null)
       file = wrapper.getFile();
@@ -296,10 +300,12 @@ public class BlockReadWrite {
     if (! isPriority)
       _rowFileSemaphore.release();
 
+    /*
     SoftReference<RandomAccessWrapper> fileRef
       = new SoftReference<RandomAccessWrapper>(wrapper);
+      */
 
-    if (_cachedRowFile.free(fileRef)) {
+    if (_cachedRowFile.free(wrapper)) {
       return;
     }
 
@@ -327,10 +333,13 @@ public class BlockReadWrite {
 
     RandomAccessWrapper wrapper = null;
 
+    /*
     SoftReference<RandomAccessWrapper> ref = _cachedRowFile.allocate();
 
     if (ref != null)
       wrapper = ref.get();
+      */
+    wrapper = _cachedRowFile.allocate();
 
     if (wrapper != null) {
       try {

@@ -245,13 +245,6 @@ public final class BlockManager
     while (block == null || ! block.allocate()) {
       block = new Block(store, blockId);
 
-      // Find any matching block in the process of being written
-      Block dirtyBlock = store.getWriter().getDirtyBlock(blockId);
-
-      if (dirtyBlock != null) {
-        dirtyBlock.copyToBlock(block);
-      }
-
       // needs to be outside the synchronized because the put
       // can cause an LRU drop which might lead to a dirty write
       Block oldBlock = _blockCache.putIfAbsent(blockId, block);
@@ -271,6 +264,16 @@ public final class BlockManager
     }
 
     return block;
+  }
+
+  boolean copyDirtyBlock(Block block)
+  {
+    BlockStore store = block.getStore();
+    
+    long blockId = block.getBlockId();
+
+    // Find any matching block in the process of being written
+    return store.getWriter().copyDirtyBlock(blockId, block);
   }
 
   //

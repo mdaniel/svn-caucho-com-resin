@@ -73,24 +73,26 @@ public class BlockWriter extends TaskWorker {
     wake();
   }
 
-  Block getDirtyBlock(long blockId)
+  boolean copyDirtyBlock(long blockId, Block block)
   {
     synchronized (_writeQueue) {
       int size = _writeQueue.size();
 
       // search from newest to oldest in case multiple writes
       for (int i = size - 1; i >= 0; i--) {
-        Block block = _writeQueue.get(i);
+        Block writeBlock = _writeQueue.get(i);
 
-        if (block.getBlockId() == blockId) {
+        if (writeBlock.getBlockId() == blockId) {
           // System.out.println("FOUND-DIRTY: " + block + " " + _writeQueue.size());
           
-          return block;
+          writeBlock.copyToBlock(block);
+          
+          return true;
         }
       }
     }
 
-    return null;
+    return false;
   }
   
   void waitForComplete()
@@ -124,7 +126,7 @@ public class BlockWriter extends TaskWorker {
           } finally {
             removeFirstBlock();
           
-            block.free();
+            block.freeFromWriter();
           }
         }
         else if (retry-- <= 0) {
