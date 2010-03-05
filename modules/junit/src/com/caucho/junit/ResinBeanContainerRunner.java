@@ -35,6 +35,7 @@ import org.junit.runners.*;
 import org.junit.runners.model.*;
 
 import com.caucho.resin.*;
+import com.caucho.vfs.*;
 
 /**
  * ResinJUnit runner runs a JUnit within the context of Resin.

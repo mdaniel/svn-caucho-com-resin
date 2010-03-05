@@ -6,4 +6,31 @@ start = r_beans
 
 r_beans = element beans {
   r_env-Content
+
+  & rb_alternatives?
+  
+  & rb_decorators?
+  
+  & rb_interceptors?
+}
+
+rb_alternatives = element alternatives {
+  rb_class*
+  & rb_stereotype*
+}
+
+rb_class =
+  attribute class { string }
+  | element class { string }
+
+rb_decorators = element decorators {
+  rb_class*
+}
+
+rb_interceptors = element interceptors {
+  rb_class*
+}
+
+rb_stereotype = element stereotype {
+  string
 }

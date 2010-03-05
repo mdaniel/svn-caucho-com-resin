@@ -29,29 +29,25 @@
 
 package com.caucho.config.cfg;
 
-import com.caucho.bytecode.*;
-import com.caucho.config.*;
-import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.DecoratorBean;
-import com.caucho.config.inject.InterceptorBean;
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ProducesBean;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.types.CustomBeanConfig;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
-import java.util.zip.*;
+import java.lang.annotation.Annotation;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.decorator.Decorator;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Interceptor;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
+import com.caucho.config.TagName;
+import com.caucho.config.inject.DecoratorBean;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InterceptorBean;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
  * Configuration for a classloader root containing webbeans

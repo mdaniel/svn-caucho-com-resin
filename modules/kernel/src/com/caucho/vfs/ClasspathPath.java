@@ -136,7 +136,7 @@ public class ClasspathPath extends FilesystemPath {
     InputStream is = loader.getResourceAsStream(path);
 
     if (is == null)
-      throw new FileNotFoundException(path);
+      throw new FileNotFoundException(getFullPath());
     
     return new VfsStream(is, null);
   }

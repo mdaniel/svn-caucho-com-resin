@@ -32,6 +32,7 @@ package com.caucho.resin;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
+import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.EJBServer;
@@ -178,16 +179,17 @@ public class ResinBeanContainer
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
+      thread.setContextClassLoader(_classLoader);
+      
       Path path = Vfs.lookup(pathName);
 
-      ContextConfig context = new ContextConfig();
+      ContextConfig context = new ContextConfig(_injectManager, path);
 
       Config config = new Config();
       config.configure(context, path, SCHEMA);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
-
   }
 
   /**
@@ -342,12 +344,19 @@ public class ResinBeanContainer
     return getClass().getName() + "[]";
   }
 
-  class ContextConfig implements EnvironmentBean {
+  class ContextConfig extends BeansConfig implements EnvironmentBean {
+    ContextConfig(InjectManager manager, Path root)
+    {
+      super(manager, root);
+    }
+    
     public ClassLoader getClassLoader()
     {
       return _classLoader;
     }
   }
+  
+  
 
   class RequestScope implements Context {
     @Override
