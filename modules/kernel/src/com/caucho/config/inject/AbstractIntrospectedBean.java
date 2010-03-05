@@ -29,51 +29,37 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.annotation.ServiceType;
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-import com.caucho.config.*;
-import com.caucho.config.bytecode.*;
-import com.caucho.config.cfg.*;
-import com.caucho.config.event.ObserverImpl;
-import com.caucho.config.inject.AnnotatedTypeImpl;
-import com.caucho.config.program.BeanArg;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import javax.annotation.*;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Names;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.util.L10N;
 
 /**
  * Common bean introspection for Produces and ManagedBean.
@@ -472,7 +458,19 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     // if (_qualifiers.size() == 0)
     
-    _qualifiers.add(DefaultLiteral.DEFAULT);
+    // _qualifiers.add(AnyLiteral.ANY);
+    boolean isQualifier = false;
+    for (Annotation ann : _qualifiers) {
+      if (! Named.class.equals(ann.annotationType())
+          && ! Any.class.equals(ann.annotationType())) {
+        isQualifier = true;
+      }
+    }
+    
+    if (! isQualifier)
+      _qualifiers.add(DefaultLiteral.DEFAULT);
+      
+    _qualifiers.add(AnyLiteral.ANY);
 
     if (_scope == null)
       _scope = Dependent.class;

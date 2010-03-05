@@ -34,5 +34,7 @@ package com.caucho.util;
 public interface SyncCacheListener {
   public boolean startLruRemove();
   
+  public void syncLruRemoveEvent();
+  
   public void syncRemoveEvent();
 }

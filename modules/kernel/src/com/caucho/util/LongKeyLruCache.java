@@ -582,8 +582,12 @@ public class LongKeyLruCache<V> {
           removeLruItem(item);
 
           // sync must occur before remove because get() is non-locking
-          if (syncListener != null)
-            syncListener.syncRemoveEvent();
+          if (syncListener != null) {
+            if (isTail)
+              syncListener.syncLruRemoveEvent();
+            else
+              syncListener.syncRemoveEvent();
+          }
           
 	  CacheItem<V> nextHash = item._nextHash;
 

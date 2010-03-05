@@ -13,6 +13,7 @@
 
 <s2 title="4.0.5 - snapshot">
 <ul>
+<li>cloud: cluster store database stress test fixes (#3895, rep by smallufo)</li>
 <li>cloud: cluster store database was not properly handling QueryContext (#3850, rep by mocospace)</li>
 <li>watchdog: permissions issues with ports and log files (rep by Jamison Novak)</li>
 <li>admin: added HealthJvmDeadlock in com.caucho.env.health (#3912, rep by Jamison Novak, #3912)</li>

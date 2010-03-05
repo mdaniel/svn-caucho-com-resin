@@ -421,9 +421,9 @@ public class BlockStore {
   public void remove()
     throws SQLException
   {
-    close();
-
     _readWrite.remove();
+    
+    close();
   }
 
   /**

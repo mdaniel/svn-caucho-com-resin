@@ -450,12 +450,28 @@ public final class Block implements SyncCacheListener {
    * Called when the block is removed from the cache.
    */
   @Override
-  public final void syncRemoveEvent()
+  public final void syncLruRemoveEvent()
   {
     if (_useCount.get() > 0) {
       System.out.println("BAD_REMOVE:" + this);
       Thread.dumpStack();
     }
+
+    _isRemoved = true;
+    if (isDirty()) {
+      save();
+    }
+    else {
+      freeImpl();
+    }
+  }
+  /**
+   * Called when the block is removed from the cache.
+   */
+  @Override
+  public final void syncRemoveEvent()
+  {
+    _useCount.decrementAndGet();
 
     _isRemoved = true;
     if (isDirty()) {

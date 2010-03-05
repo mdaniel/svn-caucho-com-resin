@@ -334,6 +334,7 @@ public class Table extends BlockStore {
   /**
    * Creates the table.
    */
+  @Override
   public void create()
     throws IOException, SQLException
   {

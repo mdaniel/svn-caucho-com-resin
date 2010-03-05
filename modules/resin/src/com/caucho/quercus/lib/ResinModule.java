@@ -142,6 +142,7 @@ public class ResinModule
 
     Bean<?> bean = beanManager.resolve(beans);
     CreationalContext<?> env = beanManager.createCreationalContext(bean);
+    System.out.println("ENV: " + bean + " " + env);
 
     return beanManager.getReference(bean, bean.getBeanClass(), env);
   }

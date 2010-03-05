@@ -103,6 +103,11 @@ public class BlockReadWrite {
                                  _path.getNativePath()));
     }
   }
+  
+  boolean isFileExist()
+  {
+    return _path.exists();
+  }
 
   void init()
     throws IOException
@@ -128,6 +133,7 @@ public class BlockReadWrite {
 
       close();
 
+      System.out.println("REMOVE: " + path);
       if (path != null)
         path.remove();
     } catch (IOException e) {

@@ -75,6 +75,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.inject.Inject;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.naming.*;
@@ -1279,7 +1280,7 @@ public class InjectManager
       return null;
 
     CreationalContext<?> env = createCreationalContext(bean);
-
+    
     return (T) getReference(bean, bean.getBeanClass(), env);
   }
 
@@ -2057,8 +2058,8 @@ public class InjectManager
     if (_decoratorList == null)
       return decorators;
 
-    for (DecoratorEntry entry : _decoratorList) {
-      Decorator decorator = entry.getDecorator();
+    for (DecoratorEntry<?> entry : _decoratorList) {
+      Decorator<?> decorator = entry.getDecorator();
 
       // XXX: delegateTypes
       if (isTypeContained(types, entry.getDelegateType())
@@ -2076,14 +2077,22 @@ public class InjectManager
     types.add(type);
 
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
+    
+    boolean isQualifier = false;
 
     for (Annotation ann : type.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
         bindingList.add(ann);
+        
+        if (! Named.class.equals(ann.annotationType())) {
+          isQualifier = true;
+        }
+      }
     }
 
-    if (bindingList.size() == 0)
-      bindingList.add(CurrentLiteral.CURRENT);
+    if (! isQualifier)
+      bindingList.add(DefaultLiteral.DEFAULT);
+    bindingList.add(AnyLiteral.ANY);
 
     Annotation []bindings = new Annotation[bindingList.size()];
     bindingList.toArray(bindings);

@@ -301,7 +301,7 @@ class DateColumn extends Column {
 	       Expr expr, QueryContext context)
     throws SQLException
   {
-    if (expr.isNull(null))
+    if (expr.isNull(context))
       setNull(block, rowOffset);
     else
       setDate(xa, block, rowOffset, expr.evalDate(context));

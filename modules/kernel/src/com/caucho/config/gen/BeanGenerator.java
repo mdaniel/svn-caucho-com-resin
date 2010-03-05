@@ -31,6 +31,8 @@ package com.caucho.config.gen;
 
 import com.caucho.make.*;
 import com.caucho.util.L10N;
+import com.caucho.config.inject.AnyLiteral;
+import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.java.*;
 import com.caucho.java.gen.*;
@@ -45,6 +47,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Set;
 import javax.interceptor.*;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -154,14 +157,23 @@ abstract public class BeanGenerator extends GenClass
       fillTypes(types, iface.getJavaClass());
     }
 
+    _decoratorBindings = new HashSet<Annotation>();
+    
+    boolean isQualifier = false;
     for (Annotation ann : cl.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-	if (_decoratorBindings == null)
-	  _decoratorBindings = new HashSet<Annotation>();
-	
 	_decoratorBindings.add(ann);
+	
+	if (! Named.class.equals(ann.annotationType())) {
+	  isQualifier = true;
+	}
       }
     }
+    
+    if (! isQualifier)
+      _decoratorBindings.add(DefaultLiteral.DEFAULT);
+    
+    _decoratorBindings.add(AnyLiteral.ANY);
 
     Annotation []decoratorBindings;
 
