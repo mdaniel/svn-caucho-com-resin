@@ -29,31 +29,32 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.annotation.ServiceBinding;
-import com.caucho.config.ServiceStartup;
-import com.caucho.config.cfg.BeansConfig;
-import com.caucho.vfs.Path;
-
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import javax.ejb.*;
-import javax.enterprise.event.Observes;
+import javax.ejb.MessageDriven;
+import javax.ejb.Startup;
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
+
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.ServiceStartup;
+import com.caucho.config.cfg.BeansConfig;
+import com.caucho.vfs.Path;
 
 /**
  * Standard XML behavior for META-INF/beans.xml
@@ -63,8 +64,6 @@ public class XmlStandardPlugin implements Extension
   private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
 
   private InjectManager _manager;
-  private ClassLoader _classLoader;
-
   private HashSet<String> _configuredBeans = new HashSet<String>();
 
   private ArrayList<Path> _paths = new ArrayList<Path>();
@@ -72,7 +71,7 @@ public class XmlStandardPlugin implements Extension
 
   private ArrayList<BeansConfig> _pendingBeans = new ArrayList<BeansConfig>();
 
-  private ArrayList<Bean> _pendingService = new ArrayList<Bean>();
+  private ArrayList<Bean<?>> _pendingService = new ArrayList<Bean<?>>();
 
   private Throwable _configException;
 
@@ -80,7 +79,7 @@ public class XmlStandardPlugin implements Extension
   {
     _manager = manager;
 
-    _classLoader = Thread.currentThread().getContextClassLoader();
+    Thread.currentThread().getContextClassLoader();
   }
 
   public void addRoot(Path root)
@@ -142,9 +141,9 @@ public class XmlStandardPlugin implements Extension
     _configuredBeans.add(className);
   }
 
-  public void processType(@Observes ProcessAnnotatedType event)
+  public void processType(@Observes ProcessAnnotatedType<?> event)
   {
-    AnnotatedType type = event.getAnnotatedType();
+    AnnotatedType<?> type = event.getAnnotatedType();
 
     if (type == null)
       return;
@@ -167,15 +166,15 @@ public class XmlStandardPlugin implements Extension
       event.addDefinitionError(_configException);
   }
 
-  public void processBean(@Observes ProcessBean event)
+  public void processBean(@Observes ProcessBean<?> event)
   {
-    ProcessBeanImpl eventImpl = (ProcessBeanImpl) event;
+    ProcessBeanImpl<?> eventImpl = (ProcessBeanImpl<?>) event;
 
     if (eventImpl.getManager() != _manager)
       return;
 
     Annotated annotated = event.getAnnotated();
-    Bean bean = event.getBean();
+    Bean<?> bean = event.getBean();
 
     if (isStartup(annotated)) {
       _pendingService.add(bean);
@@ -184,13 +183,17 @@ public class XmlStandardPlugin implements Extension
 
   public void processAfterValidation(@Observes AfterDeploymentValidation event)
   {
-    ArrayList<Bean> startupBeans = new ArrayList<Bean>(_pendingService);
+    ArrayList<Bean<?>> startupBeans = new ArrayList<Bean<?>>(_pendingService);
     _pendingService.clear();
 
-    for (Bean bean : startupBeans) {
+    for (Bean<?> bean : startupBeans) {
       CreationalContext<?> env = _manager.createCreationalContext(bean);
 
-      _manager.getReference(bean, bean.getBeanClass(), env);
+      Object value = _manager.getReference(bean, bean.getBeanClass(), env);
+      
+      if (bean instanceof ManagedBeanImpl<?>) {
+        ((ManagedBeanImpl<?>) bean).scheduleTimers(value);
+      }
     }
   }
 
@@ -200,7 +203,7 @@ public class XmlStandardPlugin implements Extension
       return false;
 
     for (Annotation ann : annotated.getAnnotations()) {
-      Class annType = ann.annotationType();
+      Class<?> annType = ann.annotationType();
 
       if (annType.equals(Startup.class))
         return true;

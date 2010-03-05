@@ -640,6 +640,11 @@ grep "x86_64" $tmpname 1> /dev/null
 if test "$?" = "0"; then
    b64_jni=true
 fi
+
+grep "s390x-64" $tmpname 1> /dev/null
+if test "$?" = "0"; then
+   b64_jni=true
+fi
                	
 $JAVA_HOME/bin/sparcv9/java -version 2> $tmpname
 grep "64-Bit" $tmpname 1> /dev/null

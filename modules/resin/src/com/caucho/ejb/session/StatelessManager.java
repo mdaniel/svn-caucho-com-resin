@@ -224,8 +224,8 @@ public class StatelessManager<T> extends SessionServer<T> {
     synchronized (this) {
       if (_homeContext == null) {
         try {
-          Class[] param = new Class[] { StatelessManager.class };
-          Constructor cons = _contextImplClass.getConstructor(param);
+          Class<?>[] param = new Class[] { StatelessManager.class };
+          Constructor<?> cons = _contextImplClass.getConstructor(param);
 
           _homeContext = (StatelessContext) cons.newInstance(this);
         } catch (Exception e) {

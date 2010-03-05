@@ -77,8 +77,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   private static final Method _namedValueMethod;
 
-  private static final HashSet<Class> _reservedTypes
-    = new HashSet<Class>();
+  private static final HashSet<Class<?>> _reservedTypes
+    = new HashSet<Class<?>>();
 
   public static final Annotation []CURRENT_ANN
     = new Annotation[] { CurrentLiteral.CURRENT };
@@ -413,16 +413,16 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
    */
   protected void introspectStereotypes(Annotated annotated)
   {
-    Class scope = null;
+    Class<? extends Annotation> scope = null;
 
     for (Annotation stereotype : annotated.getAnnotations()) {
-      Class stereotypeType = stereotype.annotationType();
+      Class<?> stereotypeType = stereotype.annotationType();
 
       if (stereotypeType.isAnnotationPresent(Stereotype.class))
         _stereotypes.add(stereotype);
 
       for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
-        Class annType = ann.annotationType();
+        Class<? extends Annotation> annType = ann.annotationType();
 
         if (annType.isAnnotationPresent(Scope.class)
             || annType.isAnnotationPresent(NormalScope.class)) {
@@ -615,8 +615,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return sb.toString();
   }
 
-  static class MethodNameComparator implements Comparator<AnnotatedMethod> {
-    public int compare(AnnotatedMethod a, AnnotatedMethod b)
+  static class MethodNameComparator implements Comparator<AnnotatedMethod<?>> {
+    public int compare(AnnotatedMethod<?> a, AnnotatedMethod<?> b)
     {
       return a.getJavaMember().getName().compareTo(b.getJavaMember().getName());
     }
@@ -625,8 +625,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   static class AnnotationComparator implements Comparator<Annotation> {
     public int compare(Annotation a, Annotation b)
     {
-      Class annTypeA = a.annotationType();
-      Class annTypeB = b.annotationType();
+      Class<?> annTypeA = a.annotationType();
+      Class<?> annTypeB = b.annotationType();
 
       return annTypeA.getName().compareTo(annTypeB.getName());
     }

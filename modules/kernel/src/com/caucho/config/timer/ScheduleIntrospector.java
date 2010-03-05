@@ -37,7 +37,6 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.types.Trigger;
-import com.caucho.util.L10N;
 
 /**
  * Processes EJB declarative scheduling. The scheduling functionality can be
@@ -46,19 +45,15 @@ import com.caucho.util.L10N;
  * @author Reza Rahman
  */
 public class ScheduleIntrospector {
-  @SuppressWarnings("unused")
-  private static final L10N L = new L10N(ScheduleIntrospector.class);
-
   /**
    * Introspects the method for scheduling attributes.
    */
-  @SuppressWarnings("unchecked")
   public ArrayList<TimerTask> introspect(TimeoutCaller caller,
-      AnnotatedType<?> type)
+                                         AnnotatedType<?> type)
   {
     ArrayList<TimerTask> timers = null;
 
-    for (AnnotatedMethod method : type.getMethods()) {
+    for (AnnotatedMethod<?> method : type.getMethods()) {
       Schedules schedules = method.getAnnotation(Schedules.class);
 
       if (schedules != null) {
@@ -83,13 +78,17 @@ public class ScheduleIntrospector {
     return timers;
   }
 
-  @SuppressWarnings("unchecked")
   private void addSchedule(ArrayList<TimerTask> timers, Schedule schedule,
-      TimeoutCaller caller, AnnotatedMethod method)
+                           TimeoutCaller caller, AnnotatedMethod<?> method)
   {
-    CronExpression cronExpression = new CronExpression(schedule.second(),
-        schedule.minute(), schedule.hour(), schedule.dayOfWeek(), schedule
-            .dayOfMonth(), schedule.month(), schedule.year());
+    CronExpression cronExpression
+      = new CronExpression(schedule.second(),
+                           schedule.minute(),
+                           schedule.hour(), 
+                           schedule.dayOfWeek(),
+                           schedule.dayOfMonth(), 
+                           schedule.month(),
+                           schedule.year());
 
     TimeZone timezone = null;
 
@@ -100,11 +99,12 @@ public class ScheduleIntrospector {
     Trigger trigger = new CronTrigger(cronExpression, -1, -1, timezone);
     EjbTimer ejbTimer = new EjbTimer();
 
-    TimeoutInvoker timeoutnvoker = new MethodTimeoutInvoker(caller, method
-        .getJavaMember());
+    TimeoutInvoker timeoutInvoker
+      = new MethodTimeoutInvoker(caller, method.getJavaMember());
 
-    TimerTask timerTask = new TimerTask(timeoutnvoker, ejbTimer,
-        cronExpression, trigger, schedule.info());
+    TimerTask timerTask 
+      = new TimerTask(timeoutInvoker, ejbTimer,
+                      cronExpression, trigger, schedule.info());
 
     ejbTimer.setScheduledTask(timerTask);
 
