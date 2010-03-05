@@ -25,6 +25,7 @@ install	:
 	  mkdir -p $(resin_home)/lib; \
 	  mkdir -p $(resin_home)/$(LIBEXEC); \
 	  cp lib/*.jar $(resin_home)/lib; \
+	  cp bin/* $(resin_home)/bin; \
 	fi; \
 	if test $(resin_root) != `pwd`; then \
 	  mkdir -p $(resin_root)/webapps; \
