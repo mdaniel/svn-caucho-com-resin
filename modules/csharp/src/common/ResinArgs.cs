@@ -26,18 +26,8 @@
  * @author Alex Rojkov
  */
 using System;
-using System.Reflection;
-using System.Collections;
 using System.Collections.Specialized;
 using System.Text;
-using System.IO;
-using Microsoft.Win32;
-using System.Diagnostics;
-using System.Windows.Forms;
-using System.ServiceProcess;
-using System.Threading;
-using System.Runtime.Serialization.Formatters.Binary;
-using System.Security.Principal;
 
 namespace Caucho
 {
@@ -100,18 +90,20 @@ namespace Caucho
     public String ResinArguments { get; private set; }
     public String ClassPath { get; private set; }
     public String EnvClassPath { get; private set; }
-    public String ResinHome { get; private set; }
-    public String ResinRoot { get; private set; }
+    public String Home { get; private set; }
+    public String Root { get; private set; }
     public String DisplayName { get; private set; }
     public String Command { get; private set; }
     public String ResinDataDir { get; private set; }
     public String ServiceName { get; private set; }
-    public String ResinExe { get; private set; }
+    public String Exe { get; private set; }
     public String Server { get; private set; }
     public String DynamicServer { get; private set; }
-    public String LogDirectory { get; private set; }
+    public String Log { get; private set; }
     public String JmxPort { get; private set; }
     public String DebugPort { get; private set; }
+    public String WatchDogPort { get; private set; }
+    public bool IsPreview { get; private set; }
 
     public ResinArgs(String cmd)
     {
@@ -127,7 +119,7 @@ namespace Caucho
           if (exe.StartsWith("\"") && exe.EndsWith("\""))
             exe = exe.Substring(1, exe.Length - 2);
 
-          ResinExe = exe;
+          Exe = exe;
           builder = new StringBuilder();
         } else if (' ' == c) {
           arguments.Add(builder.ToString());
@@ -248,14 +240,14 @@ namespace Caucho
         } else if ("-resin_home".Equals(arguments[argsIdx]) ||
                    "-resin-home".Equals(arguments[argsIdx]) ||
                    "--resin-home".Equals(arguments[argsIdx])) {
-          ResinHome = arguments[argsIdx + 1];
+          Home = arguments[argsIdx + 1];
 
           argsIdx += 2;
         } else if ("-server-root".Equals(arguments[argsIdx]) ||
                    "-server_root".Equals(arguments[argsIdx]) ||
                    "--root-directory".Equals(arguments[argsIdx]) ||
                    "-root-directory".Equals(arguments[argsIdx])) {
-          ResinRoot = arguments[argsIdx + 1];
+          Root = arguments[argsIdx + 1];
 
           argsIdx += 2;
         } else if ("-classpath".Equals(arguments[argsIdx]) ||
@@ -317,9 +309,9 @@ namespace Caucho
           argsIdx += 2;
         } else if ("-log-directory".Equals(arguments[argsIdx]) ||
                    "--log-directory".Equals(arguments[argsIdx])) {
-          LogDirectory = arguments[argsIdx + 1];
+          Log = arguments[argsIdx + 1];
 
-          resinArgs.Append("-log-directory ").Append(LogDirectory).Append(' ');
+          resinArgs.Append("-log-directory ").Append(Log).Append(' ');
 
           argsIdx += 2;
         } else if ("-jmx-port".Equals(arguments[argsIdx]) ||
@@ -336,8 +328,19 @@ namespace Caucho
           resinArgs.Append("-debug-port ").Append(DebugPort).Append(' ');
 
           argsIdx += 2;
+        } else if ("-watchdog-port".Equals(arguments[argsIdx]) ||
+                   "--watchdog-port".Equals(arguments[argsIdx])) {
+          WatchDogPort = arguments[argsIdx + 1];
+
+          resinArgs.Append("-watchdog-port ").Append(WatchDogPort).Append(' ');
+
+          argsIdx += 2;
         } else if ("-e".Equals(arguments[argsIdx]) ||
                   "-compile".Equals(arguments[argsIdx])) {
+          argsIdx++;
+        } else if ("-preview".Equals(arguments[argsIdx]) ||
+                  "--preview".Equals(arguments[argsIdx])) {
+          IsPreview = true;
           argsIdx++;
         } else if ("gui".Equals(arguments[argsIdx])) {
           Command = arguments[argsIdx];

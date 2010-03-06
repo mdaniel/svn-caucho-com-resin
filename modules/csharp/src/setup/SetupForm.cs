@@ -26,15 +26,15 @@
  * @author Alex Rojkov
  */
 using System;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Windows.Forms;
+using System.DirectoryServices.AccountManagement;
 using System.IO;
+using System.ServiceProcess;
+using System.Text;
+using System.Threading;
+using System.Windows.Forms;
 
 namespace Caucho
 {
@@ -42,6 +42,7 @@ namespace Caucho
   {
     private enum MODE { NEW, EXISTING, NONE };
 
+    private ProgressDialog _progressDialog;
     private Setup _setup;
     private String _createService = "New Service ...";
     private ArrayList _userJdks = new ArrayList();
@@ -63,21 +64,19 @@ namespace Caucho
       InitializeComponent();
       _none = _folderDlg.RootFolder;
 
-
       _resinCmbBox.BeginUpdate();
       _resinCmbBox.DataSource = _setup.GetResinList();
       _resinCmbBox.SelectedItem = _resin;
       _resinCmbBox.EndUpdate();
 
-      ResinSelectectionCommitted(null, null);
-
-      _mode = MODE.NONE;
+      UpdateServices(null);
     }
 
     private void SelectResinBtnClick(object sender, EventArgs e)
     {
       String resinHome = Util.GetResinHome(null, System.Reflection.Assembly.GetExecutingAssembly().Location);
 
+      _folderDlg.Description = "Please locate your Resin installation";
       bool select = true;
 
       while (select) {
@@ -88,7 +87,6 @@ namespace Caucho
 
         if (_folderDlg.ShowDialog() == DialogResult.OK) {
           resinHome = _folderDlg.SelectedPath;
-          //
           if (Util.IsResinHome(resinHome)) {
             SelectResin(resinHome);
             select = false;
@@ -96,7 +94,7 @@ namespace Caucho
             String caption = "Incorrect Resin Home";
             String message = "Resin Home must contain lib\\resin.jar";
 
-            if (MessageBox.Show(message, caption, MessageBoxButtons.RetryCancel) == DialogResult.Cancel)
+            if (MessageBox.Show(message, caption, MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Cancel)
               select = false;
           }
         } else {
@@ -113,10 +111,15 @@ namespace Caucho
       _resinCmbBox.SelectedItem = _resin;
       _resinCmbBox.EndUpdate();
 
-      ResinSelectectionCommitted(null, null);
+      UpdateServices(null);
+
+    }
+    private void ResinSelectectionCommitted(object sender, EventArgs e)
+    {
+      UpdateServices(null);
     }
 
-    private void ResinSelectectionCommitted(object sender, EventArgs e)
+    private void UpdateServices(ResinService newResinService)
     {
       _resin = (Resin)_resinCmbBox.SelectedItem;
 
@@ -137,14 +140,13 @@ namespace Caucho
           StringBuilder builder = new StringBuilder("Select Service: [");
           for (int i = 0; i < services.Count; i++) {
             ResinService service = services[i];
-            builder.Append(service.ServiceName);
+            builder.Append(service.Name);
             if (i + 1 < services.Count)
               builder.Append(", ");
           }
           builder.Append(']');
 
           _servicesCmbBox.Text = builder.ToString();
-          Console.WriteLine(_servicesCmbBox.Text);
         }
         _servicesCmbBox.EndUpdate();
       }
@@ -152,7 +154,6 @@ namespace Caucho
 
     private void ServiceSelectionChanged(object sender, EventArgs e)
     {
-
       if (_createService.Equals(_servicesCmbBox.SelectedItem)) {
         _resinService = null;
         _mode = MODE.NEW;
@@ -181,6 +182,8 @@ namespace Caucho
       _debugPortTxtBox.Enabled = enabled;
       _extraParamsTxbBox.Enabled = enabled;
       _watchdogPortTxtBox.Enabled = enabled;
+      _serviceInstallBtn.Enabled = enabled;
+      _serviceRemoveBtn.Enabled = MODE.EXISTING.Equals(_mode);
 
       UpdateDetails();
     }
@@ -223,7 +226,7 @@ namespace Caucho
 
       _resinLog = null;
       if (_resinService != null)
-        _resinLog = _resinService.LogDirectory;
+        _resinLog = _resinService.Log;
 
       if (_resinLog == null || "".Equals(_resinLog))
         _resinLog = "log";
@@ -243,12 +246,12 @@ namespace Caucho
         javaHome = _resinService.JavaHome;
       UpdateJavaHomes(javaHome);
 
-      UpdateServices();
+      UpdateServers();
 
       UpdateJmxAndDebugPorts();
     }
 
-    private void UpdateServices()
+    private void UpdateServers()
     {
       IList servers = _resinConf.getServerIds();
       _serverCmbBox.BeginUpdate();
@@ -259,7 +262,7 @@ namespace Caucho
       _serviceUserCmbBox.DataSource = _setup.GetUsers();
 
       if (_resinService != null)
-        _serviceNameTxtBox.Text = _resinService.ServiceName;
+        _serviceNameTxtBox.Text = _resinService.Name;
       else if (servers.Count > 0) {
         String cluster = ((ResinConfServer)servers[0]).Cluster;
         String id = ((ResinConfServer)servers[0]).ID;
@@ -316,7 +319,7 @@ namespace Caucho
 
     public void ResinConfFileChanged()
     {
-      UpdateServices();
+      UpdateServers();
       UpdateJmxAndDebugPorts();
     }
 
@@ -338,7 +341,7 @@ namespace Caucho
             String caption = "Incorrect Java Home";
             String message = @"Java Home must contain bin\java.exe";
 
-            if (MessageBox.Show(message, caption, MessageBoxButtons.RetryCancel) == DialogResult.Cancel)
+            if (MessageBox.Show(message, caption, MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Cancel)
               select = false;
           }
         } else {
@@ -386,13 +389,12 @@ namespace Caucho
       if (DialogResult.OK.Equals(_folderDlg.ShowDialog())) {
         String resinRoot = _folderDlg.SelectedPath;
         _resinRootTxtBox.Text = resinRoot;
-        ResinRootTxtBoxValidating(null, null);
+        ResinRootTxtBoxLeaving(null, null);
       }
     }
 
     private void SelectResinConf(object sender, EventArgs e)
     {
-
       int lastSlashIdx = _resinConfFile.LastIndexOf('\\');
       if (lastSlashIdx != -1) {
         _fileDlg.InitialDirectory = _resinConfFile.Substring(0, lastSlashIdx);
@@ -429,17 +431,16 @@ namespace Caucho
       }
     }
 
-    private void ResinCmbBoxValidating(object sender, CancelEventArgs e)
+    private void ResinCmbBoxLeaving(object sender, EventArgs e)
     {
       String resinHome = _resinCmbBox.Text;
-      if (Util.IsResinHome(resinHome)) {
+      if (Util.IsResinHome(resinHome) && Util.FindResinExe(resinHome) != null) {
         SelectResin(resinHome);
       } else {
-        String caption = "Incorrect Resin Home";
-        String message = @"Resin Home must contain lib\resin.jar";
-        MessageBox.Show(message, caption, MessageBoxButtons.OK);
-        _resinCmbBox.Text = _resinCmbBox.SelectedItem.ToString();
-        e.Cancel = true;
+        String message = @"Resin Home must contain lib\resin.jar and resin.exe or httpd.exe";
+        _errorProvider.SetError(_resinCmbBox, message);
+
+        _resinCmbBox.Focus();
       }
     }
 
@@ -453,17 +454,15 @@ namespace Caucho
         _javaHomeCmbBox.Text = _javaHomeCmbBox.SelectedItem.ToString();
     }
 
-    private void JavaHomeCmbBoxValidating(object sender, CancelEventArgs e)
+    private void JavaHomeCmbBoxLeaving(object sender, EventArgs e)
     {
       String javaHome = _javaHomeCmbBox.Text;
       if (javaHome.StartsWith("Default: [")) {
       } else if (Util.IsValidJavaHome(javaHome)) {
       } else {
-        String caption = "Incorrect Java Home";
         String message = @"Java Home must contain bin\java.exe";
-        MessageBox.Show(message, caption, MessageBoxButtons.OK);
-        _javaHomeCmbBox.Text = _javaHome;
-        e.Cancel = true;
+        _errorProvider.SetError(_javaHomeCmbBox, message);
+        _javaHomeCmbBox.Focus();
       }
     }
 
@@ -485,7 +484,7 @@ namespace Caucho
       }
     }
 
-    private void ResinRootTxtBoxValidating(object sender, CancelEventArgs e)
+    private void ResinRootTxtBoxLeaving(object sender, EventArgs e)
     {
       String resinRoot = null;
 
@@ -507,10 +506,11 @@ namespace Caucho
 
     private void ServiceRefreshBtnClick(object sender, EventArgs e)
     {
-      this.ServiceSelectionChanged(null, null);
+      _setup.ResetResinServices();
+      this.UpdateServices(null);
     }
 
-    private void LogDirTxtBoxValidating(object sender, CancelEventArgs e)
+    private void LogDirTxtBoxLeaving(object sender, EventArgs e)
     {
       String log = _logDirTxtBox.Text;
       if (Util.IsAbsolutePath(log))
@@ -519,7 +519,7 @@ namespace Caucho
         _resinLog = _resinRoot + @"\" + log;
     }
 
-    private void ResinConfTxtBoxValidating(object sender, CancelEventArgs e)
+    private void ResinConfTxtBoxLeaving(object sender, EventArgs e)
     {
       String resinConfFile = _resinConfTxtBox.Text;
 
@@ -531,15 +531,13 @@ namespace Caucho
         _resinConf = _setup.GetResinConf(resinConfFile);
         ResinConfFileChanged();
       } else {
-        String caption = "Incorrect Resin Conf File";
-        String message = @"File '" + resinConfFile + "' does not exist";
-        MessageBox.Show(message, caption, MessageBoxButtons.OK);
-        _resinConfTxtBox.Text = _resinConfFile;
-        e.Cancel = true;
+        String message = String.Format("File `{0}' does not exist", resinConfFile);
+        _errorProvider.SetError(_resinConfTxtBox, message);
+        _resinConfTxtBox.Focus();
       }
     }
 
-    private void _resinConfTxtBox_KeyPress(object sender, KeyPressEventArgs e)
+    private void ResinConfTxtBoxKeyPress(object sender, KeyPressEventArgs e)
     {
       if (e.KeyChar == 27)
         _resinConfTxtBox.Text = _resinConfFile;
@@ -572,9 +570,8 @@ namespace Caucho
       }
     }
 
-    private void _previewCmbBox_KeyDown(object sender, KeyEventArgs e)
+    private void PreviewCmbBoxKeyDown(object sender, KeyEventArgs e)
     {
-
       if (Keys.Left.Equals(e.KeyCode) && "Yes".Equals(_previewCmbBox.SelectedItem)) {
         _previewCmbBox.SelectedItem = "No";
         e.Handled = true;
@@ -585,56 +582,304 @@ namespace Caucho
 
     }
 
-    private void ServiceInstallBtnClick(object sender, EventArgs e)
+    private bool CheckUserCredentials(String domainUser, String password)
     {
-      if (MODE.NEW.Equals(_mode)) {
-        ResinService resinService = new ResinService();
-        resinService.Home = _resin.Home;
-        resinService.Root = _resinRoot;
-        resinService.Conf = _resinConfFile;
-        if (!_javaHomeCmbBox.Text.StartsWith("Default: ["))
-          resinService.JavaHome = _javaHome;
-        resinService.IsPreview = "Yes".Equals(_previewCmbBox.Text);
-        ResinConfServer server = null;
-        if (_serverCmbBox.SelectedItem is ResinConfServer)
-          server = (ResinConfServer)_serverCmbBox.SelectedItem;
-
-        if (server != null) {
-          resinService.Server = server.ID;
-          if (!"Not Specified".Equals(_jmxPortTxtBox.Text)) {
-            String jmxPort = _resinConf.GetJmxPort(server.Cluster, server.ID);
-            if (!_jmxPortTxtBox.Text.Equals(jmxPort))
-              resinService.JmxPort = int.Parse(jmxPort);
-          }
-
-          if (!"Not Specified".Equals(_debugPortTxtBox.Text)) {
-            String debugPort = _resinConf.GetDebugPort(server.Cluster, server.ID);
-            if (!_debugPortTxtBox.Text.Equals(debugPort))
-              resinService.DebugPort = int.Parse(debugPort);
-          }
-
-          if (!"Not Specified".Equals(_watchdogPortTxtBox.Text)) {
-            String watchDogPort = _resinConf.GetDebugPort(server.Cluster, server.ID);
-          }
+      try {
+        PrincipalContext context = null;
+        String userName = domainUser.Substring(domainUser.LastIndexOf('\\'));
+        if (domainUser.StartsWith(@".\")) {
+          context = new PrincipalContext(ContextType.Machine);
         } else {
-          resinService.DynamicServer = _serverCmbBox.Text;
+          context = new PrincipalContext(ContextType.Domain);
         }
-        resinService.LogDirectory = _logDirTxtBox.Text;
+        return context.ValidateCredentials(userName, password);
+      }
+      catch (Exception e) {
 
-        resinService.ExtraParams = _extraParams.Text;
+      }
 
-        Console.WriteLine(resinService.GetCommandLine());
+      return false;
+    }
+    private bool CheckServiceName()
+    {
+      if (Util.ServiceExists(_serviceNameTxtBox.Text)) {
+        String message = String.Format("Service Name `{0}' is already taken.", _serviceNameTxtBox.Text);
+        _errorProvider.SetError(_serviceNameTxtBox, message);
+        _serviceNameTxtBox.Focus();
+        return false;
+      } else {
+        return true;
+      }
+    }
+    private void ServiceInstallBtnClick(object sender, EventArgs eventArgs)
+    {
+      bool isNew = MODE.NEW.Equals(_mode);
+      if (isNew && !CheckServiceName())
+        return;
+
+      ResinService resinService = new ResinService();
+      String resinExe = Util.FindResinExe(_resin.Home);
+      resinService.Exe = resinExe;
+      resinService.Home = _resin.Home;
+      if (!_resinConfFile.Equals(_resin.Home + @"\" + _setup.GetResinConfFile(_resin)))
+        resinService.Conf = _resinConfFile;
+      if (!_javaHomeCmbBox.Text.StartsWith("Default: ["))
+        resinService.JavaHome = _javaHome;
+
+      if (!_resin.Home.Equals(_resinRoot))
+        resinService.Root = _resinRoot;
+
+      if (!_resinLog.Equals(_resinRoot + @"\log"))
+        resinService.Log = _resinLog;
+
+      resinService.Name = _serviceNameTxtBox.Text;
+      if ("Local Service".Equals(_serviceUserCmbBox.Text)) {
+      } else if ("".Equals(_servicePassTxtBox.Text) || _servicePassTxtBox.Text == null) {
+        MessageBox.Show("Service Password is required", "Missing Password", MessageBoxButtons.OK, MessageBoxIcon.Error);
+        _servicePassTxtBox.Focus();
+        return;
+      } else {
+        String user = _serviceUserCmbBox.Text;
+        if (!(user.StartsWith(@".\") || user.StartsWith("\\")))
+          user = @".\" + user;
+        String password = _servicePassTxtBox.Text;
+        resinService.User = user;
+        resinService.Password = password;
+      }
+
+      resinService.IsPreview = "Yes".Equals(_previewCmbBox.Text);
+
+      ResinConfServer server = null;
+      if (_serverCmbBox.SelectedItem is ResinConfServer)
+        server = (ResinConfServer)_serverCmbBox.SelectedItem;
+
+      String cluster = "";
+      String serverId = "";
+      if (server != null) {
+        cluster = server.Cluster;
+        serverId = server.ID;
+        resinService.Server = server.ID;
+      } else {
+        resinService.DynamicServer = _serverCmbBox.Text;
+      }
+
+      if (!"Not Specified".Equals(_jmxPortTxtBox.Text)) {
+        String jmxPort = _resinConf.GetJmxPort(cluster, serverId);
+        if (!_jmxPortTxtBox.Text.Equals(jmxPort))
+          resinService.JmxPort = int.Parse(_jmxPortTxtBox.Text);
+      }
+
+      if (!"Not Specified".Equals(_debugPortTxtBox.Text)) {
+        String debugPort = _resinConf.GetDebugPort(cluster, serverId);
+        if (!_debugPortTxtBox.Text.Equals(debugPort))
+          resinService.DebugPort = int.Parse(_debugPortTxtBox.Text);
+      }
+
+      if (!"Not Specified".Equals(_watchdogPortTxtBox.Text)) {
+        String watchDogPort = _resinConf.GetWatchDogPort(cluster, serverId);
+        if (!_watchdogPortTxtBox.Text.Equals(watchDogPort))
+          resinService.WatchdogPort = int.Parse(_watchdogPortTxtBox.Text);
+      }
+
+      resinService.ExtraParams = _extraParamsTxbBox.Text;
+      String checkUser = null;
+      bool success = false;
+      BackgroundWorker worker = new BackgroundWorker();
+      worker.DoWork += delegate(object delegateSender, DoWorkEventArgs delegateEvent)
+      {
+        try {
+          while (_progressDialog == null || !_progressDialog.Visible)
+            Thread.Sleep(10);
+          if (isNew) {
+            ProgressDialogAddStatus("Starting installation ...");
+            ProgressDialogAddStatus("Checkign user ...");
+          } else {
+            ProgressDialogAddStatus(String.Format("Updating service `{0}'", _resinService.Name));
+          }
+          if (resinService.User != null && !CheckUserCredentials(resinService.User, resinService.Password)) {
+            checkUser = String.Format("User {0} failed to authenticate.\nPlease check user name and password", resinService.User);
+            ProgressDialogError(checkUser);
+
+            return;
+          }
+          _setup.InstallService(resinService, isNew);
+
+          String message = null;
+          if (isNew)
+            message = String.Format("Service `{0}' is installed.", resinService.Name);
+          else
+            message = String.Format("Service `{0}' is updated.", resinService.Name);
+
+          ProgressDialogSuccess(message);
+          success = true;
+        }
+        catch (Exception e) {
+          String message = String.Format("Service installation failed due to exception: {0}", e.Message);
+          ProgressDialogError(message);
+        }
+      };
+      worker.RunWorkerAsync();
+      if (isNew)
+        ProgressDialogDisplay("Installing Service " + resinService.Name, "Progress: ");
+      else
+        ProgressDialogDisplay("Updating Service " + resinService.Name, "Progress: ");
+
+      if (success) {
+        _setup.ResetResinServices();
+        UpdateServices(null);
+      } else if (checkUser != null) {
+        _errorProvider.SetError(_serviceUserCmbBox, checkUser);
+        _serviceUserCmbBox.Focus();
       }
     }
 
-    private void label1_Click(object sender, EventArgs e)
+    private void ProgressDialogDisplay(String title, String message)
     {
+      if (_progressDialog == null) {
+        _progressDialog = new ProgressDialog();
+        _progressDialog.Icon = this.Icon;
+      }
+      _progressDialog.Text = title;
+      _progressDialog.Message = message;
+      _progressDialog.ShowDialog(this);
+    }
+
+    private void ProgressDialogAddStatus(String status)
+    {
+      _progressDialog.UpdateStatus(status);
+    }
+
+    private void ProgressDialogSuccess(String message)
+    {
+      _progressDialog.SetSuccess(message);
+    }
+
+    private void ProgressDialogError(String error)
+    {
+      _progressDialog.SetError(error);
+    }
+
+
+    private void ServiceRemoveBtnClick(object sender, EventArgs eventArgs)
+    {
+      if (_resinService != null) {
+        BackgroundWorker worker = new BackgroundWorker();
+        worker.DoWork += delegate(object delegateSender, DoWorkEventArgs delegateEvent)
+        {
+          try {
+            while (_progressDialog == null || !_progressDialog.Visible)
+              Thread.Sleep(10);
+
+            ServiceController sc = new ServiceController(_resinService.Name);
+
+            if (sc.Status == ServiceControllerStatus.Running) {
+              String status = String.Format("Stopping Service `{0}' ...", _resinService.Name);
+              ProgressDialogAddStatus(status);
+              sc.Stop();
+              sc.WaitForStatus(ServiceControllerStatus.Stopped);
+            }
+          }
+          catch (Exception e) {
+            //XXX
+          }
+
+          try {
+            String message = String.Format("Removing Service `{0}' ...", _resinService.Name);
+            ProgressDialogAddStatus(message);
+            _setup.UninstallService(_resinService);
+            message = String.Format("Service `{0}' is removed", _resinService.Name);
+            ProgressDialogSuccess(message);
+          }
+          catch (Exception e) {
+            String error = String.Format("Failed to remove service `{0}' due to error `{1}'", _resinService.Name, e.Message);
+            ProgressDialogError(error);
+          }
+        };
+        worker.RunWorkerAsync();
+        ProgressDialogDisplay("Removing Service: " + _resinService.Name, "Progress: ");
+        _setup.ResetResinServices();
+        UpdateServices(null);
+      }
+    }
+
+    private void ServiceNameTxtBoxLeaving(object sender, EventArgs e)
+    {
+      CheckServiceName();
+    }
+
+    private void JavaHomeCmbBoxTextChanged(object sender, EventArgs e)
+    {
+      _errorProvider.SetError(_javaHomeCmbBox, null);
+    }
+
+    private void ResinCmbBoxTextChanged(object sender, EventArgs e)
+    {
+      _errorProvider.SetError(_resinCmbBox, null);
+    }
+
+    private void ResinConfTxtBoxTextChanged(object sender, EventArgs e)
+    {
+      _errorProvider.SetError(_resinConfTxtBox, null);
+    }
+
+    private void ServiceNameTxtBoxTextChanged(object sender, EventArgs e)
+    {
+      _errorProvider.SetError(_serviceNameTxtBox, null);
+    }
+
+    private void ServiceUserCmbBoxSelectionChangeCommitted(object sender, EventArgs e)
+    {
+      _servicePassTxtBox.Focus();
+    }
+
+    private void ServiceUserCmbBoxTextChanged(object sender, EventArgs e)
+    {
+      _errorProvider.SetError(_serviceUserCmbBox, null);
+    }
+
+    private void PluginsTabEnter(object sender, EventArgs e)
+    {
+      if (_apacheDirs.DataSource == null) {
+        ArrayList homes = new ArrayList();
+        Apache.FindApache(homes);
+        _apacheDirs.DataSource = homes;
+      }
+    }
+
+    private void SelectApacheBtnClick(object sender, EventArgs e)
+    {
+      bool select = true;
+      while (select) {
+        _folderDlg.RootFolder = Environment.SpecialFolder.MyComputer;
+        _folderDlg.Description = "Please locate your Apache installation";
+        if (_folderDlg.ShowDialog() == DialogResult.OK) {
+          String apacheHome = _folderDlg.SelectedPath;
+          if (Apache.IsValidApacheHome(apacheHome)) {
+            ArrayList homes = (ArrayList)_apacheDirs.DataSource;
+            _apacheDirs.BeginUpdate();
+            if (!homes.Contains(apacheHome)) {
+              homes.Add(apacheHome);
+              _apacheDirs.DataSource = new ArrayList(homes);
+            }
+            _apacheDirs.SelectedItem = apacheHome;
+            _apacheDirs.EndUpdate();
+
+            select = false;
+          } else {
+            String caption = "Incorrect Apache Home";
+            String message = @"Apache Home must contain conf\httpd.conf";
+            if (MessageBox.Show(message, caption, MessageBoxButtons.RetryCancel, MessageBoxIcon.Error) == DialogResult.Cancel)
+              select = false;
+          }
+        } else {
+          select = false;
+        }
+      }
 
     }
 
-    private void textBox1_TextChanged(object sender, EventArgs e)
+    private void InstallApacheBtnClick(object sender, EventArgs e)
     {
-
     }
   }
 }

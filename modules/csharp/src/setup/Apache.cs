@@ -28,11 +28,9 @@
 
 using System;
 using System.Collections;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
+using System.Text;
 using Microsoft.Win32;
 
 
@@ -67,20 +65,46 @@ namespace Caucho
       if (apacheHome != null)
         homes.Add(Util.GetCanonicalPath(apacheHome));
 
-      FindApacheInProgramFiles(homes);
-    }
-
-    public static void FindApacheInProgramFiles(ArrayList homes)
-    {
-      String programFiles
+      String dir
         = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
 
-      String[] groupDirs = Directory.GetDirectories(programFiles, "Apache*");
+      FindApacheInDir(dir, homes);
+
+      dir = dir + " (x86)";
+      if (Directory.Exists(dir))
+        FindApacheInDir(dir, homes);
+
+      DriveInfo[] drives = DriveInfo.GetDrives();
+      foreach (DriveInfo drive in drives) {
+        if (DriveType.Fixed != drive.DriveType && DriveType.Ram != drive.DriveType)
+          continue;
+        DirectoryInfo root = drive.RootDirectory;
+        DirectoryInfo[] directories = root.GetDirectories();
+        foreach (DirectoryInfo directory in directories) {
+          if (directory.Name.Contains("appservers")) {
+            DirectoryInfo[] appserverDirectories = directory.GetDirectories();
+            foreach (DirectoryInfo appserverDir in appserverDirectories) {
+              if (IsValidApacheHome(appserverDir.FullName)) {
+                String home = Util.Canonicalize(appserverDir.FullName);
+                if (!homes.Contains(home)) {
+                  homes.Add(home);
+                }
+              }
+            }
+          }
+        }
+      }
+
+    }
+
+    public static void FindApacheInDir(String dir, ArrayList homes)
+    {
+      String[] groupDirs = Directory.GetDirectories(dir, "Apache*");
 
       foreach (String groupDir in groupDirs) {
         String[] testDirs = Directory.GetDirectories(groupDir, "*");
         foreach (String testDir in testDirs) {
-          if (File.Exists(testDir + "\\bin\\Apache.exe") || File.Exists(testDir + "\\bin\\httpd.exe")) {
+          if (File.Exists(testDir + @"\bin\Apache.exe") || File.Exists(testDir + @"\bin\httpd.exe")) {
             homes.Add(Util.GetCanonicalPath(testDir));
           }
         }
@@ -117,10 +141,10 @@ namespace Caucho
     {
       Process process = new Process();
 
-      if (File.Exists(apacheHome + "\\bin\\apache.exe"))
-        process.StartInfo.FileName = apacheHome + "\\bin\\apache.exe";
-      else if (File.Exists(apacheHome + "\\bin\\httpd.exe"))
-        process.StartInfo.FileName = apacheHome + "\\bin\\httpd.exe";
+      if (File.Exists(apacheHome + @"\bin\apache.exe"))
+        process.StartInfo.FileName = apacheHome + @"\bin\apache.exe";
+      else if (File.Exists(apacheHome + @"\bin\httpd.exe"))
+        process.StartInfo.FileName = apacheHome + @"\bin\httpd.exe";
       else
         throw new ApplicationException(String.Format("Can not find apache.exe or httpd.exe in {0}\\bin", apacheHome));
 
@@ -177,9 +201,9 @@ namespace Caucho
         throw new ApplicationException("Unable to determine version of Apache");
     }
 
-    public bool IsValidApacheHome(String dir)
+    public static bool IsValidApacheHome(String dir)
     {
-      return File.Exists(dir + "\\conf\\httpd.conf");
+      return File.Exists(dir + @"\conf\httpd.conf");
     }
 
     private static bool IsCommentedOut(String line)
@@ -322,7 +346,7 @@ namespace Caucho
     {
       ConfigureInfo configInfo = new ConfigureInfo();
 
-      String httpdConfFile = apacheHome + "\\conf\\httpd.conf";
+      String httpdConfFile = apacheHome + @"\conf\httpd.conf";
 
       StreamReader httpdConfReader = null;
       StringWriter buffer = new StringWriter();

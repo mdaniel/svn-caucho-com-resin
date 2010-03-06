@@ -28,12 +28,10 @@
 using System;
 using System.Collections;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.DirectoryServices;
-using System.Text;
 using System.IO;
-using Microsoft.Win32;
 using System.ServiceProcess;
+using System.Text;
+using Microsoft.Win32;
 
 namespace Caucho
 {
@@ -87,6 +85,16 @@ namespace Caucho
         return true;
 
       return false;
+    }
+
+    public static String FindResinExe(String home)
+    {
+      if (File.Exists(home + @"\resin.exe"))
+        return home + @"\resin.exe";
+      else if (File.Exists(home + @"\httpd.exe"))
+        return home + @"\httpd.exe";
+      else
+        return null;        
     }
 
     public static String GetResinHome(String resinHome, String path)
@@ -261,7 +269,7 @@ namespace Caucho
       ServiceController[] services = ServiceController.GetServices();
 
       foreach (ServiceController service in services) {
-        if (serviceName.Equals(service.ServiceName)) {
+        if (serviceName.Equals(service.ServiceName, StringComparison.CurrentCultureIgnoreCase)) {
           return true;
         }
       }

@@ -55,8 +55,21 @@ namespace Caucho
     /// </summary>
     private void InitializeComponent()
     {
+      this.components = new System.ComponentModel.Container();
+      System.Windows.Forms.GroupBox _apacheGrpBox;
+      System.Windows.Forms.GroupBox _iisGrpBox;
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(SetupForm));
-      this._tableLayoutPanel1 = new System.Windows.Forms.TableLayoutPanel();
+      this.label1 = new System.Windows.Forms.Label();
+      this._removeApacheBtn = new System.Windows.Forms.Button();
+      this._installApacheBtn = new System.Windows.Forms.Button();
+      this._apacheDirs = new System.Windows.Forms.ComboBox();
+      this._selectApacheBtn = new System.Windows.Forms.Button();
+      this.label2 = new System.Windows.Forms.Label();
+      this._removeIISBtn = new System.Windows.Forms.Button();
+      this._installIISBtn = new System.Windows.Forms.Button();
+      this._selectIISBtn = new System.Windows.Forms.Button();
+      this._iisDir = new System.Windows.Forms.TextBox();
+      this._root = new System.Windows.Forms.TableLayoutPanel();
       this._generalGrp = new System.Windows.Forms.GroupBox();
       this._resinCmbBox = new System.Windows.Forms.ComboBox();
       this._selectResinBtn = new System.Windows.Forms.Button();
@@ -64,6 +77,10 @@ namespace Caucho
       this._resinLbl = new System.Windows.Forms.Label();
       this._tabControl = new System.Windows.Forms.TabControl();
       this._servicesTab = new System.Windows.Forms.TabPage();
+      this._watchDogPortLbl = new System.Windows.Forms.Label();
+      this._watchdogPortTxtBox = new System.Windows.Forms.TextBox();
+      this._extraParamsTxbBox = new System.Windows.Forms.TextBox();
+      this._extraParams = new System.Windows.Forms.Label();
       this._serverCmbBox = new System.Windows.Forms.ComboBox();
       this._serverLbl = new System.Windows.Forms.Label();
       this._debugPortLbl = new System.Windows.Forms.Label();
@@ -85,7 +102,7 @@ namespace Caucho
       this._serviceUserLbl = new System.Windows.Forms.Label();
       this._serviceRefreshBtn = new System.Windows.Forms.Button();
       this._serviceRemoveBtn = new System.Windows.Forms.Button();
-      this.serviceInstallBtn = new System.Windows.Forms.Button();
+      this._serviceInstallBtn = new System.Windows.Forms.Button();
       this._serviceNameLbl = new System.Windows.Forms.Label();
       this._servicesLbl = new System.Windows.Forms.Label();
       this._servicesCmbBox = new System.Windows.Forms.ComboBox();
@@ -96,44 +113,163 @@ namespace Caucho
       this._selectJavaHomeBtn = new System.Windows.Forms.Button();
       this._javaHomeLbl = new System.Windows.Forms.Label();
       this._pluginsTab = new System.Windows.Forms.TabPage();
-      this._apacheDirs = new System.Windows.Forms.ComboBox();
-      this._selectIISBtn = new System.Windows.Forms.Button();
-      this._iisCheck = new System.Windows.Forms.CheckBox();
-      this._apacheCheck = new System.Windows.Forms.CheckBox();
-      this._refreshWebBtn = new System.Windows.Forms.Button();
-      this._removeWebBtn = new System.Windows.Forms.Button();
-      this._installWebBtn = new System.Windows.Forms.Button();
-      this._iisDir = new System.Windows.Forms.TextBox();
-      this._selectApacheBtn = new System.Windows.Forms.Button();
       this._folderDlg = new System.Windows.Forms.FolderBrowserDialog();
       this._fileDlg = new System.Windows.Forms.OpenFileDialog();
-      this._extraParams = new System.Windows.Forms.Label();
-      this._extraParamsTxbBox = new System.Windows.Forms.TextBox();
-      this._watchDogPortLbl = new System.Windows.Forms.Label();
-      this._watchdogPortTxtBox = new System.Windows.Forms.TextBox();
-      this._tableLayoutPanel1.SuspendLayout();
+      this._errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
+      this._log = new System.Diagnostics.EventLog();
+      _apacheGrpBox = new System.Windows.Forms.GroupBox();
+      _iisGrpBox = new System.Windows.Forms.GroupBox();
+      _apacheGrpBox.SuspendLayout();
+      _iisGrpBox.SuspendLayout();
+      this._root.SuspendLayout();
       this._generalGrp.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this._resinLogoImg)).BeginInit();
       this._tabControl.SuspendLayout();
       this._servicesTab.SuspendLayout();
       this._pluginsTab.SuspendLayout();
+      ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this._log)).BeginInit();
       this.SuspendLayout();
       // 
-      // _tableLayoutPanel1
+      // _apacheGrpBox
       // 
-      this._tableLayoutPanel1.AutoSize = true;
-      this._tableLayoutPanel1.ColumnCount = 1;
-      this._tableLayoutPanel1.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
-      this._tableLayoutPanel1.Controls.Add(this._generalGrp, 0, 0);
-      this._tableLayoutPanel1.Controls.Add(this._tabControl, 0, 1);
-      this._tableLayoutPanel1.Location = new System.Drawing.Point(1, 3);
-      this._tableLayoutPanel1.Name = "_tableLayoutPanel1";
-      this._tableLayoutPanel1.RowCount = 2;
-      this._tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
-      this._tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 486F));
-      this._tableLayoutPanel1.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this._tableLayoutPanel1.Size = new System.Drawing.Size(472, 569);
-      this._tableLayoutPanel1.TabIndex = 0;
+      _apacheGrpBox.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left)
+                  | System.Windows.Forms.AnchorStyles.Right)));
+      _apacheGrpBox.Controls.Add(this.label1);
+      _apacheGrpBox.Controls.Add(this._removeApacheBtn);
+      _apacheGrpBox.Controls.Add(this._installApacheBtn);
+      _apacheGrpBox.Controls.Add(this._apacheDirs);
+      _apacheGrpBox.Controls.Add(this._selectApacheBtn);
+      _apacheGrpBox.Location = new System.Drawing.Point(0, 0);
+      _apacheGrpBox.Margin = new System.Windows.Forms.Padding(0);
+      _apacheGrpBox.Name = "_apacheGrpBox";
+      _apacheGrpBox.Padding = new System.Windows.Forms.Padding(0);
+      _apacheGrpBox.Size = new System.Drawing.Size(458, 113);
+      _apacheGrpBox.TabIndex = 31;
+      _apacheGrpBox.TabStop = false;
+      _apacheGrpBox.Text = "Apache";
+      // 
+      // label1
+      // 
+      this.label1.AutoSize = true;
+      this.label1.Location = new System.Drawing.Point(9, 32);
+      this.label1.Name = "label1";
+      this.label1.Size = new System.Drawing.Size(75, 13);
+      this.label1.TabIndex = 4;
+      this.label1.Text = "Apache Home";
+      // 
+      // _removeApacheBtn
+      // 
+      this._removeApacheBtn.Location = new System.Drawing.Point(391, 85);
+      this._removeApacheBtn.Name = "_removeApacheBtn";
+      this._removeApacheBtn.Size = new System.Drawing.Size(61, 22);
+      this._removeApacheBtn.TabIndex = 34;
+      this._removeApacheBtn.Text = "Remove";
+      this._removeApacheBtn.UseVisualStyleBackColor = true;
+      // 
+      // _installApacheBtn
+      // 
+      this._installApacheBtn.Location = new System.Drawing.Point(321, 85);
+      this._installApacheBtn.Name = "_installApacheBtn";
+      this._installApacheBtn.Size = new System.Drawing.Size(61, 22);
+      this._installApacheBtn.TabIndex = 33;
+      this._installApacheBtn.Text = "Install";
+      this._installApacheBtn.UseVisualStyleBackColor = true;
+      this._installApacheBtn.Click += new System.EventHandler(this.InstallApacheBtnClick);
+      // 
+      // _apacheDirs
+      // 
+      this._apacheDirs.FormattingEnabled = true;
+      this._apacheDirs.Location = new System.Drawing.Point(97, 29);
+      this._apacheDirs.Name = "_apacheDirs";
+      this._apacheDirs.Size = new System.Drawing.Size(285, 21);
+      this._apacheDirs.TabIndex = 32;
+      this._apacheDirs.Text = "Select Apache Server ...";
+      // 
+      // _selectApacheBtn
+      // 
+      this._selectApacheBtn.Location = new System.Drawing.Point(391, 29);
+      this._selectApacheBtn.Name = "_selectApacheBtn";
+      this._selectApacheBtn.Size = new System.Drawing.Size(61, 22);
+      this._selectApacheBtn.TabIndex = 31;
+      this._selectApacheBtn.Text = "...";
+      this._selectApacheBtn.UseVisualStyleBackColor = true;
+      this._selectApacheBtn.Click += new System.EventHandler(this.SelectApacheBtnClick);
+      // 
+      // _iisGrpBox
+      // 
+      _iisGrpBox.Controls.Add(this.label2);
+      _iisGrpBox.Controls.Add(this._removeIISBtn);
+      _iisGrpBox.Controls.Add(this._installIISBtn);
+      _iisGrpBox.Controls.Add(this._selectIISBtn);
+      _iisGrpBox.Controls.Add(this._iisDir);
+      _iisGrpBox.Location = new System.Drawing.Point(0, 130);
+      _iisGrpBox.Margin = new System.Windows.Forms.Padding(0);
+      _iisGrpBox.Name = "_iisGrpBox";
+      _iisGrpBox.Padding = new System.Windows.Forms.Padding(0);
+      _iisGrpBox.Size = new System.Drawing.Size(458, 113);
+      _iisGrpBox.TabIndex = 32;
+      _iisGrpBox.TabStop = false;
+      _iisGrpBox.Text = "IIS";
+      // 
+      // label2
+      // 
+      this.label2.AutoSize = true;
+      this.label2.Location = new System.Drawing.Point(9, 35);
+      this.label2.Name = "label2";
+      this.label2.Size = new System.Drawing.Size(55, 13);
+      this.label2.TabIndex = 36;
+      this.label2.Text = "IIS Scripts";
+      // 
+      // _removeIISBtn
+      // 
+      this._removeIISBtn.Location = new System.Drawing.Point(391, 84);
+      this._removeIISBtn.Name = "_removeIISBtn";
+      this._removeIISBtn.Size = new System.Drawing.Size(61, 22);
+      this._removeIISBtn.TabIndex = 37;
+      this._removeIISBtn.Text = "Remove";
+      this._removeIISBtn.UseVisualStyleBackColor = true;
+      // 
+      // _installIISBtn
+      // 
+      this._installIISBtn.Location = new System.Drawing.Point(321, 84);
+      this._installIISBtn.Name = "_installIISBtn";
+      this._installIISBtn.Size = new System.Drawing.Size(61, 22);
+      this._installIISBtn.TabIndex = 36;
+      this._installIISBtn.Text = "Install";
+      this._installIISBtn.UseVisualStyleBackColor = true;
+      // 
+      // _selectIISBtn
+      // 
+      this._selectIISBtn.Location = new System.Drawing.Point(391, 30);
+      this._selectIISBtn.Name = "_selectIISBtn";
+      this._selectIISBtn.Size = new System.Drawing.Size(61, 22);
+      this._selectIISBtn.TabIndex = 31;
+      this._selectIISBtn.Text = "...";
+      this._selectIISBtn.UseVisualStyleBackColor = true;
+      // 
+      // _iisDir
+      // 
+      this._iisDir.Location = new System.Drawing.Point(97, 32);
+      this._iisDir.Name = "_iisDir";
+      this._iisDir.Size = new System.Drawing.Size(285, 20);
+      this._iisDir.TabIndex = 30;
+      // 
+      // _root
+      // 
+      this._root.AutoSize = true;
+      this._root.ColumnCount = 1;
+      this._root.ColumnStyles.Add(new System.Windows.Forms.ColumnStyle());
+      this._root.Controls.Add(this._generalGrp, 0, 0);
+      this._root.Controls.Add(this._tabControl, 0, 1);
+      this._root.Location = new System.Drawing.Point(1, 3);
+      this._root.Name = "_root";
+      this._root.RowCount = 2;
+      this._root.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
+      this._root.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 486F));
+      this._root.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
+      this._root.Size = new System.Drawing.Size(472, 569);
+      this._root.TabIndex = 0;
       // 
       // _generalGrp
       // 
@@ -153,12 +289,14 @@ namespace Caucho
       // 
       // _resinCmbBox
       // 
-      this._resinCmbBox.Location = new System.Drawing.Point(91, 34);
+      this._errorProvider.SetIconAlignment(this._resinCmbBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
+      this._resinCmbBox.Location = new System.Drawing.Point(105, 34);
       this._resinCmbBox.Name = "_resinCmbBox";
-      this._resinCmbBox.Size = new System.Drawing.Size(295, 21);
+      this._resinCmbBox.Size = new System.Drawing.Size(281, 21);
       this._resinCmbBox.TabIndex = 1;
-      this._resinCmbBox.Validating += new System.ComponentModel.CancelEventHandler(this.ResinCmbBoxValidating);
       this._resinCmbBox.SelectionChangeCommitted += new System.EventHandler(this.ResinSelectectionCommitted);
+      this._resinCmbBox.Leave += new System.EventHandler(this.ResinCmbBoxLeaving);
+      this._resinCmbBox.TextChanged += new System.EventHandler(this.ResinCmbBoxTextChanged);
       // 
       // _selectResinBtn
       // 
@@ -229,7 +367,7 @@ namespace Caucho
       this._servicesTab.Controls.Add(this._serviceUserLbl);
       this._servicesTab.Controls.Add(this._serviceRefreshBtn);
       this._servicesTab.Controls.Add(this._serviceRemoveBtn);
-      this._servicesTab.Controls.Add(this.serviceInstallBtn);
+      this._servicesTab.Controls.Add(this._serviceInstallBtn);
       this._servicesTab.Controls.Add(this._serviceNameLbl);
       this._servicesTab.Controls.Add(this._servicesLbl);
       this._servicesTab.Controls.Add(this._servicesCmbBox);
@@ -246,6 +384,38 @@ namespace Caucho
       this._servicesTab.TabIndex = 0;
       this._servicesTab.Text = "Resin Windows Service Install";
       this._servicesTab.UseVisualStyleBackColor = true;
+      // 
+      // _watchDogPortLbl
+      // 
+      this._watchDogPortLbl.AutoSize = true;
+      this._watchDogPortLbl.Location = new System.Drawing.Point(15, 300);
+      this._watchDogPortLbl.Name = "_watchDogPortLbl";
+      this._watchDogPortLbl.Size = new System.Drawing.Size(81, 13);
+      this._watchDogPortLbl.TabIndex = 44;
+      this._watchDogPortLbl.Text = "WatchDog Port";
+      // 
+      // _watchdogPortTxtBox
+      // 
+      this._watchdogPortTxtBox.Location = new System.Drawing.Point(101, 295);
+      this._watchdogPortTxtBox.Name = "_watchdogPortTxtBox";
+      this._watchdogPortTxtBox.Size = new System.Drawing.Size(281, 20);
+      this._watchdogPortTxtBox.TabIndex = 43;
+      // 
+      // _extraParamsTxbBox
+      // 
+      this._extraParamsTxbBox.Location = new System.Drawing.Point(101, 376);
+      this._extraParamsTxbBox.Name = "_extraParamsTxbBox";
+      this._extraParamsTxbBox.Size = new System.Drawing.Size(281, 20);
+      this._extraParamsTxbBox.TabIndex = 42;
+      // 
+      // _extraParams
+      // 
+      this._extraParams.AutoSize = true;
+      this._extraParams.Location = new System.Drawing.Point(15, 379);
+      this._extraParams.Name = "_extraParams";
+      this._extraParams.Size = new System.Drawing.Size(69, 13);
+      this._extraParams.TabIndex = 41;
+      this._extraParams.Text = "Extra Params";
       // 
       // _serverCmbBox
       // 
@@ -309,15 +479,18 @@ namespace Caucho
       // 
       // _resinConfTxtBox
       // 
+      this._errorProvider.SetIconAlignment(this._resinConfTxtBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
       this._resinConfTxtBox.Location = new System.Drawing.Point(101, 105);
       this._resinConfTxtBox.Name = "_resinConfTxtBox";
       this._resinConfTxtBox.Size = new System.Drawing.Size(281, 20);
       this._resinConfTxtBox.TabIndex = 27;
-      this._resinConfTxtBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this._resinConfTxtBox_KeyPress);
-      this._resinConfTxtBox.Validating += new System.ComponentModel.CancelEventHandler(this.ResinConfTxtBoxValidating);
+      this._resinConfTxtBox.TextChanged += new System.EventHandler(this.ResinConfTxtBoxTextChanged);
+      this._resinConfTxtBox.Leave += new System.EventHandler(this.ResinConfTxtBoxLeaving);
+      this._resinConfTxtBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ResinConfTxtBoxKeyPress);
       // 
       // _servicePassTxtBox
       // 
+      this._errorProvider.SetIconAlignment(this._servicePassTxtBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
       this._servicePassTxtBox.Location = new System.Drawing.Point(101, 213);
       this._servicePassTxtBox.Name = "_servicePassTxtBox";
       this._servicePassTxtBox.PasswordChar = '*';
@@ -327,10 +500,13 @@ namespace Caucho
       // 
       // _serviceNameTxtBox
       // 
+      this._errorProvider.SetIconAlignment(this._serviceNameTxtBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
       this._serviceNameTxtBox.Location = new System.Drawing.Point(101, 160);
       this._serviceNameTxtBox.Name = "_serviceNameTxtBox";
       this._serviceNameTxtBox.Size = new System.Drawing.Size(281, 20);
       this._serviceNameTxtBox.TabIndex = 15;
+      this._serviceNameTxtBox.TextChanged += new System.EventHandler(this.ServiceNameTxtBoxTextChanged);
+      this._serviceNameTxtBox.Leave += new System.EventHandler(this.ServiceNameTxtBoxLeaving);
       // 
       // _logDirTxtBox
       // 
@@ -338,25 +514,28 @@ namespace Caucho
       this._logDirTxtBox.Name = "_logDirTxtBox";
       this._logDirTxtBox.Size = new System.Drawing.Size(281, 20);
       this._logDirTxtBox.TabIndex = 10;
-      this._logDirTxtBox.Validating += new System.ComponentModel.CancelEventHandler(this.LogDirTxtBoxValidating);
+      this._logDirTxtBox.Leave += new System.EventHandler(this.LogDirTxtBoxLeaving);
       // 
       // _resinRootTxtBox
       // 
+      this._errorProvider.SetIconAlignment(this._resinRootTxtBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
       this._resinRootTxtBox.Location = new System.Drawing.Point(101, 77);
       this._resinRootTxtBox.Name = "_resinRootTxtBox";
       this._resinRootTxtBox.Size = new System.Drawing.Size(281, 20);
       this._resinRootTxtBox.TabIndex = 7;
+      this._resinRootTxtBox.Leave += new System.EventHandler(this.ResinRootTxtBoxLeaving);
       this._resinRootTxtBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.ResinRootTxtBoxKeyPress);
-      this._resinRootTxtBox.Validating += new System.ComponentModel.CancelEventHandler(this.ResinRootTxtBoxValidating);
       // 
       // _javaHomeCmbBox
       // 
+      this._errorProvider.SetIconAlignment(this._javaHomeCmbBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
       this._javaHomeCmbBox.Location = new System.Drawing.Point(101, 49);
       this._javaHomeCmbBox.Name = "_javaHomeCmbBox";
       this._javaHomeCmbBox.Size = new System.Drawing.Size(281, 21);
       this._javaHomeCmbBox.TabIndex = 4;
-      this._javaHomeCmbBox.Validating += new System.ComponentModel.CancelEventHandler(this.JavaHomeCmbBoxValidating);
+      this._javaHomeCmbBox.Leave += new System.EventHandler(this.JavaHomeCmbBoxLeaving);
       this._javaHomeCmbBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.JavaHomeCmbBoxKeyPress);
+      this._javaHomeCmbBox.TextChanged += new System.EventHandler(this.JavaHomeCmbBoxTextChanged);
       // 
       // _resinConfLbl
       // 
@@ -378,7 +557,7 @@ namespace Caucho
       this._previewCmbBox.Size = new System.Drawing.Size(281, 21);
       this._previewCmbBox.TabIndex = 25;
       this._previewCmbBox.KeyPress += new System.Windows.Forms.KeyPressEventHandler(this.PreviewCmbBoxKeyPress);
-      this._previewCmbBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this._previewCmbBox_KeyDown);
+      this._previewCmbBox.KeyDown += new System.Windows.Forms.KeyEventHandler(this.PreviewCmbBoxKeyDown);
       // 
       // _previewLbl
       // 
@@ -392,10 +571,13 @@ namespace Caucho
       // _serviceUserCmbBox
       // 
       this._serviceUserCmbBox.FormattingEnabled = true;
+      this._errorProvider.SetIconAlignment(this._serviceUserCmbBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
       this._serviceUserCmbBox.Location = new System.Drawing.Point(101, 186);
       this._serviceUserCmbBox.Name = "_serviceUserCmbBox";
       this._serviceUserCmbBox.Size = new System.Drawing.Size(281, 21);
       this._serviceUserCmbBox.TabIndex = 23;
+      this._serviceUserCmbBox.SelectionChangeCommitted += new System.EventHandler(this.ServiceUserCmbBoxSelectionChangeCommitted);
+      this._serviceUserCmbBox.TextChanged += new System.EventHandler(this.ServiceUserCmbBoxTextChanged);
       // 
       // _servicePassLbl
       // 
@@ -433,16 +615,17 @@ namespace Caucho
       this._serviceRemoveBtn.TabIndex = 17;
       this._serviceRemoveBtn.Text = "Remove";
       this._serviceRemoveBtn.UseVisualStyleBackColor = true;
+      this._serviceRemoveBtn.Click += new System.EventHandler(this.ServiceRemoveBtnClick);
       // 
-      // serviceInstallBtn
+      // _serviceInstallBtn
       // 
-      this.serviceInstallBtn.Location = new System.Drawing.Point(195, 422);
-      this.serviceInstallBtn.Name = "serviceInstallBtn";
-      this.serviceInstallBtn.Size = new System.Drawing.Size(93, 22);
-      this.serviceInstallBtn.TabIndex = 16;
-      this.serviceInstallBtn.Text = "Install/Change";
-      this.serviceInstallBtn.UseVisualStyleBackColor = true;
-      this.serviceInstallBtn.Click += new System.EventHandler(this.ServiceInstallBtnClick);
+      this._serviceInstallBtn.Location = new System.Drawing.Point(195, 422);
+      this._serviceInstallBtn.Name = "_serviceInstallBtn";
+      this._serviceInstallBtn.Size = new System.Drawing.Size(93, 22);
+      this._serviceInstallBtn.TabIndex = 16;
+      this._serviceInstallBtn.Text = "Install/Change";
+      this._serviceInstallBtn.UseVisualStyleBackColor = true;
+      this._serviceInstallBtn.Click += new System.EventHandler(this.ServiceInstallBtnClick);
       // 
       // _serviceNameLbl
       // 
@@ -531,103 +714,16 @@ namespace Caucho
       // 
       // _pluginsTab
       // 
-      this._pluginsTab.Controls.Add(this._apacheDirs);
-      this._pluginsTab.Controls.Add(this._selectIISBtn);
-      this._pluginsTab.Controls.Add(this._iisCheck);
-      this._pluginsTab.Controls.Add(this._apacheCheck);
-      this._pluginsTab.Controls.Add(this._refreshWebBtn);
-      this._pluginsTab.Controls.Add(this._removeWebBtn);
-      this._pluginsTab.Controls.Add(this._installWebBtn);
-      this._pluginsTab.Controls.Add(this._iisDir);
-      this._pluginsTab.Controls.Add(this._selectApacheBtn);
+      this._pluginsTab.Controls.Add(_iisGrpBox);
+      this._pluginsTab.Controls.Add(_apacheGrpBox);
       this._pluginsTab.Location = new System.Drawing.Point(4, 22);
       this._pluginsTab.Name = "_pluginsTab";
       this._pluginsTab.Padding = new System.Windows.Forms.Padding(3);
-      this._pluginsTab.Size = new System.Drawing.Size(458, 431);
+      this._pluginsTab.Size = new System.Drawing.Size(458, 454);
       this._pluginsTab.TabIndex = 1;
       this._pluginsTab.Text = "Web Server Plugins";
       this._pluginsTab.UseVisualStyleBackColor = true;
-      // 
-      // _apacheDirs
-      // 
-      this._apacheDirs.FormattingEnabled = true;
-      this._apacheDirs.Location = new System.Drawing.Point(95, 17);
-      this._apacheDirs.Name = "_apacheDirs";
-      this._apacheDirs.Size = new System.Drawing.Size(287, 21);
-      this._apacheDirs.TabIndex = 30;
-      this._apacheDirs.Text = "Select Apache Server ...";
-      // 
-      // _selectIISBtn
-      // 
-      this._selectIISBtn.Location = new System.Drawing.Point(391, 46);
-      this._selectIISBtn.Name = "_selectIISBtn";
-      this._selectIISBtn.Size = new System.Drawing.Size(64, 22);
-      this._selectIISBtn.TabIndex = 29;
-      this._selectIISBtn.Text = "...";
-      this._selectIISBtn.UseVisualStyleBackColor = true;
-      // 
-      // _iisCheck
-      // 
-      this._iisCheck.AutoSize = true;
-      this._iisCheck.Location = new System.Drawing.Point(18, 46);
-      this._iisCheck.Name = "_iisCheck";
-      this._iisCheck.Size = new System.Drawing.Size(39, 17);
-      this._iisCheck.TabIndex = 28;
-      this._iisCheck.Text = "IIS";
-      this._iisCheck.UseVisualStyleBackColor = true;
-      // 
-      // _apacheCheck
-      // 
-      this._apacheCheck.AutoSize = true;
-      this._apacheCheck.Location = new System.Drawing.Point(18, 20);
-      this._apacheCheck.Name = "_apacheCheck";
-      this._apacheCheck.Size = new System.Drawing.Size(63, 17);
-      this._apacheCheck.TabIndex = 27;
-      this._apacheCheck.Text = "Apache";
-      this._apacheCheck.UseVisualStyleBackColor = true;
-      // 
-      // _refreshWebBtn
-      // 
-      this._refreshWebBtn.Location = new System.Drawing.Point(394, 394);
-      this._refreshWebBtn.Name = "_refreshWebBtn";
-      this._refreshWebBtn.Size = new System.Drawing.Size(61, 22);
-      this._refreshWebBtn.TabIndex = 26;
-      this._refreshWebBtn.Text = "Refresh";
-      this._refreshWebBtn.UseVisualStyleBackColor = true;
-      // 
-      // _removeWebBtn
-      // 
-      this._removeWebBtn.Location = new System.Drawing.Point(296, 394);
-      this._removeWebBtn.Name = "_removeWebBtn";
-      this._removeWebBtn.Size = new System.Drawing.Size(93, 22);
-      this._removeWebBtn.TabIndex = 25;
-      this._removeWebBtn.Text = "Remove";
-      this._removeWebBtn.UseVisualStyleBackColor = true;
-      // 
-      // _installWebBtn
-      // 
-      this._installWebBtn.Location = new System.Drawing.Point(197, 394);
-      this._installWebBtn.Name = "_installWebBtn";
-      this._installWebBtn.Size = new System.Drawing.Size(93, 22);
-      this._installWebBtn.TabIndex = 24;
-      this._installWebBtn.Text = "Install";
-      this._installWebBtn.UseVisualStyleBackColor = true;
-      // 
-      // _iisDir
-      // 
-      this._iisDir.Location = new System.Drawing.Point(92, 46);
-      this._iisDir.Name = "_iisDir";
-      this._iisDir.Size = new System.Drawing.Size(290, 20);
-      this._iisDir.TabIndex = 23;
-      // 
-      // _selectApacheBtn
-      // 
-      this._selectApacheBtn.Location = new System.Drawing.Point(391, 20);
-      this._selectApacheBtn.Name = "_selectApacheBtn";
-      this._selectApacheBtn.Size = new System.Drawing.Size(64, 22);
-      this._selectApacheBtn.TabIndex = 21;
-      this._selectApacheBtn.Text = "...";
-      this._selectApacheBtn.UseVisualStyleBackColor = true;
+      this._pluginsTab.Enter += new System.EventHandler(this.PluginsTabEnter);
       // 
       // _folderDlg
       // 
@@ -639,39 +735,14 @@ namespace Caucho
       // 
       this._fileDlg.FileName = "openFileDialog1";
       // 
-      // _extraParams
+      // _errorProvider
       // 
-      this._extraParams.AutoSize = true;
-      this._extraParams.Location = new System.Drawing.Point(15, 379);
-      this._extraParams.Name = "_extraParams";
-      this._extraParams.Size = new System.Drawing.Size(69, 13);
-      this._extraParams.TabIndex = 41;
-      this._extraParams.Text = "Extra Params";
+      this._errorProvider.ContainerControl = this;
       // 
-      // _extraParamsTxbBox
+      // _log
       // 
-      this._extraParamsTxbBox.Location = new System.Drawing.Point(101, 376);
-      this._extraParamsTxbBox.Name = "_extraParamsTxbBox";
-      this._extraParamsTxbBox.Size = new System.Drawing.Size(281, 20);
-      this._extraParamsTxbBox.TabIndex = 42;
-      // 
-      // _watchDogPortLbl
-      // 
-      this._watchDogPortLbl.AutoSize = true;
-      this._watchDogPortLbl.Location = new System.Drawing.Point(15, 300);
-      this._watchDogPortLbl.Name = "_watchDogPortLbl";
-      this._watchDogPortLbl.Size = new System.Drawing.Size(81, 13);
-      this._watchDogPortLbl.TabIndex = 44;
-      this._watchDogPortLbl.Text = "WatchDog Port";
-      this._watchDogPortLbl.Click += new System.EventHandler(this.label1_Click);
-      // 
-      // _watchdogPortTxtBox
-      // 
-      this._watchdogPortTxtBox.Location = new System.Drawing.Point(101, 295);
-      this._watchdogPortTxtBox.Name = "_watchdogPortTxtBox";
-      this._watchdogPortTxtBox.Size = new System.Drawing.Size(281, 20);
-      this._watchdogPortTxtBox.TabIndex = 43;
-      this._watchdogPortTxtBox.TextChanged += new System.EventHandler(this.textBox1_TextChanged);
+      this._log.Log = "Application";
+      this._log.SynchronizingObject = this;
       // 
       // SetupForm
       // 
@@ -680,14 +751,18 @@ namespace Caucho
       this.AutoSize = true;
       this.AutoSizeMode = System.Windows.Forms.AutoSizeMode.GrowAndShrink;
       this.ClientSize = new System.Drawing.Size(722, 717);
-      this.Controls.Add(this._tableLayoutPanel1);
+      this.Controls.Add(this._root);
       this.ForeColor = System.Drawing.SystemColors.ControlText;
       this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
       this.Name = "SetupForm";
       this.Text = "Resin Setup";
       this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.SetupFormClosing);
-      this._tableLayoutPanel1.ResumeLayout(false);
-      this._tableLayoutPanel1.PerformLayout();
+      _apacheGrpBox.ResumeLayout(false);
+      _apacheGrpBox.PerformLayout();
+      _iisGrpBox.ResumeLayout(false);
+      _iisGrpBox.PerformLayout();
+      this._root.ResumeLayout(false);
+      this._root.PerformLayout();
       this._generalGrp.ResumeLayout(false);
       this._generalGrp.PerformLayout();
       ((System.ComponentModel.ISupportInitialize)(this._resinLogoImg)).EndInit();
@@ -695,7 +770,8 @@ namespace Caucho
       this._servicesTab.ResumeLayout(false);
       this._servicesTab.PerformLayout();
       this._pluginsTab.ResumeLayout(false);
-      this._pluginsTab.PerformLayout();
+      ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this._log)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -703,7 +779,7 @@ namespace Caucho
 
     #endregion
 
-    private System.Windows.Forms.TableLayoutPanel _tableLayoutPanel1;
+    private System.Windows.Forms.TableLayoutPanel _root;
     private System.Windows.Forms.TabControl _tabControl;
     private System.Windows.Forms.TabPage _servicesTab;
     private System.Windows.Forms.Button _selectResinConfBtn;
@@ -721,7 +797,7 @@ namespace Caucho
     private System.Windows.Forms.Label _serviceUserLbl;
     private System.Windows.Forms.Button _serviceRefreshBtn;
     private System.Windows.Forms.Button _serviceRemoveBtn;
-    private System.Windows.Forms.Button serviceInstallBtn;
+    private System.Windows.Forms.Button _serviceInstallBtn;
     private System.Windows.Forms.Label _serviceNameLbl;
     private System.Windows.Forms.Label _servicesLbl;
     private System.Windows.Forms.ComboBox _servicesCmbBox;
@@ -732,14 +808,6 @@ namespace Caucho
     private System.Windows.Forms.Button _selectJavaHomeBtn;
     private System.Windows.Forms.Label _javaHomeLbl;
     private System.Windows.Forms.TabPage _pluginsTab;
-    private System.Windows.Forms.Button _selectIISBtn;
-    private System.Windows.Forms.CheckBox _iisCheck;
-    private System.Windows.Forms.CheckBox _apacheCheck;
-    private System.Windows.Forms.Button _refreshWebBtn;
-    private System.Windows.Forms.Button _removeWebBtn;
-    private System.Windows.Forms.Button _installWebBtn;
-    private System.Windows.Forms.TextBox _iisDir;
-    private System.Windows.Forms.Button _selectApacheBtn;
     private System.Windows.Forms.GroupBox _generalGrp;
     private System.Windows.Forms.Button _selectResinBtn;
     private System.Windows.Forms.PictureBox _resinLogoImg;
@@ -753,10 +821,21 @@ namespace Caucho
     private System.Windows.Forms.Label _serverLbl;
     private System.Windows.Forms.FolderBrowserDialog _folderDlg;
     private System.Windows.Forms.OpenFileDialog _fileDlg;
-    private System.Windows.Forms.ComboBox _apacheDirs;
     private System.Windows.Forms.Label _extraParams;
     private System.Windows.Forms.TextBox _extraParamsTxbBox;
     private System.Windows.Forms.Label _watchDogPortLbl;
     private System.Windows.Forms.TextBox _watchdogPortTxtBox;
+    private System.Windows.Forms.ErrorProvider _errorProvider;
+    private System.Diagnostics.EventLog _log;
+    private System.Windows.Forms.ComboBox _apacheDirs;
+    private System.Windows.Forms.Button _selectApacheBtn;
+    private System.Windows.Forms.Button _removeApacheBtn;
+    private System.Windows.Forms.Button _installApacheBtn;
+    private System.Windows.Forms.Button _selectIISBtn;
+    private System.Windows.Forms.TextBox _iisDir;
+    private System.Windows.Forms.Button _removeIISBtn;
+    private System.Windows.Forms.Button _installIISBtn;
+    private System.Windows.Forms.Label label1;
+    private System.Windows.Forms.Label label2;
   }
 }
