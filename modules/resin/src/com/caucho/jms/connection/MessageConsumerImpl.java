@@ -56,7 +56,7 @@ import com.caucho.util.L10N;
 /**
  * A basic message consumer.
  */
-public class MessageConsumerImpl implements MessageConsumer
+public class MessageConsumerImpl<E> implements MessageConsumer
 {
   static final Logger log
     = Logger.getLogger(MessageConsumerImpl.class.getName());
@@ -66,13 +66,13 @@ public class MessageConsumerImpl implements MessageConsumer
 
   protected final JmsSession _session;
 
-  private AbstractQueue _queue;
+  private AbstractQueue<E> _queue;
 
   private MessageListener _messageListener;
   private ClassLoader _listenerClassLoader;
 
   private MessageConsumerCallback _messageCallback;
-  private EntryCallback _entryCallback;
+  private EntryCallback<E> _entryCallback;
 
   private String _messageSelector;
   protected Selector _selector;
@@ -82,7 +82,7 @@ public class MessageConsumerImpl implements MessageConsumer
   private volatile boolean _isClosed;
 
   MessageConsumerImpl(JmsSession session,
-                      AbstractQueue queue,
+                      AbstractQueue<E> queue,
                       String messageSelector,
                       boolean noLocal)
     throws JMSException
@@ -114,7 +114,7 @@ public class MessageConsumerImpl implements MessageConsumer
   /**
    * Returns the destination
    */
-  protected AbstractDestination getDestination()
+  protected AbstractDestination<E> getDestination()
     throws JMSException
   {
     if (_isClosed || _session.isClosed())
@@ -265,12 +265,13 @@ public class MessageConsumerImpl implements MessageConsumer
     long expireTime = timeout > 0 ? now + timeout : 0;
 
     while (_session.isActive()) {
-      QueueEntry entry = _queue.receiveEntry(expireTime, _isAutoAcknowledge, _selector);
+      QueueEntry<E> entry
+        = _queue.receiveEntry(expireTime, _isAutoAcknowledge, _selector);
 
       if (entry == null)
 	return null;
 
-      Serializable payload = entry.getPayload();
+      E payload = entry.getPayload();
 
       if (payload == null)
 	return null;
@@ -285,7 +286,7 @@ public class MessageConsumerImpl implements MessageConsumer
 	msg.setJMSMessageID(entry.getMsgId());
       }
       else {
-	msg = new ObjectMessageImpl(payload);
+	msg = new ObjectMessageImpl((Serializable) payload);
 	msg.setJMSMessageID(entry.getMsgId());
       }
 
@@ -335,7 +336,7 @@ public class MessageConsumerImpl implements MessageConsumer
 
     MessageImpl msg = null;
     try {
-      MessageCallback callback = _messageCallback;
+      MessageCallback<E> callback = _messageCallback;
       
       // XXX: not correct with new model
 
@@ -452,7 +453,7 @@ public class MessageConsumerImpl implements MessageConsumer
     return getClass().getSimpleName() + "[" + _queue + "]";
   }
 
-  class MessageConsumerCallback implements MessageCallback {
+  class MessageConsumerCallback implements MessageCallback<E> {
     private final MessageListener _listener;
     private final ClassLoader _classLoader;
     
@@ -464,7 +465,7 @@ public class MessageConsumerImpl implements MessageConsumer
       _classLoader = Thread.currentThread().getContextClassLoader();
     }
     
-    public void messageReceived(String msgId, Serializable payload)
+    public void messageReceived(String msgId, E payload)
     {
       MessageImpl message = null;
 
@@ -476,7 +477,7 @@ public class MessageConsumerImpl implements MessageConsumer
 	  message.setJMSMessageID(msgId);
 	}
 	else {
-	  message = new ObjectMessageImpl(payload);
+	  message = new ObjectMessageImpl((Serializable) payload);
 	  message.setJMSMessageID(msgId);
 	}
 

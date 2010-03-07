@@ -44,19 +44,19 @@ import com.caucho.util.ThreadPool;
  * Provides abstract implementation for a memory queue.
  * 
  */
-public abstract class AbstractMemoryQueue<E extends QueueEntry>
-  extends AbstractQueue
+public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
+  extends AbstractQueue<E>
 {
   private static final Logger log
     = Logger.getLogger(AbstractMemoryQueue.class.getName());
   
   protected final Object _queueLock = new Object();
 
-  private ArrayList<EntryCallback> _callbackList
-    = new ArrayList<EntryCallback>();
+  private ArrayList<EntryCallback<E>> _callbackList
+    = new ArrayList<EntryCallback<E>>();
 
-  protected QueueEntry []_head = new QueueEntry[10];
-  protected QueueEntry []_tail = new QueueEntry[10];
+  protected QE []_head = (QE []) new QueueEntry[10];
+  protected QE []_tail = (QE []) new QueueEntry[10];
 
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
   
@@ -74,12 +74,12 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
    */
   @Override
   public final void send(String msgId,
-                         Serializable payload,
+                         E payload,
                          int priority,
                          long expires)
     throws MessageException
   {
-    E entry = writeEntry(msgId, payload, priority, expires);
+    QE entry = writeEntry(msgId, payload, priority, expires);
       
     addQueueEntry(entry);
   }
@@ -88,12 +88,12 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   // send implementation
   //
 
-  abstract protected E writeEntry(String msg,
-                                  Serializable payload,
-                                  int priority,
-                                  long expires);
+  abstract protected QE writeEntry(String msg,
+                                   E payload,
+                                   int priority,
+                                   long expires);
 
-  protected void addQueueEntry(E entry)
+  protected void addQueueEntry(QE entry)
   {
     addEntry(entry);
 
@@ -108,23 +108,23 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
    * Primary message receiving, registers a callback for any new
    * message.
    */
-  public E receiveEntry(long expireTime, boolean isAutoAck) 
+  public QE receiveEntry(long expireTime, boolean isAutoAck) 
      throws MessageException
   {
     return receiveEntry(expireTime, isAutoAck, null);
   }
   
-  public E receiveEntry(long expireTime, boolean isAutoAck, 
-                        QueueEntrySelector selector) throws MessageException
+  public QE receiveEntry(long expireTime, boolean isAutoAck, 
+                         QueueEntrySelector selector) throws MessageException
   {
     _receiverCount.incrementAndGet();
     
     try {
-      E entry = null;
+      QE entry = null;
 
       synchronized (_queueLock) {
         if (_callbackList.size() == 0) {
-        entry = readEntry(selector);
+          entry = readEntry(selector);
         }
       }
 
@@ -143,7 +143,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   
       ReceiveEntryCallback callback = new ReceiveEntryCallback(isAutoAck);
 
-      return (E) callback.waitForEntry(expireTime);      
+      return (QE) callback.waitForEntry(expireTime);      
     } finally {
       _receiverCount.decrementAndGet();  
     }
@@ -180,11 +180,11 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   // abstract receive stubs
   //
 
-  protected void acknowledge(E entry)
+  protected void acknowledge(QE entry)
   {
   }
 
-  protected void readPayload(E entry)
+  protected void readPayload(QE entry)
   {
   }
   
@@ -203,7 +203,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   @Override
   public void acknowledge(String msgId)
   {
-    E entry = removeEntry(msgId);
+    QE entry = removeEntry(msgId);
 
     if (entry != null)
       acknowledge(entry);
@@ -212,7 +212,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   public boolean listen(EntryCallback callback)
     throws MessageException
   {
-    E entry = null;
+    QE entry = null;
 
     synchronized (_queueLock) {
       if (_callbackList.size() > 0 || (entry = readEntry()) == null) {
@@ -233,7 +233,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   protected void dispatchMessage()
   {
     while (true) {
-      E entry = null;
+      QE entry = null;
       EntryCallback callback = null;
       
       synchronized (_queueLock) {
@@ -302,7 +302,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   /**
    * Add an entry to the queue
    */
-  private E addEntry(E entry)
+  private QE addEntry(QE entry)
   {
     int priority = entry.getPriority();
     
@@ -321,19 +321,19 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   /**
    * Returns the next entry from the queue
    */
-  protected E readEntry()
+  protected QE readEntry()
   {
     return readEntry(null);
   }
   /**
    * Returns the next entry from the queue
    */
-  protected E readEntry(QueueEntrySelector selector)
+  protected QE readEntry(QueueEntrySelector selector)
   {
     for (int i = _head.length - 1; i >= 0; i--) {
-      for (QueueEntry entry = _head[i];
+      for (QE entry = _head[i];
            entry != null;
-           entry = entry._next) {
+           entry = (QE) entry._next) {
 
         if (! entry.isLease()) {
           continue;
@@ -343,14 +343,14 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
           continue;
         }
         
-        readPayload((E)entry);
+        readPayload((QE) entry);
         if ((selector != null) && (!selector.isMatch(entry))) {
           continue;
         }
           
         entry.setReadSequence(_readSequenceGenerator.incrementAndGet());
 
-        return (E) entry;
+        return entry;
       }
     }
 
@@ -362,13 +362,13 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
    * @param selector
    * @return          Entries present in the Queue.
    */
-  public ArrayList<QueueEntry> getBrowserList()
+  public ArrayList<QE> getBrowserList()
   {
-    ArrayList<QueueEntry> enteries = new ArrayList<QueueEntry>();
+    ArrayList<QE> entries = new ArrayList<QE>();
     for (int i = _head.length - 1; i >= 0; i--) {
-      for (QueueEntry entry = _head[i];
+      for (QE entry = _head[i];
            entry != null;
-           entry = entry._next) {
+           entry = (QE) entry._next) {
 
         if (! entry.isLease()) {
           continue;
@@ -378,38 +378,38 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
           continue;
         }
         
-        readPayload((E)entry);
+        readPayload(entry);
 
-        enteries.add((E)entry);
+        entries.add(entry);
       }
     }
     
-    return enteries.size() > 0 ? enteries : null;
+    return entries.size() > 0 ? entries : null;
   }
   
   /**
    * Removes message.
    */
-  protected E removeEntry(String msgId)
+  protected QE removeEntry(String msgId)
   {
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
-        QueueEntry prev = null;
-        QueueEntry entry = _head[i];
+        QE prev = null;
+        QE entry = _head[i];
 
         while (entry != null) {
-          QueueEntry next = entry._next;
+          QE next = (QE) entry._next;
           
           if (msgId.equals(entry.getMsgId())) {
             if (prev != null)
               prev._next = entry._next;
             else
-              _head[i] = entry._next;
+              _head[i] = (QE) entry._next;
 
             if (_tail[i] == entry)
               _tail[i] = prev;
             
-            return (E) entry;
+            return entry;
           }
 
           prev = entry;
@@ -430,7 +430,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   {
     synchronized (_queueLock) {
       for (int i = _head.length - 1; i >= 0; i--) {
-        for (QueueEntry entry = _head[i];
+        for (QueueEntry<E> entry = _head[i];
              entry != null;
              entry = entry._next) {
           if (msgId.equals(entry.getMsgId())) {
@@ -458,7 +458,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
 
     synchronized (_queueLock) {
       for (int i = 0; i < _head.length; i++) {
-        for (QueueEntry entry = _head[i];
+        for (QueueEntry<E> entry = _head[i];
              entry != null;
              entry = entry._next) {
           browserList.add(entry.getMsgId());
@@ -472,11 +472,11 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   /**
    * Synchronous timeout receive
    */
-  class ReceiveEntryCallback implements EntryCallback {
+  class ReceiveEntryCallback implements EntryCallback<E> {
     private boolean _isAutoAck;
     
     private Thread _thread;
-    private volatile QueueEntry _entry;
+    private volatile QueueEntry<E> _entry;
 
     ReceiveEntryCallback(boolean isAutoAck)
     {
@@ -484,7 +484,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       _thread = Thread.currentThread();
     }
     
-    public boolean entryReceived(QueueEntry entry)
+    public boolean entryReceived(QueueEntry<E> entry)
     {
       _entry = entry;
 
@@ -493,7 +493,7 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
       return _isAutoAck;
     }
 
-    public QueueEntry waitForEntry(long expireTime)
+    public QueueEntry<E> waitForEntry(long expireTime)
     {
       listen(this);
       
@@ -516,23 +516,21 @@ public abstract class AbstractMemoryQueue<E extends QueueEntry>
   /**
    * Async listen receive
    */
-  class ListenEntryCallback implements EntryCallback, Runnable {
-    private boolean _isAutoAck;
-    private MessageCallback _callback;
+  class ListenEntryCallback implements EntryCallback<E>, Runnable {
+    private MessageCallback<E> _callback;
     private ClassLoader _classLoader;
 
     private boolean _isClosed;
     
-    private volatile QueueEntry _entry;
+    private volatile QueueEntry<E> _entry;
 
-    ListenEntryCallback(MessageCallback callback, boolean isAutoAck)
+    ListenEntryCallback(MessageCallback<E> callback, boolean isAutoAck)
     {
-      _isAutoAck = isAutoAck;
       _callback = callback;
       _classLoader = Thread.currentThread().getContextClassLoader();
     }
     
-    public boolean entryReceived(QueueEntry entry)
+    public boolean entryReceived(QueueEntry<E> entry)
     {
       _entry = entry;
 

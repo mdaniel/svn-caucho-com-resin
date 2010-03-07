@@ -38,7 +38,7 @@ import com.caucho.vfs.*;
  *
  * @see com.caucho.jms.MemoryQueue
  */
-public class MemoryQueue extends MemoryQueueImpl
+public class MemoryQueue<E> extends MemoryQueueImpl<E>
 {
   public MemoryQueue()
   {

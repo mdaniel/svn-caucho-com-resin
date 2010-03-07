@@ -43,7 +43,7 @@ import com.caucho.util.*;
 /**
  * Implements an topic which polls the data periodically.
  */
-abstract public class PollingTopic extends AbstractTopic
+abstract public class PollingTopic<E> extends AbstractTopic<E>
   implements AlarmListener
 {
   private static final L10N L = new L10N(PollingTopic.class);

@@ -115,6 +115,8 @@ class InsertQuery extends Query {
       queryContext.setRowUpdateCount(1);
     } catch (java.io.IOException e) {
       throw new SQLExceptionWrapper(e);
+    } finally {
+      queryContext.close();
     }
   }
 

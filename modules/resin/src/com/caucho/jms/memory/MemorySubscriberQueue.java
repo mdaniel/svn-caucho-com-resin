@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 /**
  * Implements a memory queue.
  */
-public class MemorySubscriberQueue extends MemoryQueue
+public class MemorySubscriberQueue<E> extends MemoryQueueImpl<E>
 {
   private static final Logger log
     = Logger.getLogger(MemorySubscriberQueue.class.getName());
@@ -53,7 +53,7 @@ public class MemorySubscriberQueue extends MemoryQueue
 
   @Override
   public void send(String msgId,
-                   Serializable msg,
+                   E msg,
                    int priority,
                    long timeout,
                    Object publisher)

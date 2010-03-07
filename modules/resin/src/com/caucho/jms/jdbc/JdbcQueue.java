@@ -54,7 +54,7 @@ import java.util.logging.*;
 /**
  * A jdbc queue.
  */
-public class JdbcQueue extends PollingQueue {
+public class JdbcQueue<E> extends PollingQueue<E> {
   static final Logger log = Logger.getLogger(JdbcQueue.class.getName());
   static final L10N L = new L10N(JdbcQueue.class);
   
@@ -193,7 +193,7 @@ public class JdbcQueue extends PollingQueue {
    */
   @Override
   public void send(String msgId,
-		   Serializable payload,
+		   E payload,
 		   int priority,
 		   long expireTime)
     throws MessageException

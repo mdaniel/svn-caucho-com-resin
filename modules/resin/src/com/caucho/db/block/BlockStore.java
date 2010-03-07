@@ -431,7 +431,7 @@ public class BlockStore {
    *
    * @return the block id of the first row block
    */
-  public long firstRow(long blockId)
+  public long firstRowBlock(long blockId)
     throws IOException
   {
     return firstBlock(blockId, ALLOC_ROW);

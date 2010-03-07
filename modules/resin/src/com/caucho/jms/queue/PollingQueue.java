@@ -43,7 +43,7 @@ import com.caucho.util.*;
 /**
  * Implements an queue which polls the data periodically.
  */
-abstract public class PollingQueue extends AbstractQueue
+abstract public class PollingQueue<E> extends AbstractQueue<E>
   implements AlarmListener
 {
   private static final L10N L = new L10N(PollingQueue.class);

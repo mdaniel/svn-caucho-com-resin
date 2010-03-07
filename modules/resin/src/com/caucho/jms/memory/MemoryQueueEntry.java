@@ -29,22 +29,18 @@
 
 package com.caucho.jms.memory;
 
-import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.QueueEntry;
-import com.caucho.util.Alarm;
-
-import java.io.Serializable;
 
 /**
  * Entry in a memory queue.
  */
-public class MemoryQueueEntry extends QueueEntry
+public class MemoryQueueEntry<E> extends QueueEntry<E>
 {  
   public MemoryQueueEntry(String msgId,
 			  long leaseTimeout,
 			  int priority,
 			  long expiresTime,
-			  Serializable payload)
+			  E payload)
   {
     super(msgId, leaseTimeout, priority, expiresTime);
 

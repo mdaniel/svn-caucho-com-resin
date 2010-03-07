@@ -68,19 +68,13 @@ import com.caucho.vfs.Path;
  * &lt;/web-app>
  * </pre>
  */
-public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
+public class FileQueueImpl<E extends Serializable>
+  extends AbstractMemoryQueue<E,FileQueueEntry<E>>
   implements Topic
 {
-  private static final Logger log
-    = Logger.getLogger(FileQueueImpl.class.getName());
-
   private final FileQueueStore _store;
 
   private byte []_queueIdHash;
-
-  private volatile boolean _isStartComplete;
-
-  private Object _dispatchLock = new Object();
 
   public FileQueueImpl()
   {
@@ -106,7 +100,8 @@ public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
     if (serverId == null)
       serverId = "anon";
     
-    _store = new FileQueueStore(path, serverId);
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    _store = new FileQueueStore(path, serverId, loader);
 
     setName(name);
 
@@ -172,7 +167,7 @@ public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
       throw new RuntimeException(e);
     }
       
-    _isStartComplete = _store.receiveStart(_queueIdHash, this);
+    _store.receiveStart(_queueIdHash, this);
   }
   
   /**
@@ -185,37 +180,38 @@ public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
    * @param expireTime the expires time
    */
   @Override
-  public FileQueueEntry writeEntry(String msgId,
-				   Serializable payload,
-				   int priority,
-				   long expireTime)
+  public FileQueueEntry<E> writeEntry(String msgId,
+                                      E payload,
+                                      int priority,
+                                      long expireTime)
   {
     long id = _store.send(_queueIdHash, msgId, payload, priority, expireTime);
 
     long leaseTimeout = -1;
 
-    FileQueueEntry entry = new FileQueueEntry(id, msgId, leaseTimeout,
-					      priority, expireTime, payload);
+    FileQueueEntry<E> entry
+      = new FileQueueEntry<E>(id, msgId, leaseTimeout,
+                              priority, expireTime, payload);
 
     return entry;
   }
 
-  protected void readPayload(FileQueueEntry entry)
+  protected void readPayload(FileQueueEntry<E> entry)
   {
-    Serializable payload = entry.getPayload();
+    E payload = entry.getPayload();
 
     if (payload == null) {
       payload = entry.getPayloadRef();
 
       if (payload == null)
-	payload = _store.readMessage(entry.getId());
+	payload = (E) _store.readMessage(entry.getId());
       
       entry.setPayload(payload);
     }
   }
 
   @Override
-  protected void acknowledge(FileQueueEntry entry)
+  protected void acknowledge(FileQueueEntry<E> entry)
   {
     _store.delete(entry.getId());
   }
@@ -225,10 +221,11 @@ public class FileQueueImpl extends AbstractMemoryQueue<FileQueueEntry>
    */
   protected void addEntry(long id, String msgId, long leaseTimeout,
 			  int priority, long expireTime,
-			  Serializable payload)
+			  E payload)
   {
-    FileQueueEntry entry = new FileQueueEntry(id, msgId, leaseTimeout,
-					      priority, expireTime, payload);
+    FileQueueEntry<E> entry
+      = new FileQueueEntry<E>(id, msgId, leaseTimeout,
+                              priority, expireTime, payload);
 
     addQueueEntry(entry);
   }

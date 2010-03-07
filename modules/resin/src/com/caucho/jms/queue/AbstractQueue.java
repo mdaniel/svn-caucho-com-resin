@@ -29,10 +29,8 @@
 
 package com.caucho.jms.queue;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Enumeration;
 import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.TimeUnit;
@@ -41,19 +39,17 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-
 import javax.jms.ObjectMessage;
 import javax.jms.TextMessage;
 
-import com.caucho.jms.message.MessageImpl;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 
 /**
  * Implements an abstract queue.
  */
-abstract public class AbstractQueue extends AbstractDestination
-  implements javax.jms.Queue, MessageQueue, BlockingQueue
+abstract public class AbstractQueue<E> extends AbstractDestination<E>
+  implements javax.jms.Queue, MessageQueue<E>, BlockingQueue<E>
 {
   private static final L10N L = new L10N(AbstractQueue.class);
   private static final Logger log
@@ -95,8 +91,9 @@ abstract public class AbstractQueue extends AbstractDestination
   /**
    * Sends a message to the queue
    */
+  @Override
   public void send(String msgId,
-                   Serializable msg,
+                   E msg,
                    int priority,
                    long expires)
     throws MessageException
@@ -104,9 +101,9 @@ abstract public class AbstractQueue extends AbstractDestination
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-
+  @Override
   public void send(String msgId,
-                   Serializable msg,
+                   E msg,
                    int priority,
                    long expires,
                    Object publisher)
@@ -119,13 +116,14 @@ abstract public class AbstractQueue extends AbstractDestination
    * Primary message receiving, registers a callback for any new
    * message.
    */
-  public QueueEntry receiveEntry(long timeout, boolean isAutoAck)
+  @Override
+  public QueueEntry<E> receiveEntry(long timeout, boolean isAutoAck)
   {
     return null;//receiveEntry(timeout, isAutoAck, null);
   }
   
-  public QueueEntry receiveEntry(long timeout, boolean isAutoAck, 
-                                 QueueEntrySelector selector)
+  public QueueEntry<E> receiveEntry(long timeout, boolean isAutoAck, 
+                                    QueueEntrySelector selector)
     throws MessageException
   {
     return receiveEntry(timeout, isAutoAck);
@@ -134,8 +132,9 @@ abstract public class AbstractQueue extends AbstractDestination
   /**
    * Adds the callback to the listening list.
    */
-  public EntryCallback addMessageCallback(MessageCallback callback,
-                                          boolean isAutoAck)
+  @Override
+  public EntryCallback<E> addMessageCallback(MessageCallback<E> callback,
+                                             boolean isAutoAck)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -143,7 +142,8 @@ abstract public class AbstractQueue extends AbstractDestination
   /**
    * Removes the callback from the listening list.
    */
-  public void removeMessageCallback(EntryCallback entryCallback)
+  @Override
+  public void removeMessageCallback(EntryCallback<E> entryCallback)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -153,6 +153,7 @@ abstract public class AbstractQueue extends AbstractDestination
    *
    * @param msgId message to acknowledge
    */
+  @Override
   public void acknowledge(String msgId)
   {
   }
@@ -160,6 +161,7 @@ abstract public class AbstractQueue extends AbstractDestination
   /**
    * Rollback the message read.
    */
+  @Override
   public void rollback(String msgId)
   {
   }
@@ -172,7 +174,7 @@ abstract public class AbstractQueue extends AbstractDestination
    * Receives a message, blocking until expireTime if no message is
    * available.
    */
-  public Serializable receive(long expireTime)
+  public E receive(long expireTime)
     throws MessageException
   {
     return receive(expireTime, true);
@@ -182,11 +184,11 @@ abstract public class AbstractQueue extends AbstractDestination
    * Receives a message, blocking until expireTime if no message is
    * available.
    */
-  public Serializable receive(long expireTime,
-                              boolean isAutoAcknowledge)
+  public E receive(long expireTime,
+                   boolean isAutoAcknowledge)
     throws MessageException
   {
-    QueueEntry entry = receiveEntry(expireTime, isAutoAcknowledge);
+    QueueEntry<E> entry = receiveEntry(expireTime, isAutoAcknowledge);
 
     if (entry != null)
       return entry.getPayload();
@@ -194,21 +196,22 @@ abstract public class AbstractQueue extends AbstractDestination
       return null;
   }
 
-  public ArrayList<QueueEntry> getBrowserList()
+  public ArrayList<? extends QueueEntry<E>> getBrowserList()
   {
-    return new ArrayList<QueueEntry>();
+    return new ArrayList<QueueEntry<E>>();
   }
 
   //
   // BlockingQueue api
   //
 
+  @Override
   public int size()
   {
     return 0;
   }
 
-  public Iterator iterator()
+  public Iterator<E> iterator()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -216,7 +219,7 @@ abstract public class AbstractQueue extends AbstractDestination
   /**
    * Adds the item to the queue, waiting if necessary
    */
-  public boolean offer(Object value, long timeout, TimeUnit unit)
+  public boolean offer(E message, long timeout, TimeUnit unit)
   {
     int priority = 0;
 
@@ -224,39 +227,44 @@ abstract public class AbstractQueue extends AbstractDestination
 
     long expires = Alarm.getCurrentTime() + timeout;
 
-    send(generateMessageID(), (Serializable) value, priority, expires);
+    send(generateMessageID(), message, priority, expires);
 
     return true;
   }
 
-  public boolean offer(Object value)
+  @Override
+  public boolean offer(E message)
   {
-    return offer(value, 0, TimeUnit.SECONDS);
+    return offer(message, 0, TimeUnit.SECONDS);
   }
 
-  public void put(Object value)
+  @Override
+  public void put(E value)
   {
     offer(value, Integer.MAX_VALUE, TimeUnit.SECONDS);
   }
 
-  public Object poll(long timeout, TimeUnit unit)
+  @Override
+  public E poll(long timeout, TimeUnit unit)
   {
     long msTimeout = unit.toMillis(timeout);
 
-    Serializable payload = receive(msTimeout);
+    E payload = receive(msTimeout);
 
     try {
       if (payload == null)
         return null;
       else if (payload instanceof ObjectMessage)
-        return ((ObjectMessage) payload).getObject();
+        return (E) ((ObjectMessage) payload).getObject();
       else if (payload instanceof TextMessage)
-        return ((TextMessage) payload).getText();
-      else if (payload instanceof Serializable)
+        return (E) ((TextMessage) payload).getText();
+      else
         return payload;
+      /*
       else
         throw new MessageException(L.l("'{0}' is an unsupported message for the BlockingQueue API.",
                                        payload));
+                                       */
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -264,32 +272,38 @@ abstract public class AbstractQueue extends AbstractDestination
     }
   }
 
+  @Override
   public int remainingCapacity()
   {
     return Integer.MAX_VALUE;
   }
 
-  public Object peek()
+  @Override
+  public E peek()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public Object poll()
+  @Override
+  public E poll()
   {
     return poll(0, TimeUnit.MILLISECONDS);
   }
 
-  public Object take()
+  @Override
+  public E take()
   {
     return poll(Integer.MAX_VALUE, TimeUnit.SECONDS);
   }
 
-  public int drainTo(Collection c)
+  @Override
+  public int drainTo(Collection<? super E> c)
   {
     throw new UnsupportedOperationException();
   }
 
-  public int drainTo(Collection c, int max)
+  @Override
+  public int drainTo(Collection<? super E> c, int max)
   {
     throw new UnsupportedOperationException();
   }

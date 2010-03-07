@@ -29,12 +29,10 @@
 
 package com.caucho.jms.queue;
 
-import java.io.Serializable;
-
 /**
  * Listener for queue message available
  */
-public interface MessageCallback
+public interface MessageCallback<E>
 {
   /**
    * Notifies a listener that a message is available from the queue.
@@ -46,6 +44,6 @@ public interface MessageCallback
    * 
    * @return true if the consumer can handle the message
    */
-  public void messageReceived(String msgId, Serializable payload);
+  public void messageReceived(String msgId, E payload);
 }
 

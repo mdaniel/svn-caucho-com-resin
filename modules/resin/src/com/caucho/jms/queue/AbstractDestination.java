@@ -29,37 +29,26 @@
 
 package com.caucho.jms.queue;
 
-import java.util.logging.*;
-
-import java.io.Serializable;
-import java.util.Collection;
-import java.util.Iterator;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.jms.Destination;
 
-import com.caucho.jms.JmsRuntimeException;
-import com.caucho.jms.message.*;
-import com.caucho.jms.connection.*;
-
-import com.caucho.util.*;
 import com.caucho.config.Configurable;
 import com.caucho.config.inject.HandleAware;
+import com.caucho.util.Alarm;
+import com.caucho.util.Base64;
+import com.caucho.util.RandomUtil;
 
 /**
  * Implements an abstract queue.
  */
-abstract public class AbstractDestination
-  extends java.util.AbstractQueue
-  implements javax.jms.Destination, BlockingQueue,
+@SuppressWarnings("serial")
+abstract public class AbstractDestination<E>
+  extends java.util.AbstractQueue<E>
+  implements javax.jms.Destination, BlockingQueue<E>,
              java.io.Serializable, HandleAware
 {
-  private static final L10N L = new L10N(AbstractDestination.class);
-  private static final Logger log
-    = Logger.getLogger(AbstractDestination.class.getName());
-
   private static long _idRandom;
   private static final AtomicLong _idCount = new AtomicLong();
 
@@ -152,7 +141,7 @@ abstract public class AbstractDestination
    * Sends a message to the queue
    */
   abstract public void send(String msgId,
-                            Serializable msg,
+                            E msg,
                             int priority,
                             long expires)
     throws MessageException;
@@ -161,7 +150,7 @@ abstract public class AbstractDestination
    * Sends a message to the queue
    */
   public void send(String msgId,
-                   Serializable msg,
+                   E msg,
                    int priority,
                    long expires,
                    Object publisher)
@@ -170,7 +159,7 @@ abstract public class AbstractDestination
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public Serializable receive(long timeout)
+  public E receive(long timeout)
     throws MessageException
   {
     return null;

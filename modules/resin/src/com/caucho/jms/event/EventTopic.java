@@ -41,7 +41,7 @@ import com.caucho.jms.queue.*;
 /**
  * Implements a event topic.
  */
-public class EventTopic extends AbstractTopic
+public class EventTopic<E> extends AbstractTopic<E>
 {
   private static final Logger log
     = Logger.getLogger(EventTopic.class.getName());
@@ -64,20 +64,20 @@ public class EventTopic extends AbstractTopic
   }
 
   @Override
-  public AbstractQueue createSubscriber(Object publisher,
+  public AbstractQueue<E> createSubscriber(Object publisher,
                                         String name,
                                         boolean noLocal)
   {
-    MemoryQueue queue;
+    AbstractQueue<E> queue;
 
     if (name != null) {
-      queue = new MemorySubscriberQueue(publisher, noLocal);
+      queue = new MemorySubscriberQueue<E>(publisher, noLocal);
       queue.setName(getName() + ":sub-" + name);
 
       _subscriptionList.add(queue);
     }
     else {
-      queue = new MemorySubscriberQueue(publisher, noLocal);
+      queue = new MemorySubscriberQueue<E>(publisher, noLocal);
       queue.setName(getName() + ":sub-" + _id++);
 
       _subscriptionList.add(queue);
@@ -100,7 +100,7 @@ public class EventTopic extends AbstractTopic
 
   @Override
   public void send(String msgId,
-                   Serializable payload,
+                   E payload,
                    int priority,
                    long timeout,
                    Object publisher)

@@ -46,18 +46,18 @@ import com.caucho.vfs.*;
 /**
  * Implements a file topic.
  */
-public class FileTopicImpl extends AbstractTopic
+public class FileTopicImpl<E> extends AbstractTopic<E>
 {
   private static final Logger log
     = Logger.getLogger(FileTopicImpl.class.getName());
 
   private final FileQueueStore _store;
 
-  private HashMap<String,AbstractQueue> _durableSubscriptionMap
-    = new HashMap<String,AbstractQueue>();
+  private HashMap<String,AbstractQueue<E>> _durableSubscriptionMap
+    = new HashMap<String,AbstractQueue<E>>();
 
-  private ArrayList<AbstractQueue> _subscriptionList
-    = new ArrayList<AbstractQueue>();
+  private ArrayList<AbstractQueue<E>> _subscriptionList
+    = new ArrayList<AbstractQueue<E>>();
 
   private int _id;
 
@@ -141,7 +141,7 @@ public class FileTopicImpl extends AbstractTopic
   }
 
   @Override
-  public void closeSubscriber(AbstractQueue queue)
+  public void closeSubscriber(AbstractQueue<E> queue)
   {
     if (! _durableSubscriptionMap.values().contains(queue))
       _subscriptionList.remove(queue);
@@ -149,7 +149,7 @@ public class FileTopicImpl extends AbstractTopic
 
   @Override
   public void send(String msgId,
-                   Serializable payload,
+                   E payload,
                    int priority,
                    long timeout,
                    Object publisher)

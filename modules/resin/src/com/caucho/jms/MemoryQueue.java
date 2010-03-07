@@ -53,7 +53,7 @@ import com.caucho.jms.memory.MemoryQueueImpl;
 
 @Service
 @Configurable  
-public class MemoryQueue extends MemoryQueueImpl
+public class MemoryQueue<E> extends MemoryQueueImpl<E>
 {
   /**
    * Standard Injection constructor

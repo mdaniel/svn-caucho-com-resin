@@ -29,7 +29,6 @@
 
 package com.caucho.jms.memory;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.logging.Level;
@@ -42,16 +41,16 @@ import com.caucho.jms.queue.MessageException;
 /**
  * Implements a memory topic.
  */
-public class MemoryTopicImpl extends AbstractTopic
+public class MemoryTopicImpl<E> extends AbstractTopic<E>
 {
   private static final Logger log
     = Logger.getLogger(MemoryTopicImpl.class.getName());
 
-  private HashMap<String,MemoryQueue> _durableSubscriptionMap
-    = new HashMap<String,MemoryQueue>();
+  private HashMap<String,AbstractQueue<E>> _durableSubscriptionMap
+    = new HashMap<String,AbstractQueue<E>>();
 
-  private ArrayList<AbstractQueue> _subscriptionList
-    = new ArrayList<AbstractQueue>();
+  private ArrayList<AbstractQueue<E>> _subscriptionList
+    = new ArrayList<AbstractQueue<E>>();
 
   private int _id;
 
@@ -70,7 +69,7 @@ public class MemoryTopicImpl extends AbstractTopic
 
   @Override
   public void send(String msgId,
-                   Serializable payload,
+                   E payload,
                    int priority,
                    long timeout,
                    Object publisher)
@@ -83,17 +82,17 @@ public class MemoryTopicImpl extends AbstractTopic
   }
 
   @Override
-  public AbstractQueue createSubscriber(Object publisher,
-                                        String name,
-                                        boolean noLocal)
+  public AbstractQueue<E> createSubscriber(Object publisher,
+                                           String name,
+                                           boolean noLocal)
   {
-    MemoryQueue queue;
+    AbstractQueue<E> queue;
 
     if (name != null) {
       queue = _durableSubscriptionMap.get(name);
 
       if (queue == null) {
-        queue = new MemorySubscriberQueue(publisher, noLocal);
+        queue = new MemorySubscriberQueue<E>(publisher, noLocal);
         queue.setName(getName() + ":sub-" + name);
 
         _subscriptionList.add(queue);
@@ -101,7 +100,7 @@ public class MemoryTopicImpl extends AbstractTopic
       }
     }
     else {
-      queue = new MemorySubscriberQueue(publisher, noLocal);
+      queue = new MemorySubscriberQueue<E>(publisher, noLocal);
       queue.setName(getName() + ":sub-" + _id++);
 
       _subscriptionList.add(queue);
@@ -114,7 +113,7 @@ public class MemoryTopicImpl extends AbstractTopic
   }
 
   @Override
-  public void closeSubscriber(AbstractQueue queue)
+  public void closeSubscriber(AbstractQueue<E> queue)
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " close-subscriber(" + queue + ")");

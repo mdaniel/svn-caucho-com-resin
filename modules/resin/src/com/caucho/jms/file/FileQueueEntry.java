@@ -37,25 +37,25 @@ import com.caucho.jms.queue.QueueEntry;
 /**
  * Entry in a file queue
  */
-public class FileQueueEntry extends QueueEntry
+public class FileQueueEntry<E> extends QueueEntry<E>
 {
   private final long _id;
 
-  private SoftReference<Serializable> _payloadRef;
+  private SoftReference<E> _payloadRef;
 
   public FileQueueEntry(long id,
                         String msgId,
                         long leaseTimeout,
                         int priority,
                         long expiresTime,
-                        Serializable payload)
+                        E payload)
   {
     super(msgId, leaseTimeout, priority, expiresTime);
     
     _id = id;
     
     if (payload != null)
-      _payloadRef = new SoftReference<Serializable>(payload);
+      _payloadRef = new SoftReference<E>(payload);
   }
   
   public long getId()
@@ -63,9 +63,9 @@ public class FileQueueEntry extends QueueEntry
     return _id;
   }
 
-  public Serializable getPayloadRef()
+  public E getPayloadRef()
   {
-    SoftReference<Serializable> ref = _payloadRef;
+    SoftReference<E> ref = _payloadRef;
 
     if (ref != null)
       return ref.get();
@@ -73,8 +73,8 @@ public class FileQueueEntry extends QueueEntry
       return null;
   }
 
-  public void setPayloadRef(Serializable payload)
+  public void setPayloadRef(E payload)
   {
-    _payloadRef = new SoftReference<Serializable>(payload);
+    _payloadRef = new SoftReference<E>(payload);
   }
 }

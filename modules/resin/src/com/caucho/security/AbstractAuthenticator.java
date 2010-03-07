@@ -192,10 +192,13 @@ public class AbstractAuthenticator
     if (Server.getCurrent() != null) {
       _singleSignon = _localSingleSignon.getLevel();
       
+      // server/1al4
+      /*
       if (_singleSignon == null) {
 	_singleSignon = new ClusterSingleSignon("authenticator");
 	_localSingleSignon.set(_singleSignon);
       }
+      */
     }
   }
 

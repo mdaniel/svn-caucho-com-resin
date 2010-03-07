@@ -28,7 +28,6 @@
 
 package com.caucho.jms.file;
 
-import java.io.Serializable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -37,16 +36,16 @@ import com.caucho.jms.memory.MemoryQueueImpl;
 /**
  * Implements a file queue.
  */
-public class FileSubscriberQueue extends MemoryQueueImpl
+public class FileSubscriberQueue<E> extends MemoryQueueImpl<E>
 {
   private static final Logger log
            = Logger.getLogger(FileSubscriberQueue.class.getName());
   
-  private FileTopicImpl _topic;
+  private FileTopicImpl<E> _topic;
   private Object _publisher;
   private boolean _isNoLocal;
 
-  FileSubscriberQueue(FileTopicImpl topic, Object publisher, boolean noLocal)
+  FileSubscriberQueue(FileTopicImpl<E> topic, Object publisher, boolean noLocal)
   {
     _topic = topic;
     _publisher = publisher;
@@ -55,7 +54,7 @@ public class FileSubscriberQueue extends MemoryQueueImpl
 
   @Override
   public void send(String msgId,
-                   Serializable msg,
+                   E msg,
                    int priority,
                    long timeout,
                    Object publisher)

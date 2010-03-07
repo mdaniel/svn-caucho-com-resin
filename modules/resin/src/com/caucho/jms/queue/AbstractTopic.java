@@ -47,7 +47,7 @@ import com.caucho.util.L10N;
 /**
  * Implements an abstract topic.
  */
-abstract public class AbstractTopic extends AbstractDestination
+abstract public class AbstractTopic<E> extends AbstractDestination<E>
   implements javax.jms.Topic
 {
   private static final L10N L = new L10N(AbstractTopic.class);
@@ -72,7 +72,8 @@ abstract public class AbstractTopic extends AbstractDestination
     _admin.register();
   }
 
-  public void send(String msgId, Serializable msg, int priority, long expires)
+  @Override
+  public void send(String msgId, E msg, int priority, long expires)
     throws MessageException
   {
     send(msgId, msg, priority, expires, null);
@@ -82,16 +83,17 @@ abstract public class AbstractTopic extends AbstractDestination
    * Polls the next message from the store.  If no message is available,
    * wait for the timeout.
    */
-  public MessageImpl receive(long timeout)
+  @Override
+  public E receive(long timeout)
   {
     throw new java.lang.IllegalStateException(L.l("topic cannot be used directly for receive."));
   }
 
-  public abstract AbstractQueue createSubscriber(Object publisher,
+  public abstract AbstractQueue<E> createSubscriber(Object publisher,
                                                  String name,
                                                  boolean noLocal);
 
-  public abstract void closeSubscriber(AbstractQueue subscriber);
+  public abstract void closeSubscriber(AbstractQueue<E> subscriber);
 
   //
   // BlockingQueue api
@@ -102,7 +104,7 @@ abstract public class AbstractTopic extends AbstractDestination
     return 0;
   }
 
-  public Iterator iterator()
+  public Iterator<E> iterator()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -110,7 +112,7 @@ abstract public class AbstractTopic extends AbstractDestination
   /**
    * Adds the item to the queue, waiting if necessary
    */
-  public boolean offer(Object value, long timeout, TimeUnit unit)
+  public boolean offer(E value, long timeout, TimeUnit unit)
   {
     int priority = 0;
 
@@ -118,34 +120,34 @@ abstract public class AbstractTopic extends AbstractDestination
 
     long expires = Alarm.getCurrentTime() + timeout;
 
-    send(generateMessageID(), (Serializable) value, priority, expires);
+    send(generateMessageID(), value, priority, expires);
 
     return true;
   }
 
-  public boolean offer(Object value)
+  public boolean offer(E value)
   {
     return offer(value, 0, TimeUnit.SECONDS);
   }
 
-  public void put(Object value)
+  public void put(E value)
   {
     offer(value, Integer.MAX_VALUE, TimeUnit.SECONDS);
   }
 
-  public Object poll(long timeout, TimeUnit unit)
+  public E poll(long timeout, TimeUnit unit)
   {
     long msTimeout = unit.toMillis(timeout);
 
-    Serializable payload = receive(msTimeout);
+    E payload = receive(msTimeout);
 
     try {
       if (payload == null)
         return null;
       else if (payload instanceof ObjectMessage)
-        return ((ObjectMessage) payload).getObject();
+        return (E) ((ObjectMessage) payload).getObject();
       else if (payload instanceof TextMessage)
-        return ((TextMessage) payload).getText();
+        return (E) ((TextMessage) payload).getText();
       else if (payload instanceof Serializable)
         return payload;
       else
@@ -161,17 +163,17 @@ abstract public class AbstractTopic extends AbstractDestination
     return Integer.MAX_VALUE;
   }
 
-  public Object peek()
+  public E peek()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public Object poll()
+  public E poll()
   {
     return poll(0, TimeUnit.MILLISECONDS);
   }
 
-  public Object take()
+  public E take()
   {
     return poll(Integer.MAX_VALUE, TimeUnit.SECONDS);
   }

@@ -45,6 +45,7 @@ import javax.annotation.*;
 import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.hessian.io.Hessian2Input;
 //import com.caucho.jms.queue.*;
+import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.config.ConfigException;
 import com.caucho.db.*;
@@ -75,23 +76,20 @@ public class FileQueueStore
   private FreeList<StoreConnection> _freeList
     = new FreeList<StoreConnection>(32);
 
-  private Path _path;
   private DataSource _db;
-  private String _name = "default";
-  private String _tablePrefix = "jms";
-
-  // private MessageFactory _messageFactory;
-
   private String _queueTable;
   private String _messageTable;
 
-  private long _queueId;
-
-  public FileQueueStore(Path path, String serverId)
+  public FileQueueStore(Path path, String serverId, ClassLoader loader)
   {
     //    _messageFactory = new MessageFactory();
 
-    init(path, serverId);
+    init(path, serverId, loader);
+  }
+
+  public FileQueueStore(Path path, String serverId)
+  {
+    this(path, serverId, Thread.currentThread().getContextClassLoader());
   }
 
   public static FileQueueStore create()
@@ -104,13 +102,13 @@ public class FileQueueStore
     ClassLoader loader = server.getClassLoader();
 
     synchronized (_localStore) {
-      FileQueueStore store = _localStore.get(loader);
+      FileQueueStore store = _localStore.getLevel(loader);
 
       if (store == null) {
 	Path path = server.getResinDataDirectory();
 	String serverId = server.getServerId();
 
-	store = new FileQueueStore(path, serverId);
+	store = new FileQueueStore(path, serverId, loader);
 
 	_localStore.set(store, loader);
       }
@@ -119,7 +117,7 @@ public class FileQueueStore
     }
   }
 
-  private void init(Path path, String serverId)
+  private void init(Path path, String serverId, ClassLoader loader)
   {
     if (path == null)
       throw new NullPointerException();
@@ -142,6 +140,8 @@ public class FileQueueStore
 
     _queueTable = escapeName("jms_queue_" + serverId);
     _messageTable = escapeName("jms_message_" + serverId);
+    
+    Environment.addCloseListener(this, loader);
 
     try {
       DataSourceImpl db = new DataSourceImpl(path);

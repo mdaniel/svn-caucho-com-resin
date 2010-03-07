@@ -142,6 +142,8 @@ public abstract class AbstractLogin implements Login {
         _singleSignon = abstractAuth.getSingleSignon();
       }
 
+      // server/1al4
+      /*
       if (_singleSignon == null) {
         try {
           _singleSignon = new ClusterSingleSignon("login");
@@ -149,6 +151,7 @@ public abstract class AbstractLogin implements Login {
           log.log(Level.FINE, e.toString(), e);
         }
       }
+      */
     }
 
     return _singleSignon;

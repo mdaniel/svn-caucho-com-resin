@@ -29,24 +29,13 @@
 
 package com.caucho.jms.memory;
 
-import java.io.Serializable;
-
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
-import com.caucho.jms.connection.JmsSession;
-import com.caucho.jms.message.MessageImpl;
 import com.caucho.jms.queue.AbstractMemoryQueue;
-import com.caucho.jms.queue.QueueEntry;
 
 /**
  * Implements a memory queue.
  */
-public class MemoryQueueImpl extends AbstractMemoryQueue<MemoryQueueEntry>
+public class MemoryQueueImpl<E> extends AbstractMemoryQueue<E,MemoryQueueEntry<E>>
 {
-  private static final Logger log
-    = Logger.getLogger(MemoryQueueImpl.class.getName());
-  
   /**
    * Returns the configuration URL.
    */
@@ -61,23 +50,23 @@ public class MemoryQueueImpl extends AbstractMemoryQueue<MemoryQueueEntry>
    * active listeners.
    */
   @Override
-    public MemoryQueueEntry writeEntry(String msgId,
-				       Serializable payload,
-				       int priority,
-				       long expireTime)
+  public MemoryQueueEntry<E> writeEntry(String msgId,
+                                        E payload,
+                                        int priority,
+                                        long expireTime)
   {
     int leaseTimeout = -1;
     
-    MemoryQueueEntry entry
-      = new MemoryQueueEntry(msgId,
-			     leaseTimeout, priority, expireTime,
-			     payload);
+    MemoryQueueEntry<E> entry
+      = new MemoryQueueEntry<E>(msgId,
+			        leaseTimeout, priority, expireTime,
+			        payload);
 
     return entry;
   }
 
   @Override
-  protected void acknowledge(MemoryQueueEntry entry)
+  protected void acknowledge(MemoryQueueEntry<E> entry)
   {
   }
 }

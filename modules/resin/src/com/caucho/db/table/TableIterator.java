@@ -274,7 +274,7 @@ public class TableIterator {
       block.free();
     }
 
-    _blockId = _table.firstRow(_blockId + Table.BLOCK_SIZE);
+    _blockId = _table.firstRowBlock(_blockId + Table.BLOCK_SIZE);
 
     if (_blockId < 0) {
       return false;

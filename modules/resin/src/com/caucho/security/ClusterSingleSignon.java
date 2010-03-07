@@ -59,6 +59,7 @@ public class ClusterSingleSignon implements SingleSignon {
   public ClusterSingleSignon(String name)
   {
     _cache = new ClusterCache();
+    _cache.setExpireTimeoutMillis(24 * 3600 * 1000L);
 
     setName(name);
 

@@ -6,7 +6,7 @@ import java.io.Serializable;
 /**
  * Basic implementation of an entry in the Queue.
  */
-public abstract class QueueEntry implements Serializable
+public abstract class QueueEntry<M>
 {  
   private final int _priority;
 
@@ -14,13 +14,13 @@ public abstract class QueueEntry implements Serializable
 
   private final String _msgId;
 
-  QueueEntry _next;
+  QueueEntry<M> _next;
   
-  QueueEntry _nextPriority;
+  QueueEntry<M> _nextPriority;
 
   private long _expiresTime;
 
-  private Serializable _payload;
+  private M _payload;
   
   // True if the message has been read, but not yet committed
   private long _readSequence;
@@ -69,7 +69,7 @@ public abstract class QueueEntry implements Serializable
   
   public boolean isExpired()
   {
-    return _expiresTime > Alarm.getCurrentTime();
+    return _expiresTime < Alarm.getCurrentTime();
   }
   
   
@@ -93,17 +93,17 @@ public abstract class QueueEntry implements Serializable
     return _priority;
   }
 
-  public Serializable readPayload()
+  public M readPayload()
   {
     return getPayload();
   }
   
-  public final Serializable getPayload()
+  public final M getPayload()
   {
     return _payload;
   }
   
-  public final void setPayload(Serializable payload)
+  public final void setPayload(M payload)
   {
     _payload = payload;
   }
