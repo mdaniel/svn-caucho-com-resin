@@ -49,7 +49,6 @@ public class JniBoot implements Boot {
 
   public boolean isValid()
   {
-    System.out.println("BOOT: " + _jniProcess + " " + _jniProcess.isEnabled());
     return _jniProcess != null && _jniProcess.isEnabled();
   }
   

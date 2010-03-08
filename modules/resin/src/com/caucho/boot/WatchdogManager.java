@@ -165,9 +165,8 @@ class WatchdogManager implements AlarmListener {
     
     JniBoot boot = new JniBoot();
     Path logDirectory = getLogDirectory();
-    System.out.println("BOOT: " + boot + " " + boot.isValid());
+
     if (boot.isValid()) {
-      System.out.println("LOG: " + logDirectory.exists() + " " + logDirectory);
       if (! isLogDirectoryExists) {
         logDirectory.mkdirs();
 

@@ -370,7 +370,7 @@
     </antcall>
   </target>
   
-  <target name="resin-kernel" depends="init, inject, servlet16">
+  <target name="resin-kernel" depends="init, inject, servlet16, version">
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="kernel"/>
       <param name="module.dist" value="${lib}"/>
@@ -544,7 +544,7 @@
     </antcall>
   </target>
   
-  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, portlet, script, resin-kernel, version, resin-compile"/>
+  <target name="resin" depends="init, resin-xml, hessian, jcache, javaee, portlet, script, resin-kernel, resin-compile"/>
 
   <!--
   <target name="jaf" depends="init">

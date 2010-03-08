@@ -45,7 +45,7 @@ public class FastCgiProtocol extends AbstractHttpProtocol {
   }
 
   /**
-   * Create a HmuxRequest object for the new thread.
+   * Create a FastCgiRequest object for the new thread.
    */
   public ProtocolConnection createConnection(TransportConnection conn)
   {
