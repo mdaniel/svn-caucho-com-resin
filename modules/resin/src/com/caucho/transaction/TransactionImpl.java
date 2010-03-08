@@ -29,6 +29,24 @@
 
 package com.caucho.transaction;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.transaction.HeuristicMixedException;
+import javax.transaction.HeuristicRollbackException;
+import javax.transaction.NotSupportedException;
+import javax.transaction.RollbackException;
+import javax.transaction.Status;
+import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
+import javax.transaction.Transaction;
+import javax.transaction.xa.XAException;
+import javax.transaction.xa.XAResource;
+import javax.transaction.xa.Xid;
+
 import com.caucho.jca.UserTransactionImpl;
 import com.caucho.jca.UserTransactionSuspendState;
 import com.caucho.transaction.xalog.AbstractXALogStream;
@@ -37,30 +55,20 @@ import com.caucho.util.AlarmListener;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
-import javax.transaction.*;
-import javax.transaction.xa.XAException;
-import javax.transaction.xa.XAResource;
-import javax.transaction.xa.Xid;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
- * Implementation of the transaction.  Transactions are normally
- * associated with a single thread.
+ * Implementation of the transaction. Transactions are normally associated with
+ * a single thread.
  */
 public class TransactionImpl implements Transaction, AlarmListener {
-  private static final Logger log
-    = Logger.getLogger(TransactionImpl.class.getName());
+  private static final Logger log = Logger.getLogger(TransactionImpl.class
+      .getName());
   private static final L10N L = new L10N(TransactionImpl.class);
 
-  private final static long DEFAULT_TIMEOUT = 60000;
   private final static long EXTRA_TIMEOUT = 60000;
   private final static long MAX_TIMEOUT = 24 * 3600 * 1000L;
 
   // flag when the resource is active (between getConnection() and close())
-  private final static int RES_ACTIVE    = 0x1;
+  private final static int RES_ACTIVE = 0x1;
   // flag when the resource shares another resource manager
   private final static int RES_SHARED_RM = 0x2;
   // flag when the resource is suspended
@@ -68,50 +76,83 @@ public class TransactionImpl implements Transaction, AlarmListener {
   // flag when the resource wants to commit
   private final static int RES_COMMIT = 0x8;
 
-  private TransactionManagerImpl _manager;
-
-  // state of the transaction
-  private int _status;
+  private TransactionManagerImpl _transactionManager;
+  private UserTransactionImpl _userTransaction;
+  private UserTransactionSuspendState _suspendState;
 
   // The transaction id for the resource
   private XidImpl _xid;
 
-  // true if the transaction is suspended.
-  private boolean _isSuspended;
-  private boolean _isDead;
+  /** Transaction resources **/
 
-  // How many resources are available
+  // TODO Should these be re-factored to lists?
+  /**
+   * How many resources are available in the transaction.
+   */
   private int _resourceCount;
-  // The current resources in the transaction
-  private XAResource []_resources;
-  // The xids for the resources
-  private XidImpl []_resourceXid;
-  // Whether the resources are active (between begin/end) or not
-  private int []_resourceState;
 
-  private UserTransactionImpl _userTransaction;
-  private UserTransactionSuspendState _suspendState;
+  /**
+   * The current resources in the transaction
+   */
+  private XAResource [] _resources;
 
-  private HashMap<String,Object> _props;
+  /**
+   * The xids for the resources.
+   */
+  private XidImpl [] _resourceXids;
 
-  private ArrayList<Synchronization> _syncList;
+  /**
+   * Whether the resources are active (between begin/end) or not.
+   */
+  private int [] _resourceStates;
+
+  /**
+   * Transaction resources that a client API such as JPA may store and retrieve
+   * by key.
+   */
+  private Map<Object, XAResource> _mappedResources;
+
+  private long _timeout = 0;
+
+  /** Transaction synchronization **/
+
+  /**
+   * Synchronizations interposed for container resources like the JPA provider.
+   */
+  private ArrayList<Synchronization> _interposedSynchronizations;
+
+  /**
+   * Transaction synchronization list for resources like stateful EJBs.
+   */
+  private ArrayList<Synchronization> _synchronizations;
+
+  /** Transaction status **/
+
+  // State of the transaction
+  private int _status;
+  // True if the transaction is suspended.
+  private boolean _isSuspended;
+  // True if the transaction was closed.
+  private boolean _isDead;
 
   private Throwable _rollbackException;
 
   private AbstractXALogStream _xaLog;
 
-  private long _timeout = 0;
+  private HashMap<String, Object> _properties;
+
   private Alarm _alarm;
 
   /**
    * Creates a new transaction.
-   *
-   * @param manager the owning transaction manager
+   * 
+   * @param manager
+   *          the owning transaction manager
    */
   TransactionImpl(TransactionManagerImpl manager)
   {
-    _manager = manager;
-    _timeout = _manager.getTimeout();
+    _transactionManager = manager;
+    _timeout = _transactionManager.getTimeout();
     _status = Status.STATUS_NO_TRANSACTION;
     _alarm = new Alarm("xa-timeout", this, ClassLoader.getSystemClassLoader());
   }
@@ -129,12 +170,22 @@ public class TransactionImpl implements Transaction, AlarmListener {
     _userTransaction = ut;
   }
 
+  public Xid getXid()
+  {
+    return _xid;
+  }
+
   /**
    * Returns true if the transaction has any associated resources.
    */
   boolean hasResources()
   {
     return _resourceCount > 0;
+  }
+
+  public boolean isActive()
+  {
+    return _status == Status.STATUS_ACTIVE;
   }
 
   /**
@@ -152,127 +203,110 @@ public class TransactionImpl implements Transaction, AlarmListener {
   {
     return _isDead;
   }
-  
-  public boolean isActive()
-  {
-    return _status == Status.STATUS_ACTIVE;
-  }
 
   /**
-   * Return true if the transaction has no resources.
+   * Puts a resource into a map of resources and adds the resource to the
+   * transaction.
+   * 
+   * @param key
+   *          User defined key for the Resource.
+   * @param resource
+   *          The Resource to enlist in the transaction.
+   * @throws RollbackException
+   *           If a roll-back occurs.
+   * @throws SystemException
+   *           If an unexpected problem occurs.
    */
-  public boolean isEmpty()
+  public void putResource(Object key, XAResource resource)
+      throws RollbackException, SystemException
   {
-    if (_isDead)
-      return true;
-    else if (_resourceCount > 0)
-      return false;
-    // XXX: ejb/3692 because TransactionContext adds itself
-    else if (_syncList != null && _syncList.size() > 1)
-      return false;
-    else
-      return true;
-  }
+    enlistResource(resource);
 
-  /**
-   * Start a transaction.
-   */
-  void begin()
-    throws SystemException, NotSupportedException
-  {
-    if (_status != Status.STATUS_NO_TRANSACTION) {
-      int status = _status;
-
-      try {
-        rollback();
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-      }
-
-      throw new NotSupportedException(L.l("Nested transactions are not supported. The previous transaction for this thread did not commit() or rollback(). Check that every UserTransaction.begin() has its commit() or rollback() in a finally block.\nStatus was {0}.",
-                                          xaState(status)));
+    if (_mappedResources == null) {
+      _mappedResources = new HashMap<Object, XAResource>();
     }
 
-    if (_isDead)
-      throw new IllegalStateException(L.l("Error trying to use dead transaction."));
-
-    _status = Status.STATUS_ACTIVE;
-
-    _rollbackException = null;
-
-    if (_xid == null)
-      _xid = _manager.createXID();
-
-    if (log.isLoggable(Level.FINE))
-      log.fine(this + " begin");
-
-    if (_timeout > 0) {
-      _alarm.queue(_timeout + EXTRA_TIMEOUT);
-    }
+    _mappedResources.put(key, resource);
   }
 
   /**
-   * Enlists a resource with the current transaction.  Example
-   * resources are database or JMS connections.
-   *
+   * Gets a Resource from the underlying map.
+   * 
+   * @param key
+   *          User defined key for the resource.
+   * @return The Resource mapped to the key.
+   */
+  public Object getResource(Object key)
+  {
+    return _mappedResources.get(key);
+  }
+
+  /**
+   * Enlists a resource with the current transaction. Example resources are
+   * database or JMS connections.
+   * 
    * @return true if successful
    */
-  public boolean enlistResource(XAResource resource)
-    throws RollbackException, SystemException
+  public boolean enlistResource(XAResource resource) throws RollbackException,
+      SystemException
   {
     if (resource == null) {
-      throw new IllegalArgumentException(L.l("Resource must not be null in enlistResource"));
+      throw new IllegalArgumentException(L
+          .l("Resource must not be null in enlistResource"));
     }
 
     if (_isSuspended) {
-      throw new IllegalStateException(L.l("Can't enlist resource {0} because the transaction is suspended.",
-                                          resource));
+      throw new IllegalStateException(L.l(
+          "Can't enlist resource {0} because the transaction is suspended.",
+          resource));
     }
 
     if (_status == Status.STATUS_ACTIVE) {
       // normal
-    }
-    else {
+    } else {
       // validate the status
       if (_status != Status.STATUS_MARKED_ROLLBACK) {
-      }
-      else if (_rollbackException != null) {
+      } else if (_rollbackException != null) {
         throw RollbackExceptionWrapper.create(_rollbackException);
-      }
-      else
-        throw new RollbackException(L.l("Can't enlist resource {0} because the transaction is marked rollback-only.",
-                                        resource));
+      } else
+        throw new RollbackException(
+            L
+                .l(
+                    "Can't enlist resource {0} because the transaction is marked rollback-only.",
+                    resource));
 
       if (_status == Status.STATUS_NO_TRANSACTION)
-        throw new IllegalStateException(L.l("Can't enlist resource {0} because the transaction is not active",
-                                            resource));
+        throw new IllegalStateException(L.l(
+            "Can't enlist resource {0} because the transaction is not active",
+            resource));
 
-      throw new IllegalStateException(L.l("Can't enlist resource {0} because the transaction is not in an active state.  state='{1}'",
-                                          resource,
-                                          xaState(_status)));
+      throw new IllegalStateException(
+          L
+              .l(
+                  "Can't enlist resource {0} because the transaction is not in an active state.  state='{1}'",
+                  resource, xaState(_status)));
     }
 
     // creates enough space in the arrays for the resource
     if (_resources == null) {
       _resources = new XAResource[16];
-      _resourceState = new int[16];
-      _resourceXid = new XidImpl[16];
-    }
-    else if (_resources.length <= _resourceCount) {
+      _resourceXids = new XidImpl[16];
+      _resourceStates = new int[16];
+    } else if (_resources.length <= _resourceCount) {
       int oldLength = _resources.length;
       int newLength = 2 * oldLength;
 
-      XAResource []resources = new XAResource[newLength];
-      int []resourceState = new int[newLength];
-      XidImpl []resourceXid = new XidImpl[newLength];
+      XAResource [] resources = new XAResource[newLength];
+      XidImpl [] resourceXids = new XidImpl[newLength];
+      int [] resourceStates = new int[newLength];
 
       System.arraycopy(_resources, 0, resources, 0, oldLength);
-      System.arraycopy(_resourceState, 0, resourceState, 0, oldLength);
-      System.arraycopy(_resourceXid, 0, resourceXid, 0, oldLength);
+      System.arraycopy(_resourceStates, 0, resourceStates, 0, oldLength);
+      System.arraycopy(_resourceXids, 0, resourceXids, 0, oldLength);
 
       _resources = resources;
-      _resourceState = resourceState;
-      _resourceXid = resourceXid;
+      _resourceStates = resourceStates;
+      _resourceXids = resourceXids;
     }
 
     int flags = XAResource.TMNOFLAGS;
@@ -287,11 +321,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     for (int i = 0; i < _resourceCount; i++) {
       if (_resources[i] != resource) {
-      }
-      else if ((_resourceState[i] & RES_ACTIVE) != 0) {
+      } else if ((_resourceStates[i] & RES_ACTIVE) != 0) {
         IllegalStateException exn;
-        exn = new IllegalStateException(L.l("Can't enlist same resource {0} twice.  Delist is required before calling enlist with an old resource.",
-                                            resource));
+        exn = new IllegalStateException(
+            L
+                .l(
+                    "Can't enlist same resource {0} twice. "
+                        + "Delist is required before calling enlist with an old resource.",
+                    resource));
 
         setRollbackOnly(exn);
         throw exn;
@@ -300,11 +337,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
       try {
         if (_resources[i].isSameRM(resource)) {
           flags = XAResource.TMJOIN;
-          xid = _resourceXid[i];
+          xid = _resourceXids[i];
 
-          if ((_resourceState[i] & RES_ACTIVE) == 0) {
+          if ((_resourceStates[i] & RES_ACTIVE) == 0) {
             _resources[i] = resource;
-            _resourceState[i] |= RES_ACTIVE;
+            _resourceStates[i] |= RES_ACTIVE;
             hasNewResource = false;
           }
 
@@ -333,7 +370,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
     } catch (XAException e) {
       setRollbackOnly(e);
 
-      String message = L.l("Failed to enlist resource {0} in transaction because of exception:\n{1}", resource, e);
+      String message = L
+          .l(
+              "Failed to enlist resource {0} in transaction because of exception:\n{1}",
+              resource, e);
 
       log.log(Level.SEVERE, message, e);
 
@@ -342,12 +382,12 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     if (hasNewResource) {
       _resources[_resourceCount] = resource;
-      _resourceState[_resourceCount] = RES_ACTIVE;
+      _resourceStates[_resourceCount] = RES_ACTIVE;
 
       if (flags == XAResource.TMJOIN)
-        _resourceState[_resourceCount] |= RES_SHARED_RM;
+        _resourceStates[_resourceCount] |= RES_SHARED_RM;
 
-      _resourceXid[_resourceCount] = xid;
+      _resourceXids[_resourceCount] = xid;
       _resourceCount++;
     }
 
@@ -355,32 +395,17 @@ public class TransactionImpl implements Transaction, AlarmListener {
   }
 
   /**
-   * Returns true if the local transaction optimization would be allowed.
-   */
-  public boolean allowLocalTransactionOptimization()
-  {
-    // XXX: can also check if all are non-local
-    return _resourceCount == 0;
-  }
-
-  /**
-   * Returns the current number of resources.
-   */
-  public int getEnlistedResourceCount()
-  {
-    return _resourceCount;
-  }
-
-  /**
-   * delists a resource from the current transaction
-   *
-   * @param resource the resource to delist
-   * @param flag XXX: ???
-   *
+   * De-lists a resource from the current transaction
+   * 
+   * @param resource
+   *          the resource to delist
+   * @param flag
+   *          XXX: ???
+   * 
    * @return true if successful
    */
   public boolean delistResource(XAResource resource, int flag)
-    throws SystemException
+      throws SystemException
   {
     if (_isSuspended)
       throw new IllegalStateException(L.l("transaction is suspended"));
@@ -403,8 +428,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     if (_status == Status.STATUS_NO_TRANSACTION) {
       for (; index + 1 < _resourceCount; index++) {
         _resources[index] = _resources[index + 1];
-        _resourceState[index] = _resourceState[index + 1];
-        _resourceXid[index] = _resourceXid[index + 1];
+        _resourceStates[index] = _resourceStates[index + 1];
+        _resourceXids[index] = _resourceXids[index + 1];
       }
 
       _resourceCount--;
@@ -415,10 +440,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
     if (_status == Status.STATUS_MARKED_ROLLBACK)
       flag = XAResource.TMFAIL;
 
-    _resourceState[index] &= ~RES_ACTIVE;
+    _resourceStates[index] &= ~RES_ACTIVE;
 
     try {
-      resource.end(_resourceXid[index], flag);
+      resource.end(_resourceXids[index], flag);
     } catch (XAException e) {
       setRollbackOnly(e);
 
@@ -432,14 +457,79 @@ public class TransactionImpl implements Transaction, AlarmListener {
   }
 
   /**
+   * Returns the current number of resources.
+   */
+  public int getEnlistedResourceCount()
+  {
+    return _resourceCount;
+  }
+
+  /**
+   * Return true if the transaction has no resources.
+   */
+  public boolean isEmpty()
+  {
+    if (_isDead)
+      return true;
+    else if (_resourceCount > 0)
+      return false;
+    // XXX: ejb/3692 because TransactionContext adds itself
+    else if (_synchronizations != null && _synchronizations.size() > 1)
+      return false; // TODO Should the interposed transactions be added here as
+    // well?
+    else
+      return true;
+  }
+
+  /**
+   * Returns true if the local transaction optimization would be allowed.
+   */
+  public boolean allowLocalTransactionOptimization()
+  {
+    // XXX: can also check if all are non-local
+    return _resourceCount == 0;
+  }
+
+  /**
+   * sets the timeout for the transaction
+   */
+  public void setTransactionTimeout(int seconds) throws SystemException
+  {
+    if (seconds == 0)
+      _timeout = _transactionManager.getTimeout();
+    else if (seconds < 0)
+      _timeout = MAX_TIMEOUT;
+    else {
+      _timeout = 1000L * (long) seconds;
+    }
+
+    if (_status == Status.STATUS_ACTIVE && _timeout > 0) {
+      _alarm.queue(_timeout + EXTRA_TIMEOUT);
+    } else {
+      _alarm.dequeue();
+    }
+  }
+
+  /**
+   * sets the timeout for the transaction
+   */
+  public int getTransactionTimeout() throws SystemException
+  {
+    if (_timeout < 0)
+      return -1;
+    else
+      return (int) (_timeout / 1000L);
+  }
+
+  /**
    * Adds an attribute.
    */
   public void setAttribute(String var, Object value)
   {
-    if (_props == null)
-      _props = new HashMap<String,Object>();
+    if (_properties == null)
+      _properties = new HashMap<String, Object>();
 
-    _props.put(var, value);
+    _properties.put(var, value);
   }
 
   /**
@@ -447,15 +537,37 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   public Object getAttribute(String var)
   {
-    if (_props != null)
-      return _props.get(var);
+    if (_properties != null)
+      return _properties.get(var);
     else
       return null;
   }
 
-  public Xid getXid()
+  /**
+   * Registers synchronization interposed by container resources such as the JPA
+   * persistence provider.
+   * 
+   * @param synchronization
+   *          Interposed synchronization.
+   */
+  public void registerInterposedSynchronization(Synchronization synchronization)
   {
-    return _xid;
+    if (_interposedSynchronizations == null) {
+      _interposedSynchronizations = new ArrayList<Synchronization>();
+    }
+
+    _interposedSynchronizations.add(synchronization);
+  }
+
+  /**
+   * Register a synchronization callback
+   */
+  public void registerSynchronization(Synchronization synchronization)
+  {
+    if (_synchronizations == null)
+      _synchronizations = new ArrayList<Synchronization>();
+
+    _synchronizations.add(synchronization);
   }
 
   /**
@@ -467,24 +579,66 @@ public class TransactionImpl implements Transaction, AlarmListener {
   }
 
   /**
-   * Suspend the transaction.  The timeouts are stopped.
+   * Start a transaction.
    */
-  void suspend()
-    throws SystemException
+  void begin() throws SystemException, NotSupportedException
+  {
+    if (_status != Status.STATUS_NO_TRANSACTION) {
+      int status = _status;
+
+      try {
+        rollback();
+      } catch (Throwable e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+
+      throw new NotSupportedException(
+          L
+              .l(
+                  "Nested transactions are not supported. "
+                      + "The previous transaction for this thread did not commit() or rollback(). "
+                      + "Check that every UserTransaction.begin() has its commit() or rollback() in a finally block.\nStatus was {0}.",
+                  xaState(status)));
+    }
+
+    if (_isDead)
+      throw new IllegalStateException(L
+          .l("Error trying to use dead transaction."));
+
+    _status = Status.STATUS_ACTIVE;
+
+    _rollbackException = null;
+
+    if (_xid == null)
+      _xid = _transactionManager.createXID();
+
+    if (log.isLoggable(Level.FINE))
+      log.fine(this + " begin");
+
+    if (_timeout > 0) {
+      _alarm.queue(_timeout + EXTRA_TIMEOUT);
+    }
+  }
+
+  /**
+   * Suspend the transaction. The timeouts are stopped.
+   */
+  void suspend() throws SystemException
   {
     if (_isSuspended)
-      throw new IllegalStateException(L.l("can't suspend already-suspended transaction"));
+      throw new IllegalStateException(L
+          .l("can't suspend already-suspended transaction"));
 
     // _alarm.dequeue();
 
     _isSuspended = true;
 
     for (int i = _resourceCount - 1; i >= 0; i--) {
-      if ((_resourceState[i] & (RES_ACTIVE|RES_SUSPENDED)) == RES_ACTIVE) {
+      if ((_resourceStates[i] & (RES_ACTIVE | RES_SUSPENDED)) == RES_ACTIVE) {
         try {
           XAResource resource = _resources[i];
 
-          resource.end(_resourceXid[i], XAResource.TMSUSPEND);
+          resource.end(_resourceXids[i], XAResource.TMSUSPEND);
         } catch (Exception e) {
           setRollbackOnly(e);
         }
@@ -501,20 +655,20 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Resume the transaction and requeue the timeout.
    */
-  void resume()
-    throws SystemException
+  void resume() throws SystemException
   {
-    if (! _isSuspended)
-      throw new IllegalStateException(L.l("can't resume non-suspended transaction"));
+    if (!_isSuspended)
+      throw new IllegalStateException(L
+          .l("can't resume non-suspended transaction"));
 
     _alarm.queue(_timeout + EXTRA_TIMEOUT);
 
     for (int i = _resourceCount - 1; i >= 0; i--) {
-      if ((_resourceState[i] & (RES_ACTIVE|RES_SUSPENDED)) == RES_ACTIVE) {
+      if ((_resourceStates[i] & (RES_ACTIVE | RES_SUSPENDED)) == RES_ACTIVE) {
         try {
           XAResource resource = _resources[i];
 
-          resource.start(_resourceXid[i], XAResource.TMRESUME);
+          resource.start(_resourceXids[i], XAResource.TMRESUME);
         } catch (Exception e) {
           setRollbackOnly(e);
         }
@@ -531,26 +685,17 @@ public class TransactionImpl implements Transaction, AlarmListener {
   }
 
   /**
-   * Register a synchronization callback
+   * Force any completion to be a roll-back.
    */
-  public void registerSynchronization(Synchronization sync)
-  {
-    if (_syncList == null)
-      _syncList = new ArrayList<Synchronization>();
-
-    _syncList.add(sync);
-  }
-
-  /**
-   * Force any completion to be a rollback.
-   */
-  public void setRollbackOnly()
-    throws SystemException
+  public void setRollbackOnly() throws SystemException
   {
     if (_status != Status.STATUS_ACTIVE
         && _status != Status.STATUS_MARKED_ROLLBACK) {
-      throw new IllegalStateException(L.l("Can't set rollback-only because the transaction is not active. state={0}.",
-                                          xaState(_status)));
+      throw new IllegalStateException(
+          L
+              .l(
+                  "Can't set rollback-only because the transaction is not active, state={0}.",
+                  xaState(_status)));
     }
 
     _status = Status.STATUS_MARKED_ROLLBACK;
@@ -561,7 +706,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
       log.fine(this + " rollback-only");
 
     if (_rollbackException == null) {
-      _rollbackException = new RollbackException(L.l("Transaction marked rollback-only"));
+      _rollbackException = new RollbackException(L
+          .l("Transaction marked rollback-only"));
       _rollbackException.fillInStackTrace();
     }
   }
@@ -573,8 +719,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
   {
     if (_status != Status.STATUS_ACTIVE
         && _status != Status.STATUS_MARKED_ROLLBACK) {
-      throw new IllegalStateException(L.l("Can't set rollback-only because the transaction is not active. state={0}.",
-                                          xaState(_status)));
+      throw new IllegalStateException(
+          L
+              .l(
+                  "Can't set rollback-only because the transaction is not active, state={0}.",
+                  xaState(_status)));
     }
 
     _status = Status.STATUS_MARKED_ROLLBACK;
@@ -585,8 +734,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     if (log.isLoggable(Level.FINER)) {
       log.log(Level.FINER, this + " rollback-only: " + exn.toString(), exn);
-    }
-    else if (log.isLoggable(Level.FINE)) {
+    } else if (log.isLoggable(Level.FINE)) {
       log.fine(this + " rollback-only: " + exn.toString());
     }
   }
@@ -599,9 +747,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Commit the transaction.
    */
-  public void commit()
-    throws RollbackException, HeuristicMixedException,
-           HeuristicRollbackException, SystemException
+  public void commit() throws RollbackException, HeuristicMixedException,
+      HeuristicRollbackException, SystemException
   {
     _alarm.dequeue();
 
@@ -623,14 +770,18 @@ public class TransactionImpl implements Transaction, AlarmListener {
         if (log.isLoggable(Level.FINE))
           log.fine(this + " commit (no transaction)");
 
-        throw new IllegalStateException(L.l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
+        throw new IllegalStateException(
+            L
+                .l("Can't commit outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
 
       default:
         if (log.isLoggable(Level.FINE))
           log.fine(this + " commit (unknown: " + _status + ")");
 
         rollbackInt();
-        throw new IllegalStateException(L.l("Can't commit because the transaction state is {0}", String.valueOf(_status)));
+        throw new IllegalStateException(L.l(
+            "Can't commit because the transaction state is {0}", String
+                .valueOf(_status)));
       }
 
       try {
@@ -654,49 +805,52 @@ public class TransactionImpl implements Transaction, AlarmListener {
         rollbackInt();
 
         if (_rollbackException != null)
-          throw new RollbackExceptionWrapper(L.l("Transaction can't commit because it has been marked rolled back\n  {0}", _rollbackException),
-                                             _rollbackException);
+          throw new RollbackExceptionWrapper(
+              L
+                  .l(
+                      "Transaction can't commit because it has been marked rolled back\n  {0}",
+                      _rollbackException), _rollbackException);
         else
-          throw new RollbackException(L.l("Transaction can't commit because it has been marked rolled back."));
+          throw new RollbackException(
+              L
+                  .l("Transaction can't commit because it has been marked rolled back."));
       }
 
       if (_resourceCount > 0) {
         _status = Status.STATUS_PREPARING;
 
-        AbstractXALogStream xaLog = _manager.getXALogStream();
+        AbstractXALogStream xaLog = _transactionManager.getXALogStream();
         boolean hasPrepare = false;
         boolean allowSinglePhase = false;
 
         for (int i = _resourceCount - 1; i >= 0; i--) {
           XAResource resource = (XAResource) _resources[i];
 
-          if (i == 0 && (xaLog == null || ! hasPrepare)) {
+          if (i == 0 && (xaLog == null || !hasPrepare)) {
             // server/1601
-            _resourceState[0] |= RES_COMMIT;
+            _resourceStates[0] |= RES_COMMIT;
 
             allowSinglePhase = true;
             break;
           }
 
-          if ((_resourceState[i] & RES_SHARED_RM) == 0) {
+          if ((_resourceStates[i] & RES_SHARED_RM) == 0) {
             try {
-              int prepare = resource.prepare(_resourceXid[i]);
+              int prepare = resource.prepare(_resourceXids[i]);
 
               if (prepare == XAResource.XA_RDONLY) {
-              }
-              else if (prepare == XAResource.XA_OK) {
+              } else if (prepare == XAResource.XA_OK) {
                 hasPrepare = true;
-                _resourceState[i] |= RES_COMMIT;
-              }
-              else {
+                _resourceStates[i] |= RES_COMMIT;
+              } else {
                 log.finer(this + " unexpected prepare result " + prepare);
                 rollbackInt();
               }
             } catch (XAException e) {
               heuristicExn = heuristicException(heuristicExn, e);
               rollbackInt();
-              throw new RollbackExceptionWrapper(L.l("all commits rolled back"),
-                                                 heuristicExn);
+              throw new RollbackExceptionWrapper(
+                  L.l("all commits rolled back"), heuristicExn);
             }
           }
         }
@@ -713,7 +867,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
           try {
             XAResource resource = (XAResource) _resources[0];
 
-            if ((_resourceState[0] & RES_COMMIT) != 0)
+            if ((_resourceStates[0] & RES_COMMIT) != 0)
               resource.commit(_xid, true);
 
             if (_timeout > 0)
@@ -731,14 +885,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
           if (i == 0 && allowSinglePhase)
             continue;
 
-          if ((_resourceState[i] & RES_SHARED_RM) != 0)
+          if ((_resourceStates[i] & RES_SHARED_RM) != 0)
             continue;
-          if ((_resourceState[i] & RES_COMMIT) == 0)
+          if ((_resourceStates[i] & RES_COMMIT) == 0)
             continue;
 
           if (heuristicExn == null) {
             try {
-              resource.commit(_resourceXid[i], false);
+              resource.commit(_resourceXids[i], false);
 
               if (_timeout > 0)
                 resource.setTransactionTimeout(0);
@@ -746,10 +900,9 @@ public class TransactionImpl implements Transaction, AlarmListener {
               heuristicExn = e;
               log.log(Level.FINE, e.toString(), e);
             }
-          }
-          else {
+          } else {
             try {
-              resource.rollback(_resourceXid[i]);
+              resource.rollback(_resourceXids[i]);
 
               if (_timeout > 0)
                 resource.setTransactionTimeout(0);
@@ -768,20 +921,16 @@ public class TransactionImpl implements Transaction, AlarmListener {
       else if (heuristicExn instanceof RollbackException) {
         _status = Status.STATUS_ROLLEDBACK;
         throw (RollbackException) heuristicExn;
-      }
-      else if (heuristicExn instanceof HeuristicMixedException) {
+      } else if (heuristicExn instanceof HeuristicMixedException) {
         _status = Status.STATUS_ROLLEDBACK;
         throw (HeuristicMixedException) heuristicExn;
-      }
-      else if (heuristicExn instanceof HeuristicRollbackException) {
+      } else if (heuristicExn instanceof HeuristicRollbackException) {
         _status = Status.STATUS_ROLLEDBACK;
         throw (HeuristicRollbackException) heuristicExn;
-      }
-      else if (heuristicExn instanceof SystemException) {
+      } else if (heuristicExn instanceof SystemException) {
         _status = Status.STATUS_ROLLEDBACK;
         throw (SystemException) heuristicExn;
-      }
-      else {
+      } else {
         _status = Status.STATUS_ROLLEDBACK;
         throw RollbackExceptionWrapper.create(heuristicExn);
       }
@@ -811,11 +960,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
         break;
 
       case Status.STATUS_NO_TRANSACTION:
-        throw new IllegalStateException(L.l("Can't rollback outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
+        throw new IllegalStateException(
+            L
+                .l("Can't rollback outside of a transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back."));
 
       default:
         rollbackInt();
-        throw new IllegalStateException(L.l("Can't rollback in state: {0}", String.valueOf(_status)));
+        throw new IllegalStateException(L.l("Can't rollback in state: {0}",
+            String.valueOf(_status)));
       }
 
       _status = Status.STATUS_MARKED_ROLLBACK;
@@ -831,7 +983,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
    * exception.
    */
   private Exception heuristicException(Exception oldException,
-                                       XAException xaException)
+      XAException xaException)
   {
     switch (xaException.errorCode) {
     case XAException.XA_HEURHAZ:
@@ -853,7 +1005,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
         return oldException;
       else
         return new SystemExceptionWrapper(getXAMessage(xaException),
-                                          xaException);
+            xaException);
     }
   }
 
@@ -870,11 +1022,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
     for (int i = 0; i < _resourceCount; i++) {
       XAResource resource = (XAResource) _resources[i];
 
-      if ((_resourceState[i] & RES_SHARED_RM) != 0)
+      if ((_resourceStates[i] & RES_SHARED_RM) != 0)
         continue;
 
       try {
-        resource.rollback(_resourceXid[i]);
+        resource.rollback(_resourceXids[i]);
 
         if (_timeout > 0)
           resource.setTransactionTimeout(0);
@@ -890,15 +1042,14 @@ public class TransactionImpl implements Transaction, AlarmListener {
    * Call all the Synchronization listeners before the commit()/rollback()
    * starts.
    */
-  private void callBeforeCompletion()
-    throws RollbackException
+  private void callBeforeCompletion() throws RollbackException
   {
     // server/16h2
-    for (int i = 0; _syncList != null && i < _syncList.size(); i++) {
-      Synchronization sync = _syncList.get(i);
+    for (int i = 0; _synchronizations != null && i < _synchronizations.size(); i++) {
+      Synchronization synchronization = _synchronizations.get(i);
 
       try {
-        sync.beforeCompletion();
+        synchronization.beforeCompletion();
       } catch (RuntimeException e) {
         setRollbackOnly(e);
 
@@ -911,8 +1062,25 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
+    if (_interposedSynchronizations != null) {
+      for (Synchronization interposedSynchronization : _interposedSynchronizations) {
+        try {
+          interposedSynchronization.beforeCompletion();
+        } catch (RuntimeException e) {
+          setRollbackOnly(e);
+
+          RollbackException newException = new RollbackException(e.toString());
+          newException.initCause(e);
+
+          throw newException;
+        } catch (Throwable e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
+      }
+    }
+
     // tell the resources everything's done
-    for (int i = _resourceCount -  1; i >= 0; i--) {
+    for (int i = _resourceCount - 1; i >= 0; i--) {
       XAResource resource = _resources[i];
 
       int flag;
@@ -923,8 +1091,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
         flag = XAResource.TMSUCCESS;
 
       try {
-        if ((_resourceState[i] & RES_ACTIVE) != 0)
-          resource.end(_resourceXid[i], flag);
+        if ((_resourceStates[i] & RES_ACTIVE) != 0)
+          resource.end(_resourceXids[i], flag);
       } catch (Throwable e) {
         log.log(Level.FINE, e.toString(), e);
         setRollbackOnly(e);
@@ -938,8 +1106,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   private void callAfterCompletion()
   {
-    ArrayList<Synchronization> syncList = _syncList;
-    _syncList = null;
+    ArrayList<Synchronization> interposedSynchronizations = _interposedSynchronizations;
+    _interposedSynchronizations = null;
+
+    ArrayList<Synchronization> synchronizations = _synchronizations;
+    _synchronizations = null;
 
     _userTransaction = null;
 
@@ -968,9 +1139,22 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
-    int length = syncList == null ? 0 : syncList.size();
+    int length = interposedSynchronizations == null ? 0
+        : interposedSynchronizations.size();
     for (int i = 0; i < length; i++) {
-      Synchronization sync = (Synchronization) syncList.get(i);
+      Synchronization synchronization = (Synchronization) interposedSynchronizations
+          .get(i);
+
+      try {
+        synchronization.afterCompletion(status);
+      } catch (Throwable e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+
+    length = synchronizations == null ? 0 : synchronizations.size();
+    for (int i = 0; i < length; i++) {
+      Synchronization sync = (Synchronization) synchronizations.get(i);
 
       try {
         sync.afterCompletion(status);
@@ -979,50 +1163,15 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
-    if (_props != null)
-      _props.clear();
-  }
-
-  /**
-   * sets the timeout for the transaction
-   */
-  public void setTransactionTimeout(int seconds)
-    throws SystemException
-  {
-    if (seconds == 0)
-      _timeout = _manager.getTimeout();
-    else if (seconds < 0)
-      _timeout = MAX_TIMEOUT;
-    else {
-      _timeout = 1000L * (long) seconds;
-    }
-
-    if (_status == Status.STATUS_ACTIVE && _timeout > 0) {
-      _alarm.queue(_timeout + EXTRA_TIMEOUT);
-    }
-    else {
-      _alarm.dequeue();
-    }
-  }
-
-  /**
-   * sets the timeout for the transaction
-   */
-  public int getTransactionTimeout()
-    throws SystemException
-  {
-    if (_timeout < 0)
-      return -1;
-    else
-      return (int) (_timeout / 1000L);
+    if (_properties != null)
+      _properties.clear();
   }
 
   public void handleAlarm(Alarm alarm)
   {
     try {
-      log.warning(L.l("{0}: timed out after {1} seconds.",
-                      this,
-                      String.valueOf(getTransactionTimeout())));
+      log.warning(L.l("{0}: timed out after {1} seconds.", this, String
+          .valueOf(getTransactionTimeout())));
 
       setRollbackOnly();
 
@@ -1036,8 +1185,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
   }
 
   /**
-   * Close the transaction, rolling back everything and removing all
-   * enlisted resources.
+   * Close the transaction, rolling back everything and removing all enlisted
+   * resources.
    */
   public void close()
   {
@@ -1051,13 +1200,19 @@ public class TransactionImpl implements Transaction, AlarmListener {
       log.log(Level.FINE, e.toString(), e);
     }
 
-    if (_syncList != null)
-      _syncList.clear();
+    if (_synchronizations != null)
+      _synchronizations.clear();
+
+    if (_interposedSynchronizations != null)
+      _interposedSynchronizations.clear();
 
     for (int i = _resourceCount - 1; i >= 0; i--)
       _resources[i] = null;
 
     _resourceCount = 0;
+
+    _mappedResources.clear();
+    _mappedResources = null;
 
     _xid = null;
   }
@@ -1074,13 +1229,13 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     cb.append("Transaction[");
 
-    byte []branch = _xid.getBranchQualifier();
+    byte [] branch = _xid.getBranchQualifier();
 
     addByte(cb, branch[0]);
 
     cb.append(":");
 
-    byte []global = _xid.getGlobalTransactionId();
+    byte [] global = _xid.getGlobalTransactionId();
     for (int i = 24; i < 28; i++)
       addByte(cb, global[i]);
 
@@ -1113,12 +1268,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   private static String getXAMessage(XAException xaException)
   {
-    if (xaException.getMessage() != null &&
-        ! xaException.getMessage().equals(""))
+    if (xaException.getMessage() != null
+        && !xaException.getMessage().equals(""))
       return xaException.getMessage();
     else
-      return (xaName(xaException.errorCode) + ": " +
-              xaMessage(xaException.errorCode));
+      return (xaName(xaException.errorCode) + ": " + xaMessage(xaException.errorCode));
   }
 
   /**
@@ -1156,7 +1310,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private static String xaName(int xaCode)
   {
     switch (xaCode) {
-      // rollback codes
+    // rollback codes
     case XAException.XA_RBROLLBACK:
       return "XA_RBROLLBACK";
     case XAException.XA_RBCOMMFAIL:
@@ -1217,7 +1371,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   private static String xaMessage(int xaCode)
   {
     switch (xaCode) {
-      // rollback codes
+    // rollback codes
     case XAException.XA_RBROLLBACK:
     case XAException.XA_RBOTHER:
       return L.l("Resource rolled back for an unspecified reason.");
@@ -1228,7 +1382,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     case XAException.XA_RBINTEGRITY:
       return L.l("Resource rolled back because of an integrity check failure.");
     case XAException.XA_RBPROTO:
-      return L.l("Resource rolled back because of a protocol error in the resource manager.");
+      return L
+          .l("Resource rolled back because of a protocol error in the resource manager.");
     case XAException.XA_RBTIMEOUT:
       return L.l("Resource rolled back because of a timeout.");
     case XAException.XA_RBTRANSIENT:
@@ -1248,7 +1403,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     case XAException.XA_HEURMIX:
       return L.l("Resource has been heuristically committed and rolled back.");
     case XAException.XA_RDONLY:
-      return L.l("Resource was read-only and has been heuristically committed.");
+      return L
+          .l("Resource was read-only and has been heuristically committed.");
 
       // errors
     case XAException.XAER_RMERR:

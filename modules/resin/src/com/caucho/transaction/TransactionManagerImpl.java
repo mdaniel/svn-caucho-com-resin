@@ -74,7 +74,7 @@ public class TransactionManagerImpl implements TransactionManager,
 
   private AbstractXALogManager _xaLogManager;
 
-  // thread local is dependent on the transaction manager
+  // Thread local is dependent on the transaction manager.
   private ThreadLocal<TransactionImpl> _threadTransaction = new ThreadLocal<TransactionImpl>();
 
   private ArrayList<WeakReference<TransactionImpl>> _transactionList = new ArrayList<WeakReference<TransactionImpl>>();
@@ -271,13 +271,6 @@ public class TransactionManagerImpl implements TransactionManager,
   {
     getCurrent().rollback();
   }
-
-  /**
-   * Returns the corresponding user transaction.
-   */
-  /*
-   * public UserTransaction getUserTransaction() { return this; }
-   */
 
   /**
    * Returns the current TransactionImpl, creating if necessary.

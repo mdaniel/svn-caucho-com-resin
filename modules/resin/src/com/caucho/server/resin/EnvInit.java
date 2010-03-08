@@ -33,44 +33,35 @@ import com.caucho.jca.UserTransactionProxy;
 import com.caucho.naming.Jndi;
 import com.caucho.server.thread.ResinThreadPoolExecutor;
 import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.transaction.TransactionSynchronizationRegistryImpl;
 
 /**
  * Initialization from EnvironmentLoader, split out of the kernel
  */
-public class EnvInit
-{
-  public EnvInit()
-    throws Exception
+public class EnvInit {
+
+  public EnvInit() throws Exception
   {
     init();
   }
 
-  private void init()
-    throws Exception
+  private void init() throws Exception
   {
     TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
-    // TransactionManagerImpl.setLocal(tm);
-    //Jndi.bindDeep("java:comp/TransactionManager", tm);
-
+    TransactionSynchronizationRegistryImpl transactionSynchronizationRegistry = new TransactionSynchronizationRegistryImpl(
+        tm);
     UserTransactionProxy ut = UserTransactionProxy.getInstance();
-      
-    Jndi.bindDeep("java:comp/UserTransaction", ut);
 
     // server/16g0
     // Applications are incorrectly using TransactionManager
     // as an extended UserTransaction
     Jndi.bindDeep("java:comp/TransactionManager", tm);
+    //TODO Is this alias used?
     Jndi.bindDeep("java:/TransactionManager", tm);
-    Jndi.bindDeep("java:comp/ThreadPool",
-		  ResinThreadPoolExecutor.getThreadPool());
-
-      /*
-      try {
-        Jndi.rebindDeep("java:comp/ORB",
-                        new com.caucho.iiop.orb.ORBImpl());
-      } catch (Exception e) {
-        e.printStackTrace();
-      }
-      */
+    Jndi.bindDeep("java:comp/TransactionSynchronizationRegistry",
+        transactionSynchronizationRegistry);
+    Jndi.bindDeep("java:comp/UserTransaction", ut);
+    Jndi.bindDeep("java:comp/ThreadPool", ResinThreadPoolExecutor
+        .getThreadPool());
   }
 }
