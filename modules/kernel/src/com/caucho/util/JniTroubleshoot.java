@@ -34,6 +34,7 @@ import com.caucho.util.*;
 import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
 
+import java.util.*;
 import java.util.logging.*;
 
 /**
@@ -43,6 +44,8 @@ public class JniTroubleshoot {
   private static final Logger log
     = Logger.getLogger(JniTroubleshoot.class.getName());
   private static final L10N L = new L10N(JniTroubleshoot.class);
+
+  private static final HashSet<String> _loggedLibraries = new HashSet<String>();
   
   private String _className;
   private String _libraryName;
@@ -50,8 +53,6 @@ public class JniTroubleshoot {
   private Throwable _cause;
 
   private boolean _isValid;
-
-  private boolean _isLogged;
 
   public JniTroubleshoot(Class cl, String libraryName)
   {
@@ -70,10 +71,18 @@ public class JniTroubleshoot {
 
   public void log()
   {
-    if (! _isValid && ! _isLogged && Environment.isLoggingInitialized()) {
-      log.log(Level.WARNING, getMessage(), _cause);
+    if (! _isValid && Environment.isLoggingInitialized()) {
+      boolean isLogged = false;
 
-      _isLogged = true;
+      synchronized (_loggedLibraries) {
+        isLogged = _loggedLibraries.contains(_libraryName);
+
+        if (! isLogged)
+          _loggedLibraries.add(_libraryName);
+      }
+
+      if (! isLogged)
+        log.log(Level.WARNING, getMessage(), _cause);
     }
   }
 
@@ -172,9 +181,9 @@ public class JniTroubleshoot {
     }
     else {
       if (is64())
-        return resinHome.lookup("/libexec");
-      else
         return resinHome.lookup("/libexec64");
+      else
+        return resinHome.lookup("/libexec");
     }
   }
 
