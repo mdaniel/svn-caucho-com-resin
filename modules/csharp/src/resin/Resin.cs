@@ -42,9 +42,9 @@ namespace Caucho
 {
   public class Resin : ServiceBase
   {
-    private static String HKEY_JRE = "Software\\JavaSoft\\Java Runtime Environment";
-    private static String HKEY_JDK = "Software\\JavaSoft\\Java Development Kit";
-    private static String CAUCHO_APP_DATA = "Caucho Technology\\Resin";
+    private static String HKEY_JRE = @"Software\JavaSoft\Java Runtime Environment";
+    private static String HKEY_JDK = @"Software\JavaSoft\Java Development Kit";
+    private static String CAUCHO_APP_DATA = @"Caucho Technology\Resin";
 
     private String _javaExe;
     private String _javaHome;

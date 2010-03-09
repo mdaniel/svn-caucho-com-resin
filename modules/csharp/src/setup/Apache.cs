@@ -137,7 +137,7 @@ namespace Caucho
       return result;
     }
 
-    public String GetApacheVersion(String apacheHome)
+    public static String GetApacheVersion(String apacheHome)
     {
       Process process = new Process();
 
@@ -194,7 +194,7 @@ namespace Caucho
         return version;
 
       if (error.Length > 0)
-        throw new ApplicationException("Unable to determine version of Apache due to error: " + error.ToString());
+        throw new ApplicationException("Unable to determine version of Apache due to message: " + error.ToString());
       else if (version != null)
         throw new ApplicationException("Unsupported Apache Version: " + versionString);
       else
@@ -220,7 +220,7 @@ namespace Caucho
       return false;
     }
 
-    public String BackupHttpConf(String httpdConfFile)
+    public static String BackupHttpConf(String httpdConfFile)
     {
       String backUpFile = httpdConfFile + ".bak";
 
@@ -241,43 +241,85 @@ namespace Caucho
       return backUpFile;
     }
 
-    public ConfigureInfo SetupApache(String resinHome, String apacheHome)
+    public static bool IsConfigured(String apacheHome)
     {
+      String httpdConfFile = apacheHome + @"\conf\httpd.conf";
 
-      ConfigureInfo configureInfo = new ConfigureInfo();
+      StreamReader reader = null;
 
-      String apacheVersion = GetApacheVersion(apacheHome);
-
-      String httpdConfData = null;
-
-      String httpdConfFile = apacheHome + "\\conf\\httpd.conf";
-      StreamReader httpdConfFileReader = null;
       try {
-        httpdConfFileReader = new StreamReader(httpdConfFile);
-        httpdConfData = httpdConfFileReader.ReadToEnd();
+        reader = new StreamReader(httpdConfFile);
+        String line = reader.ReadLine();
+
+        do {
+          if (line.IndexOf("mod_caucho.") > -1)
+            return true;
+          line = reader.ReadLine();
+        } while (line != null);
       }
       catch (Exception e) {
-        throw e;
+        //XXX
       }
       finally {
-        if (httpdConfFileReader != null)
-          httpdConfFileReader.Close();
+        if (reader != null)
+          reader.Close();
       }
 
-      StringReader httpdConfReader = new StringReader(httpdConfData);
+      return false;
+    }
+
+    private static bool EnsureWritable(String file)
+    {
+      try {
+        FileStream stream = File.OpenWrite(file);
+        stream.Close();
+        return true;
+      }
+      catch {
+      }
+      return false;
+    }
+
+    public static SetupResult SetupApache(String resinHome, String apacheHome)
+    {
+      String confFile = apacheHome + @"\conf\httpd.conf";
+
+      if (!EnsureWritable(confFile)) {
+        String message = String.Format("File `{0}' appears to be read-only or locked by another process.", confFile);
+        return new SetupResult(SetupResult.ERROR, message);
+      }
+
+      String confData = null;
+      StreamReader confFileReader = null;
+      try {
+        confFileReader = new StreamReader(confFile);
+        confData = confFileReader.ReadToEnd();
+        confFileReader.ReadLine();
+      }
+      catch (Exception e) {
+        return new SetupResult(e);
+      }
+      finally {
+        if (confFileReader != null)
+          confFileReader.Close();
+      }
+
+      StringReader confReader = new StringReader(confData);
 
       int lineCounter = 0;
       int lastLoadModuleLine = 0;
       int loadModCauchoLine = -1;
       int ifModuleCaucho = -1;
       String line;
-      while ((line = httpdConfReader.ReadLine()) != null) {
+      String modCauchoLine = null;
+      while ((line = confReader.ReadLine()) != null) {
         if (line.IndexOf("LoadModule") != -1) {
           lastLoadModuleLine = lineCounter;
 
           if ((line.IndexOf("mod_caucho.dll") != -1) &&
               !IsCommentedOut(line)) {
             loadModCauchoLine = lineCounter;
+            modCauchoLine = line;
           }
         }
 
@@ -289,17 +331,17 @@ namespace Caucho
 
         lineCounter++;
       }
-      httpdConfReader.Close();
+      confReader.Close();
 
       if (ifModuleCaucho == -1 || loadModCauchoLine == -1) {
+        String apacheVersion = GetApacheVersion(apacheHome);
+        String backUpFile = BackupHttpConf(confFile);
 
-        configureInfo.BackUpFile = BackupHttpConf(httpdConfFile);
-
-        httpdConfReader = new StringReader(httpdConfData);
+        confReader = new StringReader(confData);
         StringWriter buffer = new StringWriter();
         lineCounter = 0;
         //
-        while ((line = httpdConfReader.ReadLine()) != null) {
+        while ((line = confReader.ReadLine()) != null) {
           buffer.WriteLine(line);
 
           if (lineCounter == lastLoadModuleLine &&
@@ -319,53 +361,56 @@ namespace Caucho
 
         buffer.Flush();
 
-        StreamWriter httpdConfWriter = null;
+        StreamWriter confWriter = null;
 
         try {
-          httpdConfWriter = new StreamWriter(httpdConfFile);
-          httpdConfWriter.Write(buffer.ToString());
-          httpdConfWriter.Flush();
+          confWriter = new StreamWriter(confFile);
+          confWriter.Write(buffer.ToString());
+          confWriter.Flush();
         }
         catch (Exception e) {
-          throw e;
+          return new SetupResult(e);
         }
         finally {
-          if (httpdConfWriter != null)
-            httpdConfWriter.Close();
+          if (confWriter != null)
+            confWriter.Close();
         }
 
-        configureInfo.Status = ConfigureInfo.SETUP_OK;
-      } else {
-        configureInfo.Status = ConfigureInfo.SETUP_ALREADY;
-      }
+        String message = String.Format("Apache `{0}' is configured to run with resin `{1}'.\n Old httpd.conf is backed up into `{2}'", apacheHome, resinHome, backUpFile);
 
-      return configureInfo;
+        return new SetupResult(message);
+      } else {
+        String modCaucho = modCauchoLine.Substring(modCauchoLine.IndexOf(" \""));
+        String message = String.Format("Apache `{0}' appears to be already configured to run with `{1}'", apacheHome, modCaucho);
+
+        return new SetupResult(SetupResult.ERROR, message);
+      }
     }
 
-    public ConfigureInfo RemoveApache(String apacheHome)
+    public static SetupResult RemoveApache(String apacheHome)
     {
-      ConfigureInfo configInfo = new ConfigureInfo();
+      String confFile = apacheHome + @"\conf\httpd.conf";
 
-      String httpdConfFile = apacheHome + @"\conf\httpd.conf";
+      String message;
+      if (!EnsureWritable(confFile)) {
+        message = String.Format("File `{0}' appears to be read-only or locked by another process", confFile);
+        return new SetupResult(SetupResult.ERROR, message);
+      }
 
-      StreamReader httpdConfReader = null;
+      StreamReader confReader = null;
       StringWriter buffer = new StringWriter();
-      bool resinRemoved = false;
       try {
-
-        httpdConfReader = new StreamReader(httpdConfFile);
+        confReader = new StreamReader(confFile);
         String line = null;
         bool inCauchoIfModule = false;
-        while ((line = httpdConfReader.ReadLine()) != null) {
+        while ((line = confReader.ReadLine()) != null) {
           if (line.IndexOf("LoadModule") != -1 &&
               line.IndexOf("mod_caucho.dll") != -1 &&
               !IsCommentedOut(line)) {
-            resinRemoved = true;
           } else if (line.IndexOf("IfModule") != -1 &&
                      line.IndexOf("mod_caucho.c") != -1 &&
                      !IsCommentedOut(line)) {
             inCauchoIfModule = true;
-            resinRemoved = true;
           } else if (inCauchoIfModule &&
                      line.IndexOf("/IfModule") != -1) {
             inCauchoIfModule = false;
@@ -378,46 +423,37 @@ namespace Caucho
         buffer.Flush();
       }
       catch (Exception e) {
-        throw e;
+        return new SetupResult(e);
       }
       finally {
-        if (httpdConfReader != null)
-          httpdConfReader.Close();
+        if (confReader != null)
+          confReader.Close();
       }
 
-      if (!resinRemoved) {
-        configInfo.Status = ConfigureInfo.REMOVED_ALREADY;
-
-        return configInfo;
-      }
-
-      configInfo.BackUpFile = BackupHttpConf(httpdConfFile);
-      StreamWriter httpdConfWriter = null;
+      StreamWriter confWriter = null;
       try {
-        httpdConfWriter = new StreamWriter(httpdConfFile);
-        httpdConfWriter.Write(buffer.ToString());
-        httpdConfWriter.Flush();
+        confWriter = new StreamWriter(confFile);
+        confWriter.Write(buffer.ToString());
+        confWriter.Flush();
       }
       catch (Exception e) {
-        throw e;
+        return new SetupResult(e);
       }
       finally {
-        if (httpdConfWriter != null)
-          httpdConfWriter.Close();
+        if (confWriter != null)
+          confWriter.Close();
       }
 
-      configInfo.Status = ConfigureInfo.REMOVED_OK;
-
-      return configInfo;
+      message = String.Format("Apache `{0}' no longer configured to run with resin.", apacheHome);
+      return new SetupResult(message);
     }
 
-    public String FindApacheServiceName(String apacheHome)
+    public static String FindApacheServiceName(String apacheHome)
     {
       String apacheHomeLower = apacheHome.ToLower();
       String result = null;
       RegistryKey services = Registry.LocalMachine.OpenSubKey(Setup.REG_SERVICES);
       foreach (String name in services.GetSubKeyNames()) {
-        Console.WriteLine("Service: " + name);
         RegistryKey key = services.OpenSubKey(name);
         String imagePath = (String)key.GetValue("ImagePath");
         if (imagePath != null && !"".Equals(imagePath)) {

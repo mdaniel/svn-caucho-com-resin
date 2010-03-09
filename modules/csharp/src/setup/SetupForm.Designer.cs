@@ -62,7 +62,7 @@ namespace Caucho
       this.label1 = new System.Windows.Forms.Label();
       this._removeApacheBtn = new System.Windows.Forms.Button();
       this._installApacheBtn = new System.Windows.Forms.Button();
-      this._apacheDirs = new System.Windows.Forms.ComboBox();
+      this._apacheCmbBox = new System.Windows.Forms.ComboBox();
       this._selectApacheBtn = new System.Windows.Forms.Button();
       this.label2 = new System.Windows.Forms.Label();
       this._removeIISBtn = new System.Windows.Forms.Button();
@@ -138,7 +138,7 @@ namespace Caucho
       _apacheGrpBox.Controls.Add(this.label1);
       _apacheGrpBox.Controls.Add(this._removeApacheBtn);
       _apacheGrpBox.Controls.Add(this._installApacheBtn);
-      _apacheGrpBox.Controls.Add(this._apacheDirs);
+      _apacheGrpBox.Controls.Add(this._apacheCmbBox);
       _apacheGrpBox.Controls.Add(this._selectApacheBtn);
       _apacheGrpBox.Location = new System.Drawing.Point(0, 0);
       _apacheGrpBox.Margin = new System.Windows.Forms.Padding(0);
@@ -166,6 +166,7 @@ namespace Caucho
       this._removeApacheBtn.TabIndex = 34;
       this._removeApacheBtn.Text = "Remove";
       this._removeApacheBtn.UseVisualStyleBackColor = true;
+      this._removeApacheBtn.Click += new System.EventHandler(this.RemoveApacheBtnClick);
       // 
       // _installApacheBtn
       // 
@@ -177,14 +178,18 @@ namespace Caucho
       this._installApacheBtn.UseVisualStyleBackColor = true;
       this._installApacheBtn.Click += new System.EventHandler(this.InstallApacheBtnClick);
       // 
-      // _apacheDirs
+      // _apacheCmbBox
       // 
-      this._apacheDirs.FormattingEnabled = true;
-      this._apacheDirs.Location = new System.Drawing.Point(97, 29);
-      this._apacheDirs.Name = "_apacheDirs";
-      this._apacheDirs.Size = new System.Drawing.Size(285, 21);
-      this._apacheDirs.TabIndex = 32;
-      this._apacheDirs.Text = "Select Apache Server ...";
+      this._apacheCmbBox.FormattingEnabled = true;
+      this._errorProvider.SetIconAlignment(this._apacheCmbBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
+      this._apacheCmbBox.Location = new System.Drawing.Point(97, 29);
+      this._apacheCmbBox.Name = "_apacheCmbBox";
+      this._apacheCmbBox.Size = new System.Drawing.Size(285, 21);
+      this._apacheCmbBox.TabIndex = 32;
+      this._apacheCmbBox.Text = "Select Apache Server ...";
+      this._apacheCmbBox.SelectionChangeCommitted += new System.EventHandler(this.ApacheCmbBoxSelectionChangeCommitted);
+      this._apacheCmbBox.Leave += new System.EventHandler(this.ApacheCmbBoxLeave);
+      this._apacheCmbBox.TextChanged += new System.EventHandler(this.ApacheCmbBoxTextChanged);
       // 
       // _selectApacheBtn
       // 
@@ -827,7 +832,7 @@ namespace Caucho
     private System.Windows.Forms.TextBox _watchdogPortTxtBox;
     private System.Windows.Forms.ErrorProvider _errorProvider;
     private System.Diagnostics.EventLog _log;
-    private System.Windows.Forms.ComboBox _apacheDirs;
+    private System.Windows.Forms.ComboBox _apacheCmbBox;
     private System.Windows.Forms.Button _selectApacheBtn;
     private System.Windows.Forms.Button _removeApacheBtn;
     private System.Windows.Forms.Button _installApacheBtn;

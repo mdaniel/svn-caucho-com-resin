@@ -433,14 +433,21 @@ namespace Caucho
 
     private void ResinCmbBoxLeaving(object sender, EventArgs e)
     {
+      CheckResinHome();
+    }
+
+    private bool CheckResinHome()
+    {
       String resinHome = _resinCmbBox.Text;
       if (Util.IsResinHome(resinHome) && Util.FindResinExe(resinHome) != null) {
         SelectResin(resinHome);
+        return true;
       } else {
         String message = @"Resin Home must contain lib\resin.jar and resin.exe or httpd.exe";
         _errorProvider.SetError(_resinCmbBox, message);
 
         _resinCmbBox.Focus();
+        return false;
       }
     }
 
@@ -710,11 +717,11 @@ namespace Caucho
           else
             message = String.Format("Service `{0}' is updated.", resinService.Name);
 
-          ProgressDialogSuccess(message);
+          ProgressDialogSuccess(message, true);
           success = true;
         }
         catch (Exception e) {
-          String message = String.Format("Service installation failed due to exception: {0}", e.Message);
+          String message = String.Format("Service installation failed due to message: {0}", e.Message);
           ProgressDialogError(message);
         }
       };
@@ -749,9 +756,9 @@ namespace Caucho
       _progressDialog.UpdateStatus(status);
     }
 
-    private void ProgressDialogSuccess(String message)
+    private void ProgressDialogSuccess(String message, bool resetStatus)
     {
-      _progressDialog.SetSuccess(message);
+      _progressDialog.SetSuccess(message, resetStatus);
     }
 
     private void ProgressDialogError(String error)
@@ -759,28 +766,32 @@ namespace Caucho
       _progressDialog.SetError(error);
     }
 
-
     private void ServiceRemoveBtnClick(object sender, EventArgs eventArgs)
     {
       if (_resinService != null) {
         BackgroundWorker worker = new BackgroundWorker();
         worker.DoWork += delegate(object delegateSender, DoWorkEventArgs delegateEvent)
         {
+          ServiceController serviceController = null;
           try {
             while (_progressDialog == null || !_progressDialog.Visible)
               Thread.Sleep(10);
 
-            ServiceController sc = new ServiceController(_resinService.Name);
+            serviceController = new ServiceController(_resinService.Name);
 
-            if (sc.Status == ServiceControllerStatus.Running) {
+            if (serviceController.Status == ServiceControllerStatus.Running) {
               String status = String.Format("Stopping Service `{0}' ...", _resinService.Name);
               ProgressDialogAddStatus(status);
-              sc.Stop();
-              sc.WaitForStatus(ServiceControllerStatus.Stopped);
+              serviceController.Stop();
+              serviceController.WaitForStatus(ServiceControllerStatus.Stopped);
             }
           }
           catch (Exception e) {
             //XXX
+          }
+          finally {
+            if (serviceController != null)
+              serviceController.Close();
           }
 
           try {
@@ -788,10 +799,10 @@ namespace Caucho
             ProgressDialogAddStatus(message);
             _setup.UninstallService(_resinService);
             message = String.Format("Service `{0}' is removed", _resinService.Name);
-            ProgressDialogSuccess(message);
+            ProgressDialogSuccess(message, true);
           }
           catch (Exception e) {
-            String error = String.Format("Failed to remove service `{0}' due to error `{1}'", _resinService.Name, e.Message);
+            String error = String.Format("Failed to remove service `{0}' due to message `{1}'", _resinService.Name, e.Message);
             ProgressDialogError(error);
           }
         };
@@ -839,11 +850,12 @@ namespace Caucho
 
     private void PluginsTabEnter(object sender, EventArgs e)
     {
-      if (_apacheDirs.DataSource == null) {
+      if (_apacheCmbBox.DataSource == null) {
         ArrayList homes = new ArrayList();
         Apache.FindApache(homes);
-        _apacheDirs.DataSource = homes;
+        _apacheCmbBox.DataSource = homes;
       }
+      ResetApacheInstallControls();
     }
 
     private void SelectApacheBtnClick(object sender, EventArgs e)
@@ -855,15 +867,7 @@ namespace Caucho
         if (_folderDlg.ShowDialog() == DialogResult.OK) {
           String apacheHome = _folderDlg.SelectedPath;
           if (Apache.IsValidApacheHome(apacheHome)) {
-            ArrayList homes = (ArrayList)_apacheDirs.DataSource;
-            _apacheDirs.BeginUpdate();
-            if (!homes.Contains(apacheHome)) {
-              homes.Add(apacheHome);
-              _apacheDirs.DataSource = new ArrayList(homes);
-            }
-            _apacheDirs.SelectedItem = apacheHome;
-            _apacheDirs.EndUpdate();
-
+            AddApacheHome(apacheHome);
             select = false;
           } else {
             String caption = "Incorrect Apache Home";
@@ -875,11 +879,185 @@ namespace Caucho
           select = false;
         }
       }
-
     }
 
-    private void InstallApacheBtnClick(object sender, EventArgs e)
+    private void InstallApacheBtnClick(object sender, EventArgs eventArgs)
     {
+      String resinHome = _resinCmbBox.Text;
+      String apacheHome = _apacheCmbBox.Text;
+      bool success = false;
+
+      BackgroundWorker worker = new BackgroundWorker();
+      worker.DoWork += delegate
+      {
+        while (_progressDialog == null || !_progressDialog.Visible)
+          Thread.Sleep(10);
+        ProgressDialogAddStatus(String.Format("Adding Resin Apache Module to `{0}'..", apacheHome));
+        SetupResult setupResult = Apache.SetupApache(resinHome, apacheHome);
+        if (SetupResult.OK.Equals(setupResult.Status)) {
+          ProgressDialogAddStatus(setupResult.Message);
+          ServiceController serviceController = null;
+          String apacheService = Apache.FindApacheServiceName(apacheHome);
+
+          if (apacheService != null) {
+            try {
+              serviceController = new ServiceController(apacheService);
+              if (serviceController.Status == ServiceControllerStatus.Running) {
+                ProgressDialogAddStatus(String.Format("Restarting Service `{0}' ...", apacheService));
+                serviceController.Stop();
+                serviceController.WaitForStatus(ServiceControllerStatus.Stopped);
+                ProgressDialogAddStatus(String.Format("Service `{0}' stopped...", apacheService));
+                ProgressDialogAddStatus(String.Format("Starting Service `{0}' ...", apacheService));
+                serviceController.Start();
+                serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 0, 30));
+                if (serviceController.Status == ServiceControllerStatus.Running)
+                  ProgressDialogAddStatus(String.Format("Service `{0}' started.", apacheService));
+                else
+                  ProgressDialogAddStatus(String.Format("Service `{0}' did not restart in 30 seconds time frame.\nPlease check event log for error messages from service {0}.", apacheService));
+              }
+            }
+            catch (Exception e) {
+              ProgressDialogAddStatus(String.Format("Could not restart apache service `{0}'. Please restart manually.", apacheService));
+            }
+            finally {
+              if (serviceController != null)
+                serviceController.Close();
+            }
+          }
+          ProgressDialogSuccess("Done.", false);
+          success = true;
+        } else if (SetupResult.ERROR.Equals(setupResult.Status)) {
+          ProgressDialogError(setupResult.Message);
+        } else if (SetupResult.EXCEPTION.Equals(setupResult.Status)) {
+          ProgressDialogError(setupResult.Exception + "\n" + setupResult.Exception.StackTrace);
+        }
+      };
+      worker.RunWorkerAsync();
+      ProgressDialogDisplay(String.Format("Configuring", apacheHome), "Progress: ");
+
+      _installApacheBtn.Enabled = !success;
+      _removeApacheBtn.Enabled = success;
+    }
+
+    private void ApacheCmbBoxLeave(object sender, EventArgs e)
+    {
+      String apacheHome = _apacheCmbBox.Text;
+      if (!CheckApacheHome())
+        return;
+      AddApacheHome(apacheHome);
+      ResetApacheInstallControls();
+    }
+
+    private void AddApacheHome(String apacheHome)
+    {
+      ArrayList homes = (ArrayList)_apacheCmbBox.DataSource;
+      if (homes.Contains(apacheHome)) {
+        _apacheCmbBox.SelectedItem = apacheHome;
+        return;
+      }
+
+      ArrayList newHomes = new ArrayList(homes);
+      newHomes.Add(apacheHome);
+      _apacheCmbBox.BeginUpdate();
+      _apacheCmbBox.DataSource = null;
+      _apacheCmbBox.DataSource = newHomes;
+      _apacheCmbBox.SelectedItem = apacheHome;
+      _apacheCmbBox.EndUpdate();
+    }
+
+    private bool CheckApacheHome()
+    {
+      String apacheHome = _apacheCmbBox.Text;
+      if (Apache.IsValidApacheHome(apacheHome)) {
+        return true;
+      } else {
+        String message = @"Apache Home must contain conf\httpd.conf"; ;
+        _errorProvider.SetError(_apacheCmbBox, message);
+
+        _apacheCmbBox.Focus();
+        return false;
+      }
+    }
+
+    private void RemoveApacheBtnClick(object sender, EventArgs eventArgs)
+    {
+      String resinHome = _resinCmbBox.Text;
+      String apacheHome = _apacheCmbBox.Text;
+      bool success = false;
+
+      BackgroundWorker worker = new BackgroundWorker();
+      worker.DoWork += delegate
+      {
+        while (_progressDialog == null || !_progressDialog.Visible)
+          Thread.Sleep(10);
+        ProgressDialogAddStatus(String.Format("Removing Resin Apache Module configuration from `{0}'...", apacheHome));
+        SetupResult setupResult = Apache.RemoveApache(apacheHome);
+        if (SetupResult.OK.Equals(setupResult.Status)) {
+          ProgressDialogAddStatus(setupResult.Message);
+          ServiceController serviceController = null;
+          String apacheService = Apache.FindApacheServiceName(apacheHome);
+
+          if (apacheService != null) {
+            try {
+              serviceController = new ServiceController(apacheService);
+              if (serviceController.Status == ServiceControllerStatus.Running) {
+                ProgressDialogAddStatus(String.Format("Restarting Service `{0}' ...", apacheService));
+                serviceController.Stop();
+                serviceController.WaitForStatus(ServiceControllerStatus.Stopped);
+                ProgressDialogAddStatus(String.Format("Service `{0}' stopped...", apacheService));
+                ProgressDialogAddStatus(String.Format("Starting Service `{0}' ...", apacheService));
+                serviceController.Start();
+                serviceController.WaitForStatus(ServiceControllerStatus.Running);
+                ProgressDialogAddStatus(String.Format("Service `{0}' started.", apacheService));
+              }
+            }
+            catch (Exception e) {
+              ProgressDialogAddStatus(String.Format("Could not restart apache service `{0}'. Please restart manually.", apacheService));
+            }
+            finally {
+              if (serviceController != null)
+                serviceController.Close();
+            }
+          }
+          ProgressDialogSuccess("Done.", false);
+          success = true;
+        } else if (SetupResult.ERROR.Equals(setupResult.Status)) {
+          ProgressDialogError(setupResult.Message);
+        } else if (SetupResult.EXCEPTION.Equals(setupResult.Status)) {
+          ProgressDialogError(setupResult.Exception + "\n" + setupResult.Exception.StackTrace);
+        }
+      };
+      worker.RunWorkerAsync();
+      ProgressDialogDisplay(String.Format("Configuring", apacheHome), "Progress: ");
+
+      _installApacheBtn.Enabled = success;
+      _removeApacheBtn.Enabled = !success;
+    }
+
+    private void ApacheCmbBoxTextChanged(object sender, EventArgs e)
+    {
+      _errorProvider.SetError(_apacheCmbBox, null);
+      if (_apacheCmbBox.SelectedItem == null) {
+        _installApacheBtn.Enabled = false;
+        _removeApacheBtn.Enabled = false;
+      }
+    }
+
+    private void ApacheCmbBoxSelectionChangeCommitted(object sender, EventArgs e)
+    {
+      ResetApacheInstallControls();
+    }
+
+    private void ResetApacheInstallControls()
+    {
+      if (!(_apacheCmbBox.SelectedItem is String))
+        return;
+
+      String apacheHome = (String)_apacheCmbBox.SelectedItem;
+      bool resinValid = Util.IsResinHome(_resinCmbBox.Text);
+      bool configured = Apache.IsConfigured(apacheHome);
+      _installApacheBtn.Enabled = resinValid && !configured ;
+      _removeApacheBtn.Enabled = resinValid && configured ;
     }
   }
 }

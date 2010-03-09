@@ -17,19 +17,24 @@ namespace Caucho
       _errorProvider.Icon = SystemIcons.Error;
     }
 
-    public delegate void SetSuccessCallBack(String success);
+    public delegate void SetSuccessCallBack(String success, bool resetStatus);
 
-    public void SetSuccess(String success)
+    public void SetSuccess(String success, bool resetStatus)
     {
-      BeginInvoke(new SetSuccessCallBack(_SetSuccess), new object[] { success });
+      BeginInvoke(new SetSuccessCallBack(_SetSuccess), new object[] { success, resetStatus });
     }
 
-    private void _SetSuccess(String success)
+    private void _SetSuccess(String success, bool resetStatus)
     {
       _timer.Stop();
       _progressBar.Value = _progressBar.Maximum;
-      _statusText.Clear();
-      _statusText.Text = success;
+      if (resetStatus)
+        _statusText.Clear();
+
+      _statusText.AppendText(success);
+      _statusText.SelectionStart = _statusText.TextLength;
+      _statusText.ScrollToCaret();
+
       _closeButton.Enabled = true;
     }
 
@@ -44,13 +49,15 @@ namespace Caucho
     {
       _statusText.AppendText(status);
       _statusText.AppendText("\n");
+      _statusText.SelectionStart = _statusText.TextLength;
+      _statusText.ScrollToCaret();
     }
 
     public delegate void SetErrorCallBack(String error);
 
     public void SetError(String error)
     {
-      BeginInvoke(new SetSuccessCallBack(_SetError), new object[] { error });
+      BeginInvoke(new SetErrorCallBack(_SetError), new object[] { error });
     }
 
     private void _SetError(String error)
@@ -58,6 +65,9 @@ namespace Caucho
       _timer.Stop();
       _statusText.AppendText(error);
       _errorProvider.SetError(_statusText, error);
+      _statusText.SelectionStart = _statusText.TextLength;
+      _statusText.ScrollToCaret();
+
       _closeButton.Enabled = true;
     }
 
@@ -69,17 +79,7 @@ namespace Caucho
       _timer.Start();
     }
 
-    public String Message
-    {
-      get
-      {
-        return null;
-      }
-      set
-      {
-        _message.Text = value;
-      }
-    }
+    public String Message { get { return null; } set { _message.Text = value; } }
 
     private void TimerTick(object sender, EventArgs e)
     {

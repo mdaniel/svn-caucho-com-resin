@@ -216,7 +216,7 @@ namespace Caucho
               resin = new ResinService();
               resin.Home = home;
             }
-          } 
+          }
 
           resin.Exe = resinArgs.Exe;
 
@@ -353,49 +353,51 @@ namespace Caucho
       return _users;
     }
 
-    public ConfigureInfo SetupIIS(String resinHome, String iisScripts)
+    public SetupResult SetupIIS(String resinHome, String iisScripts)
     {
-      ConfigureInfo configInfo = new ConfigureInfo();
+      /*      SetupResult configInfo = new SetupResult();
 
-      DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
-      DirectoryEntry resinFilter = null;
+            DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
+            DirectoryEntry resinFilter = null;
 
-      foreach (DirectoryEntry entry in filters.Children) {
-        if ("Resin".Equals(entry.Name)) {
-          resinFilter = entry;
-        }
-      }
+            foreach (DirectoryEntry entry in filters.Children) {
+              if ("Resin".Equals(entry.Name)) {
+                resinFilter = entry;
+              }
+            }
 
-      if (resinFilter == null)
-        resinFilter = filters.Children.Add("Resin", "IIsFilter");
+            if (resinFilter == null)
+              resinFilter = filters.Children.Add("Resin", "IIsFilter");
 
-      resinFilter.Properties["FilterEnabled"][0] = true;
-      resinFilter.Properties["FilterState"][0] = 4;
-      resinFilter.Properties["KeyType"][0] = "IIsFilter";
-      resinFilter.Properties["FilterPath"][0] = iisScripts + "\\isapi_srun.dll";
-      resinFilter.Properties["FilterDescription"][0] = "isapi_srun Extension";
+            resinFilter.Properties["FilterEnabled"][0] = true;
+            resinFilter.Properties["FilterState"][0] = 4;
+            resinFilter.Properties["KeyType"][0] = "IIsFilter";
+            resinFilter.Properties["FilterPath"][0] = iisScripts + "\\isapi_srun.dll";
+            resinFilter.Properties["FilterDescription"][0] = "isapi_srun Extension";
 
-      PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
-      String val = (String)filterOrder[0];
+            PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
+            String val = (String)filterOrder[0];
 
-      if (!val.Contains("Resin,"))
-        filterOrder[0] = "Resin," + val;
+            if (!val.Contains("Resin,"))
+              filterOrder[0] = "Resin," + val;
 
-      resinFilter.CommitChanges();
-      resinFilter.Close();
-      filters.CommitChanges();
-      filters.Close();
+            resinFilter.CommitChanges();
+            resinFilter.Close();
+            filters.CommitChanges();
+            filters.Close();
 
-      try {
-        CopyIsapiFilter(resinHome, iisScripts);
-        configInfo.Status = ConfigureInfo.SETUP_OK;
-      }
-      catch (Exception e) {
-        configInfo.Status = ConfigureInfo.ISAPI_IO_ERROR;
-        configInfo.Exception = e;
-      }
+            try {
+              CopyIsapiFilter(resinHome, iisScripts);
+              configInfo.Status = SetupResult.OK;
+            }
+            catch (Exception e) {
+              configInfo.Status = SetupResult.ISAPI_IO_ERROR;
+              configInfo.Exception = e;
+            }
 
-      return configInfo;
+            return configInfo;
+        */
+      return null;
     }
 
     public void CopyIsapiFilter(String resinHome, String iisScripts)
@@ -425,55 +427,56 @@ namespace Caucho
       sc.Close();
     }
 
-    public ConfigureInfo RemoveIIS(String iisScripts)
+    public SetupResult RemoveIIS(String iisScripts)
     {
-      ConfigureInfo configInfo = new ConfigureInfo();
+      /* SetupResult configInfo = new SetupResult();
 
-      DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
-      DirectoryEntry resinFilter = null;
+       DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
+       DirectoryEntry resinFilter = null;
 
-      foreach (DirectoryEntry entry in filters.Children) {
-        if ("Resin".Equals(entry.Name)) {
-          resinFilter = entry;
-        }
-      }
+       foreach (DirectoryEntry entry in filters.Children) {
+         if ("Resin".Equals(entry.Name)) {
+           resinFilter = entry;
+         }
+       }
 
-      bool resinFound = false;
-      if (resinFilter != null) {
-        filters.Children.Remove(resinFilter);
-        resinFound = true;
-      }
+       bool resinFound = false;
+       if (resinFilter != null) {
+         filters.Children.Remove(resinFilter);
+         resinFound = true;
+       }
 
-      PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
-      String val = (String)filterOrder[0];
+       PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
+       String val = (String)filterOrder[0];
 
-      int index = val.IndexOf("Resin,");
+       int index = val.IndexOf("Resin,");
 
-      if (index != -1) {
-        String newVal = val.Substring(0, index) + val.Substring(index + 6, val.Length - 6 - index);
-        filterOrder[0] = newVal;
-        resinFound = true;
-      }
+       if (index != -1) {
+         String newVal = val.Substring(0, index) + val.Substring(index + 6, val.Length - 6 - index);
+         filterOrder[0] = newVal;
+         resinFound = true;
+       }
 
-      filters.CommitChanges();
-      filters.Close();
+       filters.CommitChanges();
+       filters.Close();
 
-      try {
-        String filterPath = iisScripts + "\\isapi_srun.dll";
-        if (File.Exists(filterPath))
-          File.Delete(filterPath);
+       try {
+         String filterPath = iisScripts + "\\isapi_srun.dll";
+         if (File.Exists(filterPath))
+           File.Delete(filterPath);
 
-        if (resinFound)
-          configInfo.Status = ConfigureInfo.REMOVED_OK;
-        else
-          configInfo.Status = ConfigureInfo.REMOVED_ALREADY;
-      }
-      catch (Exception e) {
-        configInfo.Status = ConfigureInfo.ISAPI_IO_ERROR;
-        configInfo.Exception = e;
-      }
+         if (resinFound)
+           configInfo.Status = SetupResult.REMOVED_OK;
+         else
+           configInfo.Status = SetupResult.ALREADY_REMOVED;
+       }
+       catch (Exception e) {
+         configInfo.Status = SetupResult.ISAPI_IO_ERROR;
+         configInfo.Exception = e;
+       }
 
-      return configInfo;
+       return configInfo;*/
+      return null;
     }
 
     private String FindIIS()
@@ -664,42 +667,35 @@ namespace Caucho
     }
   }
 
-  public class ConfigureInfo
+  public class SetupResult
   {
-    public static int SETUP_ALREADY = 1;
-    public static int SETUP_OK = 2;
-    public static int ISAPI_IO_ERROR = 3;
-    public static int REMOVED_OK = 4;
-    public static int REMOVED_ALREADY = 5;
+    public static int OK = 0;
+    public static int ERROR = 1;
+    public static int EXCEPTION = 2;
 
-    private String _backupFile;
-    private String _serviceName;
-    private int _status;
-    private Exception _exception;
-
-    public String BackUpFile
+    public SetupResult(String message)
     {
-      set { _backupFile = value; }
-      get { return _backupFile; }
+      this.Status = OK;
+      this.Message = message;
     }
 
-    public String ServiceName
+    public SetupResult(int status, String message)
     {
-      set { _serviceName = value; }
-      get { return _serviceName; }
+      this.Status = status;
+      this.Message = message;
     }
 
-    public int Status
+    public SetupResult(Exception e)
     {
-      set { _status = value; }
-      get { return _status; }
+      this.Status = EXCEPTION;
+      this.Exception = e;
     }
 
-    public Exception Exception
-    {
-      set { _exception = value; }
-      get { return _exception; }
-    }
+    public int Status { get; set; }
+
+    public Exception Exception { get; set; }
+
+    public String Message { get; set; }
   }
 
   public class Resin : IEquatable<Resin>
