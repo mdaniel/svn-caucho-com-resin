@@ -33,7 +33,6 @@ import com.caucho.jca.UserTransactionProxy;
 import com.caucho.naming.Jndi;
 import com.caucho.server.thread.ResinThreadPoolExecutor;
 import com.caucho.transaction.TransactionManagerImpl;
-import com.caucho.transaction.TransactionSynchronizationRegistryImpl;
 
 /**
  * Initialization from EnvironmentLoader, split out of the kernel
@@ -48,8 +47,6 @@ public class EnvInit {
   private void init() throws Exception
   {
     TransactionManagerImpl tm = TransactionManagerImpl.getInstance();
-    TransactionSynchronizationRegistryImpl transactionSynchronizationRegistry = new TransactionSynchronizationRegistryImpl(
-        tm);
     UserTransactionProxy ut = UserTransactionProxy.getInstance();
 
     // server/16g0
@@ -59,9 +56,9 @@ public class EnvInit {
     //TODO Is this alias used?
     Jndi.bindDeep("java:/TransactionManager", tm);
     Jndi.bindDeep("java:comp/TransactionSynchronizationRegistry",
-        transactionSynchronizationRegistry);
+                  tm.getSyncRegistry());
     Jndi.bindDeep("java:comp/UserTransaction", ut);
-    Jndi.bindDeep("java:comp/ThreadPool", ResinThreadPoolExecutor
-        .getThreadPool());
+    Jndi.bindDeep("java:comp/ThreadPool", 
+                  ResinThreadPoolExecutor.getThreadPool());
   }
 }

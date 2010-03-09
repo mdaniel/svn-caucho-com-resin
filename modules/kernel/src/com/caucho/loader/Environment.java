@@ -29,22 +29,26 @@
 
 package com.caucho.loader;
 
+import java.lang.management.ManagementFactory;
+import java.security.Permission;
+import java.util.ArrayList;
+import java.util.Properties;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.naming.NamingException;
+
 import com.caucho.config.ConfigException;
 import com.caucho.jmx.Jmx;
-import java.lang.management.ManagementFactory;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogManagerImpl;
 import com.caucho.naming.Jndi;
 import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.*;
-
-import java.security.Permission;
-import java.util.ArrayList;
-import java.util.Properties;
-import java.util.logging.*;
-import javax.management.*;
-import javax.naming.NamingException;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * Static utility classes.

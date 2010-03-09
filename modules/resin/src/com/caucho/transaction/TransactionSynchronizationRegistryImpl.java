@@ -43,22 +43,17 @@ import com.caucho.util.L10N;
  * 
  * @author Reza Rahman
  */
-public class TransactionSynchronizationRegistryImpl implements
-    TransactionSynchronizationRegistry {
-  private static final Logger log = Logger
-      .getLogger(TransactionSynchronizationRegistryImpl.class.getName());
-  private static final L10N L = new L10N(
-      TransactionSynchronizationRegistryImpl.class);
+public class TransactionSynchronizationRegistryImpl
+  implements TransactionSynchronizationRegistry
+{
+  private static final Logger log
+    = Logger.getLogger(TransactionSynchronizationRegistryImpl.class.getName());
+  private static final L10N L
+    = new L10N(TransactionSynchronizationRegistryImpl.class);
 
-  private static TransactionManagerImpl _transactionManager = new TransactionManagerImpl();
+  private final TransactionManagerImpl _transactionManager;
 
-  public TransactionSynchronizationRegistryImpl()
-  {
-    super();
-  }
-
-  public TransactionSynchronizationRegistryImpl(
-      TransactionManagerImpl transactionManager)
+  public TransactionSynchronizationRegistryImpl(TransactionManagerImpl transactionManager)
   {
     _transactionManager = transactionManager;
   }
@@ -71,7 +66,8 @@ public class TransactionSynchronizationRegistryImpl implements
     if (transaction != null) {
       return transaction.getResource(key);
     } else {
-      throw new IllegalStateException(L.l("No active transaction."));
+      throw new IllegalStateException(L.l("Thread {0} does not have an active transaction.",
+                                          Thread.currentThread()));
     }
   }
 
@@ -83,7 +79,8 @@ public class TransactionSynchronizationRegistryImpl implements
     if (transaction != null) {
       return transaction.isRollbackOnly();
     } else {
-      throw new IllegalStateException(L.l("No active transaction."));
+      throw new IllegalStateException(L.l("This {0} does not have an active transaction.",
+                                          Thread.currentThread()));
     }
   }
 
@@ -107,7 +104,8 @@ public class TransactionSynchronizationRegistryImpl implements
     if (transaction != null) {
       return transaction.getStatus();
     } else {
-      throw new IllegalStateException(L.l("No active transaction."));
+      throw new IllegalStateException(L.l("Thread {0} does not have an active transaction.",
+                                          Thread.currentThread()));
     }
   }
 
@@ -159,11 +157,18 @@ public class TransactionSynchronizationRegistryImpl implements
       try {
         transaction.setRollbackOnly();
       } catch (SystemException e) {
-        log.log(Level.WARNING, L.l("Error setting roll-back: {0}", e
-            .getMessage()), e);
+        log.log(Level.WARNING, 
+                L.l("Error setting roll-back: {0}", e.getMessage()), 
+                e);
       }
     } else {
       throw new IllegalStateException(L.l("No active transaction."));
     }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

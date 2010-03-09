@@ -131,6 +131,16 @@ public class ResinWebBeansProducer
   }
 
   /**
+   * Returns the TransactoinSynchronizationRegistry
+   */
+  @Produces
+  @CauchoDeployment
+  public TransactionSynchronizationRegistry getSyncRegistry()
+  {
+    return TransactionManagerImpl.getInstance().getSyncRegistry();
+  }
+
+  /**
    * Returns the ScheduledExecutorService
    */
   @Produces

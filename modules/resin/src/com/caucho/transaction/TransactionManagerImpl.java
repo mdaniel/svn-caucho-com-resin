@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -40,9 +41,11 @@ import javax.transaction.InvalidTransactionException;
 import javax.transaction.NotSupportedException;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
+import javax.transaction.Synchronization;
 import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
@@ -61,23 +64,30 @@ import com.caucho.util.RandomUtil;
 /**
  * Implementation of the transaction manager.
  */
-public class TransactionManagerImpl implements TransactionManager,
-    Serializable, ClassLoaderListener {
+public class TransactionManagerImpl 
+  implements TransactionManager, 
+             Serializable,
+             ClassLoaderListener
+{
   private static final long serialVersionUID = 1L;
   private static L10N L = new L10N(TransactionManagerImpl.class);
-  private static Logger log = Logger.getLogger(TransactionManagerImpl.class
-      .getName());
+  private static Logger log
+    = Logger.getLogger(TransactionManagerImpl.class.getName());
 
   private static TransactionManagerImpl _tm = new TransactionManagerImpl();
 
   private int _serverId;
 
   private AbstractXALogManager _xaLogManager;
+  
+  private TransactionSynchronizationRegistry _syncRegistry
+    = new TransactionSynchronizationRegistryImpl(this);
 
   // Thread local is dependent on the transaction manager.
   private ThreadLocal<TransactionImpl> _threadTransaction = new ThreadLocal<TransactionImpl>();
 
-  private ArrayList<WeakReference<TransactionImpl>> _transactionList = new ArrayList<WeakReference<TransactionImpl>>();
+  private ArrayList<WeakReference<TransactionImpl>> _transactionList 
+    = new ArrayList<WeakReference<TransactionImpl>>();
 
   private long _timeout = -1;
 
@@ -123,6 +133,14 @@ public class TransactionManagerImpl implements TransactionManager,
   public void setXALogManager(AbstractXALogManager xaLogManager)
   {
     _xaLogManager = xaLogManager;
+  }
+  
+  /**
+   * Returns the synchronization registry
+   */
+  public TransactionSynchronizationRegistry getSyncRegistry()
+  {
+    return _syncRegistry;
   }
 
   /**
