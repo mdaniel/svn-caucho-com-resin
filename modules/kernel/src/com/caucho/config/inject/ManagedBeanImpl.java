@@ -425,8 +425,10 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     ArrayList<TimerTask> taskList
       = introspector.introspect(timeoutCaller, _annotatedType);
     
-    for (TimerTask task : taskList) {
-      task.start();
+    if (taskList != null) {
+      for (TimerTask task : taskList) {
+        task.start();
+      }
     }
   }
   
