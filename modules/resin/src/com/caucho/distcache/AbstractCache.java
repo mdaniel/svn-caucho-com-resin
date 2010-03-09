@@ -312,7 +312,7 @@ abstract public class AbstractCache extends AbstractMap
    * <p/>
    * A read-only item could be infinite (-1).  A slow changing item
    * like a list of bulletin-board comments could be 10s.  Even a relatively
-   * quicky changing item can be 10ms or 100ms.
+   * quickly changing item can be 10ms or 100ms.
    * <p/>
    * The default is 10ms
    */

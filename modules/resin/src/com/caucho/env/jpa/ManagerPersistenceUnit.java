@@ -381,6 +381,10 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
       addDefaultProperty("eclipselink.target-server",
                          "org.eclipse.persistence.platform.server.resin.ResinPlatform");
     }
+    else if ("org.hibernate.ejb.HibernatePersistence".equals(className)) {
+      addDefaultProperty("hibernate.transaction.manager_lookup_class",
+                         "org.hibernate.transaction.ResinTransactionManagerLookup");
+    }
   }
   
   private void addDefaultProperty(String name, String value)
