@@ -32,13 +32,21 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using Microsoft.Win32;
-
-
+using System.Diagnostics;
 
 namespace Caucho
 {
   class Apache
   {
+    static EventLog log = new EventLog();
+
+    static Apache()
+    {
+      ((System.ComponentModel.ISupportInitialize)(log)).BeginInit();
+      log.Log = "Application";
+      log.Source = "caucho/Apache.cs";
+    }
+
     private static String REG_APACHE_2_2 = "Software\\Apache Software Foundation\\Apache";
     private static String REG_APACHE_2 = "Software\\Apache Group\\Apache";
 
@@ -94,7 +102,6 @@ namespace Caucho
           }
         }
       }
-
     }
 
     public static void FindApacheInDir(String dir, ArrayList homes)
@@ -258,7 +265,7 @@ namespace Caucho
         } while (line != null);
       }
       catch (Exception e) {
-        //XXX
+        log.WriteEntry(e.Message + "\n" + e.StackTrace);
       }
       finally {
         if (reader != null)
@@ -275,7 +282,8 @@ namespace Caucho
         stream.Close();
         return true;
       }
-      catch {
+      catch (Exception e){
+        log.WriteEntry(e.Message + "\n" + e.StackTrace);
       }
       return false;
     }
@@ -297,6 +305,7 @@ namespace Caucho
         confFileReader.ReadLine();
       }
       catch (Exception e) {
+        log.WriteEntry(e.Message + "\n" + e.StackTrace);
         return new SetupResult(e);
       }
       finally {
@@ -369,6 +378,7 @@ namespace Caucho
           confWriter.Flush();
         }
         catch (Exception e) {
+          log.WriteEntry(e.Message + "\n" + e.StackTrace);
           return new SetupResult(e);
         }
         finally {
@@ -423,6 +433,7 @@ namespace Caucho
         buffer.Flush();
       }
       catch (Exception e) {
+        log.WriteEntry(e.Message + "\n" + e.StackTrace);
         return new SetupResult(e);
       }
       finally {
@@ -437,6 +448,7 @@ namespace Caucho
         confWriter.Flush();
       }
       catch (Exception e) {
+        log.WriteEntry(e.Message + "\n" + e.StackTrace);
         return new SetupResult(e);
       }
       finally {
