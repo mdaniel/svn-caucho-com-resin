@@ -313,20 +313,4 @@ public class ServletManager {
       }
     }
   }
-
-  class Listener implements ELContextListener {
-
-    /* (non-Javadoc)
-     * @see javax.el.ELContextListener#contextCreated(javax.el.ELContextEvent)
-     */
-    @Override
-    public void contextCreated(ELContextEvent event)
-    {
-      // TODO Auto-generated method stub
-
-     ELContext elContext = event.getELContext();
-     ELResolver resolver = elContext.getELResolver();
-    }
-
-  }
 }

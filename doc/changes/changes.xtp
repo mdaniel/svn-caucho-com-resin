@@ -13,6 +13,7 @@
 
 <s2 title="4.0.5 - snapshot">
 <ul>
+<li>servlet: welcome-file-list changes with *.jsf</li>
 <li>cloud: cluster single-signon no longer enabled automatically</li>
 <li>cloud: cluster store database stress test fixes (#3895, rep by smallufo)</li>
 <li>cloud: cluster store database was not properly handling QueryContext (#3850, rep by mocospace)</li>

@@ -48,8 +48,11 @@ import java.util.logging.Logger;
  * Manages dispatching: servlets and filters.
  */
 public class ServletMapper {
-  static final Logger log = Logger.getLogger(ServletMapper.class.getName());
-  static final L10N L = new L10N(ServletMapper.class);
+  private static final Logger log = Logger.getLogger(ServletMapper.class.getName());
+  private static final L10N L = new L10N(ServletMapper.class);
+  
+  private static final HashSet<String> _welcomeFileResourceMap
+    = new HashSet<String>();
 
   private ServletContext _servletContext;
   
@@ -296,6 +299,7 @@ public class ServletMapper {
       servletName = "j_security_check";
     }
 
+    /*
     if (servletName == null && matchResult == null) {
       vars.clear();
       
@@ -311,6 +315,7 @@ public class ServletMapper {
         return new RedirectFilterChain(contextPath + contextURI + "/");
       }
     }
+    */
 
     if (servletName == null) {
       servletName = _defaultServlet;
@@ -393,44 +398,74 @@ public class ServletMapper {
   {
     String contextURI = invocation.getContextURI();
 
-    String servletName = null;
+    // String servletName = null;
 
     ArrayList<String> welcomeFileList = _welcomeFileList;
     int size = welcomeFileList.size();
 
     for (int i = 0; i < size; i++) {
-        String file = welcomeFileList.get(i);
+      String file = welcomeFileList.get(i);
 
-        try {
-	  String welcomeURI;
+      try {
+        String welcomeURI;
 
-	  if (contextURI.endsWith("/"))
-	    welcomeURI = contextURI + file;
-	  else
-	    welcomeURI = contextURI + '/' + file;
+        if (contextURI.endsWith("/"))
+          welcomeURI = contextURI + file;
+        else
+          welcomeURI = contextURI + '/' + file;
 
+        ServletMapping servletMap = _servletMap.map(welcomeURI, vars);
+
+        String servletName = null;
+        String servletClass = null;
+        
+        if (servletMap != null) {
+          servletName = servletMap.getServletName();
+        
+          servletClass = servletMap.getServletClassName();
+        }
+        
+        if (servletName == null && _defaultServlet == null)
+          continue;
+        
+        if (servletClass == null) {
+          ServletConfigImpl servlet = null;
+          
+          if (servletName != null)
+            servlet = _servletManager.getServlet(servletName);
+          else if (_defaultServlet != null)
+            servlet = _servletManager.getServlet(_defaultServlet);
+          
+          if (servlet != null)
+            servletClass = servlet.getServletClassName();
+        }
+
+        if (servletClass != null && isWelcomeFileResource(servletClass)) {
           InputStream is;
           is = _servletContext.getResourceAsStream(welcomeURI);
 
-          if (is != null) {
+          if (is != null)
             is.close();
 
-	    ServletMapping servletMap = _servletMap.map(welcomeURI, vars);
-
-	    if (servletMap != null)
-	      servletName = servletMap.getServletName();
-
-            if (servletName != null || _defaultServlet != null) {
-              contextURI = welcomeURI;
-              return new MatchResult(servletName, contextURI);
-            }
-          }
-        } catch (Exception e) {
-          log.log(Level.WARNING, e.toString(), e);
+          if (is == null)
+            continue;
         }
+
+        if (servletName != null || _defaultServlet != null) {
+          contextURI = welcomeURI;
+          return new MatchResult(servletName, contextURI);
+        }
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
       }
+    }
 
     return null;
+  }
+  
+  private boolean isWelcomeFileResource(String servletName)
+  {
+    return _welcomeFileResourceMap.contains(servletName);
   }
 
   private MatchResult matchWelcomeServlet(ServletInvocation invocation,
@@ -668,6 +703,14 @@ public class ServletMapper {
     {
       return _contextUri;
     }
+  }
+  
+  static {
+    _welcomeFileResourceMap.add("com.caucho.servlets.FileServlet");
+    _welcomeFileResourceMap.add("com.caucho.jsp.JspServlet");
+    _welcomeFileResourceMap.add("com.caucho.jsp.JspXmlServlet");
+    _welcomeFileResourceMap.add("com.caucho.quercus.servlet.QuercusServlet");
+    _welcomeFileResourceMap.add("com.caucho.jsp.XtpServlet");
   }
 }
 

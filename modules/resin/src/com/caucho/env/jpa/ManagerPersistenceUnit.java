@@ -37,7 +37,6 @@ import java.security.ProtectionDomain;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Properties;
 import java.util.Set;
 import java.util.logging.Level;
@@ -45,14 +44,10 @@ import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Named;
-import javax.persistence.Cache;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
-import javax.persistence.PersistenceUnitUtil;
 import javax.persistence.SharedCacheMode;
 import javax.persistence.ValidationMode;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.metamodel.Metamodel;
 import javax.persistence.spi.ClassTransformer;
 import javax.persistence.spi.PersistenceProvider;
 import javax.persistence.spi.PersistenceUnitInfo;
@@ -87,8 +82,6 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   private URL _root;
   
   private String _version = "2.0";
-  private String _description;
-  
   private Class<?> _providerClass;
   
   private ArrayList<String> _managedClasses = new ArrayList<String>();
@@ -179,7 +172,6 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
   
   public void setDescription(String description)
   {
-    _description = description;
   }
   
   public Class<?> getProvider()
@@ -368,7 +360,33 @@ public class ManagerPersistenceUnit implements PersistenceUnitInfo {
       program.configure(this);
     }
     
+    addProviderProperties();
+    
     createDelegate();
+  }
+  
+  /**
+   * Adds default properties for known providers
+   */
+  private void addProviderProperties()
+  {
+    Class<?> cl = getProvider();
+    
+    if (cl == null)
+      return;
+    
+    String className = cl.getName();
+
+    if ("org.eclipse.persistence.jpa.PersistenceProvider".equals(className)) {
+      addDefaultProperty("eclipselink.target-server",
+                         "org.eclipse.persistence.platform.server.resin.ResinPlatform");
+    }
+  }
+  
+  private void addDefaultProperty(String name, String value)
+  {
+    if (_properties.get(name) == null)
+      _properties.put(name, value);
   }
   
   private void createDelegate()

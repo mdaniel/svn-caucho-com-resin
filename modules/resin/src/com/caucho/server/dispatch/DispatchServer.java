@@ -362,7 +362,7 @@ public class DispatchServer implements Dependency {
    *
    * @return the iteration of names
    */
-  public synchronized Iterator getAttributeNames()
+  public synchronized Iterator<String> getAttributeNames()
   {
     return _attributeMap.keySet().iterator();
   }
