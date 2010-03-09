@@ -36,11 +36,21 @@ using System.ServiceProcess;
 using System.Text;
 using System.Windows.Forms;
 using Microsoft.Win32;
+using System.Diagnostics;
 
 namespace Caucho
 {
   public class Setup
   {
+    static EventLog log = new EventLog();
+
+    static Setup()
+    {
+      ((System.ComponentModel.ISupportInitialize)(log)).BeginInit();
+      log.Log = "Application";
+      log.Source = "caucho/Setup.cs";
+    }
+
     public static String REG_SERVICES = "SYSTEM\\CurrentControlSet\\Services";
 
     private String _resinHome;
@@ -63,7 +73,6 @@ namespace Caucho
     private Apache _apache;
     private HashSet<Apache> _apacheSet;
 
-    private String _iisScripts;
     private ArrayList _apacheHomeSet;
 
     public String ResinHome
@@ -83,11 +92,6 @@ namespace Caucho
       get { return _apacheHomeSet; }
     }
 
-    public String IISScripts
-    {
-      get { return _iisScripts; }
-    }
-
     public Setup()
     {
       String path = System.Reflection.Assembly.GetExecutingAssembly().Location;
@@ -99,8 +103,6 @@ namespace Caucho
       FindResin();
 
       Apache.FindApache(_apacheHomeSet);
-
-      _iisScripts = FindIIS();
     }
 
     public void FindResin()
@@ -351,182 +353,6 @@ namespace Caucho
       }
 
       return _users;
-    }
-
-    public SetupResult SetupIIS(String resinHome, String iisScripts)
-    {
-      /*      SetupResult configInfo = new SetupResult();
-
-            DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
-            DirectoryEntry resinFilter = null;
-
-            foreach (DirectoryEntry entry in filters.Children) {
-              if ("Resin".Equals(entry.Name)) {
-                resinFilter = entry;
-              }
-            }
-
-            if (resinFilter == null)
-              resinFilter = filters.Children.Add("Resin", "IIsFilter");
-
-            resinFilter.Properties["FilterEnabled"][0] = true;
-            resinFilter.Properties["FilterState"][0] = 4;
-            resinFilter.Properties["KeyType"][0] = "IIsFilter";
-            resinFilter.Properties["FilterPath"][0] = iisScripts + "\\isapi_srun.dll";
-            resinFilter.Properties["FilterDescription"][0] = "isapi_srun Extension";
-
-            PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
-            String val = (String)filterOrder[0];
-
-            if (!val.Contains("Resin,"))
-              filterOrder[0] = "Resin," + val;
-
-            resinFilter.CommitChanges();
-            resinFilter.Close();
-            filters.CommitChanges();
-            filters.Close();
-
-            try {
-              CopyIsapiFilter(resinHome, iisScripts);
-              configInfo.Status = SetupResult.OK;
-            }
-            catch (Exception e) {
-              configInfo.Status = SetupResult.ISAPI_IO_ERROR;
-              configInfo.Exception = e;
-            }
-
-            return configInfo;
-        */
-      return null;
-    }
-
-    public void CopyIsapiFilter(String resinHome, String iisScripts)
-    {
-      String filterPath = iisScripts + "\\isapi_srun.dll";
-      if (File.Exists(filterPath))
-        File.Delete(filterPath);
-
-      File.Copy(resinHome + "\\win32\\isapi_srun.dll", filterPath);
-    }
-
-    public void RemoveIsapiFilter(String iisScripts)
-    {
-      String filterPath = iisScripts + "\\isapi_srun.dll";
-      File.Delete(filterPath);
-    }
-
-    public void StopIIS()
-    {
-      ServiceController sc = new ServiceController("W3SVC");
-
-      if (sc.Status == ServiceControllerStatus.Running) {
-        sc.Stop();
-        sc.WaitForStatus(ServiceControllerStatus.Stopped);
-      }
-
-      sc.Close();
-    }
-
-    public SetupResult RemoveIIS(String iisScripts)
-    {
-      /* SetupResult configInfo = new SetupResult();
-
-       DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
-       DirectoryEntry resinFilter = null;
-
-       foreach (DirectoryEntry entry in filters.Children) {
-         if ("Resin".Equals(entry.Name)) {
-           resinFilter = entry;
-         }
-       }
-
-       bool resinFound = false;
-       if (resinFilter != null) {
-         filters.Children.Remove(resinFilter);
-         resinFound = true;
-       }
-
-       PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
-       String val = (String)filterOrder[0];
-
-       int index = val.IndexOf("Resin,");
-
-       if (index != -1) {
-         String newVal = val.Substring(0, index) + val.Substring(index + 6, val.Length - 6 - index);
-         filterOrder[0] = newVal;
-         resinFound = true;
-       }
-
-       filters.CommitChanges();
-       filters.Close();
-
-       try {
-         String filterPath = iisScripts + "\\isapi_srun.dll";
-         if (File.Exists(filterPath))
-           File.Delete(filterPath);
-
-         if (resinFound)
-           configInfo.Status = SetupResult.REMOVED_OK;
-         else
-           configInfo.Status = SetupResult.ALREADY_REMOVED;
-       }
-       catch (Exception e) {
-         configInfo.Status = SetupResult.ISAPI_IO_ERROR;
-         configInfo.Exception = e;
-       }
-
-       return configInfo;*/
-      return null;
-    }
-
-    private String FindIIS()
-    {
-      String result = null;
-
-      DirectoryEntry entry = null;
-      try {
-        entry = new DirectoryEntry("IIS://localhost/W3SVC/1/ROOT/scripts");
-
-        if (entry.Properties != null) {
-          Object val = entry.Properties["Path"];
-          if (val != null && (val is PropertyValueCollection)) {
-            PropertyValueCollection collection = (PropertyValueCollection)val;
-            IEnumerator enumerator = collection.GetEnumerator();
-
-            if (enumerator.MoveNext())
-              result = (String)enumerator.Current;
-          }
-        }
-      }
-      catch (Exception e) {
-        Console.Out.WriteLine(e.ToString());
-      }
-      finally {
-        if (entry != null)
-          entry.Close();
-      }
-
-      return result;
-    }
-
-    public void RestartIIS()
-    {
-      RestartService("W3SVC");
-    }
-
-    public void RestartService(String serviceName)
-    {
-      ServiceController sc = new ServiceController(serviceName);
-
-      if (sc.Status == ServiceControllerStatus.Running) {
-        sc.Stop();
-        sc.WaitForStatus(ServiceControllerStatus.Stopped);
-      }
-
-      sc.Start();
-      sc.WaitForStatus(ServiceControllerStatus.Running);
-
-      sc.Close();
     }
 
     public void InstallService(ResinService resinService, bool isNew)

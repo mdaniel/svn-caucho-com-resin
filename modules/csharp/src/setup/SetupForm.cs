@@ -602,7 +602,7 @@ namespace Caucho
         return context.ValidateCredentials(userName, password);
       }
       catch (Exception e) {
-
+        log.WriteEntry(e.Message + "\n" + e.StackTrace);
       }
 
       return false;
@@ -721,6 +721,7 @@ namespace Caucho
           success = true;
         }
         catch (Exception e) {
+          log.WriteEntry(e.Message + "\n" + e.StackTrace);
           String message = String.Format("Service installation failed due to message: {0}", e.Message);
           ProgressDialogError(message);
         }
@@ -787,7 +788,7 @@ namespace Caucho
             }
           }
           catch (Exception e) {
-            //XXX
+            log.WriteEntry(e.Message + "\n" + e.StackTrace);
           }
           finally {
             if (serviceController != null)
@@ -802,6 +803,7 @@ namespace Caucho
             ProgressDialogSuccess(message, true);
           }
           catch (Exception e) {
+            log.WriteEntry(e.Message + "\n" + e.StackTrace);
             String error = String.Format("Failed to remove service `{0}' due to message `{1}'", _resinService.Name, e.Message);
             ProgressDialogError(error);
           }
@@ -856,6 +858,7 @@ namespace Caucho
         _apacheCmbBox.DataSource = homes;
       }
       ResetApacheInstallControls();
+      _iisScriptsTxtBox.Text = IIS.FindIIS();
     }
 
     private void SelectApacheBtnClick(object sender, EventArgs e)
@@ -917,6 +920,7 @@ namespace Caucho
               }
             }
             catch (Exception e) {
+              log.WriteEntry(e.Message + "\n" + e.StackTrace);
               ProgressDialogAddStatus(String.Format("Could not restart apache service `{0}'. Please restart manually.", apacheService));
             }
             finally {
@@ -1012,6 +1016,7 @@ namespace Caucho
               }
             }
             catch (Exception e) {
+              log.WriteEntry(e.Message + "\n" + e.StackTrace);
               ProgressDialogAddStatus(String.Format("Could not restart apache service `{0}'. Please restart manually.", apacheService));
             }
             finally {
@@ -1054,10 +1059,20 @@ namespace Caucho
         return;
 
       String apacheHome = (String)_apacheCmbBox.SelectedItem;
-      bool resinValid = Util.IsResinHome(_resinCmbBox.Text);
+      bool resinValid = Util.IsResinHome(_resinCmbBox.Text) && Util.HasWinDirs(_resinCmbBox.Text);
       bool configured = Apache.IsConfigured(apacheHome);
-      _installApacheBtn.Enabled = resinValid && !configured ;
-      _removeApacheBtn.Enabled = resinValid && configured ;
+      _installApacheBtn.Enabled = resinValid && !configured;
+      _removeApacheBtn.Enabled = resinValid && configured;
+    }
+
+    private void SelectIISBtnClick(object sender, EventArgs e)
+    {
+      _folderDlg.RootFolder = Environment.SpecialFolder.MyComputer;
+      _folderDlg.Description = "Please locate your IIS Script directory";
+      if (_folderDlg.ShowDialog() == DialogResult.OK) {
+        _iisScriptsTxtBox.Text = _folderDlg.SelectedPath;
+
+      }
     }
   }
 }

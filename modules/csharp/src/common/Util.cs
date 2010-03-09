@@ -94,7 +94,12 @@ namespace Caucho
       else if (File.Exists(home + @"\httpd.exe"))
         return home + @"\httpd.exe";
       else
-        return null;        
+        return null;
+    }
+
+    public static bool HasWinDirs(String resinHome)
+    {
+      return Directory.Exists(resinHome + @"\win32") || Directory.Exists(resinHome + @"\win64");
     }
 
     public static String GetResinHome(String resinHome, String path)
@@ -203,7 +208,7 @@ namespace Caucho
       foreach (String version in versions) {
         javaHome = jdks.OpenSubKey(version).GetValue("JavaHome").ToString();
         if (IsValidJavaHome(javaHome)) {
-          if (! list.Contains(javaHome))
+          if (!list.Contains(javaHome))
             list.Add(javaHome);
 
           foundVersions.Add(version);
@@ -251,7 +256,7 @@ namespace Caucho
         return true;
       else if (path.Length > 0 && '/'.Equals(path[0]))
         return true;
-      else 
+      else
         return false;
     }
 
@@ -264,6 +269,22 @@ namespace Caucho
 
       throw new ArgumentOutOfRangeException("depth is out of range");
     }
+
+    public static void RestartService(String serviceName)
+    {
+      ServiceController sc = new ServiceController(serviceName);
+
+      if (sc.Status == ServiceControllerStatus.Running) {
+        sc.Stop();
+        sc.WaitForStatus(ServiceControllerStatus.Stopped);
+      }
+
+      sc.Start();
+      sc.WaitForStatus(ServiceControllerStatus.Running);
+
+      sc.Close();
+    }
+
     public static bool ServiceExists(String serviceName)
     {
       ServiceController[] services = ServiceController.GetServices();

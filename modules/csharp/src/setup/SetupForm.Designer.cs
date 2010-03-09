@@ -68,7 +68,7 @@ namespace Caucho
       this._removeIISBtn = new System.Windows.Forms.Button();
       this._installIISBtn = new System.Windows.Forms.Button();
       this._selectIISBtn = new System.Windows.Forms.Button();
-      this._iisDir = new System.Windows.Forms.TextBox();
+      this._iisScriptsTxtBox = new System.Windows.Forms.TextBox();
       this._root = new System.Windows.Forms.TableLayoutPanel();
       this._generalGrp = new System.Windows.Forms.GroupBox();
       this._resinCmbBox = new System.Windows.Forms.ComboBox();
@@ -116,7 +116,7 @@ namespace Caucho
       this._folderDlg = new System.Windows.Forms.FolderBrowserDialog();
       this._fileDlg = new System.Windows.Forms.OpenFileDialog();
       this._errorProvider = new System.Windows.Forms.ErrorProvider(this.components);
-      this._log = new System.Diagnostics.EventLog();
+      this.log = new System.Diagnostics.EventLog();
       _apacheGrpBox = new System.Windows.Forms.GroupBox();
       _iisGrpBox = new System.Windows.Forms.GroupBox();
       _apacheGrpBox.SuspendLayout();
@@ -128,7 +128,7 @@ namespace Caucho
       this._servicesTab.SuspendLayout();
       this._pluginsTab.SuspendLayout();
       ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).BeginInit();
-      ((System.ComponentModel.ISupportInitialize)(this._log)).BeginInit();
+      ((System.ComponentModel.ISupportInitialize)(this.log)).BeginInit();
       this.SuspendLayout();
       // 
       // _apacheGrpBox
@@ -207,7 +207,7 @@ namespace Caucho
       _iisGrpBox.Controls.Add(this._removeIISBtn);
       _iisGrpBox.Controls.Add(this._installIISBtn);
       _iisGrpBox.Controls.Add(this._selectIISBtn);
-      _iisGrpBox.Controls.Add(this._iisDir);
+      _iisGrpBox.Controls.Add(this._iisScriptsTxtBox);
       _iisGrpBox.Location = new System.Drawing.Point(0, 130);
       _iisGrpBox.Margin = new System.Windows.Forms.Padding(0);
       _iisGrpBox.Name = "_iisGrpBox";
@@ -246,19 +246,20 @@ namespace Caucho
       // 
       // _selectIISBtn
       // 
-      this._selectIISBtn.Location = new System.Drawing.Point(391, 30);
+      this._selectIISBtn.Location = new System.Drawing.Point(391, 31);
       this._selectIISBtn.Name = "_selectIISBtn";
       this._selectIISBtn.Size = new System.Drawing.Size(61, 22);
       this._selectIISBtn.TabIndex = 31;
       this._selectIISBtn.Text = "...";
       this._selectIISBtn.UseVisualStyleBackColor = true;
+      this._selectIISBtn.Click += new System.EventHandler(this.SelectIISBtnClick);
       // 
-      // _iisDir
+      // _iisScriptsTxtBox
       // 
-      this._iisDir.Location = new System.Drawing.Point(97, 32);
-      this._iisDir.Name = "_iisDir";
-      this._iisDir.Size = new System.Drawing.Size(285, 20);
-      this._iisDir.TabIndex = 30;
+      this._iisScriptsTxtBox.Location = new System.Drawing.Point(97, 32);
+      this._iisScriptsTxtBox.Name = "_iisScriptsTxtBox";
+      this._iisScriptsTxtBox.Size = new System.Drawing.Size(285, 20);
+      this._iisScriptsTxtBox.TabIndex = 30;
       // 
       // _root
       // 
@@ -736,18 +737,14 @@ namespace Caucho
       this._folderDlg.RootFolder = System.Environment.SpecialFolder.MyComputer;
       this._folderDlg.ShowNewFolderButton = false;
       // 
-      // _fileDlg
-      // 
-      this._fileDlg.FileName = "openFileDialog1";
-      // 
       // _errorProvider
       // 
       this._errorProvider.ContainerControl = this;
       // 
-      // _log
+      // log
       // 
-      this._log.Log = "Application";
-      this._log.SynchronizingObject = this;
+      this.log.Log = "Application";
+      this.log.SynchronizingObject = this;
       // 
       // SetupForm
       // 
@@ -776,7 +773,7 @@ namespace Caucho
       this._servicesTab.PerformLayout();
       this._pluginsTab.ResumeLayout(false);
       ((System.ComponentModel.ISupportInitialize)(this._errorProvider)).EndInit();
-      ((System.ComponentModel.ISupportInitialize)(this._log)).EndInit();
+      ((System.ComponentModel.ISupportInitialize)(this.log)).EndInit();
       this.ResumeLayout(false);
       this.PerformLayout();
 
@@ -831,13 +828,13 @@ namespace Caucho
     private System.Windows.Forms.Label _watchDogPortLbl;
     private System.Windows.Forms.TextBox _watchdogPortTxtBox;
     private System.Windows.Forms.ErrorProvider _errorProvider;
-    private System.Diagnostics.EventLog _log;
+    private System.Diagnostics.EventLog log;
     private System.Windows.Forms.ComboBox _apacheCmbBox;
     private System.Windows.Forms.Button _selectApacheBtn;
     private System.Windows.Forms.Button _removeApacheBtn;
     private System.Windows.Forms.Button _installApacheBtn;
     private System.Windows.Forms.Button _selectIISBtn;
-    private System.Windows.Forms.TextBox _iisDir;
+    private System.Windows.Forms.TextBox _iisScriptsTxtBox;
     private System.Windows.Forms.Button _removeIISBtn;
     private System.Windows.Forms.Button _installIISBtn;
     private System.Windows.Forms.Label label1;
