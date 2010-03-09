@@ -49,7 +49,8 @@ import java.io.Writer;
  */
 public class QuercusScriptEngine
   extends AbstractScriptEngine
-  implements Compilable {
+  implements Compilable
+{
   private QuercusScriptEngineFactory _factory;
   private final QuercusContext _quercus;
 
@@ -67,8 +68,9 @@ public class QuercusScriptEngine
 
   /**
    * Returns the Quercus object.
+   * php/214h
    */
-  QuercusContext getQuercus()
+  public QuercusContext getQuercus()
   {
     return _quercus;
   }
