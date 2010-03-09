@@ -145,7 +145,7 @@ public class JniTroubleshoot {
 
   private boolean isWin()
   {
-    return System.getProperty("os.name").startsWith("win");
+    return System.getProperty("os.name").startsWith("Windows");
   }
 
   private String getResinHome()
