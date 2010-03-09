@@ -31,7 +31,6 @@ package com.caucho.env.jpa;
 
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;

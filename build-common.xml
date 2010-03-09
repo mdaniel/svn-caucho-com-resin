@@ -523,6 +523,10 @@
       <fileset dir="${resin.modules}/junit/classes">
         <exclude name="**/.*"/>
       </fileset>
+    	
+      <fileset dir="${resin.modules}/eclipselink/classes">
+        <exclude name="**/.*"/>
+      </fileset>    	
     </jar>
   </target>
 

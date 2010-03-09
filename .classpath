@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
 	<classpathentry kind="src" path="modules/deploy/src"/>
+	<classpathentry kind="src" path="modules/eclipselink/src"/>
 	<classpathentry kind="src" path="modules/junit/src"/>
 	<classpathentry kind="src" path="modules/ejb/src"/>
 	<classpathentry kind="src" path="modules/hessian/src"/>
@@ -39,5 +40,6 @@
 			<accessrule kind="discouraged" pattern="**/Unsafe*"/>
 		</accessrules>
 	</classpathentry>
+	<classpathentry kind="lib" path="modules/ext/eclipselink.jar"/>
 	<classpathentry kind="output" path="classes"/>
 </classpath>
