@@ -117,6 +117,15 @@ abstract public class AbstractCallChain implements EjbCallChain {
   }
   
   /**
+   * Generates pre-async dispatch code.
+   */
+  public void generateAsync(JavaWriter out)
+    throws IOException
+  {
+    _next.generateAsync(out);
+  }  
+  
+  /**
    * Generates code before the try block
    */
   public void generatePreTry(JavaWriter out)

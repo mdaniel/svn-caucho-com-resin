@@ -32,6 +32,8 @@ package com.caucho.jms.file;
 import java.io.*;
 import java.lang.IllegalStateException;
 import java.util.logging.*;
+
+import javax.management.ObjectName;
 import javax.sql.*;
 import java.sql.Connection;
 import java.sql.Statement;
@@ -47,9 +49,12 @@ import com.caucho.hessian.io.Hessian2Input;
 //import com.caucho.jms.queue.*;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.management.server.AbstractManagedObject;
+import com.caucho.management.server.FileQueueStoreMXBean;
 import com.caucho.config.ConfigException;
 import com.caucho.db.*;
 import com.caucho.db.jdbc.*;
+import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
 import com.caucho.java.*;
 import com.caucho.server.cluster.Server;
@@ -79,17 +84,25 @@ public class FileQueueStore
   private DataSource _db;
   private String _queueTable;
   private String _messageTable;
+  private boolean _isServer;
+  private FileQueueStoreAdmin _admin;
 
   public FileQueueStore(Path path, String serverId, ClassLoader loader)
   {
+    this(path, serverId, loader, false);
+  }
+
+  private FileQueueStore(Path path, String serverId, ClassLoader loader,
+                         boolean isServer)
+  {
     //    _messageFactory = new MessageFactory();
 
-    init(path, serverId, loader);
+    init(path, serverId, loader, isServer);
   }
 
   public FileQueueStore(Path path, String serverId)
   {
-    this(path, serverId, Thread.currentThread().getContextClassLoader());
+    this(path, serverId, Thread.currentThread().getContextClassLoader(), false);
   }
 
   public static FileQueueStore create()
@@ -108,7 +121,7 @@ public class FileQueueStore
 	Path path = server.getResinDataDirectory();
 	String serverId = server.getServerId();
 
-	store = new FileQueueStore(path, serverId, loader);
+	store = new FileQueueStore(path, serverId, loader, true);
 
 	_localStore.set(store, loader);
       }
@@ -117,7 +130,8 @@ public class FileQueueStore
     }
   }
 
-  private void init(Path path, String serverId, ClassLoader loader)
+  private void init(Path path, String serverId, ClassLoader loader,
+                    boolean isServer)
   {
     if (path == null)
       throw new NullPointerException();
@@ -155,6 +169,9 @@ public class FileQueueStore
       initDatabase(conn);
       
       conn.close();
+      
+      if (isServer)
+        _admin = new FileQueueStoreAdmin();
     } catch (SQLException e) {
       throw ConfigException.create(e);
     }
@@ -346,6 +363,7 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
+  /*
   public void remove(String id)
   {
     StoreConnection conn = null;
@@ -369,6 +387,7 @@ public class FileQueueStore
       freeConnection(conn, isValid);
     }
   }
+  */
 
   /**
    * Retrieves a message from the persistent store.
@@ -445,6 +464,38 @@ public class FileQueueStore
 	   + ")");
 
     stmt.executeUpdate(sql);
+  }
+
+  public int getMessageCount()
+  {
+    Connection conn = null;
+    
+    try {
+      conn = _db.getConnection();
+      
+      String sql = "select count(*) from " + _messageTable;
+      
+      Statement stmt = conn.createStatement();
+      
+      ResultSet rs = stmt.executeQuery(sql);
+      
+      if (rs.next()) {
+        return rs.getInt(1);
+      }
+      else {
+        return -1;
+      }
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    } finally {
+      JdbcUtil.close(conn);
+    }
+  }
+  
+  public void close()
+  {
+    if (_admin != null)
+      _admin.close();
   }
 
   private StoreConnection getConnection()
@@ -604,6 +655,33 @@ public class FileQueueStore
       } catch (SQLException e) {
         log.log(Level.FINER, e.toString(), e);
       }
+    }
+  }
+  
+  class FileQueueStoreAdmin extends AbstractManagedObject 
+    implements FileQueueStoreMXBean 
+  {
+    FileQueueStoreAdmin()
+    {
+      registerSelf();
+    }
+    
+    public void close()
+    {
+      unregisterSelf();
+    }
+    
+    @Override
+    public long getMessageCount()
+    {
+      // TODO Auto-generated method stub
+      return 0;
+    }
+
+    @Override
+    public String getName()
+    {
+      return null;
     }
   }
 }

@@ -1528,7 +1528,7 @@ public class InjectManager
   {
     Annotation []bindings;
 
-    if (bindingSet != null) {
+    if (bindingSet != null && bindingSet.size() > 0) {
       bindings = new Annotation[bindingSet.size()];
       bindingSet.toArray(bindings);
 
@@ -1538,7 +1538,7 @@ public class InjectManager
       }
     }
     else
-      bindings = new Annotation[] { CurrentLiteral.CURRENT };
+      bindings = new Annotation[] { DefaultLiteral.DEFAULT };
 
     Set<Bean<?>> set = getBeans(type, bindings);
     

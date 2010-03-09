@@ -108,6 +108,12 @@ public class NullCallChain implements EjbCallChain {
   {
   }
 
+  @Override
+  public void generateAsync(JavaWriter out)
+    throws IOException
+  {
+  }
+  
   /**
    * Generates code before the try block
    * <code><pre>

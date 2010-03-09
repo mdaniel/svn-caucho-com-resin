@@ -95,7 +95,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   public void send(String msgId,
                    E msg,
                    int priority,
-                   long expires)
+                   long expireTime)
     throws MessageException
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -105,11 +105,11 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   public void send(String msgId,
                    E msg,
                    int priority,
-                   long expires,
+                   long expireTime,
                    Object publisher)
     throws MessageException
   {
-    send(msgId, msg, priority, expires);
+    send(msgId, msg, priority, expireTime);
   }
 
   /**
@@ -117,16 +117,16 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
    * message.
    */
   @Override
-  public QueueEntry<E> receiveEntry(long timeout, boolean isAutoAck)
+  public QueueEntry<E> receiveEntry(long expireTime, boolean isAutoAck)
   {
     return null;//receiveEntry(timeout, isAutoAck, null);
   }
   
-  public QueueEntry<E> receiveEntry(long timeout, boolean isAutoAck, 
+  public QueueEntry<E> receiveEntry(long expireTime, boolean isAutoAck, 
                                     QueueEntrySelector selector)
     throws MessageException
   {
-    return receiveEntry(timeout, isAutoAck);
+    return receiveEntry(expireTime, isAutoAck);
   }
   
   /**
@@ -225,7 +225,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
 
     timeout = unit.toMillis(timeout);
 
-    long expires = Alarm.getCurrentTime() + timeout;
+    long expires = Alarm.getCurrentTimeActual() + timeout;
 
     send(generateMessageID(), message, priority, expires);
 
@@ -248,8 +248,10 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   public E poll(long timeout, TimeUnit unit)
   {
     long msTimeout = unit.toMillis(timeout);
-
-    E payload = receive(msTimeout);
+    
+    long expireTime = msTimeout + Alarm.getCurrentTimeActual();
+    
+    E payload = receive(expireTime);
 
     try {
       if (payload == null)
@@ -361,7 +363,7 @@ abstract public class AbstractQueue<E> extends AbstractDestination<E>
   {
     synchronized (this) {
       _listenerFailCount++;
-      _listenerFailLastTime = Alarm.getCurrentTime();
+      _listenerFailLastTime = Alarm.getCurrentTimeActual();
     }
   }
 

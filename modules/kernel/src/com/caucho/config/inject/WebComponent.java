@@ -135,8 +135,6 @@ public class WebComponent {
 
     for (BeanEntry beanEntry : _beanList) {
       if (beanEntry.isMatch(type, bindings)) {
-        Bean<?> bean = beanEntry.getBean();
-
         if (beans == null)
           beans = new LinkedHashSet<Bean<?>>();
 
@@ -196,7 +194,7 @@ public class WebComponent {
   class BeanEntry {
     private Bean<?> _bean;
     private BaseType _type;
-    private Binding []_bindings;
+    private Binding []_qualifiers;
 
     BeanEntry(BaseType type, Bean<?> bean)
     {
@@ -204,13 +202,13 @@ public class WebComponent {
 
       _bean = bean;
 
-      Set<Annotation> bindings = bean.getQualifiers();
+      Set<Annotation> qualifiers = bean.getQualifiers();
 
-      _bindings = new Binding[bindings.size()];
+      _qualifiers = new Binding[qualifiers.size()];
 
       int i = 0;
-      for (Annotation binding : bindings) {
-        _bindings[i++] = new Binding(binding);
+      for (Annotation qualifier : qualifiers) {
+        _qualifiers[i++] = new Binding(qualifier);
       }
     }
 
@@ -240,9 +238,9 @@ public class WebComponent {
       return type.isAssignableFrom(_type);
     }
 
-    boolean isMatch(Annotation []bindingArgs)
+    boolean isMatch(Annotation []qualifierArgs)
     {
-      for (Annotation arg : bindingArgs) {
+      for (Annotation arg : qualifierArgs) {
         if (! isMatch(arg)) {
           if (! arg.annotationType().isAnnotationPresent(Qualifier.class)) {
             throw new ConfigException(L.l("'{0}' is an invalid binding annotation because it does not have a @Qualifier meta-annotation.",
@@ -261,12 +259,18 @@ public class WebComponent {
       if (arg.annotationType() == Any.class)
         return true;
 
-      for (Binding binding : _bindings) {
+      for (Binding binding : _qualifiers) {
         if (binding.isMatch(arg))
           return true;
       }
 
       return false;
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _bean + "]";
     }
   }
 }

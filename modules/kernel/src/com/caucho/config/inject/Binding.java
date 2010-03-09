@@ -96,10 +96,12 @@ public class Binding {
 
   boolean isMatch(Annotation ann)
   {
-    Class annType = ann.annotationType();
+    Class<?> annType = ann.annotationType();
 
+    /*
     if (_annType == Any.class)
       return true;
+      */
 
     if (! _annType.equals(annType)) {
       return false;

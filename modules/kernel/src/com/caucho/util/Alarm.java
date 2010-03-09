@@ -820,7 +820,10 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     try {
       systemLoader = ClassLoader.getSystemClassLoader();
+    } catch (Throwable e) {
+    }
 
+    try {
       alarmThread = new AlarmThread();
       alarmThread.start();
 

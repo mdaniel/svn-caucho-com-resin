@@ -76,10 +76,10 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   public final void send(String msgId,
                          E payload,
                          int priority,
-                         long expires)
+                         long expireTime)
     throws MessageException
   {
-    QE entry = writeEntry(msgId, payload, priority, expires);
+    QE entry = writeEntry(msgId, payload, priority, expireTime);
       
     addQueueEntry(entry);
   }
@@ -132,12 +132,12 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
         readPayload(entry);
   
         if (isAutoAck)
-        acknowledge(entry.getMsgId());
+          acknowledge(entry.getMsgId());
           
         return entry;
       }
   
-      if (expireTime <= Alarm.getCurrentTime()) {              
+      if (expireTime <= Alarm.getCurrentTimeActual()) {              
         return null;
       }
   
@@ -497,16 +497,15 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
     {
       listen(this);
       
-      long timeout;
-      
       while (_entry == null
-             && (timeout = expireTime - Alarm.getCurrentTime()) > 0) {
-        
-        LockSupport.parkNanos(timeout * 1000000L);
+             && (Alarm.getCurrentTimeActual() < expireTime)) {
+        LockSupport.parkUntil(expireTime);
       }
-      
-      synchronized (_queueLock) {
-        _callbackList.remove(this);
+
+      if (_entry == null) {
+        synchronized (_queueLock) {
+          _callbackList.remove(this);
+        }
       }
       
       return _entry;

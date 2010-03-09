@@ -50,6 +50,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   private LockCallChain _lock;
   private XaCallChain _xa;
   private InterceptorCallChain _interceptor;
+  private AsynchronousCallChain _async;
 
   private EjbCallChain _next;
 
@@ -67,6 +68,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _next = _xa = createXa(_next);
     _next = _lock = new LockCallChain(this, _next);
     // _scheduling = new SchedulingCallChain(this, _lock);
+    _next = _async = new AsynchronousCallChain(this, _next);
     _next = _security = new SecurityCallChain(this, _next);
   }
 
@@ -118,6 +120,11 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public boolean hasXA()
   {
     return _xa.isEnhanced();
+  }
+  
+  public boolean isAsync()
+  {
+    return _async.isAsync();
   }
 
   /**
@@ -176,6 +183,8 @@ public class BusinessMethodGenerator implements EjbCallChain {
       return true;
     else if (_lock.isEnhanced())
       return true;
+    else if (_async.isEnhanced())
+      return true;
     /*
     else if (_scheduling.isEnhanced()) {
       return true;
@@ -196,6 +205,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _lock.introspect(apiMethod, implMethod);
     _xa.introspect(apiMethod, implMethod);
     _interceptor.introspect(apiMethod, implMethod);
+    _async.introspect(apiMethod, implMethod);
   }
 
   //
@@ -237,31 +247,6 @@ public class BusinessMethodGenerator implements EjbCallChain {
     _next.generatePostConstruct(out, map);
   }
 
-  /*
-
-  public final void generatePrologueTop(JavaWriter out,
-                                        HashMap<String,Object> prologueMap)
-    throws IOException
-  {
-    if (! isEnhanced())
-      return;
-
-    _security.generatePrologue(out, prologueMap);
-
-    generateInterceptorTarget(out);
-  }
-
-  public final void generatePostConstruct(JavaWriter out,
-                                          HashMap<String,Object> map)
-    throws IOException
-  {
-    if (!isEnhanced())
-      return;
-
-    _interceptor.generatePostConstruct(out, map);
-  }
-  */
-
   //
   // business method interception
   //
@@ -281,8 +266,24 @@ public class BusinessMethodGenerator implements EjbCallChain {
       return;
 
     generateMethodPrologue(out, prologueMap);
+    
+    String suffix = "";
+    
+    if (isAsync()) {
+      suffix = "__caucho_async";
+      
+      generateHeader(out, "");
 
-    generateHeader(out);
+      out.println("{");
+      out.pushDepth();
+
+      generateAsync(out);
+
+      out.popDepth();
+      out.println("}");
+    }
+
+    generateHeader(out, suffix);
 
     out.println("{");
     out.pushDepth();
@@ -320,7 +321,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
    *   throws MyException, ...
    * </pre><?code>
   */
-  public void generateHeader(JavaWriter out) throws IOException
+  public void generateHeader(JavaWriter out,
+                             String suffix)
+    throws IOException
   {
     out.println();
     if (_apiMethod.isPublic())
@@ -333,7 +336,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     out.printClass(_apiMethod.getReturnType());
     out.print(" ");
-    out.print(_apiMethod.getName());
+    out.print(_apiMethod.getName() + suffix);
     out.print("(");
 
     Class<?>[] types = _apiMethod.getParameterTypes();
@@ -384,6 +387,16 @@ public class BusinessMethodGenerator implements EjbCallChain {
     out.println();
   }
 
+  /**
+   * Generates the dispatch body for an async call
+   */
+  @Override
+  public void generateAsync(JavaWriter out)
+    throws IOException
+  {
+    _next.generateAsync(out);
+  }
+  
   /**
    * Generates the body of the method.
    *
@@ -450,7 +463,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public void generatePreTry(JavaWriter out)
     throws IOException
   {
-    _next.generatePreTry(out);
+      _next.generatePreTry(out);
   }
 
   /**

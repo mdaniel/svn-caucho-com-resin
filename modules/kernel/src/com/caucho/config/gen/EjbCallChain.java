@@ -102,6 +102,12 @@ public interface EjbCallChain {
                                      HashMap<String,Object> map)
     throws IOException;
   
+  //
+  // async dispatch method
+  //
+  public void generateAsync(JavaWriter out)
+    throws IOException;
+  
   /**
    * Generates code before the try block
    * <code><pre>

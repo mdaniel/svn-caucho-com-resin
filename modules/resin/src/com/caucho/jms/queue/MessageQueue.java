@@ -28,7 +28,7 @@ public interface MessageQueue<E>
    * will receive messages one at a time until the messages complete.
    */
   public EntryCallback<E> addMessageCallback(MessageCallback<E> messageCallback,
-					  boolean isAutoAck)
+                                             boolean isAutoAck)
     throws MessageException;
 
   /**

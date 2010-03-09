@@ -229,5 +229,13 @@ public class FileQueueImpl<E extends Serializable>
 
     addQueueEntry(entry);
   }
+  
+  /**
+   * Statistics
+   */
+  public int getFileStoreMessageCount()
+  {
+    return _store.getMessageCount();
+  }
 }
 
