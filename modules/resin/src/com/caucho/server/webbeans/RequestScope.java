@@ -29,19 +29,18 @@
 
 package com.caucho.server.webbeans;
 
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.scope.DestructionListener;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.server.dispatch.ServletInvocation;
-
 import java.lang.annotation.Annotation;
-import javax.servlet.*;
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
+
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.PassivationCapable;
+import javax.servlet.ServletRequest;
+
+import com.caucho.config.scope.ContextContainer;
+import com.caucho.config.scope.ScopeContext;
+import com.caucho.server.dispatch.ServletInvocation;
 
 /**
  * Configuration for the xml web bean component.
@@ -53,6 +52,7 @@ public class RequestScope extends ScopeContext
   /**
    * Returns true if the scope is currently active.
    */
+  @Override
   public boolean isActive()
   {
     ServletRequest request = ServletInvocation.getContextRequest();
@@ -63,11 +63,13 @@ public class RequestScope extends ScopeContext
   /**
    * Returns the scope annotation type.
    */
+  @Override
   public Class<? extends Annotation> getScope()
   {
     return RequestScoped.class;
   }
 
+  @Override
   public <T> T get(Contextual<T> bean)
   {
     if (! (bean instanceof PassivationCapable))
@@ -90,6 +92,7 @@ public class RequestScope extends ScopeContext
     return null;
   }
 
+  @Override
   public <T> T get(Contextual<T> bean,
                    CreationalContext<T> creationalContext)
   {
@@ -98,7 +101,7 @@ public class RequestScope extends ScopeContext
     if (request == null)
       return null;
 
-    Bean comp = (Bean) bean;
+    Bean<T> comp = (Bean) bean;
 
     String id = ((PassivationCapable) bean).getId();
 
@@ -110,36 +113,19 @@ public class RequestScope extends ScopeContext
       request.setAttribute("webbeans.resin", context);
     }
 
-    Object result = context.get(id);
+    T result = (T) context.get(id);
 
     if (result != null || creationalContext == null)
-      return (T) result;
+      return result;
 
     result = comp.create(creationalContext);
 
-    context.put(id, result);
+    context.put(comp, id, result, creationalContext);
 
-    return (T) result;
+    return result;
   }
 
   /*
-  public <T> T get(InjectionTarget<T> bean)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request == null)
-      return null;
-
-    Bean comp = (Bean) bean;
-
-    String id = _idMap.getId(comp);
-
-    Object result = request.getAttribute(id);
-
-    return (T) result;
-  }
-  */
-
   @Override
   public boolean canInject(ScopeContext scope)
   {
@@ -176,4 +162,5 @@ public class RequestScope extends ScopeContext
       listener.addValue(comp, value);
     }
   }
+  */
 }

@@ -110,7 +110,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
    * Transaction resources that a client API such as JPA may store and retrieve
    * by key.
    */
-  private Map<Object, XAResource> _mappedResources;
+  private Map<Object, Object> _mappedResources;
 
   private long _timeout = 0;
 
@@ -223,7 +223,16 @@ public class TransactionImpl implements Transaction, AlarmListener {
     enlistResource(resource);
 
     if (_mappedResources == null) {
-      _mappedResources = new HashMap<Object, XAResource>();
+      _mappedResources = new HashMap<Object, Object>();
+    }
+
+    _mappedResources.put(key, resource);
+  }
+
+  public void putResource(Object key, Object resource)
+  {
+    if (_mappedResources == null) {
+      _mappedResources = new HashMap<Object, Object>();
     }
 
     _mappedResources.put(key, resource);
@@ -238,7 +247,12 @@ public class TransactionImpl implements Transaction, AlarmListener {
    */
   public Object getResource(Object key)
   {
-    return _mappedResources.get(key);
+    Map<Object, Object> mappedResources = _mappedResources;
+    
+    if (mappedResources != null)
+      return mappedResources.get(key);
+    else
+      return null;
   }
 
   /**

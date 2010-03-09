@@ -29,15 +29,21 @@
 
 package com.caucho.server.webbeans;
 
+import com.caucho.config.TransactionScoped;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DestructionListener;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ContextContainer;
 import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.transaction.TransactionImpl;
+import com.caucho.transaction.TransactionManagerImpl;
 
 import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+
 import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.transaction.Synchronization;
 import javax.enterprise.context.*;
 import javax.enterprise.context.spi.*;
 import javax.enterprise.inject.spi.Bean;
@@ -45,125 +51,113 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.PassivationCapable;
 
 /**
- * The session scope value
+ * Scope based on the current transaction.
  */
-public class SessionScope extends ScopeContext {
-  private ScopeIdMap _idMap = new ScopeIdMap();
-
+public class TransactionScope extends ScopeContext
+{
+  private TransactionManagerImpl _xaManager;
+  
+  public TransactionScope()
+  {
+    _xaManager = TransactionManagerImpl.getInstance();
+  }
+  
   /**
    * Returns true if the scope is currently active.
    */
+  @Override
   public boolean isActive()
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
-
-      return session != null;
-    }
-
-    return false;
+    return _xaManager.getTransaction() != null;
   }
 
   /**
    * Returns the scope annotation type.
    */
+  @Override
   public Class<? extends Annotation> getScope()
   {
-    return SessionScoped.class;
+    return TransactionScoped.class;
   }
 
+  @Override
   public <T> T get(Contextual<T> bean)
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request == null)
+    TransactionImpl xa = _xaManager.getCurrent();
+    
+    if (xa == null)
       return null;
-
-    HttpSession session = ((HttpServletRequest) request).getSession();
-
-    if (session == null)
+    
+    ScopeContext cxt = (ScopeContext) xa.getResource("caucho.xa.scope");
+    
+    if (cxt != null)
+      return cxt.get(bean);
+    else
       return null;
-
-    ContextContainer context
-      = (ContextContainer) session.getAttribute("webbeans.resin");
-
-    if (context != null) {
-      String id = ((PassivationCapable) bean).getId();
-
-      return (T) context.get(id);
-    }
-
-    return null;
   }
 
+  @Override
   public <T> T get(Contextual<T> bean,
                    CreationalContext<T> creationalContext)
   {
-    ServletRequest request = ServletInvocation.getContextRequest();
+    TransactionImpl xa = _xaManager.getCurrent();
 
-    if (request == null)
+    if (xa == null)
       return null;
 
-    HttpSession session = ((HttpServletRequest) request).getSession();
-
-    Bean<T> comp = (Bean) bean;
-
-    String id = ((PassivationCapable) bean).getId();
-
-    ContextContainer context
-      = (ContextContainer) session.getAttribute("webbeans.resin");
-
-    if (context == null) {
-      context = new SessionContextContainer();
-      session.setAttribute("webbeans.resin", context);
+    ScopeContext cxt = (ScopeContext) xa.getResource("caucho.xa.scope");
+    
+    if (cxt == null) {
+      cxt = new ScopeContext();
+      xa.putResource("caucho.xa.scope", cxt);
+      xa.registerSynchronization(cxt);
     }
-
-    T result = (T) context.get(id);
+    
+    T result = cxt.get(bean);
 
     if (result != null || creationalContext == null)
-      return result;
+      return (T) result;
 
-    result = comp.create(creationalContext);
+    result = bean.create(creationalContext);
 
-    context.put(comp, id, result, creationalContext);
+    String id = null;
+    cxt.put(bean, id, result, creationalContext);
 
     return (T) result;
   }
 
-  @Override
-  public boolean canInject(Class scopeType)
-  {
-    return (scopeType == ApplicationScoped.class
-            || scopeType == SessionScoped.class
-            || scopeType == ConversationScoped.class
-            || scopeType == Dependent.class);
-  }
-
-  @Override
-  public boolean canInject(ScopeContext scope)
-  {
-    return (scope instanceof ApplicationScope
-            || scope instanceof SessionScope);
-  }
-
+  /*
   public void addDestructor(Bean comp, Object value)
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
     if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
       DestructionListener listener
-        = (DestructionListener) session.getAttribute("caucho.destroy");
+        = (DestructionListener) request.getAttribute("caucho.destroy");
 
       if (listener == null) {
         listener = new DestructionListener();
-        session.setAttribute("caucho.destroy", listener);
+        request.setAttribute("caucho.destroy", listener);
       }
 
       // XXX:
-      //listener.addValue(comp, value);
+      listener.addValue(comp, value);
+    }
+  }
+  */
+  
+  @SuppressWarnings("serial")
+  static class ScopeContext extends ContextContainer 
+    implements Synchronization {
+    @Override
+    public void beforeCompletion()
+    {
+    }
+
+    @Override
+    public void afterCompletion(int status)
+    {
+      close();
     }
   }
 }

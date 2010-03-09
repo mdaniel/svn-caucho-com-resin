@@ -46,13 +46,13 @@ public class DestructionListener
              HttpSessionBindingListener,
              ClassLoaderListener,
              Serializable {
-  private transient ArrayList<Contextual> _beanList
-    = new ArrayList<Contextual>();
+  private transient ArrayList<Contextual<?>> _beanList
+    = new ArrayList<Contextual<?>>();
 
   private transient ArrayList<WeakReference<Object>> _valueList
     = new ArrayList<WeakReference<Object>>();
 
-  public void addValue(Contextual bean, Object value)
+  public void addValue(Contextual<?> bean, Object value)
   {
     _beanList.add(bean);
     _valueList.add(new WeakReference<Object>(value));
@@ -81,9 +81,9 @@ public class DestructionListener
     close();
   }
 
-  private void close()
+  public void close()
   {
-    ArrayList<Contextual> beanList = _beanList;
+    ArrayList<Contextual<?>> beanList = _beanList;
     _beanList = null;
 
     ArrayList<WeakReference<Object>> valueList = _valueList;

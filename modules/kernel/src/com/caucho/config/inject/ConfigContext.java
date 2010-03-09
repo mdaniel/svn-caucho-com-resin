@@ -202,11 +202,14 @@ public class ConfigContext {
     }
   }
 
+  /*
   public boolean canInject(ScopeContext scope)
   {
     return _dependentScope != null && _dependentScope.canInject(scope);
   }
+  */
 
+  /*
   public boolean canInject(Class scopeType)
   {
     if (scopeType == ApplicationScoped.class
@@ -216,6 +219,7 @@ public class ConfigContext {
     else
       return false;
   }
+  */
 
   /**
    * Returns the component value for the dependent scope

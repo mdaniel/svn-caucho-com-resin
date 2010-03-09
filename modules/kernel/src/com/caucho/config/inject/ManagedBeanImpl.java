@@ -257,9 +257,13 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
    */
   protected void introspectProduces(AnnotatedType<X> beanType)
   {
-    for (AnnotatedMethod beanMethod : beanType.getMethods()) {
-      if (beanMethod.isAnnotationPresent(Produces.class))
-        addProduces(beanMethod);
+    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+      if (beanMethod.isAnnotationPresent(Produces.class)) {
+        AnnotatedMethod<? super X> disposesMethod 
+          = findDisposesMethod(beanType, beanMethod);
+        
+        addProduces(beanMethod, disposesMethod);
+      }
     }
     
     for (AnnotatedField<?> beanField : beanType.getFields()) {
@@ -268,16 +272,45 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     }
   }
 
-  protected void addProduces(AnnotatedMethod<X> beanMethod)
+  protected void addProduces(AnnotatedMethod producesMethod,
+                             AnnotatedMethod disposesMethod)
   {
-    Arg<?> []args = introspectArguments(beanMethod.getParameters());
+    Arg<?> []args = introspectArguments(producesMethod.getParameters());
 
-    ProducesBean bean = ProducesBean.create(getBeanManager(), this, beanMethod,
-                                            args);
+    ProducesBean<?,?> bean = ProducesBean.create(getBeanManager(), this, 
+                                                 producesMethod, args,
+                                                 disposesMethod);
 
     // bean.init();
 
     _producerBeans.add(bean);
+  }
+  
+  private AnnotatedMethod<? super X>
+  findDisposesMethod(AnnotatedType<X> beanType,
+                     AnnotatedMethod<? super X> producesMethod)
+  {
+    for (AnnotatedMethod beanMethod : beanType.getMethods()) {
+      List<AnnotatedParameter<?>> params = beanMethod.getParameters();
+      
+      if (params.size() != 1)
+        continue;
+      
+      AnnotatedParameter<?> param = params.get(0);
+      
+      if (! param.isAnnotationPresent(Disposes.class))
+        continue;
+      
+      if (! producesMethod.getBaseType().equals(param.getBaseType()))
+        continue;
+
+
+      // XXX: check @Qualifiers
+      
+      return beanMethod;
+    }
+    
+    return null;
   }
 
   protected void addProduces(AnnotatedField<?> beanField)

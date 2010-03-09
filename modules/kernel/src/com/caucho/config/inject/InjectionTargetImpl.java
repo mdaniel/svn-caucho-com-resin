@@ -498,11 +498,13 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   /**
    * Call pre-destroy
    */
+  /*
   @Override
-  public void destroy(X instance)
+  public void destroy(T instance)
   {
 
   }
+  */
 
   /**
    * Returns the injection points.

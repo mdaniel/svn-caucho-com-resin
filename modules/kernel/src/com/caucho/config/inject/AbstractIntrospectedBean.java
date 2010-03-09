@@ -517,6 +517,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Call destroy
    */
+  @Override
   public void destroy(T instance, CreationalContext<T> env)
   {
   }
@@ -524,9 +525,11 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Call destroy
    */
+  /*
   public void destroy(T instance)
   {
   }
+  */
 
   /**
    * Inject the bean.

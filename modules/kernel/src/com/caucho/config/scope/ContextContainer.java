@@ -50,16 +50,34 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
 {
   private transient InjectManager _beanManager = InjectManager.create();
   
-  private HashMap<String,Object> _valueMap = new HashMap<String,Object>();
+  private ContextItem<?> _values;
 
   public Object get(String id)
   {
-    return _valueMap.get(id);
+    for (ContextItem<?> ptr = _values; ptr != null; ptr = ptr.getNext()) {
+      if (id.equals(ptr.getId()))
+        return ptr.getObject();
+    }
+    
+    return null;
   }
 
-  public void put(String id, Object value)
+  public <T> T get(Contextual<T> bean)
   {
-    _valueMap.put(id, value);
+    for (ContextItem<?> ptr = _values; ptr != null; ptr = ptr.getNext()) {
+      if (bean == ptr.getBean())
+        return (T) ptr.getObject();
+    }
+    
+    return null;
+  }
+
+  public <T> void put(Contextual<T> bean, 
+                      String id, 
+                      T value, 
+                      CreationalContext<T> env)
+  {
+    _values = new ContextItem<T>(_values, bean, id, value, env);
   }
 
   public void removeEvent(Object scope, String name)
@@ -69,14 +87,67 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
   
   public void close()
   {
-    for (Map.Entry<String,Object> entry : _valueMap.entrySet()) {
-      String id = entry.getKey();
-      Object value = entry.getValue();
+    ContextItem<?> entry = _values;
+    _values = null;
+    
+    for (; entry != null; entry = entry.getNext()) {
+      Contextual bean = entry.getBean();
+      String id = entry.getId();
+      Object value = entry.getObject();
 
-      Bean<Object> bean = _beanManager.getPassivationCapableBean(id);
-      CreationalContext<Object> env = null;
+      if (bean == null)
+        bean = _beanManager.getPassivationCapableBean(id);
+      
+      CreationalContext<?> env = entry.getEnv();
 
       bean.destroy(value, env);
+    }
+  }
+  
+  static class ContextItem<T> {
+    private final ContextItem<?> _next;
+    
+    private final transient Contextual<T> _bean;
+    private final String _id;
+    private final T _object;
+    private final transient CreationalContext<T> _env;
+    
+    ContextItem(ContextItem<?> next,
+                Contextual<T> bean, 
+                String id,
+                T object, 
+                CreationalContext<T> env)
+    {
+      _next = next;
+      _bean = bean;
+      _id = id;
+      _object = object;
+      _env = env;
+    }
+    
+    ContextItem<?> getNext()
+    {
+      return _next;
+    }
+    
+    Contextual<T> getBean()
+    {
+      return _bean;
+    }
+    
+    String getId()
+    {
+      return _id;
+    }
+    
+    T getObject()
+    {
+      return _object;
+    }
+    
+    CreationalContext<T> getEnv()
+    {
+      return _env;
     }
   }
 }

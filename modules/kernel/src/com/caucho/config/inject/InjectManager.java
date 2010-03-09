@@ -281,6 +281,7 @@ public class InjectManager
       addContext("com.caucho.server.webbeans.RequestScope");
       addContext("com.caucho.server.webbeans.SessionScope");
       addContext("com.caucho.server.webbeans.ConversationScope");
+      addContext("com.caucho.server.webbeans.TransactionScope");
       addContext(_applicationScope);
       addContext(_singletonScope);
       

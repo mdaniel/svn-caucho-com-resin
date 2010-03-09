@@ -63,8 +63,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   private static final Object []NULL_ARGS = new Object[0];
 
-  private final Bean _producerBean;
-  private final AnnotatedMethod _beanMethod;
+  private final Bean<X> _producerBean;
+  private final AnnotatedMethod<X> _producesMethod;
+  private final AnnotatedMethod<X> _disposesMethod;
 
   private Producer<T> _producer;
 
@@ -74,31 +75,38 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   private boolean _isBound;
 
   protected ProducesBean(InjectManager manager,
-                         Bean producerBean,
-                         AnnotatedMethod beanMethod,
-                         Arg []args)
+                         Bean<X> producerBean,
+                         AnnotatedMethod<X> producesMethod,
+                         Arg<?> []args,
+                         AnnotatedMethod<X> disposesMethod)
   {
-    super(manager, beanMethod.getBaseType(), beanMethod);
+    super(manager, producesMethod.getBaseType(), producesMethod);
 
     _producerBean = producerBean;
-    _beanMethod = beanMethod;
+    _producesMethod = producesMethod;
+    _disposesMethod = disposesMethod;
+
     _args = args;
 
-    if (beanMethod == null)
+    if (producesMethod == null)
       throw new NullPointerException();
 
     if (args == null)
       throw new NullPointerException();
   }
 
-  public static ProducesBean create(InjectManager manager,
-                                    Bean producer,
-                                    AnnotatedMethod beanMethod,
-                                    Arg []args)
+  public static <X,T> ProducesBean<X,T> 
+  create(InjectManager manager,
+         Bean<X> producer,
+         AnnotatedMethod<X> producesMethod,
+         Arg<?> []args,
+         AnnotatedMethod<X> disposesMethod)
   {
-    ProducesBean bean = new ProducesBean(manager, producer, beanMethod, args);
+    ProducesBean<X,T> bean = new ProducesBean<X,T>(manager, producer, 
+                                                   producesMethod, args,
+                                                   disposesMethod);
     bean.introspect();
-    bean.introspect(beanMethod);
+    bean.introspect(producesMethod);
 
     return bean;
   }
@@ -113,10 +121,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     _producer = producer;
   }
 
-  protected AnnotatedMethod getMethod()
+  /*
+  protected AnnotatedMethod<T> getMethod()
   {
-    return _beanMethod;
+    return _producesMethod;
   }
+  */
 
   /*
   protected Annotation []getAnnotationList()
@@ -148,7 +158,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   @Override
   protected String getDefaultName()
   {
-    String methodName = _beanMethod.getJavaMember().getName();
+    String methodName = _producesMethod.getJavaMember().getName();
 
     if (methodName.startsWith("get") && methodName.length() > 3) {
       return (Character.toLowerCase(methodName.charAt(3))
@@ -160,7 +170,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   public boolean isInjectionPoint()
   {
-    for (Class paramType : _beanMethod.getJavaMember().getParameterTypes()) {
+    for (Class<?> paramType : _producesMethod.getJavaMember().getParameterTypes()) {
       if (InjectionPoint.class.equals(paramType))
         return true;
     }
@@ -191,7 +201,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
    */
   public T produce(CreationalContext<T> cxt)
   {
-    Class<X> type = _producerBean.getBeanClass();
+    Class<?> type = _producerBean.getBeanClass();
 
     X factory = (X) getBeanManager().getReference(_producerBean, type, cxt);
 
@@ -221,7 +231,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
         CreationalContext<?> env = inject.createCreationalContext(_producerBean);
 
         for (int i = 0; i < args.length; i++) {
-          if (_args[i] instanceof InjectionPointArg)
+          if (_args[i] instanceof InjectionPointArg<?>)
             args[i] = ij;
           else
             args[i] = _args[i].eval(env);
@@ -230,7 +240,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       else
         args = NULL_ARGS;
 
-      T value = (T) _beanMethod.getJavaMember().invoke(bean, args);
+      T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
 
       return value;
     } catch (RuntimeException e) {
@@ -265,12 +275,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
       _isBound = true;
 
-      Method method = _beanMethod.getJavaMember();
+      Method method = _producesMethod.getJavaMember();
 
       String loc = InjectManager.location(method);
 
       // Annotation [][]paramAnn = _method.getParameterAnnotations();
-      List<AnnotatedParameter> beanParams = _beanMethod.getParameters();
+      // List<AnnotatedParameter<T>> beanParams = _producesMethod.getParameters();
 
       /*
       _args = new Arg[param.length];
@@ -299,8 +309,36 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   }
 
   /**
+   * Call destroy
+   */
+  @Override
+  public void destroy(T instance, CreationalContext<T> cxt)
+  {
+    if (_disposesMethod != null) {
+      try {
+        CreationalContextImpl env = (CreationalContextImpl) cxt;
+        
+        Object producer = null;
+        
+        if (env != null)
+          producer = env.get(_producerBean);
+        else
+          Thread.dumpStack();
+        
+        if (producer == null)
+          producer = getBeanManager().getReference(_producerBean, _producerBean.getBeanClass(), cxt);
+       
+        _disposesMethod.getJavaMember().invoke(producer, instance);
+      } catch (Exception e) {
+        throw new RuntimeException(_disposesMethod.getJavaMember() + ":" + e, e);
+      }
+    }
+  }
+
+  /**
    * Disposes a bean instance
    */
+  @Override
   public void preDestroy(T instance)
   {
   }
@@ -338,7 +376,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     sb.append(getClass().getSimpleName());
     sb.append("[");
 
-    Method method = _beanMethod.getJavaMember();
+    Method method = _producesMethod.getJavaMember();
 
     sb.append(getTargetSimpleName());
     sb.append(", ");

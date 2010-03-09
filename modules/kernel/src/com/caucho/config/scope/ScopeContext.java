@@ -135,9 +135,13 @@ abstract public class ScopeContext implements Context {
    */
   public boolean canInject(Class scope)
   {
+    /*
     return (getScope() == scope
             || scope == ApplicationScoped.class
             || scope == Dependent.class);
+            */
+    return (getScope() == scope
+            || scope == ApplicationScoped.class);
   }
 
   public void addDestructor(Contextual bean, Object value)
