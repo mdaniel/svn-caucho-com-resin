@@ -117,6 +117,8 @@ namespace Caucho
     private void ResinSelectectionCommitted(object sender, EventArgs e)
     {
       UpdateServices(null);
+      ResetApacheInstallControls();
+      ResetIISInstallControls();
     }
 
     private void UpdateServices(ResinService newResinService)
@@ -253,24 +255,44 @@ namespace Caucho
 
     private void UpdateServers()
     {
-      IList servers = _resinConf.getServerIds();
-      _serverCmbBox.BeginUpdate();
-      _serverCmbBox.DataSource = null;
-      _serverCmbBox.DataSource = servers;
-      _serverCmbBox.EndUpdate();
+      if (_resinService == null) {
+        ArrayList servers = new ArrayList(_resinConf.getServers());
+        ArrayList dynamicServers = new ArrayList();
+        foreach (Object o in servers) {
+          ResinConfServer server = (ResinConfServer)o;
+          if (_resinConf.IsDynamicServerEnabled(server.Cluster)) {
+            String dynamic = "dynamic:" + server.Cluster + ":127.0.0.1:6811";
+            if (!dynamicServers.Contains(dynamic))
+              dynamicServers.Add(dynamic);
+          }
+        }
+        servers.AddRange(dynamicServers);
+        _serverCmbBox.BeginUpdate();
+        _serverCmbBox.DataSource = null;
+        _serverCmbBox.DataSource = servers;
+        _serverCmbBox.EndUpdate();
 
-      _serviceUserCmbBox.DataSource = _setup.GetUsers();
-
-      if (_resinService != null)
+        if (servers.Count > 0) {
+          String cluster = ((ResinConfServer)servers[0]).Cluster;
+          String id = ((ResinConfServer)servers[0]).ID;
+          if ("".Equals(id))
+            _serviceNameTxtBox.Text = "Resin";
+          else
+            _serviceNameTxtBox.Text = "Resin-" + id;
+        }
+        _serviceUserCmbBox.DataSource = _setup.GetUsers();
+      } else {
         _serviceNameTxtBox.Text = _resinService.Name;
-      else if (servers.Count > 0) {
-        String cluster = ((ResinConfServer)servers[0]).Cluster;
-        String id = ((ResinConfServer)servers[0]).ID;
-        if ("".Equals(id))
-          _serviceNameTxtBox.Text = "Resin";
+        if (_resinService.DynamicServer != null)
+          _serverCmbBox.Text = "dynamic:" + _resinService.DynamicServer;
+        else if (_resinService.Server == null)
+          _serverCmbBox.Text = "default";
         else
-          _serviceNameTxtBox.Text = "Resin-" + id;
+        _serverCmbBox.Text = _resinService.Server;
+
+        _serviceUserCmbBox.DataSource = null;
       }
+      
     }
 
     private void UpdateJmxAndDebugPorts()
@@ -434,6 +456,8 @@ namespace Caucho
     private void ResinCmbBoxLeaving(object sender, EventArgs e)
     {
       CheckResinHome();
+      ResetApacheInstallControls();
+      ResetIISInstallControls();
     }
 
     private bool CheckResinHome()
@@ -607,6 +631,7 @@ namespace Caucho
 
       return false;
     }
+
     private bool CheckServiceName()
     {
       if (Util.ServiceExists(_serviceNameTxtBox.Text)) {
@@ -618,6 +643,7 @@ namespace Caucho
         return true;
       }
     }
+
     private void ServiceInstallBtnClick(object sender, EventArgs eventArgs)
     {
       bool isNew = MODE.NEW.Equals(_mode);
@@ -667,7 +693,9 @@ namespace Caucho
         serverId = server.ID;
         resinService.Server = server.ID;
       } else {
-        resinService.DynamicServer = _serverCmbBox.Text;
+        ResinConfServer dynamicServer = ResinConf.ParseDynamic(_serverCmbBox.Text);
+
+        resinService.DynamicServer = dynamicServer.Cluster + ":" + dynamicServer.Address + ":" + dynamicServer.Port;
       }
 
       if (!"Not Specified".Equals(_jmxPortTxtBox.Text)) {
@@ -828,6 +856,12 @@ namespace Caucho
     private void ResinCmbBoxTextChanged(object sender, EventArgs e)
     {
       _errorProvider.SetError(_resinCmbBox, null);
+      if (_resinCmbBox.SelectedItem == null) {
+        _installApacheBtn.Enabled = false;
+        _installIISBtn.Enabled = false;
+        _removeApacheBtn.Enabled = false;
+        _removeIISBtn.Enabled = false;
+      }
     }
 
     private void ResinConfTxtBoxTextChanged(object sender, EventArgs e)
@@ -858,7 +892,9 @@ namespace Caucho
         _apacheCmbBox.DataSource = homes;
       }
       ResetApacheInstallControls();
-      _iisScriptsTxtBox.Text = IIS.FindIIS();
+      if (_iisScriptsTxtBox.Text == null || "".Equals(_iisScriptsTxtBox.Text))
+        _iisScriptsTxtBox.Text = IIS.FindIIS();
+      ResetIISInstallControls();
     }
 
     private void SelectApacheBtnClick(object sender, EventArgs e)
@@ -1059,10 +1095,18 @@ namespace Caucho
         return;
 
       String apacheHome = (String)_apacheCmbBox.SelectedItem;
-      bool resinValid = Util.IsResinHome(_resinCmbBox.Text) && Util.HasWinDirs(_resinCmbBox.Text);
+      bool resinValid = Util.IsResinHome(_resin.Home) && Util.HasWinDirs(_resin.Home);
       bool configured = Apache.IsConfigured(apacheHome);
       _installApacheBtn.Enabled = resinValid && !configured;
       _removeApacheBtn.Enabled = resinValid && configured;
+    }
+
+    private void ResetIISInstallControls()
+    {
+      bool resinValid = Util.IsResinHome(_resin.Home) && Util.HasWinDirs(_resin.Home);
+      bool enabled = resinValid && _iisScriptsTxtBox.Text != null && !"".Equals(_iisScriptsTxtBox.Text);
+      _installIISBtn.Enabled = enabled;
+      _removeIISBtn.Enabled = enabled;
     }
 
     private void SelectIISBtnClick(object sender, EventArgs e)
@@ -1072,6 +1116,143 @@ namespace Caucho
       if (_folderDlg.ShowDialog() == DialogResult.OK) {
         _iisScriptsTxtBox.Text = _folderDlg.SelectedPath;
 
+      }
+    }
+    private void InstallIISBtnClick(object sender, EventArgs eventArgs)
+    {
+      InstallOrRemoveIIS(true);
+    }
+
+    private void RemoveIISBtnClick(object sender, EventArgs e)
+    {
+      InstallOrRemoveIIS(false);
+    }
+
+    private void InstallOrRemoveIIS(bool install)
+    {
+      String resinHome = _resinCmbBox.Text;
+      String iisScripts = _iisScriptsTxtBox.Text;
+      bool success = false;
+
+      BackgroundWorker worker = new BackgroundWorker();
+      worker.DoWork += delegate
+      {
+        while (_progressDialog == null || !_progressDialog.Visible)
+          Thread.Sleep(10);
+
+        if (install)
+          ProgressDialogAddStatus(String.Format("Adding IIS Resin ISAPI Filter to `{0}'..", iisScripts));
+        else
+          ProgressDialogAddStatus(String.Format("Removing IIS Resin ISAPI Filter `{0}'..", iisScripts));
+
+        ServiceController serviceController = null;
+        bool serviceStopped = false;
+        try {
+          serviceController = new ServiceController("W3SVC");
+          if (serviceController.Status == ServiceControllerStatus.Running) {
+            ProgressDialogAddStatus(String.Format("Stopping Service `{0}' ...", serviceController.ServiceName));
+            serviceController.Stop();
+            serviceController.WaitForStatus(ServiceControllerStatus.Stopped, new TimeSpan(0, 1, 0)); //wait a minute
+            serviceStopped = serviceController.Status == ServiceControllerStatus.Stopped;
+            if (serviceStopped) {
+              ProgressDialogAddStatus(String.Format("Service `{0}' stopped...", serviceController.ServiceName));
+            } else {
+              ProgressDialogAddStatus(String.Format("Unable to stop service `{0}'. Please stop service manually and repeat installation", serviceController.ServiceName));
+              return;
+            }
+          }
+
+          SetupResult setupResult = null;
+
+          if (install) {
+            setupResult = IIS.SetupIIS(resinHome, iisScripts);
+            if (SetupResult.OK == setupResult.Status) {
+              ProgressDialogAddStatus("Resin ISAPI Filter is installed.");
+              success = true;
+            } else if (SetupResult.ERROR == setupResult.Status) {
+              ProgressDialogAddStatus("Unable to install Resin ISAPI Filter: " + setupResult.Message);
+              ProgressDialogAddStatus(setupResult.Message);
+            } else {
+              ProgressDialogAddStatus(String.Format("Unable to install Resin ISAPI Filter due to exception `{0}'", setupResult.Exception));
+            }
+          } else {
+            setupResult = IIS.RemoveIIS(iisScripts);
+            if (SetupResult.OK == setupResult.Status) {
+              success = true;
+              ProgressDialogAddStatus("Resin ISAPI Filter is uninstalled.");
+            } else if (SetupResult.ERROR == setupResult.Status) {
+              ProgressDialogAddStatus("Unable to removeResin ISAPI Filter: " + setupResult.Message);
+              ProgressDialogAddStatus(setupResult.Message);
+            } else {
+              ProgressDialogAddStatus(String.Format("Unable to remove Resin ISAPI Filter due to exception `{0}'", setupResult.Exception));
+            }
+          }
+
+          if (serviceStopped) {
+            serviceController.Start();
+            ProgressDialogAddStatus("Starting IIS...");
+            serviceController.WaitForStatus(ServiceControllerStatus.Running, new TimeSpan(0, 1, 0));//wait a minute
+            if (serviceController.Status == ServiceControllerStatus.Running)
+              ProgressDialogAddStatus("IIS Started");
+            else
+              ProgressDialogAddStatus("IIS did not start in a given timeframe. Please check IIS event log and restart IIS manually.");
+          }
+
+          if (install) {
+            if (SetupResult.OK == setupResult.Status) {
+              ProgressDialogSuccess("Installation was successful.", false);
+            } else {
+              ProgressDialogSuccess("Installation failed.", false);
+            }
+          } else {
+            if (SetupResult.OK == setupResult.Status) {
+              ProgressDialogSuccess("Uninstallation was successful.", false);
+            } else {
+              ProgressDialogSuccess("Uninstallation failed.", false);
+            }
+          }
+        }
+        catch (Exception e) {
+          ProgressDialogAddStatus(String.Format("Unable to stop service `{0}' due to exception `{1}'. Please stop service manually and repeat installation", serviceController.ServiceName, e.Message + "\n" + e.StackTrace));
+        }
+      };
+      worker.RunWorkerAsync();
+      ProgressDialogDisplay("Configuring IIS", "Progress: ");
+
+      _installIISBtn.Enabled = !install;
+      _removeIISBtn.Enabled = success && install;
+    }
+
+    private void IisScriptsTxtBoxTextChanged(object sender, EventArgs e)
+    {
+      ResetIISInstallControls();
+    }
+
+    private void ServerCmbBoxLeave(object sender, EventArgs eventArgs)
+    {
+      String server = null;
+      if (_serverCmbBox.SelectedItem is String)
+        server = (String)_serverCmbBox.SelectedItem;
+
+      if (server == null)
+        server = _serverCmbBox.Text;
+
+      if (server == null || "".Equals(server)) {
+        _errorProvider.SetError(_serverCmbBox, "Please select server.");
+        _serverCmbBox.Focus();
+        return;
+      }
+
+      if (_serverCmbBox.Text.StartsWith("dynamic")) {
+        try {
+          ResinConfServer r = ResinConf.ParseDynamic(_serverCmbBox.Text);
+        }
+        catch (Exception e) {
+          _errorProvider.SetError(_serverCmbBox, "Invalid dynamic server format");
+          _serverCmbBox.SelectedIndex = ((ArrayList)_serverCmbBox.DataSource).Count - 1;
+          _serverCmbBox.Focus();
+
+        }
       }
     }
   }

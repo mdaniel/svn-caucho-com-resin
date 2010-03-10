@@ -21,7 +21,7 @@ namespace Caucho
       _xmlnsMgr.AddNamespace("caucho", "http://caucho.com/ns/resin");
     }
 
-    public IList getServerIds()
+    public IList getServers()
     {
       IList result = new List<ResinConfServer>();
 
@@ -80,7 +80,7 @@ namespace Caucho
 
     public String GetWatchDogPort(String cluster, String server)
     {
-      XPathNavigator nav = _docNavigator.SelectSingleNode( "caucho:resin/caucho:cluster[@id='"+cluster+"']/caucho:server[@id='"+server+"']/caucho:watchdog-port/text()",_xmlnsMgr);
+      XPathNavigator nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:server[@id='" + server + "']/caucho:watchdog-port/text()", _xmlnsMgr);
       if (nav != null)
         return nav.Value;
 
@@ -98,6 +98,28 @@ namespace Caucho
 
       return null;
     }
+
+    public bool IsDynamicServerEnabled(String cluster)
+    {
+      XPathNavigator nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/@dynamic-server-enable", _xmlnsMgr);
+      if (nav != null)
+        return !"false".Equals(nav.Value);
+      
+      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster[@id='" + cluster + "']/caucho:dynamic-server-enable/text()", _xmlnsMgr);
+      if (nav != null)
+        return !"false".Equals(nav.Value);
+
+      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster-default/@dynamic-server-enable", _xmlnsMgr);
+      if (nav != null)
+        return !"false".Equals(nav.Value);
+
+      nav = _docNavigator.SelectSingleNode("caucho:resin/caucho:cluster-default/caucho:dynamic-server-enable/text()", _xmlnsMgr);
+      if (nav != null)
+        return !"false".Equals(nav.Value);
+
+      return false;
+    }
+
     public String GetDebugPort(String cluster, String server)
     {
       XPathNodeIterator jvmArgs
@@ -135,6 +157,21 @@ namespace Caucho
         return sb.ToString();
       else
         return null;
+    }
+
+    static public ResinConfServer ParseDynamic(String value)
+    { //dynamic:app-tier:ip:port
+      int lastColumn = value.LastIndexOf(':');
+      int port = int.Parse(value.Substring(lastColumn + 1));
+      int clusterEnd = value.IndexOf(':', 8);
+      String cluster = value.Substring(8, clusterEnd - 8);
+      String address = value.Substring(clusterEnd + 1, lastColumn - clusterEnd - 1);
+      ResinConfServer server = new ResinConfServer();
+      server.IsDynamic = true;
+      server.Cluster = cluster;
+      server.Address = address;
+      server.Port = port;
+      return server;
     }
   }
 

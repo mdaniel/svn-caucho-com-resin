@@ -197,40 +197,46 @@ namespace Caucho
     public static IList FindJava()
     {
       IList list = new List<String>();
-      String javaHome = Environment.GetEnvironmentVariable("JAVA_HOMfE");
+      String javaHome = Environment.GetEnvironmentVariable("JAVA_HOME");
       if (IsValidJavaHome(javaHome))
         list.Add(javaHome);
 
       HashSet<String> foundVersions = new HashSet<String>();
 
+      String[] versions = null;
       RegistryKey jdks = Registry.LocalMachine.OpenSubKey(JDK_REGISTRY);
-      String[] versions = jdks.GetSubKeyNames();
-      foreach (String version in versions) {
-        javaHome = jdks.OpenSubKey(version).GetValue("JavaHome").ToString();
-        if (IsValidJavaHome(javaHome)) {
-          if (!list.Contains(javaHome))
-            list.Add(javaHome);
 
-          foundVersions.Add(version);
+      if (jdks != null) {
+        versions = jdks.GetSubKeyNames();
+        foreach (String version in versions) {
+          javaHome = jdks.OpenSubKey(version).GetValue("JavaHome").ToString();
+          if (IsValidJavaHome(javaHome)) {
+            if (!list.Contains(javaHome))
+              list.Add(javaHome);
+
+            foundVersions.Add(version);
+          }
         }
+        jdks.Close();
       }
-      jdks.Close();
 
       RegistryKey jres = Registry.LocalMachine.OpenSubKey(JRE_REGISTRY);
-      versions = jres.GetSubKeyNames();
-      foreach (String version in versions) {
-        if (foundVersions.Contains(version))
-          continue;
+      if (jres != null) {
+        versions = jres.GetSubKeyNames();
+        foreach (String version in versions) {
+          if (foundVersions.Contains(version))
+            continue;
 
-        javaHome = jres.OpenSubKey(version).GetValue("JavaHome").ToString();
-        if (IsValidJavaHome(javaHome)) {
-          if (!list.Contains(javaHome))
-            list.Add(javaHome);
+          javaHome = jres.OpenSubKey(version).GetValue("JavaHome").ToString();
+          if (IsValidJavaHome(javaHome)) {
+            if (!list.Contains(javaHome))
+              list.Add(javaHome);
 
-          foundVersions.Add(version);
+            foundVersions.Add(version);
+          }
         }
+        jres.Close();
       }
-      jres.Close();
 
       return list;
     }

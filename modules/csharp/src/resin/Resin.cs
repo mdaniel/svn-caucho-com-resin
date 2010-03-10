@@ -63,13 +63,11 @@ namespace Caucho
     {
       ResinArgs = new ResinArgs(args);
 
+      ServiceName = ResinArgs.ServiceName;
+      if (ServiceName == null)
+        ServiceName = "Resin";
+
       _displayName = "Resin Web Server";
-
-      if (!ResinArgs.isValid()) {
-        Usage(ServiceName);
-
-        Environment.Exit(-1);
-      }
     }
 
     public bool StartResin()
@@ -101,7 +99,6 @@ namespace Caucho
     {
       if (ResinArgs.IsService) {
         Info("Stopping Resin");
-
         ExecuteJava("stop");
       } else {
         if (_process != null && !_process.HasExited) {
@@ -202,11 +199,10 @@ namespace Caucho
       }
     }
 
-   private static String GetResinAppDataDir()
+    private static String GetResinAppDataDir()
     {
       return Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + '\\' + CAUCHO_APP_DATA;
     }
-
 
     private void ExecuteJava(String command)
     {
@@ -235,6 +231,11 @@ namespace Caucho
       arguments.Append("\"" + _resinHome + "\\lib\\resin.jar\" ");
       arguments.Append("-resin-home \"").Append(_resinHome).Append("\" ");
       arguments.Append("-root-directory \"").Append(_rootDirectory).Append("\" ");
+      if (ResinArgs.Server != null)
+        arguments.Append("-server ").Append(ResinArgs.Server).Append(' ');
+      else if (ResinArgs.DynamicServer != null)
+        arguments.Append("-dynamic-server ").Append(ResinArgs.DynamicServer).Append(' ');
+
       arguments.Append(ResinArgs.ResinArguments).Append(' ');
 
       if (command != null)
@@ -257,7 +258,7 @@ namespace Caucho
           process = Process.Start(startInfo);
         }
         catch (Exception e) {
-          EventLog.WriteEntry(ServiceName, e.ToString(), EventLogEntryType.Error);
+          Error(e.Message, e);
 
           return;
         }
@@ -292,7 +293,8 @@ namespace Caucho
             messageBuilder.Append('\n').Append(error);
 
           String message = messageBuilder.ToString();
-          EventLog.WriteEntry(ServiceName, message, EventLogEntryType.Error);
+
+          Info(message, true);
 
           throw new ApplicationException(message);
         }
@@ -333,12 +335,11 @@ namespace Caucho
 
       if (writer != null)
         writer.WriteLine(data.ToString());
-      else if (ResinArgs.IsService && EventLog != null)
+      else if (ResinArgs.IsService && EventLog != null) {
         EventLog.WriteEntry(this.ServiceName, data.ToString(), EventLogEntryType.Error);
-      else
+      } else
         Console.WriteLine(data.ToString());
     }
-
 
     private void Info(String message)
     {
@@ -356,9 +357,9 @@ namespace Caucho
         writer.WriteLine(message);
       else if (writer != null && !newLine)
         writer.Write(message);
-      else if (ResinArgs.IsService && EventLog != null)
+      else if (ResinArgs.IsService && EventLog != null) {
         EventLog.WriteEntry(this.ServiceName, message, EventLogEntryType.Information);
-      else if (newLine)
+      } else if (newLine)
         Console.WriteLine(message);
       else
         Console.Write(message);
@@ -367,19 +368,26 @@ namespace Caucho
     public static int Main(String[] args)
     {
       Resin resin = new Resin(Environment.GetCommandLineArgs());
+      /*if (resin.EventLog != null) {
+        if (!EventLog.SourceExists(resin.ServiceName)) {
+          EventLog.CreateEventSource(resin.ServiceName, "Application");
+        }
+      }*/
 
-      //return resin.Execute();
-      int exitCode = resin.Execute();
-
-      return exitCode;
+      if (!resin.ResinArgs.IsValid()) {
+        resin.Usage(resin.ServiceName);
+        return -1;
+      } else {
+        return resin.Execute();
+      }
     }
 
     private static String GetJavaExe(String javaHome)
     {
-      if (File.Exists(javaHome + "\\bin\\java.exe"))
-        return javaHome + "\\bin\\java.exe";
-      else if (File.Exists(javaHome + "\\jrockit.exe"))
-        return javaHome + "\\jrockit.exe";
+      if (File.Exists(javaHome + @"\bin\java.exe"))
+        return javaHome + @"\bin\java.exe";
+      else if (File.Exists(javaHome + @"\jrockit.exe"))
+        return javaHome + @"\jrockit.exe";
       else
         return null;
     }
@@ -391,16 +399,13 @@ namespace Caucho
       if (cp != null && !"".Equals(cp))
         buffer.Append(cp).Append(';');
 
-      //      buffer.Append(resinHome + "\\classes;");
-      //      buffer.Append(resinHome + "\\lib\\resin.jar;");
-
       if (javaHome != null) {
 
-        if (File.Exists(javaHome + "\\lib\\tools.jar"))
-          buffer.Append(javaHome + "\\lib\\tools.jar;");
+        if (File.Exists(javaHome + @"\lib\tools.jar"))
+          buffer.Append(javaHome + @"\lib\tools.jar;");
 
-        if (File.Exists(javaHome + "\\jre\\lib\\rt.jar"))
-          buffer.Append(javaHome + "\\jre\\lib\\rt.jar;");
+        if (File.Exists(javaHome + @"\jre\lib\rt.jar"))
+          buffer.Append(javaHome + @"\jre\lib\rt.jar;");
       }
 
       //add zip files ommitted.

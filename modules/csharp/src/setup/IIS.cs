@@ -27,7 +27,7 @@ namespace Caucho
 
       DirectoryEntry entry = null;
       try {
-        entry = new DirectoryEntry("IIS://localhost/W3SVC/1/ROOT/scripts");
+        entry = new DirectoryEntry("IIS://localhost/W3SVC/1/Root");
 
         if (entry.Properties != null) {
           Object val = entry.Properties["Path"];
@@ -48,6 +48,15 @@ namespace Caucho
           entry.Close();
       }
 
+      if (result != null) {
+        int i = result.LastIndexOf('\\');
+        if (i > -1) {
+          result = result.Substring(0, i) + @"\Scripts";
+          if (!Directory.Exists(result))
+            Directory.CreateDirectory(result);
+        }
+      }
+
       return result;
     }
 
@@ -58,36 +67,36 @@ namespace Caucho
 
     public static SetupResult SetupIIS(String resinHome, String iisScripts)
     {
-      DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
-      DirectoryEntry resinFilter = null;
-
-      foreach (DirectoryEntry entry in filters.Children) {
-        if ("Resin".Equals(entry.Name)) {
-          resinFilter = entry;
-        }
-      }
-
-      if (resinFilter == null)
-        resinFilter = filters.Children.Add("Resin", "IIsFilter");
-
-      resinFilter.Properties["FilterEnabled"][0] = true;
-      resinFilter.Properties["FilterState"][0] = 4;
-      resinFilter.Properties["KeyType"][0] = "IIsFilter";
-      resinFilter.Properties["FilterPath"][0] = iisScripts + @"\isapi_srun.dll";
-      resinFilter.Properties["FilterDescription"][0] = "isapi_srun Extension";
-
-      PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
-      String val = (String)filterOrder[0];
-
-      if (!val.Contains("Resin,"))
-        filterOrder[0] = "Resin," + val;
-
-      resinFilter.CommitChanges();
-      resinFilter.Close();
-      filters.CommitChanges();
-      filters.Close();
-
       try {
+        DirectoryEntry filters = new DirectoryEntry("IIS://localhost/W3SVC/Filters");
+        DirectoryEntry resinFilter = null;
+
+        foreach (DirectoryEntry entry in filters.Children) {
+          if ("Resin".Equals(entry.Name)) {
+            resinFilter = entry;
+          }
+        }
+
+        if (resinFilter == null)
+          resinFilter = filters.Children.Add("Resin", "IIsFilter");
+
+        resinFilter.Properties["FilterEnabled"][0] = true;
+        //resinFilter.Properties["FilterState"][0] = 4;
+        resinFilter.Properties["KeyType"][0] = "IIsFilter";
+        resinFilter.Properties["FilterPath"][0] = iisScripts + @"\isapi_srun.dll";
+        resinFilter.Properties["FilterDescription"][0] = "isapi_srun Extension";
+
+        PropertyValueCollection filterOrder = (PropertyValueCollection)filters.Properties["FilterLoadOrder"];
+        String val = (String)filterOrder[0];
+
+        if (!val.Contains("Resin,"))
+          filterOrder[0] = "Resin," + val;
+
+        resinFilter.CommitChanges();
+        resinFilter.Close();
+        filters.CommitChanges();
+        filters.Close();
+
         CopyIsapiFilter(resinHome, iisScripts);
         return new SetupResult("IIS Installation Complete.");
       }

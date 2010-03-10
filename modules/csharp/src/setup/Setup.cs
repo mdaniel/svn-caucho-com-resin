@@ -70,9 +70,6 @@ namespace Caucho
     private List<ResinService> _resinServices = new List<ResinService>();
     private List<String> _users = null;
 
-    private Apache _apache;
-    private HashSet<Apache> _apacheSet;
-
     private ArrayList _apacheHomeSet;
 
     public String ResinHome
@@ -180,8 +177,9 @@ namespace Caucho
         path = path.Substring(0, path.LastIndexOf('\\'));
         if (Util.IsResinHome(path)) {
           Resin resin = new Resin(path);
-          if (Resin == null)
+          if (Resin == null) {
             Resin = resin;
+          }
 
           if (!HasResin(resin)) {
             AddResin(resin);
@@ -227,6 +225,7 @@ namespace Caucho
 
           resin.Name = name;
           resin.Server = resinArgs.Server;
+          resin.DynamicServer = resinArgs.DynamicServer;
           resin.Root = resinArgs.Root;
           resin.Log = resinArgs.Log;
           resin.User = resinArgs.User;
@@ -416,9 +415,15 @@ namespace Caucho
       return txInst;
     }
 
+    private String GetStateDirectory()
+    {
+      String dir = Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData) + @"\Caucho\services";
+      return dir;
+    }
+
     private void StoreState(Hashtable state, String serviceName)
     {
-      String dir = Environment.SpecialFolder.CommonApplicationData.ToString() + @"\Caucho\services";
+      String dir = GetStateDirectory();
       DirectoryInfo info;
       if ((info = Directory.CreateDirectory(dir)) != null && info.Exists) {
         String file = dir + @"\" + serviceName + ".srv";
@@ -433,7 +438,7 @@ namespace Caucho
 
     private Hashtable LoadState(String serviceName)
     {
-      String file = Environment.SpecialFolder.CommonApplicationData.ToString() + @"\Caucho\services\" + serviceName + ".srv";
+      String file = GetStateDirectory() + '\\' + serviceName + ".srv";
       if (File.Exists(file) && false) {
         Hashtable state = null;
         FileStream fs = new FileStream(file, FileMode.Open, FileAccess.Read);
@@ -539,6 +544,19 @@ namespace Caucho
       return Home.GetHashCode();
     }
 
+    public override bool Equals(object obj)
+    {
+      if (this == obj)
+        return true;
+
+      if (!(obj is Resin))
+        return false;
+
+      Resin resin = (Resin)obj;
+
+      return Home.Equals(resin.Home);
+    }
+
     #region IEquatable Members
     public bool Equals(Resin obj)
     {
@@ -639,6 +657,8 @@ namespace Caucho
 
       if (Server != null)
         result.Append("-server ").Append(Server);
+      else if (DynamicServer != null)
+        result.Append("-dynamic:").Append(DynamicServer);
       else
         result.Append("default server");
 

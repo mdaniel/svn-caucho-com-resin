@@ -234,6 +234,7 @@ namespace Caucho
       this._removeIISBtn.TabIndex = 37;
       this._removeIISBtn.Text = "Remove";
       this._removeIISBtn.UseVisualStyleBackColor = true;
+      this._removeIISBtn.Click += new System.EventHandler(this.RemoveIISBtnClick);
       // 
       // _installIISBtn
       // 
@@ -243,6 +244,7 @@ namespace Caucho
       this._installIISBtn.TabIndex = 36;
       this._installIISBtn.Text = "Install";
       this._installIISBtn.UseVisualStyleBackColor = true;
+      this._installIISBtn.Click += new System.EventHandler(this.InstallIISBtnClick);
       // 
       // _selectIISBtn
       // 
@@ -260,6 +262,7 @@ namespace Caucho
       this._iisScriptsTxtBox.Name = "_iisScriptsTxtBox";
       this._iisScriptsTxtBox.Size = new System.Drawing.Size(285, 20);
       this._iisScriptsTxtBox.TabIndex = 30;
+      this._iisScriptsTxtBox.TextChanged += new System.EventHandler(this.IisScriptsTxtBoxTextChanged);
       // 
       // _root
       // 
@@ -274,7 +277,7 @@ namespace Caucho
       this._root.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Percent, 100F));
       this._root.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 486F));
       this._root.RowStyles.Add(new System.Windows.Forms.RowStyle(System.Windows.Forms.SizeType.Absolute, 20F));
-      this._root.Size = new System.Drawing.Size(472, 569);
+      this._root.Size = new System.Drawing.Size(484, 569);
       this._root.TabIndex = 0;
       // 
       // _generalGrp
@@ -288,7 +291,7 @@ namespace Caucho
       this._generalGrp.Dock = System.Windows.Forms.DockStyle.Fill;
       this._generalGrp.Location = new System.Drawing.Point(3, 3);
       this._generalGrp.Name = "_generalGrp";
-      this._generalGrp.Size = new System.Drawing.Size(466, 77);
+      this._generalGrp.Size = new System.Drawing.Size(478, 77);
       this._generalGrp.TabIndex = 0;
       this._generalGrp.TabStop = false;
       this._generalGrp.Text = "General";
@@ -320,9 +323,9 @@ namespace Caucho
       // 
       this._resinLogoImg.BackColor = System.Drawing.Color.Transparent;
       this._resinLogoImg.Image = ((System.Drawing.Image)(resources.GetObject("_resinLogoImg.Image")));
-      this._resinLogoImg.Location = new System.Drawing.Point(374, -3);
+      this._resinLogoImg.Location = new System.Drawing.Point(385, -1);
       this._resinLogoImg.Name = "_resinLogoImg";
-      this._resinLogoImg.Size = new System.Drawing.Size(86, 52);
+      this._resinLogoImg.Size = new System.Drawing.Size(87, 48);
       this._resinLogoImg.TabIndex = 3;
       this._resinLogoImg.TabStop = false;
       // 
@@ -343,7 +346,7 @@ namespace Caucho
       this._tabControl.Location = new System.Drawing.Point(3, 86);
       this._tabControl.Name = "_tabControl";
       this._tabControl.SelectedIndex = 0;
-      this._tabControl.Size = new System.Drawing.Size(466, 480);
+      this._tabControl.Size = new System.Drawing.Size(478, 480);
       this._tabControl.TabIndex = 1;
       // 
       // _servicesTab
@@ -386,7 +389,7 @@ namespace Caucho
       this._servicesTab.Location = new System.Drawing.Point(4, 22);
       this._servicesTab.Name = "_servicesTab";
       this._servicesTab.Padding = new System.Windows.Forms.Padding(3);
-      this._servicesTab.Size = new System.Drawing.Size(458, 454);
+      this._servicesTab.Size = new System.Drawing.Size(470, 454);
       this._servicesTab.TabIndex = 0;
       this._servicesTab.Text = "Resin Windows Service Install";
       this._servicesTab.UseVisualStyleBackColor = true;
@@ -430,6 +433,7 @@ namespace Caucho
       this._serverCmbBox.Name = "_serverCmbBox";
       this._serverCmbBox.Size = new System.Drawing.Size(281, 21);
       this._serverCmbBox.TabIndex = 40;
+      this._serverCmbBox.Leave += new System.EventHandler(this.ServerCmbBoxLeave);
       this._serverCmbBox.SelectedValueChanged += new System.EventHandler(this.ServerSelectionChanged);
       // 
       // _serverLbl
@@ -725,7 +729,7 @@ namespace Caucho
       this._pluginsTab.Location = new System.Drawing.Point(4, 22);
       this._pluginsTab.Name = "_pluginsTab";
       this._pluginsTab.Padding = new System.Windows.Forms.Padding(3);
-      this._pluginsTab.Size = new System.Drawing.Size(458, 454);
+      this._pluginsTab.Size = new System.Drawing.Size(470, 454);
       this._pluginsTab.TabIndex = 1;
       this._pluginsTab.Text = "Web Server Plugins";
       this._pluginsTab.UseVisualStyleBackColor = true;

@@ -114,7 +114,7 @@ namespace Caucho
       foreach (char c in chars) {
         if (' ' == c
           && arguments.Count == 0
-          && builder.ToString().Contains("resin.exe")) {
+          && (builder.ToString().Contains("resin.exe") || builder.ToString().Contains("httpd.exe"))) {
           String exe = builder.ToString();
           if (exe.StartsWith("\"") && exe.EndsWith("\""))
             exe = exe.Substring(1, exe.Length - 2);
@@ -370,9 +370,9 @@ namespace Caucho
       ResinArguments = resinArgs.ToString();
     }
 
-    public bool isValid()
+    public bool IsValid()
     {
-      return Command == null && (!IsInstall) && (!IsUnInstall) && (!IsService);
+      return Command != null || IsInstall || IsUnInstall || IsService;
     }
   }
 }

@@ -66,6 +66,7 @@
       <Link>Version.cs</Link>
     </Compile>
     <Compile Include="Apache.cs" />
+    <Compile Include="IIS.cs" />
     <Compile Include="ProgressDialog.cs">
       <SubType>Form</SubType>
     </Compile>
