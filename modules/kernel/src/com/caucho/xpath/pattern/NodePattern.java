@@ -93,8 +93,10 @@ public class NodePattern extends AbstractPattern {
       return false;
     else if (! node.getNodeName().equals(_tag))
       return false;
-    else if (node.getNamespaceURI() != null)
+    else if (node.getNamespaceURI() != null
+             && ! "".equals(node.getNamespaceURI())) {
       return false;
+    }
     else if (_parent != null && ! _parent.match(node, env))
       return false;
 

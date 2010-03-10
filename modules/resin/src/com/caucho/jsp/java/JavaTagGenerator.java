@@ -370,6 +370,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     out.println("private static com.caucho.jsp.PageManager _jsp_pageManager;");
 
     out.println("private boolean _caucho_isDead;");
+    out.println("private boolean _caucho_isNotModified;");
 
     for (int i = 0; i < _declarations.size(); i++) {
       JspDeclaration decl = _declarations.get(i);

@@ -277,6 +277,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   /**
    * Returns true if the underlying source has been modified.
    */
+  @Override
   public boolean _caucho_isModified()
   {
     return _isDead || _depends.isModified();
@@ -285,10 +286,13 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   /***
    * Returns true if the underlying source has been modified.
    */
-  public boolean cauchoIsModified()
+  /*
+  public final boolean cauchoIsModified()
   {
-    return (_isDead || _depends.isModified());
+    // return (_isDead || _depends.isModified());
+    return _caucho_isModified();
   }
+  */
 
   protected HashMap<String,Method> _caucho_getFunctionMap()
   {

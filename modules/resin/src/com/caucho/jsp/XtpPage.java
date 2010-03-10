@@ -266,7 +266,7 @@ class XtpPage extends Page {
       }
     }
 
-    if (page != null && ! page.cauchoIsModified())
+    if (page != null && ! page._caucho_isModified())
       return page;
 
     deadPage = page;

@@ -345,7 +345,7 @@ abstract public class PageManager {
         page._caucho_setNeverModified(true);
 
       page._caucho_setUpdateInterval(_updateInterval);
-      page.cauchoIsModified();
+      page._caucho_isModified();
 
       try {
 	InjectManager beanManager = InjectManager.create();

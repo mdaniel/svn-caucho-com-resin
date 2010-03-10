@@ -30,6 +30,7 @@ package com.caucho.jstl.el;
 
 import com.caucho.jsp.PageContextImpl;
 import com.caucho.xpath.Env;
+import com.caucho.xpath.Expr;
 import com.caucho.xpath.XPath;
 import com.caucho.xpath.XPathException;
 
@@ -45,13 +46,14 @@ import java.util.logging.Logger;
 public class XmlOutTag extends TagSupport {
   private static final Logger log
     = Logger.getLogger(XmlOutTag.class.getName());
+  
   private com.caucho.xpath.Expr _select;
   private com.caucho.el.Expr _escapeXml;
 
   /**
    * Sets the JSP-EL expression value.
    */
-  public void setSelect(com.caucho.xpath.Expr select)
+  public void setSelect(Expr select)
   {
     _select = select;
   }

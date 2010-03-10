@@ -127,7 +127,7 @@ public class NodeSetExpr extends Expr {
     throws XPathException
   {
     Node value = _pattern.findAny(node, env);
-
+    
     if (value == null)
       return "";
     else

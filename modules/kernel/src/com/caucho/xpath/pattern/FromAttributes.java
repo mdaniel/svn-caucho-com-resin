@@ -63,8 +63,8 @@ public class FromAttributes extends Axis {
     if (! (node instanceof Attr))
       return false;
 
-    if (node instanceof QAttr &&
-        ((QAttr) node).getNamespaceURI() == XMLNS)
+    if (node instanceof QAttr
+        && ((QAttr) node).getNamespaceURI() == XMLNS)
       return false;
 
     return _parent == null || _parent.match(node.getParentNode(), env);

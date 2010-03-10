@@ -69,6 +69,8 @@ public class AttributeListIterator extends NodeIterator {
     _match = match;
 
     _node = findFirstMatchingNode();
+    
+    System.out.println("ATTR: " + _node + " " + parentIter);
   }
   
   /**
@@ -101,8 +103,9 @@ public class AttributeListIterator extends NodeIterator {
     Node node = null;
     
     while (true) {
-      Node parent;
+      Node parent = null;
       
+
       if (node != null && (_match == null || _match.match(node, _env))) {
         _position++;
         return node;
@@ -110,9 +113,10 @@ public class AttributeListIterator extends NodeIterator {
           
       if (_attributeMap != null && _index < _attributeMap.getLength())
         node = _attributeMap.item(_index++);
-      else if (_parentIter == null ||
-	       (parent = _parentIter.nextNode()) == null)
+      else if (_parentIter == null 
+               || (parent = _parentIter.nextNode()) == null) {
         return null;
+      }
       else if (parent instanceof Element) {
         _position = 0;
         _size = 0;

@@ -59,12 +59,12 @@ abstract public class ResponseStream extends ToByteResponseStream {
   private OutputStream _cacheStream;
   private long _cacheMaxLength;
 
-  private boolean _disableAutoFlush;
+  private boolean _isDisableAutoFlush;
 
   // bytes actually written
   private int _contentLength;
 
-  private boolean _allowFlush = true;
+  private boolean _isAllowFlush = true;
 
   public ResponseStream()
   {
@@ -94,8 +94,8 @@ abstract public class ResponseStream extends ToByteResponseStream {
     super.start();
 
     _contentLength = 0;
-    _allowFlush = true;
-    _disableAutoFlush = false;
+    _isAllowFlush = true;
+    _isDisableAutoFlush = false;
     _cacheStream = null;
   }
 
@@ -143,9 +143,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
   @Override
   protected boolean setFlush(boolean flush)
   {
-    boolean isFlush = _allowFlush;
+    boolean isFlush = _isAllowFlush;
 
-    _allowFlush = flush;
+    _isAllowFlush = flush;
 
     return isFlush;
   }
@@ -158,7 +158,13 @@ abstract public class ResponseStream extends ToByteResponseStream {
 
   void setDisableAutoFlush(boolean disable)
   {
-    _disableAutoFlush = disable;
+    _isDisableAutoFlush = disable;
+  }
+  
+  @Override
+  protected boolean isDisableAutoFlush()
+  {
+    return _isDisableAutoFlush;
   }
 
   @Override
@@ -431,7 +437,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
       if (isClosed())
         return;
 
-      if (_disableAutoFlush && ! isFinished)
+      if (_isDisableAutoFlush && ! isFinished)
         throw new IOException(L.l("auto-flushing has been disabled"));
 
       int bufferOffset = getNextBufferOffset();
@@ -559,9 +565,9 @@ abstract public class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     try {
-      _disableAutoFlush = false;
+      _isDisableAutoFlush = false;
 
-      if (_allowFlush && ! isClosed()) {
+      if (_isAllowFlush && ! isClosed()) {
         flushBuffer();
 
         int bufferOffset = getNextBufferOffset();
@@ -615,11 +621,11 @@ abstract public class ResponseStream extends ToByteResponseStream {
     throws IOException
   {
     try {
-      _disableAutoFlush = false;
+      _isDisableAutoFlush = false;
 
       flushCharBuffer();
 
-      _allowFlush = true;
+      _isAllowFlush = true;
 
       flushBuffer();
       // flushBuffer can force 304 and then a cache write which would

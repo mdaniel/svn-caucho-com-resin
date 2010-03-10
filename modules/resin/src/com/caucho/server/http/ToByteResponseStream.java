@@ -256,6 +256,11 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
     return _bufferSize + _tailByteLength + _charLength;
   }
 
+  protected boolean isDisableAutoFlush()
+  {
+    return false;
+  }
+  
   /**
    * Clears the response buffer.
    */
@@ -519,6 +524,10 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   protected void flushByteBuffer()
     throws IOException
   {
+    // jsp/0182
+    if (isDisableAutoFlush())
+      throw new IOException("auto-flush is disabled");
+    
     // jsp/0182 jsp/0502 jsp/0503
     // _isCommitted = true;
     
@@ -586,6 +595,9 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   public void flushBuffer()
     throws IOException
   {
+    if (isDisableAutoFlush())
+      throw new IOException("auto-flush is disabled");
+    
     if (_charLength > 0)
       flushCharBuffer();
 

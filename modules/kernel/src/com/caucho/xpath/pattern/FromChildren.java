@@ -52,6 +52,7 @@ public class FromChildren extends Axis {
    *
    * @return true if the pattern matches
    */
+  @Override
   public boolean match(Node node, ExprEnvironment env)
     throws XPathException
   {

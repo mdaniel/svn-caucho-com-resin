@@ -40,10 +40,10 @@ public class SetterAttribute extends Attribute {
   private static final L10N L = new L10N(SetterAttribute.class);
   
   private final Method _setter;
-  private final Class _type;
-  private ConfigType _configType;
+  private final Class<?> _type;
+  private ConfigType<?> _configType;
 
-  public SetterAttribute(Method setter, Class type)
+  public SetterAttribute(Method setter, Class<?> type)
   {
     _setter = setter;
     _setter.setAccessible(true);
@@ -166,6 +166,20 @@ public class SetterAttribute extends Attribute {
     } catch (Exception e) {
       throw ConfigException.create(_setter, e);
     }
+  }
+  
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (o == null)
+      return false;
+    else if (getClass() != o.getClass())
+      return false;
+    
+    SetterAttribute attr = (SetterAttribute) o;
+    
+    return _type.equals(attr._type) && _setter.equals(attr._setter);
   }
 
   public String toString()

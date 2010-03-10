@@ -848,6 +848,7 @@ public class JavaJspGenerator extends JspGenerator {
     out.println("private static final java.util.HashMap<String,java.lang.reflect.Method> _jsp_functionMap = new java.util.HashMap<String,java.lang.reflect.Method>();");
 
     out.println("private boolean _caucho_isDead;");
+    out.println("private boolean _caucho_isNotModified;");
     out.println("private com.caucho.jsp.PageManager _jsp_pageManager;");
     //out.println("private com.caucho.util.FreeList<TagState> _jsp_freeState = new com.caucho.util.FreeList<TagState>(8);");
 
@@ -1756,6 +1757,14 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("  super._caucho_addDepend(depend);");
     out.println("  com.caucho.jsp.JavaPage.addDepend(_caucho_depends, depend);");
     out.println("}");
+    
+    out.println();
+    // out.println("@Override");
+    out.println("protected void _caucho_setNeverModified(boolean isNotModified)");
+    out.println("{");
+    // out.println("  super._caucho_setNeverModified(isNotModified);");
+    out.println("  _caucho_isNotModified = true;");
+    out.println("}");
 
     out.println();
     out.println("public boolean _caucho_isModified()");
@@ -1763,9 +1772,15 @@ public class JavaJspGenerator extends JspGenerator {
     out.pushDepth();
     out.println("if (_caucho_isDead)");
     out.println("  return true;");
+    out.println();
+    out.println("if (_caucho_isNotModified)");
+    out.println("  return false;");
+    out.println();
     out.println("if (com.caucho.server.util.CauchoSystem.getVersionId() != " +
 		CauchoSystem.getVersionId() + "L)");
     out.println("  return true;");
+    
+    out.println();
     
     ArrayList<PersistentDependency> depends;
     depends = new ArrayList<PersistentDependency>();

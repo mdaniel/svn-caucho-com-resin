@@ -30,6 +30,7 @@
 package com.caucho.server.webapp;
 
 import com.caucho.VersionFactory;
+import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -517,6 +518,13 @@ public class ServletContextImpl extends ServletContextCompat
   public Map<String, ? extends FilterRegistration> getFilterRegistrations()
   {
     throw new UnsupportedOperationException("unimplemented");
+  }
+  
+  @Configurable
+  public void addListener(Listener config)
+    throws Exception
+  {
+    
   }
 
   public void addListener(String className)

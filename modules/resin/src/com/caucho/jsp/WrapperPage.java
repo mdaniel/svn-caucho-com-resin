@@ -96,6 +96,7 @@ class WrapperPage extends Page {
     return _child;
   }
 
+  @Override
   public boolean _caucho_isModified()
   {
     if (_childPage != null)

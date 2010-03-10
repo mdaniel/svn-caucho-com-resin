@@ -34,6 +34,7 @@ import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.ServletException;
 import javax.servlet.jsp.tagext.SimpleTagSupport;
+import javax.servlet.jsp.tagext.Tag;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import java.util.ArrayList;
@@ -41,7 +42,8 @@ import java.util.ArrayList;
 /**
  * Represents the body for a SimpleTag
  */
-abstract public class JspTagSupport extends SimpleTagSupport {
+abstract public class JspTagSupport extends SimpleTagSupport
+{
   abstract public TagInfo _caucho_getTagInfo(TagLibraryInfo taglib)
     throws ConfigException;
   

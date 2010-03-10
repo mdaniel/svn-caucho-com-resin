@@ -152,6 +152,9 @@ public class JstlCoreSet extends JstlNode {
       out.print("\", ");
       out.print(exprVar);
       out.println(");");
+      
+      // jsp/1c2m
+      generateSet(out, exprVar);
     }
     else if (_value != null) {
       String value = generateValue(Object.class, _value);
