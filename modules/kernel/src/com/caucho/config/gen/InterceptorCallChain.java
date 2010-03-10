@@ -867,9 +867,12 @@ public class InterceptorCallChain
     throws IOException
   {
     generateDecoratorClass(out, map);
-    
+
     String decoratorSetName = getDecoratorSetName(out, map);
-    
+
+    if (hasInterceptor())
+      generateDecoratorMethod(out);
+        
     if (map.get("decorator_bean_" + decoratorSetName) != null)
       return;
     
@@ -889,15 +892,12 @@ public class InterceptorCallChain
     
       out.println();
       out.println("static final ThreadLocal<" + _decoratorClass + "> "
-                  + _decoratorLocalVar
-                  + " = new ThreadLocal<" + _decoratorClass + ">();");
+                  + _decoratorLocalVar);
+      out.println("  = new ThreadLocal<" + _decoratorClass + ">();");
 
       out.println();
       out.println("private transient Object [] " + _decoratorIndexVar + ";");
     }
-
-    if (hasInterceptor())
-      generateDecoratorMethod(out);
   }
 
   private void generateDecoratorClass(JavaWriter out,
@@ -988,7 +988,6 @@ public class InterceptorCallChain
   {
     String decoratorSetName = _decoratorSetName;
 
-    String decoratorIndexVar = decoratorSetName + "_i";
     String uniqueName = getUniqueName(out);
 
     ArrayList<Class<?>> apis = getMethodApis(method);
