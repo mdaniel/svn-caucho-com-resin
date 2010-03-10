@@ -830,7 +830,8 @@ public class PageContextImpl extends PageContext
   /**
    * Returns the servlet request for the page.
    */
-  public ServletRequest getRequest()
+  @Override
+  public HttpServletRequest getRequest()
   {
     return _request;
   }
@@ -838,7 +839,8 @@ public class PageContextImpl extends PageContext
   /**
    * Returns the servlet response for the page.
    */
-  public ServletResponse getResponse()
+  @Override
+  public HttpServletResponse getResponse()
   {
     return getCauchoResponse();
   }

@@ -245,8 +245,12 @@ abstract public class GenericTag extends JspContainerNode
     }
 
     TagData tagData = new TagData(tags);
-    
-    _varInfo = _tagInfo.getVariableInfo(tagData);
+
+    try {
+      _varInfo = _tagInfo.getVariableInfo(tagData);
+    } catch (Exception e) {
+      throw error(e);
+    }
 
     if (_varInfo == null)
       _varInfo = fillVariableInfo(_tagInfo.getTagVariableInfos(), tagData);
@@ -783,8 +787,16 @@ abstract public class GenericTag extends JspContainerNode
       
       String attributeName = tagVar.getNameFromAttribute();
 
-      if (attributeName != null)
+      if (attributeName != null) {
+        Object value = tagData.getAttribute(attributeName);
+        
+        if (value != null && ! (value instanceof String)) {
+          throw error(L.l("tag variable '{0}' may not be a request time attribute",
+                          attributeName));
+        }
+        
 	name = tagData.getAttributeString(attributeName);
+      }
 
       if (name == null || "".equals(name) || "null".equals(name))
 	name = null;

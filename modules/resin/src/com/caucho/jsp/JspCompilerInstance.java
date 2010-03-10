@@ -253,8 +253,10 @@ public class JspCompilerInstance {
       appDir = app.getAppDir();
 
     if (app != null && app.hasPre23Config()
-	&& _parseState.getELIgnoredDefault() == null)
+	&& _parseState.getELIgnoredDefault() == null
+	&& ! _parseState.isXml()) { // jsp/100a 
       _parseState.setELIgnoredDefault(true);
+    }
 
     JspConfig jspConfig = null;
 

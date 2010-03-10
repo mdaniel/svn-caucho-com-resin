@@ -1667,6 +1667,10 @@ public class JavaJspGenerator extends JspGenerator {
 	HashSet<String> oldDeclaredVariables = _declaredVariables;
 	_declaredVariables = new HashSet<String>();
 	try {
+	  if (frag.hasScripting()) {
+	    generateScriptingVariables(out);
+	  }
+	  
 	  frag.generatePrologueChildren(out);
 	  frag.generate(out);
 	} finally {
@@ -1714,6 +1718,16 @@ public class JavaJspGenerator extends JspGenerator {
         frag.generateValueMethod(out);
       }
     }
+  }
+  
+  private void generateScriptingVariables(JspJavaWriter out) throws IOException
+  {
+    // jsp/103j
+    
+    out.println("HttpServletRequest request = this.pageContext.getRequest();");
+    out.println("HttpServletResponse response = this.pageContext.getResponse();");
+    out.println("ServletContext application = this.pageContext.getApplication();");
+    out.println("PageContext jspContext = this.pageContext;");
   }
 
   /**

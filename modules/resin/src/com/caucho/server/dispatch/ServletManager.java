@@ -90,7 +90,12 @@ public class ServletManager {
   public boolean isFacesServletConfigured()
   {
     for (ServletConfigImpl servletConfig : _servletList) {
-      String className = servletConfig.getServletClass().getName();
+      Class<?> servletClass = servletConfig.getServletClass();
+      
+      if (servletClass == null)
+        continue;
+      
+      String className = servletClass.getName();
 
       if ("javax.faces.webapp.FacesServlet".equals(className))
         return true;

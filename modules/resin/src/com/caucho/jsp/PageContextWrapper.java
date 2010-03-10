@@ -30,6 +30,7 @@
 package com.caucho.jsp;
 
 import com.caucho.server.http.CauchoResponse;
+import com.caucho.server.http.HttpServletResponseImpl;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -40,6 +41,7 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.ErrorData;
 import javax.servlet.jsp.JspContext;
@@ -79,7 +81,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the servlet request for the page.
    */
-  public ServletRequest getRequest()
+  public HttpServletRequest getRequest()
   {
     return _parent.getRequest();
   }
@@ -87,7 +89,7 @@ public class PageContextWrapper extends PageContextImpl {
   /**
    * Returns the servlet response for the page.
    */
-  public ServletResponse getResponse()
+  public HttpServletResponse getResponse()
   {
     return _parent.getResponse();
   }
