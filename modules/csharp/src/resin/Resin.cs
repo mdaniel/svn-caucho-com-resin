@@ -368,11 +368,6 @@ namespace Caucho
     public static int Main(String[] args)
     {
       Resin resin = new Resin(Environment.GetCommandLineArgs());
-      /*if (resin.EventLog != null) {
-        if (!EventLog.SourceExists(resin.ServiceName)) {
-          EventLog.CreateEventSource(resin.ServiceName, "Application");
-        }
-      }*/
 
       if (!resin.ResinArgs.IsValid()) {
         resin.Usage(resin.ServiceName);
