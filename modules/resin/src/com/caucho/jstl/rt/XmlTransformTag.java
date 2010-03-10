@@ -187,7 +187,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       Source source = getSource(_xslt, xsltSystemId);
 
       Transformer transformer = factory.newTransformer(source);
-      transformer.setOutputProperty("omit-xml-declaration", "yes");
+      // transformer.setOutputProperty("omit-xml-declaration", "yes");
 
       for (int i = 0; i < _paramNames.size(); i++) {
         String name = _paramNames.get(i);
@@ -276,7 +276,7 @@ public class XmlTransformTag extends BodyTagSupport implements NameValueTag {
       source = (Source) xmlObj;
     else
       throw new JspException(L.l("unknown xml object type `{0}'", xmlObj));
-
+    
     return source;
   }
 

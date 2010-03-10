@@ -32,14 +32,16 @@ import com.caucho.jsp.PageContextImpl;
 import com.caucho.xpath.Env;
 import com.caucho.xpath.Expr;
 import com.caucho.xpath.XPath;
-import com.caucho.xpath.XPathException;
 
 import org.w3c.dom.Node;
+import org.w3c.dom.xpath.XPathNamespace;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
 import javax.servlet.jsp.tagext.TagSupport;
 import javax.el.ELException;
+
+import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.io.IOException;
@@ -47,11 +49,15 @@ import java.io.IOException;
 public class XmlOutTag extends TagSupport {
   private static final Logger log 
     = Logger.getLogger(XmlOutTag.class.getName());
+
+
+  // private Expr _select;
   private Expr _select;
   private boolean _escapeXml = true;
 
   /**
    * Sets the JSP-EL expression value.
+   * @throws XPathExpressionException 
    */
   public void setSelect(Expr select)
   {
@@ -77,10 +83,10 @@ public class XmlOutTag extends TagSupport {
 
       JspWriter out = pageContext.getOut();
 
+      Node node = pageContext.getNodeEnv();
+
       Env env = XPath.createEnv();
       env.setVarEnv(pageContext.getVarEnv());
-
-      Node node = pageContext.getNodeEnv();
 
       String value = _select.evalString(node, env);
 

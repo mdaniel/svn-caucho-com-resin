@@ -1969,8 +1969,9 @@ public class PageContextImpl extends PageContext
       }
       else if (prefix.equals("initParam"))
         return getApplication().getInitParameter(suffix);
-      else if (prefix.equals("pageScope"))
+      else if (prefix.equals("pageScope")) {
         return getAttribute(suffix);
+      }
       else if (prefix.equals("requestScope"))
         return getCauchoRequest().getAttribute(suffix);
       else if (prefix.equals("sessionScope"))
@@ -1979,7 +1980,6 @@ public class PageContextImpl extends PageContext
         return getApplication().getAttribute(suffix);
       else
         return null;
-                                  
     }
   }
   
