@@ -430,10 +430,7 @@ public final class Block implements SyncCacheListener {
     }
     */
     
-    if (useCount == 0) {
-      if (_dirtyMin < _dirtyMax)
-        Thread.dumpStack();
-      
+    if (useCount == 0 && _dirtyMin < _dirtyMax) {
       // If the block is clean, discard it, e.g. for the BlockManager.getBlock
       
       freeImpl();
@@ -442,8 +439,9 @@ public final class Block implements SyncCacheListener {
   
   void freeFromWriter()
   {
-    if (_useCount.get() == 0)
+    if (_useCount.get() == 0 && _dirtyMax <= _dirtyMin) {
       freeImpl();
+    }
   }
 
   /**

@@ -607,12 +607,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
 
       throw new NotSupportedException(
-          L
-              .l(
-                  "Nested transactions are not supported. "
-                      + "The previous transaction for this thread did not commit() or rollback(). "
-                      + "Check that every UserTransaction.begin() has its commit() or rollback() in a finally block.\nStatus was {0}.",
-                  xaState(status)));
+          L.l("Nested transactions are not supported. "
+              + "The previous transaction for this thread did not commit() or rollback(). "
+              + "Check that every UserTransaction.begin() has its commit() or rollback() in a finally block.\nStatus was {0}.",
+              xaState(status)));
     }
 
     if (_isDead)
@@ -706,10 +704,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     if (_status != Status.STATUS_ACTIVE
         && _status != Status.STATUS_MARKED_ROLLBACK) {
       throw new IllegalStateException(
-          L
-              .l(
-                  "Can't set rollback-only because the transaction is not active, state={0}.",
-                  xaState(_status)));
+          L.l("Can't set rollback-only because the transaction is not active, state={0}.",
+              xaState(_status)));
     }
 
     _status = Status.STATUS_MARKED_ROLLBACK;
@@ -720,8 +716,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
       log.fine(this + " rollback-only");
 
     if (_rollbackException == null) {
-      _rollbackException = new RollbackException(L
-          .l("Transaction marked rollback-only"));
+      _rollbackException = new RollbackException(L.l("Transaction marked rollback-only"));
       _rollbackException.fillInStackTrace();
     }
   }
@@ -734,10 +729,8 @@ public class TransactionImpl implements Transaction, AlarmListener {
     if (_status != Status.STATUS_ACTIVE
         && _status != Status.STATUS_MARKED_ROLLBACK) {
       throw new IllegalStateException(
-          L
-              .l(
-                  "Can't set rollback-only because the transaction is not active, state={0}.",
-                  xaState(_status)));
+          L.l("Can't set rollback-only because the transaction is not active, state={0}.",
+              xaState(_status)));
     }
 
     _status = Status.STATUS_MARKED_ROLLBACK;
@@ -1139,8 +1132,10 @@ public class TransactionImpl implements Transaction, AlarmListener {
     // remove the resources which have officially delisted
     for (int i = _resourceCount - 1; i >= 0; i--)
       _resources[i] = null;
-
+    
     _resourceCount = 0;
+    
+    _mappedResources = null;
 
     AbstractXALogStream xaLog = _xaLog;
     _xaLog = null;
@@ -1153,11 +1148,12 @@ public class TransactionImpl implements Transaction, AlarmListener {
       }
     }
 
-    int length = interposedSynchronizations == null ? 0
-        : interposedSynchronizations.size();
+    int length = (interposedSynchronizations == null 
+                  ? 0
+                  : interposedSynchronizations.size());
     for (int i = 0; i < length; i++) {
-      Synchronization synchronization = (Synchronization) interposedSynchronizations
-          .get(i);
+      Synchronization synchronization 
+        = (Synchronization) interposedSynchronizations.get(i);
 
       try {
         synchronization.afterCompletion(status);

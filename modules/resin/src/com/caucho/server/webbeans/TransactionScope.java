@@ -89,7 +89,7 @@ public class TransactionScope extends ScopeContext
       return null;
     
     ScopeContext cxt = (ScopeContext) xa.getResource("caucho.xa.scope");
-    
+
     if (cxt != null)
       return cxt.get(bean);
     else

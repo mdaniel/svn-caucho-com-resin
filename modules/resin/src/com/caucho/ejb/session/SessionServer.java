@@ -46,6 +46,7 @@ import javax.inject.Named;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractServer;

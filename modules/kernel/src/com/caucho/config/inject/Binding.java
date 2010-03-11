@@ -84,6 +84,11 @@ public class Binding {
     }
   }
 
+  public boolean isAny()
+  {
+    return _annType == Any.class;
+  }
+
   boolean isMatch(Annotation []annList)
   {
     for (Annotation ann : annList) {
