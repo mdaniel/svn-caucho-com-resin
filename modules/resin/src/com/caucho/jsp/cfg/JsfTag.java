@@ -30,6 +30,7 @@ package com.caucho.jsp.cfg;
 
 import com.caucho.config.Config;
 import com.caucho.jsp.JspParseException;
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.TagAttributeInfo;
@@ -59,7 +60,7 @@ public class JsfTag extends TldTag {
   /**
    * Returns the dependency.
    */
-  public ArrayList<PersistentDependency> getDependencyList()
+  public ArrayList<Dependency> getDependencyList()
   {
     return getBaseTag().getDependencyList();
   }

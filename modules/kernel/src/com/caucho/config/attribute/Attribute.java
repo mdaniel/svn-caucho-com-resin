@@ -105,6 +105,11 @@ public abstract class Attribute {
   {
     return false;
   }
+
+  public boolean isAssignableFrom(Attribute oldAttr)
+  {
+    return false;
+  }
   
   /**
    * Sets the value of the attribute as text

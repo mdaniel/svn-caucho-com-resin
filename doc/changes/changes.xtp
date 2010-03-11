@@ -13,6 +13,7 @@
 
 <s2 title="4.0.5 - snapshot">
 <ul>
+<li>servlet: check isSecure() for NPE on close (#3938, rep by mocospace)</li>
 <li>jsp: check for *.jsf servlet causes NPE (#3937, rep by tangxj)</li>
 <li>servlet: welcome-file-list changes with *.jsf</li>
 <li>cloud: cluster single-signon no longer enabled automatically</li>

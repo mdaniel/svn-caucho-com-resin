@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2003 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -53,8 +53,9 @@ public class ResultImpl implements Result {
     int columnCount = metaData.getColumnCount();
 
     _columnNames = new String[columnCount];
-    for (int i = 0; i < _columnNames.length; i++)
+    for (int i = 0; i < _columnNames.length; i++) {
       _columnNames[i] = metaData.getColumnName(i + 1);
+    }
 
     // _isLimitedByMaxRows = maxRows >= 0;
 
@@ -64,8 +65,9 @@ public class ResultImpl implements Result {
     for (; rs.next() && maxRows > 0; maxRows--) {
       Object []row = new Object[columnCount];
 
-      for (int i = 0; i < columnCount; i++)
+      for (int i = 0; i < columnCount; i++) {
         row[i] = rs.getObject(i + 1);
+      }
 
       _rows.add(row);
     }

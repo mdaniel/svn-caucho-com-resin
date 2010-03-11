@@ -839,11 +839,15 @@ public class BeanType<T> extends ConfigType<T>
       _attributeMap.put(propName, attr);
     }
     else if (attr.equals(oldAttr)) {
-      
     }
     else if (oldAttr.isConfigurable() && ! attr.isConfigurable()) {
     }
     else if (attr.isConfigurable() && ! oldAttr.isConfigurable()) {
+      _attributeMap.put(propName, attr);
+    }
+    else if (attr.isAssignableFrom(oldAttr)) {
+    }
+    else if (oldAttr.isAssignableFrom(attr)) {
       _attributeMap.put(propName, attr);
     }
     else {

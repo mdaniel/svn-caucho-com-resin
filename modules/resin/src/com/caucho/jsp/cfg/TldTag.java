@@ -34,6 +34,7 @@ import com.caucho.config.DependencyBean;
 import com.caucho.jsp.JspLineParseException;
 import com.caucho.jsp.JspParseException;
 import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.jsp.tagext.SimpleTag;
@@ -77,8 +78,8 @@ public class TldTag implements DependencyBean {
   private String _configLocation;
   private JspParseException _configException;
   
-  private ArrayList<PersistentDependency> _dependencyList
-    = new ArrayList<PersistentDependency>();
+  private ArrayList<Dependency> _dependencyList
+    = new ArrayList<Dependency>();
 
   private TldTag _baseTag;
 
@@ -110,7 +111,7 @@ public class TldTag implements DependencyBean {
   /**
    * Returns the dependency.
    */
-  public ArrayList<PersistentDependency> getDependencyList()
+  public ArrayList<Dependency> getDependencyList()
   {
     return _dependencyList;
   }

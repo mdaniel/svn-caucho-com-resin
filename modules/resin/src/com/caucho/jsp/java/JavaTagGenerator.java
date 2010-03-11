@@ -888,7 +888,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
       out.println("                   \"" + _dynamicAttributes + "\",");
     else
       out.println("                   null,");
-    out.println("                   _caucho_depends);");
+    out.println("                   _caucho_depends.getDependencies());");
 
     out.popDepth();
     out.println("}");

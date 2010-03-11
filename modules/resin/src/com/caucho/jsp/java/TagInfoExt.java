@@ -29,14 +29,17 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.vfs.PersistentDependency;
+import java.util.ArrayList;
 
 import javax.servlet.jsp.tagext.TagAttributeInfo;
 import javax.servlet.jsp.tagext.TagExtraInfo;
 import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryInfo;
 import javax.servlet.jsp.tagext.TagVariableInfo;
-import java.util.ArrayList;
+
+import com.caucho.make.DependencyContainer;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.PersistentDependency;
 
 /**
  * Information for a tag file.
@@ -44,8 +47,8 @@ import java.util.ArrayList;
 public class TagInfoExt extends TagInfo {
   private String _dynamicAttributesName;
   
-  private ArrayList<PersistentDependency> _dependList =
-    new ArrayList<PersistentDependency>();
+  private ArrayList<PersistentDependency> _dependList
+    = new ArrayList<PersistentDependency>();
 
   public TagInfoExt(String tagName,
 		    String tagClassName,
@@ -60,15 +63,19 @@ public class TagInfoExt extends TagInfo {
 		    TagVariableInfo []tvi,
 		    boolean hasDynamicAttributes,
 		    String dynamicAttributesName,
-		    ArrayList<PersistentDependency> dependList)
+		    ArrayList<Dependency> dependList)
   {
     super(tagName, tagClassName, bodyContent, infoString,
 	  taglib, tagExtraInfo, attributeInfo, displayName,
 	  smallIcon, largeIcon, tvi, hasDynamicAttributes);
 
     _dynamicAttributesName = dynamicAttributesName;
-    if (dependList != null)
-      _dependList.addAll(dependList);
+    
+    if (dependList != null) {
+      for (Dependency depend : dependList) {
+        _dependList.add((PersistentDependency) depend);
+      }
+    }
   }
 
   public String getDynamicAttributesName()

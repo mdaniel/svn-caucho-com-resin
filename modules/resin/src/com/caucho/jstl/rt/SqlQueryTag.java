@@ -227,7 +227,8 @@ public class SqlQueryTag extends BodyTagSupport implements SQLExecutionTag {
                                  sql, e.getMessage()),
                              e);
     } finally {
-      if (! isTransaction && conn != null) {
+      // if (! isTransaction && conn != null) {
+      if (conn != null) {
         try {
           conn.close();
         } catch (Exception e) {

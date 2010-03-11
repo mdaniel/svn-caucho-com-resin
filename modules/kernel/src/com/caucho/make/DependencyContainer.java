@@ -91,7 +91,30 @@ public class DependencyContainer implements Dependency
     return this;
   }
   
-  /**
+  public DependencyContainer addAll(DependencyContainer container)
+  {
+    for (Dependency depend : container._dependencyList) {
+      add(depend);
+    }
+    
+    return this;
+  }
+  
+  public DependencyContainer addAll(ArrayList<Dependency> dependencyList)
+  {
+    for (Dependency depend : dependencyList) {
+      add(depend);
+    }
+    
+    return this;
+  }
+  
+  public ArrayList<Dependency> getDependencies()
+  {
+    return _dependencyList;
+  }
+  
+   /**
    * Removes a dependency.
    */
   public DependencyContainer remove(Dependency dependency)

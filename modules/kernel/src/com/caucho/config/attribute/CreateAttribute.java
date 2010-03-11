@@ -147,4 +147,23 @@ public class CreateAttribute extends Attribute {
       throw ConfigException.create(_create, e);
     }
   }
+  
+  
+  @Override
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (o == null)
+      return false;
+    else if (getClass() != o.getClass())
+      return false;
+    
+    CreateAttribute attr = (CreateAttribute) o;
+    
+    return (_type.equals(attr._type)
+            && _setter == attr._setter
+            && _create == attr._create);
+  }
+  
 }

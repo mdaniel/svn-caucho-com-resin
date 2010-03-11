@@ -409,8 +409,13 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     if (_isSecure != null)
       return _isSecure;
+    
+    AbstractHttpRequest request = _request;
+    
+    if (request != null)
+      return request.isSecure();
     else
-      return _request.isSecure();
+      return false;
   }
 
   //

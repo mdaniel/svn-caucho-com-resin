@@ -99,6 +99,21 @@ public class SetterAttribute extends Attribute {
     return _setter.isAnnotationPresent(Configurable.class);
   }
   
+  @Override
+  public boolean isAssignableFrom(Attribute attr)
+  {
+    if (! (attr instanceof SetterAttribute))
+      return false;
+    
+    SetterAttribute setterAttr = (SetterAttribute) attr;
+    Method setter = setterAttr._setter;
+    
+    if (! _setter.getName().equals(setter.getName()))
+      return false;
+    
+    return _setter.getDeclaringClass().isAssignableFrom(setter.getDeclaringClass());
+  }
+  
   /**
    * Sets the value of the attribute
    */
@@ -168,6 +183,7 @@ public class SetterAttribute extends Attribute {
     }
   }
   
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)

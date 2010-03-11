@@ -1740,22 +1740,29 @@ public class JavaJspGenerator extends JspGenerator {
   {
     out.println();
     // out.println("private com.caucho.java.LineMap _caucho_line_map;");
-    out.println("private java.util.ArrayList<com.caucho.vfs.PersistentDependency> _caucho_depends = new java.util.ArrayList<com.caucho.vfs.PersistentDependency>();");
+    out.println("private com.caucho.make.DependencyContainer _caucho_depends = new com.caucho.make.DependencyContainer();");
     if (_isCacheable && ! _isUncacheable)
       out.println("private java.util.ArrayList _caucho_cacheDepends = new java.util.ArrayList();");
 
+    /*
     out.println();
     out.println("public java.util.ArrayList<com.caucho.vfs.PersistentDependency> _caucho_getDependList()");
     out.println("{");
     out.println("  return _caucho_depends;");
     out.println("}");
+    */
     
     out.println();
     out.println("public void _caucho_addDepend(com.caucho.vfs.PersistentDependency depend)");
     out.println("{");
+    out.pushDepth();
+    
     if (_parseState.getExtends() == null)
-      out.println("  super._caucho_addDepend(depend);");
-    out.println("  com.caucho.jsp.JavaPage.addDepend(_caucho_depends, depend);");
+      out.println("super._caucho_addDepend(depend);");
+    // out.println("  com.caucho.jsp.JavaPage.addDepend(_caucho_depends, depend);");
+    out.println("_caucho_depends.add(depend);");
+    
+    out.popDepth();
     out.println("}");
     
     out.println();
@@ -1800,6 +1807,8 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("return false;");
 
     else {
+      out.println("return _caucho_depends.isModified();");
+      /*
       out.println("for (int i = _caucho_depends.size() - 1; i >= 0; i--) {");
       out.pushDepth();
       out.println("com.caucho.vfs.Dependency depend;");
@@ -1810,6 +1819,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.popDepth();
       out.println("}");
       out.println("return false;");
+      */
     }
     
     out.popDepth();
@@ -1839,6 +1849,7 @@ public class JavaJspGenerator extends JspGenerator {
     else {
       out.println("long lastModified = 0;");
       
+      /*
       out.println("for (int i = _caucho_depends.size() - 1; i >= 0; i--) {");
       out.pushDepth();
       out.println("Object oDepend = _caucho_depends.get(i);");
@@ -1849,6 +1860,7 @@ public class JavaJspGenerator extends JspGenerator {
       out.println("}");
       out.popDepth();
       out.println("}");
+      */
 
       out.println();
       out.println("return lastModified;");
@@ -2084,10 +2096,16 @@ public class JavaJspGenerator extends JspGenerator {
 		     appDir, classPath);
         out.println(", " + depend.getDigest() + "L, " +
                     _requireSource + ");");
-        out.println("com.caucho.jsp.JavaPage.addDepend(_caucho_depends, depend);");
+        // out.println("com.caucho.jsp.JavaPage.addDepend(_caucho_depends, depend);");
+        out.println("_caucho_depends.add(depend);");
       }
       else {
+        /*
         out.print("com.caucho.jsp.JavaPage.addDepend(_caucho_depends, ");
+        out.print(dependency.getJavaCreateString());
+        out.println(");");
+        */
+        out.print("_caucho_depends.add(");
         out.print(dependency.getJavaCreateString());
         out.println(");");
       }
