@@ -94,6 +94,7 @@ package hessian.client
 
       _returnType = returnType;
       _input.autoAlias = service.autoAlias;
+      _input.addHessianTypeName = service.addHessianTypeName;
     }
 
     /** 

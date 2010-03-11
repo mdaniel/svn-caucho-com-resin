@@ -73,6 +73,7 @@ package hessian.client
   {
     private var _api:Class;
     private var _autoAlias:Boolean = false;
+    private var _addHessianTypeName:Boolean = false;
 
     /**
      * Constructor.
@@ -162,6 +163,16 @@ package hessian.client
     public function get autoAlias():Boolean
     {
       return _autoAlias;
+    }
+
+    public function set addHessianTypeName(a:Boolean):void
+    {
+      _addHessianTypeName = a;
+    }
+
+    public function get addHessianTypeName():Boolean
+    {
+      return _addHessianTypeName;
     }
 
     public function toString():String

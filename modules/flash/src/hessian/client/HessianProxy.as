@@ -91,6 +91,21 @@ package hessian.client
       _input.autoAlias = a;
     }
 
+    public function get autoAlias():Boolean
+    {
+      return _input.autoAlias;
+    }
+
+    public function set addHessianTypeName(a:Boolean):void
+    {
+      _input.addHessianTypeName = a;
+    }
+
+    public function get addHessianTypeName():Boolean
+    {
+      return _input.addHessianTypeName;
+    }
+
     /** @private */
     protected function introspect():void
     {

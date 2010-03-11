@@ -114,6 +114,9 @@ package hessian.io
     /** @private */
     protected var _autoAlias:Boolean = false;
 
+    /** @private */
+    protected var _addHessianTypeName:Boolean = false;
+
     /**
      * Creates a new Hessian2Input.
      *
@@ -156,6 +159,26 @@ package hessian.io
     public function get autoAlias():Boolean
     {
       return _autoAlias;
+    }
+
+    /**
+      * When set to true, addHessianTypeName causes objects deserialized
+      * without type information (i.e. as <code>Object</code>s) to include
+      * an additional field/key called "hessianTypeName" with the value of
+      * the type name received in the Hessian stream. This feature may be
+      * useful when certain equivalent types are not available in the Flash/Flex
+      * application. Applications receiving maps as <code>Object</code>s 
+      * may want to disable this feature to avoid having the additional key
+      * in the map. Defaults to false.
+      */
+    public function set addHessianTypeName(a:Boolean):void
+    {
+      _addHessianTypeName = a;
+    }
+
+    public function get addHessianTypeName():Boolean
+    {
+      return _addHessianTypeName;
     }
 
     /**
@@ -1277,7 +1300,10 @@ package hessian.io
 
           var obj:Object = readMap(getClassDefinition(type, cl));
 
-          if (cl == Object && type != null && type.length > 0)
+          if (_addHessianTypeName
+              && cl == Object 
+              && type != null 
+              && type.length > 0)
             obj.hessianTypeName = type;
 
           return obj;
@@ -1650,7 +1676,9 @@ package hessian.io
 
           var obj:Object = readMap(getClassDefinition(type));
 
-          if (type != null && type.length > 0)
+          if (_addHessianTypeName
+              && type != null 
+              && type.length > 0)
             obj.hessianTypeName = type;
 
           return obj;
@@ -1745,7 +1773,10 @@ package hessian.io
 
       value = new cl();
 
-      if (cl == Object && type != null && type.length > 0)
+      if (_addHessianTypeName
+          && cl == Object 
+          && type != null 
+          && type.length > 0)
         value.hessianTypeName = type;
 
       addRef(value);
