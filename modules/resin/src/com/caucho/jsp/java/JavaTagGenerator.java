@@ -950,6 +950,7 @@ public class JavaTagGenerator extends JavaJspGenerator {
     _reserved.add("static");
     _reserved.add("final");
     _reserved.add("class");
+    _reserved.add("module");
     _reserved.add("interface");
     _reserved.add("extends");
     _reserved.add("implements");
@@ -978,6 +979,9 @@ public class JavaTagGenerator extends JavaJspGenerator {
     _reserved.add("int");
     _reserved.add("long");
     _reserved.add("float");
-    _reserved.add("double");
+    
+    _reserved.add("true");
+    _reserved.add("false");
+    _reserved.add("null");
   }
 }
