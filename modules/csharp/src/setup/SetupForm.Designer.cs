@@ -429,6 +429,7 @@ namespace Caucho
       // _serverCmbBox
       // 
       this._serverCmbBox.FormattingEnabled = true;
+      this._errorProvider.SetIconAlignment(this._serverCmbBox, System.Windows.Forms.ErrorIconAlignment.MiddleLeft);
       this._serverCmbBox.Location = new System.Drawing.Point(101, 268);
       this._serverCmbBox.Name = "_serverCmbBox";
       this._serverCmbBox.Size = new System.Drawing.Size(281, 21);
