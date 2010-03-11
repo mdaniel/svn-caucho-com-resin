@@ -273,6 +273,10 @@ public class ServletMapper {
 
     MatchResult matchResult = null;
 
+    if (matchResult == null && contextURI.endsWith("j_security_check")) {
+      servletName = "j_security_check";
+    }
+
     if (servletName == null) {
       matchResult = matchWelcomeFileResource(invocation, vars);
 
@@ -280,9 +284,10 @@ public class ServletMapper {
         servletName = matchResult.getServletName();
       
       if (matchResult != null && ! contextURI.endsWith("/")
+          && servletName != null
           && ! (invocation instanceof SubInvocation)) {
         String contextPath = invocation.getContextPath();
-        
+
         return new RedirectFilterChain(contextPath + contextURI + "/");
       }
 
@@ -293,10 +298,6 @@ public class ServletMapper {
         // server/10r9
         // inv.setRawURI(inv.getRawURI() + file);
       }
-    }
-
-    if (matchResult == null && contextURI.endsWith("j_security_check")) {
-      servletName = "j_security_check";
     }
 
     /*
@@ -440,7 +441,9 @@ public class ServletMapper {
             servletClass = servlet.getServletClassName();
         }
 
-        if (servletClass != null && isWelcomeFileResource(servletClass)) {
+        // server/100l
+        if (servletClass != null && isWelcomeFileResource(servletClass)
+            || servletName == null) {
           InputStream is;
           is = _servletContext.getResourceAsStream(welcomeURI);
 
@@ -453,6 +456,7 @@ public class ServletMapper {
 
         if (servletName != null || _defaultServlet != null) {
           contextURI = welcomeURI;
+          
           return new MatchResult(servletName, contextURI);
         }
       } catch (Exception e) {
