@@ -119,26 +119,6 @@
         <td>n/a</td>
       </tr>
       <tr>
-        <td>-install</td>
-        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
-        <td>n/a</td>
-      </tr>
-      <tr>
-        <td>-install-as <var>xxx</var></td>
-        <td>(Windows) install Resin as a named service (but doesn't automatically start.)</td>
-        <td>n/a</td>
-      </tr>
-      <tr>
-        <td>-remove</td>
-        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
-         <td>n/a</td>
-      </tr>
-      <tr>
-        <td>-remove-as <var>xxx</var></td>
-        <td>(Windows) remove Resin as a named service (but doesn't automatically start.)</td>
-        <td>n/a</td>
-      </tr>
-      <tr>
         <td>-resin-home <var>xxx</var></td>
         <td>
            Deprecated. Sets the Resin home directory.
@@ -287,11 +267,7 @@ can be reclaimed.
 
 <p>Each thread in the VM get's a stack.  The stack size will limit the number of
 threads that you can have, too big of a stack size and you will run out of
-memory as each thread is allocated more memory than it needs.</p>
-
-<p>
-The Resin startup scripts (resin.exe on Windows, resin.sh on Unix) will set
-the stack size to 2048k, unless it is specified explicity.  2048k is an
+memory as each thread is allocated more memory than it needs. 2048k is an
 appropriate value for most situations.
  </p>
 
@@ -494,26 +470,6 @@ Thread 12689: (state = BLOCKED)
         <td>n/a</td>
       </tr>
       <tr>
-        <td>-install</td>
-        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
-        <td>n/a</td>
-      </tr>
-      <tr>
-        <td>-install-as <var>xxx</var></td>
-        <td>(Windows) install Resin as a named service (but doesn't automatically start.)</td>
-        <td>n/a</td>
-      </tr>
-      <tr>
-        <td>-remove</td>
-        <td>(Windows) install Resin as a service (but doesn't automatically start.)</td>
-         <td>n/a</td>
-      </tr>
-      <tr>
-        <td>-remove-as <var>xxx</var></td>
-        <td>(Windows) remove Resin as a named service (but doesn't automatically start.)</td>
-        <td>n/a</td>
-      </tr>
-      <tr>
         <td>-resin-home <var>xxx</var></td>
         <td>
            Deprecated. Sets the Resin home directory.
@@ -661,13 +617,8 @@ can be reclaimed.
 
 <p>Each thread in the VM get's a stack.  The stack size will limit the number of
 threads that you can have, too big of a stack size and you will run out of
-memory as each thread is allocated more memory than it needs.</p>
-
-<p>
-The Resin startup scripts (resin.exe on Windows, resin.sh on Unix) will set
-the stack size to 2048k, unless it is specified explicity.  2048k is an
-appropriate value for most situations.
- </p>
+memory as each thread is allocated more memory than it needs. 2048k is an
+appropriate value for most situations.</p>
 
 <deftable title="Stack configuration">
 <tr>

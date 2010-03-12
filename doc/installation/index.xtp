@@ -299,33 +299,11 @@ on startup.
 </s2>
 <s2 title="Installing Resin as a Windows Service">
 <p>
-Resin can install itself as a Windows Service by executing the
-<var>resin.exe</var> with the <var>-install</var> command line
-option.  If you pass other options to <var>resin.exe</var> along
-with the <var>-install</var> option, such as specifying a server or
-content directory, these will be used when the service is started.
-To install Resin as a Windows Service using the default options,
-simply run:
+Resin can be installed as a Windows Service from a setup.exe utility supplied with
+  the distribution. The setup.exe utility requires administrative privileges and will
+  upon start-up ask for administrative privileges.
 </p>
-<example>
-C:\Resin\resin.exe -install
-</example>
-<p>
-You can also install Resin using a specific service name or install
-multiple Resin services using the <var>-install-as</var> option:
-</p>
-<example>
-C:\Resin\resin.exe -install-as ResinA
-</example>
-<s3 title="Running resin.exe on Windows Vista and Windows Server 2008">
-<p>
-Note: the command prompt i.e. cmd.exe on Windows Vista and Windows Server 2008
-will need to be run with administrative priviliges by choosing "Run As Administrator"
-from the context menu(given by Windows on right click). The cmd.exe locations
-for Windows Vista and Windows Server 2008 are %WINDIR%/system32 and
-%WINDIR%/sytemwow64 respectively.
-</p>
-</s3>
+<figure src="setup-exe.png"/>
 </s2>
 </s1>
 
@@ -339,7 +317,7 @@ unauthorized users.  </p>
 <p>
 If you are deploying Resin to a production machine, it's likely
 that you won't be running your browser on the same system as the
-server.  In this case, you'll need to configure Resin to allow
+server. In this case, you'll need to configure Resin to allow
 you to access the server remotely.
 </p>
 <ol>
@@ -810,7 +788,9 @@ they differ from your own.</p>
 <s3 title="ISAPI Filter">
 
 <p>You should run <code>RESIN_HOME/setup.exe</code> to setup your
-configuration.  If setup.exe is not used, or it fails, the steps in <a href="#Manual-Configuration">Manual Configuration</a> are necessary.</p>
+configuration.  If setup.exe is not used, or it fails, the steps in
+  <a href="#Manual-Configuration">Manual Configuration</a> are necessary.
+</p>
 
 </s3>
 
@@ -2032,10 +2012,6 @@ install as a service, the arguments are used each time the service starts.</p>
 </td></tr><tr><td>-J&lt;arg&gt;</td><td>Set a Java command line argument, e.g. -J-nojit.
 </td></tr><tr><td>-X&lt;arg&gt;</td><td>Set a Java -X command line argument, e.g. -Xms128m.
 </td></tr><tr><td>-D&lt;foo=bar&gt;</td><td>Set a Java variable, e.g. -Dresin.home=here.
-</td></tr><tr><td>-install</td><td>Install as an NT service
-</td></tr><tr><td>-install-as &lt;name&gt;</td><td>Install as an NT service with the specific name.
-</td></tr><tr><td>-remove</td><td>Remove as an NT service
-</td></tr><tr><td>-remove-as &lt;name&gt;</td><td>Remove as an NT service with the specific name.
 </td></tr></deftable>
 
 <s2 title="Memory Configuration">
@@ -2063,29 +2039,74 @@ as an NT service.  As a service, Resin will automatically start when
 NT reboots.  The service will also automatically restart Resin if it
 unexpectedly exits.</p>
 
-<p>To install the service, use</p>
+<p>To install or remove a service run setup.exe. Setup.exe provides a set of
+configuration options to use with a service. Most option have a
+corresponding resin argument.
+<deftable>
+  <tr>
+    <th>Setup Field</th>
+    <th>Resin option</th>
+    <th>Meaning</th>
+  </tr>
+  <tr>
+    <td>Java Home</td>
+    <td></td>
+    <td>JDK to use with this Resin Service</td>
+  </tr>
+  <tr>
+    <td>Resin Root</td>
+    <td>-root-directory</td>
+    <td>Resin root directory</td>
+  </tr>
+  <tr>
+    <td>Resin Conf</td>
+    <td>-conf</td>
+    <td>Configuration file to use with the instance of Resin Service</td>
+  </tr>
+  <tr>
+    <td>Log Directory</td>
+    <td>-log-directory</td>
+    <td>Directory where the log files for this Resin Service instance will be located</td>
+  </tr>
+  <tr>
+    <td>Service Name</td>
+    <td></td>
+    <td>Unique service name</td>
+  </tr>
+  <tr>
+    <td>Service User</td>
+    <td></td>
+    <td>User name used to run the service. (defaulted to "Local Service")</td>
+  </tr>
+  <tr>
+    <td>Password</td>
+    <td></td>
+    <td>Password to use with the Service User (defaulted to an empty string)</td>
+  </tr>
+  <tr>
+    <td>Preview</td>
+    <td>-preview</td>
+    <td>Specifies if the Resin Service is a staging service</td>
+  </tr>
+  <tr>
+    <td>Watchdog Port</td>
+    <td>-watchdog-port</td>
+    <td>Specifies port for communicating with Resin Watchdog</td>
+  </tr>
+  <tr>
+    <td>JMX Port</td>
+    <td>-jmx-port</td>
+    <td>Specifies port for java JMX connections (JConsole, etc.)</td>
+  </tr>
+  <tr>
+    <td>Debug Port</td>
+    <td>-debug-port</td>
+    <td>Specifies port for remove java debugging</td>
+  </tr>
+</deftable>
 
-<example>
-win&gt; resin-3.2.x/resin.exe -install
-</example>
-
-<p>To remove the service, use</p>
-
-<example>
-win&gt; resin-3.2.x/resin.exe -remove
-</example>
-
-<p>You will either need to reboot the machine or start the service
-from the Control&#160;Panel/Services panel to start the server.  On a
-machine reboot, NT will automatically start the servlet runner.</p><p/>
-
-<note>There is a bug in many JDKs which cause the JDK to exit when the
-administrator logs out.  JDK 1.4 and later can avoid that bug if the
-JDK is started with -Xrs. </note>
-
-<example>
-win&gt; resin-3.2.x/resin.exe -install -Xrs
-</example>
+Note: The service is installed with a manual start-up mode.
+</p><p/>
 
 </s1>
 
@@ -2112,12 +2133,6 @@ details.</p>
   ...
 &lt;/cluster&gt;
 &lt;/resin&gt;
-</example>
-
-<example title="installing multiple servlet runners as services">
-win&gt; resin-3.2.x/resin.exe -install-as "Resin-A" -server a -Xrs
-win&gt; resin-3.2.x/resin.exe -install-as "Resin-B" -server b -Xrs
-win&gt; resin-3.2.x/resin.exe -install-as "Resin-C" -server c -Xrs
 </example>
 </s1>
 
@@ -2270,6 +2285,11 @@ in the <code>scripts</code> directory.</p>
 &lt;/resin&gt;
 </example>
 
+<p>
+ Each virtual site can have its own resin service configured to run it. In order
+  to do so with the example given above two services should be configured using the following options:
+ 
+</p>
 <example title="installing a servlet runner for each virtual site">
 win&gt; resin-3.2.x/resin.exe -install-as "Resin-foo" \
     -conf resin-foo.xml -Xrs
@@ -2548,7 +2568,7 @@ Starting Resin on Thu, 07 Aug 2008 19:11:52 -0500 (EST)
 
 <p>The Resin Web Server can be installed as an Windows service.</p>
 
-<p>To install the service, use</p>
+<p>To install or remove the service, use setup.exe</p>
 
 <example>
 C:\&gt; resin-3.2.x\resin.exe -install -conf conf/myconf.xml \
@@ -2556,10 +2576,6 @@ C:\&gt; resin-3.2.x\resin.exe -install -conf conf/myconf.xml \
 </example>
 
 <p>To remove the service, use</p>
-
-<example>
-C:\&gt; resin-3.2.x\resin.exe -remove
-</example>
 
 <p>You will either need to reboot the machine or start the service
 from the Control&#160;Panel/Services panel to start the server.  On a
@@ -2577,14 +2593,14 @@ C:\&gt; net stop resin
 with those arguments. You can look view them in the control panel, under
 the executable string.</p>
 
-<p>With multiple named servers, you can use <var>-install-as foo</var> to specify
-the service name.</p>
+<p>With multiple named servers, you can use different names to specify
+the service name. The names must be supplied in Service Name field of setup.exe</p>
 
+<p>
+  Starting a service from command line.
+</p>
 <example>
-C:\&gt; resin-3.2.x\resin.exe -install-as ResinA \
-                              -conf conf/myconf.conf \
-                              -server a
-C:\&gt; net start ResinA
+C:\&gt; net start Resin
 </example>
 
 </s2>

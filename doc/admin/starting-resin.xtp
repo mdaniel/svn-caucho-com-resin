@@ -226,8 +226,8 @@ configuration tells Apache how to find Resin.</p>
 <li>Make any needed Apache httpd.conf changes</li>
 <li>Make any needed Resin resin.xml changes</li>
 <li>Restart Apache</li>
-<li>Start Resin with <code>resin-3.2.0/bin/resin.sh</code> on Unix or
-<code>resin-3.2.0/resin.exe</code> on Windows.</li>
+<li>Start Resin with <code>resin-4.x.x/bin/resin.sh</code> on Unix or
+<code>resin-4.x.x/resin.exe</code> on Windows.</li>
 </ol>
 
 <p>On Unix, you'll run configure using <code>--with-apache</code> and then <code>make</code>:
@@ -260,10 +260,10 @@ configuration.  The IIS configuration tells IIS how to find Resin.
 </p>
 
 <ol>
-<li>Setup the registry and IIS using resin-3.2.0/setup.exe</li>
+<li>Setup the registry and IIS using resin-4.x.x/setup.exe</li>
 <li>Any needed Resin resin.xml changes</li>
 <li>Restart IIS</li>
-<li>Start Resin with resin-3.2.0/resin.exe.</li>
+<li>Start Resin with resin-4.x.x/resin.exe.</li>
 </ol>
 
 <p>For more details and troubleshooting steps, see the

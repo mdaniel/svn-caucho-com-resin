@@ -454,16 +454,12 @@ unix&gt; java -jar lib/resin.jar -server web -conf conf/resin.xml stop
 </s3> <!-- unix startup -->
 
 <s3 title="Starting the servers on Windows">
-<p>With Windows, each JVM is installed as a service.</p>
+<p>With Windows, each JVM is installed as a service. Service is installed using
+  setup.exe graphical utility. It's possible to install a number of Resin
+  services each using a unique name. The name will need to be supplied into
+  'Service Name' field.</p>
 
-<example title="Example: installing as win32 service">
-win&gt; resin.exe -install-as "Resin" \
-            -server resin -conf conf/resin.xml
-win&gt; resin.exe -install-as "Resin www.gryffindor.com" \
-            -server gryffindor -conf conf/gryffindor.xml
-win&gt; resin.exe -install-as "Resin www.slytherin.com" \
-            -server slytherin -conf conf/slytherin.xml
-</example>
+<figure src="setup-exe.png"/>
 
 <p>You will either need to reboot the machine or start the service from the
 Control Panel/Services panel to start the server. On a machine reboot, NT will
