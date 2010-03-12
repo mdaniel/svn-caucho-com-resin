@@ -281,7 +281,10 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       return false;
 
     _localLoggers.set(logger);
-    //logger.setParent(_parent);
+    
+    if (_parent != null) {
+      logger.setParent(_parent);
+    }
 
     return true;
   }
