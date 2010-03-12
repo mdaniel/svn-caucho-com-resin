@@ -288,11 +288,11 @@ namespace Caucho
         else if (_resinService.Server == null)
           _serverCmbBox.Text = "default";
         else
-        _serverCmbBox.Text = _resinService.Server;
+          _serverCmbBox.Text = _resinService.Server;
 
         _serviceUserCmbBox.DataSource = null;
       }
-      
+
     }
 
     private void UpdateJmxAndDebugPorts()
@@ -407,7 +407,9 @@ namespace Caucho
     private void SelectResinRoot(object sender, EventArgs e)
     {
       _folderDlg.RootFolder = _none;
-      _folderDlg.SelectedPath = _resin.Home;
+      if (_resin != null)
+        _folderDlg.SelectedPath = _resin.Home;
+
       if (DialogResult.OK.Equals(_folderDlg.ShowDialog())) {
         String resinRoot = _folderDlg.SelectedPath;
         _resinRootTxtBox.Text = resinRoot;
@@ -417,10 +419,12 @@ namespace Caucho
 
     private void SelectResinConf(object sender, EventArgs e)
     {
-      int lastSlashIdx = _resinConfFile.LastIndexOf('\\');
-      if (lastSlashIdx != -1) {
-        _fileDlg.InitialDirectory = _resinConfFile.Substring(0, lastSlashIdx);
-        _fileDlg.FileName = _resinConfFile.Substring(lastSlashIdx + 1, _resinConfFile.Length - lastSlashIdx - 1);
+      if (_resinConfFile != null) {
+        int lastSlashIdx = _resinConfFile.LastIndexOf('\\');
+        if (lastSlashIdx != -1) {
+          _fileDlg.InitialDirectory = _resinConfFile.Substring(0, lastSlashIdx);
+          _fileDlg.FileName = _resinConfFile.Substring(lastSlashIdx + 1, _resinConfFile.Length - lastSlashIdx - 1);
+        }
       }
 
       if (DialogResult.OK.Equals(_fileDlg.ShowDialog())) {
@@ -441,11 +445,13 @@ namespace Caucho
       _folderDlg.RootFolder = _none;
       String log = _resinLog;
 
-      while (!Directory.Exists(log)) {
-        log = log.Substring(0, log.LastIndexOf('\\'));
-      }
+      if (log != null) {
+        while (!Directory.Exists(log)) {
+          log = log.Substring(0, log.LastIndexOf('\\'));
+        }
 
-      _folderDlg.SelectedPath = log;
+        _folderDlg.SelectedPath = log;
+      }
 
       if (DialogResult.OK.Equals(_folderDlg.ShowDialog())) {
         _resinLog = _folderDlg.SelectedPath;
@@ -1095,7 +1101,7 @@ namespace Caucho
         return;
 
       String apacheHome = (String)_apacheCmbBox.SelectedItem;
-      bool resinValid = Util.IsResinHome(_resin.Home) && Util.HasWinDirs(_resin.Home);
+      bool resinValid = (_resin != null) && Util.IsResinHome(_resin.Home) && Util.HasWinDirs(_resin.Home);
       bool configured = Apache.IsConfigured(apacheHome);
       _installApacheBtn.Enabled = resinValid && !configured;
       _removeApacheBtn.Enabled = resinValid && configured;
@@ -1103,7 +1109,7 @@ namespace Caucho
 
     private void ResetIISInstallControls()
     {
-      bool resinValid = Util.IsResinHome(_resin.Home) && Util.HasWinDirs(_resin.Home);
+      bool resinValid = (_resin != null) && Util.IsResinHome(_resin.Home) && Util.HasWinDirs(_resin.Home);
       bool enabled = resinValid && _iisScriptsTxtBox.Text != null && !"".Equals(_iisScriptsTxtBox.Text);
       _installIISBtn.Enabled = enabled;
       _removeIISBtn.Enabled = enabled;
