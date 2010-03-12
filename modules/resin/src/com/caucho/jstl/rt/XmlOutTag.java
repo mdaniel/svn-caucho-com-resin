@@ -34,7 +34,6 @@ import com.caucho.xpath.Expr;
 import com.caucho.xpath.XPath;
 
 import org.w3c.dom.Node;
-import org.w3c.dom.xpath.XPathNamespace;
 
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspWriter;
