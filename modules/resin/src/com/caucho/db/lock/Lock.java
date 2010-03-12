@@ -190,9 +190,11 @@ public final class Lock {
 
     while (_lockCount.get() == 0) {
       if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK))) {
+        /*
         if (_writeLock != null)
           Thread.dumpStack();
         _writeLock = Thread.currentThread();
+        */
         //_writeExn = new IllegalStateException("alloc");
         //_writeExn.fillInStackTrace();
         return;
@@ -208,9 +210,11 @@ public final class Lock {
 
         if (lock == 0) {
           if (_lockCount.compareAndSet(0, (WRITE|WRITE_LOCK))) {
-        if (_writeLock != null)
-          Thread.dumpStack();
+            /*
+            if (_writeLock != null)
+             Thread.dumpStack();
             _writeLock = Thread.currentThread();
+            */
             //_writeExn = new IllegalStateException("alloc");
             //_writeExn.fillInStackTrace();
             return;
@@ -234,6 +238,7 @@ public final class Lock {
       addLock(WRITE|WRITE_LOCK);
     }
 
+    /*
     Thread writeLock = _writeLock;
     if (writeLock != null) {
       Thread.dumpStack();
@@ -243,6 +248,7 @@ public final class Lock {
       }
     }
     _writeLock = Thread.currentThread();
+    */
     //_writeExn = new IllegalStateException("alloc");
     //_writeExn.fillInStackTrace();
   }
@@ -252,6 +258,7 @@ public final class Lock {
    */
   public void unlockReadAndWrite()
   {
+    /*
       if (_writeLock != Thread.currentThread()) {
         System.out.println("MISTMATCH: " + _writeLock + " " + Thread.currentThread());
         if (_writeExn != null)
@@ -259,6 +266,7 @@ public final class Lock {
         Thread.dumpStack();
       }
       _writeLock = null;
+      */
 
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + " unlockReadAndWrite "

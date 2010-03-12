@@ -887,6 +887,7 @@ public class Table extends BlockStore {
       Block block = allocateRow();
 
       blockId = block.getBlockId();
+      // System.out.println("ALLOC: " + blockId + " " + _rowTailOffset.get() + " " + _rowTailTop);
 
       block.free();
     }
@@ -925,6 +926,8 @@ public class Table extends BlockStore {
     if (newRowCount > 0) {
       _rowTailTop = _rowTailOffset.get() + newRowCount * _rowLength;
     }
+    
+    // System.out.println("RESET: used=" + _clockRowUsed + " free=" + _clockRowFree + " top=" + _rowTailTop);
 
     _rowClockOffset = 0;
     _rowClockTop = _rowTailOffset.get();

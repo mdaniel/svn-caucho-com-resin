@@ -30,8 +30,11 @@
 package com.caucho.jsp;
 
 import com.caucho.java.LineMap;
+import com.caucho.jsp.cfg.JspConfig;
+import com.caucho.jsp.cfg.JspPropertyGroup;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.SimpleLoader;
+import com.caucho.make.DependencyContainer;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.util.CauchoSystem;
@@ -42,6 +45,7 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
 import javax.servlet.*;
+import javax.servlet.descriptor.JspConfigDescriptor;
 import javax.servlet.jsp.HttpJspPage;
 import javax.servlet.jsp.JspFactory;
 import java.io.IOException;
@@ -91,6 +95,18 @@ public class JspManager extends PageManager {
   public void setLoadTldOnInit(boolean isLoadOnInit)
   {
     _isLoadTldOnInit = isLoadOnInit;
+  }
+  
+  public static long getCheckInterval()
+  {
+    WebApp webApp = WebApp.getCurrent();
+    
+    JspPropertyGroup jsp = webApp.getJsp();
+    
+    if (jsp != null)
+      return jsp.getDependencyCheckInterval();
+    else
+      return -1;
   }
 
   /**

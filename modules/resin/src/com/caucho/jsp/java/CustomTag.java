@@ -428,7 +428,7 @@ public class CustomTag extends GenericTag
       out.println("else if (_jsp_parent_tag instanceof javax.servlet.jsp.tagext.SimpleTag)");
       out.println("  " + var + ".setParent(new javax.servlet.jsp.tagext.TagAdapter((javax.servlet.jsp.tagext.SimpleTag) _jsp_parent_tag));");
       out.println("else");
-      out.println("  " + var + ".setParent(null);");
+      out.println("  " + var + ".setParent((javax.servlet.jsp.tagext.Tag) null);");
     }
     else if (parentTagNode.isSimpleTag()) {
       String parentName = parentTagNode.getCustomTagName();

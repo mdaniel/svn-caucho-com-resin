@@ -1740,7 +1740,8 @@ public class JavaJspGenerator extends JspGenerator {
   {
     out.println();
     // out.println("private com.caucho.java.LineMap _caucho_line_map;");
-    out.println("private com.caucho.make.DependencyContainer _caucho_depends = new com.caucho.make.DependencyContainer();");
+    out.println("private com.caucho.make.DependencyContainer _caucho_depends");
+    out.println("  = new com.caucho.make.DependencyContainer();");
     if (_isCacheable && ! _isUncacheable)
       out.println("private java.util.ArrayList _caucho_cacheDepends = new java.util.ArrayList();");
 
@@ -1956,6 +1957,9 @@ public class JavaJspGenerator extends JspGenerator {
     if (! isTag()) {
       out.println("init(config);");
     }
+    
+    out.println("if (com.caucho.jsp.JspManager.getCheckInterval() >= 0)");
+    out.println("  _caucho_depends.setCheckInterval(com.caucho.jsp.JspManager.getCheckInterval());");
 
     out.println("_jsp_pageManager = webApp.getJspApplicationContext().getPageManager();");
       

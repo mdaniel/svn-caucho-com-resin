@@ -357,7 +357,11 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
         if (_isQueueThrottle.get()) {
           long timeout = expires - Alarm.getCurrentTimeActual();
           
-          _isQueueThrottle.wait(timeout);
+          if (timeout > 1000)
+            timeout = 1000;
+          
+          if (timeout > 0)
+            _isQueueThrottle.wait(timeout);
         }
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);

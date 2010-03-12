@@ -69,8 +69,6 @@ public class AttributeListIterator extends NodeIterator {
     _match = match;
 
     _node = findFirstMatchingNode();
-    
-    System.out.println("ATTR: " + _node + " " + parentIter);
   }
   
   /**
