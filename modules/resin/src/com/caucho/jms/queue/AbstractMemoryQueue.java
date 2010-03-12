@@ -29,8 +29,8 @@
 
 package com.caucho.jms.queue;
 
-import java.io.Serializable;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
@@ -44,27 +44,51 @@ import com.caucho.util.ThreadPool;
  * Provides abstract implementation for a memory queue.
  * 
  */
+@SuppressWarnings("serial")
 public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   extends AbstractQueue<E>
 {
   private static final Logger log
     = Logger.getLogger(AbstractMemoryQueue.class.getName());
   
-  protected final Object _queueLock = new Object();
+  private int _queueSizeMax = Integer.MAX_VALUE / 2;
+  
+  private final Object _queueLock = new Object();
 
   private ArrayList<EntryCallback<E>> _callbackList
     = new ArrayList<EntryCallback<E>>();
 
-  protected QE []_head = (QE []) new QueueEntry[10];
-  protected QE []_tail = (QE []) new QueueEntry[10];
+  private QE []_head = (QE []) new QueueEntry[10];
+  private QE []_tail = (QE []) new QueueEntry[10];
 
   private ThreadPool _threadPool = ThreadPool.getThreadPool();
   
   private final AtomicLong _readSequenceGenerator = new AtomicLong();
   
+  private final AtomicInteger _queueSize = new AtomicInteger();
+  
+  private final AtomicBoolean _isQueueThrottle = new AtomicBoolean();
+  
   // stats
   private AtomicInteger _receiverCount = new AtomicInteger();
-  private AtomicInteger _listenerCount = new AtomicInteger();   
+  private AtomicInteger _listenerCount = new AtomicInteger();
+  
+  //
+  // configuration
+  //
+  
+  public void setQueueSizeMax(int max)
+  {
+    if (max <= 0 || Integer.MAX_VALUE / 2 < max)
+      _queueSizeMax = Integer.MAX_VALUE / 2;
+    else
+      _queueSizeMax = max;
+  }
+  
+  public int getQueueSizeMax()
+  {
+    return _queueSizeMax;
+  }
 
   //
   // Abstract/stub methods to be implemented by the Queue
@@ -81,7 +105,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   {
     QE entry = writeEntry(msgId, payload, priority, expireTime);
       
-    addQueueEntry(entry);
+    addQueueEntry(entry, expireTime);
   }
 
   //
@@ -93,9 +117,9 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
                                    int priority,
                                    long expires);
 
-  protected void addQueueEntry(QE entry)
+  protected void addQueueEntry(QE entry, long expires)
   {
-    addEntry(entry);
+    addEntry(entry, expires);
 
     dispatchMessage();
   }
@@ -149,8 +173,8 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
     }
   }
   
-  public EntryCallback addMessageCallback(MessageCallback callback,
-                                          boolean isAutoAck)
+  public EntryCallback<E> addMessageCallback(MessageCallback<E> callback,
+                                             boolean isAutoAck)
   {
     _listenerCount.incrementAndGet();
     
@@ -162,7 +186,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
     return entryCallback;
   }
 
-  public void removeMessageCallback(EntryCallback callback)
+  public void removeMessageCallback(EntryCallback<E> callback)
   {
     ListenEntryCallback listenerCallback
       = (ListenEntryCallback) callback;
@@ -209,7 +233,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
       acknowledge(entry);
   }
 
-  public boolean listen(EntryCallback callback)
+  public boolean listen(EntryCallback<E> callback)
     throws MessageException
   {
     QE entry = null;
@@ -234,7 +258,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   {
     while (true) {
       QE entry = null;
-      EntryCallback callback = null;
+      EntryCallback<E> callback = null;
       
       synchronized (_queueLock) {
         if (_callbackList.size() == 0 || (entry = readEntry()) == null) {
@@ -264,7 +288,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
     int count = 0;
 
     for (int i = 0; i < _head.length; i++) {
-      for (QueueEntry entry = _head[i];
+      for (QueueEntry<E> entry = _head[i];
            entry != null;
            entry = entry._next) {
         count++;
@@ -302,7 +326,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   /**
    * Add an entry to the queue
    */
-  private QE addEntry(QE entry)
+  private QE addEntry(QE entry, long expires)
   {
     int priority = entry.getPriority();
     
@@ -313,8 +337,40 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
         _head[priority] = entry;
 
       _tail[priority] = entry;
+    }
+    
+    int size = _queueSize.incrementAndGet();
+    
+    if (_queueSizeMax < size) {
+      waitForQueueThrottle(expires);
+    }
 
-      return entry;
+    return entry;
+  }
+  
+  private void waitForQueueThrottle(long expires)
+  {
+    _isQueueThrottle.set(true);
+    
+    synchronized (_isQueueThrottle) {
+      try {
+        if (_isQueueThrottle.get()) {
+          long timeout = expires - Alarm.getCurrentTimeActual();
+          
+          _isQueueThrottle.wait(timeout);
+        }
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+  }
+  
+  private void wakeQueueThrottle()
+  {
+    if (_isQueueThrottle.compareAndSet(true, false)) {
+      synchronized (_isQueueThrottle) {
+        _isQueueThrottle.notifyAll();
+      }
     }
   }
   
@@ -344,7 +400,7 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
         }
         
         readPayload((QE) entry);
-        if ((selector != null) && (!selector.isMatch(entry))) {
+        if ((selector != null) && (! selector.isMatch(entry))) {
           continue;
         }
           
@@ -408,6 +464,12 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
 
             if (_tail[i] == entry)
               _tail[i] = prev;
+            
+            _queueSize.decrementAndGet();
+            
+            if (_isQueueThrottle.get()) {
+              wakeQueueThrottle();
+            }
             
             return entry;
           }

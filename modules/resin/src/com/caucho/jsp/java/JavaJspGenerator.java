@@ -1744,13 +1744,11 @@ public class JavaJspGenerator extends JspGenerator {
     if (_isCacheable && ! _isUncacheable)
       out.println("private java.util.ArrayList _caucho_cacheDepends = new java.util.ArrayList();");
 
-    /*
     out.println();
-    out.println("public java.util.ArrayList<com.caucho.vfs.PersistentDependency> _caucho_getDependList()");
+    out.println("public java.util.ArrayList<com.caucho.vfs.Dependency> _caucho_getDependList()");
     out.println("{");
-    out.println("  return _caucho_depends;");
+    out.println("  return _caucho_depends.getDependencies();");
     out.println("}");
-    */
     
     out.println();
     out.println("public void _caucho_addDepend(com.caucho.vfs.PersistentDependency depend)");

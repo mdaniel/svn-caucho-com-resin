@@ -227,7 +227,7 @@ public class FileQueueImpl<E extends Serializable>
       = new FileQueueEntry<E>(id, msgId, leaseTimeout,
                               priority, expireTime, payload);
 
-    addQueueEntry(entry);
+    addQueueEntry(entry, expireTime);
   }
   
   /**

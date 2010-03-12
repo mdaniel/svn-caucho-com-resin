@@ -28,6 +28,7 @@
 
 package com.caucho.jsp;
 
+import com.caucho.vfs.Dependency;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 
@@ -105,7 +106,7 @@ class WrapperPage extends Page {
       return false;
   }
 
-  public ArrayList<PersistentDependency> _caucho_getDependList()
+  public ArrayList<Dependency> _caucho_getDependList()
   {
     if (_childPage != null)
       return _childPage._caucho_getDependList();

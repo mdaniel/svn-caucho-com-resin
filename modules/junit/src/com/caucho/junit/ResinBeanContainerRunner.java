@@ -35,6 +35,7 @@ import org.junit.runners.*;
 import org.junit.runners.model.*;
 
 import com.caucho.resin.*;
+import com.caucho.config.inject.*;
 import com.caucho.vfs.*;
 
 /**
@@ -73,7 +74,9 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
   protected Object createTest()
     throws Exception
   {
-    return getResinContext().getInstance(_testClass);
+    InjectManager manager = getResinContext().getInstance(InjectManager.class);
+
+    return manager.createTransientObject(_testClass);
   }
 
   protected ResinBeanContainer getResinContext()
