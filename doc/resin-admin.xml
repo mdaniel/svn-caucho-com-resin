@@ -1,0 +1,91 @@
+<book>
+  <chapter title="Installation">
+    <linked-section link="installation/index.xtp" />
+  </chapter>
+
+  <chapter title="Application Deployment">
+    <linked-section link="admin/deploy.xtp"/>
+    <linked-section link="admin/deploy-tool-reference.xtp"/>
+    <linked-section link="admin/deploy-git-overview.xtp"/>
+    <linked-section link="admin/deploy-pomegranate.xtp"/>
+  </chapter>
+
+  <chapter title="Starting Resin">
+    <linked-section link="admin/starting-resin.xtp"/>
+    <linked-section link="admin/starting-resin-command-line.xtp"/>
+    <linked-section link="admin/starting-resin-watchdog.xtp"/>
+  </chapter>
+
+  <chapter title="Configuration">
+    <linked-section link="admin/config-overview.xtp"/>
+    <linked-section link="admin/config.xtp"/>
+    <linked-section link="admin/config-el.xtp"/>
+    <linked-section link="admin/config-candi.xtp"/>
+  </chapter>
+
+  <chapter title="Logging">
+    <linked-section link="admin/logging-loggers.xtp"/>
+    <linked-section link="admin/logging-overview.xtp"/>
+    <linked-section link="admin/logging.xtp"/>
+  </chapter>
+
+  <chapter title="Database">
+    <linked-section link="admin/database-pool-config.xtp"/>
+  </chapter>
+
+  <chapter title="Security">
+    <linked-section link="admin/security.xtp" />
+    <linked-section link="admin/security-overview.xtp"/>
+  </chapter>
+
+
+  <chapter title="Scheduling">
+    <linked-section link="admin/scheduled-tasks.xtp"/>
+  </chapter>
+
+  <chapter title="Administration Console">
+    <linked-section link="admin/resin-admin.xtp"/>
+    <linked-section link="admin/resin-admin-console.xtp"/>
+  </chapter>
+
+  <chapter title="Clustering">
+    <linked-section link="admin/cluster-concepts.xtp"/>
+    <linked-section link="admin/cluster-config.xtp"/>
+    <linked-section link="admin/cluster-index.xtp"/>
+    <linked-section link="admin/cluster-overview.xtp"/>
+    <linked-section link="admin/cluster.xtp"/>
+    <linked-section link="admin/cluster-load-balancer.xtp"/>
+  </chapter>
+
+  <chapter title="HTTP">
+    <linked-section link="admin/http.xtp"/>
+    <linked-section link="admin/http-virtual-hosts.xtp"/>
+    <linked-section link="admin/http-rewrite.xtp"/>
+  </chapter>
+
+  <chapter title="Advanced Topics">
+    <linked-section link="admin/advanced.xtp"/>
+    <linked-section link="admin/advanced-classloaders.xtp"/>
+    <linked-section link="admin/advanced-jmx.xtp"/>
+  </chapter>
+
+  <!--
+  <chapter title="Dynamic Servers">
+    <linked-section link="admin/dynamic-servers.xtp" />
+  </chapter>
+
+  <chapter title="Project Jar Repository">
+    <linked-section link="admin/jar-repository.xtp" />
+  </chapter>
+
+  <chapter title="Java Injection">
+    <linked-section link="admin/candi.xtp" />
+  </chapter>
+
+  <chapter title="Troubleshooting">
+    <linked-section link="admin/troubleshoot.xtp" />
+  </chapter>
+
+  -->
+
+</book>

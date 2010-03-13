@@ -120,11 +120,11 @@ public class Book {
 
     for (Chapter chapter : _chapters) {
       if (isBook()) {
-	chapter.writeLaTeX(out);
+        chapter.writeLaTeX(out);
       }
       else {
-	// technically, the article should only have one chapter
-	chapter.writeLaTeXArticle(out);
+        // technically, the article should only have one chapter
+        chapter.writeLaTeXArticle(out);
       }
     }
 

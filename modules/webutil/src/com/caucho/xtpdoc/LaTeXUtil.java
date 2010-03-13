@@ -53,6 +53,12 @@ public class LaTeXUtil {
           latexText.append("\\");
           latexText.append(ch);
           break;
+        case '[':
+        case ']':
+          latexText.append("{");
+          latexText.append(ch);
+          latexText.append("}");
+          break;
         case '>':
         case '<':
           latexText.append("\\ensuremath{");

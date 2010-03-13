@@ -812,7 +812,9 @@
     <copy tofile="${build}/pdf/resin-4.0-admin.pdf"
           file="${build}/pdf/resin-admin/resin-admin.pdf"/>
     
+    <!--
     <generate-pdf name="test"/>
+    -->
   </target>
 
   <target name="test-pdf" depends="init">

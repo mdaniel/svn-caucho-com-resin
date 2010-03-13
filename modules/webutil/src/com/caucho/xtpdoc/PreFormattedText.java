@@ -106,8 +106,7 @@ public class PreFormattedText extends FormattedText {
           super.write(' ');
           break;
         case '\n':
-          super.write('\\');
-          super.write('\\');
+          super.write("\\hspace*{\\fill} \\\\");
           break;
         default:
           super.write(ch);
