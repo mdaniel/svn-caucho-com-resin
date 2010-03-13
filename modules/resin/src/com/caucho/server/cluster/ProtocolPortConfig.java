@@ -41,6 +41,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.server.connection.Port;
 import com.caucho.server.connection.AbstractProtocol;
+import com.caucho.server.connection.Protocol;
 import com.caucho.util.L10N;
 
 /**
@@ -56,6 +57,7 @@ public class ProtocolPortConfig extends Port
   // The protocol
   private Class _protocolClass;
   private ContainerProgram _init;
+  private Protocol _protocol;
 
   public ProtocolPortConfig()
   {
@@ -86,6 +88,11 @@ public class ProtocolPortConfig extends Port
 
     _init = init;
   }
+  
+  public void add(Protocol protocol)
+  {
+    setProtocol(protocol);
+  }
 
   /**
    * Initializes the port.
@@ -94,7 +101,10 @@ public class ProtocolPortConfig extends Port
   public void init()
     throws ConfigException
   {
-    if (_protocolClass != null) {
+    if (getProtocol() != null) {
+
+    }
+    else if (_protocolClass != null) {
       InjectManager webBeans = InjectManager.create();
 
       /*

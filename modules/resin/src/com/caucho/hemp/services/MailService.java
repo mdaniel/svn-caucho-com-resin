@@ -175,6 +175,7 @@ public class MailService
       }
 
       Transport smtp = _session.getTransport("smtp");
+
       smtp.close();
     } catch (Exception e) {
       throw ConfigException.create(e);

@@ -153,38 +153,38 @@ public class MailHandler extends Handler implements AlarmListener
 
       Formatter formatter = getFormatter();
       if (formatter != null)
-	value = formatter.format(record);
+        value = formatter.format(record);
       else {
-	value = record.getMessage();
+        value = record.getMessage();
 
-	Throwable thrown = record.getThrown();
-	if (thrown != null) {
-	  java.io.StringWriter writer = new java.io.StringWriter();
-	  PrintWriter out = new PrintWriter(writer);
-	  thrown.printStackTrace(out);
-	  out.close();
+        Throwable thrown = record.getThrown();
+        if (thrown != null) {
+          java.io.StringWriter writer = new java.io.StringWriter();
+          PrintWriter out = new PrintWriter(writer);
+          thrown.printStackTrace(out);
+          out.close();
 
-	  value += "\n" + out;
-	}
+          value += "\n" + out;
+        }
       }
 
       boolean isStartAlarm = false;
       synchronized (this) {
-	if (_text == null) {
-	  isStartAlarm = true;
-	  _text = new StringBuilder();
-	}
-    
-	_text.append(value).append("\n");
+        if (_text == null) {
+          isStartAlarm = true;
+          _text = new StringBuilder();
+        }
+
+        _text.append(value).append("\n");
       }
 
       if (isStartAlarm) {
-	long delta = _lastMailTime + _timeIntervalMin - Alarm.getCurrentTime();
+        long delta = _lastMailTime + _timeIntervalMin - Alarm.getCurrentTime();
 
-	if (delta < _delayTime)
-	  delta = _delayTime;
-	
-	_alarm.queue(delta);
+        if (delta < _delayTime)
+          delta = _delayTime;
+
+        _alarm.queue(delta);
       }
     } catch (RuntimeException e) {
       throw e;
@@ -203,10 +203,10 @@ public class MailHandler extends Handler implements AlarmListener
   public void handleAlarm(Alarm alarm)
   {
     String text = null;
-    
+
     synchronized (this) {
       if (_text != null)
-	text = _text.toString();
+        text = _text.toString();
       _text = null;
     }
 
@@ -220,10 +220,10 @@ public class MailHandler extends Handler implements AlarmListener
   public void close()
   {
     String text = null;
-    
+
     synchronized (this) {
       if (_text != null)
-	text = _text.toString();
+        text = _text.toString();
       _text = null;
     }
 

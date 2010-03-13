@@ -510,9 +510,11 @@ r_protocol =
   element protocol {
     r_port-Content
 
-    & (r_class | r_type)
+    & (r_class | r_type)?
 
     & r_init?
+
+    & r_bean-Content*
   }
 
 r_module-repository = element module-repository {

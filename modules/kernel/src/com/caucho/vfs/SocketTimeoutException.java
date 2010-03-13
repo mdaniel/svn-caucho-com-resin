@@ -36,17 +36,17 @@ import java.io.IOException;
  * doesn't have a specific BrokenPipeException.
  */
 @SuppressWarnings("serial")
-public class ClientDisconnectException extends IOException {
-  public ClientDisconnectException()
+public class SocketTimeoutException extends ClientDisconnectException {
+  public SocketTimeoutException()
   {
   }
   
-  public ClientDisconnectException(String msg)
+  public SocketTimeoutException(String msg)
   {
     super(msg);
   }
   
-  public ClientDisconnectException(Exception exn)
+  public SocketTimeoutException(Exception exn)
   {
     super(exn);
   }
@@ -57,10 +57,10 @@ public class ClientDisconnectException extends IOException {
    */
   public static IOException create(IOException exn)
   {
-    if (exn.getClass().equals(IOException.class) ||
-        exn.getClass().equals(java.net.SocketException.class) ||
-        exn.getClass().getName().equals("javax.net.ssl.SSLException"))
-      return new ClientDisconnectException(exn);
+    if (exn.getClass().equals(IOException.class)
+        || exn.getClass().equals(java.net.SocketException.class)
+        || exn.getClass().getName().equals("javax.net.ssl.SSLException"))
+      return new SocketTimeoutException(exn);
     else
       return exn;
   }

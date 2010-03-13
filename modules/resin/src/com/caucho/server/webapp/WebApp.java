@@ -76,6 +76,7 @@ import com.caucho.server.log.AccessLog;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.security.*;
+import com.caucho.security.AbstractAuthenticator;
 import com.caucho.security.Authenticator;
 import com.caucho.security.BasicLogin;
 import com.caucho.server.security.*;
@@ -2532,7 +2533,23 @@ public class WebApp extends ServletContextImpl
       _classLoader.setId("web-app:" + getId());
 
       _beanManager = InjectManager.getCurrent();
-
+      
+      SingleSignon singleSignon = AbstractSingleSignon.getCurrent();
+      
+      // server/1al4 vs server/1ak1
+      if (singleSignon == null) {
+        if (getSessionManager().isUsePersistentStore()) {
+          ClusterSingleSignon clusterSignon = new ClusterSingleSignon("web-app");
+          singleSignon = clusterSignon;
+        }
+        else {
+          MemorySingleSignon memorySignon = new MemorySingleSignon();
+          memorySignon.init();
+          singleSignon = memorySignon;
+        }
+          
+        AbstractSingleSignon.setCurrent(singleSignon);
+      }
       try {
         // server/1a36
 

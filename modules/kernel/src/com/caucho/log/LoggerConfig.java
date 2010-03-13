@@ -123,5 +123,9 @@ public class LoggerConfig {
 
     if (_useParentHandlers != null)
       _logger.setUseParentHandlers(_useParentHandlers.booleanValue());
+    
+    for (Handler handler : _handlerList) {
+      _logger.addHandler(handler);
+    }
   }
 }

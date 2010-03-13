@@ -24,6 +24,8 @@ public class JniStream extends StreamImpl {
   private static NullPath NULL_PATH;
 
   private final JniSocketImpl _socket;
+  
+  private IOException _readException;
 
   private long _totalReadBytes;
   private long _totalWriteBytes;
@@ -41,6 +43,7 @@ public class JniStream extends StreamImpl {
 
   public void init()
   {
+    _readException = null;
   }
 
   public boolean canRead()
@@ -55,6 +58,8 @@ public class JniStream extends StreamImpl {
       throw new NullPointerException();
     else if (offset < 0 || buf.length < offset + length)
       throw new ArrayIndexOutOfBoundsException();
+    else if (_readException != null)
+      throw _readException;
 
     int result = _socket.read(buf, offset, length, -1);
 
@@ -62,8 +67,11 @@ public class JniStream extends StreamImpl {
       _totalReadBytes += result;
       return result;
     }
-    else if (result < -1)
-      throw exception(result);
+    else if (result < -1) {
+      _readException = exception(result);
+      
+      throw _readException;
+    }
     else
       return -1;
   }
@@ -150,7 +158,7 @@ public class JniStream extends StreamImpl {
       return new ClientDisconnectException("connection reset by peer");
 
     case TIMEOUT_EXN:
-      return new ClientDisconnectException("client timeout");
+      return new SocketTimeoutException("client timeout");
 
     default:
       return new ClientDisconnectException("unknown exception=" + result);

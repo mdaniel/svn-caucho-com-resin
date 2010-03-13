@@ -78,6 +78,9 @@ struct connection_t {
   int socket_timeout;
   int sent_data;
 
+  int is_recv_timeout;
+  int is_read_shutdown;
+
   char server_data[128];
   struct sockaddr *server_sin;
   char client_data[128];

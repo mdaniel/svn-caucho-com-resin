@@ -189,7 +189,7 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   
   fd = conn->fd;
   
-  if (fd < 0) {
+  if (fd < 0 || conn->is_read_shutdown) {
     return -1;
   }
 
@@ -199,30 +199,37 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     else
       return -1;
   }
+
   if (timeout > 0 && poll_read(fd, timeout) <= 0) {
     return TIMEOUT_EXN;
   }
 
   do {
-#ifndef HAS_SOCK_TIMEOUT
-    if (timeout < 0 && poll_read(fd, conn->socket_timeout) <= 0) {
+    if (! conn->is_recv_timeout
+        && timeout < 0
+        && poll_read(fd, conn->socket_timeout) <= 0) {
       return TIMEOUT_EXN;
     }
-#endif
-  
+
     result = recv(fd, buf, len, 0);
   } while (result < 0
-	   && (errno == EINTR || errno == EAGAIN)
+	   && (errno == EINTR)
 	   && conn->fd == fd
 	   && retry-- >= 0
            && len > 0);
+
+  /* EAGAIN is returned by a timeout */
     
-  if (result > 0)
+  if (result > 0) {
     return result;
+  }
   else if (result == 0) {
     return result;
   }
   else {
+    conn->is_read_shutdown = 1;
+    shutdown(fd, SHUT_RD);
+
     return read_exception_status(conn, errno);
   }
 }
@@ -245,10 +252,9 @@ std_write(connection_t *conn, char *buf, int len)
 
   conn->sent_data = 1;
   
-#ifndef HAS_SOCK_TIMEOUT
-    if (poll_write(fd, conn->socket_timeout) == 0)
-      return -1;
-#endif
+  if (! conn->is_recv_timeout && poll_write(fd, conn->socket_timeout) == 0) {
+    return -1;
+  }
 
   do {
     result = send(fd, buf, len, 0);
@@ -370,11 +376,16 @@ std_accept(server_socket_t *ss, connection_t *conn)
     setsockopt(sock, IPPROTO_TCP, TCP_NODELAY, (char *) &flag, sizeof(int));
   }
 
+  conn->is_recv_timeout = 0;
+
 #ifdef HAS_SOCK_TIMEOUT
   timeout.tv_sec = ss->conn_socket_timeout / 1000;
   timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
-  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
-	     (char *) &timeout, sizeof(timeout));
+  
+  if (setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO,
+                 (char *) &timeout, sizeof(timeout)) == 0) {
+    conn->is_recv_timeout = 1;
+  }
 
   timeout.tv_sec = ss->conn_socket_timeout / 1000;
   timeout.tv_usec = ss->conn_socket_timeout % 1000 * 1000;
@@ -389,10 +400,14 @@ std_accept(server_socket_t *ss, connection_t *conn)
   conn->fd = sock;
   conn->sock = 0;
   conn->ops = &std_ops;
+  conn->client_sin = conn->client_data;
   memcpy(conn->client_sin, sin, sizeof(conn->client_data));
   conn->is_init = 0;
   sin_len = sizeof(conn->server_data);
+
+  conn->server_sin = conn->server_data;
   getsockname(sock, conn->server_sin, &sin_len);
+
   conn->ssl_cipher = 0;
   conn->ssl_bits = 0;
 

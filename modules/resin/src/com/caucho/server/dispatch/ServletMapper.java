@@ -284,7 +284,6 @@ public class ServletMapper {
         servletName = matchResult.getServletName();
       
       if (matchResult != null && ! contextURI.endsWith("/")
-          && servletName != null
           && ! (invocation instanceof SubInvocation)) {
         String contextPath = invocation.getContextPath();
 

@@ -28,6 +28,7 @@
 
 package com.caucho.java;
 
+import com.caucho.util.DisplayableException;
 import com.caucho.util.L10N;
 
 import java.io.IOException;
@@ -107,7 +108,16 @@ abstract public class AbstractJavaCompiler implements Runnable {
       Thread.currentThread().setContextClassLoader(_loader);
 
       compileInt(_path, _lineMap);
-    } catch (Throwable e) {
+    } catch (final Throwable e) {
+      new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
+        public void run()
+        {
+          if (e instanceof DisplayableException)
+            log.warning(e.getMessage());
+          else
+            log.warning(e.toString());
+        }
+      };
       _exception = e;
     } finally {
       Thread.currentThread().setContextClassLoader(null);

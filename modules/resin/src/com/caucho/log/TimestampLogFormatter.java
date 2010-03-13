@@ -19,49 +19,21 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.vfs;
+package com.caucho.log;
 
-import java.io.IOException;
+import com.caucho.log.formatter.TimestampFormatter;
 
 /**
- * Exception thrown when a client unexpectedly closes a connection.
- * Generally this is a broken pipe exception, but unfortunately, java.io.*
- * doesn't have a specific BrokenPipeException.
+ * Formats a log message.
  */
-@SuppressWarnings("serial")
-public class ClientDisconnectException extends IOException {
-  public ClientDisconnectException()
-  {
-  }
-  
-  public ClientDisconnectException(String msg)
-  {
-    super(msg);
-  }
-  
-  public ClientDisconnectException(Exception exn)
-  {
-    super(exn);
-  }
-
-  /**
-   * Only create a disconnect exception if it's an IOException
-   * Possible later check for broken pipe.
-   */
-  public static IOException create(IOException exn)
-  {
-    if (exn.getClass().equals(IOException.class) ||
-        exn.getClass().equals(java.net.SocketException.class) ||
-        exn.getClass().getName().equals("javax.net.ssl.SSLException"))
-      return new ClientDisconnectException(exn);
-    else
-      return exn;
-  }
+public class TimestampLogFormatter extends TimestampFormatter
+{
 }

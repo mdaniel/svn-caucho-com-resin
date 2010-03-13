@@ -1053,6 +1053,7 @@ public class TypeFactory implements AddLoaderListener
     _primitiveTypes.put(File.class, FileType.TYPE);
     _primitiveTypes.put(URL.class, UrlType.TYPE);
     _primitiveTypes.put(Pattern.class, PatternType.TYPE);
+    _primitiveTypes.put(Level.class, LevelBuilder.TYPE);
     _primitiveTypes.put(Locale.class, LocaleType.TYPE);
     _primitiveTypes.put(Node.class, NodeType.TYPE);
     _primitiveTypes.put(QDate.class, QDateType.TYPE);

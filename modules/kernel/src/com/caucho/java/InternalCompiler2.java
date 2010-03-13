@@ -149,7 +149,6 @@ public class InternalCompiler2 extends AbstractJavaCompiler {
                                    files);
 
           Boolean result = value.call();
-          System.out.println("VAUE: " + value + " " + result);
         } catch (Exception e) {
           throw new JavaCompileException(e);
         }
@@ -192,7 +191,7 @@ public class InternalCompiler2 extends AbstractJavaCompiler {
           }
         };
       }
-
+      
       if (status != 0)
         throw new JavaCompileException(errors);
     } finally {

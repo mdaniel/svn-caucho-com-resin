@@ -714,6 +714,11 @@ public final class SessionManager implements SessionCookieConfig, AlarmListener
   {
     _isPersistenceEnabled = enable;
   }
+  
+  public boolean isUsePersistentStore()
+  {
+    return isPersistenceEnabled();
+  }
 
   public boolean isPersistenceEnabled()
   {
