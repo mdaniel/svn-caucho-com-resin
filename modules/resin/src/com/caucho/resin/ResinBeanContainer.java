@@ -78,7 +78,7 @@ import javax.enterprise.inject.spi.Bean;
  *   } finally {
  *     req.close();
  *   }
- *   
+ *
  *   beans.close();
  * }
  * </pre></code>
@@ -126,9 +126,9 @@ public class ResinBeanContainer
     _classLoader = EnvironmentClassLoader.create("resin-context");
     _injectManager = InjectManager.create(_classLoader);
     _injectManager.addContext(new RequestScope());
-    
+
     _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
-    
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -180,7 +180,7 @@ public class ResinBeanContainer
 
     try {
       thread.setContextClassLoader(_classLoader);
-      
+
       Path path = Vfs.lookup(pathName);
 
       ContextConfig context = new ContextConfig(_injectManager, path);
@@ -234,7 +234,7 @@ public class ResinBeanContainer
       thread.setContextClassLoader(_classLoader);
 
       Class<?> cl = Class.forName(className, false, _classLoader);
-      
+
       return getInstance(cl, qualifiers);
     } catch (ClassNotFoundException e) {
       throw new RuntimeException(e);
@@ -349,14 +349,24 @@ public class ResinBeanContainer
     {
       super(manager, root);
     }
-    
+
     public ClassLoader getClassLoader()
     {
       return _classLoader;
     }
+
+    public SystemContext createSystem()
+    {
+      return new SystemContext();
+    }
   }
-  
-  
+
+  public class SystemContext implements EnvironmentBean {
+    public ClassLoader getClassLoader()
+    {
+      return ClassLoader.getSystemClassLoader();
+    }
+  }
 
   class RequestScope implements Context {
     @Override
@@ -392,6 +402,5 @@ public class ResinBeanContainer
     {
       return _localContext.get() != null;
     }
-
   }
 }

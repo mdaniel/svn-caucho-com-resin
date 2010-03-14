@@ -112,10 +112,13 @@ abstract public class AbstractJavaCompiler implements Runnable {
       new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
         public void run()
         {
+          /*
+          // env/0203 vs env/0206
           if (e instanceof DisplayableException)
             log.warning(e.getMessage());
           else
             log.warning(e.toString());
+            */
         }
       };
       _exception = e;

@@ -2537,7 +2537,7 @@ public class WebApp extends ServletContextImpl
       SingleSignon singleSignon = AbstractSingleSignon.getCurrent();
       
       // server/1al4 vs server/1ak1
-      if (singleSignon == null) {
+      if (singleSignon == null && Server.getCurrent() != null) {
         if (getSessionManager().isUsePersistentStore()) {
           ClusterSingleSignon clusterSignon = new ClusterSingleSignon("web-app");
           singleSignon = clusterSignon;

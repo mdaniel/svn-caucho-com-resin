@@ -377,6 +377,8 @@ public class ErrorPageManager {
 
     Level level = location == null ? Level.WARNING : Level.FINE;
 
+    System.out.println("LOG: " + e.toString() + " " + Thread.currentThread().getContextClassLoader());
+    System.out.println("LOGGABLE: " + log.isLoggable(Level.FINER));
     if (log.isLoggable(Level.FINER))
       log.log(level, e.toString(), e);
     else if (isCompileException)

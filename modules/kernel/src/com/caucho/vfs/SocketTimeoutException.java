@@ -36,7 +36,7 @@ import java.io.IOException;
  * doesn't have a specific BrokenPipeException.
  */
 @SuppressWarnings("serial")
-public class SocketTimeoutException extends ClientDisconnectException {
+public class SocketTimeoutException extends IOException {
   public SocketTimeoutException()
   {
   }

@@ -43,6 +43,7 @@ import com.caucho.server.http.ToCharResponseAdapter;
 import com.caucho.server.webapp.RequestDispatcherImpl;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.CharBuffer;
+import com.caucho.util.DisplayableException;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.NullEnumeration;
@@ -1192,7 +1193,15 @@ public class PageContextImpl extends PageContext
     _topOut.clearBuffer();
     
     if (_errorPage != null) {
-      getApplication().log(e.toString(), e);
+      if (log.isLoggable(Level.FINER)) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+      else if (e instanceof DisplayableException) {
+        log.warning(e.getMessage());
+      }
+      else {
+        log.log(Level.WARNING, e.toString(), e);
+      }
 
       getCauchoRequest().setAttribute(EXCEPTION, e);
       getCauchoRequest().setAttribute("javax.servlet.error.exception", e);

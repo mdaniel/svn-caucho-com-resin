@@ -65,8 +65,6 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   // The use-parent-handlers value
   private final EnvironmentLocal<Boolean> _useParentHandlers
     = new EnvironmentLocal<Boolean>();
-
-  private boolean _hasLocalLevel;
   
   // Application level override
   private EnvironmentLocal<Level> _localLevel;
@@ -83,6 +81,15 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   private final ArrayList<WeakReference<ClassLoader>> _loaders
     = new ArrayList<WeakReference<ClassLoader>>();
   
+  // The local effective level
+  private EnvironmentLocal<Integer> _localEffectiveLevel;
+
+  private boolean _hasLocalEffectiveLevel;
+  
+  private Level _finestEffectiveLevel = Level.INFO;
+  private int _finestEffectiveLevelValue = _finestEffectiveLevel.intValue();
+  private int _systemEffectiveLevelValue = Level.INFO.intValue();
+  
   public EnvironmentLogger(String name, String resourceBundleName)
   {
     super(name, resourceBundleName);
@@ -92,6 +99,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
    * Sets the logger's parent.  This should only be called by the LogManager
    * code.
    */
+  @Override
   public void setParent(Logger parent)
   {
     if (parent.equals(_parent))
@@ -102,11 +110,238 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     if (parent instanceof EnvironmentLogger) {
       _parent = (EnvironmentLogger) parent;
 
-      super.setLevel(_parent.getAssignedLevel());
-      
       _parent.addChild(this);
     }
+    
+    updateEffectiveLevel(_systemClassLoader);
   }
+  
+  //
+  // levels
+  //
+
+  /**
+   * Returns the logger's assigned level.
+   */
+  @Override
+  public Level getLevel()
+  {
+    if (_localLevel != null) {
+      Level level = _localLevel.get();
+
+      if (level != null) {
+        return level;
+      }
+    }
+
+    return _systemLevel;
+  }
+
+  /**
+   * Application API to set the level.
+   *
+   * @param level the logging level to set for the logger.
+   */
+  @Override
+  public void setLevel(Level level)
+  {
+    ClassLoader loader = Thread.currentThread().getContextClassLoader();
+    
+    if (loader == null)
+      loader = _systemClassLoader;
+
+    if (loader != _systemClassLoader) {
+      if (_localLevel == null)
+        _localLevel = new EnvironmentLocal<Level>();
+      
+      _localLevel.set(level);
+      
+      if (level != null) {
+        addLoader(loader);
+      }
+    }
+    else {
+      _systemLevel = level;
+    }
+    
+
+    updateEffectiveLevel(loader);
+  }
+  
+  //
+  // handlers
+  //
+
+  /**
+   * Returns the handlers.
+   */
+  @Override
+  public Handler []getHandlers()
+  {
+    Handler []handlers = _localHandlers.get();
+    
+    if (handlers != null)
+      return handlers;
+    else
+      return EMPTY_HANDLERS;
+  }
+
+  /**
+   * Adds a handler.
+   */
+  @Override
+  public void addHandler(Handler handler)
+  {
+    synchronized (this) {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      if (loader == null)
+        loader = _systemClassLoader;
+
+      boolean hasLoader = false;
+      for (int i = _loaders.size() - 1; i >= 0; i--) {
+        WeakReference<ClassLoader> ref = _loaders.get(i);
+        ClassLoader refLoader = ref.get();
+
+        if (refLoader == null)
+          _loaders.remove(i);
+
+        if (refLoader == loader)
+          hasLoader = true;
+
+        if (isParentLoader(loader, refLoader))
+          addHandler(handler, refLoader);
+      }
+
+      if (! hasLoader) {
+        _loaders.add(new WeakReference<ClassLoader>(loader));
+        addHandler(handler, loader);
+        Environment.addClassLoaderListener(this, loader);
+      }
+
+      HandlerEntry ownHandlers = _ownHandlers.get();
+      if (ownHandlers == null) {
+        ownHandlers = new HandlerEntry(this);
+        _ownHandlers.set(ownHandlers);
+      }
+    
+      ownHandlers.addHandler(handler);
+    }
+  }
+
+  /**
+   * Removes a handler.
+   */
+  @Override
+  public void removeHandler(Handler handler)
+  {
+    synchronized (this) {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      if (loader == null)
+        loader = _systemClassLoader;
+
+      for (int i = _loaders.size() - 1; i >= 0; i--) {
+        WeakReference<ClassLoader> ref = _loaders.get(i);
+        ClassLoader refLoader = ref.get();
+
+        if (refLoader == null)
+          _loaders.remove(i);
+
+        if (isParentLoader(loader, refLoader))
+          removeHandler(handler, refLoader);
+      }
+
+      HandlerEntry ownHandlers = _ownHandlers.get();
+      if (ownHandlers != null)
+        ownHandlers.removeHandler(handler);
+    }
+  }
+  
+  //
+  // logging
+  //
+  
+  /**
+   * True if the level is loggable
+   */
+  @Override
+  public final boolean isLoggable(Level level)
+  {
+    if (level == null)
+      return false;
+    
+    int intValue = level.intValue();
+    
+    if (intValue < _finestEffectiveLevelValue)
+      return false;
+    else if (! _hasLocalEffectiveLevel) {
+      return true;
+    }
+    else {
+      Integer localValue = _localEffectiveLevel.get();
+      
+      if (localValue != null)
+        return localValue.intValue() <= intValue;
+      else
+        return _systemEffectiveLevelValue <= intValue;
+    }
+  }
+
+  /**
+   * Returns the use-parent-handlers
+   */
+  @Override
+  public boolean getUseParentHandlers()
+  {
+    Boolean value = _useParentHandlers.get();
+
+    if (value != null)
+      return Boolean.TRUE.equals(value);
+    else
+      return true;
+  }
+
+  /**
+   * Sets the use-parent-handlers
+   */
+  @Override
+  public void setUseParentHandlers(boolean useParentHandlers)
+  {
+    _useParentHandlers.set(new Boolean(useParentHandlers));
+  }
+
+  /**
+   * Logs the message.
+   */
+  @Override
+  public void log(LogRecord record)
+  {
+    if (record == null)
+      return;
+    
+    Level recordLevel = record.getLevel();
+    
+    if (! isLoggable(recordLevel))
+      return;
+
+    for (Logger ptr = this; ptr != null; ptr = ptr.getParent()) {
+      Handler handlers[] = ptr.getHandlers();
+
+      if (handlers != null) {
+        for (int i = 0; i < handlers.length; i++) {
+          handlers[i].publish(record);
+        }
+      }
+
+      if (! ptr.getUseParentHandlers())
+        break;
+    }
+  }
+  
+  //
+  // implementation methods
+  //
 
   /**
    * Adds a new logger as a child, triggered by a setParent.
@@ -114,43 +349,8 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   void addChild(EnvironmentLogger child)
   {
     _children.add(new WeakReference<EnvironmentLogger>(child));
-  }
-
-  /**
-   * Adds a handler.
-   */
-  public synchronized void addHandler(Handler handler)
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    boolean hasLoader = false;
-    for (int i = _loaders.size() - 1; i >= 0; i--) {
-      WeakReference<ClassLoader> ref = _loaders.get(i);
-      ClassLoader refLoader = ref.get();
-
-      if (refLoader == null)
-        _loaders.remove(i);
-
-      if (refLoader == loader)
-        hasLoader = true;
-
-      if (isParentLoader(loader, refLoader))
-        addHandler(handler, refLoader);
-    }
-
-    if (! hasLoader) {
-      _loaders.add(new WeakReference<ClassLoader>(loader));
-      addHandler(handler, loader);
-      Environment.addClassLoaderListener(this, loader);
-    }
-
-    HandlerEntry ownHandlers = _ownHandlers.get();
-    if (ownHandlers == null) {
-      ownHandlers = new HandlerEntry(this);
-      _ownHandlers.set(ownHandlers);
-    }
     
-    ownHandlers.addHandler(handler);
+    updateChildren();
   }
 
   /**
@@ -192,29 +392,6 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
       loader = null;
 
     _localHandlers.set(newHandlers, loader);
-  }
-
-  /**
-   * Removes a handler.
-   */
-  public synchronized void removeHandler(Handler handler)
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    for (int i = _loaders.size() - 1; i >= 0; i--) {
-      WeakReference<ClassLoader> ref = _loaders.get(i);
-      ClassLoader refLoader = ref.get();
-
-      if (refLoader == null)
-        _loaders.remove(i);
-
-      if (isParentLoader(loader, refLoader))
-        removeHandler(handler, refLoader);
-    }
-
-    HandlerEntry ownHandlers = _ownHandlers.get();
-    if (ownHandlers != null)
-      ownHandlers.removeHandler(handler);
   }
 
   private void removeHandler(Handler handler, ClassLoader loader)
@@ -298,70 +475,307 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   }
 
   /**
-   * Logs the message.
+   * Adds a class loader to the list of dependency  loaders.
    */
-  public void log(LogRecord record)
+  private void addLoader(ClassLoader loader)
   {
-    if (record == null)
+    for (int i = _loaders.size() - 1; i >= 0; i--) {
+      WeakReference<ClassLoader> ref = _loaders.get(i);
+      ClassLoader refLoader = ref.get();
+
+      if (refLoader == null)
+        _loaders.remove(i);
+
+      if (refLoader == loader)
+	return;
+    }
+
+    _loaders.add(new WeakReference<ClassLoader>(loader));
+    Environment.addClassLoaderListener(this, loader);
+  }
+
+  /**
+   * Returns the assigned level, calculated through the normal
+   * Logger rules, i.e. if unassigned, use the parent's value.
+   */
+  /*
+  private Level getAssignedLevel()
+  {
+    for (Logger log = this; log != null; log = log.getParent()) {
+      Level level = log.getLevel();
+
+      if (level != null)
+	return level;
+    }
+
+    return Level.INFO;
+  }
+  */
+
+  /**
+   * Recalculate the dynamic assigned levels.
+   */
+  private synchronized void updateEffectiveLevel(ClassLoader loader)
+  {
+    if (loader == null)
+      loader = _systemClassLoader;
+
+    int oldEffectiveLevel = getEffectiveLevel(loader);
+    
+    Level newEffectiveLevel = calculateEffectiveLevel(loader);
+    
+    if (oldEffectiveLevel == newEffectiveLevel.intValue())
       return;
     
-    Level level;
+    _finestEffectiveLevel = newEffectiveLevel;
+    _hasLocalEffectiveLevel = false;
     
-    if (_localLevel != null) {
-      level = _localLevel.get();
-   }
-    else
-      level = _systemLevel;
+    updateEffectiveLevelPart(_systemClassLoader);
+    updateEffectiveLevelPart(loader);
+    for (int i = 0; i < _loaders.size(); i++) {
+      WeakReference<ClassLoader> loaderRef = _loaders.get(i);
+      ClassLoader classLoader = loaderRef.get();
+      
+      if (classLoader != null)
+        updateEffectiveLevelPart(classLoader);
+    }
+    
+    super.setLevel(_finestEffectiveLevel);
+    
+    _finestEffectiveLevelValue = _finestEffectiveLevel.intValue();
 
-    if (level != null && record.getLevel().intValue() < level.intValue())
-      return;
-
-    for (Logger ptr = this; ptr != null; ptr = ptr.getParent()) {
-      Handler handlers[] = ptr.getHandlers();
-
-      if (handlers != null) {
-	for (int i = 0; i < handlers.length; i++) {
-	  handlers[i].publish(record);
-	}
-      }
-
-      if (! ptr.getUseParentHandlers())
-	break;
+    updateChildren();
+  }
+  
+  private void updateChildren()
+  {
+    updateChildren(_systemClassLoader);
+    for (int i = _loaders.size() - 1; i >= 0; i--) {
+      WeakReference<ClassLoader> loaderRef = _loaders.get(i);
+      ClassLoader subLoader = loaderRef.get();
+      
+      if (subLoader != null)
+        updateChildren(subLoader);
+      else
+        _loaders.remove(i);
     }
   }
-
-  /**
-   * Returns the handlers.
-   */
-  public Handler []getHandlers()
+  
+  private void updateEffectiveLevelPart(ClassLoader loader)
   {
-    Handler []handlers = _localHandlers.get();
+    Level level = getOwnEffectiveLevel(loader);
     
-    if (handlers != null)
-      return handlers;
+    if (loader == _systemClassLoader) {
+      _systemEffectiveLevelValue
+        = (level != null ? level.intValue() : Level.INFO.intValue());
+    }
+    
+    if (level == null) {
+      if (_localEffectiveLevel != null)
+        _localEffectiveLevel.remove(loader);
+      
+      return;
+    }
+    
+    if (_finestEffectiveLevel == null)
+      _finestEffectiveLevel = level;
+    else if (_finestEffectiveLevel.intValue() < level.intValue()) {
+      _finestEffectiveLevel = level;
+    }
+    
+    if (loader == _systemClassLoader) {
+      _systemEffectiveLevelValue = level.intValue();
+    }
+    else {
+      _hasLocalEffectiveLevel = true;
+      
+      addLoader(loader);
+      
+      if (_localEffectiveLevel == null)
+        _localEffectiveLevel = new EnvironmentLocal<Integer>();
+      
+      _localEffectiveLevel.set(level.intValue(), loader);
+    }
+  }
+  
+  private Level getOwnEffectiveLevel(ClassLoader loader)
+    {
+    Level level = null;
+    
+    if (loader == _systemClassLoader) {
+      level = _systemLevel;
+    }
+    else if (_localLevel != null) {
+      level = _localLevel.getLevel(loader);
+    }
+    
+    if (level != null)
+      return level;
+    else if (_parent != null)
+      return _parent.getOwnEffectiveLevel(loader);
     else
-      return EMPTY_HANDLERS;
+      return null;
+  }
+  
+  private int getEffectiveLevel(ClassLoader loader)
+  {
+    int oldEffectiveLevel = _systemEffectiveLevelValue;
+    
+    if (_localEffectiveLevel != null) {
+      Integer intLevel = _localEffectiveLevel.get(loader);
+      
+      if (intLevel != null)
+        oldEffectiveLevel = intLevel;
+    }
+    
+    return oldEffectiveLevel;
+  }
+  
+  private Level calculateEffectiveLevel(ClassLoader loader)
+  {
+    Level level = getLevel(loader);
+    
+    if (level != null)
+      return level;
+    else if (_parent != null)
+      return _parent.calculateEffectiveLevel(loader);
+    else
+      return Level.INFO;
+  }
+
+  private Level getLevel(ClassLoader loader)
+  {
+    if (_localLevel != null) {
+      Level level = _localLevel.get(loader);
+
+      if (level != null) {
+        return level;
+      }
+    }
+
+    return _systemLevel;
   }
 
   /**
-   * Returns the use-parent-handlers
+   * Returns the finest assigned level for any classloader environment.
    */
-  public boolean getUseParentHandlers()
+  private Level getFinestLevel()
   {
-    Boolean value = _useParentHandlers.get();
+    Level level;
+    
+    if (_parent == null)
+      level = Level.INFO;
+    else if (_parent.isLocalLevel())
+      level = selectFinestLevel(_systemLevel, _parent.getFinestLevel());
+    else if (_systemLevel != null)
+      level = _systemLevel;
+    else
+      level = _parent.getFinestLevel();
+    
+    if (_localLevel == null)
+      return level;
+    
+    for (int i = _loaders.size() - 1; i >= 0; i--) {
+      WeakReference<ClassLoader> ref = _loaders.get(i);
+      ClassLoader loader = ref.get();
 
-    if (value != null)
-      return Boolean.TRUE.equals(value);
+      if (loader == null)
+        _loaders.remove(i);
+
+      level = selectFinestLevel(level, _localLevel.get(loader));
+    }
+    
+    return level;
+  }
+  
+  private boolean isLocalLevel()
+  {
+    if (_localLevel != null)
+      return false;
+    else if (_parent != null && ! _parent.isLocalLevel())
+      return false;
     else
       return true;
   }
 
   /**
-   * Sets the use-parent-handlers
+   * Returns the finest of the two levels.
    */
-  public void setUseParentHandlers(boolean useParentHandlers)
+  private Level selectFinestLevel(Level a, Level b)
   {
-    _useParentHandlers.set(new Boolean(useParentHandlers));
+    if (a == null)
+      return b;
+    else if (b == null)
+      return a;
+    else if (b.intValue() < a.intValue())
+      return b;
+    else
+      return a;
+  }
+  
+  /**
+   * Returns the most specific assigned level for the given classloader, i.e.
+   * children override parents.
+   */
+  private Level getAssignedLevel(ClassLoader loader)
+  {
+    Level level = null;
+    
+    if (_localLevel != null) {
+      return _localLevel.get(loader);
+    }
+    
+    return null;
+  }
+
+  private void updateClassLoaderLevel(ClassLoader loader)
+  {
+    if (_localLevel == null) {
+      if (_systemLevel != null)
+        super.setLevel(_systemLevel);
+      return;
+    }
+    
+    Level localLevel = _localLevel.get(loader);
+
+    if (localLevel != null) {
+      if (! _hasLocalEffectiveLevel)
+        super.setLevel(localLevel);
+      else if (localLevel.intValue() < super.getLevel().intValue())
+        super.setLevel(localLevel);
+	    
+      _hasLocalEffectiveLevel = true;
+    }
+  }
+  
+  private void updateChildren(ClassLoader loader)
+  {
+    for (int i = _children.size() - 1; i >= 0; i--) {
+      WeakReference<EnvironmentLogger> ref = _children.get(i);
+      EnvironmentLogger child = ref.get();
+
+      if (child != null)
+        child.updateEffectiveLevel(loader);
+      else
+        _children.remove(i);
+    }
+  }
+
+  /**
+   * Removes the specified loader.
+   */
+  private synchronized void removeLoader(ClassLoader loader)
+  {
+    int i;
+    for (i = _loaders.size() - 1; i >= 0; i--) {
+      WeakReference<ClassLoader> ref = _loaders.get(i);
+      ClassLoader refLoader = ref.get();
+
+      if (refLoader == null)
+        _loaders.remove(i);
+      else if (refLoader == loader)
+        _loaders.remove(i);
+    }
   }
 
   /**
@@ -390,174 +804,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     if (_localLevel != null)
       _localLevel.remove(loader);
 
-    updateAssignedLevel();
-  }
-
-  /**
-   * Application API to set the level.
-   *
-   * @param level the logging level to set for the logger.
-   */
-  public void setLevel(Level level)
-  {
-    ClassLoader loader = Thread.currentThread().getContextClassLoader();
-
-    if (loader != null && loader != _systemClassLoader) {
-      if (_localLevel == null)
-        _localLevel = new EnvironmentLocal<Level>();
-      
-      _localLevel.set(level);
-    }
-    else {
-      _systemLevel = level;
-    }
-    
-    if (level != null) {
-      addLoader(loader);
-    }
-
-    updateAssignedLevel();
-  }
-
-  /**
-   * Adds a class loader to the list of dependency  loaders.
-   */
-  private void addLoader(ClassLoader loader)
-  {
-    for (int i = _loaders.size() - 1; i >= 0; i--) {
-      WeakReference<ClassLoader> ref = _loaders.get(i);
-      ClassLoader refLoader = ref.get();
-
-      if (refLoader == null)
-        _loaders.remove(i);
-
-      if (refLoader == loader)
-	return;
-    }
-
-    _loaders.add(new WeakReference<ClassLoader>(loader));
-    Environment.addClassLoaderListener(this, loader);
-  }
-
-  /**
-   * Returns the logger's assigned level.
-   */
-  public Level getLevel()
-  {
-    if (_localLevel != null) {
-      Level level = _localLevel.get();
-
-      if (level != null) {
-	return level;
-      }
-    }
-
-    return _systemLevel;
-  }
-
-  /**
-   * Returns the assigned level, calculated through the normal
-   * Logger rules, i.e. if unassigned, use the parent's value.
-   */
-  private Level getAssignedLevel()
-  {
-    for (Logger log = this; log != null; log = log.getParent()) {
-      Level level = log.getLevel();
-
-      if (level != null)
-	return level;
-    }
-
-    return Level.INFO;
-  }
-
-  /**
-   * Recalculate the dynamic assigned levels.
-   */
-  private synchronized void updateAssignedLevel()
-  {
-    Level oldAssignedLevel = super.getLevel();
-    
-    super.setLevel(Level.INFO);
-    
-   _hasLocalLevel = false;
-
-    if (_parent != null) {
-      super.setLevel(_parent.getAssignedLevel());
-    }
-    
-    if (_systemLevel != null)
-      super.setLevel(_systemLevel);
-
-    for (int i = _loaders.size() - 1; i >= 0; i--) {
-      WeakReference<ClassLoader> ref = _loaders.get(i);
-      ClassLoader loader = ref.get();
-
-      if (loader == null)
-        _loaders.remove(i);
-
-      for (; loader != null; loader = loader.getParent()) {
-        if (loader instanceof EnvironmentClassLoader) {
-          EnvironmentClassLoader envLoader = (EnvironmentClassLoader) loader;
-
-          updateClassLoaderLevel(envLoader);
-        }
-      }
-      
-      updateClassLoaderLevel(ClassLoader.getSystemClassLoader());
-    }
-
-    // If this level has become changed permission, need to update all children
-    // since they may depend on this value
-    if (oldAssignedLevel == null
-        || oldAssignedLevel.intValue() != super.getLevel().intValue()) {
-      for (int i = _children.size() - 1; i >= 0; i--) {
-        WeakReference<EnvironmentLogger> ref = _children.get(i);
-        EnvironmentLogger child = ref.get();
-
-        if (child != null)
-          child.updateAssignedLevel();
-        else
-          _children.remove(i);
-      }
-    }
-  }
-
-  private void updateClassLoaderLevel(ClassLoader loader)
-  {
-    if (_localLevel == null) {
-      if (_systemLevel != null)
-        super.setLevel(_systemLevel);
-      return;
-    }
-    
-    Level localLevel = _localLevel.get(loader);
-
-    if (localLevel != null) {
-      if (! _hasLocalLevel)
-        super.setLevel(localLevel);
-      else if (localLevel.intValue() < super.getLevel().intValue())
-        super.setLevel(localLevel);
-	    
-      _hasLocalLevel = true;
-    }
-  }
-
-  /**
-   * Removes the specified loader.
-   */
-  private synchronized void removeLoader(ClassLoader loader)
-  {
-    int i;
-    for (i = _loaders.size() - 1; i >= 0; i--) {
-      WeakReference<ClassLoader> ref = _loaders.get(i);
-      ClassLoader refLoader = ref.get();
-
-      if (refLoader == null)
-        _loaders.remove(i);
-      else if (refLoader == loader)
-        _loaders.remove(i);
-    }
+    updateEffectiveLevel(_systemClassLoader);
   }
 
   public String toString()

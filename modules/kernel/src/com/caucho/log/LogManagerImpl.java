@@ -93,7 +93,7 @@ public class LogManagerImpl extends LogManager {
    */
   private EnvironmentLogger buildParentTree(String childName)
   {
-    if (childName.equals(""))
+    if (childName == null || childName.equals(""))
       return null;
     
     int p = childName.lastIndexOf('.');
