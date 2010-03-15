@@ -98,9 +98,9 @@
         After you run the Ant script above, you will see output like this:
       </p>
 
-      <pre>
+      <results>
 [resin:upload-war] Deployed foo.war to tag wars/default/default/foo
-      </pre>
+      </results>
 
       <p>
         The output exposes a few important things about the
@@ -116,9 +116,9 @@
         root name and version. The format used is this:
       </p>
 
-      <pre>
+      <def>
 &lt;type>/&lt;stage>/&lt;virtual host>/&lt;context root>[-&lt;version>]
-      </pre>
+      </def>
 
       <p>
         In our example, all web applications are stored under wars, we
@@ -204,9 +204,9 @@
         line like so:
       </p>
 
-      <pre>
+      <def>
 mvn resin:upload-war
-      </pre>
+      </def>
     </s1>
 
     <s1 title="Deployment Versioning">
@@ -248,10 +248,10 @@ mvn resin:upload-war
         you should see something like this:
       </p>
 
-      <pre>
+      <results>
 [resin:upload-war] Deployed foo.war to tag wars/default/default/foo-1.0
 [resin:upload-war] Wrote head version tag wars/default/default/foo
-      </pre>
+      </results>
 
       <p>
         The Maven equivalent of this command would look like the
@@ -283,10 +283,10 @@ mvn resin:upload-war -Dresin.version="1.0"
         uploaded file, as indicated by the Ant task output:
       </p>
 
-      <pre>
+      <results>
 [resin:upload-war] Deployed foo.war to tag wars/default/default/foo-2.0
 [resin:upload-war] Wrote head version tag wars/default/default/foo
-      </pre>
+      </results>
 
       <p>
         The Maven version of the application upgrade would be like this:
@@ -329,16 +329,20 @@ mvn resin:upload-war -Dresin.version="2.0"
         running the Ant task reveals the end result:
       </p>
 
-      <pre>
-[resin:copy-tag] Copying wars/default/default/foo-1.0 to wars/default/default/foo
-      </pre>
+      <results>
+[resin:copy-tag] Copying wars/default/default/foo-1.0 to 
+  wars/default/default/foo
+      </results>
 
       <p>
         Here is the Maven version of the command:
       </p>
 
       <example title="Maven copy tag command">
-mvn resin:copy-tag -Dresin.sourceContextRoot='foo' -Dresin.sourceVersion="1.0" -Dresin.contextRoot="foo"
+mvn resin:copy-tag \
+    -Dresin.sourceContextRoot='foo' \
+    -Dresin.sourceVersion="1.0" \
+    -Dresin.contextRoot="foo"
       </example>
 
       <p>
@@ -390,10 +394,10 @@ mvn resin:delete-tag -Dresin.version="2.0" -Dresin.contextRoot="foo"
 &lt;/project>
       </example>
 
-      <pre>
+      <results>
 [resin:query-tags] wars/default/default/foo-1.0
 [resin:query-tags] wars/default/default/foo-2.0
-      </pre>
+      </results>
 
       <p>
         The Maven version looks like this:
@@ -501,16 +505,19 @@ java -jar $RESIN_HOME/lib/resin.jar -server b -stage preview start
                 contextRoot="foo"/>
       </example>
 
-      <pre>
+      <results>
 [resin-copy-tag] Copying wars/preview/default/foo to wars/default/default/foo
-      </pre>
+      </results>
 
       <p>
         The Maven version of this looks like the following:
       </p>
 
       <example title="Maven copy tag command to move from preview to default stage">
-mvn resin:copy-tag -Dresin.sourceContextRoot='foo' -Dresin.sourceStage="preview" -Dresin.stage="default"
+mvn resin:copy-tag \
+    -Dresin.sourceContextRoot='foo' \
+    -Dresin.sourceStage="preview" \
+    -Dresin.stage="default"
       </example>
 
       <p>

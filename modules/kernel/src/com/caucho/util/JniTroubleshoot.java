@@ -46,7 +46,7 @@ public class JniTroubleshoot {
   private static final L10N L = new L10N(JniTroubleshoot.class);
 
   private static final HashSet<String> _loggedLibraries = new HashSet<String>();
-  
+
   private String _className;
   private String _libraryName;
 
@@ -81,8 +81,12 @@ public class JniTroubleshoot {
           _loggedLibraries.add(_libraryName);
       }
 
-      if (! isLogged)
-        log.log(Level.WARNING, getMessage(), _cause);
+      if (! isLogged) {
+        if (log.isLoggable(Level.FINER))
+          log.log(Level.FINER, getMessage(), _cause);
+        else
+          log.warning(getMessage());
+      }
     }
   }
 
@@ -93,7 +97,7 @@ public class JniTroubleshoot {
     if (! lib.exists()) {
       if (isMacOSX()) {
         return L.l("Unable to find native library '{0}' for {1}. "
-                   + "Resin expects to find this library in:\n" 
+                   + "Resin expects to find this library in:\n"
                    + "  (Mac OS X) {2}\n"
                    + "On Mac OS X, run ./configure; make; make install.\n"
                    + "The JVM exception was: {3}\n",
@@ -101,7 +105,7 @@ public class JniTroubleshoot {
       }
       else if (isWin()) {
         return L.l("Unable to find native library '{0}' for {1}. "
-                   + "Resin expects to find this library in:\n" 
+                   + "Resin expects to find this library in:\n"
                    + "  (Windows) {2}\n"
                    + "On Windows, check your installation for the DLL above.\n"
                    + "The JVM exception was: {3}\n",
@@ -109,14 +113,14 @@ public class JniTroubleshoot {
       }
       else {
         return L.l("Unable to find native library '{0}' for {1}. "
-                   + "Resin expects to find this library in:\n" 
+                   + "Resin expects to find this library in:\n"
                    + "  (Unix) {2}\n"
                    + "On Unix, run ./configure; make; make install.\n\n"
                    + "The JVM exception was: {3}\n",
                    _libraryName, _className, lib.getNativePath(), _cause);
       }
     }
-    else 
+    else
       return "boom";
   }
 
