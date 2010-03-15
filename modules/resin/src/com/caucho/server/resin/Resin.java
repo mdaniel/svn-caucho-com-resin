@@ -263,7 +263,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       resin = (Resin) ctor.newInstance(loader, isWatchdog);
     } catch (ConfigException e) {
-      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
 
       licenseErrorMessage = e.getMessage();
@@ -285,12 +284,12 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     } catch (Throwable e) {
       e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
-      
+
       String causeMsg = "";
       if (! (e instanceof ClassNotFoundException)) {
         causeMsg = "\n  Exception=" + e + "\n";
       }
-      
+
 
       String msg = L().l("  Using Resin(R) Open Source under the GNU Public License (GPL).\n"
                          + "\n"
