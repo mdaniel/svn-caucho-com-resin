@@ -33,6 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Vfs;
+import com.caucho.vfs.Path;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
@@ -69,6 +70,8 @@ public class IfFileExists implements RequestPredicate
     else
       realPath = request.getRealPath(request.getPathInfo());
 
-    return Vfs.lookup(realPath).exists();
+    Path path = Vfs.lookup(realPath);
+
+    return path.exists() && path.isFile();
   }
 }

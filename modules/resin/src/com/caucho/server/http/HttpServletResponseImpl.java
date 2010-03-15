@@ -603,6 +603,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       errorManager = webApp.getErrorPageManager();
 
     setStatus(code, value);
+
     try {
       if (code == SC_NOT_MODIFIED || code == SC_NO_CONTENT) {
         _response.finishInvocation();
@@ -960,7 +961,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       throw new IllegalStateException(L.l("Can't sendRedirect() after data has committed to the client."));
 
     _responseStream.clearBuffer();
-    
+
     // server/10c4
     // reset();
     resetBuffer();
@@ -1301,10 +1302,10 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       cookie.setComment(manager.getComment());
 
     cookie.setPort(manager.getCookiePort());
-    
+
     if (manager.isSecure()) {
       // cookie.setSecure(_request.isSecure());
-      
+
       // server/12zc (tck)
       cookie.setSecure(true);
    }

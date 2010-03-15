@@ -263,6 +263,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       resin = (Resin) ctor.newInstance(loader, isWatchdog);
     } catch (ConfigException e) {
+      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
 
       licenseErrorMessage = e.getMessage();
@@ -282,6 +283,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
                            + "\n  Exception=" + cause + "\n");
       }
     } catch (Throwable e) {
+      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
       
       String causeMsg = "";

@@ -30,6 +30,7 @@
 package com.caucho.quercus.program;
 
 import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.quercus.page.QuercusPage;
@@ -55,25 +56,25 @@ import java.util.logging.Level;
 public class QuercusProgram {
   private static final Logger log
     = Logger.getLogger(QuercusProgram.class.getName());
-  
+
   private QuercusContext _quercus;
 
   private QuercusPage _compiledPage;
   private QuercusPage _profilePage;
-  
+
   private Path _sourceFile;
-  
+
   private final AtomicBoolean _isCompiling
     = new AtomicBoolean();
-  
+
   private boolean _isCompilable = true;
-  
+
   private Exception _compileException;
 
   private HashMap<String,Function> _functionMap;
   private HashMap<String,Function> _functionMapLowerCase
     = new HashMap<String,Function>();
-  
+
   private ArrayList<Function> _functionList;
 
   private HashMap<String,InterpretedClassDef> _classMap;
@@ -142,13 +143,13 @@ public class QuercusProgram {
    * @param statement the top-level statement
    */
   public QuercusProgram(QuercusContext quercus,
-			Path sourceFile,
-			QuercusPage page)
+                        Path sourceFile,
+                        QuercusPage page)
   {
     _quercus = quercus;
     _sourceFile = sourceFile;
     _compiledPage = page;
-    
+
     _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
     _topDepend.add(new PageDependency());
   }
@@ -178,7 +179,7 @@ public class QuercusProgram {
   {
     return _statement;
   }
-  
+
   /*
    * Start compiling
    */
@@ -186,7 +187,7 @@ public class QuercusProgram {
   {
     return _isCompiling.compareAndSet(false, true);
   }
-  
+
   /*
    * Set to true if this page is being compiled.
    */
@@ -194,11 +195,11 @@ public class QuercusProgram {
   {
     synchronized (this) {
       _isCompiling.set(false);
-      
+
       notifyAll();
     }
   }
-  
+
   /*
    * Set to true if this page is being compiled.
    */
@@ -206,15 +207,15 @@ public class QuercusProgram {
   {
     synchronized (this) {
       if (_isCompiling.get()) {
-	try {
-	  wait(120000);
-	} catch (Exception e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+        try {
+          wait(120000);
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }
-  
+
   /*
    * Returns true if this page is being compiled.
    */
@@ -222,7 +223,7 @@ public class QuercusProgram {
   {
     return _isCompiling.get();
   }
-  
+
   /*
    * Set to false if page cannot be compiled.
    */
@@ -230,7 +231,7 @@ public class QuercusProgram {
   {
     _isCompilable = isCompilable;
   }
-  
+
   /*
    * Returns true if the page can be compiled or it is unknown.
    */
@@ -238,12 +239,24 @@ public class QuercusProgram {
   {
     return _isCompilable;
   }
-  
+
   public void setCompileException(Exception e)
   {
-    _compileException = e;
+    if (e == null) {
+      _compileException = null;
+      return;
+    }
+
+    String msg = e.toString();
+
+    // XXX: temp for memory issues
+    if (msg != null && msg.length() > 4096) {
+      msg = msg.substring(0, 4096);
+    }
+
+    _compileException = new QuercusException(msg);
   }
-  
+
   public Exception getCompileException()
   {
     return _compileException;
@@ -257,7 +270,7 @@ public class QuercusProgram {
     Depend depend = new Depend(path);
 
     depend.setRequireSource(_quercus.isRequireSource());
-    
+
     _dependList.add(depend);
     _depend.add(depend);
   }
@@ -319,7 +332,7 @@ public class QuercusProgram {
 
     if (! _quercus.isStrict())
       fun = _functionMapLowerCase.get(name.toLowerCase());
-    
+
     return fun;
   }
 
@@ -330,7 +343,7 @@ public class QuercusProgram {
   {
     return _functionMap.values();
   }
-  
+
   /**
    * Returns the functions.
    */
@@ -346,7 +359,7 @@ public class QuercusProgram {
   {
     return _classMap.values();
   }
-  
+
   /**
    * Returns the functions.
    */
@@ -361,7 +374,7 @@ public class QuercusProgram {
   public QuercusProgram createExprReturn()
   {
     // quercus/1515 - used to convert an call string to return a value
-    
+
     if (_statement instanceof ExprStatement) {
       ExprStatement exprStmt = (ExprStatement) _statement;
 
@@ -373,14 +386,14 @@ public class QuercusProgram {
       Statement []statements = blockStmt.getStatements();
 
       if (statements.length > 0 &&
-	  statements[0] instanceof ExprStatement) {
-	ExprStatement exprStmt
-	  = (ExprStatement) statements[0];
+          statements[0] instanceof ExprStatement) {
+        ExprStatement exprStmt
+          = (ExprStatement) statements[0];
 
-	_statement = new ReturnStatement(exprStmt.getExpr());
+        _statement = new ReturnStatement(exprStmt.getExpr());
       }
     }
-    
+
     return this;
   }
 
@@ -415,13 +428,13 @@ public class QuercusProgram {
   {
     synchronized (this) {
       if (_runtimeFunList == null) {
-	_runtimeFunList = funList;
+        _runtimeFunList = funList;
 
-	notifyAll();
-      
-	return true;
+        notifyAll();
+
+        return true;
       }
-    
+
       return false;
     }
   }
@@ -435,11 +448,11 @@ public class QuercusProgram {
   {
     synchronized (this) {
       if (_runtimeFunList == null) {
-	try {
-	  wait(timeout);
-	} catch (Exception e) {
-	  log.log(Level.FINER, e.toString(), e);
-	}
+        try {
+          wait(timeout);
+        } catch (Exception e) {
+          log.log(Level.FINER, e.toString(), e);
+        }
       }
     }
   }
@@ -455,7 +468,7 @@ public class QuercusProgram {
       if (fun.isGlobal())
         env.addFunction(entry.getKey(), fun);
     }
-    
+
     for (Map.Entry<String,InterpretedClassDef> entry : _classMap.entrySet()) {
       env.addClassDef(entry.getKey(), entry.getValue());
     }
@@ -470,20 +483,20 @@ public class QuercusProgram {
     public boolean isModified()
     {
       if (_compiledPage != null)
-	return _compiledPage.isModified();
+        return _compiledPage.isModified();
       else
-	return _depend.isModified();
+        return _depend.isModified();
     }
-  
+
     public boolean logModified(Logger log)
     {
       if (isModified()) {
-	log.finer(_sourceFile + " is modified");
+        log.finer(_sourceFile + " is modified");
 
-	return true;
+        return true;
       }
       else
-	return false;
+        return false;
     }
   }
 }

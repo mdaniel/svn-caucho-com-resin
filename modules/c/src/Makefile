@@ -1,4 +1,4 @@
-SHELL=/bin/sh
+SHELL=/bin/bash
 srcdir = .
 top_srcdir = ../../..
 plugins=common resin_os
