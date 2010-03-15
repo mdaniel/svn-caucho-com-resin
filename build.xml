@@ -3,7 +3,7 @@
   <property name="jar.update" value="true"/>
 
   <property name="promodules" location="${basedir}/../pro/modules"/>
-  <property name="jdkapi.href" value="http://java.sun.com/j2se/1.5.0/docs/api"/>
+  <property name="jdkapi.href" value="http://java.sun.com/javase/6/docs/api"/>
 
   <property name="shell" value="bash"/>
 
@@ -185,7 +185,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ejb"/>
       <param name="module.jar" value="ejb-15.jar"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -193,7 +193,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jpa"/>
       <param name="module.jar" value="jpa-15.jar"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -217,7 +217,7 @@
       <param name="module.name" value="j2ee-management"/>
       <param name="module.dist" value="${lib}"/>
       <param name="module.jar" value="j2ee-management-10.jar"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -226,7 +226,7 @@
       <param name="module.name" value="jaxrpc"/>
       <param name="module.jar" value="jaxrpc-15.jar"/>
       <param name="module.dist" value="${lib}"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -235,7 +235,7 @@
       <param name="module.name" value="jaxstream"/>
       <param name="module.jar" value="jaxstream-15.jar"/>
       <param name="module.dist" value="${lib}"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -243,7 +243,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="jws"/>
       <param name="module.jar" value="jws-15.jar"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -433,7 +433,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="experiment"/>
       <param name="module.jar" value="experiment.jar"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -596,7 +596,7 @@
     <antcall target="module" inheritRefs="true">
       <param name="module.name" value="ecmascript"/>
       <param name="module.dist" value="${lib}"/>
-      <param name="javac.source" value="1.5"/>
+      <!--param name="javac.source" value="1.5"/-->
     </antcall>
   </target>
 
@@ -727,7 +727,7 @@
       version="true"
       windowtitle="Resin ${version}"
       overview="${modules}/resin/src/overview.html"	     
-      source="1.5"
+      source="1.6"
       splitindex="yes">
 
       <packageset dir="${modules}/ejb/src"/>
