@@ -368,8 +368,10 @@ namespace Caucho
     public static int Main(String[] args)
     {
       Resin resin = new Resin(Environment.GetCommandLineArgs());
-
-      if (!resin.ResinArgs.IsValid()) {
+      if (resin.ResinArgs.IsServiceCommand()) {
+        resin.Info("Serivce administration was moved to setup.exe");
+        return -1;
+      } else if (!resin.ResinArgs.IsValid()) {
         resin.Usage(resin.ServiceName);
         return -1;
       } else {

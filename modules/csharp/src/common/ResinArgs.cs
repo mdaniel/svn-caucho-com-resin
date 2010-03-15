@@ -368,5 +368,10 @@ namespace Caucho
     {
       return Command != null || IsInstall || IsUnInstall || IsService;
     }
+
+    public bool IsServiceCommand()
+    {
+      return IsInstall || IsUnInstall;
+    }
   }
 }
