@@ -58,7 +58,7 @@ public class BlockReadWrite {
   private long _fileSize;
 
   private Object _fileLock = new Object();
-  
+
   private FreeList<RandomAccessWrapper> _cachedRowFile
     = new FreeList<RandomAccessWrapper>(4);
 
@@ -103,7 +103,7 @@ public class BlockReadWrite {
                                  _path.getNativePath()));
     }
   }
-  
+
   boolean isFileExist()
   {
     return _path.exists();
@@ -133,7 +133,6 @@ public class BlockReadWrite {
 
       close();
 
-      System.out.println("REMOVE: " + path);
       if (path != null)
         path.remove();
     } catch (IOException e) {
@@ -209,7 +208,7 @@ public class BlockReadWrite {
       */
       if (buffer == null || offset < 0 || length < 0 || buffer.length < offset + length)
         System.out.println("BUFFER: " + buffer + " " + offset + " " + length);
-      
+
       os.write(blockAddress, buffer, offset, length);
 
       freeRowFile(wrapper, isPriority);
