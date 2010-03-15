@@ -244,6 +244,7 @@ configuration page.</p>
 
 </s1>
 
+<!--
 <s1 title="Resin with IIS">
 
 <p>You can also combine IIS and Resin.  IIS
@@ -270,6 +271,7 @@ configuration.  The IIS configuration tells IIS how to find Resin.
 <a href="install-iis.xtp">Resin with IIS</a> configuration page.</p>
 
 </s1>
+-->
 
 </body>
 </document>

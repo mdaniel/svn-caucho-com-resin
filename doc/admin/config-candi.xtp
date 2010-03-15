@@ -142,16 +142,18 @@ A <code>&lt;my:MyBean></code> will create a new instance each time it's
 injected or referenced.</p>
 
 <example title="Example: bean and component META-INF/beans.xml">
-&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
+&lt;beans xmlns="http://java.sun.com/xml/ns/javaee"
+        xmlns:ee="urn:java:ee"
+        xmlns:example="urn:java:example">
 
   &lt;example:MyService>
-    &lt;ApplicationScoped/>
+    &lt;ee:ApplicationScoped/>
   &lt;/example:MyService>
 
   &lt;example:MyComponent>
   &lt;/example:MyComponent>
 
-&lt;/Beans>
+&lt;/beans>
 </example>
 
 <p>The <code>&lt;my:MyBean></code> tags can configure fields and
@@ -163,12 +165,12 @@ annotations:</p>
   <th>Description</th>
 </tr>
 <tr>
-  <td>&lt;Named></td>
-  <td>the <a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/Named.html">@javax.enterprise.inject.Named</a> annotations for EL naming</td>
+  <td>&lt;ee:Named></td>
+  <td>the <a href="http://caucho.com/resin-javadoc/javax/inject/Named.html">@javax.inject.Named</a> annotations for EL naming</td>
 </tr>
 <tr>
-  <td>&lt;BindingType></td>
-  <td>any <a href="http://caucho.com/resin-javadoc/javax/enterprise/inject/BindingType">@javax.enterprise.inject.BindingType</a> annotations for
+  <td>&lt;ee:Qualifier></td>
+  <td>any <a href="http://caucho.com/resin-javadoc/javax/inject/Qualifier">@javax.inject.Qualifier</a> annotations for
   injection</td>
 </tr>
 <tr>
@@ -176,7 +178,7 @@ annotations:</p>
   <td>optional configuration, using bean-style assignment</td>
 </tr>
 <tr>
-  <td>&lt;SessionScoped></td>
+  <td>&lt;ee:SessionScoped></td>
   <td>specifies scope of the instances: request, conversation, session, application, or singleton</td>
 </tr>
 </deftable>
@@ -201,15 +203,16 @@ circular references.</p>
 
 <example title="Example: circular references in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
+       xmlns:ee="urn:java:ee">
        xmlns:qa="urn:java:qa">
 
   &lt;qa:FooBean>
-    &lt;Named>a&lt;/Named>
+    &lt;ee:Named>a&lt;/ee:Named>
     &lt;qa:bar>#{b}&lt;/qa:bar>
   &lt;/qa:FooBean>
 
   &lt;qa:FooBean>
-    &lt;Named>b&lt;/Named>
+    &lt;ee:Named>b&lt;/ee:Named>
     &lt;qa:bar>#{a}&lt;/qa:bar>
   &lt;/qa:FooBean>
 
@@ -248,13 +251,14 @@ bean.  Resin will
 apply the configuration to the instance as part of the creation process.</p>
 
 <example title="Example: META-INF/beans.xml configuring a singleton">
-&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
+&lt;beans xmlns="http://java.sun.com/xml/ns/javaee"
+       xmlns:example="urn:java:example">
 
   &lt;example:Hello>
     &lt;example:greeting>Hello, World&lt;/example:greeting>
   &lt;/example:Hello>
 
-&lt;/Beans>
+&lt;/beans>
 </example>
 
 <s2 title="primitive conversions">
@@ -545,7 +549,7 @@ public class MyBean {
 <s2 title="setValue">
 
 <p>For objects with a <code>setValue</code> or <code>addText</code> method
-and a zero-argument constructor, Resin-IoC will convert using the
+and a zero-argument constructor, Resin-CanDI will convert using the
 following steps:</p>
 
 <ol>
@@ -711,16 +715,18 @@ services.
 
 </s1>
 
-<s1 title="Resin IoC">
+<s1 title="Resin CanDI">
 
-<p>Resin is designed around the Java Dependency Injection specification
-(JSR-299), an inversion-of-control framework used for all configuration
+<p>Resin is designed around the Java Contexts and Dependency Injection
+ specification (Java CanDI, JSR-299), an inversion-of-control framework
+ used for all configuration
 and resources including servlets, EJBs, messaging,
 remoting, and databases.  Applications can take advantage of Java
 Injection using standard annotations and interfaces.</p>
 
-<p>Since Resin-IoC is used for servlets, WebBeans and EJBs, any application
-bean can use EJB annotations like @TransactionAttribute or WebBeans
+<p>Since Resin-CanDI is used for servlets, Java objects
+and EJBs, any application
+bean can use EJB annotations like @TransactionAttribute or CanDI
 @InterceptionTypes or event @Observes capabilities, in addition to the
 dependency injection and IoC configuration.</p>
 
@@ -747,26 +753,38 @@ capabilities that
 are available to any registered bean.  The basic capability types are:</p>
 
 <ul>
-<li><b>Lifecycle model:</b> Java, <code>@Stateless</code>, <code>@Stateful</code>,
+<li>
+  <b>Lifecycle model:</b> Java, <code>@Stateless</code>, <code>@Stateful</code>,
 or <code>@MessageDriven</code>.
 Resin-managed objects like Servlets and Filters are Java model beans.</li>
-<li><b>Dependency injection:</b> injection annotations from <code>javax.inject</code>: <code>@Current</code>, <code>@Named</code>, <code>@BindingType</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
+
+<li>
+  <b>Dependency injection:</b> injection annotations from <code>javax.inject</code>: <code>@Default</code>, <code>@Named</code>, <code>@Qualifier</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
 available to all beans.</li>
-<li><b>Registration:</b> all beans are registered in a unified typed-namespace
+
+<li>
+  <b>Registration:</b> all beans are registered in a unified typed-namespace
 registry (i.e. the registration half of dependency injection.)</li>
 <li><b>Lifecycle events:</b> the <code>@PostConstruct</code> and <code>@PreDestroy</code></li>
-<li><b>Predefined aspects:</b> the <code>@TransactionAttribute</code>, <code>@RunAs</code>, <code>@RolesAllowed</code>, etc. annotations are
+
+<li>
+  <b>Predefined aspects:</b> the <code>@TransactionAttribute</code>, <code>@RunAs</code>, <code>@RolesAllowed</code>, etc. annotations are
 available to all beans.</li>
-<li><b>Custom interceptors:</b> EJB-style <code>@AroundInvoke</code>, and <code>@Interceptors</code>, as well
+
+<li>
+  <b>Custom interceptors:</b> EJB-style <code>@AroundInvoke</code>, and <code>@Interceptors</code>, as well
 as Java Injection <code>@Interceptor</code>, <code>@InterceptorBindingType</code>, and <code>@Decorator</code> are available to all beans.</li>
-<li><b>Event handling:</b> the Java Injection <code>javax.event</code>, <code>@Observes</code> capability is available to all beans.</li>
+
+<li>
+  <b>Event handling:</b> the Java Injection <code>javax.enterprise.event</code>, <code>@Observes</code> capability is available to all beans.</li>
 </ul>
 </s1>
 
 <s1 title="XML configuration">
 
 <p>You can register your components and services with Resin using the
-resin.xml or resin-web.xml files as well as the META-INF/beans.xml.
+resin.xml or resin-web.xml files as well as the META-INF/beans.xml
+and WEB-INF/beans.xml.
 Since the Java Injection registry is integrated
 with Resin, your services be treated as first-class components along with
 the Resin resources.  Although most components will not need XML, there
@@ -792,16 +810,17 @@ A <code>&lt;my:MyBean></code> will create a new instance each time it's
 injected or referenced.</p>
 
 <example title="Example: bean and component META-INF/beans.xml">
-&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
+&lt;beans xmlns="http://java.sun.com/xml/ns/javaee"
+   xmlns:example="urn:java:example">
 
   &lt;example:MyService>
-    &lt;ApplicationScoped/>
+    &lt;ee:ApplicationScoped/>
   &lt;/example:MyService>
 
   &lt;example:MyComponent>
   &lt;/example:MyComponent>
 
-&lt;/Beans>
+&lt;/beans>
 </example>
 
 <p>The <code>&lt;my:MyBean></code> tags can configure fields and
@@ -813,12 +832,12 @@ annotations:</p>
   <th>Description</th>
 </tr>
 <tr>
-  <td>&lt;Named></td>
-  <td>the <code>@javax.annotation.Name</code> annotations for EL naming</td>
+  <td>&lt;ee:Named></td>
+  <td>the <code>@javax.inject.Name</code> annotations for EL naming</td>
 </tr>
 <tr>
-  <td>&lt;BindingType></td>
-  <td>any <code>@javax.annotation.BindingType</code> annotations for
+  <td>&lt;ee:Qualifier></td>
+  <td>any <code>@javax.inject.Qualifier</code> annotations for
   injection</td>
 </tr>
 <tr>
@@ -826,7 +845,7 @@ annotations:</p>
   <td>optional configuration, using bean-style assignment</td>
 </tr>
 <tr>
-  <td>&lt;SessionScoped></td>
+  <td>&lt;ee:SessionScoped></td>
   <td>specifies scope of the instances: request, conversation, session, application, or singleton</td>
 </tr>
 </deftable>
@@ -861,19 +880,20 @@ bean.  Resin will
 apply the configuration to the instance as part of the creation process.</p>
 
 <example title="Example: META-INF/beans.xml configuring a singleton">
-&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
+&lt;beans xmlns="http://java.sun.com/xml/ns/javaee"
+  xmlns:example="urn:java:example">
 
   &lt;example:Hello>
     &lt;example:greeting>Hello, World&lt;/example:greeting>
   &lt;/example:Hello>
 
-&lt;/Beans>
+&lt;/beans>
 </example>
 
 <p>Resin's configuration uses 5 basic bean patterns, extending the JavaBeans
 conventions.  It can configure literal values like string and integers as
 well as configuring other beans.  Any component bean configured by Resin
-has full access to <code>@BindingType</code> injection as well as
+has full access to <code>@Qualifier</code> injection as well as
 the standard <code>@PostConstruct</code> annotations.  Sub-beans are
 not automatically registered with Java Inection, i.e. they act like the
 servlet configuration.</p>
@@ -1059,7 +1079,7 @@ string representation.</p>
 
 <s3 title="String constructor">
 
-<p>Resin-IoC will automatically convert a string to an object if the
+<p>Resin-CanDI will automatically convert a string to an object if the
 object has a single String argument constructor.</p>
 
 <example title="Example: MyBean with constructor">
@@ -1159,7 +1179,7 @@ created will be an <code>ArrayList</code>.</p>
 &lt;/my-bean>
 </example>
 
-<p>Resin-IoC can always use the <code>addXXX</code> pattern to add
+<p>Resin-CanDI can always use the <code>addXXX</code> pattern to add
 a variable number of items.  Normally, the <code>addXXX</code> pattern
 is easier and more maintainable than the <code>addList</code> pattern.
 In particular, validation of the item values is quicker and more accurate
@@ -1195,7 +1215,7 @@ with <code>addXXX</code>.</p>
 
 <s2 title="References and EL Expressions">
 
-<p>Resin-IoC configuration files can use EL expressions to get references
+<p>Resin-CanDI configuration files can use EL expressions to get references
 to resources, beans, system properties, and calculate generatal expressions
 based on those values.  Since all Resin's resources are added to
 the WebBeans registry automatically, application components have access to
@@ -1207,531 +1227,17 @@ between the two, but the deferred syntax is preferred, since Resin-IoC
 initializes beans lazily to handle circular references.</p>
 
 <example title="Example: circular references in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;bean name="a" class="qa.FooBean">
-    &lt;init bar="#{b}"/>
-  &lt;/bean>
-
-  &lt;bean name="b" class="qa.BarBean">
-    &lt;init foo="#{a}"/>
-  &lt;/bean>
-
-&lt;/web-app>
-</example>
-
-<p>Because Resin's EL implementation allows method expressions, you can
-use beans as factories in the EL expressions.</p>
-
-</s2>
-
-</s1>
-
-<s1 title="Resin IoC">
-
-<p>Resin is designed around the Java Dependency Injection specification
-(JSR-299), an inversion-of-control framework used for all configuration
-and resources including servlets, EJBs, messaging,
-remoting, and databases.  Applications can take advantage of Java
-Injection using standard annotations and interfaces.</p>
-
-<p>Since Resin-IoC is used for servlets, WebBeans and EJBs, any application
-bean can use EJB annotations like @TransactionAttribute or WebBeans
-@InterceptionTypes or event @Observes capabilities, in addition to the
-dependency injection and IoC configuration.</p>
-
-<p>The dependency injection framework is type-safe, meaning the registry
-is organized around Java types, not a flat namespace, which gives more
-power and flexibility for component assembly.
-Since injection is annotation-based, most components can avoid XML
-configuration, while XML is still available for components.</p>
-
-</s1>
-
-<s1 title="Overview">
-
-<p>Resin's Java Injection support is integrated
-with <a href="resin-ejb.xtp">EJB 3.0
-</a> and the core components like Servlets, Filters and remote objects.
-This integration means plain Java beans can use EJB annotations
-and interception, EJBs can use Java Injection annotations, and both kinds of
-beans can be configured directly from the <code>resin-web.xml</code>
-or discovered by classpath scanning.</p>
-
-<p>So it's best to think of Java Injection as a set of orthogonal
-capabilities that
-are available to any registered bean.  The basic capability types are:</p>
-
-<ul>
-<li><b>Lifecycle model:</b> Java, <code>@Stateless</code>, <code>@Stateful</code>,
-or <code>@MessageDriven</code>.
-Resin-managed objects like Servlets and Filters are Java model beans.</li>
-<li><b>Dependency injection:</b> injection annotations from <code>javax.inject</code>: <code>@Current</code>, <code>@Named</code>, <code>@BindingType</code>, <code>@EJB</code>, <code>@PersistenceUnit</code>, etc are
-available to all beans.</li>
-<li><b>Registration:</b> all beans are registered in a unified typed-namespace
-registry (i.e. the registration half of dependency injection.)</li>
-<li><b>Lifecycle events:</b> the <code>@PostConstruct</code> and <code>@PreDestroy</code></li>
-<li><b>Predefined aspects:</b> the <code>@TransactionAttribute</code>, <code>@RunAs</code>, <code>@RolesAllowed</code>, etc. annotations are
-available to all beans.</li>
-<li><b>Custom interceptors:</b> EJB-style <code>@AroundInvoke</code>, and <code>@Interceptors</code>, as well
-as Java Injection <code>@Interceptor</code>, <code>@InterceptorBindingType</code>, and <code>@Decorator</code> are available to all beans.</li>
-<li><b>Event handling:</b> the Java Injection <code>javax.event</code>, <code>@Observes</code> capability is available to all beans.</li>
-</ul>
-</s1>
-
-<s1 title="XML configuration">
-
-<p>You can register your components and services with Resin using the
-resin.xml or resin-web.xml files as well as the META-INF/beans.xml.
-Since the Java Injection registry is integrated
-with Resin, your services be treated as first-class components along with
-the Resin resources.  Although most components will not need XML, there
-are a few advantages for the small number of services which do use XML.</p>
-
-<p>The XML-configuration lets you customize your application for a
-particular environment, e.g. setting configuration parameters.  For example,
-Resin's <code>&lt;database></code> needs to select a database driver and
-configure the URL, user and password of the database as well as configuring
-connection pooling parameters.  Some application services will also need
-configuration.</p>
-
-<p>In addition, the XML-configuration documents the services
-you've enabled.  For heavyweight services, this documentation is critical,
-while lightweight components do not need this extra housekeeping overhead.</p>
-
-<s2 title="bean and component registration">
-
-<p>The <code>&lt;my:MyBean></code> tags register
-application classes with Resin.
-The default scope of a <code>&lt;my:MyBean></code> is <code>@Dependent</code>.
-A <code>&lt;my:MyBean></code> will create a new instance each time it's
-injected or referenced.</p>
-
-<example title="Example: bean and component META-INF/beans.xml">
-&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
-
-  &lt;example:MyService>
-    &lt;ApplicationScoped/>
-  &lt;/example:MyService>
-
-  &lt;example:MyComponent>
-  &lt;/example:MyComponent>
-
-&lt;/Beans>
-</example>
-
-<p>The <code>&lt;my:MyBean></code> tags can configure fields and
-annotations:</p>
-
-<deftable title="XML annotations">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>&lt;Named></td>
-  <td>the <code>@javax.annotation.Name</code> annotations for EL naming</td>
-</tr>
-<tr>
-  <td>&lt;BindingType></td>
-  <td>any <code>@javax.annotation.BindingType</code> annotations for
-  injection</td>
-</tr>
-<tr>
-  <td>my:myField</td>
-  <td>optional configuration, using bean-style assignment</td>
-</tr>
-<tr>
-  <td>&lt;SessionScoped></td>
-  <td>specifies scope of the instances: request, conversation, session, application, or singleton</td>
-</tr>
-</deftable>
-
-</s2>
-
-<s2 title="Bean property configuration">
-
-<p>Resin's Java Injection configuration uses the standard JavaBeans
-patterns to configure properties.  Resin uses the same mechanism for all of
-its own configuration parsing, including every JavaEE configuration file, the
-resin-web.xml and the resin.xml itself.  So your application will have
-all the configuration flexibility it needs.</p>
-
-<p>Since the component beans can use Java
-Injections, injected components are typically not configured in
-the resin-web.conf, avoiding the need for tags like <code>&lt;ref></code>.</p>
-
-<example title="Example: Hello.java">
-package example;
-
-public class Hello {
-  private String _greeting = "default";
-
-  public void setGreeting(String greeting) { _greeting = greeting; }
-  public String getGreeting() { return _greeting; }
-}
-</example>
-
-<p>The basic example sets a <code>greeting</code> property of a hello, world
-bean.  Resin will
-apply the configuration to the instance as part of the creation process.</p>
-
-<example title="Example: META-INF/beans.xml configuring a singleton">
-&lt;Beans xmlns="urn:java:ee" xmlns:example="urn:java:example">
-
-  &lt;example:Hello>
-    &lt;example:greeting>Hello, World&lt;/example:greeting>
-  &lt;/example:Hello>
-
-&lt;/Beans>
-</example>
-
-<p>Resin's configuration uses 5 basic bean patterns, extending the JavaBeans
-conventions.  It can configure literal values like string and integers as
-well as configuring other beans.  Any component bean configured by Resin
-has full access to <code>@BindingType</code> injection as well as
-the standard <code>@PostConstruct</code> annotations.  Sub-beans are
-not automatically registered with Java Inection, i.e. they act like the
-servlet configuration.</p>
-
-<p>(Currently the patterns are name-based like JavaBeans, since Resin
-was designed before annotations.  We may add configuration annotations
-in the future.</p>
-
-<example title="Example: Bean configuration patterns">
-  public void setFoo(String data);
-
-  public void setFoo(Movie data);
-
-  public void addFoo(Movie data);
-
-  public Movie createFoo();
-
-  public void setText(String data);
-</example>
-
-<ol>
-<li><code>setFoo(String)</code> configures a standard JavaBeans-style
-literal.</li>
-<li><code>setFoo(Movie)</code> creates a new instance of <code>Movie</code> and recursively configures it.</li>
-<li><code>addFoo(Movie)</code> also creates a new instance of <code>Movie</code> and recursively configures it.  <code>addFoo</code> is an easy way of
-configuring lists.</li>
-<li><code>Movie createFoo()</code> lets the bean create
-the <code>Movie</code> instance.  Many beans can
-use <code>createFoo</code> with inner classes to
-handle complex configuration.</li>
-<li><code>setText</code> is called with the text contents of
-the XML.  Value-style beans will use this.  (somewhat rare).</li>
-</ol>
-
-<p>As mentioned above, Resin uses these 5 patterns to handle all of the
-JavaEE configuration files.  In particular, the <code>createFoo</code>
-pattern returning inner classes is very handy for some complicated
-configuration cases, and for cases where a sub-tag needs information about
-the parent.</p>
-
-<example title="Example: sub-bean configuration example">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;example:Theater xmlns:example="urn:java:example">
-    &lt;example:name>Balboa&lt;/example:name>
-
-    &lt;example:movie title="The Princess Bride"/>
-
-    &lt;example:movie title="The Maltese Falcon"/>
-  &lt;/example:Theater>
-
-&lt;/web-app>
-</example>
-
-<p>In this example, the <code>Theater</code> classes uses
-an inner <code>Movie</code> class to illustrate the use of
-the <code>create</code> pattern.</p>
-
-<example title="Example: Theater.java">
-public class Theater {
-  String _name;
-
-  ArrayList&lt;Movie> _movies = new ArrayList&lt;Movie>();
-
-  public void setName(String name) { _name = name; }
-
-  public Movie createMovie()
-  {
-    return new Movie(this);
-  }
-
-  public void addMovie(Movie movie)
-  {
-    _movies.add(movie);
-  }
-
-  public static class Movie {
-    private Theater _theater;
-    private String _title;
-
-    Movie(Theater theater)
-    {
-      _theater = theater;
-    }
-
-    public void setTitle(String title) { _title = title; }
-  }
-}
-</example>
-
-</s2>
-
-<s2 title="Base configuration: string conversions">
-
-<p>Java Injection provides a number of built-in string conversion types as well
-as supporting JavaBeans <code>PropertyEditor</code> and custom converters.</p>
-
-<deftable title="Built-in String Converters">
-<tr>
-  <th>Type</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>boolean, Boolean</td>
-  <td>Java boolean</td>
-</tr>
-<tr>
-  <td>byte, Byte</td>
-  <td>Java byte</td>
-</tr>
-<tr>
-  <td>short, Short</td>
-  <td>Java short</td>
-</tr>
-<tr>
-  <td>int, Integer</td>
-  <td>Java integer</td>
-</tr>
-<tr>
-  <td>long, Long</td>
-  <td>Java long</td>
-</tr>
-<tr>
-  <td>float, Float</td>
-  <td>Java float</td>
-</tr>
-<tr>
-  <td>double, Double</td>
-  <td>Java double</td>
-</tr>
-<tr>
-  <td>char, Character</td>
-  <td>Java char</td>
-</tr>
-<tr>
-  <td>String[]</td>
-  <td>String array separated by commas</td>
-</tr>
-<tr>
-  <td>Class</td>
-  <td>Java classes</td>
-</tr>
-<tr>
-  <td>Path</td>
-  <td>Resin VFS Paths</td>
-</tr>
-<tr>
-  <td>File</td>
-  <td>java.io.File</td>
-</tr>
-<tr>
-  <td>URL</td>
-  <td>java.net.URL</td>
-</tr>
-<tr>
-  <td>Pattern</td>
-  <td>java.util.regex.Pattern</td>
-</tr>
-<tr>
-  <td>Locale</td>
-  <td>java.util.Locale</td>
-</tr>
-<tr>
-  <td>Date</td>
-  <td>java.util.Date</td>
-</tr>
-<tr>
-  <td>Properties</td>
-  <td>java.util.Properties</td>
-</tr>
-<tr>
-  <td>RawString</td>
-  <td>com.caucho.config.type.RawString</td>
-</tr>
-</deftable>
-
-<s3 title="enumerations">
-
-<p>Enumerations are automatically converted from their
-string representation.</p>
-
-</s3>
-
-<s3 title="String constructor">
-
-<p>Resin-IoC will automatically convert a string to an object if the
-object has a single String argument constructor.</p>
-
-<example title="Example: MyBean with constructor">
-public class MyBean {
-  public MyBean(String value)
-  {
-    ...
-  }
-}
-</example>
-
-</s3>
-
-<s3 title="valueOf">
-
-<p>For classes which implement a static <code>valueOf(String)</code> method,
-Resin will automatically convert to the given type using
-the <code>valueOf</code> method.</p>
-
-<example title="Example: MyBean with valueOf">
-public class MyBean {
-  ...
-
-  public static MyBean valueOf(String text)
-  {
-    MyBean bean = new MyBean();
-    bean.setTextValue(text);
-    bean.init();
-    return bean;
-  }
-}
-</example>
-
-</s3>
-
-<s3 title="setValue">
-
-<p>For objects with a <code>setValue</code> or <code>addText</code> method
-and a zero-argument constructor, Resin-IoC will convert using the
-following steps:</p>
-
-<ol>
-<li>Create the object</li>
-<li>Inject any dependencies</li>
-<li>Call <code>setValue</code> or <code>setText</code> with the string</li>
-<li>Call any @PostConstruct</li>
-<li>Return the configured bean</li>
-</ol>
-
-</s3>
-
-</s2>
-
-<s2 title="Compound types">
-
-<s3 title="list">
-
-<p>Setters taking a <code>List</code> or array argument can be configured
-with list values.</p>
-
-<p>List items are specified directly with &lt;value> elements.  There is
-no extra &lt;list> element required.  The &lt;list> element is only used
-when creating a sub-list or sub-element (see below.)</p>
-
-<example title="Example: MyBean.setValues(List)">
-&lt;my-bean>
-  &lt;values>
-    &lt;value>a&lt;/value>
-    &lt;value>b&lt;/value>
-    &lt;value>c&lt;/value>
-  &lt;/values>
-&lt;/my-bean>
-</example>
-
-<example title="Example: MyBean.setValues(String [])">
-&lt;my-bean>
-  &lt;values>
-    &lt;value>a&lt;/value>
-    &lt;value>b&lt;/value>
-    &lt;value>c&lt;/value>
-  &lt;/values>
-&lt;/my-bean>
-</example>
-
-<p>In the following example, the argument is an object, so we need
-a &lt;list> element to tell Resin to create a list.  The object
-created will be an <code>ArrayList</code>.</p>
-<example title="Example: MyBean.setValues(Object)">
-&lt;my-bean>
-  &lt;values>
-    &lt;list>
-      &lt;value>a&lt;/value>
-      &lt;value>b&lt;/value>
-      &lt;value>c&lt;/value>
-    &lt;/list>
-  &lt;/values>
-&lt;/my-bean>
-</example>
-
-<p>Resin-IoC can always use the <code>addXXX</code> pattern to add
-a variable number of items.  Normally, the <code>addXXX</code> pattern
-is easier and more maintainable than the <code>addList</code> pattern.
-In particular, validation of the item values is quicker and more accurate
-with <code>addXXX</code>.</p>
-
-<example title="Example: MyBean.addValue(String)">
-&lt;my-bean>
-  &lt;value>a&lt;/value>
-  &lt;value>b&lt;/value>
-  &lt;value>c&lt;/value>
-&lt;/my-bean>
-</example>
-
-</s3>
-
-<s3 title="map">
-
-<p>Generic maps can use an &lt;entry> syntax to define property values.</p>
-
-<example title="Example: MyBean.setValues(Map)">
-&lt;my-bean>
-  &lt;values>
-    &lt;entry key="a" value="one"/>
-    &lt;entry key="b" value="two"/>
-    &lt;entry key="c" value="three"/>
-  &lt;/values>
-&lt;/my-bean>
-</example>
-
-</s3>
-
-</s2>
-
-<s2 title="References and EL Expressions">
-
-<p>Resin-IoC configuration files can use EL expressions to get references
-to resources, beans, system properties, and calculate generatal expressions
-based on those values.  Since all Resin's resources are added to
-the WebBeans registry automatically, application components have access to
-anything they need.</p>
-
-<p>Both the JSP immediate syntax and deferred syntax are
-supported (${...} vs #{...}).  Currently, there is no distinction
-between the two, but the deferred syntax is preferred, since Resin-IoC
-initializes beans lazily to handle circular references.</p>
-
-<example title="Example: circular references in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;bean name="a" class="qa.FooBean">
-    &lt;init bar="#{b}"/>
-  &lt;/bean>
-
-  &lt;bean name="b" class="qa.BarBean">
-    &lt;init foo="#{a}"/>
-  &lt;/bean>
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:ee="urn:java:ee"
+  xmlns:qa="urn:java:qa">
+
+  &lt;qa:FooBean ee:Named="a">
+    &lt;bar>#{b}&lt;/bar>
+  &lt;/qa:FooBean>
+
+  &lt;qa:BarBean ee:Named="b">
+    &lt;foo>#{a}&lt;/foo>
+  &lt;/qa:BarBean>
 
 &lt;/web-app>
 </example>
@@ -2256,36 +1762,22 @@ different object. Called after the @PostConstruct. </p>
 
 </s1>
 
-<s1 title="resin:type">
+<s1 title="Inline custom Beans">
 
-<s2 title="resin:type" type="defun">
+<example title="Inline custom beans">
+&lt;beans xmlns="http://caucho.com/ns/resin"
+  xmlns:resin="urn:java:com.caucho.resin"
+  xmlns:example="urn:java:com.foo.example">
 
-<p>This special attribute can be used with all sub-beans to
-instantiate a different bean class than the one defined in the parent
-bean.</p>
+&lt;example:MessageBean resin:JndiName="env/message"&gt;
+  &lt;message&gt;This is message 1&lt;/message&gt;
+  &lt;message&gt;This is message 2&lt;/message&gt;
+  &lt;message>
+     &lt;example:CustomMessage/>
+   &lt;/message>
+&lt;/example:MessageBean>
 
-<p>If a sub-bean is returned from method like <code>SubBean
-createSubBean()</code> then <var>resin:type</var> cannot be used.  A
-<code>void setParent(Object obj)</code> method in the sub-bean, which
-is called before the other setters, provides an opportunity for the
-sub-bean instance to know it's enclosing object.</p>
-
-<p>
-The <var>resin:</var> in <code>resin:type</code> is a namespace prefix automatically
-mapped to <var>http://caucho.com/ns/resin</var>. You could use another namespace
-prefix, for example if you defined
-<var>xmlns:foo="http://caucho.com/ns/resin"</var>, you could use <code>foo:type</code>.
-</p>
-
-<example title="Bean-style configuration for using resin:type">
-&lt;resource jndi-name="env/message"&gt;
-  &lt;type&gt;example.MessageBean&lt;/type&gt;
-  &lt;init&gt;
-    &lt;message&gt;This is message 1&lt;/message&gt;
-    &lt;message&gt;This is message 2&lt;/message&gt;
-    &lt;message resin:type="example.CustomMessage"&gt;This is message 3&lt;/message&gt;
-  &lt;/init&gt;
-&lt;/resource&gt;
+&lt;/beans>
 </example>
 
 <example title="MessageBean.java">
@@ -2369,8 +1861,6 @@ createSubBean is that it's
 not possible to use a resin:type with createSubBean.  So the setParent is
 useful when the @PostConstruct method needs the parent, and you need to use
 resin:type.</p>
-
-</s2>
 
 </s1>
 
@@ -2707,348 +2197,6 @@ resin:import is used to read configuration information from another file.
 </s2> <!-- import -->
 
 </s1> <!-- xml -->
-
-<s1 title="Setter Injection Bean Patterns">
-
-<p>Resin configures beans using setter injection
-patterns, supporting the Inversion-of-Control design pattern.
-A "bean" is any plain-old Java object which follows standard
-configuration patterns.  Because Resin can find the bean-style setters
-from looking at the class, it can configure those setters in a
-configuration file like the web.xml.</p>
-
-<p>Resin's configuration follows the <em>Assembly Line</em>
-or <em>Dependency Injection</em> pattern.</p>
-
-</s1>
-
-<s1 title="Overview">
-
-<p>The Assembly Line pattern gives configuration responsibility to the
-container where it belongs, while keeping the application code independent
-of the container.  Bean-style configuration setters for simple properties
-form the foundation for the Assembly Line pattern.  If an application
-follows the bean patterns, it can be configuration in any container following
-the Assembly Line (setter injection) pattern.</p>
-
-<p>We strongly recommend following the Assembly Line pattern throughout
-an application, even if your application does not use Resin to configure
-itself.  Following the Assembly Line pattern makes application code
-easier to understand, maintain, configure and test.</p>
-
-<figure src="assembler-eg1.gif"/>
-
-</s1>
-
-<s1 title="Property Configuration: setXXX">
-
-<p>The bean configuration form the foundation of the Assembly
-Line pattern.  Since most applications already follow the bean patterns,
-they get property configuration with no changes.</p>
-
-
-<p>Each configuration parameter <var>foo</var> has a corresponding setter method
-<code>setFoo</code> with a single argument for the value.  Resin
-looks at the class using Java's reflection to find the <code>setFoo</code>
-method.</p>
-        
-<example title="Bean-style configuration for a single value setter">
-&lt;init&gt;
-  &lt;greeting&gt;Hello, World!&lt;/greeting&gt;
-  &lt;another-greeting&gt;Hello, Mom!&lt;/another-greeting&gt;
-&lt;/init&gt;
-</example>
-
-<example title="Bean-style java code for a single value setter">
-public class MyBean {
-  private String _greeting;
-  private String _anotherGreeting;
-
-  public void setGreeting(String greeting) 
-  {
-    _greeting = greeting;
-  }
-
-  public void setAnotherGreeting(String anotherGreeting) 
-  {
-    _anotherGreeting = anotherGreeting;
-  }
-}
-</example>
-
-</s1>
-
-<s1 title="Setter Injection: setXXX">
-
-<p>Setter injection connects resources following the same
-bean-style setter pattern.  Where bean properties configure simple
-values like strings and integers, setter injection configures
-other resources like databases and application components.</p>
-
-<p>Resin uses JNDI to store the intermediate resources, e.g. storing
-a database in java:comp/env/jdbc/test.  The configuration file
-specifies the JNDI resource using the JSP expression language and
-jndi:lookup.</p>
-
-<example title="Configuration for Setter Injection">
-&lt;init&gt;
-  &lt;data-source&gt;\${jndi:lookup("jdbc/test")}&lt;data-source&gt;
-&lt;/init&gt;
-</example>
-
-<example title="Setter Injection for a DataSource">
-public class MyBean {
-  private DataSource _dataSource;
-
-  public void setDataSource(DataSource ds)
-  {
-    _dataSource = ds;
-  }
-}
-</example>
-
-<s2 title="Compatibility">
-
-<p>Setter injection is portable to containers which
-support dependency injection.</p>
-
-</s2>
-
-</s1>
-
-<s1 title="Container Properties: addXXX">
-
-<p>Resources often act as containers for lists of values and map values.
-The <code>addXXX</code> pattern adds multiple values for a single property.
-</p>
-
-<p>A setter method <code>addFoo</code> allows multiple values to be
-specified from the configuration.</p>
-
-<example title="Bean-style configuration for setting multiple values">
-&lt;init&gt;
-  &lt;greeting&gt;Hello, World!&lt;/greeting&gt;
-  &lt;greeting&gt;Hello, Mom!&lt;/greeting&gt;
-&lt;/init&gt;
-</example>
-
-<example title="Bean-style java code for setting multiple values">
-public class MyBean {
-  private LinkedList _greetings = new LinkedList();
-
-  public void addGreeting(String greeting) 
-  {
-    _greetings.add(greeting);
-  }
-
-}
-</example>
-
-</s1>
-
-<s1 title="Validation and Assembly: @PostConstruct">
-
-<p>Well-written resources will validate their configuration and may
-perform additional assembly tasks.  Resin calls <code>@PostConstruct</code> methods
-after all the setter methods have been called.</p>
-
-<example title="Bean-style @PostConstruct">
-public class MyBean {
-  private String _language;
-  private String _country;
-  Locale locale;
-
-  public void setLanguage(String language) 
-  {
-    _language = language;
-  }
-
-  public void setCountry(int country) 
-  {
-    _country = country;
-  }
-
-  @PostConstruct
-  public void init()
-  {
-    locale = new Locale(language, country);
-  }
-}
-</example>
-
-<s2 title="Validation Exceptions">
-<p>If an exception is thrown from any of the methods in the bean,
-Resin will attach a file name and line number that correspond to the
-configuration file.</p>
-
-<example title="Bean-style exceptions">
-public class MyBean {
-  private String _language;
-  private String _country;
-  Locale _locale;
-
-  public void setLanguage(String language) 
-    throws Exception
-  {
-    if (language.length() != 2)
-      throw new Exception("'language' must be a two-character string");
-    _language = language;
-  }
-
-  public void setCountry(int country) 
-    throws Exception
-  {
-    if (country.length() != 2)
-      throw new Exception("'country' must be a two-character string");
-    _country = country;
-  }
-
-  @PostConstruct
-  public void init() 
-  {
-    if (_country == null)
-      throw new Exception("'country' is required");
-    if (_language == null)
-      throw new Exception("'language' is required");
-
-    _locale = new Locale(language,country);
-  }
-}
-</example>
-
-<results>
-500 Servlet Exception
-
-WEB-INF/web.xml:9: java.lang.Exception: 'country' must be a two-character string
-</results>
-</s2>
-</s1>
-
-<s1 title="Nested Beans: createXXX">
-
-<p>Beans can be nested, allowing a bean to have setters that have
-other sub-beans as the type.</p>
-
-<example title="Bean-style configuration for sub-beans">
-&lt;init&gt;
-  &lt;table&gt;
-    &lt;name&gt;Foo&lt;/name&gt;
-    &lt;timestamp-field&gt;tstamp&lt;/timestamp-field&gt;
-  &lt;/table&gt;
-
-  &lt;table name="Bar" timestamp-field="ts"/&gt;
-&lt;/init&gt;
-</example>
-
-<example title="Bean-style java code for sub-beans">
-// a class to periodically clean old log records from the database
-public class LogCleaner {
-  List _logTables = new LinkedList();
-
-  // the createXXX method is optional, and allows use something other than
-  // the default constructor for a sub-bean
-  public LogTable createTable()
-  {
-    return new LogTable();
-  }
-
-  // you could also use setTable(LogTable logTable)
-  public void addTable(LogTable logTable)
-  {
-    _logTables.add(logTable);
-  }
-
-  public class LogTable {
-    String _name;
-    String _timestampField;
-
-    public void setName(String name)
-    {
-      _name = name;
-    }
-
-    public void setTimestampField(String timestampField)
-    {
-      _timestampField = timestampField;
-    }
-
-    @PostConstruct
-    public void init()
-        throws Exception
-    {
-      if (_name == null)
-        throw new Exception("'name' is required");
-      if (_timestampField == null)
-        throw new Exception("'timestamp-field' is required");
-    }
-
-    public void cleanTable(DataSource pool)
-    {
-      Connection conn = null;
-      try {
-        conn = pool.getConnection();
-        ...
-      } catch (SQLException e) {
-        throw new ServletException(e);
-      } finally {
-        try {
-          if (conn != null)
-            conn.close();
-        } catch (SQLException e) {
-        }
-      }
-    }
-  }
-
-  ...
- 
-}
-</example>
-</s1>
-
-<s1 title="Setting with the body text">
-<p>The <code>addText()</code> method will capture the body of the tag
-for a bean setter.</p>
-
-<example title="Bean-style configuration for setting with the body text">
-&lt;init&gt;
-  &lt;message&gt;This is the message&lt;/message&gt;
-&lt;/init&gt;
-</example>
-
-<example title="Bean-style java code for setting with the body text">
-public class MyBean {
-  Message _msg;
-
-  public Message createMessage() { return new Message(); }
-
-  public void setMessage(Message msg) { _msg = msg; }
-
-  public class Message {
-    String _text;
-    public void addText(String text) { _text = text; }
-    public String getText() { return _text; }
-  }
-}
-</example>
-
-</s1>
-
-<s1 title="Returning a different object">
-
-<p>There are some unusual cases where the configured bean is just a
-configuration object and you want to return a different bean.  The
-bean can implement a method <code>Object replaceObject()</code> to return a
-different object. Called after the @PostConstruct methods. </p>
-
-</s1>
-
-<s1 title="See also">
-<ul>
-<li><a href="config-control.xtp#resin:import">resin:import</a>
-</li><li><a href="examples|ioc-injection/index.xtp">Dependency Injection Tutorial</a>
-</li></ul>
-</s1> <!-- import -->
 
 <s1 title="Administration">
 

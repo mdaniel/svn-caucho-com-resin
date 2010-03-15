@@ -403,9 +403,9 @@ current machine, and start a new watchdog if necessary.  The server id
 must be unique for all servers defined in the resin.xml.</p>
 
 <example title="Example: watchdog start">
-resin-3.2.x> java -jar lib/resin.jar -conf conf/test.conf -server a start
+resin-4.0.x> java -jar lib/resin.jar -conf conf/test.conf -server a start
 
-Resin/3.2.x started -server 'a' for watchdog at 127.0.0.1:6700
+Resin/4.0.x started -server 'a' for watchdog at 127.0.0.1:6700
 </example>
 
 </s2>
@@ -418,9 +418,9 @@ watchdog will automatically exit.  If no <code>-server</code> is specified,
 the watchdog defaults to <code>-server ""</code>.</p>
 
 <example title="Example: watchdog stop">
-resin-3.2.x> java -jar lib/resin.jar stop
+resin-4.0.x> java -jar lib/resin.jar stop
 
-Resin/3.2.x started -server '' for watchdog at 127.0.0.1:6600
+Resin/4.0.x started -server '' for watchdog at 127.0.0.1:6600
 </example>
 
 </s2>
@@ -431,9 +431,9 @@ Resin/3.2.x started -server '' for watchdog at 127.0.0.1:6600
 by the watchdog service.</p>
 
 <example title="Example: watchdog status">
-resin-3.2.x> java -jar lib/resin.jar status
+resin-4.0.x> java -jar lib/resin.jar status
 
-Resin/3.2.x status for watchdog at 127.0.0.1:6600
+Resin/4.0.x status for watchdog at 127.0.0.1:6600
 
 server '' : active
   password: missing

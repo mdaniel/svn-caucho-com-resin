@@ -230,11 +230,6 @@ the output.</td>
   <td></td>
 </tr>
 <tr>
-  <td>init</td>
-  <td>IoC-style initialization configuration for the formatter.</td>
-  <td></td>
-</tr>
-<tr>
   <td>level</td>
   <td>The <a href="#Log-Levels">log level</a> for the handler.  Typically,
 the handler's level will be finer than the logger's level</td>
@@ -297,11 +292,6 @@ The handler will be registered with the Logger with the matching name.</td>
     </td>
   <td>1mb</td>
 </tr>
-<tr>
-  <td>uri</td>
-  <td>configures a symbolic alias for the handler's class.  The handler implementer will register the schema</td>
-  <td></td>
-</tr>
 </deftable-childtags>
 
 <def title="&lt;log-handler> schema">
@@ -311,7 +301,6 @@ element log-handler {
   &amp; filter?
   &amp; format?
   &amp; formatter?
-  &amp; init?
   &amp; level?
   &amp; mbean-name?
   &amp; name
@@ -321,7 +310,6 @@ element log-handler {
   &amp; rollover-period?
   &amp; rollover-size?
   &amp; timestamp?
-  &amp; uri?
   &amp; use-parent-handlers?
 }
 </def>
@@ -333,15 +321,18 @@ for <code>com.caucho.log.handler.JmsHandler</code>.  The
 for <code>com.caucho.log.formatter.TimestampFormatter</code></p>
 
 <example title="Example: logging to a JMS queue">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+    xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;jms-queue name="myQueue" uri="memory:"/>
+  &lt;resin:MemoryQueue ee:Named="myQueue"/>
 
-  &lt;log-handler name="qa.test" level="warning" uri="jms:">
-    &lt;init target="${myQueue}"/>
+  &lt;logger name="qa.test">
+    &lt;resin:JmsLogHandler level="warning">
+      &lt;target>${myQueue}&lt;/target>
 
-    &lt;formatter uri="timestamp:"/>
-  &lt;/log-handler>
+      &lt;resin:TimestampLogFormatter/>
+    &lt;/resin:JmsLogHandler>
+  &lt;/logger>
 
 &lt;/web-app>
 </example>
@@ -352,8 +343,6 @@ will set the actual logging level.</p>
 
 <example title="Example: logging to a rollover file">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;jms-queue name="myQueue" uri="memory:"/>
 
   &lt;log-handler name="" level="all"
        timestamp="[%Y/%m/%d %H:%M:%S.%s] {%{thread}} "/>
@@ -603,7 +592,7 @@ logging patterns, including sending messages to JMS, <a href="hmtp">HMTP</a>,
 and the syslog service.  Creating your own custom handler is also
 straightforward.</p>
 
-<s3 name="bam" title="BamHandler, uri='bam:' (3.2.0)">
+<s3 name="bam" title="BamLogHandler (4.0.5)">
 
 <p>The BAM handler publishes the log message to a <a href="hmtp.xtp">BAM</a>
 agent.  The agent can be a custom HMTP service to process log messages.
@@ -611,66 +600,71 @@ The <code>BamHandler</code> needs a JID (Jabber id) as the address of the
 target service.</p>
 
 <example title="Example: BAM handler configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;log-handler name="com.foo" level="warning" uri="bam:">
-    &lt;init>
+  &lt;logger name="com.foo">
+    &lt;resin:BamLogHandler level="warning">
        &lt;to>test@localhost&lt;/to>
-   &lt;/init>
-  &lt;/log-handler>
+    &lt;/resin:BamLogHandler>
+  &lt;/logger>
 
 &lt;/web-app>
 </example>
 
 </s3>
 
-<s3 name="event" title="EventHandler, uri='event:'">
+<s3 name="event" title="EventLogHandler">
 
-<p>The event handler publishes a <code>LogEvent</code> to the WebBeans event
-system.  Any WebBeans component with an <code>@Observes</code> method for
+<p>The event handler publishes a <code>LogEvent</code> to the CanDI event
+system.  Any CanDI component with an <code>@Observes</code> method for
 <code>LogEvent</code> will receive the notifications.  The log handler
-classname is <code>com.caucho.log.handler.EventHandler</code> and the
-shortcut is uri="event:".</p>
+classname is <code>com.caucho.log.EventLogHandler</code>.</p>
 
 <example title="Example: event handler configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+   xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;log-handler name="com.foo" level="warning" uri="event:"/>
+  &lt;logger name="com.foo">
+    &lt;resin:EventLogHandler level="warning"/>
+  &lt;/logger>
 
 &lt;/web-app>
 </example>
 
 </s3>
 
-<s3 name="jms" title="JmsHandler, uri='jms:'">
+<s3 name="jms" title="JmsLogHandler">
 
 <p>The JMS handler publishes the log message to a
 <a href="resin-messaging.xtp">JMS</a> queue.</p>
 
 <example title="Example: JMS handler configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+    xmlns:ee="urn:java:ee"
+    xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;jms-queue name="myQueue" uri="memory:"/>
+  &lt;resin:MemoryQueue ee:Named="myQueue"/>
 
-  &lt;log-handler name="com.foo" level="warning" uri="jms:">
-    &lt;init>
+  &lt;logger name="com.foo">
+    &lt;resin:JmsLogHandler level="warning">
        &lt;target>${myQueue}&lt;/target>
-   &lt;/init>
-  &lt;/log-handler>
+   &lt;/resin:JmsLogHandler>
+  &lt;/logger>
 
 &lt;/web-app>
 </example>
 
 </s3>
 
-<s3 name="mail" title="MailHandler, uri='mail:' (3.2.0)">
+<s3 name="mail" title="MailLogHandler (4.0.5)">
 
 <p>The Mail handler sends log messages to an email address.  To keep the
 number of mails down, the handler will concatenate messages and only send
 them after a period of time.
 </p>
 
-<deftable title="mail: attributes">
+<deftable title="MailLogHandler attributes">
 <tr>
   <th>attribute</th>
   <th>description</th>
@@ -699,36 +693,40 @@ them after a period of time.
 </deftable>
 
 <example title="Example: Mail handler configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:resin="urn:java:com.caucho.resin">
 
-  &lt;log-handler name="" level="warning" uri="mail:">
-    &lt;init>
+  &lt;logger name="">
+    &lt;resin:MailLogHandler level="warning">
        &lt;to>admin@foo.com&lt;/to>
        &lt;properties>
          mail.smtp.host=127.0.0.1
          mail.smtp.port=25
        &lt;/properties>
-   &lt;/init>
-  &lt;/log-handler>
+    &lt;/resin:MailLogHandler>
+  &lt;/logger>
 
 &lt;/web-app>
 </example>
 
 </s3>
 
-<s3 name="syslog" title="SyslogHandler, uri='syslog:'">
+<s3 name="syslog" title="SyslogLogHandler">
 
-<p>On Unix systems, the SyslogHandler lets you log messages to syslog.</p>
+<p>On Unix systems, the SyslogLogHandler lets you log messages to syslog.</p>
 
 <example title="Example: syslog configuration">
-&lt;resin xmlns="http://caucho.com/ns/resin">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+      xmlns:resin="urn:java:com.caucho.resin">
 
-&lt;log-handler name="" level="warning" uri="syslog:"&gt;
-    &lt;init>
-      &lt;facility&gt;daemon&lt;/facility&gt;
-      &lt;severity&gt;notice&lt;/severity&gt;
-    &lt;/init>
-&lt;/log-handler&gt;
+&lt;logger name="">
+  &lt;resin:SyslogLogHandler level="warning">
+    &lt;facility&gt;daemon&lt;/facility&gt;
+    &lt;severity&gt;notice&lt;/severity&gt;
+  &lt;/resin:SyslogLogHandler>
+&lt;/logger&gt;
+
+&lt;/resin>
 </example>
 
 <p>The possible values for <var>facility</var> are user, mail, daemon, auth, lpr,
@@ -744,15 +742,18 @@ warning, notice, info, debug. The default is <i>info</i>.</p>
 <s3 title="custom handler">
 
 <example title="Example: custom formatter configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+   xmlns:demo="urn:com.foo.demo">
 
-  &lt;log-handler name="" level="warning" class="demo.MyHandler"/&gt;
+  &lt;logger name="">
+    &lt;demo:MyHandler level="warning"/>
+  &lt;/logger>
   
 &lt;/web-app>
 </example>
 
 <example title="Example: MyHandler.java">
-package demo;
+package com.foo.demo;
 
 import java.util.logging.*;
 
@@ -789,17 +790,20 @@ the handlers.</p>
 <s3 title="custom handler">
 
 <example title="Example: custom formatter configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+  xmlns:mypkg="urn:java:com.mycom.mypkg">
 
   &lt;log-handler name="com.foo" level="warning" path="WEB-INF/log.log"&gt;
-    &lt;formatter class="qa.MyFormatter"/>
+    &lt;formatter>
+      &lt;mypkg:MyFormatter/>
+    &lt;/formatter>
   &lt;/log-handler>
   
 &lt;/web-app>
 </example>
 
 <example title="Example: MyFormatter.java">
-package demo;
+package com.mycom.mypkg;
 
 import java.util.logging.*;
 
