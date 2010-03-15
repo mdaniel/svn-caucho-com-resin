@@ -60,7 +60,7 @@ public class JspManager extends PageManager {
   private final static L10N L = new L10N(JspManager.class);
   private final static Logger log
     = Logger.getLogger(JspManager.class.getName());
-  
+
   private static int _count;
 
   private boolean _isXml;
@@ -96,13 +96,16 @@ public class JspManager extends PageManager {
   {
     _isLoadTldOnInit = isLoadOnInit;
   }
-  
+
   public static long getCheckInterval()
   {
     WebApp webApp = WebApp.getCurrent();
-    
+
+    if (webApp == null)
+      return -1;
+
     JspPropertyGroup jsp = webApp.getJsp();
-    
+
     if (jsp != null)
       return jsp.getDependencyCheckInterval();
     else
@@ -115,17 +118,17 @@ public class JspManager extends PageManager {
   public void init()
   {
     WebApp app = getWebApp();
-	
+
     app.getJspApplicationContext().setPageManager(this);
-    
+
     if (_isLoadTldOnInit) {
       try {
-	TldManager tld = TldManager.create(new AppResourceManager(app), app);
+        TldManager tld = TldManager.create(new AppResourceManager(app), app);
 
-	// must be initialized at startup for <listeners>, e.g. JSF
-	tld.init();
+        // must be initialized at startup for <listeners>, e.g. JSF
+        tld.init();
       } catch (Exception e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
   }
@@ -141,8 +144,8 @@ public class JspManager extends PageManager {
    * @return the compiled JSP page
    */
   Page createGeneratedPage(Path path, String uri, String className,
-			   ServletConfig config,
-			   ArrayList<PersistentDependency> dependList)
+                           ServletConfig config,
+                           ArrayList<PersistentDependency> dependList)
     throws Exception
   {
     return createPage(path, uri, className, config, dependList, true);
@@ -159,8 +162,8 @@ public class JspManager extends PageManager {
    * @return the compiled JSP page
    */
   Page createPage(Path path, String uri, String className,
-		  ServletConfig config,
-		  ArrayList<PersistentDependency> dependList)
+                  ServletConfig config,
+                  ArrayList<PersistentDependency> dependList)
     throws Exception
   {
     return createPage(path, uri, className, config, dependList, false);
@@ -177,9 +180,9 @@ public class JspManager extends PageManager {
    * @return the compiled JSP page
    */
   private Page createPage(Path path, String uri, String className,
-			  ServletConfig config,
-			  ArrayList<PersistentDependency> dependList,
-			  boolean isGenerated)
+                          ServletConfig config,
+                          ArrayList<PersistentDependency> dependList,
+                          boolean isGenerated)
     throws Exception
   {
     Class jspClass = null;
@@ -216,9 +219,9 @@ public class JspManager extends PageManager {
   }
 
   Page compile(Path path, String uri, String className,
-	       ServletConfig config,
-	       ArrayList<PersistentDependency> dependList,
-	       boolean isGenerated)
+               ServletConfig config,
+               ArrayList<PersistentDependency> dependList,
+               boolean isGenerated)
     throws Exception
   {
     WebApp app = getWebApp();
@@ -231,8 +234,8 @@ public class JspManager extends PageManager {
 
     try {
       if (_precompile || _autoCompile)
-	page = preload(className, app.getClassLoader(), app.getAppDir(),
-		       config);
+        page = preload(className, app.getClassLoader(), app.getAppDir(),
+                       config);
     } catch (Throwable e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -245,7 +248,7 @@ public class JspManager extends PageManager {
     }
 
     if (path == null || ! path.canRead() || path.isDirectory()
-	|| ! _autoCompile) {
+        || ! _autoCompile) {
       return null;
     }
 
@@ -258,7 +261,7 @@ public class JspManager extends PageManager {
     page = compilerInst.compile();
 
     Path classPath = getClassDir().lookup(className.replace('.', '/') +
-					  ".class");
+                                          ".class");
 
     loadPage(page, config, null, uri);
 
@@ -276,16 +279,16 @@ public class JspManager extends PageManager {
    * True if the pre-load would load a valid class.
    */
   Page preload(String className,
-	       ClassLoader parentLoader,
-	       Path appDir,
-	       ServletConfig config)
+               ClassLoader parentLoader,
+               Path appDir,
+               ServletConfig config)
     throws Exception
   {
     DynamicClassLoader loader;
 
     String fullClassName = className;
     String mangledName = fullClassName.replace('.', '/');
-    
+
     Path classPath = getClassDir().lookup(mangledName + ".class");
 
     /*
@@ -312,13 +315,13 @@ public class JspManager extends PageManager {
       throw e;
     } catch (Throwable e) {
       log.log(Level.FINEST, e.toString(), e);
-      
+
       if (_autoCompile) {
         try {
-	  log.warning("removing generated file " +
-		      classPath + " due to " + e.toString());
-	  
-	  classPath.remove();
+          log.warning("removing generated file " +
+                      classPath + " due to " + e.toString());
+
+          classPath.remove();
         } catch (IOException e1) {
           log.log(Level.FINE, e1.toString(), e1);
         }
@@ -329,21 +332,21 @@ public class JspManager extends PageManager {
 
     HttpJspPage jspPage = (HttpJspPage) cl.newInstance();
     Page page = null;
-    
+
     if (jspPage instanceof CauchoPage) {
       CauchoPage cPage = (CauchoPage) jspPage;
 
       cPage.init(appDir);
 
       if (cPage instanceof Page)
-	((Page) cPage)._caucho_setJspManager(this);
+        ((Page) cPage)._caucho_setJspManager(this);
 
       if (_autoCompile && cPage._caucho_isModified())
         return null;
       else if (cPage instanceof Page)
-	page = (Page) cPage;
+        page = (Page) cPage;
       else
-	page = new WrapperPage(jspPage);
+        page = new WrapperPage(jspPage);
     }
     else if (jspPage instanceof SingleThreadModel)
       page = new SingleThreadWrapperPage((HttpJspPage) jspPage);
@@ -363,14 +366,14 @@ public class JspManager extends PageManager {
   {
     String staticName = mangledName + ".static";
     String dependName = mangledName + ".depend";
-    
+
     Path staticPath = getClassDir().lookup(staticName);
 
     if (! staticPath.canRead())
       return null;
 
     Path dependPath = getClassDir().lookup(dependName);
-    
+
     if (! dependPath.canRead())
       return null;
 
@@ -378,17 +381,17 @@ public class JspManager extends PageManager {
       ArrayList<Depend> dependList = StaticPage.parseDepend(dependPath);
 
       if (dependList == null)
-	return null;
-      
+        return null;
+
       StaticPage page = new StaticPage(staticPath, true);
 
       for (int i = 0; i < dependList.size(); i++) {
-	Depend depend = dependList.get(i);
+        Depend depend = dependList.get(i);
 
-	if (depend.isModified())
-	  return null;
+        if (depend.isModified())
+          return null;
 
-	page._caucho_addDepend(depend);
+        page._caucho_addDepend(depend);
       }
 
       return page;
@@ -407,7 +410,7 @@ public class JspManager extends PageManager {
    * @param lineMap the java to JSP line map.
    */
   private Page loadPage(Page page, ServletConfig config, LineMap lineMap,
-			String servletName)
+                        String servletName)
     throws Exception
   {
     page.init(_webApp.getAppDir());
@@ -418,7 +421,7 @@ public class JspManager extends PageManager {
       config = new JspServletConfig(_webApp, null, servletName);
 
     page.caucho_init(config);
-    
+
     return page;
   }
 

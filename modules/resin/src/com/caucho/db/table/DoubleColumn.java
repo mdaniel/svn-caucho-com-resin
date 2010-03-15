@@ -68,7 +68,7 @@ class DoubleColumn extends Column {
   {
     return double.class;
   }
-  
+
   /**
    * Returns the column's declaration size.
    */
@@ -86,7 +86,7 @@ class DoubleColumn extends Column {
   {
     return 8;
   }
-  
+
   /**
    * Sets a string value in the column.
    *
@@ -102,7 +102,7 @@ class DoubleColumn extends Column {
     else
       setDouble(xa, block, rowOffset, Double.parseDouble(str));
   }
-  
+
   /**
    * Gets a string value from the column.
    *
@@ -117,7 +117,7 @@ class DoubleColumn extends Column {
     else
       return String.valueOf(getDouble(block, rowOffset));
   }
-  
+
   /**
    * Sets an integer value in the column.
    *
@@ -130,7 +130,7 @@ class DoubleColumn extends Column {
   {
     setDouble(xa, block, rowOffset, value);
   }
-  
+
   /**
    * Gets an integer value from the column.
    *
@@ -142,7 +142,7 @@ class DoubleColumn extends Column {
   {
     return (int) getDouble(block, rowOffset);
   }
-  
+
   /**
    * Sets a long value in the column.
    *
@@ -155,7 +155,7 @@ class DoubleColumn extends Column {
   {
     setDouble(xa, block, rowOffset, value);
   }
-  
+
   /**
    * Gets a long value from the column.
    *
@@ -167,7 +167,7 @@ class DoubleColumn extends Column {
   {
     return (long) getDouble(block, rowOffset);
   }
-  
+
   /**
    * Sets a double value in the column.
    *
@@ -177,17 +177,17 @@ class DoubleColumn extends Column {
    */
   @Override
   void setDouble(Transaction xa,
-		 byte []block, int rowOffset, double value)
+                 byte []block, int rowOffset, double value)
   {
     int offset = rowOffset + _columnOffset;
 
     long longValue = Double.doubleToRawLongBits(value);
-    
+
     block[offset++] = (byte) (longValue >> 56);
     block[offset++] = (byte) (longValue >> 48);
     block[offset++] = (byte) (longValue >> 40);
     block[offset++] = (byte) (longValue >> 32);
-    
+
     block[offset++] = (byte) (longValue >> 24);
     block[offset++] = (byte) (longValue >> 16);
     block[offset++] = (byte) (longValue >> 8);
@@ -195,7 +195,7 @@ class DoubleColumn extends Column {
 
     setNonNull(block, rowOffset);
   }
-  
+
   /**
    * Gets a double value from the column.
    *
@@ -207,23 +207,23 @@ class DoubleColumn extends Column {
   {
     if (isNull(block, rowOffset))
       return 0;
-    
+
     int offset = rowOffset + _columnOffset;
     long longValue = 0;
-    
+
     longValue = (block[offset++] & 0xffL) << 56;
     longValue |= (block[offset++] & 0xffL) << 48;
     longValue |= (block[offset++] & 0xffL) << 40;
     longValue |= (block[offset++] & 0xffL) << 32;
-    
+
     longValue |= (block[offset++] & 0xffL) << 24;
     longValue |= (block[offset++] & 0xffL) << 16;
     longValue |= (block[offset++] & 0xffL) << 8;
     longValue |= (block[offset++] & 0xffL);
-    
+
     return Double.longBitsToDouble(longValue);
   }
-  
+
   /**
    * Sets the column based on an expression.
    *
@@ -233,10 +233,10 @@ class DoubleColumn extends Column {
    */
   @Override
   void setExpr(Transaction xa, byte []block, int rowOffset,
-	       Expr expr, QueryContext context)
+               Expr expr, QueryContext context)
     throws SQLException
   {
-    if (expr.isNull(null))
+    if (expr.isNull(context))
       setNull(block, rowOffset);
     else
       setDouble(xa, block, rowOffset, expr.evalDouble(context));
@@ -255,7 +255,7 @@ class DoubleColumn extends Column {
 
     result.writeDouble(getDouble(block, rowOffset));
   }
-  
+
   /**
    * Evaluate to a buffer.
    *
@@ -268,7 +268,7 @@ class DoubleColumn extends Column {
    */
   @Override
   int evalToBuffer(byte []block, int rowOffset,
-		   byte []buffer, int bufferOffset)
+                   byte []buffer, int bufferOffset)
     throws SQLException
   {
     if (isNull(block, rowOffset))
@@ -287,7 +287,7 @@ class DoubleColumn extends Column {
    */
   @Override
   public boolean isEqual(byte []block1, int rowOffset1,
-			 byte []block2, int rowOffset2)
+                         byte []block2, int rowOffset2)
   {
     if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
       return false;
@@ -296,13 +296,13 @@ class DoubleColumn extends Column {
     int startOffset2 = rowOffset2 + _columnOffset;
 
     return (block1[startOffset1 + 0] == block2[startOffset2 + 0] &&
-	    block1[startOffset1 + 1] == block2[startOffset2 + 1] &&
-	    block1[startOffset1 + 2] == block2[startOffset2 + 2] &&
-	    block1[startOffset1 + 3] == block2[startOffset2 + 3] &&
-	    block1[startOffset1 + 4] == block2[startOffset2 + 4] &&
-	    block1[startOffset1 + 5] == block2[startOffset2 + 5] &&
-	    block1[startOffset1 + 6] == block2[startOffset2 + 6] &&
-	    block1[startOffset1 + 7] == block2[startOffset2 + 7]);
+            block1[startOffset1 + 1] == block2[startOffset2 + 1] &&
+            block1[startOffset1 + 2] == block2[startOffset2 + 2] &&
+            block1[startOffset1 + 3] == block2[startOffset2 + 3] &&
+            block1[startOffset1 + 4] == block2[startOffset2 + 4] &&
+            block1[startOffset1 + 5] == block2[startOffset2 + 5] &&
+            block1[startOffset1 + 6] == block2[startOffset2 + 6] &&
+            block1[startOffset1 + 7] == block2[startOffset2 + 7]);
   }
 
   /**
@@ -315,10 +315,10 @@ class DoubleColumn extends Column {
   {
     iter.setDirty();
     setDouble(iter.getTransaction(),
-	      iter.getBuffer(), iter.getRowOffset(),
-	      expr.evalDouble(context));
+              iter.getBuffer(), iter.getRowOffset(),
+              expr.evalDouble(context));
   }
-  
+
   /**
    * Deleting the row, based on the column.
    *
