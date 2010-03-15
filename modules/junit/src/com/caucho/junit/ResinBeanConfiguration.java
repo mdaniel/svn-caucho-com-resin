@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -46,8 +46,9 @@ public @interface ResinBeanConfiguration {
   String []modules() default {};
 
   String []beansXml() default {};
-  
-  String []resinBeansXml() default {};  
-  
-  String persistenceXml() default "";  
+  /*
+  String []resinBeansXml() default {};
+
+  String persistenceXml() default "";
+  */
 }
