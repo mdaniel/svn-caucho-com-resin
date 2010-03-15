@@ -202,10 +202,10 @@ public class ErrorPageManager {
       response.reset();
     } catch (IllegalStateException e1) {
     }
-    
+
     if (req.isAsyncStarted()) {
       AsyncContext async = req.getAsyncContext();
-      
+
       if (async != null)
         async.complete();
     }
@@ -377,8 +377,6 @@ public class ErrorPageManager {
 
     Level level = location == null ? Level.WARNING : Level.FINE;
 
-    System.out.println("LOG: " + e.toString() + " " + Thread.currentThread().getContextClassLoader());
-    System.out.println("LOGGABLE: " + log.isLoggable(Level.FINER));
     if (log.isLoggable(Level.FINER))
       log.log(level, e.toString(), e);
     else if (isCompileException)
@@ -611,12 +609,12 @@ public class ErrorPageManager {
       response.setContentType("text/html; charset=utf-8");
       boolean isOutputStreamWrapper = false;
       PrintWriter out;
-      
+
       try {
         out = response.getWriter();
       } catch (IllegalStateException e) {
         log.log(Level.ALL, e.toString(), e);
-        
+
         out = Vfs.openWrite(response.getOutputStream()).getPrintWriter();
         isOutputStreamWrapper = true;
       }
@@ -669,7 +667,7 @@ public class ErrorPageManager {
       if (userAgent != null && userAgent.indexOf("MSIE") >= 0) {
         out.write(MSIE_PADDING, 0, MSIE_PADDING.length);
       }
-      
+
       if (isOutputStreamWrapper) {
         out.flush();
         out.close();
@@ -889,7 +887,7 @@ public class ErrorPageManager {
   private String normalizeForTesting(String s)
   {
     String userName = System.getProperty("user.name");
-    
+
     if ("caucho".equals(userName))
       return s;
 
