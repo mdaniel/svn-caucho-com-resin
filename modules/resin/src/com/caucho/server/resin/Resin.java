@@ -282,7 +282,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
                            + "\n  Exception=" + cause + "\n");
       }
     } catch (Throwable e) {
-      e.printStackTrace();
       log().log(Level.FINER, e.toString(), e);
 
       String causeMsg = "";
