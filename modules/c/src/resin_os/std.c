@@ -228,7 +228,9 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
   }
   else {
     conn->is_read_shutdown = 1;
+#ifndef WIN32
     shutdown(fd, SHUT_RD);
+#endif
 
     return read_exception_status(conn, errno);
   }

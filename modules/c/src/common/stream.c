@@ -1426,11 +1426,11 @@ select_host(cluster_t *cluster, time_t now)
   best_srun = round_robin;
 
   for (i = 0; i < size; i++) {
+    int cost;
     int index = (i + round_robin) % size;
     cluster_srun = &cluster->srun_list[index];
     srun = cluster_srun->srun;
     /* int tail; */
-    int cost;
 
     if (! srun)
       continue;
