@@ -53,7 +53,7 @@ public class QueryContext {
   private static final L10N L = new L10N(QueryContext.class);
 
   private static final long LOCK_TIMEOUT = 120000;
-  
+
   private static final FreeList<QueryContext> _freeList
     = new FreeList<QueryContext>(64);
 
@@ -306,7 +306,9 @@ public class QueryContext {
    */
   public String getGroupString(int index)
   {
-    return _groupItem.getString(index);
+    String value = _groupItem.getString(index);
+
+    return value;
   }
 
   /**
@@ -449,7 +451,7 @@ public class QueryContext {
   {
     return _parameters[index - 1].isBinaryStream();
   }
-  
+
   /**
    * Set a binary stream parameter.
    */
@@ -645,7 +647,7 @@ public class QueryContext {
       throw new IllegalStateException();
     }
   }
-  
+
   public static void free(QueryContext cxt)
   {
     _freeList.free(cxt);

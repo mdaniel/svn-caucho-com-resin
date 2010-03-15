@@ -42,7 +42,7 @@ public class GroupResultExpr extends Expr implements GroupExpr {
   private static final int LONG_VALUE = 1;
   private static final int DOUBLE_VALUE = 2;
   private static final int STRING_VALUE = 3;
-    
+
   private Expr _expr;
   private int _index;
   private int _type;
@@ -70,7 +70,7 @@ public class GroupResultExpr extends Expr implements GroupExpr {
   {
     return _expr.getName();
   }
-  
+
   public Expr bind(Query query)
     throws SQLException
   {
@@ -93,9 +93,9 @@ public class GroupResultExpr extends Expr implements GroupExpr {
     switch (_type) {
     default:
       {
-	String value = _expr.evalString(context);
-	
-	context.setGroupString(_index, value);
+        String value = _expr.evalString(context);
+
+        context.setGroupString(_index, value);
       }
       break;
     }

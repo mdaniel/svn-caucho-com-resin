@@ -49,17 +49,17 @@ import java.sql.SQLException;
 
 public class SelectResult {
   private static final L10N L = new L10N(SelectResult.class);
-  
+
   private static final FreeList<SelectResult> _freeList
     = new FreeList<SelectResult>(32);
 
   private static final int SIZE = TempBuffer.SIZE;
-  
+
   private static QDate _date = new QDate();
 
   private CharBuffer _cb = new CharBuffer();
   private byte []_blob = new byte[128];
-  
+
   private Expr []_exprs;
   private BlockStore []_stores = new BlockStore[32];
 
@@ -67,19 +67,19 @@ public class SelectResult {
 
   private Order _order;
   private IntArray _orderIndex;
-  
+
   private TempBuffer []_tempBuffers = new TempBuffer[128];
   private byte [][]_buffers = new byte[128][];
   private int _length;
   private int _rowCount;
 
   private int _row;
-  
+
   private int _offset;
   private int _rowOffset;
   private int _columnOffset;
   private int _column;
-  
+
   private boolean _wasNull;
 
   private SelectResult()
@@ -105,16 +105,16 @@ public class SelectResult {
   {
     if (_rows.length < fromItems.length)
       _rows = new TableIterator[fromItems.length];
-      
+
     for (int i = 0; i < fromItems.length; i++) {
       if (_rows[i] == null)
-	_rows[i] = new TableIterator();
+        _rows[i] = new TableIterator();
       _rows[i].init(fromItems[i].getTable());
     }
 
     return _rows;
   }
-    
+
   /**
    * Initialize based on the exprs.
    */
@@ -125,7 +125,7 @@ public class SelectResult {
 
     if (order != null)
       _orderIndex = new IntArray();
-    
+
     if (_stores.length < _exprs.length) {
       _stores = new BlockStore[exprs.length];
     }
@@ -158,13 +158,13 @@ public class SelectResult {
   {
     if (++_row < _rowCount) {
       if (_orderIndex != null) {
-	_offset = _orderIndex.get(_row);
+        _offset = _orderIndex.get(_row);
       }
       else if (_row != 0) {
-	_offset = _columnOffset;
-	skipColumns(_exprs.length - _column);
+        _offset = _columnOffset;
+        skipColumns(_exprs.length - _column);
       }
-      
+
       _column = 0;
       _rowOffset = _offset;
       _columnOffset = _rowOffset;
@@ -191,7 +191,7 @@ public class SelectResult {
   {
     for (int i = 0; i < _exprs.length; i++) {
       if (_exprs[i].getName().equals(name))
-	return i + 1;
+        return i + 1;
     }
 
     throw new SQLException(L.l("column `{0}' does not exist.", name));
@@ -208,68 +208,69 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
+
     switch (type) {
     case Column.NONE:
       _wasNull = true;
       return null;
-      
+
     case Column.SHORT:
       {
-	int value = (short) ((read() << 8) + (read()));
+        int value = (short) ((read() << 8) + (read()));
 
-	return String.valueOf(value);
+        return String.valueOf(value);
       }
-      
+
     case Column.INT:
       {
-	int value = ((read() << 24) +
-		     (read() << 16) +
-		     (read() << 8) +
-		     (read()));
+        int value = ((read() << 24) +
+                     (read() << 16) +
+                     (read() << 8) +
+                     (read()));
 
-	return String.valueOf(value);
+        return String.valueOf(value);
       }
-      
+
     case Column.LONG:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return String.valueOf(value);
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return String.valueOf(value);
       }
-      
+
     case Column.DOUBLE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return String.valueOf(Double.longBitsToDouble(value));
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return String.valueOf(Double.longBitsToDouble(value));
       }
-      
+
     case Column.DATE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return QDate.formatISO8601(value);
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return QDate.formatISO8601(value);
       }
 
     case Column.VARCHAR:
@@ -280,15 +281,15 @@ public class SelectResult {
 
     case Column.BINARY:
       {
-	int len = read();
-	
-	char []chars = new char[len];
-	
-	for (int i = 0; i < len; i++) {
-	  chars[i] = (char) (read() & 0xff);
-	}
+        int len = read();
 
-	return new String(chars);
+        char []chars = new char[len];
+
+        for (int i = 0; i < len; i++) {
+          chars[i] = (char) (read() & 0xff);
+        }
+
+        return new String(chars);
       }
 
 
@@ -308,7 +309,7 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
-    
+
     switch (type) {
     case Column.NONE:
       _wasNull = true;
@@ -316,13 +317,13 @@ public class SelectResult {
 
     case Column.BINARY:
       {
-	int len = read();
-	
-	byte []bytes = new byte[len];
+        int len = read();
 
-	read(bytes, 0, len);
+        byte []bytes = new byte[len];
 
-	return bytes;
+        read(bytes, 0, len);
+
+        return bytes;
       }
 
     case Column.BLOB:
@@ -347,52 +348,52 @@ public class SelectResult {
     case Column.NONE:
       _wasNull = true;
       return 0;
-      
+
     case Column.SHORT:
       {
-	int value = (short) ((read() << 8)
-			     + (read()));
+        int value = (short) ((read() << 8)
+                             + (read()));
 
-	return value;
+        return value;
       }
-      
+
     case Column.INT:
       {
-	int value = ((read() << 24) +
-		     (read() << 16) +
-		     (read() << 8) +
-		     (read()));
+        int value = ((read() << 24) +
+                     (read() << 16) +
+                     (read() << 8) +
+                     (read()));
 
-	return value;
+        return value;
       }
-      
+
     case Column.LONG:
     case Column.DATE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return (int) value;
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return (int) value;
       }
-      
+
     case Column.DOUBLE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return (int) Double.longBitsToDouble(value);
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return (int) Double.longBitsToDouble(value);
       }
 
     case Column.VARCHAR:
@@ -420,52 +421,52 @@ public class SelectResult {
     case Column.NONE:
       _wasNull = true;
       return 0;
-      
+
     case Column.SHORT:
       {
-	int value = (short) ((read() << 8)
-			     + (read()));
+        int value = (short) ((read() << 8)
+                             + (read()));
 
-	return value;
+        return value;
       }
-      
+
     case Column.INT:
       {
-	int value = ((read() << 24) +
-		     (read() << 16) +
-		     (read() << 8) +
-		     (read()));
+        int value = ((read() << 24) +
+                     (read() << 16) +
+                     (read() << 8) +
+                     (read()));
 
-	return value;
+        return value;
       }
-      
+
     case Column.LONG:
     case Column.DATE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return value;
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return value;
       }
-      
+
     case Column.DOUBLE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return (long) Double.longBitsToDouble(value);
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return (long) Double.longBitsToDouble(value);
       }
 
     case Column.VARCHAR:
@@ -493,52 +494,52 @@ public class SelectResult {
     case Column.NONE:
       _wasNull = true;
       return 0;
-      
+
     case Column.SHORT:
       {
-	int value = (short) ((read() << 8)
-			     + (read()));
+        int value = (short) ((read() << 8)
+                             + (read()));
 
-	return value;
+        return value;
       }
-      
+
     case Column.INT:
       {
-	int value = ((read() << 24) +
-		     (read() << 16) +
-		     (read() << 8) +
-		     (read()));
+        int value = ((read() << 24) +
+                     (read() << 16) +
+                     (read() << 8) +
+                     (read()));
 
-	return value;
+        return value;
       }
-      
+
     case Column.LONG:
     case Column.DATE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return value;
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return value;
       }
-      
+
     case Column.DOUBLE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return Double.longBitsToDouble(value);
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return Double.longBitsToDouble(value);
       }
 
     case Column.VARCHAR:
@@ -563,56 +564,56 @@ public class SelectResult {
     case Column.NONE:
       _wasNull = true;
       return 0;
-      
+
     case Column.LONG:
     case Column.DATE:
       {
-	long value = (((long) read() << 56) +
-		      ((long) read() << 48) +
-		      ((long) read() << 40) +
-		      ((long) read() << 32) +
-		      ((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return value;
+        long value = (((long) read() << 56) +
+                      ((long) read() << 48) +
+                      ((long) read() << 40) +
+                      ((long) read() << 32) +
+                      ((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return value;
       }
-      
+
     case Column.INT:
       {
-	long value = (((long) read() << 24) +
-		      ((long) read() << 16) +
-		      ((long) read() << 8) +
-		      ((long) read()));
-	
-	return value;
+        long value = (((long) read() << 24) +
+                      ((long) read() << 16) +
+                      ((long) read() << 8) +
+                      ((long) read()));
+
+        return value;
       }
 
     case Column.VARCHAR:
       {
-	String value = readString();
-	
-	synchronized (_date) {
-	  try {
-	    return _date.parseDate(value);
-	  } catch (Exception e) {
-	    throw new SQLExceptionWrapper(e);
-	  }
-	}
+        String value = readString();
+
+        synchronized (_date) {
+          try {
+            return _date.parseDate(value);
+          } catch (Exception e) {
+            throw new SQLExceptionWrapper(e);
+          }
+        }
       }
 
     case Column.BLOB:
       {
-	String value = readBlobString();
-	
-	synchronized (_date) {
-	  try {
-	    return _date.parseDate(value);
-	  } catch (Exception e) {
-	    throw new SQLExceptionWrapper(e);
-	  }
-	}
+        String value = readBlobString();
+
+        synchronized (_date) {
+          try {
+            return _date.parseDate(value);
+          } catch (Exception e) {
+            throw new SQLExceptionWrapper(e);
+          }
+        }
       }
 
     default:
@@ -682,10 +683,10 @@ public class SelectResult {
   private String readString()
     throws SQLException
   {
-    int length = ((read() << 24) +
-		  (read() << 16) +
-		  (read() << 8) +
-		  (read()));
+    int length = ((read() << 24)
+                  + (read() << 16)
+                  + (read() << 8)
+                  + (read()));
 
     int len = length >> 1;
 
@@ -755,8 +756,8 @@ public class SelectResult {
 
       int ch;
       while ((ch = is.read()) >= 0) {
-	if (ch < 0x80)
-	  cb.append((char) ch);
+        if (ch < 0x80)
+          cb.append((char) ch);
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
@@ -781,7 +782,7 @@ public class SelectResult {
 
       int ch;
       while ((ch = is.read()) >= 0) {
-	bos.write(ch);
+        bos.write(ch);
       }
     } catch (IOException e) {
       throw new SQLExceptionWrapper(e);
@@ -830,46 +831,46 @@ public class SelectResult {
 
       switch (type) {
       case Column.NONE:
-	break;
-	  
+        break;
+
       case Column.VARCHAR:
-	int l0 = read();
-	int l1 = read();
-	int l2 = read();
-	int l3 = read();
-	
-	sublen = ((l0 << 24) +
-		  (l1 << 16) +
-		  (l2 << 8) +
-		  (l3));
+        int l0 = read();
+        int l1 = read();
+        int l2 = read();
+        int l3 = read();
 
-	_offset += sublen;
-	break;
-	  
+        sublen = ((l0 << 24) +
+                  (l1 << 16) +
+                  (l2 << 8) +
+                  (l3));
+
+        _offset += sublen;
+        break;
+
       case Column.BINARY:
-	sublen = read();
+        sublen = read();
 
-	_offset += sublen;
-	break;
+        _offset += sublen;
+        break;
 
       case Column.SHORT:
-	_offset += 2;
-	break;
+        _offset += 2;
+        break;
       case Column.INT:
-	_offset += 4;
-	break;
+        _offset += 4;
+        break;
       case Column.LONG:
       case Column.DOUBLE:
       case Column.DATE:
-	_offset += 8;
-	break;
-	  
+        _offset += 8;
+        break;
+
       case Column.BLOB:
-	_offset += 128;
-	break;
-	  
+        _offset += 128;
+        break;
+
       default:
-	throw new RuntimeException("Unknown column type: " + type);
+        throw new RuntimeException("Unknown column type: " + type);
       }
     }
   }
@@ -920,10 +921,10 @@ public class SelectResult {
   public void writeString(byte []buffer, int offset, int stringLength)
   {
     int rLength = _length;
-    
+
     int rOffset = rLength % SIZE;
     int rBlockId = rLength / SIZE;
-    
+
     if (_buffers[rBlockId] == null) {
       TempBuffer tempBuffer = TempBuffer.allocate();
       _tempBuffers[rBlockId] = tempBuffer;
@@ -942,13 +943,13 @@ public class SelectResult {
       rBuffer[rOffset + 4] = (byte) length;
 
       if (rOffset + 5 + length < SIZE) {
-	System.arraycopy(buffer, offset, rBuffer, rOffset + 5, length);
+        System.arraycopy(buffer, offset, rBuffer, rOffset + 5, length);
 
-	_length = rLength + 5 + length;
+        _length = rLength + 5 + length;
       }
       else {
-	_length = rLength + 5;
-	write(buffer, offset, length);
+        _length = rLength + 5;
+        write(buffer, offset, length);
       }
     }
     else {
@@ -990,7 +991,7 @@ public class SelectResult {
     write(Column.DOUBLE);
 
     long value = Double.doubleToLongBits(dValue);
-    
+
     write((int) (value >> 56));
     write((int) (value >> 48));
     write((int) (value >> 40));
@@ -1079,12 +1080,12 @@ public class SelectResult {
   private int read()
   {
     int offset = _offset;
-    
+
     if (_length <= offset)
       return -1;
 
     _offset = offset + 1;
-    
+
     byte []buf = _buffers[offset / SIZE];
 
     return buf[offset % SIZE] & 0xff;
@@ -1101,14 +1102,14 @@ public class SelectResult {
 
     for (int i = bufLength; i > 0; i--) {
       if (length <= offset) {
-	_offset = offset;
-	return -1;
+        _offset = offset;
+        return -1;
       }
 
       byte []buf = buffers[offset / SIZE];
 
       buffer[bufOffset] = buf[offset % SIZE];
-      
+
       offset++;
       bufOffset++;
     }
@@ -1129,18 +1130,18 @@ public class SelectResult {
 
     while (_buffers.length <= blockId) {
       byte [][]newBuffers = new byte[2 * _buffers.length][];
-      
+
       System.arraycopy(_buffers, 0, newBuffers, 0, _buffers.length);
       _buffers = newBuffers;
-      
+
       TempBuffer []newTempBuffers = new TempBuffer[newBuffers.length];
       System.arraycopy(_tempBuffers, 0, newTempBuffers, 0,
-		       _tempBuffers.length);
+                       _tempBuffers.length);
       _tempBuffers = newTempBuffers;
     }
-    
+
     byte []buffer = _buffers[blockId];
-    
+
     if (buffer == null) {
       TempBuffer tempBuffer = TempBuffer.allocate();
       _tempBuffers[blockId] = tempBuffer;
@@ -1160,29 +1161,29 @@ public class SelectResult {
   public void write(byte []buffer, int offset, int length)
   {
     int rLength = _length;
-    
+
     while (length > 0) {
       int rOffset = rLength % SIZE;
 
       int rBufferId = rLength / SIZE;
-      
-      if (rOffset == 0) {
-	TempBuffer tempBuffer = TempBuffer.allocate();
-	if (_tempBuffers.length <= rBufferId) {
-	  int len = _tempBuffers.length;
-	  
-	  TempBuffer []newTempBuffers = new TempBuffer[len + 32];
-	  System.arraycopy(_tempBuffers, 0, newTempBuffers, 0, len);
-	  _tempBuffers = newTempBuffers;
-	  
-	  byte [][]newBuffers = new byte[len + 32][];
-	  System.arraycopy(_buffers, 0, newBuffers, 0, len);
-	  _buffers = newBuffers;
 
-	}
-	
-	_tempBuffers[rBufferId] = tempBuffer;
-	_buffers[rBufferId] = tempBuffer.getBuffer();
+      if (rOffset == 0) {
+        TempBuffer tempBuffer = TempBuffer.allocate();
+        if (_tempBuffers.length <= rBufferId) {
+          int len = _tempBuffers.length;
+
+          TempBuffer []newTempBuffers = new TempBuffer[len + 32];
+          System.arraycopy(_tempBuffers, 0, newTempBuffers, 0, len);
+          _tempBuffers = newTempBuffers;
+
+          byte [][]newBuffers = new byte[len + 32][];
+          System.arraycopy(_buffers, 0, newBuffers, 0, len);
+          _buffers = newBuffers;
+
+        }
+
+        _tempBuffers[rBufferId] = tempBuffer;
+        _buffers[rBufferId] = tempBuffer.getBuffer();
       }
 
       byte []rBuffer = _buffers[rBufferId];
@@ -1190,7 +1191,7 @@ public class SelectResult {
       int sublen = rBuffer.length - rOffset;
 
       if (length < sublen)
-	sublen = length;
+        sublen = length;
 
       System.arraycopy(buffer, offset, rBuffer, rOffset, sublen);
 
@@ -1205,33 +1206,33 @@ public class SelectResult {
   private String toHex(byte []bytes)
   {
     StringBuilder sb = new StringBuilder();
-    
+
     int len = bytes.length;
     for (int i = 0; i < len; i++) {
       int d1 = (bytes[i] >> 4) & 0xf;
       int d2 = (bytes[i]) & 0xf;
 
       if (d1 < 10)
-	sb.append((char) ('0' + d1));
+        sb.append((char) ('0' + d1));
       else
-	sb.append((char) ('a' + d1 - 10));
+        sb.append((char) ('a' + d1 - 10));
 
       if (d2 < 10)
-	sb.append((char) ('0' + d2));
+        sb.append((char) ('0' + d2));
       else
-	sb.append((char) ('a' + d2 - 10));
+        sb.append((char) ('a' + d2 - 10));
     }
 
     return sb.toString();
   }
-  
+
   public void close()
   {
     for (int i = 0; i < _buffers.length; i++) {
       TempBuffer buffer = _tempBuffers[i];
 
       if (buffer != null)
-	TempBuffer.free(buffer);
+        TempBuffer.free(buffer);
 
       _tempBuffers[i] = null;
       _buffers[i] = null;
@@ -1239,7 +1240,7 @@ public class SelectResult {
 
     _order = null;
     _orderIndex = null;
-    
+
     _freeList.free(this);
   }
 }

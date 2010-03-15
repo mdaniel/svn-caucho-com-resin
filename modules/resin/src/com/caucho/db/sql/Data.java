@@ -55,11 +55,11 @@ public class Data {
   private long _longData;
   private double _doubleData;
   // private Expr _expr;
-  
+
   private InputStream _binaryStream;
   private int _streamLength;
   private byte []_bytes;
-  
+
   public void clear()
   {
     _type = NULL;
@@ -69,12 +69,12 @@ public class Data {
   {
     _column = column;
   }
-  
+
   public Column getColumn()
   {
     return _column;
   }
-  
+
   public int getType()
   {
     return _type;
@@ -100,13 +100,13 @@ public class Data {
       _stringData = value;
     }
   }
-  
+
   public void setDate(long value)
   {
     _type = DATE;
     _longData = value;
   }
-  
+
   public boolean isBinaryStream()
   {
     return _type == BINARY_STREAM;
@@ -121,7 +121,7 @@ public class Data {
     _binaryStream = is;
     _streamLength = length;
   }
-  
+
   public InputStream getBinaryStream()
   {
     switch (_type) {
@@ -141,16 +141,16 @@ public class Data {
     _type = BYTES;
     _bytes = bytes;
   }
-  
+
   public byte []getBytes()
   {
     switch (_type) {
     case NULL:
       return null;
-      
+
     case BYTES:
       return _bytes;
-      
+
     default:
       throw new UnsupportedOperationException(_type + " " + toString());
     }
@@ -164,20 +164,21 @@ public class Data {
     switch (_type) {
     case NULL:
       return null;
-      
+
     case BOOLEAN:
       return _booleanData ? "true" : "false";
-      
+
     case INTEGER:
       return String.valueOf(_intData);
-      
+
     case LONG:
       return String.valueOf(_longData);
-      
+
     case DOUBLE:
       return String.valueOf(_doubleData);
 
     case STRING:
+      return _stringData;
 
     case DATE:
       return QDate.formatISO8601(_longData);
@@ -215,16 +216,16 @@ public class Data {
     switch (_type) {
     case NULL:
       return Expr.UNKNOWN;
-      
+
     case BOOLEAN:
       return _booleanData ? Expr.TRUE : Expr.FALSE;
-      
+
     case INTEGER:
       return _intData != 0 ? Expr.TRUE : Expr.FALSE;
-      
+
     case LONG:
       return _longData != 0 ? Expr.TRUE : Expr.FALSE;
-      
+
     case DOUBLE:
       return _doubleData != 0 ? Expr.TRUE : Expr.FALSE;
 
@@ -253,16 +254,16 @@ public class Data {
     switch (_type) {
     case NULL:
       return 0;
-      
+
     case BOOLEAN:
       return _booleanData ? 1 : 0;
-      
+
     case INTEGER:
       return _intData;
-      
+
     case LONG:
       return (int) _longData;
-      
+
     case DOUBLE:
       return (int) _doubleData;
 
@@ -291,16 +292,16 @@ public class Data {
     switch (_type) {
     case NULL:
       return 0;
-      
+
     case BOOLEAN:
       return _booleanData ? 1 : 0;
-      
+
     case INTEGER:
       return _intData;
-      
+
     case LONG:
       return _longData;
-      
+
     case DOUBLE:
       return (long) _doubleData;
 
@@ -320,16 +321,16 @@ public class Data {
     switch (_type) {
     case NULL:
       return 0;
-      
+
     case BOOLEAN:
       return _booleanData ? 1 : 0;
-      
+
     case INTEGER:
       return _intData;
-      
+
     case LONG:
       return _longData;
-      
+
     case DOUBLE:
       return (long) _doubleData;
 
@@ -358,16 +359,16 @@ public class Data {
     switch (_type) {
     case NULL:
       return 0;
-      
+
     case BOOLEAN:
       return _booleanData ? 1 : 0;
-      
+
     case INTEGER:
       return _intData;
-      
+
     case LONG:
       return _longData;
-      
+
     case DOUBLE:
       return _doubleData;
 
@@ -388,19 +389,19 @@ public class Data {
     case NULL:
       dst.setString(null);
       break;
-      
+
     case BOOLEAN:
       dst.setBoolean(_booleanData);
       break;
-      
+
     case INTEGER:
       dst.setInt(_intData);
       break;
-      
+
     case LONG:
       dst.setLong(_longData);
       break;
-      
+
     case DOUBLE:
       dst.setDouble(_doubleData);
       break;
@@ -413,7 +414,7 @@ public class Data {
       throw new UnsupportedOperationException();
     }
   }
-  
+
   /*
   public int evalToBuffer(byte []buffer, int offset)
   {
@@ -426,7 +427,7 @@ public class Data {
       return evalToBuffer(buffer, offset, _type);
   }
   */
-  
+
   /**
    * Evaluates the expression to a buffer
    *
@@ -461,16 +462,16 @@ public class Data {
     switch (_type) {
     case NULL:
       return 17;
-      
+
     case BOOLEAN:
       return _booleanData ? 1 : 0;
-      
+
     case INTEGER:
       return _intData;
-      
+
     case LONG:
       return (int) _longData;
-      
+
     case DOUBLE:
       return (int) _doubleData;
 
@@ -500,16 +501,16 @@ public class Data {
     switch (_type) {
     case NULL:
       return false;
-      
+
     case BOOLEAN:
       return _booleanData == data._booleanData;
-      
+
     case INTEGER:
       return _intData == data._intData;
-      
+
     case LONG:
       return _longData == data._longData;
-      
+
     case DOUBLE:
       return _doubleData == data._doubleData;
 
