@@ -1385,26 +1385,26 @@
 
     <exec executable="${basedir}/debian-perm"/>
 
-    <delete dir="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"
+    <delete dir="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"
             failonerror="false"/>
 
-    <mkdir dir="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"/>
+    <mkdir dir="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"/>
         
     <exec executable="dpkg">
       <arg value="-b"/>
       <arg value="dist-debian"/>
-      <arg value="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/${shortproduct}_${version}-${debian.architecture}.deb"/>
+      <arg value="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/${shortproduct}_${version}-${debian.architecture}.deb"/>
     </exec>
 
     <exec executable="dpkg-scanpackages"
-          dir="/tmp/debian"
-          output="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/Packages"
+          dir="${dist}/debian"
+          output="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/Packages"
           logError="true">
       <arg value="dists/${debian.stability}/${debian.component}/binary-${debian.architecture}"/>
     </exec>
 
     <exec executable="gzip">
-      <arg value="/tmp/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/Packages"/>
+      <arg value="${dist}/debian/dists/${debian.stability}/${debian.component}/binary-${debian.architecture}/Packages"/>
     </exec>
   </target>
 
