@@ -410,7 +410,7 @@ namespace Caucho
       ServiceInstaller srvInst = new ServiceInstaller();
       srvInst.ServiceName = resinService.Name;
       srvInst.DisplayName = resinService.Name;
-      srvInst.StartType = ServiceStartMode.Manual;
+      srvInst.StartType = ServiceStartMode.Automatic;
 
       txInst.Installers.Add(srvInst);
 
