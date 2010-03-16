@@ -44,9 +44,24 @@ install	:
 	(cd modules/c/src; $(MAKE) install)
 	if test -r $(resin_pro)/modules/c/src/Makefile; then \
 	  cd $(resin_pro)/modules/c/src; $(MAKE) install; \
-	fi
+	fi; \
 	if test -n "${resin_init_d}"; then \
-	  cp $(CP_U_FLAG) init.d/resin $(resin_init_d); \
-	  chmod +x $(resin_init_d); \
+		if test -w "${resin_init_d}"; then \
+			cp $(CP_U_FLAG) init.d/resin $(resin_init_d); \
+			chmod +x $(resin_init_d); \
+		else \
+			echo ;\
+			echo ;\
+			echo "****************************************************************"; \
+			echo "WARNING: Unable to install ${resin_init_d}"; \
+			echo "         Destination is not writable. Usually, only root has";\
+			echo "         permissions to install this file.";\
+			echo;\
+			echo "         This file is not required, but is used to start Resin"; \
+			echo "         at boot time.";\
+			echo "****************************************************************"; \
+			echo ;\
+			echo ;\
+		fi; \
 	fi;
 
