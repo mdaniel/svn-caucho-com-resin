@@ -1223,7 +1223,7 @@
     </exec>
   </target>
 
-  <target name="debian" depends="compile,resin.dist.jar,debian-libexec,debian-perm">
+  <target name="debian" depends="debian-libexec,debian-perm">
     <exec executable="${basedir}/debian-perm">
       <arg value="-r"/>
     </exec>
