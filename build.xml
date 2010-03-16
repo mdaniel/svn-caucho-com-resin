@@ -655,9 +655,9 @@
     <copy todir="${install}/win64"
           file="${win32}/resin/modules/c/src/resin_os_64/Release/resin_os.dll"/>
     <copy todir="${install}"
-          file="${win32}/resin/modules/csharp/src/resin/Release/resin.exe"/>
+          file="${win32}/resin/modules/csharp/src/resin/bin/Release/resin.exe"/>
     <copy todir="${install}"
-          file="${win32}/resin/modules/csharp/src/setup/Release/setup.exe"/>
+          file="${win32}/resin/modules/csharp/src/setup/bin/Release/setup.exe"/>
     <copy todir="${install}/win32"
           file="${win32}/resin/modules/c/src/isapi_srun/Release/isapi_srun.dll"/>
     <copy todir="${install}/win64"

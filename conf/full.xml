@@ -99,7 +99,11 @@
 
       <!-- SSL port configuration: -->
       <http address="*" port="8443">
-        <jsse-ssl self-signed-certificate-name="resin@localhost"/>
+        <openssl>
+          <certificate-file>keys/gryffindor.crt</certificate-file>
+          <certificate-key-file>keys/gryffindor.key</certificate-key-file>
+          <password>my-password</password>
+        </openssl>
       </http>
 
       <!--
