@@ -101,20 +101,30 @@ namespace Caucho
 
     public ResinArgs(String cmd)
     {
+      int resinIdx = cmd.IndexOf("resin.exe");
+      if (resinIdx == -1)
+        resinIdx = cmd.IndexOf("httpd.exe");
+
+      if (resinIdx > 0 && cmd[0] == '"')
+        Exe = cmd.Substring(1, resinIdx - 1 + 9);
+      else if (resinIdx > 0)
+        Exe = cmd.Substring(0, resinIdx + 9);
+
       StringCollection arguments = new StringCollection();
+      if (Exe != null)
+        arguments.Add(Exe);
+
       StringBuilder builder = new StringBuilder();
-      char[] chars = cmd.ToCharArray();
 
-      foreach (char c in chars) {
-        if (' ' == c
-          && arguments.Count == 0
-          && (builder.ToString().Contains("resin.exe") || builder.ToString().Contains("httpd.exe"))) {
-          String exe = builder.ToString();
-          if (exe.StartsWith("\"") && exe.EndsWith("\""))
-            exe = exe.Substring(1, exe.Length - 2);
+      int startIdx = 0;
+      if (resinIdx > 0)
+        startIdx = resinIdx + 9;
 
-          Exe = exe;
-          builder = new StringBuilder();
+      for (int i = startIdx; i < cmd.Length; i++) {
+        char c = cmd[i];
+        if ('"' == c) {
+        } else if (' ' == c
+          && builder.Length == 0) {
         } else if (' ' == c) {
           arguments.Add(builder.ToString());
           builder = new StringBuilder();
@@ -141,7 +151,7 @@ namespace Caucho
     {
       StringBuilder jvmArgs = new StringBuilder();
       StringBuilder resinArgs = new StringBuilder();
-
+     
       int argsIdx = 1;
       while (argsIdx < arguments.Count) {
         if ("-verbose".Equals(arguments[argsIdx])) {
