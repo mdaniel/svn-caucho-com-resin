@@ -11,7 +11,7 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.5 - snapshot">
+<s2 title="4.0.5 - March 16, 2010">
 <ul>
 <li>mod_caucho: read timeout needs to repeat only on EINTR</li>
 <li>setup.exe: added GUI capability to install and remove Resin Services</li>
