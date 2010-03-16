@@ -216,6 +216,8 @@ namespace Caucho
               resin = new ResinService();
               resin.Home = home;
             }
+          } else {
+            continue;
           }
 
           resin.Exe = resinArgs.Exe;
