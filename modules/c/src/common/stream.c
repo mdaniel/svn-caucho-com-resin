@@ -573,9 +573,9 @@ cse_fill_buffer(stream_t *s)
       read_length = s->cluster_srun->srun->read(s, s->read_buf, BUF_LENGTH);
     else
       read_length = read(s->socket, s->read_buf, BUF_LENGTH);
-    // repeat for EINTR, EAGAIN
+    // repeat for EINTR
   } while (read_length < 0
-	   && errno != EPIPE && errno != ECONNRESET
+	   && errno == EINTR
 	   && retry-- > 0);
   
   if (read_length <= 0) {

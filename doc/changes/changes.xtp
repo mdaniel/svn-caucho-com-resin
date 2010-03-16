@@ -13,6 +13,7 @@
 
 <s2 title="4.0.5 - snapshot">
 <ul>
+<li>mod_caucho: read timeout needs to repeat only on EINTR</li>
 <li>setup.exe: added GUI capability to install and remove Resin Services</li>
 <li>resin.exe: moved service installation commands (-install, -install-as, -remove, -remove-as) to setup.exe</li>
 <li>jsp: the implementation produced successful results with the latest JSP TCK V2.1b</li>

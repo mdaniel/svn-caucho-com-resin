@@ -103,7 +103,7 @@
       <isset property="version"/>
     </condition>
     <property name="maven.m2" value="m2-snapshot"/>
-    <property name="maven.root" value="${dist}/${maven.m2}"/>
+    <property name="maven.root" value="${resin.dist}/${maven.m2}"/>
     
     <property name="version" value="4.0.s${snapshotdate}"/>
     <property name="dist.name" value="${shortproduct}-${version}"/>
@@ -434,9 +434,9 @@
 
     <property file="${artifact.src}/module.properties"/>
 
-    <mkdir dir="${dist}/${dist.name}/project-jars"/>
+    <mkdir dir="${resin.dist}/${dist.name}/project-jars"/>
     
-    <copy tofile="${dist}/${dist.name}/project-jars/resin-${artifact.name}-${version}.jar"
+    <copy tofile="${resin.dist}/${dist.name}/project-jars/resin-${artifact.name}-${version}.jar"
           file="${artifact.dist}/${artifact.jar}"/>
   </target>
 	  
@@ -664,8 +664,8 @@
         <include name="description-pak"/>
       </fileset>
     </copy>
-    
-    <copy todir="${dist}/${dist.name}/doc/resin-doc">
+
+    <copy todir="${resin.dist}/${dist.name}/doc/resin-doc">
       <fileset dir="${resin.install}/doc">
         <exclude name="**/*~"/>
         <exclude name="**/.cvsignore"/>

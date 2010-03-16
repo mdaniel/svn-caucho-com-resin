@@ -332,7 +332,7 @@ class WatchdogClient
       client.setVirtualHost("admin.resin");
 
       String cookie = getAdminCookie();
-      
+
       if (cookie == null)
         cookie = "";
 
@@ -395,7 +395,7 @@ class WatchdogClient
     ArrayList<String> list = new ArrayList<String>();
 
     list.add(_config.getJavaExe());
-    
+
     // #3759 - user args are first so they're displayed by ps
     list.addAll(_config.getWatchdogJvmArgs());
 
@@ -454,14 +454,35 @@ class WatchdogClient
 
     builder = builder.command(list);
 
-    builder.redirectErrorStream(true);
+    // builder.redirectErrorStream(true);
 
-    Process process = builder.start();
+    Process process = null;
+
+    try {
+      process = builder.start();
+    } catch(Exception e) {
+      e.printStackTrace();
+    }
 
     InputStream stdIs = process.getInputStream();
+    InputStream stdErr = process.getErrorStream();
     OutputStream stdOs = process.getOutputStream();
 
-    stdIs.close();
+    ProcessThreadReader reader = new ProcessThreadReader(stdIs);
+    reader.setDaemon(true);
+    reader.start();
+
+    ProcessThreadReader errorReader = new ProcessThreadReader(stdErr);
+    errorReader.setDaemon(true);
+    errorReader.start();
+
+    try {
+      Thread.sleep(1000);
+    } catch (Exception e) {
+      
+    }
+
+    // stdIs.close();
     stdOs.close();
   }
 
@@ -516,5 +537,27 @@ class WatchdogClient
     }
 
     return false;
+  }
+
+  static class ProcessThreadReader extends Thread {
+    private InputStream _is;
+
+    ProcessThreadReader(InputStream is)
+    {
+      _is = is;
+    }
+
+    public void run()
+    {
+      try {
+        int ch;
+
+        while ((ch = _is.read()) >= 0) {
+          System.out.print((char) ch);
+        }
+      } catch (Exception e) {
+
+      }
+    }
   }
 }
