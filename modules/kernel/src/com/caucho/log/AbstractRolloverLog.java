@@ -529,19 +529,20 @@ public class AbstractRolloverLog {
     if (path == null) {
       path = getPath(Alarm.getCurrentTime());
     }
-    
+
     Path parent = path.getParent();
 
     try {
       if (! parent.isDirectory()) {
         if (! parent.mkdirs()) {
+          /* XXX:
           logWarning(L.l("Can't create log directory {0}.\n",
                          parent));
-          
+          */
         }
       }
     } catch (Throwable e) {
-      logWarning(L.l("Can't create log directory {0}.\n  Exception={1}", 
+      logWarning(L.l("Can't create log directory {0}.\n  Exception={1}",
                      parent, e), e);
     }
 
@@ -571,7 +572,7 @@ public class AbstractRolloverLog {
     }
 
     if (exn != null)
-      logWarning(L.l("Can't create log for {0}.\n  User={1} Exception={2}", 
+      logWarning(L.l("Can't create log for {0}.\n  User={1} Exception={2}",
                      path, System.getProperty("user.name"), exn), exn);
   }
 
