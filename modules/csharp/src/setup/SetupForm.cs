@@ -673,7 +673,7 @@ namespace Caucho
 
       resinService.Name = _serviceNameTxtBox.Text;
       if ("Local Service".Equals(_serviceUserCmbBox.Text)) {
-      } else if ("".Equals(_servicePassTxtBox.Text) || _servicePassTxtBox.Text == null) {
+      } else if (_resinService == null && ("".Equals(_servicePassTxtBox.Text) || _servicePassTxtBox.Text == null)) {
         MessageBox.Show("Service Password is required", "Missing Password", MessageBoxButtons.OK, MessageBoxIcon.Error);
         _servicePassTxtBox.Focus();
         return;
@@ -737,7 +737,7 @@ namespace Caucho
           } else {
             ProgressDialogAddStatus(String.Format("Updating service `{0}'", _resinService.Name));
           }
-          if (resinService.User != null && !CheckUserCredentials(resinService.User, resinService.Password)) {
+          if (_resinService == null && resinService.User != null && !CheckUserCredentials(resinService.User, resinService.Password)) {
             checkUser = String.Format("User {0} failed to authenticate.\nPlease check user name and password", resinService.User);
             ProgressDialogError(checkUser);
 

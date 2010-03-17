@@ -605,15 +605,15 @@ namespace Caucho
       sb.Append("-service -name ");
       sb.Append(Name);
       if (Conf != null)
-        sb.Append(" -conf ").Append(Conf);
+        sb.Append(" -conf ").Append('"').Append(Conf).Append('"');
 
-      sb.Append(" -resin-home ").Append(Home);
+      sb.Append(" -resin-home ").Append('"').Append(Home).Append('"');
 
       if (Root != null)
-        sb.Append(" -root-directory ").Append(Root);
+        sb.Append(" -root-directory ").Append('"').Append(Root).Append('"');
 
       if (Log != null)
-        sb.Append(" -log-directory ").Append(Log);
+        sb.Append(" -log-directory ").Append('"').Append(Log).Append('"');
 
       if (Server != null && !"".Equals(Server))
         sb.Append(" -server ").Append(Server);
@@ -655,7 +655,6 @@ namespace Caucho
     {
       StringBuilder result = new StringBuilder(Name);
       result.Append(" [");
-
 
       if (Server != null)
         result.Append("-server ").Append(Server);

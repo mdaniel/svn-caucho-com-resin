@@ -119,12 +119,24 @@ namespace Caucho
       int startIdx = 0;
       if (resinIdx > 0)
         startIdx = resinIdx + 9;
+      for (; startIdx < cmd.Length; startIdx++) {
+        if (cmd[startIdx] == ' ')
+          break;
+      }
 
+      bool quoted = false;
       for (int i = startIdx; i < cmd.Length; i++) {
         char c = cmd[i];
-        if ('"' == c) {
-        } else if (' ' == c
-          && builder.Length == 0) {
+        if ('"' == c && !quoted) {
+          quoted = true;
+        } else if ('"' == c && quoted) {
+          if (builder.Length > 0)
+            arguments.Add(builder.ToString());
+
+          builder = new StringBuilder();
+          quoted = false;
+        } else if (' ' == c && quoted) {
+          builder.Append(c);
         } else if (' ' == c) {
           arguments.Add(builder.ToString());
           builder = new StringBuilder();
@@ -315,7 +327,7 @@ namespace Caucho
                    "--log-directory".Equals(arguments[argsIdx])) {
           Log = arguments[argsIdx + 1];
 
-          resinArgs.Append("-log-directory ").Append(Log).Append(' ');
+          resinArgs.Append("-log-directory \"").Append(Log).Append("\" ");
 
           argsIdx += 2;
         } else if ("-jmx-port".Equals(arguments[argsIdx]) ||

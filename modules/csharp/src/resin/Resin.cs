@@ -278,7 +278,7 @@ namespace Caucho
 
         while (!process.HasExited)
           process.WaitForExit(500);
-
+        
         process.CancelErrorRead();
         process.CancelOutputRead();
 
