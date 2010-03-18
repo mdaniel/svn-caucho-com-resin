@@ -130,6 +130,7 @@ public class ForbidHost {
   /**
    * Returns true if the host is forbidden.
    */
+  /*
   public boolean isForbidden(long addr)
   {
     if (_forbiddenHosts != null) {
@@ -148,6 +149,7 @@ public class ForbidHost {
 
     return false;
   }
+  */
 
   /**
    * Returns true if the host is forbidden.
@@ -167,7 +169,7 @@ public class ForbidHost {
       for (int i = _forbiddenNets.size(); i >= 0; i--) {
         InetNetwork net = (InetNetwork) _forbiddenNets.get(i);
 
-        if (net.isMatch(ip))
+        if (net.isMatch(addr))
           return true;
       }
     }

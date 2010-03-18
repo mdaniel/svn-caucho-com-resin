@@ -1089,7 +1089,7 @@ public final class ReadStream extends InputStream
     if (_readBuffer == null) {
       _readOffset = 0;
       _readLength = 0;
-      return true;
+      return false;
     }
 
     if (_sibling != null)
@@ -1119,9 +1119,9 @@ public final class ReadStream extends InputStream
       return false;
     }
     else {
-      // return true on end of file
+      // return false on end of file
       _readLength = 0;
-      return true;
+      return false;
     }
   }
 

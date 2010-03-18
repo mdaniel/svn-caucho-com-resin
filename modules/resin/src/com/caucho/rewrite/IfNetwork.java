@@ -38,7 +38,10 @@ import com.caucho.util.L10N;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -106,9 +109,11 @@ public class IfNetwork implements RequestPredicate {
   /**
    * Add an ip network to allow.  If allow is never used, (only deny is used),
    * then all are allowed except those in deny.
+   * @throws UnknownHostException 
    */
   @Configurable
-  public void addValue(String network)
+  public void addValue(String network) 
+    throws UnknownHostException
   {
     if (_networkList == null)
       _networkList = new ArrayList<InetNetwork>();
@@ -128,10 +133,10 @@ public class IfNetwork implements RequestPredicate {
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     String remoteAddr = request.getRemoteAddr();
-    long addr = 0;
 
     if (remoteAddr == null)
       return false;
@@ -143,24 +148,18 @@ public class IfNetwork implements RequestPredicate {
 	return cacheValue;
     }
 
-    int len = remoteAddr.length();
-    int ch;
-    int i = 0;
-
-    while (i < len && (ch = remoteAddr.charAt(i)) >= '0' && ch <= '9') {
-      int digit = 0;
-	
-      for (; i < len && (ch = remoteAddr.charAt(i)) >= '0' && ch <= '9'; i++)
-	digit = 10 * digit + ch - '0';
-
-      addr = 256 * addr + digit;
-
-      if (ch == '.')
-	i++;
+    InetAddress addr = null;
+    
+    try {
+      addr = InetAddress.getByName(remoteAddr);
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return false;
     }
 
     boolean isMatch = false;
-    for (i = 0; i < _networkList.size(); i++) {
+    for (int i = 0; i < _networkList.size(); i++) {
       InetNetwork net = _networkList.get(i);
 
       if (net.isMatch(addr)) {

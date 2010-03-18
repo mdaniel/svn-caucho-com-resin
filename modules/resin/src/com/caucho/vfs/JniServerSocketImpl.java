@@ -32,7 +32,6 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.net.InetAddress;
 
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.L10N;
 

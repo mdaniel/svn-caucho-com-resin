@@ -40,6 +40,8 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.logging.Logger;
 
@@ -155,8 +157,9 @@ public class IPConstraint extends AbstractConstraint {
   /**
    * Add an ip network to allow.  If allow is never used, (only deny is used),
    * then all are allowed except those in deny.
+   * @throws UnknownHostException 
    */
-  public void addAllow(String network)
+  public void addAllow(String network) throws UnknownHostException
   {
     if (_allowNetworkList == null)
       _allowNetworkList = new ArrayList<InetNetwork>();
@@ -166,8 +169,9 @@ public class IPConstraint extends AbstractConstraint {
 
   /**
    * Add an ip network to deny.
+   * @throws UnknownHostException 
    */
-  public void addDeny(String network)
+  public void addDeny(String network) throws UnknownHostException
   {
     if (_denyNetworkList == null)
       _denyNetworkList = new ArrayList<InetNetwork>();
@@ -175,8 +179,9 @@ public class IPConstraint extends AbstractConstraint {
     _denyNetworkList.add(InetNetwork.create(network));
   }
 
-  /** backwards compatibility, same as addAllow() */
-  public void addText(String network)
+  /** backwards compatibility, same as addAllow() 
+   * @throws UnknownHostException */
+  public void addText(String network) throws UnknownHostException
   {
     _oldStyle = true;
     addAllow(network);
@@ -245,8 +250,8 @@ public class IPConstraint extends AbstractConstraint {
     throws ServletException, IOException
   {
     String remoteAddr = request.getRemoteAddr();
-    long addr = 0;
     boolean allow =  false;
+    InetAddress addr = null;
 
     if (remoteAddr != null) {
       if (_cache != null) {
@@ -262,22 +267,8 @@ public class IPConstraint extends AbstractConstraint {
 		  : AuthorizationResult.DENY_SENT_RESPONSE);
         }
       }
-
-      int len = remoteAddr.length();
-      int ch;
-      int i = 0;
-
-      while (i < len && (ch = remoteAddr.charAt(i)) >= '0' && ch <= '9') {
-        int digit = 0;
-	
-        for (; i < len && (ch = remoteAddr.charAt(i)) >= '0' && ch <= '9'; i++)
-          digit = 10 * digit + ch - '0';
-
-        addr = 256 * addr + digit;
-
-        if (ch == '.')
-          i++;
-      }
+      
+      addr = InetAddress.getByName(remoteAddr);
     }
 
     // check allow

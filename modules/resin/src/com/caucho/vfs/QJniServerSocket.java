@@ -128,8 +128,9 @@ public class QJniServerSocket {
 
       if (host != null)
 	hostAddress = host.getHostAddress();
-      else
-	hostAddress = "0.0.0.0";
+      else {
+	hostAddress = null;
+      }
 
       try {
 	return (QServerSocket) method.invoke(null, hostAddress, port);

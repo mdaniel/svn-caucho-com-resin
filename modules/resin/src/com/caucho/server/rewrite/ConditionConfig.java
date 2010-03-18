@@ -29,6 +29,8 @@
 
 package com.caucho.server.rewrite;
 
+import java.net.UnknownHostException;
+
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.Config;
@@ -100,7 +102,8 @@ public class ConditionConfig {
     setCondition(new QueryParamCondition(queryParam));
   }
   
-  public void setRemoteAddr(String addr)
+  public void setRemoteAddr(String addr) 
+    throws UnknownHostException
   {
     setCondition(new RemoteAddrCondition(InetNetwork.create(addr)));
   }

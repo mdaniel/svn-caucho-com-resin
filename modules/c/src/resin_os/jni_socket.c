@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2008 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * @author Scott Ferguson
  */
@@ -606,12 +606,12 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   char addr_name[256];
   const char *temp_string = 0;
   int sock;
-  int family;
-  int protocol;
+  int family = 0;
+  int protocol = 0;
   server_socket_t *ss;
   char sin_data[256];
-  struct sockaddr_in *sin;
-  int sin_length;
+  struct sockaddr_in *sin = (struct sockaddr_in *) sin_data;
+  int sin_length = sizeof(sin_data);
 
 #ifdef WIN32
   {
@@ -622,6 +622,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
 #endif
   
   addr_name[0] = 0;
+  memset(sin_data, 0, sizeof(sin_data));
 
   if (jaddr != 0) {
     temp_string = (*env)->GetStringUTFChars(env, jaddr, 0);
@@ -632,15 +633,24 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   
       (*env)->ReleaseStringUTFChars(env, jaddr, temp_string);
     }
-  }
+    else {
+      resin_throw_exception(env, "java/lang/NullPointerException", "missing addr");
+      return 0;
+    }
 
-  if (temp_string == 0) {
-    resin_throw_exception(env, "java/lang/NullPointerException", "missing addr");
-    return 0;
+    sin = lookup_addr(env, addr_name, port, sin_data,
+                      &family, &protocol, &sin_length);
   }
-
-  sin = lookup_addr(env, addr_name, port, sin_data,
-		    &family, &protocol, &sin_length);
+  else {
+    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sin_data;
+    sin6->sin6_family = AF_INET6;
+    sin6->sin6_port = htons(port);
+    family = AF_INET6;
+    protocol = IPPROTO_TCP;
+    sin_length = sizeof(struct sockaddr_in6);
+    sin = (struct sockaddr_in *) sin6;
+  }
+  
   if (! sin)
     return 0;
 
@@ -688,7 +698,7 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
   }
 
   sin_length = sizeof(sin_data);
-  getsockname(sock, sin, &sin_length);
+  getsockname(sock, (struct sockaddr *) sin, &sin_length);
 
   /* must be 0 if the poll is missing for accept */
 #if 0 && defined(O_NONBLOCK)
@@ -915,7 +925,7 @@ get_address(struct sockaddr *addr, char *dst, int length)
 
   if (result) {
     strncpy(dst, result, length);
-	dst[length - 1] = 0;
+    dst[length - 1] = 0;
 
     return strlen(dst);
   }
@@ -924,16 +934,52 @@ get_address(struct sockaddr *addr, char *dst, int length)
 }
 #else
 
+static char *
+get_ipv4_address(struct in6_addr *addr, char *dst, int length)
+{
+  uint8_t *bytes = addr->s6_addr;
+
+  if (bytes[0] != 0 || bytes[1] != 0
+      || bytes[2] != 0 || bytes[3] != 0
+      || bytes[4] != 0 || bytes[5] != 0
+      || bytes[6] != 0 || bytes[7] != 0
+      || bytes[8] != 0 || bytes[9] != 0
+      || bytes[10] != 0xff || bytes[11] != 0xff) {
+    return 0;
+  }
+
+  sprintf(dst, "%d.%d.%d.%d", bytes[12], bytes[13], bytes[14], bytes[15]);
+
+  return dst;
+}
+
 static int
 get_address(struct sockaddr *addr, char *dst, int length)
 {
   struct sockaddr_in *sin = (struct sockaddr_in *) addr;
   const char *result;
-      
+  
   if (sin->sin_family == AF_INET6) {
     struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sin;
-      
-    result = inet_ntop(AF_INET6, &sin6->sin6_addr, dst, length);
+    struct in6_addr *sin6_addr = &sin6->sin6_addr;
+
+    result = get_ipv4_address(sin6_addr, dst, length);
+
+    if (result != 0) {
+      return strlen(result);
+    }
+    
+    dst[0] = '[';
+    result = inet_ntop(AF_INET6, sin6_addr, dst + 1, length - 1);
+
+    if (result) {
+      int len = strlen(dst);
+
+      dst[len] = ']';
+      dst[len + 1] = 0;
+
+      return len + 1;
+    }
   }
   else {
     result = inet_ntop(AF_INET, &sin->sin_addr, dst, length);
@@ -976,7 +1022,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
     addrBuffer = (*env)->GetObjectField(env, obj, ss->_localAddrBuffer);
 
     if (addrBuffer) {
-      /* the 256 must match JniServerImpl */
+      /* the 256 must match JniSocketImpl */
       len = get_address(conn->server_sin, temp_buf, 256);
 
       set_byte_array_region(env, addrBuffer, 0, len, temp_buf);
@@ -999,7 +1045,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
     addrBuffer = (*env)->GetObjectField(env, obj, ss->_remoteAddrBuffer);
 
     if (addrBuffer) {
-      /* the 256 must match JniServerImpl */
+      /* the 256 must match JniSocketImpl */
       len = get_address(conn->client_sin, temp_buf, 256);
 
       set_byte_array_region(env, addrBuffer, 0, len, temp_buf);
@@ -1020,15 +1066,16 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
 
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniSocketImpl_getRemoteIP(JNIEnv *env,
-                                           jobject obj,
-                                           jlong conn_fd,
-					   jbyteArray j_buffer,
-					   jint offset,
-					   jint length)
+                                              jobject obj,
+                                              jlong conn_fd,
+                                              jbyteArray j_buffer,
+                                              jint offset,
+                                              jint length)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   int len = 0;
   char temp_buf[1024];
+
   if (! conn || ! j_buffer || ! env)
     return 0;
 

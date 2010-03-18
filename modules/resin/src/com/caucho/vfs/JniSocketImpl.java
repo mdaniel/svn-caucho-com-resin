@@ -16,6 +16,8 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.util.Alarm;
+
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
@@ -96,6 +98,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the remote client's host name.
    */
+  @Override
   public String getRemoteHost()
   {
     if (_remoteName == null) {
@@ -103,9 +106,9 @@ public class JniSocketImpl extends QSocket {
       char []remoteAddrCharBuffer = _remoteAddrCharBuffer;
 
       for (int i = _remoteAddrLength - 1; i >= 0; i--)
-        _remoteAddrCharBuffer[i] = (char) (_remoteAddrBuffer[i] & 0xff);
+        remoteAddrCharBuffer[i] = (char) (remoteAddrBuffer[i] & 0xff);
 
-      _remoteName = new String(_remoteAddrCharBuffer, 0, _remoteAddrLength);
+      _remoteName = new String(remoteAddrCharBuffer, 0, _remoteAddrLength);
     }
 
     return _remoteName;
@@ -114,6 +117,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the remote client's inet address.
    */
+  @Override
   public InetAddress getRemoteAddress()
   {
     if (_remoteAddr == null) {
@@ -130,6 +134,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the remote client's inet address.
    */
+  @Override
   public int getRemoteAddress(byte []buffer, int offset, int length)
   {
     System.arraycopy(_remoteAddrBuffer, 0, buffer, offset, _remoteAddrLength);
@@ -281,8 +286,17 @@ public class JniSocketImpl extends QSocket {
   public int read(byte []buffer, int offset, int length, long timeout)
     throws IOException
   {
+    long expires = timeout + Alarm.getCurrentTime();
+    
     synchronized (_readLock) {
-      return readNative(_fd, buffer, offset, length, timeout);
+      int result = 0;
+      
+      do {
+        result = readNative(_fd, buffer, offset, length, timeout);
+      } while (result == JniStream.TIMEOUT_EXN
+               && Alarm.getCurrentTime() <= expires);
+
+      return result;
     }
   }
 

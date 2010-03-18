@@ -19,7 +19,7 @@ public class JniStream extends StreamImpl {
 
   private final static int INTERRUPT_EXN = -2;
   private final static int DISCONNECT_EXN = -3;
-  private final static int TIMEOUT_EXN = -4;
+  public final static int TIMEOUT_EXN = -4;
 
   private static NullPath NULL_PATH;
 
