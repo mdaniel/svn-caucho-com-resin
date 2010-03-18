@@ -173,10 +173,12 @@ public class JniStream extends StreamImpl {
     _socket.close();
   }
 
+  /*
   public void finalize()
     throws IOException
   {
     close();
   }
+  */
 }
 

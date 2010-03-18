@@ -76,8 +76,8 @@ public final class ReadStream extends InputStream
 
   private Reader _readEncoding;
   private String _readEncodingName;
-  private int _specialEncoding;
-
+  private CharBuffer _cb;
+  
   private boolean _disableClose;
   private boolean _isDisableCloseSource;
   private boolean _reuseBuffer;
@@ -681,14 +681,26 @@ public final class ReadStream extends InputStream
    */
   public String readLine() throws IOException
   {
-    CharBuffer cb = new CharBuffer();
+    CharBuffer cb = _cb;
+    
+    if (cb == null) {
+      cb = _cb = new CharBuffer();
+    }
 
-    if (readLine(cb, true))
-      return cb.toString();
+    String result;
+    
+    if (readLine(cb, true)) {
+      result = cb.toString();
+      cb.clear();
+    }
     else if (cb.length() == 0)
-      return null;
-    else
-      return cb.toString();
+      result = null;
+    else {
+      result = cb.toString();
+      cb.clear();
+    }
+    
+    return result;
   }
 
   /**

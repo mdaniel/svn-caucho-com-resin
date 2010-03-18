@@ -146,6 +146,8 @@ public class Port extends TaskWorker
   private long _suspendCloseTimeMax = 120 * 1000L;
 
   private boolean _tcpNoDelay = true;
+  
+  private boolean _isEnableJni = true;
 
   // The virtual host name
   private String _virtualHost;
@@ -542,6 +544,14 @@ public class Port extends TaskWorker
   }
 
   /**
+   * Sets the read/write timeout for the accepted sockets.
+   */
+  public void setSocketTimeoutMillis(long timeout)
+  {
+    _socketTimeout = timeout;
+  }
+
+  /**
    * Sets the read timeout for the accepted sockets.
    *
    * @deprecated
@@ -599,6 +609,11 @@ public class Port extends TaskWorker
       return _throttle.getMaxConcurrentRequests();
     else
       return -1;
+  }
+  
+  public void setEnableJni(boolean isEnableJni)
+  {
+    _isEnableJni = isEnableJni;
   }
 
   /**
@@ -857,6 +872,19 @@ public class Port extends TaskWorker
   {
     return (_startThreadCount.get() + _idleThreadCount.get() < _idleThreadMin);
   }
+  
+  /**
+   * Returns the server socket class name for debugging.
+   */
+  public String getServerSocketClassName()
+  {
+    QServerSocket ss = _serverSocket;
+    
+    if (ss != null)
+      return ss.getClass().getName();
+    else
+      return null;
+  }
 
   /**
    * Returns the accept pool.
@@ -967,12 +995,14 @@ public class Port extends TaskWorker
     }
     else if (_socketAddress != null) {
       _serverSocket = QJniServerSocket.create(_socketAddress, _port,
-                                              _acceptListenBacklog);
+                                              _acceptListenBacklog,
+                                              _isEnableJni);
 
       log.info(_protocol.getProtocolName() + " listening to " + _socketAddress.getHostName() + ":" + _serverSocket.getLocalPort());
     }
     else {
-      _serverSocket = QJniServerSocket.create(_port, _acceptListenBacklog);
+      _serverSocket = QJniServerSocket.create(null, _port, _acceptListenBacklog,
+                                              _isEnableJni);
 
       log.info(_protocol.getProtocolName() + " listening to *:"
                + _serverSocket.getLocalPort());
