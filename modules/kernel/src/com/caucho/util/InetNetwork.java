@@ -43,6 +43,9 @@ public class InetNetwork {
   private byte []_address = new byte[8];
   
   private int _subnetBits;
+  
+  private int _subnetByte;
+  private int _subnetMask;
 
   /**
    * Create a internet mask.
@@ -54,7 +57,10 @@ public class InetNetwork {
   {
     _inetAddress = inetAddress;
     _address = inetAddress.getAddress();
-    _subnetBits = 0;
+    _subnetBits = subnetBits;
+    
+    _subnetByte = subnetBits / 8;
+    _subnetMask = ~((1 << subnetBits % 8) - 1) & 0xff;
   }
 
   public static InetNetwork valueOf(String network)
@@ -93,10 +99,19 @@ public class InetNetwork {
 
     if (bytes.length != _address.length)
       return false;
-    
+
     for (int i = 0; i < bytes.length; i++) {
-      if (bytes[i] != _address[i])
+      if (bytes[i] == _address[i]) {
+      }
+      else if (bytes.length - i - 1 < _subnetByte) {
+        return true;
+      }
+      else if (bytes.length - i - 1 == _subnetByte) {
+        return (bytes[i] & _subnetMask) == (_address[i] & _subnetMask);
+      }
+      else {
         return false;
+      }
     }
 
     return true;

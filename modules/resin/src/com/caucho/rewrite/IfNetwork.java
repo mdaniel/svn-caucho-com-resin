@@ -161,7 +161,7 @@ public class IfNetwork implements RequestPredicate {
     boolean isMatch = false;
     for (int i = 0; i < _networkList.size(); i++) {
       InetNetwork net = _networkList.get(i);
-
+      
       if (net.isMatch(addr)) {
 	isMatch = true;
 	break;
