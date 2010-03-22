@@ -772,7 +772,9 @@ plaintext.</p>
  
 <example title="Example: password encryption">
 &lt;driver type="..."&gt; 
-  &lt;password resin:type="com.hogwarts.Password"&gt;mX9aN9M==&lt;/password&gt; 
+  &lt;password>
+    &lt;hogwarts:Password value="mX9aN9M==&lt;/>
+  &lt;/password>
   ...
 </example>
  
@@ -804,8 +806,8 @@ public class Password {
 </example>
  
 <p>
-This solution is completely general, you can use resin:type anywhere in the
-configuration files where a string value is allowed.
+This solution is completely general, you can use &lt;mypkg:MyClass/> anywhere
+in the configuration files where a string value is allowed.
 </p>
  
 <p>
@@ -1014,7 +1016,7 @@ allows a site to limit to total time of that connection.</p>
 
 <p>&lt;password> configures the database connection password.
 Sites requiring additional security for their passwords can use
-the <a href="env-tags.xtp#resin:type">resin:type</a> attribute
+the &lt;mypkg:MyDecryptor/> syntax
 to configure a password decoder.</p>
 
 </defun>
