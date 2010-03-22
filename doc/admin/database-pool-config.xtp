@@ -772,8 +772,8 @@ plaintext.</p>
  
 <example title="Example: password encryption">
 &lt;driver type="..."&gt; 
-  &lt;password>
-    &lt;hogwarts:Password value="mX9aN9M==&lt;/>
+  &lt;password xmlns:hogwarts="urn:java:com.hogwarts">
+    &lt;hogwarts:Password value="mX9aN9M=="/>
   &lt;/password>
   ...
 </example>
@@ -788,7 +788,7 @@ package com.hogwarts;
 public class Password { 
   private String _value; 
  
-  public void addText(String value) 
+  public void setValue(String value) 
   { 
     _value = value; 
   } 
