@@ -41,11 +41,11 @@ import javax.xml.stream.XMLStreamReader;
 
 import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.HempBrokerManager;
-import com.caucho.server.connection.AbstractProtocolConnection;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TcpConnection;
-import com.caucho.server.connection.TcpDuplexController;
-import com.caucho.server.connection.TcpDuplexHandler;
+import com.caucho.network.listen.AbstractProtocolConnection;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.network.listen.TcpDuplexController;
+import com.caucho.network.listen.TcpDuplexHandler;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -71,7 +71,7 @@ public class XmppRequest extends AbstractProtocolConnection {
   private HempBrokerManager _brokerManager;
   private Broker _broker;
   
-  private TcpConnection _conn;
+  private TcpSocketLink _conn;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -104,7 +104,7 @@ public class XmppRequest extends AbstractProtocolConnection {
   private State _state;
   private boolean _isFinest;
 
-  XmppRequest(XmppProtocol protocol, TcpConnection conn)
+  XmppRequest(XmppProtocol protocol, TcpSocketLink conn)
   {
     _protocol = protocol;
     _brokerManager = protocol.getBrokerManager();
@@ -125,7 +125,7 @@ public class XmppRequest extends AbstractProtocolConnection {
   /**
    * Returns the tcp connection
    */
-  public TcpConnection getConnection()
+  public TcpSocketLink getConnection()
   {
     return _conn;
   }

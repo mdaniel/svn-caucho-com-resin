@@ -911,47 +911,21 @@ Java_com_caucho_vfs_JniServerSocketImpl_closeNative(JNIEnv *env,
   return 0;
 }
 
-#if ! defined(AF_INET6) || defined(WIN32)
+#if ! defined(AF_INET6)
 static int
 get_address(struct sockaddr *addr, char *dst, int length)
 {
   struct sockaddr_in *sin = (struct sockaddr_in *) addr;
-  char *result;
 
   if (! sin)
-	  return 0;
-      
-  result = inet_ntoa(sin->sin_addr);
-
-  if (result) {
-    strncpy(dst, result, length);
-    dst[length - 1] = 0;
-
-    return strlen(dst);
-  }
-  else
     return 0;
+  
+  memset(dst + 4, 0, 12);
+  memcpy(dst, sin->sin_addr, 4);
+
+  return 4;
 }
 #else
-
-static char *
-get_ipv4_address(struct in6_addr *addr, char *dst, int length)
-{
-  uint8_t *bytes = addr->s6_addr;
-
-  if (bytes[0] != 0 || bytes[1] != 0
-      || bytes[2] != 0 || bytes[3] != 0
-      || bytes[4] != 0 || bytes[5] != 0
-      || bytes[6] != 0 || bytes[7] != 0
-      || bytes[8] != 0 || bytes[9] != 0
-      || bytes[10] != 0xff || bytes[11] != 0xff) {
-    return 0;
-  }
-
-  sprintf(dst, "%d.%d.%d.%d", bytes[12], bytes[13], bytes[14], bytes[15]);
-
-  return dst;
-}
 
 static int
 get_address(struct sockaddr *addr, char *dst, int length)
@@ -963,39 +937,25 @@ get_address(struct sockaddr *addr, char *dst, int length)
     struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sin;
     struct in6_addr *sin6_addr = &sin6->sin6_addr;
 
-    result = get_ipv4_address(sin6_addr, dst, length);
+    memcpy(dst, sin6_addr, 16);
 
-    if (result != 0) {
-      return strlen(result);
-    }
-    
-    dst[0] = '[';
-    result = inet_ntop(AF_INET6, sin6_addr, dst + 1, length - 1);
-
-    if (result) {
-      int len = strlen(dst);
-
-      dst[len] = ']';
-      dst[len + 1] = 0;
-
-      return len + 1;
-    }
+    return 6;
   }
   else {
-    result = inet_ntop(AF_INET, &sin->sin_addr, dst, length);
-  }
+    memset(dst + 4, 0, 12);
+    memcpy(dst, (char *) &sin->sin_addr, 4);
 
-  if (! result)
-    return 0;
-  else
-    return strlen(result);
+    return 4;
+  }
 }
 #endif
 
 JNIEXPORT jboolean JNICALL
 Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
 					     jobject obj,
-					     jlong conn_fd)
+					     jlong conn_fd,
+                                             jbyteArray local_addr,
+                                             jbyteArray remote_addr)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
   char temp_buf[1024];
@@ -1016,18 +976,11 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
   }
 
   if (ss->_localAddrBuffer && ss->_localAddrLength) {
-    jbyteArray addrBuffer;
-    int len;
+    if (local_addr) {
+      /* the 16 must match JniSocketImpl 16 bytes ipv6 */
+      get_address(conn->server_sin, temp_buf, 16);
 
-    addrBuffer = (*env)->GetObjectField(env, obj, ss->_localAddrBuffer);
-
-    if (addrBuffer) {
-      /* the 256 must match JniSocketImpl */
-      len = get_address(conn->server_sin, temp_buf, 256);
-
-      set_byte_array_region(env, addrBuffer, 0, len, temp_buf);
-
-      (*env)->SetIntField(env, obj, ss->_localAddrLength, len);
+      set_byte_array_region(env, local_addr, 0, 16, temp_buf);
     }
   }
 
@@ -1039,18 +992,11 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
   }
 
   if (ss->_remoteAddrBuffer && ss->_remoteAddrLength) {
-    jbyteArray addrBuffer;
-    int len;
+    if (local_addr) {
+      /* the 16 must match JniSocketImpl 16 bytes ipv6 */
+      get_address(conn->client_sin, temp_buf, 16);
 
-    addrBuffer = (*env)->GetObjectField(env, obj, ss->_remoteAddrBuffer);
-
-    if (addrBuffer) {
-      /* the 256 must match JniSocketImpl */
-      len = get_address(conn->client_sin, temp_buf, 256);
-
-      set_byte_array_region(env, addrBuffer, 0, len, temp_buf);
-
-      (*env)->SetIntField(env, obj, ss->_remoteAddrLength, len);
+      set_byte_array_region(env, local_addr, 0, 16, temp_buf);
     }
   }
 
@@ -1061,83 +1007,14 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
     (*env)->SetIntField(env, obj, ss->_remotePort, remote_port);
   }
 
-  return 1;
-}
-
-JNIEXPORT jint JNICALL
-Java_com_caucho_vfs_JniSocketImpl_getRemoteIP(JNIEnv *env,
-                                              jobject obj,
-                                              jlong conn_fd,
-                                              jbyteArray j_buffer,
-                                              jint offset,
-                                              jint length)
-{
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
-  int len = 0;
-  char temp_buf[1024];
-
-  if (! conn || ! j_buffer || ! env)
-    return 0;
-
-  len = get_address(conn->client_sin, temp_buf, sizeof(temp_buf));
-  if (len > 0 && len < sizeof(temp_buf) && len < length)
-    set_byte_array_region(env, j_buffer, offset, len, temp_buf);
-
- return len;
-}
-
-JNIEXPORT jint JNICALL
-Java_com_caucho_vfs_JniSocketImpl_getRemotePort(JNIEnv *env,
-                                             jobject obj,
-                                             jlong conn_fd)
-{
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
-  struct sockaddr_in *sin;
-
-  if (! conn)
-    return 0;
-
-  sin = (struct sockaddr_in *) conn->client_sin;
-
-  return ntohs(sin->sin_port);
-}
-
-JNIEXPORT jint JNICALL
-Java_com_caucho_vfs_JniSocketImpl_getLocalIP(JNIEnv *env,
-					  jobject obj,
-					  jlong conn_fd,
-					  jbyteArray buffer,
-					  jint offset,
-					  jint length)
-{
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
-  int len = 0;
-  char temp_buf[1024];
+  struct sockaddr_in *sin = (struct sockaddr_in *) conn->server_sin;
   
-  if (! conn)
-    return 0;
-
-  len = get_address(conn->server_sin, temp_buf, length);
-
-  set_byte_array_region(env, buffer, offset, len, temp_buf);
-
-  return len;
-}
-
-JNIEXPORT jint JNICALL
-Java_com_caucho_vfs_JniSocketImpl_getLocalPort(JNIEnv *env,
-					    jobject obj,
-					    jlong conn_fd)
-{
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
-  struct sockaddr_in *sin;
-
-  if (! conn)
-    return 0;
-
-  sin = (struct sockaddr_in *) conn->server_sin;
-
-  return ntohs(sin->sin_port);
+  if (sin->sin_family == AF_INET)
+    return 4;
+  else if (sin->sin_family == AF_INET6)
+    return 6;
+  else
+    return 1;
 }
 
 JNIEXPORT jint JNICALL

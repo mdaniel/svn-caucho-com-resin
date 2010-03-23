@@ -29,21 +29,18 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.server.connection.*;
-import com.caucho.filters.*;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.http.CauchoRequest;
-import com.caucho.server.http.HttpServletRequestImpl;
-import com.caucho.server.http.RequestAdapter;
+import java.io.IOException;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletRequestWrapper;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
+
+import com.caucho.server.http.CauchoRequest;
+import com.caucho.server.http.HttpServletRequestImpl;
+import com.caucho.server.http.RequestAdapter;
 
 public class SetRequestSecureFilterChain implements FilterChain
 {

@@ -29,20 +29,18 @@
 
 package com.caucho.server.rewrite;
 
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import javax.annotation.PostConstruct;
 
-import java.util.regex.Pattern;
-import java.util.*;
-import java.util.logging.*;
-
-import com.caucho.util.*;
-import com.caucho.java.*;
-import com.caucho.vfs.*;
-import com.caucho.i18n.*;
-import com.caucho.server.connection.*;
+import com.caucho.i18n.CharacterEncoding;
 import com.caucho.server.http.Form;
+import com.caucho.util.HashMapImpl;
+import com.caucho.vfs.Encoding;
 
 /**
 * A rewrite condition that passes if the value of a query parameter exists

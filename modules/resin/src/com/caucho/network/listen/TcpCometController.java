@@ -27,30 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
+import com.caucho.config.Module;
 import com.caucho.util.Alarm;
 
 /**
  * Public API to control a comet connection.
  */
+@Module
 public class TcpCometController extends AsyncController {
-  private TcpConnection _conn;
+  private TcpSocketLink _conn;
 
   private CometHandler _cometHandler;
 
   private boolean _isTimeout;
 
-  private long _maxIdleTime;
-
-  TcpCometController(TcpConnection conn,
+  TcpCometController(TcpSocketLink conn,
                      CometHandler cometHandler)
   {
     _conn = conn;
     _cometHandler = cometHandler;
   }
 
-  public TcpConnection getConnection()
+  public TcpSocketLink getConnection()
   {
     return _conn;
   }
@@ -79,7 +79,7 @@ public class TcpCometController extends AsyncController {
    */
   public final void complete()
   {
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
 
     if (conn != null)
       conn.toCometComplete();
@@ -94,7 +94,7 @@ public class TcpCometController extends AsyncController {
    */
   public final boolean wake()
   {
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
 
     if (conn != null)
       return conn.wake();
@@ -143,7 +143,7 @@ public class TcpCometController extends AsyncController {
    */
   public boolean isComet()
   {
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
 
     return conn != null && ! conn.isCometComplete();
   }
@@ -153,7 +153,7 @@ public class TcpCometController extends AsyncController {
    */
   public final boolean isClosed()
   {
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
 
     return conn == null || conn.isCometComplete();
   }
@@ -163,7 +163,7 @@ public class TcpCometController extends AsyncController {
   {
     // complete();
 
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
     _conn = null;
 
     if (conn != null)
@@ -172,7 +172,7 @@ public class TcpCometController extends AsyncController {
 
   public String toString()
   {
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
 
     if (conn == null)
       return getClass().getSimpleName() + "[closed]";
@@ -185,10 +185,10 @@ public class TcpCometController extends AsyncController {
     else
       sb.append(conn.getId());
 
-    TcpConnection tcpConn = null;
+    TcpSocketLink tcpConn = null;
 
-    if (_conn instanceof TcpConnection)
-      tcpConn = (TcpConnection) _conn;
+    if (_conn instanceof TcpSocketLink)
+      tcpConn = (TcpSocketLink) _conn;
 
     if (tcpConn != null && tcpConn.isCometComplete())
       sb.append(",complete");

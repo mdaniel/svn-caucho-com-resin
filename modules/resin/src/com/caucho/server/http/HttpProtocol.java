@@ -28,8 +28,8 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 
 /**
  * The main class for the HTTP server.
@@ -48,7 +48,7 @@ public class HttpProtocol extends AbstractHttpProtocol {
  /**
    * Create a HttpRequest object for the new thread.
    */
-  public ProtocolConnection createConnection(TransportConnection conn)
+  public ProtocolConnection createConnection(SocketLink conn)
   {
     return new HttpRequest(getServer(), conn);
   }

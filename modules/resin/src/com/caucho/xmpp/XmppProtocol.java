@@ -34,9 +34,9 @@ import javax.annotation.PostConstruct;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.broker.HempBrokerManager;
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TcpConnection;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.http.AbstractHttpProtocol;
 
 /*
@@ -80,8 +80,8 @@ public class XmppProtocol extends AbstractHttpProtocol
    * Returns an new xmpp connection
    */
   @Override
-  public ProtocolConnection createConnection(TransportConnection connection)
+  public ProtocolConnection createConnection(SocketLink connection)
   {
-    return new XmppRequest(this, (TcpConnection) connection);
+    return new XmppRequest(this, (TcpSocketLink) connection);
   }
 }

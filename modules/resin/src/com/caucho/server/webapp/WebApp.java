@@ -55,6 +55,8 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.naming.Jndi;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.rewrite.RewriteFilter;
 import com.caucho.rewrite.DispatchRule;
 import com.caucho.rewrite.RedirectSecure;
@@ -63,8 +65,6 @@ import com.caucho.rewrite.Not;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TcpConnection;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
@@ -2482,7 +2482,7 @@ public class WebApp extends ServletContextImpl
 
   public static ServletRequest getThreadRequest()
   {
-    ProtocolConnection serverRequest = TcpConnection.getCurrentRequest();
+    ProtocolConnection serverRequest = TcpSocketLink.getCurrentRequest();
 
     if (serverRequest instanceof ServletRequest)
       return (ServletRequest) serverRequest;

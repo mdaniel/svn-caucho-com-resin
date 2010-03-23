@@ -29,14 +29,14 @@
 package com.caucho.server.resin;
 
 import com.caucho.config.ConfigException;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.cluster.ProtocolConfig;
-import com.caucho.server.connection.Port;
 import com.caucho.util.L10N;
 
 /**
  * Represents a protocol connection.
  */
-public class SrunPort extends Port {
+public class SrunPort extends SocketLinkListener {
   private static L10N L = new L10N(SrunPort.class);
 
   private int _index = -1;

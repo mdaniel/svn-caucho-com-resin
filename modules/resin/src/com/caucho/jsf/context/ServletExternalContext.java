@@ -28,22 +28,35 @@
 
 package com.caucho.jsf.context;
 
-import java.io.*;
-import java.net.URL;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
-import java.util.*;
+import java.net.URL;
+import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.logging.Logger;
-import java.security.*;
 
-import javax.faces.*;
-import javax.faces.context.*;
+import javax.faces.FacesException;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.server.connection.*;
 import com.caucho.server.http.CauchoRequest;
-import com.caucho.util.*;
+import com.caucho.util.L10N;
 
 public class ServletExternalContext extends ExternalContext {
   private static final L10N L = new L10N(ServletExternalContext.class);

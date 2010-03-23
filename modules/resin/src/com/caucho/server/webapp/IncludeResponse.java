@@ -29,8 +29,18 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.*;
-import com.caucho.server.cache.*;
+import java.io.IOException;
+import java.io.PrintWriter;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.server.cache.AbstractCacheFilterChain;
 import com.caucho.server.http.AbstractResponseStream;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.CauchoResponseWrapper;
@@ -38,14 +48,6 @@ import com.caucho.server.http.ResponseWriter;
 import com.caucho.server.http.ServletOutputStreamImpl;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.Collection;
-import java.util.Set;
-import java.util.HashSet;
-import java.util.List;
 
 /**
  * Internal response for an include() or forward()

@@ -40,8 +40,8 @@ import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ServerMXBean;
 import com.caucho.management.server.TcpConnectionMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
-import com.caucho.server.connection.Port;
-import com.caucho.server.connection.TcpConnection;
+import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 
@@ -120,12 +120,12 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public PortMXBean []getPorts()
   {
-    Collection<Port> portList = _server.getPorts();
+    Collection<SocketLinkListener> portList = _server.getPorts();
 
     PortMXBean []ports = new PortMXBean[portList.size()];
 
     int i = 0;
-    for (Port port : portList) {
+    for (SocketLinkListener port : portList) {
       ports[i++] = port.getAdmin();
     }
 
@@ -252,7 +252,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     int activeThreadCount = -1;
 
-    for (Port port : _server.getPorts()) {
+    for (SocketLinkListener port : _server.getPorts()) {
       if (port.getActiveThreadCount() >= 0) {
         if (activeThreadCount == -1)
           activeThreadCount = 0;
@@ -272,7 +272,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     int keepaliveThreadCount = -1;
 
-    for (Port port : _server.getPorts()) {
+    for (SocketLinkListener port : _server.getPorts()) {
       if (port.getKeepaliveConnectionCount() >= 0) {
         if (keepaliveThreadCount == -1)
           keepaliveThreadCount = 0;
@@ -301,7 +301,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     long lifetimeRequestCount = 0;
 
-    for (Port port : _server.getPorts())
+    for (SocketLinkListener port : _server.getPorts())
       lifetimeRequestCount += port.getLifetimeRequestCount();
 
     return lifetimeRequestCount;
@@ -324,7 +324,7 @@ public class ServerAdmin extends AbstractEmitterObject
   {
     long lifetimeClientDisconnectCount = 0;
 
-    for (Port port : _server.getPorts())
+    for (SocketLinkListener port : _server.getPorts())
       lifetimeClientDisconnectCount += port.getLifetimeClientDisconnectCount();
 
     return lifetimeClientDisconnectCount;
@@ -430,7 +430,7 @@ public class ServerAdmin extends AbstractEmitterObject
    */
   public TcpConnectionMXBean findConnectionByThreadId(long threadId)
   {
-    TcpConnection conn = _server.findConnectionByThreadId(threadId);
+    TcpSocketLink conn = _server.findConnectionByThreadId(threadId);
 
     if (conn != null)
       return conn.getAdmin();

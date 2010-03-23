@@ -41,12 +41,12 @@ import com.caucho.env.sample.ActiveTimeProbe;
 import com.caucho.env.sample.AverageProbe;
 import com.caucho.env.sample.ProbeManager;
 import com.caucho.env.sample.SampleCountProbe;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.network.listen.TcpDuplexController;
+import com.caucho.network.listen.TcpDuplexHandler;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TcpConnection;
-import com.caucho.server.connection.TcpDuplexController;
-import com.caucho.server.connection.TcpDuplexHandler;
-import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.util.CharBuffer;
@@ -123,7 +123,7 @@ public class HttpRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  public HttpRequest(Server server, TransportConnection conn)
+  public HttpRequest(Server server, SocketLink conn)
   {
     super(server, conn);
 
@@ -595,7 +595,7 @@ public class HttpRequest extends AbstractHttpRequest
   @Override
   protected void initAttributes(HttpServletRequestImpl request)
   {
-    TcpConnection tcpConn = _tcpConn;
+    TcpSocketLink tcpConn = _tcpConn;
 
     if (tcpConn == null || ! tcpConn.isSecure())
       return;
@@ -632,7 +632,7 @@ public class HttpRequest extends AbstractHttpRequest
    */
   public String findSessionIdFromConnection()
   {
-    TcpConnection tcpConn = _tcpConn;
+    TcpSocketLink tcpConn = _tcpConn;
 
     if (tcpConn == null || ! tcpConn.isSecure())
       return null;
@@ -1214,7 +1214,7 @@ public class HttpRequest extends AbstractHttpRequest
   @Override
   public TcpDuplexController startDuplex(TcpDuplexHandler handler)
   {
-    TcpConnection conn = (TcpConnection) _conn;
+    TcpSocketLink conn = (TcpSocketLink) _conn;
 
     TcpDuplexController context = conn.startDuplex(handler);
 

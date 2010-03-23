@@ -26,20 +26,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
-import com.caucho.util.L10N;
+import com.caucho.config.Module;
 
-import java.util.logging.Logger;
 
 /**
  * A select manager handles keepalive connections.
  */
+@Module
 abstract public class AbstractSelectManager {
-  private static final L10N L = new L10N(AbstractSelectManager.class);
-  private static final Logger log
-    = Logger.getLogger(AbstractSelectManager.class.getName());
-
   /**
    * Sets the timeout.
    */
@@ -74,7 +70,7 @@ abstract public class AbstractSelectManager {
    *
    * @return true if the keepalive was successful
    */
-  abstract public boolean keepalive(TcpConnection conn);
+  abstract public boolean keepalive(TcpSocketLink conn);
 
   /**
    * Returns the select count.

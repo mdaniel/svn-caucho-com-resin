@@ -27,35 +27,72 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
-import java.io.IOException;
 
 /**
- * Application handler for a bidirectional tcp stream
- *
- * The read stream should only be read by the <code>onRead</code> thread.
- * 
- * The write stream must be synchronized if it's every written by a thread
- * other than the <code>serviceRead</code>
+ * Abstract implementation of the Protocol.
  */
-public interface TcpDuplexHandler
-{
-  /**
-   * Called when read data is available
-   */
-  public void onRead(TcpDuplexController controller)
-    throws IOException;
+abstract public class AbstractProtocol implements Protocol {
+  // The owning port
+  //private Port _port;
+  
+  private ClassLoader _classLoader;
+
+  // The protocol name
+  private String _name = "tcp";
+
+  protected AbstractProtocol()
+  {
+    _classLoader = Thread.currentThread().getContextClassLoader();
+  }
   
   /**
-   * Called when the connection closes
+   * Sets the protocol name.
    */
-  public void onComplete(TcpDuplexController controller)
-    throws IOException;
+  public void setProtocolName(String name)
+  {
+    _name = name;
+  }
+
+  /**
+   * Returns the protocol name.
+   */
+  public String getProtocolName()
+  {
+    return _name;
+  }
   
   /**
-   * Called when the connection times out
+   * Sets the containing port
    */
-  public void onTimeout(TcpDuplexController controller)
-    throws IOException;
+  /*
+  public void setPort(Port port)
+  {
+    _port = port;
+  }
+  */
+
+  /**
+   * Gets the parent port.
+   */
+  /*
+  public Port getPort()
+  {
+    return _port;
+  }
+  */
+  
+  /**
+   * Returns the protocol owning classloader
+   */
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
+  }
+  
+  /**
+   * Create a Request object for the new thread.
+   */
+  abstract public ProtocolConnection createConnection(SocketLink conn);
 }

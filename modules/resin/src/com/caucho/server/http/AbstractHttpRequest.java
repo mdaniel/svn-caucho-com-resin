@@ -48,13 +48,13 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.network.listen.TcpDuplexController;
+import com.caucho.network.listen.TcpDuplexHandler;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.TcpConnection;
-import com.caucho.server.connection.TcpDuplexController;
-import com.caucho.server.connection.TcpDuplexHandler;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
@@ -123,8 +123,8 @@ public abstract class AbstractHttpRequest
 
   protected final Server _server;
 
-  protected final TransportConnection _conn;
-  protected final TcpConnection _tcpConn;
+  protected final SocketLink _conn;
+  protected final TcpSocketLink _tcpConn;
 
   protected final AbstractHttpResponse _response;
 
@@ -178,7 +178,7 @@ public abstract class AbstractHttpRequest
    *
    * @param server the parent server
    */
-  protected AbstractHttpRequest(Server server, TransportConnection conn)
+  protected AbstractHttpRequest(Server server, SocketLink conn)
   {
     _server = server;
 
@@ -189,8 +189,8 @@ public abstract class AbstractHttpRequest
     else
       _rawRead = null;
 
-    if (conn instanceof TcpConnection)
-      _tcpConn = (TcpConnection) conn;
+    if (conn instanceof TcpSocketLink)
+      _tcpConn = (TcpSocketLink) conn;
     else
       _tcpConn = null;
 
@@ -224,7 +224,7 @@ public abstract class AbstractHttpRequest
   /**
    * Returns the connection.
    */
-  public final TransportConnection getConnection()
+  public final SocketLink getConnection()
   {
     return _conn;
   }
@@ -711,7 +711,7 @@ public abstract class AbstractHttpRequest
    */
   protected void handleConnectionClose()
   {
-    TransportConnection conn = _conn;
+    SocketLink conn = _conn;
 
     if (conn != null)
       conn.killKeepalive();
@@ -1606,7 +1606,7 @@ public abstract class AbstractHttpRequest
    */
   public void killKeepalive()
   {
-    TransportConnection conn = _conn;
+    SocketLink conn = _conn;
 
     if (conn != null)
       conn.killKeepalive();
@@ -1650,7 +1650,7 @@ public abstract class AbstractHttpRequest
    */
   public boolean isKeepaliveAllowed()
   {
-    TransportConnection conn = _conn;
+    SocketLink conn = _conn;
 
     if (conn != null)
       return conn.isKeepaliveAllocated();

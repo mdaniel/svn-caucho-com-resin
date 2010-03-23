@@ -28,9 +28,9 @@
 
 package com.caucho.server.cluster;
 
-import com.caucho.server.connection.AbstractProtocol;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TransportConnection;
+import com.caucho.network.listen.AbstractProtocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 
 
 /**
@@ -74,7 +74,7 @@ public class ProtocolConfig extends AbstractProtocol {
   /**
    * Create a Request object for the new thread.
    */
-  public ProtocolConnection createConnection(TransportConnection conn)
+  public ProtocolConnection createConnection(SocketLink conn)
   {
     throw new UnsupportedOperationException();
   }

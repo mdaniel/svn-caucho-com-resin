@@ -27,20 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
+
+import java.io.IOException;
+
+import com.caucho.config.Module;
+
 
 /**
- * Application handler for a comet controller.
+ * Application handler for a bidirectional tcp stream
+ *
+ * The read stream should only be read by the <code>onRead</code> thread.
+ * 
+ * The write stream must be synchronized if it's every written by a thread
+ * other than the <code>serviceRead</code>
  */
-public interface CometHandler
+@Module
+public interface TcpDuplexHandler
 {
+  /**
+   * Called when read data is available
+   */
+  public void onRead(TcpDuplexController controller)
+    throws IOException;
+  
   /**
    * Called when the connection closes
    */
-  public void onComplete();
+  public void onComplete(TcpDuplexController controller)
+    throws IOException;
   
   /**
    * Called when the connection times out
    */
-  public void onTimeout();
+  public void onTimeout(TcpDuplexController controller)
+    throws IOException;
 }

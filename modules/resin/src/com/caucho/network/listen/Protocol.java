@@ -27,37 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.http;
+package com.caucho.network.listen;
 
-import com.caucho.config.ConfigException;
-import com.caucho.network.listen.AbstractProtocol;
-import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.SocketLink;
-import com.caucho.server.cluster.Server;
-import com.caucho.util.L10N;
+
 
 /**
- * Abstract Protocol handling for HTTP requests.
+ * Protocol factory responsible for creating new protocol connection objects. 
+ * Each protocol connection corresponds to a stream/socket connection.
  */
-abstract public class AbstractHttpProtocol extends AbstractProtocol {
-  private static final L10N L = new L10N(AbstractHttpProtocol.class);
-  
-  private Server _server;
-  
-  protected AbstractHttpProtocol()
-  {
-    _server = Server.getCurrent();
-    
-    if (_server == null)
-      throw new ConfigException(L.l("{0} needs an active Resin Server.",
-				    getClass().getName()));
-  }
-
+public interface Protocol {
   /**
-   * Returns the active server.
+   * Returns the protocol name.
    */
-  public Server getServer()
-  {
-    return _server;
-  }
+  public String getProtocolName();
+  
+  /**
+   * Creates a new protocol connection.
+   */
+  public ProtocolConnection createConnection(SocketLink link);
 }

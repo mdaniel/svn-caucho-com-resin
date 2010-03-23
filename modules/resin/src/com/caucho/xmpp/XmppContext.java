@@ -29,17 +29,8 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import com.caucho.xmpp.im.XmppRosterQueryMarshal;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.xml.namespace.QName;
-import javax.xml.stream.*;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
 /**
  * Protocol handler from the TCP/XMPP stream forwarding to the broker

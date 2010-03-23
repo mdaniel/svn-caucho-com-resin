@@ -31,7 +31,7 @@ package com.caucho.server.cluster;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.server.connection.AbstractProtocol;
+import com.caucho.network.listen.AbstractProtocol;
 
 /**
  * Represents a protocol connection.

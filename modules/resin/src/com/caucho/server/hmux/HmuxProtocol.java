@@ -33,14 +33,14 @@ import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.http.AbstractHttpProtocol;
 
 /**
  * Dispatches the HMUX protocol.
  *
- * @see com.caucho.server.connection.AbstractProtocol
+ * @see com.caucho.network.listen.AbstractProtocol
  */
 public class HmuxProtocol extends AbstractHttpProtocol {
   private static EnvironmentLocal<HmuxProtocol> _localManager
@@ -66,7 +66,7 @@ public class HmuxProtocol extends AbstractHttpProtocol {
   /**
    * Create a HmuxRequest object for the new thread.
    */
-  public ProtocolConnection createConnection(TransportConnection conn)
+  public ProtocolConnection createConnection(SocketLink conn)
   {
     return new HmuxRequest(getServer(), conn, this);
   }

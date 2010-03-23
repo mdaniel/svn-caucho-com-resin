@@ -33,7 +33,7 @@ import javax.servlet.AsyncContext;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import com.caucho.server.connection.TransportConnection;
+import com.caucho.network.listen.SocketLink;
 
 /**
  * Public API to control a comet connection.
@@ -41,7 +41,7 @@ import com.caucho.server.connection.TransportConnection;
 public class AsyncConnectionImpl extends ConnectionCometController
   implements AsyncContext
 {
-  public AsyncConnectionImpl(TransportConnection conn,
+  public AsyncConnectionImpl(SocketLink conn,
                              boolean isTop,
                              ServletRequest request,
                              ServletResponse response)

@@ -31,9 +31,9 @@ package com.caucho.server.snmp;
 
 import java.util.HashMap;
 
-import com.caucho.server.connection.AbstractProtocol;
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.network.listen.AbstractProtocol;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.snmp.types.OctetStringValue;
 import com.caucho.server.snmp.types.SnmpValue;
 
@@ -195,7 +195,7 @@ public class SnmpProtocol extends AbstractProtocol
     _community = s;
   }
 
-  public ProtocolConnection createConnection(TransportConnection connection)
+  public ProtocolConnection createConnection(SocketLink connection)
   {
     OctetStringValue community;
     

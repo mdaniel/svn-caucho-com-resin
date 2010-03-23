@@ -29,20 +29,22 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.ActorError;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.xml.stream.XMLStreamException;
+
 import com.caucho.bam.ActorClient;
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
-import com.caucho.bam.SimpleActorClient;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
-import javax.xml.stream.*;
+import com.caucho.network.listen.TcpDuplexController;
+import com.caucho.network.listen.TcpDuplexHandler;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Protocol handler from the TCP/XMPP stream forwarding to the broker

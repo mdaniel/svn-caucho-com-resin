@@ -29,19 +29,23 @@
 
 package com.caucho.server.rewrite;
 
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.server.connection.*;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.logging.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.server.dispatch.ServletConfigImpl;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
 
 public class ProxyRule
   extends AbstractRuleWithConditions

@@ -29,14 +29,14 @@
 
 package com.caucho.server.fastcgi;
 
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.ProtocolConnection;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.http.AbstractHttpProtocol;
 
 /**
  * Dispatches the FastCgi protocol.
  *
- * @see com.caucho.server.connection.AbstractProtocol
+ * @see com.caucho.network.listen.AbstractProtocol
  */
 public class FastCgiProtocol extends AbstractHttpProtocol {
   public FastCgiProtocol()
@@ -47,7 +47,7 @@ public class FastCgiProtocol extends AbstractHttpProtocol {
   /**
    * Create a FastCgiRequest object for the new thread.
    */
-  public ProtocolConnection createConnection(TransportConnection conn)
+  public ProtocolConnection createConnection(SocketLink conn)
   {
     return new FastCgiRequest(getServer(), conn);
   }

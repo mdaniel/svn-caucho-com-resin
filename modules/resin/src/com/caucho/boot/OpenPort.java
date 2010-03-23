@@ -33,14 +33,14 @@ import java.net.InetAddress;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.server.connection.Port;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.vfs.QServerSocket;
 import com.caucho.vfs.SSLFactory;
 
 /**
  * Represents a protocol connection.
  */
-public class OpenPort extends Port
+public class OpenPort extends SocketLinkListener
 {
   public OpenPort()
   {

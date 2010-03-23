@@ -142,8 +142,10 @@ public class NetworkModule extends AbstractQuercusModule {
         host = host.substring(p + 3);
       }
 
-      p = host.indexOf(':');
-      if (p > 0) {
+      p = host.lastIndexOf(':');
+      int q = host.lastIndexOf(']');
+      
+      if (p > 0 && q < p) {
         String portStr = host.substring(p + 1);
         host = host.substring(0, p);
 	

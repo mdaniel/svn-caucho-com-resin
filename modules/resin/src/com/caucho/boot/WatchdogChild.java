@@ -31,7 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.WatchdogMXBean;
-import com.caucho.server.connection.Port;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.util.*;
 import com.caucho.vfs.Path;
 
@@ -222,7 +222,7 @@ class WatchdogChild
     return _config.getWatchdogAddress();
   }
 
-  Iterable<Port> getPorts()
+  Iterable<SocketLinkListener> getPorts()
   {
     return _config.getPorts();
   }

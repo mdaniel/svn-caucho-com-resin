@@ -56,9 +56,9 @@ import com.caucho.hessian.io.Hessian2StreamingInput;
 import com.caucho.hessian.io.HessianDebugInputStream;
 import com.caucho.hmtp.HmtpReader;
 import com.caucho.hmtp.HmtpWriter;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.ProtocolConnection;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractResponseStream;
@@ -272,7 +272,7 @@ public class HmuxRequest extends AbstractHttpRequest
   private ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   public HmuxRequest(Server server,
-                     TransportConnection conn,
+                     SocketLink conn,
                      HmuxProtocol protocol)
   {
     super(server, conn);

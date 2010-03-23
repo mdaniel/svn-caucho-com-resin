@@ -40,9 +40,9 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 
-import com.caucho.server.connection.AsyncController;
-import com.caucho.server.connection.CometHandler;
-import com.caucho.server.connection.TransportConnection;
+import com.caucho.network.listen.AsyncController;
+import com.caucho.network.listen.CometHandler;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.servlet.comet.CometController;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
@@ -74,7 +74,7 @@ public class ConnectionCometController
 
   private long _maxIdleTime;
 
-  public ConnectionCometController(TransportConnection conn,
+  public ConnectionCometController(SocketLink conn,
                                    boolean isTop,
                                    ServletRequest request,
                                    ServletResponse response)

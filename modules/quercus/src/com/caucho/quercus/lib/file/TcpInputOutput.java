@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.file;
 
+import com.caucho.quercus.QuercusException;
 import com.caucho.quercus.env.Env;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.SocketStream;
@@ -36,12 +37,16 @@ import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
 import java.net.Socket;
 import java.net.SocketAddress;
+import java.security.KeyManagementException;
+import java.security.NoSuchAlgorithmException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.net.SocketFactory;
+import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
 
 /**
@@ -60,15 +65,22 @@ public class TcpInputOutput
   private int _errno;
 
   public TcpInputOutput(Env env, String host, int port,
-                   boolean isSecure,
-                   Domain domain)
+                        boolean isSecure,
+                        Domain domain)
     throws IOException
   {
     super(env);
     env.addCleanup(this);
     
-    if (isSecure)
-      _socket = SSLSocketFactory.getDefault().createSocket(host, port);
+    if (isSecure) {
+      try {
+        _socket = createSSLSocket(host, port);
+      } catch (KeyManagementException e) {
+        throw new QuercusException(e);
+      } catch (NoSuchAlgorithmException e) {
+        throw new QuercusException(e);
+      }
+  }
     else
       _socket = SocketFactory.getDefault().createSocket(host, port);
     
@@ -82,6 +94,34 @@ public class TcpInputOutput
 
     _socket = socket;
     _domain = domain;
+  }
+  
+  private Socket createSSLSocket(String host, int port)
+    throws IOException, NoSuchAlgorithmException, KeyManagementException
+  {
+    Socket s = new Socket(host, port);
+
+    SSLContext context = SSLContext.getInstance("TLS");
+
+    javax.net.ssl.TrustManager tm =
+      new javax.net.ssl.X509TrustManager() {
+        public java.security.cert.X509Certificate[]
+          getAcceptedIssuers() {
+          return null;
+        }
+        public void checkClientTrusted(
+                                       java.security.cert.X509Certificate[] cert, String foo) {
+        }
+        public void checkServerTrusted(
+                                       java.security.cert.X509Certificate[] cert, String foo) {
+        }
+      };
+
+
+    context.init(null, new javax.net.ssl.TrustManager[] { tm }, null);
+    SSLSocketFactory factory = context.getSocketFactory();
+
+    return factory.createSocket(s, host, port, true);
   }
 
   public void bind(SocketAddress address)

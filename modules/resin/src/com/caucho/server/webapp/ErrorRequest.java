@@ -29,20 +29,14 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.*;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.server.dispatch.Invocation;
-import com.caucho.server.dispatch.ServletInvocation;
-import com.caucho.server.http.CauchoRequestWrapper;
-import com.caucho.server.http.Form;
-import com.caucho.util.HashMapImpl;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
 
 public class ErrorRequest extends ForwardRequest {
   private static final IntMap _errorAttributeMap = new IntMap();

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -35,6 +35,10 @@ import java.net.InetAddress;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
+
+import com.caucho.config.Module;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
@@ -51,10 +55,11 @@ import com.caucho.vfs.StreamImpl;
  *
  * <p>Each TcpConnection has its own thread.
  */
-public class TcpConnection extends AbstractTransportConnection
+@Module
+public class TcpSocketLink extends AbstractSocketLink
 {
   private static final Logger log
-    = Logger.getLogger(TcpConnection.class.getName());
+    = Logger.getLogger(TcpSocketLink.class.getName());
 
   private static final ThreadLocal<ProtocolConnection> _currentRequest
     = new ThreadLocal<ProtocolConnection>();
@@ -66,7 +71,7 @@ public class TcpConnection extends AbstractTransportConnection
   private final String _name;
   private String _dbgId;
 
-  private final Port _port;
+  private final SocketLinkListener _port;
   private final QSocket _socket;
   private final ProtocolConnection _request;
   private final ClassLoader _loader;
@@ -83,7 +88,7 @@ public class TcpConnection extends AbstractTransportConnection
 
   private final Admin _admin = new Admin();
 
-  private ConnectionState _state = ConnectionState.INIT;
+  private SocketLinkState _state = SocketLinkState.INIT;
   private AsyncController _controller;
   
   private boolean _isWakeRequested;
@@ -108,8 +113,8 @@ public class TcpConnection extends AbstractTransportConnection
    * @param server The TCP server controlling the connections
    * @param request The protocol Request
    */
-  TcpConnection(int connId,
-                Port port,
+  TcpSocketLink(int connId,
+                SocketLinkListener port,
                 QSocket socket)
   {
     _connectionId = connId;
@@ -164,7 +169,7 @@ public class TcpConnection extends AbstractTransportConnection
   /**
    * Returns the port which generated the connection.
    */
-  public Port getPort()
+  public SocketLinkListener getPort()
   {
     return _port;
   }
@@ -222,7 +227,7 @@ public class TcpConnection extends AbstractTransportConnection
   /**
    * Returns the state.
    */
-  public ConnectionState getState()
+  public SocketLinkState getState()
   {
     return _state;
   }
@@ -373,6 +378,40 @@ public class TcpConnection extends AbstractTransportConnection
   {
     return getPort().getVirtualHost();
   }
+  
+  //
+  // SSL api
+  //
+  
+  /**
+   * Returns the cipher suite
+   */
+  @Override
+  public String getCipherSuite()
+  {
+    return _socket.getCipherSuite();
+  }
+  
+  /***
+   * Returns the key size.
+   */
+  @Override
+  public int getKeySize()
+  {
+    return _socket.getCipherBits();
+  }
+  
+  /**
+   * Returns any client certificates.
+   * @throws CertificateException 
+   */
+  @Override
+  public X509Certificate []getClientCertificates()
+    throws CertificateException
+  {
+    return _socket.getClientCertificates();
+  }
+  
 
   //
   // thread information
@@ -565,7 +604,7 @@ public class TcpConnection extends AbstractTransportConnection
 
       dispatchRequest();
 
-      if (_state == ConnectionState.DUPLEX) {
+      if (_state == SocketLinkState.DUPLEX) {
         // duplex (xmpp/hmtp) handling
         return RequestState.DUPLEX;
       }
@@ -619,7 +658,7 @@ public class TcpConnection extends AbstractTransportConnection
   private RequestState processKeepalive()
     throws IOException
   {
-    Port port = _port;
+    SocketLinkListener port = _port;
 
     // quick timed read to see if data is already available
     if (port.keepaliveThreadRead(getReadStream())) {
@@ -831,7 +870,7 @@ public class TcpConnection extends AbstractTransportConnection
   {
     _isCompleteRequested = true;
     
-    ConnectionState state = _state;
+    SocketLinkState state = _state;
 
     if (state.isCometSuspend()) {
       // XXX: timing issues, need to have isComplete flag
@@ -893,7 +932,7 @@ public class TcpConnection extends AbstractTransportConnection
    */
   private void closeImpl()
   {
-    ConnectionState state = _state;
+    SocketLinkState state = _state;
     _state = _state.toClosed(this);
 
     if (state.isClosed())
@@ -913,7 +952,7 @@ public class TcpConnection extends AbstractTransportConnection
     if (controller != null)
       controller.closeImpl();
 
-    Port port = getPort();
+    SocketLinkListener port = getPort();
 
     if (log.isLoggable(Level.FINER)) {
       if (port != null)
@@ -969,7 +1008,7 @@ public class TcpConnection extends AbstractTransportConnection
   {
     closeImpl();
 
-    ConnectionState state = _state;
+    SocketLinkState state = _state;
     _state = state.toIdle();
     _isCompleteRequested = false;
 
@@ -1031,7 +1070,7 @@ public class TcpConnection extends AbstractTransportConnection
 
       RequestState result = null;
 
-      _port.threadBegin(TcpConnection.this);
+      _port.threadBegin(TcpSocketLink.this);
 
       try {
         result = doTask();
@@ -1041,7 +1080,7 @@ public class TcpConnection extends AbstractTransportConnection
         log.log(Level.WARNING, e.toString(), e);
       } finally {
         thread.setName(oldThreadName);
-        _port.threadEnd(TcpConnection.this);
+        _port.threadEnd(TcpSocketLink.this);
 
         if (result == null)
           destroy();
@@ -1054,16 +1093,16 @@ public class TcpConnection extends AbstractTransportConnection
     @Override
     public String toString()
     {
-      return getClass().getSimpleName() + "[" + TcpConnection.this + "]";
+      return getClass().getSimpleName() + "[" + TcpSocketLink.this + "]";
     }
   }
 
   class AcceptTask extends ConnectionReadTask {
     public void run()
     {
-      Port port = _port;
+      SocketLinkListener port = _port;
 
-      port.startConnection(TcpConnection.this);
+      port.startConnection(TcpSocketLink.this);
 
       runThread();
     }
@@ -1131,7 +1170,7 @@ public class TcpConnection extends AbstractTransportConnection
       getReadStream().init(_socket.getStream(), null);
 
       if (log.isLoggable(Level.FINE)) {
-        log.fine(dbgId() + "starting connection " + TcpConnection.this + ", total=" + _port.getConnectionCount());
+        log.fine(dbgId() + "starting connection " + TcpSocketLink.this + ", total=" + _port.getConnectionCount());
       }
     }
   }
@@ -1179,7 +1218,7 @@ public class TcpConnection extends AbstractTransportConnection
     public RequestState doTask()
       throws IOException
     {
-      _state = _state.toDuplexActive(TcpConnection.this);
+      _state = _state.toDuplexActive(TcpSocketLink.this);
 
       RequestState result;
 
@@ -1255,7 +1294,7 @@ public class TcpConnection extends AbstractTransportConnection
 
     public long getThreadId()
     {
-      return TcpConnection.this.getThreadId();
+      return TcpSocketLink.this.getThreadId();
     }
 
     public long getRequestActiveTime()
@@ -1268,14 +1307,14 @@ public class TcpConnection extends AbstractTransportConnection
 
     public String getUrl()
     {
-      ProtocolConnection request = TcpConnection.this.getRequest();
+      ProtocolConnection request = TcpSocketLink.this.getRequest();
 
       String url = request.getProtocolRequestURL();
       
       if (url != null && ! "".equals(url))
         return url;
       
-      Port port = TcpConnection.this.getPort();
+      SocketLinkListener port = TcpSocketLink.this.getPort();
 
       if (port.getAddress() == null)
         return "request://*:" + port.getPort();
@@ -1285,17 +1324,17 @@ public class TcpConnection extends AbstractTransportConnection
 
     public String getState()
     {
-      return TcpConnection.this.getState().toString();
+      return TcpSocketLink.this.getState().toString();
     }
 
     public String getDisplayState()
     {
-      return TcpConnection.this.getDisplayState();
+      return TcpSocketLink.this.getDisplayState();
     }
 
     public String getRemoteAddress()
     {
-      return TcpConnection.this.getRemoteHost();
+      return TcpSocketLink.this.getRemoteHost();
     }
 
     void register()

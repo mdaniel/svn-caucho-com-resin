@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,55 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.config;
+
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * Controls a tcp connection for comet.
+ * @Module marks a bean as being private to the current module,
+ * as a forward-compatibility for JSR-294.
  */
-public class AsyncController {
-  /**
-   * Creates a new TcpConnectionController.
-   */
-  protected AsyncController()
-  {
-  }
-  
-  public void setMaxIdleTime(long idleTimeout)
-  {
-  }
-  
-  public long getMaxIdleTime()
-  {
-    return -1;
-  }
-
-  public boolean wake()
-  {
-    return true;
-  }
-  
-  public boolean isCometComplete()
-  {
-    return false;
-  }
-  
-  public void timeout()
-  {
-  }
-
-  public void complete()
-  {
-  }
-  
-  public void close()
-  {
-    
-  }
-
-  /**
-   * Closes the connection.
-   */
-  public void closeImpl()
-  {
-  }
+@Documented  
+@Retention(RUNTIME)
+@Target({TYPE, FIELD, METHOD})
+public @interface Module {
 }

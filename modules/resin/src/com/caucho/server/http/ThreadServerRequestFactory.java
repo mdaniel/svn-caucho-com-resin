@@ -30,7 +30,7 @@
 package com.caucho.server.http;
 
 import com.caucho.config.scope.ThreadRequestFactory;
-import com.caucho.server.connection.TcpConnection;
+import com.caucho.network.listen.TcpSocketLink;
 
 import javax.servlet.http.HttpServletRequest;
 
@@ -44,7 +44,7 @@ public class ThreadServerRequestFactory extends ThreadRequestFactory {
   @Override
   public Object getRequestImpl()
   {
-    return TcpConnection.getCurrentRequest();
+    return TcpSocketLink.getCurrentRequest();
   }
   
   /**
@@ -53,7 +53,7 @@ public class ThreadServerRequestFactory extends ThreadRequestFactory {
   @Override
   public HttpServletRequest getHttpRequestImpl()
   {
-    Object objRequest = TcpConnection.getCurrentRequest();
+    Object objRequest = TcpSocketLink.getCurrentRequest();
 
     if (objRequest instanceof AbstractHttpRequest) {
       AbstractHttpRequest absRequest = (AbstractHttpRequest) objRequest;

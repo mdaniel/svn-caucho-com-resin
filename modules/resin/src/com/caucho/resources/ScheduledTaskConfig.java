@@ -29,26 +29,19 @@
 
 package com.caucho.resources;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Service;
-import com.caucho.config.Unbound;
-import com.caucho.config.Configurable;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.types.*;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-import com.caucho.server.connection.*;
-import com.caucho.server.webapp.*;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
+import javax.el.MethodExpression;
 import javax.enterprise.context.Dependent;
-import javax.el.*;
-import javax.resource.spi.work.Work;
-import javax.servlet.*;
-import java.util.*;
-import java.util.concurrent.Executor;
-import java.util.logging.*;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.Service;
+import com.caucho.config.Unbound;
+import com.caucho.config.cfg.BeanConfig;
+import com.caucho.config.types.Period;
+import com.caucho.util.L10N;
 
 /**
  * The cron resources starts application Work tasks at cron-specified

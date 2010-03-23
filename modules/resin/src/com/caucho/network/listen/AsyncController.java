@@ -27,50 +27,58 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
-import java.util.logging.*;
-import com.caucho.vfs.*;
+import com.caucho.config.Module;
 
 /**
- * Throttles connections
+ * Controls a tcp connection for comet.
  */
-public class Throttle
-{
-  private static final Logger log = Logger.getLogger(Throttle.class.getName());
-  protected Throttle()
+@Module
+public class AsyncController {
+  /**
+   * Creates a new TcpConnectionController.
+   */
+  protected AsyncController()
   {
   }
-
-  public void setMaxConcurrentRequests(int max)
+  
+  public void setMaxIdleTime(long idleTimeout)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  public long getMaxIdleTime()
+  {
+    return -1;
   }
 
-  public int getMaxConcurrentRequests()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public static Throttle createPro()
-  {
-    try {
-      Class<?> cl = Class.forName("com.caucho.server.connection.ProThrottle");
-
-      return (Throttle) cl.newInstance();
-    } catch (Exception e) {
-      log.finer(e.toString());
-    }
-
-    return null;
-  }
-
-  public boolean accept(QSocket socket)
+  public boolean wake()
   {
     return true;
   }
+  
+  public boolean isCometComplete()
+  {
+    return false;
+  }
+  
+  public void timeout()
+  {
+  }
 
-  public void close(QSocket socket)
+  public void complete()
+  {
+  }
+  
+  public void close()
+  {
+    
+  }
+
+  /**
+   * Closes the connection.
+   */
+  public void closeImpl()
   {
   }
 }

@@ -29,7 +29,7 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.server.connection.AbstractSelectManager;
+import com.caucho.network.listen.AbstractSelectManager;
 
 public class ProtocolDispatchServer extends DispatchServer {
   private boolean _isIgnoreClientDisconnect = true;

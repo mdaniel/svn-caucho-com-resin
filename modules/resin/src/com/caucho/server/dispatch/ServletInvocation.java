@@ -29,8 +29,8 @@
 
 package com.caucho.server.dispatch;
 
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TcpConnection;
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.http.AbstractHttpRequest;
 
 import com.caucho.util.L10N;
@@ -261,7 +261,7 @@ public class ServletInvocation {
    */
   public static ServletRequest getContextRequest()
   {
-    ProtocolConnection req = TcpConnection.getCurrentRequest();
+    ProtocolConnection req = TcpSocketLink.getCurrentRequest();
 
     if (req instanceof AbstractHttpRequest)
       return ((AbstractHttpRequest) req).getRequestFacade();

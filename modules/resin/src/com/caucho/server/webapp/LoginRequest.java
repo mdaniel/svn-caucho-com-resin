@@ -29,17 +29,10 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.*;
-import com.caucho.server.dispatch.Invocation;
-import com.caucho.util.HashMapImpl;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 
-import java.io.*;
-import java.util.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import com.caucho.server.dispatch.Invocation;
 
 public class LoginRequest extends ForwardRequest {
   public LoginRequest(HttpServletRequest request,

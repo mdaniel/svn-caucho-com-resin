@@ -27,21 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
-
+package com.caucho.network.listen;
 
 /**
- * Protocol factory responsible for creating new protocol connection objects. 
- * Each protocol connection corresponds to a stream/socket connection.
+ * Application handler for a comet controller.
  */
-public interface Protocol {
+public interface CometHandler
+{
   /**
-   * Returns the protocol name.
+   * Called when the connection closes
    */
-  public String getProtocolName();
+  public void onComplete();
   
   /**
-   * Creates a new protocol connection.
+   * Called when the connection times out
    */
-  public ProtocolConnection createConnection(TransportConnection conn);
+  public void onTimeout();
 }

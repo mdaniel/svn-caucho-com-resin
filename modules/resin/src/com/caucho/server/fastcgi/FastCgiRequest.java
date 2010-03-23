@@ -36,9 +36,9 @@ import java.util.Enumeration;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.ProtocolConnection;
-import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.dispatch.InvocationDecoder;
@@ -165,7 +165,7 @@ public class FastCgiRequest extends AbstractHttpRequest
    *
    * @param server the owning server.
    */
-  public FastCgiRequest(Server server, TransportConnection conn)
+  public FastCgiRequest(Server server, SocketLink conn)
   {
     super(server, conn);
 

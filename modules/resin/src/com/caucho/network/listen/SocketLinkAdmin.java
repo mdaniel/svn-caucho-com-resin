@@ -28,18 +28,20 @@
  */
 
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
+import com.caucho.config.Module;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
 
-public class PortAdmin extends AbstractManagedObject
+@Module
+public class SocketLinkAdmin extends AbstractManagedObject
   implements PortMXBean
 {
-  private Port _port;
+  private SocketLinkListener _port;
 
-  public PortAdmin(Port port)
+  public SocketLinkAdmin(SocketLinkListener port)
   {
     _port = port;
   }

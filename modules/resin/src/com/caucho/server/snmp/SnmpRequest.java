@@ -43,8 +43,8 @@ import javax.management.ObjectName;
 import javax.management.ReflectionException;
 
 import com.caucho.jmx.Jmx;
-import com.caucho.server.connection.AbstractProtocolConnection;
-import com.caucho.server.connection.TransportConnection;
+import com.caucho.network.listen.AbstractProtocolConnection;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.snmp.types.GetResponsePduValue;
 import com.caucho.server.snmp.types.IntegerValue;
 import com.caucho.server.snmp.types.NullValue;
@@ -74,14 +74,14 @@ public class SnmpRequest extends AbstractProtocolConnection
   public static final int READ_ONLY = 4;
   public static final int GENERAL_ERROR = 5;
   
-  private final TransportConnection _connection;
+  private final SocketLink _connection;
 
   private IntegerValue _version = IntegerValue.ZERO;
   private final OctetStringValue _communityString;
   
   private HashMap<String, Oid> _mibMap;
   
-  public SnmpRequest(TransportConnection connection,
+  public SnmpRequest(SocketLink connection,
                      HashMap<String, Oid> mibMap,
                      OctetStringValue community)
   {

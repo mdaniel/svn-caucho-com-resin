@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import com.caucho.vfs.VfsStream;
 
@@ -39,7 +39,7 @@ import java.net.InetAddress;
  * A Connection based on streams.  Stream connection is primarily used
  * for testing.
  */
-public class StreamConnection extends AbstractTransportConnection {
+public class StreamSocketLink extends AbstractSocketLink {
   private int _id = 1;
   private InetAddress _localAddress;
   private int _localPort;
@@ -49,11 +49,11 @@ public class StreamConnection extends AbstractTransportConnection {
   private boolean _isSecure;
   private boolean _isKeepalive = true;
 
-  public StreamConnection()
+  public StreamSocketLink()
   {
   }
 
-  public StreamConnection(InputStream is, OutputStream os)
+  public StreamSocketLink(InputStream is, OutputStream os)
   {
     setStream(is, os);
   }
@@ -165,11 +165,8 @@ public class StreamConnection extends AbstractTransportConnection {
   }
 
   class StreamAsyncController extends AsyncController {
-    private CometHandler _handler;
-
     StreamAsyncController(CometHandler handler)
     {
-      _handler = handler;
     }
 
     public String toString()

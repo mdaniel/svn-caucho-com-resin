@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,55 +27,53 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import java.io.IOException;
 
 /**
- * Protocol specific information for each request.  ServerRequest
+ * Protocol specific information for each connection.  ProtocolConnection
  * is reused to reduce memory allocations.
  *
- * <p>ServerRequests are created by Server.createRequest()
+ * <p>ProtocolConnections are created by Protocol.createConnection
  */
-public abstract  class AbstractProtocolConnection implements ProtocolConnection {
+public interface ProtocolConnection {
   /**
    * Initialize the connection.  At this point, the current thread is the
    * connection thread.
    */
-  public void init()
-  {
-  }
-  
-  @Override
-  public void onStartConnection()
-  {
-    
-  }
-  
+  public void init();
+
   /**
-   * Returns a default debugging identifier for the connection
+   * Return true if the connection should wait for a read before
+   * handling the request.
    */
-  @Override
-  public String getProtocolRequestURL()
-  {
-    return null;
-  }
-  
+  public boolean isWaitForRead();
+
   /**
-   * Handles a new connection.  The controlling TcpServer may call
-   * handleConnection again after the connection completes, so 
+   * Called when the connection starts, i.e. just after the accept
+   */
+  public void onStartConnection();
+
+  /**
+   * Handles a new request.  The controlling TcpServer may call
+   * handleRequest again after the connection completes, so
    * the implementation must initialize any variables for each connection.
-   *
-   * @param conn Information about the connection, including buffered
-   * read and write streams.
    */
-  public abstract boolean handleRequest() throws IOException;
+  public boolean handleRequest() throws IOException;
+  
+  /**
+   * Returns a request URL for debugging/management.
+   */
+  public String getProtocolRequestURL();
+
+  /**
+   * Handles a resumption of the connection for an async/comet request.
+   */
+  public boolean handleResume() throws IOException;
 
   /**
    * Handles a close event when the connection is closed.
    */
-  @Override
-  public void onCloseConnection()
-  {
-  }
+  public void onCloseConnection();
 }

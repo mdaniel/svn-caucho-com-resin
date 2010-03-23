@@ -27,9 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import java.net.InetAddress;
+
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -42,7 +45,7 @@ import com.caucho.vfs.WriteStream;
  * <p>TcpConnection is the most common implementation.  The test harness
  * provides a string based Connection.
  */
-public interface TransportConnection {
+public interface SocketLink {
   /**
    * Returns the connection id.  Primarily for debugging.
    */
@@ -97,6 +100,27 @@ public interface TransportConnection {
    * Returns the remove port of the connection
    */
   public int getRemotePort();
+  
+  //
+  // SSL-related information
+  //
+  
+  /**
+   * Returns the cipher suite
+   */
+  public String getCipherSuite();
+  
+  /***
+   * Returns the key size.
+   */
+  public int getKeySize();
+  
+  /**
+   * Returns any client certificates.
+   * @throws CertificateException 
+   */
+  public X509Certificate []getClientCertificates()
+    throws CertificateException;
   
   //
   // checks for Port enable/disable

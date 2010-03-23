@@ -27,21 +27,24 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
-enum ConnectionState {
+import com.caucho.config.Module;
+
+@Module
+enum SocketLinkState {
   /**
    * The allocated, ready to accept state
    */
   INIT {
     @Override
-    ConnectionState toInit() 
+    SocketLinkState toInit() 
     { 
       return INIT; 
     }
 
     @Override
-    ConnectionState toAccept() 
+    SocketLinkState toAccept() 
     { 
       return ACCEPT; 
     }
@@ -55,7 +58,7 @@ enum ConnectionState {
     boolean isActive() { return true; }
 
     @Override
-    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
     { 
       conn.getPort().keepaliveAllocate();
       
@@ -63,7 +66,7 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     { 
       return REQUEST_ACTIVE_NKA;
     }
@@ -85,7 +88,7 @@ enum ConnectionState {
      * XXX: qa
      */
     @Override
-    ConnectionState toKeepalive(TcpConnection conn)
+    SocketLinkState toKeepalive(TcpSocketLink conn)
     {
       conn.getPort().keepaliveAllocate();
       
@@ -93,7 +96,7 @@ enum ConnectionState {
     }
     
     @Override
-    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
     { 
       conn.getPort().keepaliveAllocate();
       
@@ -101,7 +104,7 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     { 
       return REQUEST_ACTIVE_NKA;
     }
@@ -121,13 +124,13 @@ enum ConnectionState {
     boolean isKeepaliveAllocated() { return true; }
     
     @Override
-    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
     { 
       return REQUEST_ACTIVE_KA; 
     }
 
     @Override
-    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     { 
       conn.getPort().keepaliveFree();
       
@@ -135,7 +138,7 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toKillKeepalive(TcpConnection conn)
+    SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -143,19 +146,19 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toKeepalive(TcpConnection conn)
+    SocketLinkState toKeepalive(TcpSocketLink conn)
     {
       return REQUEST_KEEPALIVE;
     }
 
     @Override
-    ConnectionState toComet()
+    SocketLinkState toComet()
     {
       return COMET_KA;
     }
 
     @Override
-    ConnectionState toDuplex(TcpConnection conn)
+    SocketLinkState toDuplex(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -163,7 +166,7 @@ enum ConnectionState {
     }
     
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -179,13 +182,13 @@ enum ConnectionState {
     boolean isActive() { return true; }
 
     @Override
-    ConnectionState toComet()
+    SocketLinkState toComet()
     {
       return COMET_NKA;
     }
 
     @Override
-    ConnectionState toDuplex(TcpConnection conn)
+    SocketLinkState toDuplex(TcpSocketLink conn)
     {
       return DUPLEX;
     }
@@ -202,13 +205,13 @@ enum ConnectionState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
     { 
       return REQUEST_ACTIVE_KA; 
     }
 
     @Override
-    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     {
       conn.getPort().keepaliveFree();
       
@@ -216,13 +219,13 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toKeepaliveSelect()
+    SocketLinkState toKeepaliveSelect()
     {
       return REQUEST_KEEPALIVE_SELECT;
     }
 
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
 
@@ -238,13 +241,13 @@ enum ConnectionState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
     { 
       return REQUEST_ACTIVE_KA; 
     }
 
     @Override
-    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     {
       conn.getPort().keepaliveFree();
 
@@ -252,7 +255,7 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
 
@@ -274,25 +277,25 @@ enum ConnectionState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toCometSuspend()
+    SocketLinkState toCometSuspend()
     {
       return COMET_SUSPEND_KA;
     }
     
     @Override
-    ConnectionState toCometDispatch()
+    SocketLinkState toCometDispatch()
     {
       return REQUEST_ACTIVE_KA;
     }
 
     @Override
-    ConnectionState toCometComplete()
+    SocketLinkState toCometComplete()
     {
       return COMET_COMPLETE_KA;
     }
 
     @Override
-    ConnectionState toKillKeepalive(TcpConnection conn)
+    SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -300,7 +303,7 @@ enum ConnectionState {
     }
     
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -316,19 +319,19 @@ enum ConnectionState {
     boolean isCometActive() { return true; }
 
     @Override
-    ConnectionState toCometDispatch() 
+    SocketLinkState toCometDispatch() 
     { 
       return REQUEST_ACTIVE_NKA;
     }
 
     @Override
-    ConnectionState toCometSuspend()
+    SocketLinkState toCometSuspend()
     {
       return COMET_SUSPEND_NKA;
     }
 
     @Override
-    ConnectionState toCometComplete()
+    SocketLinkState toCometComplete()
     {
       return COMET_COMPLETE_NKA;
     }
@@ -345,7 +348,7 @@ enum ConnectionState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toKillKeepalive(TcpConnection conn)
+    SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -353,19 +356,19 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toCometResume()
+    SocketLinkState toCometResume()
     {
       return COMET_KA;
     }
     
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       throw new IllegalStateException();
     }
 
     @Override
-    ConnectionState toDestroy(TcpConnection conn)
+    SocketLinkState toDestroy(TcpSocketLink conn)
     {
       throw new IllegalStateException();
     }
@@ -379,19 +382,19 @@ enum ConnectionState {
     boolean isCometSuspend() { return true; }
 
     @Override
-    ConnectionState toCometResume()
+    SocketLinkState toCometResume()
     {
       return COMET_NKA;
     }
     
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       throw new IllegalStateException();
     }
 
     @Override
-    ConnectionState toDestroy(TcpConnection conn)
+    SocketLinkState toDestroy(TcpSocketLink conn)
     {
       throw new IllegalStateException();
     }
@@ -408,13 +411,13 @@ enum ConnectionState {
     boolean isKeepaliveAllocated() { return true; }
 
     @Override
-    ConnectionState toActiveWithKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveWithKeepalive(TcpSocketLink conn) 
     { 
       return REQUEST_ACTIVE_KA;
     }
 
     @Override
-    ConnectionState toActiveNoKeepalive(TcpConnection conn) 
+    SocketLinkState toActiveNoKeepalive(TcpSocketLink conn) 
     { 
       conn.getPort().keepaliveFree();
       
@@ -422,7 +425,7 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toKillKeepalive(TcpConnection conn)
+    SocketLinkState toKillKeepalive(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -430,19 +433,19 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toCometComplete()
+    SocketLinkState toCometComplete()
     {
       return this;
     }
 
     @Override
-    ConnectionState toKeepalive(TcpConnection conn)
+    SocketLinkState toKeepalive(TcpSocketLink conn)
     {
       return REQUEST_KEEPALIVE;
     }
     
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       conn.getPort().keepaliveFree();
       
@@ -458,7 +461,7 @@ enum ConnectionState {
     boolean isCometComplete() { return true; }
 
     @Override
-    ConnectionState toCometComplete()
+    SocketLinkState toCometComplete()
     {
       return this;
     }
@@ -469,7 +472,7 @@ enum ConnectionState {
     boolean isDuplex() { return true; }
 
     @Override
-    ConnectionState toKeepalive(TcpConnection conn)
+    SocketLinkState toKeepalive(TcpSocketLink conn)
     {
       conn.getPort().duplexKeepaliveBegin();
 
@@ -477,7 +480,7 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toDuplexActive(TcpConnection conn)
+    SocketLinkState toDuplexActive(TcpSocketLink conn)
     {
       return DUPLEX;
     }
@@ -491,7 +494,7 @@ enum ConnectionState {
     boolean isKeepalive() { return true; }
 
     @Override
-    ConnectionState toDuplexActive(TcpConnection conn)
+    SocketLinkState toDuplexActive(TcpSocketLink conn)
     {
       conn.getPort().duplexKeepaliveEnd();
 
@@ -499,7 +502,7 @@ enum ConnectionState {
     }
 
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       conn.getPort().duplexKeepaliveEnd();
 
@@ -515,13 +518,13 @@ enum ConnectionState {
     boolean isAllowIdle() { return true; }
 
     @Override
-    ConnectionState toAccept() 
+    SocketLinkState toAccept() 
     { 
       return ACCEPT; 
     }
 
     @Override
-    ConnectionState toIdle()
+    SocketLinkState toIdle()
     {
       return IDLE;
     }
@@ -532,13 +535,13 @@ enum ConnectionState {
     boolean isIdle() { return true; }
 
     @Override
-    ConnectionState toInit() 
+    SocketLinkState toInit() 
     { 
       return INIT; 
     }
 
     @Override
-    ConnectionState toDestroy(TcpConnection conn)
+    SocketLinkState toDestroy(TcpSocketLink conn)
     {
       throw new IllegalStateException(this + " is an illegal destroy state");
     }
@@ -552,19 +555,19 @@ enum ConnectionState {
     boolean isDestroyed() { return true; }
 
     @Override
-    ConnectionState toIdle()
+    SocketLinkState toIdle()
     {
       return this;
     }
 
     @Override
-    ConnectionState toClosed(TcpConnection conn)
+    SocketLinkState toClosed(TcpSocketLink conn)
     {
       return this;
     }
 
     @Override
-    ConnectionState toDestroy(TcpConnection conn)
+    SocketLinkState toDestroy(TcpSocketLink conn)
     {
       return this;
     }
@@ -655,7 +658,7 @@ enum ConnectionState {
    * Convert from the idle (pooled) or closed state to the initial state
    * before accepting a connection.
    */
-  ConnectionState toInit()
+  SocketLinkState toInit()
   {
     throw new IllegalStateException(this + " cannot switch to init");
   }
@@ -663,7 +666,7 @@ enum ConnectionState {
   /**
    * Change to the accept state.
    */
-  ConnectionState toAccept()
+  SocketLinkState toAccept()
   {
     throw new IllegalStateException(this + " cannot switch to accept");
   }
@@ -671,7 +674,7 @@ enum ConnectionState {
   /**
    * Changes to the active state with the keepalive allocated.
    */
-  ConnectionState toActiveWithKeepalive(TcpConnection conn)
+  SocketLinkState toActiveWithKeepalive(TcpSocketLink conn)
   {
     throw new IllegalStateException(this + " cannot switch to active");
   }
@@ -679,7 +682,7 @@ enum ConnectionState {
   /**
    * Changes to the active state with no keepalive allocatedn.
    */
-  ConnectionState toActiveNoKeepalive(TcpConnection conn)
+  SocketLinkState toActiveNoKeepalive(TcpSocketLink conn)
   {
     throw new IllegalStateException(this + " cannot switch to active");
   }
@@ -687,17 +690,17 @@ enum ConnectionState {
   /**
    * Kill the keepalive, i.e. remove the keepalive allocation.
    */
-  ConnectionState toKillKeepalive(TcpConnection conn)
+  SocketLinkState toKillKeepalive(TcpSocketLink conn)
   {
     return this;
   }
 
-  ConnectionState toKeepalive(TcpConnection conn)
+  SocketLinkState toKeepalive(TcpSocketLink conn)
   {
     throw new IllegalStateException(this + " cannot switch to keepalive");
   }
 
-  ConnectionState toKeepaliveSelect()
+  SocketLinkState toKeepaliveSelect()
   {
     throw new IllegalStateException(this + " cannot switch to keepalive select");
   }
@@ -706,27 +709,27 @@ enum ConnectionState {
   // comet
   //
 
-  ConnectionState toComet()
+  SocketLinkState toComet()
   {
     throw new IllegalStateException(this + " cannot switch to comet");
   }
 
-  ConnectionState toCometSuspend()
+  SocketLinkState toCometSuspend()
   {
     throw new IllegalStateException(this + " cannot suspend comet");
   }
 
-  ConnectionState toCometResume()
+  SocketLinkState toCometResume()
   {
     throw new IllegalStateException(this + " cannot resume comet");
   }
 
-  ConnectionState toCometDispatch()
+  SocketLinkState toCometDispatch()
   {
     throw new IllegalStateException(this + " cannot dispatch comet");
   }
     
-  ConnectionState toCometComplete()
+  SocketLinkState toCometComplete()
   {
     throw new IllegalStateException(this + " cannot complete comet");
   }
@@ -735,12 +738,12 @@ enum ConnectionState {
   // duplex/websocket
   //
 
-  ConnectionState toDuplex(TcpConnection conn)
+  SocketLinkState toDuplex(TcpSocketLink conn)
   {
     throw new IllegalStateException(this + " cannot switch to duplex/websocket");
   }
 
-  ConnectionState toDuplexActive(TcpConnection conn)
+  SocketLinkState toDuplexActive(TcpSocketLink conn)
   {
     throw new IllegalStateException(this + " cannot switch to duplex/websocket");
   }
@@ -749,17 +752,17 @@ enum ConnectionState {
   // idle/close
   //
 
-  ConnectionState toIdle()
+  SocketLinkState toIdle()
   {
     throw new IllegalStateException(this + " is an illegal idle state");
   }
 
-  ConnectionState toClosed(TcpConnection conn)
+  SocketLinkState toClosed(TcpSocketLink conn)
   {
     return CLOSED;
   }
 
-  ConnectionState toDestroy(TcpConnection conn)
+  SocketLinkState toDestroy(TcpSocketLink conn)
   {
     toClosed(conn);
 

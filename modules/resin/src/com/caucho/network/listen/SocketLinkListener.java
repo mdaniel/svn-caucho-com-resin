@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import java.io.IOException;
 import java.net.ConnectException;
@@ -55,7 +55,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;
-import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
@@ -73,22 +72,20 @@ import com.caucho.vfs.SSLFactory;
 /**
  * Represents a protocol connection.
  */
-public class Port extends TaskWorker
+public class SocketLinkListener extends TaskWorker
   implements EnvironmentListener, Runnable
 {
-  private static final L10N L = new L10N(Port.class);
+  private static final L10N L = new L10N(SocketLinkListener.class);
 
   private static final Logger log
-    = Logger.getLogger(Port.class.getName());
-
-  private static final int DEFAULT = -0xcafe;
+    = Logger.getLogger(SocketLinkListener.class.getName());
 
   private final AtomicInteger _connectionCount = new AtomicInteger();
 
   // started at 128, but that seems wasteful since the active threads
   // themselves are buffering the free connections
-  private FreeList<TcpConnection> _idleConn
-    = new FreeList<TcpConnection>(32);
+  private FreeList<TcpSocketLink> _idleConn
+    = new FreeList<TcpSocketLink>(32);
 
   // The owning server
   // private ProtocolDispatchServer _server;
@@ -135,8 +132,7 @@ public class Port extends TaskWorker
   private long _keepaliveTimeout = 120 * 1000L;
   private boolean _isKeepaliveSelectEnable = true;
   private long _keepaliveSelectThreadTimeout = 1000;
-  private int _minSpareConnection = 16;
-
+  
   // default timeout
   private long _socketTimeout = 120 * 1000L;
 
@@ -152,7 +148,7 @@ public class Port extends TaskWorker
   // The virtual host name
   private String _virtualHost;
 
-  private final PortAdmin _admin = new PortAdmin(this);
+  private final SocketLinkAdmin _admin = new SocketLinkAdmin(this);
 
   // the server socket
   private QServerSocket _serverSocket;
@@ -162,17 +158,16 @@ public class Port extends TaskWorker
 
   // the selection manager
   private AbstractSelectManager _selectManager;
-  private boolean _isSelectManagerEnabled;
 
   // active set of all connections
-  private Set<TcpConnection> _activeConnectionSet
-    = Collections.synchronizedSet(new HashSet<TcpConnection>());
+  private Set<TcpSocketLink> _activeConnectionSet
+    = Collections.synchronizedSet(new HashSet<TcpSocketLink>());
 
   private final AtomicInteger _activeConnectionCount = new AtomicInteger();
 
   // server push (comet) suspend set
-  private Set<TcpConnection> _suspendConnectionSet
-    = Collections.synchronizedSet(new HashSet<TcpConnection>());
+  private Set<TcpSocketLink> _suspendConnectionSet
+    = Collections.synchronizedSet(new HashSet<TcpSocketLink>());
 
   private final AtomicInteger _idleThreadCount = new AtomicInteger();
   private final AtomicInteger _startThreadCount = new AtomicInteger();
@@ -202,7 +197,7 @@ public class Port extends TaskWorker
   // The port lifecycle
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  public Port()
+  public SocketLinkListener()
   {
     if ("64".equals(System.getProperty("sun.arch.data.model"))) {
       // on 64-bit machines we can use more threads before parking in nio
@@ -724,12 +719,12 @@ public class Port extends TaskWorker
 
   public boolean isKeepaliveSelectEnabled()
   {
-    return _isSelectManagerEnabled;
+    return _isKeepaliveSelectEnable;
   }
 
   public void setKeepaliveSelectEnabled(boolean isKeepaliveSelect)
   {
-    _isSelectManagerEnabled = isKeepaliveSelect;
+    _isKeepaliveSelectEnable = isKeepaliveSelect;
   }
 
   public void setKeepaliveSelectEnable(boolean isKeepaliveSelect)
@@ -1205,16 +1200,16 @@ public class Port extends TaskWorker
    */
   TcpConnectionInfo []connectionInfo()
   {
-    TcpConnection []connections;
+    TcpSocketLink []connections;
 
-    connections = new TcpConnection[_activeConnectionSet.size()];
+    connections = new TcpSocketLink[_activeConnectionSet.size()];
     _activeConnectionSet.toArray(connections);
 
     long now = Alarm.getExactTime();
     TcpConnectionInfo []infoList = new TcpConnectionInfo[connections.length];
 
     for (int i = 0 ; i < connections.length; i++) {
-      TcpConnection conn = connections[i];
+      TcpSocketLink conn = connections[i];
 
       long requestTime = -1;
       long startTime = conn.getRequestStartTime();
@@ -1303,7 +1298,7 @@ public class Port extends TaskWorker
   /**
    * Registers the new connection as started
    */
-  void startConnection(TcpConnection conn)
+  void startConnection(TcpSocketLink conn)
   {
     _startThreadCount.decrementAndGet();
 
@@ -1313,7 +1308,7 @@ public class Port extends TaskWorker
   /**
    * Marks a new thread as running.
    */
-  void threadBegin(TcpConnection conn)
+  void threadBegin(TcpSocketLink conn)
   {
     _threadCount.incrementAndGet();
   }
@@ -1321,7 +1316,7 @@ public class Port extends TaskWorker
   /**
    * Marks a new thread as stopped.
    */
-  void threadEnd(TcpConnection conn)
+  void threadEnd(TcpSocketLink conn)
   {
     _threadCount.decrementAndGet();
 
@@ -1380,7 +1375,7 @@ public class Port extends TaskWorker
 
     // boolean isSelectManager = getServer().isSelectManagerEnabled();
 
-    if (_isSelectManagerEnabled) {
+    if (_isKeepaliveSelectEnable) {
       timeout = getBlockingTimeoutForSelect();
     }
 
@@ -1416,7 +1411,7 @@ public class Port extends TaskWorker
    *
    * @return true if the connection was added to the suspend list
    */
-  void cometSuspend(TcpConnection conn)
+  void cometSuspend(TcpSocketLink conn)
   {
     if (conn.isWakeRequested()) {
       conn.toCometResume();
@@ -1433,7 +1428,7 @@ public class Port extends TaskWorker
   /**
    * Remove from suspend list.
    */
-  boolean cometDetach(TcpConnection conn)
+  boolean cometDetach(TcpSocketLink conn)
   {
     return _suspendConnectionSet.remove(conn);
   }
@@ -1441,7 +1436,7 @@ public class Port extends TaskWorker
   /**
    * Resumes the controller (for comet-style ajax)
    */
-  boolean cometResume(TcpConnection conn)
+  boolean cometResume(TcpSocketLink conn)
   {
     if (_suspendConnectionSet.remove(conn)) {
       conn.toCometResume();
@@ -1561,12 +1556,12 @@ public class Port extends TaskWorker
   /**
    * Find the TcpConnection based on the thread id (for admin)
    */
-  public TcpConnection findConnectionByThreadId(long threadId)
+  public TcpSocketLink findConnectionByThreadId(long threadId)
   {
-    ArrayList<TcpConnection> connList
-      = new ArrayList<TcpConnection>(_activeConnectionSet);
+    ArrayList<TcpSocketLink> connList
+      = new ArrayList<TcpSocketLink>(_activeConnectionSet);
 
-    for (TcpConnection conn : connList) {
+    for (TcpSocketLink conn : connList) {
       if (conn.getThreadId() == threadId)
         return conn;
     }
@@ -1583,7 +1578,7 @@ public class Port extends TaskWorker
       return;
 
     try {
-      TcpConnection startConn = null;
+      TcpSocketLink startConn = null;
 
       if (isStartThreadRequired()
           && _lifecycle.isActive()
@@ -1596,7 +1591,7 @@ public class Port extends TaskWorker
         else {
           int connId = _connectionCount.incrementAndGet();
           QSocket socket = _serverSocket.createSocket();
-          startConn = new TcpConnection(connId, this, socket);
+          startConn = new TcpSocketLink(connId, this, socket);
         }
 
         _startThreadCount.incrementAndGet();
@@ -1647,7 +1642,7 @@ public class Port extends TaskWorker
    *
    * only called from ConnectionState
    */
-  void free(TcpConnection conn)
+  void free(TcpSocketLink conn)
   {
     closeConnection(conn);
 
@@ -1659,7 +1654,7 @@ public class Port extends TaskWorker
    *
    * only called from ConnectionState
    */
-  void destroy(TcpConnection conn)
+  void destroy(TcpSocketLink conn)
   {
     closeConnection(conn);
   }
@@ -1667,7 +1662,7 @@ public class Port extends TaskWorker
   /**
    * Closes the stats for the connection.
    */
-  private void closeConnection(TcpConnection conn)
+  private void closeConnection(TcpSocketLink conn)
   {
     _activeConnectionSet.remove(conn);
     _activeConnectionCount.decrementAndGet();
@@ -1740,13 +1735,13 @@ public class Port extends TaskWorker
       }
     }
 
-    Set<TcpConnection> activeSet;
+    Set<TcpSocketLink> activeSet;
 
     synchronized (_activeConnectionSet) {
-      activeSet = new HashSet<TcpConnection>(_activeConnectionSet);
+      activeSet = new HashSet<TcpSocketLink>(_activeConnectionSet);
     }
 
-    for (TcpConnection conn : activeSet) {
+    for (TcpSocketLink conn : activeSet) {
       try {
         conn.destroy();
       }
@@ -1788,7 +1783,7 @@ public class Port extends TaskWorker
       }
     }
 
-    TcpConnection conn;
+    TcpSocketLink conn;
     while ((conn = _idleConn.allocate()) != null) {
       conn.destroy();
     }
@@ -1814,14 +1809,14 @@ public class Port extends TaskWorker
   }
 
   public class SuspendReaper implements AlarmListener {
-    private ArrayList<TcpConnection> _suspendSet
-      = new ArrayList<TcpConnection>();
+    private ArrayList<TcpSocketLink> _suspendSet
+      = new ArrayList<TcpSocketLink>();
 
-    private ArrayList<TcpConnection> _timeoutSet
-      = new ArrayList<TcpConnection>();
+    private ArrayList<TcpSocketLink> _timeoutSet
+      = new ArrayList<TcpSocketLink>();
 
-    private ArrayList<TcpConnection> _completeSet
-      = new ArrayList<TcpConnection>();
+    private ArrayList<TcpSocketLink> _completeSet
+      = new ArrayList<TcpSocketLink>();
 
     public void handleAlarm(Alarm alarm)
     {
@@ -1837,7 +1832,7 @@ public class Port extends TaskWorker
         }
 
         for (int i = _suspendSet.size() - 1; i >= 0; i--) {
-          TcpConnection conn = _suspendSet.get(i);
+          TcpSocketLink conn = _suspendSet.get(i);
           
           if (conn.getIdleExpireTime() < now) {
             _timeoutSet.add(conn);
@@ -1854,7 +1849,7 @@ public class Port extends TaskWorker
         }
 
         for (int i = _timeoutSet.size() - 1; i >= 0; i--) {
-          TcpConnection conn = _timeoutSet.get(i);
+          TcpSocketLink conn = _timeoutSet.get(i);
 
           if (log.isLoggable(Level.FINE))
             log.fine(this + " suspend idle timeout " + conn);
@@ -1863,7 +1858,7 @@ public class Port extends TaskWorker
         }
 
         for (int i = _completeSet.size() - 1; i >= 0; i--) {
-          TcpConnection conn = _completeSet.get(i);
+          TcpSocketLink conn = _completeSet.get(i);
 
           if (log.isLoggable(Level.FINE))
             log.fine(this + " async end-of-file " + conn);

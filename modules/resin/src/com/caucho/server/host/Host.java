@@ -41,9 +41,9 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.HostMXBean;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Port;
 import com.caucho.server.deploy.EnvironmentDeployInstance;
 import com.caucho.server.dispatch.DispatchServer;
 import com.caucho.server.dispatch.ExceptionFilterChain;
@@ -267,7 +267,7 @@ public class Host extends WebAppContainer
       if (server == null)
         return "http://localhost";
 
-      for (Port port : server.getPorts()) {
+      for (SocketLinkListener port : server.getPorts()) {
         if ("http".equals(port.getProtocolName())) {
           String address = port.getAddress();
 
@@ -278,7 +278,7 @@ public class Host extends WebAppContainer
         }
       }
 
-      for (Port port : server.getPorts()) {
+      for (SocketLinkListener port : server.getPorts()) {
         if ("https".equals(port.getProtocolName())) {
           String address = port.getAddress();
           if (address == null || address.equals(""))

@@ -31,8 +31,8 @@ package com.caucho.protocols;
 
 import com.caucho.config.program.ConfigProgram;
 
+import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.server.cluster.ProtocolPort;
-import com.caucho.server.connection.AbstractProtocol;
 import com.caucho.server.fastcgi.FastCgiProtocol;
 
 /**

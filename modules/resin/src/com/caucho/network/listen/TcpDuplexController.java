@@ -27,11 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.config.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
@@ -41,6 +42,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * Public API to control a http upgrade connection.
  */
+@Module
 public class TcpDuplexController extends AsyncController {
   private static final L10N L = new L10N(TcpDuplexController.class);
   private static final Logger log
@@ -48,7 +50,7 @@ public class TcpDuplexController extends AsyncController {
 
   private ClassLoader _loader;
 
-  private TcpConnection _conn;
+  private TcpSocketLink _conn;
 
   private ReadStream _is;
   private WriteStream _os;
@@ -56,7 +58,7 @@ public class TcpDuplexController extends AsyncController {
   private TcpDuplexHandler _handler;
   private String _readThreadName;
 
-  public TcpDuplexController(TcpConnection conn,
+  public TcpDuplexController(TcpSocketLink conn,
                              TcpDuplexHandler handler)
   {
     if (handler == null)
@@ -90,7 +92,7 @@ public class TcpDuplexController extends AsyncController {
     if (idleTime < 0 || Long.MAX_VALUE / 2 < idleTime)
       idleTime = Long.MAX_VALUE / 2;
 
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
     if (conn != null)
       conn.setIdleTimeout(idleTime);
   }
@@ -100,7 +102,7 @@ public class TcpDuplexController extends AsyncController {
    */
   public long getIdleTimeMax()
   {
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
 
     if (conn != null)
       return conn.getIdleTimeout();
@@ -146,7 +148,7 @@ public class TcpDuplexController extends AsyncController {
       thread.setName(_readThreadName);
       thread.setContextClassLoader(_loader);
 
-      TcpConnection conn = _conn;
+      TcpSocketLink conn = _conn;
       ReadStream is = _is;
       TcpDuplexHandler handler = _handler;
 
@@ -194,7 +196,7 @@ public class TcpDuplexController extends AsyncController {
     ReadStream is = _is;
     _is = null;
     
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
     _conn = null;
     _os = null;
     _handler = null;
@@ -214,7 +216,7 @@ public class TcpDuplexController extends AsyncController {
   @Override
   public String toString()
   {
-    TcpConnection conn = _conn;
+    TcpSocketLink conn = _conn;
 
     if (conn == null)
       return getClass().getSimpleName() + "[" + _handler + ",closed]";

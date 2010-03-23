@@ -39,15 +39,15 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.server.connection.Port;
-import com.caucho.server.connection.AbstractProtocol;
-import com.caucho.server.connection.Protocol;
+import com.caucho.network.listen.AbstractProtocol;
+import com.caucho.network.listen.SocketLinkListener;
+import com.caucho.network.listen.Protocol;
 import com.caucho.util.L10N;
 
 /**
  * Represents a protocol connection.
  */
-public class ProtocolPortConfig extends Port
+public class ProtocolPortConfig extends SocketLinkListener
 {
   private static final L10N L = new L10N(ProtocolPortConfig.class);
 

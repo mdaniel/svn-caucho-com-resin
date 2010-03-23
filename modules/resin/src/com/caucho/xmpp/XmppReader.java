@@ -29,25 +29,25 @@
 
 package com.caucho.xmpp;
 
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.ActorError;
-import com.caucho.bam.Broker;
-import com.caucho.server.connection.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.stream.*;
-import com.caucho.xmpp.im.XmppRosterQueryMarshal;
-import com.caucho.xmpp.im.Text;
-import com.caucho.xmpp.im.ImSessionQuery;
-import com.caucho.xmpp.im.ImPresence;
-import com.caucho.xmpp.im.ImMessage;
-import com.caucho.xmpp.im.XmlData;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
-import javax.servlet.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.xml.namespace.QName;
-import javax.xml.stream.*;
+import javax.xml.stream.XMLStreamConstants;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
+
+import com.caucho.bam.ActorError;
+import com.caucho.bam.ActorStream;
+import com.caucho.vfs.ReadStream;
+import com.caucho.xmpp.im.ImMessage;
+import com.caucho.xmpp.im.ImPresence;
+import com.caucho.xmpp.im.ImSessionQuery;
+import com.caucho.xmpp.im.Text;
+import com.caucho.xmpp.im.XmlData;
 
 /**
  * Protocol handler from the TCP/XMPP stream forwarding to the broker

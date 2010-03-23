@@ -29,21 +29,25 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.*;
-import com.caucho.config.types.*;
-import com.caucho.server.connection.*;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.servlets.HttpProxyServlet;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.logging.*;
+import javax.servlet.FilterChain;
+import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.types.Period;
+import com.caucho.server.dispatch.ServletConfigImpl;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.servlets.HttpProxyServlet;
+import com.caucho.util.L10N;
 
 /**
  * Dispatches a request to a backend server using HTTP as the proxy

@@ -77,16 +77,10 @@ abstract public class QSocket {
   /**
    * Returns the remote client's inet address.
    */
-  public long getRemoteIP()
+  public byte[] getRemoteIP()
   {
     InetAddress addr = getRemoteAddress();
-    byte []bytes = addr.getAddress();
-
-    long address = 0;
-    for (int i = 0; i < bytes.length; i++)
-      address = 256 * address + (bytes[i] & 0xff);
-    
-    return address;
+    return addr.getAddress();
   }
   
   /**

@@ -43,9 +43,9 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 
-import com.caucho.server.connection.AsyncController;
-import com.caucho.server.connection.CometHandler;
-import com.caucho.server.connection.TransportConnection;
+import com.caucho.network.listen.AsyncController;
+import com.caucho.network.listen.CometHandler;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.webapp.AsyncRequest;
 import com.caucho.server.webapp.RequestDispatcherImpl;

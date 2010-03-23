@@ -27,71 +27,54 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
+
+import java.util.logging.*;
+
+import com.caucho.config.Configurable;
+import com.caucho.vfs.*;
 
 /**
- * Abstract implementation of the Protocol.
+ * Throttles connections
  */
-abstract public class AbstractProtocol implements Protocol {
-  // The owning port
-  //private Port _port;
+@Configurable
+public class Throttle
+{
+  private static final Logger log = Logger.getLogger(Throttle.class.getName());
   
-  private ClassLoader _classLoader;
-
-  // The protocol name
-  private String _name = "tcp";
-
-  protected AbstractProtocol()
+  protected Throttle()
   {
-    _classLoader = Thread.currentThread().getContextClassLoader();
-  }
-  
-  /**
-   * Sets the protocol name.
-   */
-  public void setProtocolName(String name)
-  {
-    _name = name;
   }
 
-  /**
-   * Returns the protocol name.
-   */
-  public String getProtocolName()
+  public void setMaxConcurrentRequests(int max)
   {
-    return _name;
+    throw new UnsupportedOperationException(getClass().getName());
   }
-  
-  /**
-   * Sets the containing port
-   */
-  /*
-  public void setPort(Port port)
-  {
-    _port = port;
-  }
-  */
 
-  /**
-   * Gets the parent port.
-   */
-  /*
-  public Port getPort()
+  public int getMaxConcurrentRequests()
   {
-    return _port;
+    throw new UnsupportedOperationException(getClass().getName());
   }
-  */
-  
-  /**
-   * Returns the protocol owning classloader
-   */
-  public ClassLoader getClassLoader()
+
+  public static Throttle createPro()
   {
-    return _classLoader;
+    try {
+      Class<?> cl = Class.forName("com.caucho.network.listen.ProThrottle");
+
+      return (Throttle) cl.newInstance();
+    } catch (Exception e) {
+      log.finer(e.toString());
+    }
+
+    return null;
   }
-  
-  /**
-   * Create a Request object for the new thread.
-   */
-  abstract public ProtocolConnection createConnection(TransportConnection conn);
+
+  public boolean accept(QSocket socket)
+  {
+    return true;
+  }
+
+  public void close(QSocket socket)
+  {
+  }
 }

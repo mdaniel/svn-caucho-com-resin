@@ -29,12 +29,12 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.*;
+import java.io.IOException;
+
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.server.http.CauchoResponseWrapper;
 import com.caucho.util.L10N;
-
-import javax.servlet.http.*;
-import java.io.*;
 
 /**
  * Internal response for an include() or forward()

@@ -29,7 +29,7 @@
 
 package com.caucho.server.security;
 
-import com.caucho.server.connection.TcpConnection;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.util.LruCache;
@@ -113,7 +113,7 @@ public abstract class AbstractLogin extends com.caucho.security.AbstractLogin {
   public boolean isUserInRole(Principal user, String role)
   {
     CauchoRequest request
-      = (CauchoRequest) TcpConnection.getCurrentRequest();
+      = (CauchoRequest) TcpSocketLink.getCurrentRequest();
 
     return isUserInRole(request,
 			null, // request.getResponse(),

@@ -35,10 +35,10 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
 import com.caucho.util.L10N;
+import com.caucho.network.listen.TcpDuplexController;
+import com.caucho.network.listen.TcpDuplexHandler;
 import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
-import com.caucho.server.connection.TcpDuplexController;
-import com.caucho.server.connection.TcpDuplexHandler;
 
 /**
  * Wraps a servlet response in another response.  Filters may

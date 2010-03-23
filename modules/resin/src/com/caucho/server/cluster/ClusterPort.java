@@ -32,13 +32,13 @@ package com.caucho.server.cluster;
 import javax.annotation.PostConstruct;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.connection.Port;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.hmux.HmuxProtocol;
 
 /**
  * Represents a protocol connection.
  */
-public class ClusterPort extends Port {
+public class ClusterPort extends SocketLinkListener {
   public ClusterPort(String address, int port)
   {
     try {

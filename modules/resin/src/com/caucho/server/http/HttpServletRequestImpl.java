@@ -63,13 +63,13 @@ import javax.servlet.http.Part;
 
 import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.i18n.CharacterEncoding;
+import com.caucho.network.listen.TcpDuplexController;
+import com.caucho.network.listen.TcpDuplexHandler;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Authenticator;
 import com.caucho.security.Login;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.TcpDuplexController;
-import com.caucho.server.connection.TcpDuplexHandler;
-import com.caucho.server.connection.TransportConnection;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
@@ -1716,7 +1716,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     _request.clientDisconnect();
   }
 
-  public TransportConnection getConnection()
+  public SocketLink getConnection()
   {
     return _request.getConnection();
   }

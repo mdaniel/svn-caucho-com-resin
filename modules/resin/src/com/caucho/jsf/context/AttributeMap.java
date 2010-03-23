@@ -28,19 +28,12 @@
 
 package com.caucho.jsf.context;
 
-import java.io.*;
-import java.net.URL;
-import java.net.MalformedURLException;
-import java.util.*;
-import java.security.*;
-
-import javax.faces.*;
-import javax.faces.context.*;
-
-import javax.servlet.*;
-import javax.servlet.http.*;
-
-import com.caucho.server.connection.*;
+import java.util.AbstractMap;
+import java.util.AbstractSet;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
 abstract class AttributeMap extends AbstractMap<String,Object>
 {

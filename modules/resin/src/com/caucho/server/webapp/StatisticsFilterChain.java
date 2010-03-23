@@ -30,8 +30,8 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.TransportConnection;
-import com.caucho.server.connection.TcpConnection;
+import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.network.listen.SocketLink;
 import com.caucho.server.dispatch.*;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.util.Alarm;
@@ -60,10 +60,10 @@ public class StatisticsFilterChain implements FilterChain
     if (request instanceof AbstractHttpRequest) {
       AbstractHttpRequest httpRequest = (AbstractHttpRequest) request;
 
-      TransportConnection connection = httpRequest.getConnection();
+      SocketLink connection = httpRequest.getConnection();
 
-      if (connection instanceof TcpConnection) {
-        TcpConnection tcpConnection = (TcpConnection) connection;
+      if (connection instanceof TcpSocketLink) {
+        TcpSocketLink tcpConnection = (TcpSocketLink) connection;
 
         long time = Alarm.getExactTime();
 

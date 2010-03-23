@@ -27,9 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import java.net.InetAddress;
+
+import java.security.cert.CertificateException;
+import java.security.cert.X509Certificate;
 
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
@@ -42,13 +45,13 @@ import com.caucho.vfs.WriteStream;
  * <p>TcpConnection is the most common implementation.  The test harness
  * provides a string based Connection.
  */
-public abstract class AbstractTransportConnection
-  implements TransportConnection
+public abstract class AbstractSocketLink
+  implements SocketLink
 {
   private final ReadStream _readStream;
   private final WriteStream _writeStream;
 
-  public AbstractTransportConnection()
+  public AbstractSocketLink()
   {
     _readStream = new ReadStream();
     _readStream.setReuseBuffer(true);
@@ -137,7 +140,40 @@ public abstract class AbstractTransportConnection
    * Returns the remove port of the connection
    */
   public abstract int getRemotePort();
-
+  
+  //
+  // SSL api
+  //
+  
+  /**
+   * Returns the cipher suite
+   */
+  @Override
+  public String getCipherSuite()
+  {
+    return null;
+  }
+  
+  /***
+   * Returns the key size.
+   */
+  @Override
+  public int getKeySize()
+  {
+    return 0;
+  }
+  
+  /**
+   * Returns any client certificates.
+   * @throws CertificateException 
+   */
+  @Override
+  public X509Certificate []getClientCertificates()
+    throws CertificateException
+  {
+    return null;
+  }
+  
   /**
    * Sends a broadcast request.
    */
@@ -163,9 +199,9 @@ public abstract class AbstractTransportConnection
   {
   }
 
-  public ConnectionState getState()
+  public SocketLinkState getState()
   {
-    return ConnectionState.REQUEST_ACTIVE_KA;
+    return SocketLinkState.REQUEST_ACTIVE_KA;
   }
 
   /**

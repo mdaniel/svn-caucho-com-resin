@@ -30,16 +30,16 @@
 package com.caucho.resin;
 
 import com.caucho.config.ConfigException;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Port;
 
 /**
  * Embeddable version of a HTTP port
  */
 public class HttpEmbed extends PortEmbed
 {
-  private Port _port;
+  private SocketLinkListener _port;
   
   /**
    * Creates a new HttpEmbed configuration.

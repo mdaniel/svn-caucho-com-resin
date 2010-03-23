@@ -575,6 +575,10 @@ r_resin-Content =
   & (attribute security-provider { string }
      | element security-provider { string })*
 
+  & element system {
+      r_env-Content
+    }*
+
   & r_watchdog-manager?
 
   & element rcore:if|r:if { rcore_if-Args, r_resin-Content }*

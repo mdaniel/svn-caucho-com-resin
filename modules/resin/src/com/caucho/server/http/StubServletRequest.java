@@ -30,10 +30,10 @@
 package com.caucho.server.http;
 
 import com.caucho.util.NullEnumeration;
+import com.caucho.network.listen.TcpDuplexController;
+import com.caucho.network.listen.TcpDuplexHandler;
 import com.caucho.servlet.DuplexContext;
 import com.caucho.servlet.DuplexListener;
-import com.caucho.server.connection.TcpDuplexController;
-import com.caucho.server.connection.TcpDuplexHandler;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.vfs.ReadStream;
 

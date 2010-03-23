@@ -33,7 +33,7 @@ import java.util.HashMap;
 
 import javax.servlet.ServletRequest;
 
-import com.caucho.server.connection.AsyncController;
+import com.caucho.network.listen.AsyncController;
 import com.caucho.util.Alarm;
 
 /**

@@ -29,20 +29,24 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.connection.*;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.Map;
+import java.util.NoSuchElementException;
+
+import javax.servlet.DispatcherType;
+import javax.servlet.ServletContext;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.CauchoRequestWrapper;
 import com.caucho.server.http.Form;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.util.IntMap;
 import com.caucho.util.HashMapImpl;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import com.caucho.util.IntMap;
+import com.caucho.vfs.Encoding;
 
 public class IncludeRequest extends CauchoRequestWrapper {
   private static final IntMap _includeAttributeMap = new IntMap();

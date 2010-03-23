@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -27,53 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.connection;
+package com.caucho.network.listen;
 
 import java.io.IOException;
 
+
 /**
- * Protocol specific information for each connection.  ProtocolConnection
+ * Protocol specific information for each request.  ServerRequest
  * is reused to reduce memory allocations.
  *
- * <p>ProtocolConnections are created by Protocol.createConnection
+ * <p>ServerRequests are created by Server.createRequest()
  */
-public interface ProtocolConnection {
+public abstract  class AbstractProtocolConnection implements ProtocolConnection {
   /**
    * Initialize the connection.  At this point, the current thread is the
    * connection thread.
    */
-  public void init();
-
-  /**
-   * Return true if the connection should wait for a read before
-   * handling the request.
-   */
-  public boolean isWaitForRead();
-
-  /**
-   * Called when the connection starts, i.e. just after the accept
-   */
-  public void onStartConnection();
-
-  /**
-   * Handles a new request.  The controlling TcpServer may call
-   * handleRequest again after the connection completes, so
-   * the implementation must initialize any variables for each connection.
-   */
-  public boolean handleRequest() throws IOException;
+  public void init()
+  {
+  }
+  
+  @Override
+  public void onStartConnection()
+  {
+    
+  }
   
   /**
-   * Returns a request URL for debugging/management.
+   * Returns a default debugging identifier for the connection
    */
-  public String getProtocolRequestURL();
-
+  @Override
+  public String getProtocolRequestURL()
+  {
+    return null;
+  }
+  
   /**
-   * Handles a resumption of the connection for an async/comet request.
+   * Handles a new connection.  The controlling TcpServer may call
+   * handleConnection again after the connection completes, so 
+   * the implementation must initialize any variables for each connection.
+   *
+   * @param conn Information about the connection, including buffered
+   * read and write streams.
    */
-  public boolean handleResume() throws IOException;
+  public abstract boolean handleRequest() throws IOException;
 
   /**
    * Handles a close event when the connection is closed.
    */
-  public void onCloseConnection();
+  @Override
+  public void onCloseConnection()
+  {
+  }
 }

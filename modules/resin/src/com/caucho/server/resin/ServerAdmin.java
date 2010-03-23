@@ -33,10 +33,10 @@ import com.caucho.management.server.ClusterMXBean;
 import com.caucho.management.server.HostMXBean;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.ThreadPoolMXBean;
+import com.caucho.network.listen.AbstractSelectManager;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.AbstractSelectManager;
-import com.caucho.server.connection.Port;
 import com.caucho.server.host.HostController;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.L10N;
@@ -101,7 +101,7 @@ public class ServerAdmin
 
     ArrayList<PortMXBean> portList = new ArrayList<PortMXBean>();
 
-    for (Port port : server.getPorts()) {
+    for (SocketLinkListener port : server.getPorts()) {
       PortMXBean admin = port.getAdmin();
 
       if (admin != null)
@@ -186,7 +186,7 @@ public class ServerAdmin
 
     int activeThreadCount = -1;
 
-    for (Port port : server.getPorts()) {
+    for (SocketLinkListener port : server.getPorts()) {
       if (port.getActiveThreadCount() >= 0) {
         if (activeThreadCount == -1)
           activeThreadCount = 0;
@@ -207,7 +207,7 @@ public class ServerAdmin
 
     int keepaliveThreadCount = -1;
 
-    for (Port port : server.getPorts()) {
+    for (SocketLinkListener port : server.getPorts()) {
       if (port.getKeepaliveConnectionCount() >= 0) {
         if (keepaliveThreadCount == -1)
           keepaliveThreadCount = 0;
@@ -228,7 +228,7 @@ public class ServerAdmin
 
     int keepaliveSelectCount = -1;
 
-    for (Port port : server.getPorts()) {
+    for (SocketLinkListener port : server.getPorts()) {
       if (port.getSelectConnectionCount() >= 0) {
         if (keepaliveSelectCount == -1)
           keepaliveSelectCount = 0;
@@ -249,7 +249,7 @@ public class ServerAdmin
 
     long lifetimeRequestCount = 0;
 
-    for (Port port : server.getPorts())
+    for (SocketLinkListener port : server.getPorts())
       lifetimeRequestCount += port.getLifetimeRequestCount();
 
     return lifetimeRequestCount;
@@ -264,7 +264,7 @@ public class ServerAdmin
 
     long lifetimeRequestTime = 0;
 
-    for (Port port : server.getPorts())
+    for (SocketLinkListener port : server.getPorts())
       lifetimeRequestTime += port.getLifetimeRequestTime();
 
     return lifetimeRequestTime;
@@ -279,7 +279,7 @@ public class ServerAdmin
 
     long lifetimeReadBytes = 0;
 
-    for (Port port : server.getPorts())
+    for (SocketLinkListener port : server.getPorts())
       lifetimeReadBytes += port.getLifetimeReadBytes();
 
     return lifetimeReadBytes;
@@ -294,7 +294,7 @@ public class ServerAdmin
 
     long lifetimeWriteBytes = 0;
 
-    for (Port port : server.getPorts())
+    for (SocketLinkListener port : server.getPorts())
       lifetimeWriteBytes += port.getLifetimeWriteBytes();
 
     return lifetimeWriteBytes;
@@ -309,7 +309,7 @@ public class ServerAdmin
 
     long lifetimeClientDisconnectCount = 0;
 
-    for (Port port : server.getPorts())
+    for (SocketLinkListener port : server.getPorts())
       lifetimeClientDisconnectCount += port.getLifetimeClientDisconnectCount();
 
     return lifetimeClientDisconnectCount;
@@ -324,7 +324,7 @@ public class ServerAdmin
 
     long lifetimeKeepaliveCount = 0;
 
-    for (Port port : server.getPorts())
+    for (SocketLinkListener port : server.getPorts())
       lifetimeKeepaliveCount += port.getLifetimeKeepaliveCount();
 
     return lifetimeKeepaliveCount;

@@ -54,12 +54,12 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.log.EnvironmentStream;
 import com.caucho.log.LogConfig;
 import com.caucho.log.RotateStream;
+import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Cluster;
 import com.caucho.server.cluster.ClusterServer;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.connection.Port;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.resin.ResinELContext;
 import com.caucho.server.util.JniCauchoSystem;
@@ -90,7 +90,7 @@ class WatchdogManager implements AlarmListener {
   private BootManagementConfig _management;
 
   private Server _server;
-  private Port _httpPort;
+  private SocketLinkListener _httpPort;
 
   private HashMap<String,WatchdogChild> _watchdogMap
     = new HashMap<String,WatchdogChild>();
