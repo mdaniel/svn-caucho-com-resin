@@ -29,7 +29,6 @@
 
 package com.caucho.log;
 
-import com.caucho.log.handler.MailHandler;
 
 /**
  * Sends formatted messages to mail

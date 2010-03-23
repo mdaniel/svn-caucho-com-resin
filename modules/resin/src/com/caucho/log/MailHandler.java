@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.log.handler;
+package com.caucho.log;
 
 import com.caucho.hemp.services.MailService;
 import com.caucho.config.ConfigException;
@@ -141,7 +141,7 @@ public class MailHandler extends Handler implements AlarmListener
    */
   public void publish(LogRecord record)
   {
-    if (record.getLevel().intValue() < getLevel().intValue())
+    if (! isLoggable(record))
       return;
 
     Filter filter = getFilter();

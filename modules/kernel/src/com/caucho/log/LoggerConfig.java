@@ -95,8 +95,13 @@ public class LoggerConfig {
       _level = Level.FINEST;
     else if (level.equals("all"))
       _level = Level.ALL;
-    else
-      throw new ConfigException(L.l("'{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging", level));
+    else {
+      try {
+        _level = Level.parse(level);
+      } catch (IllegalArgumentException e) {
+        throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging\n[-]?[0-9]+ - custom level", level));
+      }
+    }
   }
   
   public void add(Handler handler)
@@ -104,7 +109,7 @@ public class LoggerConfig {
     _handlerList.add(handler);
   }
   
-  public void set(Filter filter)
+  public void add(Filter filter)
   {
     _filter = filter;
   }
@@ -127,5 +132,8 @@ public class LoggerConfig {
     for (Handler handler : _handlerList) {
       _logger.addHandler(handler);
     }
+    
+    if (_filter != null)
+      _logger.setFilter(_filter);
   }
 }

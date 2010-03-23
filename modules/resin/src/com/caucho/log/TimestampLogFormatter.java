@@ -29,7 +29,7 @@
 
 package com.caucho.log;
 
-import com.caucho.log.formatter.TimestampFormatter;
+import com.caucho.log.TimestampFormatter;
 
 /**
  * Formats a log message.

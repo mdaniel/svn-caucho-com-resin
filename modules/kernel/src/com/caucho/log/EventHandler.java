@@ -27,84 +27,39 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.log.handler;
+package com.caucho.log;
 
-import java.util.logging.Filter;
-import java.util.logging.Formatter;
-import java.util.logging.Handler;
-import java.util.logging.LogRecord;
-
-import javax.annotation.PostConstruct;
-
-import com.caucho.bam.ActorClient;
-import com.caucho.bam.SimpleActorClient;
-import com.caucho.config.ConfigException;
-import com.caucho.hemp.broker.HempBroker;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
+import java.util.logging.Logger;
+import java.util.logging.LogRecord;
+import java.util.logging.Filter;
+import java.util.logging.Handler;
+
 /**
- * Sends formatted messages to HMTP target
+ * raises a LogRecord as an event
  */
-public class HmtpHandler extends Handler {
-  private static final L10N L = new L10N(HmtpHandler.class);
+public class EventHandler extends Handler {
+  private static final Logger log
+    = Logger.getLogger(EventHandler.class.getName());
+  private static final L10N L = new L10N(EventHandler.class);
 
-  private String _to;
-  private ActorClient _conn;
-
-  public HmtpHandler()
-  {
-  }
-
-  /**
-   * Sets the destination
-   */
-  public void setTo(String to)
-  {
-    _to = to;
-  }
-
-  /**
-   * Initialize the handler
-   */
-  @PostConstruct
-  public void init()
-    throws ConfigException
-  {
-    if (_to == null)
-      throw new ConfigException(L.l("BamHandler needs a 'to' attribute"));
-
-    HempBroker broker = HempBroker.getCurrent();
-    
-    _conn = new SimpleActorClient(broker, "log@localhost", null);
-  }
+  private InjectManager _webBeans = InjectManager.create();
 
   /**
    * Publishes the record.
    */
   public void publish(LogRecord record)
   {
-    if (record.getLevel().intValue() < getLevel().intValue())
+    if (! isLoggable(record))
       return;
 
     Filter filter = getFilter();
     if (filter != null && ! filter.isLoggable(record))
       return;
 
-    try {
-      String value;
-
-      Formatter formatter = getFormatter();
-      if (formatter != null)
-	value = formatter.format(record);
-      else
-	value = record.getMessage();
-
-      _conn.message(_to, value);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    _webBeans.fireEvent(record);
   }
 
   /**
@@ -123,6 +78,6 @@ public class HmtpHandler extends Handler {
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _to + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

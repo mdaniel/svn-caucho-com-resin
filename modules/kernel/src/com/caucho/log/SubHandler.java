@@ -53,7 +53,7 @@ public class SubHandler extends Handler {
    */
   public void publish(LogRecord record)
   {
-    if (record.getLevel().intValue() < getLevel().intValue())
+    if (! isLoggable(record))
       return;
 
     if (_handler != null)

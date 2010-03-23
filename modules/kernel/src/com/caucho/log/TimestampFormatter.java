@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.log.formatter;
+package com.caucho.log;
 
 import java.util.ArrayList;
 import java.util.logging.Formatter;

@@ -66,6 +66,9 @@ import javax.enterprise.inject.spi.Bean;
  * static void main(String []args)
  * {
  *   ResinBeanContainer beans = new ResinBeanContainer();
+ *   
+ *   // optional resin configuration file
+ *   // beans.addBeansXml("resin-context.xml");
  *
  *   beans.addModule("test.jar");
  *   beans.start();

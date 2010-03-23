@@ -37,13 +37,12 @@ import java.util.logging.LogRecord;
  * Wrapper for a level-based handler.
  */
 public class LevelHandler extends Handler {
-  private final int _level;
   private final Handler []_handlers;
 
   public LevelHandler(Level level, Handler []handlers)
   {
-    _level = level.intValue();
     _handlers = handlers;
+    setLevel(level);
   }
 
   /**
@@ -51,16 +50,16 @@ public class LevelHandler extends Handler {
    */
   public void publish(LogRecord record)
   {
-    int recordLevel = record.getLevel().intValue();
-
-    if (recordLevel < _level)
+    if (! isLoggable(record))
       return;
+    
+    int level = getLevel().intValue();
 
     for (int i = 0; i < _handlers.length; i++) {
       Handler handler = _handlers[i];
 
-      if (_level <= handler.getLevel().intValue())
-	handler.publish(record);
+      if (level <= handler.getLevel().intValue())
+        handler.publish(record);
     }
   }
 
@@ -69,11 +68,13 @@ public class LevelHandler extends Handler {
    */
   public void flush()
   {
+    int level = getLevel().intValue();
+    
     for (int i = 0; i < _handlers.length; i++) {
       Handler handler = _handlers[i];
 
-      if (_level <= handler.getLevel().intValue())
-	handler.flush();
+      if (level <= handler.getLevel().intValue())
+        handler.flush();
     }
   }
 

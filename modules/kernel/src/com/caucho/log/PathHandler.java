@@ -29,26 +29,159 @@
 
 package com.caucho.log;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.*;
+import com.caucho.log.*;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.WriteStream;
+import com.caucho.vfs.*;
 
-import java.io.IOException;
-import java.util.logging.Handler;
+import javax.annotation.PostConstruct;
+import javax.management.*;
+import java.io.*;
+import java.util.*;
+import java.util.logging.Logger;
 import java.util.logging.LogRecord;
+import java.util.logging.Level;
+import java.util.logging.Filter;
+import java.util.logging.Formatter;
+import java.util.logging.Handler;
 
 /**
- * Resin's rotating path-based log.
+ * Configures a log handler
  */
 public class PathHandler extends Handler {
-  private static final L10N L = new L10N(PathHandler.class);
-  
-  private Path _path;
-  private String _encoding;
+  private static final Logger log
+    = Logger.getLogger(LogHandlerConfig.class.getName());
+  private static final L10N L = new L10N(LogConfig.class);
 
+  private RotateLog _pathLog = new RotateLog();
+
+  private Formatter _formatter;
+  private String _timestamp;
+
+  private Filter _filter;
+
+  private WriteStream _os;
+
+  public PathHandler()
+  {
+    _timestamp = "[%Y/%m/%d %H:%M:%S.%s] ";
+  }
+
+  /**
+   * Convenience method to create a path.  Calls init() automatically.
+   */
   public PathHandler(Path path)
   {
-    _path = path;
+    this();
+
+    setPath(path);
+
+    init();
+  }
+
+  /**
+   * Sets the path
+   */
+  public void setPath(Path path)
+  {
+    _pathLog.setPath(path);
+  }
+
+  /**
+   * Sets the path-format
+   */
+  public void setPathFormat(String pathFormat)
+  {
+    _pathLog.setPathFormat(pathFormat);
+  }
+
+  /**
+   * Sets the archive-format
+   */
+  public void setArchiveFormat(String archiveFormat)
+  {
+    _pathLog.setArchiveFormat(archiveFormat);
+  }
+
+  /**
+   * Sets the rollover-period
+   */
+  public void setRolloverPeriod(Period rolloverPeriod)
+  {
+    _pathLog.setRolloverPeriod(rolloverPeriod);
+  }
+
+  /**
+   * Sets the rollover-size
+   */
+  public void setRolloverSize(Bytes size)
+  {
+    _pathLog.setRolloverSize(size);
+  }
+
+  /**
+   * Sets the rollover-count
+   */
+  public void setRolloverCount(int count)
+  {
+    _pathLog.setRolloverCount(count);
+  }
+
+  /**
+   * Sets the timestamp.
+   */
+  public void setTimestamp(String timestamp)
+  {
+    _timestamp = timestamp;
+  }
+
+  /**
+   * Sets the formatter.
+   */
+  public void setFormatter(Formatter formatter)
+  {
+    _formatter = formatter;
+  }
+
+  /**
+   * Sets the filter.
+   */
+  public void setFilter(Filter filter)
+  {
+    _filter = filter;
+  }
+
+  /**
+   * Initialize the log.
+   */
+  @PostConstruct
+  public void init()
+    throws ConfigException
+  {
+    try {
+      _pathLog.init();
+
+      WriteStream os = _pathLog.getRotateStream().getStream();
+
+      if (_timestamp != null) {
+        TimestampFilter filter = new TimestampFilter();
+        filter.setTimestamp(_timestamp);
+        filter.setStream(os);
+        os = new WriteStream(filter);
+      }
+
+      String encoding = System.getProperty("file.encoding");
+
+      if (encoding != null)
+        os.setEncoding(encoding);
+
+      os.setDisableClose(true);
+
+      _os = os;
+    } catch (IOException e) {
+      throw ConfigException.create(e);
+    }
   }
 
   /**
@@ -56,33 +189,57 @@ public class PathHandler extends Handler {
    */
   public void publish(LogRecord record)
   {
-    if (record.getLevel().intValue() < getLevel().intValue())
+    if (! isLoggable(record))
+        return;
+
+    if (_filter != null && ! _filter.isLoggable(record))
       return;
 
-    WriteStream os = null;
-    synchronized (_path) {
-      try {
-	try {
-	  os = _path.openAppend();
-	} catch (Exception e) {
-	  _path.getParent().mkdirs();
-	  os = _path.openAppend();
-	}
-
-	if (_encoding != null)
-	  os.setEncoding(_encoding);
-
-	String msg = record.getMessage();
-	os.println(msg);
-      } catch (Exception e) {
-	e.printStackTrace();
-      } finally {
-	try {
-	  if (os != null)
-	    os.close();
-	} catch (IOException e) {
-	}
+    try {
+      if (record == null) {
+        synchronized (_os) {
+          _os.println("no record");
+          _os.flush();
+        }
+        return;
       }
+
+      if (_formatter != null) {
+        String value = _formatter.format(record);
+
+        synchronized (_os) {
+          _os.println(value);
+          _os.flush();
+        }
+
+        return;
+      }
+
+      String message = record.getMessage();
+      Throwable thrown = record.getThrown();
+
+      synchronized (_os) {
+        /*
+        if (_timestamp != null) {
+          _os.print(_timestamp);
+        }
+        */
+
+        if (thrown != null) {
+          if (message != null
+              && ! message.equals(thrown.toString())
+              && ! message.equals(thrown.getMessage()))
+            _os.println(message);
+
+          record.getThrown().printStackTrace(_os.getPrintWriter());
+        }
+        else {
+          _os.println(record.getMessage());
+        }
+        _os.flush();
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
     }
   }
 
@@ -105,7 +262,10 @@ public class PathHandler extends Handler {
    */
   public int hashCode()
   {
-    return _path.hashCode();
+    if (_os == null || _os.getPath() == null)
+      return super.hashCode();
+    else
+    return _os.getPath().hashCode();
   }
 
   /**
@@ -115,16 +275,22 @@ public class PathHandler extends Handler {
   {
     if (this == o)
       return true;
-    else if (! (o instanceof PathHandler))
+    else if (getClass() != o.getClass())
       return false;
 
     PathHandler handler = (PathHandler) o;
 
-    return _path.equals(handler._path);
+    if (_os == null || handler._os == null)
+      return false;
+    else
+      return _os.getPath().equals(handler._os.getPath());
   }
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _path + "]";
+    if (_os == null)
+      return getClass().getSimpleName() + "[" + _pathLog + "]";
+    else
+      return getClass().getSimpleName() + "[" + _os.getPath() + "]";
   }
 }

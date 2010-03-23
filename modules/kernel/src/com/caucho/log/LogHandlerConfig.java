@@ -35,8 +35,6 @@ import com.caucho.config.types.*;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
-import com.caucho.log.formatter.TimestampFormatter;
-import com.caucho.log.handler.PathHandler;
 import com.caucho.management.server.*;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
@@ -183,7 +181,7 @@ public class LogHandlerConfig extends BeanConfig {
     if (_level != null)
       return _level.getName();
     else
-      return Level.INFO.getName();
+      return Level.ALL.getName();
   }
 
   /**
@@ -263,12 +261,12 @@ public class LogHandlerConfig extends BeanConfig {
 
     if (_timestamp != null) {
       if (_pathHandler != null) {
-	_pathHandler.setTimestamp(_timestamp);
+        _pathHandler.setTimestamp(_timestamp);
       }
       else if (_formatter == null) {
-	TimestampFormatter formatter = new TimestampFormatter();
-	_formatter = formatter;
-	formatter.setTimestamp(_timestamp);
+        TimestampFormatter formatter = new TimestampFormatter();
+        _formatter = formatter;
+        formatter.setTimestamp(_timestamp);
       }
     }
     
@@ -286,10 +284,16 @@ public class LogHandlerConfig extends BeanConfig {
       Environment.addClassLoaderListener(listener);
     }
     
+    // env/02s9
+    if (_level != null)
+      _handler.setLevel(_level);
+
+    /* JDK defaults to Level.ALL
     if (_level != null)
       _handler.setLevel(_level);
     else
       _handler.setLevel(Level.INFO);
+    */
 
     if (_formatter != null)
       _handler.setFormatter(_formatter);
@@ -321,7 +325,12 @@ public class LogHandlerConfig extends BeanConfig {
       return Level.FINEST;
     else if (level.equals("all"))
       return Level.ALL;
-    else
-      throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging", level));
+    else {
+      try {
+        return Level.parse(level);
+      } catch (IllegalArgumentException e) {
+        throw new ConfigException(L.l("`{0}' is an unknown log level.  Log levels are:\noff - disable logging\nsevere - severe errors only\nwarning - warnings\ninfo - information\nconfig - configuration\nfine - fine debugging\nfiner - finer debugging\nfinest - finest debugging\nall - all debugging\n[-]?[0-9]+ - custom level", level));
+      }
+    }
   }
 }

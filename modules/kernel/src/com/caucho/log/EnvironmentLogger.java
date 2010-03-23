@@ -270,7 +270,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   {
     if (level == null)
       return false;
-    
+
     int intValue = level.intValue();
     
     if (intValue < _finestEffectiveLevelValue)
@@ -281,10 +281,20 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     else {
       Integer localValue = _localEffectiveLevel.get();
       
-      if (localValue != null)
-        return localValue.intValue() <= intValue;
-      else
-        return _systemEffectiveLevelValue <= intValue;
+      if (localValue != null) {
+        int localIntValue = localValue.intValue();
+        
+        if (localIntValue == Level.OFF.intValue())
+          return false;
+        else
+          return localIntValue <= intValue;
+      }
+      else {
+        if (_systemEffectiveLevelValue == Level.OFF.intValue())
+          return false;
+        else
+          return _systemEffectiveLevelValue <= intValue;
+      }
     }
   }
 
@@ -447,7 +457,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   /**
    * Sets a custom logger if possible
    */
-  boolean addLogger(Logger logger)
+  boolean addCustomLogger(Logger logger)
   {
     if (logger.getClass().getName().startsWith("java"))
       return false;
@@ -531,7 +541,9 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     _hasLocalEffectiveLevel = false;
     
     updateEffectiveLevelPart(_systemClassLoader);
+    
     updateEffectiveLevelPart(loader);
+        
     for (int i = 0; i < _loaders.size(); i++) {
       WeakReference<ClassLoader> loaderRef = _loaders.get(i);
       ClassLoader classLoader = loaderRef.get();
@@ -541,7 +553,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     }
     
     super.setLevel(_finestEffectiveLevel);
-    
+        
     _finestEffectiveLevelValue = _finestEffectiveLevel.intValue();
 
     updateChildren();
@@ -579,7 +591,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
     
     if (_finestEffectiveLevel == null)
       _finestEffectiveLevel = level;
-    else if (_finestEffectiveLevel.intValue() < level.intValue()) {
+    else if (level.intValue() < _finestEffectiveLevel.intValue()) {
       _finestEffectiveLevel = level;
     }
     
@@ -599,7 +611,7 @@ class EnvironmentLogger extends Logger implements ClassLoaderListener {
   }
   
   private Level getOwnEffectiveLevel(ClassLoader loader)
-    {
+  {
     Level level = null;
     
     if (loader == _systemClassLoader) {

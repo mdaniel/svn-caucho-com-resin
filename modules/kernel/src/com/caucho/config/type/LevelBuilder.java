@@ -87,9 +87,13 @@ public class LevelBuilder extends ConfigType {
       return Level.SEVERE;
     else if ("off".equals(text))
       return Level.OFF;
-    else
-      throw new ConfigException(L.l("'{0}' is an unknown java.util.logging.Level",
-                                    _text));
-                                
+    else {
+      try {
+        return Level.parse(text);
+      } catch (IllegalArgumentException e) {
+        throw new ConfigException(L.l("'{0}' is an unknown java.util.logging.Level",
+                                      text));
+      }
+    }
   }
 }

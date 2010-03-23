@@ -83,60 +83,60 @@ public class StreamHandler extends Handler {
    */
   public void publish(LogRecord record)
   {
-    if (record.getLevel().intValue() < getLevel().intValue())
+    if (! isLoggable(record))
       return;
 
     try {
       if (record == null) {
-	synchronized (_os) {
-	  _os.println("no record");
-	  
-	  if (_isNullDelimited)
-	    _os.write(0);
-	    
-	  _os.flush();
-	}
-	return;
+        synchronized (_os) {
+          _os.println("no record");
+          
+          if (_isNullDelimited)
+            _os.write(0);
+            
+          _os.flush();
+        }
+        return;
       }
 
       if (_formatter != null) {
-	String value = _formatter.format(record);
+        String value = _formatter.format(record);
 
-	synchronized (_os) {
-	  _os.println(value);
-	  if (_isNullDelimited)
-	    _os.write(0);
-	  
-	  _os.flush();
-	}
-	
-	return;
+        synchronized (_os) {
+          _os.println(value);
+          if (_isNullDelimited)
+            _os.write(0);
+          
+          _os.flush();
+        }
+        
+        return;
       }
       
       String message = record.getMessage();
       Throwable thrown = record.getThrown();
 
       synchronized (_os) {
-	if (_timestamp != null) {
-	  _os.print(_timestamp);
-	}
-      
-	if (thrown != null) {
-	  if (message != null
-	      && ! message.equals(thrown.toString()) 
-	      && ! message.equals(thrown.getMessage()))
-	    _os.println(message);
-	
-	  record.getThrown().printStackTrace(_os.getPrintWriter());
-	}
-	else {
-	  _os.println(record.getMessage());
-	}
-	
-	if (_isNullDelimited)
-	  _os.write(0);
-	
-	_os.flush();
+        if (_timestamp != null) {
+          _os.print(_timestamp);
+        }
+          
+        if (thrown != null) {
+          if (message != null
+              && ! message.equals(thrown.toString()) 
+              && ! message.equals(thrown.getMessage()))
+            _os.println(message);
+        
+          record.getThrown().printStackTrace(_os.getPrintWriter());
+        }
+        else {
+          _os.println(record.getMessage());
+        }
+        
+        if (_isNullDelimited)
+          _os.write(0);
+        
+        _os.flush();
       }
     } catch (Throwable e) {
       e.printStackTrace();

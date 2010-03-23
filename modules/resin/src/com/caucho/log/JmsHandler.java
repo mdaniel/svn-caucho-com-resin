@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.log.handler;
+package com.caucho.log;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.*;
@@ -114,7 +114,7 @@ public class JmsHandler extends Handler {
    */
   public void publish(LogRecord record)
   {
-    if (record.getLevel().intValue() < getLevel().intValue())
+    if (! isLoggable(record))
       return;
 
     Filter filter = getFilter();

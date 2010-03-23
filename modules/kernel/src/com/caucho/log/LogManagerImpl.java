@@ -82,7 +82,7 @@ public class LogManagerImpl extends LogManager {
 
     // handle custom logger
     if (! logger.getClass().equals(Logger.class)) {
-      return envLogger.addLogger(logger);
+      return envLogger.addCustomLogger(logger);
     }
 
     return false;

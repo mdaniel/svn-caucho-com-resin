@@ -127,7 +127,7 @@ public class SyslogHandler extends Handler {
    */
   public void publish(LogRecord record)
   {
-    if (record.getLevel().intValue() < getLevel().intValue())
+    if (! isLoggable(record))
       return;
 
     Syslog.syslog(_facility, _severity, record.getMessage());
