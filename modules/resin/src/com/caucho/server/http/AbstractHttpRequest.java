@@ -1423,8 +1423,9 @@ public abstract class AbstractHttpRequest
 
       // Default host name if the host doesn't have a canonical
       // name
-      int p = hostName.indexOf(':');
-      if (p > 0)
+      int p = hostName.lastIndexOf(':');
+      int q = hostName.lastIndexOf(']');
+      if (p > 0 && q < p)
         invocation.setHostName(hostName.substring(0, p));
       else
         invocation.setHostName(hostName);

@@ -667,12 +667,13 @@ public class ConfigContext {
 
     Node childNode = getChildElement(node);
 
-    if (childNode == null)
+    if (childNode == null) {
       return false;
-
+    }
+    
     QName qName = ((QNode) childNode).getQName();
 
-    ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+    ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
 
     if (type == null || ! attrStrategy.isInlineType(type)) {
       // server/6500
@@ -695,7 +696,7 @@ public class ConfigContext {
       return false;
 
     // server/1af3
-    ConfigType childType = TypeFactory.getType(childBean);
+    ConfigType<?> childType = TypeFactory.getType(childBean);
 
     childBean = configureChildBean(childBean, childType,
                                    childNode, attrStrategy);
@@ -705,83 +706,20 @@ public class ConfigContext {
     return true;
   }
 
-  private Object configureObjectBean(ConfigType type, Element node)
-  {
-    String text = getTextValue(node);
-
-    Object value = null;
-
-    if (text != null) {
-      boolean isTrim = isTrim(node);
-
-      if (isEL()
-          && (text.indexOf("#{") >= 0 || text.indexOf("${") >= 0)) {
-        if (isTrim)
-          text = text.trim();
-
-        return eval(type, text);
-      }
-      else
-        return type.valueOf(text);
-    }
-    else if ((value = configureInlineObject(type, node)) != null)
-      return value;
-    else {
-      throw new UnsupportedOperationException();
-    }
-  }
-
-  private Object configureInlineObject(ConfigType type, Element node)
-  {
-    QName qName = ((QNode) node).getQName();
-
-    type = TypeFactory.getFactory().getEnvironmentType(qName);
-
-    if (type == null) {
-      // server/6500
-      return null;
-    }
-
-    // server/0219
-    // Object childBean = attrStrategy.create(parent, qName, type);
-
-    Element childNew = getChildNewElement(node);
-
-    Object childBean;
-
-    if (childNew != null)
-      childBean = createNew(type, null, childNew);
-    else
-      childBean = type.create(null, qName);
-
-    if (childBean == null)
-      return null;
-
-    // server/1af3
-    ConfigType childType = TypeFactory.getType(childBean);
-
-    childBean = configureChildBean(childBean, childType,
-                                   node, null);
-
-    return childBean;
-  }
-
   private void configureBeanProperties(Node childNode,
                                        QName qName,
                                        Object bean,
-                                       ConfigType type,
+                                       ConfigType<?> type,
                                        Attribute attrStrategy,
                                        boolean allowParam)
   {
     Object childBean = attrStrategy.create(bean, qName);
 
     if (childBean == null) {
-      throw error(L.l("unable to create attribute {0} for {1} and {2}",
-                      attrStrategy, bean, qName),
-                  childNode);
+      throw unableToCreateError(attrStrategy, bean, qName, childNode);
     }
 
-    ConfigType childBeanType = TypeFactory.getType(childBean);
+    ConfigType<?> childBeanType = TypeFactory.getType(childBean);
 
     childBean = configureChildBean(childBean, childBeanType,
                                    childNode, attrStrategy);
@@ -790,7 +728,7 @@ public class ConfigContext {
   }
 
   private Object configureChildBean(Object childBean,
-                                    ConfigType childBeanType,
+                                    ConfigType<?> childBeanType,
                                     Node childNode,
                                     Attribute attrStrategy)
   {
@@ -809,8 +747,60 @@ public class ConfigContext {
     else
       return newBean;
   }
+  
+  private ConfigException unableToCreateError(Attribute attr,
+                                              Object bean,
+                                              QName qName,
+                                              Node node)
+  {
+    Element child = getUniqueChildElement(node);
+    
+    if (child == null) {
+      throw error(L.l("unable to create inline attribute '{2}' for '{1}' because no unique child Element exists.  Attribute = {0}",
+                      attr, bean, qName),
+                      node);
+    }
+    
+
+    QName childQName = ((QNode) child).getQName();
+    String uri = childQName.getNamespaceURI();
+
+    if (uri == null || ! uri.startsWith("urn:java:")) {
+      throw error(L.l("unable to create inline attribute '{0}' for '{1}' because the child <{2}> uri must start with xmlns='urn:java:...' but uri='{3}' for {4}",
+                      qName.getName(), bean, childQName.getName(), uri, attr),
+                      node);
+    }
+    
+    throw throwUnableToCreateError(attr, bean, qName, node);
+  }
+  
+  private ConfigException throwUnableToCreateError(Attribute attr,
+                                                   Object bean,
+                                                   QName qName,
+                                                   Node childNode)
+  {
+    throw error(L.l("unable to create attribute {0} for {1} and {2}",
+                    attr, bean, qName),
+                    childNode);
+  }
 
   private Node getChildElement(Node node)
+  {
+    Element child = getUniqueChildElement(node);
+    
+    if (child == null)
+      return null;
+
+    QName qName = ((QNode) child).getQName();
+    String uri = qName.getNamespaceURI();
+
+    if (uri == null || ! uri.startsWith("urn:java:"))
+      return null;
+
+    return child;
+  }
+  
+  private Element getUniqueChildElement(Node node)
   {
     if (! (node instanceof Element))
       return null;
@@ -829,23 +819,17 @@ public class ConfigContext {
         return null;
     }
 
-    if (! (child instanceof Element))
-      return null;
-
-    QName qName = ((QNode) child).getQName();
-    String uri = qName.getNamespaceURI();
-
-    if (uri == null || ! uri.startsWith("urn:java:"))
-      return null;
-
     Node next = child.getNextSibling();
 
     if (next != null) {
       if (next.getNextSibling() != null || ! isEmptyText(next))
         return null;
     }
-
-    return child;
+    
+    if (child instanceof Element)
+      return (Element) child;
+    else
+      return null;
   }
 
   private Object createNew(ConfigType type,

@@ -30,6 +30,7 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
+import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -178,7 +179,7 @@ public final class OwnerServerTriad
   public ClusterServer getActiveServer(ClusterServer oldServer)
   {
     ClusterServer server;
-    ServerPool pool;
+    ClientSocketFactory pool;
 
     server = _primary;
     pool = server != null ? server.getServerPool() : null;
@@ -233,7 +234,7 @@ public final class OwnerServerTriad
   public ClusterServer getActiveOrSelfServer(ClusterServer oldServer)
   {
     ClusterServer server;
-    ServerPool pool;
+    ClientSocketFactory pool;
 
     server = _primary;
 

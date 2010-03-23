@@ -30,6 +30,8 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
+import com.caucho.network.balance.ClientSocket;
+import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.util.L10N;
 
 /**
@@ -38,7 +40,7 @@ import com.caucho.util.L10N;
 public class SingleLoadBalanceManager extends CustomLoadBalanceManager {
   private static final L10N L = new L10N(SingleLoadBalanceManager.class);
 
-  private ServerPool _serverPool;
+  private ClientSocketFactory _serverPool;
 
   public SingleLoadBalanceManager(String probeCategory)
   {
@@ -62,7 +64,7 @@ public class SingleLoadBalanceManager extends CustomLoadBalanceManager {
   /**
    * Opens the next available server.
    */
-  public ClusterStream openServer(String sessionId, ServerPool oldSrun)
+  public ClientSocket openServer(String sessionId, ClientSocketFactory oldSrun)
   {
     if (_serverPool == oldSrun)
       return null;

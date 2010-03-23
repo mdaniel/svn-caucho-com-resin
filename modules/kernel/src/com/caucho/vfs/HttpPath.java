@@ -160,17 +160,27 @@ public class HttpPath extends FilesystemPath {
   {
     int length = uri.length();
 
-    if (length < 2 + offset ||
-        uri.charAt(offset) != '/' ||
-        uri.charAt(offset + 1) != '/')
+    if (length < 2 + offset
+        || uri.charAt(offset) != '/'
+        || uri.charAt(offset + 1) != '/')
       throw new RuntimeException(L.l("bad scheme in `{0}'", uri));
 
     CharBuffer buf = CharBuffer.allocate();
     int i = 2 + offset;
     int ch = 0;
-    for (; i < length && (ch = uri.charAt(i)) != ':' && ch != '/' && ch != '?';
+    boolean isInBrace = false;
+    
+    for (; i < length
+           && ((ch = uri.charAt(i)) != ':' || isInBrace)
+           && ch != '/'
+           && ch != '?';
 	 i++) {
       buf.append((char) ch);
+      
+      if (ch == '[')
+        isInBrace = true;
+      else if (ch == ']')
+        isInBrace = false;
     }
 
     String host = buf.close();

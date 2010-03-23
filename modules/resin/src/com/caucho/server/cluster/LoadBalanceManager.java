@@ -29,6 +29,9 @@
 
 package com.caucho.server.cluster;
 
+import com.caucho.network.balance.ClientSocket;
+import com.caucho.network.balance.ClientSocketFactory;
+
 /**
  * Manages a load balancer.
  */
@@ -52,8 +55,8 @@ abstract public class LoadBalanceManager {
   /**
    * Opens the next available server.
    */
-  abstract public ClusterStream
-    openServer(String sessionId, ServerPool oldSrun);
+  abstract public ClientSocket
+    openServer(String sessionId, ClientSocketFactory oldSrun);
 
   public void destroy()
   {

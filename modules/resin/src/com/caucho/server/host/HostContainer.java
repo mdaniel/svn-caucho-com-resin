@@ -289,6 +289,7 @@ public class HostContainer implements DispatchBuilder {
   /**
    * Creates the invocation.
    */
+  @Override
   public Invocation buildInvocation(Invocation invocation)
   {
     String rawHost = invocation.getHost();
@@ -389,11 +390,12 @@ public class HostContainer implements DispatchBuilder {
     if (rawHost == null)
       rawHost = "";
 
-    int p = rawHost.indexOf(':');
+    int p = rawHost.lastIndexOf(':');
+    int q = rawHost.lastIndexOf(']');
 
     String shortHost = rawHost;
 
-    if (p > 0)
+    if (p > 0 && q < p)
       shortHost = rawHost.substring(0, p);
     
     String fullHost = shortHost + ':' + rawPort;

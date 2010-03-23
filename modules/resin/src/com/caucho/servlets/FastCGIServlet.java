@@ -32,10 +32,10 @@ package com.caucho.servlets;
 import com.caucho.VersionFactory;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
+import com.caucho.network.balance.ClientSocket;
+import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.CustomLoadBalanceManager;
-import com.caucho.server.cluster.ServerPool;
-import com.caucho.server.cluster.ClusterStream;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
@@ -217,7 +217,7 @@ public class FastCGIServlet extends GenericServlet {
 
     String sessionId = null;
 
-    ClusterStream stream = _loadBalancer.openServer(sessionId, null);
+    ClientSocket stream = _loadBalancer.openServer(sessionId, null);
     boolean isValid = false;
 
     if (stream == null) {
@@ -248,13 +248,13 @@ public class FastCGIServlet extends GenericServlet {
 
   private boolean handleRequest(HttpServletRequest req,
                                 HttpServletResponse res,
-                                ClusterStream stream,
+                                ClientSocket stream,
                                 OutputStream out,
                                 boolean keepalive)
     throws ServletException, IOException
   {
-    ReadStream rs = stream.getReadStream();
-    WriteStream ws = stream.getWriteStream();
+    ReadStream rs = stream.getInputStream();
+    WriteStream ws = stream.getOutputStream();
 
     writeHeader(ws, FCGI_BEGIN_REQUEST, 8);
 
@@ -313,7 +313,7 @@ public class FastCGIServlet extends GenericServlet {
     return ! is.isDead() && keepalive;
   }
 
-  private void setEnvironment(ClusterStream stream,
+  private void setEnvironment(ClientSocket stream,
                               WriteStream ws, HttpServletRequest req)
     throws IOException
   {
@@ -506,7 +506,7 @@ public class FastCGIServlet extends GenericServlet {
     return ch;
   }
 
-  private void addHeader(ClusterStream stream, WriteStream ws,
+  private void addHeader(ClientSocket stream, WriteStream ws,
                          String key, String value)
     throws IOException
   {
@@ -552,7 +552,7 @@ public class FastCGIServlet extends GenericServlet {
     ws.print(value);
   }
 
-  private void addHeader(ClusterStream stream, WriteStream ws,
+  private void addHeader(ClientSocket stream, WriteStream ws,
                          CharBuffer key, String value)
     throws IOException
   {
@@ -617,7 +617,7 @@ public class FastCGIServlet extends GenericServlet {
   }
 
   static class FastCGIInputStream extends InputStream {
-    private ClusterStream _stream;
+    private ClientSocket _stream;
 
     private InputStream _is;
     private int _chunkLength;
@@ -628,16 +628,16 @@ public class FastCGIServlet extends GenericServlet {
     {
     }
 
-    public FastCGIInputStream(ClusterStream stream)
+    public FastCGIInputStream(ClientSocket stream)
     {
       init(stream);
     }
 
-    public void init(ClusterStream stream)
+    public void init(ClientSocket stream)
     {
       _stream = stream;
 
-      _is = stream.getReadStream();
+      _is = stream.getInputStream();
       _chunkLength = 0;
       _isDead = false;
     }

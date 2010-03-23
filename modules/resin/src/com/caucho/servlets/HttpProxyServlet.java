@@ -33,10 +33,10 @@ import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.*;
 import com.caucho.config.types.*;
+import com.caucho.network.balance.ClientSocket;
 import com.caucho.servlets.HttpProxyServlet;
 import com.caucho.server.cluster.CustomLoadBalanceManager;
 import com.caucho.server.cluster.Server;
-import com.caucho.server.cluster.ClusterStream;
 import com.caucho.server.http.CauchoRequest;
 
 import javax.servlet.GenericServlet;
@@ -150,7 +150,7 @@ public class HttpProxyServlet extends GenericServlet {
     if (queryString != null)
       uri += '?' + queryString;
 
-    ClusterStream stream = _loadBalancer.openServer(sessionId, null);
+    ClientSocket stream = _loadBalancer.openServer(sessionId, null);
 
     try {
       long startRequestTime = Alarm.getCurrentTime();
@@ -175,11 +175,11 @@ public class HttpProxyServlet extends GenericServlet {
   private boolean handleRequest(HttpServletRequest req,
                                 HttpServletResponse res,
                                 String uri,
-                                ClusterStream stream)
+                                ClientSocket stream)
     throws ServletException, IOException
   {
-    ReadStream rs = stream.getReadStream();
-    WriteStream out = stream.getWriteStream();
+    ReadStream rs = stream.getInputStream();
+    WriteStream out = stream.getOutputStream();
 
     try {
       out.print(req.getMethod());

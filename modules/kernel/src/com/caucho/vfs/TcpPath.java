@@ -91,16 +91,27 @@ public class TcpPath extends Path {
   {
     int length = uri.length();
 
-    if (length < 2 + offset ||
-        uri.charAt(offset) != '/' ||
-        uri.charAt(1 + offset) != '/')
+    if (length < 2 + offset
+        || uri.charAt(offset) != '/'
+        || uri.charAt(1 + offset) != '/')
       throw new RuntimeException("bad scheme");
 
     CharBuffer buf = new CharBuffer();
     int i = 2 + offset;
     int ch = 0;
-    for (; i < length && (ch = uri.charAt(i)) != ':' && ch != '/' && ch != '?';
+    boolean isIpv6 = false;
+    
+    for (; 
+          (i < length
+           && (ch = uri.charAt(i)) != '/'
+           && ch != '?'
+           && ! (ch == ':' && ! isIpv6));
          i++) {
+      if (ch == '[')
+        isIpv6 = true;
+      else if (ch == ']')
+        isIpv6 = false;
+      
       buf.append((char) ch);
     }
 

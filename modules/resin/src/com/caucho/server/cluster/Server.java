@@ -60,6 +60,7 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.management.server.CacheItem;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.management.server.ServerMXBean;
+import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.security.PermissionManager;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.server.admin.Management;
@@ -945,6 +946,15 @@ public class Server extends ProtocolDispatchServer
   }
 
   public Port createProtocol()
+  {
+    ProtocolPortConfig port = new ProtocolPortConfig();
+
+    _ports.add(port);
+
+    return port;
+  }
+
+  public Port createListen()
   {
     ProtocolPortConfig port = new ProtocolPortConfig();
 
@@ -1943,7 +1953,7 @@ public class Server extends ProtocolDispatchServer
     for (Cluster cluster : getResin().getClusterList()) {
       for (ClusterPod pod : cluster.getPodList()) {
         for (ClusterServer server : pod.getStaticServerList()) {
-          ServerPool pool = server.getServerPool();
+          ClientSocketFactory pool = server.getServerPool();
 
           if (pool != null)
             pool.start();

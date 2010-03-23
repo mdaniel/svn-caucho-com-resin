@@ -30,6 +30,7 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
+import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;
@@ -423,7 +424,7 @@ abstract public class ClusterPod
 				       ClusterServer oldServer)
   {
     ClusterServer server;
-    ServerPool pool;
+    ClientSocketFactory pool;
 
     server = getPrimary(owner);
 
@@ -482,7 +483,7 @@ abstract public class ClusterPod
                                              ClusterServer oldServer)
   {
     ClusterServer server;
-    ServerPool pool;
+    ClientSocketFactory pool;
 
     server = getPrimary(owner);
 

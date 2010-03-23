@@ -398,14 +398,14 @@ Java_com_caucho_vfs_JniSocketImpl_isSecure(JNIEnv *env,
 
 JNIEXPORT jstring JNICALL
 Java_com_caucho_vfs_JniSocketImpl_getCipher(JNIEnv *env,
-                                         jobject obj,
-                                         jlong conn_fd)
+                                            jobject obj,
+                                            jlong conn_fd)
 {
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
   if (! conn || ! conn->sock || ! conn->ssl_cipher)
     return 0;
-
+  
   return (*env)->NewStringUTF(env, conn->ssl_cipher);
 }
 

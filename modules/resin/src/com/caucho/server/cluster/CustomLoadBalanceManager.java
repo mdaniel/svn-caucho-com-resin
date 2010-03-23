@@ -30,8 +30,8 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
+import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.util.L10N;
-import java.net.*;
 
 
 /**
@@ -54,11 +54,12 @@ abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
     return _probeCategory;
   }
 
-  protected ServerPool createServerPool(String address)
+  protected ClientSocketFactory createServerPool(String address)
   {
-    int p = address.indexOf(':');
+    int p = address.lastIndexOf(':');
+    int q = address.lastIndexOf(']');
 
-    if (p < 0)
+    if (p < 0 && q < p)
       throw new ConfigException(L.l("'{0}' is an invalid address because it does not specify the port.",
                                     address));
 
@@ -69,7 +70,7 @@ abstract public class CustomLoadBalanceManager extends LoadBalanceManager {
 
     boolean isSecure = false;
 
-    return new ServerPool(server.getServerId(),
+    return new ClientSocketFactory(server.getServerId(),
                           address,
                           getProbeCategory(),
                           address,

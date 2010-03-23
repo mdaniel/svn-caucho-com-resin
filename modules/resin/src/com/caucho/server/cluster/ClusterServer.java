@@ -43,6 +43,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.management.server.ClusterServerMXBean;
+import com.caucho.network.balance.ClientSocketFactory;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
 
@@ -115,7 +116,7 @@ public final class ClusterServer {
 
   // runtime
 
-  private ServerPool _serverPool;
+  private ClientSocketFactory _serverPool;
 
   private boolean _isActive;
   private long _stateTimestamp;
@@ -789,7 +790,7 @@ public final class ClusterServer {
   /**
    * Returns the server connector.
    */
-  public final ServerPool getServerPool()
+  public final ClientSocketFactory getServerPool()
   {
     return _serverPool;
   }
@@ -807,7 +808,7 @@ public final class ClusterServer {
    */
   public final boolean isActiveRemote()
   {
-    ServerPool pool = _serverPool;
+    ClientSocketFactory pool = _serverPool;
 
     return pool != null && pool.isActive();
   }
@@ -854,11 +855,44 @@ public final class ClusterServer {
     */
 
     if (! getId().equals(Resin.getCurrent().getServerId())) {
-      _serverPool = new ServerPool(Resin.getCurrent().getServerId(), this);
+      _serverPool = createServerPool(Resin.getCurrent().getServerId());
       _serverPool.init();
     }
 
     _admin.register();
+  }
+
+  private ClientSocketFactory createServerPool(String serverId)
+  {
+    ClientSocketFactory pool = new ClientSocketFactory(serverId,
+                                     getId(),
+                                     "Resin|Cluster",
+                                     getStatId(),
+                                     getAddress(),
+                                     getPort(),
+                                     isSSL());
+
+    pool.setLoadBalanceConnectTimeout(getLoadBalanceConnectTimeout());
+    pool.setLoadBalanceConnectionMin(getLoadBalanceConnectionMin());
+    pool.setLoadBalanceSocketTimeout(getLoadBalanceSocketTimeout());
+    pool.setLoadBalanceIdleTime(getLoadBalanceIdleTime());
+    pool.setLoadBalanceRecoverTime(getLoadBalanceRecoverTime());
+    pool.setLoadBalanceWarmupTime(getLoadBalanceWarmupTime());
+    pool.setLoadBalanceWeight(getLoadBalanceWeight());
+    
+    return pool;
+  }
+
+  private String getStatId()
+  {
+    String targetCluster = getCluster().getId();
+
+    if ("".equals(targetCluster))
+      targetCluster = "default";
+
+    int index = getIndex();
+
+    return String.format("%02x:%s", index, targetCluster);
   }
 
   /**

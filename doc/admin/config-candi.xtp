@@ -1858,9 +1858,9 @@ MessageBean.addMessage(): example.CustomMessage@12164ea: This is message 3
 of <code>setParent</code>.  The possible issue with addSubBean is that
 @PostConstruct methods are called before addSubBean.  The possible issue with
 createSubBean is that it's
-not possible to use a resin:type with createSubBean.  So the setParent is
+not possible to use a &lt;mypkg:MySubBean> with createSubBean.  So the setParent is
 useful when the @PostConstruct method needs the parent, and you need to use
-resin:type.</p>
+&lt;mypkg:MySubBean>.</p>
 
 </s1>
 

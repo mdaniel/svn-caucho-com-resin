@@ -311,6 +311,13 @@ r_keepalive-select-max =
   attribute keepalive-select-max { r_int-Type }
   | element keepalive-select-max { r_int-Type }
 
+r_listen =
+  element listen {
+    r_port-Content
+
+    & r_bean-Content*
+  }
+
 r_log-service = element log-service {
   r_enable?
 
@@ -646,6 +653,8 @@ r_server-Content =
   & r_keepalive-select-thread-timeout?
 
   & r_keepalive-timeout?
+  
+  & r_listen*
 
   & (attribute load-balance-connect-timeout { r_period-Type }
      | element load-balance-connect-timeout { r_period-Type })?

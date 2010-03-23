@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.network.balance;
 
 import java.io.IOException;
 import java.util.logging.Level;
@@ -36,8 +36,6 @@ import java.util.logging.Logger;
 import com.caucho.bam.ActorException;
 import com.caucho.env.sample.ActiveProbe;
 import com.caucho.env.sample.ActiveTimeProbe;
-import com.caucho.hessian.io.Hessian2Output;
-import com.caucho.hessian.io.Hessian2StreamingInput;
 import com.caucho.server.hmux.HmuxRequest;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -47,22 +45,19 @@ import com.caucho.vfs.WriteStream;
 /**
  * Defines a connection to the client.
  */
-public class ClusterStream {
-  private static final L10N L = new L10N(ClusterStream.class);
+public class ClientSocket {
+  private static final L10N L = new L10N(ClientSocket.class);
 
   private static final Logger log
-    = Logger.getLogger(ClusterStream.class.getName());
+    = Logger.getLogger(ClientSocket.class.getName());
 
-  private ServerPool _pool;
+  private ClientSocketFactory _pool;
   
   // The pools sequence id when the stream was allocated.
   private long _poolSequenceId;
 
   private ReadStream _is;
   private WriteStream _os;
-
-  private Hessian2StreamingInput _in;
-  private Hessian2Output _out;
 
   private boolean _isAuthenticated;
 
@@ -77,7 +72,7 @@ public class ClusterStream {
 
   private String _debugId;
 
-  ClusterStream(ServerPool pool, int count,
+  ClientSocket(ClientSocketFactory pool, int count,
                 ReadStream is, WriteStream os)
   {
     _pool = pool;
@@ -99,7 +94,7 @@ public class ClusterStream {
   /**
    * Returns the owning pool
    */
-  public ServerPool getPool()
+  public ClientSocketFactory getPool()
   {
     return _pool;
   }
@@ -107,7 +102,7 @@ public class ClusterStream {
   /**
    * Returns the input stream.
    */
-  public ReadStream getReadStream()
+  public ReadStream getInputStream()
   {
     _idleStartTime = 0;
 
@@ -117,7 +112,7 @@ public class ClusterStream {
   /**
    * Returns the write stream.
    */
-  public WriteStream getWriteStream()
+  public WriteStream getOutputStream()
   {
     _idleStartTime = 0;
 
@@ -209,7 +204,7 @@ public class ClusterStream {
   public void switchToHmtp(boolean isUnidir)
   {
     try {
-      WriteStream out = getWriteStream();
+      WriteStream out = getOutputStream();
 
       if (isUnidir)
         out.write(HmuxRequest.HMUX_TO_UNIDIR_HMTP);

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.cluster;
+package com.caucho.network.balance;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -37,8 +37,8 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.env.sample.ActiveTimeProbe;
 import com.caucho.env.sample.ActiveProbe;
+import com.caucho.env.sample.ActiveTimeProbe;
 import com.caucho.env.sample.CountProbe;
 import com.caucho.env.sample.ProbeManager;
 import com.caucho.util.Alarm;
@@ -50,13 +50,13 @@ import com.caucho.vfs.ReadWritePair;
 import com.caucho.vfs.Vfs;
 
 /**
- * A pool of connections to a Resin server.
+ * A pool of connections to a server.
  */
-public class ServerPool
+public class ClientSocketFactory
 {
   private static final Logger log
-    = Logger.getLogger(ServerPool.class.getName());
-  private static final L10N L = new L10N(ServerPool.class);
+    = Logger.getLogger(ClientSocketFactory.class.getName());
+  private static final L10N L = new L10N(ClientSocketFactory.class);
 
   // number of chunks in the throttling
   private static final int WARMUP_MAX = 16;
@@ -64,7 +64,7 @@ public class ServerPool
   private static final int []WARMUP_CONNECTION_MAX
     = new int[] { 1, 1, 1, 1, 2, 2, 2, 2, 4, 4, 8, 8, 16, 32, 64, 128 };
 
-  private final String _serverId;
+  private final String _sourceId;
   private final String _targetId;
 
   private final String _address;
@@ -87,7 +87,7 @@ public class ServerPool
   private long _loadBalanceWarmupTime = 60000;
   private int _loadBalanceWeight = 100;
 
-  private ClusterStream []_idle = new ClusterStream[64];
+  private ClientSocket []_idle = new ClientSocket[64];
   private volatile int _idleHead;
   private volatile int _idleTail;
   private int _idleSize = 16;
@@ -142,64 +142,42 @@ public class ServerPool
 
   private volatile double _cpuLoadAvg;
   private volatile long _cpuSetTime;
-
-  public ServerPool(String serverId,
-                    String targetId,
-                    String statCategory,
-                    String statId,
-                    String address,
-                    int port,
-                    boolean isSecure)
+  
+  public ClientSocketFactory(String address, int port)
   {
-    _serverId = serverId;
+    this(address, port, false);
+  }
+  
+  public ClientSocketFactory(String address, int port, boolean isSecure)
+  {
+    this("client", address + ":" + port, null, null, address, port, isSecure); 
+  }
+
+  public ClientSocketFactory(String sourceId,
+                             String targetId,
+                             String statCategory,
+                             String statId,
+                             String address,
+                             int port,
+                             boolean isSecure)
+  {
+    _sourceId = sourceId;
 
     if ("".equals(targetId))
       targetId = "default";
 
     _targetId = targetId;
-    _debugId = _serverId + "->" + _targetId;
-    _address = address;
+    _debugId = _sourceId + "->" + _targetId;
+    _address = address;    
     _port = port;
     _isSecure = isSecure;
 
     _statCategory = statCategory;
 
-    if (! "".equals(statId) && ! statId.startsWith("|"))
+    if (statId != null && ! "".equals(statId) && ! statId.startsWith("|"))
       statId = "|" + statId;
 
     _statId = statId;
-  }
-
-  public ServerPool(String serverId,
-                    ClusterServer server)
-  {
-    this(serverId,
-         server.getId(),
-         "Resin|Cluster",
-         getStatId(server),
-         server.getAddress(),
-         server.getPort(),
-         server.isSSL());
-
-    _loadBalanceConnectTimeout = server.getLoadBalanceConnectTimeout();
-    _loadBalanceConnectionMin = server.getLoadBalanceConnectionMin();
-    _loadBalanceSocketTimeout = server.getLoadBalanceSocketTimeout();
-    _loadBalanceIdleTime = server.getLoadBalanceIdleTime();
-    _loadBalanceRecoverTime = server.getLoadBalanceRecoverTime();
-    _loadBalanceWarmupTime = server.getLoadBalanceWarmupTime();
-    _loadBalanceWeight = server.getLoadBalanceWeight();
-  }
-
-  private static String getStatId(ClusterServer server)
-  {
-    String targetCluster = server.getCluster().getId();
-
-    if ("".equals(targetCluster))
-      targetCluster = "default";
-
-    int index = server.getIndex();
-
-    return String.format("%02x:%s", index, targetCluster);
   }
 
   /**
@@ -783,7 +761,7 @@ public class ServerPool
    *
    * @return the socket's read/write pair.
    */
-  public ClusterStream openSoft()
+  public ClientSocket openSoft()
   {
     State state = _state;
 
@@ -791,7 +769,7 @@ public class ServerPool
       return null;
     }
 
-    ClusterStream stream = openRecycle();
+    ClientSocket stream = openRecycle();
 
     if (stream != null)
       return stream;
@@ -809,13 +787,13 @@ public class ServerPool
    *
    * @return the socket's read/write pair.
    */
-  public ClusterStream openIfLive()
+  public ClientSocket openIfLive()
   {
     if (_state == State.CLOSED) {
       return null;
     }
 
-    ClusterStream stream = openRecycle();
+    ClientSocket stream = openRecycle();
 
     if (stream != null)
       return stream;
@@ -837,14 +815,14 @@ public class ServerPool
    *
    * @return the socket's read/write pair.
    */
-  public ClusterStream openForSession()
+  public ClientSocket openForSession()
   {
     State state = _state;
     if (! state.isSessionEnabled()) {
       return null;
     }
 
-    ClusterStream stream = openRecycle();
+    ClientSocket stream = openRecycle();
 
     if (stream != null)
       return stream;
@@ -867,13 +845,13 @@ public class ServerPool
    *
    * @return the socket's read/write pair.
    */
-  public ClusterStream open()
+  public ClientSocket open()
   {
     State state = _state;
     if (! state.isInit())
       return null;
 
-    ClusterStream stream = openRecycle();
+    ClientSocket stream = openRecycle();
 
     if (stream != null)
       return stream;
@@ -889,10 +867,10 @@ public class ServerPool
    *
    * @return the socket's read/write pair.
    */
-  private ClusterStream openRecycle()
+  private ClientSocket openRecycle()
   {
     long now = Alarm.getCurrentTime();
-    ClusterStream stream = null;
+    ClientSocket stream = null;
 
     synchronized (this) {
       if (_idleHead != _idleTail) {
@@ -930,7 +908,7 @@ public class ServerPool
    *
    * @return the socket's read/write pair.
    */
-  private ClusterStream connect()
+  private ClientSocket connect()
   {
     synchronized (this) {
       if (_maxConnections <= _activeCount + _startingCount)
@@ -958,7 +936,7 @@ public class ServerPool
         _connectCountTotal++;
       }
 
-      ClusterStream stream = new ClusterStream(this, _streamCount++,
+      ClientSocket stream = new ClientSocket(this, _streamCount++,
                                                rs, pair.getWriteStream());
 
       if (log.isLoggable(Level.FINER))
@@ -1016,7 +994,7 @@ public class ServerPool
    *
    * @param stream the stream to free
    */
-  void free(ClusterStream stream)
+  void free(ClientSocket stream)
   {
     success();
 
@@ -1053,7 +1031,7 @@ public class ServerPool
 
     long now = Alarm.getCurrentTime();
     long maxIdleTime = _loadBalanceIdleTime;
-    ClusterStream oldStream = null;
+    ClientSocket oldStream = null;
 
     do {
       oldStream = null;
@@ -1112,7 +1090,7 @@ public class ServerPool
    * Closes the read/write pair for reuse.  Called only
    * from ClusterStream.close().
    */
-  void close(ClusterStream stream)
+  void close(ClientSocket stream)
   {
     if (log.isLoggable(Level.FINER))
       log.finer("close " + stream);
@@ -1150,20 +1128,20 @@ public class ServerPool
    */
   public void clearRecycle()
   {
-    ArrayList<ClusterStream> recycleList = null;
+    ArrayList<ClientSocket> recycleList = null;
 
     synchronized (this) {
       _idleHead = _idleTail = 0;
 
       for (int i = 0; i < _idle.length; i++) {
-        ClusterStream stream;
+        ClientSocket stream;
 
         stream = _idle[i];
         _idle[i] = null;
 
         if (stream != null) {
           if (recycleList == null)
-            recycleList = new ArrayList<ClusterStream>();
+            recycleList = new ArrayList<ClientSocket>();
 
           recycleList.add(stream);
         }
@@ -1171,7 +1149,7 @@ public class ServerPool
     }
 
     if (recycleList != null) {
-      for (ClusterStream stream : recycleList) {
+      for (ClientSocket stream : recycleList) {
         stream.closeImpl();
       }
     }
@@ -1194,7 +1172,7 @@ public class ServerPool
     }
 
     for (int i = 0; i < _idle.length; i++) {
-      ClusterStream stream;
+      ClientSocket stream;
 
       synchronized (this) {
         stream = _idle[i];
@@ -1225,7 +1203,7 @@ public class ServerPool
     try {
       wake();
 
-      ClusterStream stream = open();
+      ClientSocket stream = open();
 
       if (stream != null) {
         stream.free(stream.getIdleStartTime());
