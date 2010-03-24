@@ -187,7 +187,7 @@ public class Server extends ProtocolDispatchServer
   private int _threadIdleMin = -1;
   private int _threadIdleMax = -1;
   
-  private ContainerProgram _portDefaults
+  private ContainerProgram _listenerDefaults
     = new ContainerProgram();
 
   // <cluster> configuration
@@ -999,7 +999,7 @@ public class Server extends ProtocolDispatchServer
     
     program.configure(port);
     
-    _portDefaults.configure(port);
+    _listenerDefaults.configure(port);
   }
 
   //
@@ -1109,7 +1109,7 @@ public class Server extends ProtocolDispatchServer
    */
   public void addPortDefault(ConfigProgram program)
   {
-    _portDefaults.addProgram(program);
+    _listenerDefaults.addProgram(program);
   }
 
   /**

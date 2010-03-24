@@ -1250,7 +1250,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     } finally {
       _lifecycle.toDestroy();
 
-      if (_mainThread != null)
+      if (Alarm.isTest()) {
+        log().warning("test simulating exit");
+      }
+      else if (_mainThread != null)
         System.exit(EXIT_OK); // check exit code with config errors
     }
   }
@@ -1502,8 +1505,10 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
     addRandom();
 
-    _failSafeHaltThread = new FailSafeHaltThread();
-    _failSafeHaltThread.start();
+    if (! Alarm.isTest()) {
+      _failSafeHaltThread = new FailSafeHaltThread();
+      _failSafeHaltThread.start();
+    }
 
     _shutdownThread = new ShutdownThread();
     _shutdownThread.start();
