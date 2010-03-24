@@ -51,7 +51,7 @@ is very cautious about security issues to enable the administration.</p>
 &lt;cluster id="">
 &lt;host id="">
 
-  &lt;web-app id="/resin-admin" root-directory="${resin.home}/php/admin">
+  &lt;web-app id="/resin-admin" root-directory="${resin.home}/doc/admin">
      &lt;prologue>
         &lt;resin:set var="resin_admin_external" value="false"/>
         &lt;resin:set var="resin_admin_insecure" value="true"/>
