@@ -179,15 +179,15 @@ public class JniTroubleshoot {
 
     if (isWin()) {
       if (is64())
-        return resinHome.lookup("/win64");
+        return resinHome.lookup("win64");
       else
-        return resinHome.lookup("/win32");
+        return resinHome.lookup("win32");
     }
     else {
       if (is64())
-        return resinHome.lookup("/libexec64");
+        return resinHome.lookup("libexec64");
       else
-        return resinHome.lookup("/libexec");
+        return resinHome.lookup("libexec");
     }
   }
 
