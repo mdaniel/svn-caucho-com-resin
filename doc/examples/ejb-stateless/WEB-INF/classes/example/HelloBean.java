@@ -14,15 +14,27 @@ import javax.inject.Named;
  */
 @Stateless
 public class HelloBean implements Hello {
-  @Inject @Named("greeting")
-  private String _greeting;
-  
+  @Inject @Named("greeting1")
+  private String _greeting1;
+
+  @Inject @Named("greeting2")
+  private String _greeting2;
+
   /**
-   * Returns a hello, world string.
+   * Returns the first greeting
    */
   @TransactionAttribute(SUPPORTS)
-  public String hello()
+  public String greeting1()
   {
-    return _greeting;
+    return _greeting1;
+  }
+
+  /**
+   * Returns the second greeting.
+   */
+  @TransactionAttribute(SUPPORTS)
+  public String greeting2()
+  {
+    return _greeting2;
   }
 }

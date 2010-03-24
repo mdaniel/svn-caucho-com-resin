@@ -27,33 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.manager;
-
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.AddLoaderListener;
+package com.caucho.network.server;
 
 /**
- * Listener for environment start to detect and load persistence.xml
+ * Interface for a service registered with the Resin Server.
  */
-public class EjbEnvironmentListener implements AddLoaderListener
+public class AbstractNetworkService implements NetworkService
 {
-  public EjbEnvironmentListener()
+  public static final int START_PRIORITY_CLASSLOADER = 999;
+  public static final int START_PRIORITY_DEFAULT = 1000;
+  
+  public static final int STOP_PRIORITY_DEFAULT = 1000;
+  public static final int STOP_PRIORITY_CLASSLOADER = 1001;
+
+  @Override
+  public int getStartPriority()
+  {
+    return START_PRIORITY_DEFAULT;
+  }
+
+  @Override
+  public void start()
+    throws Exception
   {
   }
 
-  public boolean isEnhancer()
+  @Override
+  public int getStopPriority()
   {
-    return false;
+    return STOP_PRIORITY_DEFAULT;
+  }
+
+  @Override
+  public void stop() 
+    throws Exception
+  {
+  }
+
+  @Override
+  public void destroy()
+  {
   }
   
-  /**
-   * Handles the case where the environment is starting (after init).
-   */
   @Override
-  public void addLoader(EnvironmentClassLoader loader)
+  public String toString()
   {
-    EjbContainer.create(loader);
+    return getClass().getSimpleName() + "[]";
   }
 }
-
-

@@ -19,8 +19,13 @@ public class HelloServlet extends HttpServlet {
   public void service(HttpServletRequest req, HttpServletResponse res)
     throws IOException, ServletException
   {
+    res.setContentType("text/html");
+
     PrintWriter out = res.getWriter();
-    
-    out.println(_hello.hello());
+
+    out.println("<pre>");
+    out.println(_hello.greeting1());
+    out.println(_hello.greeting2());
+    out.println("</pre>");
   }
 }

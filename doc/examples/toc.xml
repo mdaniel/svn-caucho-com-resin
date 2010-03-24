@@ -1,5 +1,5 @@
-<navigation threaded="true" section="Resin : Tutorials : ">
-  <item link="index.xtp" title="Tutorials">
+<navigation threaded="true" section="Resin : Development Guide : ">
+  <item link="index.xtp" title="Development">
 
     <!--
        - Amber

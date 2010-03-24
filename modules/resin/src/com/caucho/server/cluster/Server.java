@@ -29,13 +29,24 @@
 
 package com.caucho.server.cluster;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+
 import com.caucho.VersionFactory;
 import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
-import com.caucho.distcache.ClusterCache;
-import com.caucho.distcache.GlobalCache;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -44,10 +55,12 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
+import com.caucho.distcache.ClusterCache;
+import com.caucho.distcache.GlobalCache;
 import com.caucho.git.GitRepository;
+import com.caucho.hemp.broker.DomainManager;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.hemp.broker.HempBrokerManager;
-import com.caucho.hemp.broker.DomainManager;
 import com.caucho.hemp.servlet.ServerAuthManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.ClassLoaderListener;
@@ -65,8 +78,8 @@ import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.AbstractSelectManager;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.security.PermissionManager;
 import com.caucho.security.AdminAuthenticator;
+import com.caucho.security.PermissionManager;
 import com.caucho.server.admin.Management;
 import com.caucho.server.cache.AbstractCache;
 import com.caucho.server.cache.TempFileManager;
@@ -79,8 +92,8 @@ import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.distcache.FileCacheManager;
 import com.caucho.server.distcache.PersistentStoreConfig;
 import com.caucho.server.distlock.AbstractLockManager;
-import com.caucho.server.distlock.SingleLockManager;
 import com.caucho.server.distlock.AbstractVoteManager;
+import com.caucho.server.distlock.SingleLockManager;
 import com.caucho.server.distlock.SingleVoteManager;
 import com.caucho.server.e_app.EarConfig;
 import com.caucho.server.host.Host;
@@ -90,8 +103,8 @@ import com.caucho.server.host.HostController;
 import com.caucho.server.host.HostExpandDeployGenerator;
 import com.caucho.server.http.HttpProtocol;
 import com.caucho.server.log.AccessLog;
-import com.caucho.server.repository.Repository;
 import com.caucho.server.repository.FileRepository;
+import com.caucho.server.repository.Repository;
 import com.caucho.server.resin.Resin;
 import com.caucho.server.rewrite.RewriteDispatch;
 import com.caucho.server.webapp.ErrorPage;
@@ -101,20 +114,10 @@ import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
-import com.caucho.vfs.*;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.caucho.vfs.MemoryPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.QServerSocket;
+import com.caucho.vfs.Vfs;
 
 public class Server extends ProtocolDispatchServer
   implements EnvironmentBean, SchemaBean, AlarmListener,
@@ -2001,7 +2004,7 @@ public class Server extends ProtocolDispatchServer
   }
   
   public void bind(String address, int port, QServerSocket ss)
-  throws Exception
+    throws Exception
   {
     if ("null".equals(address))
       address = null;

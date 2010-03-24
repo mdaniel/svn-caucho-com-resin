@@ -29,29 +29,20 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.ConfigException;
-import com.caucho.jmx.Jmx;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.enhancer.ScanListener;
-import com.caucho.loader.enhancer.ScanManager;
-import com.caucho.log.EnvironmentStream;
-import com.caucho.management.server.EnvironmentMXBean;
-import com.caucho.naming.Jndi;
-import com.caucho.util.ResinThreadPoolExecutor;
-import com.caucho.vfs.Vfs;
-
-import javax.management.MBeanServerFactory;
-import javax.naming.NamingException;
-import java.lang.management.ManagementFactory;
 import java.lang.reflect.Constructor;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.loader.enhancer.ScanListener;
+import com.caucho.loader.enhancer.ScanManager;
+import com.caucho.management.server.EnvironmentMXBean;
+import com.caucho.util.ResinThreadPoolExecutor;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -627,7 +618,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Returns any import class, e.g. from an artifact
    */
-  protected Class findImportClass(String name)
+  protected Class<?> findImportClass(String name)
   {
     if (_artifactManager != null)
       return _artifactManager.findImportClass(name);

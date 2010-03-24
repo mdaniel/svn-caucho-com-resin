@@ -816,6 +816,10 @@ public class SocketLinkListener extends TaskWorker
     return _lifecycle;
   }
 
+  public boolean isAfterBind()
+  {
+    return _isBind.get();
+  }
   /**
    * Returns true if the port is active.
    */
@@ -1880,4 +1884,5 @@ public class SocketLinkListener extends TaskWorker
       }
     }
   }
+
 }

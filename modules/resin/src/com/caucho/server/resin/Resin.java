@@ -67,6 +67,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
+import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -409,6 +410,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new WebBeansAddLoaderListener());
+      Environment.addChildLoaderListener(new EjbEnvironmentListener());
       InjectManager webBeans = InjectManager.create();
 
       Config.setProperty("resinHome", getResinHome());

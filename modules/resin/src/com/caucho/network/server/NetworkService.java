@@ -32,11 +32,13 @@ package com.caucho.network.server;
 /**
  * Interface for a service registered with the Resin Server.
  */
-public interface Service
+public interface NetworkService
 {
+  public static final int START_PRIORITY_CLASSLOADER = 999;
   public static final int START_PRIORITY_DEFAULT = 1000;
   
   public static final int STOP_PRIORITY_DEFAULT = 1000;
+  public static final int STOP_PRIORITY_CLASSLOADER = 1001;
 
   /**
    * Returns the start priority of the service, used to determine which
@@ -46,8 +48,10 @@ public interface Service
   
   /**
    * Starts the service.
+   * @throws Exception 
    */
-  public void start();
+  public void start()
+    throws Exception;
   
   /**
    * Returns the stop priority of the service, used to determine which
@@ -57,8 +61,9 @@ public interface Service
 
   /**
    * Stops the service.
+   * @throws Exception 
    */
-  public void stop();
+  public void stop() throws Exception;
   
   /**
    * Destroys the service.

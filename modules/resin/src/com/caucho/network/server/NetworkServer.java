@@ -29,7 +29,10 @@
 
 package com.caucho.network.server;
 
+import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,10 +44,12 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 public class NetworkServer
 {
+  private static final L10N L = new L10N(NetworkServer.class);
   private static final Logger log
     = Logger.getLogger(NetworkServer.class.getName());
 
@@ -56,8 +61,11 @@ public class NetworkServer
   private final Path _dataDirectory;
   private EnvironmentClassLoader _classLoader;
   
-  private final ConcurrentHashMap<Class<? extends Service>,Service> _serviceMap
-    = new ConcurrentHashMap<Class<? extends Service>,Service>();
+  private final ConcurrentHashMap<Class<? extends NetworkService>,NetworkService> _serviceMap
+    = new ConcurrentHashMap<Class<? extends NetworkService>,NetworkService>();
+  
+  private final TreeSet<NetworkService> _pendingStart
+    = new TreeSet<NetworkService>(new StartComparator());
   
   private InjectManager _injectManager;
 
@@ -79,15 +87,22 @@ public class NetworkServer
   public NetworkServer(String id,
                        Path rootDirectory,
                        Path dataDirectory)
+    throws IOException
   {
     _id = id;
     _rootDirectory = rootDirectory;
     _dataDirectory = dataDirectory;
     _classLoader = EnvironmentClassLoader.create("server:" + id);
+    
+    rootDirectory.mkdirs();
+    dataDirectory.mkdirs();
 
     _serverLocal.set(this, _classLoader);
 
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+    
+    // lifecycle for the classloader itself
+    addService(new ClassLoaderService());
     
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -258,6 +273,39 @@ public class NetworkServer
   }
   
   //
+  // Service operations
+  //
+  
+  /**
+   * Adds a new service.
+   */
+  public void addService(NetworkService service)
+  {
+    NetworkService oldService
+      = _serviceMap.putIfAbsent(service.getClass(), service);
+    
+    if (oldService != null) {
+      throw new IllegalStateException(L.l("duplicate service '{0}' is not allowed because another service with that class is already registered '{1}'",
+                                          service, oldService));
+    }
+    
+    _pendingStart.add(service);
+    
+    if (_lifecycle.isActive()) {
+      startServices();
+    }
+  }
+  
+  /**
+   * Returns the service for the given class.
+   */
+  @SuppressWarnings("unchecked")
+  public <T extends NetworkService> T getService(Class<T> cl)
+  {
+    return (T) _serviceMap.get(cl);
+  }
+  
+  //
   // lifecycle operations
   //
 
@@ -306,17 +354,31 @@ public class NetworkServer
 
       _lifecycle.toStarting();
 
-      ArrayList<Service> services = new ArrayList<Service>(_serviceMap.values());
-      
-      // sort
-      
-      for (Service service : services) {
-        service.start();
-      }
-
-      // _alarm.queue(ALARM_INTERVAL);
+      startServices();
 
       _lifecycle.toActive();
+    } finally {
+      if (! _lifecycle.isActive())
+        _lifecycle.toError();
+      
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
+  private void startServices()
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(_classLoader);
+      
+      while (_pendingStart.size() > 0) {
+        NetworkService service = _pendingStart.first();
+        _pendingStart.remove(service);
+
+        service.start();
+      }
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
 
@@ -331,56 +393,10 @@ public class NetworkServer
       // if the server can't start, it needs to completely fail, especially
       // for the watchdog
       throw new RuntimeException(e);
-
-      // log.log(Level.WARNING, e.toString(), e);
-
-      // _configException = e;
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
-
-  /**
-   * Handles the alarm.
-   */
-  /*
-  public void handleAlarm(Alarm alarm)
-  {
-    if (! _lifecycle.isActive())
-      return;
-
-    try {
-      if (isModified()) {
-        // XXX: message slightly wrong
-        String msg = L.l("Resin restarting due to configuration change");
-
-        // startShutdown(msg);
-        return;
-      }
-
-      try {
-        ArrayList<SocketLinkListener> ports = _ports;
-
-        for (int i = 0; i < ports.size(); i++) {
-          SocketLinkListener port = ports.get(i);
-
-          if (port.isClosed()) {
-            log.severe("Resin restarting due to closed port: " + port);
-            // destroy();
-            //_controller.restart();
-          }
-        }
-      } catch (Throwable e) {
-        log.log(Level.WARNING, e.toString(), e);
-        // destroy();
-        //_controller.restart();
-        return;
-      }
-    } finally {
-      alarm.queue(ALARM_INTERVAL);
-    }
-  }
-  */
 
   /**
    * Closes the server.
@@ -396,19 +412,23 @@ public class NetworkServer
       if (! _lifecycle.toStopping())
         return;
 
-      // notify other servers that we've stopped
-      // notifyStop();
-
-      /*
-      Alarm alarm = _alarm;
-      _alarm = null;
-
-      if (alarm != null)
-        alarm.dequeue();
-        */
-
-      _lifecycle.toStop();
+      TreeSet<NetworkService> services
+        = new TreeSet<NetworkService>(new StopComparator());
+      
+      services.addAll(_serviceMap.values());
+      
+      // sort
+      
+      for (NetworkService service : services) {
+        try {
+          service.stop();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      }
     } finally {
+      _lifecycle.toStop();
+      
       thread.setContextClassLoader(oldLoader);
     }
   }
@@ -429,6 +449,21 @@ public class NetworkServer
     try {
       thread.setContextClassLoader(_classLoader);
 
+      TreeSet<NetworkService> services
+        = new TreeSet<NetworkService>(new StopComparator());
+      
+      services.addAll(_serviceMap.values());
+      
+      _serviceMap.clear();
+      
+      for (NetworkService service : services) {
+        try {
+          service.destroy();
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
+      }
+
       /*
        * destroy
        */
@@ -439,6 +474,7 @@ public class NetworkServer
     } finally {
       DynamicClassLoader.setOldLoader(thread, oldLoader);
 
+      _classLoader = null;
       // resin.startShutdown(L.l("Resin shutdown from Server.destroy()"));
     }
   }
@@ -448,5 +484,53 @@ public class NetworkServer
   {
     return (getClass().getSimpleName()
             + "[id=" + getId() + "]");
+  }
+  
+  class ClassLoaderService implements NetworkService {
+    @Override
+    public int getStartPriority()
+    {
+      return NetworkService.START_PRIORITY_CLASSLOADER;
+    }
+    
+    @Override
+    public void start()
+    {
+      _classLoader.start();
+    }
+    
+    @Override
+    public int getStopPriority()
+    {
+      return NetworkService.STOP_PRIORITY_CLASSLOADER;
+    }
+    
+    @Override
+    public void stop()
+    {
+      _classLoader.stop();
+    }
+  
+    @Override
+    public void destroy()
+    {
+      _classLoader.destroy();
+    }
+  }
+  
+  static class StartComparator implements Comparator<NetworkService> {
+    @Override
+    public int compare(NetworkService a, NetworkService b)
+    {
+      return a.getStartPriority() - b.getStartPriority();
+    }
+  }
+  
+  static class StopComparator implements Comparator<NetworkService> {
+    @Override
+    public int compare(NetworkService a, NetworkService b)
+    {
+      return a.getStopPriority() - b.getStopPriority();
+    }
   }
 }
