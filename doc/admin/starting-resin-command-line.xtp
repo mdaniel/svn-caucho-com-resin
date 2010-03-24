@@ -35,11 +35,11 @@
     </tr>
     <tr>
       <td>--enable-ssl</td>
-      <td>Enable OpenSSL, see the <a href="../admin/security.xtp#openssl">OpenSSL</a> documentation for details.</td>
+      <td>Enable OpenSSL, see the <a href="security.xtp#openssl">OpenSSL</a> documentation for details.</td>
     </tr>
     <tr>
       <td>--with-apxs=<var>/path/to/apxs</var></td>
-      <td>Enable <a href="install-3rd-party.xtp">Apache integration</a> and produce mod_caucho</td>
+      <td>Enable <a href="starting-resin-apache.xtp">Apache integration</a> and produce mod_caucho</td>
     </tr>
     <tr>
       <td>--enable-debug</td>
@@ -133,7 +133,7 @@
       <s1 title="JDK arguments">
 
       <p>Resin 4.0 has moved all JDK arguments into the resin.xml
-      file, in the &lt;<a href="../reference/server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
+      file, in the &lt;<a href="cluster-overview-ref.xtp#server.xtp#jvm-arg">jvm-arg</a>&gt;
       tag. Because the Resin 4.0 watchdog starts each Resin server instance,
       it can pass the arguments defined in the configuration file to the JVM.
       By moving the Java arguments to the configuration file, server configuration
@@ -256,11 +256,6 @@ can be reclaimed.
 </p>
 
 
-<p>See also:</p>
-<ul>
-<li><a href="troubleshoot.xtp#garbage-collector">Troubleshooting Technique: Garbage Collector</a>
-</li><li><a href="http://java.sun.com/docs/hotspot/gc1.4.2/">Sun documentation on garbage collection</a>
-</li></ul>
 </s1> <!-- garbage-collection -->
 
 <s1 name="stack-size" title="Stack size">
@@ -306,7 +301,7 @@ website</a>.  For JDK's prior to 5, Sun provides the
 
 <p>
 The most useful tool is <var>jconsole</var>.  Details on using jconsole are
-provided in the <a href="jmx.xtp#console">Administration</a> section of the
+provided in the <a href="advanced-jmx.xtp#console">Administration</a> section of the
 Resin documentation.
 </p>
 
@@ -338,8 +333,7 @@ unix&gt; jconsole
 <var>jps</var> and <var>jstack</var> are also useful, providing a quick command line
 method for obtaining stack traces of all current threads.
 Details on obtaining and interpreting stack traces is in the
-<a href="troubleshoot.xtp#thread-dump">Troubleshooting</a>
-section of the Resin documentation.
+<a href="resin-admin.xtp">resin-admin console</a> documentation.
 </p>
 
 <example title="jps and jstack">
@@ -395,11 +389,11 @@ Thread 12689: (state = BLOCKED)
     </tr>
     <tr>
       <td>--enable-ssl</td>
-      <td>Enable OpenSSL, see the <a href="resin-security.xtp#openssl">OpenSSL</a> documentation for details.</td>
+      <td>Enable OpenSSL, see the <a href="security-ssl.xtp#openssl">OpenSSL</a> documentation for details.</td>
     </tr>
     <tr>
       <td>--with-apxs=<var>/path/to/apxs</var></td>
-      <td>Enable <a href="install-apache.xtp">Apache integration</a> and produce mod_caucho</td>
+      <td>Enable <a href="starting-resin-apache.xtp">Apache integration</a> and produce mod_caucho</td>
     </tr>
     </deftable>
 
@@ -484,7 +478,7 @@ Thread 12689: (state = BLOCKED)
       <s1 title="JDK arguments">
 
       <p>Resin 4.0 has moved all JDK arguments into the resin.xml
-      file, in the &lt;<a href="server-tags.xtp#jvm-arg">jvm-arg</a>&gt;
+      file, in the &lt;<a href="starting-resin-command-line-ref.xtp">jvm-arg</a>&gt;
       tag. Because the Resin 4.0 watchdog starts each Resin server instance,
       it can pass the arguments defined in the configuration file to the JVM.
       By moving the Java arguments to the configuration file, server configuration
@@ -606,11 +600,6 @@ can be reclaimed.
 </p>
 
 
-<p>See also:</p>
-<ul>
-<li><a href="troubleshoot.xtp#garbage-collector">Troubleshooting Technique: Garbage Collector</a>
-</li><li><a href="http://java.sun.com/docs/hotspot/gc1.4.2/">Sun documentation on garbage collection</a>
-</li></ul>
 </s1> <!-- garbage-collection -->
 
 <s1 name="stack-size" title="Stack size">
@@ -655,7 +644,7 @@ website</a>.  For JDK's prior to 5, Sun provides the
 
 <p>
 The most useful tool is <var>jconsole</var>.  Details on using jconsole are
-provided in the <a href="jmx.xtp#console">Administration</a> section of the
+provided in the <a href="advanced-jmx.xtp#console">Administration</a> section of the
 Resin documentation.
 </p>
 
@@ -687,7 +676,7 @@ unix&gt; jconsole
 <var>jps</var> and <var>jstack</var> are also useful, providing a quick command line
 method for obtaining stack traces of all current threads.
 Details on obtaining and interpreting stack traces is in the
-<a href="troubleshoot.xtp#thread-dump">Troubleshooting</a>
+<a href="resin-admin.xtp">resin-admin console</a>
 section of the Resin documentation.
 </p>
 

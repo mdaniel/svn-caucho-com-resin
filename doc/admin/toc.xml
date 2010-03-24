@@ -12,6 +12,9 @@
       
       <item link="starting-resin-watchdog.xtp" title="Watchdog"
             description="Resin's watchdog process manages Resin servers and checks status for reliability."/>
+
+      <item link="starting-resin-apache.xtp" title="Apache HTTPd"
+            description="Using Apache HTTPd with Resin"/>
     </item>
 
     <item link="deploy.xtp" title="Deployment"
@@ -45,15 +48,12 @@
             description="EL expressions used in configuration"/>
     </item>
 
-    <item link="database-pool-config.xtp" title="Database"
+    <item link="database.xtp" title="Database"
           description="Configuration of the Resin database pool"/>
 
     <item link="logging.xtp" title="Logging"
           description="java.util logging configuration in Resin">
       
-      <item link="logging-overview.xtp" title="Overview"
-            description="Logging configuration"/>
-
       <!--
       <item link="logging-loggers.xtp" .../>
 
@@ -63,6 +63,8 @@
     </item>
 
     <item link="http.xtp" title="HTTP">
+      <item link="http-server.xtp" title="HTTP server"
+            description="Resin's built-in, high performance HTTP server"/>
 
        <item link="http-virtual-hosts.xtp" title="Virtual Hosts"
              description="HTTP Virtual Host configuration for multi-host sites"/>
@@ -70,10 +72,12 @@
        <item link="http-rewrite.xtp" title="Rewrite"
              description="Resin's URL rewriting capability, replacing mod_rewrited sites"/>
 
+       <item link="http-proxy-cache.xtp" title="Proxy Cache"
+             description="Resin's built-in proxy cache"/>
+
        <!--
        <item link="http-10k.xtp" title="Resin 10k"/>
        
-       <item link="http-proxy-caching.xtp" title="Cachd"/>
        -->
            
     </item>
@@ -84,10 +88,12 @@
       <item link="security-overview.xtp" title="Overview"
           description="Overview of security concepts"/>
 
+      <item link="security-ssl.xtp" title="SSL"
+        description="Integrating OpenSSL and JSSE"/>
+
       <!--
       <item link="security-authentication.xtp" title="Overview"
       
-      <item link="security-openssl.xtp" title="Overview"
       -->
       
     </item>
@@ -97,9 +103,6 @@
     
       <item link="cluster-overview.xtp" title="Overview"
           description="Overview of Resin's triad-based clustering architecture"/>
-    
-      <item link="cluster-config.xtp" title="Configuration"
-          description="Configuration for Resi clustering"/>
     
       <item link="cluster-load-balancer.xtp" title="Load Balancing"
           description="HTTP load balancing to a Resin cluster"/>

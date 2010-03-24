@@ -17,7 +17,7 @@ starting Resin with a Java command line.</p>
 
 <p>The Resin web server starts  listening to HTTP requests on
 port 8080 and listens on port 6800
-for <a href="resin-clustering.xtp">load balancer</a>
+for <a href="cluster-load-balancer.xtp">load balancer</a>
 or cluster messages.  Resin can then be
 used for development or evaluation.  The steps are:</p>
 
@@ -88,7 +88,7 @@ configure the 'hello' web application.</li>
 
 <s2 title="Virtual Hosts">
 
-<p>You can easily create <a href="virtual-host.xtp">virtual hosts</a>
+<p>You can easily create <a href="http-virtual-hosts.xtp">virtual hosts</a>
 by creating content in the <var>resin.root/hosts</var> directory:</p>
 
 <ol>
@@ -112,7 +112,7 @@ into a more permanent location:</p>
 <ul>
 <li>Virtual hosts go in <var>/var/www/hosts/www.foo.com/webapps/ROOT</var></li>
 <li>Run <var>java -jar resin-4.0.x/lib/resin.jar --root-directory /var/www</var></li>
-<li>You can also set &lt;root-directory> in the &lt;<a href="cluster-tags.xtp#root-directory">cluster</a>> to configure the resin root.</li>
+<li>You can also set &lt;root-directory> in the &lt;<a href="cluster-overview-ref.xtp#root-directory">cluster</a>> to configure the resin root.</li>
 </ul>
 </li>
 
@@ -198,7 +198,7 @@ Resin, for example "c:\resin-4.0.x"</li>
 
 </s2>
 
-<p>For more details, see the <a href="resin-web-server.xtp">Resin Web Server</a>
+<p>For more details, see the <a href="http-server.xtp">Resin Web Server</a>
 configuration page.</p>
 
 </s1>
@@ -239,39 +239,10 @@ unix&gt; make
 unix&gt; make install
 </example>
 
-<p>For more details, see the <a href="install-apache.xtp">Resin with Apache</a>
+
+<p>For more details, see the <a href="starting-resin-apache.xtp">Resin with Apache</a>
 configuration page.</p>
 
 </s1>
-
-<!--
-<s1 title="Resin with IIS">
-
-<p>You can also combine IIS and Resin.  IIS
-serves static content like html and images and Resin serves JSPs and
-Servlets.   The IIS configuration requires two pieces:
-<var>isapi_srun.dll</var>, an ISAPI extension which lets IIS talk to
-Resin, and <var>srun</var>, Resin's Java support.</p>
-
-<figure src="iis_srun.gif"/>
-
-<p>For this setup you must configure both IIS and Resin.  The Resin
-configuration to run with IIS is identical to Resin's standalone
-configuration.  The IIS configuration tells IIS how to find Resin.
-</p>
-
-<ol>
-<li>Setup the registry and IIS using resin-4.x.x/setup.exe</li>
-<li>Any needed Resin resin.xml changes</li>
-<li>Restart IIS</li>
-<li>Start Resin with resin-4.x.x/resin.exe.</li>
-</ol>
-
-<p>For more details and troubleshooting steps, see the
-<a href="install-iis.xtp">Resin with IIS</a> configuration page.</p>
-
-</s1>
--->
-
 </body>
 </document>

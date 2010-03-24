@@ -29,7 +29,7 @@ a PHP mediawiki or wordpress site to use <a href="../doc/quercus.xtp">Quercus</a
 for security and performance.</p>
 
 <p>The virtual host will contain one or
-more <a href="../reference/webapp-tags.xtp">web-apps</a> to serve the host's contents.
+more <a href="deploy-ref.xtp">web-apps</a> to serve the host's contents.
 Simple sites will use a fixed root webapp, like the Apache-style
 <code>/var/www/htdocs</code>.  More complicated sites can use a
 <code>webapps</code>-style directory.</p>
@@ -78,7 +78,7 @@ the <code>hosts</code> directory will cause Resin to create a new
 virtual host.  To customize the configuration, you can
 add a <code>host.xml</code> in the host's root directory for shared
 databases, beans or security, or to add
-<a href="../reference/host-tags.xtp#host-alias">&lt;host-alias></a> names.
+<a href="http-virtual-hosts-ref.xtp#host-alias">&lt;host-alias></a> names.
 </p>
 
 <p>You can add hosts dynamically to a running server just by creating
@@ -119,8 +119,8 @@ return <code>404 Not Found</code> for any unknown virtual hosts.</p>
 <p>Often, the same virtual host will respond to multiple names, like
 <code>www.slytherin.com</code> and <code>slytherin.com</code>.  One
 name is the primary name and the others are aliases.  In Resin, the
-primary name is configured by the <a href="../reference/host-tags.xtp#host-name">&lt;host-name></a> tag and aliases are configured
-by <a href="../reference/host-tags.xtp#host-alias">&lt;host-alias></a>.  In a dynamic
+primary name is configured by the <a href="http-virtual-hosts-ref.xtp#host-name">&lt;host-name></a> tag and aliases are configured
+by <a href="http-virtual-hosts-ref.xtp#host-alias">&lt;host-alias></a>.  In a dynamic
 host configuration, the directory name is used as the <code>host-name</code>
 by default, and aliases are declared in the <code>host.xml</code>.</p>
 
@@ -140,7 +140,7 @@ logins, shared databases, and shared resources.</p>
 
 <s2 title="host-deploy configuration">
 
-<p>The <a href="../reference/host-tags.xtp#host-deploy">&lt;host-deploy></a> tag configures
+<p>The <a href="http-virtual-hosts-ref.xtp#host-deploy">&lt;host-deploy></a> tag configures
 the dynamic virtual hosting specifying the directory where Resin should
 scan for virtual hosts.  Because Resin does not automatically add default
 configuration, you will need to also add configuration for the
@@ -152,7 +152,7 @@ security.  Because all configuration is explicit, it's ultimately traceable
 to the <code>resin.xml</code> which makes debugging more reliable.</p>
 
 <p>Shared host configuration goes in the
-<a href="../reference/host-tags.xtp#host-default">&lt;host-default></a> tag.  In this
+<a href="http-virtual-hosts-ref.xtp#host-default">&lt;host-default></a> tag.  In this
 case, we've added an optional <code>host.xml</code> for configuration,
 an access log in <code>log/access.log</code> and a standard
 <code>webapps</code> directory.  The standard servlets and file handling
@@ -161,8 +161,8 @@ app-default.xml or the webapps, you will see <code>404 Not Found</code> for
 any requests.</p>
 
 <p>The example below is a complete, working <code>resin.xml</code> listening
-to HTTP at port 8080.  The <a href="clustering.xtp">cluster</a>
-consists of a single server.  It includes a <a href="../reference/cluster-tags.xtp#development-mode-error-page">&lt;development-mode-error-page/></a> to help debugging
+to HTTP at port 8080.  The <a href="cluster-overview.xtp">cluster</a>
+consists of a single server.  It includes a <a href="cluster-overview-ref.xtp#development-mode-error-page">&lt;development-mode-error-page/></a> to help debugging
 the configuration.  Many sites will omit the error-page to
 hide configuration details in case an error occurs on a live site.</p>
 
@@ -215,8 +215,8 @@ ${resin.root}/hosts/www.gryffindor.com/classes/example/CustomAuthenticator.java
 </example>
 
 <p>More information is available in the configuration documentation
-for &lt;<a href="../reference/host-tags.xtp#host-deploy">host-deploy</a>&gt;
-and &lt;<a href="../reference/host-tags.xtp#host-default">host-default</a>&gt;.</p>
+for &lt;<a href="http-virtual-hosts-ref.xtp#host-deploy">host-deploy</a>&gt;
+and &lt;<a href="http-virtual-hosts-ref.xtp#host-default">host-default</a>&gt;.</p>
 
 </s2>
 
@@ -233,7 +233,7 @@ improve performance and security might use the explicit &lt;host> to
 point to the existing <code>/var/www/htdocs</code> directory.</p>
 
 <p>In the explicit configuration, each virtual host has its
-own <a href="../doc/resin.xtp#host">host</a> block.  At the very least, each host
+own <a href="http-virtual-hosts-ref.xtp#host">host</a> block.  At the very least, each host
 will define the <var>id</var> specifying the host name and a root web-app.
 A <a config-tag="root-directory"/> is often used to provide a host specific
 root for logfiles.</p>
@@ -248,7 +248,7 @@ hosts.  If you don't have a default host, Resin will return a
 <p>The following sample configuration defines an explicit virtual hosts
 www.slytherin.com and a default host, each with its own
 root directory, access-log and a single explicit
-<a href="../reference/webapp-tags.xtp">&lt;web-app></a> in the <code>htdocs</code>
+<a href="deploy-ref.xtp">&lt;web-app></a> in the <code>htdocs</code>
 directory.  The default virtual host is configured just like a typical
 Apache configuration, so it can be used to upgrade an Apache/PHP site
 to use <a href="../doc/quercus.xtp">Quercus</a> for security and performance.</p>
@@ -306,7 +306,7 @@ each &lt;host> belongs to its own &lt;cluster> and has a dedicated
 so the load-balance server will dispatch requests as appropriate.</p>
 
 <p>For further security restrictions, see
-the <a href="watchdog.xtp">watchdog</a> section.  ISPs can also
+the <a href="starting-resin-watchdog.xtp">watchdog</a> section.  ISPs can also
 use the watchdog to assign different &lt;user-name> values for each
 host and can even create chroot directories for each JVM.</p>
 
@@ -325,7 +325,7 @@ server port.</p>
 <p>In this example, the virtual hosts <code>www.gryffindor.com</code> and
 <code>www.slytherin.com</code> each get their own server.  The backend
 clusters have their own virtual host.  The frontend load-balancer dispatches
-the <a href="rewrite.xtp#load-balance">&lt;resin:LoadBalance></a> tags
+the <a href="cluster-load-balancer.xtp">&lt;resin:LoadBalance></a> tags
 to the backend.</p>
 
 <p>This example is split into two blocks to emphasize the frontend and
@@ -393,7 +393,7 @@ It receives all requests and dispatches to the back-end servers.</p>
 
 <figure src="config-jvmpervirtualhost-resin.png" width="481" height="145"/>
 
-<p>The Resin web server is configured using <a href="rewrite.xtp">rewrite</a> with a <a href="rewrite.xtp#load-balance">&lt;resin:LoadBalance</a> directive to dispatch to the back-end server.  A cluster is
+<p>The Resin web server is configured using <a href="http-rewrite.xtp">rewrite</a> with a <a href="cluster-load-balancer.xtp">&lt;resin:LoadBalance</a> directive to dispatch to the back-end server.  A cluster is
 defined for each back-end host, so that the
 &lt;load-balance> knows how to find them.</p>
 
@@ -480,11 +480,11 @@ started with -Xrs.</p>
 <s2 title="host naming">
 
 <p>The virtual host name can be configured by
-an explicit <a href="../reference/host-tags.xtp#host-name">&lt;host-name></a>, 
-a <a href="../reference/host-tags.xtp#host-alias">&lt;host-alias></a>,
-a <a href="../reference/host-tags.xtp#host-alias-regexp">&lt;host-alias-regexp></a>,
-by the <a href="../reference/host-tags.xtp#host">&lt;host></a> tag or 
-implicitly by the <a href="../reference/host-tags.xtp#host-deploy">&lt;host-deploy></a>.
+an explicit <a href="http-virtual-hosts-ref.xtp#host-name">&lt;host-name></a>, 
+a <a href="http-virtual-hosts-ref.xtp#host-alias">&lt;host-alias></a>,
+a <a href="http-virtual-hosts-ref.xtp#host-alias-regexp">&lt;host-alias-regexp></a>,
+by the <a href="http-virtual-hosts-ref.xtp#host">&lt;host></a> tag or 
+implicitly by the <a href="http-virtual-hosts-ref.xtp#host-deploy">&lt;host-deploy></a>.
 For explicit configuration styles, the host name and alias
 configuration will generally be in the resin.xml.  For dynamic configuration,
 the host aliases will typically be in an included <code>host.xml</code> inside
@@ -502,12 +502,12 @@ Resin will return a <code>404 Not Found</code>.</p>
 <p>The <code>host.xml</code> is an optional file where virtual hosts can
 put host-common configuration.  The <code>host.xml</code>
 is a good place for shared resources like authentication, database pools
-or host-wide <a href="candi.xtp">beans and services</a>.  It's also a
+or host-wide <a href="config-candi.xtp">beans and services</a>.  It's also a
 location for the &lt;host-alias> in a dynamic hosting configuration.</p>
 
 <p>The <code>host.xml</code> is configured in a &lt;host-deploy>
 or &lt;host-default> by adding a
-<a href="../reference/env-tags.xtp#import">&lt;resin:import></a> tag
+<a href="config-ref.xtp#import">&lt;resin:import></a> tag
 specifying the host.xml name and location.  Because the &lt;host-default>
 applies the &lt;resin:import> to every virtual host, it becomes a common
 system-wide configuration file.</p>
@@ -516,13 +516,13 @@ system-wide configuration file.</p>
 
 <s2 title="web-applications">
 
-<p>Hosts must define <a href="../reference/webapp-tags.xtp">web-apps</a> in order to
+<p>Hosts must define <a href="deploy-ref.xtp">web-apps</a> in order to
 serve files, servlets, or PHP pages.  If the host is missing all
 webapps, Resin will return <code>404 Not Found</code> for all requests
 make to the host.</p>
 
-<p>Both explicit <a href="../reference/webapp-tags.xtp#web-app">&lt;web-app></a> and
-dynamic <a href="../reference/webapp-tags.xtp#web-app-deploy">web-app-deploy</a> tags
+<p>Both explicit <a href="deploy-ref.xtp#web-app">&lt;web-app></a> and
+dynamic <a href="deploy-ref.xtp#web-app-deploy">web-app-deploy</a> tags
 are used to configure webapps.  The explicit style is generally used for
 Apache-style configuration, while the dynamic style is generally used for
 Java app-server .war configuration.</p>
@@ -649,9 +649,11 @@ your configuration.  Check that each virtual host is using the
 server <var>address</var> and <var>port</var> that you expect.</p>
 </s2>
 
+<!--
 <s2 title="IIS">
 <p>Configuration and installation for IIS virtual sites is discussed in the <a href="../install/install-3rd-party.xtp">IIS installation</a> section.</p>
 </s2>
+-->
 </s1> <!-- with Apache or IIS -->
 
 <s1 title="Testing virtual hosts">
@@ -688,10 +690,10 @@ computer that the client is running on.</p>
 <s1 title="See Also">
 
 <ul>
-<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="webapp-tags.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="env-tags.xtp">Resource</a> configuration for resources: classloader, databases, JMS, EJB, and IoC beans.</li>
-<li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
+<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
+<li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
+<li>See <a href="config-ref.xtp">Resource</a> configuration for resources: classloader, databases, JMS, EJB, and IoC beans.</li>
+<li>See <a href="logging-ref.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>
@@ -733,7 +735,7 @@ in.</p>
 <tr>
   <td>path</td>
   <td>Output path for the log entries,
-see <a href="config-log.xtp#path">"Log Paths"</a>.</td>
+see <a href="logging-ref.xtp#path">"Log Paths"</a>.</td>
   <td>required</td>
 </tr>
 <tr>
@@ -787,7 +789,7 @@ element access-log {
 </pre>
 
 <p>The access log formatting variables follow the Apache variables:</p>
-<!-- duplicated in config-log.xtp, cluster.xtp, host-tags.xtp -->
+<!-- duplicated in config-log.xtp, cluster.xtp, http-virtual-hosts-ref.xtp -->
 <deftable title="format patterns">
 <tr>
   <th>Pattern</th>
@@ -829,7 +831,7 @@ element access-log {
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
 extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
-<a href="resin-ioc.xtp">Resin-IoC initialization</a> can be used to set bean
+<a href="config-candi.xtp">Resin CanDI initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
 <example title="Example: &lt;access-log> in host configuration">
@@ -965,7 +967,7 @@ Note, this is not a default error-page, i.e. if
 an error occurs inside of a &lt;web-app&gt;, the error-page for
 that web-app will be used instead.</p>
 
-<p>See <a href="webapp.xtp#error-page">webapp: error-page</a>.</p>
+<p>See <a href="deploy-ref.xtp#error-page">webapp: error-page</a>.</p>
 
 </defun>
 
@@ -1000,7 +1002,7 @@ configured explicitly.</p>
     <td>Root directory for host files</td>
     <td>parent directory</td></tr>
 <tr><td>startup-mode</td>
-    <td>'automatic', 'lazy', or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+    <td>'automatic', 'lazy', or 'manual', see <a href="deploy.xtp#startup-mode">Startup and Redeploy Mode</a></td>
     <td>automatic</td></tr>
 </deftable>
 
@@ -1254,7 +1256,7 @@ element startup-mode {
 <defun title="Resources" version="Resin 3.1">
 <parents>resin, cluster, host, web-app</parents>
 
-<p>All <a href="env-tags.xtp">Resource tags</a> are
+<p>All <a href="config-ref.xtp">Resource tags</a> are
 available to the &lt;host&gt;, for example, resources
 like &lt;database&gt; or &lt;authenticator>.  Resources defined at
 the host level are available for all web-apps in the host.</p>
@@ -1287,7 +1289,7 @@ the host level are available for all web-apps in the host.</p>
 dispatching and forwarding URLs.  Applications can use these rules
 to redirect old URLs to their new replacements.</p>
 
-<p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
+<p>See <a href="http-rewrite-ref.xtp">rewrite-dispatch</a> for more
 details.</p>
 
 <example title="rewrite-dispatch">
@@ -1328,7 +1330,7 @@ redirection.  For some security configurations, Resin needs to redirect from
 an insecure site to a secure one.  The &lt;secure-host-name> configures
 the host to redirect to.</p>
 
-<p>See <a href="resin-security.xtp">Resin security</a>.</p>
+<p>See <a href="security-overview.xtp">Resin security</a>.</p>
 
 <def title="&lt;secure-host-name> schema">
 element secure-host-name {
@@ -1399,12 +1401,12 @@ the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative pa
 </tr>
 <tr>
   <td>startup-mode</td>
-  <td>'automatic', 'lazy', or 'manual', see <a href="resin.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>'automatic', 'lazy', or 'manual', see <a href="deploy-ref.xtp#startup-mode">Startup and Redeploy Mode</a></td>
   <td>automatic</td>
 </tr>
 <tr>
   <td>redeploy-mode</td>
-  <td>'automatic' or 'manual', see <a href="resin.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>'automatic' or 'manual', see <a href="deploy-ref.xtp#startup-mode">Startup and Redeploy Mode</a></td>
   <td>automatic</td>
 </tr>
 </deftable>

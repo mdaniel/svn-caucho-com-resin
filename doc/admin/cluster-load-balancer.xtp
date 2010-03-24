@@ -57,10 +57,10 @@ serve the Drupal content, while the web-tier server "web-a" handles the
 HTTP, caches content, and balances the load to the app-tier cluster.</p>
 
 <p>The web-tier is configured with a &lt;cache> tag for the caching, and
-uses <a href="rewrite.xtp">&lt;resin:LoadBalance></a>
+uses <a href="http-rewrite-ref.xtp">&lt;resin:LoadBalance></a>
 for the dispatching.  In this case, we send
 all content to the app-tier.  &lt;resin:LoadBalance> is part of
-Resin's <a href="rewrite.xtp">rewrite</a> capabilities, load
+Resin's <a href="http-rewrite.xtp">rewrite</a> capabilities, load
 Resin's equivalent of the Apache mod_rewrite module, providing a powerful
 and detailed URL matching and decoding, so more complicated sites might
 load-balance based on the virtual host or URL.</p>
@@ -186,7 +186,7 @@ new requests on the socket.  The <b>keepalive-timeout</b> must be
 significantly larger than the <b>load-balance-idle-time</b> so the app-tier
 doesn't close its sockets too soon.  The keepalive timeout can be large
 since the app-tier can use the
-<a href="../reference/server-tags.xtp#keepalive-select-enable">keepalive-select</a>
+<a href="http-server-ref.xtp">keepalive-select</a>
 manager to efficiently wait for many connections at once.</p>
 
 </s2>
@@ -202,7 +202,7 @@ will serve static pages as fast as if they were local pages.</p>
 requests to different backend clusters.  The
 <a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/LoadBalance.html">&lt;resin:LoadBalance></a> tag can choose clusters based on URL patterns.</p>
 
-<p>The following <a href="rewrite.xtp">rewrite</a>
+<p>The following <a href="http-rewrite.xtp">rewrite</a>
 keeps all *.png, *.gif, and *.jpg files on the web-tier, sends
 everything in /foo/* to the foo-tier cluster, everything in /bar/* to
 the bar-tier cluster, and keeps anything else on the web-tier.</p>

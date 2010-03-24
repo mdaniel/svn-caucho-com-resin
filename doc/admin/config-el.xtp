@@ -64,7 +64,7 @@ filters. <var>init-param</var> values can use JSP EL expressions, including the
 ability to use system properties.
 
 </p><p>Servlets, filters, and resources can be configured like beans with setter
-methods are called directly (See <a href="doc|ioc-bean.xtp">Bean-style
+methods are called directly (See <a href="config-candi.xtp">Bean-style
 init)</a>.</p>
 
 <p>One example use use for the bean-style servlet initialization is to avoid
@@ -111,7 +111,7 @@ public class TestServlet extends HttpServlet {
 
 <p>The <code>%lt;data-source%gt;</code> xml tag corresponds to the
 <code>setDataSource</code> method of the bean.  More infomation on this
-powerful pattern is in the <a href="doc|ioc-bean.xtp">Bean-style init</a>
+powerful pattern is in the <a href="config-candi.xtp">Bean-style init</a>
 section of the documentation.</p>
 </s1>
 -->
@@ -126,7 +126,7 @@ filters. <var/init-param/> values can use JSP EL expressions, including the
 ability to use system properties.</p>
 
 <p>Servlets, filters, and resources can be configured like beans with setter
-methods are called directly (See <a href="doc|ioc-bean.xtp">Bean-style
+methods are called directly (See <a href="config-candi.xtp">Bean-style
 init)</a>.</p>
 
 <p>One example use for the bean-style servlet initialization is to avoid
@@ -173,7 +173,7 @@ public class TestServlet extends HttpServlet {
 
 <p>The <code>&lt;data-source&gt;</code> xml tag corresponds to the
 <code>setDataSource</code> method of the bean.  More infomation on this
-powerful pattern is in the <a href="ioc-bean.xtp">bean configuration</a>
+powerful pattern is in the <a href="config-candi.xtp">bean configuration</a>
 section of the documentation.</p>
 </s2>
 
@@ -584,7 +584,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
 <defun title="server">
 
 <p>
-Values related to the active <a href="server-tags.xtp">&lt;server></a>.
+Values related to the active <a href="cluster-overview-ref.xtp#server.xtp">&lt;server></a>.
 </p>
 
 <deftable title="server properties">

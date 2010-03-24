@@ -1,0 +1,118 @@
+<document>
+<header>
+  <title>server: Server tag configuration</title>
+  <version>Resin 3.1</version>
+
+  <description>
+
+  <p>The &lt;server> tag configures a JVM instance in a cluster.  It
+configures HTTP and cluster sockets, keepalives and timeouts, thread pooling,
+load balancing, and JVM arguments.</p>
+
+  </description>
+</header>
+<body>
+
+<localtoc/>
+
+<defun title="&lt;user-name>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;user-name> configures the operating system user Resin should
+run as.  Since the HTTP port 80 is protected in Unix, the web server
+needs to start as root to bind to port 80.  For security, Resin should
+switch to a non-root user after binding to port 80.</p>
+
+<example title="resin.xml with user-name">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+
+    &lt;server-default>
+      &lt;http port="80"/>
+
+      &lt;user-name>resin&lt;/user-name>
+    &lt;/server-default>
+
+    &lt;server id="web-a"/>
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+<defun title="&lt;group-name>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;group-name> configures the operating system group Resin should
+run as.  Since the HTTP port 80 is protected in Unix, the web server
+needs to start as root to bind to port 80.  For security, Resin should
+switch to a non-root user after binding to port 80.</p>
+
+<example title="resin.xml with user-name">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+
+    &lt;server-default>
+      &lt;http port="80"/>
+
+      &lt;user-name>resin&lt;/user-name>
+      &lt;group-name>www&lt;/group-name>
+    &lt;/server-default>
+
+    &lt;server id="web-a"/>
+    ...
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+
+<defun title="&lt;watchdog-arg>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>The &lt;watchdog-arg> configures arguments for the
+watchdog process.  The watchdog improves reliability by
+monitoring the Resin instance, restarting it if necessary.</p>
+
+<p>The &lt;watchdog-arg> typically is used to enable <g>jconsole</g>
+for the watchdog JVM.</p>
+
+<example title="resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin">
+  &lt;cluster id="app-tier">
+    &lt;server-default>
+
+      &lt;watchdog-arg>-Dcom.sun.management.jmxremote&lt;/watchdog-arg>
+
+    &lt;/server-default>
+
+    ...
+       
+  &lt;/cluster>
+&lt;/resin>
+</example>
+
+</defun>
+
+<defun title="&lt;watchdog-port>" version="Resin 3.1">
+<parents>server</parents>
+
+<p>&lt;watchdog-port> configures the administration port for the
+watchdog JVM.  The watchdog launches the server JVM and monitors its
+health, restarting the JVM when necessary to improve site reliability.
+The command line arguments use the watchdog-port for
+the "start" and "stop" commands to tell the watchdog to start and
+stop the server JVM.  The administration also uses the watchdog port
+for watchdog administration.</p>
+
+<p>The watchdog port will use the same &lt;address> as the server, so it
+will always be an internal network address, never an external internet
+address.</p>
+
+<default>6700</default>
+
+</defun>
+
+</body>
+</document>

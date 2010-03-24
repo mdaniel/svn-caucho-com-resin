@@ -12,17 +12,6 @@ options.
 
 <localtoc/>
 
-<s1 title="See Also">
-
-<ul>
-<li><a href="../reference/webapp-tags.xtp">web-app tags</a> defines all of the available
-tags for web-app configuration.</li>
-<li><a href="../reference/host-tags.xtp">host tags</a> defines all of the available
-tags for host configuration.</li>
-</ul>
-
-</s1>
-
 <s1 title="Custom web-app with .war file">
 
 <p>In this scenario, you want to configure a web-app with a
@@ -160,7 +149,7 @@ As of Resin 4.0.0, it is now possible to deploy web applications remotely
 to a shared repository that is distributed across the cluster.  This feature
 allows you to deploy once to any triad server and have the application
 be updated automatically across the entire cluster.  When a new 
-<a href="dynamic-servers.xtp">dynamic server</a> joins the cluster, the
+<a href="cluster-overview.xtp">dynamic server</a> joins the cluster, the
 triad will populate it with these applications as well.
 </p>
 <p>

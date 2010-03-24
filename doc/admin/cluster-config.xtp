@@ -2,7 +2,7 @@
 <header>
   <product>resin</product>
   <title>resin.xml: Ports, Virtual Hosts, Clustering and Threads</title>
-  <version>Resin 3.0</version>
+  <version>Resin 4.0</version>
 
   <description>
 
@@ -17,8 +17,8 @@
 <s1 title="See Also">
 
 <ul>
-<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="webapp.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
+<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
+<li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
 <li>See <a href="config-env.xtp">Environment</a> configuration for resources: classloader, databases, connectors, and resources.</li>
 <li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
@@ -372,8 +372,8 @@ server is running.</p>
 <s1 title="See Also">
 
 <ul>
-<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
-<li>See &lt;<a href="cluster-tags.xtp">cluster</a>&gt; tag configuration</li>
+<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
+<li>See &lt;<a href="cluster-ref.xtp">cluster</a>&gt; tag configuration</li>
 </ul>
 
 </s1>
@@ -2232,9 +2232,8 @@ idle session before invalidating it.  The value is specified in minutes.</p>
 <s1 title="See Also">
 
 <ul>
-<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
-<li>See &lt;<a href="cluster-tags.xtp">cluster</a>&gt; tag configuration</li>
-<li>See &lt;<a href="server-tags.xtp">server</a>&gt; tag configuration</li>
+<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
+<li>See &lt;<a href="cluster-ref.xtp">cluster</a>&gt; tag configuration</li>
 </ul>
 
 </s1>

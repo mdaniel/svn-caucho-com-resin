@@ -741,8 +741,7 @@ configuration, while XML is still available for components.</p>
 <s1 title="Overview">
 
 <p>Resin's Java Injection support is integrated
-with <a href="resin-ejb.xtp">EJB 3.0
-</a> and the core components like Servlets, Filters and remote objects.
+with EJB 3.1 Lite and the core components like Servlets, Filters and remote objects.
 This integration means plain Java beans can use EJB annotations
 and interception, EJBs can use Java Injection annotations, and both kinds of
 beans can be configured directly from the <code>resin-web.xml</code>
@@ -1348,7 +1347,7 @@ to a field or property.  Typically, the resource will be stored in JNDI.</p>
 <deftable title="Known types">
 <tr>
   <td>DataSource</td>
-  <td>Configured by &lt;<a href="env-tags.xtp#database">database</a>&gt;</td>
+  <td>Configured by &lt;<a href="config-ref.xtp#database">database</a>&gt;</td>
 </tr>
 <tr>
   <td>UserTransaction</td>
@@ -2190,7 +2189,7 @@ resin:import is used to read configuration information from another file.
 
 <s3 title="See also">
 <ul>
-<li><a href="config-control.xtp#resin:import">resin:import</a>
+<li><a href="config-el-ref.xtp#resin:import">resin:import</a>
 </li><li><a href="../examples/ioc-injection/index.xtp">Dependency Injection Tutorial</a>
 </li></ul>
 </s3>

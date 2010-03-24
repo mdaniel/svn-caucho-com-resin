@@ -262,7 +262,7 @@ in order to efficiently update them when changes occur to the server.</p>
 <p>
 Each web-app which needs distributed sessions must enable
 the persistent store with a
-<a href="../reference/webapp-tags.xtp#session-config">use-persistent-store</a>
+<a href="deploy-ref.xtp#session-config">use-persistent-store</a>
 tag in the session-config.</p>
 
 <deftable>
@@ -399,10 +399,10 @@ uses sticky-session caching to avoid unnecessary network traffic.</p>
 <p>The cluster configuration must tell each host the servers in the
 cluster
 and it must enable the persistent in the session configuration
-with <a href="../reference/session-tags.xtp#session-config">use-persistent-store</a>.
+with <a href="deploy-ref.xtp#session-config">use-persistent-store</a>.
 Because session configuration is specific to a virtual host and a
 web-application, each web-app needs <var>use-persistent-store</var> enabled
-individually.  The <a href="../reference/webapp-tags.xtp#web-app-default">web-app-default</a>
+individually.  The <a href="deploy-ref.xtp#web-app-default">web-app-default</a>
 tag can be used to enable distributed sessions across an entire site.
 </p>
 
@@ -660,10 +660,6 @@ Before adding a dynamic server, you must:
   ...
 </example></li>
 </ul>
-<p>
-Check the main <a href="clustering.xtp">Clustering</a> section for more
-information on this topic.
-</p>
 </s1>
 
 <s1 title="Registering a dynamic server">
@@ -736,11 +732,11 @@ tab of the administration application should look like this:
 <s1 title="See Also">
 
 <ul>
-<li>See the <a href="index-tags.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="webapp-tags.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="server-tags.xtp">Server tags</a> for ports, threads, and JVM configuration.</li>
-<li>See <a href="config-env.xtp">Resource</a> configuration for resources: classloader, databases, connectors, and resources.</li>
-<li>See <a href="config-log.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
+<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
+<li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
+<li>See <a href="cluster-overview-ref.xtp#server">Server tags</a> for ports, threads, and JVM configuration.</li>
+<li>See <a href="config-overview.xtp">Resource</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="logging-ref.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
 </s1>
@@ -749,7 +745,7 @@ tab of the administration application should look like this:
 
 <p>&lt;access-log> configures a HTTP access log for all virtual hosts
 in the cluster.
-See <a href="host-tags.xtp#%3caccess-log%3d">access-log</a>
+See <a href="http-virtual-hosts-ref.xtp#%3caccess-log%3d">access-log</a>
 in the &lt;host> tag for more information.</p>
 
 </defun>
@@ -851,7 +847,7 @@ matching the -server-id on the command line.</p>
   <td>required</td>
 </tr>
 <tr>
-  <td><a href="host-tags.xtp#access-log">access-log</a></td>
+  <td><a href="http-virtual-hosts-ref.xtp#access-log">access-log</a></td>
   <td>An access-log shared for all virtual hosts.</td>
   <td></td>
 </tr>
@@ -866,7 +862,7 @@ matching the -server-id on the command line.</p>
   <td></td>
 </tr>
 <tr>
-  <td><a href="host-tags.xtp#ear-default">ear-default</a></td>
+  <td><a href="http-virtual-hosts-ref.xtp#ear-default">ear-default</a></td>
   <td>default values for deployed ear files</td>
   <td></td>
 </tr>
@@ -926,17 +922,17 @@ matching the -server-id on the command line.</p>
   <td>automatic</td>
 </tr>
 <tr>
-  <td><a href="env-tags.xtp#resin:choose">resin:choose</a></td>
+  <td><a href="config-ref.xtp#resin:choose">resin:choose</a></td>
   <td>Conditional configuration based on EL expressions</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="env-tags.xtp#resin:import">resin:import</a></td>
+  <td><a href="config-ref.xtp#resin:import">resin:import</a></td>
   <td>Imports a custom cluster.xml files for a configuration management </td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="env-tags.xtp#resin:if">resin:if</a></td>
+  <td><a href="config-ref.xtp#resin:if">resin:if</a></td>
   <td>Conditional configuration based on EL expressions</td>
   <td></td>
 </tr>
@@ -951,7 +947,7 @@ matching the -server-id on the command line.</p>
   <td>${resin.root}</td>
 </tr>
 <tr>
-  <td><a href="server.xtp">server</a></td>
+  <td><a href="cluster-overview-ref.xtp">server</a></td>
   <td>Configures JVM instances (servers).  Each cluster needs at least one server</td>
   <td></td>
 </tr>
@@ -995,7 +991,7 @@ matching the -server-id on the command line.</p>
 <def title="&lt;cluster> schema">
 element cluster {
   attribute id { string }
-  &amp; <a href="env-tags.xtp">environment resources</a>
+  &amp; <a href="config-ref.xtp">environment resources</a>
   &amp; access-log?
   &amp; cache?
   &amp; connection-error-page?
@@ -1129,7 +1125,7 @@ Note, this is not a default error-page, i.e. if
 an error occurs inside a &lt;host&gt; or &lt;web-app&gt;, the error-page for
 that host or web-app will be used instead.</p>
 
-<p>See <a href="webapp.xtp#error-page">webapp: error-page</a>.</p>
+<p>See <a href="deploy-ref.xtp#error-page">webapp: error-page</a>.</p>
 
 <def title="&lt;error-page> schema">
 element error-page {
@@ -1147,7 +1143,7 @@ element error-page {
 configured explicitly.</p>
 
 <ul>
-<li>See <a href="host-tags.xtp">host tags</a> for configuration details.</li>
+<li>See <a href="http-virtual-hosts-ref.xtp">host tags</a> for configuration details.</li>
 </ul>
 
 <deftable-childtags title="&lt;host> attributes">
@@ -1175,7 +1171,7 @@ configured explicitly.</p>
     <td>Root directory for host files</td>
     <td>parent directory</td></tr>
 <tr><td>startup-mode</td>
-    <td>'automatic', 'lazy', or 'manual', see <a href="resin-tags.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+    <td>'automatic', 'lazy', or 'manual', see <a href="deploy.xtp#startup-mode">Startup and Redeploy Mode</a></td>
     <td>automatic</td></tr>
 </deftable-childtags>
 
@@ -1321,8 +1317,6 @@ because it needs to share update information across the
 active cluster and the &lt;cluster&gt; definition is at the &lt;server&gt; level.
 Sessions activate the persistent store with the &lt;use-persistent-store&gt;
 tag of the &lt;session-config&gt;.</p>
-
-<p>See <a href="resin-clustering.xtp">Persistent sessions</a> for more details.</p>
 
 <deftable title="&lt;persistent-store> Attributes">
 <tr>
@@ -1671,7 +1665,7 @@ System properties are used to configure a different SMTP server.
 <defun title="Resource Tags" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>All <a href="env-tags.xtp">Environment tags</a> are
+<p>All <a href="config-ref.xtp">Environment tags</a> are
 available to the &lt;cluster&gt;.  For example,
 resources like &lt;database&gt;.</p>
 
@@ -1703,7 +1697,7 @@ resources like &lt;database&gt;.</p>
 dispatching and forwarding URLs.  Applications can use these rules
 to redirect old URLs to their new replacements.</p>
 
-<p>See <a href="rewrite-tags.xtp">rewrite-dispatch</a> for more
+<p>See <a href="http-rewrite-ref.xtp">rewrite-dispatch</a> for more
 details.</p>
 
 <example title="rewrite-dispatch">
@@ -1757,7 +1751,7 @@ the cluster.  Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
 the -server-id command line argument.</p>
 
-<p>See the full <a href="server-tags.xtp">server configuration</a>
+<p>See the full <a href="cluster-overview-ref.xtp#server">server configuration</a>
 for more details of the &lt;server> tag and its children.</p>
 
 <p>The current server is managed with a
@@ -1798,7 +1792,7 @@ JVM instance for security.</td>
 </tr>
 <tr>
   <td>http</td>
-  <td>Adds a HTTP port (see <a href="port-tags.xtp">port tags</a>)</td>
+  <td>Adds a HTTP port (see <a href="http-server-ref.xtp">port tags</a>)</td>
   <td></td>
 </tr>
 <tr>
@@ -1924,7 +1918,7 @@ to launch the JVM</td>
 </tr>
 <tr>
   <td>user-name</td>
-  <td>The setuid user-name for the <a href="resin-watchdog.xtp">watchdog</a>
+  <td>The setuid user-name for the <a href="starting-resin-watchdog.xtp">watchdog</a>
 when launching Resin for Unix security.</td>
   <td></td>
 </tr>
@@ -2005,7 +1999,7 @@ element server {
 <parents>cluster</parents>
 
 <p>Defines default values for all &lt;server&gt; instances. See
-<a href="server-tags.xtp">&lt;server> configuration</a> for more details.</p>
+<a href="cluster-overview-ref.xtp#server">&lt;server> configuration</a> for more details.</p>
 
 <example title="Example: server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;

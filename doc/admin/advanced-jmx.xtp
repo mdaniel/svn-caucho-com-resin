@@ -200,45 +200,6 @@ Object value = server.getAttribute(name, "Count");
 out.println("Count: " + value);
 </example>
 
-<s2 title="/resin-status">
-
-<p>The <a href="doc|jmx|servlet">resin-status servlet</a> has a
-primitive generic JMX management view of JMX managed servlets.
-By adding a MBean interface to your servlet, you'll automatically get
-a view of your servlets from /resin-status.
-</p>
-
-</s2>
-
-</s1>
-
-<s1 title="Configure the /resin-status servlet">
-
-<example title="resin.xml /resin-status configuration">
-&lt;resin xmlns="http://caucho.com/ns/resin"
-       xmlns:resin="http://caucho.com/ns/resin/core"&gt;
-
-...
-
-&lt;web-app-default&gt;
-
-      &lt;servlet-mapping servlet-class='com.caucho.servlets.ResinStatusServlet'&gt;
-        &lt;url-pattern&gt;/resin-status&lt;/url-pattern&gt;
-        &lt;init enable="read"/&gt;
-      &lt;/servlet-mapping&gt;
-
-      &lt;security-constraint&gt;
-        &lt;web-resource-collection url-pattern="/resin-status/*"/&gt;
-        &lt;ip-constraint&gt;
-          &lt;allow&gt;127.0.0.1/32&lt;/allow&gt;
-        &lt;/ip-constraint&gt;
-      &lt;/security-constraint&gt;
-
-&lt;/web-app-default&gt;
-
-...
-
-</example>
 </s1>
 
 <s1 title="Interpreting the proxy cache hit ratio">

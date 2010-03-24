@@ -14,7 +14,7 @@
     <s1 title="Comparison to File Based Deployment">
       <p> Like other lightweight servlet containers
       and Java EE application servers, Resin supports
-      <a href="file-system-deploy.xtp">file-system based
+      <a href="deploy.xtp">file-system based
       deployment</a>. In order to deploy an application, all you need
       to do is copy your file to the Resin deployment directory. As
       you might also know, Resin has supported hot deployment for

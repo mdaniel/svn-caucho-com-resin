@@ -1,0 +1,197 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Proxy Cache Configuration Reference</title>
+  <version>Resin 4.0</version>
+
+  <description>
+
+  <p>Proxy Cache Configuration Reference</p>
+  </description>
+</header>
+
+<body>
+
+<localtoc/>
+
+<defun title="&lt;cache-mapping>" version="Resin 1.1">
+<parents>web-app</parents>
+      
+<p>&lt;cache-mapping> specifies <var>max-age</var> and <var>Expires</var> times for cacheable pages.</p>
+
+<p>See <a href="http-proxy-cache.xtp">caching</a> for more information.</p>
+
+<p>&lt;cache-mapping> is intended to provide Expires times for pages that
+have ETags or Last-Modified specified, but do not wish to hard-code the
+max-age timeout in the servlet.  For example, Resin's FileServlet relies
+on cache-mapping to set the expires times for static pages.  Using
+cache-mapping lets cacheable pages be configured in a standard manner.</p>
+
+<p>&lt;cache-mapping> does not automatically make pages cacheable.  Your
+servlets must already set the <var>ETag</var> (or Last-Modified) header
+to activate &lt;cache-mapping>.</p>
+      
+<deftable-childtags>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>expires</td>
+  <td>A time interval to be used for the HTTP Expires header.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>max-age</td>
+  <td>A time interval to be used for the "Cache-Control max-age=xxx" header.
+max-age affects proxies and browsers.</td>
+  <td></td>
+</tr>
+<tr>
+  <td>s-max-age</td>
+  <td>A time interval to be used for the "Cache-Control s-max-age=xxx" header.
+s-max-age affects proxy caches (including Resin), but not browsers.</td>
+  <td></td>
+</tr>
+<tr><td>url-pattern</td>
+    <td>A pattern matching the url:<var>/foo/*</var>, <var>/foo</var>, or <var>*.foo</var></td>
+    <td></td>
+</tr>
+<tr><td>url-regexp</td>
+    <td>A regular expression matching the url</td>
+    <td></td>
+</tr>
+</deftable-childtags>
+
+<p>The time interval defaults to seconds, but will allow other periods:</p>
+
+<deftable>
+<tr>
+  <th>Suffix</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>s</td>
+  <td>seconds</td>
+</tr>
+<tr>
+  <td>m</td>
+  <td>minutes</td>
+</tr>
+<tr>
+  <td>h</td>
+  <td>hours</td>
+</tr>
+<tr>
+  <td>D</td>
+  <td>days</td>
+</tr>
+</deftable>
+
+<def title="&lt;cache-mapping> schema">
+element cache-mapping {
+  (url-pattern | url-regexp)
+  &amp; expires?
+  &amp; max-age?
+  &amp; s-max-age?
+}
+</def>
+
+<ul>
+<li>cache-mapping requires an enabled &lt;cache&gt;.  If the cache is disabled,
+cache-mapping will be ignored.</li>
+<li>cache-mapping does not automatically make a page cacheable.  Only
+cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-Modified.</li>
+</ul>
+
+<example title="Example: cache-mapping in resin-web.xml">
+&lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
+
+  &lt;cache-mapping url-pattern='/*'
+                 max-age='10'/&gt;
+
+  &lt;cache-mapping url-pattern='*.gif'
+                 max-age='15m'/&gt;
+
+&lt;/web-app&gt;
+</example>
+</defun>
+
+<defun title="&lt;cache>" version="Resin 3.1">
+<parents>cluster</parents>
+
+<p>&lt;cache> configures the proxy cache (requires Resin Professional).  The
+proxy cache improves performance by caching the output of servlets,
+jsp and php pages.  For database-heavy pages, this caching can improve
+performance and reduce database load by several orders of magnitude.</p>
+
+<p>The proxy cache uses a combination of a memory cache and a disk-based
+cache to save large amounts of data with little overhead.</p>
+
+<p>Management of the proxy cache uses the
+<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
+
+<deftable title="&lt;cache> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr><td>path</td>
+    <td>Path to the persistent cache files.</td>
+    <td>cache/</td></tr>
+<tr><td>disk-size</td>
+    <td>Maximum size of the cache saved on disk.</td>
+    <td>1024M</td></tr>
+<tr><td>enable</td>
+    <td>Enables the proxy cache.</td>
+    <td>true</td></tr>
+<tr><td>enable-range</td>
+    <td>Enables support for the HTTP Range header.</td>
+    <td>true</td></tr>
+<tr><td>entries</td>
+    <td>Maximum number of pages stored in the cache.</td>
+    <td>8192</td></tr>
+<tr><td>max-entry-size</td>
+    <td>Largest page size allowed in the cache.</td>
+    <td>1M</td></tr>
+<tr><td>memory-size</td>
+    <td>Maximum heap memory used to cache blocks.</td>
+    <td>8M</td></tr>
+<tr><td>rewrite-vary-as-private</td>
+    <td>Rewrite Vary headers as Cache-Control: private to avoid browser
+and proxy-cache bugs (particularly IE).</td>
+    <td>false</td></tr>
+</deftable>
+
+<def title="&lt;cache> schema">
+element cache {
+  disk-size?
+  &amp; enable?
+  &amp; enable-range?
+  &amp; entries?
+  &amp; path?
+  &amp; max-entry-size?
+  &amp; memory-size?
+  &amp; rewrite-vary-as-private?
+}
+</def>
+
+<example title="Example: enabling proxy cache">
+&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
+    &lt;cluster id="web-tier"&gt;
+        &lt;cache entries="16384" disk-size="2G" memory-size="256M"/&gt;
+
+        &lt;server id="a" address="192.168.0.10"/&gt;
+
+        &lt;host host-name="www.foo.com"&gt;
+    &lt;/cluster&gt;
+&lt;/resin&gt;
+</example>
+
+</defun>
+
+</body>
+
+</document>

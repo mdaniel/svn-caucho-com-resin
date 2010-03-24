@@ -484,9 +484,8 @@ is every 60s.</p>
 of the server.  You can set thresholds so Resin will log a thread dump
 if the CPU gets high, e.g. to find and debug a runaway thread.  If necessary,
 you can also have Resin restart if the CPU load gets too high.
-The configuration is documented in
-<a href="resin-tags.xtp#management">&lt;management></a> in the resin-tags
-section.</p>
+The configuration is documented in <a
+href="security-overview.xtp#Authentication">&lt;resin:AdminAuthenticator></a>.</p>
 
 <example title="Example: CPU thresholds">
 &lt;resin xmlns="http://caucho.com/ns/resin">

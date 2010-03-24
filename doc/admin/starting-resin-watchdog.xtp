@@ -604,7 +604,7 @@ resin-3.2.x> java -jar lib/resin.jar -server app-b start
 configuration file for the watchdog, which launches Resin instances
 for different users.  In this case, you will want to make sure
 the watchdog.xml is not readable by the users, and make sure to
-set a management user (see <a href="resin-security.xtp">resin-security</a>).</p>
+set a management user (see <a href="security.xtp">resin-security</a>).</p>
 
 <ul>
 <li>Start and restart the user's Resin JVM</li>
