@@ -122,7 +122,7 @@ public class Document {
   {
     if (_navItem != null)
       return _navItem;
-    
+
     ArrayList<Navigation> navList = new ArrayList();
 
     String uri = _uri;
@@ -137,46 +137,54 @@ public class Document {
 
     while (! uri.equals("") && rootWebApp != null) {
       String realPath = rootWebApp.getRealPath(uri);
-      
+
       Path path = Vfs.lookup(realPath);
 
       Path toc = path.lookup("toc.xml");
 
       if (toc.canRead()) {
-	Config config = new Config();
-	config.setEL(false);
+        Config config = new Config();
+        config.setEL(false);
 
-	Navigation navigation = new Navigation(this, uri, path, 0);
-      
-	navigation.setChild(child);
+        Navigation navigation = new Navigation(this, uri, path, 0);
 
-	try {
-	  config.configure(navigation, toc);
+        navigation.setChild(child);
 
-	  navList.add(navigation);
-	} catch (Exception e) {
-	  log.log(Level.FINE, e.toString(), e);
-	
-	  navigation = null;
-	}
+        try {
+          config.configure(navigation, toc);
 
-	if (navigation != null)
-	  child = navigation.getRootItem();
-	else
-	  child = null;
+          navList.add(navigation);
+        } catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+
+          navigation = null;
+        }
+
+        if (navigation != null)
+          child = navigation.getRootItem();
+        else
+          child = null;
       }
 
       p = uri.lastIndexOf('/', uri.length() - 2);
       if (p >= 0)
-	uri = uri.substring(0, p + 1);
+        uri = uri.substring(0, p + 1);
       else
-	break;
+        break;
     }
 
     if (navList.size() > 0) {
       Navigation nav = navList.get(0);
       
-      _navItem = nav.getItem(_uri);
+      if (_uri.endsWith("-ref.xtp")) {
+        String mainDoc = 
+          _uri.substring(0, _uri.length() - "-ref.xtp".length())
+          + ".xtp";
+        
+        _navItem = nav.getItem(mainDoc);
+      }
+      else
+        _navItem = nav.getItem(_uri);
     }
 
     return _navItem;

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -48,11 +48,13 @@ public class NavigationItem {
   private NavigationItem _parent;
 
   private String _uri;
+  private String _refUri;
 
   private int _maxDepth = 3;
   private int _depth;
   private boolean _isRelative;
   private String _link;
+  private String _ref;
   private String _title;
   private String _product;
   private Document _document;
@@ -63,8 +65,8 @@ public class NavigationItem {
   private ArrayList<NavigationItem> _items = new ArrayList<NavigationItem>();
 
   public NavigationItem(Navigation navigation,
-			NavigationItem parent,
-			int depth)
+                        NavigationItem parent,
+                        int depth)
   {
     _navigation = navigation;
     _parent = parent;
@@ -96,16 +98,16 @@ public class NavigationItem {
       int p = parent._items.indexOf(this);
 
       if (p > 0) {
-	NavigationItem ptr = _parent._items.get(p - 1);
+        NavigationItem ptr = _parent._items.get(p - 1);
 
-	while (ptr != null && ptr._items.size() > 0) {
-	  ptr = ptr._items.get(ptr._items.size() - 1);
-	}
+        while (ptr != null && ptr._items.size() > 0) {
+          ptr = ptr._items.get(ptr._items.size() - 1);
+        }
 
-	return ptr;
+        return ptr;
       }
       else
-	return parent;
+        return parent;
     }
 
     return null;
@@ -120,9 +122,9 @@ public class NavigationItem {
       int p = ptr._items.indexOf(child);
 
       if (p < 0 && ptr._items.size() > 0)
-	return ptr._items.get(0);
+        return ptr._items.get(0);
       else if (p + 1 < ptr._items.size())
-	return ptr._items.get(p + 1);
+        return ptr._items.get(p + 1);
 
       child = ptr;
       ptr = ptr.getParent();
@@ -152,21 +154,21 @@ public class NavigationItem {
       return;
 
     Path rootPath = _document.getDocumentPath().getParent();
-    
+
     if (_uri != null) {
       Path linkPath = _document.getRealPath(_uri);
 
       if (linkPath.exists() && linkPath.getPath().endsWith(".xtp")) {
         Config config = new Config();
-	config.setEL(false);
+        config.setEL(false);
 
         try {
           config.configure(_document, linkPath);
 
           if (_document.getHeader() != null)
             _fullDescription = _document.getHeader().getDescription();
-	  else
-	    _fullDescription = new Description(_document);
+          else
+            _fullDescription = new Description(_document);
         } catch (NullPointerException e) {
           log.info("error configuring " + linkPath + ": " + e);
         } catch (Exception e) {
@@ -176,16 +178,16 @@ public class NavigationItem {
         if (_atocDescend) {
           Path linkRoot = linkPath.getParent();
 
-	  if (linkRoot.equals(_navigation.getRootPath().getParent()))
-	    return;
+          if (linkRoot.equals(_navigation.getRootPath().getParent()))
+            return;
 
           Path subToc = linkPath.getParent().lookup("toc.xml");
-	  
+
           if (subToc.exists()) {
             _child = new Navigation(_navigation,
-				    _uri,
-				    linkRoot,
-				    _depth + 1);
+                                    _uri,
+                                    linkRoot,
+                                    _depth + 1);
 
             try {
               config.configure(_child, subToc);
@@ -200,14 +202,6 @@ public class NavigationItem {
     }
   }
 
-  /*
-  public ContentItem createDescription()
-  {
-    _fullDescription = new FormattedText(_document);
-    return _fullDescription;
-  }
-  */
-
   public void setATOCDescend(boolean atocDescend)
   {
     _atocDescend = atocDescend;
@@ -216,11 +210,8 @@ public class NavigationItem {
   public void setLink(String link)
   {
     _link = link;
+
     _isRelative  = (_link.indexOf(':') < 0);
-    if (_isRelative)
-      _uri = _navigation.getUri() + link;
-    else
-      _uri = _link;
   }
 
   public String getLink()
@@ -258,10 +249,30 @@ public class NavigationItem {
   @PostConstruct
   public void init()
   {
-    if (_isRelative) 
-      _navigation.putItem(_navigation.getUri() + _link, this);
+    if (_isRelative)
+      _uri = _navigation.getUri() + _link;
     else
-      _navigation.putItem(_link, this);
+      _uri = _link;
+
+    _navigation.putItem(_uri, this);
+
+    Path linkPath = _document.getRealPath(_uri);
+
+    if (_link.endsWith(".xtp")) {
+      String ref = 
+        _link.substring(0, _link.length() - ".xtp".length()) + "-ref.xtp";
+
+      Path refPath = linkPath.getParent().lookup(ref);
+
+      if (refPath.exists()) {
+        _ref = ref;
+
+        if (_isRelative)
+          _refUri = _navigation.getUri() + _ref;
+        else
+          _refUri = _ref;
+      }
+    }
   }
 
   public void writeHtml(XMLStreamWriter out, String path)
@@ -279,7 +290,7 @@ public class NavigationItem {
   }
 
   public void writeHtml(XMLStreamWriter out, String path,
-			int depth, int styleDepth, int maxDepth)
+                        int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
   {
     if (depth + styleDepth <= 1)
@@ -290,8 +301,7 @@ public class NavigationItem {
   }
 
   protected void writeHtmlImpl(XMLStreamWriter out, String path,
-			       int depth,
-			       int styleDepth, int maxDepth)
+                               int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
   {
     if (maxDepth <= depth)
@@ -321,7 +331,7 @@ public class NavigationItem {
       else
         out.writeCharacters(_title);
 
-      out.writeEndElement();
+      out.writeEndElement(); // h2
     }
     else {
       out.writeStartElement("dt");
@@ -338,6 +348,20 @@ public class NavigationItem {
 
         out.writeCharacters(_title);
         out.writeEndElement(); // a
+
+        if (_ref != null) {
+          out.writeCharacters(" (");
+          out.writeStartElement("a");
+
+          if (_isRelative)
+            out.writeAttribute("href", path + _ref);
+          else
+            out.writeAttribute("href", _ref);
+
+          out.writeCharacters("ref");
+          out.writeEndElement(); // a
+          out.writeCharacters(")");
+        }
       }
 
       out.writeEndElement(); // b
@@ -491,6 +515,17 @@ public class NavigationItem {
     out.writeAttribute("class", "leftnav");
     out.writeCharacters(_title.toLowerCase());
     out.writeEndElement(); // a
+
+    if (_refUri != null) {
+      out.writeCharacters(" (");
+      out.writeStartElement("a");
+      out.writeAttribute("href", _refUri);
+      out.writeAttribute("class", "leftnav");
+      out.writeCharacters("ref");
+      out.writeEndElement(); // a
+      out.writeCharacters(")");
+    }
+
     out.writeEndElement(); // li
   }
 
@@ -499,6 +534,7 @@ public class NavigationItem {
   {
     out.writeStartElement("a");
     out.writeAttribute("href", _uri);
+
     out.writeCharacters(_title.toLowerCase());
     out.writeEndElement(); // a
   }

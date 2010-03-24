@@ -75,19 +75,19 @@ public class Localtoc implements ContentItem {
 
     for (ContentItem item : container.getItems()) {
       if (item instanceof Section) {
-	Section section = (Section) item;
+        Section section = (Section) item;
 
-	if (section.getTitle() != null
-	    && ! "".equals(section.getTitle())) {
-	  out.writeStartElement("li");
-	  out.writeStartElement("a");
-	  out.writeAttribute("href", "#" + section.getHref());
-	  out.writeCharacters(section.getTitle());
-	  out.writeEndElement();
-	  out.writeEndElement();
-	
-	  writeContainerRec(out, section);
-	}
+        if (section.getTitle() != null
+            && ! "".equals(section.getTitle())) {
+          out.writeStartElement("li");
+          out.writeStartElement("a");
+          out.writeAttribute("href", "#" + section.getHref());
+          out.writeCharacters(section.getTitle());
+          out.writeEndElement();
+          out.writeEndElement();
+
+          writeContainerRec(out, section);
+        }
       }
     }
     out.writeEndElement(); // </ul>

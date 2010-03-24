@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -145,18 +145,15 @@ public class Navigation {
   {
     if (_child != null && _child.getUri().equals(uri)) {
       if (item.getParent() != null)
-	_child.setParent(item.getParent());
-      _itemMap.put(uri, _child);
+        _child.setParent(item.getParent());
 
-      if (_parent != null)
-	_parent.putItem(uri, item);
+      _itemMap.put(uri, _child);
     }
-    else {
+    else
       _itemMap.put(uri, item);
 
-      if (_parent != null)
-	_parent.putItem(uri, item);
-    }
+    if (_parent != null)
+      _parent.putItem(uri, item);
   }
 
   public NavigationItem getItem(String uri)
@@ -185,22 +182,15 @@ public class Navigation {
   }
   
   public void writeHtml(XMLStreamWriter out, String path,
-			int depth, int styleDepth, int maxDepth)
+                        int depth, int styleDepth, int maxDepth)
     throws XMLStreamException
   {
-    /*
-    String depthString = (depth == 0) ? "top" : ("" + depth);
-    out.writeStartElement("dl");
-    out.writeAttribute("class", "atoc-toplevel atoc-toplevel-" + depthString);
-    */
     out.writeStartElement("ol");
 
     for (NavigationItem item : _items)
       item.writeHtml(out, path, depth, styleDepth, maxDepth);
 
     out.writeEndElement(); // ol
-
-    //out.writeEndElement(); // dl
   }
 
   protected void initSummary()
