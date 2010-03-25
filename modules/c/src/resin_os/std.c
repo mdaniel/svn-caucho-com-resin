@@ -212,9 +212,6 @@ std_read(connection_t *conn, char *buf, int len, int timeout)
     }
 
     result = recv(fd, buf, len, 0);
-    if (result > 0) {
-      buf[1024] = 0;
-    }
   } while (result < 0
 	   && (errno == EINTR)
 	   && conn->fd == fd

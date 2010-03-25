@@ -167,6 +167,10 @@ public class IfNetwork implements RequestPredicate {
 	break;
       }
     }
+    
+    if (log.isLoggable(Level.FINER)) {
+      log.finer(this + " match=" + isMatch + " " + addr);
+    }
 
     // update cache
 

@@ -557,6 +557,7 @@ init_server_socket(JNIEnv *env, server_socket_t *ss)
       resin_throw_exception(env, "com/caucho/config/ConfigException",
 			    "can't load _isSecure field");
       
+    /*
     ss->_localAddrBuffer = (*env)->GetFieldID(env, jniServerSocketClass,
 					      "_localAddrBuffer", "[B");
     if (! ss->_localAddrBuffer)
@@ -568,6 +569,7 @@ init_server_socket(JNIEnv *env, server_socket_t *ss)
     if (! ss->_localAddrLength)
       resin_throw_exception(env, "com/caucho/config/ConfigException",
 			    "can't load _localAddrLength field");
+    */
     
     ss->_localPort = (*env)->GetFieldID(env, jniServerSocketClass,
 					"_localPort", "I");
@@ -575,6 +577,7 @@ init_server_socket(JNIEnv *env, server_socket_t *ss)
       resin_throw_exception(env, "com/caucho/config/ConfigException",
 			    "can't load _localPort field");
       
+    /*
     ss->_remoteAddrBuffer = (*env)->GetFieldID(env, jniServerSocketClass,
 					       "_remoteAddrBuffer", "[B");
     if (! ss->_remoteAddrBuffer)
@@ -586,6 +589,7 @@ init_server_socket(JNIEnv *env, server_socket_t *ss)
     if (! ss->_remoteAddrLength)
       resin_throw_exception(env, "com/caucho/config/ConfigException",
 			    "can't load _remoteAddrLength field");
+    */
     
     ss->_remotePort = (*env)->GetFieldID(env, jniServerSocketClass,
 					 "_remotePort", "I");
@@ -975,13 +979,11 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
     (*env)->SetBooleanField(env, obj, ss->_isSecure, is_secure);
   }
 
-  if (ss->_localAddrBuffer && ss->_localAddrLength) {
-    if (local_addr) {
-      /* the 16 must match JniSocketImpl 16 bytes ipv6 */
-      get_address(conn->server_sin, temp_buf, 16);
+  if (local_addr) {
+    /* the 16 must match JniSocketImpl 16 bytes ipv6 */
+    get_address(conn->server_sin, temp_buf, 16);
 
-      set_byte_array_region(env, local_addr, 0, 16, temp_buf);
-    }
+    set_byte_array_region(env, local_addr, 0, 16, temp_buf);
   }
 
   if (ss->_localPort) {
@@ -991,13 +993,11 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
     (*env)->SetIntField(env, obj, ss->_localPort, local_port);
   }
 
-  if (ss->_remoteAddrBuffer && ss->_remoteAddrLength) {
-    if (local_addr) {
-      /* the 16 must match JniSocketImpl 16 bytes ipv6 */
-      get_address(conn->client_sin, temp_buf, 16);
+  if (remote_addr) {
+    /* the 16 must match JniSocketImpl 16 bytes ipv6 */
+    get_address(conn->client_sin, temp_buf, 16);
 
-      set_byte_array_region(env, local_addr, 0, 16, temp_buf);
-    }
+    set_byte_array_region(env, remote_addr, 0, 16, temp_buf);
   }
 
   if (ss->_remotePort) {

@@ -29,18 +29,14 @@
 
 package com.caucho.quercus.lib.file;
 
-import com.caucho.quercus.QuercusModuleException;
-import com.caucho.quercus.env.*;
-import com.caucho.vfs.ReadStream;
-import com.caucho.vfs.TempBuffer;
-import com.caucho.vfs.VfsStream;
-
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.quercus.env.Value;
+import com.caucho.vfs.TempBuffer;
 
 /**
  * Represents a Quercus file open for reading
@@ -92,6 +88,12 @@ public class WriteStreamOutput extends OutputStream implements BinaryOutput {
   public void write(int ch) throws IOException
   {
     _os.write(ch);
+  }
+
+  @Override
+  public void write(byte []buffer, int offset, int length) throws IOException
+  {
+    _os.write(buffer, offset, length);
   }
 
   @Override

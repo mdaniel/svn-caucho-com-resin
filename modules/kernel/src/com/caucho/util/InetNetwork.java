@@ -57,10 +57,14 @@ public class InetNetwork {
   {
     _inetAddress = inetAddress;
     _address = inetAddress.getAddress();
+    
+    if (subnetBits < 0)
+      subnetBits = 8 * _address.length;
+    
     _subnetBits = subnetBits;
     
     _subnetByte = subnetBits / 8;
-    _subnetMask = ~((1 << subnetBits % 8) - 1) & 0xff;
+    _subnetMask = ~((1 << (8 - subnetBits % 8)) - 1) & 0xff;
   }
 
   public static InetNetwork valueOf(String network)
@@ -75,7 +79,7 @@ public class InetNetwork {
     if (network == null)
       return null;
     
-    int subnetBits = 0;
+    int subnetBits = -1;
     
     int p = network.indexOf('/');
     
@@ -103,10 +107,10 @@ public class InetNetwork {
     for (int i = 0; i < bytes.length; i++) {
       if (bytes[i] == _address[i]) {
       }
-      else if (bytes.length - i - 1 < _subnetByte) {
+      else if (_subnetByte < i) {
         return true;
       }
-      else if (bytes.length - i - 1 == _subnetByte) {
+      else if (i == _subnetByte) {
         return (bytes[i] & _subnetMask) == (_address[i] & _subnetMask);
       }
       else {

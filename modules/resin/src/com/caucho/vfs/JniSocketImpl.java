@@ -155,9 +155,20 @@ public class JniSocketImpl extends QSocket {
   @Override
   public int getRemoteAddress(byte []buffer, int offset, int length)
   {
-    System.arraycopy(_remoteAddrBuffer, 0, buffer, offset, _remoteAddrLength);
+    int len = _remoteAddrLength;
+    
+    if (len <= 0) {
+      len = _remoteAddrLength = createIpAddress(_remoteAddrBuffer, 
+                                                _remoteAddrCharBuffer);
+    }
+    
+    char []charBuffer = _remoteAddrCharBuffer;
+    
+    for (int i = 0; i < len; i++) {
+      buffer[offset + i] = (byte) charBuffer[i];
+    }
 
-    return _remoteAddrLength;
+    return len;
   }
 
   /**
@@ -193,106 +204,10 @@ public class JniSocketImpl extends QSocket {
                                            localAddrCharBuffer);
       }
 
-      _remoteName = new String(localAddrCharBuffer, 0, _localAddrLength);
+      _localName = new String(localAddrCharBuffer, 0, _localAddrLength);
     }
-
-    if (_localName == null)
-      _localName = new String(_localAddrBuffer, 0, _localAddrLength);
 
     return _localName;
-  }
-  
-  private int createIpAddress(byte []address, char []buffer)
-  {
-    if (! _isIpv6) {
-      return createIpv4Address(address, 0, buffer, 0);
-    }
-    
-    int offset = 0;
-    boolean isZeroCompress = false;
-    boolean isInZeroCompress = false;
-    
-    buffer[offset++] = '[';
-    
-    for (int i = 0; i < 16; i += 2) {
-      int value = (address[i] & 0xff) * 256 + (address[i + 1] & 0xff);
-      
-      if (value == 0 && i != 14) {
-        if (isInZeroCompress)
-          continue;
-        else if (! isZeroCompress) {
-          isZeroCompress = true;
-          isInZeroCompress = true;
-          continue;
-        }
-      }
-      
-      if (isInZeroCompress) {
-        isInZeroCompress = false;
-        buffer[offset++] = ':';
-        buffer[offset++] = ':';
-      }
-      else if (i != 0){
-        buffer[offset++] = ':';
-      }
-      
-      if (value == 0) {
-        buffer[offset++] = '0';
-        continue;
-      }
-      
-      offset = writeHexDigit(buffer, offset, value >> 12);
-      offset = writeHexDigit(buffer, offset, value >> 8);
-      offset = writeHexDigit(buffer, offset, value >> 4);
-      offset = writeHexDigit(buffer, offset, value);
-    }
-    
-    buffer[offset++] = ']';
-    
-    return offset;
-  }
-  
-  private int writeHexDigit(char []buffer, int offset, int value)
-  {
-    if (value == 0)
-      return offset;
-    
-    value = value & 0xf;
-    
-    if (value < 10)
-      buffer[offset++] = (char) ('0' + value);
-    else
-      buffer[offset++] = (char) ('a' + value - 10);
-    
-    return offset;
-  }
-  
-  private int createIpv4Address(byte []address, int addressOffset, 
-                                char []buffer, int bufferOffset)
-  {
-    int tailOffset = bufferOffset;
-    
-    for (int i = 0; i < 4; i++) {
-      if (i != 0)
-        buffer[tailOffset++] = '.';
-      
-      int digit = address[addressOffset + i];
-      int d1 = digit / 100;
-      int d2 = digit / 10 % 10;
-      int d3 = digit % 10;
-      
-      if (digit >= 100) {
-        buffer[tailOffset++] = (char) ('0' + d1);
-      }
-      
-      if (digit >= 10) {
-        buffer[tailOffset++] = (char) ('0' + d2);
-      }
-      
-      buffer[tailOffset++] = (char) ('0' + d3);
-    }
-    
-    return tailOffset - bufferOffset;
   }
 
   /**
@@ -401,7 +316,7 @@ public class JniSocketImpl extends QSocket {
   public int read(byte []buffer, int offset, int length, long timeout)
     throws IOException
   {
-    long expires = timeout + Alarm.getCurrentTime();
+    long expires = timeout + Alarm.getCurrentTimeActual();
     
     synchronized (_readLock) {
       int result = 0;
@@ -409,7 +324,7 @@ public class JniSocketImpl extends QSocket {
       do {
         result = readNative(_fd, buffer, offset, length, timeout);
       } while (result == JniStream.TIMEOUT_EXN
-               && Alarm.getCurrentTime() <= expires);
+               && Alarm.getCurrentTimeActual() <= expires);
 
       return result;
     }
@@ -466,6 +381,99 @@ public class JniSocketImpl extends QSocket {
   public long getTotalWriteBytes()
   {
     return (_stream == null) ? 0 : _stream.getTotalWriteBytes();
+  }
+  
+  private int createIpAddress(byte []address, char []buffer)
+  {
+    if (! _isIpv6) {
+      return createIpv4Address(address, 0, buffer, 0);
+    }
+    
+    int offset = 0;
+    boolean isZeroCompress = false;
+    boolean isInZeroCompress = false;
+    
+    buffer[offset++] = '[';
+    
+    for (int i = 0; i < 16; i += 2) {
+      int value = (address[i] & 0xff) * 256 + (address[i + 1] & 0xff);
+      
+      if (value == 0 && i != 14) {
+        if (isInZeroCompress)
+          continue;
+        else if (! isZeroCompress) {
+          isZeroCompress = true;
+          isInZeroCompress = true;
+          continue;
+        }
+      }
+      
+      if (isInZeroCompress) {
+        isInZeroCompress = false;
+        buffer[offset++] = ':';
+        buffer[offset++] = ':';
+      }
+      else if (i != 0){
+        buffer[offset++] = ':';
+      }
+      
+      if (value == 0) {
+        buffer[offset++] = '0';
+        continue;
+      }
+      
+      offset = writeHexDigit(buffer, offset, value >> 12);
+      offset = writeHexDigit(buffer, offset, value >> 8);
+      offset = writeHexDigit(buffer, offset, value >> 4);
+      offset = writeHexDigit(buffer, offset, value);
+    }
+    
+    buffer[offset++] = ']';
+    
+    return offset;
+  }
+  
+  private int writeHexDigit(char []buffer, int offset, int value)
+  {
+    if (value == 0)
+      return offset;
+    
+    value = value & 0xf;
+    
+    if (value < 10)
+      buffer[offset++] = (char) ('0' + value);
+    else
+      buffer[offset++] = (char) ('a' + value - 10);
+    
+    return offset;
+  }
+  
+  private int createIpv4Address(byte []address, int addressOffset, 
+                                char []buffer, int bufferOffset)
+  {
+    int tailOffset = bufferOffset;
+    
+    for (int i = 0; i < 4; i++) {
+      if (i != 0)
+        buffer[tailOffset++] = '.';
+      
+      int digit = address[addressOffset + i];
+      int d1 = digit / 100;
+      int d2 = digit / 10 % 10;
+      int d3 = digit % 10;
+      
+      if (digit >= 100) {
+        buffer[tailOffset++] = (char) ('0' + d1);
+      }
+      
+      if (digit >= 10) {
+        buffer[tailOffset++] = (char) ('0' + d2);
+      }
+      
+      buffer[tailOffset++] = (char) ('0' + d3);
+    }
+    
+    return tailOffset - bufferOffset;
   }
 
   /**
