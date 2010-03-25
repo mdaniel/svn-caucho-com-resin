@@ -97,6 +97,9 @@
       -->
       
     </item>
+
+    <item link="scheduled-tasks.xtp" title="Scheduled tasks"
+          description="Scheduled tasks"/>
     
     <item link="cluster.xtp" title="Clustering"
           description="Clustering and load balancing of multiple coordinated Resin servers">
