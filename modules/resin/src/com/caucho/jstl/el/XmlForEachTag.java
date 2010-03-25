@@ -236,14 +236,16 @@ public class XmlForEachTag extends TagSupport implements IterationTag {
       return _count;
     }
     
+    @Override
     public boolean isFirst()
     {
-      return _count == _begin;
+      return _count == _begin + 1;
     }
     
+    @Override
     public boolean isLast()
     {
-      return _count == _end;
+      return _count == _end || ! _iterator.hasNext();
     }
     
     public Integer getBegin()

@@ -13,7 +13,10 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>jsp: x:forEach was not properly setting isFirst and isLast (#3752, rep by biku)</li>
+<li>rewrite: IfNetwork now supports IPv6 (#3903)</li>
 <li>ejb: ejb-server should no longer be required (rep by smallufo)</li>
+<li>network: IPv6 support (#3924, rep by webapps)</li>
 </ul>
 </s2>
 
