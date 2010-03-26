@@ -51,9 +51,7 @@ public class UrlMap<E> {
 
   // List of matching regular expressions
   private ArrayList<RegexpEntry<E>> _regexps;
-  // If true, use the shortest match
-  private boolean _bestShort;
-
+  
   /**
    * Create a new map
    */
@@ -70,7 +68,6 @@ public class UrlMap<E> {
   public UrlMap(boolean bestShort)
   {
     _regexps = new ArrayList<RegexpEntry<E>>();
-    _bestShort = bestShort;
   }
 
   /**
@@ -81,7 +78,6 @@ public class UrlMap<E> {
    */
   void setBestShort(boolean bestShort)
   {
-    _bestShort = bestShort;
   }
 
   boolean contains(Filter<E> filter)
@@ -295,8 +291,7 @@ public class UrlMap<E> {
     }
 
     int length = pattern.length();
-    boolean isExact = true;
-
+    
     if (pattern.charAt(0) != '/' && pattern.charAt(0) != '*') {
       pattern = "/" + pattern;
       length++;
@@ -406,6 +401,9 @@ public class UrlMap<E> {
 
     if (isShort)
       entry.setShortMatch();
+    
+    if (isIgnore)
+      entry.setIgnore(true);
 
     _regexps.add(entry);
   }
@@ -486,8 +484,7 @@ public class UrlMap<E> {
 
     int bestPrefixLength = -2;
     int bestMinLength = -2;
-    int bestMaxLength = Integer.MAX_VALUE;
-
+    
     for (int i = 0; i < _regexps.size(); i++) {
       RegexpEntry<E> entry = _regexps.get(i);
 
@@ -509,8 +506,6 @@ public class UrlMap<E> {
 
       int length = end - begin;
 
-      boolean bestShort = entry.isShortMatch();
-
       // Earlier matches override later ones
       if (bestPrefixLength < entry._prefixLength || bestMinLength < length) {
         if (vars != null) {
@@ -527,8 +522,6 @@ public class UrlMap<E> {
 
         best = entry._value;
         bestPrefixLength = entry._prefixLength;
-        bestMaxLength = length;
-
         if (! entry.isShortMatch())
           bestMinLength = length;
 
@@ -595,6 +588,11 @@ public class UrlMap<E> {
       _isIgnore = isIgnore;
       _isSimple = isSimple;
     }
+    
+    void setIgnore(boolean isIgnore)
+    {
+      _isIgnore = isIgnore;
+    }
 
     boolean isIgnore()
     {
@@ -643,10 +641,10 @@ public class UrlMap<E> {
 
     public boolean equals(Object o)
     {
-      if (! (o instanceof RegexpEntry))
+      if (! (o instanceof RegexpEntry<?>))
         return false;
 
-      RegexpEntry re = (RegexpEntry) o;
+      RegexpEntry<?> re = (RegexpEntry<?>) o;
 
       if (_urlPattern != null)
         return _urlPattern.equals(re._urlPattern);

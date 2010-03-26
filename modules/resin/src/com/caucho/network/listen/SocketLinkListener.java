@@ -1767,22 +1767,19 @@ public class SocketLinkListener extends TaskWorker
       int idleCount = _idleThreadCount.get() + _startThreadCount.get();
 
       for (int i = 0; i < idleCount + 10; i++) {
-        try {
-          Socket socket = new Socket();
-          InetSocketAddress addr;
+        InetSocketAddress addr;
 
-          if (localAddress == null ||
-              localAddress.getHostAddress().startsWith("0."))
-            addr = new InetSocketAddress("127.0.0.1", localPort);
-          else
-            addr = new InetSocketAddress(localAddress, localPort);
-
-          socket.connect(addr, 100);
-
-          socket.close();
-        } catch (ConnectException e) {
-        } catch (Throwable e) {
-          log.log(Level.FINEST, e.toString(), e);
+        if (localAddress == null ||
+            localAddress.getHostAddress().startsWith("0.")) {
+          addr = new InetSocketAddress("127.0.0.1", localPort);
+          connectAndClose(addr);
+          
+          addr = new InetSocketAddress("[::1]", localPort);
+          connectAndClose(addr);
+        }
+        else {
+          addr = new InetSocketAddress(localAddress, localPort);
+          connectAndClose(addr);
         }
       }
     }
@@ -1793,6 +1790,21 @@ public class SocketLinkListener extends TaskWorker
     }
 
     log.finest(this + " closed");
+  }
+  
+  private void connectAndClose(InetSocketAddress addr)
+  {
+    try {
+      Socket socket = new Socket();
+
+      socket.connect(addr, 100);
+
+      socket.close();
+    } catch (ConnectException e) {
+    } catch (Throwable e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+
   }
 
   public String toURL()

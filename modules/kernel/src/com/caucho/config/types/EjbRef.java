@@ -29,15 +29,20 @@
 
 package com.caucho.config.types;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.naming.Jndi;
 import com.caucho.naming.ObjectProxy;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import javax.annotation.PostConstruct;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 import javax.naming.Context;
 import javax.naming.NamingException;
 import javax.rmi.PortableRemoteObject;
 import java.util.Hashtable;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,13 +62,14 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   private Context _context;
 
   private String _ejbRefName;
-  private String _type;
-  private Class _home;
-  private Class _remote;
+  private String _ejbRefType;
+  private Class<?> _type;
+  
+  private Class<?> _home;
+  private Class<?> _remote;
   private String _foreignName;
   private String _ejbLink;
 
-  private String _typeName;
 
   private Object _target;
 
@@ -109,7 +115,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     return _injectionTarget;
   }
 
-  public Class getLocal()
+  public Class<?> getLocal()
   {
     return null;
   }
@@ -166,10 +172,10 @@ public class EjbRef extends BaseRef implements ObjectProxy {
 
   public void setEjbRefType(String type)
   {
-    _type = type;
+    _ejbRefType = type;
   }
 
-  public void setHome(Class home)
+  public void setHome(Class<?> home)
   {
     _home = home;
   }
@@ -177,12 +183,12 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   /**
    * Returns the home class.
    */
-  public Class getHome()
+  public Class<?> getHome()
   {
     return _home;
   }
 
-  public void setRemote(Class remote)
+  public void setRemote(Class<?> remote)
   {
     _remote = remote;
   }
@@ -190,7 +196,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   /**
    * Returns the remote class.
    */
-  public Class getRemote()
+  public Class<?> getRemote()
   {
     // XXX: should distinguish
     return _remote;
@@ -243,22 +249,27 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       _injectionTarget = other._injectionTarget;
   }
 
-  // XXX TCK, needs QA
   @PostConstruct
   public void init()
     throws Exception
   {
-    // TCK, needsQA, ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1
-
-    // Cannot do initialization here as there might be duplicated ejb-ref's in
-    // application-client.xml and resin-application-client.xml or even additional
-    // configuration files (TCK).
-    // application-client: <ejb-ref> initialization
-    // if (_clientClassName != null)
-    //  initBinding(null);
-
-    if (log.isLoggable(Level.FINER))
-      log.log(Level.FINER, L.l("{0} init", this));
+    Object value = Jndi.lookup(_ejbRefName);
+    
+    if (value != null)
+      return;
+    
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+      
+      _type = Class.forName(_ejbRefType, false, loader);
+    } catch (ClassNotFoundException e) {
+      log.log(Level.FINER, e.toString(), e);
+      return;
+    }
+   
+    Jndi.bindDeepShort(_ejbRefName, this);
+    
+    // new BeanJndiProxy(injectManager, bean));
   }
 
   public void bind()
@@ -266,99 +277,6 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   {
     // initBinding(null);
   }
-
-  // XXX TCK, needs QA @PostConstruct, called from EjbConfig.deployBeans()
-  /*
-  public void initBinding(AbstractServer ejbServer)
-    throws Exception
-  {
-    if (_isInitBinding)
-      return;
-
-    _isInitBinding = true;
-    
-    if (_foreignName != null) {
-      int pos = _foreignName.indexOf("#");
-
-      // TCK/IIOP for multiple interfaces 2.1/3.0 home/remote, needs QA
-      // TCK: ejb30/bb/session/stateful/sessioncontext/descriptor/getBusinessObjectLocal1
-      if (pos < 0) {
-        // TCK, needs QA: ejb30/bb/session/stateless/migration/twothree/descriptor
-        // The EJB 2.1 home is bound to the foreign name. No need to append the interface.
-        if (_home == null) {
-          if (_remote != null)
-            _foreignName += "#" + _remote.getName().replace(".", "_");
-          else if (getLocal() != null)
-            _foreignName += "#" + getLocal().getName().replace(".", "_");
-        }
-      }
-    }
-
-    EjbRefContext context = EjbRefContext.createLocal();
-
-    context.add(this);
-    
-    WebBeansContainer webBeans = WebBeansContainer.create();
-    Bean comp = null;
-
-    if (_home != null) {
-      if (comp == null && _ejbLink != null)
-        comp = InjectIntrospector.bind(_loc, _home, _ejbLink);
-      
-      if (comp == null)
-        comp = InjectIntrospector.bind(_loc, _home, _ejbRefName);
-      
-      if (comp == null)
-        comp = InjectIntrospector.bind(_loc, _home);
-
-      if (comp == null) {
-	ComponentImpl compImpl;
-	
-        compImpl = new ObjectProxyComponent(webBeans, this, _home);
-        compImpl.setName(_ejbRefName);
-        // weaker priority
-        compImpl.setDeploymentType(Production.class);
-
-        webBeans.addBean(compImpl);
-
-	comp = compImpl;
-      }
-    }
-    else if (_remote != null) {
-      if (comp == null && _ejbLink != null)
-        comp = InjectIntrospector.bind(_loc, _home, _ejbLink);
-
-      if (comp == null)
-        comp = InjectIntrospector.bind(_loc, _remote, _ejbRefName);
-      
-      if (comp == null)
-        comp = InjectIntrospector.bind(_loc, _remote);
-
-      if (comp == null) {
-	ComponentImpl compImpl;
-	
-        compImpl = new ObjectProxyComponent(webBeans, this, _remote);
-        compImpl.setName(_ejbRefName);
-        // weaker priority
-        compImpl.setDeploymentType(Production.class);
-
-        webBeans.addBean(compImpl);
-
-	comp = compImpl;
-      }
-    }
-
-    String fullEjbRefName = Jndi.getFullName(_ejbRefName);
-
-    boolean bind = false;
-    try {
-      if (bind)
-        Jndi.rebindDeep(fullEjbRefName, this);
-    } catch (Exception e) {
-      throw e;
-    }
-  }
-  */
 
   /**
    * Creates the object from the proxy.
@@ -368,7 +286,23 @@ public class EjbRef extends BaseRef implements ObjectProxy {
   public Object createObject(Hashtable env)
     throws NamingException
   {
-    if (_target == null) {
+    
+    InjectManager injectManager = InjectManager.getCurrent();
+    
+    Set<Bean<?>> beans = injectManager.getBeans(_type);
+    
+    Bean<?> bean = injectManager.resolve(beans);
+    
+    if (bean == null)
+      throw new ConfigException(L.l("ejb-ref '{0}' is an unknown bean", 
+                                    _type));
+    
+    CreationalContext<?> cxt = injectManager.createCreationalContext(bean);
+    
+    return injectManager.getReference(bean, _type, cxt);
+    
+    /*
+     if (_target == null) {
       // ejb/0f6g, TCK
       if (_foreignName != null)
         resolve(null);
@@ -383,9 +317,10 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     }
 
     return _target;
+    */
   }
 
-  public Object getByType(Class type)
+  public Object getByType(Class<?> type)
   {
     try {
       if (_home != null && type.isAssignableFrom(_home))
@@ -426,7 +361,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     return null;
   }
 
-  private void resolve(Class type)
+  private void resolve(Class<?> type)
     throws NamingException
   {
     if (log.isLoggable(Level.FINEST))
@@ -443,7 +378,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
       log.log(Level.CONFIG, L.l("{0} resolved", this));
   }
 
-  private Object lookupByLink(String link, Class type)
+  private Object lookupByLink(String link, Class<?> type)
     throws NamingException
   {
     Object target = null;
@@ -467,60 +402,7 @@ public class EjbRef extends BaseRef implements ObjectProxy {
 
       if (true)
 	throw new IllegalStateException();
-      /*
-      EJBServer ejbServer = EJBServer.getLocal();
-      AbstractServer server = null;
-
-      if (ejbServer != null) {
-        server = ejbServer.getServer(path, ejbName);
-
-        if (server == null && archiveName == null)
-          server = ejbServer.getServer(ejbName);
-      }
-
-      if (server != null) {
-        if (isEjbLocalRef()) {
-          target = server.getEJBLocalHome();
-
-          if (target != null) {
-            // ejb/0f6g
-            if (type != null && ! type.isAssignableFrom(target.getClass()))
-              target = null;
-          }
-
-          if (target == null) {
-            target = server.getLocalObject(type);
-          }
-        } else {
-          target = server.getEJBHome();
-
-          if (target != null) {
-            if (type != null && ! type.isAssignableFrom(target.getClass()))
-              target = null;
-          }
-
-          if (target == null) {
-            target = server.getRemoteObject(type);
-          }
-        }
-
-        if (target == null) {
-          log.log(Level.FINE, L.l("no home or business interface is available for '{0}'", server));
-
-          throw new NamingException(L.l("{0} '{1}' ejb bean found with ejb-link '{2}' has no home or business interface",
-                                        getTagName(), _ejbRefName, link));
-        }
-      }
-      else {
-        target = lookupByForeignJndi(_ejbLink, type);
-      }
-
-      if (target != null && target instanceof ObjectProxy) {
-        ObjectProxy proxy = (ObjectProxy) target;
-        target = proxy.createObject(null);
-      }
-      */
-
+ 
       if (false) throw new NamingException();
     }
     catch (NamingException e) {
@@ -541,67 +423,10 @@ public class EjbRef extends BaseRef implements ObjectProxy {
     Object target = Jndi.lookup(foreignName);
 
     return target;
-
-    /* XXX
-    Object target = null;
-
-    String fullForeignName = Jndi.getFullName(foreignName);
-    String fullEjbName = Jndi.getFullName(_ejbRefName);
-
-    if (_context != null) {
-      target = _context.lookup(fullForeignName);
-    }
-    else if (fullForeignName.equals(fullEjbName)) {
-      // ejb/0ga0
-      return null;
-    }
-    else
-      target = Jndi.lookup(foreignName);
-
-    if (target == null) {
-      if (fullForeignName.equals(fullEjbName))
-        throw new NamingException(L.l("{0} '{1}' cannot be resolved",
-                                      getTagName(), _ejbRefName));
-      else
-        throw new NamingException(L.l("{0} '{1}' foreign-name '{2}' not found",
-                                      getTagName(), _ejbRefName, foreignName));
-    }
-
-    if (type != null)
-      target = PortableRemoteObject.narrow(target, type);
-
-    return target;
-    */
   }
 
   private Object lookupLocal(Class type)
   {
-    /*
-    EjbServerManager manager = EjbServerManager.getLocal();
-
-    if (manager != null) {
-      Object value = manager.getLocalByInterface(type);
-
-      if (value instanceof ObjectProxy) {
-        try {
-          return ((ObjectProxy) value).createObject(null);
-        } catch (Exception e) {
-          throw new RuntimeException(e);
-        }
-      }
-      else if (value != null)
-        return value;
-      else
-        return manager.getRemoteByInterface(type);
-    }
-*/
-    /*
-      EjbRefContext context = EjbRefContext.getLocal();
-
-      if (context != null)
-        return context.findByType(type);
-    */
-
     return null;
   }
 

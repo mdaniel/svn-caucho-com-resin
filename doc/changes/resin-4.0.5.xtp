@@ -61,7 +61,7 @@ gives your beans a lifecycle exactly matching a transaction.</p>
 
 <p>Custom java.util logging handlers can now be configured by CDI.</p>
 
-<example title="ConsoleHandler">
+<example title="SocketHandler">
 &lt;resin xmlns="http://caucho.com/ns/resin"
    xmlns:logging="urn:java:java.util.logging">
 

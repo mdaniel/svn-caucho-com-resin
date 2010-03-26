@@ -545,8 +545,8 @@ public class TestLoginModule implements javax.security.auth.spi.LoginModule {
      _handler = handler;
      _state = sharedState;
 
-     _userName = (String) _options.get("user");
-     _password = (String) _options.get("password");
+     _userName = (String) options.get("user");
+     _password = (String) options.get("password");
    }
 
    public boolean login()

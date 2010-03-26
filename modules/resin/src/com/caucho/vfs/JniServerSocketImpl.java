@@ -44,6 +44,8 @@ public class JniServerSocketImpl extends QServerSocket {
 
   private long _fd;
   private String _id;
+  
+  private String _host;
 
   /**
    * Creates the new server socket.
@@ -54,6 +56,8 @@ public class JniServerSocketImpl extends QServerSocket {
     _fd = bindPort(host, port);
 
     _id = host + ":" + port;
+    
+    _host = host;
 
     if (_fd == 0)
       throw new IOException(L.l("Socket bind failed for {0}:{1} while running as {2}.  Check for other processes listening to the port and check for permissions (root on unix).",
@@ -197,7 +201,10 @@ public class JniServerSocketImpl extends QServerSocket {
   public InetAddress getLocalAddress()
   {
     try {
-      return InetAddress.getLocalHost();
+      if (_host != null)
+        return InetAddress.getByName(_host);
+      else
+        return InetAddress.getLocalHost();
     } catch (Exception e) {
       return null;
     }

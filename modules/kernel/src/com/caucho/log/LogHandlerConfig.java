@@ -167,10 +167,10 @@ public class LogHandlerConfig extends BeanConfig {
   /**
    * Sets the output level.
    */
-  public void setLevel(String level)
+  public void setLevel(Level level)
     throws ConfigException
   {
-    _level = toLevel(level);
+    _level = level;
   }
 
   /**

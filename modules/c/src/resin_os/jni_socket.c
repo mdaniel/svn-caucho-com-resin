@@ -924,8 +924,10 @@ get_address(struct sockaddr *addr, char *dst, int length)
   if (! sin)
     return 0;
   
-  memset(dst + 4, 0, 12);
-  memcpy(dst, sin->sin_addr, 4);
+  memset(dst, 0, 10);
+  dst[10] = 0xff;
+  dst[11] = 0xff;
+  memcpy(dst + 12, sin->sin_addr, 4);
 
   return 4;
 }
@@ -946,8 +948,10 @@ get_address(struct sockaddr *addr, char *dst, int length)
     return 6;
   }
   else {
-    memset(dst + 4, 0, 12);
-    memcpy(dst, (char *) &sin->sin_addr, 4);
+    memset(dst, 0, 10);
+    dst[10] = 0xff;
+    dst[11] = 0xff;
+    memcpy(dst + 12, (char *) &sin->sin_addr, 4);
 
     return 4;
   }

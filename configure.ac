@@ -670,16 +670,38 @@ else
 fi
 
 rm -f $tmpname	
-		    	  	
+
 #
 # --enable-64bit
 #
 AC_ARG_ENABLE(64bit,
 [  --enable-64bit    Enable 64 bit],
 [case "${enableval}" in
- yes) b64=true ;;
+ yes) b64=true; b64_jni=true ;;
  no)  b64=""; b64_jni="" ;;
  *) AC_MSG_ERROR(bad value ${enableval} for --enable-64bit) ;;
+ esac],[])
+
+#
+# --enable-64bit-jni
+#
+AC_ARG_ENABLE(64bit-jni,
+[  --enable-64bit-jni    Enable 64 bit JNI only (not Apache)],
+[case "${enableval}" in
+ yes) b64_jni=true ;;
+ no)  b64_jni="" ;;
+ *) AC_MSG_ERROR(bad value ${enableval} for --enable-64bit-jni) ;;
+ esac],[])
+
+#
+# --enable-64bit-plugin
+#
+AC_ARG_ENABLE(64bit-plugin,
+[  --enable-64bit-plugin    Enable 64 bit plugin (Apache) (not JNI)
+[case "${enableval}" in
+ yes) b64=true ;;
+ no)  b64="" ;;
+ *) AC_MSG_ERROR(bad value ${enableval} for --enable-64bit-plugin) ;;
  esac],[])
 
 if test -n "${b64}"; then

@@ -385,7 +385,7 @@ public class JniSocketImpl extends QSocket {
   
   private int createIpAddress(byte []address, char []buffer)
   {
-    if (! _isIpv6) {
+    if (isIpv4(address)) {
       return createIpv4Address(address, 0, buffer, 0);
     }
     
@@ -433,6 +433,19 @@ public class JniSocketImpl extends QSocket {
     return offset;
   }
   
+  private boolean isIpv4(byte []buffer)
+  {
+    if (buffer[10] != (byte) 0xff || buffer[11] != (byte) 0xff)
+      return false;
+    
+    for (int i = 0; i < 10; i++) {
+      if (buffer[i] != 0)
+        return false;
+    }
+    
+    return true;
+  }
+  
   private int writeHexDigit(char []buffer, int offset, int value)
   {
     if (value == 0)
@@ -453,8 +466,8 @@ public class JniSocketImpl extends QSocket {
   {
     int tailOffset = bufferOffset;
     
-    for (int i = 0; i < 4; i++) {
-      if (i != 0)
+    for (int i = 12; i < 16; i++) {
+      if (i > 12)
         buffer[tailOffset++] = '.';
       
       int digit = address[addressOffset + i];

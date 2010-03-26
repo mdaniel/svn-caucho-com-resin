@@ -854,8 +854,13 @@ public class InjectManager
    */
   public <T> InjectionTarget<T> processInjectionTarget(InjectionTarget<T> target)
   {
+    AnnotatedType<T> annotatedType = null;
+    
+    if (target instanceof InjectionTargetImpl<?>)
+      annotatedType = ((InjectionTargetImpl) target).getAnnotatedType();
+    
     ProcessInjectionTargetImpl<T> processTarget
-      = new ProcessInjectionTargetImpl<T>(target);
+      = new ProcessInjectionTargetImpl<T>(target, annotatedType);
 
     fireExtensionEvent(processTarget);
 
@@ -2588,6 +2593,9 @@ public class InjectManager
 
     try {
       thread.setContextClassLoader(_classLoader);
+      
+      if (_pendingBindList == null)
+        return;
 
       ArrayList<AbstractBean> bindList
         = new ArrayList<AbstractBean>(_pendingBindList);
@@ -3162,15 +3170,18 @@ public class InjectManager
   class ProcessInjectionTargetImpl<X> implements ProcessInjectionTarget<X>
   {
     private InjectionTarget<X> _target;
+    private AnnotatedType<X> _type;
 
-    ProcessInjectionTargetImpl(InjectionTarget<X> target)
+    ProcessInjectionTargetImpl(InjectionTarget<X> target,
+                               AnnotatedType<X> type)
     {
       _target = target;
+      _type = type;
     }
 
     public AnnotatedType<X> getAnnotatedType()
     {
-      return null;
+      return _type;
     }
 
     public InjectionTarget<X> getInjectionTarget()

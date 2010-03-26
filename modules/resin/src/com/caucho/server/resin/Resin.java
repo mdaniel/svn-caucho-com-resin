@@ -1253,7 +1253,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       _lifecycle.toDestroy();
 
       if (Alarm.isTest()) {
-        log().warning("test simulating exit");
+        log().finer("test simulating exit");
       }
       else if (_mainThread != null)
         System.exit(EXIT_OK); // check exit code with config errors

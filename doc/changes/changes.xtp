@@ -13,6 +13,10 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>jni: readNative was not properly handling SO_RCVTIMEO (#3941, rep by Vinod Mehra)</li>
+<li>configure: --enable-64bit needs to enable both JNI and plugin (#3968, rep by Bill Au)</li>
+<li>cdi: ProcessInjectionTarget.getAnnotatedType() was returning null (#3967, rep by jharting)</li>
+<li>ejb: ejb-ref partial support added (rep by 3964, rep by Matthew Brew)</li>
 <li>jsp: x:forEach was not properly setting isFirst and isLast (#3752, rep by biku)</li>
 <li>rewrite: IfNetwork now supports IPv6 (#3903)</li>
 <li>ejb: ejb-server should no longer be required (rep by smallufo)</li>
