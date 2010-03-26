@@ -35,13 +35,14 @@ namespace Caucho.IIS
       channel.WriteMethod(context.Request.HttpMethod);
       channel.WriteQuit();
       channel.WriteExit();
-      channel.Flush();
+      channel.FlushBuffer();
+      channel.DoResponse(context);
 
-      byte []buffer = new byte[1024];
-      int x = channel.Read(buffer);
-      context.Response.OutputStream.Write(buffer, 0, x);
+      //byte []buffer = new byte[1024];
+      //int x = channel.Read(buffer);
+      //context.Response.OutputStream.Write(buffer, 0, x);
 
-/**      hmuxSocket.Send(
+/**      hmuxSocket.FlushBuffer(
       cse_write_byte(hmuxSocket, HMUX_CHANNEL);
       cse_write_byte(hmuxSocket, channel >> 8);
       cse_write_byte(hmuxSocket, channel);
