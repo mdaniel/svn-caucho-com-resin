@@ -33,6 +33,7 @@ namespace Caucho.IIS
       channel.StartChannel();
       channel.WriteUrl(context.Request.RawUrl);
       channel.WriteMethod(context.Request.HttpMethod);
+      channel.WriteBody(context.Request);
       channel.WriteQuit();
       channel.WriteExit();
       channel.FlushBuffer();

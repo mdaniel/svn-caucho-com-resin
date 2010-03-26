@@ -97,6 +97,30 @@ namespace Caucho.IIS
       WriteRawString(bytes);
     }
 
+    public void WriteBody(HttpRequest request)
+    {
+      int contentLength = request.ContentLength;
+      if (contentLength == 0)
+        return;
+
+      Write((byte)HMUX_DATA);
+
+      WriteHmuxLength(contentLength);
+
+      if (_hmuxOutBuffer.Offset == _hmuxOutBuffer.Capacity) {
+        FlushBuffer();
+      }
+
+      int len;
+      while ((len
+        = request.InputStream.Read(
+        _hmuxOutBuffer.Bytes,
+        _hmuxOutBuffer.Offset,
+        _hmuxOutBuffer.Capacity - _hmuxOutBuffer.Offset)) > 0) {
+        _hmuxOutBuffer.Offset = _hmuxOutBuffer.Offset + len;
+        FlushBuffer();
+      }
+    }
     public void WriteQuit()
     {
       Write((byte)HMUX_QUIT);
@@ -117,7 +141,6 @@ namespace Caucho.IIS
     {
       if (_hmuxOutBuffer.Offset == _hmuxOutBuffer.Capacity)
         FlushBuffer();
-
       _hmuxOutBuffer.Bytes[_hmuxOutBuffer.Offset++] = b;
     }
 
@@ -152,12 +175,14 @@ namespace Caucho.IIS
      */
     private int SendHmux(byte[] buffer, int offset, int length)
     {
+      Debug("SendHmux: [" + offset + "] [" + length + "]");
       return _socket.Send(buffer, offset, length, SocketFlags.None);
     }
 
     private int FillInBuffer()
     {
       _hmuxInBuffer.Reset();
+      Debug("Filling In Buffer: ");
       int length = _socket.Receive(_hmuxInBuffer.Bytes);
       Debug("Filled In Buffer: " + length);
       if (length == -1)
@@ -298,8 +323,8 @@ namespace Caucho.IIS
             charset = value.Substring(start + 1, end - start - 1);
             Debug("setting charset: " + charset);
             response.Charset = charset;
-          }         
-          
+          }
+
         }
       }
     }
@@ -307,9 +332,10 @@ namespace Caucho.IIS
     public void DoResponse(HttpContext context)
     {
       HttpResponse response = context.Response;
-
+      Debug("Do Response");
       int code;
       while ((code = Read()) != -1) {
+        Debug("Do Response: " + code);
         switch (code) {
           case HMUX_ACK: {
               Debug("read ack");
