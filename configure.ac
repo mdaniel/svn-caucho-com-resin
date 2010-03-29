@@ -697,7 +697,7 @@ AC_ARG_ENABLE(64bit-jni,
 # --enable-64bit-plugin
 #
 AC_ARG_ENABLE(64bit-plugin,
-[  --enable-64bit-plugin    Enable 64 bit plugin (Apache) (not JNI)
+[  --enable-64bit-plugin    Enable 64 bit plugin (Apache) (not JNI)],
 [case "${enableval}" in
  yes) b64=true ;;
  no)  b64="" ;;
