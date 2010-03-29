@@ -29,6 +29,13 @@
 
 package com.caucho.db.sql;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.config.Module;
 import com.caucho.db.Database;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
@@ -38,13 +45,7 @@ import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
+@Module
 abstract public class Query {
   private static final Logger log
     = Logger.getLogger(Query.class.getName());
@@ -295,10 +296,14 @@ abstract public class Query {
     }
 
     InitRow initRow;
-    _initRowArray = new InitRow[_indexExprs.length];
+    
+    if (_indexExprs.length > 0)
+      _initRowArray = new InitRow[_indexExprs.length];
+    else
+      _initRowArray = new InitRow[1];
 
     if (_whereExprs[0] != null) {
-      if (_indexExprs[0] == RowIterateExpr.DEFAULT)
+      if (_indexExprs.length == 0 || _indexExprs[0] == RowIterateExpr.DEFAULT)
         initRow = new ExprTailNonIndexInitRow(_whereExprs[0]);
       else
         initRow = new ExprTailInitRow(_indexExprs[0], _whereExprs[0]);
@@ -342,7 +347,7 @@ abstract public class Query {
 
     Expr []whereExprs = new Expr[fromItems.length + 1];
     RowIterateExpr []indexExprs = new RowIterateExpr[fromItems.length];
-
+    
     _whereExprs = whereExprs;
     _indexExprs = indexExprs;
 
@@ -756,8 +761,6 @@ abstract public class Query {
         //  xa.lockRead(row.getTable().getLock());
       }
 
-      //System.out.println("IBR:");
-
       return (_initRow.initBlockRow(rows, queryContext)
               || nextBlock(rowLength - 1, rows, rowLength, queryContext));
     } catch (IOException e) {
@@ -838,66 +841,6 @@ abstract public class Query {
 
       if (prevInitRow.initBlockRow(rows, queryContext))
         return true;
-    }
-  }
-
-  /**
-   * Initialize this row and all previous rows within this block group.
-   */
-  private boolean initBlockRow(final int rowIndex,
-                               final TableIterator []rows,
-                               final QueryContext queryContext)
-    throws IOException, SQLException
-  {
-    final RowIterateExpr iterExpr = _indexExprs[rowIndex];
-
-    final TableIterator rowIter = rows[rowIndex];
-
-    if (! iterExpr.initRow(queryContext, rowIter)) {
-      return false;
-    }
-
-    final Expr []whereExprs = _whereExprs;
-    final Expr expr = whereExprs == null ? null : whereExprs[rowIndex];
-    final int prevRowIndex = rowIndex - 1;
-
-    if (expr != null) {
-      if (rowIndex <= 0) {
-        // first row with an expression
-        while (true) {
-          if (expr.isSelect(queryContext)) {
-            return true;
-          }
-          else if (! iterExpr.nextRow(queryContext, rowIter)) {
-            return false;
-          }
-        }
-      }
-      else {
-        // n > 1 row with an expression
-
-        while (true) {
-          if (expr.isSelect(queryContext)
-              && initBlockRow(prevRowIndex, rows, queryContext)) {
-            return true;
-          }
-          else if (! iterExpr.nextRow(queryContext, rowIter)) {
-            return false;
-          }
-        }
-      }
-    }
-    else {
-      // row with no expression
-
-      while (true) {
-        if (rowIndex <= 0 || initBlockRow(prevRowIndex, rows, queryContext)) {
-          return true;
-        }
-        else if (! iterExpr.nextRow(queryContext, rowIter)) {
-          return false;
-        }
-      }
     }
   }
 

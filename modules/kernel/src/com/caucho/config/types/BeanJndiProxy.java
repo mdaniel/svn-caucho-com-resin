@@ -36,11 +36,13 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.naming.NamingException;
 
+import com.caucho.config.Module;
 import com.caucho.naming.ObjectProxy;
 
 /**
  * Object proxy to create instance of a bean.
  */
+@Module
 public class BeanJndiProxy implements ObjectProxy {
   private BeanManager _manager;
   private Bean<?> _bean;

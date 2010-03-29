@@ -29,18 +29,19 @@
 
 package com.caucho.db.sql;
 
+import java.io.InputStream;
+import java.sql.SQLException;
+import java.sql.Types;
+import java.util.ArrayList;
+
+import com.caucho.config.Module;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 
-import java.io.InputStream;
-import java.sql.SQLException;
-import java.sql.Types;
-import java.util.ArrayList;
-import java.util.logging.Logger;
-
+@Module
 abstract public class Expr {
   protected static final L10N L = new L10N(Expr.class);
 
@@ -66,7 +67,7 @@ abstract public class Expr {
   /**
    * Returns the expected result type of the expression.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return Object.class;
   }
@@ -76,7 +77,7 @@ abstract public class Expr {
    */
   public boolean isLong()
   {
-    Class type = getType();
+    Class<?> type = getType();
 
     return (int.class.equals(type) || long.class.equals(type)
             || java.sql.Date.class.equals(type));
@@ -87,7 +88,7 @@ abstract public class Expr {
    */
   public boolean isDouble()
   {
-    Class type = getType();
+    Class<?> type = getType();
 
     return isLong() || double.class.isAssignableFrom(type);
   }
@@ -105,7 +106,7 @@ abstract public class Expr {
    */
   public boolean isBinaryStream(QueryContext context)
   {
-    Class type = getType();
+    Class<?> type = getType();
 
     return (InputStream.class.equals(type));
   }
@@ -412,7 +413,7 @@ abstract public class Expr {
     case Column.VARCHAR:
       {
         String v = evalString(context);
-
+        
         if (v == null)
           return -1;
 

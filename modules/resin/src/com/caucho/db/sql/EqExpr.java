@@ -31,8 +31,10 @@ package com.caucho.db.sql;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
+import com.caucho.config.Module;
+
+@Module
 final class EqExpr extends Expr {
   private final Expr _left;
   private final Expr _right;
@@ -160,6 +162,7 @@ final class EqExpr extends Expr {
   /**
    * Evaluates the expression as a boolean.
    */
+  @Override
   public int evalBoolean(QueryContext context)
     throws SQLException
   {
@@ -181,7 +184,7 @@ final class EqExpr extends Expr {
     else {
       String leftValue = _left.evalString(context);
       String rightValue = _right.evalString(context);
-
+      
       if (leftValue == rightValue || leftValue.equals(rightValue))
         return TRUE;
       else

@@ -30,9 +30,11 @@ package com.caucho.db.sql;
 
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
-class SubSelectParamExpr extends Expr {
+import com.caucho.config.Module;
+
+@Module
+public class SubSelectParamExpr extends Expr {
   private SelectQuery _subselect;
   private Expr _expr;
   private int _index;
@@ -42,6 +44,9 @@ class SubSelectParamExpr extends Expr {
     _subselect = (SelectQuery) subselect;
     _expr = expr;
     _index = index;
+    
+    if (index < 0)
+      throw new IllegalStateException("index: " + index + " must be >= 0");
   }
 
   /**
@@ -88,13 +93,13 @@ class SubSelectParamExpr extends Expr {
     Class type = getType();
 
     if (_expr.isNull(parent))
-      context.setNull(_index);
+      context.setNull(_index + 1);
     else if (long.class.equals(type))
-      context.setLong(_index, _expr.evalLong(parent));
+      context.setLong(_index + 1, _expr.evalLong(parent));
     else if (int.class.equals(type))
-      context.setLong(_index, _expr.evalLong(parent));
+      context.setLong(_index + 1, _expr.evalLong(parent));
     else {
-      context.setString(_index, _expr.evalString(parent));
+      context.setString(_index + 1, _expr.evalString(parent));
     }
   }
 
@@ -108,7 +113,7 @@ class SubSelectParamExpr extends Expr {
   public boolean isNull(QueryContext context)
     throws SQLException
   {
-    return context.isNull(_index);
+    return context.isNull(_index + 1);
   }
 
   /**
@@ -121,7 +126,7 @@ class SubSelectParamExpr extends Expr {
   public String evalString(QueryContext context)
     throws SQLException
   {
-    return context.getString(_index);
+    return context.getString(_index + 1);
   }
 
   /**
@@ -134,7 +139,7 @@ class SubSelectParamExpr extends Expr {
   public int evalBoolean(QueryContext context)
     throws SQLException
   {
-    return context.getBoolean(_index);
+    return context.getBoolean(_index + 1);
   }
 
   /**
@@ -144,10 +149,11 @@ class SubSelectParamExpr extends Expr {
    *
    * @return the long value
    */
+  @Override
   public long evalLong(QueryContext context)
     throws SQLException
   {
-    return context.getLong(_index);
+    return context.getLong(_index + 1);
   }
 
   /**
@@ -160,7 +166,7 @@ class SubSelectParamExpr extends Expr {
   public double evalDouble(QueryContext context)
     throws SQLException
   {
-    return context.getDouble(_index);
+    return context.getDouble(_index + 1);
   }
 
   /**
@@ -173,7 +179,7 @@ class SubSelectParamExpr extends Expr {
   public long evalDate(QueryContext context)
     throws SQLException
   {
-    return context.getDate(_index);
+    return context.getDate(_index + 1);
   }
 
   public String toString()

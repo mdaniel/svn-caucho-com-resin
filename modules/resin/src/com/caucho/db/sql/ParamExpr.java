@@ -29,12 +29,9 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.util.QDate;
-
 import java.io.InputStream;
 import java.sql.SQLException;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 class ParamExpr extends Expr {
   private static final int NULL = 0;
@@ -68,7 +65,7 @@ class ParamExpr extends Expr {
   /**
    * Returns the type of the expression.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return Object.class;
     
