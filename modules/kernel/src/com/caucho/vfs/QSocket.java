@@ -43,6 +43,20 @@ abstract public class QSocket {
   abstract public InetAddress getLocalAddress();
   
   /**
+   * Returns the server inet address that accepted the request.
+   */
+  public String getLocalHost()
+  {
+    InetAddress localAddress = getLocalAddress();
+    
+    if (localAddress != null)
+      return localAddress.getHostAddress();
+    else
+      return null;
+  }
+
+ 
+  /**
    * Returns the server port that accepted the request.
    */
   abstract public int getLocalPort();
@@ -57,7 +71,12 @@ abstract public class QSocket {
    */
   public String getRemoteHost()
   {
-    return getRemoteAddress().getHostAddress();
+    InetAddress remoteAddress = getRemoteAddress();
+    
+    if (remoteAddress != null)
+      return remoteAddress.getHostAddress();
+    else
+      return null;
   }
 
   /**

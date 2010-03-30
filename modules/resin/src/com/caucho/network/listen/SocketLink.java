@@ -75,6 +75,11 @@ public interface SocketLink {
    * Returns the local address of the connection
    */
   public InetAddress getLocalAddress();
+  
+  /**
+   * Returns the local host of the connection
+   */
+  public String getLocalHost();
 
   /**
    * Returns the local port of the connection

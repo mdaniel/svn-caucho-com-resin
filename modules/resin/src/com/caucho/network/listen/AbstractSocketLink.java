@@ -62,6 +62,7 @@ public abstract class AbstractSocketLink
   /**
    * Returns the connection id.  Primarily for debugging.
    */
+  @Override
   abstract public int getId();
 
   /**
@@ -69,6 +70,7 @@ public abstract class AbstractSocketLink
    * needs to block, it will automatically flush the corresponding
    * WriteStream.
    */
+  @Override
   public final ReadStream getReadStream()
   {
     return _readStream;
@@ -79,6 +81,7 @@ public abstract class AbstractSocketLink
    * needs to block, it will automatically flush the corresponding
    * WriteStream.
    */
+  @Override
   public final WriteStream getWriteStream()
   {
     return _writeStream;
@@ -87,6 +90,7 @@ public abstract class AbstractSocketLink
   /**
    * Returns true if secure (ssl)
    */
+  @Override
   public boolean isSecure()
   {
     return false;
@@ -94,6 +98,7 @@ public abstract class AbstractSocketLink
   /**
    * Returns the static virtual host
    */
+  @Override
   public String getVirtualHost()
   {
     return null;
@@ -101,29 +106,53 @@ public abstract class AbstractSocketLink
   /**
    * Returns the local address of the connection
    */
+  @Override
   public abstract InetAddress getLocalAddress();
+
+  /**
+   * Returns the remote client's inet address.
+   */
+  @Override
+  public String getLocalHost()
+  {
+    InetAddress localAddress = getLocalAddress();
+    
+    if (localAddress != null)
+      return localAddress.getHostAddress();
+    else
+      return null;
+  }
 
   /**
    * Returns the local port of the connection
    */
+  @Override
   public abstract int getLocalPort();
 
   /**
    * Returns the remote address of the connection
    */
+  @Override
   public abstract InetAddress getRemoteAddress();
 
   /**
    * Returns the remote client's inet address.
    */
+  @Override
   public String getRemoteHost()
   {
-    return getRemoteAddress().getHostAddress();
+    InetAddress remoteAddress = getRemoteAddress();
+    
+    if (remoteAddress != null)
+      return remoteAddress.getHostAddress();
+    else
+      return null;
   }
 
   /**
    * Returns the remote address of the connection
    */
+  @Override
   public int getRemoteAddress(byte []buffer, int offset, int length)
   {
     InetAddress remote = getRemoteAddress();
@@ -139,6 +168,7 @@ public abstract class AbstractSocketLink
   /**
    * Returns the remove port of the connection
    */
+  @Override
   public abstract int getRemotePort();
   
   //
@@ -183,6 +213,7 @@ public abstract class AbstractSocketLink
   }
   */
 
+  @Override
   public boolean isKeepaliveAllocated()
   {
     return false;
@@ -195,6 +226,7 @@ public abstract class AbstractSocketLink
   }
   */
 
+  @Override
   public void killKeepalive()
   {
   }
@@ -207,6 +239,7 @@ public abstract class AbstractSocketLink
   /**
    * Returns true for a comet connection
    */
+  @Override
   public boolean isCometActive()
   {
     return false;
@@ -215,11 +248,13 @@ public abstract class AbstractSocketLink
   /**
    * Returns true for a comet connection
    */
+  @Override
   public boolean isCometSuspend()
   {
     return false;
   }
   
+  @Override
   public boolean isCometComplete()
   {
     return false;
@@ -228,11 +263,13 @@ public abstract class AbstractSocketLink
   /**
    * Returns true for a duplex connection
    */
+  @Override
   public boolean isDuplex()
   {
     return false;
   }
 
+  @Override
   public boolean wake()
   {
     return false;
@@ -241,6 +278,7 @@ public abstract class AbstractSocketLink
   /**
    * Starts a comet request
    */
+  @Override
   public AsyncController toComet(CometHandler cometHandler)
   {
     throw new UnsupportedOperationException(getClass().getName());

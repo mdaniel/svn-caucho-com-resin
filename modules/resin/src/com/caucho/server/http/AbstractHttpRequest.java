@@ -522,17 +522,9 @@ public abstract class AbstractHttpRequest
   /**
    * Returns the server's address.
    */
-  public String getLocalAddr()
+  public String getLocalHost()
   {
-    return _conn.getLocalAddress().getHostAddress();
-  }
-
-  /**
-   * Returns the server's address.
-   */
-  public String getLocalName()
-  {
-    return _conn.getLocalAddress().getHostAddress();
+    return _conn.getLocalHost();
   }
 
   public String getRemoteAddr()
@@ -1384,10 +1376,13 @@ public abstract class AbstractHttpRequest
    */
   public final long getStartTime()
   {
+    return _startTime;
+    /*
     if (_tcpConn != null)
       return _tcpConn.getRequestStartTime();
     else
       return _startTime;
+      */
   }
 
   /**

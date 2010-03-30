@@ -107,6 +107,7 @@ public class PageContextImpl extends PageContext
   private Servlet _servlet;
   private HttpServletRequest _request;
 
+  private ServletResponse _servletResponse;
   private CauchoResponse _response;
   private ToCharResponseAdapter _responseAdapter;
   
@@ -224,6 +225,7 @@ public class PageContextImpl extends PageContext
   {
     _servlet = servlet;
     _request = (HttpServletRequest) request;
+    _servletResponse = response;
 
     if (response instanceof CauchoResponse
 	&& bufferSize <= TempCharBuffer.SIZE) {
@@ -1098,8 +1100,9 @@ public class PageContextImpl extends PageContext
       _out.clear();
 
     //jsp/183n jsp/18kl jsp/1625
-    while (_out instanceof BodyContentImpl)
+    while (_out instanceof BodyContentImpl) {
       popBody();
+    }
 
     if (relativeUrl != null && ! relativeUrl.startsWith("/")) {
       String servletPath = RequestAdapter.getPageServletPath(req);
@@ -1118,7 +1121,8 @@ public class PageContextImpl extends PageContext
     if (rd == null)
       throw new ServletException(L.l("unknown forwarding page: `{0}'",
                                      relativeUrl));
-    rd.forward(req, res);
+    // rd.forward(req, res);
+    rd.forward(req, _servletResponse);
 
     //_out.close();
     _responseStream.close();
@@ -1418,6 +1422,7 @@ public class PageContextImpl extends PageContext
       	responseStream.close();
       */
 	
+      _servletResponse = null;
       _response = null;
     } catch (IOException e) {
       _out = null;

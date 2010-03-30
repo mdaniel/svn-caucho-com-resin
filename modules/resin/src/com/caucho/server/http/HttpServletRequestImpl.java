@@ -265,13 +265,13 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public String getLocalAddr()
   {
-    return _request.getLocalAddr();
+    return _request.getLocalHost();
   }
 
   /**
    * Returns the IP address of the local host, i.e. the server.
    *
-   * This call returns the name of the host actaully used to connect to the
+   * This call returns the name of the host actually used to connect to the
    * Resin server,  which means that if ipchains, load balancing, or proxying
    * is involved this call <i>does not</i> return the correct host for
    * forming urls.
@@ -281,7 +281,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public String getLocalName()
   {
-    return _request.getLocalAddr();
+    return _request.getLocalHost();
   }
 
   /**

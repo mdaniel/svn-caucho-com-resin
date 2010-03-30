@@ -550,7 +550,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case 'T':
         {
           long startTime = request.getStartTime();
-          long endTime = Alarm.getExactTime();
+          long endTime = Alarm.getCurrentTime();
 
           offset = print(buffer, offset, (int) ((endTime - startTime + 500) / 1000));
           break;
@@ -559,7 +559,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
       case 'D':
         {
           long startTime = request.getStartTime();
-          long endTime = Alarm.getExactTime();
+          long endTime = Alarm.getCurrentTime();
 
           offset = print(buffer, offset, (int) ((endTime - startTime) * 1000));
           break;

@@ -320,6 +320,14 @@ public class TcpSocketLink extends AbstractSocketLink
   }
 
   /**
+   * Returns the local host name.
+   */
+  public String getLocalHost()
+  {
+    return _socket.getLocalHost();
+  }
+
+  /**
    * Returns the socket's local TCP port.
    */
   public int getLocalPort()
