@@ -46,7 +46,7 @@ public abstract class Section extends ContainerNode {
     this(document, "");
   }
 
-    public Section(Document document, String parentHref)
+  public Section(Document document, String parentHref)
   {
     super(document);
     _parentHref = parentHref;
@@ -126,12 +126,12 @@ public abstract class Section extends ContainerNode {
       char ch = href.charAt(i);
 
       switch (ch) {
-      case '<': case '>': case '(': case ')': case '?':
-	break;
-	
-      default:
-	sb.append(ch);
-	break;
+        case '<': case '>': case '(': case ')': case '?':
+          break;
+
+        default:
+          sb.append(ch);
+          break;
       }
     }
 
@@ -309,11 +309,11 @@ public abstract class Section extends ContainerNode {
       char ch = label.charAt(i);
 
       if (ch == ' ')
-	sb.append('-');
+        sb.append('-');
       else if (ch == '<' || ch == '>') {
       }
       else
-	sb.append(ch);
+        sb.append(ch);
     }
     
     label = sb.toString();

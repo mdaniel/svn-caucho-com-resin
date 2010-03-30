@@ -43,7 +43,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class Document {
-  private static Logger log = Logger.getLogger(ResinDocServlet.class.getName());
+  private static Logger log = Logger.getLogger(Document.class.getName());
 
   private ServletContext _webApp;
   private Header _header;
@@ -60,6 +60,8 @@ public class Document {
   private boolean _isDisableAction;
 
   private String _redirect;
+
+  private ReferenceDocument _referenceDocument;
 
   Document()
   {
@@ -110,8 +112,8 @@ public class Document {
       String contextPath = _webApp.getContextPath();
 
       if (uri.startsWith(contextPath))
-	uri = uri.substring(contextPath.length());
-      
+        uri = uri.substring(contextPath.length());
+
       return Vfs.lookup(_webApp.getRealPath(uri));
     }
     else
@@ -177,9 +179,8 @@ public class Document {
       Navigation nav = navList.get(0);
       
       if (_uri.endsWith("-ref.xtp")) {
-        String mainDoc = 
-          _uri.substring(0, _uri.length() - "-ref.xtp".length())
-          + ".xtp";
+        String mainDoc = _uri.substring(0, _uri.length() - "-ref.xtp".length())
+                         + ".xtp";
         
         _navItem = nav.getItem(mainDoc);
       }
@@ -204,7 +205,7 @@ public class Document {
   {
     if (navItem == null)
       return;
-    
+
     for (NavigationItem child : navItem.getChildren()) {
       fillChildNavigation(child);
     }
@@ -213,45 +214,83 @@ public class Document {
       String link = navItem.getLink();
 
       if (link.indexOf('/') > 0) {
-	ServletContext rootWebApp = _webApp.getContext("/");
-	String uri = navItem.getUri();
-	String realPath = rootWebApp.getRealPath(uri);
-      
-	Path path = Vfs.lookup(realPath);
+        ServletContext rootWebApp = _webApp.getContext("/");
+        String uri = navItem.getUri();
+        String realPath = rootWebApp.getRealPath(uri);
 
-	Path pwd = path.getParent();
-	Path toc = pwd.lookup("toc.xml");
+        Path path = Vfs.lookup(realPath);
 
-	if (toc.canRead()) {
-	  Config config = new Config();
-	  config.setEL(false);
+        Path pwd = path.getParent();
+        Path toc = pwd.lookup("toc.xml");
 
-	  int p = uri.lastIndexOf('/');
-	  if (p > 0)
-	    uri = uri.substring(0, p + 1);
+        if (toc.canRead()) {
+          Config config = new Config();
+          config.setEL(false);
 
-	  Navigation navigation = new Navigation(this, uri, pwd, 0);
-      
-	  navigation.setChild(navItem);
+          int p = uri.lastIndexOf('/');
+          if (p > 0)
+            uri = uri.substring(0, p + 1);
 
-	  config.configure(navigation, toc);
+          Navigation navigation = new Navigation(this, uri, pwd, 0);
 
-	  if (navigation.getRootItem() != null)
-	    navItem.addChildren(navigation.getRootItem().getChildren());
+          navigation.setChild(navItem);
 
-	  //navList.add(navigation);
+          config.configure(navigation, toc);
 
-	  /*
-	    if (navigation != null)
-	    child = navigation.getRootItem();
-	    else
-	    child = null;
-	  */
-	}
+          if (navigation.getRootItem() != null)
+            navItem.addChildren(navigation.getRootItem().getChildren());
+        }
       }
-    } catch (Exception e) {
+    } 
+    catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
+  }
+
+  ReferenceDocument getReferenceDocument()
+  {
+    if (_referenceDocument != null)
+      return _referenceDocument;
+
+    String uri = _uri;
+
+    int p = uri.lastIndexOf('/');
+    if (p > 0)
+      uri = uri.substring(0, p + 1);
+
+    ServletContext rootWebApp = _webApp.getContext("/");
+
+    if (! uri.equals("") && rootWebApp != null) {
+      String realPath = rootWebApp.getRealPath(uri);
+
+      Path path = Vfs.lookup(realPath);
+
+      Path ref = path.lookup("reference.xtp");
+
+      if (ref.canRead()) {
+        Config config = new Config();
+        config.setEL(false);
+
+        try {
+          _referenceDocument = 
+            new ReferenceDocument(_webApp, ref, _contextPath, 
+                                  uri + "/reference.xtp", _encoding);
+
+          config.configure(_referenceDocument, ref);
+
+          if (_header != null) {
+            _referenceDocument.setReferences(_header.getReferences());
+          }
+        }
+        catch (Exception e) {
+          log.log(Level.FINE, e.toString(), e);
+
+          _referenceDocument = null;
+        }
+      }
+    }
+
+    return _referenceDocument;
   }
 
   public Path getDocumentPath()
@@ -288,8 +327,12 @@ public class Document {
 
   public Body createBody()
   {
-    _body = new Body(this);
-    return _body;
+    return new Body(this);
+  }
+
+  public void setBody(Body body)
+  {
+    _body = body;
   }
 
   public Body getBody()
@@ -322,6 +365,26 @@ public class Document {
 
     if (_body != null)
       _body.writeHtml(out);
+
+    out.writeEndElement(); // html
+  }
+
+  public void writeRef(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    out.writeStartDocument(_encoding, "1.0");
+    out.writeDTD("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
+                 "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
+
+    out.writeStartElement("html");
+    out.writeDefaultNamespace("http://www.w3.org/1999/xhtml");
+
+    if (_header != null)
+      _header.writeHtml(out);
+
+    if (getReferenceDocument() != null 
+        && getReferenceDocument().getBody() != null) 
+      getReferenceDocument().getBody().writeHtml(out);
 
     out.writeEndElement(); // html
   }
@@ -364,7 +427,6 @@ public class Document {
   {
     setArticle(true);
     
-    // out.println("\\documentclass{article}");
     _header.writeLaTeXArticle(out);
     _body.writeLaTeX(out);
   }

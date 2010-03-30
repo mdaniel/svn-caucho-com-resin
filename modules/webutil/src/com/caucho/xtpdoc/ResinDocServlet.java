@@ -115,8 +115,6 @@ public class ResinDocServlet extends HttpServlet {
 
     try {
       response.setContentType("text/html");
-      //response.addHeader("Cache-Control", "max-age=3600");
-      //response.addHeader("Cache-Control", "max-age=60");
 
       XMLStreamWriter xmlOut
         = _outputFactory.createXMLStreamWriter(os, _encoding);
@@ -124,11 +122,15 @@ public class ResinDocServlet extends HttpServlet {
       _config.configure(document, path);
 
       if (document.getRedirect() != null) {
-	response.sendRedirect(document.getRedirect());
-	return;
+        response.sendRedirect(document.getRedirect());
+        return;
       }
       
-      document.writeHtml(xmlOut);
+
+      if (request.getParameter("ref") != null)
+        document.writeRef(xmlOut);
+      else
+        document.writeHtml(xmlOut);
 
       xmlOut.flush();
     } catch (ConfigException e) {

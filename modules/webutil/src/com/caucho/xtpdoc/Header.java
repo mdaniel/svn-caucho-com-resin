@@ -34,6 +34,8 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.util.HashSet;
+
 public class Header {
   private Document _document;
   private String _product;
@@ -45,6 +47,7 @@ public class Header {
   private Section _description;
   private Keywords _keywords;
   private String _tutorial;
+  private References _references;
 
   public Header(Document document)
   {
@@ -113,6 +116,16 @@ public class Header {
     _keywords = keywords;
   }
 
+  public void setReferences(References references)
+  {
+    _references = references;
+  }
+
+  public References getReferences()
+  {
+    return _references;
+  }
+
   public ContentItem getDescription()
   {
     return _description;
@@ -173,8 +186,8 @@ public class Header {
     NavigationItem nav = _document.getNavigation();
 
     if (nav != null
-	&& nav.getNavigation() != null
-	&& nav.getNavigation().getSection() != null)
+        && nav.getNavigation() != null
+        && nav.getNavigation().getSection() != null)
       out.writeCharacters(nav.getNavigation().getSection());
     
     out.writeCharacters(_title);
