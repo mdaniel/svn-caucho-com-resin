@@ -459,7 +459,7 @@ public class JsfTagNode extends JsfNode
 
       if (jspAttr != null) {
 	generateSetParameter(out, _var, jspAttr, method,
-			     true, null, false, null);
+			     true, null, false, false, null);
       }
       else if (ActionListener.class.isAssignableFrom(type)) {
 	String exprVar = "_caucho_method_expr_" + _gen.addMethodExpr(value, "void foo(javax.faces.event.ActionEvent)");

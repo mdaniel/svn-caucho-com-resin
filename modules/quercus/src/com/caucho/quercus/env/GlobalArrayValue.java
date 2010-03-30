@@ -34,6 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
+import com.caucho.config.Module;
 import com.caucho.quercus.env.ArrayValue.Entry;
 import com.caucho.quercus.env.ArrayValue.EntryIterator;
 import com.caucho.quercus.env.ArrayValue.KeyIterator;
@@ -42,6 +43,7 @@ import com.caucho.quercus.env.ArrayValue.ValueIterator;
 /**
  * Represents the server
  */
+@Module
 public class GlobalArrayValue extends ArrayValueImpl {
   private final Env _env;
 
@@ -56,6 +58,12 @@ public class GlobalArrayValue extends ArrayValueImpl {
   public Object toObject()
   {
     return null;
+  }
+  
+  @Override
+  public boolean toBoolean()
+  {
+    return true;
   }
 
   /**
@@ -79,9 +87,12 @@ public class GlobalArrayValue extends ArrayValueImpl {
   /**
    * Returns the array ref.
    */
+  @Override
   public Var getVar(Value key)
   {
-    return _env.getGlobalRef(key.toStringValue());
+    // return _env.getGlobalRef(key.toStringValue());
+
+    return _env.getGlobalVar(key.toStringValue());
   }
 
   /**
@@ -110,6 +121,11 @@ public class GlobalArrayValue extends ArrayValueImpl {
   public Value remove(Value key)
   {
     return _env.unsetGlobalVar(key.toStringValue());
+  }
+  
+  @Override
+  public void clear()
+  {
   }
   
   /**

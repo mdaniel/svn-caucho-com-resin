@@ -199,7 +199,7 @@ public class JsfViewRoot extends JsfNode
 
       if (jspAttr != null) {
 	generateSetParameter(out, _var, jspAttr, method,
-			     true, null, false, null);
+			     true, null, false, false, null);
       }
       else if ((value.indexOf("#{") >= 0
 		&& ! ValueExpression.class.isAssignableFrom(type)

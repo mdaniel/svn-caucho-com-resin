@@ -176,7 +176,7 @@ public class CustomSimpleTag extends GenericTag
 
     if (_body != null) {
       out.print(name + ".setJspBody(");
-      generateFragment(out, _body, "pageContext");
+      generateFragment(out, _body, "pageContext", false);
       out.println(");");
     }
 

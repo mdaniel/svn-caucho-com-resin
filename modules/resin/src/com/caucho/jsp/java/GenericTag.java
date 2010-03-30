@@ -619,7 +619,7 @@ abstract public class GenericTag extends JspContainerNode
 			method.getName()));
 
       generateSetParameter(out, name, value, method,
-			   allowRtexpr, "pageContext", isFragment, attrInfo);
+			   allowRtexpr, "pageContext", false, isFragment, attrInfo);
     }
     else if (! isDynamic) {
       throw error(L.l("attribute '{0}' in tag '{1}' has no corresponding set method in tag class '{2}'",

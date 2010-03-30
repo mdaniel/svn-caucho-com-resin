@@ -266,7 +266,7 @@ public class TagFileTag extends GenericTag {
       // jsp/1025      
       out.print(customTagName + ".setJspBody(");
       if (_body != null)
-        generateFragment(out, _body, "pageContext");
+        generateFragment(out, _body, "pageContext", false);
       else
         out.print("null");
       out.println(");");

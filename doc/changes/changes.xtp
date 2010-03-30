@@ -13,6 +13,7 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>jsp: SimpleTag parents not properly managed with fragments (#3953, rep by Jamison Novak)</li>
 <li>jni: readNative was not properly handling SO_RCVTIMEO (#3941, rep by Vinod Mehra)</li>
 <li>configure: --enable-64bit needs to enable both JNI and plugin (#3968, rep by Bill Au)</li>
 <li>cdi: ProcessInjectionTarget.getAnnotatedType() was returning null (#3967, rep by jharting)</li>

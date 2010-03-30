@@ -167,4 +167,9 @@ public class IntegerLoopSupportTag extends TagSupport
 
     return new Integer(_step);
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _begin + "," + _end + "]";
+  }
 }
