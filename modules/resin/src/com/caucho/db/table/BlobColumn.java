@@ -62,15 +62,17 @@ class BlobColumn extends Column {
   /**
    * Returns the type code for the column.
    */
-  public int getTypeCode()
+  @Override
+  public ColumnType getTypeCode()
   {
-    return BLOB;
+    return ColumnType.BLOB;
   }
 
   /**
    * Returns the java type.
    */
-  public Class getJavaType()
+  @Override
+  public Class<?> getJavaType()
   {
     return java.sql.Blob.class;
   }
@@ -78,6 +80,7 @@ class BlobColumn extends Column {
   /**
    * Returns the declaration size
    */
+  @Override
   public int getDeclarationSize()
   {
     return 128;
@@ -86,6 +89,7 @@ class BlobColumn extends Column {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return 128;
@@ -98,6 +102,7 @@ class BlobColumn extends Column {
    * @param rowOffset the offset into the row
    * @param str the string value
    */
+  @Override
   void setString(Transaction xa,
 		 byte []block, int rowOffset, String str)
   {
@@ -213,7 +218,7 @@ class BlobColumn extends Column {
   }
 
   @Override
-  public String getString(byte []block, int rowOffset)
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
@@ -257,6 +262,7 @@ class BlobColumn extends Column {
   /**
    * Sets based on an iterator.
    */
+  @Override
   public void set(Transaction xa,
 		  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
@@ -281,6 +287,7 @@ class BlobColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa,
 	       byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
@@ -300,6 +307,7 @@ class BlobColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -321,6 +329,7 @@ class BlobColumn extends Column {
   /**
    * Returns true if the bytes match.
    */
+  @Override
   public boolean isEqual(byte []block, int rowOffset,
 			 byte []buffer, int offset, int length)
   {
@@ -330,6 +339,7 @@ class BlobColumn extends Column {
     return false;
   }
   
+  @Override
   public boolean isEqual(byte []block, int rowOffset, String value)
   {
     if (value == null)
@@ -344,7 +354,8 @@ class BlobColumn extends Column {
    * Evaluates the column to a stream.
    */
   @Override
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();

@@ -29,37 +29,38 @@
 
 package com.caucho.db.table;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import com.caucho.config.Module;
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
-import com.caucho.db.index.IndexCache;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.xa.Transaction;
 import com.caucho.util.L10N;
-import java.sql.SQLException;
-import java.util.logging.Logger;
-import java.io.IOException;
 
+@Module
 abstract public class Column {
   private static final L10N L = new L10N(Column.class);
   
-  private final static Logger log
-    = Logger.getLogger(Column.class.getName());
-  
-  public final static int NONE = 0;
-  public final static int VARCHAR = 1;
-  public final static int BOOLEAN = 2;
-  public final static int BYTE = 3;
-  public final static int SHORT = 4;
-  public final static int INT = 5;
-  public final static int LONG = 6;
-  public final static int DOUBLE = 7;
-  public final static int DATE = 8;
-  public final static int BLOB = 9;
-  public final static int NUMERIC = 10;
-  public final static int BINARY = 11;
-  public final static int VARBINARY = 12;
+  @Module
+  public enum ColumnType {
+    NONE,
+    VARCHAR,
+    BOOLEAN,
+    BYTE,
+    SHORT,
+    INT,
+    LONG,
+    DOUBLE,
+    DATE,
+    BLOB,
+    NUMERIC,
+    BINARY,
+    VARBINARY,
+    IDENTITY;
+  }
   
   private final Row _row;
   private final String _name;
@@ -123,12 +124,12 @@ abstract public class Column {
   /**
    * Returns the column's code.
    */
-  abstract public int getTypeCode();
+  abstract public ColumnType getTypeCode();
 
   /**
    * Returns the java type.
    */
-  public Class getJavaType()
+  public Class<?> getJavaType()
   {
     return Object.class;
   }
@@ -250,7 +251,7 @@ abstract public class Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  public final boolean isNull(byte []block, int rowOffset)
+  public boolean isNull(byte []block, int rowOffset)
   {
     return (block[rowOffset + _nullOffset] & _nullMask) == 0;
   }
@@ -283,7 +284,7 @@ abstract public class Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  public abstract String getString(byte []block, int rowOffset)
+  public abstract String getString(long blockId, byte []block, int rowOffset)
     throws SQLException;
 
   /**
@@ -304,10 +305,10 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  public int getInteger(byte []block, int rowOffset)
+  public int getInteger(long blockId, byte []block, int rowOffset)
     throws SQLException
   {
-    String str = getString(block, rowOffset);
+    String str = getString(blockId, block, rowOffset);
 
     if (str == null)
       return 0;
@@ -336,10 +337,10 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  public long getLong(byte []block, int rowOffset)
+  public long getLong(long blockId, byte []block, int rowOffset)
     throws SQLException
   {
-    String str = getString(block, rowOffset);
+    String str = getString(blockId, block, rowOffset);
 
     if (str == null)
       return 0;
@@ -368,10 +369,10 @@ abstract public class Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  public double getDouble(byte []block, int rowOffset)
+  public double getDouble(long blockId, byte []block, int rowOffset)
     throws SQLException
   {
-    String str = getString(block, rowOffset);
+    String str = getString(blockId, block, rowOffset);
 
     if (str == null)
       return 0;
@@ -482,7 +483,7 @@ abstract public class Column {
   /**
    * Evaluates the column to the result.
    */
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  public void evalToResult(long blockId, byte []block, int rowOffset, SelectResult result)
     throws SQLException
   {
     throw new UnsupportedOperationException(getClass().getName());

@@ -28,9 +28,12 @@
 
 package com.caucho.db.table;
 
+import com.caucho.config.Module;
+
 /**
  * Validity constraints.
  */
+@Module
 public class PrimaryKeyConstraint extends UniqueConstraint {
   /**
    * Creates a uniqueness constraint.

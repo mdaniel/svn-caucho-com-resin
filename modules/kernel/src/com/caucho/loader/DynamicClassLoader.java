@@ -123,7 +123,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   // a normal reference.  Anything in between makes no sense.
   //
   // server/10w3 indicates that it needs to be a regular reference
-  private ArrayList<ClassLoaderListener> _listeners;
+  private ArrayList<ClassLoaderListener> _listeners
+    = new ArrayList<ClassLoaderListener>();
 
   // The security manager for the loader
   private SecurityManager _securityManager;
@@ -710,16 +711,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
       return;
     }
 
-    ArrayList<ClassLoaderListener> listeners;
+    ArrayList<ClassLoaderListener> listeners = _listeners;
     WeakCloseListener closeListener = null;
 
-    synchronized (this) {
-      if (_listeners == null) {
-        _listeners = new ArrayList<ClassLoaderListener>();
+    synchronized (listeners) {
+      if (listeners.size() == 0) {
         closeListener = new WeakCloseListener(this);
         //_closeListener = closeListener;
       }
-      listeners = _listeners;
     }
 
     if (closeListener != null) {

@@ -166,6 +166,16 @@ public class TableFactory {
   }
 
   /**
+   * Adds the identity column
+   */
+  public Column addIdentity(String name)
+  {
+    _row.allocateColumn();
+
+    return _row.addColumn(new IdentityColumn(_row, name));
+  }
+
+  /**
    * Adds a double
    */
   public Column addDouble(String name)

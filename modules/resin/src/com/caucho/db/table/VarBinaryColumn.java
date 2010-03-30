@@ -29,25 +29,19 @@
 
 package com.caucho.db.table;
 
+import java.sql.SQLException;
+
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
-import com.caucho.db.index.BinaryKeyCompare;
-import com.caucho.db.index.VarBinaryKeyCompare;
 import com.caucho.db.index.SqlIndexAlreadyExistsException;
+import com.caucho.db.index.VarBinaryKeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.xa.Transaction;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 class VarBinaryColumn extends Column {
-  private static final Logger log
-    = Logger.getLogger(VarBinaryColumn.class.getName());
   private static final L10N L = new L10N(VarBinaryColumn.class);
   
   private final int _maxLength;
@@ -73,15 +67,17 @@ class VarBinaryColumn extends Column {
   /**
    * Returns the type code for the column.
    */
-  public int getTypeCode()
+  @Override
+  public ColumnType getTypeCode()
   {
-    return VARBINARY;
+    return ColumnType.VARBINARY;
   }
 
   /**
    * Returns the java type.
    */
-  public Class getJavaType()
+  @Override
+  public Class<?> getJavaType()
   {
     return String.class;
   }
@@ -89,6 +85,7 @@ class VarBinaryColumn extends Column {
   /**
    * Returns the declaration size
    */
+  @Override
   public int getDeclarationSize()
   {
     return _maxLength;
@@ -97,6 +94,7 @@ class VarBinaryColumn extends Column {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return _maxLength + 1;
@@ -105,6 +103,7 @@ class VarBinaryColumn extends Column {
   /**
    * Returns the key compare for the column.
    */
+  @Override
   public KeyCompare getIndexKeyCompare()
   {
     return new VarBinaryKeyCompare();
@@ -117,6 +116,7 @@ class VarBinaryColumn extends Column {
    * @param rowOffset the offset into the row
    * @param str the string value
    */
+  @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
     int offset = rowOffset + _columnOffset;
@@ -150,7 +150,8 @@ class VarBinaryColumn extends Column {
     setNonNull(block, rowOffset);
   }
   
-  public String getString(byte []block, int rowOffset)
+  @Override
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
@@ -162,7 +163,7 @@ class VarBinaryColumn extends Column {
 
     int offset = startOffset + 1;
     int endOffset = offset + len;
-    int i = 0;
+    
     while (offset < endOffset) {
       int ch1 = block[offset++] & 0xff;
 
@@ -193,6 +194,7 @@ class VarBinaryColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa,
 	       byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
@@ -207,6 +209,7 @@ class VarBinaryColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -233,6 +236,7 @@ class VarBinaryColumn extends Column {
   /**
    * Returns true if the bytes match.
    */
+  @Override
   public boolean isEqual(byte []block, int rowOffset,
 			 byte []buffer, int offset, int length)
   {
@@ -255,6 +259,7 @@ class VarBinaryColumn extends Column {
     return true;
   }
   
+  @Override
   public boolean isEqual(byte []block, int rowOffset, String value)
   {
     if (value == null)
@@ -286,15 +291,16 @@ class VarBinaryColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  @Override
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();
       return;
     }
 
-    // XXX: add writeVarBinary to SelectResult
-    result.writeString(getString(block, rowOffset));
+    result.writeString(getString(blockId, block, rowOffset));
   }
   
   /**
@@ -307,6 +313,7 @@ class VarBinaryColumn extends Column {
    *
    * @return the length of the value
    */
+  @Override
   int evalToBuffer(byte []block, int rowOffset,
 		   byte []buffer, int bufferOffset)
     throws SQLException
@@ -330,6 +337,7 @@ class VarBinaryColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
+  @Override
   void setIndex(Transaction xa,
 		byte []block, int rowOffset,
 		long rowAddr, QueryContext context)
@@ -344,10 +352,12 @@ class VarBinaryColumn extends Column {
 		     rowAddr,
 		     false);
       } catch (SqlIndexAlreadyExistsException e) {
+        long blockId = 0;
+        
 	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}\n{3}",
 					  getTable().getName(),
 					  getName(),
-					  getString(block, rowOffset),
+					  getString(blockId, block, rowOffset),
 					  e.toString()),
 				      e);
       }

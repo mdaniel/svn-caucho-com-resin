@@ -28,6 +28,7 @@
 
 package com.caucho.db.table;
 
+import com.caucho.config.Module;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
 
@@ -36,6 +37,7 @@ import java.sql.SQLException;
 /**
  * Validity constraints.
  */
+@Module
 abstract public class Constraint {
   private String _name;
 

@@ -79,7 +79,8 @@ abstract public class Expr {
   {
     Class<?> type = getType();
 
-    return (int.class.equals(type) || long.class.equals(type)
+    return (int.class.equals(type) 
+            || long.class.equals(type)
             || java.sql.Date.class.equals(type));
   }
 
@@ -376,11 +377,11 @@ abstract public class Expr {
   public int evalToBuffer(QueryContext context,
                           byte []buffer,
                           int off,
-                          int columnType)
+                          Column.ColumnType columnType)
     throws SQLException
   {
     switch (columnType) {
-    case Column.INT:
+    case INT:
       {
         int v = (int) evalLong(context);
 
@@ -392,8 +393,8 @@ abstract public class Expr {
         return 4;
       }
 
-    case Column.LONG:
-    case Column.DATE:
+    case LONG:
+    case DATE:
       {
         long v = evalLong(context);
 
@@ -410,7 +411,7 @@ abstract public class Expr {
         return 8;
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       {
         String v = evalString(context);
         
@@ -431,7 +432,7 @@ abstract public class Expr {
         return offset;
       }
 
-    case Column.VARBINARY:
+    case VARBINARY:
       {
         String v = evalString(context);
 
@@ -461,7 +462,7 @@ abstract public class Expr {
         return offset;
       }
 
-    case Column.BINARY:
+    case BINARY:
       {
         byte []bytes = evalBytes(context);
         

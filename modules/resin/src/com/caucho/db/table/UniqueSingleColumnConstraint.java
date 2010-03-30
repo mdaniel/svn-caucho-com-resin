@@ -57,13 +57,12 @@ public class UniqueSingleColumnConstraint extends Constraint {
   /**
    * validate the constraint.
    */
+  @Override
   public void validate(TableIterator []sourceRows,
 		       QueryContext queryContext, Transaction xa)
     throws SQLException
   {
     Column column = _uniqueColumn;
-    int columnOffset = column.getColumnOffset();
-
     BTree index = column.getIndex();
 
     if (index != null) {
@@ -72,8 +71,7 @@ public class UniqueSingleColumnConstraint extends Constraint {
     }
       
     TableIterator sourceRow = sourceRows[0];
-    String value = null;
-
+    
     Table table = sourceRow.getTable();
     TableIterator iter = table.createTableIterator();
 
@@ -95,11 +93,14 @@ public class UniqueSingleColumnConstraint extends Constraint {
 	    continue;
 
 	  if (column.isEqual(iterBuffer, iterOffset,
-			     sourceBuffer, sourceOffset)) 
+			     sourceBuffer, sourceOffset)) {
+	    long blockId = iter.getBlockId();
+	    
 	    throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
-				       column.getString(iterBuffer, iterOffset),
+				       column.getString(blockId, iterBuffer, iterOffset),
 				       table.getName(),
 				       column.getName()));
+	  }
 	}
       }
     } catch (IOException e) {
@@ -123,8 +124,6 @@ public class UniqueSingleColumnConstraint extends Constraint {
       byte []sourceBuffer = sourceRow.getBuffer();
       int sourceOffset = sourceRow.getRowOffset();
       
-      byte []buffer = context.getBuffer();
-
       BTree index = column.getIndex();
 
       /*
@@ -146,9 +145,11 @@ public class UniqueSingleColumnConstraint extends Constraint {
 
       if (value != 0) {
 	Table table = sourceRow.getTable();
+	long blockId = sourceRow.getBlockId();
 
 	throw new SQLException(L.l("'{0}' in {1}.{2} fails uniqueness constraint with block address {3}.",
-				   column.getString(sourceBuffer,
+				   column.getString(blockId,
+				                    sourceBuffer,
 						    sourceOffset),
 				   table.getName(),
 				   column.getName(),

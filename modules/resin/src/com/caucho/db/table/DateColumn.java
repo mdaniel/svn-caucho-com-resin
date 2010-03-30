@@ -59,16 +59,16 @@ class DateColumn extends Column {
    * Returns the column's type code.
    */
   @Override
-  public int getTypeCode()
+  public ColumnType getTypeCode()
   {
-    return DATE;
+    return ColumnType.DATE;
   }
 
   /**
    * Returns the column's Java type.
    */
   @Override
-  public Class getJavaType()
+  public Class<?> getJavaType()
   {
     return java.sql.Date.class;
   }
@@ -126,7 +126,7 @@ class DateColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public String getString(byte []block, int rowOffset)
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
@@ -205,7 +205,7 @@ class DateColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public long getLong(byte []block, int rowOffset)
+  public long getLong(long blockId, byte []block, int rowOffset)
   {
     return getDate(block, rowOffset);
   }
@@ -217,7 +217,7 @@ class DateColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public double getDouble(byte []block, int rowOffset)
+  public double getDouble(long blockId, byte []block, int rowOffset)
   {
     return (double) getDate(block, rowOffset);
   }
@@ -243,7 +243,7 @@ class DateColumn extends Column {
    * @param value the value to store
    */
   @Override
-  public int getInteger(byte []block, int rowOffset)
+  public int getInteger(long blockId, byte []block, int rowOffset)
   {
     return (int) getDate(block, rowOffset);
   }
@@ -252,7 +252,8 @@ class DateColumn extends Column {
    * Evaluates the column to a stream.
    */
   @Override
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();

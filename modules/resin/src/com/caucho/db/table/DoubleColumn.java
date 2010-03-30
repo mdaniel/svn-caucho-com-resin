@@ -55,16 +55,16 @@ class DoubleColumn extends Column {
    * Returns the column's type code.
    */
   @Override
-  public int getTypeCode()
+  public ColumnType getTypeCode()
   {
-    return DOUBLE;
+    return ColumnType.DOUBLE;
   }
 
   /**
    * Returns the column's Java type.
    */
   @Override
-  public Class getJavaType()
+  public Class<?> getJavaType()
   {
     return double.class;
   }
@@ -110,12 +110,12 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public String getString(byte []block, int rowOffset)
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
     else
-      return String.valueOf(getDouble(block, rowOffset));
+      return String.valueOf(getDouble(blockId, block, rowOffset));
   }
 
   /**
@@ -138,9 +138,9 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public int getInteger(byte []block, int rowOffset)
+  public int getInteger(long blockId, byte []block, int rowOffset)
   {
-    return (int) getDouble(block, rowOffset);
+    return (int) getDouble(blockId, block, rowOffset);
   }
 
   /**
@@ -163,9 +163,9 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public long getLong(byte []block, int rowOffset)
+  public long getLong(long blockId, byte []block, int rowOffset)
   {
-    return (long) getDouble(block, rowOffset);
+    return (long) getDouble(blockId, block, rowOffset);
   }
 
   /**
@@ -203,7 +203,7 @@ class DoubleColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public double getDouble(byte []block, int rowOffset)
+  public double getDouble(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return 0;
@@ -246,14 +246,15 @@ class DoubleColumn extends Column {
    * Evaluates the column to a stream.
    */
   @Override
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();
       return;
     }
 
-    result.writeDouble(getDouble(block, rowOffset));
+    result.writeDouble(getDouble(blockId, block, rowOffset));
   }
 
   /**

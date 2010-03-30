@@ -29,16 +29,16 @@
 
 package com.caucho.db.sql;
 
+import java.sql.SQLException;
+import java.util.ArrayList;
+
 import com.caucho.db.Database;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
-
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 class InsertQuery extends Query {
   private Table _table;
@@ -76,7 +76,10 @@ class InsertQuery extends Query {
 
       Expr defaultExpr = column.getDefault();
 
-      if (column.getAutoIncrement() > 0) {
+      if (column.getTypeCode() == ColumnType.IDENTITY) {
+        defaultExpr = new IdentityExpr(column.getTable(), column);
+      }
+      else if (column.getAutoIncrement() > 0) {
         defaultExpr = new AutoIncrementExpr(column.getTable());
       }
 

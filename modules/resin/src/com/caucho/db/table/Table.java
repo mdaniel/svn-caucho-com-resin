@@ -29,6 +29,7 @@
 
 package com.caucho.db.table;
 
+import com.caucho.config.Module;
 import com.caucho.db.Database;
 import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
@@ -72,6 +73,7 @@ import java.util.logging.Logger;
  * Block 3: first data
  * </pre>
  */
+@Module
 public class Table extends BlockStore {
   private final static Logger log
     = Logger.getLogger(Table.class.getName());
@@ -90,8 +92,8 @@ public class Table extends BlockStore {
   public final static byte ROW_ALLOC = 0x2;
   public final static byte ROW_MASK = 0x3;
 
-  private final static String DB_VERSION = "Resin-DB 4.0.5";
-  private final static String MIN_VERSION = "Resin-DB 4.0.5";
+  private final static String DB_VERSION = "Resin-DB 4.0.6";
+  private final static String MIN_VERSION = "Resin-DB 4.0.6";
 
   private final Row _row;
 
@@ -113,12 +115,8 @@ public class Table extends BlockStore {
   private final AtomicInteger _insertFreeRowBlockTail
     = new AtomicInteger();
 
-  // top of file counters for row insert allocation
-  private final Object _rowTailLock = new Object();
   private long _rowTailTop = BlockStore.BLOCK_SIZE * FREE_ROW_BLOCK_SIZE;
   private final AtomicLong _rowTailOffset = new AtomicLong();
-
-  private final Object _rowClockLock = new Object();
 
   private final RowAllocator _rowAllocator = new RowAllocator();
 
@@ -132,9 +130,6 @@ public class Table extends BlockStore {
   private long _clockBlockFree;
 
   private long _autoIncrementValue = -1;
-
-  private Lock _allocLock;
-  private Lock _insertLock;
 
   Table(Database database, String name, Row row, Constraint constraints[])
   {
@@ -157,8 +152,8 @@ public class Table extends BlockStore {
     }
     _autoIncrementColumn = autoIncrementColumn;
 
-    _insertLock = new Lock("table-insert:" + name);
-    _allocLock = new Lock("table-alloc:" + name);
+    new Lock("table-insert:" + name);
+    new Lock("table-alloc:" + name);
   }
 
   Row getRow()
@@ -169,7 +164,7 @@ public class Table extends BlockStore {
   /**
    * Returns the length of a row.
    */
-  int getRowLength()
+  public int getRowLength()
   {
     return _rowLength;
   }
@@ -598,34 +593,37 @@ public class Table extends BlockStore {
       os.print(" ");
 
       switch (column.getTypeCode()) {
-      case Column.VARCHAR:
+      case IDENTITY:
+        os.print("IDENTITY");
+        break;
+      case VARCHAR:
         os.print("VARCHAR(" + column.getDeclarationSize() + ")");
         break;
-      case Column.VARBINARY:
+      case VARBINARY:
         os.print("VARBINARY(" + column.getDeclarationSize() + ")");
         break;
-      case Column.BINARY:
+      case BINARY:
         os.print("BINARY(" + column.getDeclarationSize() + ")");
         break;
-      case Column.SHORT:
+      case SHORT:
         os.print("SMALLINT");
         break;
-      case Column.INT:
+      case INT:
         os.print("INTEGER");
         break;
-      case Column.LONG:
+      case LONG:
         os.print("BIGINT");
         break;
-      case Column.DOUBLE:
+      case DOUBLE:
         os.print("DOUBLE");
         break;
-      case Column.DATE:
+      case DATE:
         os.print("TIMESTAMP");
         break;
-      case Column.BLOB:
+      case BLOB:
         os.print("BLOB");
         break;
-      case Column.NUMERIC:
+      case NUMERIC:
         {
           NumericColumn numeric = (NumericColumn) column;
 
@@ -633,7 +631,7 @@ public class Table extends BlockStore {
           break;
         }
       default:
-        throw new UnsupportedOperationException();
+        throw new UnsupportedOperationException(String.valueOf(column));
       }
 
       if (column.isPrimaryKey())
@@ -689,8 +687,9 @@ public class Table extends BlockStore {
       iter.init(context);
       while (iter.next()) {
         byte []buffer = iter.getBuffer();
+        long blockId = iter.getBlockId();
 
-        long value = _autoIncrementColumn.getLong(buffer, iter.getRowOffset());
+        long value = _autoIncrementColumn.getLong(blockId, buffer, iter.getRowOffset());
 
         if (max < value)
           max = value;
@@ -828,8 +827,7 @@ public class Table extends BlockStore {
 
         for (int i = 0; i < columns.size(); i++) {
           Column column = columns.get(i);
-          Expr value = values.get(i);
-
+          
           column.setIndex(xa, buffer, rowOffset, rowAddr, queryContext);
         }
 
@@ -838,7 +836,9 @@ public class Table extends BlockStore {
         xa.addUpdateBlock(block);
 
         if (_autoIncrementColumn != null) {
-          long value = _autoIncrementColumn.getLong(buffer, rowOffset);
+          long blockId = iter.getBlockId();
+          
+          long value = _autoIncrementColumn.getLong(blockId, buffer, rowOffset);
 
           synchronized (this) {
             if (_autoIncrementValue < value)

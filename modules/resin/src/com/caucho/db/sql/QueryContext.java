@@ -40,6 +40,7 @@ import com.caucho.config.Module;
 import com.caucho.db.block.Block;
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.db.xa.Transaction;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -485,7 +486,7 @@ public class QueryContext {
     return _parameters[index - 1].getBytes();
   }
 
-  public int getType(int index)
+  public ColumnType getType(int index)
   {
     return _parameters[index - 1].getType();
   }

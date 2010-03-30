@@ -30,8 +30,6 @@
 package com.caucho.db.sql;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
 final class LongEqExpr extends AbstractBinaryBooleanExpr {
   private final Expr _left;

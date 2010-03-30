@@ -29,24 +29,19 @@
 
 package com.caucho.db.table;
 
+import java.sql.SQLException;
+
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
-import com.caucho.db.index.StringKeyCompare;
 import com.caucho.db.index.SqlIndexAlreadyExistsException;
+import com.caucho.db.index.StringKeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.xa.Transaction;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 class StringColumn extends Column {
-  private static final Logger log
-    = Logger.getLogger(StringColumn.class.getName());
   private static final L10N L = new L10N(StringColumn.class);
   
   private final int _maxLength;
@@ -73,16 +68,16 @@ class StringColumn extends Column {
    * Returns the type code for the column.
    */
   @Override
-  public int getTypeCode()
+  public ColumnType getTypeCode()
   {
-    return VARCHAR;
+    return ColumnType.VARCHAR;
   }
 
   /**
    * Returns the java type.
    */
   @Override
-  public Class getJavaType()
+  public Class<?> getJavaType()
   {
     return String.class;
   }
@@ -146,7 +141,7 @@ class StringColumn extends Column {
   }
   
   @Override
-  public String getString(byte []block, int rowOffset)
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
@@ -272,7 +267,8 @@ class StringColumn extends Column {
    * Evaluates the column to a stream.
    */
   @Override
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();
@@ -342,10 +338,12 @@ class StringColumn extends Column {
 		     rowAddr,
 		     false);
       } catch (SqlIndexAlreadyExistsException e) {
+        long blockId = 0;
+        
 	throw new SqlIndexAlreadyExistsException(L.l("StringColumn '{0}.{1}' unique index set failed for {2}.\n{3}",
 					  getTable().getName(),
 					  getName(),
-					  getString(block, rowOffset),
+					  getString(blockId, block, rowOffset),
 					  e.toString()),
 				      e);
       }

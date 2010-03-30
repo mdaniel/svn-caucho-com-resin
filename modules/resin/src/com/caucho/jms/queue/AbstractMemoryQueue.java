@@ -342,26 +342,29 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
     int size = _queueSize.incrementAndGet();
     
     if (_queueSizeMax < size) {
-      waitForQueueThrottle(expires);
+      long timeout = 100;
+      
+      waitForQueueThrottle(timeout);
     }
 
     return entry;
   }
   
-  private void waitForQueueThrottle(long expires)
+  private void waitForQueueThrottle(long timeout)
   {
     _isQueueThrottle.set(true);
     
     synchronized (_isQueueThrottle) {
       try {
         if (_isQueueThrottle.get()) {
-          long timeout = expires - Alarm.getCurrentTimeActual();
+          // long timeout = expires - Alarm.getCurrentTimeActual();
           
           if (timeout > 1000)
             timeout = 1000;
           
-          if (timeout > 0)
+          if (timeout > 0) {
             _isQueueThrottle.wait(timeout);
+          }
         }
       } catch (Exception e) {
         log.log(Level.FINER, e.toString(), e);
@@ -371,9 +374,13 @@ public abstract class AbstractMemoryQueue<E,QE extends QueueEntry<E>>
   
   private void wakeQueueThrottle()
   {
-    if (_isQueueThrottle.compareAndSet(true, false)) {
-      synchronized (_isQueueThrottle) {
-        _isQueueThrottle.notifyAll();
+   int size = _queueSize.get();
+    
+    if (size <= _queueSizeMax) {
+      if (_isQueueThrottle.compareAndSet(true, false)) {
+        synchronized (_isQueueThrottle) {
+          _isQueueThrottle.notifyAll();
+        }
       }
     }
   }

@@ -29,10 +29,16 @@
 
 package com.caucho.db.sql;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Blob;
+import java.sql.Clob;
+import java.sql.SQLException;
+
 import com.caucho.db.blob.BlobInputStream;
 import com.caucho.db.block.BlockStore;
-import com.caucho.db.table.Column;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.FreeList;
@@ -40,12 +46,6 @@ import com.caucho.util.IntArray;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
 import com.caucho.vfs.TempBuffer;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.Blob;
-import java.sql.Clob;
-import java.sql.SQLException;
 
 public class SelectResult {
   private static final L10N L = new L10N(SelectResult.class);
@@ -208,20 +208,25 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
+    
+    if (type < 0)
+      return null;
+    
+    ColumnType cType = ColumnType.values()[type];
 
-    switch (type) {
-    case Column.NONE:
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return null;
 
-    case Column.SHORT:
+    case SHORT:
       {
         int value = (short) ((read() << 8) + (read()));
 
         return String.valueOf(value);
       }
 
-    case Column.INT:
+    case INT:
       {
         int value = ((read() << 24) +
                      (read() << 16) +
@@ -231,7 +236,7 @@ public class SelectResult {
         return String.valueOf(value);
       }
 
-    case Column.LONG:
+    case LONG:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -245,7 +250,7 @@ public class SelectResult {
         return String.valueOf(value);
       }
 
-    case Column.DOUBLE:
+    case DOUBLE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -259,7 +264,7 @@ public class SelectResult {
         return String.valueOf(Double.longBitsToDouble(value));
       }
 
-    case Column.DATE:
+    case DATE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -273,13 +278,13 @@ public class SelectResult {
         return QDate.formatISO8601(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return readString();
 
-    case Column.BLOB:
+    case BLOB:
       return readBlobString();
 
-    case Column.BINARY:
+    case BINARY:
       {
         int len = read();
 
@@ -309,13 +314,18 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
+    
+    if (type < 0)
+      return null;
+    
+    ColumnType cType = ColumnType.values()[type];
 
-    switch (type) {
-    case Column.NONE:
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return null;
 
-    case Column.BINARY:
+    case BINARY:
       {
         int len = read();
 
@@ -326,7 +336,7 @@ public class SelectResult {
         return bytes;
       }
 
-    case Column.BLOB:
+    case BLOB:
       return readBlobBytes();
 
     default:
@@ -344,12 +354,18 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
-    switch (type) {
-    case Column.NONE:
+    
+    if (type < 0)
+      return 0;
+    
+    ColumnType cType = ColumnType.values()[type];
+    
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return 0;
 
-    case Column.SHORT:
+    case SHORT:
       {
         int value = (short) ((read() << 8)
                              + (read()));
@@ -357,7 +373,7 @@ public class SelectResult {
         return value;
       }
 
-    case Column.INT:
+    case INT:
       {
         int value = ((read() << 24) +
                      (read() << 16) +
@@ -367,8 +383,8 @@ public class SelectResult {
         return value;
       }
 
-    case Column.LONG:
-    case Column.DATE:
+    case LONG:
+    case DATE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -382,7 +398,7 @@ public class SelectResult {
         return (int) value;
       }
 
-    case Column.DOUBLE:
+    case DOUBLE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -396,10 +412,10 @@ public class SelectResult {
         return (int) Double.longBitsToDouble(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return Integer.parseInt(readString());
 
-    case Column.BLOB:
+    case BLOB:
       return Integer.parseInt(readBlobString());
 
     default:
@@ -417,12 +433,18 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
-    switch (type) {
-    case Column.NONE:
+
+    if (type < 0)
+      return 0;
+    
+    ColumnType cType = ColumnType.values()[type];
+
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return 0;
 
-    case Column.SHORT:
+    case SHORT:
       {
         int value = (short) ((read() << 8)
                              + (read()));
@@ -430,7 +452,7 @@ public class SelectResult {
         return value;
       }
 
-    case Column.INT:
+    case INT:
       {
         int value = ((read() << 24) +
                      (read() << 16) +
@@ -440,8 +462,8 @@ public class SelectResult {
         return value;
       }
 
-    case Column.LONG:
-    case Column.DATE:
+    case LONG:
+    case DATE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -455,7 +477,7 @@ public class SelectResult {
         return value;
       }
 
-    case Column.DOUBLE:
+    case DOUBLE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -469,10 +491,10 @@ public class SelectResult {
         return (long) Double.longBitsToDouble(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return Long.parseLong(readString());
 
-    case Column.BLOB:
+    case BLOB:
       return Long.parseLong(readBlobString());
 
     default:
@@ -490,12 +512,18 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
-    switch (type) {
-    case Column.NONE:
+
+    if (type < 0)
+      return 0;
+    
+    ColumnType cType = ColumnType.values()[type];
+    
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return 0;
 
-    case Column.SHORT:
+    case SHORT:
       {
         int value = (short) ((read() << 8)
                              + (read()));
@@ -503,7 +531,7 @@ public class SelectResult {
         return value;
       }
 
-    case Column.INT:
+    case INT:
       {
         int value = ((read() << 24) +
                      (read() << 16) +
@@ -513,8 +541,8 @@ public class SelectResult {
         return value;
       }
 
-    case Column.LONG:
-    case Column.DATE:
+    case LONG:
+    case DATE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -528,7 +556,7 @@ public class SelectResult {
         return value;
       }
 
-    case Column.DOUBLE:
+    case DOUBLE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -542,10 +570,10 @@ public class SelectResult {
         return Double.longBitsToDouble(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return Double.parseDouble(readString());
 
-    case Column.BLOB:
+    case BLOB:
       return Double.parseDouble(readBlobString());
 
     default:
@@ -560,13 +588,19 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
-    switch (type) {
-    case Column.NONE:
+
+    if (type < 0)
+      return 0;
+    
+    ColumnType cType = ColumnType.values()[type];
+    
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return 0;
 
-    case Column.LONG:
-    case Column.DATE:
+    case LONG:
+    case DATE:
       {
         long value = (((long) read() << 56) +
                       ((long) read() << 48) +
@@ -580,7 +614,7 @@ public class SelectResult {
         return value;
       }
 
-    case Column.INT:
+    case INT:
       {
         long value = (((long) read() << 24) +
                       ((long) read() << 16) +
@@ -590,7 +624,7 @@ public class SelectResult {
         return value;
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       {
         String value = readString();
 
@@ -603,7 +637,7 @@ public class SelectResult {
         }
       }
 
-    case Column.BLOB:
+    case BLOB:
       {
         String value = readBlobString();
 
@@ -632,12 +666,18 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
-    switch (type) {
-    case Column.NONE:
+
+    if (type < 0)
+      return null;
+    
+    ColumnType cType = ColumnType.values()[type];
+
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return null;
 
-    case Column.BLOB:
+    case BLOB:
       return getBlob();
 
     default:
@@ -656,12 +696,18 @@ public class SelectResult {
     setColumn(index);
 
     int type = read();
-    switch (type) {
-    case Column.NONE:
+
+    if (type < 0)
+      return null;
+    
+    ColumnType cType = ColumnType.values()[type];
+
+    switch (cType) {
+    case NONE:
       _wasNull = true;
       return null;
 
-    case Column.BLOB:
+    case BLOB:
       return getClob();
 
     default:
@@ -826,14 +872,21 @@ public class SelectResult {
   private void skipColumns(int count)
   {
     for (; count > 0; count--) {
+
       int type = read();
+
+      if (type < 0)
+        return;
+      
+      ColumnType cType = ColumnType.values()[type];
+
       int sublen;
 
-      switch (type) {
-      case Column.NONE:
+      switch (cType) {
+      case NONE:
         break;
 
-      case Column.VARCHAR:
+      case VARCHAR:
         int l0 = read();
         int l1 = read();
         int l2 = read();
@@ -847,25 +900,25 @@ public class SelectResult {
         _offset += sublen;
         break;
 
-      case Column.BINARY:
+      case BINARY:
         sublen = read();
 
         _offset += sublen;
         break;
 
-      case Column.SHORT:
+      case SHORT:
         _offset += 2;
         break;
-      case Column.INT:
+      case INT:
         _offset += 4;
         break;
-      case Column.LONG:
-      case Column.DOUBLE:
-      case Column.DATE:
+      case LONG:
+      case DOUBLE:
+      case DATE:
         _offset += 8;
         break;
 
-      case Column.BLOB:
+      case BLOB:
         _offset += 128;
         break;
 
@@ -891,7 +944,7 @@ public class SelectResult {
    */
   public void writeNull()
   {
-    write(Column.NONE);
+    write(ColumnType.NONE.ordinal());
   }
 
   /**
@@ -899,7 +952,7 @@ public class SelectResult {
    */
   public void writeString(String s)
   {
-    write(Column.VARCHAR);
+    write(ColumnType.VARCHAR.ordinal());
     int stringLength = s.length();
     int length = 2 * stringLength;
     write(length >> 24);
@@ -932,7 +985,7 @@ public class SelectResult {
     }
 
     byte []rBuffer = _buffers[rBlockId];
-    rBuffer[rOffset] = Column.VARCHAR;
+    rBuffer[rOffset] = (byte) ColumnType.VARCHAR.ordinal();
 
     int length = 2 * stringLength;
 
@@ -969,7 +1022,7 @@ public class SelectResult {
    */
   public void writeBinary(byte []buffer, int offset, int length)
   {
-    write(Column.BINARY);
+    write(ColumnType.BINARY.ordinal());
     write(length);
     write(buffer, offset, length);
   }
@@ -988,7 +1041,7 @@ public class SelectResult {
    */
   public void writeDouble(double dValue)
   {
-    write(Column.DOUBLE);
+    write(ColumnType.DOUBLE.ordinal());
 
     long value = Double.doubleToLongBits(dValue);
 
@@ -1007,7 +1060,7 @@ public class SelectResult {
    */
   public void writeLong(long value)
   {
-    write(Column.LONG);
+    write(ColumnType.LONG.ordinal());
     write((int) (value >> 56));
     write((int) (value >> 48));
     write((int) (value >> 40));
@@ -1023,7 +1076,7 @@ public class SelectResult {
    */
   public void writeDate(long value)
   {
-    write(Column.DATE);
+    write(ColumnType.DATE.ordinal());
     write((int) (value >> 56));
     write((int) (value >> 48));
     write((int) (value >> 40));
@@ -1039,7 +1092,7 @@ public class SelectResult {
    */
   public void writeInt(int value)
   {
-    write(Column.INT);
+    write(ColumnType.INT.ordinal());
     write(value >> 24);
     write(value >> 16);
     write(value >> 8);
@@ -1051,7 +1104,7 @@ public class SelectResult {
    */
   public void writeShort(int value)
   {
-    write(Column.SHORT);
+    write(ColumnType.SHORT.ordinal());
     write(value >> 8);
     write(value);
   }
@@ -1061,17 +1114,9 @@ public class SelectResult {
    */
   public void writeBlob(byte []buffer, int offset)
   {
-    write(Column.BLOB);
+    write(ColumnType.BLOB.ordinal());
 
     write(buffer, offset, 128);
-  }
-
-  /**
-   * Seeks the specified offset.
-   */
-  private void seek(int offset)
-  {
-    _offset = offset;
   }
 
   /**
@@ -1201,29 +1246,6 @@ public class SelectResult {
     }
 
     _length = rLength;
-  }
-
-  private String toHex(byte []bytes)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    int len = bytes.length;
-    for (int i = 0; i < len; i++) {
-      int d1 = (bytes[i] >> 4) & 0xf;
-      int d2 = (bytes[i]) & 0xf;
-
-      if (d1 < 10)
-        sb.append((char) ('0' + d1));
-      else
-        sb.append((char) ('a' + d1 - 10));
-
-      if (d2 < 10)
-        sb.append((char) ('0' + d2));
-      else
-        sb.append((char) ('a' + d2 - 10));
-    }
-
-    return sb.toString();
   }
 
   public void close()

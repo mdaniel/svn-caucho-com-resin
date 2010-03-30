@@ -49,8 +49,6 @@ public class TableIterator {
   private final static byte []_nullBuffer = new byte[256];
   
   private Table _table;
-  private Column []_columns;
-  
   private Transaction _xa;
   private QueryContext _queryContext;
 
@@ -79,7 +77,7 @@ public class TableIterator {
       throw new IllegalStateException(L.l("iterating with closed table."));
     }
       
-    _columns = table.getColumns();
+    table.getColumns();
 
     _rowLength = table.getRowLength();
     _rowEnd = table.getRowEnd();
@@ -116,7 +114,7 @@ public class TableIterator {
    */
   public final long getRowAddress()
   {
-    return _table.blockIdToAddress(_blockId) + _rowOffset;
+    return BlockStore.blockIdToAddress(_blockId) + _rowOffset;
   }
 
   /**
@@ -182,12 +180,6 @@ public class TableIterator {
     _rowOffset = Integer.MAX_VALUE / 2;
     _queryContext = null;
     _xa = xa;
-
-    // XXX:
-    /*
-    if (! _xa.isAutoCommit())
-      _xa.lockRead(_table.getLock());
-    */
   }
 
   public void initRow()
@@ -293,6 +285,22 @@ public class TableIterator {
   /**
    * Sets the next row.
    */
+  public boolean isValidRow(long rowAddr)
+    throws IOException
+  {
+    long blockId = _table.addressToBlockId(rowAddr);
+    
+    if (! _table.isRowBlock(blockId))
+      return false;
+    
+    int rowOffset = (int) (rowAddr & BlockStore.BLOCK_OFFSET_MASK);
+    
+    return (rowOffset % _table.getRowLength() == 0);
+  }
+
+  /**
+   * Sets the next row.
+   */
   public void setRow(long rowAddr)
     throws IOException
   {
@@ -356,7 +364,7 @@ public class TableIterator {
   public String getString(Column column)
     throws SQLException
   {
-    return column.getString(_buffer, _rowOffset);
+    return column.getString(getBlockId(), _buffer, _rowOffset);
   }
 
   /**
@@ -369,7 +377,7 @@ public class TableIterator {
   public int getInteger(Column column)
     throws SQLException
   {
-    return column.getInteger(_buffer, _rowOffset);
+    return column.getInteger(getBlockId(), _buffer, _rowOffset);
   }
 
   /**
@@ -382,7 +390,7 @@ public class TableIterator {
   public long getLong(Column column)
     throws SQLException
   {
-    return column.getLong(_buffer, _rowOffset);
+    return column.getLong(getBlockId(), _buffer, _rowOffset);
   }
 
   /**
@@ -395,7 +403,7 @@ public class TableIterator {
   public double getDouble(Column column)
     throws SQLException
   {
-    return column.getDouble(_buffer, _rowOffset);
+    return column.getDouble(getBlockId(), _buffer, _rowOffset);
   }
 
   public boolean isEqual(Column column, byte []matchBuffer)
@@ -433,7 +441,7 @@ public class TableIterator {
   public void evalToResult(Column column, SelectResult result)
     throws SQLException
   {
-    column.evalToResult(_buffer, _rowOffset, result);
+    column.evalToResult(_blockId, _buffer, _rowOffset, result);
   }
 
   public void delete()

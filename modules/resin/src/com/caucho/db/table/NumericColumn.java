@@ -67,9 +67,10 @@ class NumericColumn extends Column {
   /**
    * Returns the column's type code.
    */
-  public int getTypeCode()
+  @Override
+  public ColumnType getTypeCode()
   {
-    return NUMERIC;
+    return ColumnType.NUMERIC;
   }
 
   /**
@@ -91,7 +92,8 @@ class NumericColumn extends Column {
   /**
    * Returns the column's Java type.
    */
-  public Class getJavaType()
+  @Override
+  public Class<?> getJavaType()
   {
     return double.class;
   }
@@ -99,6 +101,7 @@ class NumericColumn extends Column {
   /**
    * Returns the column's declaration size.
    */
+  @Override
   public int getDeclarationSize()
   {
     return 8;
@@ -107,6 +110,7 @@ class NumericColumn extends Column {
   /**
    * Returns the column's length
    */
+  @Override
   public int getLength()
   {
     return 8;
@@ -119,6 +123,7 @@ class NumericColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
     throws SQLException
   {
@@ -134,7 +139,8 @@ class NumericColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  public String getString(byte []block, int rowOffset)
+  @Override
+  public String getString(long blockId, byte []block, int rowOffset)
     throws SQLException
   {
     if (isNull(block, rowOffset))
@@ -162,6 +168,7 @@ class NumericColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   public void setDouble(Transaction xa, byte []block, int rowOffset, double v)
     throws SQLException
   {
@@ -175,7 +182,8 @@ class NumericColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
-  public double getDouble(Transaction xa, byte []block, int rowOffset)
+  @Override
+  public double getDouble(long blockId, byte []block, int rowOffset)
     throws SQLException
   {
     return (double) getNumeric(block, rowOffset) / _offset;
@@ -184,7 +192,9 @@ class NumericColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  @Override
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
     throws SQLException
   {
     if (isNull(block, rowOffset)) {
@@ -192,7 +202,7 @@ class NumericColumn extends Column {
       return;
     }
 
-    result.writeString(getString(block, rowOffset));
+    result.writeString(getString(blockId, block, rowOffset));
   }
   
   /**
@@ -205,6 +215,7 @@ class NumericColumn extends Column {
    *
    * @return the length of the value
    */
+  @Override
   int evalToBuffer(byte []block, int rowOffset,
 		   byte []buffer, int bufferOffset)
     throws SQLException
@@ -227,6 +238,7 @@ class NumericColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa,
 	       byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
@@ -241,6 +253,7 @@ class NumericColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -267,6 +280,7 @@ class NumericColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
+  @Override
   void setIndex(Transaction xa,
 		byte []block, int rowOffset,
 		long rowAddr, QueryContext context)

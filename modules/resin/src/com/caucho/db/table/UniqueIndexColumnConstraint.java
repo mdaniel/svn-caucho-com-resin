@@ -29,6 +29,7 @@
 
 package com.caucho.db.table;
 
+import com.caucho.config.Module;
 import com.caucho.db.index.BTree;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
@@ -41,6 +42,7 @@ import java.sql.SQLException;
 /**
  * Validity constraints.
  */
+@Module
 public class UniqueIndexColumnConstraint extends Constraint {
   private final static L10N L = new L10N(UniqueIndexColumnConstraint.class);
   
@@ -57,6 +59,7 @@ public class UniqueIndexColumnConstraint extends Constraint {
   /**
    * validate the constraint.
    */
+  @Override
   public void validate(TableIterator []sourceRows,
 		       QueryContext context, Transaction xa)
     throws SQLException
@@ -80,9 +83,10 @@ public class UniqueIndexColumnConstraint extends Constraint {
 
       if (value != 0) {
 	Table table = sourceRow.getTable();
+	long blockId = sourceRow.getBlockId();
 	
 	throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
-				   _column.getString(sourceBuffer,
+				   _column.getString(blockId, sourceBuffer,
 						     sourceOffset),
 				   table.getName(),
 				   _column.getName()));

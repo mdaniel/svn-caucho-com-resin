@@ -32,6 +32,7 @@ package com.caucho.db.lock;
 /**
  * Wraps an exception in a SQLException wrapper.
  */
+@SuppressWarnings("serial")
 public class LockTimeoutException extends RuntimeException {
   private Throwable _cause;
 

@@ -43,10 +43,10 @@ final class ColumnExpr extends Expr {
   private final int _columnIndex;
 
   private final String _name;
-  private final Class _type;
+  private final Class<?> _type;
 
   ColumnExpr(String name, Table table, int tableIndex,
-             int columnIndex, Class type)
+             int columnIndex, Class<?> type)
   {
     _name = name;
     _table = table;

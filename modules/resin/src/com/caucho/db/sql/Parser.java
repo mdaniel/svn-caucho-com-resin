@@ -852,8 +852,11 @@ public class Parser {
       factory.addVarchar(name, 255);
     }
     else if (type.equalsIgnoreCase("decimal")
-	     || type.equalsIgnoreCase("numeric")) {
+             || type.equalsIgnoreCase("numeric")) {
       factory.addNumeric(name, length, scale);
+    }
+    else if (type.equalsIgnoreCase("identity")) {
+      factory.addIdentity(name);
     }
     else
       throw error(L.l("Unknown type {0}", type));

@@ -28,6 +28,7 @@
 
 package com.caucho.db.table;
 
+import com.caucho.config.Module;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
@@ -39,6 +40,7 @@ import java.sql.SQLException;
 /**
  * Validity constraints.
  */
+@Module
 public class UniqueConstraint extends Constraint {
   private final static L10N L = new L10N(UniqueConstraint.class);
   private final Column []_uniqueSet;
@@ -54,13 +56,13 @@ public class UniqueConstraint extends Constraint {
   /**
    * validate the constraint.
    */
+  @Override
   public void validate(TableIterator []sourceRows,
 		       QueryContext queryContext, Transaction xa)
     throws SQLException
   {
     TableIterator sourceRow = sourceRows[0];
-    String value = null;
-
+    
     Table table = sourceRow.getTable();
     TableIterator iter = table.createTableIterator();
 
@@ -86,8 +88,6 @@ public class UniqueConstraint extends Constraint {
 	  for (int i = 0; i < _uniqueSet.length; i++) {
 	    Column column = _uniqueSet[i];
 
-	    int columnOffset = column.getColumnOffset();
-
 	    if (! column.isEqual(iterBuffer, iterOffset,
 				 sourceBuffer, sourceOffset)) {
 	      isMatch = false;
@@ -95,11 +95,14 @@ public class UniqueConstraint extends Constraint {
 	    }
 	  }
 
-	  if (isMatch)
-	    throw new SQLException(L.l("`{0}' in {1}.{2} fails uniqueness constraint.",
-				       _uniqueSet[0].getString(iterBuffer, iterOffset),
+	  if (isMatch) {
+	    long blockId = iter.getBlockId();
+	    
+	    throw new SQLException(L.l("'{0}' in {1}.{2} fails uniqueness constraint.",
+				       _uniqueSet[0].getString(blockId, iterBuffer, iterOffset),
 				       table.getName(),
 				       _uniqueSet[0].getName()));
+	  }
 	}
       }
     } catch (IOException e) {

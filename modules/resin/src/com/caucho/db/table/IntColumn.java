@@ -57,16 +57,16 @@ class IntColumn extends Column {
    * Returns the column's type code.
    */
   @Override
-  public int getTypeCode()
+  public ColumnType getTypeCode()
   {
-    return INT;
+    return ColumnType.INT;
   }
 
   /**
    * Returns the column's Java type.
    */
   @Override
-  public Class getJavaType()
+  public Class<?> getJavaType()
   {
     return int.class;
   }
@@ -105,12 +105,12 @@ class IntColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public String getString(byte []block, int rowOffset)
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
     else
-      return String.valueOf(getInteger(block, rowOffset));
+      return String.valueOf(getInteger(blockId, block, rowOffset));
   }
   
   /**
@@ -136,7 +136,7 @@ class IntColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public int getInteger(byte []block, int rowOffset)
+  public int getInteger(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return 0;
@@ -192,9 +192,9 @@ class IntColumn extends Column {
    * @param rowOffset the offset of the row in the block
    */
   @Override
-  public long getLong(byte []block, int rowOffset)
+  public long getLong(long blockId, byte []block, int rowOffset)
   {
-    return getInteger(block, rowOffset);
+    return getInteger(blockId, block, rowOffset);
   }
   
   /**
@@ -220,7 +220,8 @@ class IntColumn extends Column {
    * Evaluates the column to a stream.
    */
   @Override
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();
@@ -229,7 +230,7 @@ class IntColumn extends Column {
 
     int startOffset = rowOffset + _columnOffset;
     
-    result.write(Column.INT);
+    result.write(ColumnType.INT.ordinal());
     result.write(block, startOffset, 4);
   }
   

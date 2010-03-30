@@ -28,15 +28,14 @@
 
 package com.caucho.db.table;
 
+import java.sql.SQLException;
+
 import com.caucho.db.index.BTree;
-import com.caucho.db.index.IntKeyCompare;
 import com.caucho.db.index.KeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.xa.Transaction;
-
-import java.sql.SQLException;
 
 /**
  * Represents a 16-bit integer column.
@@ -56,15 +55,17 @@ class ShortColumn extends Column {
   /**
    * Returns the column's type code.
    */
-  public int getTypeCode()
+  @Override
+  public ColumnType getTypeCode()
   {
-    return SHORT;
+    return ColumnType.SHORT;
   }
 
   /**
    * Returns the column's Java type.
    */
-  public Class getJavaType()
+  @Override
+  public Class<?> getJavaType()
   {
     return short.class;
   }
@@ -72,6 +73,7 @@ class ShortColumn extends Column {
   /**
    * Returns the column's declaration size.
    */
+  @Override
   public int getDeclarationSize()
   {
     return 2;
@@ -80,6 +82,7 @@ class ShortColumn extends Column {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return 2;
@@ -88,6 +91,7 @@ class ShortColumn extends Column {
   /**
    * Returns the key compare for the column.
    */
+  @Override
   public KeyCompare getIndexKeyCompare()
   {
     return null;
@@ -99,12 +103,13 @@ class ShortColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  public String getString(byte []block, int rowOffset)
+  @Override
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
     else
-      return String.valueOf(getInteger(block, rowOffset));
+      return String.valueOf(getInteger(blockId, block, rowOffset));
   }
   
   /**
@@ -114,6 +119,7 @@ class ShortColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
     if (str == null)
@@ -128,7 +134,8 @@ class ShortColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  public int getInteger(byte []block, int rowOffset)
+  @Override
+  public int getInteger(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return 0;
@@ -149,6 +156,7 @@ class ShortColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setInteger(Transaction xa, byte []block, int rowOffset, int value)
   {
     int offset = rowOffset + _columnOffset;
@@ -166,6 +174,7 @@ class ShortColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param value the value to store
    */
+  @Override
   void setLong(Transaction xa, byte []block, int rowOffset, long value)
   {
     setInteger(xa, block, rowOffset, (int) value);
@@ -177,9 +186,10 @@ class ShortColumn extends Column {
    * @param block the block's buffer
    * @param rowOffset the offset of the row in the block
    */
-  public long getLong(byte []block, int rowOffset)
+  @Override
+  public long getLong(long blockId, byte []block, int rowOffset)
   {
-    return getInteger(block, rowOffset);
+    return getInteger(blockId, block, rowOffset);
   }
   
   /**
@@ -189,6 +199,7 @@ class ShortColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param expr the expression to store
    */
+  @Override
   void setExpr(Transaction xa,
 	       byte []block, int rowOffset,
 	       Expr expr, QueryContext context)
@@ -203,7 +214,9 @@ class ShortColumn extends Column {
   /**
    * Evaluates the column to a stream.
    */
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  @Override
+  public void evalToResult(long blockId, byte []block, int rowOffset,
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();
@@ -212,7 +225,7 @@ class ShortColumn extends Column {
 
     int startOffset = rowOffset + _columnOffset;
     
-    result.write(Column.SHORT);
+    result.write(ColumnType.SHORT.ordinal());
     result.write(block, startOffset, 2);
   }
   
@@ -226,6 +239,7 @@ class ShortColumn extends Column {
    *
    * @return the length of the value
    */
+  @Override
   int evalToBuffer(byte []block, int rowOffset,
 		   byte []buffer, int bufferOffset)
     throws SQLException
@@ -244,6 +258,7 @@ class ShortColumn extends Column {
   /**
    * Returns true if the items in the given rows match.
    */
+  @Override
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
@@ -264,6 +279,7 @@ class ShortColumn extends Column {
    * @param rowOffset the offset of the row in the block
    * @param rowAddr the address of the row
    */
+  @Override
   void setIndex(Transaction xa,
 		byte []block, int rowOffset,
 		long rowAddr, QueryContext context)

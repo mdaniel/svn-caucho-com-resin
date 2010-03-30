@@ -29,38 +29,34 @@
 
 package com.caucho.jms.file;
 
-import java.io.*;
-import java.lang.IllegalStateException;
-import java.util.logging.*;
-
-import javax.management.ObjectName;
-import javax.sql.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.Serializable;
 import java.sql.Connection;
-import java.sql.Statement;
 import java.sql.PreparedStatement;
-import java.sql.SQLException;
 import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-//import javax.jms.*;
-import javax.annotation.*;
+import javax.sql.DataSource;
 
-import com.caucho.hessian.io.Hessian2Output;
+import com.caucho.config.ConfigException;
+import com.caucho.db.jdbc.DataSourceImpl;
 import com.caucho.hessian.io.Hessian2Input;
-//import com.caucho.jms.queue.*;
+import com.caucho.hessian.io.Hessian2Output;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.FileQueueStoreMXBean;
-import com.caucho.config.ConfigException;
-import com.caucho.db.*;
-import com.caucho.db.jdbc.*;
+import com.caucho.server.cluster.Server;
+import com.caucho.util.FreeList;
 import com.caucho.util.JdbcUtil;
 import com.caucho.util.L10N;
-import com.caucho.java.*;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.resin.*;
-import com.caucho.util.FreeList;
-import com.caucho.vfs.*;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.TempOutputStream;
 
 /**
  * Implements a file queue.
@@ -84,7 +80,6 @@ public class FileQueueStore
   private DataSource _db;
   private String _queueTable;
   private String _messageTable;
-  private boolean _isServer;
   private FileQueueStoreAdmin _admin;
 
   public FileQueueStore(Path path, String serverId, ClassLoader loader)
@@ -187,8 +182,7 @@ public class FileQueueStore
 		   long expireTime)
   {
     StoreConnection conn = null;
-    boolean isValid = false;
-
+    
     try {
       TempOutputStream os = new TempOutputStream();
       
@@ -220,8 +214,6 @@ public class FileQueueStore
 
       rs.close();
       
-      isValid = true;
-
       return id;
     } catch (RuntimeException e) {
       throw e;
@@ -235,7 +227,7 @@ public class FileQueueStore
   /**
    * Retrieves a message from the persistent store.
    */
-  boolean receiveStart(byte []queueHash, FileQueueImpl fileQueue)
+  boolean receiveStart(byte []queueHash, FileQueueImpl<?> fileQueue)
   {
     StoreConnection conn = null;
     boolean isValid = false;
@@ -257,8 +249,6 @@ public class FileQueueStore
 	int priority = rs.getInt(3);
 	long expire = rs.getLong(4);
 
-	int type = 0;
-	  
 	fileQueue.addEntry(id, msgId, -1, priority, expire, null);
       }
 
@@ -340,7 +330,7 @@ public class FileQueueStore
 
       if (rs.next()) {
 	long id = rs.getLong(1);
-
+	
 	rs.close();
 
 	PreparedStatement deleteStmt = conn.prepareDelete();
@@ -359,35 +349,6 @@ public class FileQueueStore
 
     return null;
   }
-
-  /**
-   * Retrieves a message from the persistent store.
-   */
-  /*
-  public void remove(String id)
-  {
-    StoreConnection conn = null;
-    boolean isValid = false;
-    
-    try {
-      conn = getConnection();
-
-      PreparedStatement removeStmt = conn.prepareRemove();
-      
-      removeStmt.setString(1, id);
-
-      removeStmt.executeUpdate();
-      
-      isValid = true;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    } finally {
-      freeConnection(conn, isValid);
-    }
-  }
-  */
 
   /**
    * Retrieves a message from the persistent store.
@@ -454,7 +415,7 @@ public class FileQueueStore
     stmt.executeUpdate(sql);
 
     sql = ("create table " + _messageTable + " ("
-	   + "  id bigint primary key auto_increment,"
+	   + "  id identity primary key,"
 	   + "  queue_id binary(32),"
 	   + "  priority integer,"
 	   + "  expire datetime,"
@@ -608,7 +569,7 @@ public class FileQueueStore
       if (_receiveStartStmt == null) {
 	String sql = ("select id,msg_id,priority,expire"
 		      + " from " + _messageTable
-		      + " WHERE queue_id=? AND is_valid=1 ORDER BY id"
+		      + " WHERE queue_id=? AND is_valid=1" // ORDER BY id"
 		      + " LIMIT " + START_LIMIT);
     
 	_receiveStartStmt = _conn.prepareStatement(sql);

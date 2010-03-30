@@ -46,15 +46,17 @@ class BigStringColumn extends BlobColumn {
   /**
    * Returns the type code for the column.
    */
-  public int getTypeCode()
+  @Override
+  public ColumnType getTypeCode()
   {
-    return VARCHAR;
+    return ColumnType.VARCHAR;
   }
 
   /**
    * Returns the java type.
    */
-  public Class getJavaType()
+  @Override
+  public Class<?> getJavaType()
   {
     return java.sql.Blob.class;
   }
@@ -62,6 +64,7 @@ class BigStringColumn extends BlobColumn {
   /**
    * Returns the declaration size
    */
+  @Override
   public int getDeclarationSize()
   {
     return _size;
@@ -70,6 +73,7 @@ class BigStringColumn extends BlobColumn {
   /**
    * Returns the column's size.
    */
+  @Override
   public int getLength()
   {
     return 128;

@@ -29,26 +29,15 @@
 package com.caucho.db.sql;
 
 import java.io.InputStream;
-import java.sql.SQLException;
 
 import com.caucho.db.table.Column;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.util.QDate;
 
 public class Data {
-  private static final int NULL = Column.NONE;
-  private static final int BOOLEAN = Column.BOOLEAN;
-  private static final int STRING = Column.VARCHAR;
-  private static final int INTEGER = Column.INT;
-  private static final int LONG = Column.LONG;
-  private static final int DOUBLE = Column.DOUBLE;
-  private static final int DATE = Column.DATE;
-  private static final int BYTES = Column.BINARY;
-  private static final int BINARY_STREAM = Column.VARBINARY;
-  // private static final int EXPR = BINARY + 1;
-
   private Column _column;
 
-  private int _type;
+  private ColumnType _type = ColumnType.NONE;
   private boolean _booleanData;
   private String _stringData;
   private int _intData;
@@ -62,7 +51,7 @@ public class Data {
 
   public void clear()
   {
-    _type = NULL;
+    _type = ColumnType.NONE;
   }
 
   public void setColumn(Column column)
@@ -75,7 +64,7 @@ public class Data {
     return _column;
   }
 
-  public int getType()
+  public ColumnType getType()
   {
     return _type;
   }
@@ -85,7 +74,7 @@ public class Data {
    */
   public boolean isNull()
   {
-    return _type == NULL;
+    return _type == ColumnType.NONE;
   }
 
   /**
@@ -94,22 +83,22 @@ public class Data {
   public void setString(String value)
   {
     if (value == null)
-      _type = NULL;
+      _type = ColumnType.NONE;
     else {
-      _type = STRING;
+      _type = ColumnType.VARCHAR;
       _stringData = value;
     }
   }
 
   public void setDate(long value)
   {
-    _type = DATE;
+    _type = ColumnType.DATE;
     _longData = value;
   }
 
   public boolean isBinaryStream()
   {
-    return _type == BINARY_STREAM;
+    return _type == ColumnType.BLOB;
   }
 
   /**
@@ -117,7 +106,7 @@ public class Data {
    */
   public void setBinaryStream(InputStream is, int length)
   {
-    _type = BINARY_STREAM;
+    _type = ColumnType.BLOB;
     _binaryStream = is;
     _streamLength = length;
   }
@@ -125,10 +114,10 @@ public class Data {
   public InputStream getBinaryStream()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return null;
 
-    case BINARY_STREAM:
+    case BLOB:
       return _binaryStream;
 
     default:
@@ -138,17 +127,17 @@ public class Data {
 
   public void setBytes(byte []bytes)
   {
-    _type = BYTES;
+    _type = ColumnType.BINARY;
     _bytes = bytes;
   }
 
   public byte []getBytes()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return null;
 
-    case BYTES:
+    case BINARY:
       return _bytes;
 
     default:
@@ -162,13 +151,13 @@ public class Data {
   public String getString()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return null;
 
     case BOOLEAN:
       return _booleanData ? "true" : "false";
 
-    case INTEGER:
+    case INT:
       return String.valueOf(_intData);
 
     case LONG:
@@ -177,13 +166,13 @@ public class Data {
     case DOUBLE:
       return String.valueOf(_doubleData);
 
-    case STRING:
+    case VARCHAR:
       return _stringData;
 
     case DATE:
       return QDate.formatISO8601(_longData);
 
-    case BYTES:
+    case BINARY:
       {
         StringBuilder sb = new StringBuilder();
         int len = _bytes.length;
@@ -204,7 +193,7 @@ public class Data {
    */
   public void setBoolean(boolean value)
   {
-    _type = BOOLEAN;
+    _type = ColumnType.BOOLEAN;
     _booleanData = value;
   }
 
@@ -214,13 +203,13 @@ public class Data {
   public int getBoolean()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return Expr.UNKNOWN;
 
     case BOOLEAN:
       return _booleanData ? Expr.TRUE : Expr.FALSE;
 
-    case INTEGER:
+    case INT:
       return _intData != 0 ? Expr.TRUE : Expr.FALSE;
 
     case LONG:
@@ -229,7 +218,7 @@ public class Data {
     case DOUBLE:
       return _doubleData != 0 ? Expr.TRUE : Expr.FALSE;
 
-    case STRING:
+    case VARCHAR:
       return _stringData.equalsIgnoreCase("y") ? Expr.TRUE : Expr.FALSE;
 
     default:
@@ -242,7 +231,7 @@ public class Data {
    */
   public void setInt(int value)
   {
-    _type = INTEGER;
+    _type = ColumnType.INT;
     _intData = value;
   }
 
@@ -252,13 +241,13 @@ public class Data {
   public int getInt()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return 0;
 
     case BOOLEAN:
       return _booleanData ? 1 : 0;
 
-    case INTEGER:
+    case INT:
       return _intData;
 
     case LONG:
@@ -267,7 +256,7 @@ public class Data {
     case DOUBLE:
       return (int) _doubleData;
 
-    case STRING:
+    case VARCHAR:
       return Integer.parseInt(_stringData);
 
     default:
@@ -280,7 +269,7 @@ public class Data {
    */
   public void setLong(long value)
   {
-    _type = LONG;
+    _type = ColumnType.LONG;
     _longData = value;
   }
 
@@ -290,13 +279,13 @@ public class Data {
   public long getLong()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return 0;
 
     case BOOLEAN:
       return _booleanData ? 1 : 0;
 
-    case INTEGER:
+    case INT:
       return _intData;
 
     case LONG:
@@ -305,7 +294,7 @@ public class Data {
     case DOUBLE:
       return (long) _doubleData;
 
-    case STRING:
+    case VARCHAR:
       return Long.parseLong(_stringData);
 
     default:
@@ -319,13 +308,13 @@ public class Data {
   public long getDate()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return 0;
 
     case BOOLEAN:
       return _booleanData ? 1 : 0;
 
-    case INTEGER:
+    case INT:
       return _intData;
 
     case LONG:
@@ -334,7 +323,7 @@ public class Data {
     case DOUBLE:
       return (long) _doubleData;
 
-    case STRING:
+    case VARCHAR:
       return Long.parseLong(_stringData);
 
     default:
@@ -347,7 +336,7 @@ public class Data {
    */
   public void setDouble(double value)
   {
-    _type = DOUBLE;
+    _type = ColumnType.DOUBLE;
     _doubleData = value;
   }
 
@@ -356,14 +345,17 @@ public class Data {
    */
   public double getDouble()
   {
+    if (_type == null)
+      return 0;
+    
     switch (_type) {
-    case NULL:
+    case NONE:
       return 0;
 
     case BOOLEAN:
       return _booleanData ? 1 : 0;
 
-    case INTEGER:
+    case INT:
       return _intData;
 
     case LONG:
@@ -372,7 +364,7 @@ public class Data {
     case DOUBLE:
       return _doubleData;
 
-    case STRING:
+    case VARCHAR:
       return Double.parseDouble(_stringData);
 
     default:
@@ -386,7 +378,7 @@ public class Data {
   public void copyTo(Data dst)
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       dst.setString(null);
       break;
 
@@ -394,7 +386,7 @@ public class Data {
       dst.setBoolean(_booleanData);
       break;
 
-    case INTEGER:
+    case INT:
       dst.setInt(_intData);
       break;
 
@@ -406,7 +398,7 @@ public class Data {
       dst.setDouble(_doubleData);
       break;
 
-    case STRING:
+    case VARCHAR:
       dst.setString(_stringData);
       break;
 
@@ -460,13 +452,13 @@ public class Data {
   public int hashCode()
   {
     switch (_type) {
-    case NULL:
+    case NONE:
       return 17;
 
     case BOOLEAN:
       return _booleanData ? 1 : 0;
 
-    case INTEGER:
+    case INT:
       return _intData;
 
     case LONG:
@@ -475,7 +467,7 @@ public class Data {
     case DOUBLE:
       return (int) _doubleData;
 
-    case STRING:
+    case VARCHAR:
       return _stringData.hashCode();
 
     default:
@@ -499,13 +491,13 @@ public class Data {
       return false;
 
     switch (_type) {
-    case NULL:
+    case NONE:
       return false;
 
     case BOOLEAN:
       return _booleanData == data._booleanData;
 
-    case INTEGER:
+    case INT:
       return _intData == data._intData;
 
     case LONG:
@@ -514,7 +506,7 @@ public class Data {
     case DOUBLE:
       return _doubleData == data._doubleData;
 
-    case STRING:
+    case VARCHAR:
       return _stringData.equals(data._stringData);
 
     default:

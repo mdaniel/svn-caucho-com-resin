@@ -29,24 +29,19 @@
 
 package com.caucho.db.table;
 
+import java.sql.SQLException;
+
 import com.caucho.db.index.BTree;
-import com.caucho.db.index.KeyCompare;
 import com.caucho.db.index.BinaryKeyCompare;
+import com.caucho.db.index.KeyCompare;
 import com.caucho.db.index.SqlIndexAlreadyExistsException;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.xa.Transaction;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 
-import java.sql.SQLException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 class BinaryColumn extends Column {
-  private static final Logger log
-    = Logger.getLogger(BinaryColumn.class.getName());
   private static final L10N L = new L10N(BinaryColumn.class);
   
   private final int _length;
@@ -73,16 +68,16 @@ class BinaryColumn extends Column {
    * Returns the type code for the column.
    */
   @Override
-  public int getTypeCode()
+  public ColumnType getTypeCode()
   {
-    return BINARY;
+    return ColumnType.BINARY;
   }
 
   /**
    * Returns the java type.
    */
   @Override
-  public Class getJavaType()
+  public Class<?> getJavaType()
   {
     return String.class;
   }
@@ -154,7 +149,7 @@ class BinaryColumn extends Column {
   }
   
   @Override
-  public String getString(byte []block, int rowOffset)
+  public String getString(long blockId, byte []block, int rowOffset)
   {
     if (isNull(block, rowOffset))
       return null;
@@ -281,7 +276,8 @@ class BinaryColumn extends Column {
    * Evaluates the column to a stream.
    */
   @Override
-  public void evalToResult(byte []block, int rowOffset, SelectResult result)
+  public void evalToResult(long blockId, byte []block, int rowOffset, 
+                           SelectResult result)
   {
     if (isNull(block, rowOffset)) {
       result.writeNull();
@@ -372,23 +368,7 @@ class BinaryColumn extends Column {
 
     if (index != null) {
       try {
-        int len = getLength();
-
-        /*
-        if (len > 3) {
-          int d1 = block[rowOffset + _columnOffset + len - 1];
-          int d2 = block[rowOffset + _columnOffset + len - 2];
-          int d3 = block[rowOffset + _columnOffset + len - 3];
-          
-          if (d1 == 0 && d2 == 0 && d3 == 0) {
-            System.out.println("INSERT: " + this + " " + rowOffset + " " + getDebugString(block, rowOffset));
-
-            Thread.dumpStack();
-          }
-        }
-        */
-
-	index.insert(block,
+        index.insert(block,
 		     rowOffset + _columnOffset, getLength(),
 		     rowAddr,
 		     false);

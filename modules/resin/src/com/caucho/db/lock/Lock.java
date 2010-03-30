@@ -29,14 +29,13 @@
 
 package com.caucho.db.lock;
 
-import com.caucho.util.Alarm;
-import com.caucho.util.L10N;
-
-import java.sql.SQLException;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
 
 /**
  * Locking for tables/etc.
@@ -54,21 +53,12 @@ public final class Lock {
   private static final long READ = 1L;
   private static final long FAIL_MASK = 0x8000800080008000L;
 
-  private static final long RW_LOCK = WRITE_LOCK|WRITE|READ_LOCK|READ;
-
   private final String _id;
 
   private final Object _lock = new Object();
-  private final Object _testLock = new Object();
-
   private final AtomicLong _lockCount = new AtomicLong();
-  private final AtomicLong _activeLockCount = new AtomicLong();
-
   private LockNode _lockHead;
   private LockNode _lockTail;
-
-  private Thread _writeLock;
-  private IllegalStateException _writeExn;
 
   public Lock(String id)
   {

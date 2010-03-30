@@ -30,26 +30,30 @@ package com.caucho.db.table;
 
 import java.sql.SQLException;
 
-import com.caucho.db.index.KeyCompare;
-import com.caucho.db.index.LongKeyCompare;
+import com.caucho.db.block.BlockStore;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.xa.Transaction;
+import com.caucho.util.L10N;
 
 /**
- * Represents a 64-bit long integer column.
+ * Represents the 64-bit long identity value
  */
-class LongColumn extends Column {
+class IdentityColumn extends Column {
+  private static final L10N L = new L10N(IdentityColumn.class);
+  
   /**
-   * Creates a long column.
+   * Creates an identity column.
    *
    * @param row the row the column is being added to
    * @param name the column's name
    */
-  LongColumn(Row row, String name)
+  IdentityColumn(Row row, String name)
   {
     super(row, name);
+    
+    setPrimaryKey(true);
   }
 
   /**
@@ -58,7 +62,7 @@ class LongColumn extends Column {
   @Override
   public ColumnType getTypeCode()
   {
-    return ColumnType.LONG;
+    return ColumnType.IDENTITY;
   }
 
   /**
@@ -76,7 +80,7 @@ class LongColumn extends Column {
   @Override
   public int getDeclarationSize()
   {
-    return 8;
+    return 0;
   }
   
   /**
@@ -85,16 +89,19 @@ class LongColumn extends Column {
   @Override
   public int getLength()
   {
-    return 8;
+    return 0;
   }
 
   /**
-   * Returns the key compare for the column.
+   * Returns true if the column is null.
+   *
+   * @param block the block's buffer
+   * @param rowOffset the offset of the row in the block
    */
   @Override
-  public KeyCompare getIndexKeyCompare()
+  public boolean isNull(byte []block, int rowOffset)
   {
-    return new LongKeyCompare();
+    return false;
   }
   
   /**
@@ -107,10 +114,7 @@ class LongColumn extends Column {
   @Override
   void setString(Transaction xa, byte []block, int rowOffset, String str)
   {
-    if (str == null)
-      setNull(block, rowOffset);
-    else
-      setLong(xa, block, rowOffset, Long.parseLong(str));
+    throw new IllegalStateException(L.l("an IDENTITY column cannot be set"));
   }
   
   /**
@@ -122,10 +126,7 @@ class LongColumn extends Column {
   @Override
   public String getString(long blockId, byte []block, int rowOffset)
   {
-    if (isNull(block, rowOffset))
-      return null;
-    else
-      return String.valueOf(getLong(blockId, block, rowOffset));
+    return "0x" + Long.toHexString(getLong(blockId, block, rowOffset));
   }
   
   /**
@@ -138,7 +139,7 @@ class LongColumn extends Column {
   @Override
   void setInteger(Transaction xa, byte []block, int rowOffset, int value)
   {
-    setLong(xa, block, rowOffset, value);
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**
@@ -163,18 +164,7 @@ class LongColumn extends Column {
   @Override
   void setLong(Transaction xa, byte []block, int rowOffset, long value)
   {
-    int offset = rowOffset + _columnOffset;
-    
-    block[offset++] = (byte) (value >> 56);
-    block[offset++] = (byte) (value >> 48);
-    block[offset++] = (byte) (value >> 40);
-    block[offset++] = (byte) (value >> 32);
-    block[offset++] = (byte) (value >> 24);
-    block[offset++] = (byte) (value >> 16);
-    block[offset++] = (byte) (value >> 8);
-    block[offset++] = (byte) (value);
-
-    setNonNull(block, rowOffset);
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   /**
@@ -186,22 +176,7 @@ class LongColumn extends Column {
   @Override
   public long getLong(long blockId, byte []block, int rowOffset)
   {
-    if (isNull(block, rowOffset))
-      return 0;
-    
-    int offset = rowOffset + _columnOffset;
-    long value = 0;
-    
-    value = (block[offset++] & 0xffL) << 56;
-    value |= (block[offset++] & 0xffL) << 48;
-    value |= (block[offset++] & 0xffL) << 40;
-    value |= (block[offset++] & 0xffL) << 32;
-    value |= (block[offset++] & 0xffL) << 24;
-    value |= (block[offset++] & 0xffL) << 16;
-    value |= (block[offset++] & 0xffL) << 8;
-    value |= (block[offset++] & 0xffL);
-
-    return value;
+    return (blockId & BlockStore.BLOCK_MASK) + rowOffset;
   }
   
   /**
@@ -229,10 +204,7 @@ class LongColumn extends Column {
 	       Expr expr, QueryContext context)
     throws SQLException
   {
-    if (expr.isNull(context))
-      setNull(block, rowOffset);
-    else
-      setLong(xa, block, rowOffset, expr.evalLong(context));
+    long value = expr.evalLong(context);
   }
 
   /**
@@ -243,10 +215,7 @@ class LongColumn extends Column {
 		  TableIterator iter, Expr expr, QueryContext context)
     throws SQLException
   {
-    setLong(xa, iter.getBuffer(), iter.getRowOffset(),
-            expr.evalLong(context));
-    
-    iter.setDirty();
+      throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -256,12 +225,7 @@ class LongColumn extends Column {
   public void evalToResult(long blockId, byte []block, int rowOffset,
                            SelectResult result)
   {
-    if (isNull(block, rowOffset)) {
-      result.writeNull();
-      return;
-    }
-
-    result.writeLong(getLong(blockId, block, rowOffset));
+    result.writeLong((blockId & BlockStore.BLOCK_MASK) + rowOffset);
   }
   
   /**
@@ -279,15 +243,7 @@ class LongColumn extends Column {
 		   byte []buffer, int bufferOffset)
     throws SQLException
   {
-    if (isNull(block, rowOffset))
-      return 0;
-
-    int startOffset = rowOffset + _columnOffset;
-    int len = 8;
-
-    System.arraycopy(block, startOffset, buffer, bufferOffset, len);
-
-    return len;
+      throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -297,19 +253,6 @@ class LongColumn extends Column {
   public boolean isEqual(byte []block1, int rowOffset1,
 			 byte []block2, int rowOffset2)
   {
-    if (isNull(block1, rowOffset1) != isNull(block2, rowOffset2))
-      return false;
-
-    int startOffset1 = rowOffset1 + _columnOffset;
-    int startOffset2 = rowOffset2 + _columnOffset;
-
-    return (block1[startOffset1 + 0] == block2[startOffset2 + 0] &&
-	    block1[startOffset1 + 1] == block2[startOffset2 + 1] &&
-	    block1[startOffset1 + 2] == block2[startOffset2 + 2] &&
-	    block1[startOffset1 + 3] == block2[startOffset2 + 3] &&
-	    block1[startOffset1 + 4] == block2[startOffset2 + 4] &&
-	    block1[startOffset1 + 5] == block2[startOffset2 + 5] &&
-	    block1[startOffset1 + 6] == block2[startOffset2 + 6] &&
-	    block1[startOffset1 + 7] == block2[startOffset2 + 7]);
+    throw new UnsupportedOperationException(getClass().getName());
   }
- }
+}

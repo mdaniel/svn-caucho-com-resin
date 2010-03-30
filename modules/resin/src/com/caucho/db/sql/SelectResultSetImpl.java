@@ -33,6 +33,7 @@ import com.caucho.db.blob.BlobInputStream;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.TableIterator;
+import com.caucho.db.table.Column.ColumnType;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.FreeList;
@@ -62,7 +63,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
   private static QDate _date = new QDate();
   
   private Expr []_exprs;
-  private int []_types = new int[32];
+  private ColumnType []_types = new ColumnType[32];
   private int []_offsets = new int[32];
   private int []_lengths = new int[32];
   private BlockStore []_stores = new BlockStore[32];
@@ -119,7 +120,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
     if (_offsets.length < _exprs.length) {
       _offsets = new int[exprs.length];
       _lengths = new int[exprs.length];
-      _types = new int[exprs.length];
+      _types = new ColumnType[exprs.length];
       _stores = new BlockStore[exprs.length];
     }
 
@@ -163,12 +164,17 @@ public class SelectResultSetImpl extends ResultSetImpl {
 
 	int sublen = 0;
 
-	switch (type) {
-	case Column.NONE:
+	if (type < 0)
+	  return false;
+	    
+	ColumnType cType = ColumnType.values()[type];
+
+	switch (cType) {
+	case NONE:
 	  sublen = -1;
 	  break;
 	  
-	case Column.VARCHAR:
+	case VARCHAR:
 	  int l0 = rs.read();
 	  int l1 = rs.read();
 	  int l2 = rs.read();
@@ -180,16 +186,16 @@ public class SelectResultSetImpl extends ResultSetImpl {
 		    (l3));
 	  break;
 
-	case Column.INT:
+	case INT:
 	  sublen = 4;
 	  break;
-	case Column.LONG:
-	case Column.DOUBLE:
-	case Column.DATE:
+	case LONG:
+	case DOUBLE:
+	case DATE:
 	  sublen = 8;
 	  break;
 	  
-	case Column.BLOB:
+	case BLOB:
 	  sublen = 128;
 	  break;
 	  
@@ -197,7 +203,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	  throw new SQLException("Unknown column: " + type);
 	}
 
-	_types[i] = type;
+	_types[i] = cType;
 	_offsets[i] = length;
 	_lengths[i] = sublen;
 
@@ -241,10 +247,10 @@ public class SelectResultSetImpl extends ResultSetImpl {
     int length = _lengths[index];
     
     switch (_types[index]) {
-    case Column.NONE:
+    case NONE:
       return null;
       
-    case Column.INT:
+    case INT:
       {
 	int value = (((buffer[offset] & 0xff) << 24) +
 		     ((buffer[offset + 1] & 0xff) << 16) +
@@ -254,7 +260,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return String.valueOf(value);
       }
       
-    case Column.LONG:
+    case LONG:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -267,7 +273,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return String.valueOf(value);
       }
       
-    case Column.DOUBLE:
+    case DOUBLE:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -280,7 +286,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return String.valueOf(Double.longBitsToDouble(value));
       }
       
-    case Column.DATE:
+    case DATE:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -293,10 +299,10 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return QDate.formatGMT(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return getStringValue(index);
 
-    case Column.BLOB:
+    case BLOB:
       return getBlobString(index);
 
     default:
@@ -368,16 +374,16 @@ public class SelectResultSetImpl extends ResultSetImpl {
     int length = _lengths[index];
     
     switch (_types[index]) {
-    case Column.NONE:
+    case NONE:
       return 0;
       
-    case Column.INT:
+    case INT:
       return (((buffer[offset + 0] & 0xff) << 24) +
 	      ((buffer[offset + 1] & 0xff) << 16) +
 	      ((buffer[offset + 2] & 0xff) << 8) +
 	      ((buffer[offset + 3] & 0xff)));
       
-    case Column.LONG:
+    case LONG:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -390,7 +396,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return (int) value;
       }
       
-    case Column.DOUBLE:
+    case DOUBLE:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -403,7 +409,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return (int) Double.longBitsToDouble(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return Integer.parseInt(getString(index));
 
     default:
@@ -421,17 +427,17 @@ public class SelectResultSetImpl extends ResultSetImpl {
     int length = _lengths[index];
     
     switch (_types[index]) {
-    case Column.NONE:
+    case NONE:
       return 0;
       
-    case Column.INT:
+    case INT:
       return (((buffer[offset] & 0xff) << 24) +
 	      ((buffer[offset + 1] & 0xff) << 16) +
 	      ((buffer[offset + 2] & 0xff) << 8) +
 	      ((buffer[offset + 3] & 0xff)));
       
-    case Column.LONG:
-    case Column.DATE:
+    case LONG:
+    case DATE:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -444,7 +450,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return value;
       }
       
-    case Column.DOUBLE:
+    case DOUBLE:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -457,7 +463,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return (long) Double.longBitsToDouble(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return Long.parseLong(getString(index));
 
     default:
@@ -478,16 +484,16 @@ public class SelectResultSetImpl extends ResultSetImpl {
     int length = _lengths[index];
     
     switch (_types[index]) {
-    case Column.NONE:
+    case NONE:
       return 0;
       
-    case Column.INT:
+    case INT:
       return (((buffer[offset + 0] & 0xff) << 24) +
 	      ((buffer[offset + 1] & 0xff) << 16) +
 	      ((buffer[offset + 2] & 0xff) << 8) +
 	      ((buffer[offset + 3] & 0xff)));
       
-    case Column.LONG:
+    case LONG:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -500,7 +506,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return value;
       }
       
-    case Column.DOUBLE:
+    case DOUBLE:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -513,7 +519,7 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return Double.longBitsToDouble(value);
       }
 
-    case Column.VARCHAR:
+    case VARCHAR:
       return Double.parseDouble(getString(index));
 
     default:
@@ -531,11 +537,11 @@ public class SelectResultSetImpl extends ResultSetImpl {
     int length = _lengths[index];
     
     switch (_types[index]) {
-    case Column.NONE:
+    case NONE:
       return 0;
       
-    case Column.LONG:
-    case Column.DATE:
+    case LONG:
+    case DATE:
       {
 	long value = (((buffer[offset + 0] & 0xffL) << 56) +
 		      ((buffer[offset + 1] & 0xffL) << 48) +
@@ -548,8 +554,8 @@ public class SelectResultSetImpl extends ResultSetImpl {
 	return value;
       }
 
-    case Column.VARCHAR:
-    case Column.BLOB:
+    case VARCHAR:
+    case BLOB:
       {
 	String value = getString(index);
 	
