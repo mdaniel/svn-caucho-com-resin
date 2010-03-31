@@ -1303,6 +1303,15 @@ public class InjectManager
                              Type type,
                              CreationalContext<?> createContext)
   {
+    if (bean instanceof ScopeAdapterBean<?>) {
+      ScopeAdapterBean<?> simpleBean = (ScopeAdapterBean<?>) bean;
+
+      Object adapter = simpleBean.getScopeAdapter(null);
+
+      if (adapter != null)
+        return adapter;
+    }
+    
     CreationalContextImpl<?> env
       = (CreationalContextImpl<?>) createContext;
 
@@ -1326,6 +1335,16 @@ public class InjectManager
     CreationalContext<?> env = createCreationalContext(bean);
 
     return getReference(bean, bean.getBeanClass(), env);
+  }
+
+  /**
+   * Used by ScopeProxy
+   */
+  public Object getInstance(Bean<?> bean)
+  {
+    CreationalContext<?> env = createCreationalContext(bean);
+
+    return getInstanceRec(bean, bean.getBeanClass(), env, this);
   }
 
   private <T> T getInstanceRec(Bean<T> bean,

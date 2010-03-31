@@ -97,12 +97,23 @@ public class WebBeansContextResolver extends ELResolver {
 
     Bean<?> bean = webBeans.resolve(beans);
     
-    CreationalContext<?> cxt = null;
-    
     ConfigContext env = ConfigContext.getCurrent();
     
+    CreationalContext<?> cxt = null;
+    
     if (env != null) {
-      cxt = new CreationalContextImpl(bean, env.getCreationalContext());
+      cxt = env.getCreationalContext();
+      
+      if (cxt instanceof CreationalContextImpl<?>) {
+        CreationalContextImpl<?> cxtImpl = (CreationalContextImpl<?>) cxt;
+        
+        Object value = cxtImpl.get(bean);
+        
+        if (value != null)
+          return value;
+      }
+      
+      cxt = new CreationalContextImpl(bean, cxt);
     }
     else {
       cxt = new CreationalContextImpl(bean, null);

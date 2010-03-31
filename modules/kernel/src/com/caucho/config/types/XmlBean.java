@@ -108,7 +108,7 @@ public class XmlBean<X> extends BeanWrapper<X>
   }
 
   @Override
-  public X create(CreationalContext<X> context)
+  public X create(CreationalContext<X> env)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -116,8 +116,10 @@ public class XmlBean<X> extends BeanWrapper<X>
     try {
       thread.setContextClassLoader(_loader);
 
-      X instance = produce(context);
-      inject(instance, context);
+      X instance = produce(env);
+      env.push(instance);
+      
+      inject(instance, env);
       postConstruct(instance);
 
       return instance;

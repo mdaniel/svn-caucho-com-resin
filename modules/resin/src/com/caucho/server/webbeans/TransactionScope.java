@@ -29,32 +29,28 @@
 
 package com.caucho.server.webbeans;
 
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.context.ContextNotActiveException;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.transaction.Synchronization;
+
+import com.caucho.config.Module;
 import com.caucho.config.TransactionScoped;
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.scope.DestructionListener;
-import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.scope.ContextContainer;
-import com.caucho.server.dispatch.ServletInvocation;
+import com.caucho.config.scope.ScopeContext;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
-
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
-
-import javax.servlet.*;
-import javax.transaction.Synchronization;
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.PassivationCapable;
+import com.caucho.util.L10N;
 
 /**
  * Scope based on the current transaction.
  */
+@Module
 public class TransactionScope extends ScopeContext
 {
+  private static final L10N L = new L10N(TransactionScope.class);
   private TransactionManagerImpl _xaManager;
   
   public TransactionScope()
@@ -85,8 +81,10 @@ public class TransactionScope extends ScopeContext
   {
     TransactionImpl xa = _xaManager.getCurrent();
     
-    if (xa == null)
-      return null;
+    if (xa == null || ! xa.isActive()) {
+      throw new ContextNotActiveException(L.l("'{0}' cannot be created because @TransactionScoped requires an active transaction.",
+                                              bean));
+    }
     
     ScopeContext cxt = (ScopeContext) xa.getResource("caucho.xa.scope");
 
@@ -102,9 +100,11 @@ public class TransactionScope extends ScopeContext
   {
     TransactionImpl xa = _xaManager.getCurrent();
 
-    if (xa == null)
-      return null;
-
+    if (xa == null || ! xa.isActive()) {
+      throw new ContextNotActiveException(L.l("'{0}' cannot be created because @TransactionScoped requires an active transaction.",
+                                              bean));
+    }
+    
     ScopeContext cxt = (ScopeContext) xa.getResource("caucho.xa.scope");
     
     if (cxt == null) {

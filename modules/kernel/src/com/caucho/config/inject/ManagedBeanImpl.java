@@ -59,6 +59,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 
+import com.caucho.config.Module;
 import com.caucho.config.Names;
 import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.program.Arg;
@@ -71,14 +72,13 @@ import com.caucho.util.L10N;
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
+@Module
 public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   implements ScopeAdapterBean<X>
 {
   private static final L10N L = new L10N(ManagedBeanImpl.class);
   private static final Logger log
     = Logger.getLogger(ManagedBeanImpl.class.getName());
-
-  private static final Object []NULL_ARGS = new Object[0];
 
   private AnnotatedType<X> _annotatedType;
 

@@ -198,6 +198,23 @@ public class CodeWriterAttribute extends CodeAttribute {
     write(index);
   }
 
+  public void invokeInterface(String className,
+                              String methodName,
+                              String signature,
+                              int argStack,
+                              int returnStack)
+  {
+    _stack += returnStack - argStack;
+
+    int index = addInterfaceMethodRef(className, methodName, signature);
+    
+    write(CodeVisitor.INVOKEINTERFACE);
+    write(index >> 8);
+    write(index);
+    write(argStack);
+    write(0);
+  }
+
   public void newInstance(String className)
   {
     _stack += 1;
@@ -299,6 +316,14 @@ public class CodeWriterAttribute extends CodeAttribute {
   {
     MethodRefConstant ref
       = getConstantPool().addMethodRef(className, methodName, sig);
+
+    return ref.getIndex();
+  }
+
+  public int addInterfaceMethodRef(String className, String methodName, String sig)
+  {
+    InterfaceMethodRefConstant ref
+      = getConstantPool().addInterfaceRef(className, methodName, sig);
 
     return ref.getIndex();
   }

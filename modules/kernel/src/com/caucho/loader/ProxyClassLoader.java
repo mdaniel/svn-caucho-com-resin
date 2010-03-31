@@ -29,20 +29,28 @@
 
 package com.caucho.loader;
 
+import com.caucho.config.Module;
+
 /**
  * Class loader which loads a single proxy.
  */
+@Module
 public class ProxyClassLoader extends DynamicClassLoader {
   public ProxyClassLoader()
   {
-    super(Thread.currentThread().getContextClassLoader());
+    this(Thread.currentThread().getContextClassLoader());
   }
 
-  public Class loadClass(String className, byte []bytecode)
+  public ProxyClassLoader(ClassLoader loader)
   {
-    Class cl = defineClass(className,
-			   bytecode, 0, bytecode.length,
-			   (java.security.CodeSource) null);
+    super(loader);
+  }
+
+  public Class<?> loadClass(String className, byte []bytecode)
+  {
+    Class<?> cl = defineClass(className,
+                              bytecode, 0, bytecode.length,
+                              (java.security.CodeSource) null);
 
     return cl;
   }

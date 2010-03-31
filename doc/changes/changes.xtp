@@ -13,6 +13,7 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>cdi: allow circular XML/EL definition of beans (#3954, rep by Hontvari Jozsef)</li>
 <li>classloader: avoid class loader deadlocks on ClassEntry (#3848, rep by zenant)</li>
 <li>jni: LD_LIBRARY_PATH handling moved from Watchdog to SystemClassLoader</li>
 <li>servlet: micro-second logging not properly matching start time (#3935, rep by mocospace)</li>

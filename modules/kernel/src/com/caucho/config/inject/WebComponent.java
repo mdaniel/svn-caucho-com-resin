@@ -29,37 +29,34 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.*;
-import com.caucho.config.cfg.*;
-
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashSet;
-import java.util.HashSet;
 import java.util.Set;
-import java.util.logging.*;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 
-/**
- * Configuration for the xml web bean component.
- */
-public class WebComponent {
-  private static final Logger log
-    = Logger.getLogger(WebComponent.class.getName());
-  private static final L10N L = new L10N(WebComponent.class);
+import com.caucho.config.ConfigException;
+import com.caucho.config.Module;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.util.L10N;
 
-  private static final Class []NULL_ARG = new Class[0];
+/**
+ * Configuration for the web bean component.
+ */
+@Module
+public class WebComponent {
+  private static final L10N L = new L10N(WebComponent.class);
 
   private InjectManager _beanManager;
 
-  private Class _rawType;
+  private Class<?> _rawType;
 
   private BeanEntry _injectionPointEntry;
 
@@ -78,12 +75,14 @@ public class WebComponent {
         return;
     }
 
-    if (bean instanceof ProducesBean
-        && ((ProducesBean) bean).isInjectionPoint()) {
+    if (bean instanceof ProducesBean<?,?>
+        && ((ProducesBean<?,?>) bean).isInjectionPoint()) {
       _injectionPointEntry = new BeanEntry(type, bean);
     }
 
     _beanList.add(new BeanEntry(type, bean));
+    
+    Collections.sort(_beanList);
 
     /*
     for (int i = _componentList.size() - 1; i >= 0; i--) {
@@ -180,8 +179,8 @@ public class WebComponent {
 
   static String getName(Type type)
   {
-    if (type instanceof Class)
-      return ((Class) type).getName();
+    if (type instanceof Class<?>)
+      return ((Class<?>) type).getName();
     else
       return String.valueOf(type);
   }
@@ -191,7 +190,7 @@ public class WebComponent {
     return getClass().getSimpleName() + "[" + _rawType + "]";
   }
 
-  class BeanEntry {
+  class BeanEntry implements Comparable<BeanEntry> {
     private Bean<?> _bean;
     private BaseType _type;
     private Binding []_qualifiers;
@@ -265,6 +264,38 @@ public class WebComponent {
       }
 
       return false;
+    }
+
+    @Override
+    public int compareTo(BeanEntry test)
+    {
+      Bean<?> bean = test._bean;
+      
+      String beanClassName = _bean.getBeanClass().getName();
+      String beanClassNameTest = bean.getBeanClass().getName(); 
+      
+      int beanTypeCompare = beanClassName.compareTo(beanClassNameTest);
+      
+      if (beanTypeCompare != 0)
+        return beanTypeCompare;
+      
+      Iterator<Annotation> qualifierIterA = _bean.getQualifiers().iterator();
+      Iterator<Annotation> qualifierIterB = bean.getQualifiers().iterator();
+      
+      while (qualifierIterA.hasNext() && qualifierIterB.hasNext()) {
+        Annotation qualifierA = qualifierIterA.next();
+        Annotation qualifierB = qualifierIterB.next();
+        
+        String annTypeA = qualifierA.annotationType().getName();
+        String annTypeB = qualifierB.annotationType().getName();
+        
+        int cmp = annTypeA.compareTo(annTypeB);
+        
+        if (cmp != 0)
+          return cmp;
+      }
+      
+      return 0;
     }
 
     @Override

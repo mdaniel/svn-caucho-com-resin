@@ -27,45 +27,17 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigELContext;
-import com.caucho.config.ConfigException;
-import com.caucho.config.LineConfigException;
-import com.caucho.config.program.NodeBuilderChildProgram;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.types.Validator;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
-import com.caucho.config.attribute.*;
-import com.caucho.el.ELParser;
-import com.caucho.el.Expr;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-
-import org.w3c.dom.*;
-
-import javax.el.*;
-import java.io.Closeable;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+
+import com.caucho.config.Module;
 
 /**
  * Stack of partially constructed beans.
  */
+@Module
 public class CreationalContextImpl<T> implements CreationalContext<T> {
   private final CreationalContextImpl<?> _next;
   private final Contextual<T> _bean;
@@ -103,12 +75,12 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     _injectionPoint = null;
   }
   
-  public static CreationalContextImpl create()
+  public static CreationalContextImpl<Object> create()
   {
-    return new CreationalContextImpl();
+    return new CreationalContextImpl<Object>();
   }
   
-  <X> X get(Contextual<X> bean)
+  public <X> X get(Contextual<X> bean)
   {
     return find(this, bean);    
   }
@@ -132,11 +104,11 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     for (; ptr != null; ptr = ptr._next) {
       Contextual<?> testBean = ptr._bean;
       
-      if (! (testBean instanceof Bean))
+      if (! (testBean instanceof Bean<?>))
         continue;
       
       Bean<?> bean = (Bean<?>) testBean;
-      
+
       if (name.equals(bean.getName())) {
         return ptr._value;
       }

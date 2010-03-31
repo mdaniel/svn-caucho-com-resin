@@ -35,6 +35,7 @@ import com.caucho.config.program.Arg;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
 import com.caucho.config.*;
+import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.cfg.*;
 
 import java.lang.reflect.*;
@@ -43,6 +44,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.*;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
@@ -57,7 +60,7 @@ import javax.enterprise.inject.spi.Producer;
  * Configuration for a @Produces method
  */
 public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
-  implements InjectionTarget<T>
+  implements InjectionTarget<T>, ScopeAdapterBean<X>
 {
   private static final L10N L = new L10N(ProducesBean.class);
 
@@ -73,6 +76,8 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   private Arg []_args;
 
   private boolean _isBound;
+
+  private Object _scopeAdapter;
 
   protected ProducesBean(InjectManager manager,
                          Bean<X> producerBean,
@@ -258,6 +263,31 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   }
   */
 
+  @Override
+  public X getScopeAdapter(CreationalContext<X> cxt)
+  {
+    NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
+
+    // ioc/0520
+    if (scopeType != null
+        && ! getScope().equals(ApplicationScoped.class)) {
+      // && scopeType.normal()
+      //  && ! env.canInject(getScope())) {
+
+      Object value = _scopeAdapter;
+
+      if (value == null) {
+        ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
+        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
+        value = _scopeAdapter;
+      }
+
+      return (X) value;
+    }
+
+    return null;
+  } 
+  
   public void inject(T instance, CreationalContext<T> cxt)
   {
   }
@@ -408,4 +438,5 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
     return sb.toString();
   }
+
 }
