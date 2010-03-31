@@ -444,7 +444,6 @@ class WatchdogChildProcess
 
     env.put("CLASSPATH", classPath);
 
-    /*
     if (_watchdog.is64bit()) {
       appendEnvPath(env,
                     "LD_LIBRARY_PATH",
@@ -467,7 +466,6 @@ class WatchdogChildProcess
                     "PATH",
                     resinHome.lookup("win32").getNativePath());
     }
-    */
 
     return env;
   }

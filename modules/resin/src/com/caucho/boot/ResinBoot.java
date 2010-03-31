@@ -90,6 +90,13 @@ public class ResinBoot {
     else {
       Environment.init();
     }
+    
+    String jvmVersion = System.getProperty("java.runtime.version");
+    
+    if ("1.6".compareTo(jvmVersion) > 0) {
+      throw new ConfigException(L().l("Resin requires Java 1.6 or later but was started with {0}",
+                                      jvmVersion));
+    }
 
     // required for license check
     System.setProperty("resin.home", resinHome.getNativePath());
