@@ -34,7 +34,11 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import java.util.HashSet;
+
 public class Defun extends Section {
+  private final HashSet<String> _parents = new HashSet<String>();
+
   public Defun(Document document)
   {
     super(document);
@@ -45,6 +49,21 @@ public class Defun extends Section {
     S2 s2 = new S2(getDocument(), getHref());
     addItem(s2);
     return s2;
+  }
+
+  public void setParents(Text parentText)
+  {
+    addItem(new NamedText("child of", parentText));
+ 
+    String []parents = parentText.getText().split("[ ,]+");
+
+    for (String parent : parents)
+      _parents.add(parent);
+  }
+
+  public Iterable<String> getParents()
+  {
+    return _parents;
   }
 
   public void writeHtml(XMLStreamWriter out)

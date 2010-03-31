@@ -56,12 +56,6 @@ public class Body extends ContainerNode {
       _navigation = item.getNavigation();
   }
 
-  /*
-  public void setLocalTOC(String text)
-  {
-  }
-  */
-
   public void setClass(String styleClass)
   {
     _class = styleClass;
@@ -104,6 +98,13 @@ public class Body extends ContainerNode {
     Defun defun = new Defun(getDocument());
     addItem(defun);
     return defun;
+  }
+
+  public IncludeDefun createIncludeDefun()
+  {
+    IncludeDefun includeDefun = new IncludeDefun(getDocument());
+    addItem(includeDefun);
+    return includeDefun;
   }
 
   public Index createIxx()

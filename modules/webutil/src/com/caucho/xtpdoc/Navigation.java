@@ -52,13 +52,16 @@ public class Navigation {
   private String _section;
   private boolean _threaded;
   private boolean _comment;
-  private ArrayList<NavigationItem> _items 
+  private final ArrayList<NavigationItem> _items 
     = new ArrayList<NavigationItem>();
 
   private NavigationItem _docItem;
   private NavigationItem _child;
 
-  private HashMap<String,NavigationItem> _itemMap
+  private final HashMap<String,NavigationItem> _itemMap
+    = new HashMap<String,NavigationItem>();
+
+  private final HashMap<String,NavigationItem> _refMap
     = new HashMap<String,NavigationItem>();
 
   public Navigation(Document document, String uri, Path path, int depth)
@@ -148,15 +151,32 @@ public class Navigation {
         _child.setParent(item.getParent());
 
       _itemMap.put(uri, _child);
+
+      if (_child.getReference() != null)
+        _refMap.put(_child.getReferenceUri(), _child);
     }
-    else
+    else {
       _itemMap.put(uri, item);
+
+      if (item.getReference() != null)
+        _refMap.put(item.getReferenceUri(), item);
+    }
 
     if (_parent != null)
       _parent.putItem(uri, item);
   }
 
   public NavigationItem getItem(String uri)
+  {
+    NavigationItem item = _itemMap.get(uri);
+
+    if (item == null)
+      item = _refMap.get(uri);
+
+    return item;
+  }
+
+  public NavigationItem getItemByReference(String uri)
   {
     return _itemMap.get(uri);
   }

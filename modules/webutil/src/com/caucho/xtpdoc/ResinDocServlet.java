@@ -126,11 +126,7 @@ public class ResinDocServlet extends HttpServlet {
         return;
       }
       
-
-      if (request.getParameter("ref") != null)
-        document.writeRef(xmlOut);
-      else
-        document.writeHtml(xmlOut);
+      document.writeHtml(xmlOut);
 
       xmlOut.flush();
     } catch (ConfigException e) {

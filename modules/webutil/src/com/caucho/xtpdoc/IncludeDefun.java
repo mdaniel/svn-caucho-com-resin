@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,43 +28,77 @@
  */
 
 package com.caucho.xtpdoc;
-
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class Text implements ContentItem {
-  private String _text;
+public class IncludeDefun extends Section {
+  private String _name;
+  private Defun _defun;
 
-  public Text(String text)
+  public IncludeDefun(Document document)
   {
-    _text = text;
+    super(document);
   }
 
-  public String getText()
+  public void setName(String name)
   {
-    return _text;
+    _name = name;
   }
 
+  public String getTitle()
+  {
+    if (getDefun() != null)
+      return getDefun().getTitle();
+
+    return super.getTitle();
+  }
+
+  public String getHref()
+  {
+    if (getDefun() != null)
+      return getDefun().getHref();
+
+    return super.getHref();
+  }
+
+  private Defun getDefun()
+  {
+    if (_defun == null) {
+      ReferenceDocument referenceDocument 
+        = getDocument().getReferenceDocument();
+
+      if (referenceDocument != null)
+        _defun = referenceDocument.getDefun(_name);
+    }
+
+    return _defun;
+  }
+
+  @Override
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeCharacters(_text);
+    if (getDefun() != null)
+      getDefun().writeHtml(out);
   }
 
+  @Override
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print(LaTeXUtil.escapeForLaTeX(_text));
+    // XXX
   }
 
+  @Override
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
     writeLaTeX(out);
   }
 
+  @Override
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {

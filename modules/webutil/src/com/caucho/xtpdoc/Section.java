@@ -271,13 +271,6 @@ public abstract class Section extends ContainerNode {
     return warning;
   }
 
-  public FormattedText createParents()
-  {
-    FormattedText parents = new FormattedText(getDocument());
-    addItem(new NamedText("child of", parents));
-    return parents;
-  }
- 
   public FormattedText createDefault()
   {
     FormattedText def = new FormattedText(getDocument());

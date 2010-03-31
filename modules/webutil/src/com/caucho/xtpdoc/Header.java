@@ -47,7 +47,6 @@ public class Header {
   private Section _description;
   private Keywords _keywords;
   private String _tutorial;
-  private References _references;
 
   public Header(Document document)
   {
@@ -114,16 +113,6 @@ public class Header {
   public void setKeywords(Keywords keywords)
   {
     _keywords = keywords;
-  }
-
-  public void setReferences(References references)
-  {
-    _references = references;
-  }
-
-  public References getReferences()
-  {
-    return _references;
   }
 
   public ContentItem getDescription()

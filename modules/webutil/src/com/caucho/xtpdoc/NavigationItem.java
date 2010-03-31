@@ -219,6 +219,21 @@ public class NavigationItem {
     return _link;
   }
 
+  public void setReference(String ref)
+  {
+    _ref = ref;
+  }
+
+  public String getReference()
+  {
+    return _ref;
+  }
+
+  public String getReferenceUri()
+  {
+    return _refUri;
+  }
+
   public void setTitle(String title)
   {
     _title = title;
@@ -249,30 +264,20 @@ public class NavigationItem {
   @PostConstruct
   public void init()
   {
-    if (_isRelative)
+    if (_isRelative) {
       _uri = _navigation.getUri() + _link;
-    else
+
+      if (_ref != null) 
+        _refUri = _navigation.getUri() + _ref;
+    }
+    else {
       _uri = _link;
 
-    _navigation.putItem(_uri, this);
-
-    Path linkPath = _document.getRealPath(_uri);
-
-    if (_link.endsWith(".xtp")) {
-      String ref = 
-        _link.substring(0, _link.length() - ".xtp".length()) + "-ref.xtp";
-
-      Path refPath = linkPath.getParent().lookup(ref);
-
-      if (refPath.exists()) {
-        _ref = ref;
-
-        if (_isRelative)
-          _refUri = _navigation.getUri() + _ref;
-        else
-          _refUri = _ref;
-      }
+      if (_ref != null) 
+        _refUri = _ref;
     }
+
+    _navigation.putItem(_uri, this);
   }
 
   public void writeHtml(XMLStreamWriter out, String path)
@@ -350,7 +355,10 @@ public class NavigationItem {
         out.writeEndElement(); // a
 
         if (_ref != null) {
-          out.writeCharacters(" (");
+          out.writeStartElement("span");
+          out.writeAttribute("class", "ref");
+          out.writeCharacters(" ");
+          out.writeEntityRef("laquo");
           out.writeStartElement("a");
 
           if (_isRelative)
@@ -360,7 +368,8 @@ public class NavigationItem {
 
           out.writeCharacters("ref");
           out.writeEndElement(); // a
-          out.writeCharacters(")");
+          out.writeEntityRef("raquo");
+          out.writeEndElement(); // span
         }
       }
 
@@ -517,13 +526,17 @@ public class NavigationItem {
     out.writeEndElement(); // a
 
     if (_refUri != null) {
-      out.writeCharacters(" (");
+      out.writeStartElement("span");
+      out.writeAttribute("class", "ref");
+      out.writeCharacters(" ");
+      out.writeEntityRef("laquo");
       out.writeStartElement("a");
       out.writeAttribute("href", _refUri);
       out.writeAttribute("class", "leftnav");
       out.writeCharacters("ref");
       out.writeEndElement(); // a
-      out.writeCharacters(")");
+      out.writeEntityRef("raquo");
+      out.writeEndElement(); // span
     }
 
     out.writeEndElement(); // li

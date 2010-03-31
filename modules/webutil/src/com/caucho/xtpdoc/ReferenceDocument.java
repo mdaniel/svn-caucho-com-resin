@@ -45,22 +45,16 @@ import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
+/**
+ * Loads the reference.xtp document alongside the topic document and outputs
+ * only the references linked in the topic document.
+ **/
 public class ReferenceDocument extends Document {
   private static Logger log = 
     Logger.getLogger(ReferenceDocument.class.getName());
   private static L10N L = new L10N(ReferenceDocument.class);
 
-  private References _references;
-
-  ReferenceDocument()
-  {
-    super();
-  }
-
-  public ReferenceDocument(Path documentPath, String contextPath)
-  {
-    super(documentPath, contextPath);
-  }
+  private final HashMap<String,Defun> _defuns = new HashMap<String,Defun>();
 
   public ReferenceDocument(ServletContext webApp,
                            Path documentPath,
@@ -69,11 +63,6 @@ public class ReferenceDocument extends Document {
                            String encoding)
   {
     super(webApp, documentPath, contextPath, uri, encoding);
-  }
-
-  void setReferences(References references)
-  {
-    _references = references;
   }
 
   @Override
@@ -88,9 +77,13 @@ public class ReferenceDocument extends Document {
     return new ReferenceBody(this);
   }
 
-  private class ReferenceBody extends Body {
-    private final HashMap<String,Defun> _defuns = new HashMap<String,Defun>();
+  public Defun getDefun(String ref)
+  {
+    // XXX implement parent:child lookup
+    return _defuns.get(ref);
+  }
 
+  private class ReferenceBody extends Body {
     public ReferenceBody(Document document) 
     {
       super(document);
@@ -104,43 +97,30 @@ public class ReferenceDocument extends Document {
 
       return defun;
     }
+  }
 
-    public Defun getDefun(String ref)
+  private class ReferenceDefun extends Defun {
+    public ReferenceDefun(Document document)
     {
-      // XXX implement parent:child lookup
-      return _defuns.get(ref);
+      super(document);
     }
 
-    @Override
-    protected void writeContent(XMLStreamWriter out)
-      throws XMLStreamException
+    @PostConstruct
+    public void init()
     {
-      if (_references == null) {
-        super.writeContent(out);
-        return;
-      }
-        
-      for (String ref : _references.getReferences()) {
-        Defun defun = getDefun(ref);
+      Defun oldDefun = _defuns.get(getName());
 
-        if (defun == null)
-          log.log(Level.FINE, L.l("Unknown reference '{0}'", ref));
-        else
-          defun.writeHtml(out);
-      }
-    }
+      if (oldDefun != null) {
+        _defuns.remove(getName());
 
-    private class ReferenceDefun extends Defun {
-      public ReferenceDefun(Document document)
-      {
-        super(document);
-      }
+        for (String parent : oldDefun.getParents())
+          _defuns.put(parent + ":" + getName(), oldDefun);
 
-      @PostConstruct
-      public void init()
-      {
+        for (String parent : getParents())
+          _defuns.put(parent + ":" + getName(), this);
+      }
+      else 
         _defuns.put(getName(), this);
-      }
     }
   }
 }

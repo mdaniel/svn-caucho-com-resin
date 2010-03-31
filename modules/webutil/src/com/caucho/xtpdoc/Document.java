@@ -177,15 +177,17 @@ public class Document {
 
     if (navList.size() > 0) {
       Navigation nav = navList.get(0);
+
       
+      /*
       if (_uri.endsWith("-ref.xtp")) {
         String mainDoc = _uri.substring(0, _uri.length() - "-ref.xtp".length())
                          + ".xtp";
         
         _navItem = nav.getItem(mainDoc);
       }
-      else
-        _navItem = nav.getItem(_uri);
+      else*/
+      _navItem = nav.getItem(_uri);
     }
 
     return _navItem;
@@ -277,10 +279,6 @@ public class Document {
                                   uri + "/reference.xtp", _encoding);
 
           config.configure(_referenceDocument, ref);
-
-          if (_header != null) {
-            _referenceDocument.setReferences(_header.getReferences());
-          }
         }
         catch (Exception e) {
           log.log(Level.FINE, e.toString(), e);
@@ -365,26 +363,6 @@ public class Document {
 
     if (_body != null)
       _body.writeHtml(out);
-
-    out.writeEndElement(); // html
-  }
-
-  public void writeRef(XMLStreamWriter out)
-    throws XMLStreamException
-  {
-    out.writeStartDocument(_encoding, "1.0");
-    out.writeDTD("<!DOCTYPE html PUBLIC \"-//W3C//DTD XHTML 1.0 Strict//EN\" " +
-                 "\"http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd\">");
-
-    out.writeStartElement("html");
-    out.writeDefaultNamespace("http://www.w3.org/1999/xhtml");
-
-    if (_header != null)
-      _header.writeHtml(out);
-
-    if (getReferenceDocument() != null 
-        && getReferenceDocument().getBody() != null) 
-      getReferenceDocument().getBody().writeHtml(out);
 
     out.writeEndElement(); // html
   }
