@@ -411,6 +411,9 @@
   <resin:Redirect regexp="^/doc/watchdog.xtp"
                   target="${app.contextPath}/admin/starting-resin-watchdog.xtp"/>
 
+  <resin:Redirect regexp="^/doc/webapp-overview.xtp"
+                  target="${app.contextPath}/admin/deploy.xtp"/>
+
   <resin:Redirect regexp="^/doc/webapp-deploy.xtp"
                   target="${app.contextPath}/admin/deploy.xtp"/>
 

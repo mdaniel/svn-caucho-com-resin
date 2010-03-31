@@ -56,6 +56,10 @@ a.leftnav {
   font-family: Verdana, Helvetica, Arial, sans-serif;
   font-size : 80%;
 }
+
+span.ref {
+  font-size : 80%;
+}
 /*
 a.leftnav:visited {
   text-decoration : none;
