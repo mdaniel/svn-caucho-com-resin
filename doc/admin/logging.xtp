@@ -191,7 +191,7 @@ avoid completely swallowing, or Hessian or XML protocol parsing</td>
 
 </s2>
 
-<s2 title="&lt;log-handler>" type="defun">
+<defun title="&lt;log-handler>">
 <parents>resin, server, host-default, host, web-app-default, web-app</parents>
    
 <p>Configure a log handler for the JDK java.util.logging.* API.
@@ -352,9 +352,9 @@ will set the actual logging level.</p>
 &lt;/web-app>
 </example>
 
-</s2>
+</defun>
 
-<s2 title="&lt;log>" type="defun">
+<defun title="&lt;log>">
 <parents>resin, server, host-default, host, web-app-default, web-app</parents>
    
 <p>Configure the amount and destination of debug logging for the JDK
@@ -486,7 +486,7 @@ java.util.logging.* API.</p>
 
 <p>The class that corresponds to &lt;log&gt; is <a href="javadoc|com.caucho.log.LogConfig|"/>.</p>
 
-<s3 name="Format-String" title="Log format string">
+<s2 name="Format-String" title="Log format string">
 
 <p>The <var>format</var> for log tags is used to specify a format string for each
 log message.  <code>format</code> recognizes EL-expressions. The EL variable
@@ -579,9 +579,9 @@ space pad the values and make the results look a little nicer:</p>
             "Application[http://localhost:8080/freelistbm] starting"
 </results>
 
-</s3> <!-- Format-String -->
+</s2> <!-- Format-String -->
 
-</s2>
+</defun>
 
 <s2 title="Log Handlers">
 
@@ -823,7 +823,7 @@ public class MyFormatter extends Formatter
 
 <s1 title="Standard Output Redirection">
 
-<s2 title="stdout-log" type="defun">
+<defun title="stdout-log">
 <parents>resin, server, host-default, web-app-default, web-app</parents>
 <default>use the JDK's destination for System.out</default>
 
@@ -908,9 +908,9 @@ the same output file.</p>
 ...
   </example>
 
-</s2>
+</defun>
 
-<s2 title="stderr-log" type="defun">
+<defun title="stderr-log">
 <parents>resin, server, host-default, web-app-default, web-app</parents>
 <default>use the JDK's destination for System.err</default>
 
@@ -980,11 +980,11 @@ the same output file.</p>
 ...
 </example>
 
-</s2>
+</defun>
 
 </s1>
 
-<s1 title="Access logging">
+<defun title="Access logging">
 <parents>server, host-default, host, web-app-default, web-app</parents>
 
 <p>Specify the access log file.</p>
@@ -1112,7 +1112,7 @@ parameters in the custom class.</p>
 ...
 </example>
 
-</s1> <!-- access logging -->
+</defun> <!-- access logging -->
 
 <s1 name="path" title="Log Paths">
 

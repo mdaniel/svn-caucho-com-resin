@@ -387,7 +387,7 @@ in the request, whether they're used or not.</p>
 
 <s1 title="Configuration">
 
-<s2 title="cache">
+<defun title="cache">
 <parents>cluster</parents>
 
 <p>&lt;cache> configures the proxy cache (requires Resin Professional).  The
@@ -459,7 +459,7 @@ element cache {
 &lt;/resin&gt;
 </example>
 
-<s3 title="rewrite-vary-as-private">
+<s2 title="rewrite-vary-as-private">
 
 <p>Because not all browsers understand the Vary header, Resin can rewrite
 Vary to a Cache-Control: private.  This rewriting will cache the page
@@ -475,9 +475,9 @@ refuse to cache gzipped pages or "Vary: Cookie" pages.</p>
 since it's rewritten as "Cache-Control: private" with no Vary at all.
 Resin will continue to cache the page as normal.</p>
 
-</s3>
+</s2>
 
-</s2> <!-- cache -->
+</defun> <!-- cache -->
 
 <s2 title="cache-mapping">
 

@@ -1291,7 +1291,7 @@ virtual hosts that do not share some portion of their domain name.  For example,
 
 <s1 title="Login">
 
-<s2 title="BasicLogin" type="defun">
+<defun title="BasicLogin">
 
 <p>Configures HTTP basic login, which can be convenient for a quick protection
 of internal pages or administration when writing a form isn't necessary.</p>
@@ -1313,9 +1313,9 @@ of internal pages or administration when writing a form isn't necessary.</p>
 &lt;/web-app>  
 </example>
 
-</s2>
+</defun>
 
-<s2 title="FormLogin" type="defun">
+<defun title="FormLogin">
 <p>Configures authentication for forms.  The login form has
 specific parameters that the servlet engine's login form processing
 understands.  If the login succeeds, the user will see the original
@@ -1398,7 +1398,7 @@ default, the authentication only lasts for a single session.
 &lt;/form&gt;
 </example>
 
-</s2>
+</defun>
 
 <s2 title="Custom Login">
 <p>The Login is primarily responsible for extracting the credentials
@@ -1444,7 +1444,7 @@ into one class.</p>
 
 <s1 title="Authorization">
 
-<s2 title="resin:Allow" type="defun">
+<defun title="resin:Allow">
 <parents>web-app</parents>
 
 <p>Selects protected areas of the web site.  Sites using
@@ -1477,9 +1477,9 @@ security constraints.</p>
 </tr>
 </deftable>
 
-</s2>
+</defun>
 
-<s2 title="resin:IfNetwork" version="Resin 4.0.0" type="defun">
+<defun title="resin:IfNetwork" version="Resin 4.0.0" type="defun">
 <parents>security-constraint</parents>
 
 <p>Allow or deny requests based on the ip address of the client.
@@ -1528,9 +1528,9 @@ a <code>deny</code>.  If only <var>allow</var> is used, then an ip is denied unl
 matches an <code>allow</code>. If both are used, then the ip must match both an
 <code>allow</code> and a <code>deny</code></p>
 
-</s2>
+</defun>
 
-<s2 title="resin:IfUserInRole" type="defun">
+<defun title="resin:IfUserInRole" type="defun">
 <parents>resin:Allow, resin:Deny</parents>
 
 <p>Requires that authenticated users fill the specified role.
@@ -1559,9 +1559,9 @@ Think of a role as a group of users.</p>
 &lt;/web-app>
 </example>
 
-</s2>
+</defun>
 
-<s2 title="resin:IfSecure" type="defun">
+<defun title="resin:IfSecure" type="defun">
 <parents>resin:Allow, resin:Deny</parents>
 
 <p>Restricts access to secure transports, i.e. SSL.</p>
@@ -1599,9 +1599,9 @@ If the default rewriting of the host is not appropriate, you can set the
 &lt;/resin> 
 </example>
 
-</s2>
+</defun>
 
-<s2 title="constraint" version="Resin 4.0" type="defun">
+<defun title="constraint" version="Resin 4.0" type="defun">
 
 <p>Any custom class that extends <a href="javadoc:com.caucho.security.RequestPredicate">com.caucho.security.RequestPredicate</a> can be used as
 an &lt;IfXXX> rule.  Just create the class and instantiate it directly:</p>
@@ -1639,7 +1639,7 @@ public class IfMyTest extends ServletRequestPredicate {
 }
 </example>
 
-</s2>
+</defun>
 
 </s1> <!-- Security-Constraints -->
 
@@ -1655,7 +1655,7 @@ be served to a browser.</p>
 from viewing.</p>
 </s2>
 
-<s2 title="resin:Deny">
+<defun title="resin:Deny">
 <p>Use a security constraint that requires a <var>role</var> that nobody
 will ever have.</p>
 
@@ -1672,7 +1672,7 @@ will ever have.</p>
 &lt;/web-app&gt;
 </example>
 
-</s2>
+</defun>
 </s1>
 </body>
 </document>

@@ -19,7 +19,7 @@ configuration tags.
 <localtoc/>
 
 <s1 title="Classloaders">
-<s2 title="class-loader" occur="*" version="Resin 3.0" type="defun">
+<defun title="class-loader" occur="*" version="Resin 3.0">
   <parents>resin, server, host-default, host, web-app-default, web-app</parents>
   <!-- com.caucho.loader.DynamicLoader -->
 
@@ -43,9 +43,9 @@ WEB-INF/classes, even make-loader for more complex auto-compilation.</p>
 &lt;/web-app&gt;
 </example>
 
-</s2>
+</defun>
 
-<s2 title="compiling-loader" occur="*" version="Resin 3.0" type="defun">
+<defun title="compiling-loader" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
   <!-- com.caucho.loader.CompilingLoader -->
 
@@ -63,9 +63,9 @@ files loading them.</p>
 </td></tr><tr><td>require-source</td><td>If true, .class files without matching .java files will be deleted. Since Resin 3.0</td><td>false
 </td></tr></deftable-childtags>
 
-</s2>
+</defun>
 
-<s2 title="library-loader" occur="*" version="Resin 3.0" type="defun">
+<defun title="library-loader" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
 
 <p>Configures a jar library, <var>WEB-INF/lib</var>-style class loader.</p>
@@ -79,9 +79,9 @@ Jar files are recognized wihen they have a filename extension of
 </td></tr></deftable-childtags>
 
 <p>See <a href="javadoc|com.caucho.loader.DirectoryLoader|"/>.</p>
-</s2>
+</defun>
 
-<s2 title="tree-loader" occur="*" version="Resin 3.0" type="defun">
+<defun title="tree-loader" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
   <!-- com.caucho.loader.TreeLoader -->
 
@@ -94,16 +94,16 @@ Jar files are recognized wihen they have a filename extension of
 </td></tr></deftable-childtags>
 
 <p>See <a href="javadoc|com.caucho.loader.TreeLoader|"/>.</p>
-</s2>
+</defun>
 
-<s2 title="make-loader" occur="*" version="Resin 3.0" type="defun">
+<defun title="make-loader" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
   <!-- com.caucho.loader.MakeLoader -->
 
 <p>Configures a custom make-style loader.</p>
-</s2>
+</defun>
 
-<s2 title="servlet-hack" occur="*" version="Resin 3.0" type="defun">
+<defun title="servlet-hack" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
 
 <p>Use of servlet-hack is discouraged.  Using servlet-hack violates
@@ -114,9 +114,9 @@ produce surprising ClassCastExceptions.</p>
 Instead of parent classloaders having priority, child classloaders
 have priority.</p>
 
-</s2>
+</defun>
 
-<s2 title="simple-loader" occur="*" version="Resin 3.0" type="defun">
+<defun title="simple-loader" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
   <!-- com.caucho.loader.SimpleLoader -->
 
@@ -130,7 +130,7 @@ special compilation steps (in contrast with compiling-loader.)</p>
 </td></tr><tr><td>prefix</td><td>Class package prefix to only load to a subset of classes. Resin 3.0</td><td>none
 </td></tr></deftable-childtags>
 
-</s2>
+</defun>
 
 </s1>
 </body>

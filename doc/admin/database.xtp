@@ -212,7 +212,7 @@ them.</p>
 
 <s1 title="Core Configuration">
 
-<s2 title="database" version="Resin 3.0" type="defun">
+<defun title="database" version="Resin 3.0">
 <parents>server, host-default, host, web-app-default, web-app</parents>
 
 <p>Configure a <var>database</var> resource, which is a database pool that manages
@@ -317,9 +317,9 @@ the pool</td>
 
 <p>The class that corresponds to &lt;database&gt; is <a href="javadoc|com.caucho.sql.DBPool|"/></p>
 
-</s2>
+</defun>
 
-<s2 title="connection" version="Resin 3.0" type="defun">
+<defun title="connection" version="Resin 3.0">
 <parents>database</parents>
 
 <p>Initialize <code>java.sql.Connection</code> object managed by <var>database</var>.</p>
@@ -353,14 +353,14 @@ the pool</td>
 
 <p>The class that corresponds to &lt;connection&gt; is <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Connection.html">Connection (Java 2 Platform SE 5.0)</a></p>
 
-</s2>
+</defun>
 
 </s1>
 
 
 <s1 name="driver-config" title="Driver Configuration">
 
-<s2 title="driver" version="Resin 3.0" type="defun">
+<defun title="driver" version="Resin 3.0">
 <parents>database</parents>
 
 <p>Configure a database <var>driver</var>.  The driver is a class provided by the
@@ -387,7 +387,7 @@ your web applications.
 </td></tr><tr><td>init-param</td><td>Set <a href="#init-param">driver specific properties</a> not known to Resin.</td><td> 
 </td></tr></deftable-childtags>
 
-</s2> <!-- driver -->
+</defun> <!-- driver -->
 
 
 <s2 name="choosing-driver" title="Choosing a driver class for &lt;type&gt;">
