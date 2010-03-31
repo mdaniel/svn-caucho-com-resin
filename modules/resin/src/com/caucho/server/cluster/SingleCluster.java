@@ -30,6 +30,7 @@
 package com.caucho.server.cluster;
 
 import com.caucho.config.ConfigException;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.server.resin.*;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -88,8 +89,9 @@ public class SingleCluster extends Cluster
   }
 
   @Override
-  protected Server createResinServer(ClusterServer clusterServer)
+  protected Server createResinServer(NetworkServer networkServer,
+                                     ClusterServer clusterServer)
   {
-    return new Server(clusterServer);
+    return new Server(networkServer, clusterServer);
   }
 }

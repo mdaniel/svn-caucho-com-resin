@@ -56,6 +56,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 import java.util.logging.Level;
@@ -96,7 +97,8 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private ArrayList<Path> _nativePath = new ArrayList<Path>();
 
   // List of cached classes
-  private Hashtable<String,ClassEntry> _entryCache;
+  private ConcurrentHashMap<String,ClassEntry> _entryCache
+    = new ConcurrentHashMap<String,ClassEntry>(8);
 
   private TimedCache<String,URL> _resourceCache;
 
@@ -1347,14 +1349,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded classes
    */
-  public Class loadClassImpl(String name, boolean resolve)
+  public Class<?> loadClassImpl(String name, boolean resolve)
     throws ClassNotFoundException
   {
     if (_entryCache != null) {
       ClassEntry entry = _entryCache.get(name);
 
       if (entry != null) {
-        Class cl = entry.getEntryClass();
+        Class<?> cl = entry.getEntryClass();
 
         if (cl != null)
           return cl;
@@ -1362,7 +1364,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     }
 
     // The JVM has already cached the classes, so we don't need to
-    Class cl = findLoadedClass(name);
+    Class<?> cl = findLoadedClass(name);
 
     if (cl != null) {
       if (resolve)
@@ -1429,7 +1431,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Returns any import class, e.g. from an osgi bundle
    */
-  protected Class findImportClass(String name)
+  protected Class<?> findImportClass(String name)
   {
     return null;
   }
@@ -1442,10 +1444,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * @return the loaded class
    */
   @Override
-  protected Class findClass(String name)
+  protected Class<?> findClass(String name)
     throws ClassNotFoundException
   {
-    Class cl = findClassImpl(name);
+    Class<?> cl = findClassImpl(name);
 
     if (cl != null)
       return cl;
@@ -1460,7 +1462,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    *
    * @return the loaded class
    */
-  public Class findClassImpl(String name)
+  public Class<?> findClassImpl(String name)
     throws ClassNotFoundException
   {
     if (_isVerbose)
@@ -1495,7 +1497,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
       // special case for osgi
       for (int i = 0; i < len; i++) {
-        Class cl = _loaders.get(i).loadClass(name);
+        Class<?> cl = _loaders.get(i).loadClass(name);
 
         if (cl != null)
           return cl;
@@ -1517,17 +1519,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     // to work.  The same entry must be returned for two separate threads
     // trying to load the class at the same time.
 
-    synchronized (this) {
-      if (_entryCache == null)
-        _entryCache = new Hashtable<String,ClassEntry>(8);
+    ClassEntry oldEntry = _entryCache.putIfAbsent(name, entry);
 
-      ClassEntry oldEntry = _entryCache.get(name);
-
-      if (oldEntry != null)
-        entry = oldEntry;
-      else
-        _entryCache.put(name, entry);
-    }
+    if (oldEntry != null)
+      entry = oldEntry;
 
     try {
       return loadClassEntry(entry);
@@ -1567,10 +1562,10 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * Loads the class from the loader.  The loadClass must be in the
    * top classLoader because the defineClass must be owned by the top.
    */
-  protected Class loadClassEntry(ClassEntry entry)
+  protected Class<?> loadClassEntry(ClassEntry entry)
     throws IOException, ClassNotFoundException
   {
-    Class cl = null;
+    Class<?> cl = null;
 
     byte []bBuf;
     int bLen;

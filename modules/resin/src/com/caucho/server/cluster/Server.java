@@ -78,6 +78,7 @@ import com.caucho.network.listen.AbstractProtocol;
 import com.caucho.network.listen.AbstractSelectManager;
 import com.caucho.network.listen.SocketLinkListener;
 import com.caucho.network.listen.TcpSocketLink;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.security.AdminAuthenticator;
 import com.caucho.security.PermissionManager;
 import com.caucho.server.admin.Management;
@@ -136,6 +137,7 @@ public class Server extends ProtocolDispatchServer
     = new EnvironmentLocal<Server>();
 
   private final Resin _resin;
+  private final NetworkServer _networkServer;
   private final ClusterServer _selfServer;
 
   private EnvironmentClassLoader _classLoader;
@@ -229,8 +231,14 @@ public class Server extends ProtocolDispatchServer
   /**
    * Creates a new servlet server.
    */
-  public Server(ClusterServer clusterServer)
+  public Server(NetworkServer networkServer,
+                ClusterServer clusterServer)
   {
+    _networkServer = networkServer;
+    
+    if (networkServer == null)
+      throw new NullPointerException();
+    
     if (clusterServer == null)
       throw new NullPointerException();
 
@@ -319,6 +327,11 @@ public class Server extends ProtocolDispatchServer
   public static Server getCurrent()
   {
     return _serverLocal.get();
+  }
+  
+  public NetworkServer getNetworkServer()
+  {
+    return _networkServer;
   }
 
   public boolean isResinServer()

@@ -13,6 +13,8 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>classloader: avoid class loader deadlocks on ClassEntry (#3848, rep by zenant)</li>
+<li>jni: LD_LIBRARY_PATH handling moved from Watchdog to SystemClassLoader</li>
 <li>servlet: micro-second logging not properly matching start time (#3935, rep by mocospace)</li>
 <li>jsp: jsp:forward issues with buffer="10k" (#3922, rep by Danny Mann)</li>
 <li>jsp: SimpleTag parents not properly managed with fragments (#3953, rep by Jamison Novak)</li>

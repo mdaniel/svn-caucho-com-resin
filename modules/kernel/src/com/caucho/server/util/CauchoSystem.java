@@ -487,4 +487,12 @@ public class CauchoSystem {
       Runtime.getRuntime().halt(EXIT_OOM);
     }
   }
+
+  /**
+   * @return
+   */
+  public static boolean is64Bit()
+  {
+    return "64".equals(System.getProperty("sun.arch.data.model"));
+  }
 }

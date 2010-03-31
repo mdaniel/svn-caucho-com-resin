@@ -44,6 +44,7 @@ import com.caucho.config.types.Period;
 import com.caucho.lifecycle.StartLifecycleException;
 import com.caucho.management.server.ClusterServerMXBean;
 import com.caucho.network.balance.ClientSocketFactory;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.Alarm;
 
@@ -971,14 +972,14 @@ public final class ClusterServer {
   /**
    * Starts the server.
    */
-  public Server startServer()
+  public Server startServer(NetworkServer networkServer)
     throws StartLifecycleException
   {
     _isSelf = true;
     _isActive = true;
     _stateTimestamp = Alarm.getCurrentTime();
 
-    return _cluster.startServer(this);
+    return _cluster.startServer(networkServer, this);
   }
 
   /**

@@ -45,6 +45,7 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.management.server.ClusterMXBean;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.server.distcache.DistributedCacheManager;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;
@@ -603,7 +604,8 @@ abstract public class Cluster
   /**
    * Starts the server.
    */
-  Server startServer(ClusterServer clusterServer)
+  Server startServer(NetworkServer networkServer,
+                     ClusterServer clusterServer)
     throws StartLifecycleException
   {
     Thread thread = Thread.currentThread();
@@ -612,7 +614,7 @@ abstract public class Cluster
     try {
       thread.setContextClassLoader(getResin().getClassLoader());
 
-      Server server = createResinServer(clusterServer);
+      Server server = createResinServer(networkServer, clusterServer);
       
       thread.setContextClassLoader(server.getClassLoader());
 
@@ -624,9 +626,10 @@ abstract public class Cluster
     }
   }
 
-  protected Server createResinServer(ClusterServer clusterServer)
+  protected Server createResinServer(NetworkServer networkServer,
+                                     ClusterServer clusterServer)
   {
-    return new Server(clusterServer);
+    return new Server(networkServer, clusterServer);
   }
 
   //

@@ -31,6 +31,7 @@ package com.caucho.loader;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 
@@ -62,7 +63,7 @@ public class SystemClassLoader
   private AtomicBoolean _isInit = new AtomicBoolean();
   private boolean _hasBootClassPath;
 
-  private URLClassLoader _loader;
+  private Path _libexec;
 
   /**
    * Creates a new SystemClassLoader.
@@ -231,6 +232,53 @@ public class SystemClassLoader
   protected String getSchema()
   {
     return "com/caucho/loader/system.rnc";
+  }
+  
+  private Path getLibexec()
+  {
+    if (_libexec == null) {
+      if (CauchoSystem.isWindows()) {
+        if (CauchoSystem.is64Bit()) {
+          _libexec = CauchoSystem.getResinHome().lookup("win64");
+        }
+        else {
+          _libexec = CauchoSystem.getResinHome().lookup("win32");
+        }
+      }
+      else {
+        if (CauchoSystem.is64Bit()) {
+          _libexec = CauchoSystem.getResinHome().lookup("libexec");
+        }
+        else {
+          _libexec = CauchoSystem.getResinHome().lookup("libexec64");
+        }
+      }
+    }
+    
+    return _libexec;
+  }
+
+  /**
+   * Returns the full library path for the name.
+   */
+  @Override
+  public String findLibrary(String name)
+  {
+    Path path = getLibexec().lookup("lib" + name + ".so");
+
+    if (path.canRead()) {
+      return path.getNativePath();
+    }
+    
+    path = getLibexec().lookup("lib" + name + ".jnilib");
+
+    if (path.canRead()) {
+      return path.getNativePath();
+    }
+    
+    path = getLibexec().lookup(name + ".dll");
+
+    return super.findLibrary(name);
   }
 }
 
