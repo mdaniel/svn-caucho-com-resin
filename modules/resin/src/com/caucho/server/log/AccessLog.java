@@ -67,23 +67,13 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
   // Default maximum log size = 1G
   private static final long ROLLOVER_SIZE = 1024L * 1024L * 1024L;
-  // Milliseconds in a day
-  private static final long DAY = 24L * 3600L * 1000L;
-  // How often to check size
-  private static final long ROLLOVER_CHECK_TIME = 600L * 1000L;
-
   public static final int BUFFER_SIZE = 64 * 1024;
-  private static final int BUFFER_GAP = 8 * 1024;
-
-  private QDate _calendar = QDate.createLocal();
+  
   private String _timeFormat;
   private int _timeFormatSecondOffset = -1;
   private int _timeFormatMinuteOffset = -1;
 
   private final AccessLogWriter _logWriter = new AccessLogWriter(this);
-
-  // AccessStream
-  private Object _streamLock = new Object();
 
   private String _format;
   private Segment []_segments;
@@ -92,9 +82,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
   private Pattern []_excludes = new Pattern[0];
 
   private boolean _isAutoFlush;
-
-  private boolean _isSharedBuffer = false;
-  private Object _sharedBufferLock;
 
   private long _autoFlushTime = 60000;
 
@@ -225,7 +212,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
    */
   public void setSharedBuffer(boolean isSharedBuffer)
   {
-    _isSharedBuffer = isSharedBuffer;
   }
 
   /**
@@ -409,7 +395,6 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
     for (int i = 0; i < len; i++) {
       Segment segment = _segments[i];
       String value = null;
-      CharBuffer cbValue = null;
       CharSegment csValue = null;
 
       switch (segment._code) {
@@ -444,7 +429,7 @@ public class AccessLog extends AbstractAccessLog implements AlarmListener
 
         // set cookie
       case Segment.SET_COOKIE:
-        ArrayList cookies = responseFacade.getCookies();
+        ArrayList<Cookie> cookies = responseFacade.getCookies();
         if (cookies == null || cookies.size() == 0)
           buffer[offset++] = (byte) '-';
         else {

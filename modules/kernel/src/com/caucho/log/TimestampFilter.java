@@ -28,22 +28,22 @@
 
 package com.caucho.log;
 
+import java.io.IOException;
 import java.util.ArrayList;
 
+import com.caucho.config.Module;
 import com.caucho.loader.Environment;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.QDate;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.WriteStream;
 
-import java.io.IOException;
-
 /**
  * Automatically-rotating streams.  Normally, clients will call
  * getStream instead of using the StreamImpl interface.
  */
+@Module
 public class TimestampFilter extends StreamImpl {
 
   static final String []DAY_NAMES = {
@@ -72,7 +72,6 @@ public class TimestampFilter extends StreamImpl {
   
   private WriteStream _stream;
   
-  private String _timestampString;
   private TimestampBase []_timestamp;
 
   private boolean _isNullDelimited;
@@ -111,8 +110,6 @@ public class TimestampFilter extends StreamImpl {
 
   public void setTimestamp(String timestamp)
   {
-    _timestampString = timestamp;
-
     ArrayList<TimestampBase> timestampList = new ArrayList<TimestampBase>();
     StringBuilder sb = new StringBuilder();
 
@@ -177,6 +174,7 @@ public class TimestampFilter extends StreamImpl {
     _stream = stream;
   }
 
+  @Override
   public Path getPath()
   {
     if (_stream != null)
@@ -188,6 +186,7 @@ public class TimestampFilter extends StreamImpl {
   /**
    * Returns true if the stream can write.
    */
+  @Override
   public boolean canWrite()
   {
     return _stream != null && _stream.canWrite();
@@ -196,6 +195,7 @@ public class TimestampFilter extends StreamImpl {
   /**
    * Write data to the stream.
    */
+  @Override
   public void write(byte []buffer, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -212,13 +212,8 @@ public class TimestampFilter extends StreamImpl {
     
     long now;
 
-    if (CauchoSystem.isTesting())
-      now = Alarm.getCurrentTime();
-    else
-      now = System.currentTimeMillis();
+    now = Alarm.getExactTime();
 
-    int timestampLength = 0;
-    
     for (int i = 0; i < length; i++) {
       int ch = buffer[offset + i];
 
@@ -263,9 +258,12 @@ public class TimestampFilter extends StreamImpl {
 	  _isRecordBegin = true;
 	}
 
+	// env/02d4
+	/*
 	if (! _isNullDelimited) {
 	  _isRecordBegin = true;
 	}
+	*/
       }
       else if (ch == '\r'
 	       && i + 1 < length && buffer[offset + i + 1] != '\n') {
@@ -275,10 +273,18 @@ public class TimestampFilter extends StreamImpl {
 	  _isRecordBegin = true;
 	}
 
-	if (! _isNullDelimited) {
-	  _isRecordBegin = true;
-	}
+	// env/02d4
+	/*
+        if (! _isNullDelimited) {
+          _isRecordBegin = true;
+        }
+	*/
       }
+    }
+    
+    // env/02d4
+    if (! _isNullDelimited) {
+      _isRecordBegin = true;
     }
   }
 

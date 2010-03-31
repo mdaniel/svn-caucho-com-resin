@@ -110,9 +110,6 @@ public class QDate {
   private static final FreeList<QDate> _freeLocalDate
     = new FreeList<QDate>(8);
   
-  private static final FreeList<QDate> _freeGmtDate
-    = new FreeList<QDate>(8);
-
   private TimeZone _timeZone;
   private Calendar _calendar;
 
@@ -299,11 +296,7 @@ public class QDate {
    */
   public void setGMTTime(long time)
   {
-    calculateSplit(time + _timeZone.getRawOffset());
-
-    // need to recalculate for daylight time
-    if (_isDaylightTime)
-      calculateSplit(time + _zoneOffset);
+    calculateSplit(time + _timeZone.getOffset(time));
   }
 
   /**
@@ -1341,8 +1334,6 @@ public class QDate {
   {
     int strlen = string.length();
     int year = 0;
-    int i;
-
     char ch = string.charAt(pos);
 
     if ('0' <= ch && ch <= '9') {
@@ -1646,14 +1637,10 @@ public class QDate {
     if (_timeZone == _gmtTimeZone) {
       _isDaylightTime = false;
       _zoneName = _stdName;
+      _zoneOffset = 0;
     }
     else {
-      _zoneOffset = _timeZone.getOffset(GregorianCalendar.AD,
-                                        (int) _year,
-                                        (int) _month,
-                                        (int) _dayOfMonth + 1,
-                                        getDayOfWeek(),
-                                        (int) _timeOfDay);
+      _zoneOffset = _timeZone.getOffset(_localTimeOfEpoch);
 
       if (_zoneOffset == _timeZone.getRawOffset()) {
         _isDaylightTime = false;
@@ -1665,7 +1652,7 @@ public class QDate {
       }
     }
 
-    _calendar.setTime(new Date(_localTimeOfEpoch));
+    _calendar.setTimeInMillis(_localTimeOfEpoch);
   }
 
   /**

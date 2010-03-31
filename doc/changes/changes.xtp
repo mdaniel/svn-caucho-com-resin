@@ -13,6 +13,9 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>log: print timestamp only for first item for multiline (#3229, rep by Jamison Novak)</li>
+<li>log: remove excess synchronization for log period calculation (#3814, rep by zenant)</li>
+<li>log: change date calculating to use TimeZone.getOffset(time) (#3853, rep by Jamison Novak)</li>
 <li>cdi: allow circular XML/EL definition of beans (#3954, rep by Hontvari Jozsef)</li>
 <li>classloader: avoid class loader deadlocks on ClassEntry (#3848, rep by zenant)</li>
 <li>jni: LD_LIBRARY_PATH handling moved from Watchdog to SystemClassLoader</li>

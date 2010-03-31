@@ -29,33 +29,30 @@
 
 package com.caucho.log;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.types.*;
-import com.caucho.jmx.Jmx;
-import com.caucho.loader.CloseListener;
-import com.caucho.loader.Environment;
-import com.caucho.management.server.*;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
-import javax.annotation.PostConstruct;
-import javax.management.*;
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.cfg.BeanConfig;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.Period;
+import com.caucho.config.types.RawString;
+import com.caucho.loader.CloseListener;
+import com.caucho.loader.Environment;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
 
 /**
- * Configures a log handler
+ * Configuration for the <log-handler> tag.
  */
-
+@Configurable
 public class LogHandlerConfig extends BeanConfig {
-  private static final Logger log
-    = Logger.getLogger(LogHandlerConfig.class.getName());
   private static final L10N L = new L10N(LogHandlerConfig.class);
 
   private Level _level;
@@ -64,7 +61,6 @@ public class LogHandlerConfig extends BeanConfig {
   
   private Filter _filter;
 
-  private boolean _useParentHandlers;
   private Handler _handler;
   
   private String _timestamp = "[%Y/%m/%d %H:%M:%S.%s] {%{thread}} ";
@@ -161,7 +157,6 @@ public class LogHandlerConfig extends BeanConfig {
   public void setUseParentHandlers(boolean useParentHandlers)
     throws ConfigException
   {
-    _useParentHandlers = useParentHandlers;
   }
 
   /**

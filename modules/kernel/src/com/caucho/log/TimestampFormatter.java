@@ -33,19 +33,16 @@ import java.util.ArrayList;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
+import com.caucho.config.Module;
 import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;
 import com.caucho.util.QDate;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamImpl;
-import com.caucho.vfs.WriteStream;
-
-import java.io.IOException;
 
 /**
  * Formats a timestamp
  */
+@Module
 public class TimestampFormatter extends Formatter {
   static final String []DAY_NAMES = {
     "Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"
@@ -71,7 +68,6 @@ public class TimestampFormatter extends Formatter {
     "July", "August", "September", "October", "November", "December",
   };
   
-  private String _timestampString;
   private TimestampBase []_timestamp;
 
   /**
@@ -89,8 +85,6 @@ public class TimestampFormatter extends Formatter {
 
   public void setTimestamp(String timestamp)
   {
-    _timestampString = timestamp;
-
     ArrayList<TimestampBase> timestampList = new ArrayList<TimestampBase>();
     StringBuilder sb = new StringBuilder();
 

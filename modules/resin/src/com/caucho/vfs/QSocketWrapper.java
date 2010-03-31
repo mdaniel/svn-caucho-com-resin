@@ -28,6 +28,7 @@
 
 package com.caucho.vfs;
 
+import com.caucho.config.Module;
 import com.caucho.util.IntMap;
 
 import javax.net.ssl.SSLPeerUnverifiedException;
@@ -47,10 +48,11 @@ import java.util.logging.Logger;
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
+@Module
 public class QSocketWrapper extends QSocket {
   private static final Logger log
     = Logger.getLogger(QSocketWrapper.class.getName());
-  private static Class sslSocketClass;
+  private static Class<?> sslSocketClass;
   private static IntMap sslKeySizes;
   
   private Socket _s;
@@ -91,6 +93,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the server inet address that accepted the request.
    */
+  @Override
   public InetAddress getLocalAddress()
   {
     return _s.getLocalAddress();
@@ -99,6 +102,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the server port that accepted the request.
    */
+  @Override
   public int getLocalPort()
   {
     return _s.getLocalPort();
@@ -107,6 +111,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the remote client's inet address.
    */
+  @Override
   public InetAddress getRemoteAddress()
   {
     if (_s != null)
@@ -118,6 +123,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the remote client's port.
    */
+  @Override
   public int getRemotePort()
   {
     if (_s != null)
@@ -129,6 +135,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns true if the connection is secure.
    */
+  @Override
   public boolean isSecure()
   {
     if (_s == null || sslSocketClass == null)
@@ -139,6 +146,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the secure cipher algorithm.
    */
+  @Override
   public String getCipherSuite()
   {
     if (! (_s instanceof SSLSocket))
@@ -157,6 +165,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the bits in the socket.
    */
+  @Override
   public int getCipherBits()
   {
     if (! (_s instanceof SSLSocket))
@@ -175,6 +184,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the client certificate.
    */
+  @Override
   public X509Certificate getClientCertificate()
     throws CertificateException
   {
@@ -189,6 +199,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the client certificate.
    */
+  @Override
   public X509Certificate []getClientCertificates()
     throws CertificateException
   {
@@ -213,8 +224,6 @@ public class QSocketWrapper extends QSocket {
     if (sslSession == null)
       return null;
 
-    String cipherSuite = sslSession.getCipherSuite();
-
     try {
       return (X509Certificate []) sslSession.getPeerCertificates();
     } catch (SSLPeerUnverifiedException e) {
@@ -232,6 +241,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the selectable channel.
    */
+  @Override
   public SelectableChannel getSelectableChannel()
   {
     if (_s != null)
@@ -243,6 +253,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns the socket's input stream.
    */
+  @Override
   public StreamImpl getStream()
     throws IOException
   {
@@ -254,41 +265,19 @@ public class QSocketWrapper extends QSocket {
     return _streamImpl;
   }
   
-  /**
-   * Returns the socket's input stream.
-   */
-  private InputStream getInputStream()
-    throws IOException
-  {
-    if (_is == null)
-      _is = _s.getInputStream();
-
-    return _is;
-  }
-  
-  /**
-   * Returns the socket's output stream.
-   */
-  private OutputStream getOutputStream()
-    throws IOException
-  {
-    if (_os == null)
-      _os = _s.getOutputStream();
-
-    return _os;
-  }
-
   public void resetTotalBytes()
   {
     if (_streamImpl != null)
       _streamImpl.resetTotalBytes();
   }
 
+  @Override
   public long getTotalReadBytes()
   {
     return (_streamImpl == null) ? 0 : _streamImpl.getTotalReadBytes();
   }
 
+  @Override
   public long getTotalWriteBytes()
   {
     return (_streamImpl == null) ? 0 : _streamImpl.getTotalWriteBytes();
@@ -297,6 +286,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Returns true for closes.
    */
+  @Override
   public boolean isClosed()
   {
     return _s == null;
@@ -305,6 +295,7 @@ public class QSocketWrapper extends QSocket {
   /**
    * Closes the underlying socket.
    */
+  @Override
   public void close()
     throws IOException
   {
@@ -339,9 +330,10 @@ public class QSocketWrapper extends QSocket {
     }
   }
 
+  @Override
   public String toString()
   {
-    return "QSocketWrapper[" + _s + "]";
+    return getClass().getSimpleName() + "[" + _s + "]";
   }
 
   static {

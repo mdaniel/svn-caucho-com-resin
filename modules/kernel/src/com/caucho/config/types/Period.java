@@ -49,8 +49,6 @@ public class Period {
   public static final long YEAR = DAY * 365L;
   public static final long INFINITE = (Long.MAX_VALUE / 2 / 1000) * 1000;
   public static final long FOREVER = INFINITE;
-
-  private static final QDate _localCalendar = QDate.createLocal();
   
   private long _period;
 
@@ -213,7 +211,13 @@ public class Period {
    */
   public static long periodEnd(long now, long period)
   {
-    return periodEnd(now, period, _localCalendar);
+    QDate localCalendar = QDate.allocateLocalDate();
+    
+    long endTime = periodEnd(now, period, localCalendar);
+    
+    QDate.freeLocalDate(localCalendar);
+    
+    return endTime;
   }
   
   /**
@@ -223,7 +227,7 @@ public class Period {
    *
    * @return the time of the next period in GMT ms since the epoch
    */
-  public static long periodEnd(long now, long period, QDate cal)
+  private static long periodEnd(long now, long period, QDate cal)
   {
     if (period < 0)
       return Long.MAX_VALUE;
@@ -231,53 +235,6 @@ public class Period {
       return now;
 
     if (period < 30 * DAY) {
-      synchronized (cal) {
-        cal.setGMTTime(now);
-
-        long localTime = cal.getLocalTime();
-
-        localTime = localTime + (period - (localTime + 4 * DAY) % period);
-
-        cal.setLocalTime(localTime);
-
-        return cal.getGMTTime();
-      }
-    }
-
-    if (period % (30 * DAY) == 0) {
-      int months = (int) (period / (30 * DAY));
-
-      synchronized (cal) {
-        cal.setGMTTime(now);
-        long year = cal.getYear();
-        int month = cal.getMonth();
-
-        cal.setLocalTime(0);
-      
-        cal.setDate(year, month + months, 1);
-
-        return cal.getGMTTime();
-      }
-    }
-
-    if (period % (365 * DAY) == 0) {
-      long years = (period / (365 * DAY));
-
-      synchronized (cal) {
-        cal.setGMTTime(now);
-        long year = cal.getYear();
-
-        cal.setLocalTime(0);
-
-        long newYear = year + (years - year % years);
-      
-        cal.setDate(newYear, 0, 1);
-
-        return cal.getGMTTime();
-      }
-    }
-
-    synchronized (cal) {
       cal.setGMTTime(now);
 
       long localTime = cal.getLocalTime();
@@ -288,6 +245,45 @@ public class Period {
 
       return cal.getGMTTime();
     }
+
+    if (period % (30 * DAY) == 0) {
+      int months = (int) (period / (30 * DAY));
+
+      cal.setGMTTime(now);
+      long year = cal.getYear();
+      int month = cal.getMonth();
+
+      cal.setLocalTime(0);
+      
+      cal.setDate(year, month + months, 1);
+
+      return cal.getGMTTime();
+    }
+
+    if (period % (365 * DAY) == 0) {
+      long years = (period / (365 * DAY));
+
+      cal.setGMTTime(now);
+      long year = cal.getYear();
+
+      cal.setLocalTime(0);
+
+      long newYear = year + (years - year % years);
+      
+      cal.setDate(newYear, 0, 1);
+
+      return cal.getGMTTime();
+    }
+
+    cal.setGMTTime(now);
+
+    long localTime = cal.getLocalTime();
+
+    localTime = localTime + (period - (localTime + 4 * DAY) % period);
+
+    cal.setLocalTime(localTime);
+
+    return cal.getGMTTime();
   }
 
   public String toString()

@@ -30,8 +30,6 @@ public class JniSocketImpl extends QSocket {
   private long _fd;
   private JniStream _stream;
   
-  private boolean _isIpv6;
-
   private final byte []_localAddrBuffer = new byte[16];
   private final char []_localAddrCharBuffer = new char[256];
   
@@ -75,18 +73,7 @@ public class JniSocketImpl extends QSocket {
     _isSecure = false;
 
     // initialize fields from the _fd
-    int result = nativeInit(_fd, _localAddrBuffer, _remoteAddrBuffer);
-    
-    switch (result) {
-    case 4:
-      _isIpv6 = false;
-      break;
-    case 6:
-      _isIpv6 = true;
-      break;
-    default:
-      // error
-    }
+    nativeInit(_fd, _localAddrBuffer, _remoteAddrBuffer);
 
     _isClosed.set(false);
   }
@@ -104,6 +91,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the server port that accepted the request.
    */
+  @Override
   public int getLocalPort()
   {
     return _localPort;
@@ -164,7 +152,7 @@ public class JniSocketImpl extends QSocket {
     
     char []charBuffer = _remoteAddrCharBuffer;
     
-    for (int i = 0; i < len; i++) {
+    for (int i = len - 1; i >= 0; i--) {
       buffer[offset + i] = (byte) charBuffer[i];
     }
 
@@ -183,6 +171,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the remote client's port.
    */
+  @Override
   public int getRemotePort()
   {
     return _remotePort;
@@ -193,6 +182,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the local server's host name.
    */
+  @Override
   public String getLocalHost()
   {
     if (_localName == null) {
@@ -213,6 +203,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the local server's inet address.
    */
+  @Override
   public InetAddress getLocalAddress()
   {
     if (_localAddr == null) {
@@ -247,6 +238,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns true if the connection is secure.
    */
+  @Override
   public boolean isSecure()
   {
     // return isSecure(_fd);
@@ -257,6 +249,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Returns the cipher for an ssl connection.
    */
+  @Override
   public String getCipherSuite()
   {
     return getCipher(_fd);
@@ -303,6 +296,7 @@ public class JniSocketImpl extends QSocket {
   /**
    * Read non-blocking
    */
+  @Override
   public boolean readNonBlock(int ms)
   {
     synchronized (_readLock) {
@@ -362,6 +356,7 @@ public class JniSocketImpl extends QSocket {
    * Returns a stream impl for the socket encapsulating the
    * input and output stream.
    */
+  @Override
   public StreamImpl getStream()
     throws IOException
   {
@@ -513,6 +508,7 @@ public class JniSocketImpl extends QSocket {
    *
    * XXX: potential sync issues
    */
+  @Override
   public void close()
     throws IOException
   {

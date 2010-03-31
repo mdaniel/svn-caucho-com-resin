@@ -29,31 +29,26 @@
 
 package com.caucho.log;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.*;
-import com.caucho.log.*;
-import com.caucho.util.L10N;
-import com.caucho.vfs.*;
-
-import javax.annotation.PostConstruct;
-import javax.management.*;
-import java.io.*;
-import java.util.*;
-import java.util.logging.Logger;
-import java.util.logging.LogRecord;
-import java.util.logging.Level;
+import java.io.IOException;
 import java.util.logging.Filter;
 import java.util.logging.Formatter;
 import java.util.logging.Handler;
+import java.util.logging.LogRecord;
+
+import javax.annotation.PostConstruct;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.types.Bytes;
+import com.caucho.config.types.Period;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Configures a log handler
  */
+@Configurable
 public class PathHandler extends Handler {
-  private static final Logger log
-    = Logger.getLogger(LogHandlerConfig.class.getName());
-  private static final L10N L = new L10N(LogConfig.class);
-
   private RotateLog _pathLog = new RotateLog();
 
   private Formatter _formatter;
@@ -139,6 +134,7 @@ public class PathHandler extends Handler {
   /**
    * Sets the formatter.
    */
+  @Override
   public void setFormatter(Formatter formatter)
   {
     _formatter = formatter;
@@ -147,6 +143,7 @@ public class PathHandler extends Handler {
   /**
    * Sets the filter.
    */
+  @Override
   public void setFilter(Filter filter)
   {
     _filter = filter;
@@ -187,6 +184,7 @@ public class PathHandler extends Handler {
   /**
    * Publishes the record.
    */
+  @Override
   public void publish(LogRecord record)
   {
     if (! isLoggable(record))
@@ -246,6 +244,7 @@ public class PathHandler extends Handler {
   /**
    * Flushes the buffer.
    */
+  @Override
   public void flush()
   {
   }
@@ -253,6 +252,7 @@ public class PathHandler extends Handler {
   /**
    * Closes the handler.
    */
+  @Override
   public void close()
   {
   }
@@ -260,6 +260,7 @@ public class PathHandler extends Handler {
   /**
    * Returns the hash code.
    */
+  @Override
   public int hashCode()
   {
     if (_os == null || _os.getPath() == null)
@@ -271,6 +272,7 @@ public class PathHandler extends Handler {
   /**
    * Test for equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
@@ -286,6 +288,7 @@ public class PathHandler extends Handler {
       return _os.getPath().equals(handler._os.getPath());
   }
 
+  @Override
   public String toString()
   {
     if (_os == null)

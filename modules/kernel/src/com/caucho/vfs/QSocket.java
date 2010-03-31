@@ -33,9 +33,12 @@ import java.net.InetAddress;
 import java.nio.channels.SelectableChannel;
 import java.security.cert.X509Certificate;
 
+import com.caucho.config.Module;
+
 /**
  * Abstract socket to handle both normal sockets and JNI sockets.
  */
+@Module
 abstract public class QSocket {
   /**
    * Returns the server inet address that accepted the request.
