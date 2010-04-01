@@ -640,6 +640,9 @@ r_server-Content =
   & (attribute jvm-arg { string }
      | element jvm-arg { string })*
 
+  & (attribute jvm-arg-line { string }
+     | element jvm-arg-line { string })*
+
   & (attribute jvm-classpath { string }
      | element jvm-classpath { string })*
 

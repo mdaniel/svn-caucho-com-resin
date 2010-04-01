@@ -1158,6 +1158,27 @@ public abstract class JspNode {
     }
   }
 
+  /**
+   * Generate include params.
+   */
+  void generateIncludeParam(JspJavaWriter out,
+                            JspParam param)
+    throws Exception
+  {
+    String value = param.getValue();
+        
+    out.print("\"" + param.getName() + "=\"");
+
+    String outValue = generateParameterValue(String.class, value);
+
+    if (outValue.equals("null")) {
+    }
+    else if (outValue.startsWith("\""))
+      out.print(" + (" + outValue + ")");
+    else
+      out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
+  }
+
   String generateJstlValue(Class type, String value)
     throws Exception
   {

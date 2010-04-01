@@ -29,17 +29,12 @@
 
 package com.caucho.loader;
 
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.ConfigException;
 import com.caucho.loader.enhancer.EnhancerManager;
 import com.caucho.loader.ivy.IvyLoader;
-import com.caucho.loader.ivy.IvyModule;
-//import com.caucho.osgi.OsgiLoader;
-//import com.caucho.osgi.OsgiBundleConfig;
 import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
-import java.util.ArrayList;
 
 /**
  * Class for configuration.
@@ -48,14 +43,7 @@ public class ClassLoaderConfig {
   private final static L10N L = new L10N(ClassLoaderConfig.class);
 
   private EnvironmentClassLoader _classLoader;
-  private EnvironmentBean _owner;
-
-  private Path _source;
-  private boolean _servletHack;
-
   private int _index;
-
-  private ArrayList<String> _priorityPackages;
 
   public ClassLoaderConfig()
     throws ConfigException
@@ -177,7 +165,9 @@ public class ClassLoaderConfig {
    */
   public void addCompilingLoader(CompilingLoader loader)
   {
-    _classLoader.addLoader(loader, _index++);
+    // _classLoader.addLoader(loader, _index++);
+    // server/1h60
+    _classLoader.addLoader(loader);
   }
 
   /**

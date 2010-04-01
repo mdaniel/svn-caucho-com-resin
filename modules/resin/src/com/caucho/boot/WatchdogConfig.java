@@ -31,6 +31,7 @@ package com.caucho.boot;
 
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.config.types.Bytes;
 import com.caucho.config.types.Period;
 import com.caucho.log.AbstractRolloverLog;
@@ -155,6 +156,7 @@ class WatchdogConfig
       return _args.getJavaHome();
   }
   
+  @Configurable
   public void addJvmArg(String arg)
   {
     _jvmArgs.add(arg);
@@ -165,6 +167,15 @@ class WatchdogConfig
       _hasXss = true;
     else if (arg.startsWith("-Xmx"))
       _hasXmx = true;
+  }
+
+  @Configurable
+  public void addJvmArgLine(String argLine)
+  {
+    for (String arg : argLine.split("\\s+")) {
+      if (! "".equals(arg))
+        addJvmArg(arg);
+    }
   }
   
   public ArrayList<String> getJvmArgs()

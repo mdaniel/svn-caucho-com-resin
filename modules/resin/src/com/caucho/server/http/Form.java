@@ -144,8 +144,12 @@ public class Form {
 			       int ch, boolean isTop)
     throws IOException
   {
-    if (ch == '+')
-      converter.addByte(' ');
+    if (ch == '+') {
+      if (isTop)
+        converter.addByte(' ');
+      else
+        converter.addChar(' ');
+    }
     else if (ch == '%') {
       int ch1 = is.next();
 

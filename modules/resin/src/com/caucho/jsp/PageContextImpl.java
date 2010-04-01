@@ -968,17 +968,31 @@ public class PageContextImpl extends PageContext
 
     include(relativeUrl, flush);
   }
+  
+  public StringBuilder encode(String relativeUrl)
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(relativeUrl);
+    
+    if (relativeUrl.indexOf('?') >= 0)
+      sb.append('&');
+    else
+      sb.append('?');
+    
+    return sb;
+  }
 
   private String encode(String relativeUrl, String query)
   {
     StringBuilder sb = new StringBuilder();
     sb.append(relativeUrl);
+    sb = encode(sb, query);
+    return sb.toString();
+  }
 
-    if (relativeUrl.indexOf('?') > 0)
-      sb.append('&');
-    else
-      sb.append('?');
-
+  public StringBuilder encode(StringBuilder sb, String query)
+  {
     int len = query.length();
 
     for (int i = 0; i < len; i++) {
@@ -989,15 +1003,21 @@ public class PageContextImpl extends PageContext
 	sb.append('+');
 	break;
       case '+':
-	sb.append("%2b");
-	break;
+        sb.append("%2b");
+        break;
+      case '%':
+        sb.append("%25");
+        break;
+      case '&':
+        sb.append("%3D");
+        break;
       default:
 	sb.append(ch);
 	break;
       }
     }
 
-    return sb.toString();
+    return sb;
   }
   
   /**

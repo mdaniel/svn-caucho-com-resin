@@ -41,6 +41,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.caucho.config.Module;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.CauchoRequestWrapper;
 import com.caucho.server.http.Form;
@@ -48,6 +49,7 @@ import com.caucho.util.HashMapImpl;
 import com.caucho.util.IntMap;
 import com.caucho.vfs.Encoding;
 
+@Module
 public class IncludeRequest extends CauchoRequestWrapper {
   private static final IntMap _includeAttributeMap = new IntMap();
 
@@ -62,7 +64,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
   private static final String QUERY_STRING
     = "javax.servlet.include.query_string";
 
-  private static Enumeration _emptyEnum;
+  private static Enumeration<String> _emptyEnum;
 
   private static final int REQUEST_URI_CODE = 1;
   private static final int CONTEXT_PATH_CODE = 2;
@@ -178,7 +180,7 @@ public class IncludeRequest extends CauchoRequestWrapper {
   }
 
   @Override
-  public Enumeration getHeaders(String name) {
+  public Enumeration<String> getHeaders(String name) {
     if ("If-Modified-Since".equals(name) || "If-None-Match".equals(name))
       return _emptyEnum;
 
@@ -186,12 +188,12 @@ public class IncludeRequest extends CauchoRequestWrapper {
   }
 
   @Override
-  public Enumeration getHeaderNames() {
+  public Enumeration<String> getHeaderNames() {
     // jsp/17eh jsp/17ek
     if (_headerNames == null) {
       _headerNames = new ArrayList<String>();
 
-      Enumeration names = super.getHeaderNames();
+      Enumeration<String> names = super.getHeaderNames();
       while (names.hasMoreElements()) {
         String name = (String) names.nextElement();
         if ("If-Modified-Since".equals(name) || "If-None-Match".equals(name)) {

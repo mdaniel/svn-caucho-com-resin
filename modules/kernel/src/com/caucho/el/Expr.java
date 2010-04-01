@@ -1100,7 +1100,7 @@ public abstract class Expr extends ValueExpression {
         throw new JspException(L.l("can't find property `{0}' in `{1}'",
                                   property, target.getClass()));
 
-      Class type = method.getParameterTypes()[0];
+      Class<?> type = method.getParameterTypes()[0];
 
       try {
 	int code = _typeMap.get(type);

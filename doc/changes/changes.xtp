@@ -13,6 +13,11 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>jsp: jsp:param in jsp:include must encode '%' (#3976, rep by Aaron Freeman)</li>
+<li>servlet: escape status message for default error page (#3781, rep by Bill Au)</li>
+<li>class-loader: changed override order to match config order (#3773, rep by cyttesen)</li>
+<li>servlet: add cookie-domain-regexp to &lt;session-config> (#3865, rep by Matt Sporleder)</li>
+<li>watchdog: add &lt;jvm-arg-line> as shortcut for &lt;jvm-arg> (#3940, rep by Bill Au)</li>
 <li>log: print timestamp only for first item for multiline (#3229, rep by Jamison Novak)</li>
 <li>log: remove excess synchronization for log period calculation (#3814, rep by zenant)</li>
 <li>log: change date calculating to use TimeZone.getOffset(time) (#3853, rep by Jamison Novak)</li>

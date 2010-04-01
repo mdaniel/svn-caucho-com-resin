@@ -29,6 +29,7 @@
 
 package com.caucho.jsp.java;
 
+import com.caucho.config.Module;
 import com.caucho.jsp.JspParseException;
 import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
@@ -39,6 +40,7 @@ import java.util.ArrayList;
 /**
  * Represents a Java scriptlet.
  */
+@Module
 public class JspInclude extends JspNode {
   private static final QName PAGE = new QName("page");
   private static final QName FLUSH = new QName("flush");
@@ -142,8 +144,6 @@ public class JspInclude extends JspNode {
   public void generate(JspJavaWriter out)
     throws Exception
   {
-    boolean hasQuery = false;
-
     if (_page == null)
       throw error(L.l("<jsp:include> expects a 'page' attribute.  'page' specifies the path to include."));
 
@@ -151,20 +151,34 @@ public class JspInclude extends JspNode {
       out.print("pageContext.include(");
       out.print(getRuntimeAttribute(_page));
     }
-    else {
-      String page = _page;
-
+    else if (_params == null) {
       out.print("pageContext.include(");
       out.print(generateParameterValue(String.class, _page));
+      out.println(", " + _flush + ");");
     }
-
-    if (_params != null) {
-      out.print(", ");
-      generateIncludeParams(out, _params);
+    else {
+      out.print("pageContext.include(");
+      
+      for (int i = 0; i < _params.size(); i++) {
+        out.print("pageContext.encode(");
+      }
+      
+      out.print("pageContext.encode(");
+      out.print(generateParameterValue(String.class, _page));
+      out.print(")");
+      
+      for (int i = 0; i < _params.size(); i++) {
+        if (i > 0)
+          out.print(".append('&')");
+        
+        out.print(", ");
+        
+        generateIncludeParam(out, _params.get(i));
+        
+        out.print(")");
+      }
+      
+      out.println(".toString(), " + _flush + ");");
     }
-
-    out.print(", " + _flush);
-    
-    out.println(");");
   }
 }

@@ -753,6 +753,13 @@ public class Server extends ProtocolDispatchServer
   /**
    * Arguments on boot
    */
+  public void addJvmArgLine(String args)
+  {
+  }
+
+  /**
+   * Arguments on boot
+   */
   public void addJvmClasspath(String args)
   {
   }

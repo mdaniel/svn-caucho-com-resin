@@ -29,6 +29,27 @@
 
 package com.caucho.loader;
 
+import java.io.FilePermission;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.instrument.ClassFileTransformer;
+import java.net.MalformedURLException;
+import java.net.URL;
+import java.net.URLClassLoader;
+import java.security.CodeSource;
+import java.security.Permission;
+import java.security.PermissionCollection;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.Vector;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.Attributes;
+import java.util.jar.Manifest;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.regex.Pattern;
+
 import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.EnhancerRuntimeException;
@@ -36,7 +57,7 @@ import com.caucho.make.AlwaysModified;
 import com.caucho.make.DependencyContainer;
 import com.caucho.make.Make;
 import com.caucho.make.MakeContainer;
-import com.caucho.management.server.*;
+import com.caucho.management.server.DynamicClassLoaderMXBean;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.L10N;
@@ -45,23 +66,6 @@ import com.caucho.vfs.Dependency;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
-
-import java.io.FilePermission;
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.*;
-import java.security.*;
-import java.lang.instrument.*;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.Hashtable;
-import java.util.Vector;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.jar.Attributes;
-import java.util.jar.Manifest;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.regex.Pattern;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -148,8 +152,6 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private final Lifecycle _lifecycle = new Lifecycle();
 
   private boolean _hasNewLoader = true;
-
-  private long _lastNullCheck;
 
   /**
    * Create a new class loader.
@@ -252,7 +254,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   private void verbose(String name, String msg)
   {
     if (_isVerbose) {
-      for (int i = _verboseDepth; _verboseDepth > 0; _verboseDepth--)
+      for (int i = _verboseDepth; i > 0; i--)
         System.err.print(' ');
 
       System.err.println(toString() + " " + name + " " + msg);
@@ -990,12 +992,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   {
     ArrayList<String> cp = new ArrayList<String>();
 
-    ArrayList<Loader> loaders = getLoaders();
-    for (int i = 0; i < loaders.size(); i++) {
-      Loader loader = loaders.get(i);
-
-      buildClassPath(cp);
-    }
+    buildClassPath(cp);
 
     return toClassPath(cp);
   }
@@ -1326,12 +1323,12 @@ public class DynamicClassLoader extends java.net.URLClassLoader
    * @return the loaded classes
    */
   @Override
-  protected Class loadClass(String name, boolean resolve)
+  protected Class<?> loadClass(String name, boolean resolve)
     throws ClassNotFoundException
   {
     // XXX: removed sync block, since handled below
 
-    Class cl = null;
+    Class<?> cl = null;
 
     cl = loadClassImpl(name, resolve);
 

@@ -29,17 +29,17 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.Path;
-import com.caucho.server.util.*;
-
 import java.io.InputStream;
 import java.net.URL;
 import java.security.CodeSource;
 import java.security.cert.Certificate;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.vfs.Path;
 
 
 /**
@@ -78,7 +78,7 @@ abstract public class Loader {
   /**
    * Loads the class directly, e.g. from OSGi
    */
-  protected Class loadClass(String name)
+  protected Class<?> loadClass(String name)
   {
     return null;
   }
