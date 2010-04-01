@@ -5,11 +5,13 @@
 <description></description>
 </header>
 <body>
+
 <s1 title="Authenticators">
 <p>
 The following are details on the authenticators that can be used with Resin, along with 
 example code to utilize as a starting point for your applications:  
 </p>
+
 <s2 title="DatabaseAuthenticator">
 <p>
   The DatabaseAuthenticator (<a href="javadoc|com.caucho.security.DatabaseAuthenticator|"/>)
@@ -107,6 +109,7 @@ example code to utilize as a starting point for your applications:
 &lt;/web-app&gt;
 </example>
 </s2>
+
 <s2 title="JaasAuthenticator">
 <p>
 The JaasAuthenticator (<a href="javadoc|com.caucho.security.JaasAuthenticator|"/>) uses a
@@ -161,6 +164,7 @@ login module.
   ...
 &lt;/web-app&gt;
 </example>
+
 <s3 name="jaas-is-user-in-role" title="isUserInRole">
 <p>
 The isUserInRole method is supported if the LoginModule provides either an isUserInRole
@@ -676,6 +680,8 @@ generate the digest programmatically. The following is an example of using this 
 <example>
 echo -n "user:resin:password" | openssl dgst -md5 -binary | uuencode -m -
 </example>
+</s2>
+
 <s2 title="Disabling the use of password-digest">
 <p>
 Using password digests is so important that all Resin authenticators use it by default. Although it is really not advised, 

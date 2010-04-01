@@ -104,6 +104,15 @@
       <item link="security-overview.xtp" title="Overview"
           description="Overview of security concepts"/>
 
+      <item link="security-authenticators.xtp" title="authenticators"
+            description="authenticators for Resin server"/>
+
+      <item link="security-authentication-method.xtp" title="authentication method"
+            description="authenticators for Resin server"/>
+
+      <item link="security-authorization.xtp" title="authorization"
+            description="authenticators for Resin server"/>
+
       <item link="security-ssl.xtp" title="SSL"
         description="Integrating OpenSSL and JSSE"/>
 
