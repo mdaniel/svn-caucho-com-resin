@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Linq;
 using System.Text;
 using System.IO;
 using System.Net.Sockets;
 using System.Web;
+using System.Diagnostics;
 /*
 s\x00\x06200 OKM\x00\x08cpu-loadS\x00\x010H\x00\x0eContent-LengthS\x00\x0212H\x00\x0cContent-TypeS\x00\x18text/html; charset=utf-8G\x00\x00D\x00\x0cHello World
 Q
@@ -58,10 +60,12 @@ namespace Caucho.IIS
     private Socket _socket;
     private TempBuffer _hmuxOutBuffer;
     private TempBuffer _hmuxInBuffer;
+    private String _traceId;
 
     public HmuxChannel(Socket socket)
     {
       _socket = socket;
+      _traceId = _socket.Handle.ToInt32().ToString();
       _hmuxOutBuffer = new TempBuffer(1024);
       _hmuxInBuffer = new TempBuffer(1024);
     }
@@ -73,38 +77,77 @@ namespace Caucho.IIS
 
     public void StartChannel()
     {
+      Trace.TraceInformation("Hmux[{0}] start request", _traceId);
       byte[] bytes = new byte[] { (byte)HMUX_CHANNEL, 0, 1 };
       Write(bytes);
     }
 
-    public void WriteUrl(String path)
+    public void WriteUri(String uri)
     {
-      byte[] bytes = System.Text.Encoding.ASCII.GetBytes(path.ToCharArray());
-      Write((byte)HMUX_URI);
-      WriteRawString(bytes);
+      String escaped = Uri.EscapeUriString(uri);
+      Trace.TraceInformation("Hmux[{0}] U-r:uri {1}->{2}", _traceId, uri, escaped);
+      WriteRequestString(HMUX_URI, escaped);
     }
 
-    public void WriteRawString(byte[] bytes)
+    public void WriteRequestString(int code, String str)
     {
-      WriteHmuxLength(bytes.Length);
-      Write(bytes);
+      Write((byte)code);
+      if (str == null) {
+        WriteHmuxLength(0);
+      } else {
+        byte[] bytes = System.Text.Encoding.ASCII.GetBytes(str.ToCharArray());
+        WriteHmuxLength(bytes.Length);
+        Write(bytes);
+      }
     }
 
-    public void WriteMethod(String method)
+    public void WriteHttpMethod(String method)
     {
-      byte[] bytes = System.Text.Encoding.ASCII.GetBytes(method.ToCharArray());
-      Write((byte)HMUX_METHOD);
-      WriteRawString(bytes);
+      Trace.TraceInformation("Hmux[{0}] m-r:method {1}", _traceId, method);
+      WriteRequestString(HMUX_METHOD, method);
     }
 
-    public void WriteBody(HttpRequest request)
+    public void WriteServerVariables(NameValueCollection serverVariables)
+    {
+      String protocol = serverVariables.Get("HTTP_VERSION");
+      Trace.TraceInformation("Hmux[{0}] c-r:protocol {1}", _traceId, protocol);
+      WriteRequestString(CSE_PROTOCOL, protocol);
+
+      String remoteAddr = serverVariables.Get("REMOTE_ADDR");
+      Trace.TraceInformation("Hmux[{0}] i-r:remote address {1}", _traceId, remoteAddr);
+      WriteRequestString(CSE_REMOTE_ADDR, remoteAddr);
+
+      String remoteHost = serverVariables.Get("REMOTE_HOST");
+      if (remoteHost == null)
+        remoteHost = remoteAddr;
+
+      Trace.TraceInformation("Hmux[{0}] h-r:remote host {1}", _traceId, remoteHost);
+      WriteRequestString(CSE_REMOTE_HOST, remoteHost);
+
+      String remotePort = serverVariables.Get("REMOTE_PORT");
+      Trace.TraceInformation("Hmux[{0}] j-r:remote port {1}", _traceId, remotePort);
+      WriteRequestString(CSE_REMOTE_PORT, remotePort);
+
+      String serverName = serverVariables.Get("SERVER_NAME");
+      Trace.TraceInformation("Hmux[{0}] v-r:server name {1}", _traceId, remotePort);
+      WriteRequestString(HMUX_SERVER_NAME, serverName);
+
+      String serverPort = serverVariables.Get("SERVER_PORT");
+      Trace.TraceInformation("Hmux[{0}] g-r:server name {1}", _traceId, serverPort);
+      WriteRequestString(CSE_SERVER_PORT, serverPort);
+
+      Trace.TraceInformation("Hmux[{0}] u-r:server type {1}", _traceId, serverPort);
+      WriteRequestString(CSE_SERVER_TYPE, "IIS");
+    }
+
+    public void RelayRequestBody(HttpRequest request)
     {
       int contentLength = request.ContentLength;
       if (contentLength == 0)
         return;
 
+      Trace.TraceInformation("Hmux[{0}] D-r:({1})", _traceId, contentLength);
       Write((byte)HMUX_DATA);
-
       WriteHmuxLength(contentLength);
 
       if (_hmuxOutBuffer.Offset == _hmuxOutBuffer.Capacity) {
@@ -123,11 +166,13 @@ namespace Caucho.IIS
     }
     public void WriteQuit()
     {
+      Trace.TraceInformation("Hmux[{0}] Q-r: end of request", _traceId);
       Write((byte)HMUX_QUIT);
     }
 
     public void WriteExit()
     {
+      Trace.TraceInformation("Hmux[{0}] E-r: exit", _traceId);
       Write((byte)HMUX_EXIT);
     }
 
@@ -175,16 +220,13 @@ namespace Caucho.IIS
      */
     private int SendHmux(byte[] buffer, int offset, int length)
     {
-      Debug("SendHmux: [" + offset + "] [" + length + "]");
       return _socket.Send(buffer, offset, length, SocketFlags.None);
     }
 
     private int FillInBuffer()
     {
       _hmuxInBuffer.Reset();
-      Debug("Filling In Buffer: ");
       int length = _socket.Receive(_hmuxInBuffer.Bytes);
-      Debug("Filled In Buffer: " + length);
       if (length == -1)
         return -1;
 
@@ -222,12 +264,10 @@ namespace Caucho.IIS
      */
     private int Read(byte[] buffer, int offset, int length)
     {
-      Debug("read " + length + " bytes starting at " + offset);
       int l = length;
       int bytesRead = 0;
       while (l > 0) {
         int len = l > _hmuxInBuffer.Length - _hmuxInBuffer.Offset ? _hmuxInBuffer.Length - _hmuxInBuffer.Offset : l;
-        Debug("  offset:" + offset + ", bytesToSend:" + length + ", len:" + len + ", l:" + l + ", hmuxInBuffer.Length:" + _hmuxInBuffer.Length + ", hmuxInBuffer.Offset:" + _hmuxInBuffer.Offset + "");
         Array.Copy(_hmuxInBuffer.Bytes, _hmuxInBuffer.Offset, buffer, offset, len);
         _hmuxInBuffer.Offset = _hmuxInBuffer.Offset + len;
         offset = offset + len;
@@ -246,17 +286,14 @@ namespace Caucho.IIS
     private String ReadString()
     {
       int length = ReadHmuxLength();
-      Debug("read string of bytesToSend: " + length);
       byte[] buffer = new byte[length];
       Read(buffer, 0, length);
       String result = Encoding.ASCII.GetString(buffer);
-      Debug("  string [" + result + "]");
       return result;
     }
 
     private int SkipBytes(int skipLength)
     {
-      Debug("skip " + skipLength + " bytes");
       int skipped = 0;
       int l = skipLength;
       while (l > 0) {
@@ -275,27 +312,26 @@ namespace Caucho.IIS
 
     public int RelayResponseData(Stream stream)
     {
-      int bytesToSend = ReadHmuxLength();
-
-      Debug("D:" + bytesToSend);
+      int bytesToRelay = ReadHmuxLength();
+      Trace.TraceInformation("Hmux[{0}] D-w:({1})", _traceId, bytesToRelay);
 
       int bytesSent = 0;
-      while (bytesSent < bytesToSend) {
-        int len = (bytesToSend - bytesSent) > _hmuxInBuffer.Length - _hmuxInBuffer.Offset ? _hmuxInBuffer.Length - _hmuxInBuffer.Offset : (bytesToSend - bytesSent);
+      while (bytesSent < bytesToRelay) {
+        int len = (bytesToRelay - bytesSent) > _hmuxInBuffer.Length - _hmuxInBuffer.Offset ? _hmuxInBuffer.Length - _hmuxInBuffer.Offset : (bytesToRelay - bytesSent);
 
         stream.Write(_hmuxInBuffer.Bytes, _hmuxInBuffer.Offset, len);
 
         _hmuxInBuffer.Offset = _hmuxInBuffer.Offset + len;
         bytesSent = bytesSent + len;
 
-        if (bytesSent < bytesToSend && FillInBuffer() == -1)
+        if (bytesSent < bytesToRelay && FillInBuffer() == -1)
           break;
       }
 
       return bytesSent;
     }
 
-    private void AddHeader(HttpResponse response, String name, String value)
+    private void RelayResponseHeader(HttpResponse response, String name, String value)
     {
       response.Headers.Add(name, value);
 
@@ -321,10 +357,8 @@ namespace Caucho.IIS
           }
           if (start > -1 && end > start) {
             charset = value.Substring(start + 1, end - start - 1);
-            Debug("setting charset: " + charset);
             response.Charset = charset;
           }
-
         }
       }
     }
@@ -332,26 +366,24 @@ namespace Caucho.IIS
     public void DoResponse(HttpContext context)
     {
       HttpResponse response = context.Response;
-      Debug("Do Response");
       int code;
       while ((code = Read()) != -1) {
-        Debug("Do Response: " + code);
         switch (code) {
           case HMUX_ACK: {
-              Debug("read ack");
+              Trace.TraceInformation("Hmux[{0}] A-w: Ack", _traceId);
               int len = ReadHmuxLength();
               SkipBytes(len);
 
               break;
             }
           case HMUX_STATUS: {
-              Debug("read status");
               response.Status = ReadString();
+              Trace.TraceInformation("Hmux[{0}] s-w: {1}", _traceId, response.Status);
 
               break;
             }
           case HMUX_META_HEADER: {
-              Debug("read meta header");
+              Trace.TraceInformation("Hmux[{0}] M-w", _traceId, response.Status);
               SkipBytes(ReadHmuxLength());
               Read();
               SkipBytes(ReadHmuxLength());
@@ -359,12 +391,16 @@ namespace Caucho.IIS
               break;
             }
           case HMUX_HEADER: {
-              Debug("Read header");
               String name = ReadString();
               Read();//HMUX_STRING
               String value = ReadString();
-              AddHeader(response, name, value);
+              RelayResponseHeader(response, name, value);
+              Trace.TraceInformation("Hmux[{0}] H-w: {1}={2}", _traceId, name, value);
 
+              break;
+            }
+          case CSE_SEND_HEADER: {
+              Trace.TraceInformation("Hmux[{0}] G-w", _traceId);
               break;
             }
           case HMUX_DATA: {
@@ -373,25 +409,23 @@ namespace Caucho.IIS
               break;
             }
           case HMUX_YIELD: {
+              Trace.TraceInformation("Hmux[{0}] Y-w", _traceId);
+
               break;
             }
           case HMUX_EXIT: {
+              Trace.TraceInformation("Hmux[{0}] E-w", _traceId);
+
               return;
             }
           case HMUX_QUIT: {
+              Trace.TraceInformation("Hmux[{0}] Q-w", _traceId);
+
               return;
             }
           default: { break; }
         }
       }
-    }
-
-    private void Debug(String str)
-    {
-      StreamWriter w = new StreamWriter(new FileStream("c:\\temp\\plugin.log", FileMode.Append));
-      w.WriteLine(str);
-      w.Flush();
-      w.Close();
     }
   }
 

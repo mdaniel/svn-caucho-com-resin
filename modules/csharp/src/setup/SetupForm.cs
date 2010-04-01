@@ -733,7 +733,7 @@ namespace Caucho
             Thread.Sleep(10);
           if (isNew) {
             ProgressDialogAddStatus("Starting installation ...");
-            ProgressDialogAddStatus("Checkign user ...");
+            ProgressDialogAddStatus("Checking user ...");
           } else {
             ProgressDialogAddStatus(String.Format("Updating service `{0}'", _resinService.Name));
           }
