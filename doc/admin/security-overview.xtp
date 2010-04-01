@@ -1,171 +1,163 @@
 <document>
 <header>
-  <product>resin</product>
-  <title>Resin 4.0 Security</title>
-  <description>
-  </description>
+<product>resin</product>
+<title>Resin Security</title>
+<description></description>
 </header>
-
 <body>
-
 <localtoc/>
-
-<s1 title="Samples">
-
-<s2 title="Local Access Authorization">
-
-<p>If you want an administration page to be accessible only from a
-local network, you can use the &lt;resin:Allow> and &lt;resin:IfNetwork> tags
-together to ensure only local requests are authorized.</p>
-
-<example title="WEB-INF/resin-web.xml - local network only">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:Allow url-pattern="/admin/*">
-    &lt;resin:IfNetwork>
-      &lt;resin:value>127.0.0.1&lt;/resin:value>
-      &lt;resin:value>192.168.0.0/16&lt;/resin:value>
-    &lt;/resin:IfNetwork>
-  &lt;/resin:Allow>
-
-&lt;/web-app>
-</example>
-
-<ul>
-<li>&lt;resin:Allow> creates an allow authorization rule.  If all the contents
-match, the pattern is allowed.</li>
-<li>&lt;resin:IfNetwork> matches a set of IP addresses using standard network
-notation.  If any address matches, &lt;resin:IfNetwork> is true.</li>
-</ul>
-
-<p>Because the local access protection only involves authorization, it's
-a shorter example than cases requiring a login.</p>
-
-</s2>
-
-<s2 title="Hide URLs from browsing">
-
-<p>In cases like WEB-INF, when you want to protect files from any
-browsing, local or not, you can use a single &lt;resin:Deny> authorization
-to prevent access.</p>
-
-<example title="hiding /hidden/*">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:Deny>
-     &lt;resin:url-pattern>/hidden/*&lt;/resin:url-pattern>
-     &lt;resin:url-pattern>*.hidden&lt;/resin:url-pattern>
-  &lt;/resin:Deny>
-
-&lt;/web-app>
-</example>
-
-</s2>
-
-<s2 title="XML Authentication">
-
-<p>If a section of a web-site needs basic password protection, you can
-use HTTP Basic authentication, an &lt;resin:IfRule> authorization and an
-XML authenticator as follows.</p>
-
-<example title="WEB-INF/resin-web.xml - Simple Password Protection">
+<s1 title="Resin Security">
+<s2 title="Overview">
+<!-- Add introductory sentence about SSL features. -->
+<p>
+Resin includes a comprehensive security framework for application authentication, 
+authorization and transport level SSL based security. Authentication capabilities include 
+built-in support for security data stored in XML files, the database, JAAS, LDAP or 
+properties files, HTTP basic authentication, form based authentication and password digests. 
+The authorization features include traditional role based security as well as robust 
+conditionals based-on cookies, HTTP headers, locale, IP address and the like.
+The security framework also supports single sign-on shared across multiple web applications.
+</p>
+<p>
+The basic structure of the Resin security framework can be demonstrated through a simple 
+example:
+</p>
+<example title="WEB-INF/resin-web.xml Basic security framework example">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
+  &lt;!-- The authentication mechanism -->
+  &lt;resin:BasicLogin/>
 
-  &lt;resin:Allow url-pattern="/secure/*">
-    &lt;resin:IfUserInRole role="*"/>
+  &lt;!-- Authorization -->
+  &lt;resin:Allow url-pattern="/foo/*">
+    &lt;resin:IfUserInRole role="user"/>
   &lt;/resin:Allow>
 
-  &lt;resin:FormLogin login-page="/login.jsp"/>
-
-  &lt;resin:XmlAuthenticator>
-     &lt;resin:user name="harry" password="uTOZTGaB6pooMDvqvl2Lbg==" group="user"/>
+  &lt;!-- Authentication provider -->
+  &lt;resin:XmlAuthenticator password-digest="none">
+    &lt;resin:user name="Harry Potter" password="quidditch" group="user,gryffindor"/>
+    &lt;resin:user name="Draco Malfoy" password="pureblood" group="user,slytherin"/>
   &lt;/resin:XmlAuthenticator>
-
+  
 &lt;/web-app>
-</example>
-
-<p>For security, the password is secured with an MD5 hash, because
-plaintext passwords aren't very secure at all.  The easiest way to
-generate the hash is with a short PHP script:</p>
-
-<example title="PHP generation of MD5 hash">
-&lt;?php
-
-echo base64_encode(md5("harry:resin:quidditch", true)) . "\n";
-
-</example>
-
-<ul>
-<li>&lt;resin:Allow> protects a section of the web-app, i.e.
-providing an authorization context.</li>
-<li>&lt;url-pattern> matches the URLs to be protected</li>
-<li>&lt;resin:IfUserInRole> protects the web-app through login (as opposed to
-by IP address or by SSL)</li>
-<li>&lt;resin:FormLogin> specifies the form login method</li>
-<li>&lt;resin:XmlAuthenticator> defines the login users and passwords.
-The XML authenticator specifies a simple XML file for user definition.</li>
-</ul>
-
+</example>    
+<p>
+Most usages of the Resin security framework will follow the general outline of the example 
+above. In the example, the &lt;resin:Allow> tag enables authorization whereas the 
+&lt;resin:IfUserInRole> applies role-based authorization. There is a rich set of available
+authorization features that are discussed in the sections below. Users actually enter 
+authentication information through HTTP basic authentication in the example above. The 
+various mechanisms for authentication allowed in Resin will be discussed shortly in a 
+following section. The authentication information that the user enters is checked against 
+an authentication provider. In the example, the authentication information, including 
+user name, password and groups, are stored in XML (the passwords above are simple text,
+but they need not and should not be). Resin offers a number of authentication providers 
+other than &lt;resin:XmlAuthenticator>. We will discuss this in detail in the next section.
+Note, authentication can sometimes be entirely unnecessary, especially while using 
+condition authorization rules not specific to a user - such as a condition allowing or
+denying a set of IP addresses from accessing a URL.     
+</p>
 </s2>
-
-</s1>
-
-<s1 title="Overview">
-
+<s2 title="Authenticators">
+<p>
+<i>Authentication</i> is the process of verifying that a user is who they say they are. 
+The most common way of verifying the identity of a user is through user name and password.
+As demonstrated in the example, Resin uses authenticators to verify user credentials. The
+following are the authenticators Resin currently supports:
+</p>
 <deftable title="Authenticators">
 <tr>
   <th>name</th>
   <th>description</th>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/AdminAuthenticator.html">&lt;resin:AdminAuthenticator></a></td>
-  <td>Resin administration authentication (same syntax as XmlAuthenticator).</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/DatabaseAuthenticator.html">&lt;resin:DatabaseAuthenticator></a></td>
-  <td>Authentication using a JDBC database schema.</td>
+  <td>
+    <a href="http://caucho.com/resin-javadoc/com/caucho/security/DatabaseAuthenticator.html">&lt;resin:DatabaseAuthenticator></a>
+  </td>
+  <td>
+    This authenticator works with authentication information stored in a relational 
+    database and uses JDBC.
+  </td>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/JaasAuthenticator.html">&lt;resin:JaasAuthenticator></a></td>
-  <td>Java authentication service authenticator.</td>
+  <td>
+    This authenticator can be used to plugin-in any Java authentication service (JAAS) 
+    module into Resin, including the JAAS modules built into the Sun JDK.
+  </td>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/LdapAuthenticator.html">&lt;resin:LdapAuthenticator></a></td>
-  <td>LDAP authentication using JNDI.</td>
+  <td>
+    This can be used with authentication data stored in LDAP and uses JNDI under the 
+    hood.
+  </td>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/PropertiesAuthenticator.html">&lt;resin:PropertiesAuthenticator></a></td>
-  <td>.properties file authentication.</td>
+  <td>This authenticator can use credentials stored in properties files.</td>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/XmlAuthenticator.html">&lt;resin:XmlAuthenticator></a></td>
-  <td>.xml file authentication.</td>
+  <td>Uses data stored in XML (either in-line or in a separate file).</td>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/AbstractAuthenticator.html">AbstractAuthenticator</a></td>
-  <td>Abstract class for custom authentication.</td>
+  <td>
+    This is an abstract class you can sue to create your own Resin custom authenticator.
+  </td>
 </tr>
-</deftable>
-
-<deftable title="Single Signon">
-<tr>
-  <th>name</th>
-  <th>description</th>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/ClusterSingleSignon.html">&lt;resin:ClusterSingleSignon></a></td>
-  <td>Cluster-based single signon.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/MemorySingleSignon.html">&lt;resin:MemorySingleSignon></a></td>
-  <td>Memory-based single signon.</td>
-</tr>
-</deftable>
-
-<deftable title="Login managers">
+</deftable>  
+<p>
+Each authenticator is described in detail <a href="security-authenticators.xtp">here</a>,
+including example code that you could use as a starting point for your application. The 
+built-in authenticators should satisfy a large number of common cases, but you can easily
+create your own custom authenticator when needed.
+</p>
+<p>
+Resin supports single sign-on in the form of authenticators at the server or virtual host
+level shared across multiple web applications. This described in detail with authenticators
+if this is functionality you need for your application.  
+</p>
+</s2>
+<s2 title="Securing Resin Administration">
+<p>
+The Resin security framework and the authenticators above are intended for application security. However, Resin resources
+such as <code>/resin-admin</code> as well as the Resin clustered managemnt and deployment administrative features also 
+needs to be secured. Resin internally uses the security framework to secure these resources. 
+</p>
+<p>
+The <a href="http://caucho.com/resin-javadoc/com/caucho/security/AdminAuthenticator.html">&lt;resin:AdminAuthenticator></a>
+tag is used to secure all Resin resources such as /resin-admin. The admin authenticator is defined only once in the 
+resin.xml file. The authenticator uses the exact same syntax as the XmlAuthenticator. 
+</p>
+<p>
+Resin's top-level &lt;resin:AdminAuthenticator> tag is essentially a static, XML-based authentication context. The 
+authenticator is automatically shared for all hosts and web-apps, so simple sites can even use this authenticator 
+configuration for their site-wide authentication.
+</p>
+<p>Here is a basic example of the Resin admin authenticator:</p>
+<example title="resin.xml">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+          xmlns:resin="urn:java:com.caucho.resin">
+  ...
+  &lt;resin:AdminAuthenticator>
+    &lt;user name="admin" password="MD5HASH=="/>
+    ...
+  &lt;/resin:AdminAuthenticator>
+  ...
+&lt;/resin>
+</example>
+</s2>
+<s2 title="Login Managers">
+<p>
+Authenticators manage how authentication data is stored, how the user-provided login information is matched to the
+stored authentication information and how an authenticated principal is constructed. A login manager, on the other hand,
+controls how the login information is actually collected. HTTP basic authentication is the simplest authentication 
+method (the variety that causes a login/password prompt to appear on the browser when you access a URL). The following are 
+the login managers Resin currently supports:
+</p>
+<deftable title="Login Managers">
 <tr>
   <th>name</th>
   <th>description</th>
@@ -180,16 +172,31 @@ The XML authenticator specifies a simple XML file for user definition.</li>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/FormLogin.html">&lt;resin:FormLogin></a></td>
-  <td>Servlet form authentication.</td>
+  <td>Form-based authentication.</td>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/AbstractLogin.html">AbstractLogin</a></td>
-  <td>Abstract class for custom login.</td>
+  <td>Abstract class for custom login managers.</td>
 </tr>
 </deftable>
-
-
-<deftable title="Authorization rules">
+<p>
+Each login manager is described in detail <a href="security-authentication-method.xtp">here</a>,
+including example code that you could use as a starting point for your application. The 
+built-in login managers should satisfy a large number of common cases, but you can easily
+create your own custom login manager when needed.
+</p> 
+</s2>
+<s2 title="Authorization">
+<p>
+<i>Authorization</i> is the process of verifying that an authenticated user has the appropriate priviledges
+to access a secure resource. The typical authorization process verifies that a user has the right set of permissions
+to access a URL or is assigned to the correct role/group.
+</p>
+<p>
+Resin has a very robust set of built-in authorization rules including conditionals, role-based security and
+combining/chaining rules. Authorization rules are based on a basic URL pattern based allow/deny tag set:
+</p>
+<deftable title="Basic Authorization">
 <tr>
   <th>name</th>
   <th>description</th>
@@ -203,8 +210,11 @@ The XML authenticator specifies a simple XML file for user definition.</li>
   <td>Denies access to a URL pattern.</td>
 </tr>
 </deftable>
-
-<deftable title="Basic conditions">
+<p>
+The allow/deny high-level directives can be qualified through a set of conditionals that include the
+most common case of role-based security (shown in the initial example):
+</p>
+<deftable title="Basic Conditions">
 <tr>
   <th>name</th>
   <th>description</th>
@@ -263,15 +273,15 @@ The XML authenticator specifies a simple XML file for user definition.</li>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfUserInRole.html">&lt;resin:IfUserInRole></a></td>
-  <td>Tests is the user is in the servlet security role.</td>
+  <td>Tests is the user is in the role.</td>
 </tr>
 <tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/RequestPredicate.html">RequestPredicate</a></td>
   <td>Interface for custom request predicates.</td>
 </tr>
 </deftable>
-
-<deftable title="Combining conditions">
+<p>These conditionals can also be combined/chained as needed using the following tags:</p>
+<deftable title="Combining Conditions">
 <tr>
   <th>name</th>
   <th>description</th>
@@ -297,1382 +307,13 @@ The XML authenticator specifies a simple XML file for user definition.</li>
   <td>Matches if all the children do not match.</td>
 </tr>
 </deftable>
-
-<deftable title="Permission Mapping">
-<tr>
-  <th>name</th>
-  <th>description</th>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/XmlRoleMap.html">&lt;resin:XmlRoleMap></a></td>
-  <td>Role to group permission mapping.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/security/AbstractRoleMap.html">AbstractRoleMap</a></td>
-  <td>Abstract class for custom role to group permission mapping.</td>
-</tr>
-</deftable>
-
-</s1>
-
-<s1 title="Management">
-
-<p>Since all Resin users will want to protect
-the <code>/resin-admin</code> pages with an administration password,
-and protect any clustered management and deployment, Resin's top-level
-&lt;resin:AdminAuthenticator> tag includes a static, XML-based authentication context.
-The authenticator is automatically shared for all hosts and web-apps, so
-simple sites can even use this authenticator configuration for their
-site-wide authentication.</p>
-
-<example title="resin.xml">
-&lt;resin xmlns="http://caucho.com/ns/resin"
-    xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:AdminAuthenticator>
-     &lt;user name="admin" password="MD5HASH=="/>
-
-     ...
-  &lt;/resin:AdminAuthenticator>
-
-  ...
-
-&lt;/resin>
-</example>
-
-<p>The password is a hash of the user name, password, and the "resin"
-realm.  The <code>/resin-admin</code> page includes a form to easily generate
-the MD5 hash.  You can also use the
-<a href="http://caucho.com/resin-javadoc/com/caucho/server/security/PasswordDigest.html">PasswordDigest</a> class to generate the digest
-programmatically.</p>
-
-</s1>
-
-<s1 title="Authentication">
-
-<p>Resin provides a basic set of authenticators covering the most
-common cases.  Applications which need custom authenticators can easily
-write their own extensions, described below.</p>
-
-<s2 title="DatabaseAuthenticator" version="Resin 4.0.0">
-<p>The DatabaseAuthenticator (<a href="javadoc|com.caucho.security.DatabaseAuthenticator|"/>)
-asks a backend database for the password matching the user's name.
-It uses the DataSource specified by the <var>data-source</var> option.
-<var>data-source</var> refers to a DataSource configured with
-<a href="database-ref.xtp">database</a>.</p>
-
-<p>The following are the attributes for the DatabaseAuthenticator:</p>
-
-<deftable>
-<tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
-</tr>
-<tr>
-  <td>data-source</td>
-  <td>The database pool.  Looks in the application attributes first, then
-  in the global database pools.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>password-query</td>
-  <td>A SQL query to get the user's password.  The default query is given
-  below.</td>
-  <td>see below</td>
-</tr>
-<tr>
-  <td>cookie-auth-query</td>
-  <td>A SQL query to authenticate the user by a persistent cookie.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>cookie-auth-update</td>
-  <td>A SQL update to match a persistent cookie to a user.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>role-query</td>
-  <td>A SQL query to determine the user's role.  By
-default, all users are in role "user", but no others.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td><a href="#password-digest">password-digest</a></td>
-  <td>Specifies the digest algorithm and format (Resin 2.0.4)</td>
-  <td>md5-base64</td>
-</tr>
-<tr>
-  <td>logout-on-session-timeout</td>
-  <td>If true, the user will be logged out when the session times out (Resin 2.0.6)</td>
-  <td>true</td>
-</tr>
-</deftable>
-
-<example title="WEB-INF/resin-web.xml for DatabaseAuthenticator">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"&gt;
-
-  ...
-
-  &lt;!-- DatabaseAuthenticator --&gt;
-  &lt;resin:DatabaseAuthenticator'&gt;
-    &lt;resin:data-source&gt;test&lt;/resin:data-source&gt;
-    
-    &lt;resin:password-query&gt;
-      SELECT password FROM LOGIN WHERE username=?
-    &lt;/resin:password-query&gt;
-    
-    &lt;resin:cookie-auth-query&gt;
-      SELECT username FROM LOGIN WHERE cookie=?
-    &lt;/resin:cookie-auth-query&gt;
-    
-    &lt;resin:cookie-auth-update&gt;
-      UPDATE LOGIN SET cookie=? WHERE username=?
-    &lt;/resin:cookie-auth-update&gt;
-    
-    &lt;resin:role-query&gt;
-      SELECT role FROM LOGIN WHERE username=?
-    &lt;/resin:role-query&gt;
-  &lt;/resin:DatabaseAuthenticator&gt;
-
-  &lt;resin:BasicLogin/&gt;
-
-  &lt;resin:Allow url-pattern="/users-only/*">
-     &lt;resin:IfUserInRole role="user"/&gt;
-  &lt;/resin:Allow>
-
-  ...
-
-&lt;/web-app&gt;
-</example>
-
-</s2>
-
-<s2 title="JaasAuthenticator" version="Resin 4.0.0">
 <p>
-The JaasAuthenticator (<a href="javadoc|com.caucho.security.JaasAuthenticator|"/>)
-uses a JAAS LoginModule for authentication.  The JaasAuthenticator is an
-adapter that provides the ability to use the large number of JAAS LoginModule's
-included in the JDK for authentication purposes.
-</p>
-
-<deftable title="JaasAuthenticator attributes">
-<tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
-</tr>
-<tr>
-  <td><a href="#jaas-init-param">init-param</a></td>
-  <td>Add a property to the LoginModule</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>login-module</td>
-  <td>The fully qualified class name of the LoginModule implementation</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>logout-on-session-timeout</td>
-  <td>If true, the user will be logged out when the session times out</td>
-  <td>true</td>
-</tr>
-<tr>
-  <td><a href="#password-digest">password-digest</a></td>
-  <td>selects the signature method to protect the password</td>
-  <td>md5-base64</td>
-</tr>
-</deftable>
-
-<example title="WEB-INF/resin-web.xml JaasAuthenticator">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"&gt;
-
-  &lt;resin:JaasAuthenticator&gt;
-    &lt;resin:login-module&gt;com.sun.security.auth.module.Krb5LoginModule&lt;/resin:login-module&gt;
-    &lt;resin:init-param&gt;
-      &lt;debug&gt;true&lt;/debug&gt;
-    &lt;/resin:init-param&gt;
-  &lt;/resin:JaasAuthenticator&gt;
-
-&lt;/web-app&gt;
-</example>
-
-<s3 name="jaas-is-user-in-role" title="isUserInRole">
-<p>
-The isUserInRole method is supported if the LoginModule provides either an
-isUserInRole method in the Principal returned by the LoginModule, or a
-getRoles() method returning a java.util.Set. (Since 3.0.19).
-</p>
-</s3> <!-- jaas-is-user-in-role -->
-
-<s3 name="jaas-init-param" title="init-param">
-
-<p>
-&lt;init-param&gt; directives are used to configure the properties of the
-LoginModule. Existing LoginModules provide documentation of the init-param that
-are accepted. Custom LoginModule implementations retrieve the init-param values
-in the initialize method.
-</p>
-
-</s3> <!-- jaas-init-param -->
-
-<s3 name="jaas-custom" title="Custom LoginModule">
-
-<example title="Custom LoginModule - java code">
-import java.util.*;
-
-import javax.security.auth.*;
-import javax.security.auth.spi.*;
-import javax.security.auth.callback.*;
-import javax.security.auth.login.*;
-
-public class TestLoginModule implements javax.security.auth.spi.LoginModule {
-  private Subject _subject;
-  private CallbackHandler _handler;
-  private Map _state;
- 
-  private String _userName;
-  private String _password;
-
-  public void initialize(Subject subject,
-                         CallbackHandler handler,
-                         Map sharedState,
-                         Map options)
-   {
-     _subject = subject;
-     _handler = handler;
-     _state = sharedState;
-
-     _userName = (String) options.get("user");
-     _password = (String) options.get("password");
-   }
-
-   public boolean login()
-     throws LoginException
-   {
-     NameCallback name = new NameCallback("");
-     PasswordCallback password = new PasswordCallback("", false);
- 
-     _handler.handle(new Callback[] { name, password });
-
-     if (_userName.equals(name.getName()) &amp;&amp; 
-         _password.equals(password.getPassword()) {
-         _subject.getPrincipals().add(new TestPrincipal(_userName));
-       return true;
-     }
-     else
-       return false;
-   }
-
-   public boolean abort()
-   {
-     return true;
-   }
-
-   public boolean commit()
-   {
-     return _subject.getPrincipals().size() > 0;
-   }
-
-   public boolean logout()
-   {
-      return true;
-   }
-}
-</example>
-
-<example title="Custom LoginModule - resin-web.xml configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"&gt;
-
-  &lt;resin:JaasAuthenticator&gt;
-    &lt;resin:login-module&gt;example.TestModule&lt;/resin:login-module&gt;
-    
-    &lt;resin:init-param&gt;
-      &lt;user&gt;Harry&lt;/user&gt;
-      &lt;password&gt;quidditch&lt;/password&gt;
-    &lt;/resin:init-param&gt;
-  &lt;/resin:JaasAuthenticator&gt;
-&lt;/web-app&gt;
-</example>
-</s3> <!-- jaas-custom -->
-
-</s2> <!-- JaasAuthenticator -->
-
-<s2 title="LdapAuthenticator" version="Resin 4.0.0">
-<p>
-The LdapAuthenticator (<a href="javadoc|com.caucho.security.LdapAuthenticator|"/>)
-uses jndi to contact an LDAP (or Active Directory) server for authentication purposes.
-</p>
-
-<deftable>
-<tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
-</tr>
-<tr>
-  <td>dn-prefix</td>
-  <td>string to prepend to query before portion selecting user by name</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>dn-suffix</td>
-  <td>string to append to query after portion selecting user by name</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td><a href="#jndi-env">jndi-env</a></td>
-  <td>Add a property to the jndi provider used for connecting to the ldap server</td>
-  <td>see below</td></tr>
-<tr>
-  <td>logout-on-session-timeout</td>
-  <td>If true, the user will be logged out when the session times out</td>
-  <td>true</td>
-</tr>
-<tr>
-  <td>security-authentication</td>
-  <td>Sets the Context.SECURITY_AUTHENTICATION for the ldap environment</td>
-  <td></td>
-</tr>
-<tr>
-  <td>security-principal</td>
-  <td>Sets the Context.SECURITY_PRINCIPAL for the ldap environment</td>
-  <td></td>
-</tr>
-<tr>
-  <td>security-credentials</td>
-  <td>Sets the Context.SECURITY_CREDENTIALS for the ldap environment</td>
-  <td></td>
-</tr>
-<tr>
-  <td><a href="#password-digest">password-digest</a></td>
-  <td>selects the signature method to protect the password</td>
-  <td>md5-base64</td>
-</tr>
-<tr>
-  <td>user-attribute</td>
-  <td>the attribute name to use in the query for matching the user</td>
-  <td>uid</td>
-</tr>
-<tr>
-  <td>password-attribute</td>
-  <td>the attribute name to use for obtaining the password</td>
-  <td>userPassword</td>
-</tr>
-<tr>
-  <td>url</td>
-  <td>the url for the server</td>
-  <td>ldap://localhost:389</td>
-</tr>
-</deftable>
-
-<example title="WEB-INF/resin-web.xml for LdapAuthenticator">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin"&gt;
-
-  ...
-
-  &lt;resin:LdapAuthenticator password-digest="none">
-    &lt;resin:url&gt;ldap://localhost:389&lt;/resin:url&gt;
-    &lt;resin:dn-suffix&gt;dc=hogwarts,dc=com&lt;/resin:dn-suffix&gt;
-  &lt;/resin:LdapAuthenticator>
-
-  ...
-
-&lt;/web-app>
-</example>
-
-<s3 title="jndi-env">
-
-<p>jndi-env configures properties of the ldap provider implementation.
-Prior to 3.1.1, the url of the server is specified with
-<code>jndi-env</code> and the <code>java.naming.provider.url</code> property.
-</p>
-
-<example title="WEB-INF/resin-web.xml LdapAuthenticator jndi-env">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-	    
-  &lt;resin:LdapAuthenticator password-digest="none">
-    &lt;resin:jndi-env java.naming.factory.initial="com.sun.jndi.ldap.LdapCtxFactory"/&gt;
-    &lt;resin:jndi-env java.naming.provider.url="ldap://localhost:389"/&gt;
-
-    &lt;resin:dn-suffix&gt;dc=hogwarts,dc=com&lt;/dn-suffix&gt;
-  &lt;/resin:LdapAuthenticator&gt;
-
-&lt;web-app>  
-</example>
-</s3>
-</s2>
-
-<s2 title="PropertiesAuthenticator">
-
-<example title="WEB-INF/resin-web.xml - inline properties">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:PropertiesAuthenticator password-digest="none">
-     harry=quidditch,user,admin
-     draco=mudblood,disabled,user
-  &lt;/resin:PropertiesAuthenticator>
-
-&lt;/web-app>
-</example>
-
-<example title="WEB-INF/resin-web.xml - file property">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"
-
-  &lt;resin:PropertiesAuthenticator path="WEB-INF/users.properties"/>
-
-&lt;/web-app>
-</example>
-
-<example title="WEB-INF/users.properties">
-harry=/Tj/54ylCloUeMi2YQIVCQ===,user,admin
-</example>
-
-</s2>
-
-<s2 title="XmlAuthenticator">
-
-<example title="WEB-INF/resin-web.xml - inline xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-        xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:XmlAuthenticator password-digest="none">
-     &lt;resin:user name="harry" password="quidditch"/>
-  &lt;/resin:XmlAuthenticator>
-
-&lt;/web-app>
-</example>
-
-<example title="WEB-INF/resin-web.xml - file xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;resin:XmlAuthenticator path="WEB-INF/users.xml"/>
-
-&lt;/web-app>
-</example>
-
-<example title="WEB-INF/users.xml">
-&lt;users>
-  &lt;user name="harry password="/Tj/54ylCloUeMi2YQIVCQ===" roles="user,admin"/>
-&lt;users>
-</example>
-
-</s2>
-
-<s2 title="XmlAuthenticator" version="Resin 4.0.0">
-<p>The XmlAuthenticator (<a href="http://caucho.com/resin-javadoc/com.caucho.security.XmlAuthenticator">com.caucho.security.XmlAuthenticator</a>),
-stores the authentication in either an xml file or in the configuration
-itself.</p>
-
-<p>When configuring the XmlAuthenticator in the resin.xml
-(or resin-web.xml), each <var>user</var> adds a new configured
-user.  The value contains the username, password, and the
-roles the user plays.</p>
-
-<example title="XmlAuthenticator in resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin">
-	 
-  &lt;resin:XmlAuthenticator password-digest="none">
-    &lt;resin:user name="Harry Potter" password="quidditch" group="user,gryffindor"/>
-    &lt;resin:user name="Draco Malfoy" password="pureblood" group=":user,slytherin"/>
-  &lt;/resin:XmlAuthenticator>
-
-&lt;/web-app>  
-</example>
-
-<p>Because the plain text passwords in the example
-above are a serious security issue, most sites will use
-the password-digest attribute described below to protect the
-passwords.</p>
-
-<deftable>
-<tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
-</tr>
-<tr>
-  <td>user</td>
-  <td>specifies an allowed user.  May be repeated.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td><a href="#password-digest">password-digest</a></td>
-  <td>selects the signature method to protect the password</td>
-  <td>md5-base64</td>
-</tr>
-<tr>
-  <td>path</td>
-  <td>specifies a path to an XML file containing the users and passwords.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>logout-on-session-timeout</td>
-  <td>If true, the user will be logged out when the session times out</td>
-  <td>true</td>
-</tr>
-</deftable>
-
-<p>The passwords can be specified in a separate *.xml file.  The password
-file looks like:</p>
-
-<example title="password.xml">
-&lt;authenticator&gt;
-  &lt;user name='Harry Potter' password='quidditch' roles='gryffindor'/&gt;
-  &lt;user name='Draco Malfoy' password='pureblood' roles='slytherin'/&gt;
-&lt;/authenticator&gt;
-</example>
-
-<p>Sites should use <a href="#password-digest">password-digest</a> to protect the passwords.</p>
-
-</s2>
-
-<!--
-<s2 title="AuthenticationList" version="3.0.9">
-<p>AuthenticatorList 
-(<a href="javadoc|com.caucho.server.security.AuthenticatorList|"/>)
-is used to configure more than one authenticator in a list, each
-authenticator is tried in turn and if the authentication fails the next
-authenticator in the list is attempted.
-
-<example>
-  &lt;authenticator type="com.caucho.server.security.AuthenticatorList"&gt;
-    &lt;init&gt;
-      &lt;authenticator resin:type="com.caucho.server.security.XmlAuthenticator"&gt;
-        &lt;user&gt;admin:NIHlOSafJN2H7emQCkOQ2w==:user,admin&lt;/user&gt;
-      &lt;/authenticator&gt;
-
-      &lt;authenticator resin:type='com.caucho.server.security.JdbcAuthenticator'&gt;
-        &lt;data-source&gt;jdbc/users&lt;/data-source&gt;
-        &lt;password-query&gt;
-          SELECT password FROM LOGIN WHERE username=?
-        &lt;/password-query&gt;
-        &lt;cookie-auth-query&gt;
-          SELECT username FROM LOGIN WHERE cookie=?
-        &lt;/cookie-auth-query&gt;
-        &lt;cookie-auth-update&gt;
-          UPDATE LOGIN SET cookie=? WHERE username=?
-        &lt;/cookie-auth-update&gt;
-        &lt;role-query&gt;
-          SELECT role FROM LOGIN WHERE username=?
-        &lt;/role-query&gt;
-      &lt;/authenticator&gt;
-    &lt;/init&gt;
-  &lt;/authenticator&gt;
-
-  &lt;login-config auth-method='basic'/&gt;
-
-  &lt;security-constraint url-pattern='/users/*' role-name='user'/&gt;
-  &lt;security-constraint url-pattern='/admin/*' role-name='admin'/&gt;
-</example>
-
-</p></s2>
--->
-
-<s2 title="custom Authenticator">
-
-<example title="WEB-INF/resin-web.xml - custom">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-        xmlns:foo="urn:java:com.caucho.foo">
-
-  &lt;foo:MyAuthenticator>
-    &lt;foo:foo>bar&lt;/foo:foo>
-  &lt;/foo:MyAuthenticator>
-
-&lt;/web-app>
-</example>
-
-<example title="MyAuthenticator.java">
-package com.foo;
-
-import com.caucho.security.AbstractAuthenticator;
-import com.caucho.security.PasswordUser;
-
-public class MyAuthenticator extends AbstractAuthenticator {
-  private PasswordUser _user;
-
-  public MyAuthenticator()
-  {
-    _user = new PasswordUser("harry", "quidditch",
-                             new String[] { "user" });
-  }
-
-  public PasswordUser getUser(String userName)
-  {
-    if (userName.equals(_user.getName()))
-      return _user;
-    else
-      return null;
-  }
-}
-</example>
-
-</s2>
-
-</s1>
-
-<s1 title="Digest passwords">
-
-<s2 title="Digest protects passwords">
-
-<p>Digest passwords enable an application to avoid storing and even
-transmitting the password in a form that someone can read.</p>
-
-<p>A digest of a cleartext password is calculated when it is passed through a
-one-way function that consistently produces another series of characters,
-<code>digestPassword = digester(username + ":" + realm + ":"
-cleartextPassword)</code>.  The function is "one-way" because the
-digestPassword cannot be used to reverse-engineer the original password.</p>
-
-<p>For example, Resin uses md5 and base64 as the default.  You can create the
-hash with a simple PHP script like:</p>
-
-<example title="digest.php">
-&lt;?php
-
-echo base64_encode(md5("harry:resin:quidditch")) . "\n";
-
-</example>
-
-<p>Digest passwords can be used in two places: storage and transmission.
-Digest passwords in storage means that the password is stored in a digested
-form, for example in a database or in a file.
-Digest passwords in transmission means that the client (usually a web browser)
-creates the digest and submits the digest password to the web server.  
-</p>
-
-<p>Storing digest passwords is so important for security purposes that the
-Resin authenticators default to assuming
-that the passwords are stored in digest form.</p>
-
-<p>The important advantage is that a user's cleartext password is not as easily
-compromised. Since the password they use (the "cleartext" password) is not
-stored a malicious user cannot determine the password by gaining access to the
-database or other backend storage for the passwords.</p>
-
-</s2>
-
-<s2 title="MD5 digest">
-<p>Resin's authenticators use "MD5-base64" and a realm "resin" to digest
-passwords by default. <var>MD5</var> indicates that the MD5 algorithm is used. <var>base64</var> is an encoding format to apply to the binary result of MD5.</p>
-
-
-<p>Some examples are:</p>
-
-<deftable>
-<tr><th>Username</th><th>Realm</th><th>Password</th><th>digest
-</th></tr><tr><td>root</td><td>resin</td><td>changeme</td><td>j/qGVP4C0T7UixSpKJpTdw==
-</td></tr><tr><td>harry</td><td>resin</td><td>quidditch</td><td>uTOZTGaB6pooMDvqvl2Lbg==
-</td></tr><tr><td>hpotter</td><td>resin</td><td>quidditch</td><td>x8i6aM+zOwDqqKPRO/vkxg==
-</td></tr><tr><td>filch</td><td>resin</td><td>mrsnorris</td><td>KmZIq2RKXAHV4BaoNHfupQ==
-</td></tr><tr><td>pince</td><td>resin</td><td>quietplease</td><td>Txpd1jQc/xwhISIqodEjfw==
-</td></tr><tr><td>snape</td><td>resin</td><td>potion</td><td>I7HdZr7CTM6hZLlSd2o+CA==
-</td></tr><tr><td>mcgonagall</td><td>resin</td><td>quidditch</td><td>4slsTREVeTo0sv5hGkZWag==
-</td></tr><tr><td>dmalfoy</td><td>resin</td><td>pureblood</td><td>yI2uN1l97Rv5E6mdRnDFwQ==
-</td></tr><tr><td>lmalfoy</td><td>resin</td><td>myself</td><td>sj/yhtU1h4LZPw7/Uy9IVA==
-</td></tr></deftable>
-
-<p>In the above example the digest of "harry/quidditch" is different than the
-digest of "hpotter/quidditch" because even though the password is the same, the
-username has changed. The digest is calculated with 
-<code>digest(username + ":" + realm + ":" + password)</code>, so if the username
-changes the resulting digest is different.</p>
-
-</s2>
-
-<s2 title="Calculating a digest">
-
-<p>Of course, storing the digest password is a bit more work.  When
-the user registers, the application needs to compute the
-digest to store it.</p>
-
-<!-- a form for calculating an MD5 digest -->
-<!--
-<jsp:scriptlet>
-
-String digest_user = request.getParameter("digest_user");
-String digest_realm = request.getParameter("digest_realm");
-String digest_password = request.getParameter("digest_password");
-String digest_result = null;
-
-if (digest_realm == null || digest_realm.length() == 0)
-  digest_realm = "resin";
-pageContext.setAttribute("digest_realm",digest_realm);
-
-if (digest_user != null &amp;&amp; digest_password != null)
-{
-  String digest_concat = digest_user + ":" + digest_realm + ":" + digest_password;
-
-  com.caucho.http.security.PasswordDigest digest_digest = new com.caucho.http.security.PasswordDigest();
-
-  digest_digest.setRealm(digest_realm);
-  digest_result = digest_digest.getPasswordDigest(digest_user, digest_password);
-
-  pageContext.setAttribute("digest_user",digest_user);
-  pageContext.setAttribute("digest_password",digest_password);
-  pageContext.setAttribute("digest_concat",digest_concat);
-  pageContext.setAttribute("digest_result",digest_result);
-}
-
-String digest_requestURI = request.getRequestURI();
-digest_requestURI = digest_requestURI + "#Calculating-a-digest";
-
-pageContext.setAttribute("digest_requestURI",digest_requestURI);
-
-</jsp:scriptlet>
-
-<form action="${digest_requestURI}">
-<jsp:scriptlet>if (digest_result == null || digest_result.length() == 0) {</jsp:scriptlet>
-<p>The following form can be used to calculate an MD5-base64 digest:</p>
-<jsp:scriptlet>} else {</jsp:scriptlet>
-<p>The digest of <var>${digest_concat}</var> is <code><b>${digest_result}</b></code></p>
-<jsp:scriptlet>}</jsp:scriptlet>
-
-  <table>
-  <tr><td><b>user id:</b>
-  </td><td><input name="digest_user" size="50" value="${digest_user}"/>
-
-  </td></tr><tr><td><b>password:</b>
-  </td><td><input name="digest_password" size="50" value="${digest_password}"/>
-
-  </td></tr><tr><td><b>realm:</b>
-  </td><td><input name="digest_realm" size="50" value="${digest_realm}"/>
-  </td></tr><tr><td><input type="submit"/>
-  </td></tr></table>
-</form>
--->
-
-<example title="Calculating a digest using PHP">
-&lt;?php
-
-  $username = "harry";
-  $password = "quidditch";
-  $realm = "resin";
-
-  $digest = base64_encode(md5("$username:$realm:$password", true));
-?>  
-</example>
-
-<p>Unix users can quickly calculate a digest:</p>
-<example>
-echo -n "user:resin:password" | openssl dgst -md5 -binary | uuencode -m -
-</example>
-
-<p>The class <a href="javadoc|com.caucho.security.PasswordDigest|"/> can
-be used to calculate a digest.</p>
-
-<example title="Calculating a digest - Java example">
-  import com.caucho.security.PasswordDigest;
-
-  ...
-
-  String username = ...;
-  String password = ...;
-  String realm = "resin";
-
-  PasswordDigest passwordDigest = PasswordDigest();
-
-  String digest = passwordDigest.getPasswordDigest(username, password, realm);
-</example>
-
-<p>
-The realm for DatabaseAuthenticator and XmlAuthenticator defaults to "resin";
-the realm can be specified during configuration:
-</p>
-
-<example title="Specifying a realm">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:DatabaseAuthenticator&gt;
-    &lt;resin:password-digest-realm&gt;hogwarts&lt;/resin:password-digest-realm&gt;
-    ...
-  &lt;/resin:DatabaseAuthenticator&gt;
-  
-&lt;/web-app>  
-</example>
-
-</s2>
-
-<s2 title="Using Digest with basic authentication or a form login">
-
-<p>When using the form login method or the HTTP basic authentication login
-method, the password submitted is in cleartext.  The Resin authenticator will
-digest the password before comparing it to the value retrieved from storage.
-The message is transmitted in cleartext but is stored as a digest. This method
-provides only half of the protection - the password is not protected in
-transmission (although if the form submit is being done over an <a href="security-ssl.xtp">SSL</a> connection it will be secure).</p>
-
-</s2>
-
-
-<s2 title="Using HTTP digest authentication">
-
-<p>The HTTP protocol includes a method to indicate to the client that it should
-make a digest using the password.  The client submits a digest to Resin instead
-of submitting a cleartext password. HTTP digest authentication protects the password in transmission.</p>
-
-<p>When using HTTP digest, Resin will respond to the browser and ask it to
-calculcate a digest. The steps involved are:</p>
-<ul>
-<li>Resin provides the client a realm and some other information 
-</li><li>The client obtains a username and password (usually a dialog box with a web browser)
-</li><li>The client calculates a digest using the username, realm, pasword, and other information supplied by Resin
-</li><li>The client submits the digest to Resin
-</li><li>Resin does the same digest calculation as the client did
-</li><li>Resin compares the submitted digest and the digest it calculated.  If they match, the user has been authenticated
-</li>
-</ul>
-
-<p>The advantage of this method is that the cleartext password is protected in
-transmission, it cannot be determined from the digest that is submitted by the
-client to the server.</p>
-
-<p>HTTP digest authentication is enabled with the <a config-tag="auth-method"/> child of the <a config-tag="login-config"/> configuration tag.</p>
-
-<example title="Using HTTP digest authentication">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin">
-	 
-  &lt;resin:DigestLogin/>
-
-&lt;/web-app>
-</example>
-
-</s2>
-
-<s2 title="Disabling the use of password-digest">
-
-<p>Although it is not advised, Resin's authenticators can be configured to use
-passwords that are not in digest form.</p>
-
-<example title="Disabling the use of password-digest">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin">
-	 
-  &lt;resin:XmlAuthenticator&lt;/type&gt;
-    &lt;resin:password-digest&gt;none&lt;/resin:password-digest&gt;
-    
-    &lt;resin:user name="harry" password="quidditch" group="user"/>
-  &lt;/resin:XmlAuthenticator>
-  
-&lt;/web-app>
-
-</example>
-
-</s2>
-
-<s2 title="Compatibility">
-
-<p>Authenticators are not defined by the 
-<a href="http://www.jcp.org/en/jsr/detail?id=154">Servlet Specification</a>, 
-so the ability to use passwords stored as a digest depends
-upon the implementation of the Authenticator that the application server
-provides.  MD5-base64 is the most common form of digest, because it is the
-default in <a href="#Using-HTTP-digest-authentication">HTTP digest
-authentication</a>.</p>
-
-<p>The use of <code>&lt;auth-method&gt;DIGEST&lt;auth-method&gt;</code> is
-defined in the Servlet Specification and implemented in most
-application servers.</p>
-
-</s2>
-</s1>
-
-<s1 title="Single Signon" version="Resin 3.0.0">
-
-<p>"Single signon" refers to allowing for a single login for more
-than one context, for example, logging in to all web-apps in a server at once.
-You can implement single signon by configuring the authenticator in
-the proper environment: web-app, host, or server.  The login will last for
-all the web-apps in that environment.</p>
-
-<p>The authenticator is a resource which is shared across its <a href="config-ref.xtp">environment</a>.
-For example, to configure the XML authenticator
-for all web-apps in foo.com, you might configure as follows:</p>
-
-<example title="Single Signon for foo.com">
-&lt;resin xmlns="http://caucho.com/ns/resin"
-      xmlns:resin="urn:java:com.caucho.resin"&gt;
-      
-  &lt;cluster id="app-tier&gt;
-    &lt;http port="8080"/&gt;
-
-    &lt;host id="foo.com"&gt;
-      &lt;root-directory&gt;/opt/foo.com&lt;/root-directory&gt;
-
-      &lt;resin:XmlAuthenticator"&gt;
-        &lt;!-- password: quidditch --&gt;
-        &lt;resin:user name="harry" password="uTOZTGaB6pooMDvqvl2LBu" group="user,gryffindor"/>
-	
-        &lt;!-- password: pureblood --&gt;
-        &lt;resin:user name="dmalfoy" password="yI2uN1l97Rv5E6mdRnDFDB" group="user,slytherin"/>
-      &lt;/resin:XmlAuthenticator&gt;
-
-      &lt;web-app-deploy path="webapps"/&gt;
-    &lt;/host&gt;
-  &lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
-
-<p>Any .war in the webapps directory will share the same signon for the
-host.  You will still need to implement a
-<a href="deploy-ref.xtp#login-config">login-config</a> for each web-app.</p>
-
-<p>
-The value of <a config-tag="reuse-session-id">reuse-session-id</a> must be <code>true</code>
-for single signon.
-</p>
-
-
-<s2 title="Single signon for virtual hosts">
-<p>
-The basis for establishing client identity is the JSESSIONID cookie.  If single
-signon is desired for virtual hosts, Resin must be configured to notify the
-browser of the proper domain name for the cookie so that the same JSESSIONID
-cookie is submitted by the browser to each virtual host.
-</p>
-
-<p>
-The <a href="#authenticator">authenticator</a> is placed at the cluster level
-so that it is common to all virtual hosts.  The
-<a href="deploy-ref.xtp#session-config">cookie-domain</a> is
-placed in a <a href="deploy-ref.xtp#web-app-default">web-app-default</a> at
-the cluster level so that it is applied as the default for all webapps in all
-virtual hosts.
-</p>
-
-<example title="Single Signon for gryffindor.hogwarts.com and slytherin.hogwarts.com">
-&lt;resin xmlns="http://caucho.com/ns/resin"
-        xmlns:resin="urn:java:com.caucho.resin"&gt;
-	
-  &lt;cluster id="app-tier&gt;
-    &lt;http port="8080"/&gt;
-
-    &lt;resin:XmlAuthenticator"&gt;
-      &lt;user name="Harry" password="..."/>
-    &lt;/resin:XmlAuthenticator&gt;
-
-    &lt;web-app-default&gt;
-      &lt;session-config&gt;
-        &lt;cookie-domain&gt;.hogwarts.com&lt;/cookie-domain&gt;
-      &lt;/session-config&gt;
-    &lt;/web-app-default&gt;
-
-
-    &lt;host id="gryffindor.hogwarts.com"&gt;
-      ...
-    &lt;/host&gt;
-
-    &lt;host id="slytherin.hogwarts.com"&gt;
-      ...
-    &lt;/host&gt;
-  &lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
-
-<p>
-Because of the way that browsers are restricted by the HTTP specification from
-submitting cookies to servers, it is not possible to have a single signon for
-virtual hosts that do not share some portion of their domain name.  For example,
-"gryffindor.com" and "slytherin.com" cannot share a common authentication.
+Each authorization tag is described in detail <a href="security-authentication.xtp">here</a>,
+including example code that you could use as a starting point for your application as well as common usage 
+patterns. The built-in rules should satisfy a large number of common cases, but you can easily
+create your own custom predicate when needed.
 </p>
 </s2>
-
-</s1>
-
-<s1 title="Login">
-
-<defun title="BasicLogin">
-
-<p>Configures HTTP basic login, which can be convenient for a quick protection
-of internal pages or administration when writing a form isn't necessary.</p>
-
-<example title="WEB-INF/resin-web.xml resin:BasicLogin">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:BasicLogin/>
-
-  &lt;resin:Allow url-pattern="/foo/*">
-     &lt;resin:IfUserInRole role="user"/>
-  &lt;/resin:Allow>
-
-  &lt;resin:XmlAuthenticator>
-     ...
-  &lt;/resin:XmlAuthenticator>
-  
-&lt;/web-app>  
-</example>
-
-</defun>
-
-<defun title="FormLogin">
-<p>Configures authentication for forms.  The login form has
-specific parameters that the servlet engine's login form processing
-understands.  If the login succeeds, the user will see the original
-page.  If it fails, she will see the error page.</p>
-
-<deftable title="FormLogin attribute">
-<tr>
-  <th>attribute</th>
-  <th>description</th>
-  <th>default</th>
-</tr>  
-<tr>
-  <td>form-login-page</td>
-  <td>The page to be used to prompt the user login</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>form-error-page</td>
-  <td>The error page for unsuccessful login</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>internal-forward</td>
-  <td>Use an internal redirect on success or a sendRedirect</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>form-uri-priority</td>
-  <td>If true, the form's j_uri will override a stored URI</td>
-  <td>false</td>
-</tr>
-</deftable>
-
-<p>The form itself must have the action <var>j_security_check</var>.  It
-must also have the parameters <var>j_username</var> and <var>j_password</var>.
-Optionally, it can also have <var>j_uri</var> and
-<var>j_use_cookie_auth</var>.  <var>j_uri</var> gives the next page to display
-when login succeeds.  <var>j_use_cookie_auth</var> allows Resin to send a
-persistent cookie to the user to make following login easier.
-</p>
-
-<p><var>j_use_cookie_auth</var> gives control to the user whether to generate
-a persistent cookie.  It lets you implement the "remember me" button.  By
-default, the authentication only lasts for a single session.
-</p>
-
-<deftable title="j_security_check Parameters">
-<tr>
-  <th>Parameter</th>
-  <th>Meaning</th>
-</tr>
-<tr>
-  <td>j_username</td>
-  <td>The user name</td>
-</tr>
-<tr>
-  <td>j_password</td>
-  <td>The password</td>
-</tr>
-<tr>
-  <td>j_uri</td>
-  <td>Resin extension for the successful display page (Optional).</td>
-</tr>
-<tr>
-  <td>j_use_cookie_auth</td>
-  <td>Resin extension to allow cookie login (Optional).</td>
-</tr>
-</deftable>
-
-<p>The following is an example of a servlet-standard login page:</p>
-
-<example title="j_security_check form">
-&lt;form action='j_security_check' method='POST'&gt;
-&lt;table&gt;
-&lt;tr&gt;&lt;td&gt;User:&lt;td&gt;&lt;input name='j_username'&gt;
-&lt;tr&gt;&lt;td&gt;Password:&lt;td&gt;&lt;input name='j_password'&gt;
-&lt;tr&gt;&lt;td colspan=2&gt;hint: the password is 'quidditch'
-&lt;tr&gt;&lt;td&gt;&lt;input type=submit&gt;
-&lt;/table&gt;
-&lt;/form&gt;
-</example>
-
-</defun>
-
-<s2 title="Custom Login">
-<p>The Login is primarily responsible for extracting the credentials
-from the request (typically username and password) and passing those
-to the ServletAuthenticator.</p>
-
-<p>The Servlet API calls the Login in two contexts: directly from
-<code>ServletRequest.getUserPrincipal()</code>, and during 
-security checking.   When called from the Servlet API, the login class
-can't change the response.  In other words, if an application
-calls getUserPrincipal(), the Login class can't return a forbidden
-error page.  When the servlet engine calls authenticate(), the login class
-can return an error page (or forward internally.)</p>
-
-<p>Normally, Login implementations will defer the actual authentication
-to a ServletAuthenticator class.  That way, both "basic" and "form" login
-can use the same JdbcAuthenticator.  Some applications, like SSL
-client certificate login, may want to combine the Login and authentication
-into one class.</p>
-
- <p>Login instances are configured through bean introspection.  Adding
- a public <code>setFoo(String foo)</code> method will be configured with
- the following login-config:</p>
-
-<example title="WEB-INF/resin-web.xml CustomLogin">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-          xmlns:foo="urn:java:com.foo">
-     
-  &lt;foo:CustomLogin>
-    &lt;foo:foo&gt;bar&lt;/foo:foo&gt;
-  &lt;/foo:CustomLogin>
-
-  &lt;resin:XmlAuthenticator>
-    ...
-  &lt;/resin:XmlAuthenticator>
-
-&lt;/web-app>  
-</example>
-
-</s2>
-</s1>
-
-<s1 title="Authorization">
-
-<defun title="resin:Allow">
-<parents>web-app</parents>
-
-<p>Selects protected areas of the web site.  Sites using
-authentication as an optional personalization feature will typically
-not use any security constraints.  Sites using authentication to limit
-access to certain sections of the website to certain users will use
-security constraints.</p>
-
-<p>Security constraints can also be custom classes.</p>
-
-<example title="Protecting all pages for logged-in users">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin">
-	 
-  &lt;resin:IfAllow url-pattern="/*">
-    &lt;resin:IfUserInRole role="*"/>
-  &lt;/resin:IfAllow>
-
-&lt;/web-app&gt;
-</example>
-
-<deftable title="resin:Allow attributes">
-<tr>
-  <td>url-pattern</td>
-  <td>url patterns describing the resource</td>
-</tr>
-<tr>
-  <td>http-method</td>
-  <td>HTTP methods to be restricted.</td>
-</tr>
-</deftable>
-
-</defun>
-
-<defun title="resin:IfNetwork" version="Resin 4.0.0" type="defun">
-<parents>security-constraint</parents>
-
-<p>Allow or deny requests based on the ip address of the client.
-ip-constraint is very useful for protecting administration resources
-to an internal network.  It can also be useful for denying service to known
-problem ip's.</p>
-
-<example title="Admin pages allowed from 192.168.17.0/24">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-        xmlns:resin="urn:java:com.caucho.resin">
-	
-  &lt;resin:Allow url-pattern="/admin/*">
-    &lt;resin:IfAddress name="192.168.17.0/24"/>
-  &lt;/resin:Allow>
-  
-&lt;/web-app>
-</example>
-
-<p>The <code>/24</code> in the ip <code>192.168.17.0/24</code> means that the
-first 24 bits of the ip are matched - any ip address that begins with
-<code>192.168.17.</code> will match.  The usage of <var>/bits</var> is
-optional.</p> 
-
-<example title="Block out known trouble makers">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-          xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:Deny>
-    &lt;resin:IfNetwork>
-       &lt;resin:value>205.11.12.3&lt;/resin:value>
-       &lt;resin:value>213.43.62.45&lt;/resin:value>
-       &lt;resin:value>123.4.45.6&lt;/resin:value>
-       &lt;resin:value>233.15.25.35&lt;/resin:value>
-       &lt;resin:value>233.14.87.12&lt;/resin:value>
-    &lt;/resin:IfNetwork>
-  &lt;/resin:Deny>
-  
-&lt;/web-app&gt;
-</example>
-
-<p>Be careful with deny - some ISP's (like AOL) use proxies and the ip of many
-different users may appear to be the same ip to your server.</p>
-
-<p>If only <var>deny</var> is used, then all ip's are allowed if they do not match
-a <code>deny</code>.  If only <var>allow</var> is used, then an ip is denied unless it
-matches an <code>allow</code>. If both are used, then the ip must match both an
-<code>allow</code> and a <code>deny</code></p>
-
-</defun>
-
-<defun title="resin:IfUserInRole" type="defun">
-<parents>resin:Allow, resin:Deny</parents>
-
-<p>Requires that authenticated users fill the specified role.
-In Resin's DatabaseAuthenticator, normal users are in the "user" role.
-Think of a role as a group of users.</p>
-
-<deftable title="IfUserInRole attributes">
-<tr>
-  <th>attribute</th>
-  <th>description</th>
-</tr>  
-<tr>
-  <td>role</td>
-  <td>Roles which are allowed to access the resource.</td>
-</tr>
-</deftable>
-
-<example title="WEB-INF/resin-web.xml Protecting webdav for webdav users">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-        xmlns:resin="urn:java:com.caucho.resin">
-	
-  &lt;resin:Allow url-pattern="/webdav/*">
-    &lt;resin:IfUserInRole role='webdav'/>
-  &lt;/resin:Allow>
-  
-&lt;/web-app>
-</example>
-
-</defun>
-
-<defun title="resin:IfSecure" type="defun">
-<parents>resin:Allow, resin:Deny</parents>
-
-<p>Restricts access to secure transports, i.e. SSL.</p>
-
-<example title="WEB-INF/resin-web.xml">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"
-	 
-  &lt;resin:Allow>
-    &lt;resin:IfSecure/>
-  &lt;/resin:Allow>
-  
-&lt;/web-app&gt;
-</example>
-
-<p>
-The default behaviour is for Resin to rewrite any url that starts with
-"http:" by replacing the "http:" part with "https:", and then send
-redirect to the browser.
-</p>
-
-<p>
-If the default rewriting of the host is not appropriate, you can set the
-<a config-tag="secure-host-name"/> for the host:
-</p>
-
-<example title="WEB-INF/resin-web.xml">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-&lt;cluster id="app-tier">
-  ...
-  
-  &lt;host id="..."&gt;
-    &lt;secure-host-name&gt;https://hogwarts.com&lt;/secure-host-name&gt;
-    ...
-&lt;/resin> 
-</example>
-
-</defun>
-
-<defun title="constraint" version="Resin 4.0" type="defun">
-
-<p>Any custom class that extends <a href="javadoc:com.caucho.security.RequestPredicate">com.caucho.security.RequestPredicate</a> can be used as
-an &lt;IfXXX> rule.  Just create the class and instantiate it directly:</p>
-
-<example title="WEB-INF/resin-web.xml - custom rule ">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin"
-         xmlns:foo="urn:java:com.foo"
-
- &lt;resin:Allow url-pattern="/safe/*"
-    &lt;foo:IfMyTest value="value"/>
- &lt;/resin:Allow url-pattern="/safe/*"
-
-&lt;/web-app&gt;
-</example>
-
-<example>
-package com.foo;
-
-import javax.servlet.http.HttpServletRequest;
-import com.caucho.security.ServletRequestPredicate;
-
-public class IfMyTest extends ServletRequestPredicate {
-  private String _value;
-
-  public void setValue(String value)
-  {
-    _value = value;
-  }
-
-  public boolean isMatch(HttpServletRequest request)
-  {
-    return _value.equals(request.getHeader("Foo"));
-  }
-}
-</example>
-
-</defun>
-
-</s1> <!-- Security-Constraints -->
-
-<s1 name="protectall" title="Protecting static files from viewing by anyone">
-
-<p>Sometimes it is necessary to protect files from being viewed by
-anyone, such as configuration files used in your code but not meant to
-be served to a browser.</p>
-
-<s2 title="Place files in WEB-INF">
-<p>Place files in <var>WEB-INF</var> or a subdirectory of <var>WEB-INF</var>.  Any files in
-<var>WEB-INF</var> or it's subdirectories will automatically be protected
-from viewing.</p>
-</s2>
-
-<defun title="resin:Deny">
-<p>Use a security constraint that requires a <var>role</var> that nobody
-will ever have.</p>
-
-<example title="security-constraint to protect static files">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-        xmlns:resin="urn:java:com.caucho.resin"&gt;
-  ...
-  &lt;!-- protect all .properties files --&gt;
-  &lt;resin:Deny url-pattern="*.properties"/>
-
-  &lt;!-- protect the config/ subdirectory --&gt;
-  &lt;resin:Deny url-pattern="/config/*"/>
-  ...
-&lt;/web-app&gt;
-</example>
-
-</defun>
 </s1>
 </body>
 </document>
