@@ -3,6 +3,8 @@
   <product>resin</product>
   <title>Resin 4.0 SSL support</title>
   <description>
+  Resin supports SSL for both HTTP transport level encryption as well as server 
+  authentication. Both Apache OpenSSL and JSSE aere supported as SSL implementations.
   </description>
 </header>
 

@@ -2,13 +2,21 @@
 <header>
 <product>resin</product>
 <title>Resin Security</title>
-<description></description>
+<description>
+Resin has a comprehensive security framework for application authentication, 
+authorization and transport level SSL based security. Authentication capabilities include 
+built-in support for security data stored in XML files, the database, JAAS, LDAP or 
+properties files, HTTP basic authentication, form based authentication and 
+HTTP password digests. The authorization features include traditional role based security 
+as well as robust conditionals based-on cookies, HTTP headers, locale, IP address and 
+the like. The security framework also supports single sign-on shared across multiple 
+web applications.
+</description>
 </header>
 <body>
 <localtoc/>
 <s1 title="Resin Security">
 <s2 title="Overview">
-<!-- Add introductory sentence about SSL features. -->
 <p>
 Resin includes a comprehensive security framework for application authentication, 
 authorization and transport level SSL based security. Authentication capabilities include 
@@ -17,6 +25,10 @@ properties files, HTTP basic authentication, form based authentication and passw
 The authorization features include traditional role based security as well as robust 
 conditionals based-on cookies, HTTP headers, locale, IP address and the like.
 The security framework also supports single sign-on shared across multiple web applications.
+</p>
+<p>
+This document covers Resin's authentication and authorization capabilities while Resin's 
+SSL support is described in detail <a href="security-ssl.xtp">here</a>.
 </p>
 <p>
 The basic structure of the Resin security framework can be demonstrated through a simple 
@@ -55,7 +67,7 @@ but they need not and should not be). Resin offers a number of authentication pr
 other than &lt;resin:XmlAuthenticator>. We will discuss this in detail in the next section.
 Note, authentication can sometimes be entirely unnecessary, especially while using 
 condition authorization rules not specific to a user - such as a condition allowing or
-denying a set of IP addresses from accessing a URL.     
+denying a set of IP addresses from accessing a URL.
 </p>
 </s2>
 <s2 title="Authenticators">
@@ -122,8 +134,8 @@ if this is functionality you need for your application.
 </s2>
 <s2 title="Securing Resin Administration">
 <p>
-The Resin security framework and the authenticators above are intended for application security. However, Resin resources
-such as <code>/resin-admin</code> as well as the Resin clustered managemnt and deployment administrative features also 
+The Resin security framework and the authenticators above are intended for application 
+security. However, Resin resources such as <code>/resin-admin</code> as well as the Resin clustered managemnt and deployment administrative features also 
 needs to be secured. Resin internally uses the security framework to secure these resources. 
 </p>
 <p>
@@ -188,13 +200,15 @@ create your own custom login manager when needed.
 </s2>
 <s2 title="Authorization">
 <p>
-<i>Authorization</i> is the process of verifying that an authenticated user has the appropriate priviledges
-to access a secure resource. The typical authorization process verifies that a user has the right set of permissions
-to access a URL or is assigned to the correct role/group.
+<i>Authorization</i> is the process of verifying that an authenticated user has the 
+appropriate priviledges to access a secure resource. The typical authorization process 
+verifies that a user has the right set of permissions to access a URL or is assigned to 
+the correct role/group.
 </p>
 <p>
-Resin has a very robust set of built-in authorization rules including conditionals, role-based security and
-combining/chaining rules. Authorization rules are based on a basic URL pattern based allow/deny tag set:
+Resin has a very robust set of built-in authorization rules including conditionals, 
+role-based security and combining/chaining rules. Authorization rules are based on a basic 
+URL pattern based allow/deny tag set:
 </p>
 <deftable title="Basic Authorization">
 <tr>
@@ -211,8 +225,8 @@ combining/chaining rules. Authorization rules are based on a basic URL pattern b
 </tr>
 </deftable>
 <p>
-The allow/deny high-level directives can be qualified through a set of conditionals that include the
-most common case of role-based security (shown in the initial example):
+The allow/deny high-level directives can be qualified through a set of conditionals that 
+include the most common case of role-based security (shown in the initial example):
 </p>
 <deftable title="Basic Conditions">
 <tr>
@@ -308,10 +322,11 @@ most common case of role-based security (shown in the initial example):
 </tr>
 </deftable>
 <p>
-Each authorization tag is described in detail <a href="security-authentication.xtp">here</a>,
-including example code that you could use as a starting point for your application as well as common usage 
-patterns. The built-in rules should satisfy a large number of common cases, but you can easily
-create your own custom predicate when needed.
+Each authorization tag is described in detail 
+<a href="security-authorization.xtp">here</a>, including example code that you could use 
+as a starting point for your application as well as common usage patterns. The built-in 
+rules should satisfy a large number of common cases, but you can easily create your own 
+custom predicate when needed.
 </p>
 </s2>
 </s1>

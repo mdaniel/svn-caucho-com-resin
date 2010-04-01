@@ -5,13 +5,11 @@
 <description></description>
 </header>
 <body>
-
 <s1 title="Authenticators">
 <p>
 The following are details on the authenticators that can be used with Resin, along with 
 example code to utilize as a starting point for your applications:  
 </p>
-
 <s2 title="DatabaseAuthenticator">
 <p>
   The DatabaseAuthenticator (<a href="javadoc|com.caucho.security.DatabaseAuthenticator|"/>)
@@ -33,7 +31,7 @@ example code to utilize as a starting point for your applications:
     The pooled JDBC data source. Looks in the application attributes first, then in the
     global database pools.
   </td>
-  <td>none</td>
+  <td>None</td>
 </tr>
 <tr>
   <td>password-query</td>
@@ -47,13 +45,13 @@ example code to utilize as a starting point for your applications:
 <tr>
   <td>cookie-auth-query</td>
   <td>An SQL query to authenticate the user by a persistent cookie.</td>
-  <td>none</td>
+  <td>None</td>
 </tr>
 <!-- XXX: This needs to be clarified further -->
 <tr>
   <td>cookie-auth-update</td>
   <td>A SQL update to match a persistent cookie to a user.</td>
-  <td>none</td>
+  <td>None</td>
 </tr>
 <!-- XXX: What happens when there are multiple roles? Should they be comma-separated? -->
 <tr>
@@ -62,13 +60,13 @@ example code to utilize as a starting point for your applications:
     A SQL query to determine the user's role. By default, all users are in role "user", 
     but no others.
   </td>
-  <td>none</td>
+  <td>None</td>
 </tr>
 <tr>
-  <td><a href="#password-digest">password-digest</a></td>
+  <td>password-digest</td>
   <td>
-    Specifies the digest algorithm and format used to secure the password (see following section in this document for 
-    details).
+    Specifies the digest algorithm and format used to secure the password (see following 
+    section in this document for details).
   </td>
   <td>md5-base64</td>
 </tr>
@@ -101,7 +99,7 @@ example code to utilize as a starting point for your applications:
     &lt;/resin:cookie-auth-query&gt;    
     &lt;resin:cookie-auth-update&gt;
       UPDATE LOGIN SET cookie=? WHERE username=?
-    &lt;/resin:cookie-auth-update&gt;    
+    &lt;/resin:cookie-auth-update&gt;
     &lt;resin:role-query&gt;
       SELECT role FROM LOGIN WHERE username=?
     &lt;/resin:role-query&gt;
@@ -109,7 +107,6 @@ example code to utilize as a starting point for your applications:
 &lt;/web-app&gt;
 </example>
 </s2>
-
 <s2 title="JaasAuthenticator">
 <p>
 The JaasAuthenticator (<a href="javadoc|com.caucho.security.JaasAuthenticator|"/>) uses a
@@ -122,30 +119,30 @@ login module.
 <p>The following are the attributes for the JaasAuthenticator:</p>
 <deftable title="JaasAuthenticator attributes">
 <tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
+  <th>Attribute</th>
+  <th>Meaning</th>
+  <th>Default</th>
 </tr>
 <tr>
   <td><a href="#jaas-init-param">init-param</a></td>
-  <td>Adds a property to the LoginModule</td>
-  <td>none</td>
+  <td>Adds a property to the LoginModule.</td>
+  <td>None</td>
 </tr>
 <tr>
   <td>login-module</td>
-  <td>The fully qualified class name of the LoginModule implementation</td>
-  <td>required</td>
+  <td>The fully qualified class name of the LoginModule implementation.</td>
+  <td>Required</td>
 </tr>
 <tr>
   <td>logout-on-session-timeout</td>
-  <td>If true, the user will be logged out when the session times out</td>
+  <td>If true, the user will be logged out when the session times out.</td>
   <td>true</td>
 </tr>
 <tr>
-  <td><a href="#password-digest">password-digest</a></td>
+  <td>password-digest</td>
   <td>
-    Specifies the digest algorithm and format used to secure the password (see following section in this document for 
-    details).
+    Specifies the digest algorithm and format used to secure the password (see following 
+    section in this document for details).
   </td>
   <td>md5-base64</td>
 </tr>
@@ -164,7 +161,6 @@ login module.
   ...
 &lt;/web-app&gt;
 </example>
-
 <s3 name="jaas-is-user-in-role" title="isUserInRole">
 <p>
 The isUserInRole method is supported if the LoginModule provides either an isUserInRole
@@ -273,65 +269,65 @@ JNDI to connect to an LDAP (or Active Directory) server for authentication.
 <p>The following are the attributes for the LdapAuthenticator:</p>
 <deftable>
 <tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
+  <th>Attribute</th>
+  <th>Meaning</th>
+  <th>Default</th>
 </tr>
 <tr>
   <td>dn-prefix</td>
-  <td>String to prepend to query before portion selecting user by name</td>
-  <td>none</td>
+  <td>String to prepend to query before portion selecting user by name.</td>
+  <td>None</td>
 </tr>
 <tr>
   <td>dn-suffix</td>
-  <td>String to append to query after portion selecting user by name</td>
-  <td>none</td>
+  <td>String to append to query after portion selecting user by name.</td>
+  <td>None</td>
 </tr>
 <tr>
   <td><a href="#jndi-env">jndi-env</a></td>
-  <td>Add a property to the JNDI provider used for connecting to the LDAP server</td>
-  <td>see below</td></tr>
+  <td>Add a property to the JNDI provider used for connecting to the LDAP server.</td>
+  <td>See below</td></tr>
 <tr>
   <td>logout-on-session-timeout</td>
-  <td>If true, the user will be logged out when the session times out</td>
+  <td>If true, the user will be logged out when the session times out.</td>
   <td>true</td>
 </tr>
 <tr>
   <td>security-authentication</td>
-  <td>Sets the Context.SECURITY_AUTHENTICATION for the LDAP environment</td>
+  <td>Sets the Context.SECURITY_AUTHENTICATION for the LDAP environment.</td>
   <td></td>
 </tr>
 <tr>
   <td>security-principal</td>
-  <td>Sets the Context.SECURITY_PRINCIPAL for the LDAP environment</td>
+  <td>Sets the Context.SECURITY_PRINCIPAL for the LDAP environment.</td>
   <td></td>
 </tr>
 <tr>
   <td>security-credentials</td>
-  <td>Sets the Context.SECURITY_CREDENTIALS for the LDAP environment</td>
+  <td>Sets the Context.SECURITY_CREDENTIALS for the LDAP environment.</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="#password-digest">password-digest</a></td>
+  <td>password-digest</td>
   <td>
-    Specifies the digest algorithm and format used to secure the password (see following section in this document for 
-    details).
+    Specifies the digest algorithm and format used to secure the password (see following 
+    section in this document for details).
   </td>
   <td>md5-base64</td>
 </tr>
 <tr>
   <td>user-attribute</td>
-  <td>The attribute name to use in the query for matching the user</td>
+  <td>The attribute name to use in the query for matching the user.</td>
   <td>uid</td>
 </tr>
 <tr>
   <td>password-attribute</td>
-  <td>The attribute name to use for obtaining the password</td>
+  <td>The attribute name to use for obtaining the password.</td>
   <td>userPassword</td>
 </tr>
 <tr>
   <td>url</td>
-  <td>The URL for the server</td>
+  <td>The URL for the server.</td>
   <td>ldap://localhost:389</td>
 </tr>
 </deftable>
@@ -372,7 +368,8 @@ The following example shows the usage of the <code>jndi-env</code> configuration
 </s2>
 <s2 title="PropertiesAuthenticator">
 <p>
-The PropertiesAuthenticator (<a href="javadoc|com.caucho.security.PropertiesAuthenticator|"/>)
+The PropertiesAuthenticator 
+(<a href="javadoc|com.caucho.security.PropertiesAuthenticator|"/>)
 allows you to use Java proprties to store authentication information. This is very useful
 for a variety of applications such as very small sites, developement, unit testing or 
 integration testing. You can either specify properties in-line in XML or via an external
@@ -382,20 +379,20 @@ properties file.
 <!-- XXX: Check this attributes table for completeness -->
 <deftable title="PropertiesAuthenticator attributes">
 <tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
+  <th>Attribute</th>
+  <th>Meaning</th>
+  <th>Default</th>
 </tr>
 <tr>
   <td>path</td>
-  <td>Path to the properties file</td>
-  <td>none</td>
+  <td>Path to the properties file.</td>
+  <td>None</td>
 </tr>
 <tr>
-  <td><a href="#password-digest">password-digest</a></td>
+  <td>password-digest</td>
   <td>
-    Specifies the digest algorithm and format used to secure the password (see following section in this document for 
-    details).
+    Specifies the digest algorithm and format used to secure the password (see following 
+    section in this document for details).
   </td>
   <td>md5-base64</td>
 </tr>
@@ -449,27 +446,27 @@ authenticator, in a slight more human readable form, especially for a non-techni
 <p>The following are the attributes for the XmlAuthenticator:</p>
 <deftable>
 <tr>
-  <th>attribute</th>
-  <th>meaning</th>
-  <th>default</th>
+  <th>Attribute</th>
+  <th>Meaning</th>
+  <th>Default</th>
 </tr>
 <tr>
   <td>user</td>
   <td>Specifies a user authentication record. There maybe zero, one or more records.</td>
-  <td>none</td>
+  <td>None</td>
 </tr>
 <tr>
-  <td><a href="#password-digest">password-digest</a></td>
+  <td>password-digest</td>
   <td>
-    Specifies the digest algorithm and format used to secure the password (see following section in this document for 
-    details).
+    Specifies the digest algorithm and format used to secure the password (see following 
+    section in this document for details).
   </td>
   <td>md5-base64</td>
 </tr>
 <tr>
   <td>path</td>
   <td>Specifies the path to an XML file containing users and passwords.</td>
-  <td>none</td>
+  <td>None</td>
 </tr>
 <tr>
   <td>logout-on-session-timeout</td>
@@ -483,7 +480,7 @@ configured user. The user value contains the username, password, and the roles f
 user.</p>
 <example title="XmlAuthenticator in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin">
+            xmlns:resin="urn:java:com.caucho.resin">
   ...
   &lt;resin:XmlAuthenticator password-digest="none">
     &lt;resin:user name="Harry Potter" password="quidditch" group="user,gryffindor"/>
@@ -493,7 +490,7 @@ user.</p>
 &lt;/web-app>  
 </example>
 <p>This example shows how to use an external XML file for authentication:</p>
-<example title="WEB-INF/resin-web.xml - file XML">
+<example title="WEB-INF/resin-web.xml - File XML">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
   ...
   &lt;resin:XmlAuthenticator path="WEB-INF/users.xml"/>
@@ -510,8 +507,9 @@ user.</p>
 <p>
 While this case is rare, it may sometimes be useful to create your own Resin custom 
 authenticator (for example to use a legacy resource as an authentication store). The Resin
-security framework provides an abtract base class (<a href="javadoc|com.caucho.security.AbstractAuthenticator|"/>)
-that you can extend to do this.  
+security framework provides an abtract base class 
+(<a href="javadoc|com.caucho.security.AbstractAuthenticator|"/>) that you can extend to 
+do this.  
 </p>
 <p>
   The following is a simple example that you can use a starting point for your 
@@ -600,35 +598,40 @@ attempted.
 </example>
 </s2>
 -->
-<s2 title="Securing Passwords with Digests">
+</s1>
+<s1 title="Securing Passwords with Digests">
 <p>
-Passwords in clear-text form are a major security vulnerability. Such passwords can be stolen during transmission or 
-storage and used malicicously (such as in order to gain unauthorized access to back-end resources). The transmission 
-vulnerability is caused by the fact that passwords are sent across the network to the server from the browser in plain text
-when HTTP basic authentication or form-based authentication is used. This vulnerability can be addressed by either using 
-HTTP digest authentication (covered <a href="security-authentication-method.xtp">here</a>) or by using transport layer SSL
-security (covered <a href="security-ssl.xtp">here</a>).
+Passwords in clear-text form are a major security vulnerability. Such passwords can be 
+stolen during transmission or storage and used malicicously (such as in order to gain 
+unauthorized access to back-end resources). The transmission vulnerability is caused by 
+the fact that passwords are sent across the network to the server from the browser in 
+plain text when HTTP basic authentication or form-based authentication is used. This 
+vulnerability can be addressed by either using HTTP digest authentication 
+(covered <a href="security-authentication-method.xtp">here</a>) or by using transport layer 
+SSL security (covered <a href="security-ssl.xtp">here</a>).
 </p>
 <p>
-You can secure passwords in storage by using the password digest feature built-into Resin authenticators (see the 
-<code>password-digest</code> attribute referenced above). You can use the password-digest attribute to specify that the 
-authenticator should use passwords in a secure fashion. When this feature is enabled, the authenticator will store the 
-password in digest instead of clear-text form. When the authenticator receives a clear-text password, it will digest it 
-before comparing it to a stored password for a match.
+You can secure passwords in storage by using the password digest feature built-into Resin 
+authenticators (see the <code>password-digest</code> attribute referenced above). You can 
+use the password-digest attribute to specify that the authenticator should use passwords in 
+a secure fashion. When this feature is enabled, the authenticator will store the password 
+in digest instead of clear-text form. When the authenticator receives a clear-text 
+password, it will digest it before comparing it to a stored password for a match.
 </p>
 <p>
 A <i>digest</i> of a clear-text password is calculated when it is passed through a
 one-way hashing function that consistently produces another series of characters,
-<code>digestPassword = digester(username + ":" + realm + ":" + cleartextPassword)</code>. The function is "one-way" 
-because the digestPassword cannot be used to practically reverse-engineer the original password.
+<code>digestPassword = digester(username + ":" + realm + ":" + cleartextPassword)</code>. 
+The function is "one-way" because the digestPassword cannot be used to practically 
+reverse-engineer the original password.
 </p>
 <p>
 Resin's authenticators use "MD5-base64" and a realm "resin" to digest passwords by default. 
-<var>MD5</var> indicates that the MD5 hashing algorithm is used. <var>base64</var> is an encoding format to 
-apply to the binary result of MD5. You can create an MD5/Base64 digest yourself with a simple PHP script
-like this:
+<var>MD5</var> indicates that the MD5 hashing algorithm is used. <var>base64</var> is an 
+encoding format to apply to the binary result of MD5. You can create an MD5/Base64 digest 
+yourself with a simple PHP script like this:
 </p>
-<example title="Calculating a digest using PHP">
+<example title="Calculating a Digest Using PHP">
 &lt;?php
 
   $username = "harry";
@@ -641,7 +644,7 @@ like this:
 </example>
 <p>The following are some examples of passwords digested by Resin:</p>
 <deftable>
-<tr><th>Username</th><th>Realm</th><th>Password</th><th>digest
+<tr><th>Username</th><th>Realm</th><th>Password</th><th>Digest
 </th></tr><tr><td>root</td><td>resin</td><td>changeme</td><td>j/qGVP4C0T7UixSpKJpTdw==
 </td></tr><tr><td>harry</td><td>resin</td><td>quidditch</td><td>uTOZTGaB6pooMDvqvl2Lbg==
 </td></tr><tr><td>hpotter</td><td>resin</td><td>quidditch</td><td>x8i6aM+zOwDqqKPRO/vkxg==
@@ -654,18 +657,20 @@ like this:
 </td></tr></deftable>
 <p>In the above examples the digest of "harry/quidditch" is different than the
 digest of "hpotter/quidditch" because even though the password is the same, the
-username has changed. The Resin digest is calculated with <code>digest(username + ":" + realm + ":" + password)</code>, 
+username has changed. The Resin digest is calculated with 
+<code>digest(username + ":" + realm + ":" + password)</code>, 
 so if the username changes the resulting digest is different.</p>
-</s2>
 <s2 title="Calculating a Digest">
 <p>
-While using password digests with Resin authenticators, it may occationally be necessary to calculate digests yourself.
-You can do this in a number of different ways. You could use the PHP script example above. The <code>/resin-admin</code> 
-page includes a form to easily generate the MD5 hash.  You can also use the
-<a href="http://caucho.com/resin-javadoc/com/caucho/server/security/PasswordDigest.html">PasswordDigest</a> class to 
-generate the digest programmatically. The following is an example of using this class:
+While using password digests with Resin authenticators, it may occationally be necessary to 
+calculate digests yourself. You can do this in a number of different ways. You could use 
+the PHP script example above. The <code>/resin-admin</code> page includes a form to easily 
+generate the MD5 hash. You can also use the 
+<a href="http://caucho.com/resin-javadoc/com/caucho/server/security/PasswordDigest.html">PasswordDigest</a> 
+class to generate the digest programmatically. The following is an example of using this 
+class:
 </p>
-<example title="Calculating a digest - Java example">
+<example title="Calculating a Digest - Java example">
   import com.caucho.security.PasswordDigest;
   ...
   String username = ...;
@@ -681,16 +686,16 @@ generate the digest programmatically. The following is an example of using this 
 echo -n "user:resin:password" | openssl dgst -md5 -binary | uuencode -m -
 </example>
 </s2>
-
-<s2 title="Disabling the use of password-digest">
+<s2 title="Disabling the Use of password-digest">
 <p>
-Using password digests is so important that all Resin authenticators use it by default. Although it is really not advised, 
-Resin's authenticators can be also be configured to use passwords that are not in digest form. You can do this by
-specifying <code>password-digest="none"</code> as in the example below:
+Using password digests is so important that all Resin authenticators use it by default. 
+Although it is really not advised, Resin's authenticators can be also be configured to use 
+passwords that are not in digest form. You can do this by specifying 
+<code>password-digest="none"</code> as in the example below:
 </p>
-<example title="Disabling the use of password-digest">
+<example title="Disabling the Use of password-digest">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
-         xmlns:resin="urn:java:com.caucho.resin">
+            xmlns:resin="urn:java:com.caucho.resin">
   ...	 
   &lt;resin:XmlAuthenticator&lt;/type&gt;
     &lt;resin:password-digest&gt;none&lt;/resin:password-digest&gt;    
@@ -700,15 +705,17 @@ specifying <code>password-digest="none"</code> as in the example below:
 &lt;/web-app>
 </example>
 <p>
-This technique can come in handy for development, testing, etc where password security is not critical.
+This technique can come in handy for development, testing, etc where password security is 
+not critical.
 </p>
 </s2>
 <s2 title="Setting Password Digest Realm">
 <p>
-The realm for Resin authenticators such as the DatabaseAuthenticator and the XmlAuthenticator defaults to "resin". However,
-if you want, you can explicitly specify the realm to be used for digesting like this:
+The realm for Resin authenticators such as the DatabaseAuthenticator and the 
+XmlAuthenticator defaults to "resin". However, if you want, you can explicitly specify the 
+realm to be used for digesting like this:
 </p>
-<example title="Specifying a realm">
+<example title="Specifying a Realm">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
           xmlns:resin="urn:java:com.caucho.resin">
   ...
@@ -720,15 +727,18 @@ if you want, you can explicitly specify the realm to be used for digesting like 
 &lt;/web-app>  
 </example>
 </s2>
-<s2 title="Single Sign-on">
+</s1>
+<s1 title="Single Sign-on">
 <p>
-<i>Single sign-on</i> refers to allowing for a single login for more than one context, for example, logging into all 
-web-apps in a server at once without having to re-enter authentication information. Resin allows single sign-on by
-allowing you to place an authenticator at the host or server level instead of at the web-app level. The shared 
-authenticator then applies to all the web applications under the host or server. Once you authenticate, the login will 
-last for all the web-apps in that environment/scope.
+<i>Single sign-on</i> refers to allowing for a single login for more than one context, 
+for example, logging into all web-apps in a server at once without having to re-enter 
+authentication information. Resin allows single sign-on by allowing you to place an 
+authenticator at the host or server level instead of at the web-app level. The shared 
+authenticator then applies to all the web applications under the host or server. Once you 
+authenticate, the login will last for all the web-apps in that environment/scope.
 </p>
-<p>For example, to configure an XML authenticator for all the web-apps in foo.com, you might configure as follows:</p>
+<p>For example, to configure an XML authenticator for all the web-apps in foo.com, you 
+might configure as follows:</p>
 <example title="Single Sign-on for foo.com">
 &lt;resin xmlns="http://caucho.com/ns/resin"
       xmlns:resin="urn:java:com.caucho.resin"&gt;
@@ -754,27 +764,30 @@ last for all the web-apps in that environment/scope.
 &lt;/resin&gt;
 </example>
 <p>
-Any .war in the webapps directory will share the same login across the host. Note, you will still need to implement 
-a <a href="deploy-ref.xtp#login-config">login-config</a> for each web-app in addition to login managers/authorization.
+Any .war in the webapps directory will share the same login across the host. Note, you will 
+still need to implement a <a href="deploy-ref.xtp#login-config">login-config</a> for each 
+web-app in addition to login managers/authorization.
 </p>
 <p>
-The value of <a config-tag="reuse-session-id">reuse-session-id</a> must be <code>true</code>
-for single signon.
+The value of <a config-tag="reuse-session-id">reuse-session-id</a> must be 
+<code>true</code> for single sign-on.
 </p>
-<s3 title="Single Sign-on for Virtual Hosts">
+<s2 title="Single Sign-on for Virtual Hosts">
 <p>
-The basis for establishing client identity is the standard JSESSIONID session cookie. If single sign-on is desired for 
-virtual hosts, Resin must be configured to notify the browser of the proper domain name for the cookie so that the same 
-JSESSIONID cookie is submitted by the browser to each virtual host.
+The basis for establishing client identity is the standard JSESSIONID session cookie. If 
+single sign-on is desired for virtual hosts, Resin must be configured to notify the browser 
+of the proper domain name for the cookie so that the same JSESSIONID cookie is submitted 
+by the browser to each virtual host.
 </p>
 <p>
-In this case, an authenticator is placed at the cluster level so that it is common to all virtual hosts. The 
-<a href="deploy-ref.xtp#session-config">cookie-domain</a> is placed in a 
-<a href="deploy-ref.xtp#web-app-default">web-app-default</a> at the cluster level so that it is applied as the default 
-for all webapps in all virtual hosts.
+In this case, an authenticator is placed at the cluster level so that it is common to all 
+virtual hosts. The <a href="deploy-ref.xtp#session-config">cookie-domain</a> is placed in a 
+<a href="deploy-ref.xtp#web-app-default">web-app-default</a> at the cluster level so that 
+it is applied as the default for all webapps in all virtual hosts.
 </p>
-<p>The following example shows how you can configure single sign-on for two different sub-domains:</p>
-<example title="Single Signon for gryffindor.hogwarts.com and slytherin.hogwarts.com">
+<p>The following example shows how you can configure single sign-on for two different 
+sub-domains:</p>
+<example title="Single Sign-on for gryffindor.hogwarts.com and slytherin.hogwarts.com">
 &lt;resin xmlns="http://caucho.com/ns/resin"
         xmlns:resin="urn:java:com.caucho.resin"&gt;
 	
@@ -808,7 +821,7 @@ submitting cookies to servers, it is not possible to have a single sign-on for
 virtual hosts that do not share some portion of their domain name.  For example,
 "gryffindor.com" and "slytherin.com" cannot share a common authentication.
 </p>
-</s3>
+</s2>
 <!-- XXX: This needs further clarification -->
 <deftable title="Clustering Single Signon">
 <tr>
@@ -824,6 +837,8 @@ virtual hosts that do not share some portion of their domain name.  For example,
   <td>Memory-based single signon.</td>
 </tr>
 </deftable>
+</s1>
+<s1>
 <!-- XXX: This needs further clarification -->
 <deftable title="Permission Mapping">
 <tr>
@@ -839,15 +854,15 @@ virtual hosts that do not share some portion of their domain name.  For example,
   <td>Abstract class for custom role to group permission mapping.</td>
 </tr>
 </deftable>
-</s2>
-<s2 title="Compatibility with Other Application Servers">
-<p>Authenticators are not defined by the <a href="http://www.jcp.org/en/jsr/detail?id=315">Servlet Specification</a>,  so 
-the ability to use passwords stored as a digest depends upon the implementation of the Authenticator that the application 
-server provides. MD5-base64 is the most common form of digest, because it is the default in 
-<a href="#Using-HTTP-digest-authentication">HTTP digest authentication</a>, which is why Resin uses it.</p>
-<p>The use of <code>&lt;auth-method&gt;DIGEST&lt;auth-method&gt;</code> is defined in the Servlet Specification and 
-implemented in most application servers.</p>
-</s2>
+</s1>
+<s1 title="Compatibility with Other Application Servers">
+<p>Authenticators are not defined by the 
+<a href="http://www.jcp.org/en/jsr/detail?id=315">Servlet Specification</a>, so the ability 
+to use passwords stored as a digest depends upon the implementation of the Authenticator 
+that the application server provides. MD5-base64 is the most common form of digest, 
+because it is the default in HTTP digest authentication, which is why Resin uses it.</p>
+<p>The use of <code>&lt;auth-method&gt;DIGEST&lt;auth-method&gt;</code> is defined in the 
+Servlet Specification and implemented in most application servers.</p>
 </s1>
 </body>
 </document>
