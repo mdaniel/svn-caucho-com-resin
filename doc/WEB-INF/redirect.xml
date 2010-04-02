@@ -27,7 +27,7 @@
                   target="${app.contextPath}/admin/cluster-overview.xtp"/>
 
   <resin:Redirect regexp="^/admin/cluster-tags.xtp" 
-                  target="${app.contextPath}/admin/cluster-overview-ref.xtp"/>
+                  target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/admin/config-control.xtp"
                   target="${app.contextPath}/admin/config-el-ref.xtp"/>
@@ -193,7 +193,7 @@
                   target="${app.contextPath}/admin/config-candi.xtp"/>
 
   <resin:Redirect regexp="^/doc/cluster-tags.xtp"
-                  target="${app.contextPath}/admin/cluster-overview-ref.xtp"/>
+                  target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/doc/cluster.xtp"
                   target="${app.contextPath}/admin/cluster-overview.xtp"/>
@@ -238,7 +238,7 @@
                   target="http://wiki.caucho.com"/>
 
   <resin:Redirect regexp="^/doc/doc/cluster-tags.xtp"
-                  target="${app.contextPath}/admin/cluster-overview-ref.xtp"/>
+                  target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/doc/el-var.xtp"
                   target="${app.contextPath}/admin/config-el.xtp"/>
@@ -451,7 +451,7 @@
                   target="http://wiki.caucho.com"/>
 
   <resin:Redirect regexp="^/install/cluster-tags.xtp"
-                  target="${app.contextPath}/admin/cluster-overview-ref.xtp"/>
+                  target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/install/configure.xtp"
                   target="${app.contextPath}/admin/config.xtp"/>
@@ -544,7 +544,7 @@
                   target="${app.contextPath}/examples/"/>
 
   <resin:Redirect regexp="^/reference/cluster-tags.xtp"
-                  target="${app.contextPath}/admin/cluster-overview-ref.xtp"/>
+                  target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/reference/config-log.xtp"
                   target="${app.contextPath}/admin/logging-ref.xtp"/>
@@ -577,7 +577,7 @@
                   target="${app.contextPath}/examples/jms.xtp"/>
 
   <resin:Redirect regexp="^/reference/resin-tags.xtp"
-                  target="${app.contextPath}/admin/cluster-overview-ref.xtp"/>
+                  target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/reference/resources.xtp"
                   target="${app.contextPath}/admin/config-el-ref.xtp"/>

@@ -11,6 +11,7 @@ Resin's HTTP server can use JSSE or OpenSSL for SSL connections.
   </description>
 </header>
 <body>
+<reference-legend/>
 <localtoc/>
 <defun title="&lt;openssl>" version="Resin 4.0">
 <parents>http, protocol, cluster-port</parents>

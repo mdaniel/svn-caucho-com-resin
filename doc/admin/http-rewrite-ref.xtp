@@ -9,6 +9,7 @@
 </header>
 <body>
 
+<reference-legend/>
 <localtoc/>
 
 <!-- XXX write admin oriented reference and add to reference.xtp -->

@@ -107,7 +107,8 @@
       <item link="security-authenticators.xtp" title="authenticators"
             description="authenticators for Resin server"/>
 
-      <item link="security-authentication-method.xtp" title="authentication method"
+      <item link="security-authentication-method.xtp" 
+            title="authentication method"
             description="authenticators for Resin server"/>
 
       <item link="security-authorization.xtp" title="authorization"
@@ -127,11 +128,11 @@
           description="Scheduled tasks"/>
     
     <item link="cluster.xtp" title="Clustering"
-          description="Clustering and load balancing of multiple coordinated Resin servers">
+          description="Clustering and load balancing of multiple coordinated Resin servers"
+          reference="cluster-ref.xtp">
     
       <item link="cluster-overview.xtp" title="Overview"
-            description="Overview of Resin's triad-based clustering architecture"
-            reference="cluster-overview-ref.xtp"/>
+        description="Overview of Resin's triad-based clustering architecture"/>
     
       <item link="cluster-load-balancer.xtp" title="Load Balancing"
           description="HTTP load balancing to a Resin cluster"/>

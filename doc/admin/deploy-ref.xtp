@@ -29,6 +29,7 @@
 
 <body>
 
+<reference-legend/>
 <localtoc/>
 
 <include-defun name="access-log"/>

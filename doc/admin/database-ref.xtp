@@ -13,6 +13,7 @@ obtain connections to databases.
 </header>
 
 <body>
+<reference-legend/>
 <localtoc/>
 
 <include-defun name="connection-wait-time"/>

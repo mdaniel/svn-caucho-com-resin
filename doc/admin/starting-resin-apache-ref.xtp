@@ -12,6 +12,7 @@
   </header>
 
   <body>
+<reference-legend/>
 
 <s1>
       <p>The web server plugins (mod_caucho and isapi_srun) have

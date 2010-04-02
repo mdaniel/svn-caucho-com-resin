@@ -12,6 +12,7 @@ load balancing, and JVM arguments.</p>
   </description>
 </header>
 <body>
+<reference-legend/>
 
 <localtoc/>
 <include-defun name="accept-listen-backlog"/>
