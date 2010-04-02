@@ -30,6 +30,7 @@
 package com.caucho.loader;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 
@@ -45,6 +46,7 @@ import java.util.logging.Logger;
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
  */
+@Configurable
 public class SimpleLoader extends Loader {
   private static final Logger log
     = Logger.getLogger(SimpleLoader.class.getName());
@@ -62,14 +64,21 @@ public class SimpleLoader extends Loader {
   public SimpleLoader()
   {
   }
+  
+  public SimpleLoader(ClassLoader loader)
+  {
+    super(loader);
+  }
 
   /**
    * Creates the simple loader with the specified path.
    *
    * @param path specifying the root of the resources
    */
-  public SimpleLoader(Path path)
+  public SimpleLoader(DynamicClassLoader loader, Path path)
   {
+    this(loader);
+    
     setPath(path);
   }
 
@@ -79,8 +88,10 @@ public class SimpleLoader extends Loader {
    * @param path specifying the root of the resources
    * @param prefix the prefix that the resources must match
    */
-  public SimpleLoader(Path path, String prefix)
+  public SimpleLoader(DynamicClassLoader loader, Path path, String prefix)
   {
+    this(loader);
+    
     setPath(path);
     setPrefix(prefix);
   }
@@ -100,7 +111,7 @@ public class SimpleLoader extends Loader {
   {
     DynamicClassLoader loader = new DynamicClassLoader(parent, false);
 
-    SimpleLoader simpleLoader = new SimpleLoader(path, prefix);
+    SimpleLoader simpleLoader = new SimpleLoader(loader, path, prefix);
     simpleLoader.init();
     
     loader.addLoader(simpleLoader);
@@ -123,7 +134,7 @@ public class SimpleLoader extends Loader {
   {
     DynamicClassLoader loader = new DynamicClassLoader(parent, false);
 
-    loader.addLoader(new SimpleLoader(path));
+    loader.addLoader(new SimpleLoader(loader, path));
 
     loader.init();
     
@@ -187,6 +198,7 @@ public class SimpleLoader extends Loader {
   /**
    * Sets the owning class loader.
    */
+  @Override
   public void setLoader(DynamicClassLoader loader)
   {
     super.setLoader(loader);
@@ -198,6 +210,7 @@ public class SimpleLoader extends Loader {
    * Initializes the loader.
    */
   @PostConstruct
+  @Override
   public void init()
     throws ConfigException
   {
@@ -207,6 +220,8 @@ public class SimpleLoader extends Loader {
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
+    
+    super.init();
   }
 
   /**
@@ -216,6 +231,7 @@ public class SimpleLoader extends Loader {
    *
    * @return the path representing the class or resource.
    */
+  @Override
   public Path getPath(String name)
   {
     if (_prefix != null && _pathPrefix == null)
@@ -233,6 +249,7 @@ public class SimpleLoader extends Loader {
   /**
    * Returns the code source for the directory.
    */
+  @Override
   protected CodeSource getCodeSource(Path path)
   {
     return _codeSource;
@@ -258,11 +275,12 @@ public class SimpleLoader extends Loader {
   /**
    * Returns a printable representation of the loader.
    */
+  @Override
   public String toString()
   {
     if (_prefix != null)
-      return "SimpleLoader[" + _path + ",prefix=" + _prefix + "]";
+      return getClass().getSimpleName() + "[" + _path + ",prefix=" + _prefix + "]";
     else
-      return "SimpleLoader[" + _path + "]";
+      return getClass().getSimpleName() + "[" + _path + "]";
   }
 }

@@ -30,11 +30,12 @@
 package com.caucho.config.inject;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
 public interface ScopeAdapterBean<X>
 {
-  public X getScopeAdapter(CreationalContext<X> cxt);
+  public X getScopeAdapter(Bean<?> bean, CreationalContext<X> cxt);
 }

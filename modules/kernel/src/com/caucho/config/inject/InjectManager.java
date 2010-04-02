@@ -1306,7 +1306,7 @@ public class InjectManager
     if (bean instanceof ScopeAdapterBean<?>) {
       ScopeAdapterBean<?> simpleBean = (ScopeAdapterBean<?>) bean;
 
-      Object adapter = simpleBean.getScopeAdapter(null);
+      Object adapter = simpleBean.getScopeAdapter(bean, null);
 
       if (adapter != null)
         return adapter;
@@ -1504,7 +1504,7 @@ public class InjectManager
     if (bean instanceof ScopeAdapterBean) {
       ScopeAdapterBean simpleBean = (ScopeAdapterBean) bean;
 
-      Object adapter = simpleBean.getScopeAdapter(parentCxt);
+      Object adapter = simpleBean.getScopeAdapter(bean, parentCxt);
 
       if (adapter != null)
         return adapter;
@@ -2903,7 +2903,7 @@ public class InjectManager
       return false;
     else {
       if (log.isLoggable(Level.FINER))
-        log.finer("WebBeans scanning " + root.getURL());
+        log.finer("CanDI scanning " + root.getURL());
 
       context.setScanComplete(true);
       return true;
@@ -2913,6 +2913,7 @@ public class InjectManager
   /**
    * Checks if the class can be a simple class
    */
+  @Override
   public ScanMatch isScanMatchClass(String className, int modifiers)
   {
     if (Modifier.isInterface(modifiers))
@@ -3335,7 +3336,7 @@ public class InjectManager
   }
 
   static class InjectBean<X> extends BeanWrapper<X>
-    implements PassivationCapable, ScopeAdapterBean
+    implements PassivationCapable, ScopeAdapterBean<X>
   {
     private ClassLoader _loader;
 
@@ -3367,12 +3368,12 @@ public class InjectManager
         return null;
     }
 
-    public Object getScopeAdapter(CreationalContext cxt)
+    public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
     {
       Bean bean = getBean();
 
       if (bean instanceof ScopeAdapterBean)
-        return ((ScopeAdapterBean) bean).getScopeAdapter(cxt);
+        return (X) ((ScopeAdapterBean) bean).getScopeAdapter(topBean, cxt);
       else
         return null;
     }

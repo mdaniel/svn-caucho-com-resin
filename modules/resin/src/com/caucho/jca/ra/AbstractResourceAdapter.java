@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
 import javax.resource.NotSupportedException;
 import javax.resource.ResourceException;

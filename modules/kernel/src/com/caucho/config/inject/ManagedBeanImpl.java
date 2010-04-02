@@ -153,7 +153,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   }
 
   @Override
-  public X getScopeAdapter(CreationalContext<X> cxt)
+  public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
   {
     NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
 
@@ -167,7 +167,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
       if (value == null) {
         ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
-        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
+        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), topBean);
         value = _scopeAdapter;
       }
 
@@ -175,6 +175,18 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     }
 
     return null;
+  }
+  
+  protected boolean isProxiedScope()
+  {
+    NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
+    
+    if (scopeType != null
+        && ! getScope().equals(ApplicationScoped.class)) {
+      return true;
+    }
+    else
+      return false;
   }
 
   public Object getScopeAdapter()

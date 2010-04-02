@@ -28,42 +28,27 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.PathPatternType;
-import com.caucho.make.DependencyContainer;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Depend;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import java.net.URL;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.io.*;
-import java.util.zip.*;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.types.FileSetType;
+import com.caucho.config.types.PathPatternType;
+import com.caucho.vfs.Path;
 
 /**
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
  */
+@Configurable
 public class LibraryLoader extends JarListLoader {
-  private static final Logger log
-    = Logger.getLogger(LibraryLoader.class.getName());
-  
   // Configured path.
   private Path _path;
   
   private FileSetType _fileSet;
-
-  // When the directory was last modified
-  private long _lastModified;
-
-  private String []_fileNames;
 
   // list of the matching paths
   private ArrayList<Path> _pathList = new ArrayList<Path>();
@@ -77,12 +62,19 @@ public class LibraryLoader extends JarListLoader {
   public LibraryLoader()
   {
   }
+  
+  public LibraryLoader(ClassLoader loader)
+  {
+    super(loader);
+  }
 
   /**
    * Creates a new directory loader.
    */
-  public LibraryLoader(Path path)
+  public LibraryLoader(ClassLoader loader, Path path)
   {
+    this(loader);
+    
     _path = path;
 
     try {
@@ -126,9 +118,8 @@ public class LibraryLoader extends JarListLoader {
   {
     DynamicClassLoader loader = new DynamicClassLoader(parent);
 
-    LibraryLoader dirLoader = new LibraryLoader(path);
-
-    loader.addLoader(dirLoader);
+    LibraryLoader dirLoader = new LibraryLoader(loader, path);
+    dirLoader.init();
 
     loader.init();
     
@@ -173,6 +164,7 @@ public class LibraryLoader extends JarListLoader {
    * True if any of the loaded classes have been modified.  If true, the
    * caller should drop the classpath and create a new one.
    */
+  @Override
   public boolean isModified()
   {
     _newPathList.clear();
@@ -185,6 +177,7 @@ public class LibraryLoader extends JarListLoader {
   /**
    * True if the classes in the directory have changed.
    */
+  @Override
   public boolean logModified(Logger log)
   {
     if (isModified()) {
@@ -220,11 +213,13 @@ public class LibraryLoader extends JarListLoader {
   /**
    * Destroys the loader, closing the jars.
    */
+  @Override
   protected void destroy()
   {
     clearJars();
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _fileSet + "]";

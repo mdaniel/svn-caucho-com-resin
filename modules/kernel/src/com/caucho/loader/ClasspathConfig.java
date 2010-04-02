@@ -85,16 +85,18 @@ public class ClasspathConfig {
     Loader loader = null;
 
     if (_isLibraryDir)
-      loader = new DirectoryLoader(_classDir);
+      loader = new DirectoryLoader(classLoader, _classDir);
     else if (! _compile)
-      loader = new SimpleLoader(_classDir);
+      loader = new SimpleLoader(classLoader, _classDir);
     else if (_classDir.getPath().endsWith(".jar") ||
              _classDir.getPath().endsWith(".zip"))
-      loader = new SimpleLoader(_classDir);
+      loader = new SimpleLoader(classLoader, _classDir);
     else if (_source != null)
-      loader = new CompilingLoader(_classDir, _source, null, null);
+      loader = new CompilingLoader(classLoader, _classDir, _source, null, null);
     else
-      loader = new CompilingLoader(_classDir);
+      loader = new CompilingLoader(classLoader, _classDir);
+    
+    loader.init();
 
     classLoader.addLoader(loader);
 

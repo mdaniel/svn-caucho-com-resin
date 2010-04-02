@@ -40,7 +40,7 @@ import javax.transaction.Synchronization;
 import javax.transaction.Transaction;
 import javax.transaction.xa.XAResource;
 
-import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 

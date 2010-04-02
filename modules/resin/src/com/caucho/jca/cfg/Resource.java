@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.cfg;
 
 import com.caucho.config.Config;
 import com.caucho.config.CauchoDeployment;
@@ -39,7 +39,8 @@ import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.jca.cfg.JavaMailConfig;
+import com.caucho.jca.pool.ConnectionPool;
+import com.caucho.jca.ra.ResourceManagerImpl;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.ClassLoaderListener;
@@ -79,7 +80,7 @@ public class Resource {
   
   private static L10N L = new L10N(Resource.class);
 
-  private Class _type;
+  private Class<?> _type;
 
   private String _var;
   private String _name;
@@ -87,7 +88,7 @@ public class Resource {
   
   private String _mbeanName;
   
-  private Class _mbeanInterface;
+  private Class<?> _mbeanInterface;
 
   // private ArrayList<BuilderProgram> _args = new ArrayList<BuilderProgram>();
   private ArrayList<Object> _args = new ArrayList<Object>();
@@ -158,7 +159,7 @@ public class Resource {
   /**
    * Sets the class
    */
-  public void setType(Class resourceClass)
+  public void setType(Class<?> resourceClass)
   {
     if (resourceClass.getName().equals("javax.mail.Session"))
       _type = JavaMailConfig.class;
@@ -169,7 +170,7 @@ public class Resource {
   /**
    * Sets the class
    */
-  public void setClass(Class resourceClass)
+  public void setClass(Class<?> resourceClass)
   {
     _type = resourceClass;
   }
@@ -177,7 +178,7 @@ public class Resource {
   /**
    * Gets the type;
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return _type;
   }
@@ -185,7 +186,7 @@ public class Resource {
   /**
    * Sets the class
    */
-  public void setMbeanInterface(Class cl)
+  public void setMbeanInterface(Class<?> cl)
   {
     _mbeanInterface = cl;
   }

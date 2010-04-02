@@ -26,15 +26,15 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca.cfg;
+package com.caucho.jca.ra;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.jca.cfg.ConfigPropertyConfig;
 import com.caucho.util.L10N;
 
 import java.util.HashMap;
 import java.util.Iterator;
-import java.util.logging.Logger;
 
 /**
  * Configuration for an object with config values.
@@ -42,7 +42,7 @@ import java.util.logging.Logger;
 public class ObjectConfig {
   private static final L10N L = new L10N(ObjectConfig.class);
 
-  private Class _type;
+  private Class<?> _type;
   private HashMap<String,ConfigPropertyConfig> _propertyMap =
     new HashMap<String,ConfigPropertyConfig>();
   
@@ -53,7 +53,7 @@ public class ObjectConfig {
   /**
    * Sets the type.
    */
-  public void setType(Class type)
+  public void setType(Class<?> type)
     throws ConfigException
   {
     _type = type;
@@ -64,7 +64,7 @@ public class ObjectConfig {
   /**
    * Gets the config property type.
    */
-  public Class getType()
+  public Class<?> getType()
   {
     return _type;
   }

@@ -29,7 +29,7 @@
 
 package com.caucho.server.resin;
 
-import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.naming.Jndi;
 import com.caucho.server.thread.ResinThreadPoolExecutor;
 import com.caucho.transaction.TransactionManagerImpl;

@@ -27,7 +27,7 @@
  * @author Sam
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ResourceDeployMXBean;

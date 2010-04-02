@@ -28,7 +28,6 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.jca.ResourceManagerConfig;
 import com.caucho.util.L10N;
 
 import java.util.logging.Logger;

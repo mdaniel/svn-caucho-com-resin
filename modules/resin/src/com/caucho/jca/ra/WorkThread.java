@@ -26,24 +26,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
-
-import com.caucho.util.L10N;
-import com.caucho.util.ThreadTask;
+package com.caucho.jca.ra;
 
 import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkEvent;
 import javax.resource.spi.work.WorkListener;
-import java.util.logging.Logger;
+
+import com.caucho.config.Module;
+import com.caucho.util.ThreadTask;
 
 /**
  * Implementation of the work manager.
  */
+@Module
 public class WorkThread implements ThreadTask {
-  private static final L10N L = new L10N(WorkThread.class);
-  private static final Logger log
-    = Logger.getLogger(WorkThread.class.getName());
-
   private boolean _isStarted;
   private WorkManagerImpl _manager;
   private ClassLoader _classLoader;

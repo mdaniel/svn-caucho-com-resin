@@ -162,11 +162,9 @@ public class ResinBeanContainer
       _classLoader.addJar(path);
     }
     else {
-      CompilingLoader loader = new CompilingLoader();
+      CompilingLoader loader = new CompilingLoader(_classLoader);
       loader.setPath(path);
       loader.init();
-
-      _classLoader.addLoader(loader);
     }
   }
 

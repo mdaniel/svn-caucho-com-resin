@@ -122,7 +122,7 @@ public class ClassEntry implements Dependency {
                     String name, Path sourcePath,
                     Path classPath)
   {
-    this(loader.getLoader(), name, sourcePath, classPath,
+    this(loader.getClassLoader(), name, sourcePath, classPath,
          loader.getCodeSource(classPath));
   }
 

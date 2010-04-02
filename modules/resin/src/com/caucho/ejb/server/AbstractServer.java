@@ -48,7 +48,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.AroundInvokeConfig;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.session.AbstractSessionContext;
-import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;

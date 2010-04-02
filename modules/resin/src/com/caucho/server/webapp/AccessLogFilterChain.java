@@ -29,8 +29,8 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.jca.UserTransactionProxy;
-import com.caucho.jca.UserTransactionImpl;
+import com.caucho.jca.pool.UserTransactionImpl;
+import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.servlet.comet.CometFilterChain;
 import com.caucho.server.http.AbstractHttpRequest;
 import com.caucho.server.http.AbstractHttpResponse;

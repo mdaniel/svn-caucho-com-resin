@@ -26,8 +26,9 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
+import com.caucho.config.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;
@@ -39,16 +40,13 @@ import javax.resource.spi.work.WorkException;
 import javax.resource.spi.work.WorkListener;
 import javax.resource.spi.work.WorkManager;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Implementation of the work manager.
  */
+@Module
 public class WorkManagerImpl implements WorkManager {
   private static final L10N L = new L10N(WorkManagerImpl.class);
-  private static final Logger log
-    = Logger.getLogger(WorkManagerImpl.class.getName());
-
   private ArrayList<Work> _activeTasks = new ArrayList<Work>();
 
   private volatile boolean _isClosed;

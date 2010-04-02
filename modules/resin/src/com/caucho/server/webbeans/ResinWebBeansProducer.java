@@ -37,7 +37,7 @@ import com.caucho.config.inject.BeanStartupEvent;
 import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.timer.EjbTimerService;
-import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
 import com.caucho.security.SecurityContext;

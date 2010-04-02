@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -36,7 +36,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.type.TypeFactory;
-import com.caucho.jca.cfg.ObjectConfig;
+import com.caucho.jca.pool.ConnectionPool;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;

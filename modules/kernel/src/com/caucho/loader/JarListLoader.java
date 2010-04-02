@@ -29,21 +29,18 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.PathPatternType;
-import com.caucho.make.DependencyContainer;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.*;
-
-import javax.annotation.PostConstruct;
 import java.net.URL;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.io.*;
-import java.util.zip.*;
+
+import com.caucho.config.ConfigException;
+import com.caucho.make.DependencyContainer;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -54,7 +51,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
     = Logger.getLogger(JarListLoader.class.getName());
   
   // list of the jars in the directory
-  protected ArrayList<JarEntry> _jarList;
+  protected ArrayList<JarEntry> _jarList = new ArrayList<JarEntry>();
   
   // list of dependencies
   private DependencyContainer _dependencyList = new DependencyContainer();
@@ -67,27 +64,21 @@ abstract public class JarListLoader extends Loader implements Dependency {
    */
   public JarListLoader()
   {
-    _jarList = new ArrayList<JarEntry>();
-    _dependencyList = new DependencyContainer();
   }
-
-  /**
-   * Initialize
-   */
-  protected void init()
+  
+  public JarListLoader(ClassLoader loader)
   {
+    super(loader);
   }
 
   /**
    * Sets the owning class loader.
    */
+  @Override
   public void setLoader(DynamicClassLoader loader)
   {
     super.setLoader(loader);
-
-    for (int i = 0; i < _jarList.size(); i++)
-      loader.addURL(_jarList.get(i).getJarPath());
-  }
+ }
   
   /**
    * True if any of the loaded classes have been modified.  If true, the
@@ -110,6 +101,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
   /**
    * Validates the loader.
    */
+  @Override
   public void validate()
     throws ConfigException
   {
@@ -118,9 +110,18 @@ abstract public class JarListLoader extends Loader implements Dependency {
     }
   }
 
+  @Override
+  public void init()
+  {
+    super.init();
+
+    for (int i = 0; i < _jarList.size(); i++)
+      getClassLoader().addURL(_jarList.get(i).getJarPath());
+  }
+
   protected boolean isJarCacheEnabled()
   {
-    DynamicClassLoader loader = getLoader();
+    DynamicClassLoader loader = getClassLoader();
 
     if (loader != null)
       return loader.isJarCacheEnabled();
@@ -146,8 +147,8 @@ abstract public class JarListLoader extends Loader implements Dependency {
     JarPath jarPath = JarPath.create(jar);
     JarEntry jarEntry = new JarEntry(jarPath);
 
-    if (getLoader() != null) {
-      if (! getLoader().addURL(jarPath))
+    if (getClassLoader() != null) {
+      if (! getClassLoader().addURL(jarPath))
 	return;
     }
 
@@ -231,7 +232,7 @@ abstract public class JarListLoader extends Loader implements Dependency {
     if (p > 0)
       pkg = pathName.substring(0, p + 1);
 
-    ClassEntry entry = new ClassEntry(getLoader(), name, filePath,
+    ClassEntry entry = new ClassEntry(getClassLoader(), name, filePath,
 				      filePath,
 				      jarEntry.getCodeSource(pathName));
 

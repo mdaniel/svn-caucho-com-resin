@@ -47,9 +47,9 @@ import javax.transaction.Transaction;
 
 import com.caucho.amber.AmberRuntimeException;
 import com.caucho.config.inject.HandleAware;
-import com.caucho.jca.CloseResource;
-import com.caucho.jca.UserTransactionImpl;
-import com.caucho.jca.UserTransactionProxy;
+import com.caucho.jca.pool.UserTransactionImpl;
+import com.caucho.jca.pool.UserTransactionProxy;
+import com.caucho.jca.ra.CloseResource;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 

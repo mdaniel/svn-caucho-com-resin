@@ -47,8 +47,8 @@ import javax.transaction.xa.XAException;
 import javax.transaction.xa.XAResource;
 import javax.transaction.xa.Xid;
 
-import com.caucho.jca.UserTransactionImpl;
-import com.caucho.jca.UserTransactionSuspendState;
+import com.caucho.jca.pool.UserTransactionImpl;
+import com.caucho.jca.pool.UserTransactionSuspendState;
 import com.caucho.transaction.xalog.AbstractXALogStream;
 import com.caucho.util.Alarm;
 import com.caucho.util.AlarmListener;

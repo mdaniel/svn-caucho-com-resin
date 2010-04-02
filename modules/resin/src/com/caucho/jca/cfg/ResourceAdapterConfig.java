@@ -29,21 +29,19 @@
 
 package com.caucho.jca.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-
 import java.util.ArrayList;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.jca.ra.ObjectConfig;
+import com.caucho.util.L10N;
 
 /**
  * Configuration for a connector.
  */
 public class ResourceAdapterConfig extends ObjectConfig {
   private static final L10N L = new L10N(ResourceAdapterConfig.class);
-  private static final Logger log
-    = Logger.getLogger(ResourceAdapterConfig.class.getName());
-
-  private Class _adapterClass;
+  
+  private Class<?> _adapterClass;
 
   private ArrayList<ConnectionDefinition> _outboundConnections =
     new ArrayList<ConnectionDefinition>();
@@ -65,7 +63,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
   /**
    * Sets the resource adapter class
    */
-  public void setResourceadapterClass(Class cl)
+  public void setResourceadapterClass(Class<?> cl)
     throws ConfigException
   {
     _adapterClass = cl;
@@ -76,7 +74,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
   /**
    * Gets the resource adapter class
    */
-  public Class getResourceadapterClass()
+  public Class<?> getResourceadapterClass()
   {
     return _adapterClass;
   }
@@ -92,7 +90,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
   /**
    * Sets the ManagedConnectionFactory class.
    */
-  public void setManagedconnectionfactoryClass(Class cl)
+  public void setManagedconnectionfactoryClass(Class<?> cl)
     throws ConfigException
   {
     getConnectionDefinition().setManagedconnectionfactoryClass(cl);
@@ -166,7 +164,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
     for (int i = 0; i < _outboundConnections.size(); i++) {
       ConnectionDefinition cfg = _outboundConnections.get(i);
 
-      Class cl = cfg.getManagedConnectionFactoryClass();
+      Class<?> cl = cfg.getManagedConnectionFactoryClass();
       
       if (cl != null && cl.getName().equals(type))
 	return cfg;
@@ -186,7 +184,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
   }
 
   /**
-   * Adds a new connection definitin.
+   * Adds a new connection definition.
    */
   void addMessageListener(MessageListenerConfig cfg)
     throws ConfigException
@@ -212,7 +210,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
       MessageListenerConfig cfg = _inboundConnections.get(i);
 
       //Class cl = cfg.getMessageListenerType();
-      Class cl = cfg.getActivationSpecClass();
+      Class<?> cl = cfg.getActivationSpecClass();
 
       if (cl != null && cl.getName().equals(type))
 	return cfg;
@@ -237,7 +235,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
     for (int i = 0; i < _resources.size(); i++) {
       AdminObjectConfig cfg = _resources.get(i);
 
-      Class cl = cfg.getAdminObjectClass();
+      Class<?> cl = cfg.getAdminObjectClass();
 
       if (cl != null && cl.getName().equals(type))
 	return cfg;

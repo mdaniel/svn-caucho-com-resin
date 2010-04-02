@@ -180,6 +180,7 @@ public class BeanFactory<T>
     return this;
   }
 
+  @SuppressWarnings("unchecked")
   public Bean<T> singleton(Object value)
   {
     return new SingletonBean<T>(_managedBean,

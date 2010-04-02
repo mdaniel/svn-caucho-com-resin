@@ -29,6 +29,7 @@
 package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
+import com.caucho.jca.ra.ObjectConfig;
 import com.caucho.util.L10N;
 
 import java.util.ArrayList;

@@ -60,14 +60,30 @@ public class JarLoader extends JarListLoader implements Dependency {
   }
 
   /**
+   * Creates a new directory loader.
+   */
+  public JarLoader(ClassLoader loader)
+  {
+    super(loader);
+  }
+
+  /**
    * Sets the owning class loader.
    */
+  @Override
   public void setLoader(DynamicClassLoader loader)
   {
     super.setLoader(loader);
+  }
 
-    for (int i = 0; i < _jarList.size(); i++)
-      loader.addURL(_jarList.get(i).getJarPath());
+  @Override
+  public void init()
+  {
+    super.init();
+
+    for (int i = 0; i < _jarList.size(); i++) {
+      getClassLoader().addURL(_jarList.get(i).getJarPath());
+    }
   }
 
   public Path getCodePath()

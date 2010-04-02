@@ -77,9 +77,9 @@ public class ClassLoaderConfig {
   /**
    * Adds a simple class loader.
    */
-  public void addSimpleLoader(SimpleLoader loader)
+  public SimpleLoader createSimpleLoader()
   {
-    _classLoader.addLoader(loader, _index++);
+    return new SimpleLoader();
   }
 
   /**
@@ -124,18 +124,7 @@ public class ClassLoaderConfig {
    */
   public LibraryLoader createLibraryLoader()
   {
-    LibraryLoader loader = new LibraryLoader();
-    loader.setLoader(_classLoader);
-
-    return loader;
-  }
-
-  /**
-   * Adds a directory class loader.
-   */
-  public void addLibraryLoader(LibraryLoader loader)
-  {
-    _classLoader.addLoader(loader, _index++);
+    return new LibraryLoader(_classLoader);
   }
 
   /**
@@ -163,11 +152,9 @@ public class ClassLoaderConfig {
   /**
    * Adds a compiling class loader.
    */
-  public void addCompilingLoader(CompilingLoader loader)
+  public CompilingLoader createCompilingLoader()
   {
-    // _classLoader.addLoader(loader, _index++);
-    // server/1h60
-    _classLoader.addLoader(loader);
+    return new CompilingLoader(_classLoader);
   }
 
   /**

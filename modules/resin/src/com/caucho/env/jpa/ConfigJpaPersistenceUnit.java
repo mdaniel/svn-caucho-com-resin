@@ -118,7 +118,7 @@ public class ConfigJpaPersistenceUnit {
       throw new ConfigException(L.l("jpa-persistence-unit requires a 'name' attribute"));
     
     ManagerPersistence manager = ManagerPersistence.create();
-    
+
     manager.addPersistenceUnit(_name, this);
   }
 }

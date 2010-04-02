@@ -29,34 +29,46 @@
 
 package com.caucho.config.cfg;
 
-import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
-import com.caucho.config.inject.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.*;
-import com.caucho.config.types.*;
-import com.caucho.config.gen.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-
-import java.beans.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
+import java.beans.Introspector;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Map;
 
-import javax.annotation.*;
-import javax.ejb.*;
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.*;
-import javax.enterprise.inject.spi.*;
-import javax.inject.*;
+import javax.annotation.PostConstruct;
+import javax.ejb.MessageDriven;
+import javax.ejb.Startup;
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.ConversationScoped;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.NormalScope;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.SessionScoped;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.inject.Scope;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Module;
+import com.caucho.config.Names;
+import com.caucho.config.inject.AbstractBean;
+import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.PropertyStringProgram;
+import com.caucho.config.program.PropertyValueProgram;
+import com.caucho.config.type.TypeFactory;
+import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.naming.Jndi;
+import com.caucho.util.L10N;
 
 /**
- * Configuration for the xml web bean component.
+ * Backward-compat configuration for the xml web bean component.
  */
+@Module
 public class BeanConfig {
   private static final L10N L = new L10N(BeanConfig.class);
 
@@ -68,15 +80,13 @@ public class BeanConfig {
   private String _jndiName;
 
   private String _mbeanName;
-  private Class _beanConfigClass;
+  private Class<?> _beanConfigClass;
 
   private CustomBeanConfig _customBean;
 
-  private static final Object []NULL_ARGS = new Object[0];
-
   private InjectManager _beanManager;
 
-  private Class _cl;
+  private Class<?> _cl;
 
   private String _name;
 
@@ -86,13 +96,13 @@ public class BeanConfig {
   private ArrayList<Annotation> _stereotypeList
     = new ArrayList<Annotation>();
 
-  private Class _scope;
+  private Class<?> _scope;
 
   private ArrayList<ConfigProgram> _newArgs;
   private ContainerProgram _init;
 
-  private AnnotatedType _annotatedType;
-  protected Bean _bean;
+  private AnnotatedType<?> _annotatedType;
+  protected Bean<?> _bean;
 
   // XXX: temp for osgi
   private boolean _isService;
@@ -165,7 +175,7 @@ public class BeanConfig {
                                     cl.getName(), type.getName()));
   }
 
-  public Class getClassType()
+  public Class<?> getClassType()
   {
     if (_customBean != null)
       return _customBean.getClassType();
@@ -173,9 +183,9 @@ public class BeanConfig {
       return _cl;
   }
 
-  public AbstractBean getComponent()
+  public AbstractBean<?> getComponent()
   {
-    return (AbstractBean) _bean;
+    return (AbstractBean<?>) _bean;
   }
 
   /**
@@ -574,7 +584,7 @@ public class BeanConfig {
   public Object getObject()
   {
     if (_bean != null) {
-      CreationalContext env = _beanManager.createCreationalContext(_bean);
+      CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
 
       Object value = _beanManager.getReference(_bean, _bean.getBeanClass(), env);
 
@@ -592,9 +602,9 @@ public class BeanConfig {
   public Object createObjectNoInit()
   {
     if (_bean != null) {
-      CreationalContext env = _beanManager.createCreationalContext(_bean);
+      CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
       // XXX:
-      return _beanManager.getReference(_bean, (Class) null, env);
+      return _beanManager.getReference(_bean, (Class<?>) null, env);
       // return _bean.createNoInit();
     }
     else

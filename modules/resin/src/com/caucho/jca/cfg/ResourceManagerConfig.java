@@ -26,12 +26,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.cfg;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.jca.cfg.ConnectorConfig;
-import com.caucho.jca.cfg.ResourceAdapterConfig;
+import com.caucho.jca.ra.ResourceManagerImpl;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
@@ -39,17 +38,12 @@ import javax.annotation.PostConstruct;
 import javax.resource.spi.ResourceAdapter;
 import java.io.InputStream;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 /**
  * Configuration for the resource manager.
  */
 public class ResourceManagerConfig {
   private static final L10N L = new L10N(ResourceManagerConfig.class);
-  private static final Logger log
-    = Logger.getLogger(ResourceManagerConfig.class.getName());
-
-  private ResourceManagerImpl _rm;
 
   private Path _configDirectory;
 
@@ -59,7 +53,7 @@ public class ResourceManagerConfig {
   public ResourceManagerConfig()
     throws ConfigException
   {
-    _rm = ResourceManagerImpl.createLocalManager();
+    ResourceManagerImpl.createLocalManager();
   }
 
   /**
@@ -93,9 +87,7 @@ public class ResourceManagerConfig {
   {
     if (_configDirectory == null)
       throw new ConfigException(L.l("resource-manager requires a config-directory"));
-    Thread thread = Thread.currentThread();
-    ClassLoader loader = thread.getContextClassLoader();
-
+    
     try {
       Path path = _configDirectory;
       String []list = path.list();
@@ -136,7 +128,7 @@ public class ResourceManagerConfig {
     ResourceAdapterConfig raCfg = conn.getResourceAdapter();
     
     try {
-      Class raClass = raCfg.getResourceadapterClass();
+      Class<?> raClass = raCfg.getResourceadapterClass();
 
       ResourceAdapter ra = (ResourceAdapter) raClass.newInstance();
 
@@ -145,7 +137,7 @@ public class ResourceManagerConfig {
       if (init != null)
 	init.invoke(ra, (Object []) null);
 
-      _rm.addResource(ra);
+      ResourceManagerImpl.addResource(ra);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

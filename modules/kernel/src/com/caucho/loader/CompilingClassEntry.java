@@ -81,7 +81,7 @@ class CompilingClassEntry extends ClassEntry {
     } catch (IOException e) {
     }
       
-    String sourcePath = _loader.prefixClassPath(_loader.getLoader().getSourcePath());
+    String sourcePath = _loader.prefixClassPath(_loader.getClassLoader().getSourcePath());
 
     // deal with windows case nuttiness
     if (CauchoSystem.isWindows()

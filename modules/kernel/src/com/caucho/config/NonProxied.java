@@ -19,23 +19,31 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.config;
 
-import javax.transaction.Transaction;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * A resource with a begin method.
+ * @NonProxied marks a bean as non-proxied, even if the enclosing scope
+ * is a @Normal scope.
  */
-public interface BeginResource {
-  /**
-   * Callback when the transaction starts.
-   */
-  public void begin(Transaction xa);
+@Documented  
+@Retention(RUNTIME)
+@Target({TYPE, FIELD, METHOD})
+public @interface NonProxied {
 }

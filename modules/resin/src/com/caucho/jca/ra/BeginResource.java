@@ -26,37 +26,16 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
-import com.caucho.util.L10N;
-
-import java.util.ArrayList;
-import java.util.logging.Logger;
+import javax.transaction.Transaction;
 
 /**
- * Saved state for a suspend.
+ * A resource with a begin method.
  */
-public class UserTransactionSuspendState {
-  private static final Logger log
-    = Logger.getLogger(UserTransactionSuspendState.class.getName());
-  private static final L10N L = new L10N(UserTransactionSuspendState.class);
-
-  private ArrayList<ManagedPoolItem> _poolItems = new ArrayList<ManagedPoolItem>();
-  
+public interface BeginResource {
   /**
-   * Creates the suspend state.
+   * Callback when the transaction starts.
    */
-  public UserTransactionSuspendState(ArrayList<ManagedPoolItem> poolItems)
-  {
-    _poolItems.addAll(poolItems);
-  }
-
-  /**
-   * Returns the pooled items.
-   */
-  public ArrayList<ManagedPoolItem> getPoolItems()
-  {
-    return _poolItems;
-  }
+  public void begin(Transaction xa);
 }
-

@@ -27,26 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
-import com.caucho.lifecycle.*;
-import com.caucho.loader.*;
-import com.caucho.util.L10N;
-import com.caucho.config.inject.InjectManager;
-
-import java.util.logging.Logger;
 import javax.enterprise.inject.spi.Bean;
-import javax.resource.spi.*;
+import javax.resource.spi.ResourceAdapter;
+
+import com.caucho.config.inject.InjectManager;
+import com.caucho.lifecycle.Lifecycle;
+import com.caucho.lifecycle.StartLifecycleException;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
 
 /**
  * Controller for a resource-adapter
  */
 public class ResourceAdapterController implements EnvironmentListener
 {
-  private static final L10N L = new L10N(ResourceAdapterController.class);
-  private static final Logger log
-    = Logger.getLogger(ResourceAdapterController.class.getName());
-
   private InjectManager _beanManager;
   private final Bean<ResourceAdapter> _comp;
   private final ResourceArchive _raConfig;
@@ -78,6 +75,9 @@ public class ResourceAdapterController implements EnvironmentListener
   private void start()
   {
     if (! _lifecycle.toActive())
+      return;
+    
+    if (_ra != null)
       return;
 
     _ra = (ResourceAdapter) _beanManager.getReference(_comp);
@@ -114,6 +114,7 @@ public class ResourceAdapterController implements EnvironmentListener
   /**
    * Handles the environment config phase.
    */
+  @Override
   public void environmentConfigure(EnvironmentClassLoader loader)
     throws StartLifecycleException
   {
@@ -122,6 +123,7 @@ public class ResourceAdapterController implements EnvironmentListener
   /**
    * Handles the environment bind phase.
    */
+  @Override
   public void environmentBind(EnvironmentClassLoader loader)
     throws StartLifecycleException
   {
@@ -130,6 +132,7 @@ public class ResourceAdapterController implements EnvironmentListener
   /**
    * Handles the case where the environment is starting (after init).
    */
+  @Override
   public void environmentStart(EnvironmentClassLoader loader)
     throws StartLifecycleException
   {
@@ -140,6 +143,7 @@ public class ResourceAdapterController implements EnvironmentListener
   /**
    * Handles the case where the environment is stopping
    */
+  @Override
   public void environmentStop(EnvironmentClassLoader loader)
   {
     stop();

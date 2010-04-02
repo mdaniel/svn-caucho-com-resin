@@ -48,6 +48,8 @@ import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.*;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.jca.cfg.*;
+import com.caucho.jca.ra.ResourceArchive;
+import com.caucho.jca.ra.ResourceArchiveManager;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
@@ -645,7 +647,7 @@ public class EjbMessageBean extends EjbBean {
         throw error(L.l("'{0}' is an unknown activation-spec.  Make sure the .rar file for the driver is properly installed.",
                         specType));
 
-      Class raClass = raCfg.getResourceAdapterClass();
+      Class<?> raClass = raCfg.getResourceAdapterClass();
 
       if (raClass == null)
         throw error(L.l("resource-adapter class does not exist for activation-spec '{0}'.  Make sure the .rar file for the driver is properly installed.",

@@ -133,22 +133,22 @@
           class="com.caucho.remote.client.RemoteClient"/>
 
     <bean name="resource"
-          class="com.caucho.jca.Resource"/>
+          class="com.caucho.jca.cfg.Resource"/>
 
     <bean name="rar-deploy"
-          class="com.caucho.jca.ResourceDeploy"/>
+          class="com.caucho.jca.ra.ResourceDeploy"/>
     
     <bean name="resource-default"
-          class="com.caucho.jca.ResourceDefault"/>
+          class="com.caucho.jca.ra.ResourceDefault"/>
     
     <bean name="resource-deploy"
-          class="com.caucho.jca.ResourceDeploy"/>
+          class="com.caucho.jca.ra.ResourceDeploy"/>
 
     <bean name="resource-env-ref"
           class="com.caucho.config.types.ResourceEnvRef"/>
 
     <bean name="resource-manager"
-          class="com.caucho.jca.ResourceManagerConfig"/>
+          class="com.caucho.jca.ra.ResourceManagerConfig"/>
 
     <bean name="resource-ref"
           class="com.caucho.config.types.ResourceRef"/>

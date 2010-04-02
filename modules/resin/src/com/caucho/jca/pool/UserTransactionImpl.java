@@ -27,8 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.pool;
 
+import com.caucho.jca.ra.BeginResource;
+import com.caucho.jca.ra.CloseResource;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;

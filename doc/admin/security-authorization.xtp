@@ -11,7 +11,7 @@ All Resin authorization rules are based on the top level &lt;resin:Allow> and
 &lt;resin:Deny> tag set. Any conditionals, if applicable, are nested within these top 
 level tags. 
 </p>
-<s2 title="resin:Allow">
+<defun title="resin:Allow">
 <parents>web-app</parents>
 <p>The &lt;resin:Allow> tag is used to secure a particular URL pattern. Because it is 
 affirmative, it must always include a nested condition expressing an authorization 
@@ -40,8 +40,8 @@ access. This tag is the most common type of top level authorization tag.</p>
   ...
 &lt;/web-app&gt;
 </example>
-</s2>
-<s2 title="resin:Deny">
+</defun>
+<defun title="resin:Deny">
 <p>The &lt;resin:Deny> tag is the opposite of the top level &lt;resin:Allow>. It restricts 
 access to a particular URL pattern based on any nested conditions. Access attempts that 
 match the condition are denied access. If no conditions are specified, all access to a URL 
@@ -71,7 +71,7 @@ pattern is restricted.</p>
   ...
 &lt;/web-app&gt;
 </example>
-</s2>
+</defun>
 </s1>
 <s1 title="Authorization Conditions">
 <p>Authorization conditions express the criteria by which access should be allowed 

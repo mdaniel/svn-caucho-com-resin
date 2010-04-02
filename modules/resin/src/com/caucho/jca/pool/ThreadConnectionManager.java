@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.pool;
 
 import com.caucho.util.L10N;
 

@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.cfg;
 
 import com.caucho.server.deploy.DeployConfig;
 import com.caucho.util.L10N;

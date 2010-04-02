@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.pool;
 
 import java.util.AbstractSet;
 import java.util.Collection;

@@ -26,36 +26,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca.cfg;
+package com.caucho.jca.pool;
 
-import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
+import java.util.ArrayList;
+import java.util.logging.Logger;
 
 /**
- * Configuration for a connector.
+ * Saved state for a suspend.
  */
-public class InboundResourceAdapterConfig {
-  private ResourceAdapterConfig _resourceAdapter;
+public class UserTransactionSuspendState {
+  private static final Logger log
+    = Logger.getLogger(UserTransactionSuspendState.class.getName());
+  private static final L10N L = new L10N(UserTransactionSuspendState.class);
+
+  private ArrayList<ManagedPoolItem> _poolItems = new ArrayList<ManagedPoolItem>();
   
-  InboundResourceAdapterConfig(ResourceAdapterConfig ra)
+  /**
+   * Creates the suspend state.
+   */
+  public UserTransactionSuspendState(ArrayList<ManagedPoolItem> poolItems)
   {
-    _resourceAdapter = ra;
+    _poolItems.addAll(poolItems);
   }
 
   /**
-   * Returns the message adapter.
+   * Returns the pooled items.
    */
-  public MessageAdapterConfig createMessageadapter()
+  public ArrayList<ManagedPoolItem> getPoolItems()
   {
-    MessageAdapterConfig msg = new MessageAdapterConfig();
-
-    return msg;
-  }
-
-  public class MessageAdapterConfig {
-    public void addMessagelistener(MessageListenerConfig listener)
-      throws ConfigException
-    {
-      _resourceAdapter.addMessageListener(listener);
-    }
+    return _poolItems;
   }
 }
+

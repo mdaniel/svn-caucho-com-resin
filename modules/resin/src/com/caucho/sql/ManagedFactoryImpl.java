@@ -29,7 +29,7 @@
 
 package com.caucho.sql;
 
-import com.caucho.jca.IdlePoolSet;
+import com.caucho.jca.pool.IdlePoolSet;
 import com.caucho.server.cluster.*;
 import com.caucho.server.resin.Resin;
 import com.caucho.util.L10N;

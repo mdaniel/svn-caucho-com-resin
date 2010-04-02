@@ -87,6 +87,13 @@ public class CompilingLoader extends Loader implements Make {
 
   public CompilingLoader()
   {
+    this(Thread.currentThread().getContextClassLoader());
+  }
+  
+  public CompilingLoader(ClassLoader loader)
+  {
+    super(loader);
+    
     _excludedDirectories.add("CVS");
     _excludedDirectories.add(".svn");
   }
@@ -96,9 +103,9 @@ public class CompilingLoader extends Loader implements Make {
    *
    * @param classDir generated class directory root
    */
-  public CompilingLoader(Path classDir)
+  public CompilingLoader(ClassLoader loader, Path classDir)
   {
-    this(classDir, classDir, null, null);
+    this(loader, classDir, classDir, null, null);
   }
 
   /**
@@ -109,9 +116,12 @@ public class CompilingLoader extends Loader implements Make {
    * @param args Javac arguments
    * @param encoding javac encoding
    */
-  public CompilingLoader(Path classDir, Path sourceDir,
+  public CompilingLoader(ClassLoader loader,
+                         Path classDir, Path sourceDir,
                          String args, String encoding)
   {
+    this(loader);
+    
     if (classDir.getScheme().equals("http")
 	|| classDir.getScheme().equals("https"))
       throw new RuntimeException("compiling class loader can't be http.  Use compile=false.");
@@ -144,9 +154,8 @@ public class CompilingLoader extends Loader implements Make {
   {
     DynamicClassLoader loader = new DynamicClassLoader(null);
 
-    CompilingLoader compilingLoader = new CompilingLoader(path);
-
-    loader.addLoader(compilingLoader);
+    CompilingLoader compilingLoader = new CompilingLoader(loader, path);
+    compilingLoader.init();
 
     loader.init();
 
@@ -276,11 +285,12 @@ public class CompilingLoader extends Loader implements Make {
    * Initialize.
    */
   @PostConstruct
+  @Override
   public void init()
     throws ConfigException
   {
     if (_classDir == null)
-      throw new ConfigException(L.l("`path' is a required attribute <compiling-loader>."));
+      throw new ConfigException(L.l("'path' is a required attribute of <compiling-loader>."));
 
     try {
       _classDir.mkdirs();
@@ -296,6 +306,10 @@ public class CompilingLoader extends Loader implements Make {
       if (scheme != null && ! scheme.equals("memory"))
 	log.log(Level.FINE, e.toString(), e);
     }
+    
+    super.init();
+
+    getClassLoader().addURL(_classDir);
   }
 
   /**
@@ -311,7 +325,7 @@ public class CompilingLoader extends Loader implements Make {
                                           String args, String encoding)
   {
     DynamicClassLoader loader = new DynamicClassLoader(parent);
-    loader.addLoader(new CompilingLoader(classDir, sourceDir, args, encoding));
+    loader.addLoader(new CompilingLoader(loader, classDir, sourceDir, args, encoding));
 
     loader.init();
     
@@ -321,17 +335,16 @@ public class CompilingLoader extends Loader implements Make {
   /**
    * Sets the owning class loader.
    */
+  @Override
   public void setLoader(DynamicClassLoader loader)
   {
     super.setLoader(loader);
-
-    loader.addURL(_classDir);
   }
 
   public String getClassPath()
   {
     if (_classPath == null)
-      _classPath = getLoader().getClassPath();
+      _classPath = getClassLoader().getClassPath();
 
     return _classPath;
   }
@@ -339,6 +352,7 @@ public class CompilingLoader extends Loader implements Make {
   /**
    * Compiles all changed files in the class directory.
    */
+  @Override
   public void make()
     throws IOException, ClassNotFoundException
   {
@@ -595,7 +609,7 @@ public class CompilingLoader extends Loader implements Make {
       if (! classFile.canRead() && ! javaFile.canRead())
 	return null;
 
-      return new CompilingClassEntry(this, getLoader(),
+      return new CompilingClassEntry(this, getClassLoader(),
 				     name, javaFile,
 				     classFile,
 				     getCodeSource(classFile));
@@ -663,7 +677,7 @@ public class CompilingLoader extends Loader implements Make {
   {
     long length = classFile.getLength();
 
-    ClassEntry entry = new CompilingClassEntry(this, getLoader(),
+    ClassEntry entry = new CompilingClassEntry(this, getClassLoader(),
 					       className, javaFile,
 					       classFile,
 					       getCodeSource(classFile));
@@ -671,7 +685,7 @@ public class CompilingLoader extends Loader implements Make {
     Class cl = null;
 
     try {
-      cl = getLoader().loadClassEntry(entry);
+      cl = getClassLoader().loadClassEntry(entry);
     } catch (Exception e) {
       try {
         if (javaFile.canRead())
@@ -697,7 +711,7 @@ public class CompilingLoader extends Loader implements Make {
     throws ClassNotFoundException
   {
     try {
-      JavaCompiler compiler = JavaCompiler.create(getLoader());
+      JavaCompiler compiler = JavaCompiler.create(getClassLoader());
       compiler.setClassDir(_classDir);
       compiler.setSourceDir(_sourceDir);
       if (_encoding != null)
@@ -732,7 +746,7 @@ public class CompilingLoader extends Loader implements Make {
           
       compiler.compileIfModified(source, null);
     } catch (Exception e) {
-      getLoader().addDependency(new Depend(javaSource));
+      getClassLoader().addDependency(new Depend(javaSource));
 
       log.log(Level.FINEST, e.toString(), e);
 
@@ -750,7 +764,7 @@ public class CompilingLoader extends Loader implements Make {
     throws ClassNotFoundException
   {
     try {
-      JavaCompiler compiler = JavaCompiler.create(getLoader());
+      JavaCompiler compiler = JavaCompiler.create(getClassLoader());
       compiler.setClassDir(_classDir);
       compiler.setSourceDir(_sourceDir);
       if (_encoding != null)
@@ -767,7 +781,7 @@ public class CompilingLoader extends Loader implements Make {
           
       compiler.compileBatch(files);
     } catch (Exception e) {
-      getLoader().addDependency(AlwaysModified.create());
+      getClassLoader().addDependency(AlwaysModified.create());
 
       // Compile errors are wrapped in a special ClassNotFound class
       // so the server can give a nice error message

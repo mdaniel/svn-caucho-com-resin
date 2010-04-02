@@ -27,55 +27,66 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.inject;
+package com.caucho.jca.ra;
 
-import com.caucho.config.inject.BeanWrapper;
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ScopeAdapterBean;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.L10N;
-import javax.enterprise.inject.spi.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.PassivationCapable;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
+
+import com.caucho.config.Module;
 
 /**
- * Internal implementation for a Bean
+ * Controller for a resource-adapter
  */
-public class SessionBeanImpl<X> extends BeanWrapper<X>
-  implements ScopeAdapterBean<X>, PassivationCapable, EjbGeneratedBean
+@Module
+public class ResourceAdapterProducer<X> implements InjectionTarget<X>
 {
-  private static final L10N L = new L10N(SessionBeanImpl.class);
+  private ResourceAdapterController _controller;
 
-  public SessionBeanImpl(ManagedBeanImpl<X> bean)
+  public ResourceAdapterProducer(ResourceAdapterController controller)
   {
-    super(bean.getBeanManager(), bean);
+    _controller = controller;
+  }
+
+  @SuppressWarnings("unchecked")
+  @Override
+  public X produce(CreationalContext<X> ctx)
+  {
+    return (X) _controller.getResourceAdapter();
   }
 
   @Override
-  public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> context)
+  public void inject(X instance, CreationalContext<X> ctx)
   {
-    return null;
   }
 
   @Override
-  public X create(CreationalContext context)
+  public void postConstruct(X instance)
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  /**
-   * Returns the injection points.
-   */
+  @Override
+  public void preDestroy(X instance)
+  {
+  }
+
+  @Override
+  public void dispose(X instance)
+  {
+  }
+
+  @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
-    return getBean().getInjectionPoints();
+    return new HashSet<InjectionPoint>();
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _controller + "]";
   }
 }

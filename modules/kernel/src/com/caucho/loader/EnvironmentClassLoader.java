@@ -63,7 +63,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
   // listeners invoked when a Loader is added
   private static EnvironmentLocal<ArrayList<AddLoaderListener>> _addLoaderListeners;
-  
+
   // The owning bean
   private EnvironmentBean _owner;
 
@@ -346,7 +346,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     synchronized (_childListenerLock) {
       if (_childListeners == null)
         _childListeners = new EnvironmentLocal<ArrayList<EnvironmentListener>>();
-      
+
       ArrayList<EnvironmentListener> listeners
         = _childListeners.getLevel(this);
 
@@ -372,7 +372,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     synchronized (_childListenerLock) {
       if (_childListeners == null)
         return;
-      
+
       ArrayList<EnvironmentListener> listeners
         = _childListeners.getLevel(this);
 
@@ -433,7 +433,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     synchronized (_childListenerLock) {
       if (_addLoaderListeners == null)
         _addLoaderListeners = new EnvironmentLocal<ArrayList<AddLoaderListener>>();
-      
+
       ArrayList<AddLoaderListener> listeners
         = _addLoaderListeners.getLevel(this);
 
@@ -461,7 +461,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     if (_addLoaderListeners == null)
       return listeners;
-    
+
     // add the descendent listeners
     synchronized (_childListenerLock) {
       ClassLoader loader;
@@ -528,25 +528,25 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     _pendingScanUrls.add(url);
   }
-  
+
   /**
    * Tells the classloader to scan the root classpath.
    */
   public void scanRoot()
   {
     super.scanRoot();
-    
+
     ClassLoader parent = getParent();
     if (parent instanceof EnvironmentClassLoader)
       return;
-    
-    if (parent instanceof URLClassLoader) {    
+
+    if (parent instanceof URLClassLoader) {
       URLClassLoader urlParent = (URLClassLoader) parent;
 
       for (URL url : urlParent.getURLs()) {
         _pendingScanUrls.add(url);
       }
-      
+
       return;
     }
   }
@@ -682,7 +682,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
     _pendingScanUrls.clear();
-    
+
     try {
       if (_scanListeners != null && urlList.size() > 0) {
         try {
@@ -722,11 +722,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     int size = listeners.size();
     for (int i = 0; listeners != null && i < size; i++) {
       EnvironmentListener listener = listeners.get(i);
-      
+
       if (listener instanceof EnvironmentEnhancerListener) {
         EnvironmentEnhancerListener enhancerListener
           = (EnvironmentEnhancerListener) listener;
-        
+
         enhancerListener.environmentConfigureEnhancer(this);
       }
     }

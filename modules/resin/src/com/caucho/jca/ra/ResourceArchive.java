@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;

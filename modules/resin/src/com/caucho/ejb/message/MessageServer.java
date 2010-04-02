@@ -29,31 +29,35 @@
 
 package com.caucho.ejb.message;
 
-import com.caucho.config.*;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.ejb.MessageDrivenContext;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.resource.spi.ActivationSpec;
+import javax.resource.spi.ResourceAdapter;
+import javax.resource.spi.UnavailableException;
+import javax.resource.spi.endpoint.MessageEndpoint;
+import javax.resource.spi.endpoint.MessageEndpointFactory;
+import javax.transaction.UserTransaction;
+import javax.transaction.xa.XAResource;
+
+import com.caucho.config.Module;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractServer;
 import com.caucho.ejb.server.EjbProducer;
-import com.caucho.jca.*;
 import com.caucho.util.L10N;
-
-import javax.ejb.MessageDrivenContext;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.jms.*;
-import javax.naming.*;
-import javax.resource.spi.*;
-import javax.resource.spi.endpoint.*;
-import javax.transaction.*;
-import javax.transaction.xa.*;
-import java.lang.reflect.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * JCA activation-spec server container for a message bean.
  */
+@Module
 public class MessageServer<T> extends AbstractServer<T>
   implements MessageEndpointFactory
 {

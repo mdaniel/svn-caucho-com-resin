@@ -96,7 +96,7 @@ public class PathLoader extends Loader implements Dependency {
     Path path = _pathMap.get(name);
 
     if (path != null && path.canRead() && path.getLength() > 0) {
-      ClassEntry entry = new ClassEntry(getLoader(), name, path,
+      ClassEntry entry = new ClassEntry(getClassLoader(), name, path,
 					path, getCodeSource(path));
 
       /*

@@ -29,7 +29,7 @@
 package com.caucho.resources.rmi;
 
 import com.caucho.config.ConfigException;
-import com.caucho.jca.AbstractResourceAdapter;
+import com.caucho.jca.ra.AbstractResourceAdapter;
 import com.caucho.util.L10N;
 
 import javax.resource.spi.BootstrapContext;

@@ -26,14 +26,26 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.pool;
+
+import javax.transaction.xa.XAException;
 
 /**
- * A resource with a close method.
+ * Configuration for the init-param pattern.
  */
-public interface CloseResource {
-  /**
-   * Closes the resource.
-   */
-  public void close();
+public class XAExceptionWrapper extends XAException {
+  private Throwable _cause;
+
+  public XAExceptionWrapper(Throwable cause)
+  {
+    super(cause != null ? cause.getMessage() : null);
+
+    _cause = cause;
+  }
+
+  public Throwable getCause()
+  {
+    return _cause;
+  }
 }
+

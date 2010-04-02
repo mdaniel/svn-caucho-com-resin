@@ -29,40 +29,41 @@
 
 package com.caucho.config.types;
 
+import java.lang.reflect.Constructor;
+import java.util.Set;
+
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.PassivationCapable;
+
+import com.caucho.config.Module;
 import com.caucho.config.inject.BeanWrapper;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.L10N;
-import javax.enterprise.inject.spi.*;
-import javax.enterprise.inject.spi.InjectionTarget;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.Type;
-import java.util.Set;
-
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.PassivationCapable;
 
 /**
  * Internal implementation for a Bean
  */
+@Module
 public class XmlBean<X> extends BeanWrapper<X>
-  implements InjectionTarget<X>, ScopeAdapterBean, PassivationCapable
+  implements InjectionTarget<X>, ScopeAdapterBean<X>, PassivationCapable
 {
   ManagedBeanImpl<X> _bean;
   private Constructor<X> _ctor;
-  private Arg []_newProgram;
+  private Arg<X> []_newProgram;
   private ConfigProgram []_injectProgram;
 
   private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
 
   public XmlBean(ManagedBeanImpl<X> bean,
                  Constructor<X> ctor,
-                 Arg []newProgram,
+                 Arg<X> []newProgram,
                  ConfigProgram []injectProgram)
   {
     super(bean.getBeanManager(), bean);
@@ -97,12 +98,13 @@ public class XmlBean<X> extends BeanWrapper<X>
     return this;
   }
 
-  public Object getScopeAdapter(CreationalContext context)
+  @Override
+  public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> context)
   {
     Bean<X> bean = getBean();
 
-    if (bean instanceof ScopeAdapterBean)
-      return ((ScopeAdapterBean) bean).getScopeAdapter(context);
+    if (bean instanceof ScopeAdapterBean<?>)
+      return ((ScopeAdapterBean<X>) bean).getScopeAdapter(topBean, context);
     else
       return null;
   }

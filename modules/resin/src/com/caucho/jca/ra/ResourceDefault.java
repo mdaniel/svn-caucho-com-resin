@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.jca.cfg.ResourceConfig;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;

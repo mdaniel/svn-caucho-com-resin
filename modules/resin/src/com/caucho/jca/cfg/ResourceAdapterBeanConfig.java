@@ -29,6 +29,7 @@
 
 package com.caucho.jca.cfg;
 
+import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.CurrentLiteral;
@@ -41,6 +42,10 @@ import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.*;
 import com.caucho.jca.*;
 import com.caucho.jca.cfg.JavaMailConfig;
+import com.caucho.jca.ra.ResourceAdapterController;
+import com.caucho.jca.ra.ResourceAdapterProducer;
+import com.caucho.jca.ra.ResourceArchive;
+import com.caucho.jca.ra.ResourceArchiveManager;
 import com.caucho.jmx.IntrospectionMBean;
 import com.caucho.jmx.Jmx;
 import com.caucho.loader.ClassLoaderListener;
@@ -53,6 +58,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.spi.Bean;
 import javax.management.Attribute;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -73,35 +79,43 @@ import java.util.logging.Logger;
  * Configuration for the init-param pattern.
  */
 public class ResourceAdapterBeanConfig extends BeanConfig {
-  private static final Logger log
-    = Logger.getLogger(ResourceAdapterBeanConfig.class.getName());
-  
-  private static L10N L = new L10N(ResourceAdapterBeanConfig.class);
-
   public ResourceAdapterBeanConfig()
   {
     setBeanConfigClass(ResourceAdapter.class);
   }
 
+  @Override
   public void init()
   {
     super.init();
 
-    Class type = getClassType();
+    addProducer();
+  }
+  
+  private <T> void addProducer()
+  {
+    Class<T> type = (Class<T>) getClassType();
 
     ResourceArchive ra
       = ResourceArchiveManager.findResourceArchive(type.getName());
 
     ResourceAdapterController controller
-      = new ResourceAdapterController(getComponent(), ra);
+      = new ResourceAdapterController((Bean<ResourceAdapter>) getComponent(), ra);
 
     InjectManager beanManager = InjectManager.create();
-    BeanFactory factory = beanManager.createBeanFactory(controller.getClass());
+    BeanFactory<T> factory = beanManager.createBeanFactory(type);
 
     factory.name(type.getName());
     factory.binding(Names.create(type.getName()));
-    factory.binding(CurrentLiteral.CURRENT);
+    factory.binding(DefaultLiteral.DEFAULT);
+    
+    ResourceAdapterProducer<T> producer = new ResourceAdapterProducer(controller);
 
-    beanManager.addBean(factory.singleton(controller));
+    beanManager.addBean(factory.injection(producer));
+  }
+
+  @Override
+  protected void deploy()
+  {
   }
 }

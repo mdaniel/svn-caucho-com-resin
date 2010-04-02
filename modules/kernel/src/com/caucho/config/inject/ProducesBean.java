@@ -264,7 +264,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   */
 
   @Override
-  public X getScopeAdapter(CreationalContext<X> cxt)
+  public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
   {
     NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
 
@@ -278,7 +278,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
       if (value == null) {
         ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
-        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
+        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), topBean);
         value = _scopeAdapter;
       }
 

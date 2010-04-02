@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.pool;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -48,6 +48,7 @@ import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.Module;
 import com.caucho.config.types.Period;
 import com.caucho.env.sample.ActiveTimeProbe;
 import com.caucho.env.sample.ProbeManager;
@@ -63,6 +64,7 @@ import com.caucho.util.WeakAlarm;
 /**
  * Implementation of the connection manager.
  */
+@Module
 public class ConnectionPool extends AbstractManagedObject
   implements ConnectionManager, AlarmListener, ConnectionPoolMXBean
 {
@@ -159,7 +161,7 @@ public class ConnectionPool extends AbstractManagedObject
 
   private final Lifecycle _lifecycle = new Lifecycle();
 
-  ConnectionPool()
+  public ConnectionPool()
   {
   }
 

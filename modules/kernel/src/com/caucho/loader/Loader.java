@@ -38,6 +38,8 @@ import java.util.Vector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.annotation.PostConstruct;
+
 import com.caucho.config.ConfigException;
 import com.caucho.vfs.Path;
 
@@ -51,6 +53,21 @@ abstract public class Loader {
   
   private DynamicClassLoader _loader;
 
+  protected Loader()
+  {
+    this(Thread.currentThread().getContextClassLoader());
+  }
+  
+  protected Loader(ClassLoader loader)
+  {
+    if (! (loader instanceof DynamicClassLoader)) {
+      // XXX: no L10N for initialization reasons
+      
+      throw new IllegalStateException("'" + loader + "' must be created in a DynamicClassLoader context");
+    }
+    
+    _loader = (DynamicClassLoader) loader;
+  }
   /**
    * Sets the owning class loader.
    */
@@ -62,7 +79,7 @@ abstract public class Loader {
   /**
    * Gets the owning class loader.
    */
-  public DynamicClassLoader getLoader()
+  public DynamicClassLoader getClassLoader()
   {
     return _loader;
   }
@@ -73,6 +90,16 @@ abstract public class Loader {
   public void validate()
     throws ConfigException
   {
+  }
+  
+  /**
+   * Initialize the loader
+   */
+  @PostConstruct
+  public void init()
+  {
+    if (_loader != null)
+      _loader.addLoader(this);
   }
 
   /**

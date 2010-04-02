@@ -694,8 +694,8 @@ public class JspCompiler implements EnvironmentBean {
 	Path appDir = app.getAppDir();
 
 	DynamicClassLoader dynLoader = app.getEnvironmentClassLoader();
-	dynLoader.addLoader(new CompilingLoader(appDir.lookup("WEB-INF/classes")));
-	dynLoader.addLoader(new DirectoryLoader(appDir.lookup("WEB-INF/lib")));
+	dynLoader.addLoader(new CompilingLoader(dynLoader, appDir.lookup("WEB-INF/classes")));
+	dynLoader.addLoader(new DirectoryLoader(dynLoader, appDir.lookup("WEB-INF/lib")));
 
 	Path webXml = appDir.lookup("WEB-INF/web.xml");
 

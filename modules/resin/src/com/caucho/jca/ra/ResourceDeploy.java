@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.jca;
+package com.caucho.jca.ra;
 
 import com.caucho.config.ConfigException;
+import com.caucho.jca.cfg.ResourceConfig;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.server.deploy.DeployController;
 import com.caucho.server.util.CauchoSystem;

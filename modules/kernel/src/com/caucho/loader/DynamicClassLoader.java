@@ -335,7 +335,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     _loaders.add(offset, loader);
 
-    if (loader.getLoader() == null)
+    if (loader.getClassLoader() == null)
       loader.setLoader(this);
 
     if (loader instanceof Dependency)
@@ -458,15 +458,16 @@ public class DynamicClassLoader extends java.net.URLClassLoader
         || root.getPath().endsWith(".jar")
         || root.getPath().endsWith(".zip")) {
       if (_jarLoader == null) {
-        _jarLoader = new JarLoader();
-        addLoader(_jarLoader);
+        _jarLoader = new JarLoader(this);
+        _jarLoader.init();
       }
 
       _jarLoader.addJar(root);
     }
     else {
-      SimpleLoader loader = new SimpleLoader();
+      SimpleLoader loader = new SimpleLoader(this);
       loader.setPath(root);
+      loader.init();
 
       if (! _loaders.contains(loader))
         addLoader(loader);
@@ -1216,6 +1217,7 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   /**
    * Makes any changed classes for the virtual class loader.
    */
+  @Override
   public final void make()
     throws Exception
   {

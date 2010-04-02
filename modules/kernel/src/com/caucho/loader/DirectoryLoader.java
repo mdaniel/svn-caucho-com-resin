@@ -28,19 +28,7 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.ConfigException;
-import com.caucho.make.DependencyContainer;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
-
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -54,12 +42,17 @@ public class DirectoryLoader extends LibraryLoader
   public DirectoryLoader()
   {
   }
+  
+  public DirectoryLoader(ClassLoader loader)
+  {
+    super(loader);
+  }
 
   /**
    * Creates a new directory loader.
    */
-  public DirectoryLoader(Path dir)
+  public DirectoryLoader(ClassLoader loader, Path dir)
   {
-    super(dir);
+    super(loader, dir);
   }
 }

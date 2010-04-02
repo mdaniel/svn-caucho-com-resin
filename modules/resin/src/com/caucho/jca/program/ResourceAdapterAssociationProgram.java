@@ -34,6 +34,9 @@ import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.jca.*;
+import com.caucho.jca.ra.ResourceAdapterController;
+import com.caucho.jca.ra.ResourceArchive;
+import com.caucho.jca.ra.ResourceArchiveManager;
 import com.caucho.util.*;
 
 import javax.enterprise.context.spi.CreationalContext;
