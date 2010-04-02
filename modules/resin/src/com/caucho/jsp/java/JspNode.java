@@ -1157,6 +1157,43 @@ public abstract class JspNode {
 	out.print(" + com.caucho.el.Expr.toString(" + outValue + ", null)");
     }
   }
+  
+  protected void generateIncludeUrl(JspJavaWriter out, String page,
+                                    ArrayList<JspParam> params)
+    throws Exception
+  {
+    if (params != null) {
+      for (int i = 0; i < params.size(); i++) {
+        out.print("pageContext.encode(");
+      }
+
+      out.print("pageContext.encode(");
+    }
+
+    if (hasRuntimeAttribute(page)) {
+      out.print(getRuntimeAttribute(page));
+    }
+    else {
+      out.print(generateParameterValue(String.class, page));
+    }
+
+    if (params != null) {
+      out.print(")");
+
+      for (int i = 0; i < params.size(); i++) {
+        if (i > 0)
+          out.print(".append('&')");
+
+        out.print(", ");
+
+        generateIncludeParam(out, params.get(i));
+
+        out.print(")");
+      }
+
+      out.print(".toString()");
+    }
+  }
 
   /**
    * Generate include params.

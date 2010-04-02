@@ -28,6 +28,7 @@
 
 package com.caucho.jsp.java;
 
+import com.caucho.config.Module;
 import com.caucho.jsp.JspParseException;
 import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;
@@ -38,6 +39,7 @@ import java.util.ArrayList;
 /**
  * Represents a Java scriptlet.
  */
+@Module
 public class JspForward extends JspNode {
   private static final QName PAGE = new QName("page");
   
@@ -48,6 +50,7 @@ public class JspForward extends JspNode {
   /**
    * Adds an attribute.
    */
+  @Override
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
@@ -61,6 +64,7 @@ public class JspForward extends JspNode {
   /**
    * Adds a parameter.
    */
+  @Override
   public void addChild(JspNode node)
     throws JspParseException
   {
@@ -82,6 +86,7 @@ public class JspForward extends JspNode {
    *
    * @param os write stream to the generated XML.
    */
+  @Override
   public void printXml(WriteStream os)
     throws IOException
   {
@@ -97,32 +102,23 @@ public class JspForward extends JspNode {
    *
    * @param out the output writer for the generated java.
    */
+  @Override
   public void generate(JspJavaWriter out)
     throws Exception
   {
-    boolean hasQuery = false;
-
     if (_page == null)
       throw error(L.l("<jsp:forward> expects a `page' attribute.  `page' specifies the path to forward."));
 
-    if (hasRuntimeAttribute(_page)) {
-      out.print("pageContext.forward(");
-      out.print(getRuntimeAttribute(_page));
-    }
-    else {
-      out.print("pageContext.forward(");
-      out.print(generateParameterValue(String.class, _page));
-    }
+    out.print("pageContext.forward(");
+      
+    generateIncludeUrl(out, _page, _params);
+      
+    out.print(");");
 
-    if (_params != null) {
-      out.print(", ");
-      generateIncludeParams(out, _params);
-    }
-    
-    out.println(");");
     if (_gen.isTag() || isInFragment())
       out.println("if (true) throw new SkipPageException();");
     else
       out.println("if (true) return;");
   }
+  
 }

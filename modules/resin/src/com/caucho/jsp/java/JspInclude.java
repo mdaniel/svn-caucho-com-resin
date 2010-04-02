@@ -48,13 +48,12 @@ public class JspInclude extends JspNode {
   private String _page;
   private boolean _flush = false; // jsp/15m4
   
-  private String _text;
-  
   private ArrayList<JspParam> _params;
 
   /**
    * Adds an attribute.
    */
+  @Override
   public void addAttribute(QName name, String value)
     throws JspParseException
   {
@@ -70,6 +69,7 @@ public class JspInclude extends JspNode {
   /**
    * True if the node has scripting
    */
+  @Override
   public boolean hasScripting()
   {
     if (_params == null)
@@ -95,16 +95,16 @@ public class JspInclude extends JspNode {
   /**
    * Adds text to the scriptlet.
    */
+  @Override
   public JspNode addText(String text)
   {
-    _text = text;
-
     return null;
   }
 
   /**
    * Adds a parameter.
    */
+  @Override
   public void addChild(JspNode node)
     throws JspParseException
   {
@@ -126,6 +126,7 @@ public class JspInclude extends JspNode {
    *
    * @param os write stream to the generated XML.
    */
+  @Override
   public void printXml(WriteStream os)
     throws IOException
   {
@@ -141,44 +142,17 @@ public class JspInclude extends JspNode {
    *
    * @param out the output writer for the generated java.
    */
+  @Override
   public void generate(JspJavaWriter out)
     throws Exception
   {
     if (_page == null)
       throw error(L.l("<jsp:include> expects a 'page' attribute.  'page' specifies the path to include."));
 
-    if (hasRuntimeAttribute(_page)) {
-      out.print("pageContext.include(");
-      out.print(getRuntimeAttribute(_page));
-    }
-    else if (_params == null) {
-      out.print("pageContext.include(");
-      out.print(generateParameterValue(String.class, _page));
-      out.println(", " + _flush + ");");
-    }
-    else {
-      out.print("pageContext.include(");
-      
-      for (int i = 0; i < _params.size(); i++) {
-        out.print("pageContext.encode(");
-      }
-      
-      out.print("pageContext.encode(");
-      out.print(generateParameterValue(String.class, _page));
-      out.print(")");
-      
-      for (int i = 0; i < _params.size(); i++) {
-        if (i > 0)
-          out.print(".append('&')");
-        
-        out.print(", ");
-        
-        generateIncludeParam(out, _params.get(i));
-        
-        out.print(")");
-      }
-      
-      out.println(".toString(), " + _flush + ");");
-    }
+    out.print("pageContext.include(");
+    
+    generateIncludeUrl(out, _page, _params);
+    
+    out.print(", " + _flush + ");");
   }
 }

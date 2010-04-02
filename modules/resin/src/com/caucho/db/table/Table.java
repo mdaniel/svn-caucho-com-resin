@@ -42,6 +42,7 @@ import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
 import com.caucho.sql.SQLExceptionWrapper;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.TaskWorker;
 import com.caucho.vfs.Path;
@@ -1133,9 +1134,12 @@ public class Table extends BlockStore {
     os.write((int) value);
   }
 
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getName() + ":" + getId() + "]";
+    int id = Alarm.isTest() ? 1 : getId();
+    
+    return getClass().getSimpleName() + "[" + getName() + ":" + id + "]";
   }
 
   class RowAllocator extends TaskWorker {
