@@ -34,7 +34,7 @@
         class="com.caucho.jca.cfg.ConnectionFactoryConfig"/>
 
   <bean name="connector"
-        class="com.caucho.jca.ConnectorConfig"/>
+        class="com.caucho.jca.ra.ConnectorConfig"/>
 
   <bean name="database"
         class="com.caucho.sql.DBPool"/>

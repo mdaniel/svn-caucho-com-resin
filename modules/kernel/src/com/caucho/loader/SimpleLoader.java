@@ -202,8 +202,6 @@ public class SimpleLoader extends Loader {
   public void setLoader(DynamicClassLoader loader)
   {
     super.setLoader(loader);
-
-    loader.addURL(_path);
   }
 
   /**
@@ -222,6 +220,8 @@ public class SimpleLoader extends Loader {
     }
     
     super.init();
+
+    getClassLoader().addURL(_path);
   }
 
   /**

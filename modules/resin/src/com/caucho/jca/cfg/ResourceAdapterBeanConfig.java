@@ -104,9 +104,15 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
 
     InjectManager beanManager = InjectManager.create();
     BeanFactory<T> factory = beanManager.createBeanFactory(type);
+    
+    factory.type(ResourceAdapter.class, type);
+    
+    String name = type.getSimpleName();
+    
+    name = Character.toLowerCase(name.charAt(0)) + name.substring(1);
 
-    factory.name(type.getName());
-    factory.binding(Names.create(type.getName()));
+    factory.name(name);
+    factory.binding(Names.create(name));
     factory.binding(DefaultLiteral.DEFAULT);
     
     ResourceAdapterProducer<T> producer = new ResourceAdapterProducer(controller);

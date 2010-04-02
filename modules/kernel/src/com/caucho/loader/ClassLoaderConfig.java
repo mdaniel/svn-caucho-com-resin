@@ -79,7 +79,7 @@ public class ClassLoaderConfig {
    */
   public SimpleLoader createSimpleLoader()
   {
-    return new SimpleLoader();
+    return new SimpleLoader(_classLoader);
   }
 
   /**
