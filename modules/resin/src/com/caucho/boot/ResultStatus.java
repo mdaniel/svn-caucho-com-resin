@@ -33,10 +33,12 @@ import java.io.Serializable;
 /**
  * General result status for watchdog queries
  */
+@SuppressWarnings("serial")
 public class ResultStatus implements Serializable {
   private final boolean _isSuccess;
   private final String _message;
 
+  @SuppressWarnings("unused")
   private ResultStatus()
   {
     _isSuccess = false;

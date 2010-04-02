@@ -29,13 +29,14 @@
 
 package com.caucho.boot;
 
-import com.caucho.management.server.*;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.*;
+import java.io.IOException;
+import java.security.CodeSource;
+import java.security.SecureClassLoader;
 
-import java.io.*;
-import java.security.*;
-import java.lang.instrument.*;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
 
 /**
  * Class loader which checks for changes in class files and automatically

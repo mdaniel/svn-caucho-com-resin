@@ -214,11 +214,21 @@ class WatchdogClient
     throws ConfigException, IOException
   {
     if (getUserName() != null && ! hasBoot()) {
-      throw new ConfigException(L.l("<user-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
+      String message = getTroubleshootMessage();
+
+      if (message == null)
+        message = "Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so.";
+        
+      throw new ConfigException(L.l("<user-name> requires compiled JNI.\n{0}", message));
     }
 
     if (getGroupName() != null && ! hasBoot()) {
-      throw new ConfigException(L.l("<group-name> requires compiled JNI.  Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so."));
+      String message = getTroubleshootMessage();
+
+      if (message == null)
+        message = "Check the $RESIN_HOME/libexec or $RESIN_HOME/libexec64 directory for libresin_os.so.";
+        
+      throw new ConfigException(L.l("<group-name> requires compiled JNI.\n{0}", message));
     }
 
     ActorClient conn = null;
@@ -537,6 +547,16 @@ class WatchdogClient
     }
 
     return false;
+  }
+  
+  private String getTroubleshootMessage()
+  {
+    Boot boot = getJniBoot();
+    
+    if (_jniBoot != null)
+      boot = _jniBoot;
+    
+    return boot != null ? boot.getValidationMessage() : null;
   }
 
   static class ProcessThreadReader extends Thread {

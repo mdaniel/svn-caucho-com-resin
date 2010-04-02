@@ -32,13 +32,14 @@ package com.caucho.boot;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import com.caucho.config.ConfigException;
-import com.caucho.vfs.*;
 import com.caucho.bootjni.JniProcess;
+import com.caucho.config.Module;
+import com.caucho.vfs.Path;
 
 /**
  * Resin's bootstrap class.
  */
+@Module
 public class JniBoot implements Boot {
   private JniProcess _jniProcess;
   
@@ -47,11 +48,19 @@ public class JniBoot implements Boot {
     _jniProcess = new JniProcess();
   }
 
+  @Override
   public boolean isValid()
   {
     return _jniProcess != null && _jniProcess.isEnabled();
   }
   
+  @Override
+  public String getValidationMessage()
+  {
+    return _jniProcess != null ? _jniProcess.getTroubleshootMessage() : null;
+  }
+
+  @Override
   public void clearSaveOnExec()
   {
     if (_jniProcess != null)
@@ -64,6 +73,7 @@ public class JniBoot implements Boot {
       _jniProcess.chown(path.getNativePath(), user, group);
   }
   
+  @Override
   public Process exec(ArrayList<String> argv,
                       HashMap<String,String> env,
                       String chroot,

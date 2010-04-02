@@ -29,38 +29,29 @@
 
 package com.caucho.bootjni;
 
-import com.caucho.boot.*;
-import com.caucho.config.ConfigException;
-import com.caucho.util.*;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.vfs.*;
-
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.lang.reflect.Constructor;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Module;
+import com.caucho.util.JniTroubleshoot;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.StreamImpl;
 
 /**
  * Resin's bootstrap class.
  */
+@Module
 public class JniProcess extends Process
 {
-  private static final L10N L
-    = new L10N(JniProcess.class);
-  private static final Logger log
-    = Logger.getLogger(JniProcess.class.getName());
-
   private static final JniTroubleshoot _jniTroubleshoot;
   
   private int _stdoutFd = -1;
   private int _pid = -1;
-  private int _exitValue = -1;
-
   private int _status = -1;
 
   private ReadStream _is;
@@ -97,10 +88,10 @@ public class JniProcess extends Process
     try {
       StreamImpl stream;
 
-      Class cl = Class.forName("com.caucho.vfs.JniFileStream",
+      Class<?> cl = Class.forName("com.caucho.vfs.JniFileStream",
 			       false, getClass().getClassLoader());
 
-      Constructor ctor = cl.getConstructor(new Class[] { int.class, boolean.class, boolean.class });
+      Constructor<?> ctor = cl.getConstructor(new Class[] { int.class, boolean.class, boolean.class });
       
       stream = (StreamImpl) ctor.newInstance(stdoutFd, true, false);
       
@@ -127,6 +118,11 @@ public class JniProcess extends Process
   public boolean isEnabled()
   {
     return _jniTroubleshoot.isEnabled() && isNativeBootAvailable();
+  }
+  
+  public String getTroubleshootMessage()
+  {
+    return _jniTroubleshoot.getMessage();
   }
   
   public OutputStream getOutputStream()

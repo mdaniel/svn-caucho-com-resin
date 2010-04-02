@@ -35,6 +35,8 @@ import java.util.HashMap;
 public interface Boot {
   public boolean isValid();
   
+  public String getValidationMessage();
+  
   public void clearSaveOnExec();
   
   public Process exec(ArrayList<String> args,
