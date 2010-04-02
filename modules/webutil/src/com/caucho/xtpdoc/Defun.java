@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -51,14 +51,40 @@ public class Defun extends Section {
     return s2;
   }
 
-  public void setParents(Text parentText)
+  public DefunParents createParents()
   {
-    addItem(new NamedText("child of", parentText));
- 
-    String []parents = parentText.getText().split("[ ,]+");
+    DefunParents parents = new DefunParents(getDocument());
+    addItem(parents);
 
-    for (String parent : parents)
-      _parents.add(parent);
+    return parents;
+  }
+
+  public DefunSchema createSchema()
+  {
+    DefunSchema schema = new DefunSchema(this);
+    addItem(schema);
+    return schema;
+  }
+
+  public DefunExample createExample()
+  {
+    DefunExample example = new DefunExample(getDocument());
+    addItem(example);
+    return example;
+  }
+
+  public DefunAttributes createAttributes()
+  {
+    DefunAttributes attributes = new DefunAttributes(this);
+    addItem(attributes);
+    return attributes;
+  }
+
+  public DefunDescription createDescription()
+  {
+    DefunDescription description = new DefunDescription(getDocument());
+    addItem(description);
+    return description;
   }
 
   public Iterable<String> getParents()

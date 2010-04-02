@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -34,44 +34,16 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class DefinitionTable extends Table {
-  public DefinitionTable(Document document)
+public class DefunExample extends Example {
+  public DefunExample(Document document)
   {
     super(document);
   }
 
+  @Override
   public String getCssClass()
   {
-    return "deftable";
-  }
-
-  public void writeHtml(XMLStreamWriter out)
-    throws XMLStreamException
-  {
-    out.writeStartElement("table");
-    out.writeAttribute("class", getCssClass());
-
-    if (_title != null) {
-      out.writeStartElement("caption");
-      out.writeCharacters(_title);
-      out.writeEndElement();
-    }
-
-    int count = 0;
-    
-    for (TableRow row : _rows)
-      row.writeHtml(out, count++);
-
-    out.writeEndElement();
-  }
-
-  protected void writeRows(PrintWriter out)
-    throws IOException
-  {
-    for (TableRow row : _rows) {
-      out.print("\\rowcolor[gray]{0.9}");
-      row.writeLaTeX(out);
-      out.println(" \\hline");
-    }
+    return "reference-example";
   }
 }
+

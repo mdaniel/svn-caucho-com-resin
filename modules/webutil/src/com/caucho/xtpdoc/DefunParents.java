@@ -34,22 +34,25 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class Def extends VerboseFormattedTextWithAnchors {
-  private String _title;
+public class DefunParents implements ContentItem {
+  private final Document _document;
+  private String _text;
+  private String []_parents;
 
-  public Def(Document document)
+  public DefunParents(Document document)
   {
-    super(document);
+    _document = document;
   }
 
-  public void setTitle(String title)
+  public void setText(String text)
   {
-    _title = title;
+    _text = text;
+    _parents = text.split("[ ,]+");
   }
 
   public String getCssClass()
   {
-    return "definition";
+    return "reference-parents";
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -58,43 +61,44 @@ public class Def extends VerboseFormattedTextWithAnchors {
     out.writeStartElement("div");
     out.writeAttribute("class", getCssClass());
 
-    if (_title != null) {
-      out.writeStartElement("div");
-      out.writeAttribute("class", "def-caption");
-      out.writeCharacters(_title);
-      out.writeEndElement();
+    out.writeCharacters("child of ");
+
+    ReferenceDocument referenceDocument = _document.getReferenceDocument();
+
+    for (int i = 0; i < _parents.length; i++) {
+      String parent = _parents[i];
+
+      if (referenceDocument != null) {
+        out.writeStartElement("a");
+        out.writeAttribute("href", referenceDocument.getURI() + '#' + parent);
+      }
+
+      out.writeCharacters(parent);
+
+      if (referenceDocument != null)
+        out.writeEndElement(); // a
+
+      if (i < _parents.length - 1)
+        out.writeCharacters(",");
     }
 
-    out.writeStartElement("div");
-    out.writeAttribute("class", "definition-body");
-
-    out.writeStartElement("pre");
-
-    super.writeHtml(out);
-
-    out.writeEndElement(); // pre
     out.writeEndElement(); // div
-    out.writeEndElement(); // div
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.println("\\begin{center}");
-    out.println("\\begin{Verbatim}[fontfamily=courier,");
-    out.println("                  fontsize=\\footnotesize,");
+    out.print("child of " + _text);
+  }
 
-    if (_title != null && ! "".equals(_title)) {
-      out.println("                  label=" + _title + ",");
-      out.println("                  labelposition=bottomline,");
-    }
-
-    out.println("                  samepage=true]");
-
-    super.writeLaTeX(out);
-
-    out.println();
-    out.println("\\end{Verbatim}");
-    out.println("\\end{center}");
+  public void writeLaTeXEnclosed(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
   }
 }

@@ -79,6 +79,15 @@ public class Body extends ContainerNode {
     return toc;
   }
 
+  public ReferenceLegend createReferenceLegend()
+  {
+    ReferenceLegend legend = new ReferenceLegend();
+
+    addItem(legend);
+
+    return legend;
+  }
+
   public Faq createFaq()
   {
     Faq faq = new Faq(getDocument());

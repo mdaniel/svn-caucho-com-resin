@@ -29,45 +29,23 @@
 
 package com.caucho.xtpdoc;
 
-import java.util.TreeSet;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
+public class DefunSchema extends Def {
 
-
-public class References {
-  private final TreeSet<String> _references 
-    = new TreeSet<String>(String.CASE_INSENSITIVE_ORDER);
-
-  public void addText(String text)
+  public DefunSchema(Defun defun)
   {
-    String []refs = text.split("[ ,]+");
+    super(defun.getDocument());
 
-    for (int i = 0; i < refs.length; i++)
-      addReference(refs[i]);
-  }
-  
-  public void addReference(String ref)
-  {
-    _references.add(ref);
+    setTitle(defun.getTitle() + " schema");
   }
 
-  public Iterable<String> getReferences()
+  @Override
+  public String getCssClass()
   {
-    return _references;
-  }
-
-  public String toString()
-  {
-    StringBuilder sb = new StringBuilder("References[");
-    
-    for (String ref : _references) {
-      sb.append(ref);
-      sb.append(",");
-    }
-
-    sb.append("]");
-
-    return sb.toString();
+    return "reference-schema";
   }
 }

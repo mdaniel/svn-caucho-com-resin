@@ -178,15 +178,6 @@ public class Document {
     if (navList.size() > 0) {
       Navigation nav = navList.get(0);
 
-      
-      /*
-      if (_uri.endsWith("-ref.xtp")) {
-        String mainDoc = _uri.substring(0, _uri.length() - "-ref.xtp".length())
-                         + ".xtp";
-        
-        _navItem = nav.getItem(mainDoc);
-      }
-      else*/
       _navItem = nav.getItem(_uri);
     }
 

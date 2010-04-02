@@ -162,13 +162,11 @@ public class Header {
     out.writeAttribute("rel", "shortcut icon");
     out.writeAttribute("href", _document.getContextPath() + "/images/favicon.ico");
 
+    // this must be a start/end - browsers don't like empty <script/> tags
     out.writeStartElement("script");
-    out.writeCharacters("function hide(id) ");
-    out.writeCharacters("{ document.getElementById(id).style.display = 'none'; }");
-    out.writeCharacters("function show(id) ");
-    out.writeCharacters("{ document.getElementById(id).style.display = ''; }");
-    out.writeEndElement();
-
+    out.writeAttribute("type", "text/javascript");
+    out.writeAttribute("src", _document.getContextPath() + "/js/default.js");
+    out.writeEndElement(); // script
 
     out.writeStartElement("title");
 

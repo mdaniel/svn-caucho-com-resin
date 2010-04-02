@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -59,10 +59,19 @@ public class Example extends VerboseFormattedTextWithAnchors {
     _file = file;
   }
 
+  public String getCssClass()
+  {
+    return "example";
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
     out.writeCharacters("\n");
+
+    out.writeStartElement("div");
+    out.writeAttribute("class", getCssClass());
+
     if (_title != null) {
       out.writeStartElement("div");
       out.writeAttribute("class", "caption");
@@ -70,25 +79,16 @@ public class Example extends VerboseFormattedTextWithAnchors {
       out.writeEndElement();
     }
 
-    /*
-    if (_file != null) {
-      out.writeEmptyElement("br");
-      out.writeCharacters("See it in: ");
-      out.writeStartElement("a");
-      out.writeAttribute("href", _file);
-      out.writeCharacters(_file);
-      out.writeEndElement();
-    }
-    */
-    
     out.writeStartElement("div");
-    out.writeAttribute("class", "example");
+    out.writeAttribute("class", "example-body");
+
     out.writeStartElement("pre");
 
     super.writeHtml(out);
 
-    out.writeEndElement();
-    out.writeEndElement();
+    out.writeEndElement(); // pre
+    out.writeEndElement(); // div
+    out.writeEndElement(); // div
   }
 
   public void writeLaTeX(PrintWriter out)

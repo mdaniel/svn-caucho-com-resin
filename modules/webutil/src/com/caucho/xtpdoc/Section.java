@@ -152,11 +152,12 @@ public abstract class Section extends ContainerNode {
     return list;
   }
 
+  /*
   public FormattedTextWithAnchors createDescription()
   {
     _description = new FormattedTextWithAnchors(getDocument());
     return _description;
-  }
+  }*/
 
   public BlockQuote createBlockquote()
   {

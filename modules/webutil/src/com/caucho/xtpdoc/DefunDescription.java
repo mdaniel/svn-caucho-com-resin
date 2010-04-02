@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -29,49 +29,33 @@
 
 package com.caucho.xtpdoc;
 
-import javax.xml.stream.XMLStreamException;
-import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-public class DefinitionTable extends Table {
-  public DefinitionTable(Document document)
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamWriter;
+
+public class DefunDescription extends Section {
+  public DefunDescription(Document document) 
   {
     super(document);
-  }
-
-  public String getCssClass()
-  {
-    return "deftable";
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
-    out.writeStartElement("table");
-    out.writeAttribute("class", getCssClass());
-
-    if (_title != null) {
-      out.writeStartElement("caption");
-      out.writeCharacters(_title);
-      out.writeEndElement();
-    }
-
-    int count = 0;
+    out.writeCharacters("\n");
+    out.writeStartElement("div");
+    out.writeAttribute("class", "reference-description");
     
-    for (TableRow row : _rows)
-      row.writeHtml(out, count++);
-
+    super.writeHtml(out);
+    
     out.writeEndElement();
   }
 
-  protected void writeRows(PrintWriter out)
+  public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
-    for (TableRow row : _rows) {
-      out.print("\\rowcolor[gray]{0.9}");
-      row.writeLaTeX(out);
-      out.println(" \\hline");
-    }
+    writeLaTeX(out);
   }
 }
