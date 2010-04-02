@@ -32,13 +32,15 @@ namespace Caucho.IIS
       hmuxSocket.Connect("localhost", 6810);
       HmuxChannel channel = new HmuxChannel(hmuxSocket);
       channel.StartChannel();
-      channel.WriteUri(context.Request.RawUrl);
-      channel.WriteHttpMethod(context.Request.HttpMethod);
-      channel.WriteServerVariables(context.Request.ServerVariables);
+      channel.RelayUri(context.Request.RawUrl);
+      channel.RelayHttpMethod(context.Request.HttpMethod);
+      channel.RelayHeaders(context.Request.Headers);
+      channel.RelayServerVariables(context.Request.ServerVariables);
       channel.RelayRequestBody(context.Request);
-      channel.WriteQuit();
+      channel.MarkQuit();
       //channel.WriteExit();
       channel.FlushBuffer();
+
       channel.DoResponse(context);
 
       //byte []buffer = new byte[1024];

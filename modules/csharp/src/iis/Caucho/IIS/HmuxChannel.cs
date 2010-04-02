@@ -82,7 +82,7 @@ namespace Caucho.IIS
       Write(bytes);
     }
 
-    public void WriteUri(String uri)
+    public void RelayUri(String uri)
     {
       String escaped = Uri.EscapeUriString(uri);
       Trace.TraceInformation("Hmux[{0}] U-r:uri {1}->{2}", _traceId, uri, escaped);
@@ -101,13 +101,26 @@ namespace Caucho.IIS
       }
     }
 
-    public void WriteHttpMethod(String method)
+    public void RelayHttpMethod(String method)
     {
       Trace.TraceInformation("Hmux[{0}] m-r:method {1}", _traceId, method);
       WriteRequestString(HMUX_METHOD, method);
     }
 
-    public void WriteServerVariables(NameValueCollection serverVariables)
+    public void RelayHeaders(NameValueCollection headers)
+    {
+      foreach (String key in headers.AllKeys) {
+        String[] values = headers.GetValues(key);
+        foreach (String value in values) {
+          Trace.TraceInformation("Hmux[{0}] H-r:header {1}", _traceId, key);
+          WriteRequestString(HMUX_HEADER, key);
+          Trace.TraceInformation("Hmux[{0}] S-r:string '{1}'", _traceId, value);
+          WriteRequestString(HMUX_STRING, value);
+        }
+      }
+    }
+
+    public void RelayServerVariables(NameValueCollection serverVariables)
     {
       String protocol = serverVariables.Get("HTTP_VERSION");
       Trace.TraceInformation("Hmux[{0}] c-r:protocol {1}", _traceId, protocol);
@@ -133,7 +146,7 @@ namespace Caucho.IIS
       WriteRequestString(HMUX_SERVER_NAME, serverName);
 
       String serverPort = serverVariables.Get("SERVER_PORT");
-      Trace.TraceInformation("Hmux[{0}] g-r:server name {1}", _traceId, serverPort);
+      Trace.TraceInformation("Hmux[{0}] g-r:server port {1}", _traceId, serverPort);
       WriteRequestString(CSE_SERVER_PORT, serverPort);
 
       Trace.TraceInformation("Hmux[{0}] u-r:server type {1}", _traceId, serverPort);
@@ -164,7 +177,7 @@ namespace Caucho.IIS
         FlushBuffer();
       }
     }
-    public void WriteQuit()
+    public void MarkQuit()
     {
       Trace.TraceInformation("Hmux[{0}] Q-r: end of request", _traceId);
       Write((byte)HMUX_QUIT);
