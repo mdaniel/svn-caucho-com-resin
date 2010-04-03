@@ -3376,8 +3376,39 @@ public class QuercusParser {
       return parseEscapedString(_lexeme, token, false, false);
 
     case LONG:
-      return _factory.createLiteral(LongValue.create(Long.parseLong(_lexeme)));
-
+    {
+      long value = 0;
+      double doubleValue = 0;
+      long sign = 1;
+      boolean isOverflow = false;
+      
+      char ch = _lexeme.charAt(0);
+      
+      int i = 0;
+      if (ch == '+') {
+        i++;
+      } else if (ch == '-') {
+        sign = -1;
+        i++;
+      }
+      
+      int len = _lexeme.length();
+      for (; i < len; i++) {
+        int digit = _lexeme.charAt(i) - '0';
+        long oldValue = value;
+        
+        value = value * 10 + digit;
+        doubleValue = doubleValue * 10 + digit;
+        
+        if (value < oldValue)
+          isOverflow = true;           
+      }
+      
+      if (! isOverflow)
+        return _factory.createLiteral(LongValue.create(value * sign));
+      else
+        return _factory.createLiteral(new DoubleValue(doubleValue * sign));
+    }
     case DOUBLE:
       return _factory.createLiteral(new DoubleValue(Double.parseDouble(_lexeme)));
 

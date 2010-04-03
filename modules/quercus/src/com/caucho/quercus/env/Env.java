@@ -348,6 +348,9 @@ public class Env {
   private Object _duplex;
 
   private StringValue _variablesOrder;
+  private int []_querySeparatorMap;
+  
+  public static final int []DEFAULT_QUERY_SEPARATOR_MAP;
   
   private CharBuffer _cb = new CharBuffer();
 
@@ -368,6 +371,22 @@ public class Env {
     _variablesOrder
       = _quercus.getIniValue("variables_order").toStringValue(this);
 
+    StringValue querySeparators 
+      = _quercus.getIniValue("arg_separator.input").toStringValue(this);
+  
+    int len = querySeparators.length();
+    if (len == 0)
+      _querySeparatorMap = DEFAULT_QUERY_SEPARATOR_MAP;
+    else {
+      _querySeparatorMap = new int[128];
+      
+      for (int i = 0; i < len; i++) {
+        char ch = querySeparators.charAt(i);
+      
+        _querySeparatorMap[ch] = 1;
+      }
+    }
+    
     _page = page;
 
     // XXX: grab initial from page
@@ -463,6 +482,20 @@ public class Env {
   
   private void fillGet(ArrayValue array, boolean isMagicQuotes)
   {
+    String queryString = getQueryString();
+
+    if (queryString == null || queryString.length() == 0)
+      return;
+
+    StringUtility.parseStr(this,
+                           queryString,
+                           array,
+                           true,
+                           getHttpInputEncoding(),
+                           isMagicQuotes,
+                           _querySeparatorMap);
+    
+    /*
     try {
       String encoding = getHttpInputEncoding();
 
@@ -488,6 +521,7 @@ public class Env {
                         value,
                         isMagicQuotes);
     }
+    */
   }
 
   private void fillPost(ArrayValue array, ArrayValue postArray)
@@ -2395,18 +2429,8 @@ public class Env {
         envVar.set(array);
 
         if (_variablesOrder.indexOf('G') >= 0) {
-          String queryString = getQueryString();
-
-          if (queryString == null || queryString.length() == 0)
-            return envVar;
-
-          StringUtility.parseStr(this,
-                                 queryString,
-                                 array,
-                                 true,
-                                 getHttpInputEncoding());
+          fillGet(array, getIniBoolean("magic_quotes_gpc"));
         }
-
 
         return envVar;
       }
@@ -7114,5 +7138,8 @@ public class Env {
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_SERVER_VARS"), HTTP_SERVER_VARS);
     SPECIAL_VARS.put(MethodIntern.intern("PHP_SELF"), PHP_SELF);
     SPECIAL_VARS.put(MethodIntern.intern("HTTP_RAW_POST_DATA"), HTTP_RAW_POST_DATA);
+    
+    DEFAULT_QUERY_SEPARATOR_MAP = new int[128];
+    DEFAULT_QUERY_SEPARATOR_MAP['&'] = 1;
   }
 }

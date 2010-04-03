@@ -1151,7 +1151,7 @@ public class ArrayModule
    * @param callback the callback function
    * @param userData extra parameter required by the callback function
    *
-   * @return true if the walk succedded, false otherwise
+   * @return true if the walk succeeded, false otherwise
    */
   public static boolean array_walk(Env env,
                                    @Reference Value arrayVar,
@@ -1159,7 +1159,8 @@ public class ArrayModule
                                    @Optional("NULL") Value userData)
   {
     if (callback == null || ! callback.isValid(env)) {
-      env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
+      env.error(L.l("'{0}' is an unknown function.",
+                    callback.getCallbackName()));
       return false;
     }
     
@@ -1183,7 +1184,7 @@ public class ArrayModule
         else
           value = entry.getValue();
         
-        callback.callArray(env, array, key, value, userData);
+        callback.callArray(env, array, key, value, key, userData);
       }
       
       return true;

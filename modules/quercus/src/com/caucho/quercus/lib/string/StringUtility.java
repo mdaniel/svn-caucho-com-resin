@@ -46,19 +46,16 @@ import com.caucho.vfs.ByteToChar;
 public class StringUtility
 {
   private static final L10N L = new L10N(StringModule.class);
-  
+
   public static Value parseStr(Env env,
                                CharSequence str,
                                ArrayValue result,
                                boolean isRef,
                                String encoding)
   {
-    return parseStr(env,
-                    str,
-                    result,
-                    isRef,
-                    encoding,
-                    env.getIniBoolean("magic_quotes_gpc"));
+    return parseStr(env, str, result, isRef, encoding,
+                    env.getIniBoolean("magic_quotes_gpc"),
+                    Env.DEFAULT_QUERY_SEPARATOR_MAP);
   }
   
   public static Value parseStr(Env env,
@@ -66,7 +63,8 @@ public class StringUtility
                                ArrayValue result,
                                boolean isRef,
                                String encoding,
-                               boolean isMagicQuotes)
+                               boolean isMagicQuotes,
+                               int []querySeparatorMap)
   {
     try {
       ByteToChar byteToChar = env.getByteToChar();
@@ -80,10 +78,11 @@ public class StringUtility
         int ch = 0;
         byteToChar.clear();
 
-        for (; i < len && (ch = str.charAt(i)) == '&'; i++) {
+        for (; i < len && querySeparatorMap[ch = str.charAt(i)] > 0; i++) {
         }
       
-        for (; i < len && (ch = str.charAt(i)) != '=' && ch != '&'; i++) {
+        for (; i < len && (ch = str.charAt(i)) != '='
+             && querySeparatorMap[ch] == 0; i++) {
           i = addQueryChar(byteToChar, str, len, i, ch);
         }
 
@@ -93,7 +92,8 @@ public class StringUtility
 
         String value;
         if (ch == '=') {
-          for (i++; i < len && (ch = str.charAt(i)) != '&'; i++) {
+          for (i++; i < len
+               && querySeparatorMap[ch = str.charAt(i)] == 0; i++) {
             i = addQueryChar(byteToChar, str, len, i, ch);
           }
 
