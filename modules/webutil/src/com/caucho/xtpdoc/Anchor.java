@@ -70,12 +70,20 @@ public class Anchor extends FormattedText {
     throws XMLStreamException
   {
     if (_configTag != null) {
-      out.writeStartElement("a");
-      // XXX: href
+      ReferenceDocument referenceDocument 
+        = getDocument().getReferenceDocument();
+
+      if (referenceDocument != null) {
+        out.writeStartElement("a");
+        out.writeAttribute("href", referenceDocument.getURI() 
+                                   + '#' + _configTag);
+      }
 
       setDefaultText(_configTag);
       super.writeHtml(out);
-      out.writeEndElement(); // XMLStreamWriter
+
+      if (referenceDocument != null)
+        out.writeEndElement(); // a
 
       return;
     }
