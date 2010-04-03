@@ -1068,6 +1068,9 @@ public class EjbBean extends DescriptionGroupConfig
       initIntrospect();
       
       _bean = createBeanGenerator();
+      
+      if (_bean == null)
+        throw new NullPointerException(getClass().getName() + ": createBeanGenerator returns null");
 
       _bean.introspect();
 

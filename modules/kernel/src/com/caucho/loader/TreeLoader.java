@@ -28,40 +28,28 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.*;
-import com.caucho.make.DependencyContainer;
-import com.caucho.util.*;
-import com.caucho.vfs.Dependency;
-import com.caucho.vfs.JarPath;
-import com.caucho.vfs.Path;
+import java.io.IOException;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.net.URL;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.Vector;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
 
 /**
  * Class loader which checks for changes in class files and automatically
  * picks up new jars.
  */
+@Configurable
 public class TreeLoader extends JarListLoader implements Dependency
 {
   private static final L10N L = new L10N(TreeLoader.class);
   
-  private static final Logger log
-    = Logger.getLogger(TreeLoader.class.getName());
-  
   // Directory which may have jars dynamically added
   private Path _dir;
-
-  // When the directory was last modified
-  private long _lastModified;
-
-  private String []_fileNames;
 
   /**
    * Creates a new directory loader.
@@ -73,8 +61,18 @@ public class TreeLoader extends JarListLoader implements Dependency
   /**
    * Creates a new directory loader.
    */
-  public TreeLoader(Path dir)
+  public TreeLoader(ClassLoader loader)
   {
+    super(loader);
+  }
+
+  /**
+   * Creates a new directory loader.
+   */
+  public TreeLoader(ClassLoader loader, Path dir)
+  {
+    super(loader);
+    
     _dir = dir;
 
     init();
@@ -106,7 +104,7 @@ public class TreeLoader extends JarListLoader implements Dependency
   {
     DynamicClassLoader loader = new DynamicClassLoader(parent);
 
-    TreeLoader treeLoader = new TreeLoader(dir);
+    TreeLoader treeLoader = new TreeLoader(loader, dir);
 
     loader.addLoader(treeLoader);
 
@@ -127,14 +125,17 @@ public class TreeLoader extends JarListLoader implements Dependency
     if (_dir == null)
       throw new ConfigException(L.l("<tree-loader> requires a 'path' attribute"));
     
-    _lastModified = _dir.getLastModified();
+    _dir.getLastModified();
     
     try {
-      _fileNames = _dir.list();
+      _dir.list();
     } catch (IOException e) {
     }
 
     fillJars();
+
+    for (int i = 0; i < _jarList.size(); i++)
+      getClassLoader().addURL(_jarList.get(i).getJarPath());
   }
   
   /**
@@ -148,17 +149,6 @@ public class TreeLoader extends JarListLoader implements Dependency
     }
     else
       return false;
-  }
-
-  /**
-   * Sets the owning class loader.
-   */
-  public void setLoader(DynamicClassLoader loader)
-  {
-    super.setLoader(loader);
-
-    for (int i = 0; i < _jarList.size(); i++)
-      loader.addURL(_jarList.get(i).getJarPath());
   }
 
   /**
@@ -202,13 +192,16 @@ public class TreeLoader extends JarListLoader implements Dependency
   /**
    * Destroys the loader, closing the jars.
    */
+  @Override
   protected void destroy()
   {
+    super.destroy();
+    
     clearJars();
   }
 
   public String toString()
   {
-    return "TreeLoader[" + _dir + "]";
+    return getClass().getSimpleName() + "[" + _dir + "]";
   }
 }

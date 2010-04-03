@@ -29,13 +29,19 @@
 
 package com.caucho.loader;
 
+import java.io.IOException;
+import java.lang.ref.WeakReference;
+import java.security.CodeSource;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.config.Module;
 import com.caucho.make.DependencyContainer;
 import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;
 import com.caucho.util.JniTroubleshoot;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
-import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.JarPath;
@@ -43,15 +49,10 @@ import com.caucho.vfs.Path;
 import com.caucho.vfs.PersistentDependency;
 import com.caucho.vfs.ReadStream;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
-import java.security.CodeSource;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * Describes a cached loaded class entry.
  */
+@Module
 public class ClassEntry implements Dependency {
   private static final L10N L = new L10N(ClassEntry.class);
   private static final Logger log
@@ -78,9 +79,7 @@ public class ClassEntry implements Dependency {
 
   private CodeSource _codeSource;
 
-  private ClassNotFoundException _exn;
-    
-  private WeakReference<Class> _clRef;
+  private WeakReference<Class<?>> _clRef;
 
   /**
    * Create a loaded class entry
@@ -96,7 +95,7 @@ public class ClassEntry implements Dependency {
   {
     _loader = loader;
     _name = name;
-
+    
     _classPath = classPath;
 
     setDependPath(classPath);
@@ -206,6 +205,7 @@ public class ClassEntry implements Dependency {
   /**
    * Returns true if the source file has been modified.
    */
+  @Override
   public boolean isModified()
   {
     if (_depend.isModified()) {
@@ -214,9 +214,9 @@ public class ClassEntry implements Dependency {
 
       return reloadIsModified();
     }
-    else if (_sourcePath == null)
+    else if (_sourcePath == null) {
       return false;
-      
+    }  
     else if (_sourcePath.getLastModified() != _sourceLastModified) {
       if (log.isLoggable(Level.FINE))
         log.fine("source modified time: " + _sourcePath +
@@ -301,7 +301,7 @@ public class ClassEntry implements Dependency {
     try {
       long length = _classPath.getLength();
 
-      Class cl = _clRef != null ? _clRef.get() : null;
+      Class<?> cl = _clRef != null ? _clRef.get() : null;
 
       if (cl == null) {
         return false;
@@ -353,14 +353,14 @@ public class ClassEntry implements Dependency {
     return _classPath;
   }
 
-  public Class getEntryClass()
+  public Class<?> getEntryClass()
   {
     return _clRef != null ? _clRef.get() : null;
   }
 
-  public void setEntryClass(Class cl)
+  public void setEntryClass(Class<?> cl)
   {
-    _clRef = new WeakReference<Class>(cl);
+    _clRef = new WeakReference<Class<?>>(cl);
   }
 
   /**

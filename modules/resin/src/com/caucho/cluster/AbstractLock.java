@@ -31,6 +31,7 @@ package com.caucho.cluster;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
+import com.caucho.config.Module;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distlock.AbstractLockManager;
@@ -45,6 +46,7 @@ import javax.annotation.PostConstruct;
  * Implements the distributed lock
  */
 
+@Module
 abstract public class AbstractLock implements Lock
 {
   private static final L10N L = new L10N(AbstractLock.class);
@@ -84,33 +86,39 @@ abstract public class AbstractLock implements Lock
   // Lock API
   //
 
+  @Override
   public void lock()
   {
     _lock.lock();
   }
 
+  @Override
   public void lockInterruptibly()
     throws InterruptedException
   {
     _lock.lockInterruptibly();
   }
 
+  @Override
   public boolean tryLock()
   {
     return _lock.tryLock();
   }
 
+  @Override
   public boolean tryLock(long time, TimeUnit unit)
     throws InterruptedException
   {
     return _lock.tryLock(time, unit);
   }
 
+  @Override
   public void unlock()
   {
     _lock.unlock();
   }
 
+  @Override
   public Condition newCondition()
   {
     return _lock.newCondition();
@@ -133,6 +141,8 @@ abstract public class AbstractLock implements Lock
       initName(_name);
 
       _lock = _manager.getOrCreateLock(_guid);
+      
+      assert(_lock != null);
     }
   }
 

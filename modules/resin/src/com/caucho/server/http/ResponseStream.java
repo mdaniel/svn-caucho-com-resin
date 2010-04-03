@@ -642,7 +642,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
         writeHeaders(-1);
       }
 
-      writeTail();
+      writeTail(true);
 
       finishCache();
 
@@ -707,7 +707,7 @@ abstract public class ResponseStream extends ToByteResponseStream {
   {
   }
 
-  protected void writeTail()
+  protected void writeTail(boolean isClosed)
     throws IOException
   {
   }

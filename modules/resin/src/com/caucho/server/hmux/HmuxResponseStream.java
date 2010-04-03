@@ -103,7 +103,7 @@ public class HmuxResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void writeTail()
+  protected void writeTail(boolean isClose)
     throws IOException
   {
     _request.writeTail();

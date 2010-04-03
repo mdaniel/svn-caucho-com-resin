@@ -100,7 +100,7 @@ Java_com_caucho_vfs_JniSocketImpl_nativeAllocate(JNIEnv *env,
 {
   connection_t *conn;
 
-  conn = (connection_t *) cse_malloc(sizeof(connection_t));
+  conn = (connection_t *) malloc(sizeof(connection_t));
   
   memset(conn, 0, sizeof(connection_t));
   conn->fd = -1;
@@ -373,13 +373,20 @@ Java_com_caucho_vfs_JniSocketImpl_nativeFree(JNIEnv *env,
   connection_t *conn = (connection_t *) (PTR) conn_fd;
 
   if (conn) {
+    if (conn->fd >= 0) {
+      conn->jni_env = env;
+
+      conn->ops->close(conn);
+    }
+
 #ifdef WIN32
 	  /*
     if (conn->event)
       WSACloseEvent(conn->event);
 	  */
 #endif
-    cse_free(conn);
+    
+    free(conn);
   }
 }
 
@@ -822,24 +829,6 @@ Java_com_caucho_vfs_JniServerSocketImpl_nativeListen(JNIEnv *env,
     listen(ss->fd, backlog);
 }
 
-JNIEXPORT jboolean JNICALL
-Java_com_caucho_vfs_JniServerSocketImpl_nativeAccept(JNIEnv *env,
-						     jobject obj,
-						     jlong ss_fd,
-						     jlong conn_fd)
-{
-  server_socket_t *socket = (server_socket_t *) (PTR) ss_fd;
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
-  jboolean value;
-
-  if (! socket || ! conn)
-    return 0;
-
-  value = socket->accept(socket, conn);
-
-  return value;
-}
-
 JNIEXPORT jint JNICALL
 Java_com_caucho_vfs_JniServerSocketImpl_getLocalPort(JNIEnv *env,
                                                   jobject obj,
@@ -958,24 +947,14 @@ get_address(struct sockaddr *addr, char *dst, int length)
 }
 #endif
 
-JNIEXPORT jboolean JNICALL
-Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
-					     jobject obj,
-					     jlong conn_fd,
-                                             jbyteArray local_addr,
-                                             jbyteArray remote_addr)
+static void
+socket_fill_address(JNIEnv *env, jobject obj,
+                    server_socket_t *ss,
+                    connection_t *conn,
+                    jbyteArray local_addr,
+                    jbyteArray remote_addr)
 {
-  connection_t *conn = (connection_t *) (PTR) conn_fd;
   char temp_buf[1024];
-  server_socket_t *ss;
-  
-  if (! conn || ! env || ! obj)
-    return 0;
-
-  ss = conn->ss;
-
-  if (! ss)
-    return 0;
 
   if (ss->_isSecure) {
     jboolean is_secure = conn->sock != 0 && conn->ssl_cipher != 0;
@@ -1010,15 +989,35 @@ Java_com_caucho_vfs_JniSocketImpl_nativeInit(JNIEnv *env,
 
     (*env)->SetIntField(env, obj, ss->_remotePort, remote_port);
   }
+}
 
-  struct sockaddr_in *sin = (struct sockaddr_in *) conn->server_sin;
-  
-  if (sin->sin_family == AF_INET)
-    return 4;
-  else if (sin->sin_family == AF_INET6)
-    return 6;
-  else
-    return 1;
+JNIEXPORT jboolean JNICALL
+Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
+                                               jobject obj,
+                                               long ss_fd,
+                                               jlong conn_fd,
+                                               jbyteArray local_addr,
+                                               jbyteArray remote_addr)
+{
+  server_socket_t *ss = (server_socket_t *) (PTR) ss_fd;
+  connection_t *conn = (connection_t *) (PTR) conn_fd;
+  jboolean value;
+
+  if (! ss || ! conn || ! env || ! obj)
+    return 0;
+
+  if (conn->fd >= 0) {
+    conn->jni_env = env;
+
+    conn->ops->close(conn);
+  }
+
+  if (! ss->accept(ss, conn))
+    return 0;
+
+  socket_fill_address(env, obj, ss, conn, local_addr, remote_addr);
+
+  return 1;
 }
 
 JNIEXPORT jint JNICALL

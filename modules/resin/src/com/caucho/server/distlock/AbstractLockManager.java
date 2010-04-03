@@ -31,13 +31,17 @@ package com.caucho.server.distlock;
 
 import java.util.concurrent.locks.Lock;
 
+import com.caucho.config.Module;
+
 /**
  * Manages the distributed lock
  */
+@Module
 abstract public class AbstractLockManager implements LockManager {
   /**
    * Creates a new lock with the given name;
    */
+  @Override
   abstract public Lock getOrCreateLock(String name);
   
   @Override

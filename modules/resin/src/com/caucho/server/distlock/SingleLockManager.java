@@ -47,12 +47,10 @@ public class SingleLockManager extends AbstractLockManager {
   {
     _server = server;
   }
-  
+
+  @Override
   public Lock getOrCreateLock(String name)
   {
-    if (true)
-      return null;
-    
     SingleLock lock = _lockMap.get(name);
 
     if (lock == null) {

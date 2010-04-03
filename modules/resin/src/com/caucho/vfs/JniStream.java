@@ -9,9 +9,12 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
+import com.caucho.config.Module;
+
 /**
  * Stream using with JNI.
  */
+@Module
 public class JniStream extends StreamImpl {
   private final static int INTERRUPT_EXN = -2;
   private final static int DISCONNECT_EXN = -3;
@@ -42,9 +45,10 @@ public class JniStream extends StreamImpl {
     _readException = null;
   }
 
+  @Override
   public boolean canRead()
   {
-    return _socket.getFd() != 0;
+    return ! _socket.isClosed();
   }
 
   public int read(byte []buf, int offset, int length)
@@ -103,11 +107,13 @@ public class JniStream extends StreamImpl {
     return 0;
   }
 
+  @Override
   public boolean canWrite()
   {
-    return _socket.getFd() != 0;
+    return ! _socket.isClosed();
   }
 
+  @Override
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {

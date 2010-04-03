@@ -178,13 +178,7 @@ public class JniServerSocketImpl extends QServerSocket {
     if (_fd == 0)
       throw new IOException("accept from closed socket");
 
-    if (nativeAccept(_fd, jniSocket.getFd())) {
-      jniSocket.initFd();
-
-      return true;
-    }
-    else
-      return false;
+    return jniSocket.accept(_fd);
   }
 
   /**
@@ -244,12 +238,16 @@ public class JniServerSocketImpl extends QServerSocket {
     return getClass().getSimpleName() + "[" + _id + "]";
   }
 
+  @Override
   public void finalize()
+    throws Throwable
   {
     try {
       close();
     } catch (Throwable e) {
     }
+    
+    super.finalize();
   }
 
   /**
@@ -271,12 +269,6 @@ public class JniServerSocketImpl extends QServerSocket {
    * Sets the listen backlog
    */
   native void nativeListen(long fd, int listen);
-
-  /**
-   * Accepts a new connection from the accept socket.
-   */
-  private native boolean nativeAccept(long fd, long connFd)
-    throws IOException;
 
   /**
    * Returns the server's local port.

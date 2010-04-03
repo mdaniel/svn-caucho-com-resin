@@ -170,7 +170,6 @@ class CompilingClassEntry extends ClassEntry {
 
   public String toString()
   {
-    return "CompilingClassEntry[" + getClassPath() + ", src=" + getSourcePath() + "]";
+    return getClass().getSimpleName() + "[" + getClassPath() + ", src=" + getSourcePath() + "]";
   }
-
 }

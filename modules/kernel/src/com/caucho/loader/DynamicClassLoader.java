@@ -337,6 +337,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (loader.getClassLoader() == null)
       loader.setLoader(this);
+    else {
+      assert(loader.getClassLoader() == this);
+    }
 
     if (loader instanceof Dependency)
       _dependencies.add((Dependency) loader);
@@ -1511,8 +1514,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     if (entry != null && _isVerbose)
       verbose(name, (isNormalJdkOrder(name) ? "found" : "found (took priority from parent)"));
 
-    if (_isEnableDependencyCheck)
+    if (_isEnableDependencyCheck) {
       entry.addDependencies(_dependencies);
+    }
 
     // Currently, the entry must be in the entry cache for synchronization
     // to work.  The same entry must be returned for two separate threads

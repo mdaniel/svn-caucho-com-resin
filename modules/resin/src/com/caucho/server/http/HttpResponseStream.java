@@ -201,12 +201,17 @@ public class HttpResponseStream extends ResponseStream {
   }
 
   @Override
-  protected void writeTail()
+  protected void writeTail(boolean isClose)
     throws IOException
   {
     if (! _isChunkedEncoding) {
       // server/0550
       _next.flush();
+      // XXX: the isClose flag isn't accurate with keepalives
+      /*
+      if (isClose)
+        _next.close();
+      */
       return;
     }
 

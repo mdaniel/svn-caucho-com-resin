@@ -60,7 +60,7 @@ public class JniSocketImpl extends QSocket {
     _fd = nativeAllocate();
   }
 
-  void initFd()
+  boolean accept(long serverSocketFd)
   {
     _localName = null;
     _localAddr = null;
@@ -71,18 +71,19 @@ public class JniSocketImpl extends QSocket {
     _remoteAddrLength = 0;
 
     _isSecure = false;
-
-    // initialize fields from the _fd
-    nativeInit(_fd, _localAddrBuffer, _remoteAddrBuffer);
-
     _isClosed.set(false);
-  }
 
-  final long getFd()
+    synchronized (this) {
+      // initialize fields from the _fd
+      return nativeAccept(serverSocketFd, _fd, _localAddrBuffer, _remoteAddrBuffer);
+    }
+  }
+  
+  public long getFd()
   {
     return _fd;
   }
-
+  
   public int getNativeFd()
   {
     return getNativeFd(_fd);
@@ -523,6 +524,7 @@ public class JniSocketImpl extends QSocket {
     }
   }
 
+  @Override
   protected void finalize()
     throws Throwable
   {
@@ -543,9 +545,10 @@ public class JniSocketImpl extends QSocket {
 
   native boolean nativeReadNonBlock(long fd, int ms);
 
-  private native int nativeInit(long fd, 
-                                byte []localAddress,
-                                byte []remoteAddress);
+  private native boolean nativeAccept(long serverSocketFd,
+                                      long socketfd, 
+                                      byte []localAddress,
+                                      byte []remoteAddress);
 
   native String getCipher(long fd);
 

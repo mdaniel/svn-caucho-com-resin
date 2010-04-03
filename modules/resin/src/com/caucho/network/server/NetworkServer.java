@@ -61,8 +61,8 @@ public class NetworkServer
   private final Path _dataDirectory;
   private EnvironmentClassLoader _classLoader;
   
-  private final ConcurrentHashMap<Class<? extends NetworkService>,NetworkService> _serviceMap
-    = new ConcurrentHashMap<Class<? extends NetworkService>,NetworkService>();
+  private final ConcurrentHashMap<Class<?>,NetworkService> _serviceMap
+    = new ConcurrentHashMap<Class<?>,NetworkService>();
   
   private final TreeSet<NetworkService> _pendingStart
     = new TreeSet<NetworkService>(new StartComparator());
@@ -281,8 +281,16 @@ public class NetworkServer
    */
   public void addService(NetworkService service)
   {
+    addService(service.getClass(), service);
+  }
+  
+  /**
+   * Adds a new service.
+   */
+  public void addService(Class<?> serviceApi, NetworkService service)
+  {
     NetworkService oldService
-      = _serviceMap.putIfAbsent(service.getClass(), service);
+      = _serviceMap.putIfAbsent(serviceApi, service);
     
     if (oldService != null) {
       throw new IllegalStateException(L.l("duplicate service '{0}' is not allowed because another service with that class is already registered '{1}'",

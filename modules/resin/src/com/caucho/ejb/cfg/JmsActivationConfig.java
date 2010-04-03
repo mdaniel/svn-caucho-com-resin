@@ -29,51 +29,14 @@
 
 package com.caucho.ejb.cfg;
 
+import javax.jms.Destination;
+import javax.jms.Queue;
+import javax.jms.Topic;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.config.Names;
 import com.caucho.config.TagName;
-import com.caucho.config.gen.ApiClass;
-import com.caucho.config.gen.ApiMethod;
-import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.XaAnnotation;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.JndiBuilder;
-import com.caucho.ejb.gen.MessageGenerator;
-import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.message.*;
-import com.caucho.ejb.server.AbstractServer;
-import com.caucho.ejb.server.EjbProducer;
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.jca.*;
-import com.caucho.jms.JmsMessageListener;
-import com.caucho.jca.cfg.*;
 import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
-import javax.ejb.ActivationConfigProperty;
-import javax.ejb.MessageDriven;
-import javax.ejb.TransactionAttribute;
-import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
-import javax.interceptor.AroundInvoke;
-import javax.jms.ConnectionFactory;
-import javax.jms.Destination;
-import javax.jms.MessageListener;
-import javax.jms.Queue;
-import javax.jms.Session;
-import javax.jms.Topic;
-import javax.resource.spi.*;
-import javax.naming.NamingException;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import java.lang.reflect.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import java.util.List;
-import java.util.Set;
 
 /**
  * Configuration for a JMS/JNDI based MessageDrivenBean.  Each property
@@ -159,6 +122,7 @@ public class JmsActivationConfig {
     _destinationType = type;
   }
   
+  @SuppressWarnings("unchecked")
   public Class <? extends Destination> getDestinationType()
   {
     return (Class<? extends Destination>) _destinationType;

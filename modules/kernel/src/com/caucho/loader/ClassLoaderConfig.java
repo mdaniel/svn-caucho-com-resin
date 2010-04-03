@@ -193,15 +193,7 @@ public class ClassLoaderConfig {
    */
   public TreeLoader createTreeLoader()
   {
-    TreeLoader loader = new TreeLoader();
-    loader.setLoader(_classLoader);
-
-    return loader;
-  }
-
-  public void addTreeLoader(TreeLoader loader)
-  {
-    _classLoader.addLoader(loader, _index++);
+    return new TreeLoader(_classLoader);
   }
 
   /**

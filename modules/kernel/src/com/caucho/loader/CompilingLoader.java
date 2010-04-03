@@ -332,15 +332,6 @@ public class CompilingLoader extends Loader implements Make {
     return loader;
   }
 
-  /**
-   * Sets the owning class loader.
-   */
-  @Override
-  public void setLoader(DynamicClassLoader loader)
-  {
-    super.setLoader(loader);
-  }
-
   public String getClassPath()
   {
     if (_classPath == null)
@@ -392,87 +383,6 @@ public class CompilingLoader extends Loader implements Make {
 	String []paths = new String[] { path };
 	
 	compileBatch(paths, true);
-      }
-    }
-  }
-
-  private void makeAllSequential(String name, Path sourceDir, Path classDir,
-				 String sourcePath)
-    throws IOException, ClassNotFoundException
-  {
-    String []list;
-
-    try {
-      list = sourceDir.list();
-    } catch (IOException e) {
-      return;
-    }
-
-    for (int i = 0; list != null && i < list.length; i++) {
-      if (list[i].startsWith("."))
-        continue;
-
-      if (_excludedDirectories.contains(list[i]))
-        continue;
-      
-      Path subSource = sourceDir.lookup(list[i]);
-
-      if (subSource.isDirectory()) {
-	makeAllSequential(name + list[i] + "/", subSource,
-			  classDir.lookup(list[i]), sourcePath);
-      }
-      else if (list[i].endsWith(_sourceExt)) {
-	int tail = list[i].length() - _sourceExt.length();
-	String prefix = list[i].substring(0, tail);
-	Path subClass = classDir.lookup(prefix + ".class");
-
-	if (subSource.getLastModified() <= subClass.getLastModified())
-	  continue;
-
-	compileClass(subSource, subClass, sourcePath, true);
-      }
-    }
-
-    if (! _requireSource)
-      return;
-    
-    try {
-      list = classDir.list();
-    } catch (IOException e) {
-      return;
-    }
-
-    for (int i = 0; list != null && i < list.length; i++) {
-      if (list[i].startsWith("."))
-        continue;
-
-      if (_excludedDirectories.contains(list[i]))
-        continue;
-      
-      Path subClass = classDir.lookup(list[i]);
-
-      if (list[i].endsWith(".class")) {
-	String prefix = list[i].substring(0, list[i].length() - 6);
-	Path subSource = sourceDir.lookup(prefix + _sourceExt);
-
-	if (! subSource.exists()) {
-	  String tail = subSource.getTail();
-	  boolean doRemove = true;
-
-	  if (tail.indexOf('$') > 0) {
-	    String subTail = tail.substring(0, tail.indexOf('$')) + _sourceExt;
-	    Path subJava = subSource.getParent().lookup(subTail);
-
-	    if (subJava.exists())
-	      doRemove = false;
-	  }
-
-	  if (doRemove) {
-	    log.finer(L.l("removing obsolete class `{0}'.", subClass.getPath()));
-
-	    subClass.remove();
-	  }
-	}
       }
     }
   }
@@ -575,8 +485,6 @@ public class CompilingLoader extends Loader implements Make {
       String javaName = name.replace('.', '/') + _sourceExt;
       Path javaFile = _sourceDir.lookup(javaName);
 
-      String tail = javaFile.getTail();
-
       for (int i = 0; i < INNER_CLASS_SEPARATORS.length; i++) {
 	char sep = INNER_CLASS_SEPARATORS[i];
 	if (name.indexOf(sep) > 0) {
@@ -662,42 +570,6 @@ public class CompilingLoader extends Loader implements Make {
     }
 
     return true;
-  }
-
-  /**
-   * Loads the class from the class file.
-   *
-   * @param className the name of the class to load
-   * @param javaFile the path to the java source
-   * @param classFile the path to the class file
-   *
-   * @return a class entry or null on failure
-   */
-  private ClassEntry loadClass(String className, Path javaFile, Path classFile)
-  {
-    long length = classFile.getLength();
-
-    ClassEntry entry = new CompilingClassEntry(this, getClassLoader(),
-					       className, javaFile,
-					       classFile,
-					       getCodeSource(classFile));
-
-    Class cl = null;
-
-    try {
-      cl = getClassLoader().loadClassEntry(entry);
-    } catch (Exception e) {
-      try {
-        if (javaFile.canRead())
-          classFile.remove();
-      } catch (IOException e1) {
-      }
-    }
-
-    if (cl != null)
-      return entry;
-    else
-      return null;
   }
 
   /**
