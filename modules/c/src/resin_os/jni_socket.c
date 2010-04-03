@@ -994,7 +994,7 @@ socket_fill_address(JNIEnv *env, jobject obj,
 JNIEXPORT jboolean JNICALL
 Java_com_caucho_vfs_JniSocketImpl_nativeAccept(JNIEnv *env,
                                                jobject obj,
-                                               long ss_fd,
+                                               jlong ss_fd,
                                                jlong conn_fd,
                                                jbyteArray local_addr,
                                                jbyteArray remote_addr)
