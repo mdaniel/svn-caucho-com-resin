@@ -23,6 +23,9 @@
             reference="starting-resin-apache-ref.xtp"/>
     </item>
 
+    <item link="migration.xtp" title="Migrating"
+          description="Migrating to Resin 4.0"/>
+
     <item link="deploy.xtp" title="Deployment"
           description="Deploying applications and .war files to a Resin server."
           reference="deploy-ref.xtp">
@@ -105,14 +108,14 @@
           description="Overview of security concepts"/>
 
       <item link="security-authenticators.xtp" title="authenticators"
-            description="authenticators for Resin server"/>
+            description="Authenticators for Resin server"/>
 
       <item link="security-authentication-method.xtp" 
             title="authentication method"
-            description="authenticators for Resin server"/>
+            description="Authenticators for Resin server"/>
 
       <item link="security-authorization.xtp" title="authorization"
-            description="authenticators for Resin server"/>
+            description="Authenticators for Resin server"/>
 
       <item link="security-ssl.xtp" title="SSL"
         description="Integrating OpenSSL and JSSE"/>

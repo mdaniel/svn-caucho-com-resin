@@ -34,6 +34,9 @@ and reliability.</p>
 <include-defun name="invocation-cache-max-url-length"/> 
 <include-defun name="max-uri-length"/> 
 <include-defun name="cluster:ping"/> 
+<include-defun name="resin:JmxService"/>
+<include-defun name="resin:LogService"/>
+<include-defun name="resin:XaLogService"/>
 <include-defun name="root-directory"/> 
 <include-defun name="server"/> 
 <include-defun name="server-default"/> 

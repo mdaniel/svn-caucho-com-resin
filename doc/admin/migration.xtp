@@ -1,0 +1,38 @@
+<document>
+<header>
+  <product>resin</product>
+  <title>Migrating to Resin 4.0</title>
+  <description>
+    Resin 4.0 introduced a number of new features and capabilities over
+    earlier versions of Resin. Along with these changes, configuration and
+    some operating semantics changed. Certain configuration was deprecated
+    and should be removed or rewritten using newer constructs.
+  </description>
+</header>
+<body>
+  <s1 title="Migrating from Resin 3.0 to Resin 4.0">
+    <p>
+      The Caucho Wiki features a full <a href="http://wiki.caucho.com/Migrating_from_Resin_3.0_to_Resin_4.0">migration document</a> for those upgrading from 
+      Resin 3.0.
+    </p>
+  </s1>
+  <s1 title="Migrating from WebLogic">
+    <p>
+      The Caucho Wiki features <a href="http://wiki.caucho.com/Migrating_from_WebLogic_to_Resin">migration document</a> for those transitioning from WebLogic
+      to Resin.
+    </p>
+  </s1>
+  <s1 title="Deprecated configuration">
+    <p> The following is a list of deprecated tags in Resin 4.0 that should
+      no longer be used:
+    </p>
+    <ul>
+      <li>&lt;management> (see <a config-tag="resin:JmxService"/>, <a config-tag="resin:LogService"/>, <a config-tag="resin:XaLogService"/>, <a config-tag="resin:AdminAuthenticator"/>)</li>
+      <li>&lt;log> (see <a config-tag="log-handler"/>)</li>
+      <li>&lt;scheduled-task> (see <a config-tag="resin:ScheduledTask"/>)</li>
+      <li>resin:type attribute (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
+      <li>uri: convention (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
+    </ul>
+  </s1>
+</body>
+</document>

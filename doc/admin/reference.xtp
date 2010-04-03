@@ -5696,11 +5696,62 @@ element resin-data-directory {
 
 </defun>
 
+
+<defun title="&lt;resin:AdminAuthenticator>" name="resin:AdminAuthenticator">
+<description>
+<p>
+
+  Resin administration authentication (same syntax as XmlAuthenticator).
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/AdminAuthenticator.html">&lt;resin:AdminAuthenticator> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:Allow>" name="resin:Allow">
+<description>
+<p>
+
+  Allows access to a URL pattern.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/Allow.html">&lt;resin:Allow> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:And>" name="resin:And">
+<description>
+<p>
+
+  Matches if all children match.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/And.html">&lt;resin:And> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:BasicLogin>" name="resin:BasicLogin">
+<description>
+<p>
+
+  HTTP basic authentication.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/BasicLogin.html">&lt;resin:BasicLogin> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:ByteStreamCache>" name="resin:ByteStreamCache">
+<description>
+<p>
+
+  Distributed cache of InputStream/OutputStream byte streams across a cluster pod.
+<a href="http://caucho.com/resin-javadoc/com/caucho/distcache/ByteStreamCache.html">&lt;resin:ByteStreamCache> JavaDoc</a>
+</p>
+</description>
+</defun>
+
 <defun title="&lt;resin:choose>" name="resin:choose" version="Resin 3.0.7">
 
 <p>resin:choose implements an if, elsif, else.</p>
 
-<deftable title="&lt;resin:choose> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -5713,7 +5764,7 @@ element resin-data-directory {
   <td>resin:otherwise</td>
   <td>A fallback section executed when the tests fail</td>
 </tr>
-</deftable>
+</attributes>
 
 <p>The &lt;resin:choose> schema is context-dependent.  A &lt;resin:choose>
 in a &lt;web-app> will have &lt;web-app> content, while a &lt;resin:choose>
@@ -5751,48 +5802,165 @@ element resin:otherwise {
   &lt;/resin:otherwise&gt;
 &lt;resin:choose&gt;
 </example>
-
-<defun title="&lt;resin:when>" name="resin:when" version="Resin 3.0.7">
-<parents>resin:choose</parents>
-<p>&lt;resin:when> conditionally configures a block within a
-&lt;resin:choose> block.  If the <var>test</var> matches, Resin will
-use the enclosed configuration.</p>
-
-<deftable title="&lt;resin:when> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>test</td>
-  <td>the test to perform</td>
-</tr>
-</deftable>
-
-<def title="&lt;resin:when> schema">
-element resin:when {
-  attribute test { string },
-
-  <var>context-dependent content</var>
-}
-</def>
-
 </defun>
 
-<defun title="&lt;resin:otherwise>" name="resin:otherwise" version="Resin 3.0.7">
-<parents>resin:choose</parents>
-<p>&lt;resin:otherwise> is the catch-all configuration for a &lt;resin:choose>
-block when none of the &lt;resin:when> items match.</p>
 
-<def title="&lt;resin:otherwise> schema">
-element resin:otherwise {
-  <var>context-dependent content</var>
-}
-</def>
+<defun title="&lt;resin:ClusterCache>" name="resin:ClusterCache">
+<description>
+<p>
 
+  JCache-style distributed object cache across a cluster pod (java.util.Map).
+<a href="http://caucho.com/resin-javadoc/com/caucho/distcache/ClusterCache.html">&lt;resin:ClusterCache> JavaDoc</a>
+</p>
+</description>
 </defun>
 
-</defun> <!-- resin:choose -->
+<defun title="&lt;resin:ClusterQueue>" name="resin:ClusterQueue">
+<description>
+<p>
+
+  Clustered queue.
+<a href="http://caucho.com/resin-javadoc/com/caucho/jms/ClusterQueue.html">&lt;resin:ClusterQueue> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:ClusterSingleSignon>" name="resin:ClusterSingleSignon">
+<description>
+<p>
+
+  Cluster-based single signon.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/ClusterSingleSignon.html">&lt;resin:ClusterSingleSignon> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:DatabaseAuthenticator>" name="resin:DatabaseAuthenticator">
+<description>
+<p>
+
+  Authentication using a JDBC database schema.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/DatabaseAuthenticator.html">&lt;resin:DatabaseAuthenticator> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:Deny>" name="resin:Deny">
+<description>
+<p>
+
+  Denies access to a URL pattern.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/Deny.html">&lt;resin:Deny> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:DigestLogin>" name="resin:DigestLogin">
+<description>
+<p>
+
+  HTTP digest authentication.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/DigestLogin.html">&lt;resin:DigestLogin> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:Dispatch>" name="resin:Dispatch">
+<description>
+<p>
+
+  Normal servlet dispatching with optional <em>target</em> rewriting.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Dispatch.html">&lt;resin:Dispatch> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:FastCgiPort>" name="resin:FastCgiPort">
+<description>
+<p>
+
+  FastCGI requests, e.g. from nginx.
+<a href="http://caucho.com/resin-javadoc/com/caucho/protocols/FastCgiPort.html">&lt;resin:FastCgiPort> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:FastCgiProxy>" name="resin:FastCgiProxy">
+<description>
+<p>
+
+  Proxies the request to a backend server using FastCGI as a proxy protocol.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/FastCgiProxy.html">&lt;resin:FastCgiProxy> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:FileQueue>" name="resin:FileQueue">
+<description>
+<p>
+
+  Filesystem based queue.
+<a href="http://caucho.com/resin-javadoc/com/caucho/jms/FileQueue.html">&lt;resin:FileQueue> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:FileTopic>" name="resin:FileTopic">
+<description>
+<p>
+
+  Filesystem based topic.
+<a href="http://caucho.com/resin-javadoc/com/caucho/jms/FileTopic.html">&lt;resin:FileTopic> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:Forbidden>" name="resin:Forbidden">
+<description>
+<p>
+
+  Send a HTTP forbidden response.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Forbidden.html">&lt;resin:Forbidden> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:FormLogin>" name="resin:FormLogin">
+<description>
+<p>
+
+  Servlet form authentication.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/FormLogin.html">&lt;resin:FormLogin> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:Forward>" name="resin:Forward">
+<description>
+<p>
+
+  Forwards to the new URL using RequestDispatcher.forward with the <em>target</em> URL.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Forward.html">&lt;resin:Forward> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:GlobalCache>" name="resin:GlobalCache">
+<description>
+<p>
+
+  JCache-style distributed object cache across the entire Resin system.
+<a href="http://caucho.com/resin-javadoc/com/caucho/distcache/GlobalCache.html">&lt;resin:GlobalCache> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:HttpProxy>" name="resin:HttpProxy">
+<description>
+<p>
+
+  Proxies the request to a backend server using HTTP as a proxy protocol.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/HttpProxy.html">&lt;resin:HttpProxy> JavaDoc</a>
+</p>
+</description>
+</defun>
 
 <defun title="&lt;resin:if>" name="resin:if" version="Resin 3.0.7">
 
@@ -5839,6 +6007,135 @@ element resin:if {
 </example>
 
 </defun> <!-- resin:if -->
+
+
+<defun title="&lt;resin:IfAuthType>" name="resin:IfAuthType">
+<description>
+<p>
+
+  Checks for the authentication type, request.getAuthType().
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfAuthType.html">&lt;resin:IfAuthType> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfCookie>" name="resin:IfCookie">
+<description>
+<p>
+
+  Checks for the presence of a named HTTP cookie from request.getCookies().
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfCookie.html">&lt;resin:IfCookie> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfCron>" name="resin:IfCron">
+<description>
+<p>
+
+  Matches if the current time is in an active range configured by cron-style times.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfCron.html">&lt;resin:IfCron> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfFileExists>" name="resin:IfFileExists">
+<description>
+<p>
+
+  Matches if the URL corresponds to an actual file.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfFileExists.html">&lt;resin:IfFileExists> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfHeader>" name="resin:IfHeader">
+<description>
+<p>
+
+  Tests for a HTTP header and value match.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfHeader.html">&lt;resin:IfHeader> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfLocale>" name="resin:IfLocale">
+<description>
+<p>
+
+  Tests for a Locale match from the HTTP request.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfLocale.html">&lt;resin:IfLocale> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfLocalPort>" name="resin:IfLocalPort">
+<description>
+<p>
+
+  Compares the local port of the request, request.getLocalPort().
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfLocalPort.html">&lt;resin:IfLocalPort> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfMethod>" name="resin:IfMethod">
+<description>
+<p>
+
+  Compares the HTTP method, request.getMethod().
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfMethod.html">&lt;resin:IfMethod> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfNetwork>" name="resin:IfNetwork">
+<description>
+<p>
+
+  Compares the remote IP address to a network pattern like 192.168/16.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfNetwork.html">&lt;resin:IfNetwork> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfQueryParam>" name="resin:IfQueryParam">
+<description>
+<p>
+
+  Tests for a HTTP query parameger, request.getParameter().
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfQueryParam.html">&lt;resin:IfQueryParam> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfRemoteAddr>" name="resin:IfRemoteAddr">
+<description>
+<p>
+
+  Tests against the remote IP address, request.getRemoteAddr().
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteAddr.html">&lt;resin:IfRemoteAddr> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfRemoteUser>" name="resin:IfRemoteUser">
+<description>
+<p>
+
+  Tests against the remote user, request.getRemoteUser().
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteUser.html">&lt;resin:IfRemoteUser> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfSecure>" name="resin:IfSecure">
+<description>
+<p>
+
+  True for SSL requests, i.e. if request.isSecure() is true.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfSecure.html">&lt;resin:IfSecure> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:IfUserInRole>" name="resin:IfUserInRole">
+<description>
+<p>
+
+  Tests is the user is in the servlet security role.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfUserInRole.html">&lt;resin:IfUserInRole> JavaDoc</a>
+</p>
+</description>
+</defun>
+
 
 <defun title="&lt;resin:import>" name="resin:import" version="Resin 3.0.7">
 
@@ -5948,7 +6245,97 @@ the web-app flexibility in which bean files to create.</p>
 </example>
 
 </defun>
-  
+
+
+<defun title="&lt;resin:JaasAuthenticator>" name="resin:JaasAuthenticator">
+<description>
+<p>
+
+  Java authentication service authenticator.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/JaasAuthenticator.html">&lt;resin:JaasAuthenticator> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:JmsConnectionFactory>" name="resin:JmsConnectionFactory">
+<description>
+<p>
+
+  Combined Queue and Topic ConnectionFactory.
+<a href="http://caucho.com/resin-javadoc/com/caucho/jms/JmsConnectionFactory.html">&lt;resin:JmsConnectionFactory> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:JmxService>" name="resin:JmxService">
+<description>
+<p>
+  Enables cluster-wide JMX administration.
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/JmsService.html">&lt;resin:JmxService> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:LdapAuthenticator>" name="resin:LdapAuthenticator">
+<description>
+<p>
+
+  LDAP authentication using JNDI.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/LdapAuthenticator.html">&lt;resin:LdapAuthenticator> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:LoadBalance>" name="resin:LoadBalance">
+<description>
+<p>
+
+  Load balance to a cluster of backend Resin servers.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/LoadBalance.html">&lt;resin:LoadBalance> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:LogService>" name="resin:LogService">
+<description>
+<p>
+
+  Stores high-priority log messages in a database.
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/LogService.html">&lt;resin:LogService> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:MemoryQueue>" name="resin:MemoryQueue">
+<description>
+<p>
+
+  Memory based queue.
+<a href="http://caucho.com/resin-javadoc/com/caucho/jms/MemoryQueue.html">&lt;resin:MemoryQueue> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:MemorySingleSignon>" name="resin:MemorySingleSignon">
+<description>
+<p>
+
+  Memory-based single signon.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/MemorySingleSignon.html">&lt;resin:MemorySingleSignon> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:MemoryTopic>" name="resin:MemoryTopic">
+<description>
+<p>
+
+  Memory based topic.
+<a href="http://caucho.com/resin-javadoc/com/caucho/jms/MemoryTopic.html">&lt;resin:MemoryTopic> JavaDoc</a>
+</p>
+</description>
+</defun>
+
 <defun title="&lt;resin:message>" name="resin:message" version="Resin 3.0.7">
 
 <p>Logs a message to the given log file. The content of the element is the
@@ -5970,6 +6357,141 @@ element resin:message {
 </example>
 
 </defun> <!-- resin:message -->
+
+
+<defun title="&lt;resin:Not>" name="resin:Not">
+<description>
+<p>
+
+  Matches if the child does not match.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Not.html">&lt;resin:Not> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:NotAnd>" name="resin:NotAnd">
+<description>
+<p>
+
+  Matches if any child does not match.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/NotAnd.html">&lt;resin:NotAnd> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:NotOr>" name="resin:NotOr">
+<description>
+<p>
+
+  Matches if all the children do not match.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/NotOr.html">&lt;resin:NotOr> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:Or>" name="resin:Or">
+<description>
+<p>
+
+  Matches if any children match.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Or.html">&lt;resin:Or> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:otherwise>" name="resin:otherwise" version="Resin 3.0.7">
+<parents>resin:choose</parents>
+<p>&lt;resin:otherwise> is the catch-all configuration for a &lt;resin:choose>
+block when none of the &lt;resin:when> items match.</p>
+
+<def title="&lt;resin:otherwise> schema">
+element resin:otherwise {
+  <var>context-dependent content</var>
+}
+</def>
+
+</defun>
+
+  
+<defun title="&lt;resin:PingMailer>" name="resin:PingMailer">
+<description>
+<p>
+
+  Mails a notification when a ping check fails.
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/PingMailer.html">&lt;resin:PingMailer> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:PingThread>" name="resin:PingThread">
+<description>
+<p>
+
+  Checks status of Resin sutomatically.
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/PingThread.html">&lt;resin:PingThread> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:ProjectJarRepository>" name="resin:ProjectJarRepository">
+<description>
+<p>
+
+  Maven-style library jar management for webapps.
+<a href="http://caucho.com/resin-javadoc/com/caucho/server/repository/ProjectJarRepository.html">&lt;resin:ProjectJarRepository> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:PropertiesAuthenticator>" name="resin:PropertiesAuthenticator">
+<description>
+<p>
+
+  .properties file authentication.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/PropertiesAuthenticator.html">&lt;resin:PropertiesAuthenticator> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:Redirect>" name="resin:Redirect">
+<description>
+<p>
+
+  Send a HTTP redirect to a new URL specified by <em>target</em>.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Redirect.html">&lt;resin:Redirect> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:RemoteAdminService>" name="resin:RemoteAdminService">
+<description>
+<p>
+
+  Enables administration by remote agents, like an eclipse console.
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/RemoteAdminService.html">&lt;resin:RemoteAdminService> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:ScheduledTask>" name="resin:ScheduledTask">
+<description>
+<p>
+
+  cron-style task scheduling.
+<a href="http://caucho.com/resin-javadoc/com/caucho/resources/ScheduledTask.html">&lt;resin:ScheduledTask> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:SendError>" name="resin:SendError">
+<description>
+<p>
+
+  Send a HTTP error response.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SendError.html">&lt;resin:SendError> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+
 
 <defun title="&lt;resin:set>" name="resin:set" version="Resin 3.0.7">
 
@@ -6015,7 +6537,108 @@ element set {
 &lt;/resin>
 </example>
 
-</defun> <!-- resin:message -->
+</defun>
+
+<defun title="&lt;resin:SetHeader>" name="resin:SetHeader">
+<description>
+<p>
+
+  Sets a response header.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SetHeader.html">&lt;resin:SetHeader> JavaDoc</a>
+</p>
+</description>
+</defun>
+<defun title="&lt;resin:SetRequestSecure>" name="resin:SetRequestSecure">
+<description>
+<p>
+
+  Marks the request as secure.
+<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SetRequestSecure.html">&lt;resin:SetRequestSecure> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:StatService>" name="resin:StatService">
+<description>
+<p>
+
+  Gathers timed runtime status of Resin for graphing.
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/StatService.html">&lt;resin:StatService> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:when>" name="resin:when" version="Resin 3.0.7">
+<parents>resin:choose</parents>
+<p>&lt;resin:when> conditionally configures a block within a
+&lt;resin:choose> block.  If the <var>test</var> matches, Resin will
+use the enclosed configuration.</p>
+
+<deftable title="&lt;resin:when> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>test</td>
+  <td>the test to perform</td>
+</tr>
+</deftable>
+
+<def title="&lt;resin:when> schema">
+element resin:when {
+  attribute test { string },
+
+  <var>context-dependent content</var>
+}
+</def>
+
+</defun>
+
+<defun title="&lt;resin:XaLogService>" name="resin:XaLogService">
+<description>
+<p>
+
+  Transaction log service.
+<a href="http://caucho.com/resin-javadoc/com/caucho/admin/XaLogService.html">&lt;resin:XaLogService> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+<defun title="&lt;resin:XmlAuthenticator>" name="resin:XmlAuthenticator">
+<description>
+<p>
+
+  .xml file authentication.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/XmlAuthenticator.html">&lt;resin:XmlAuthenticator> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="&lt;resin:XmlRoleMap>" name="resin:XmlRoleMap">
+<description>
+<p>
+
+  Role to group permission mapping.
+<a href="http://caucho.com/resin-javadoc/com/caucho/security/XmlRoleMap.html">&lt;resin:XmlRoleMap> JavaDoc</a>
+</p>
+</description>
+</defun>
+
+<defun title="RequestPredicate" name="RequestPredicate">
+<description>
+  <p>
+
+  Interface for custom request predicates.
+    <a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/RequestPredicate.html">RequestPredicate JavaDoc</a>
+</p>
+</description>
+</defun>
+
+
+
 
 <defun title="&lt;resource>" name="resource" occur="*" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>

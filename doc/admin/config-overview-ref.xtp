@@ -20,124 +20,14 @@ class-loaders, logging and shared resources.</p>
 
 <include-defun name="cluster"/>
 <include-defun name="cluster-default"/>
-<include-defun name="jmx-service"/>
 <include-defun name="environment-system-properties"/>
-<include-defun name="jmx-service"/>
-<include-defun name="log-service"/>
 <include-defun name="resin"/>
 <include-defun name="resin-data-directory"/>
+<include-defun name="resin:AdminAuthenticator"/>
 <include-defun name="root-directory"/>
 <include-defun name="security-manager"/>
 <include-defun name="security-provider"/>
 <include-defun name="stat-service"/>
-
-<!-- XXX 
-<defun title="&lt;management>" version="Resin 3.0">
-
-<p>&lt;management> controls system-wide management capabilities, like
-the clustered JMX reporting, transaction logging, and persistence logging.
-It also defines a system-wide administration authenticator, providing a
-centralized place to manage administration identity.</p>
-
-<p>The &lt;user> configuration is particularly important since it is used
-as a security measure for the <a href="starting-resin-watchdog.xtp">watchdog</a>
-as well as for remote JMX capabilities.</p>
-
-<deftable title="&lt;management> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>jmx-service</td>
-  <td>enables the remote JMX administration (Resin-Pro)</td>
-</tr>
-<tr>
-  <td>log-service</td>
-  <td>enables persistent log management (Resin-Pro)</td>
-</tr>
-<tr>
-  <td>path</td>
-  <td>configures the directory for storing management data</td>
-</tr>
-<tr>
-  <td>user</td>
-  <td>configures system-wide administration accounts</td>
-</tr>
-<tr>
-  <td>xa-log-service</td>
-  <td>enables XA logging (Resin-Pro)</td>
-</tr>
-</deftable>
-
-<def title="&lt;management> schema">
-element management {
-  jmx-service?
-  &amp; log-service?
-  &amp; path
-  &amp; secure?
-  &amp; user*
-}
-
-element user {
-  name
-  &amp; password
-  &amp; disable?
-}
-</def>
-
-<s2 title="user">
-
-<p>The &lt;user> tags in &lt;management> define Resin administrators for
-the /resin-admin service and also add security for JMX remoting and the
-watchdog.</p>
-
-<p>Since the authenticator is available to all web-apps, you can
-use the &lt;management> login as a simple security authenticator for
-the entire site.  The role of the logged-in user is <var>resin-admin</var>,
-for configuring security authentication and for the <code>isUserInRole</code>
-method.</p>
-
-<p>The password field is an MD5 hash of the username and password for security.
-The /resin-admin or <code>PasswordDigest</code> can be used to create the
-hash.  See <a href="../admin/security.xtp">Resin security</a> for more
-information.</p>
-
-<deftable title="&lt;user> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>name</td>
-  <td>The user's name</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>password</td>
-  <td>An MD5 hash of the username and password.  The /resin-admin page
-provides an easy way of generating the hash.</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>disable</td>
-  <td>disable the user from logging in</td>
-  <td>false</td>
-</tr>
-</deftable>
-
-<def title="&lt;user> schema">
-element user {
-  name
-  &amp; password
-  &amp; disable?
-}
-</def>
-</s2>
-
-</defun>
--->
 
 </body>
 </document>

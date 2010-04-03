@@ -77,7 +77,7 @@ pattern is restricted.</p>
 <p>Authorization conditions express the criteria by which access should be allowed 
 (or denied). Resin includes a rich number of conditions for a variety of cases. The 
 following sections describe these conditional access rules in detail.</p>
-<s2 title="resin:IfUserInRole">
+<defun title="resin:IfUserInRole">
 <parents>resin:Allow, resin:Deny</parents>
 <p>The &lt;resin:IfUserInRole condition enforces role-based security. It requires that 
 authenticated users have a specified role. The following are the attributes of the tag:</p>
@@ -102,8 +102,8 @@ authenticated users have a specified role. The following are the attributes of t
   ...  
 &lt;/web-app>
 </example>
-</s2>
-<s2 title="resin:IfNetwork">
+</defun>
+<defun title="resin:IfNetwork">
 <parents>resin:Allow, resin:Deny</parents>
 <p>This tags allows or denies requests based on the IP address of the client. IP-constraint 
 is very useful for protecting administration resources to an internal network. It can also 
@@ -149,8 +149,8 @@ users may appear to be the same IP to your server.</p>
 <code>deny</code>. If only <var>allow</var> is used, then an IP is denied unless it 
 matches an <code>allow</code>. If both are used, then the IP must match both an 
 <code>allow</code> and a <code>deny</code></p>
-</s2>
-<s2 title="resin:IfSecure">
+</defun>
+<defun title="resin:IfSecure">
 <parents>resin:Allow, resin:Deny</parents>
 <p>The &lt;resin:IfSecure> tag restricts access to secure transports, usually SSL.</p>
 <!-- XXX: Need to list the attributes here -->
@@ -180,8 +180,8 @@ this configuration.</p>
     ...
 &lt;/resin> 
 </example>
-</s2>
-<s2 title="Custom Rule">
+</defun>
+<defun title="Custom Rule">
 <p>
 Although extremely rare, it is sometimes useful to create a custom predicate (for example 
 for encapsulating complex custom authorization logic). You can easily do this by extending 
@@ -222,7 +222,7 @@ public class IfMyTest extends ServletRequestPredicate {
   }
 }
 </example>
-</s2>
+</defun>
 <!-- XXX: The rest of the tags must be properly documented (a large number) -->
 </s1>
 </body>
