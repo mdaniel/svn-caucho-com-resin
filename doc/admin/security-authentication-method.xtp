@@ -2,195 +2,20 @@
 <header>
 <product>resin</product>
 <title>Resin Login Managers</title>
-<description></description>
-</header>
-<body>
-<s1 title="Login Managers">
+<description>
 <p>
 The following are details on the login managers that can be used with Resin, along with 
 example code to utilize as a starting point for your applications:  
 </p>
-<s2 title="Basic Authentication">
-<p>
-As the name implies, HTTP basic authentication is the simplest mechanism for gathering 
-login data for web applications. When a web page is secured through HTTP basic 
-authentication, the brower renders a simple dialog box for the user to enter login 
-information. This information is then sent to the server in clear-text using well-defined 
-HTTP headers. This authentication mechanism can be convenient for quick protection of 
-internal pages or administration when writing a form isn't necessary. If you use basic 
-authentication for applications outside the fire-wall, it is highly recommended that you
-secure the transport layer using <a href="security-ssl.xtp">SSL</a>.
-</p>
-<p>The following is an example of how basic login may be configured for an application:</p>
-<example title="WEB-INF/resin-web.xml resin:BasicLogin">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:BasicLogin/>
-
-  &lt;resin:Allow url-pattern="/foo/*">
-     &lt;resin:IfUserInRole role="user"/>
-  &lt;/resin:Allow>
-
-  &lt;resin:XmlAuthenticator>
-     ...
-  &lt;/resin:XmlAuthenticator>
-  
-&lt;/web-app>  
-</example>
-</s2>
-<s2 title="HTTP Digest Authentication">
-<p>
-The HTTP protocol includes a method to indicate to the client that it should digest the 
-password before sending it to the server. This is basically a more secure variant of HTTP 
-basic authentication. The browser submits a digest to Resin instead of submitting a 
-clear-text password. HTTP digest authentication protects the password in transmission.
-</p>
-<p>
-When using the HTTP digest, Resin will respond to the browser when a secure URL is accessed 
-and ask it to calculate a digest. The steps involved are:
-</p>
-<ul>
-  <li>Resin provides the client a realm and some other information.</li>
-  <li>
-    The client obtains a user-name and password (usually through a dialog box with a web 
-    browser).
-  </li>
-  <li>
-    The client calculates a digest using the user-name, realm, password, and other 
-    information supplied by Resin.
-  </li>
-  <li>The client submits the digest to Resin.</li>
-  <li>Resin does the same digest calculation as the client did.</li>
-  <li>
-    Resin compares the submitted digest and the digest it calculated. If they match, 
-    the user is authenticated.
-  </li>
-</ul>
-<p>
-The advantage of this method is that the clear-text password is protected in transmission, 
-it cannot be determined from the digest that is submitted by the client to the server.
-</p>
-<p>The following is an example of how digest login may be configured for an application:</p>
-<example title="Using HTTP Digest Authentication">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin">
-  ...
-  &lt;resin:DigestLogin/>
-  ...
-&lt;/web-app>
-</example>
-</s2>
-<s2 title="Form Based Authentication">
-<p>
-Form-based login is the most common way collecting login information. Using this login 
-mechanism, you can plug-in a custom login page with a form storing login information 
-(usually two input text fields for user-name and password). This custom login page can 
-then be used with the Resin security framework. This allows for a much more seamless login 
-mechanism integrated closely with your application, especially in terms of look and feel.
-</p>
-<p>
-When a URL is secured via form based login, the custom login form page is used to 
-collect authentication information. If authentication succeeds, the user is redirected to 
-the originally requested page. Otherwise, the user is forwarded to an error page (that can 
-also be configured).
-</p>
-<p>
-The &lt;resin:FormLogin/&gt; element is used to configure form-based authentication. Here 
-are the attributes of the element:
-</p>
-<deftable title="FormLogin attribute">
-<tr>
-  <th>attribute</th>
-  <th>description</th>
-  <th>default</th>
-</tr>  
-<tr>
-  <td>form-login-page</td>
-  <td>The page to be used to prompt the user login.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>form-error-page</td>
-  <td>The error page for unsuccessful login.</td>
-  <td>none</td>
-</tr>
-<tr>
-  <td>internal-forward</td>
-  <td>Use an internal redirect on success or a <code>sendRedirect</code>.</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>form-uri-priority</td>
-  <td>If true, the login form's j_uri will override the originally requested URI.</td>
-  <td>false</td>
-</tr>
-</deftable>
-<p>The following is an example of how form-based login may be configured for an 
-application:</p>
-<example title="WEB-INF/resin-web.xml resin:FormLogin">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin">
-  ...
-  &lt;resin:FormLogin form-login-page="/login.html"
-                      form-error-page="/login_failure.html"/>
-  ...
-&lt;/web-app>
-</example>
-<p>
-A login page can be anything that renders a valid login form such as HTML, Servlet, JSP or 
-JSF. A valid login form must have the action <var>j_security_check</var>. It must also have 
-the parameters <var>j_username</var> and <var>j_password</var> holding the username and 
-password. Optionally, it can also have <var>j_uri</var> and <var>j_use_cookie_auth</var>. 
-<var>j_uri</var> gives the next page to display when login succeeds. If the 
-form-uri-priority is set to true, the user will be forwarded to the <var>j_uri</var> page 
-regardless of what the originally requested page was. If the attribute is set to 
-false (the default), the <var>j_uri</var> page is only used when the originally requested 
-page was the login page itself. <var>j_use_cookie_auth</var> allows Resin to send a
-persistent cookie to the client to make subsequent logins automatic. When 
-<var>j_use_cookie_auth</var> is set, Resin will store a persistent cookie on the client's 
-machine after authentication succeeds. On all subsequent access, Resin detects the 
-persistent cookie and automatically logs the user in instead of prompting for 
-authentication. This essentially lets you implement "remember me" functionality common in
-many web-sites. By default, the authentication only lasts for a single session and no
-persistent login cookie is sent to the client.
-</p>
-<p>The following table outlines all the login parameters recognized by Resin:</p>
-<deftable title="j_security_check Parameters">
-<tr>
-  <th>Parameter</th>
-  <th>Meaning</th>
-</tr>
-<tr>
-  <td>j_username</td>
-  <td>The user name.</td>
-</tr>
-<tr>
-  <td>j_password</td>
-  <td>The password.</td>
-</tr>
-<tr>
-  <td>j_uri</td>
-  <td>Resin extension for the successful display page (optional).</td>
-</tr>
-<tr>
-  <td>j_use_cookie_auth</td>
-  <td>Resin extension to allow cookie login (optional).</td>
-</tr>
-</deftable>
-<p>The following is an example of a very simple login page:</p>
-<example title="j_security_check form">
-&lt;form action='j_security_check' method='POST'&gt;
-&lt;table&gt;
-&lt;tr&gt;&lt;td&gt;User:&lt;td&gt;&lt;input name='j_username'&gt;
-&lt;tr&gt;&lt;td&gt;Password:&lt;td&gt;&lt;input name='j_password'&gt;
-&lt;tr&gt;&lt;td colspan=2&gt;hint: the password is 'quidditch'
-&lt;tr&gt;&lt;td&gt;&lt;input type=submit&gt;
-&lt;/table&gt;
-&lt;/form&gt;
-</example>
-</s2>
-<!-- XXX: This really needs further clarification or some external references -->
+</description>
+</header>
+<body>
+<localtoc/>
+<include-defun name="resin:BasicLogin"/>
+<include-defun name="resin:DigestLogin"/>
+<include-defun name="resin:FormLogin"/>
+<!-- 
+XXX: This really needs further clarification or some external references
 <s2 title="Custom Login Manager">
 <p>The Login is primarily responsible for extracting the credentials
 from the request (typically username and password) and passing those
@@ -226,6 +51,6 @@ the following login-config:</p>
 &lt;/web-app>  
 </example>
 </s2>
-</s1>
+-->
 </body>
 </document>
