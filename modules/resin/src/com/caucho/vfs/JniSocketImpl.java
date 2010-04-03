@@ -29,10 +29,10 @@ public class JniSocketImpl extends QSocket {
 
   private long _fd;
   private JniStream _stream;
-  
+
   private final byte []_localAddrBuffer = new byte[16];
   private final char []_localAddrCharBuffer = new char[256];
-  
+
   private int _localAddrLength;
   private String _localName;
   private InetAddress _localAddr;
@@ -41,7 +41,7 @@ public class JniSocketImpl extends QSocket {
 
   private final byte []_remoteAddrBuffer = new byte[16];
   private final char []_remoteAddrCharBuffer = new char[256];
-  
+
   private int _remoteAddrLength;
   private String _remoteName;
   private InetAddress _remoteAddr;
@@ -78,12 +78,12 @@ public class JniSocketImpl extends QSocket {
       return nativeAccept(serverSocketFd, _fd, _localAddrBuffer, _remoteAddrBuffer);
     }
   }
-  
+
   public long getFd()
   {
     return _fd;
   }
-  
+
   public int getNativeFd()
   {
     return getNativeFd(_fd);
@@ -111,7 +111,7 @@ public class JniSocketImpl extends QSocket {
       char []remoteAddrCharBuffer = _remoteAddrCharBuffer;
 
       if (_remoteAddrLength <= 0) {
-        _remoteAddrLength = createIpAddress(remoteAddrBuffer, 
+        _remoteAddrLength = createIpAddress(remoteAddrBuffer,
                                             remoteAddrCharBuffer);
       }
 
@@ -145,14 +145,14 @@ public class JniSocketImpl extends QSocket {
   public int getRemoteAddress(byte []buffer, int offset, int length)
   {
     int len = _remoteAddrLength;
-    
+
     if (len <= 0) {
-      len = _remoteAddrLength = createIpAddress(_remoteAddrBuffer, 
+      len = _remoteAddrLength = createIpAddress(_remoteAddrBuffer,
                                                 _remoteAddrCharBuffer);
     }
-    
+
     char []charBuffer = _remoteAddrCharBuffer;
-    
+
     for (int i = len - 1; i >= 0; i--) {
       buffer[offset + i] = (byte) charBuffer[i];
     }
@@ -191,7 +191,7 @@ public class JniSocketImpl extends QSocket {
       char []localAddrCharBuffer = _localAddrCharBuffer;
 
       if (_localAddrLength <= 0) {
-        _localAddrLength = createIpAddress(localAddrBuffer, 
+        _localAddrLength = createIpAddress(localAddrBuffer,
                                            localAddrCharBuffer);
       }
 
@@ -312,10 +312,10 @@ public class JniSocketImpl extends QSocket {
     throws IOException
   {
     long expires = timeout + Alarm.getCurrentTimeActual();
-    
+
     synchronized (_readLock) {
       int result = 0;
-      
+
       do {
         result = readNative(_fd, buffer, offset, length, timeout);
       } while (result == JniStream.TIMEOUT_EXN
@@ -378,22 +378,22 @@ public class JniSocketImpl extends QSocket {
   {
     return (_stream == null) ? 0 : _stream.getTotalWriteBytes();
   }
-  
+
   private int createIpAddress(byte []address, char []buffer)
   {
     if (isIpv4(address)) {
       return createIpv4Address(address, 0, buffer, 0);
     }
-    
+
     int offset = 0;
     boolean isZeroCompress = false;
     boolean isInZeroCompress = false;
-    
+
     buffer[offset++] = '[';
-    
+
     for (int i = 0; i < 16; i += 2) {
       int value = (address[i] & 0xff) * 256 + (address[i + 1] & 0xff);
-      
+
       if (value == 0 && i != 14) {
         if (isInZeroCompress)
           continue;
@@ -403,7 +403,7 @@ public class JniSocketImpl extends QSocket {
           continue;
         }
       }
-      
+
       if (isInZeroCompress) {
         isInZeroCompress = false;
         buffer[offset++] = ':';
@@ -412,76 +412,76 @@ public class JniSocketImpl extends QSocket {
       else if (i != 0){
         buffer[offset++] = ':';
       }
-      
+
       if (value == 0) {
         buffer[offset++] = '0';
         continue;
       }
-      
+
       offset = writeHexDigit(buffer, offset, value >> 12);
       offset = writeHexDigit(buffer, offset, value >> 8);
       offset = writeHexDigit(buffer, offset, value >> 4);
       offset = writeHexDigit(buffer, offset, value);
     }
-    
+
     buffer[offset++] = ']';
-    
+
     return offset;
   }
-  
+
   private boolean isIpv4(byte []buffer)
   {
     if (buffer[10] != (byte) 0xff || buffer[11] != (byte) 0xff)
       return false;
-    
+
     for (int i = 0; i < 10; i++) {
       if (buffer[i] != 0)
         return false;
     }
-    
+
     return true;
   }
-  
+
   private int writeHexDigit(char []buffer, int offset, int value)
   {
     if (value == 0)
       return offset;
-    
+
     value = value & 0xf;
-    
+
     if (value < 10)
       buffer[offset++] = (char) ('0' + value);
     else
       buffer[offset++] = (char) ('a' + value - 10);
-    
+
     return offset;
   }
-  
-  private int createIpv4Address(byte []address, int addressOffset, 
+
+  private int createIpv4Address(byte []address, int addressOffset,
                                 char []buffer, int bufferOffset)
   {
     int tailOffset = bufferOffset;
-    
+
     for (int i = 12; i < 16; i++) {
       if (i > 12)
         buffer[tailOffset++] = '.';
-      
+
       int digit = address[addressOffset + i];
       int d1 = digit / 100;
       int d2 = digit / 10 % 10;
       int d3 = digit % 10;
-      
+
       if (digit >= 100) {
         buffer[tailOffset++] = (char) ('0' + d1);
       }
-      
+
       if (digit >= 10) {
         buffer[tailOffset++] = (char) ('0' + d2);
       }
-      
+
       buffer[tailOffset++] = (char) ('0' + d3);
     }
-    
+
     return tailOffset - bufferOffset;
   }
 
@@ -519,9 +519,8 @@ public class JniSocketImpl extends QSocket {
     if (_stream != null)
       _stream.close();
 
-    synchronized (this) {
-      nativeClose(_fd);
-    }
+    // XXX: can't be locked because of accept lock
+    nativeClose(_fd);
   }
 
   @Override
@@ -546,7 +545,7 @@ public class JniSocketImpl extends QSocket {
   native boolean nativeReadNonBlock(long fd, int ms);
 
   private native boolean nativeAccept(long serverSocketFd,
-                                      long socketfd, 
+                                      long socketfd,
                                       byte []localAddress,
                                       byte []remoteAddress);
 
