@@ -69,7 +69,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
   private DependencyContainer _depends = new DependencyContainer();
   private ArrayList<Depend> _cacheDepends;
-  
+
   protected String _contentType;
 
   private PageManager.Entry _entry;
@@ -77,7 +77,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   private String _lastModifiedString;
   private String _etag;
   private QDate _calendar;
-  
+
   private JspManager _jspManager;
 
   private boolean _isRecompiling = false;
@@ -125,7 +125,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   {
     if (encoding != null && encoding.equals("ISO-8859-1"))
       encoding = null;
-    
+
     _contentType = contentType;
   }
 
@@ -202,7 +202,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     for (int i = 0; i < dependList.size(); i++)
       _caucho_addDepend(dependList.get(i));
   }
-  
+
   /**
    * Adds a JSP source dependency.  If the source file changes, the JSP must
    * be recompiled.
@@ -248,7 +248,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   {
     if (_cacheDepends == null)
       _cacheDepends = new ArrayList<Depend>();
-    
+
     Depend depend = new Depend(path, lastModified, length);
 
     if (! _cacheDepends.contains(depend))
@@ -273,7 +273,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
       if (! _cacheDepends.contains(depend))
         _cacheDepends.add(depend);
     }
-  }    
+  }
 
   /**
    * Returns true if the underlying source has been modified.
@@ -299,7 +299,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   {
     return null;
   }
-  
+
   /**
    * Returns true if deleting the underlying JSP will force a recompilation.
    */
@@ -316,10 +316,10 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   {
     if (_config != null)
       return;
-    
+
     _config = config;
     _isDead = false;
-    
+
     _webApp = (WebApp) config.getServletContext();
 
     //cauchoIsModified();
@@ -430,7 +430,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   public long _caucho_lastModified()
   {
     return 0;
-    
+
     /*
     if (_cacheDepends == null) {
       return 0;
@@ -455,7 +455,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
                                            ArrayList<Depend> cacheDepends)
   {
       long lastModified = 0;
-      
+
       for (int i = 0; i < depends.size(); i++) {
         PersistentDependency dependency = depends.get(i);
 
@@ -468,7 +468,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
       }
 
       for (int i = 0; cacheDepends != null && i < cacheDepends.size(); i++) {
-	Depend depend = cacheDepends.get(i);
+        Depend depend = cacheDepends.get(i);
         long modified = depend.getLastModified();
         if (lastModified < modified)
           lastModified = modified;
@@ -476,7 +476,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
       return lastModified;
   }
-  
+
   /**
    * The extended service method creates JavaScript global variables
    * from a property map.
@@ -493,7 +493,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
     PageManager.Entry entry = _entry;
     if (entry != null)
       entry.accessPage();
-    
+
     long lastModified = getLastModified(req);
 
     if (lastModified > 0) {
@@ -513,20 +513,20 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
           _calendar.setGMTTime(lastModified);
           _lastModifiedString = _calendar.printDate();
         }
-	
-	_lastModified = lastModified;
+
+        _lastModified = lastModified;
       }
-      
+
       String ifMatch = req.getHeader("If-None-Match");
       if (etag.equals(ifMatch)) {
-	res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
-	return;
+        res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
+        return;
       }
 
       String ifModifiedSince = req.getHeader("If-Modified-Since");
       if (_lastModifiedString.equals(ifModifiedSince)) {
-	res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
-	return;
+        res.sendError(HttpServletResponse.SC_NOT_MODIFIED);
+        return;
       }
 
       res.setHeader("ETag", etag);
@@ -535,9 +535,11 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
 
     // jsp/0510, jsp/17f?
     if (res instanceof CauchoResponse) {
-      JspResponse jspResponse = new JspResponse((CauchoResponse) res);
-      
-      service(req, jspResponse);
+      // JspResponse jspResponse = new JspResponse((CauchoResponse) res);
+
+      // service(req, jspResponse);
+
+      service(req, res);
     }
     else {
       // The wrapping is needed to handle the output stream.
@@ -549,7 +551,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
         service(req, resAdapt);
       } finally {
         resAdapt.close();
-	ToCharResponseAdapter.free(resAdapt);
+        ToCharResponseAdapter.free(resAdapt);
       }
     }
   }
@@ -571,7 +573,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   public boolean startRecompiling()
   {
     boolean allowRecompiling;
-    
+
     synchronized (this) {
       allowRecompiling = _isDead || ! _isRecompiling;
       _isRecompiling = true;
@@ -609,7 +611,7 @@ abstract public class Page implements Servlet, ServletConfig, CauchoPage {
   {
     if (_isDead)
       return;
-    
+
     _isDead = true;
     /*
     if (! _isDead)

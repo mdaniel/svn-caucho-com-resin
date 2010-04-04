@@ -750,96 +750,22 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       _contentType = null;
       return;
     }
-    else if (value == "text/html" || value.equals("text/html")) {
-      _contentType = "text/html";
-      return;
-    }
 
-    _contentType = value;
+    ContentType item = _response.parseContentType(value);
 
-    int length = value.length();
-    int i;
-    int ch;
+    _contentType = item.getContentType();
 
-    for (i = 0;
-         i < length && value.charAt(i) != ';'
-           && ! Character.isWhitespace(value.charAt(i));
-         i++) {
-    }
+    String encoding = item.getEncoding();
 
-    if (i < length)
-      _contentType.substring(0, i);
-    else {
-    }
+    // server/172k
+    // _setCharEncoding = encoding;
 
-    while ((i = value.indexOf(';', i)) > 0) {
-      int semicolon = i;
-      for (i++; i < length && XmlChar.isWhitespace(value.charAt(i)); i++) {
-      }
-
-      int j;
-      for (j = i + 1;
-           j < length && ! XmlChar.isWhitespace((ch = value.charAt(j))) &&
-             ch != '=';
-           j++) {
-      }
-
-      if (length <= j)
-        break;
-      else if ((ch = value.charAt(i)) != 'c' && ch != 'C') {
-      }
-      else if (value.substring(i, j).equalsIgnoreCase("charset")) {
-        for (; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
-        }
-
-        if (length <= j || value.charAt(j) != '=')
-          continue;
-
-        for (j++; j < length && XmlChar.isWhitespace(value.charAt(j)); j++) {
-        }
-
-        String encoding;
-
-        if (j < length && value.charAt(j) == '"') {
-          int k = ++j;
-
-          for (; j < length && value.charAt(j) != '"'; j++) {
-          }
-
-          encoding = value.substring(k, j);
-        }
-        else {
-          int k = j;
-          for (k = j;
-               j < length && ! XmlChar.isWhitespace(ch = value.charAt(j)) && ch != ';';
-               j++) {
-          }
-
-          encoding = value.substring(k, j);
-        }
-
-        int tail = value.indexOf(';', semicolon + 1);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(value, 0, semicolon);
-        if (tail > 0)
-          sb.append(value, tail, value.length());
-
-        _contentType = sb.toString();
-
-        // server/172k
-        // _setCharEncoding = encoding;
-
-        setCharacterEncoding(encoding);
-        break;
-      }
-      else
-        i = j;
-    }
+    if (encoding != null)
+      setCharacterEncoding(encoding);
 
     // XXX: conflict with servlet exception throwing order?
     try {
-      String encoding = getCharacterEncoding();
+      encoding = getCharacterEncoding();
 
       _responseStream.setEncoding(encoding);
     } catch (Exception e) {
@@ -1014,7 +940,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
       setHeader("Content-Type", "text/html; charset=utf-8");
 
     String msg = "The URL has moved <a href=\"" + path + "\">here</a>";
-    
+
     // The data is required for some WAP devices that can't handle an
     // empty response.
     if (_writer != null) {

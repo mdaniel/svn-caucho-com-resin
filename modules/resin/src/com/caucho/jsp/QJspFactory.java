@@ -46,7 +46,7 @@ public class QJspFactory extends JspFactory {
   private static JspEngineInfo _engineInfo = new EngineInfo();
 
   private static QJspFactory _factory;
-  
+
   static public QJspFactory create()
   {
     if (_factory == null)
@@ -56,13 +56,15 @@ public class QJspFactory extends JspFactory {
   }
 
   public PageContext getPageContext(Servlet servlet,
-				    ServletRequest request,
-				    ServletResponse response,
-				    String errorPageURL,
-				    boolean needsSession,
-				    int buffer,
-				    boolean autoFlush)
+                                    ServletRequest request,
+                                    ServletResponse response,
+                                    String errorPageURL,
+                                    boolean needsSession,
+                                    int buffer,
+                                    boolean autoFlush)
   {
+    // WebApp webApp = (WebApp) request.getServletContext();
+
     PageContextImpl pc = new PageContextImpl();
 
     try {
@@ -91,12 +93,12 @@ public class QJspFactory extends JspFactory {
   {
     return getEngineInfo().getSpecificationVersion();
   }
-  
+
   public JspEngineInfo getEngineInfo()
   {
     return _engineInfo;
   }
-  
+
   public JspApplicationContext getJspApplicationContext(ServletContext context)
   {
     return ((WebApp) context).getJspApplicationContext();

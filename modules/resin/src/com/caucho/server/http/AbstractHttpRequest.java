@@ -121,19 +121,19 @@ public abstract class AbstractHttpRequest
 
   private static final Cookie []NULL_COOKIES = new Cookie[0];
 
-  protected final Server _server;
+  private final Server _server;
 
-  protected final SocketLink _conn;
-  protected final TcpSocketLink _tcpConn;
+  private final SocketLink _conn;
+  private final TcpSocketLink _tcpConn;
 
-  protected final AbstractHttpResponse _response;
+  private final AbstractHttpResponse _response;
 
   private final InvocationKey _invocationKey = new InvocationKey();
 
   // Connection stream
-  protected final ReadStream _rawRead;
+  private final ReadStream _rawRead;
   // Stream for reading post contents
-  protected final ReadStream _readStream;
+  private final ReadStream _readStream;
 
   private final ArrayList<Cookie> _cookies = new ArrayList<Cookie>();
 
@@ -151,10 +151,10 @@ public abstract class AbstractHttpRequest
   private final ErrorPageManager _errorManager = new ErrorPageManager(null);
 
   // Efficient date class for printing date headers
-  protected final QDate _calendar = new QDate();
+  private final QDate _calendar = new QDate();
   private final CharBuffer _cbName = new CharBuffer();
   private final CharBuffer _cbValue = new CharBuffer();
-  protected final CharBuffer _cb = new CharBuffer();
+  private final CharBuffer _cb = new CharBuffer();
 
   private HttpBufferStore _httpBuffer;
 
@@ -240,6 +240,11 @@ public abstract class AbstractHttpRequest
   public final DispatchServer getDispatchServer()
   {
     return _server;
+  }
+
+  protected final CharBuffer getCharBuffer()
+  {
+    return _cb;
   }
 
   /**
@@ -354,7 +359,7 @@ public abstract class AbstractHttpRequest
     else
       return null;
   }
-  
+
   @Override
   public String getProtocolRequestURL()
   {
@@ -363,7 +368,7 @@ public abstract class AbstractHttpRequest
     if (request != null)
       return request.getRequestURL().toString();
     else
-      return null;    
+      return null;
   }
 
   /**
@@ -930,10 +935,10 @@ public abstract class AbstractHttpRequest
     throws UnsupportedEncodingException
   {
     // server/122k (tck)
-    
+
     if (_hasReadStream)
       return;
-    
+
     _readEncoding = encoding;
 
     try {
@@ -1156,6 +1161,16 @@ public abstract class AbstractHttpRequest
       }
     }
 
+    return _readStream;
+  }
+
+  public final ReadStream getRawRead()
+  {
+    return _rawRead;
+  }
+
+  public final ReadStream getReadStream()
+  {
     return _readStream;
   }
 
@@ -1458,7 +1473,7 @@ public abstract class AbstractHttpRequest
 
     return invocation.getRequestInvocation(_requestFacade);
   }
-  
+
   /**
    * Handles a comet-style resume.
    *
@@ -1469,14 +1484,14 @@ public abstract class AbstractHttpRequest
   {
     try {
       startInvocation();
-      
+
       HttpServletRequestImpl request = getRequestFacade();
-      
+
       /*
       if (! request.isAsyncStarted())
         return false;
         */
-      
+
       if (request == null)
         return false;
 
@@ -1484,12 +1499,12 @@ public abstract class AbstractHttpRequest
 
       ServletContext webApp = asyncContext.getDispatchContext();
       String url = asyncContext.getDispatchPath();
-      
+
       HttpServletRequest asyncRequest = getRequestFacade();
       HttpServletResponse asyncResponse = getResponseFacade();
-      
+
       // asyncContext.onStart(webApp, asyncRequest, asyncResponse);
-      
+
       if (url != null) {
         if (webApp == null)
           webApp = getWebApp();
@@ -1534,13 +1549,13 @@ public abstract class AbstractHttpRequest
 
     return isSuspend();
   }
-  
+
   WebApp getAsyncDispatchWebApp()
   {
     // XXX:
     throw new UnsupportedOperationException();
   }
-  
+
   String getAsyncDispatchUrl()
   {
     // XXX:
@@ -1639,7 +1654,7 @@ public abstract class AbstractHttpRequest
 
   /**
    * Returns true if a keepalive has been allocated for the request.
-   * 
+   *
    * The keepalives are preallocated at the start of the request to keep
    * the connection state machine simple.
    */

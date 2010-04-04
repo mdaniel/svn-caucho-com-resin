@@ -223,25 +223,31 @@ public class FastCgiRequest extends AbstractHttpRequest
   {
     _hasRequest = false;
 
+    SocketLink conn = getConnection();
+    Server server = getServer();
+
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_server.getClassLoader());
+      thread.setContextClassLoader(server.getClassLoader());
 
-      HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) _server);
+      HttpBufferStore httpBuffer = HttpBufferStore.allocate((Server) server);
 
       startRequest(httpBuffer);
       startInvocation();
 
-      _filter.init(_rawRead, _rawWrite);
+      ReadStream is = getRawRead();
+      WriteStream os = getRawWrite();
+
+      _filter.init(is, os);
       _writeStream.init(_filter);
       // _writeStream.setWritePrefix(3);
 
       try {
         _hasRequest = false;
 
-        while (readPacket(_rawRead)) {
+        while (readPacket(is)) {
         }
 
         if (! _hasRequest) {
@@ -253,7 +259,7 @@ public class FastCgiRequest extends AbstractHttpRequest
 
         startInvocation();
 
-        _isSecure = _conn.isSecure() || _conn.getLocalPort() == 443;
+        _isSecure = conn.isSecure() || conn.getLocalPort() == 443;
 
         /*
         if (_protocol.length() == 0)
@@ -283,12 +289,12 @@ public class FastCgiRequest extends AbstractHttpRequest
 
       CharSequence host = getHost();
 
-      String ipHost = _conn.getVirtualHost();
+      String ipHost = conn.getVirtualHost();
       if (ipHost != null)
         host = ipHost;
 
       _invocationKey.init(_isSecure,
-                          host, _conn.getLocalPort(),
+                          host, conn.getLocalPort(),
                           _uri, _uriLength);
 
       Invocation invocation = getInvocation(host);
@@ -321,11 +327,9 @@ public class FastCgiRequest extends AbstractHttpRequest
       }
       */
 
-      if (_server instanceof Server) {
-        WebApp webApp = ((Server) _server).getDefaultWebApp();
-        if (webApp != null)
-          webApp.accessLog(getRequestFacade(), getResponseFacade());
-      }
+      WebApp webApp = server.getDefaultWebApp();
+      if (webApp != null)
+        webApp.accessLog(getRequestFacade(), getResponseFacade());
 
       return false;
     } finally {
@@ -349,17 +353,18 @@ public class FastCgiRequest extends AbstractHttpRequest
   private Invocation getInvocation(CharSequence host)
     throws Throwable
   {
-    Invocation invocation = _server.getInvocation(_invocationKey);
+    Server server = getServer();
+    Invocation invocation = server.getInvocation(_invocationKey);
 
     if (invocation == null) {
-      invocation = _server.createInvocation();
+      invocation = server.createInvocation();
       invocation.setSecure(_isSecure);
 
       if (host != null) {
         String hostName = host.toString().toLowerCase();
 
         invocation.setHost(hostName);
-        invocation.setPort(_conn.getLocalPort());
+        invocation.setPort(getConnection().getLocalPort());
 
         // Default host name if the host doesn't have a canonical
         // name
@@ -370,7 +375,7 @@ public class FastCgiRequest extends AbstractHttpRequest
           invocation.setHostName(hostName);
       }
 
-      InvocationDecoder decoder = _server.getInvocationDecoder();
+      InvocationDecoder decoder = server.getInvocationDecoder();
 
       decoder.splitQueryAndUnescape(invocation, _uri, _uriLength);
 
@@ -388,7 +393,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       }
       */
 
-      invocation = _server.buildInvocation(_invocationKey.clone(),
+      invocation = server.buildInvocation(_invocationKey.clone(),
                                            invocation);
     }
 
@@ -1252,7 +1257,7 @@ public class FastCgiRequest extends AbstractHttpRequest
    */
   public ReadStream getRawInput()
   {
-    return _rawRead;
+    return getRawRead();
   }
 
   public final void onCloseConnection()
@@ -1322,19 +1327,25 @@ public class FastCgiRequest extends AbstractHttpRequest
 
   protected String dbgId()
   {
-    if ("".equals(_server.getServerId()))
-      return "FastCgi[" + _conn.getId() + "] ";
+    String serverId = getServer().getServerId();
+    int connId = getConnectionId();
+
+    if ("".equals(serverId))
+      return "FastCgi[" + connId + "] ";
     else
-      return "FastCgi[" + _server.getServerId() + ", " + _conn.getId() + "] ";
+      return "FastCgi[" + serverId + ", " + connId + "] ";
   }
 
   public String toString()
   {
-    if ("".equals(_server.getServerId()))
-      return getClass().getSimpleName() + "[" + _conn.getId() + "]";
+    String serverId = getServer().getServerId();
+    int connId = getConnectionId();
+
+    if ("".equals(serverId))
+      return getClass().getSimpleName() + "[" + connId + "]";
     else {
-      return (getClass().getSimpleName() + "[" + _server.getServerId()
-              + ", " + _conn.getId() + "]");
+      return (getClass().getSimpleName() + "[" + serverId
+              + ", " + connId + "]");
     }
   }
 
@@ -1405,7 +1416,7 @@ public class FastCgiRequest extends AbstractHttpRequest
       if (length < sublen)
         sublen = length;
 
-      ReadStream is = _request._rawRead;
+      ReadStream is = _request.getRawRead();
 
       is.readAll(buf, offset, sublen);
 

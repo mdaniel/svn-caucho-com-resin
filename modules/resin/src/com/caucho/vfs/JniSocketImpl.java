@@ -23,7 +23,7 @@ import com.caucho.util.Alarm;
  * Abstract socket to handle both normal sockets and bin/resin sockets.
  */
 @Module
-public class JniSocketImpl extends QSocket {
+public final class JniSocketImpl extends QSocket {
   private final static Logger log
     = Logger.getLogger(JniSocketImpl.class.getName());
 
@@ -240,7 +240,7 @@ public class JniSocketImpl extends QSocket {
    * Returns true if the connection is secure.
    */
   @Override
-  public boolean isSecure()
+  public final boolean isSecure()
   {
     // return isSecure(_fd);
 

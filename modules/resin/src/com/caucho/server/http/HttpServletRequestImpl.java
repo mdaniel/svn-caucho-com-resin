@@ -93,7 +93,7 @@ import com.caucho.vfs.WriteStream;
 /**
  * User facade for http requests.
  */
-public class HttpServletRequestImpl extends AbstractCauchoRequest
+public final class HttpServletRequestImpl extends AbstractCauchoRequest
   implements CauchoRequest, WebSocketServletRequest
 {
   private static final Logger log
@@ -409,9 +409,9 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     if (_isSecure != null)
       return _isSecure;
-    
+
     AbstractHttpRequest request = _request;
-    
+
     if (request != null)
       return request.isSecure();
     else
@@ -1405,7 +1405,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     return _isLoginRequested;
   }
-  
+
   @Override
   public void requestLogin()
   {
@@ -1471,7 +1471,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     try {
       WebApp webApp = getWebApp();
-      
+
       if (webApp == null) {
         if (log.isLoggable(Level.FINE))
           log.finer("authentication failed, no web-app found");
@@ -1758,10 +1758,10 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   public void finishInvocation()
   {
     AsyncContextImpl asyncContext = _asyncContext;
-    
+
     if (asyncContext != null)
       asyncContext.onComplete();
-    
+
     _request.finishInvocation();
   }
 
@@ -1816,7 +1816,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   public AsyncContext startAsync(ServletRequest request,
                                  ServletResponse response)
   {
-    
+
     if (! isAsyncSupported())
       throw new IllegalStateException(L.l("The servlet '{0}' at '{1}' does not support async because the servlet or one of the filters does not support asynchronous mode.  The servlet should be annotated with a @WebServlet(asyncSupported=true) annotation or have a <async-supported> tag in the web.xml.",
                                           getServletName(), getServletPath()));
@@ -1826,9 +1826,9 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     }
 
     boolean isOriginal = (request == this && response == _response);
-      
+
     _asyncContext = new AsyncContextImpl(_request, request, response, isOriginal);
-      
+
     if (_asyncTimeout > 0)
       _asyncContext.setTimeout(_asyncTimeout);
 
@@ -1960,13 +1960,13 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
   {
     AsyncContextImpl comet = _asyncContext;
     _asyncContext = null;
-    
+
     /* server/1ld5
     if (comet != null) {
       comet.onComplete();
     }
     */
-    
+
     super.finishRequest();
 
     // ioc/0a10
@@ -1983,7 +1983,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
         }
       }
     }
-    
+
     _request = null;
   }
 
@@ -2033,7 +2033,7 @@ public class HttpServletRequestImpl extends AbstractCauchoRequest
     else
       return null;
   }
-  
+
   public boolean isClosed()
   {
     return _request == null;

@@ -472,15 +472,23 @@ public class HttpResponse extends AbstractHttpResponse
   private void fillDate(long now)
   {
     if (_lastDate / 60000 == now / 60000) {
-      _lastDate = now;
-
+      int min = (int) (now / 60000 % 60);
       int sec = (int) (now / 1000 % 60);
+
+      int m2 = '0' + (min / 10);
+      int m1 = '0' + (min % 10);
 
       int s2 = '0' + (sec / 10);
       int s1 = '0' + (sec % 10);
 
+      _dateBuffer[28] = (byte) m2;
+      _dateBuffer[29] = (byte) m1;
+
       _dateBuffer[31] = (byte) s2;
       _dateBuffer[32] = (byte) s1;
+
+      _lastDate = now;
+
       return;
     }
 

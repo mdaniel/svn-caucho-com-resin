@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -68,6 +69,9 @@ abstract public class AbstractHttpResponse {
   protected static final int HEADER_DATE = HEADER_CONTENT_LENGTH + 1;
   protected static final int HEADER_SERVER = HEADER_DATE + 1;
   protected static final int HEADER_CONNECTION = HEADER_SERVER + 1;
+
+  private static final ConcurrentHashMap<String,ContentType> _contentTypeMap
+    = new ConcurrentHashMap<String,ContentType>();
 
   protected final AbstractHttpRequest _request;
 
@@ -200,7 +204,7 @@ abstract public class AbstractHttpResponse {
     _contentLength = -1;
     _isClosed = false;
   }
-  
+
   public void startInvocation()
   {
   }
@@ -313,7 +317,7 @@ abstract public class AbstractHttpResponse {
   {
     int i = 0;
     boolean hasHeader = false;
-    
+
     ArrayList<String> keys = _headerKeys;
     ArrayList<String> values = _headerValues;
 
@@ -372,6 +376,19 @@ abstract public class AbstractHttpResponse {
 
     _headerKeys.add(key);
     _headerValues.add(value);
+  }
+
+  protected static ContentType parseContentType(String contentType)
+  {
+    ContentType item = _contentTypeMap.get(contentType);
+
+    if (item == null) {
+      item = new ContentType(contentType);
+
+      _contentTypeMap.put(contentType, item);
+    }
+
+    return item;
   }
 
   /**
@@ -845,7 +862,7 @@ abstract public class AbstractHttpResponse {
       }
       else {
         cb.append("; Comment=");
-        cb.append(cookie.getComment());        
+        cb.append(cookie.getComment());
       }
 
       if (cookie instanceof CookieImpl) {
@@ -926,7 +943,7 @@ abstract public class AbstractHttpResponse {
   {
     if (_isClosed)
       return;
- 
+
     try {
       /* XXX:
       if (_statusCode == SC_NOT_MODIFIED && _request.isInitial()) {

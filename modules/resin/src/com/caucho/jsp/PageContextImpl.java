@@ -97,8 +97,10 @@ public class PageContextImpl extends PageContext
   implements ExprEnv, JstlPageContext, VariableResolver {
   private static final Logger log
     = Logger.getLogger(PageContextImpl.class.getName());
-  static final L10N L = new L10N(PageContextImpl.class);
-  
+  private static final L10N L = new L10N(PageContextImpl.class);
+
+  private WebApp _webApp;
+
   private JspWriterAdapter _jspAdapter = new JspWriterAdapter();
   private JspServletOutputStream _jspOutputStream
     = new JspServletOutputStream(this);
@@ -110,18 +112,17 @@ public class PageContextImpl extends PageContext
   private ServletResponse _servletResponse;
   private CauchoResponse _response;
   private ToCharResponseAdapter _responseAdapter;
-  
-  private WebApp _webApp;
+
   private HttpSession _session;
   private JspWriter _topOut;
   private JspWriter _out;
   private String _errorPage;
   protected boolean _isFilled;
-  
+
   private AbstractResponseStream _responseStream;
 
   private BodyResponseStream _bodyResponseStream;
-  
+
   private JspPrintWriter _jspPrintWriter;
 
   private int _bufferSize = 8192;
@@ -137,13 +138,15 @@ public class PageContextImpl extends PageContext
   private final CharBuffer _cb = new CharBuffer();
 
   private VariableResolver _varResolver;
-  
-  private ELContext _elContext;
+
+  private PageELContext _elContextValue;
+  private PageELContext _elContext;
+
   private ELResolver _elResolver;
   private javax.el.FunctionMapper _functionMapper;
   private PageVariableMapper _variableMapper;
   private boolean _hasException;
-  
+
   private HashMap<String,Method> _functionMap;
 
   private ExpressionEvaluatorImpl _expressionEvaluator;
@@ -153,10 +156,10 @@ public class PageContextImpl extends PageContext
   PageContextImpl()
   {
     _attributes = new HashMapImpl<String,Object>();
-    
+
     _bodyResponseStream = new BodyResponseStream();
     _bodyResponseStream.start();
-    
+
     _jspPrintWriter = new JspPrintWriter();
   }
 
@@ -166,8 +169,9 @@ public class PageContextImpl extends PageContext
 
     if (webApp == null)
       throw new NullPointerException();
-    
+
     _webApp = webApp;
+
     _servlet = servlet;
 
     if (servlet instanceof Page) {
@@ -182,53 +186,52 @@ public class PageContextImpl extends PageContext
 
   public PageContextImpl(WebApp webApp, HashMap<String,Method> functionMap)
   {
-    this();
-
-    if (webApp == null)
-      throw new NullPointerException();
-    
     _webApp = webApp;
-    
+
     _functionMap = functionMap;
   }
 
   public void initialize(Servlet servlet,
-			 ServletRequest request,
-			 ServletResponse response,
-			 String errorPage,
-			 boolean needsSession,
-			 int bufferSize,
-			 boolean autoFlush)
+                         ServletRequest request,
+                         ServletResponse response,
+                         String errorPage,
+                         boolean needsSession,
+                         int bufferSize,
+                         boolean autoFlush)
   {
     HttpSession session = null;
-    
+
     if (needsSession)
       session = ((HttpServletRequest) request).getSession(true);
 
     ServletConfig config = servlet.getServletConfig();
     WebApp app = (WebApp) request.getServletContext();
 
+    _webApp = app;
+
     initialize(servlet, app, request, response,
-	       errorPage, session, bufferSize, autoFlush,
-	       false);
+               errorPage, session, bufferSize, autoFlush,
+               false);
   }
 
   public void initialize(Servlet servlet,
-			 WebApp app,
-			 ServletRequest request,
-			 ServletResponse response,
-			 String errorPage,
-			 HttpSession session,
-			 int bufferSize,
-			 boolean autoFlush,
-			 boolean isPrintNullAsBlank)
+                         WebApp app,
+                         ServletRequest request,
+                         ServletResponse response,
+                         String errorPage,
+                         HttpSession session,
+                         int bufferSize,
+                         boolean autoFlush,
+                         boolean isPrintNullAsBlank)
   {
+    _webApp = app;
+
     _servlet = servlet;
     _request = (HttpServletRequest) request;
     _servletResponse = response;
 
     if (response instanceof CauchoResponse
-	&& bufferSize <= TempCharBuffer.SIZE) {
+        && bufferSize <= TempCharBuffer.SIZE) {
       _response = (CauchoResponse) response;
       _responseAdapter = null;
     }
@@ -238,13 +241,13 @@ public class PageContextImpl extends PageContext
       _response = _responseAdapter;
 
       try {
-	// jsp/017m
-	response.setBufferSize(bufferSize);
+        // jsp/017m
+        response.setBufferSize(bufferSize);
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
-    
+
     _responseStream = _response.getResponseStream();
     _topOut = _jspAdapter;
     _responseStream.setAutoFlush(autoFlush);
@@ -253,9 +256,9 @@ public class PageContextImpl extends PageContext
 
     if (bufferSize != TempCharBuffer.SIZE) {
       try {
-	_responseStream.setBufferSize(bufferSize);
+        _responseStream.setBufferSize(bufferSize);
       } catch (Exception e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -266,22 +269,16 @@ public class PageContextImpl extends PageContext
     _session = session;
 
     _out = _topOut;
-    
+
     _errorPage = errorPage;
-    _webApp = app;
     _locale = null;
-    
-    if (app == null)
-      throw new NullPointerException();
 
     // jsp/1059, jsp/3147
-    _elContext = null;
     // XXX: recycling is important for performance reasons
-    /* 
-     _elResolver = null;
-     _bundleManager = null;
-     _varResolver = null;
-    */
+    _elContext = null;
+    if (_elContext != null)
+      _elContext.clear();
+
     _hasException = false;
     //if (_attributes.size() > 0)
     //  _attributes.clear();
@@ -301,7 +298,9 @@ public class PageContextImpl extends PageContext
   {
     // XXX: important for performance reasons
     // jsp/1059, jsp/3147
-     _elContext = null;
+    _elContext = null;
+    if (_elContext != null)
+      _elContext.clear();
   }
 
   protected void setOut(JspWriter out)
@@ -325,7 +324,7 @@ public class PageContextImpl extends PageContext
   {
     if (name == null)
       throw new NullPointerException(L.l("getAttribute must have a non-null name"));
-    
+
     Object value = _attributes.get(name);
     if (value != null)
       return value;
@@ -371,7 +370,7 @@ public class PageContextImpl extends PageContext
   {
     if (name == null)
       throw new NullPointerException(L.l("putAttribute must have a non-null name"));
-    
+
     if (attribute != null)
       return _attributes.put(name, attribute);
     else
@@ -387,7 +386,7 @@ public class PageContextImpl extends PageContext
   {
     if (name == null)
       throw new NullPointerException(L.l("removeAttribute must have a non-null name"));
-    
+
     _attributes.remove(name);
     // jsp/162b
     if (_request != null)
@@ -395,13 +394,13 @@ public class PageContextImpl extends PageContext
 
     if (_session != null) {
       try {
-	_session.removeAttribute(name);
+        _session.removeAttribute(name);
       } catch (IllegalStateException e) {
-	// jsp/162f
-	log.log(Level.FINE, e.toString(), e);
+        // jsp/162f
+        log.log(Level.FINE, e.toString(), e);
       }
     }
-    
+
     if (_webApp != null)
       _webApp.removeAttribute(name);
   }
@@ -440,8 +439,8 @@ public class PageContextImpl extends PageContext
       return getCauchoRequest().getAttribute(name);
     case SESSION_SCOPE:
       {
-	HttpSession session = getSession();
-	return session != null ? session.getValue(name) : null;
+        HttpSession session = getSession();
+        return session != null ? session.getValue(name) : null;
       }
     case APPLICATION_SCOPE:
       return getApplication().getAttribute(name);
@@ -480,11 +479,11 @@ public class PageContextImpl extends PageContext
   {
     if (name == null)
       throw new NullPointerException(L.l("removeAttribute must have a non-null name"));
-    
+
     switch (scope) {
     case PAGE_SCOPE:
       if (name != null)
-	_attributes.remove(name);
+        _attributes.remove(name);
       break;
 
     case REQUEST_SCOPE:
@@ -550,20 +549,20 @@ public class PageContextImpl extends PageContext
     HttpServletRequest req = getCauchoRequest();
 
     if (req != null &&
-	(value = getCauchoRequest().getAttribute(name)) != null)
+        (value = getCauchoRequest().getAttribute(name)) != null)
       return value;
 
     HttpSession session = getSession();
     if (session != null) {
       try {
-	value = session.getAttribute(name);
+        value = session.getAttribute(name);
       } catch (IllegalStateException e) {
-	// jsp/162e
-	log.log(Level.FINE, e.toString(), e);
+        // jsp/162e
+        log.log(Level.FINE, e.toString(), e);
       }
 
       if (value != null)
-	return value;
+        return value;
     }
 
     return getServletContext().getAttribute(name);
@@ -626,9 +625,9 @@ public class PageContextImpl extends PageContext
       body = BodyContentImpl.allocate();
 
     CauchoResponse response = getCauchoResponse();
-    
+
     body.init(_out);
-    
+
     _out = body;
 
     response.setForbidForward(true);
@@ -640,7 +639,7 @@ public class PageContextImpl extends PageContext
     _bodyResponseStream.setWriter(body);
     _bodyResponseStream.setEncoding(response.getCharacterEncoding());
     response.setResponseStream(_bodyResponseStream);
-    
+
     return body;
   }
 
@@ -651,14 +650,14 @@ public class PageContextImpl extends PageContext
   {
     if (writer == _out)
       return null;
-    
+
     JspWriter oldWriter = _out;
-    
+
     StreamJspWriter jspWriter;
 
     jspWriter = new StreamJspWriter();
     jspWriter.init(_out, writer);
-    
+
     _out = jspWriter;
 
     getCauchoResponse().setForbidForward(true);
@@ -694,21 +693,21 @@ public class PageContextImpl extends PageContext
       _bodyResponseStream.setWriter(writer.getWriter());
 
       if (_response != null)
-	_bodyResponseStream.setEncoding(_response.getCharacterEncoding());
+        _bodyResponseStream.setEncoding(_response.getCharacterEncoding());
     }
     else if (_out instanceof JspWriterAdapter) {
       if (getCauchoResponse() != null) {
-	getCauchoResponse().setResponseStream(_responseStream);
-	getCauchoResponse().setForbidForward(false);
+        getCauchoResponse().setResponseStream(_responseStream);
+        getCauchoResponse().setForbidForward(false);
       }
     }
     else if (_out instanceof BodyContentImpl) {
       BodyContentImpl body = (BodyContentImpl) _out;
-      
+
       _bodyResponseStream.setWriter(body.getWriter());
 
       if (_response != null)
-	_bodyResponseStream.setEncoding(_response.getCharacterEncoding());
+        _bodyResponseStream.setEncoding(_response.getCharacterEncoding());
     }
 
     return _out;
@@ -755,17 +754,17 @@ public class PageContextImpl extends PageContext
     /*
     if (_out instanceof FlushBuffer) {
       try {
-	((FlushBuffer) _out).flushBuffer();
+        ((FlushBuffer) _out).flushBuffer();
       } catch (IOException e) {
       }
     }
     */
     try {
       if (_out instanceof FlushBuffer)
-	((FlushBuffer) _out).flushBuffer();
+        ((FlushBuffer) _out).flushBuffer();
     } catch (IOException e) {
     }
-    
+
     _out = oldWriter;
 
     // jsp/18eg
@@ -776,13 +775,13 @@ public class PageContextImpl extends PageContext
     }
     else if (_out instanceof JspWriterAdapter) {
       if (getCauchoResponse() != null) {
-	getCauchoResponse().setResponseStream(_responseStream);
-	getCauchoResponse().setForbidForward(false);
+        getCauchoResponse().setResponseStream(_responseStream);
+        getCauchoResponse().setForbidForward(false);
       }
     }
     else if (_out instanceof BodyContentImpl) {
       BodyContentImpl body = (BodyContentImpl) _out;
-      
+
       _bodyResponseStream.setWriter(body.getWriter());
     }
 
@@ -798,9 +797,9 @@ public class PageContextImpl extends PageContext
     throws IOException
   {
     CauchoResponse response = getCauchoResponse();
-      
+
     AbstractResponseStream currentStream = response.getResponseStream();
-    
+
     response.setResponseStream(_responseStream);
 
     try {
@@ -838,7 +837,7 @@ public class PageContextImpl extends PageContext
   {
     return _request;
   }
-  
+
   /**
    * Returns the servlet response for the page.
    */
@@ -847,7 +846,7 @@ public class PageContextImpl extends PageContext
   {
     return getCauchoResponse();
   }
-  
+
   /**
    * Returns the servlet response for the page.
    */
@@ -855,7 +854,7 @@ public class PageContextImpl extends PageContext
   {
     return _response;
   }
-  
+
   /**
    * Returns the servlet response for the page.
    */
@@ -870,9 +869,9 @@ public class PageContextImpl extends PageContext
       HttpServletRequest req = getCauchoRequest();
 
       if (req != null)
-	_session = req.getSession(false);
+        _session = req.getSession(false);
     }
-    
+
     return _session;
   }
 
@@ -887,7 +886,7 @@ public class PageContextImpl extends PageContext
 
     if (_session == null)
       throw new IllegalStateException(L.l("session is not available"));
-    
+
     return _session;
   }
 
@@ -927,7 +926,7 @@ public class PageContextImpl extends PageContext
   {
     _errorPage = errorPage;
   }
-  
+
   public Exception getException()
   {
     return (Exception) getThrowable();
@@ -939,12 +938,12 @@ public class PageContextImpl extends PageContext
   public Throwable getThrowable()
   {
     Throwable exn = (Throwable) getCauchoRequest().getAttribute(EXCEPTION);
-    
+
     if (exn == null)
       exn = (Throwable) getCauchoRequest().getAttribute("javax.servlet.error.exception_type");
     if (exn == null)
       exn = (Throwable) getCauchoRequest().getAttribute("javax.servlet.jsp:jspException");
-    
+
     return exn;
   }
 
@@ -953,7 +952,7 @@ public class PageContextImpl extends PageContext
   {
     include(relativeUrl, false);
   }
-  
+
   /**
    * Include another servlet into the current output stream.
    *
@@ -968,18 +967,18 @@ public class PageContextImpl extends PageContext
 
     include(relativeUrl, flush);
   }
-  
+
   public StringBuilder encode(String relativeUrl)
   {
     StringBuilder sb = new StringBuilder();
-    
+
     sb.append(relativeUrl);
-    
+
     if (relativeUrl.indexOf('?') >= 0)
       sb.append('&');
     else
       sb.append('?');
-    
+
     return sb;
   }
 
@@ -1000,8 +999,8 @@ public class PageContextImpl extends PageContext
 
       switch (ch) {
       case ' ':
-	sb.append('+');
-	break;
+        sb.append('+');
+        break;
       case '+':
         sb.append("%2b");
         break;
@@ -1012,14 +1011,14 @@ public class PageContextImpl extends PageContext
         sb.append("%3D");
         break;
       default:
-	sb.append(ch);
-	break;
+        sb.append(ch);
+        break;
       }
     }
 
     return sb;
   }
-  
+
   /**
    * Include another servlet into the current output stream.
    *
@@ -1046,15 +1045,15 @@ public class PageContextImpl extends PageContext
           path += pathInfo;
       }
       else if (pathInfo != null)
-	path = pathInfo;
+        path = pathInfo;
       else
         path = "/";
-      
+
       int p = path.lastIndexOf('/');
       if (p >= 0) {
-	_cb.clear();
-	_cb.append(path, 0, p + 1);
-	_cb.append(relativeUrl);
+        _cb.clear();
+        _cb.append(path, 0, p + 1);
+        _cb.append(relativeUrl);
         rd = getServletContext().getRequestDispatcher(_cb.toString());
       }
     }
@@ -1077,7 +1076,7 @@ public class PageContextImpl extends PageContext
 
     rd.include(req, res);
   }
-  
+
   /**
    * Include another servlet into the current output stream.
    *
@@ -1104,9 +1103,9 @@ public class PageContextImpl extends PageContext
     if (_bufferSize == 0) {
       // jsp/15m3, tck
       if (_out instanceof FlushBuffer)
-	((FlushBuffer) _out).flushBuffer();
+        ((FlushBuffer) _out).flushBuffer();
       else
-	_out.flush();
+        _out.flush();
     }
 
     RequestDispatcher rd = null;
@@ -1128,9 +1127,9 @@ public class PageContextImpl extends PageContext
       String servletPath = RequestAdapter.getPageServletPath(req);
       int p = servletPath.lastIndexOf('/');
       if (p >= 0) {
-	_cb.clear();
-	_cb.append(servletPath, 0, p + 1);
-	_cb.append(relativeUrl);
+        _cb.clear();
+        _cb.append(servletPath, 0, p + 1);
+        _cb.append(relativeUrl);
         rd = getServletContext().getRequestDispatcher(_cb.toString());
       }
     }
@@ -1171,11 +1170,11 @@ public class PageContextImpl extends PageContext
       return;
 
     HttpServletRequest request = getCauchoRequest();
-    
+
     request.setAttribute("javax.servlet.jsp.jspException", e);
 
     CauchoResponse response = getCauchoResponse();
-    
+
     response.setForbidForward(false);
     response.setResponseStream(_responseStream);
     response.killCache();
@@ -1189,33 +1188,33 @@ public class PageContextImpl extends PageContext
     if (! (_servlet instanceof Page)) {
     }
     else if (getApplication() == null
-	     || getApplication().getJsp() == null
-	     || ! getApplication().getJsp().isRecompileOnError()) {
+             || getApplication().getJsp() == null
+             || ! getApplication().getJsp().isRecompileOnError()) {
     }
     else if (e instanceof OutOfMemoryError) {
     }
     else if (e instanceof Error) {
       try {
-	Path workDir = getApplication().getAppDir().lookup("WEB-INF/work");
-	String className = _servlet.getClass().getName();
-	Path path = workDir.lookup(className.replace('.', '/') + ".class");
-	
-	log.warning("Removing " + path + " due to " + e);
-		    
-	path.remove();
+        Path workDir = getApplication().getAppDir().lookup("WEB-INF/work");
+        String className = _servlet.getClass().getName();
+        Path path = workDir.lookup(className.replace('.', '/') + ".class");
+
+        log.warning("Removing " + path + " due to " + e);
+
+        path.remove();
       } catch (Exception e1) {
       }
       Page page = (Page) _servlet;
 
       page._caucho_unload();
       if (! page.isDead()) {
-	page.setDead();
-	page.destroy();
+        page.setDead();
+        page.destroy();
       }
     }
 
     _topOut.clearBuffer();
-    
+
     if (_errorPage != null) {
       if (log.isLoggable(Level.FINER)) {
         log.log(Level.FINER, e.toString(), e);
@@ -1234,26 +1233,26 @@ public class PageContextImpl extends PageContext
                             getCauchoRequest().getRequestURI());
 
       try {
-	RequestDispatcher rd = getCauchoRequest().getRequestDispatcher(_errorPage);
+        RequestDispatcher rd = getCauchoRequest().getRequestDispatcher(_errorPage);
 
         if (rd instanceof RequestDispatcherImpl) {
-	  getCauchoResponse().setHasError(true);
-	  
+          getCauchoResponse().setHasError(true);
+
           ((RequestDispatcherImpl) rd).error(getCauchoRequest(), getCauchoResponse());
         }
         else {
-	  if (rd != null) {
-	    getCauchoResponse().killCache();
-	    getCauchoResponse().setNoCache(true);
-	    rd.forward(getCauchoRequest(), getCauchoResponse());
-	  }
-	  else {
-	    log.log(Level.FINE, e.toString(), e);
-	    throw new ServletException(L.l("`{0}' is an unknown error page.  The JSP errorPage directive must refer to a valid URL relative to the current web-app.",
-					   _errorPage));
-	  }
+          if (rd != null) {
+            getCauchoResponse().killCache();
+            getCauchoResponse().setNoCache(true);
+            rd.forward(getCauchoRequest(), getCauchoResponse());
+          }
+          else {
+            log.log(Level.FINE, e.toString(), e);
+            throw new ServletException(L.l("`{0}' is an unknown error page.  The JSP errorPage directive must refer to a valid URL relative to the current web-app.",
+                                           _errorPage));
+          }
         }
-        
+
       } catch (FileNotFoundException e2) {
         log.log(Level.WARNING, e.toString(), e2);
         throw new ServletException(L.l("`{0}' is an unknown error page.  The JSP errorPage directive must refer to a valid URL relative to the current web-app.",
@@ -1268,12 +1267,12 @@ public class PageContextImpl extends PageContext
     /*
     if (_servlet instanceof Page && ! (e instanceof LineMapException)) {
       LineMap lineMap = ((Page) _servlet)._caucho_getLineMap();
-      
+
       if (lineMap != null)
-        e = new JspLineException(e, lineMap);        
+        e = new JspLineException(e, lineMap);
     }
     */
-    
+
     if (e instanceof ServletException) {
       throw (ServletException) e;
     }
@@ -1304,9 +1303,9 @@ public class PageContextImpl extends PageContext
     Integer status = (Integer) getCauchoRequest().getAttribute(AbstractHttpRequest.STATUS_CODE);
 
     return new ErrorData(getThrowable(),
-			 status == null ? 0 : status.intValue(),
-			 (String) getCauchoRequest().getAttribute(AbstractHttpRequest.ERROR_URI),
-			 (String) getCauchoRequest().getAttribute(AbstractHttpRequest.SERVLET_NAME));
+                         status == null ? 0 : status.intValue(),
+                         (String) getCauchoRequest().getAttribute(AbstractHttpRequest.ERROR_URI),
+                         (String) getCauchoRequest().getAttribute(AbstractHttpRequest.SERVLET_NAME));
   }
 
   /**
@@ -1324,7 +1323,7 @@ public class PageContextImpl extends PageContext
   {
     if (_expressionEvaluator == null)
       _expressionEvaluator = new ExpressionEvaluatorImpl(getELContext());
-    
+
     return _expressionEvaluator;
   }
 
@@ -1336,25 +1335,29 @@ public class PageContextImpl extends PageContext
     if (_elContext != null)
       return _elContext;
 
-    WebApp webApp = getApplication();
+    if (_elContextValue == null) {
+      WebApp webApp = getApplication();
 
-    JspApplicationContextImpl jspContext = webApp.getJspApplicationContext();
+      JspApplicationContextImpl jspContext = webApp.getJspApplicationContext();
 
-    if (_elResolver == null) {
-      ELResolver[] resolverArray = jspContext.getELResolverArray();
-      _elResolver = new PageContextELResolver(this, resolverArray);
+      if (_elResolver == null) {
+        ELResolver[] resolverArray = jspContext.getELResolverArray();
+        _elResolver = new PageContextELResolver(this, resolverArray);
+      }
+
+      if (_functionMapper == null)
+        _functionMapper = new PageFunctionMapper();
+
+      if (_variableMapper == null)
+        _variableMapper = new PageVariableMapper();
+
+      _elContextValue = new PageELContext();
+
+      if (_elContextListeners == null)
+        _elContextListeners = jspContext.getELListenerArray();
     }
 
-    if (_functionMapper == null)
-      _functionMapper = new PageFunctionMapper();
-
-    if (_variableMapper == null)
-      _variableMapper = new PageVariableMapper();
-
-    _elContext = new PageELContext();
-
-    if (_elContextListeners == null)
-      _elContextListeners = jspContext.getELListenerArray();
+    _elContext = _elContextValue;
 
     if (_elContextListeners.length > 0) {
       ELContextEvent event = new ELContextEvent(_elContext);
@@ -1363,7 +1366,7 @@ public class PageContextImpl extends PageContext
         _elContextListeners[i].contextCreated(event);
       }
     }
-    
+
     return _elContext;
   }
 
@@ -1386,7 +1389,7 @@ public class PageContextImpl extends PageContext
 
     int p = relPath.lastIndexOf('/');
     String urlPwd = p <= 0 ? "/" : relPath.substring(0, p + 1);
-    
+
     return urlPwd + value;
   }
 
@@ -1397,9 +1400,9 @@ public class PageContextImpl extends PageContext
   {
     try {
       _servlet = null;
-      
+
       if (_attributes.size() > 0)
-	_attributes.clear();
+        _attributes.clear();
 
       /* XXX:
       if (! autoFlush && response instanceof Response)
@@ -1413,42 +1416,45 @@ public class PageContextImpl extends PageContext
       _webApp = null;
       _session = null;
       while (_out instanceof AbstractJspWriter) {
-	if (_out instanceof AbstractJspWriter)
-	  _out = ((AbstractJspWriter) _out).popWriter();
+        if (_out instanceof AbstractJspWriter)
+          _out = ((AbstractJspWriter) _out).popWriter();
       }
 
       JspWriter out = _out;
       _out = null;
       _topOut = null;
       _nodeEnv = null;
-      
+
+      if (_elContext != null)
+        _elContext.clear();
+
       _jspOutputStream.release();
       AbstractResponseStream responseStream = _responseStream;
       _responseStream = null;
-      
+
       ToCharResponseAdapter resAdapt = _responseAdapter;
       _responseAdapter = null;
       if (resAdapt != null) {
         // jsp/15l3
         resAdapt.finish();
-	//_responseAdapter.close();
-	
-	ToCharResponseAdapter.free(resAdapt);
+        //_responseAdapter.close();
+
+        ToCharResponseAdapter.free(resAdapt);
       }
 
       /*
-	// server/137q
+        // server/137q
       if (! _hasException && responseStream != null)
-      	responseStream.close();
+        responseStream.close();
       */
-	
+
       _servletResponse = null;
       _response = null;
     } catch (IOException e) {
       _out = null;
     }
   }
-  
+
   /**
    * Returns the localized message appropriate for the current context.
    */
@@ -1460,10 +1466,10 @@ public class PageContextImpl extends PageContext
 
     if (lc == null)
       lc = getAttribute("caucho.bundle");
-    
+
     if (lc == null)
       lc = Config.find(this, Config.FMT_LOCALIZATION_CONTEXT);
-    
+
     return getLocalizedMessage(lc, key, args, basename);
   }
 
@@ -1481,7 +1487,7 @@ public class PageContextImpl extends PageContext
     String prefix = (String) getAttribute("caucho.bundle.prefix");
 
     // jsp/1c3x
-    if (key == null) 
+    if (key == null)
       key = "";
 
     if (prefix != null)
@@ -1511,9 +1517,9 @@ public class PageContextImpl extends PageContext
     else if (lc instanceof String) {
       LocalizationContext loc = getBundle((String) lc);
       locale = loc.getLocale();
-      
+
       ResourceBundle bundle = loc.getResourceBundle();
-      
+
       try {
         if (bundle != null)
           bundleString = bundle.getString(key);
@@ -1558,8 +1564,8 @@ public class PageContextImpl extends PageContext
       String acceptLanguage = getCauchoRequest().getHeader("Accept-Language");
 
       if (acceptLanguage != null) {
-	String cacheKey = name + acceptLanguage; 
-	bundle = manager.getBundle(name, cacheKey, getCauchoRequest().getLocales());
+        String cacheKey = name + acceptLanguage;
+        bundle = manager.getBundle(name, cacheKey, getCauchoRequest().getLocales());
       }
     }
 
@@ -1582,7 +1588,7 @@ public class PageContextImpl extends PageContext
 
     if (bundle != null)
       return bundle;
-    
+
     bundle = manager.getBundle(name);
 
     if (bundle != null)
@@ -1614,10 +1620,10 @@ public class PageContextImpl extends PageContext
   private Locale getLocaleImpl()
   {
     Object localeObj = Config.find(this, Config.FMT_LOCALIZATION_CONTEXT);
-    
+
     LocalizationContext lc;
     Locale locale = null;
-    
+
     if (localeObj instanceof LocalizationContext) {
       lc = (LocalizationContext) localeObj;
 
@@ -1641,14 +1647,14 @@ public class PageContextImpl extends PageContext
 
     if (locale != null)
       return locale;
-    
+
     String acceptLanguage = getCauchoRequest().getHeader("Accept-Language");
 
     if (acceptLanguage != null) {
       Enumeration e = getCauchoRequest().getLocales();
 
       if (e != null && e.hasMoreElements())
-	locale = (Locale) e.nextElement();
+        locale = (Locale) e.nextElement();
     }
 
     localeObj = Config.find(this, Config.FMT_FALLBACK_LOCALE);
@@ -1665,7 +1671,7 @@ public class PageContextImpl extends PageContext
   {
     Locale locale = null;
     int len = value.length();
-    
+
     CharBuffer cb = new CharBuffer();
     int i = 0;
     char ch = 0;
@@ -1683,9 +1689,9 @@ public class PageContextImpl extends PageContext
       String country = cb.toString();
 
       if (variant != null && ! variant.equals(""))
-	return new Locale(language, country, variant);
+        return new Locale(language, country, variant);
       else
-	return new Locale(language, country);
+        return new Locale(language, country);
     }
     else if (variant != null && ! variant.equals(""))
       return new Locale(language, "", variant);
@@ -1757,7 +1763,7 @@ public class PageContextImpl extends PageContext
   {
     if (fragment == null)
       return "";
-    
+
     BodyContentImpl body = (BodyContentImpl) pushBody();
 
     try {
@@ -1777,7 +1783,7 @@ public class PageContextImpl extends PageContext
   {
     if (fragment == null)
       return "";
-    
+
     BodyContentImpl body = (BodyContentImpl) pushBody();
 
     try {
@@ -1797,7 +1803,7 @@ public class PageContextImpl extends PageContext
   {
     if (fragment == null)
       return null;
-    
+
     BodyContentImpl body = (BodyContentImpl) pushBody();
 
     try {
@@ -1857,7 +1863,7 @@ public class PageContextImpl extends PageContext
     else
       getCauchoRequest().removeAttribute(var);
   }
-  
+
   /**
    * Set/Remove a session attribute.
    */
@@ -1929,7 +1935,7 @@ public class PageContextImpl extends PageContext
 
     return JspUtil.createValueExpression(getELContext(), type, exprString);
   }
-  
+
   /**
    * Finds an attribute in any of the scopes from page to webApp.
    *
@@ -1945,10 +1951,13 @@ public class PageContextImpl extends PageContext
     if (value != null)
       return value;
 
+    ELContext elContext = getELContext();
+    /*
     if (_elContext == null)
       _elContext = EL.getEnvironment();
+    */
 
-    return _elContext.getELResolver().getValue(_elContext, null, name);
+    return elContext.getELResolver().getValue(elContext, null, name);
   }
 
   /**
@@ -2018,7 +2027,7 @@ public class PageContextImpl extends PageContext
         return null;
     }
   }
-  
+
   static class StringArrayEnum implements Enumeration
   {
     private int _index;
@@ -2033,7 +2042,7 @@ public class PageContextImpl extends PageContext
     {
       return _index < _values.length;
     }
-    
+
     public Object nextElement()
     {
       return _values[_index++];
@@ -2041,18 +2050,45 @@ public class PageContextImpl extends PageContext
   }
 
   public class PageELContext extends ServletELContext {
+    private HashMap<Class,Object> _contextMap;
+
     public PageELContext()
     {
     }
 
+    @Override
     public Object getContext(Class key)
     {
       if (key == JspContext.class)
-	return PageContextImpl.this;
+        return PageContextImpl.this;
+      if (key == null)
+        throw new NullPointerException();
+      else if (_contextMap != null)
+        return _contextMap.get(key);
       else
-	return super.getContext(key);
+        return null;
     }
-    
+
+    @Override
+    public void putContext(Class key, Object contextObject)
+    {
+      if (key == null)
+        throw new NullPointerException();
+
+      if (_contextMap == null)
+        _contextMap = new HashMap<Class,Object>(8);
+
+      _contextMap.put(key, contextObject);
+    }
+
+    public void clear()
+    {
+      if (_contextMap != null)
+        _contextMap.clear();
+
+      setLocale(null);
+    }
+
     public PageContextImpl getPageContext()
     {
       return PageContextImpl.this;
@@ -2068,7 +2104,7 @@ public class PageContextImpl extends PageContext
     public Object getApplicationScope()
     {
       return new PageContextAttributeMap(PageContextImpl.this,
-					 APPLICATION_SCOPE);
+                                         APPLICATION_SCOPE);
     }
 
     @Override
@@ -2081,16 +2117,16 @@ public class PageContextImpl extends PageContext
     public Object getRequestScope()
     {
       return new PageContextAttributeMap(PageContextImpl.this,
-					 REQUEST_SCOPE);
+                                         REQUEST_SCOPE);
     }
 
     @Override
     public Object getSessionScope()
     {
       return new PageContextAttributeMap(PageContextImpl.this,
-					 SESSION_SCOPE);
+                                         SESSION_SCOPE);
     }
-    
+
     public ELResolver getELResolver()
     {
       return _elResolver;
@@ -2116,9 +2152,9 @@ public class PageContextImpl extends PageContext
     public Method resolveFunction(String prefix, String localName)
     {
       if (_functionMap != null)
-	return _functionMap.get(prefix + ":" + localName);
+        return _functionMap.get(prefix + ":" + localName);
       else
-	return null;
+        return null;
     }
   }
 
@@ -2129,7 +2165,7 @@ public class PageContextImpl extends PageContext
     {
       return _map == null || _map.size() == 0;
     }
-    
+
     public ValueExpression resolveVariable(String var)
     {
       if (_map != null) {
@@ -2142,8 +2178,8 @@ public class PageContextImpl extends PageContext
       Object value = PageContextImpl.this.resolveVariable(var);
 
       if (value instanceof ValueExpression)
-	return (ValueExpression) value;
-      
+        return (ValueExpression) value;
+
       ValueExpression expr;
 
       expr = super.resolveVariable(var);
@@ -2152,16 +2188,16 @@ public class PageContextImpl extends PageContext
     }
 
     public ValueExpression setVariable(String var,
-				       ValueExpression expr)
+                                       ValueExpression expr)
     {
       // ValueExpression oldValue = getVariable(var);
-      
+
       if (_map == null) {
         _map = new HashMap<String,ValueExpression>();
       }
 
       _map.put(var, expr);
-      
+
       return expr;
     }
 

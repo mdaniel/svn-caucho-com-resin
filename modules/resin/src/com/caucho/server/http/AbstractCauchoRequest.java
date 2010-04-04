@@ -56,12 +56,12 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   private static final L10N L = new L10N(AbstractCauchoRequest.class);
   private static final Logger log
     = Logger.getLogger(AbstractCauchoRequest.class.getName());
-  
-  protected int _sessionGroup = -1;
+
+  private int _sessionGroup = -1;
 
   private boolean _sessionIsLoaded;
   private SessionImpl _session;
-  
+
   abstract public CauchoResponse getResponse();
 
   public RequestDispatcher getRequestDispatcher(String path)
@@ -151,11 +151,11 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   //
 
   public abstract boolean isSessionIdFromCookie();
-  
+
   public abstract String getSessionId();
-  
+
   public abstract void setSessionId(String sessionId);
-  
+
   /**
    * Returns the memory session.
    */
@@ -261,7 +261,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
         && manager.enableSessionCookies()) {
       setSessionId(session.getId());
     }
-    
+
     // server/0123 vs TCK
     /*
     if (session != null)
@@ -381,7 +381,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
   {
     try {
       WebApp webApp = getWebApp();
-      
+
       if (webApp == null) {
         if (log.isLoggable(Level.FINE))
           log.finer("authentication failed, no web-app found");
@@ -432,7 +432,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
    * Returns true if any authentication is requested
    */
   abstract public boolean isLoginRequested();
-  
+
   abstract public void requestLogin();
 
   /**
@@ -485,7 +485,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     // If the authenticator can find the user, return it.
     Login login = webApp.getLogin();
-    
+
     if (login != null) {
       user = login.getUserPrincipal(this);
 
@@ -519,7 +519,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
       else
         return false;
     }
-    
+
     HashMap<String,String> roleMap = invocation.getSecurityRoleMap();
 
     if (roleMap != null) {
@@ -530,7 +530,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     }
 
     String runAs = getRunAs();
-    
+
     if (runAs != null)
       return runAs.equals(role);
 
@@ -576,12 +576,12 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
 
     return inRole;
   }
-  
-  
+
+
   //
   // lifecycle
   //
-  
+
   protected void finishRequest()
     throws IOException
   {
@@ -589,7 +589,7 @@ abstract public class AbstractCauchoRequest implements CauchoRequest {
     //
     if (session == null && getSessionId() != null)
       session = (SessionImpl) getSession(false);
-      
+
     if (session != null)
       session.finishRequest();
   }
