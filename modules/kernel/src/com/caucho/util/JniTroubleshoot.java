@@ -33,7 +33,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.vfs.Path;

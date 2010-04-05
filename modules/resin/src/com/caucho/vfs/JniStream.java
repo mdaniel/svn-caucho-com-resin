@@ -9,7 +9,7 @@ package com.caucho.vfs;
 import java.io.IOException;
 import java.io.InterruptedIOException;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Stream using with JNI.

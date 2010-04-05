@@ -28,7 +28,7 @@
 
 package com.caucho.jsp.java;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.jsp.JspParseException;
 import com.caucho.vfs.WriteStream;
 import com.caucho.xml.QName;

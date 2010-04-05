@@ -41,7 +41,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.http.CauchoRequestWrapper;
 import com.caucho.server.http.Form;

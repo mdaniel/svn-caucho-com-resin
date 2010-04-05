@@ -36,12 +36,12 @@ import java.util.Iterator;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.config.Module;
 import com.caucho.db.block.Block;
 import com.caucho.db.jdbc.GeneratedKeysResultSet;
 import com.caucho.db.table.TableIterator;
 import com.caucho.db.table.Column.ColumnType;
 import com.caucho.db.xa.Transaction;
+import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 

@@ -45,13 +45,13 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAResource;
 
-import com.caucho.config.Module;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractServer;
 import com.caucho.ejb.server.EjbProducer;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
 /**

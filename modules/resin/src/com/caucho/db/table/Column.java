@@ -31,13 +31,13 @@ package com.caucho.db.table;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import com.caucho.config.Module;
 import com.caucho.db.index.BTree;
 import com.caucho.db.index.KeyCompare;
 import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.sql.SelectResult;
 import com.caucho.db.xa.Transaction;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
 @Module

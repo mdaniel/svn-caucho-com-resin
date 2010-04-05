@@ -35,7 +35,7 @@ import java.security.CodeSource;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.make.DependencyContainer;
 import com.caucho.util.Alarm;
 import com.caucho.util.ByteBuffer;

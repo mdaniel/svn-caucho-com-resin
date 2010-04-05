@@ -29,7 +29,7 @@
 
 package com.caucho.network.listen;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 
 /**

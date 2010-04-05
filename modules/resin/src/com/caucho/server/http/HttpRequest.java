@@ -595,9 +595,14 @@ public class HttpRequest extends AbstractHttpRequest
   @Override
   protected void initAttributes(HttpServletRequestImpl request)
   {
-    TcpSocketLink tcpConn = (TcpSocketLink) getConnection();
+    SocketLink conn = getConnection();
 
-    if (tcpConn == null || ! tcpConn.isSecure())
+    if (! (conn instanceof TcpSocketLink))
+      return;
+    
+    TcpSocketLink tcpConn = (TcpSocketLink) conn;
+    
+    if (! conn.isSecure())
       return;
 
     QSocket socket = tcpConn.getSocket();

@@ -33,7 +33,7 @@ import java.net.InetAddress;
 import java.nio.channels.SelectableChannel;
 import java.security.cert.X509Certificate;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Abstract socket to handle both normal sockets and JNI sockets.

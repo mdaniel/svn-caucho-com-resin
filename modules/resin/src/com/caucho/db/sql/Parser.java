@@ -28,11 +28,11 @@
 
 package com.caucho.db.sql;
 
-import com.caucho.config.Module;
 import com.caucho.db.Database;
 import com.caucho.db.table.Column;
 import com.caucho.db.table.Table;
 import com.caucho.db.table.TableFactory;
+import com.caucho.inject.Module;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IntMap;
 import com.caucho.util.L10N;

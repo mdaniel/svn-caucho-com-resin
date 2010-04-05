@@ -28,9 +28,12 @@
 
 package com.caucho.loader;
 
+import com.caucho.inject.Module;
+
 /**
  * Information about a particular package.
  */
+@Module
 public class ClassPackage {
   private String _prefix;
   

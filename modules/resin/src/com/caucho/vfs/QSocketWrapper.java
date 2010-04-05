@@ -28,7 +28,7 @@
 
 package com.caucho.vfs;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.util.IntMap;
 
 import javax.net.ssl.SSLPeerUnverifiedException;

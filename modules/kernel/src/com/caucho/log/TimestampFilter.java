@@ -31,7 +31,7 @@ package com.caucho.log;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 import com.caucho.util.Alarm;
 import com.caucho.util.QDate;

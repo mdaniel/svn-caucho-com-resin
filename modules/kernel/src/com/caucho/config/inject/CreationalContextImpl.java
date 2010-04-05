@@ -32,7 +32,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Stack of partially constructed beans.

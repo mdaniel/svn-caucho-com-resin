@@ -132,6 +132,9 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     // server/1b08 (tck)
     if (_writer != null)
       throw new IllegalStateException(L.l("getOutputStream() can't be called after getWriter()."));
+    
+    // jsp/0510
+    _responseStream.clear();
 
     _outputStream = _response.getResponseOutputStream();
     _outputStream.init(_responseStream);

@@ -27,9 +27,10 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.loader.module;
 
 import java.util.ArrayList;
+
 
 /**
  * A jar artifact in the repository

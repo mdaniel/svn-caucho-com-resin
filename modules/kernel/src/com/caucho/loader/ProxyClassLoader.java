@@ -29,7 +29,7 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Class loader which loads a single proxy.

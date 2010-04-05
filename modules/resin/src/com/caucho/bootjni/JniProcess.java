@@ -37,7 +37,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.util.JniTroubleshoot;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StreamImpl;

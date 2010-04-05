@@ -37,6 +37,7 @@ import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.bytecode.*;
 import com.caucho.config.*;
+import com.caucho.inject.Module;
 import com.caucho.loader.*;
 import com.caucho.config.cfg.*;
 import com.caucho.config.inject.InjectManager;

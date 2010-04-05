@@ -276,8 +276,8 @@ public class PageContextImpl extends PageContext
     // jsp/1059, jsp/3147
     // XXX: recycling is important for performance reasons
     _elContext = null;
-    if (_elContext != null)
-      _elContext.clear();
+    if (_elContextValue != null)
+      _elContextValue.clear();
 
     _hasException = false;
     //if (_attributes.size() > 0)
@@ -299,8 +299,8 @@ public class PageContextImpl extends PageContext
     // XXX: important for performance reasons
     // jsp/1059, jsp/3147
     _elContext = null;
-    if (_elContext != null)
-      _elContext.clear();
+    if (_elContextValue != null)
+      _elContextValue.clear();
   }
 
   protected void setOut(JspWriter out)

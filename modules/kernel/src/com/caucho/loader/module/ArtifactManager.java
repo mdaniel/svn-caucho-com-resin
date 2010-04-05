@@ -27,18 +27,21 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
-
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
+package com.caucho.loader.module;
 
 import java.net.URL;
 import java.util.ArrayList;
 
+import com.caucho.config.ConfigException;
+import com.caucho.inject.Module;
+import com.caucho.loader.EnvironmentApply;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.util.L10N;
+
 /**
  * A jar artifact in the repository
  */
+@Module
 public class ArtifactManager
 {
   private static final L10N L = new L10N(ArtifactManager.class);
@@ -60,7 +63,7 @@ public class ArtifactManager
   private ArrayList<ArtifactClassLoader> _loaderList
     = new ArrayList<ArtifactClassLoader>();
 
-  ArtifactManager(EnvironmentClassLoader loader)
+  public ArtifactManager(EnvironmentClassLoader loader)
   {
     _loader = loader;
   }
@@ -153,7 +156,7 @@ public class ArtifactManager
     }
   }
 
-  void applyVisibleModules(EnvironmentApply apply)
+  public void applyVisibleModules(EnvironmentApply apply)
   {
     resolve();
     

@@ -51,7 +51,6 @@ import javax.enterprise.inject.spi.Bean;
 import javax.inject.Scope;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.Module;
 import com.caucho.config.Names;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanFactory;
@@ -62,6 +61,7 @@ import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.type.TypeFactory;
 import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.inject.Module;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 

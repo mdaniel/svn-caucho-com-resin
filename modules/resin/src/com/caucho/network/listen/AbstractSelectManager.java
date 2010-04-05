@@ -28,7 +28,7 @@
 
 package com.caucho.network.listen;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 
 /**

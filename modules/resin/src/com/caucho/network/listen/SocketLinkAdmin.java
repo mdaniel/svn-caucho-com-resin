@@ -30,7 +30,7 @@
 
 package com.caucho.network.listen;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.PortMXBean;
 import com.caucho.management.server.TcpConnectionInfo;

@@ -31,7 +31,7 @@ package com.caucho.db.sql;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 @Module
 public class SubSelectParamExpr extends Expr {

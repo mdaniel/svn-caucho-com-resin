@@ -48,10 +48,10 @@ import javax.security.auth.Subject;
 import javax.transaction.xa.XAResource;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.Module;
 import com.caucho.config.types.Period;
 import com.caucho.env.sample.ActiveTimeProbe;
 import com.caucho.env.sample.ProbeManager;
+import com.caucho.inject.Module;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.ConnectionPoolMXBean;

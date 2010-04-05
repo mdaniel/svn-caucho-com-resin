@@ -29,8 +29,6 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cluster.Server;
-import com.caucho.server.dispatch.ProtocolDispatchServer;
 import com.caucho.xml.XmlChar;
 
 /**
@@ -50,6 +48,11 @@ class ContentType {
 
     parseContentType(userContentType);
   }
+  
+  public String getUserContentType()
+  {
+    return _userContentType;
+  }
 
   public String getContentType()
   {
@@ -64,16 +67,18 @@ class ContentType {
   private void parseContentType(String value)
   {
     int length = value.length();
-    int i;
     int ch;
-
-    for (i = 0;
-         i < length && value.charAt(i) != ';'
-           && ! Character.isWhitespace(value.charAt(i));
-         i++) {
-    }
+    int i = 0;
 
     while (i < length) {
+      for (;
+           i < length && value.charAt(i) != ';';
+           i++) {
+      }
+      
+      if (length <= i)
+        break;
+
       int semicolon = i;
 
       for (i++; i < length && XmlChar.isWhitespace(value.charAt(i)); i++) {
@@ -91,9 +96,11 @@ class ContentType {
       if (length <= i)
         break;
       else if ((ch = value.charAt(keyIndex)) != 'c' && ch != 'C') {
+        i++;
       }
       else if (! value.regionMatches(true, keyIndex,
                                      "charset", 0, i - keyIndex)) {
+        i++;
       }
       else {
         for (; i < length && XmlChar.isWhitespace(value.charAt(i)); i++) {
@@ -126,12 +133,13 @@ class ContentType {
           _encoding = value.substring(encodingIndex, i).intern();
         }
 
-        int tail = value.indexOf(';', semicolon + 1);
-
-        if (tail > 0) {
+        for (; i < length && value.charAt(i) != ';'; i++) {
+        }
+        
+        if (i < length) {
           StringBuilder sb = new StringBuilder();
           sb.append(value, 0, semicolon);
-          sb.append(value, tail, value.length());
+          sb.append(value, i, value.length());
 
           _contentType = sb.toString().intern();
         }

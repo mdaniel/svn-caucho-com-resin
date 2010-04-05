@@ -28,7 +28,7 @@
 
 package com.caucho.jca.ra;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.ThreadPool;

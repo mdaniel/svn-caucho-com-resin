@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.logging.Formatter;
 import java.util.logging.LogRecord;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.Alarm;

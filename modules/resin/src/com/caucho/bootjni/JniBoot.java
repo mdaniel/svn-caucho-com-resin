@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.caucho.boot.Boot;
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Resin's bootstrap class.

@@ -16,7 +16,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.JniTroubleshoot;
 
@@ -518,13 +518,12 @@ public final class JniSocketImpl extends QSocket {
   @Override
   public void forceShutdown()
   {
+    // can't be locked because of shutdown
     nativeCloseFd(_fd);
   }
 
   /**
    * Closes the socket.
-   *
-   * XXX: potential sync issues
    */
   @Override
   public void close()
@@ -536,7 +535,7 @@ public final class JniSocketImpl extends QSocket {
     if (_stream != null)
       _stream.close();
 
-    // XXX: can't be locked because of accept lock
+    // can't be locked because of shutdown
     nativeClose(_fd);
   }
 

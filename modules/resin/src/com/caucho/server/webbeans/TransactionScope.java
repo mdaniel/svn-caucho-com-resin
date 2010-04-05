@@ -36,10 +36,10 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.transaction.Synchronization;
 
-import com.caucho.config.Module;
 import com.caucho.config.TransactionScoped;
 import com.caucho.config.scope.ContextContainer;
 import com.caucho.config.scope.ScopeContext;
+import com.caucho.inject.Module;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;

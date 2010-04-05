@@ -41,6 +41,7 @@ import java.util.logging.Logger;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
+import com.caucho.loader.module.ArtifactManager;
 import com.caucho.management.server.EnvironmentMXBean;
 import com.caucho.util.ResinThreadPoolExecutor;
 

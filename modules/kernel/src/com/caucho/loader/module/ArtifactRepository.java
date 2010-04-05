@@ -27,8 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.loader.module;
 
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentLocal;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

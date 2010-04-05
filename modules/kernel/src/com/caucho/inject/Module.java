@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.inject;
 
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.ElementType.FIELD;

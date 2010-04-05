@@ -32,6 +32,8 @@ package com.caucho.loader;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.loader.maven.MavenProject;
+import com.caucho.loader.module.Artifact;
+import com.caucho.loader.module.ArtifactDependency;
 import com.caucho.util.L10N;
 import com.caucho.repository.ModuleRepository;
 import com.caucho.vfs.Depend;

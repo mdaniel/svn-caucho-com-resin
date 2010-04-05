@@ -59,7 +59,6 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 
-import com.caucho.config.Module;
 import com.caucho.config.Names;
 import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.program.Arg;
@@ -67,6 +66,7 @@ import com.caucho.config.program.BeanArg;
 import com.caucho.config.timer.ScheduleIntrospector;
 import com.caucho.config.timer.TimeoutCaller;
 import com.caucho.config.timer.TimerTask;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
 /**

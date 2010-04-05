@@ -27,10 +27,11 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.loader.module;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
+import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
 

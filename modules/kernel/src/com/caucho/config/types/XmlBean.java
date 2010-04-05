@@ -40,12 +40,12 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.PassivationCapable;
 
-import com.caucho.config.Module;
 import com.caucho.config.inject.BeanWrapper;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean

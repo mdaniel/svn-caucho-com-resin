@@ -31,7 +31,7 @@ package com.caucho.server.distlock;
 
 import java.util.concurrent.locks.Lock;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Manages the distributed lock

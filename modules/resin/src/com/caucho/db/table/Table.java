@@ -29,7 +29,6 @@
 
 package com.caucho.db.table;
 
-import com.caucho.config.Module;
 import com.caucho.db.Database;
 import com.caucho.db.block.Block;
 import com.caucho.db.block.BlockStore;
@@ -41,6 +40,7 @@ import com.caucho.db.sql.Expr;
 import com.caucho.db.sql.Parser;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
+import com.caucho.inject.Module;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;

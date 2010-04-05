@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import com.caucho.bootjni.JniProcess;
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.vfs.Path;
 
 /**

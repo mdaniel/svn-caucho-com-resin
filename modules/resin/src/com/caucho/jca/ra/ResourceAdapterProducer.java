@@ -36,7 +36,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Controller for a resource-adapter

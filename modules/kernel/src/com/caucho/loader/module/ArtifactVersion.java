@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.loader;
+package com.caucho.loader.module;
 
 import com.caucho.config.ConfigException;
 import com.caucho.util.L10N;

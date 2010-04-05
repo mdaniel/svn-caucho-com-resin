@@ -29,10 +29,10 @@
 
 package com.caucho.db.table;
 
-import com.caucho.config.Module;
 import com.caucho.db.index.BTree;
 import com.caucho.db.sql.QueryContext;
 import com.caucho.db.xa.Transaction;
+import com.caucho.inject.Module;
 import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 

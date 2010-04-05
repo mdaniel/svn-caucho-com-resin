@@ -31,7 +31,7 @@ package com.caucho.cluster;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.distlock.AbstractLockManager;

@@ -18,7 +18,7 @@
                      error-page="/error.php"/>
     <resin:BasicLogin/>
   </resin:LoginList>
-<!--
+
   <resin:Allow url-pattern="*.php">
     <resin:if test="${! resin_admin_external}">
       <resin:IfNetwork>
@@ -33,5 +33,5 @@
     </resin:if>
     <resin:IfUserInRole role="resin-admin"/>
   </resin:Allow>
-  -->
+
 </web-app>

@@ -38,7 +38,7 @@ import java.util.logging.Logger;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;

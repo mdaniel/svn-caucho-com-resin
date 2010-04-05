@@ -32,8 +32,8 @@ package com.caucho.db.sql;
 import java.sql.SQLException;
 import java.util.ArrayList;
 
-import com.caucho.config.Module;
 import com.caucho.db.table.Column.ColumnType;
+import com.caucho.inject.Module;
 
 @Module
 final class EqExpr extends Expr {

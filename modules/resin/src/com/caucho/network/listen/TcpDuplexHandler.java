@@ -31,7 +31,7 @@ package com.caucho.network.listen;
 
 import java.io.IOException;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 
 /**

@@ -31,10 +31,10 @@ package com.caucho.loader.maven;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.loader.Artifact;
-import com.caucho.loader.ArtifactDependency;
-import com.caucho.loader.ArtifactVersion;
-import com.caucho.loader.ArtifactVersionRange;
+import com.caucho.loader.module.Artifact;
+import com.caucho.loader.module.ArtifactDependency;
+import com.caucho.loader.module.ArtifactVersion;
+import com.caucho.loader.module.ArtifactVersionRange;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 

@@ -32,7 +32,7 @@ import javax.resource.spi.work.Work;
 import javax.resource.spi.work.WorkEvent;
 import javax.resource.spi.work.WorkListener;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.util.ThreadTask;
 
 /**

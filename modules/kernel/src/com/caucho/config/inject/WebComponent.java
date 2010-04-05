@@ -43,8 +43,8 @@ import javax.enterprise.inject.spi.Bean;
 import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.Module;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
 /**

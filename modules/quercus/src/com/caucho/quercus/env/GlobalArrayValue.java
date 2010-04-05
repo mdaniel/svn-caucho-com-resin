@@ -34,7 +34,7 @@ import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 import com.caucho.quercus.env.ArrayValue.Entry;
 import com.caucho.quercus.env.ArrayValue.EntryIterator;
 import com.caucho.quercus.env.ArrayValue.KeyIterator;

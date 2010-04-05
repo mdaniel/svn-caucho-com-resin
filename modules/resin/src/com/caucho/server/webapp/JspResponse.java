@@ -28,11 +28,11 @@
  */
 package com.caucho.server.webapp;
 
+import com.caucho.inject.Module;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.CauchoResponseWrapper;
 
-import javax.servlet.http.HttpServletResponse;
-
+@Module
 public class JspResponse extends CauchoResponseWrapper {
 
   public JspResponse()

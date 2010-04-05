@@ -28,7 +28,7 @@
 
 package com.caucho.db.table;
 
-import com.caucho.config.Module;
+import com.caucho.inject.Module;
 
 /**
  * Validity constraints.
