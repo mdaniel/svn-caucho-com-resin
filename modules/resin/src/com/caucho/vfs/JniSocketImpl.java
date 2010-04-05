@@ -18,6 +18,7 @@ import java.util.logging.Logger;
 
 import com.caucho.config.Module;
 import com.caucho.util.Alarm;
+import com.caucho.util.JniTroubleshoot;
 
 /**
  * Abstract socket to handle both normal sockets and bin/resin sockets.
@@ -26,6 +27,9 @@ import com.caucho.util.Alarm;
 public final class JniSocketImpl extends QSocket {
   private final static Logger log
     = Logger.getLogger(JniSocketImpl.class.getName());
+
+  private static boolean _hasJni;
+  private static final JniTroubleshoot _jniTroubleshoot;
 
   private long _fd;
   private JniStream _stream;
@@ -58,6 +62,19 @@ public final class JniSocketImpl extends QSocket {
   JniSocketImpl()
   {
     _fd = nativeAllocate();
+  }
+
+  public static boolean isEnabled()
+  {
+    return _jniTroubleshoot.isEnabled();
+  }
+
+  public static String getInitMessage()
+  {
+    if (! _jniTroubleshoot.isEnabled())
+      return _jniTroubleshoot.getMessage();
+    else
+      return null;
   }
 
   boolean accept(long serverSocketFd)
@@ -587,6 +604,23 @@ public final class JniSocketImpl extends QSocket {
   {
     return ("JniSocketImpl$" + System.identityHashCode(this)
             + "[" + _fd + ",fd=" + getNativeFd(_fd) + "]");
+  }
+
+  static {
+    JniTroubleshoot jniTroubleshoot = null;
+
+    try {
+      System.loadLibrary("resin_os");
+
+      jniTroubleshoot 
+        = new JniTroubleshoot(JniSocketImpl.class, "resin_os");
+    } 
+    catch (Throwable e) {
+      jniTroubleshoot 
+        = new JniTroubleshoot(JniSocketImpl.class, "resin_os", e);
+    }
+
+    _jniTroubleshoot = jniTroubleshoot;
   }
 }
 
