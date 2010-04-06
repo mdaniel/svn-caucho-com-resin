@@ -654,13 +654,12 @@ Java_com_caucho_vfs_JniServerSocketImpl_bindPort(JNIEnv *env,
                       &family, &protocol, &sin_length);
   }
   else {
-    struct sockaddr_in6 *sin6 = (struct sockaddr_in6 *) sin_data;
-    sin6->sin6_family = AF_INET6;
-    sin6->sin6_port = htons(port);
-    family = AF_INET6;
+    sin = (struct sockaddr_in *) sin_data;
+    sin->sin_family = AF_INET;
+    sin->sin_port = htons(port);
+    family = AF_INET;
     protocol = IPPROTO_TCP;
-    sin_length = sizeof(struct sockaddr_in6);
-    sin = (struct sockaddr_in *) sin6;
+    sin_length = sizeof(struct sockaddr_in);
   }
   
   if (! sin)
