@@ -10,6 +10,7 @@
 #endif 
 #include <windows.h>
 #include <winsock2.h>
+#include <ws2tcpip.h>
 #include <io.h>
 #else
 #include <sys/param.h>
@@ -68,7 +69,7 @@ cse_log(char *fmt, ...)
 static char *
 q_strdup(char *str)
 {
-  int len = strlen(str);
+  size_t len = strlen(str);
   char *dup = cse_malloc(len + 1);
 
   strcpy(dup, str);
@@ -955,6 +956,7 @@ socket_fill_address(JNIEnv *env, jobject obj,
                     jbyteArray remote_addr)
 {
   char temp_buf[1024];
+  struct sockaddr_in *sin;
 
   if (ss->_isSecure) {
     jboolean is_secure = conn->sock != 0 && conn->ssl_cipher != 0;
@@ -970,8 +972,10 @@ socket_fill_address(JNIEnv *env, jobject obj,
   }
 
   if (ss->_localPort) {
-    struct sockaddr_in *sin = (struct sockaddr_in *) conn->server_sin;
-    jint local_port = ntohs(sin->sin_port);
+    jint local_port;
+
+    sin = (struct sockaddr_in *) conn->server_sin;
+    local_port = ntohs(sin->sin_port);
 
     (*env)->SetIntField(env, obj, ss->_localPort, local_port);
   }
@@ -984,8 +988,10 @@ socket_fill_address(JNIEnv *env, jobject obj,
   }
 
   if (ss->_remotePort) {
-    struct sockaddr_in *sin = (struct sockaddr_in *) conn->client_sin;
-    jint remote_port = ntohs(sin->sin_port);
+	jint remote_port;
+
+    sin = (struct sockaddr_in *) conn->client_sin;
+    remote_port = ntohs(sin->sin_port);
 
     (*env)->SetIntField(env, obj, ss->_remotePort, remote_port);
   }

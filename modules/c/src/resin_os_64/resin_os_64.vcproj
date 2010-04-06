@@ -339,7 +339,7 @@
 				Optimization="2"
 				InlineFunctionExpansion="1"
 				AdditionalIncludeDirectories="c:\program files\java\jdk1.6.0_14\include,c:\program files\java\jdk1.6.0_14\include\win32,..\common,c:\local\ssl\include"
-				PreprocessorDefinitions="WIN32;HAS_JVMTI;NDEBUG;_WINDOWS;_USRDLL"
+				PreprocessorDefinitions="WIN32;HAS_JVMTI;NDEBUG;_WINDOWS;_USRDLL;B64"
 				StringPooling="true"
 				RuntimeLibrary="0"
 				EnableFunctionLevelLinking="true"
