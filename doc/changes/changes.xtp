@@ -11,7 +11,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.6 - snapshot">
+<s2 title="4.0.7 - snapshot">
+<ul>
+</ul>
+</s2>
+
+<s2 title="4.0.6 - April 6, 2010">
 <ul>
 <li>openssl: crypto threading issues with CRYPTO_set_locking_callback (#3531, #3740, rep by Benjamin Loy, bryan)</li> 
 <li>jni: socket accept/close changes to avoid fd leak (#3960, rep by rmann)</li>

@@ -125,7 +125,9 @@ public class XmlStandardPlugin implements Extension
   private void configurePath(Path beansPath)
     throws IOException
   {
-    if (beansPath.canRead()) {
+    if (beansPath.canRead() && beansPath.getLength() > 0) {
+      // ioc/0041 - tck allows empty beans.xml
+      
       BeansConfig beans = new BeansConfig(_manager, beansPath);
 
       beansPath.setUserPath(beansPath.getURL());

@@ -1300,7 +1300,7 @@
         <include name="bin/resin.sh"/>
       </fileset>
       
-      <fileset dir="dist/libexec">
+      <fileset dir="${resin.install}/dist/libexec">
         <include name="**"/>
         <exclude name="aclocal.m4"/>
         <exclude name="automake"/>
