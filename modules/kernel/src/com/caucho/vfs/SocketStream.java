@@ -336,12 +336,17 @@ public class SocketStream extends StreamImpl {
 
     // since the output stream is opened lazily, we might
     // need to open it
-    if (_s != null)
-      _s.shutdownOutput();
-    /*
+    if (_s != null) {
+      try {
+        _s.shutdownOutput();
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+      }
+    }
+
+    // SSLSocket doesn't support shutdownOutput()
     if (os != null)
       os.close();
-    */
   }
 
   /**

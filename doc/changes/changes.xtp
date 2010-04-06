@@ -13,6 +13,7 @@
 
 <s2 title="4.0.6 - snapshot">
 <ul>
+<li>openssl: crypto threading issues with CRYPTO_set_locking_callback (#3531, #3740, rep by Benjamin Loy, bryan)</li> 
 <li>jni: socket accept/close changes to avoid fd leak (#3960, rep by rmann)</li>
 <li>jsp: jsp:param in jsp:include must encode '%' (#3976, rep by Aaron Freeman)</li>
 <li>servlet: escape status message for default error page (#3781, rep by Bill Au)</li>

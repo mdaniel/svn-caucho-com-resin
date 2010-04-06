@@ -2,8 +2,5 @@
   <!--
   <jsf enable-developer-aid="true"/>
   -->
-  
-  <servlet-mapping url-pattern="*.jsf"
-                   servlet-class="javax.faces.webapp.FacesServlet"/>
 
 </web-app>
