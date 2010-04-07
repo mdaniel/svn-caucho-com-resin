@@ -21,6 +21,8 @@ namespace Caucho.IIS
         DoTestBasic(context);
       } else if ("/__caucho__test__chunked".Equals(path)) {
         DoTestChunked(context);
+      } else if ("/__caucho__test__ssl".Equals(path)) {
+        DoTestSSL(context);
       } else {
         DoHmux(context);
       }
@@ -35,7 +37,7 @@ namespace Caucho.IIS
       channel.RelayUri(context.Request.RawUrl);
       channel.RelayHttpMethod(context.Request.HttpMethod);
       channel.RelayHeaders(context.Request.Headers);
-      channel.RelayServerVariables(context.Request.ServerVariables);
+      channel.RelayServerVariables(context.Request);
       channel.RelayRequestBody(context.Request);
       channel.MarkQuit();
       //channel.WriteExit();
@@ -79,6 +81,28 @@ namespace Caucho.IIS
         context.Response.Write("chunk:" + i);
         context.Response.Flush();
       }
+    }
+
+    public void DoTestSSL(HttpContext context)
+    {
+      HttpClientCertificate certificate = context.Request.ClientCertificate;
+      context.Response.Output.WriteLine("issuer: " + certificate.Issuer);
+      context.Response.Output.WriteLine("server-issuer: " + certificate.ServerIssuer);
+      context.Response.Output.WriteLine("server-subject" + certificate.ServerSubject);
+      context.Response.Output.WriteLine("valid-from: " + certificate.ValidFrom);
+      context.Response.Output.WriteLine("valid-until: " + certificate.ValidUntil);
+      foreach (String key in certificate.AllKeys) {
+        context.Response.Output.Write(key + ": ");
+        if (certificate.GetValues(key) != null)
+          foreach (String value in certificate.GetValues(key))
+            context.Response.Output.Write(value + ", ");
+        context.Response.Output.WriteLine();
+      }
+      context.Response.Output.WriteLine("is-valid: " + certificate.IsValid);
+      context.Response.Output.WriteLine("is-present: " + certificate.IsPresent);
+      context.Response.Output.WriteLine("cert-cookie: " + certificate.Cookie);
+      context.Response.Output.WriteLine("binary-cert: " + certificate.Certificate.Length);
+      context.Response.Output.WriteLine("cert-encoding: " + certificate.CertEncoding);
     }
   }
 }

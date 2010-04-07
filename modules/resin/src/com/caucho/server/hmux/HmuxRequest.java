@@ -543,10 +543,11 @@ public class HmuxRequest extends AbstractHttpRequest
     try {
       CertificateFactory cf = CertificateFactory.getInstance("X.509");
       InputStream is = _clientCert.createInputStream();
-      Object cert = cf.generateCertificate(is);
+      X509Certificate cert = (X509Certificate) cf.generateCertificate(is);
       is.close();
 
-      request.setAttribute("javax.servlet.request.X509Certificate", cert);
+      request.setAttribute("javax.servlet.request.X509Certificate",
+                           new X509Certificate[]{cert});
       request.setAttribute(com.caucho.security.AbstractLogin.LOGIN_NAME,
                            ((X509Certificate) cert).getSubjectDN());
     } catch (Exception e) {

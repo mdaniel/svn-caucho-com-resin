@@ -120,12 +120,9 @@ namespace Caucho.IIS
       }
     }
 
-    public void RelayServerVariables(NameValueCollection serverVariables)
+    public void RelayServerVariables(HttpRequest request)
     {
-      String protocol = serverVariables.Get("HTTP_VERSION");
-      Trace.TraceInformation("Hmux[{0}] c-r:protocol {1}", _traceId, protocol);
-      WriteRequestString(CSE_PROTOCOL, protocol);
-
+      NameValueCollection serverVariables = request.ServerVariables;
       String remoteAddr = serverVariables.Get("REMOTE_ADDR");
       Trace.TraceInformation("Hmux[{0}] i-r:remote address {1}", _traceId, remoteAddr);
       WriteRequestString(CSE_REMOTE_ADDR, remoteAddr);
@@ -141,16 +138,51 @@ namespace Caucho.IIS
       Trace.TraceInformation("Hmux[{0}] j-r:remote port {1}", _traceId, remotePort);
       WriteRequestString(CSE_REMOTE_PORT, remotePort);
 
-      String serverName = serverVariables.Get("SERVER_NAME");
-      Trace.TraceInformation("Hmux[{0}] v-r:server name {1}", _traceId, remotePort);
+      String serverPort = serverVariables.Get("SERVER_PORT");
+      String serverName = serverVariables.Get("SERVER_NAME") + ':' + serverPort;
+      Trace.TraceInformation("Hmux[{0}] v-r:server name {1}", _traceId, serverName);
       WriteRequestString(HMUX_SERVER_NAME, serverName);
 
-      String serverPort = serverVariables.Get("SERVER_PORT");
       Trace.TraceInformation("Hmux[{0}] g-r:server port {1}", _traceId, serverPort);
       WriteRequestString(CSE_SERVER_PORT, serverPort);
 
-      Trace.TraceInformation("Hmux[{0}] u-r:server type {1}", _traceId, serverPort);
+      Trace.TraceInformation("Hmux[{0}] u-r:server type {1}", _traceId, "IIS");
       WriteRequestString(CSE_SERVER_TYPE, "IIS");
+
+      String protocol = serverVariables.Get("HTTP_VERSION");
+      Trace.TraceInformation("Hmux[{0}] c-r:protocol {1}", _traceId, protocol);
+      WriteRequestString(CSE_PROTOCOL, protocol);
+
+      HttpClientCertificate clientCertificate = request.ClientCertificate;
+      if (request.IsSecureConnection) {
+        Trace.TraceInformation("Hmux[{0}] r-r:secure", _traceId);
+        WriteRequestString((byte)CSE_IS_SECURE, "");
+
+        RelayHeader("HTTPS", "on");
+        RelayHeader("SSL_SECRETKEYSIZE", clientCertificate.KeySize.ToString());
+        //RelayHeader("HTTPS_SECRETKEYSIZE", clientCertificate.SecretKeySize.ToString());
+      }
+
+      if (clientCertificate.IsPresent) {
+        Trace.TraceInformation("Hmux[{0}] t-r:certificate ({1})", _traceId, clientCertificate.Certificate.Length);
+        Write(CSE_CLIENT_CERT);
+        WriteHmuxLength(clientCertificate.Certificate.Length);
+        Write(clientCertificate.Certificate);
+
+        RelayHeader("CERT_ISSUER", clientCertificate.Issuer);
+        RelayHeader("CERT_SERIALNUMBER", clientCertificate.SerialNumber);
+        RelayHeader("CERT_SUBJECT", clientCertificate.Subject);
+        RelayHeader("CERT_SERVER_ISSUER", clientCertificate.ServerIssuer);
+        RelayHeader("CERT_SERVER_SUBJECT", clientCertificate.ServerSubject);
+      }
+    }
+
+    public void RelayHeader(String name, String value)
+    {
+      Trace.TraceInformation("Hmux[{0}] H-r:{1}", _traceId, name);
+      WriteRequestString(HMUX_HEADER, name);
+      Trace.TraceInformation("Hmux[{0}] S-r:{1}", _traceId, value);
+      WriteRequestString(HMUX_STRING, value);
     }
 
     public void RelayRequestBody(HttpRequest request)
@@ -177,6 +209,7 @@ namespace Caucho.IIS
         FlushBuffer();
       }
     }
+
     public void MarkQuit()
     {
       Trace.TraceInformation("Hmux[{0}] Q-r: end of request", _traceId);
