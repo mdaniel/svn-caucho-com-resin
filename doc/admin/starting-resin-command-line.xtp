@@ -133,7 +133,7 @@
       <s1 title="JDK arguments">
 
       <p>Resin 4.0 has moved all JDK arguments into the resin.xml
-      file, in the &lt;<a href="cluster-overview-ref.xtp#server.xtp#jvm-arg">jvm-arg</a>&gt;
+        file, in the &lt;<a config-tag="jvm-arg"/>&gt;
       tag. Because the Resin 4.0 watchdog starts each Resin server instance,
       it can pass the arguments defined in the configuration file to the JVM.
       By moving the Java arguments to the configuration file, server configuration

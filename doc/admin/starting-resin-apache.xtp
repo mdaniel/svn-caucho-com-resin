@@ -328,7 +328,7 @@ to bypass Apache and make a request straight to Resin.
 
 <p>The following snippet shows the
 &lt;<a href="http-server-ref.xtp#http">http</a>&gt;
-and &lt;<a href="cluster-overview-ref.xtp#server.xtp#server">server</a>&gt;
+and &lt;<a config-tag="server"/>&gt;
 configuration for the above example.</p>
 
 <example>

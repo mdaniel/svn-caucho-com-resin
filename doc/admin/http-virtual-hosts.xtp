@@ -162,7 +162,7 @@ any requests.</p>
 
 <p>The example below is a complete, working <code>resin.xml</code> listening
 to HTTP at port 8080.  The <a href="cluster-overview.xtp">cluster</a>
-consists of a single server.  It includes a <a href="cluster-overview-ref.xtp#development-mode-error-page">&lt;development-mode-error-page/></a> to help debugging
+consists of a single server.  It includes a &lt;<a config-tag="development-mode-error-page"/>&gt; to help debugging
 the configuration.  Many sites will omit the error-page to
 hide configuration details in case an error occurs on a live site.</p>
 

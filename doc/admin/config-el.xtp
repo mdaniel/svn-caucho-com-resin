@@ -584,7 +584,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</p>
 <defun title="server">
 
 <p>
-Values related to the active <a href="cluster-overview-ref.xtp#server.xtp">&lt;server></a>.
+Values related to the active &lt;<a config-tag="server">></a>.
 </p>
 
 <deftable title="server properties">

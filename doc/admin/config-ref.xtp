@@ -15,7 +15,7 @@
        - A
       -->
       
-    <ix id="&lt;access-log>" h="cluster-overview-ref.xtp#access-log">
+    <ix id="&lt;access-log>" h="reference.xtp#access-log">
       <d>Specifies the access log file.</d>
     </ix>
     <ix id="access-log" h="logging-ref.xtp#access-log">
@@ -119,7 +119,7 @@ Think of a role as a group of users.</d>
         a file containing a concatenated list of PEM-encoded certificates which have been revoked and are no longer valid</d>
     </ix>
       
-    <ix id="cache" h="cluster-overview-ref.xtp#cache">
+    <ix id="cache" h="reference.xtp#cache">
       <d>Configures Resin's internal HTTP proxy cache.
 Resin's cache can dramatically improve performance by avoiding  re-evaluation
 of slowly changing database-backed changes.</d>
@@ -161,7 +161,7 @@ of slowly changing database-backed changes.</d>
       <d>Adds dynamic classloaders to the current environment.</d>
     </ix>
     
-    <ix id="&lt;cluster>" h="cluster-overview-ref.xtp">
+    <ix id="&lt;cluster>" h="reference.xtp">
       <d>Configures a cluster of Resin servers for load balancing and sharing
 state information.</d>
     </ix>
@@ -471,11 +471,11 @@ reserved ports as root.</d>
       <d><i>As a child of <a config-tag="openssl"/></i>.
         the maximum number of intermediate signers to accept when verifying client certificates</d>
     </ix>
-    <ix id="url" h="cluster-overview-ref.xtp#ping">
+    <ix id="url" h="reference.xtp#ping">
       <d><i>As a child of <a config-tag="ping"/></i>.
         A url to ping.</d>
     </ix>
-    <ix id="try-count" h="cluster-overview-ref.xtp#ping">
+    <ix id="try-count" h="reference.xtp#ping">
       <d><i>As a child of <a config-tag="ping"/></i>.
         If a ping fails, number of times to retry before giving up and restarting 
       </d>
@@ -974,10 +974,6 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</d>
       </d>
     </ix>
     
-    <ix id="min-free-memory" h="config-overview-ref.xtp#min-free-memory">
-      <d>For reliability, Resin periodically checks the amount of free
-memory available.</d>
-    </ix>
     
     <ix id="multipart-form" h="deploy-ref.xtp#multipart-form">
       <d>Enables multipart-mime for forms and file uploads.</d>
@@ -1086,7 +1082,7 @@ memory available.</d>
                 (resin 3.0)</d>
     </ix>
     
-    <ix id="ping" h="cluster-overview-ref.xtp#ping">
+    <ix id="ping" h="reference.xtp#ping">
       <d>Starts a thread that periodically makes a request to the server, and
 restarts Resin if it fails.</d>
     </ix>
@@ -1152,7 +1148,7 @@ with <var>url-regexp</var>, allows substitution variables like <var>$1</var>.
         Return 404 when JSP source is deleted</d>
     </ix>
     
-    <ix id="resin" h="config-overview-ref.xtp#resin">
+    <ix id="resin" h="reference.xtp#resin">
       <d>Top-level configuration for the resin.xml file.</d>
     </ix>
     
@@ -1229,7 +1225,7 @@ of &lt;server&gt;.
       <d>Declares that the application needs a resouce configuration.</d>
     </ix>
     
-    <ix id="retry-time" h="cluster-overview-ref.xtp#ping">
+    <ix id="retry-time" h="reference.xtp#ping">
       <d><i>As a child of <a config-tag="ping"/></i>.
         time between retries</d>
     </ix>
@@ -1239,7 +1235,7 @@ of &lt;server&gt;.
         Reuse the session id even if the session has timed out. (resin 2.0.4)</d>
     </ix>
     
-    <ix id="root-directory" h="config-overview-ref.xtp#root-directory">
+    <ix id="root-directory" h="reference.xtp#root-directory">
       <d>Specifies the root directory for the &lt;server&gt; and &lt;host&gt;
 contexts.</d>
     </ix>
@@ -1306,13 +1302,13 @@ Normally in days (15D), weeks (2W) or months (1M).</d>
       <d>Specifies protected areas of the web site.</d>
     </ix>
     
-    <ix id="security-manager" h="config-overview-ref.xtp#security-manager">
+    <ix id="security-manager" h="reference.xtp#security-manager">
       <d>
 Enable the use of the security manager for the JVM.
       </d>
     </ix>
     
-    <ix id="security-provider" h="config-overview-ref.xtp#security-provider">
+    <ix id="security-provider" h="reference.xtp#security-provider">
       <d>
 Add one or more security providers.</d>
     </ix>
@@ -1321,7 +1317,7 @@ Add one or more security providers.</d>
       <d/>
     </ix>
       
-    <ix id="server" h="cluster-overview-ref.xtp#server">
+    <ix id="server" h="reference.xtp#server">
       <d><i>As a child of <a config-tag="cluster"/></i>.
         configures the server port and protocol for a cluster server. Since Resin 3.0</d>
     </ix>
@@ -1403,12 +1399,12 @@ class name directly like <var>test.HelloWorld</var>
       <d>Configures a simple  classes -style class loader.</d>
     </ix>
     
-    <ix id="sleep-time" h="cluster-overview-ref.xtp#ping">
+    <ix id="sleep-time" h="reference.xtp#ping">
       <d><i>As a child of <a config-tag="ping"/></i>.
         Time to wait between pings.  The first ping is always 15m after the server starts, this is for subsequent pings.</d>
     </ix>
     
-    <ix id="socket-timeout" h="cluster-overview-ref.xtp#ping">
+    <ix id="socket-timeout" h="reference.xtp#ping">
       <d><i>As a child of <a config-tag="ping"/></i>.
         time to wait for server to satrt responding to the tcp connection before giving up</d>
     </ix>

@@ -30,6 +30,7 @@
       <li>&lt;management> (see <a config-tag="resin:JmxService"/>, <a config-tag="resin:LogService"/>, <a config-tag="resin:XaLogService"/>, <a config-tag="resin:AdminAuthenticator"/>)</li>
       <li>&lt;log> (see <a config-tag="log-handler"/>)</li>
       <li>&lt;scheduled-task> (see <a config-tag="resin:ScheduledTask"/>)</li>
+      <li>&lt;persistent-store> (No longer necessary. See <a href="cluster.xtp">clustering</a>.)</li>
       <li>resin:type attribute (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
       <li>uri: convention (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
     </ul>

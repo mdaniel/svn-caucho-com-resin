@@ -266,7 +266,7 @@ Resin in cases of failure, and providing a single point of control for
 the <var>start</var>, <var>stop</var> and <var>restart</var> of all Resin
 processes. It is responsible for launching
 Resin with the correct JVM arguments and environment options such as starting
-Resin as the specified user, e.g. for <a href="cluster-overview-ref.xtp#server.xtp#user-name">&lt;user-name&gt;</a> on unix.</p>
+Resin as the specified user, e.g. for &lt;<a config-tag="user-name"/>&gt; on unix.</p>
 
 <p>ResinWatchdogManager watches Resin via a Socket connection. When
 the watchdog socket closes, Resin shuts itself down gracefully. The 

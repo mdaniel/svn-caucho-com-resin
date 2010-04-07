@@ -432,3 +432,14 @@ div#reference-legend {
   border : solid 1px #fdba31;
   background : #fef3dd;
 }
+
+div#popup {
+  position : absolute;
+  top : 0px;
+  left : 0px;
+  border : solid 1px #fdba31;
+  background : #fef3dd;
+  display : none;
+  overflow : auto;
+  padding : 1em;
+}

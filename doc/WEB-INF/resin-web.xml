@@ -25,6 +25,16 @@
     <servlet servlet-name="xtp-doc" 
              servlet-class="com.caucho.xtpdoc.ResinDocServlet"/>
     <servlet-mapping url-pattern="*.xtp" servlet-name="xtp-doc"/>
+
+    <servlet servlet-name="reference" 
+             servlet-class="com.caucho.xtpdoc.ReferenceServlet">
+      <init>
+        <reference-document>${webApp.root}/admin/reference.xtp</reference-document>
+      </init>
+    </servlet>
+
+    <servlet-mapping url-pattern="/admin/reference/*" 
+                     servlet-name="reference"/>
 		   
     <welcome-file-list>
       <welcome-file>index.xtp</welcome-file>

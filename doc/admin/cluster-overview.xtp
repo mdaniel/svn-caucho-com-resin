@@ -734,8 +734,7 @@ tab of the administration application should look like this:
 <ul>
 <li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
 <li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="cluster-overview-ref.xtp#server">Server tags</a> for ports, threads, and JVM configuration.</li>
-<li>See <a href="config-overview.xtp">Resource</a> configuration for resources: classloader, databases, connectors, and resources.</li>
+<li>See <a href="cluster-ref.xtp#server">Server tags</a> for ports, threads, and JVM configuration.</li>
 <li>See <a href="logging-ref.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
 </ul>
 
@@ -947,7 +946,7 @@ matching the -server-id on the command line.</p>
   <td>${resin.root}</td>
 </tr>
 <tr>
-  <td><a href="cluster-overview-ref.xtp">server</a></td>
+  <td><a config-tag="server"/></td>
   <td>Configures JVM instances (servers).  Each cluster needs at least one server</td>
   <td></td>
 </tr>
@@ -1751,7 +1750,7 @@ the cluster.  Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
 the -server-id command line argument.</p>
 
-<p>See the full <a href="cluster-overview-ref.xtp#server">server configuration</a>
+<p>See the full <a config-tag="server"/> configuration
 for more details of the &lt;server> tag and its children.</p>
 
 <p>The current server is managed with a
@@ -1999,7 +1998,7 @@ element server {
 <parents>cluster</parents>
 
 <p>Defines default values for all &lt;server&gt; instances. See
-<a href="cluster-overview-ref.xtp#server">&lt;server> configuration</a> for more details.</p>
+&lt;<a config-tag="server"/>&gt; configuration for more details.</p>
 
 <example title="Example: server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;

@@ -7,7 +7,7 @@
   <description>
 
   <p>The top-level &lt;resin> tag contains any
-&lt;<a href="cluster-overview-ref.xtp">cluster</a>&gt; defined for a deployment.
+  &lt;<a config-tag="cluster"/>&gt; defined for a deployment.
 It also provides an <a href="config-ref.xtp">resources</a> for
 class-loaders, logging and shared resources.</p>
 
@@ -21,7 +21,7 @@ class-loaders, logging and shared resources.</p>
 
 <ul>
 <li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="cluster-overview-ref.xtp#server.xtp">Server tags</a> for JVM-specific configuration like thread-max, JVM settings, ports, etc.</li>
+<li>See the <a config-tag="server"/> tag for JVM-specific configuration like thread-max, JVM settings, ports, etc.</li>
 <li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
 <li>See <a href="config-ref.xtp">Resource</a> configuration: classloader, databases, connectors, and beans.</li>
 <li>See <a href="logging-ref.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
@@ -36,9 +36,9 @@ class-loaders, logging and shared resources.</p>
 sharing distributed sessions.</p>
 
 <ul>
-<li>See <a href="cluster-overview-ref.xtp">&lt;cluster> tags</a> for more details
+  <li>See the &lt;<a config-tag="cluster"/>> tag for more details
 about the cluster contents.</li>
-<li>See <a href="cluster-overview-ref.xtp#server.xtp">&lt;server> tags</a> for more details
+<li>See the &lt;<a config-tag="server"/>> tag for more details
 about the server contents.</li>
 </ul>
 

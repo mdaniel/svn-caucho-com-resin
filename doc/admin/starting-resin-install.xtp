@@ -105,7 +105,7 @@ server in front of Resin (unrecommended), please take a look
 at our <a href="install-3rd-party.xtp">third-party HTTP server
 setup documentation</a>.  If you need to configure other options
 with Resin, now is the time to do it.  Please consult the <a
-href="configure.xtp">reference to all the configuration options</a>.
+href="reference.xtp">reference to all the configuration options</a>.
 </p>
 
 <p>
