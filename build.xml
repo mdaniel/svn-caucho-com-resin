@@ -809,7 +809,7 @@
 
     <generate-pdf name="resin-admin"/>
 
-    <copy tofile="${build}/pdf/resin-4.0-admin.pdf"
+    <copy tofile="${dist}/resin-4.0-admin.pdf"
           file="${build}/pdf/resin-admin/resin-admin.pdf"/>
     
     <!--
