@@ -56,6 +56,11 @@ public class ReferenceDocument extends Document {
 
   private final HashMap<String,Defun> _defuns = new HashMap<String,Defun>();
 
+  public ReferenceDocument(Path documentPath, String contextPath)
+  {
+    super(documentPath, contextPath);
+  }
+
   public ReferenceDocument(ServletContext webApp,
                            Path documentPath,
                            String contextPath,

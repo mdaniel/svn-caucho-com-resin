@@ -58,6 +58,7 @@ public class Document {
   private boolean _hasChildren;
   private boolean _isArticle;
   private boolean _isDisableAction;
+  private boolean _isJavascriptEnabled = true;
 
   private String _redirect;
 
@@ -104,6 +105,16 @@ public class Document {
   public boolean isDisableAction()
   {
     return _isDisableAction;
+  }
+
+  public boolean isJavascriptEnabled()
+  {
+    return _isJavascriptEnabled;
+  }
+
+  public void setJavascriptEnabled(boolean isJavascriptEnabled)
+  {
+    _isJavascriptEnabled = isJavascriptEnabled;
   }
 
   public Path getRealPath(String uri)

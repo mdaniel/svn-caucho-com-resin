@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -77,6 +77,13 @@ public class Anchor extends FormattedText {
         out.writeStartElement("a");
         out.writeAttribute("href", referenceDocument.getURI() 
                                    + '#' + _configTag);
+
+        if (getDocument().isJavascriptEnabled()) {
+          out.writeAttribute("onmouseover", 
+                             "popup.mouseOverHandler(this, "
+                                                  + "'" + _configTag + "')");
+          out.writeAttribute("onmouseout", "popup.mouseOutHandler()");
+        }
       }
 
       setDefaultText(_configTag);

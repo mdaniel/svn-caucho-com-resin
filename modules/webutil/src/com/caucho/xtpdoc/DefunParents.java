@@ -33,26 +33,46 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.util.HashSet;
+import java.util.Iterator;
 
-public class DefunParents implements ContentItem {
-  private final Document _document;
-  private String _text;
-  private String []_parents;
+public class DefunParents extends ContainerNode implements Iterable<String> {
+  private static final Text COMMA = new Text(",");
+
+  private final HashSet<String> _parents = new HashSet<String>();
 
   public DefunParents(Document document)
   {
-    _document = document;
+    super(document);
   }
 
   public void setText(String text)
   {
-    _text = text;
-    _parents = text.split("[ ,]+");
+    String []parents = text.split("[ ,]+");
+
+    for (int i = 0; i < parents.length; i++) {
+      String parent = parents[i];
+
+      _parents.add(parent);
+
+      Anchor anchor = new Anchor(getDocument());
+      anchor.setConfigTag(parent);
+
+      addItem(anchor);
+
+      if (i < parents.length - 1)
+        anchor.addItem(COMMA);
+    }
   }
 
   public String getCssClass()
   {
     return "reference-parents";
+  }
+
+  public Iterator<String> iterator()
+  {
+    return _parents.iterator();
   }
 
   public void writeHtml(XMLStreamWriter out)
@@ -63,24 +83,7 @@ public class DefunParents implements ContentItem {
 
     out.writeCharacters("child of ");
 
-    ReferenceDocument referenceDocument = _document.getReferenceDocument();
-
-    for (int i = 0; i < _parents.length; i++) {
-      String parent = _parents[i];
-
-      if (referenceDocument != null) {
-        out.writeStartElement("a");
-        out.writeAttribute("href", referenceDocument.getURI() + '#' + parent);
-      }
-
-      out.writeCharacters(parent);
-
-      if (referenceDocument != null)
-        out.writeEndElement(); // a
-
-      if (i < _parents.length - 1)
-        out.writeCharacters(",");
-    }
+    super.writeHtml(out);
 
     out.writeEndElement(); // div
   }
@@ -93,7 +96,9 @@ public class DefunParents implements ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("child of " + _text);
+    out.print("child of ");
+
+    super.writeLaTeX(out);
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)

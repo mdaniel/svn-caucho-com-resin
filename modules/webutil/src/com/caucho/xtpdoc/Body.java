@@ -286,6 +286,9 @@ public class Body extends ContainerNode {
     out.writeEndElement(); // tr
     out.writeEndElement(); // table
 
+    out.writeEmptyElement("div");
+    out.writeAttribute("id", "popup");
+
     out.writeEndElement(); //body
   }
 

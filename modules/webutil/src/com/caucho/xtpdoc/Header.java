@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -166,6 +166,14 @@ public class Header {
     out.writeStartElement("script");
     out.writeAttribute("type", "text/javascript");
     out.writeAttribute("src", _document.getContextPath() + "/js/default.js");
+    out.writeEndElement(); // script
+
+    out.writeStartElement("script");
+    out.writeAttribute("type", "text/javascript");
+    out.writeCharacters("  var popup = null;\n\n");
+    out.writeCharacters("  window.onload = function() {\n");
+    out.writeCharacters("    popup = new Popup();\n");
+    out.writeCharacters("  };\n");
     out.writeEndElement(); // script
 
     out.writeStartElement("title");

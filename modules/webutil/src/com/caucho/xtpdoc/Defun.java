@@ -37,7 +37,7 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 
 public class Defun extends Section {
-  private final HashSet<String> _parents = new HashSet<String>();
+  private DefunParents _parents;
 
   public Defun(Document document)
   {
@@ -53,10 +53,10 @@ public class Defun extends Section {
 
   public DefunParents createParents()
   {
-    DefunParents parents = new DefunParents(getDocument());
-    addItem(parents);
+    _parents = new DefunParents(getDocument());
+    addItem(_parents);
 
-    return parents;
+    return _parents;
   }
 
   public DefunSchema createSchema()
@@ -87,7 +87,7 @@ public class Defun extends Section {
     return description;
   }
 
-  public Iterable<String> getParents()
+  public DefunParents getParents()
   {
     return _parents;
   }
