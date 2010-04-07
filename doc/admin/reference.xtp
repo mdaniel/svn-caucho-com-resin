@@ -194,7 +194,7 @@ parameters in the custom class.</p>
 <tr>
   <td>archive-format</td>
   <td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
+        see <a config-tag="rollover">Rollovers</a>.
   </td>
   <td>see below</td>
 </tr>
@@ -217,7 +217,7 @@ see <a href="logging-ref.xtp#path">"Log Paths"</a>.</td>
 <tr>
   <td>rollover-period</td>
   <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+        months (1M), or hours (1h). See <a config-tag="rollover">Rollovers</a>. 
   </td>
   <td>none</td>
 </tr>
@@ -225,7 +225,7 @@ see <a href="logging-ref.xtp#path">"Log Paths"</a>.</td>
   <td>rollover-size</td>
   <td>maximum size of the file before a rollover occurs, in bytes (50000), 
         kb (128kb), or megabytes (10mb).  
-        See <a href="#rollover">Rollovers</a>.
+        See <a config-tag="rollover">Rollovers</a>.
   </td>
   <td>1mb</td>
 </tr>
@@ -882,9 +882,10 @@ end of a request and logs a warning and stack trace.</p>
 </defun>
 
 
-<defun title="&lt;cluster>" version="Resin 3.1" name="cluster">
+<defun title="&lt;cluster>" name="cluster">
 <parents>resin</parents>
 
+<description>
 <p>&lt;cluster> configures a set of identically-configured servers.
 The cluster typically configures a set of &lt;server&gt;s, each with some
 ports, and a set of virtual &lt;host&gt;s.</p>
@@ -892,8 +893,9 @@ ports, and a set of virtual &lt;host&gt;s.</p>
 <p>Only one &lt;cluster&gt; is active in any on server.  At runtime,
 the &lt;cluster&gt; is selected by the &lt;server&gt; with <var>id</var>
 matching the -server-id on the command line.</p>
+</description>
 
-<deftable title="&lt;cluster> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -905,27 +907,27 @@ matching the -server-id on the command line.</p>
   <td>required</td>
 </tr>
 <tr>
-  <td><a href="http-virtual-hosts-ref.xtp#access-log">access-log</a></td>
+  <td><a config-tag="access-log">access-log</a></td>
   <td>An access-log shared for all virtual hosts.</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="#cache">cache</a></td>
+  <td><a config-tag="cache">cache</a></td>
   <td>Proxy cache for HTTP-cacheable results.</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="#connection-error-page">connection-error-page</a></td>
+  <td><a config-tag="connection-error-page">connection-error-page</a></td>
   <td>IIS error page to use when isapi_srun to Resin connection fails</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="http-virtual-hosts-ref.xtp#ear-default">ear-default</a></td>
+  <td><a config-tag="ear-default">ear-default</a></td>
   <td>default values for deployed ear files</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="#error-page">error-page</a></td>
+  <td><a config-tag="error-page">error-page</a></td>
   <td>Custom error-page when virtual-hosts fail to match</td>
   <td></td>
 </tr>
@@ -980,17 +982,17 @@ matching the -server-id on the command line.</p>
   <td>automatic</td>
 </tr>
 <tr>
-  <td><a href="config-ref.xtp#resin:choose">resin:choose</a></td>
+  <td><a config-tag="resin:choose">resin:choose</a></td>
   <td>Conditional configuration based on EL expressions</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="config-ref.xtp#resin:import">resin:import</a></td>
+  <td><a config-tag="resin:import">resin:import</a></td>
   <td>Imports a custom cluster.xml files for a configuration management </td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="config-ref.xtp#resin:if">resin:if</a></td>
+  <td><a config-tag="resin:if">resin:if</a></td>
   <td>Conditional configuration based on EL expressions</td>
   <td></td>
 </tr>
@@ -1005,7 +1007,7 @@ matching the -server-id on the command line.</p>
   <td>${resin.root}</td>
 </tr>
 <tr>
-  <td><a href="#server">server</a></td>
+  <td><a config-tag="server">server</a></td>
   <td>Configures JVM instances (servers).  Each cluster needs at least one server</td>
   <td></td>
 </tr>
@@ -1044,9 +1046,9 @@ matching the -server-id on the command line.</p>
   <td>Configures defaults to apply to all web-apps in the cluster</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;cluster> schema">
+<schema>
 element cluster {
   attribute id { string }
   &amp; <a href="config-ref.xtp">environment resources</a>
@@ -1078,7 +1080,7 @@ element cluster {
   &amp; url-length-max?
   &amp; web-app-default*
 }
-</def>
+</schema>
 
 <example title="Example: cluster-default">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -1096,24 +1098,6 @@ element cluster {
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
-<s2 title="rewrite-vary-as-private">
-
-<p>Because not all browsers understand the Vary header, Resin can rewrite
-Vary to a Cache-Control: private.  This rewriting will cache the page
-with the Vary in Resin's proxy cache, and also cache the page in the browser.
-Any other proxy caches, however, will not be able to cache the page.</p>
-
-<p>The underlying issue is a limitation of browsers such as IE.  When IE
-sees a Vary header it doesn't understand, it marks the page as uncacheable.
-Since IE only understands "Vary: User-Agent", this would mean IE would
-refuse to cache gzipped pages or "Vary: Cookie" pages.</p>
-
-<p>With the &lt;rewrite-vary-as-private> tag, IE will cache the page
-since it's rewritten as "Cache-Control: private" with no Vary at all.
-Resin will continue to cache the page as normal.</p>
-
-</s2>
 
 </defun>
 
@@ -4180,7 +4164,7 @@ idle socket before closing it.</p>
 keepalive of the cluster port.</p>
 
 <p>load-balance-idle-time must be less than the <var>keepalive</var> value of
-the target <a href="cluster-overview-ref.xtp#cluster-port">cluster-port</a>.</p>
+the target <a config-tag="cluster-port">cluster-port</a>.</p>
 
 <p>The load balancer and distributed sessions reuse sockets to the
 cluster peer and <g>app-tier</g> servers to improve TCP performance.
@@ -4348,7 +4332,7 @@ with the other logging configuration.</p>
 <tr>
   <td>archive-format</td>
   <td>the format for the archive filename when a rollover occurs,
-        see <a href="#rollover">Rollovers</a>.
+        see <a config-tag="rollover">Rollovers</a>.
     </td>
   <td>see below</td>
 </tr>
@@ -4365,13 +4349,13 @@ the output.</td>
 </tr>
 <tr>
   <td>level</td>
-  <td>The <a href="#Log-Levels">log level</a> for the handler.  Typically,
+  <td>The <a config-tag="Log-Levels">log level</a> for the handler.  Typically,
 the handler's level will be finer than the logger's level</td>
   <td>info</td>
 </tr>
 <tr>
   <td>mbean-name</td>
-  <td>an mbean name, see <a href="#mbean">MBean control</a>.</td>
+  <td>an mbean name, see <a config-tag="mbean">MBean control</a>.</td>
   <td>no mbean name, no mbean registration</td>
 </tr>
 <tr>
@@ -4383,7 +4367,7 @@ The handler will be registered with the Logger with the matching name.</td>
 <tr>
   <td>path</td>
   <td>Output path for the log messages, see 
-       <a href="#path">"Log Paths"</a>
+       <a config-tag="path">"Log Paths"</a>
     </td>
   <td>required</td>
 </tr>
@@ -4394,7 +4378,7 @@ The handler will be registered with the Logger with the matching name.</td>
 </tr>
 <tr>
   <td>timestamp</td>
-  <td>a timestamp <a href="#timestamp">format string</a> 
+  <td>a timestamp <a config-tag="timestamp">format string</a> 
         to use at the beginning of each log line.
     </td>
   <td>"[%Y/%m/%d %H:%M:%S.%s] "</td>
@@ -4402,7 +4386,7 @@ The handler will be registered with the Logger with the matching name.</td>
 <tr>
   <td>rollover-count</td>
   <td>maximum number of rollover files before the oldest ones get overwritten.
-        See <a href="#rollover">Rollovers</a>. 
+        See <a config-tag="rollover">Rollovers</a>. 
     </td>
   <td>none</td>
 </tr>
@@ -4414,7 +4398,7 @@ The handler will be registered with the Logger with the matching name.</td>
 <tr>
   <td>rollover-period</td>
   <td>how often to rollover the log.  Specify in days (15D), weeks (2W), 
-        months (1M), or hours (1h). See <a href="#rollover">Rollovers</a>. 
+        months (1M), or hours (1h). See <a config-tag="rollover">Rollovers</a>. 
     </td>
   <td>none</td>
 </tr>
@@ -4422,7 +4406,7 @@ The handler will be registered with the Logger with the matching name.</td>
   <td>rollover-size</td>
   <td>maximum size of the file before a rollover occurs, in bytes (50000), 
         kb (128kb), or megabytes (10mb).  
-        See <a href="#rollover">Rollovers</a>.
+        See <a config-tag="rollover">Rollovers</a>.
     </td>
   <td>1mb</td>
 </tr>
@@ -4829,7 +4813,7 @@ open connections allowed for Resin's database pool.  Sites
 can use &lt;max-connections> to throttle the number of database
 connections for an overloaded server.  When <code>max-connections</code>
 is reached and an application calls <code>getConnection</code>, Resin will
-wait <a href="#connection-wait-time">connection-wait-time</a> or until
+wait <a config-tag="connection-wait-time">connection-wait-time</a> or until
 a connection is freed before allocating a new connection.</p>
 
 <default>128</default>
@@ -5229,13 +5213,13 @@ System properties are used to configure a different SMTP server.
 <parents>database</parents>
 
 <p>&lt;ping> enables connection validation.  When &lt;ping> is enabled,
-Resin will test the connection with <a href="#ping-query">&lt;ping-query></a>
-or <a href="#ping-table">&lt;ping-table></a> before returning a connection
+Resin will test the connection with <a config-tag="ping-query">&lt;ping-query></a>
+or <a config-tag="ping-table">&lt;ping-table></a> before returning a connection
 to the user.  If the connection fails the test, Resin will close it and
 return a new connection.</p>
 
 <p>For efficiency, Resin will only validate the connection if it
-has been idle for longer than <a href="#ping-interval">&lt;ping-interval></a>.
+has been idle for longer than <a config-tag="ping-interval">&lt;ping-interval></a>.
 </p>
 
 <default>false</default>
@@ -5501,6 +5485,27 @@ element rewrite-real-path {
 </example>
 
 </defun>
+
+<defun title="&lt;rewrite-vary-as-private>" name="rewrite-vary-as-private">
+
+<description>
+<p>Because not all browsers understand the Vary header, Resin can rewrite
+Vary to a Cache-Control: private.  This rewriting will cache the page
+with the Vary in Resin's proxy cache, and also cache the page in the browser.
+Any other proxy caches, however, will not be able to cache the page.</p>
+
+<p>The underlying issue is a limitation of browsers such as IE.  When IE
+sees a Vary header it doesn't understand, it marks the page as uncacheable.
+Since IE only understands "Vary: User-Agent", this would mean IE would
+refuse to cache gzipped pages or "Vary: Cookie" pages.</p>
+
+<p>With the &lt;rewrite-vary-as-private> tag, IE will cache the page
+since it's rewritten as "Cache-Control: private" with no Vary at all.
+Resin will continue to cache the page as normal.</p>
+</description>
+
+</defun>
+
 
 <defun title="&lt;root-directory>" version="Resin 3.0" name="root-directory">
 <parents>resin, cluster, host, web-app</parents>
@@ -6573,7 +6578,7 @@ a top-level tag of &lt;cluster>.
 </tr>
 <tr>
   <td>fileset</td>
-  <td>a <a href="config-ref.xtp#fileset">fileset</a> describing all
+  <td>a <a config-tag="fileset">fileset</a> describing all
 the files to import.</td>
   <td>either path or fileset is required</td>
 </tr>
@@ -6674,7 +6679,7 @@ login module.
   <th>Default</th>
 </tr>
 <tr>
-  <td><a href="#jaas-init-param">init-param</a></td>
+  <td><a config-tag="jaas-init-param">init-param</a></td>
   <td>Adds a property to the LoginModule.</td>
   <td>None</td>
 </tr>
@@ -6853,7 +6858,7 @@ JNDI to connect to an LDAP (or Active Directory) server for authentication.
   <td>None</td>
 </tr>
 <tr>
-  <td><a href="#jndi-env">jndi-env</a></td>
+  <td><a config-tag="jndi-env">jndi-env</a></td>
   <td>Add a property to the JNDI provider used for connecting to the LDAP server.</td>
   <td>See below</td></tr>
 <tr>
@@ -7418,8 +7423,8 @@ singletons.  Applications should use the &lt;bean> syntax instead.</p>
   <!-- com.caucho.config.types.Resource -->
 
 <p>&lt;resource-adapter> configures a JCA <code>ResourceAdapter</code>
-in combination with <a href="#connection-factory">&lt;connection-factory></a>
-for connections or <a href="#activation-spec">&lt;activation-spec</a> for
+in combination with <a config-tag="connection-factory">&lt;connection-factory></a>
+for connections or <a config-tag="activation-spec">&lt;activation-spec</a> for
 message listeners.  </p>
 
 <p><code>ResourceAdapters</code> can be deployed in .rar files, but this
@@ -7479,7 +7484,7 @@ element resource-adapter {
 <p>&lt;resource-deploy> defines a deployment directory for .rar files.</p>
 
 <p>Connectors and resources defined in .rar files must be deployed
-before they can be configured by <a href="#connector">connector</a>.
+before they can be configured by <a config-tag="connector">connector</a>.
 The &lt;resource-deploy&gt; tag specifies the directory for that deployment.
 </p>
 
@@ -8111,12 +8116,14 @@ requests</td>
 <defun title="&lt;server-default>" version="Resin 3.1" name="server-default">
 <parents>cluster</parents>
 
+<description>
 <p>&lt;server-default> defines default values for
 all &lt;server&gt; instances.  Since most &lt;server> configuration
 is identical for all server instances, the shared configuration belongs
 in a &lt;server-default>.  For example, &lt;http> ports, timeouts,
 JVM arguments, and keepalives are typically identical for all
 server instances and therefore belong in a server-default.</p>
+</description>
 
 <example title="server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -8132,33 +8139,6 @@ server instances and therefore belong in a server-default.</p>
         &lt;server id="a" address="192.168.0.10" port="6800"/&gt;
         &lt;server id="b" address="192.168.0.11" port="6800"/&gt;
         &lt;server id="c" address="192.168.0.12" port="6800"/&gt;
-
-        &lt;host id=""&gt;
-          ...
-    &lt;/cluster&gt;
-&lt;/resin&gt;
-</example>
-
-</defun>
-
-<defun title="&lt;server-default>" version="Resin 3.1" name="server-default">
-<parents>cluster</parents>
-
-<p>Defines default values for all &lt;server&gt; instances. See
-<a href="#server">&lt;server> configuration</a> for more details.</p>
-
-<example title="Example: server">
-&lt;resin xmlns="http://caucho.com/ns/resin"&gt;
-    &lt;cluster id="web-tier"&gt;
-        &lt;server-default&gt;
-            &lt;server-port&gt;6800&lt;/server-port&gt;
-
-            &lt;http port="8080"/&gt;
-        &lt;/server-default&gt;
-
-        &lt;server id="a" address="192.168.0.10"/&gt;
-        &lt;server id="b" address="192.168.0.11"/&gt;
-        &lt;server id="c" address="192.168.0.12"/&gt;
 
         &lt;host id=""&gt;
           ...
