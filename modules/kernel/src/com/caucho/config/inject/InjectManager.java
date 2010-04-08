@@ -1166,7 +1166,9 @@ public class InjectManager
         _classLoader.applyVisibleModules(fillByType);
       }
 
-      beanSet = new WebComponent(this, baseType.getRawClass());
+      Class<?> rawClass = baseType.getRawClass();
+      
+      beanSet = new WebComponent(this, rawClass);
 
       for (TypedBean typedBean : typedBeans) {
         if (getDeploymentPriority(typedBean.getBean()) < 0)
@@ -1174,8 +1176,8 @@ public class InjectManager
 
         beanSet.addComponent(typedBean.getType(), typedBean.getBean());
       }
-
-      _beanMap.put(baseType.getRawClass(), beanSet);
+      
+      _beanMap.put(rawClass, beanSet);
     }
 
     return beanSet;
@@ -1187,18 +1189,14 @@ public class InjectManager
   {
     Class<?> rawClass = baseType.getRawClass();
     
+    InjectScanClass scanClass = _scanManager.getScanClass(rawClass.getName());
+    
+    if (scanClass != null) {
+      discoverScanClass(scanClass);
+    }
+      
     Set<TypedBean> localBeans = _selfBeanMap.get(rawClass);
     
-    if (localBeans == null) {
-      InjectScanClass scanClass = _scanManager.getScanClass(rawClass.getName());
-      
-      if (scanClass != null) {
-        discoverScanClass(scanClass);
-        
-        localBeans = _selfBeanMap.get(rawClass);
-      }
-    }
-
     if (localBeans != null) {
       // ioc/0k00, ioc/0400 - XXX: not exactly right.  want local beans to have
       // priority if type and binding match
