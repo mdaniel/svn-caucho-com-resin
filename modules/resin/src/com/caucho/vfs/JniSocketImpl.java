@@ -483,7 +483,7 @@ public final class JniSocketImpl extends QSocket {
       if (i > 12)
         buffer[tailOffset++] = '.';
 
-      int digit = address[addressOffset + i];
+      int digit = address[addressOffset + i] & 0xff;
       int d1 = digit / 100;
       int d2 = digit / 10 % 10;
       int d3 = digit % 10;
