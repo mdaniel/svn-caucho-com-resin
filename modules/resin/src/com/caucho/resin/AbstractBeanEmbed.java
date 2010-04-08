@@ -31,7 +31,7 @@ package com.caucho.resin;
 
 import com.caucho.config.*;
 import com.caucho.config.types.*;
-import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
 import com.caucho.server.dispatch.*;

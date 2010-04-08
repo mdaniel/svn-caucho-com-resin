@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
@@ -40,84 +40,64 @@ import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 /**
- * Abstract introspected view of a Bean
+ * Annotated object based only on reflection.
  */
-public class AnnotatedElementImpl implements Annotated
+public class ReflectionAnnotated implements Annotated
 {
+  private static final LinkedHashSet<Annotation> _emptyAnnSet
+    = new  LinkedHashSet<Annotation>();
+
+  private static final Annotation []_emptyAnnArray = new Annotation[0];
+
   private Type _type;
 
   private LinkedHashSet<Type> _typeSet
     = new LinkedHashSet<Type>();
 
-  private LinkedHashSet<Annotation> _annSet
-    = new LinkedHashSet<Annotation>();
+  private LinkedHashSet<Annotation> _annSet;
 
-  protected AnnotatedElementImpl(Type type,
-                                 Annotated annotated,
-                                 Annotation []annList)
+  private Annotation []_annArray;
+
+  protected ReflectionAnnotated(Type type,
+                                Annotation []annList)
   {
     _type = type;
-
     _typeSet.add(type);
 
-    if (annList == null)
-      annList = new Annotation[0];
+    if (annList != null && annList.length > 0) {
+      _annSet = new LinkedHashSet<Annotation>();
 
-    if (annotated != null) {
-      _annSet.addAll(annotated.getAnnotations());
-    }
-    else {
       for (Annotation ann : annList) {
         _annSet.add(ann);
       }
+
+      _annArray = new Annotation[_annSet.size()];
+      _annSet.toArray(_annArray);
+    }
+    else {
+      _annSet = _emptyAnnSet;
+      _annArray = _emptyAnnArray;
     }
   }
 
-  public AnnotatedElementImpl(Annotated annotated)
-  {
-    this(annotated.getBaseType(), annotated, null);
-  }
-
+  /**
+   * Returns the base type of the annotated member.
+   */
   public Type getBaseType()
   {
     return _type;
   }
 
+  /**
+   * Returns all the types implemented by the member.
+   */
   public Set<Type> getTypeClosure()
   {
     return _typeSet;
   }
 
-  public void addAnnotation(Annotation newAnn)
-  {
-    for (Annotation oldAnn : _annSet) {
-      if (newAnn.annotationType().equals(oldAnn.annotationType())) {
-        _annSet.remove(oldAnn);
-        _annSet.add(newAnn);
-        return;
-      }
-    }
-
-    _annSet.add(newAnn);
-  }
-
-  public void removeAnnotation(Annotation ann)
-  {
-    for (Annotation oldAnn : _annSet) {
-      if (ann.annotationType().equals(oldAnn.annotationType())) {
-        _annSet.remove(oldAnn);
-        return;
-      }
-    }
-  }
-
-  public void clearAnnotations()
-  {
-    _annSet.clear();
-  }
-
   /**
-   * Returns the declared annotations
+   * Returns the introspected annotations
    */
   public Set<Annotation> getAnnotations()
   {
@@ -129,7 +109,7 @@ public class AnnotatedElementImpl implements Annotated
    */
   public <T extends Annotation> T getAnnotation(Class<T> annType)
   {
-    for (Annotation ann : getAnnotations()) {
+    for (Annotation ann : _annArray) {
       if (annType.equals(ann.annotationType()))
         return (T) ann;
     }
@@ -137,12 +117,22 @@ public class AnnotatedElementImpl implements Annotated
     return null;
   }
 
+  protected void addAnnotation(Annotation ann)
+  {
+    if (_annSet == _emptyAnnSet)
+      _annSet = new LinkedHashSet<Annotation>();
+
+    _annSet.add(ann);
+    _annArray = new Annotation[_annSet.size()];
+    _annSet.toArray(_annArray);
+  }
+
   /**
    * Returns true if the annotation is present)
    */
   public boolean isAnnotationPresent(Class<? extends Annotation> annType)
   {
-    for (Annotation ann : getAnnotations()) {
+    for (Annotation ann : _annArray) {
       if (annType.equals(ann.annotationType()))
         return true;
     }

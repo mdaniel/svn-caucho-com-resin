@@ -31,15 +31,15 @@ package com.caucho.config.types;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
-import com.caucho.config.inject.AnnotatedElementImpl;
-import com.caucho.config.inject.AnnotatedTypeImpl;
-import com.caucho.config.inject.AnnotatedMethodImpl;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ProducesBean;
 import com.caucho.config.program.*;
+import com.caucho.config.reflect.AnnotatedElementImpl;
+import com.caucho.config.reflect.AnnotatedMethodImpl;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.type.*;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
 
@@ -218,7 +218,7 @@ public class CustomBeanConfig {
       Node node = getProgramNode(program);
 
       if (node != null)
-        ConfigContext.getCurrent().configureNode(node, bean, type);
+        XmlConfigContext.getCurrent().configureNode(node, bean, type);
 
       Annotation ann = (Annotation) type.replaceObject(bean);
 

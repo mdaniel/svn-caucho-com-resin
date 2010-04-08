@@ -27,54 +27,56 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.scope;
 
-import com.caucho.vfs.*;
+import java.lang.annotation.Annotation;
 
-import java.util.ArrayList;
+import javax.enterprise.context.Dependent;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.inject.Module;
+
 
 /**
- * Scanned data for the root context
+ * The dependent context.
  */
-public class WebBeansRootContext  {
-  private final Path _root;
-  
-  private ArrayList<String> _classList = new ArrayList<String>();
-  private boolean _isScanComplete;
-  
-  public WebBeansRootContext(Path root)
+@Module
+public class DependentContext implements Context {
+  @Override
+  public <T> T get(Contextual<T> bean)
   {
-    _root = root;
+    return null;
   }
 
-  public Path getRoot()
+  @Override
+  public <T> T get(Contextual<T> bean, CreationalContext<T> creationalContext)
   {
-    return _root;
+    if (creationalContext == null)
+      return null;
+    
+    T instance = bean.create(creationalContext);
+    
+    return instance;
   }
 
-  public void addClassName(String className)
+  @Override
+  public Class<? extends Annotation> getScope()
   {
-    _classList.add(className);
+    return Dependent.class;
   }
 
-  public ArrayList<String> getClassNameList()
+  @Override
+  public boolean isActive()
   {
-    return _classList;
-  }
-
-  public boolean isScanComplete()
-  {
-    return _isScanComplete;
-  }
-
-  public void setScanComplete(boolean isScanComplete)
-  {
-    _isScanComplete = isScanComplete;
+    return true;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _root + "]";
+    return getClass().getSimpleName() + "[]";
   }
+
 }

@@ -29,22 +29,36 @@
 
 package com.caucho.loader.enhancer;
 
-import com.caucho.bytecode.*;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import com.caucho.bytecode.Analyzer;
+import com.caucho.bytecode.Attribute;
+import com.caucho.bytecode.ByteCodeParser;
+import com.caucho.bytecode.CodeAttribute;
+import com.caucho.bytecode.CodeEnhancer;
+import com.caucho.bytecode.CodeVisitor;
+import com.caucho.bytecode.ConstantPool;
+import com.caucho.bytecode.ConstantPoolEntry;
+import com.caucho.bytecode.JClass;
+import com.caucho.bytecode.JMethod;
+import com.caucho.bytecode.JavaClass;
+import com.caucho.bytecode.JavaClassLoader;
+import com.caucho.bytecode.JavaField;
+import com.caucho.bytecode.JavaMethod;
+import com.caucho.bytecode.MethodRefConstant;
+import com.caucho.bytecode.Utf8Constant;
+import com.caucho.inject.Module;
 import com.caucho.java.WorkDir;
-import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.loader.DynamicClassLoader;
-import com.caucho.util.L10N;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.Vfs;
 import com.caucho.vfs.WriteStream;
-
-import java.net.URL;
-import java.net.URLDecoder;
-import java.util.ArrayList;
-import java.util.logging.Logger;
-import java.util.logging.Level;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -54,15 +68,13 @@ import java.util.logging.Level;
  * From the perspective of the JDK, it's all one classloader.  Internally,
  * the class loader chain searches like a classpath.
  */
+@Module
 public class EnhancerFixup {
-  private static final L10N L = new L10N(EnhancerFixup.class);
   private static final Logger log = Logger.getLogger(EnhancerFixup.class.getName());
 
   private static final int ACC_PUBLIC = 0x1;
   private static final int ACC_PRIVATE = 0x2;
   private static final int ACC_PROTECTED = 0x4;
-
-  private JavaClassGenerator _javaGen = new JavaClassGenerator();
 
   private JavaClassLoader _jClassLoader;
   private DynamicClassLoader _loader;

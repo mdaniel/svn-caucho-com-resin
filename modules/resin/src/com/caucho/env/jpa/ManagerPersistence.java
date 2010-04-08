@@ -57,6 +57,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentEnhancerListener;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.util.CharBuffer;
@@ -521,7 +522,7 @@ public class ManagerPersistence
    * Since JPA enhances, it is priority 0
    */
   @Override
-  public int getPriority()
+  public int getScanPriority()
   {
     return 0;
   }
@@ -540,9 +541,9 @@ public class ManagerPersistence
   }
 
   @Override
-  public ScanMatch isScanMatchClass(String className, int modifiers)
+  public ScanClass scanClass(String className, int modifiers)
   {
-    return ScanMatch.DENY;
+    return null;
   }
 
   @Override

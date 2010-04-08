@@ -31,16 +31,21 @@ package com.caucho.config.scope;
 
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
-import java.util.*;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.servlet.http.*;
+import java.util.ArrayList;
 
-import com.caucho.loader.*;
+import javax.enterprise.context.spi.Contextual;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
+
+import com.caucho.inject.Module;
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
 
 /**
  * Contains the objects which need destruction for a given scope.
  */
+@SuppressWarnings("serial")
+@Module
 public class DestructionListener
   implements ScopeRemoveListener,
              HttpSessionBindingListener,
@@ -96,8 +101,7 @@ public class DestructionListener
       Contextual bean = beanList.get(i);
       WeakReference<Object> ref = valueList.get(i);
       Object value = null;
-      CreationalContext<?> env = null;
-
+      
       if (ref != null) {
         value = ref.get();
 

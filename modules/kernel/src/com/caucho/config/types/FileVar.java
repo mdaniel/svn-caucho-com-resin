@@ -29,7 +29,7 @@
 package com.caucho.config.types;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.*;
 
 /**
@@ -45,7 +45,7 @@ public class FileVar {
   }
   public String toString()
   {
-    ConfigContext env = ConfigContext.getCurrent();
+    XmlConfigContext env = XmlConfigContext.getCurrent();
 
     if (env != null)
       return env.getBaseUri();

@@ -59,6 +59,7 @@ import javax.inject.Scope;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.util.L10N;
 
 /**

@@ -29,24 +29,24 @@
 
 package com.caucho.config.scope;
 
-import com.caucho.loader.*;
-
 import java.lang.annotation.Annotation;
-import java.util.Hashtable;
 
-import javax.inject.Singleton;
-import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.inject.spi.Bean;
+import javax.inject.Singleton;
+
+import com.caucho.inject.Module;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
 
 /**
  * The application scope value
  */
+@Module
 public class SingletonScope extends ScopeContext {
   private ScopeMap _scopeMap = new ScopeMap();
 
   /**
-   * Returns the current applicatin scope
+   * Returns the current application scope
    */
   public SingletonScope()
   {
@@ -86,7 +86,7 @@ public class SingletonScope extends ScopeContext {
     return (scope instanceof ApplicationScope);
   }
 
-  public void addDestructor(Contextual comp, Object value)
+  public <T> void addDestructor(Contextual<T> comp, T value)
   {
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 

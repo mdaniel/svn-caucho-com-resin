@@ -30,9 +30,9 @@
 package com.caucho.jca.program;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.jca.*;
 import com.caucho.jca.ra.ResourceAdapterController;
 import com.caucho.jca.ra.ResourceArchive;

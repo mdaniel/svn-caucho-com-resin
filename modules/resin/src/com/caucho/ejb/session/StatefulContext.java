@@ -31,7 +31,7 @@ package com.caucho.ejb.session;
 import javax.ejb.TimerService;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.*;
 import com.caucho.ejb.server.AbstractServer;
 import com.caucho.util.*;
@@ -94,7 +94,7 @@ abstract public class StatefulContext extends AbstractSessionContext {
   /**
    * Returns the new instance for EJB 3.0
    */
-  protected Object _caucho_newInstance(ConfigContext env)
+  protected Object _caucho_newInstance(XmlConfigContext env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

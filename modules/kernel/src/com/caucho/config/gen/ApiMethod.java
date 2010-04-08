@@ -29,7 +29,7 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.config.inject.AnnotatedElementImpl;
+import com.caucho.config.reflect.AnnotatedElementImpl;
 
 import java.lang.reflect.*;
 import java.lang.annotation.*;

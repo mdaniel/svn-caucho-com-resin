@@ -37,6 +37,7 @@ import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.program.FieldEventProgram;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.config.scope.*;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
@@ -89,8 +90,8 @@ public class ExtensionManager
   private static final EnvironmentLocal<ExtensionManager> _localExtension
     = new EnvironmentLocal<ExtensionManager>();
 
-  private HashMap<Class,ExtensionItem> _extensionMap
-    = new HashMap<Class,ExtensionItem>();
+  private HashMap<Class<?>,ExtensionItem> _extensionMap
+    = new HashMap<Class<?>,ExtensionItem>();
 
   private ExtensionManager()
   {
@@ -125,7 +126,7 @@ public class ExtensionManager
     }
   }
 
-  private synchronized ExtensionItem introspect(Class cl)
+  private ExtensionItem introspect(Class<?> cl)
   {
     ExtensionItem item = _extensionMap.get(cl);
 
@@ -138,12 +139,12 @@ public class ExtensionManager
   }
 
   static class ExtensionItem {
-    private final Class _cl;
+    private final Class<?> _cl;
 
     private ArrayList<ExtensionMethod> _observers
       = new ArrayList<ExtensionMethod>();
 
-    ExtensionItem(Class cl)
+    ExtensionItem(Class<?> cl)
     {
       _cl = cl;
 

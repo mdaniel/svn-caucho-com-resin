@@ -35,10 +35,10 @@ import java.lang.annotation.*;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.inject.AnnotatedMethodImpl;
-import com.caucho.config.inject.AnnotatedTypeImpl;
-import com.caucho.config.inject.AnnotatedElementImpl;
-import com.caucho.config.inject.ReflectionAnnotatedFactory;
+import com.caucho.config.reflect.AnnotatedElementImpl;
+import com.caucho.config.reflect.AnnotatedMethodImpl;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.util.*;
 
 /**

@@ -29,8 +29,8 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.xml.XmlConfigContext;
 
 import java.lang.annotation.*;
 import java.util.Set;

@@ -30,6 +30,7 @@
 package com.caucho.config.scope;
 
 import com.caucho.config.inject.AbstractBean;
+import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 
 import java.util.*;
@@ -40,21 +41,22 @@ import javax.enterprise.context.Dependent;
 /**
  * The application scope value
  */
+@Module
 public class DependentScope {
   private static final ThreadLocal<DependentScope> _threadScope
     = new ThreadLocal<DependentScope>();
 
-  private AbstractBean _owner;
+  private AbstractBean<?> _owner;
   private Object _value;
   private ScopeContext _scope;
 
-  private IdentityHashMap<AbstractBean,Object> _map;
+  private IdentityHashMap<AbstractBean<?>,Object> _map;
 
   public DependentScope()
   {
   }
   
-  public DependentScope(AbstractBean owner, Object value, ScopeContext scope)
+  public DependentScope(AbstractBean<?> owner, Object value, ScopeContext scope)
   {
     _owner = owner;
     _value = value;
@@ -100,7 +102,7 @@ public class DependentScope {
   /**
    * Returns the object with the given name.
    */
-  public Object get(AbstractBean comp)
+  public Object get(AbstractBean<?> comp)
   {
     if (comp == _owner)
       return _value;
@@ -115,8 +117,8 @@ public class DependentScope {
     if (_owner != null && name.equals(_owner.getName()))
       return _value;
     else if (_map != null && _map.size() > 0) {
-      for (Map.Entry<AbstractBean,Object> entry : _map.entrySet()) {
-	AbstractBean comp = entry.getKey();
+      for (Map.Entry<AbstractBean<?>,Object> entry : _map.entrySet()) {
+	AbstractBean<?> comp = entry.getKey();
 
 	if (name.equals(comp.getName()))
 	  return entry.getValue();
@@ -131,10 +133,10 @@ public class DependentScope {
   /**
    * Sets the object with the given name.
    */
-  public void put(AbstractBean comp, Object value)
+  public void put(AbstractBean<?> comp, Object value)
   {
     if (_map == null)
-      _map = new IdentityHashMap<AbstractBean,Object>(8);
+      _map = new IdentityHashMap<AbstractBean<?>,Object>(8);
     
     _map.put(comp, value);
   }
@@ -142,7 +144,7 @@ public class DependentScope {
   /**
    * Sets the object with the given name.
    */
-  public void remove(AbstractBean comp)
+  public void remove(AbstractBean<?> comp)
   {
     if (_map != null)
       _map.remove(comp);
@@ -158,7 +160,7 @@ public class DependentScope {
       return _scope.canInject(scope);
   }
 
-  public boolean canInject(Class scopeType)
+  public boolean canInject(Class<?> scopeType)
   {
     if (scopeType == null)
       return true;
@@ -172,7 +174,7 @@ public class DependentScope {
   /**
    * Adds a @PreDestroy destructor
    */
-  public void addDestructor(AbstractBean comp, Object value)
+  public <T> void addDestructor(AbstractBean<T> comp, T value)
   {
     if (_scope != null)
       _scope.addDestructor(comp, value);

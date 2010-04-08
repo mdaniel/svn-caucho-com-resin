@@ -54,6 +54,8 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.SimpleLoader;
+import com.caucho.loader.enhancer.ScanClass;
+import com.caucho.loader.enhancer.ScanClassAllow;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.util.CharBuffer;
@@ -370,7 +372,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Since EJB doesn't bytecode enhance, it's priority 1
    */
-  public int getPriority()
+  public int getScanPriority()
   {
     return 1;
   }
@@ -416,14 +418,15 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     }
   }
 
-  public ScanMatch isScanMatchClass(String className, int modifiers)
+  @Override
+  public ScanClass scanClass(String className, int modifiers)
   {
     if (Modifier.isInterface(modifiers))
-      return ScanMatch.DENY;
+      return null;
     else if (Modifier.isAbstract(modifiers))
-      return ScanMatch.DENY;
+      return null;
     else
-      return ScanMatch.ALLOW;
+      return ScanClassAllow.ALLOW;
   }
 
   public boolean isScanMatchAnnotation(CharBuffer annotationName)

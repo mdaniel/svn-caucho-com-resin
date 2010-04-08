@@ -29,11 +29,11 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.scope.DependentScope;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 
 import javax.rmi.PortableRemoteObject;

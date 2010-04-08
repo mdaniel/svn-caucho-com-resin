@@ -29,13 +29,12 @@
 
 package com.caucho.loader.enhancer;
 
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Path;
+import com.caucho.inject.Module;
 
 /**
  * Return values for scanning
  */
+@Module
 public enum ScanMatch {
   DENY,   // the class does not match the scanning
     MATCH,  // the class matches scanning

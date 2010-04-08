@@ -29,11 +29,11 @@
 
 package com.caucho.ejb.inject;
 
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.session.StatelessProvider;
 import com.caucho.ejb.session.StatelessManager;
 import com.caucho.util.L10N;

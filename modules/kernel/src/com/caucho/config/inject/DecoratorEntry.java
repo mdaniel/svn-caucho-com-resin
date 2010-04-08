@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.util.*;
 
 import java.lang.annotation.*;

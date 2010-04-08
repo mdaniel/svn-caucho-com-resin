@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
@@ -47,47 +47,45 @@ import javax.annotation.*;
 /**
  * class type matching
  */
-public class VarType<D extends GenericDeclaration> extends BaseType
-  implements TypeVariable<D>
+public class WildcardTypeImpl extends BaseType implements WildcardType
 {
-  private String _name;
-  private BaseType []_bounds;
+  private BaseType []_lowerBounds;
+  private BaseType []_upperBounds;
 
-  public VarType(String name, BaseType []bounds)
+  public WildcardTypeImpl(BaseType []lowerBounds, BaseType []upperBounds)
   {
-    _name = name;
-    _bounds = bounds;
+    _lowerBounds = lowerBounds;
+    _upperBounds = upperBounds;
   }
 
-  public String getName()
+  public Type []getLowerBounds()
   {
-    return _name;
+    Type []lowerBounds = new Type[_lowerBounds.length];
+
+    for (int i = 0; i < lowerBounds.length; i++)
+      lowerBounds[i] = _lowerBounds[i].toType();
+      
+    return lowerBounds;
   }
 
-  public D getGenericDeclaration()
+  public Type []getUpperBounds()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    Type []upperBounds = new Type[_upperBounds.length];
+
+    for (int i = 0; i < upperBounds.length; i++)
+      upperBounds[i] = _upperBounds[i].toType();
+      
+    return upperBounds;
+  }
+  
+  public Class getRawClass()
+  {
+    return Object.class; // technically bounds(?)
   }
 
   public boolean isWildcard()
   {
     return true;
-  }
-
-  public Type []getBounds()
-  {
-    Type []bounds = new Type[_bounds.length];
-
-    for (int i = 0; i < bounds.length; i++) {
-      bounds[i] = _bounds[i].toType();
-    }
-
-    return bounds;
-  }
-  
-  public Class getRawClass()
-  {
-    return Object.class; // technically bounds
   }
 
   public Type getGenericComponentType()
@@ -102,10 +100,12 @@ public class VarType<D extends GenericDeclaration> extends BaseType
 
   public boolean isAssignableFrom(BaseType type)
   {
-    if (type.isWildcard())
-      return true;
+    for (BaseType bound : _lowerBounds) {
+      if (! type.isAssignableFrom(bound))
+	return false;
+    }
     
-    for (BaseType bound : _bounds) {
+    for (BaseType bound : _upperBounds) {
       if (! bound.isAssignableFrom(type))
 	return false;
     }
@@ -115,24 +115,23 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   
   public boolean isMatch(Type type)
   {
-    if (type instanceof TypeVariable) {
+    if (type instanceof WildcardType || type instanceof TypeVariable)
       return true;
-    }
     else
       return false;
   }
 
   public int hashCode()
   {
-    return 17 + 37 * _name.hashCode();
+    return 17;
   }
 
   public boolean equals(Object o)
   {
     if (o == this)
       return true;
-    else if (o instanceof TypeVariable) {
-      TypeVariable var = (TypeVariable) o;
+    else if (o instanceof WildcardType) {
+      WildcardType var = (WildcardType) o;
 
       return true;
     }
@@ -142,6 +141,6 @@ public class VarType<D extends GenericDeclaration> extends BaseType
 
   public String toString()
   {
-    return _name;
+    return "?";
   }
 }

@@ -31,7 +31,7 @@ package com.caucho.config.type;
 
 import javax.el.*;
 import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.el.*;
 
 /**
@@ -61,7 +61,7 @@ public final class ValueExpressionType extends ConfigType
    */
   public Object valueOf(String text)
   {
-    ELContext elContext = ConfigContext.getCurrent().getELContext();
+    ELContext elContext = XmlConfigContext.getCurrent().getELContext();
     
     ELParser parser = new ELParser(elContext, text);
     

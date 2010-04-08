@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
@@ -46,6 +46,7 @@ import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+
 
 /**
  * Represents the reflected type where only the top-level annotations are

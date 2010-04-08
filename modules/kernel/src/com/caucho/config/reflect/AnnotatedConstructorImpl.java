@@ -27,36 +27,35 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.inject.Module;
 
 /**
  * Abstract introspected view of a Bean
  */
-public class AnnotatedConstructorImpl
-  extends AnnotatedElementImpl implements AnnotatedConstructor
+@Module
+public class AnnotatedConstructorImpl<T>
+  extends AnnotatedElementImpl implements AnnotatedConstructor<T>
 {
-  private final AnnotatedType _declaringType;
+  private final AnnotatedType<T> _declaringType;
   
-  private final Constructor _ctor;
+  private final Constructor<T> _ctor;
 
-  private final ArrayList<AnnotatedParameter> _parameterList
-    = new ArrayList<AnnotatedParameter>();
+  private final ArrayList<AnnotatedParameter<T>> _parameterList
+    = new ArrayList<AnnotatedParameter<T>>();
   
-  public AnnotatedConstructorImpl(AnnotatedType declaringType, Constructor ctor)
+  public AnnotatedConstructorImpl(AnnotatedType<T> declaringType, Constructor<T> ctor)
   {
     super(declaringType.getBaseType(), null, ctor.getAnnotations());
 
@@ -67,7 +66,8 @@ public class AnnotatedConstructorImpl
     introspect(ctor);
   }
 
-  public AnnotatedType getDeclaringType()
+  @Override
+  public AnnotatedType<T> getDeclaringType()
   {
     return _declaringType;
   }
@@ -75,7 +75,8 @@ public class AnnotatedConstructorImpl
   /**
    * Returns the reflected Constructor
    */
-  public Constructor getJavaMember()
+  @Override
+  public Constructor<T> getJavaMember()
   {
     return _ctor;
   }
@@ -83,24 +84,26 @@ public class AnnotatedConstructorImpl
   /**
    * Returns the constructor parameters
    */
-  public List<AnnotatedParameter> getParameters()
+  @Override
+  public List<AnnotatedParameter<T>> getParameters()
   {
     return _parameterList;
   }
 
+  @Override
   public boolean isStatic()
   {
     return false;
   }
 
-  private void introspect(Constructor ctor)
+  private void introspect(Constructor<T> ctor)
   {
     Type []paramTypes = ctor.getGenericParameterTypes();
     Annotation [][]annTypes = ctor.getParameterAnnotations();
     
     for (int i = 0; i < paramTypes.length; i++) {
-      AnnotatedParameterImpl param
-	= new AnnotatedParameterImpl(this, paramTypes[i], annTypes[i]);
+      AnnotatedParameterImpl<T> param
+	= new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i]);
 	
       _parameterList.add(param);
     }

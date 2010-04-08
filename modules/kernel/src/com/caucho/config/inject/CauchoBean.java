@@ -30,11 +30,11 @@
 package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
+
+import com.caucho.config.reflect.BaseType;
 
 /**
  * Configuration for the xml web bean component.
@@ -48,7 +48,7 @@ abstract public class CauchoBean<T> implements Bean<T>
    */
   abstract public Annotation []getAnnotations();
 
-  public boolean isAnnotationPresent(Class annType)
+  public boolean isAnnotationPresent(Class<?> annType)
   {
     for (Annotation ann : getAnnotations()) {
       if (ann.annotationType().equals(annType))

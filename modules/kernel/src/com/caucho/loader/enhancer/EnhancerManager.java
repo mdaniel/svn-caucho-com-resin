@@ -29,41 +29,45 @@
 
 package com.caucho.loader.enhancer;
 
-import com.caucho.bytecode.ByteCodeClassMatcher;
-import com.caucho.bytecode.ByteCodeClassScanner;
+import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.lang.instrument.ClassFileTransformer;
+import java.lang.reflect.Method;
+import java.security.ProtectionDomain;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.bytecode.ByteCodeParser;
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JavaClass;
 import com.caucho.bytecode.JavaClassLoader;
+import com.caucho.inject.Module;
 import com.caucho.java.WorkDir;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.loader.*;
-import com.caucho.util.CharBuffer;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.SimpleLoader;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.lang.instrument.*;
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.security.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 /**
  * Manages the enhancement
  */
+@Module
 public class EnhancerManager implements ClassFileTransformer
 {
   private static final L10N L = new L10N(EnhancerManager.class);
   private static final Logger log = Log.open(EnhancerManager.class);
 
-  private static EnvironmentLocal<EnhancerManager> _localEnhancer =
-    new EnvironmentLocal<EnhancerManager>();
+  private static EnvironmentLocal<EnhancerManager> _localEnhancer
+    = new EnvironmentLocal<EnhancerManager>();
 
-  private EnhancerManager _parent;
   private DynamicClassLoader _loader;
 
   private Path _workPath;
@@ -84,12 +88,7 @@ public class EnhancerManager implements ClassFileTransformer
     _loader = (DynamicClassLoader) loader;
 
     if (loader != null)
-      _parent = getLocalEnhancer(loader.getParent());
-    /*
-    if (_parent != null) {
-      _classEnhancerList.addAll(_parent._classEnhancerList);
-    }
-    */
+      getLocalEnhancer(loader.getParent());
   }
 
   public static EnhancerManager create()
@@ -171,23 +170,13 @@ public class EnhancerManager implements ClassFileTransformer
   {
     _classEnhancerList.add(classEnhancer);
   }
-
-  /**
-   * Adds a class annotation.
-   */
-  public void addClass(ClassEnhancerConfig config)
-  {
-    config.setEnhancerManager(this);
-
-    _classEnhancerList.add(config);
-  }
-  
+ 
   /**
    * Returns the enhanced .class or null if no enhancement.
    */
   public byte[] transform(ClassLoader loader,
 			  String className,
-			  Class oldClass,
+			  Class<?> oldClass,
 			  ProtectionDomain domain,
 			  byte []buffer)
   {
@@ -204,7 +193,7 @@ public class EnhancerManager implements ClassFileTransformer
 	ClassLoader oldLoader = thread.getContextClassLoader();
 	
 	try {
-	  Class cl = Class.forName(className.replace('/', '.'),
+	  Class<?> cl = Class.forName(className.replace('/', '.'),
 				   false,
 				   workLoader);
 

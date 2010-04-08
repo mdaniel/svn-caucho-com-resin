@@ -31,9 +31,9 @@ package com.caucho.config.types;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
-import com.caucho.config.inject.AnnotatedElementImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
+import com.caucho.config.reflect.AnnotatedElementImpl;
 import com.caucho.config.type.*;
 import com.caucho.util.*;
 import com.caucho.xml.QName;

@@ -27,53 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
-import com.caucho.config.gen.*;
-import com.caucho.util.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
+import javax.enterprise.inject.spi.AnnotatedCallable;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 
-import javax.annotation.*;
-import javax.enterprise.inject.spi.Bean;
+import com.caucho.inject.Module;
+
 
 /**
- * Configuration for a SimpleBean method, e.g. for an XML configuration of
- * a @Produces
+ * Abstract introspected view of a Bean
  */
-public class SimpleBeanField
+@Module
+public class AnnotatedParameterImpl<T>
+  extends AnnotatedElementImpl implements AnnotatedParameter<T>
 {
-  private static final L10N L = new L10N(SimpleBeanField.class);
+  private AnnotatedCallable<T> _callable;
   
-  private Field _field;
-
-  private Annotation []_annotations;
-
-  public SimpleBeanField(Field field, Annotation []annotations)
+  public AnnotatedParameterImpl(AnnotatedCallable<T> callable,
+				Type type,
+				Annotation []annList)
   {
-    _field = field;
-    _annotations = annotations;
+    super(type, null, annList);
+
+    _callable = callable;
   }
 
-  public Field getField()
+  @Override
+  public AnnotatedCallable<T> getDeclaringCallable()
   {
-    return _field;
+    return _callable;
   }
 
-  public Annotation []getAnnotations()
+  @Override
+  public int getPosition()
   {
-    return _annotations;
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _field.getName() + "]";
+    return -1;
   }
 }

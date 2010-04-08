@@ -33,7 +33,7 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;
-import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.util.L10N;
 import com.caucho.xml.*;
@@ -74,7 +74,7 @@ public class NodeBuilderChildProgram extends FlowProgram {
   public <T> void inject(T bean, CreationalContext<T> cxt)
     throws ConfigException
   {
-    ConfigContext env = ConfigContext.create();
+    XmlConfigContext env = XmlConfigContext.create();
     
     CreationalContext<?> oldCxt = env.setCreationalContext(cxt);
     
@@ -89,7 +89,7 @@ public class NodeBuilderChildProgram extends FlowProgram {
   public <T> T create(ConfigType<T> type, CreationalContext<T> cxt)
     throws ConfigException
   {
-    ConfigContext env = ConfigContext.create();
+    XmlConfigContext env = XmlConfigContext.create();
     
     return (T) env.create(_node, type);
   }

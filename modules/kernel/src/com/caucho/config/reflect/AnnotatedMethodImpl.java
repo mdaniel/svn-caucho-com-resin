@@ -27,42 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
+
 import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.inject.Module;
+
 
 /**
  * Abstract introspected view of a Bean
  */
-public class AnnotatedMethodImpl
-  extends AnnotatedElementImpl implements AnnotatedMethod
+@Module
+public class AnnotatedMethodImpl<T>
+  extends AnnotatedElementImpl implements AnnotatedMethod<T>
 {
-  private AnnotatedType _declaringType;
+  private AnnotatedType<T> _declaringType;
   
   private Method _method;
 
-  private ArrayList<AnnotatedParameter> _parameterList
-    = new ArrayList<AnnotatedParameter>();
+  private ArrayList<AnnotatedParameter<T>> _parameterList
+    = new ArrayList<AnnotatedParameter<T>>();
   
   public AnnotatedMethodImpl(Method method)
   {
     this(null, null, method);
   }
   
-  public AnnotatedMethodImpl(AnnotatedType declaringType,
+  public AnnotatedMethodImpl(AnnotatedType<T> declaringType,
 			     Annotated annotated,
 			     Method method)
   {
@@ -74,7 +75,8 @@ public class AnnotatedMethodImpl
     introspect(method);
   }
 
-  public AnnotatedType getDeclaringType()
+  @Override
+  public AnnotatedType<T> getDeclaringType()
   {
     return _declaringType;
   }
@@ -82,6 +84,7 @@ public class AnnotatedMethodImpl
   /**
    * Returns the reflected Method
    */
+  @Override
   public Method getJavaMember()
   {
     return _method;
@@ -90,11 +93,13 @@ public class AnnotatedMethodImpl
   /**
    * Returns the constructor parameters
    */
-  public List<AnnotatedParameter> getParameters()
+  @Override
+  public List<AnnotatedParameter<T>> getParameters()
   {
     return _parameterList;
   }
 
+  @Override
   public boolean isStatic()
   {
     return Modifier.isStatic(_method.getModifiers());
@@ -106,8 +111,8 @@ public class AnnotatedMethodImpl
     Annotation [][]annTypes = method.getParameterAnnotations();
     
     for (int i = 0; i < paramTypes.length; i++) {
-      AnnotatedParameterImpl param
-	= new AnnotatedParameterImpl(this, paramTypes[i], annTypes[i]);
+      AnnotatedParameterImpl<T> param
+	= new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i]);
     
       _parameterList.add(param);
     }
@@ -118,8 +123,8 @@ public class AnnotatedMethodImpl
     if (! methodA.getName().equals(methodB.getName()))
       return false;
 
-    Class []paramA = methodA.getParameterTypes();
-    Class []paramB = methodB.getParameterTypes();
+    Class<?> []paramA = methodA.getParameterTypes();
+    Class<?> []paramB = methodB.getParameterTypes();
 
     if (paramA.length != paramB.length)
       return false;
@@ -143,10 +148,10 @@ public class AnnotatedMethodImpl
   {
     if (this == obj)
       return true;
-    else if (! (obj instanceof AnnotatedMethodImpl))
+    else if (! (obj instanceof AnnotatedMethodImpl<?>))
       return false;
 
-    AnnotatedMethodImpl method = (AnnotatedMethodImpl) obj;
+    AnnotatedMethodImpl<?> method = (AnnotatedMethodImpl<?>) obj;
 
     return isMatch(_method, method._method);
   }

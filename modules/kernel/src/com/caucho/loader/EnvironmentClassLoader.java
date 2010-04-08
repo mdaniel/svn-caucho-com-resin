@@ -562,7 +562,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     int i = 0;
     for (; i < _scanListeners.size(); i++) {
-      if (listener.getPriority() < _scanListeners.get(i).getPriority())
+      if (listener.getScanPriority() < _scanListeners.get(i).getScanPriority())
         break;
     }
     _scanListeners.add(i, listener);

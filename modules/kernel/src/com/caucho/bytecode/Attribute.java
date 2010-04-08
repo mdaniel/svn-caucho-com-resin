@@ -29,11 +29,13 @@
 package com.caucho.bytecode;
 
 import java.io.IOException;
-import java.util.logging.Logger;
+
+import com.caucho.inject.Module;
 
 /**
  * Represents a generic attribute
  */
+@Module
 abstract public class Attribute {
   private String _name;
 

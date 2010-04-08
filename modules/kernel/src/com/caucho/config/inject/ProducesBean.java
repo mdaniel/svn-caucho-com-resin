@@ -245,6 +245,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       else
         args = NULL_ARGS;
 
+      // ioc/0084
+      _producesMethod.getJavaMember().setAccessible(true);
+      
       T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
 
       return value;

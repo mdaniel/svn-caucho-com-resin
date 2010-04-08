@@ -37,6 +37,7 @@ import java.util.zip.*;
 
 import com.caucho.bytecode.ByteCodeClassMatcher;
 import com.caucho.bytecode.ByteCodeClassScanner;
+import com.caucho.inject.Module;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
@@ -44,6 +45,7 @@ import com.caucho.vfs.*;
 /**
  * Interface for a scan manager
  */
+@Module
 public class ScanManager {
   private static final Logger log
     = Logger.getLogger(ScanManager.class.getName());
@@ -82,29 +84,33 @@ public class ScanManager {
     if (! hasListener) {
       return;
     }
+    
+    ByteCodeClassScanner scanner = new ByteCodeClassScanner();
 
     if (root instanceof JarPath) {
       JarByteCodeMatcher matcher
 	= new JarByteCodeMatcher(loader, root, listeners);
     
-      scanForJarClasses(((JarPath) root).getContainer(), matcher);
+      scanForJarClasses(((JarPath) root).getContainer(), scanner, matcher);
     }
     else {
       PathByteCodeMatcher matcher
 	= new PathByteCodeMatcher(loader, root, listeners);
       
-      scanForClasses(root, root, matcher);
+      scanForClasses(root, root, scanner, matcher);
     }
   }
 
   private void scanForClasses(Path root,
                               Path path,
+                              ByteCodeClassScanner classScanner,
                               PathByteCodeMatcher matcher)
   {
     try {
       if (path.isDirectory()) {
-        for (String name : path.list())
-          scanForClasses(root, path.lookup(name), matcher);
+        for (String name : path.list()) {
+          scanForClasses(root, path.lookup(name), classScanner, matcher);
+        }
 
         return;
       }
@@ -117,8 +123,7 @@ public class ScanManager {
       ReadStream is = path.openRead();
       
       try {
-        ByteCodeClassScanner classScanner
-        = new ByteCodeClassScanner(path.getPath(), is, matcher);
+        classScanner.init(path.getPath(), is, matcher);
 
         classScanner.scan();
       } finally {
@@ -129,7 +134,9 @@ public class ScanManager {
     }
   }
 
-  private void scanForJarClasses(Path path, JarByteCodeMatcher matcher)
+  private void scanForJarClasses(Path path,
+                                 ByteCodeClassScanner classScanner,
+                                 JarByteCodeMatcher matcher)
   {
     ZipFile zipFile = null;
 
@@ -145,12 +152,11 @@ public class ScanManager {
 	if (! entryName.endsWith(".class"))
 	  continue;
 
-	matcher.init(entryName);
+	matcher.init();
       
 	ReadStream is = Vfs.openRead(zipFile.getInputStream(entry));
 	try {
-	  ByteCodeClassScanner classScanner
-	    = new ByteCodeClassScanner(path.getPath(), is, matcher);
+	  classScanner.init(path.getPath(), is, matcher);
 
 	  classScanner.scan();
 	} finally {
@@ -169,29 +175,11 @@ public class ScanManager {
   }
 
   static class JarByteCodeMatcher extends ScanByteCodeMatcher {
-    private String _entryName;
-
     JarByteCodeMatcher(EnvironmentClassLoader loader,
 		       Path root,
 		       ScanListener []listeners)
     {
       super(loader, root, listeners);
-    }
-
-    void init(String entryName)
-    {
-      super.init();
-      
-      _entryName = entryName;
-    }
-
-    String getClassName()
-    {
-      int p = _entryName.lastIndexOf('.');
-
-      String className = _entryName.substring(0, p);
-
-      return className.replace('/', '.');
     }
   }
 
@@ -232,6 +220,7 @@ public class ScanManager {
     private final Path _root;
     private final ScanListener []_listeners;
     private final ScanListener []_currentListeners;
+    private final ScanClass []_currentClasses;
 
     ScanByteCodeMatcher(EnvironmentClassLoader loader,
 			Path root,
@@ -242,18 +231,22 @@ public class ScanManager {
       
       _listeners = listeners;
       _currentListeners = new ScanListener[listeners.length];
+      _currentClasses = new ScanClass[listeners.length];
     }
 
     void init()
     {
-      for (int i = 0; i < _listeners.length; i++)
+      for (int i = 0; i < _listeners.length; i++) {
 	_currentListeners[i] = _listeners[i];
+	_currentClasses[i] = null;
+      }
     }
     
     /**
      * Returns true if the annotation class is a match.
      */
-    public boolean isClassMatch(String className, int modifiers)
+    @Override
+    public boolean scanClass(String className, int modifiers)
     {
       int activeCount = 0;
 
@@ -263,23 +256,70 @@ public class ScanManager {
 	if (listener == null)
 	  continue;
 
-	ScanMatch scanMatch
-	  = listener.isScanMatchClass(className, modifiers);
+	ScanClass scanClass = listener.scanClass(className, modifiers);
 	
-	if (scanMatch == ScanMatch.MATCH) {
-	  listener.classMatchEvent(_loader, _root, getClassName());
-	  _currentListeners[i] = null;
-	}
-	else if (scanMatch == ScanMatch.DENY) {
-	  _currentListeners[i] = null;
-	}
-	else
+	if (scanClass != null) {
 	  activeCount++;
+	  _currentClasses[i] = scanClass;
+	}
+	else {
+          _currentListeners[i] = null;
+	}
       }
 
-      return activeCount == 0;
+      return activeCount > 0;
     }
-    
+
+    @Override
+    public void addInterface(char[] buffer, int offset, int length)
+    {
+      for (ScanClass scanClass : _currentClasses) {
+        if (scanClass != null) {
+          scanClass.addInterface(buffer, offset, length);
+        }
+      }
+    }
+
+    @Override
+    public void addSuperClass(char[] buffer, int offset, int length)
+    {
+      for (ScanClass scanClass : _currentClasses) {
+        if (scanClass != null) {
+          scanClass.addSuperClass(buffer, offset, length);
+        }
+      }
+    }
+
+    @Override
+    public void addClassAnnotation(char[] buffer, int offset, int length)
+    {
+      for (ScanClass scanClass : _currentClasses) {
+        if (scanClass != null) {
+          scanClass.addClassAnnotation(buffer, offset, length);
+        }
+      }
+    }
+
+    @Override
+    public void addPoolString(char[] buffer, int offset, int length)
+    {
+      for (ScanClass scanClass : _currentClasses) {
+        if (scanClass != null) {
+          scanClass.addPoolString(buffer, offset, length);
+        }
+      }
+    }
+
+    @Override
+    public void finishScan()
+    {
+      for (ScanClass scanClass : _currentClasses) {
+        if (scanClass != null) {
+          scanClass.finishScan();
+        }
+      }
+    }
+ 
     /**
      * Returns true if the annotation class is a match.
      */
@@ -294,7 +334,6 @@ public class ScanManager {
 	  continue;
 
 	if (listener.isScanMatchAnnotation(annotationClassName)) {
-	  listener.classMatchEvent(_loader, _root, getClassName());
 	  _currentListeners[i] = null;
 	}
 	else
@@ -303,7 +342,5 @@ public class ScanManager {
 
       return activeCount == 0;
     }
-
-    abstract String getClassName();
   }
 }

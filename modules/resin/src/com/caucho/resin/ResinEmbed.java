@@ -43,9 +43,9 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.RawString;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.network.listen.StreamSocketLink;

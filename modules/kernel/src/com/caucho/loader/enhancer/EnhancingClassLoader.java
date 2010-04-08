@@ -29,9 +29,9 @@
 
 package com.caucho.loader.enhancer;
 
+import com.caucho.inject.Module;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 /**
@@ -42,9 +42,8 @@ import com.caucho.vfs.Path;
  * From the perspective of the JDK, it's all one classloader.  Internally,
  * the class loader chain searches like a classpath.
  */
+@Module
 public class EnhancingClassLoader extends EnvironmentClassLoader {
-  private static final L10N L = new L10N(EnhancingClassLoader.class);
-
   private Path _workPath;
 
   /**

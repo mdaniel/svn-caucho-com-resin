@@ -57,7 +57,6 @@ import com.caucho.config.attribute.ProgramAttribute;
 import com.caucho.config.attribute.PropertyAttribute;
 import com.caucho.config.attribute.SetterAttribute;
 import com.caucho.config.attribute.TextAttribute;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
@@ -65,6 +64,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.config.types.RawString;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
 import com.caucho.vfs.PersistentDependency;
@@ -215,7 +215,7 @@ public class BeanType<T> extends ConfigType<T>
    * Called before the children are configured.
    */
   @Override
-  public void beforeConfigure(ConfigContext env, Object bean, Node node)
+  public void beforeConfigure(XmlConfigContext env, Object bean, Node node)
   {
     super.beforeConfigure(env, bean, node);
 

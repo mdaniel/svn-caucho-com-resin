@@ -27,56 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.type;
+package com.caucho.loader.enhancer;
 
-import javax.el.*;
-import com.caucho.config.*;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.el.*;
+import com.caucho.inject.Module;
 
 /**
- * Represents a MethodExpression type.
+ * Interface for a scanned class.
  */
-public final class MethodExpressionType extends ConfigType
-{
-  public static final MethodExpressionType TYPE = new MethodExpressionType();
-  
+@Module
+public interface ScanClass {
   /**
-   * The MethodExpressionType is a singleton
+   * Adds the superclass information to the scan class.
    */
-  private MethodExpressionType()
-  {
-  }
-  
-  /**
-   * Returns the Java type.
-   */
-  public Class getType()
-  {
-    return MethodExpression.class;
-  }
+  void addSuperClass(char[] buffer, int offset, int length);
 
   /**
-   * Return false to disable EL
+   * Adds interface information to the scan class.
    */
-  @Override
-  public boolean isEL()
-  {
-    return false;
-  }
+  void addInterface(char[] buffer, int offset, int length);
   
   /**
-   * Converts the string to a value of the type.
+   * Adds a class annotation
    */
-  public Object valueOf(String text)
-  {
-    ELContext elContext = XmlConfigContext.getCurrent().getELContext();
-    
-    ELParser parser = new ELParser(elContext, text);
+  void addClassAnnotation(char [] buffer, int offset, int length);
+  
+  /**
+   * Adds a pool string of the form "L...;" to test for annotations.
+   */
+  void addPoolString(char []buffer, int offset, int length);
 
-    Expr expr = parser.parse();
-
-    return new MethodExpressionImpl(expr, text,
-				    Object.class, new Class[0]);
-  }
+  /**
+   * Complete scan processing.
+   */
+  void finishScan();
 }

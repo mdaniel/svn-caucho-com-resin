@@ -33,8 +33,8 @@ import java.beans.*;
 import java.util.*;
 import javax.el.*;
 
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.xml.XmlConfigContext;
 
 /**
  * Variable resolution for webbeans variables
@@ -81,7 +81,7 @@ public class ConfigContextResolver extends ELResolver {
 
     String name = (String) property;
 
-    ConfigContext configContext = ConfigContext.getCurrent();
+    XmlConfigContext configContext = XmlConfigContext.getCurrent();
 
     if (configContext == null)
       return null;

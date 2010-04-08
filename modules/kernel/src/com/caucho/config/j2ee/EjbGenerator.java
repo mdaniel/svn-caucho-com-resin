@@ -30,10 +30,10 @@
 package com.caucho.config.j2ee;
 
 import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.config.ConfigException;
 import com.caucho.naming.*;
 import com.caucho.util.L10N;

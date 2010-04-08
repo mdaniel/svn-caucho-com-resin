@@ -30,11 +30,11 @@
 package com.caucho.config.j2ee;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.AbstractInjectionPoint;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.*;
 
 import java.lang.annotation.Annotation;

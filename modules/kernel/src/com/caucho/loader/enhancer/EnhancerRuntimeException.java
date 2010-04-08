@@ -28,6 +28,10 @@
 
 package com.caucho.loader.enhancer;
 
+import com.caucho.inject.Module;
+
+@Module
+@SuppressWarnings("serial")
 public class EnhancerRuntimeException extends RuntimeException {
   public EnhancerRuntimeException(Throwable e)
   {

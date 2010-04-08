@@ -29,19 +29,46 @@
 
 package com.caucho.bytecode;
 
+import com.caucho.inject.Module;
 import com.caucho.util.CharBuffer;
   
 /**
  * Returns true if the class matches, i.e. if enhancement is necessary.
  */
+@Module
 public interface ByteCodeClassMatcher {
   /**
    * Returns true if the class is a match.
    */
-  public boolean isClassMatch(String className, int modifiers);
+  public boolean scanClass(String className, int modifiers);
   
   /**
    * Returns true if the annotation class is a match.
    */
-  public boolean isAnnotationMatch(CharBuffer annotationClassName); 
+  public boolean isAnnotationMatch(CharBuffer annotationClassName);
+
+  /**
+   * Adds information about the superclass.
+   */
+  public void addSuperClass(char[] buffer, int offset, int length);
+
+  /**
+   * Adds information about an interface.
+   */
+  public void addInterface(char[] buffer, int offset, int length);
+
+  /**
+   * Adds the class annotation type
+   */
+  public void addClassAnnotation(char[] buffer, int offset, int length);
+
+  /**
+   * Adds a class defined in the constant pool
+   */
+  public void addPoolString(char[] charBuffer, int offset, int length);
+  
+  /**
+   * Complete the scan.
+   */
+  public void finishScan();
 }

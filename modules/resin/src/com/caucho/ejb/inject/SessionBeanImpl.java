@@ -30,11 +30,11 @@
 package com.caucho.ejb.inject;
 
 import com.caucho.config.inject.BeanWrapper;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import javax.enterprise.inject.spi.*;
 import java.lang.annotation.Annotation;

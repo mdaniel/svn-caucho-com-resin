@@ -49,6 +49,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.make.AlwaysModified;
@@ -4092,7 +4093,7 @@ public class WebApp extends ServletContextImpl
     return _status500LastTime;
   }
 
-  public int getPriority()
+  public int getScanPriority()
   {
     return 2;
   }
@@ -4102,9 +4103,9 @@ public class WebApp extends ServletContextImpl
     return true;
   }
 
-  public ScanMatch isScanMatchClass(String name, int modifiers)
+  public ScanClass scanClass(String name, int modifiers)
   {
-    return ScanMatch.DENY;
+    return null;
   }
 
   public boolean isScanMatchAnnotation(CharBuffer string)

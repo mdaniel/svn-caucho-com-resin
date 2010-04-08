@@ -29,34 +29,50 @@
 
 package com.caucho.bytecode;
 
-import com.caucho.loader.enhancer.ScanMatch;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import java.io.*;
+import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Scans for matching classes.
  */
+@Module
 public class ByteCodeClassScanner {
   private static final Logger log
     = Logger.getLogger(ByteCodeClassScanner.class.getName());
   private static final L10N L = new L10N(ByteCodeClassScanner.class);
+  
+  private static final char []RUNTIME_VISIBLE_ANNOTATIONS
+    = "RuntimeVisibleAnnotations".toCharArray();
 
-  private final String _className;
+  private String _className;
 
-  private final InputStream _is;
+  private InputStream _is;
 
-  private final ByteCodeClassMatcher _matcher;
+  private ByteCodeClassMatcher _matcher;
+  
+  private char []_charBuffer;
+  private int _charBufferOffset;
+  
+  private int _cpCount;
+  private int []_cpData;
+  private int []_cpLengths;
+  private int []_classData;
+  
+  public ByteCodeClassScanner()
+  {
+    _charBuffer = new char[16384];
+  }
 
-  private CharBuffer _cb = new CharBuffer();
-
-  public ByteCodeClassScanner(String className,
-			      InputStream is,
-			      ByteCodeClassMatcher matcher)
+  public void init(String className,
+                   InputStream is,
+                   ByteCodeClassMatcher matcher)
   {
     _className = className;
 
@@ -68,21 +84,92 @@ public class ByteCodeClassScanner {
   public boolean scan()
   {
     try {
-      int magic = readInt();
+      InputStream is = _is;
+      
+      int magic = readInt(is);
 
       if (magic != JavaClass.MAGIC)
 	throw error(L.l("bad magic number in class file"));
 
-      _is.skip(2); // major
-      _is.skip(2); // minor
+      is.skip(2); // major
+      is.skip(2); // minor
 
-      boolean isMatch = parseConstantPool();
+      parseConstantPool(is);
 
-      int modifiers = readShort();
+      int modifiers = readShort(is);
+      int thisClassIndex = readShort(is);
+      
+      int cpIndex = _classData[thisClassIndex];
+      
+      if (cpIndex > 0) {
+        String className = new String(_charBuffer, 
+                                      _cpData[cpIndex], 
+                                      _cpLengths[cpIndex]);
+        
+        if (! _matcher.scanClass(className, modifiers)) {
+          return false;
+        }
+      }
+      
+      int superClassIndex = readShort(is);
+      
+      if (superClassIndex > 0) {
+        cpIndex = _classData[superClassIndex];
+        
+        if (cpIndex > 0) {
+          _matcher.addSuperClass(_charBuffer, 
+                                 _cpData[cpIndex], 
+                                 _cpLengths[cpIndex]);
+        }
+      }
 
-      boolean isClassMatch = _matcher.isClassMatch(_className, modifiers);
+      int interfaceCount = readShort(is);
+      for (int i = 0; i < interfaceCount; i++) {
+        int classIndex = readShort(is);
+        
+        cpIndex = _classData[classIndex];
+        if (cpIndex > 0) {
+          _matcher.addInterface(_charBuffer, 
+                                _cpData[cpIndex], 
+                                _cpLengths[cpIndex]);
+        }
+      }
 
-      return isClassMatch;
+      int fieldCount = readShort(is);
+      for (int i = 0; i < fieldCount; i++) {
+        skipField(is);
+      }
+
+      int methodCount = readShort(is);
+      for (int i = 0; i < methodCount; i++) {
+        skipMethod(is);
+      }
+
+      int attrCount = readShort(is);
+      for (int i = 0; i < attrCount; i++) {
+        scanClassAttribute(is);
+      }
+      
+      char []charBuffer = _charBuffer;
+      
+      for (int i = 0; i < _cpCount; i++) {
+        int cpLength = _cpLengths[i];
+        
+        if (cpLength > 0) {
+          int cpOffset = _cpData[i];
+          
+          if (charBuffer[cpOffset] == 'L'
+              && charBuffer[cpOffset + cpLength - 1] == ';') {
+            _matcher.addPoolString(charBuffer, 
+                                   cpOffset + 1,
+                                   cpLength - 2);
+          }
+        }
+      }
+      
+      _matcher.finishScan();
+
+      return true;
     } catch (Exception e) {
       log.log(Level.WARNING,
 	      "failed scanning class " + _className + "\n" + e.toString(),
@@ -95,14 +182,27 @@ public class ByteCodeClassScanner {
   /**
    * Parses the constant pool.
    */
-  public boolean parseConstantPool()
+  public boolean parseConstantPool(InputStream is)
     throws IOException
   {
-    int count = readShort();
+    int count = readShort(is);
+    
+    _cpCount = count;
+    
+    if (_cpData == null || _cpData.length <= count) {
+      _cpData = new int[count];
+      _cpLengths = new int[count];
+      _classData = new int[count];
+    }
+    
+    Arrays.fill(_cpData, 0);
+    Arrays.fill(_cpLengths, 0);
+    Arrays.fill(_classData, 0);
 
     int i = 1;
     while (i < count) {
-      int code = _is.read();
+      int index = i;
+      int code = is.read();
 
       if (code == ByteCodeParser.CP_LONG || code == ByteCodeParser.CP_DOUBLE)
 	i += 2;
@@ -111,69 +211,68 @@ public class ByteCodeClassScanner {
       
       switch (code) {
       case ByteCodeParser.CP_CLASS:
-	// int utf8Index = readShort();
-	
-	_is.skip(2);
+        int utf8Index = readShort(is);
+        
+        // index of the UTF-8 string
+	_classData[index] = utf8Index;
 	break;
       
       case ByteCodeParser.CP_FIELD_REF:
 	// int classIndex = readShort();
 	// int nameAndTypeIndex = readShort();
 	
-	_is.skip(4);
+	is.skip(4);
 	break;
       
       case ByteCodeParser.CP_METHOD_REF:
 	// int classIndex = readShort();
 	// int nameAndTypeIndex = readShort();
 
-	_is.skip(4);
+	is.skip(4);
 	break;
       
       case ByteCodeParser.CP_INTERFACE_METHOD_REF:
 	// int classIndex = readShort();
 	// int nameAndTypeIndex = readShort();
 
-	_is.skip(4);
+	is.skip(4);
 	break;
 	
       case ByteCodeParser.CP_STRING:
 	// int stringIndex = readShort();
 
-	_is.skip(2);
+	is.skip(2);
 	break;
       
       case ByteCodeParser.CP_INTEGER:
-	_is.skip(4);
+	is.skip(4);
 	break;
       
       case ByteCodeParser.CP_FLOAT:
-	_is.skip(4);
+	is.skip(4);
 	break;
       
       case ByteCodeParser.CP_LONG:
-	_is.skip(8);
+	is.skip(8);
 	break;
       
       case ByteCodeParser.CP_DOUBLE:
-	_is.skip(8);
+	is.skip(8);
 	break;
       
       case ByteCodeParser.CP_NAME_AND_TYPE:
 	// int nameIndex = readShort();
 	// int descriptorIndex = readShort();
 	
-	_is.skip(4);
+	is.skip(4);
 	break;
       
       case ByteCodeParser.CP_UTF8:
 	{
-	  int length = readShort();
+	  int length = readShort(is);
 
-	  if (parseUtf8ForAnnotation(_cb, length)) {
-	    if (_matcher.isAnnotationMatch(_cb))
-	      return true;
-	  }
+          _cpData[index] = _charBufferOffset;
+          _cpLengths[index] = parseUtf8(is, length);
 
 	  break;
 	}
@@ -189,89 +288,241 @@ public class ByteCodeClassScanner {
   /**
    * Parses the UTF.
    */
-  private boolean parseUtf8ForAnnotation(CharBuffer cb, int len)
+  private int parseUtf8(InputStream is, int length)
     throws IOException
   {
-    if (len <= 0)
-      return false;
+    if (length <= 0)
+      return 0;
     
-    InputStream is = _is;
-
-    int ch = is.read();
-    len -= 1;
-
-    // only scan annotations
-    if (ch != 'L') {
-      is.skip(len);
-      return false;
+    if (length > 256) {
+      is.skip(length);
+      return 0;
     }
     
-    cb.ensureCapacity(len);
-
-    char []cBuf = cb.getBuffer();
-    int cLen = 0;
-
-    while (len > 0) {
+    int offset = _charBufferOffset;
+    
+    if (_charBuffer.length <= offset + length) {
+      char []buffer = new char[2 * _charBuffer.length];
+      System.arraycopy(_charBuffer, 0, buffer, 0, _charBuffer.length);
+      _charBuffer = buffer;
+    }
+    
+    char []buffer = _charBuffer;
+    
+    while (length > 0) {
       int d1 = is.read();
 
       if (d1 == '/') {
-	cBuf[cLen++] = '.';
-	
-	len--;
+        buffer[offset++] = '.';
+        
+        length--;
       }
       else if (d1 < 0x80) {
-	cBuf[cLen++] = (char) d1;
-	
-	len--;
+        buffer[offset++] = (char) d1;
+        
+        length--;
       }
       else if (d1 < 0xe0) {
-	int d2 = is.read() & 0x3f;
+        int d2 = is.read() & 0x3f;
 
-	cBuf[cLen++] = (char) (((d1 & 0x1f) << 6) + (d2));
-	
-	len -= 2;
+        buffer[offset++] = (char) (((d1 & 0x1f) << 6) + (d2));
+        
+        length -= 2;
       }
       else if (d1 < 0xf0) {
-	int d2 = is.read() & 0x3f;
-	int d3 = is.read() & 0x3f;
+        int d2 = is.read() & 0x3f;
+        int d3 = is.read() & 0x3f;
 
-	cBuf[cLen++] = (char) (((d1 & 0xf) << 12) + (d2 << 6) + d3);
-	
-	len -= 3;
+        buffer[offset++] = (char) (((d1 & 0xf) << 12) + (d2 << 6) + d3);
+        
+        length -= 3;
       }
       else
-	throw new IllegalStateException();
+        throw new IllegalStateException();
     }
 
-    if (cLen > 0 && cBuf[cLen - 1] == ';') {
-      cb.setLength(cLen - 1);
+    int charLength = offset - _charBufferOffset;
     
-      return true;
+    _charBufferOffset = offset;
+    
+    return charLength;
+  }
+
+  /**
+   * Parses a field entry.
+   */
+  private void skipField(InputStream is)
+    throws IOException
+  {
+    // int accessFlags = readShort();
+    // int nameIndex = readShort();
+    // int descriptorIndex = readShort();
+    
+    is.skip(6);
+
+    int attributesCount = readShort(is);
+
+    for (int i = 0; i < attributesCount; i++) {
+      skipAttribute(is);
     }
-    else
+  }
+
+  /**
+   * Parses a method entry.
+   */
+  private void skipMethod(InputStream is)
+    throws IOException
+  {
+    /*
+    int accessFlags = readShort();
+    int nameIndex = readShort();
+    int descriptorIndex = readShort();
+    */
+    
+    is.skip(6);
+
+    int attributesCount = readShort(is);
+
+    for (int i = 0; i < attributesCount; i++) {
+      skipAttribute(is);
+    }
+  }
+
+  /**
+   * Parses an attribute.
+   */
+  private void scanClassAttribute(InputStream is)
+    throws IOException
+  {
+    int nameIndex = readShort(is);
+
+    // String name = _cp.getUtf8(nameIndex).getValue();
+    
+    int length = readInt(is);
+
+    if (! isNameAnnotation(nameIndex)) {
+      is.skip(length);
+      return;
+    }
+    
+    int count = readShort(is);
+    
+    for (int i = 0; i < count; i++) {
+      int annTypeIndex = scanAnnotation(is);
+    
+      if (annTypeIndex > 0) {
+        _matcher.addClassAnnotation(_charBuffer, 
+                                    _cpData[annTypeIndex] + 1, 
+                                    _cpLengths[annTypeIndex] - 2);
+      }
+    }
+  }
+  
+  private int scanAnnotation(InputStream is)
+    throws IOException
+  {
+    int typeIndex = readShort(is);
+    
+    int n = readShort(is);
+    
+    for (int i = 0; i < n; i++) {
+      is.skip(2);   // int type = readShort(is);
+      int valueCount = readShort(is);
+      
+      for (int j = 0; j < valueCount; j++) {
+        is.skip(2); // int eltIndex = readShort(is);
+        
+        skipElementValue(is);
+      }
+    }
+    
+    return typeIndex;
+  }
+  
+  private void skipElementValue(InputStream is)
+    throws IOException
+  {
+    switch (is.read()) {
+    case 'B': case 'C': case 'D': case 'F': case 'I': case 'J':
+    case 'S': case 'Z': case 's':
+      is.skip(2);
+      return;
+    case 'e':
+      is.skip(4);
+      return;
+    case 'c':
+      is.skip(2);
+      return;
+    case '@':
+      scanAnnotation(is);
+      return;
+    case '[':
+      int len = readShort(is);
+      for (int i = 0; i < len; i++) {
+        skipElementValue(is);
+      }
+      return;
+    default:
+      return;
+    }
+  }
+  
+  private boolean isNameAnnotation(int nameIndex)
+  {
+    if (nameIndex <= 0)
       return false;
+    
+    int offset = _cpData[nameIndex];
+    int length = _cpLengths[nameIndex];
+    
+    char []charBuffer = _charBuffer;
+    
+    if (length != RUNTIME_VISIBLE_ANNOTATIONS.length)
+      return false;
+    
+    for (int i = 0; i < length; i++) {
+      if (charBuffer[i + offset] != RUNTIME_VISIBLE_ANNOTATIONS[i])
+        return false;
+    }
+    
+    return true;
+  }
+
+  /**
+   * Parses an attribute.
+   */
+  private void skipAttribute(InputStream is)
+    throws IOException
+  {
+    int nameIndex = readShort(is);
+
+    // String name = _cp.getUtf8(nameIndex).getValue();
+    
+    int length = readInt(is);
+    
+    is.skip(length);
   }
 
   /**
    * Parses a 32-bit int.
    */
-  private int readInt()
+  private int readInt(InputStream is)
     throws IOException
   {
-    return ((_is.read() << 24)
-	    | (_is.read() << 16)
-	    | (_is.read() << 8)
-	    | (_is.read()));
+    return ((is.read() << 24)
+	    | (is.read() << 16)
+	    | (is.read() << 8)
+	    | (is.read()));
   }
 
   /**
    * Parses a 16-bit int.
    */
-  private int readShort()
+  private int readShort(InputStream is)
     throws IOException
   {
-    int c1 = _is.read();
-    int c2 = _is.read();
+    int c1 = is.read();
+    int c2 = is.read();
 
     return ((c1 << 8) | c2);
   }

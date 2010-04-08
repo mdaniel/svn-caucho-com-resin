@@ -31,11 +31,13 @@ package com.caucho.loader.enhancer;
 
 import com.caucho.bytecode.JClass;
 import com.caucho.bytecode.JavaClass;
+import com.caucho.inject.Module;
 import com.caucho.java.gen.GenClass;
 
 /**
  * Interface for a class enhancer.
  */
+@Module
 public interface ClassEnhancer {
   /**
    * Returns true if the class will be enhanced.

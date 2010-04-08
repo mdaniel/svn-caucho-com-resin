@@ -30,10 +30,10 @@
 package com.caucho.config;
 
 import com.caucho.config.attribute.*;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.type.*;
 import com.caucho.config.types.*;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.el.EL;
 import com.caucho.el.EnvironmentContext;
 import com.caucho.loader.Environment;
@@ -298,7 +298,7 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      ConfigContext builder = createBuilder();
+      XmlConfigContext builder = createBuilder();
 
       InjectManager webBeans = InjectManager.create();
 
@@ -350,7 +350,7 @@ public class Config {
     try {
       thread.setContextClassLoader(_classLoader);
 
-      ConfigContext builder = createBuilder();
+      XmlConfigContext builder = createBuilder();
 
       InjectManager webBeans = InjectManager.create();
 
@@ -363,9 +363,9 @@ public class Config {
     }
   }
 
-  private ConfigContext createBuilder()
+  private XmlConfigContext createBuilder()
   {
-    return new ConfigContext(this);
+    return new XmlConfigContext(this);
   }
 
   /**
@@ -665,7 +665,7 @@ public class Config {
   public static void setStringAttribute(Object obj, String attr, String value)
     throws Exception
   {
-    ConfigContext builder = new ConfigContext();
+    XmlConfigContext builder = new XmlConfigContext();
     QAttr qAttr = new QAttr(attr);
     qAttr.setValue(value);
 
@@ -712,7 +712,7 @@ public class Config {
    */
   public static ELContext getEnvironment()
   {
-    ConfigContext builder = ConfigContext.getCurrentBuilder();
+    XmlConfigContext builder = XmlConfigContext.getCurrentBuilder();
 
     if (builder != null) {
       return builder.getELContext();
@@ -726,7 +726,7 @@ public class Config {
    */
   public static ConfigELContext getELContext()
   {
-    ConfigContext builder = ConfigContext.getCurrentBuilder();
+    XmlConfigContext builder = XmlConfigContext.getCurrentBuilder();
 
     if (builder != null) {
       return builder.getELContext();

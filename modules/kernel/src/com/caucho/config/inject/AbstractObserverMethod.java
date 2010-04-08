@@ -36,6 +36,7 @@ import com.caucho.config.j2ee.*;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
@@ -44,7 +45,6 @@ import com.caucho.config.*;
 import com.caucho.config.bytecode.*;
 import com.caucho.config.cfg.*;
 import com.caucho.config.event.ObserverImpl;
-import com.caucho.config.inject.AnnotatedTypeImpl;
 import com.caucho.config.program.BeanArg;
 
 import java.lang.reflect.*;

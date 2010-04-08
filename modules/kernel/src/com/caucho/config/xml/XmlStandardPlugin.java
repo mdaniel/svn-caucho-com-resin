@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.xml;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
@@ -54,6 +54,9 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ServiceStartup;
 import com.caucho.config.cfg.BeansConfig;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.ProcessBeanImpl;
 import com.caucho.vfs.Path;
 
 /**

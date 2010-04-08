@@ -25,137 +25,128 @@
  *   Boston, MA 02111-1307  USA
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.xml;
+
+import java.io.IOException;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
+
+import org.w3c.dom.Attr;
+import org.w3c.dom.CharacterData;
+import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.NamedNodeMap;
+import org.w3c.dom.Node;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigELContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-import com.caucho.config.program.NodeBuilderChildProgram;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.types.Validator;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
-import com.caucho.config.attribute.*;
+import com.caucho.config.program.NodeBuilderChildProgram;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.StringType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.el.ELParser;
 import com.caucho.el.Expr;
-import com.caucho.loader.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.xml.*;
-
-import org.w3c.dom.*;
-
-import javax.el.*;
-import java.io.Closeable;
-import java.io.IOException;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.*;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
+import com.caucho.inject.Module;
+import com.caucho.util.CompileException;
+import com.caucho.util.DisplayableException;
+import com.caucho.util.L10N;
+import com.caucho.util.LineCompileException;
+import com.caucho.vfs.Depend;
+import com.caucho.vfs.Dependency;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
+import com.caucho.xml.QAbstractNode;
+import com.caucho.xml.QAttributedNode;
+import com.caucho.xml.QDocument;
+import com.caucho.xml.QElement;
+import com.caucho.xml.QName;
+import com.caucho.xml.QNode;
+import com.caucho.xml.XmlUtil;
 
 /**
  * The ConfigContext contains the state of the current configuration.
  */
-public class ConfigContext {
-  private final static L10N L = new L10N(ConfigContext.class);
+@Module
+public class XmlConfigContext {
+  private final static L10N L = new L10N(XmlConfigContext.class);
   private final static Logger log
-    = Logger.getLogger(ConfigContext.class.getName());
+    = Logger.getLogger(XmlConfigContext.class.getName());
 
   private final static QName TEXT = new QName("#text");
-  private final static QName VALUE = new QName("value");
-
   private final static Object NULL = new Object();
 
-  private static ThreadLocal<ConfigContext> _currentBuilder
-    = new ThreadLocal<ConfigContext>();
+  private static ThreadLocal<XmlConfigContext> _currentBuilder
+    = new ThreadLocal<XmlConfigContext>();
 
   private Config _config;
 
-  private ConfigContext _parent;
-  private DependentScope _dependentScope;
-
-  private ScopeContext _scope;
-  private Contextual<?> _bean;
   private InjectionPoint _ij;
   
-  private CreationalContextImpl _beanStack;
+  private CreationalContextImpl<?> _beanStack;
 
   private ArrayList<Dependency> _dependList;
   private Document _dependDocument;
 
   private String _baseUri;
 
-  public ConfigContext()
+  public XmlConfigContext()
   {
   }
 
-  public ConfigContext(ConfigContext parent)
-  {
-    this();
-
-    _parent = parent;
-  }
-
-  public ConfigContext(AbstractBean bean,
-                       Object value,
-                       ScopeContext scope)
+  public XmlConfigContext(XmlConfigContext parent)
   {
     this();
-
-    _dependentScope = new DependentScope(bean, value, scope);
   }
 
-  public ConfigContext(ScopeContext scope)
-  {
-    this();
-
-    _dependentScope = new DependentScope(scope);
-  }
-
-  public ConfigContext(Config config)
+  public XmlConfigContext(Config config)
   {
     this();
 
     _config = config;
   }
 
-  public static ConfigContext create()
+  public static XmlConfigContext create()
   {
-    ConfigContext env = _currentBuilder.get();
+    XmlConfigContext env = _currentBuilder.get();
 
     if (env != null)
       return env;
     else
-      return new ConfigContext();
+      return new XmlConfigContext();
   }
 
-  public static ConfigContext createForProgram()
+  public static XmlConfigContext createForProgram()
   {
-    return new ConfigContext();
+    return new XmlConfigContext();
   }
 
-  public static ConfigContext getCurrentBuilder()
+  public static XmlConfigContext getCurrentBuilder()
   {
     return _currentBuilder.get();
   }
 
-  public static ConfigContext getCurrent()
+  public static XmlConfigContext getCurrent()
   {
     return _currentBuilder.get();
   }
 
   // s/b private?
-  static void setCurrentBuilder(ConfigContext builder)
+  static void setCurrentBuilder(XmlConfigContext builder)
   {
     _currentBuilder.set(builder);
   }
@@ -170,12 +161,6 @@ public class ConfigContext {
     _ij = ij;
   }
 
-  public void setScope(ScopeContext scope, Contextual<?> bean)
-  {
-    _scope = scope;
-    _bean = bean;
-  }
-
   /**
    * Returns the file var
    */
@@ -183,43 +168,6 @@ public class ConfigContext {
   {
     return Vfs.decode(_baseUri);
   }
-
-  /**
-   * WebBeans method
-   *
-   * @param aThis
-   * @param value
-   */
-  public void addDestructor(AbstractBean comp, Object value)
-  {
-    if (_dependentScope != null)
-      _dependentScope.addDestructor(comp, value);
-    else {
-      InjectManager manager = InjectManager.create();
-
-      //manager.addDestructor(new Destructor(comp, value));
-      // manager.addDestructor(comp, value);
-    }
-  }
-
-  /*
-  public boolean canInject(ScopeContext scope)
-  {
-    return _dependentScope != null && _dependentScope.canInject(scope);
-  }
-  */
-
-  /*
-  public boolean canInject(Class scopeType)
-  {
-    if (scopeType == ApplicationScoped.class
-        || scopeType == Dependent.class
-        || _dependentScope != null && _dependentScope.canInject(scopeType))
-      return true;
-    else
-      return false;
-  }
-  */
 
   /**
    * Returns the component value for the dependent scope
@@ -236,24 +184,6 @@ public class ConfigContext {
   {
     return CreationalContextImpl.findByName(_beanStack, name);
   }
-
-  /*
-  public Object findByName(String name)
-  {
-    if (_dependentScope != null) {
-      Object value = _dependentScope.findByName(name);
-
-      if (value != null)
-        return value;
-      else if (_parent != null)
-        return _parent.findByName(name);
-      else
-        return null;
-    }
-    else
-      return null;
-  }
-  */
   
   public CreationalContext<?> setCreationalContext(CreationalContext<?> cxt)
   {
@@ -272,29 +202,6 @@ public class ConfigContext {
   public Config getConfig()
   {
     return _config;
-  }
-
-  /**
-   * WebBeans dependent scope setting
-   *
-   * @param aThis
-   * @param obj
-   */
-  public void put(AbstractBean comp, Object obj)
-  {
-    if (_dependentScope == null)
-      _dependentScope = new DependentScope();
-
-    _dependentScope.put(comp, obj);
-
-    if (_scope != null)
-      _scope.put(comp, obj);
-  }
-
-  public void remove(Bean comp)
-  {
-    if (_dependentScope != null)
-      _dependentScope.remove((AbstractBean) comp);
   }
 
   /**
@@ -323,7 +230,7 @@ public class ConfigContext {
     if (bean == null)
       throw new NullPointerException(L.l("unexpected null bean at node '{0}'", top));
 
-    ConfigContext oldBuilder = _currentBuilder.get();
+    XmlConfigContext oldBuilder = _currentBuilder.get();
     try {
       _currentBuilder.set(this);
 
@@ -354,7 +261,7 @@ public class ConfigContext {
   public void configureBean(Object bean, Node top)
     throws LineConfigException
   {
-    ConfigContext oldBuilder = _currentBuilder.get();
+    XmlConfigContext oldBuilder = _currentBuilder.get();
     String oldFile = _baseUri;
     ArrayList<Dependency> oldDependList = _dependList;
 
@@ -369,7 +276,7 @@ public class ConfigContext {
 
       _dependList = getDependencyList(top);
 
-      ConfigType type = TypeFactory.getType(bean);
+      ConfigType<?> type = TypeFactory.getType(bean);
 
       configureNode(top, bean, type);
     } finally {
@@ -398,13 +305,13 @@ public class ConfigContext {
     String oldFile = _baseUri;
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
-    ConfigContext oldBuilder = getCurrentBuilder();
+    XmlConfigContext oldBuilder = getCurrentBuilder();
     try {
       setCurrentBuilder(this);
 
       _baseUri = attribute.getBaseURI();
 
-      ConfigType type = TypeFactory.getType(bean);
+      ConfigType<?> type = TypeFactory.getType(bean);
 
       QName qName = ((QAbstractNode) attribute).getQName();
 
@@ -437,7 +344,7 @@ public class ConfigContext {
    */
   public Object configureNode(Node node,
                               Object bean,
-                              ConfigType type)
+                              ConfigType<?> type)
     throws LineConfigException
   {
     Thread thread = Thread.currentThread();
@@ -486,7 +393,7 @@ public class ConfigContext {
    */
   private void configureNodeAttributes(Node node,
                                        Object bean,
-                                       ConfigType type)
+                                       ConfigType<?> type)
   {
     if (node instanceof QAttributedNode) {
       Node child = ((QAttributedNode) node).getFirstAttribute();
@@ -515,7 +422,7 @@ public class ConfigContext {
   private void configureChildNode(Node childNode,
                                   QName qName,
                                   Object bean,
-                                  ConfigType type,
+                                  ConfigType<?> type,
                                   boolean allowParam)
   {
     if (qName.getName().startsWith("xmlns")) {
@@ -552,7 +459,7 @@ public class ConfigContext {
     }
   }
 
-  private Attribute getAttribute(ConfigType type,
+  private Attribute getAttribute(ConfigType<?> type,
                                  QName qName,
                                  Node childNode)
   {
@@ -595,13 +502,13 @@ public class ConfigContext {
                        Attribute attrStrategy,
                        boolean isTrim)
   {
-    ConfigType attrType = attrStrategy.getConfigType();
+    ConfigType<?> attrType = attrStrategy.getConfigType();
 
     if (isTrim && ! attrType.isNoTrim())
       text = text.trim();
 
     if (isEL() && attrType.isEL() && text.indexOf("${") >= 0) {
-      ConfigType childType = attrStrategy.getConfigType();
+      ConfigType<?> childType = attrStrategy.getConfigType();
 
       Object value = childType.valueOf(evalObject(text));
 
@@ -832,9 +739,9 @@ public class ConfigContext {
       return null;
   }
 
-  private Object createNew(ConfigType type,
-                                Object parent,
-                                Element newNode)
+  private Object createNew(ConfigType<?> type,
+                           Object parent,
+                           Element newNode)
   {
     String text = getTextValue(newNode);
 
@@ -846,9 +753,9 @@ public class ConfigContext {
 
     int count = countNewChildren(newNode);
 
-    Constructor ctor = type.getConstructor(count);
+    Constructor<?> ctor = type.getConstructor(count);
 
-    Class []paramTypes = ctor.getParameterTypes();
+    Class<?> []paramTypes = ctor.getParameterTypes();
 
     Object []args = new Object[paramTypes.length];
     int i = 0;
@@ -858,7 +765,7 @@ public class ConfigContext {
       if (! (child instanceof Element))
         continue;
 
-      ConfigType childType = TypeFactory.getType(paramTypes[i]);
+      ConfigType<?> childType = TypeFactory.getType(paramTypes[i]);
 
       args[i++] = create(child, childType);
     }
@@ -932,50 +839,10 @@ public class ConfigContext {
     return new NodeBuilderChildProgram(node);
   }
 
-  private void configureChildAttribute(Attr childNode,
-                                       QName qName,
-                                       Object bean,
-                                       ConfigType type)
-  {
-    if (qName.getName().startsWith("xmlns")) {
-      return;
-    }
-
-    Attribute attrStrategy;
-
-    try {
-      attrStrategy = type.getAttribute(qName);
-
-      if (attrStrategy == null) {
-        throw error(L.l("'{0}' is an unknown property of '{1}'.",
-                        qName.getName(), type.getTypeName()),
-                    childNode);
-      }
-
-      if (attrStrategy.isProgram()) {
-        attrStrategy.setValue(bean, qName,
-                              buildProgram(attrStrategy, childNode));
-        return;
-      }
-      else if (attrStrategy.isNode()) {
-        attrStrategy.setValue(bean, qName, childNode);
-        return;
-      }
-
-      String textValue = childNode.getValue();
-
-      attrStrategy.setText(bean, qName, textValue);
-    } catch (LineConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, childNode);
-    }
-  }
-
   //
   // Used for args
   //
-  public Object create(Node childNode, ConfigType type)
+  public Object create(Node childNode, ConfigType<?> type)
     throws ConfigException
   {
     try {
@@ -1005,7 +872,7 @@ public class ConfigContext {
 
       QName qName = ((QNode) childNode).getQName();
 
-      ConfigType childBeanType = type.createType(qName);
+      ConfigType<?> childBeanType = type.createType(qName);
 
       if (childBeanType != null) {
         childBean = childBeanType.create(null, qName);
@@ -1054,19 +921,6 @@ public class ConfigContext {
       return value;
   }
 
-  public void setDependentScope(DependentScope scope)
-  {
-    _dependentScope = scope;
-  }
-
-  public DependentScope getDependentScope()
-  {
-    if (_dependentScope == null)
-      _dependentScope = new DependentScope();
-
-    return _dependentScope;
-  }
-
   public ArrayList<Dependency> getDependencyList()
   {
     return _dependList;
@@ -1078,12 +932,6 @@ public class ConfigContext {
 
     if (node instanceof QElement) {
       QElement qelt = (QElement) node;
-
-      /* XXX: line #
-      builder.setLocation(bean, qelt.getBaseURI(),
-                          qelt.getFilename(), qelt.getLine());
-      builder.setNode(bean, qelt);
-      */
 
       QDocument doc = (QDocument) qelt.getOwnerDocument();
 
@@ -1112,27 +960,6 @@ public class ConfigContext {
   }
 
   /**
-   * Configures a new object given the object's type.
-   *
-   * @param type the expected type of the object
-   * @param node the configuration node
-   * @return the configured object
-   * @throws Exception
-   */
-  Object configureCreate(Class type, Node node)
-  {
-    try {
-      Object value = type.newInstance();
-
-      return configure(value, node);
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw error(e, node);
-    }
-  }
-
-  /**
    * Returns the variable resolver.
    */
   public ConfigELContext getELContext()
@@ -1140,104 +967,10 @@ public class ConfigContext {
     return ConfigELContext.EL_CONTEXT;
   }
 
-  static String getValue(QName name, Node node, String defaultValue)
-  {
-    /*
-    NamedNodeMap attrList = node.getAttributes();
-    if (attrList != null) {
-      for (int i = 0; i < attrList.getLength(); i++) {
-        if (attrList.item(i).getNodeName().equals(name.getName()))
-          return attrList.item(i).getNodeValue();
-      }
-    }
-    */
-
-    if (node instanceof Element) {
-      String value = ((Element) node).getAttribute(name.getName());
-
-      if (! "".equals(value))
-        return value;
-    }
-
-    Node ptr;
-
-    for (ptr = node.getFirstChild(); ptr != null; ptr = ptr.getNextSibling()) {
-      QName qName = ((QAbstractNode) ptr).getQName();
-
-      if (name.equals(qName))
-        return textValue(ptr);
-    }
-
-    return defaultValue;
-  }
-
   /**
    * Returns the text value of the node.
    */
-  Object getELValue(Attribute attr, Node node)
-  {
-    if (node instanceof Attr) {
-      Attr attrNode = (Attr) node;
-      String data = attrNode.getNodeValue();
-
-      // server/12h6
-      if (data != null && isEL() && attr.isEL()
-          && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
-        return eval(attr.getConfigType(), data);
-      }
-
-      return null;
-    }
-
-    if (! (node instanceof Element))
-      return null;
-
-    Element elt = (Element) node;
-    Element childElt = null;
-
-    for (Node child = elt.getFirstChild();
-         child != null;
-         child = child.getNextSibling()) {
-      if (child instanceof Element) {
-        if (childElt != null)
-          return null;
-
-        childElt = (Element) child;
-      }
-
-      else if (child instanceof CharacterData
-               && ! XmlUtil.isWhitespace(((CharacterData) child).getData())) {
-        String data = ((CharacterData) child).getData();
-
-        if (isEL() && attr.isEL() && childElt == null
-            && child.getNextSibling() == null
-            && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
-
-          String exprString = data.trim();
-
-          ELContext elContext = getELContext();
-
-          ELParser parser = new ELParser(elContext, exprString);
-
-          Expr expr = parser.parse();
-
-          Object value = expr.getValue(elContext);
-
-          // ioc/2403
-          return attr.getConfigType().valueOf(value);
-        }
-
-        return null;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Returns the text value of the node.
-   */
-  String getTextValue(Node node)
+  private String getTextValue(Node node)
   {
     if (node instanceof Attr) {
       Attr attrNode = (Attr) node;
@@ -1288,7 +1021,7 @@ public class ConfigContext {
   /**
    * Returns the text value of the node.
    */
-  String getArgTextValue(Node node)
+  private String getArgTextValue(Node node)
   {
     if (node instanceof Element && ! node.getLocalName().equals("value"))
       return null;
@@ -1296,7 +1029,7 @@ public class ConfigContext {
     return getTextValue(node);
   }
 
-  private Object eval(ConfigType type, String data)
+  private Object eval(ConfigType<?> type, String data)
   {
     ELContext elContext = getELContext();
 
@@ -1315,81 +1048,7 @@ public class ConfigContext {
   /**
    * Returns the text value of the node.
    */
-  Object getElementValue(Attribute attr, Node node)
-  {
-    if (! (node instanceof Element))
-      return null;
-
-    Element elt = (Element) node;
-    Element childElt = null;
-
-    for (Node child = elt.getFirstChild();
-         child != null;
-         child = child.getNextSibling()) {
-      if (child instanceof Element) {
-        if (childElt != null)
-          return null;
-
-        childElt = (Element) child;
-      }
-
-      else if (child instanceof CharacterData
-               && ! XmlUtil.isWhitespace(((CharacterData) child).getData())) {
-        String data = ((CharacterData) child).getData();
-
-        if (isEL() && attr.isEL() && childElt == null
-            && child.getNextSibling() == null
-            && (data.indexOf("#{") >= 0 || data.indexOf("${") >= 0)) {
-          ELContext elContext = getELContext();
-
-          ELParser parser = new ELParser(elContext, data.trim());
-
-          Expr expr = parser.parse();
-
-          Object value = attr.getConfigType().valueOf(elContext, expr);
-
-          if (value != null)
-            return value;
-          else
-            return NULL;
-        }
-
-        return null;
-      }
-    }
-
-    if (childElt == null)
-      return null;
-
-    TypeFactory factory = TypeFactory.getFactory();
-
-    QName qName = ((QElement) childElt).getQName();
-
-    ConfigType childType
-      = factory.getEnvironmentType(((QElement) childElt).getQName());
-
-    if (childType != null) {
-      Object childBean = childType.create(null, qName);
-
-      configureNode(childElt, childBean, childType);
-
-      childType.init(childBean);
-
-      Object value = childType.replaceObject(childBean);
-
-      if (value != null)
-        return value;
-      else
-        return NULL;
-    }
-
-    return null;
-  }
-
-  /**
-   * Returns the text value of the node.
-   */
-  static String textValue(Node node)
+  private static String textValue(Node node)
   {
     if (node instanceof Attr)
       return node.getNodeValue();
@@ -1412,7 +1071,7 @@ public class ConfigContext {
   /**
    * Returns the text value of the node.
    */
-  static String textValueNoTrim(Node node)
+  private static String textValueNoTrim(Node node)
   {
     if (node instanceof Attr)
       return node.getNodeValue();
@@ -1429,7 +1088,7 @@ public class ConfigContext {
   /**
    * Evaluate as an object
    */
-  public Object evalObject(String exprString)
+  private Object evalObject(String exprString)
     throws ELException
   {
     if (exprString.indexOf("${") >= 0 && isEL()) {
@@ -1443,7 +1102,7 @@ public class ConfigContext {
       return exprString;
   }
 
-  public static RuntimeException error(String msg, Node node)
+  private static RuntimeException error(String msg, Node node)
   {
     String systemId = null;
     String filename = null;
@@ -1469,7 +1128,7 @@ public class ConfigContext {
       return new LineConfigException(msg);
   }
 
-  public static RuntimeException error(Throwable e, Node node)
+  private static RuntimeException error(Throwable e, Node node)
   {
     String systemId = null;
     String filename = null;
@@ -1566,100 +1225,9 @@ public class ConfigContext {
     }
   }
 
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _dependentScope + "]";
-  }
-
-  /*
-  public static String decode(String uri)
-  {
-    StringBuilder sb = new StringBuilder();
-
-    int len = uri.length();
-
-    for (int i = 0; i < len; i++) {
-      char ch = uri.charAt(i);
-
-      if (ch != '%' || len <= i + 2) {
-        sb.append(ch);
-        continue;
-      }
-
-      int d1 = uri.charAt(i + 1);
-      int d2 = uri.charAt(i + 2);
-      int v = 0;
-
-      if ('0' <= d1 && d1 <= '9')
-        v = 16 * v + d1 - '0';
-      else if ('a' <= d1 && d1 <= 'f')
-        v = 16 * v + d1 - 'a' + 10;
-      else if ('A' <= d1 && d1 <= 'F')
-        v = 16 * v + d1 - 'A' + 10;
-      else {
-        sb.append('%');
-        continue;
-      }
-
-      if ('0' <= d2 && d2 <= '9')
-        v = 16 * v + d2 - '0';
-      else if ('a' <= d2 && d2 <= 'f')
-        v = 16 * v + d2 - 'a' + 10;
-      else if ('A' <= d2 && d2 <= 'F')
-        v = 16 * v + d2 - 'A' + 10;
-      else {
-        sb.append('%');
-        continue;
-      }
-
-      sb.append((char) v);
-      i += 2;
-    }
-
-    return sb.toString();
-  }
-  */
-
-  /*
-  static boolean hasChildren(Node node)
-  {
-    Node ptr;
-
-    if (node instanceof QAttributedNode) {
-      Node attr = ((QAttributedNode) node).getFirstAttribute();
-
-      for (; attr != null; attr = attr.getNextSibling()) {
-        if (! attr.getNodeName().startsWith("xml"))
-          return true;
-      }
-    }
-    else if (node instanceof Element) {
-      NamedNodeMap attrList = node.getAttributes();
-      if (attrList != null) {
-        for (int i = 0; i < attrList.getLength(); i++) {
-          if (! attrList.item(i).getNodeName().startsWith("xml"))
-            return true;
-        }
-      }
-    }
-
-    for (ptr = node.getFirstChild(); ptr != null; ptr = ptr.getNextSibling()) {
-      if (ptr instanceof Element)
-        return true;
-    }
-
-    return false;
-  }
-  */
-
-  public void push(Object obj)
-  {
-    if (_scope != null) {
-      _scope.put(_bean, obj);
-    }
-  }
-
-  public void release()
-  {
+    return getClass().getSimpleName() + "[]";
   }
 }

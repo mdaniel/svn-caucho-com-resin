@@ -29,51 +29,52 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
-import com.caucho.config.types.*;
-import com.caucho.config.gen.*;
-import com.caucho.util.*;
+import com.caucho.vfs.*;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
-import javax.enterprise.inject.spi.Bean;
+import java.util.ArrayList;
 
 /**
- * Configuration for a SimpleBean method, e.g. for an XML configuration of
- * a @Produces
+ * Scanned data for the root context
  */
-public class SimpleBeanMethod
-{
-  private static final L10N L = new L10N(SimpleBeanMethod.class);
+public class ScanRootContext  {
+  private final Path _root;
   
-  private Method _method;
-
-  private Annotation []_annotations;
-
-  public SimpleBeanMethod(Method method, Annotation []annotations)
+  private ArrayList<String> _classList = new ArrayList<String>();
+  private boolean _isScanComplete;
+  
+  public ScanRootContext(Path root)
   {
-    _method = method;
-    _annotations = annotations;
+    _root = root;
   }
 
-  public Method getMethod()
+  public Path getRoot()
   {
-    return _method;
+    return _root;
   }
 
-  public Annotation []getAnnotations()
+  public void addClassName(String className)
   {
-    return _annotations;
+    _classList.add(className);
   }
 
+  public ArrayList<String> getClassNameList()
+  {
+    return _classList;
+  }
+
+  public boolean isScanComplete()
+  {
+    return _isScanComplete;
+  }
+
+  public void setScanComplete(boolean isScanComplete)
+  {
+    _isScanComplete = isScanComplete;
+  }
+
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _method.getName() + "]";
+    return getClass().getSimpleName() + "[" + _root + "]";
   }
 }

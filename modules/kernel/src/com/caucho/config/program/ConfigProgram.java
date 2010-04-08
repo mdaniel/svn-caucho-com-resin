@@ -32,10 +32,10 @@ package com.caucho.config.program;
 import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.scope.DependentScope;
 import com.caucho.config.type.*;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.xml.QName;
 
 /**
@@ -79,7 +79,7 @@ public abstract class ConfigProgram {
   public <T> T configure(Class<T> type)
     throws ConfigException
   {
-    return configure(type, ConfigContext.create());
+    return configure(type, XmlConfigContext.create());
   }
 
 
@@ -87,7 +87,7 @@ public abstract class ConfigProgram {
    * Configures a bean given a class to instantiate.
    */
   final
-  protected <T> T configure(Class<T> type, ConfigContext env)
+  protected <T> T configure(Class<T> type, XmlConfigContext env)
     throws ConfigException
   {
     try {

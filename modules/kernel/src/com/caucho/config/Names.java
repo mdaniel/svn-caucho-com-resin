@@ -44,10 +44,13 @@ public final class Names {
     final String name = value;
 
     return new Named() {
+      @Override
       public Class annotationType() { return Named.class; }
 
+      @Override
       public String value() { return name; }
 
+      @Override
       public String toString()
       {
         return "@" + Named.class.getSimpleName() + "('" + name + "')";

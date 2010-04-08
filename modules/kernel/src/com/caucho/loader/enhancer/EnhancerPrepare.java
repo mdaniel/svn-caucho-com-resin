@@ -59,8 +59,6 @@ public class EnhancerPrepare {
   private static final int ACC_PRIVATE = 0x2;
   private static final int ACC_PROTECTED = 0x4;
 
-  private JavaClassGenerator _javaGen = new JavaClassGenerator();
-
   private ClassLoader _loader;
 
   private Path _workPath;

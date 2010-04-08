@@ -44,6 +44,7 @@ import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 

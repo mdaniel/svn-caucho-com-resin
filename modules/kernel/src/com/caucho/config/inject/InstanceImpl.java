@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -39,9 +39,12 @@ import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.enterprise.util.TypeLiteral;
 
+import com.caucho.inject.Module;
+
 /**
  * Factory to create instances of a bean.
  */
+@Module
 public class InstanceImpl<T> implements Instance<T>
 {
   private InjectManager _beanManager;
@@ -50,7 +53,7 @@ public class InstanceImpl<T> implements Instance<T>
 
   private long _version;
   private Set<Bean<?>> _beanSet;
-  private Bean _bean;
+  private Bean<T> _bean;
 
   InstanceImpl(InjectManager beanManager,
                Type type,
@@ -70,13 +73,13 @@ public class InstanceImpl<T> implements Instance<T>
   public T get()
   {
     if (_bean == null) {
-      _bean = _beanManager.resolve(getBeanSet());
+      _bean = (Bean<T>) _beanManager.resolve(getBeanSet());
     }
 
     if (_bean == null)
       return null;
 
-    CreationalContext<?> env = _beanManager.createCreationalContext(_bean);
+    CreationalContext<T> env = _beanManager.createCreationalContext(_bean);
 
     return (T) _beanManager.getReference(_bean, _bean.getBeanClass(), env);
   }

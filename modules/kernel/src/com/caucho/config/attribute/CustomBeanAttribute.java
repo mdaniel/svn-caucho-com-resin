@@ -37,10 +37,10 @@ import javax.enterprise.context.spi.CreationalContext;
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.cfg.BeanConfig;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
 import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 

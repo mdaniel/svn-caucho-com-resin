@@ -1,8 +1,9 @@
 default namespace w = "http://java.sun.com/xml/ns/javaee"
 
 namespace xsi="http://www.w3.org/2001/XMLSchema-instance"
+namespace n=""
 
-start = w_beans
+start = w_beans | compat_beans
 
 w_Any = text | (attribute * {string} | element * { w_Any })*
 
@@ -113,4 +114,8 @@ w_beans = element beans {
   & w_alternatives?
   
   & w_interceptors?
+}
+
+compat_beans = element n:beans {
+  w_Any
 }

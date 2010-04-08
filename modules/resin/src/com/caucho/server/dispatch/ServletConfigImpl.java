@@ -31,7 +31,6 @@ package com.caucho.server.dispatch;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.BeanFactory;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.InjectManager;
@@ -39,6 +38,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.InitParam;
 import com.caucho.config.types.CronType;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.jmx.Jmx;
 import com.caucho.jsp.Page;
 import com.caucho.jsp.QServlet;

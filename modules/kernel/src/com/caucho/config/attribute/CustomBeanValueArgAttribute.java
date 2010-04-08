@@ -32,10 +32,10 @@ package com.caucho.config.attribute;
 import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.xml.QName;
 
 public class CustomBeanValueArgAttribute extends Attribute {
@@ -99,7 +99,7 @@ public class CustomBeanValueArgAttribute extends Attribute {
       throw new UnsupportedOperationException(getClass().getName());
     }
 
-    public Object configure(ConfigType type, ConfigContext env)
+    public Object configure(ConfigType type, XmlConfigContext env)
       throws ConfigException
     {
       return type.valueOf(_arg);

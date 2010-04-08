@@ -29,38 +29,56 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.BeanArg;
-import com.caucho.config.program.ValueArg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.gen.*;
-import com.caucho.config.type.TypeFactory;
-import com.caucho.config.type.ConfigType;
-import com.caucho.util.*;
-import com.caucho.config.bytecode.*;
-import com.caucho.config.cfg.*;
-import com.caucho.config.event.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-import java.util.logging.*;
-
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.*;
-import javax.enterprise.inject.*;
-import javax.enterprise.inject.spi.*;
-import javax.inject.Qualifier;
+import javax.enterprise.inject.CreationException;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedConstructor;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.inject.Inject;
+import javax.inject.Qualifier;
 import javax.interceptor.InvocationContext;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.SerializeHandle;
+import com.caucho.config.bytecode.SerializationAdapter;
+import com.caucho.config.gen.ApiClass;
+import com.caucho.config.gen.BeanInjectionTarget;
+import com.caucho.config.gen.PojoBean;
+import com.caucho.config.j2ee.PostConstructProgram;
+import com.caucho.config.j2ee.PreDestroyInject;
+import com.caucho.config.program.Arg;
+import com.caucho.config.program.BeanArg;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ValueArg;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
+@Module
 public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   implements InjectionTarget<X>
 {
@@ -94,9 +112,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   private ArrayList<ConfigProgram> _injectProgramList
     = new ArrayList<ConfigProgram>();
-
-  private ArrayList<SimpleBeanMethod> _methodList
-    = new ArrayList<SimpleBeanMethod>();
 
   public InjectionTargetImpl(InjectManager beanManager,
                              AnnotatedType<X> beanType)
@@ -177,27 +192,12 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     }
   }
 
-  /**
-   * Adds a configured method
-   */
-  public void addMethod(SimpleBeanMethod simpleMethod)
-  {
-    throw new UnsupportedOperationException();
-  }
-
   public Set<Annotation> getInterceptorBindings()
   {
     return _interceptorBindings;
   }
 
-  /**
-   * Adds a configured method
-   */
-  public void addField(SimpleBeanField simpleField)
-  {
-  }
-
-  private static boolean isAnnotationPresent(Annotation []annotations, Class type)
+  private static boolean isAnnotationPresent(Annotation []annotations, Class<?> type)
   {
     for (Annotation ann : annotations) {
       if (ann.annotationType().equals(type))
@@ -214,8 +214,10 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (! _isBound)
         bind();
 
-      CreationalContextImpl<X> env
-        = (CreationalContextImpl<X>) contextEnv;
+      CreationalContextImpl<X> env = null;
+      
+      if (contextEnv instanceof CreationalContextImpl<?>)
+        env = (CreationalContextImpl<X>) contextEnv;
 
       if (_args == null)
         throw new IllegalStateException(L.l("Can't instantiate bean because it is not a valid ManagedBean: '{0}'", toString()));
@@ -319,18 +321,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       HashMap<Method,Annotation[]> methodMap
         = new HashMap<Method,Annotation[]>();
 
-      for (SimpleBeanMethod beanMethod : _methodList) {
-        methodMap.put(beanMethod.getMethod(),
-                      beanMethod.getAnnotations());
-      }
-
-      /*
-      ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
-      InjectIntrospector.introspectInject(injectList, cl);
-      _injectProgram = new ConfigProgram[injectList.size()];
-      injectList.toArray(_injectProgram);
-      */
-
       ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
       introspectInit(initList, cl, methodMap);
       _initProgram = new ConfigProgram[initList.size()];
@@ -372,8 +362,10 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       if (instanceClass != null && instanceClass != _instanceClass) {
         try {
-          if (_javaCtor != null)
+          if (_javaCtor != null) {
             _javaCtor = instanceClass.getConstructor(_javaCtor.getParameterTypes());
+            _javaCtor.setAccessible(true);
+          }
 
           _instanceClass = instanceClass;
         } catch (Exception e) {
@@ -628,6 +620,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       _beanCtor = best;
       _javaCtor = _beanCtor.getJavaMember();
+      _javaCtor.setAccessible(true);
 
       _args = introspectArguments(_beanCtor.getParameters());
     } catch (RuntimeException e) {
@@ -637,9 +630,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     }
   }
 
-  protected Arg []introspectArguments(List<AnnotatedParameter<X>> params)
+  protected Arg<?> []introspectArguments(List<AnnotatedParameter<X>> params)
   {
-    Arg []args = new Arg[params.size()];
+    Arg<?> []args = new Arg[params.size()];
 
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter<?> param = params.get(i);
@@ -647,9 +640,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       Annotation []qualifiers = getQualifiers(param);
 
       if (qualifiers.length > 0)
-        args[i] = new BeanArg(param.getBaseType(), qualifiers);
+        args[i] = new BeanArg<X>(param.getBaseType(), qualifiers);
       else
-        args[i] = new ValueArg(param.getBaseType());
+        args[i] = new ValueArg<X>(param.getBaseType());
     }
 
     return args;

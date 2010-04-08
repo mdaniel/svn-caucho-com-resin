@@ -27,78 +27,101 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.inject.Module;
 
 /**
- * Annotated object based only on reflection.
+ * Abstract introspected view of a Bean
  */
-public class ReflectionAnnotated implements Annotated
+@Module
+public class AnnotatedElementImpl implements Annotated
 {
-  private static final LinkedHashSet<Annotation> _emptyAnnSet
-    = new  LinkedHashSet<Annotation>();
-
-  private static final Annotation []_emptyAnnArray = new Annotation[0];
-
   private Type _type;
 
   private LinkedHashSet<Type> _typeSet
     = new LinkedHashSet<Type>();
 
-  private LinkedHashSet<Annotation> _annSet;
+  private LinkedHashSet<Annotation> _annSet
+    = new LinkedHashSet<Annotation>();
 
-  private Annotation []_annArray;
-
-  protected ReflectionAnnotated(Type type,
-                                Annotation []annList)
+  protected AnnotatedElementImpl(Type type,
+                                 Annotated annotated,
+                                 Annotation []annList)
   {
     _type = type;
+
     _typeSet.add(type);
 
-    if (annList != null && annList.length > 0) {
-      _annSet = new LinkedHashSet<Annotation>();
+    if (annList == null)
+      annList = new Annotation[0];
 
+    if (annotated != null) {
+      _annSet.addAll(annotated.getAnnotations());
+    }
+    else {
       for (Annotation ann : annList) {
         _annSet.add(ann);
       }
-
-      _annArray = new Annotation[_annSet.size()];
-      _annSet.toArray(_annArray);
-    }
-    else {
-      _annSet = _emptyAnnSet;
-      _annArray = _emptyAnnArray;
     }
   }
 
-  /**
-   * Returns the base type of the annotated member.
-   */
+  public AnnotatedElementImpl(Annotated annotated)
+  {
+    this(annotated.getBaseType(), annotated, null);
+  }
+
+  @Override
   public Type getBaseType()
   {
     return _type;
   }
 
-  /**
-   * Returns all the types implemented by the member.
-   */
+  @Override
   public Set<Type> getTypeClosure()
   {
     return _typeSet;
   }
 
+  public void addAnnotation(Annotation newAnn)
+  {
+    for (Annotation oldAnn : _annSet) {
+      if (newAnn.annotationType().equals(oldAnn.annotationType())) {
+        _annSet.remove(oldAnn);
+        _annSet.add(newAnn);
+        return;
+      }
+    }
+
+    _annSet.add(newAnn);
+  }
+
+  public void removeAnnotation(Annotation ann)
+  {
+    for (Annotation oldAnn : _annSet) {
+      if (ann.annotationType().equals(oldAnn.annotationType())) {
+        _annSet.remove(oldAnn);
+        return;
+      }
+    }
+  }
+
+  public void clearAnnotations()
+  {
+    _annSet.clear();
+  }
+
   /**
-   * Returns the introspected annotations
+   * Returns the declared annotations
    */
+  @Override
   public Set<Annotation> getAnnotations()
   {
     return _annSet;
@@ -107,9 +130,10 @@ public class ReflectionAnnotated implements Annotated
   /**
    * Returns the matching annotation
    */
+  @Override
   public <T extends Annotation> T getAnnotation(Class<T> annType)
   {
-    for (Annotation ann : _annArray) {
+    for (Annotation ann : getAnnotations()) {
       if (annType.equals(ann.annotationType()))
         return (T) ann;
     }
@@ -117,22 +141,13 @@ public class ReflectionAnnotated implements Annotated
     return null;
   }
 
-  protected void addAnnotation(Annotation ann)
-  {
-    if (_annSet == _emptyAnnSet)
-      _annSet = new LinkedHashSet<Annotation>();
-
-    _annSet.add(ann);
-    _annArray = new Annotation[_annSet.size()];
-    _annSet.toArray(_annArray);
-  }
-
   /**
    * Returns true if the annotation is present)
    */
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annType)
   {
-    for (Annotation ann : _annArray) {
+    for (Annotation ann : getAnnotations()) {
       if (annType.equals(ann.annotationType()))
         return true;
     }

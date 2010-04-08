@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;

@@ -29,24 +29,24 @@
 
 package com.caucho.config.scope;
 
-import com.caucho.loader.*;
-
 import java.lang.annotation.Annotation;
-import java.util.Hashtable;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.inject.spi.Bean;
+
+import com.caucho.inject.Module;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
 
 /**
  * The application scope value
  */
+@Module
 public class ApplicationScope extends ScopeContext {
   private ScopeMap _scopeMap = new ScopeMap();
 
   /**
-   * Returns the current applicatin scope
+   * Returns the current application scope
    */
   public ApplicationScope()
   {
@@ -55,6 +55,7 @@ public class ApplicationScope extends ScopeContext {
   /**
    * Returns true if the scope is currently active.
    */
+  @Override
   public boolean isActive()
   {
     return true;
@@ -63,6 +64,7 @@ public class ApplicationScope extends ScopeContext {
   /**
    * Returns the scope annotation type.
    */
+  @Override
   public Class<? extends Annotation> getScope()
   {
     return ApplicationScoped.class;
@@ -86,7 +88,8 @@ public class ApplicationScope extends ScopeContext {
     return (scope instanceof ApplicationScope);
   }
 
-  public void addDestructor(Contextual comp, Object value)
+  @Override
+  public <T> void addDestructor(Contextual<T> comp, T value)
   {
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();
 

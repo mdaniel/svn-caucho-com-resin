@@ -35,7 +35,7 @@ import com.caucho.config.EnhancedLiteral;
 import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ProcessBeanImpl;
-import com.caucho.config.inject.AnnotatedTypeImpl;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.remote.annotation.ServiceType;
 import com.caucho.remote.annotation.ProxyType;
 import com.caucho.remote.client.ProtocolProxyFactory;

@@ -86,6 +86,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   }
   
   @SuppressWarnings("unchecked")
+  public
   static <X> X find(CreationalContextImpl<?> ptr, Contextual<X> bean)
   {
     for (; ptr != null; ptr = ptr._next){
@@ -99,7 +100,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     return null;
   }
   
-  static Object findByName(CreationalContextImpl<?> ptr, String name)
+  public static Object findByName(CreationalContextImpl<?> ptr, String name)
   {
     for (; ptr != null; ptr = ptr._next) {
       Contextual<?> testBean = ptr._bean;

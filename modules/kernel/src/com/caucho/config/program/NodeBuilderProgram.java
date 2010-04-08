@@ -34,7 +34,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import org.w3c.dom.Node;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.xml.QElement;
 import com.caucho.xml.QName;
@@ -69,7 +69,7 @@ public class NodeBuilderProgram extends FlowProgram {
   public <T> void inject(T bean, CreationalContext<T> cxt)
     throws ConfigException
   {
-    ConfigContext env = ConfigContext.getCurrent();
+    XmlConfigContext env = XmlConfigContext.getCurrent();
     
     env.configureBean(bean, _node);
   }

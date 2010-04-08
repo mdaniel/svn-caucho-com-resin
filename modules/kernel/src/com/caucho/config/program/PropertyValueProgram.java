@@ -33,8 +33,8 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.*;
 import com.caucho.config.type.*;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.config.attribute.*;
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.util.*;
 import com.caucho.xml.*;
 

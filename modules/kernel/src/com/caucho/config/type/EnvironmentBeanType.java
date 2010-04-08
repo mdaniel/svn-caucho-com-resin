@@ -35,7 +35,7 @@ import java.util.logging.*;
 
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
-import com.caucho.config.inject.ConfigContext;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.loader.*;
 import com.caucho.make.*;
 import com.caucho.el.*;
@@ -64,7 +64,7 @@ public class EnvironmentBeanType extends BeanType
    * Called before the children are configured.
    */
   @Override
-  public void beforeConfigure(ConfigContext env, Object bean, Node node)
+  public void beforeConfigure(XmlConfigContext env, Object bean, Node node)
   {
     super.beforeConfigure(env, bean, node);
     

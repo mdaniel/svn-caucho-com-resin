@@ -31,21 +31,22 @@ package com.caucho.config.scope;
 
 import java.lang.annotation.Annotation;
 
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.inject.ConfigContext;
-import com.caucho.config.inject.HandleAware;
+import com.caucho.inject.Module;
 
 /**
  * Context for a named EL bean scope
  */
+@Module
 abstract public class ScopeContext implements Context {
   /**
    * Returns true if the scope is currently active.
    */
+  @Override
   public boolean isActive()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -102,7 +103,7 @@ abstract public class ScopeContext implements Context {
     return instance;
   }
 
-  public void put(Contextual bean, Object instance)
+  public <T> void put(Contextual<T> bean, T instance)
   {
     ScopeMap scopeMap = getScopeMap();
 
@@ -133,7 +134,7 @@ abstract public class ScopeContext implements Context {
    * Returns true if a value in the target scope can be safely be injected
    * into this scope
    */
-  public boolean canInject(Class scope)
+  public boolean canInject(Class<?> scope)
   {
     /*
     return (getScope() == scope
@@ -144,7 +145,7 @@ abstract public class ScopeContext implements Context {
             || scope == ApplicationScoped.class);
   }
 
-  public void addDestructor(Contextual bean, Object value)
+  public <T> void addDestructor(Contextual<T> bean, T value)
   {
   }
 }

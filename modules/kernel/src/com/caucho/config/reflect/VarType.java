@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.reflect;
 
 import com.caucho.config.program.FieldComponentProgram;
 import com.caucho.config.*;
@@ -47,45 +47,47 @@ import javax.annotation.*;
 /**
  * class type matching
  */
-public class WildcardTypeImpl extends BaseType implements WildcardType
+public class VarType<D extends GenericDeclaration> extends BaseType
+  implements TypeVariable<D>
 {
-  private BaseType []_lowerBounds;
-  private BaseType []_upperBounds;
+  private String _name;
+  private BaseType []_bounds;
 
-  public WildcardTypeImpl(BaseType []lowerBounds, BaseType []upperBounds)
+  public VarType(String name, BaseType []bounds)
   {
-    _lowerBounds = lowerBounds;
-    _upperBounds = upperBounds;
+    _name = name;
+    _bounds = bounds;
   }
 
-  public Type []getLowerBounds()
+  public String getName()
   {
-    Type []lowerBounds = new Type[_lowerBounds.length];
-
-    for (int i = 0; i < lowerBounds.length; i++)
-      lowerBounds[i] = _lowerBounds[i].toType();
-      
-    return lowerBounds;
+    return _name;
   }
 
-  public Type []getUpperBounds()
+  public D getGenericDeclaration()
   {
-    Type []upperBounds = new Type[_upperBounds.length];
-
-    for (int i = 0; i < upperBounds.length; i++)
-      upperBounds[i] = _upperBounds[i].toType();
-      
-    return upperBounds;
-  }
-  
-  public Class getRawClass()
-  {
-    return Object.class; // technically bounds(?)
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   public boolean isWildcard()
   {
     return true;
+  }
+
+  public Type []getBounds()
+  {
+    Type []bounds = new Type[_bounds.length];
+
+    for (int i = 0; i < bounds.length; i++) {
+      bounds[i] = _bounds[i].toType();
+    }
+
+    return bounds;
+  }
+  
+  public Class getRawClass()
+  {
+    return Object.class; // technically bounds
   }
 
   public Type getGenericComponentType()
@@ -100,12 +102,10 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
 
   public boolean isAssignableFrom(BaseType type)
   {
-    for (BaseType bound : _lowerBounds) {
-      if (! type.isAssignableFrom(bound))
-	return false;
-    }
+    if (type.isWildcard())
+      return true;
     
-    for (BaseType bound : _upperBounds) {
+    for (BaseType bound : _bounds) {
       if (! bound.isAssignableFrom(type))
 	return false;
     }
@@ -115,23 +115,24 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
   
   public boolean isMatch(Type type)
   {
-    if (type instanceof WildcardType || type instanceof TypeVariable)
+    if (type instanceof TypeVariable) {
       return true;
+    }
     else
       return false;
   }
 
   public int hashCode()
   {
-    return 17;
+    return 17 + 37 * _name.hashCode();
   }
 
   public boolean equals(Object o)
   {
     if (o == this)
       return true;
-    else if (o instanceof WildcardType) {
-      WildcardType var = (WildcardType) o;
+    else if (o instanceof TypeVariable) {
+      TypeVariable var = (TypeVariable) o;
 
       return true;
     }
@@ -141,6 +142,6 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
 
   public String toString()
   {
-    return "?";
+    return _name;
   }
 }

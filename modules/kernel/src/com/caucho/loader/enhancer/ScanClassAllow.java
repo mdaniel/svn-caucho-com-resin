@@ -27,48 +27,43 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.loader.enhancer;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.*;
-import com.caucho.config.cfg.*;
-
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.*;
-
-import javax.enterprise.inject.Any;
-import javax.enterprise.inject.spi.Bean;
+import com.caucho.inject.Module;
 
 /**
- * Wrapper to handle @Specializes
+ * Interface for a scanned class.
  */
-public class RegisteredBean {
-  private final Bean _bean;
-
-  private RegisteredBean _specialized;
-
-  RegisteredBean(Bean bean)
+@Module
+public final class ScanClassAllow implements ScanClass {
+  public static ScanClass ALLOW = new ScanClassAllow();
+  
+  private ScanClassAllow()
   {
-    _bean = bean;
   }
 
-  void setSpecializes(RegisteredBean specialized)
+  @Override
+  public void addInterface(char[] buffer, int offset, int length)
   {
-    _specialized = specialized;
   }
 
-  Bean getMostSpecialized()
+  @Override
+  public void addClassAnnotation(char[] buffer, int offset, int length)
   {
-    if (_specialized != null)
-      return _specialized.getMostSpecialized();
-    else
-      return _bean;
+  }
+
+  @Override
+  public void addPoolString(char[] buffer, int offset, int length)
+  {
+  }
+
+  @Override
+  public void addSuperClass(char[] buffer, int offset, int length)
+  {
+  }
+
+  @Override
+  public void finishScan()
+  {
   }
 }

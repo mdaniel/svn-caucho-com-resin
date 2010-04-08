@@ -280,6 +280,34 @@ public class ResinBeanContainer
   }
 
   /**
+   * Returns an instance of the bean with the given name.
+   * If the type is a managed bean, it will be injected before returning.
+   *
+   * @param name the @Named of the bean to instantiate
+   */
+  public Object getBeanByName(String name)
+  {
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+
+    try {
+      thread.setContextClassLoader(_classLoader);
+
+      Set<Bean<?>> beans = _injectManager.getBeans(name);
+
+      if (beans.size() > 0) {
+        Bean<?> bean = _injectManager.resolve(beans);
+
+        return _injectManager.getReference(bean);
+      }
+
+      return null;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
+    }
+  }
+
+  /**
    * Enters the Resin context and begins a new request on the thread. The
    * the returned context must be passed to the completeRequest. To ensure
    * the request is properly closed, use the following pattern:

@@ -29,8 +29,8 @@
 
 package com.caucho.config.type;
 
-import com.caucho.config.inject.ConfigContext;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
 import com.caucho.el.*;
@@ -290,7 +290,7 @@ abstract public class ConfigType<T>
   /**
    * Called before the children are configured.
    */
-  public void beforeConfigureBean(ConfigContext builder,
+  public void beforeConfigureBean(XmlConfigContext builder,
 				  Object bean,
 				  Node node)
   {
@@ -300,14 +300,14 @@ abstract public class ConfigType<T>
    * Called before the children are configured.  Also called for
    * attribute configuration, e.g. for macros and web-app-default.
    */
-  public void beforeConfigure(ConfigContext builder, Object bean, Node node)
+  public void beforeConfigure(XmlConfigContext builder, Object bean, Node node)
   {
   }
 
   /**
    * Called after the children are configured.
    */
-  public void afterConfigure(ConfigContext builder, Object bean)
+  public void afterConfigure(XmlConfigContext builder, Object bean)
   {
   }
 

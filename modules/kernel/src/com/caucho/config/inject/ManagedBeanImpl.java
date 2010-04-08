@@ -144,7 +144,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   {
     X instance = _injectionTarget.produce(context);
 
-    context.push(instance);
+    if (context != null)
+      context.push(instance);
 
     _injectionTarget.inject(instance, context);
     _injectionTarget.postConstruct(instance);
