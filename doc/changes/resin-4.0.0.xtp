@@ -2,6 +2,28 @@
   <header>
     <product>resin</product>
     <title>Resin 4.0.0 Release Notes</title>
+    <description>
+      <ul>
+        <li>Resin 10,000</li>
+        <li>Java Injection (JSR-299, CanDI)</li>
+        <li>Distributed Deployment</li>
+        <li>Distributed Caching</li>
+        <li>Dynamic Server Deployment</li>
+        <li>Clustered Session Refactor</li>
+        <li>Distributed JMX</li>
+        <li>Eclipse plugin</li>
+        <li>Maven Jar Project Repository</li>
+        <li>Rewrite redesign</li>
+        <li>FastCGI support</li>
+        <li>Security Redesign</li>
+        <li>Management services</li>
+        <li>JMS</li>
+        <li>BAM updates and refactoring</li>
+        <li>Win32 OpenSSL</li>
+        <li>Quercus: PHP on the JVM</li>
+        <li>PHP on Google Application Engine</li>
+      </ul>
+    </description>
   </header>
 
 <body>

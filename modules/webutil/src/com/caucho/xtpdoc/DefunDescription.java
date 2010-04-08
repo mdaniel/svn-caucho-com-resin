@@ -41,6 +41,13 @@ public class DefunDescription extends Section {
     super(document);
   }
 
+  public S2 createS2()
+  {
+    S2 s2 = new S2(getDocument(), getHref());
+    addItem(s2);
+    return s2;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {

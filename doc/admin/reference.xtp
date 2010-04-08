@@ -10,17 +10,20 @@
 <reference-legend/>
 <localtoc/>
 <defun title="AbstractAuthenticator" name="AbstractAuthenticator">
+<description>
 <p>
-While this case is rare, it may sometimes be useful to create your own Resin custom 
-authenticator (for example to use a legacy resource as an authentication store). The Resin
-security framework provides an abtract base class 
-(<a href="javadoc|com.caucho.security.AbstractAuthenticator|"/>) that you can extend to 
-do this.  
+While this case is rare, it may sometimes be useful to
+create your own Resin custom authenticator (for example
+to use a legacy resource as an authentication store). The
+Resin security framework provides an abtract base class (<a
+href="javadoc|com.caucho.security.AbstractAuthenticator|"/>) that
+you can extend to do this.
 </p>
 <p>
   The following is a simple example that you can use a starting point for your 
   application:
 </p>
+</description>
 <example title="WEB-INF/resin-web.xml - Custom Authenticator Configuration">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:foo="urn:java:com.caucho.foo">
@@ -56,9 +59,11 @@ public class MyAuthenticator extends AbstractAuthenticator {
 }
 </example>
 </defun>
+
 <defun title="&lt;accept-listen-backlog>" name="accept-listen-backlog" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
 
+<description>
 <p>&lt;accept-listen-backlog> configures operating system TCP listen
 queue size for the port.</p>
 
@@ -70,11 +75,13 @@ receive them.  When the queue fills up, the operating system will
 start refusing new connections.</p>
 
 <default>100</default>
+</description>
 
 </defun>
 
 <defun title="&lt;accept-thread-max>" name="accept-thread-max" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
+<description>
 
 <p>&lt;accept-thread-max> configures the maximum number of 
 threads listening for new connections on this port.  &lt;accept-thread-max>
@@ -92,6 +99,7 @@ to wait for the connections.  Smaller values use less threads, but may
 be slower handling spikes.</p>
 
 <default>10</default>
+</description>
 
 </defun>
 
@@ -511,7 +519,7 @@ More details on the predefined authenticators are in the
 
 <p>See also: the <a href="security.xtp">Resin security</a> section.</p>
 
-<deftable-childtags title="&lt;authenticator> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -548,9 +556,9 @@ parameters.  Examples include xml:, property:, jdbc:, jndi:.</td>
   <td>A bean-style configuration section.  Since Resin 3.0</td>
   <td></td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;authenticator> schema">
+<schema>
 r_authenticator = element authenticator {
   (r_class | r_uri)
   &amp; r_binding*
@@ -559,7 +567,7 @@ r_authenticator = element authenticator {
   &amp; r_name?
   &amp; r_scope?
 }
-</def>
+</schema>
 
 <example title="Example: WEB-INF/resin-web.xml properties-based authenticator">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -726,14 +734,14 @@ s-max-age affects proxy caches (including Resin), but not browsers.</td>
 </tr>
 </deftable>
 
-<def title="&lt;cache-mapping> schema">
+<schema>
 element cache-mapping {
   (url-pattern | url-regexp)
   &amp; expires?
   &amp; max-age?
   &amp; s-max-age?
 }
-</def>
+</schema>
 
 <ul>
 <li>cache-mapping requires an enabled &lt;cache&gt;.  If the cache is disabled,
@@ -768,11 +776,11 @@ and case-insensitive directories.  For example, when case-insensitive
 is true, url-patterns will match in a case-insensitive manner, so TEST.JSP
 will work like test.jsp.</p>
 
-<def title="&lt;case-insensitive> schema">
+<schema>
 r_case-insensitive = element case-insensitive {
   r_boolean-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -783,11 +791,11 @@ r_case-insensitive = element case-insensitive {
 <p>&lt;character-encoding> specifies the default character
 encoding for the environment.</p>
 
-<def title="&lt;character-encoding> schema">
+<schema>
 r_character-encoding = element character-encoding {
   string
 }
-</def>
+</schema>
 
 <example title="Example: utf-8 as default character encoding">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -1138,7 +1146,7 @@ session management and for the load balancing itself.</p>
 unique &lt;id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
-<deftable-childtags>
+<attributes>
 <tr><td>address</td>
     <td>hostname of the interface to listen to</td>
     <td>*</td></tr>
@@ -1163,7 +1171,7 @@ which ports the server should listen to.</p>
 <tr><td>tcp-no-delay</td>
     <td>sets the NO_DELAY socket parameter</td>
     <td>true</td></tr>
-</deftable-childtags>
+</attributes>
 
 <p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
 
@@ -1176,7 +1184,7 @@ which ports the server should listen to.</p>
 <p>&lt;compiling-loader> automatically compiles Java code into .class
 files before loading them.</p>
 
-<deftable title="&lt;compiling-loader> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1207,7 +1215,7 @@ files before loading them.</p>
   <td>If true, .class files without matching .java files will be deleted. Since Resin 3.0</td>
   <td>false</td>
 </tr>
-</deftable>
+</attributes>
 
 <example title="Example: WEB-INF/resin-web.xml &lt;compiling-loader>">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -1241,6 +1249,7 @@ element connection-error-page {
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.jca.ConnectorResource -->
 
+<description>
 <deftable title="Parallels to JDBC">
 <tr>
   <th>JDBC Class</th>
@@ -1263,8 +1272,9 @@ element connection-error-page {
   <td>ResourceAdapter</td>
 </tr>
 </deftable>
+</description>
 
-<deftable title="&lt;connection-factory> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1320,9 +1330,9 @@ element connection-error-page {
   <td>Shortcut alias for the ManagedConnectionFactory</td>
   <td>required or <var>class</var></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;connection-factory> schema">
+<schema>
 r_connection-factory = element connection-factory {
   (r_class | r_uri)
   &amp; r_binding*
@@ -1336,30 +1346,33 @@ r_connection-factory = element connection-factory {
   &amp; resource-adapter?
   &amp; shareable?
 }
-</def>
+</schema>
 
 </defun>
 
-
-<defun title="&lt;connection-wait-time>" version="Resin 3.1" name="connection-wait-time">
+<defun title="&lt;connection-wait-time>" version="Resin 4.0" name="connection-wait-time">
 <parents>database</parents>
 
+<description>
 <p>&lt;connection-wait-time> configures the time a <code>getConnection</code>
 call should wait when then pool is full before trying to create an
 overflow connection.</p>
 
 <default>10m</default>
+</description>
 
 </defun>
 <defun title="&lt;constraint>" name="constraint" version="Resin">
 <parents>security-constraint</parents>
 
+<description>
 <p>
 Defines a custom constraint.  Applications can define their own
 security constraints to handle custom authentication requirements.
 </p>
+</description>
 
-<deftable-childtags>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1372,25 +1385,27 @@ security constraints to handle custom authentication requirements.
   <td>init</td>
   <td>initialization parameters, set in the object using Bean-style setters and getters</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;constraint> schema">
+<schema>
 element constraint {
   class
   &amp; init?
 }
-</def>
+</schema>
 
 </defun>
 
 <defun title="&lt;context-param>" name="context-param" version="Servlet 2.2">
 <parents>web-app</parents>
 
+<description>
 <p>Initializes application (ServletContext) variables.  <var>context-param</var>
 defines initial values for <code>application.getInitParameter("foo")</code>.  See also
 <a href="javadoc|javax.servlet.ServletContext">ServletContext.getInitParameter()</a>.</p>
+</description>
 
-<deftable title="&lt;context-param attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1407,15 +1422,15 @@ defines initial values for <code>application.getInitParameter("foo")</code>.  Se
   <td><var/foo/></td>
   <td>Parameter name</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;context-param> schema">
+<schema>
 element context-param {
   (param-name, param-value)*
   | (attribute * { string })*
   | (element * { string })*
 }
-</def>
+</schema>
 
 <example title="Example: context-param in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -1435,16 +1450,18 @@ element context-param {
 <defun title="&lt;cookie-http-only>" name="cookie-http-only">
 <parents>web-app</parents>
 
+<description>
 <p>The &lt;cookie-http-only> flag configures the Http-Only attribute
 for all Cookies generated from the web-app.  The Http-Only attribute
 can add security to a website by not forwarding HTTP cookies to
 SSL HTTPS requests.</p>
+</description>
 
-<def title="&lt;cookie-http-only> schema">
+<schema>
 element cookie-http-only {
   r_boolean-Type
 }
-</def>
+</schema>
 
 <example title="Example: &lt;cookie-http-only> in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -1471,10 +1488,12 @@ element cookie-http-only {
 <defun title="&lt;development-mode-error-page>" version="Resin 3.2.0">
 <parents>cluster</parents>
 
+<description>
 <p>&lt;development-mode-error-page> enables browser error reporting
 with extra information.  Because it can expose internal data, it is not
 generally recommended in production systems.  (The information is generally
 coped to the log.</p>
+</description>
 
 </defun>
 
@@ -1482,13 +1501,15 @@ coped to the log.</p>
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.sql.DBPool -->
 
+<description>
 <p>&lt;database> defines a database (i.e. DataSource)  resource.</p>
 
 <p>The <a href="../admin/database.xtp">database configuration</a> section has
 more details on the configuration.  A code pattern for using databases
 is in a <a href="../examples/db-jdbc/index.xtp">DataSource tutorial.</a></p>
+</description>
 
-<deftable title="&lt;database> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1653,9 +1674,9 @@ connections.</td>
 not properly implement the XAResource API.</td>
   <td>false</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;database> schema">
+<schema>
 database = element database {
   backup-driver*
   &amp; close-dangling-connections?
@@ -1705,7 +1726,7 @@ driver = element driver {
   &amp; element * { * }?
 }
 
-</def>
+</schema>
 
 <example title="Example: WEB-INF/resin-web.xml database">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -1723,19 +1744,21 @@ driver = element driver {
 
 </defun>
 
-<defun title="&lt;database-default>" name="database-default" occur="*" version="Resin 3.0">
+<defun title="&lt;database-default>" name="database-default" version="Resin 4.0">
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.sql.DBPool -->
 
+<description>
 <p>&lt;database-default> defines default database values to be used
 for any &lt;database> definition, or runtime database creation
 (see <a href="http://caucho.com/resin-javadoc/com/caucho/sql/DatabaseManager.html">DatabaseManager</a>).</p>
+</description>
 
-<def title="&lt;database-default> schema">
+<schema>
 element database-default {
   r_database-Content
 }
-</def>
+</schema>
 
 <example title="Example: WEB-INF/resin-web.xml idle-time defaults">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -1752,10 +1775,12 @@ element database-default {
 <defun title="&lt;dependency>" name="dependency" occur="?" version="Resin 3.0.1">
 <parents>resin, cluster, host, web-app</parents>
 
+<description>
 <p>&lt;dependency> adds dependent files which should force a
 reload when changed, like web.xml and resin-web.xml.</p>
+</description>
 
-<deftable title="&lt;dependency> attributes">>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1766,13 +1791,13 @@ reload when changed, like web.xml and resin-web.xml.</p>
   <td>Filesystem path to the dependent file.  Since Resin 3.0</td>
   <td>required</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;dependency> schema">
+<schema>
 element dependency {
   string
 }
-</def>
+</schema>
 
 <example title="Example: struts dependency">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -1785,8 +1810,8 @@ element dependency {
 
 <defun title="&lt;dependency-check-interval>" name="dependency-check-interval" occur="?" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>
-<default>2s</default>
 
+<description>
 <p>&lt;dependency-check-interval> Configures how often the environment context
 should be checked for changes.  The default value is set low for
 development purposes, deployments should use something larger like
@@ -1799,11 +1824,14 @@ amount of time, deployment servers should use high values like 60s or more while
 <p>The interval defaults to the parent's interval.  So the web-app will
 default to the host's value.</p>
 
-<def title="&lt;dependency-check-interval> schema">
+<default>2s</default>
+</description>
+
+<schema>
 element dependency-check-interval {
   string
 }
-</def>
+</schema>
 
 <example title="Example: deployment dependency-check-interval">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -1820,23 +1848,24 @@ element dependency-check-interval {
 
 </defun>
 
-
-<defun title="&lt;driver>" name="driver" version="Resin 3.1">
+<defun title="&lt;driver>" name="driver" version="Resin 4.0">
 <parents>database</parents>
 
+<description>
 <p>&lt;driver> configures a database driver for a connection pool.
 The individual driver information is available from the driver vendor
 or on the <a href="http://wiki.caucho.com/Main_Page">Caucho Wiki</a>.</p>
 
 <p>The content of the driver tag configures bean properties of
 the driver class, e.g. url, user, password.</p>
+</description>
 
-<def title="driver schema">
+<schema>
 element driver {
   type,
   *
 }
-</def>
+</schema>
 
 </defun>
 
@@ -1844,20 +1873,24 @@ element driver {
 <defun title="&lt;ear-default>" version="Resin 3.1" name="ear-default">
 <parents>cluster</parents>
 
+<description>
 <p>&lt;ear-default> configures defaults for .ear resource,
 i.e. enterprise applications.</p>
+</description>
 
 </defun>
 
 <defun title="&lt;ear-deploy>" name="ear-deploy">
 <parents>host, web-app</parents>
 
+<description>
 <p>Specifies ear expansion.</p>
 
 <p>ear-deploy can be used in web-apps to define a subdirectory
 for ear expansion.</p>
+</description>
 
-<deftable title="&lt;ear-deploy> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1916,9 +1949,9 @@ automatically and deploys them.</td>
   <td>optional URL prefix to group deployed .ear files</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;ear-deploy> schema">
+<schema>
 element ear-deploy {
   path
   &amp; archive-directory?
@@ -1933,7 +1966,7 @@ element ear-deploy {
   &amp; require-file*
   &amp; url-prefix?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -1958,7 +1991,7 @@ dependency injection, transaction attributes, and aspect interception.
 application will need to define a <a href="http://caucho.com/resin-javadoc/javax/resource/spi/ResourceAdapter.html">ResourceAdapter</a> and
 an <code>ActivationSpec</code>.  </p>
 
-<deftable title="&lt;ejb-message-bean> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -1994,9 +2027,9 @@ an <code>ActivationSpec</code>.  </p>
   <td>The number of listener instances to create for the pool.</td>
   <td>5</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;ejb-message-bean> schema">
+<schema>
 element ejb-message-bean {
   class
   &amp; init?
@@ -2007,7 +2040,7 @@ element ejb-message-bean {
         &amp; message-consumer-max?)
     )
 }
-</def>
+</schema>
 
 <example title="Example: JMS listener in WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -2046,7 +2079,7 @@ element ejb-message-bean {
 <p>Configures an EJB server.  See <a href="../doc/resin-ejb.xtp">Resin EJB</a>
 for more details.</p>
 
-<deftable title="&lt;ejb-server> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2102,9 +2135,9 @@ for more details.</p>
   <td>specifies a separate database for transactions</td>
   <td>data-source</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;ejb-server> schema">
+<schema>
 element ejb-server {
   auto-compile
   &amp; create-database-schema
@@ -2117,7 +2150,7 @@ element ejb-server {
   &amp; jms-connection-factory
   &amp; xa-data-source
 }
-</def>
+</schema>
 
 </defun>
 
@@ -2139,7 +2172,7 @@ a @Stateless session bean.</p>
 
 <p>@Stateful beans may optionally implement a <a href="http://caucho.com/resin-javadoc/javax/ejb/SessionSynchronization.html">SessionSynchronization</a> interface for transaction callbacks.</p>
 
-<deftable title="&lt;ejb-stateful-bean> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2170,9 +2203,9 @@ a @Stateless session bean.</p>
   <td>The Resin-IoC/WebBeans scope: dependent, request, session, conversaion</td>
   <td>dependent classname</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;ejb-stateful-bean> schema">
+<schema>
 element ejb-stateful-bean {
   class
   &amp; init?
@@ -2180,7 +2213,7 @@ element ejb-stateful-bean {
   &amp; name?
   &amp; scope?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -2201,7 +2234,7 @@ use the same aspect capabilities like dependency injection, transactions,
 and interceptors.  Because @Stateless beans are singletons, they
 do not have a scope attribute.</p>
 
-<deftable title="&lt;ejb-stateless-bean> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2227,16 +2260,16 @@ do not have a scope attribute.</p>
   <td>The Resin-IoC/WebBeans @Named registration</td>
   <td>The classname</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;ejb-stateless-bean> schema">
+<schema>
 element ejb-stateless-bean {
   class
   &amp; init?
   &amp; jndi-name?
   &amp; name?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -2248,11 +2281,11 @@ environment-dependent, so the settings in on web-app do not affect the
 properties in any other web-app.  Some sites may need to disable
 this virtualization capability, when using certain JVM agents.</p>
 
-<def title="&lt;environment-system-properties> schema">
+<schema>
 element environment-system-properties {
   r_boolean-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -2268,7 +2301,7 @@ including String, Integer, and Double constants.  env-entry configures
 that data in the current context.  As with other Resin configuration, the
 value can use JSP-EL expressions.</p>
 
-<deftable title="&lt;env-entry> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2289,9 +2322,9 @@ value can use JSP-EL expressions.</p>
   <td>Value to be stored.  Since Servlet 2.1</td>
   <td>required</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;env-entry> schema">
+<schema>
 element env-entry {
   description*,
 
@@ -2301,7 +2334,7 @@ element env-entry {
 
   env-entry-value
 }
-</def>
+</schema>
 
 <p>The example configuration stores a string in java:comp/env/greeting.
 Following the J2EE spec, the env-entry-name is relative to
@@ -2355,7 +2388,7 @@ public class TestServlet extends HttpServlet {
 <defun title="&lt;error-page>" name="error-page" version="Servlet 2.2">
 <parents>web-app</parents>
 
-<deftable-childtags>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2372,7 +2405,7 @@ public class TestServlet extends HttpServlet {
   <td>location</td>
   <td>The error page to display</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
 <deftable title="Request attributes for error handling">
 <tr>
@@ -2405,12 +2438,12 @@ public class TestServlet extends HttpServlet {
 </tr>
 </deftable>
 
-<def title="&lt;error-page> schema">
+<schema>
 element error-page {
   (error-code | exception-type)?
   &amp; location
 }
-</def>
+</schema>
 
 <p>By default, Resin returns a 500 Servlet Error and a stack trace for
 exceptions and a simple 404 File Not Found for error pages.  Applications can
@@ -2459,7 +2492,7 @@ files from a base directory defined by 'dir'.  Files can be included
 by patterns defined by &lt;include> tags or excluded by patterns defined in
 &lt;exclude> tags.</p>
 
-<deftable title="&lt;fileset> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2474,14 +2507,14 @@ by patterns defined by &lt;include> tags or excluded by patterns defined in
 <tr><td>exclude</td>
     <td>an exclude pattern</td>
     <td>do not exclude any files</td></tr>
-</deftable>
+</attributes>
 
-<def title="&lt;fileset> schema">
+<schema>
 element fileset {
   dir
   &amp; exclude*
   &amp; include*
-</def>
+</schema>
 
 <s2 title="fileset patterns">
 
@@ -2528,7 +2561,7 @@ use dependency-injection, transactional aspects, custom interception
 with @InterceptorType, and event handling with @Observes.
 </p>
 
-<deftable-childtags>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2549,16 +2582,16 @@ with @InterceptorType, and event handling with @Observes.
   <td>init-param</td>
   <td>Initialization parameters, see <a href="javadoc|javax.servlet.FilterConfig">FilterConfig.getInitParameter</a></td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;filter> schema">
+<schema>
 element filter {
   filter-name
   &amp; filter-class
   &amp; init*
   &amp; init-param*
 }
-</def>
+</schema>
 
 <p>The following example defines a filter alias 'image'</p>
 <example title="Example: WEB-INF/resin-web.xml">
@@ -2610,7 +2643,7 @@ children, <var>url-pattern</var> and <var>filter-name</var>.
 can specify a servlet alias defined by <code>filter</code>.
 </p>
 
-<deftable title="&lt;filter-mapping> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2636,15 +2669,15 @@ can specify a servlet alias defined by <code>filter</code>.
   <td>A regular expression matching the portion of the url that follows the <g>context path</g></td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;filter-mapping> schema">
+<schema>
 element filter-mapping {
   (url-pattern | url-regexp | servlet-name)+
   &amp; filter-name
   &amp; dispatcher*
 }
-</def>
+</schema>
 
 <example title="Example: resin-web.xml filters">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -2691,7 +2724,7 @@ specific parameters that the servlet engine's login form processing
 understands.  If the login succeeds, the user will see the original
 page.  If it fails, she will see the error page.</p>
 
-<deftable title="&lt;form-login-config> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2717,7 +2750,7 @@ page.  If it fails, she will see the error page.</p>
   <td>If true, the form's j_uri will override a stored URI</td>
   <td>false</td>
 </tr>
-</deftable>
+</attributes>
 
 <p>The form itself must have the action <var>j_security_check</var>.  It
 must also have the parameters <var>j_username</var> and <var>j_password</var>.
@@ -2730,7 +2763,7 @@ persistent cookie to the user to make following login easier.</p>
 a persistent cookie.  It lets you implement the "remember me" button.  By
 default, the authentication only lasts for a single session.</p>
 
-<deftable-childtags>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -2755,16 +2788,16 @@ default, the authentication only lasts for a single session.</p>
   <td>j_use_cookie_auth</td>
   <td>Optional Resin extension to allow cookie login.</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;form-login-config> schema">
+<schema>
 element form-login-config {
   form-login-page,
   form-error-page,
   internal-forward,
   form-uri-priority
 }
-</def>
+</schema>
 
 <p>The following is an example of a servlet-standard login page:</p>
 
@@ -2808,7 +2841,7 @@ switch to a non-root user after binding to port 80.</p>
 
 </defun>
 
-<defun title="&lt;host>" version="Resin 3.0">
+<defun title="&lt;host>" name="host" version="Resin 4.0">
 <parents>cluster</parents>
 
 <description>
@@ -3071,7 +3104,7 @@ element host-name {
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
 
-<deftable-childtags>
+<attributes>
 <tr><td>address</td>
     <td>IP address of the interface to listen to</td>
     <td>*</td></tr>
@@ -3099,7 +3132,7 @@ which ports the server should listen to.</p>
 <tr><td>jsse-ssl</td>
     <td>configures the port to use JSSE for SSL</td>
     <td>none</td></tr>
-</deftable-childtags>
+</attributes>
 
 <p>The <var>virtual-host</var> attribute overrides the browser's
 Host directive, specifying the explicit host and port for
@@ -3122,11 +3155,11 @@ when those web-apps should be freed.</p>
 child web-apps because there are a large number of sub-web-apps for
 the individual tutorials.</p>
 
-<def title="&lt;idle-time> schema">
+<schema>
 element idle-time {
   r_period-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3139,11 +3172,11 @@ element idle-time {
 disconnection exceptions from the client, or if it should send those
 exceptions to the application.</p>
 
-<def title="&lt;ignore-client-disconnect> schema">
+<schema>
 element ignore-client-disconnect {
   r_boolean-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3155,11 +3188,11 @@ element ignore-client-disconnect {
 The invocation cache is used to store pre-calculated servlet and filter
 chains from the URLs.  It's also used as the basis for proxy caching.</p>
 
-<def title="&lt;invocation-cache-size> schema">
+<schema>
 element invocation-cache-size {
   r_int-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3170,11 +3203,11 @@ element invocation-cache-size {
 <p>Configures the longest entry cacheable in the invocation cache.
 It is used to avoid certain types of denial-of-service attacks.</p>
 
-<def title="&lt;invocation-cache-max-url-length> schema">
+<schema>
 element invocation-cache-max-url-length {
   r_int-Type
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;javac>" name="javac" occur="?">
@@ -3187,7 +3220,7 @@ compiled files.</p>
 <p>The javac configuration is used for JSP, PHP, EJB and
 compiling-loader configuration.</p>
 
-<deftable title="&lt;javac> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -3213,16 +3246,16 @@ compiling-loader configuration.</p>
   <td>the maximum number of source files to batch into one compilation</td>
   <td>64</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;javac> schema">
+<schema>
 element javac {
   args*
   &amp; compiler
   &amp; encoding?
   &amp; max-batch?
 }
-</def>
+</schema>
 
 <p>
 The eclipse compiler requires the presence of
@@ -3292,7 +3325,7 @@ can be specified by it's class or a URI alias.</p>
 </tr>
 </deftable>
 
-<deftable title="&lt;jms-connection-factory> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -3323,27 +3356,27 @@ can be specified by it's class or a URI alias.</p>
   <td>URI alias for the ConnectionFactory class</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;jms-connection-factory> schema">
+<schema>
 element jms-connection-factory {
   (class | uri)
   &amp; init?
   &amp; jndi-name?
   &amp; name?
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;jmx-service>" name="jmx-service">
 
 <p>&lt;jmx-service> enables the clustered JMX management.</p>
 
-<def title="&lt;jmx-service> schema">
+<schema>
 element jmx-service {
   enable?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3352,12 +3385,12 @@ element jmx-service {
 <p>&lt;log-service> enables persistent storage of warning and critical
 log messages in the administration.</p>
 
-<def title="&lt;log-service> schema">
+<schema>
 element log-service {
   enable?
   &amp; level?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3373,7 +3406,7 @@ EJB servers will often expose their EJB beans through a JNDI context.
 jndi-link will create the appropriate InitialContextFactory, configure it,
 and lookup the foreign JNDI objects.</p>
 
-<deftable title="&lt;jndi-link> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -3391,16 +3424,16 @@ and lookup the foreign JNDI objects.</p>
 <tr><td>jndi-name</td>
     <td>The JNDI name to use for the link.  Resin 3.0</td>
     <td>required</td></tr>
-</deftable>
+</attributes>
 
-<def title="&lt;jndi-link> schema">
+<schema>
 element jndi-link {
   jndi-name
   &amp; factory?
   &amp; foreign-name?
   &amp; init-param*
 }
-</def>
+</schema>
 
 <example title="Example: A JNDI symbolic link for a DataSource">
 &lt;web-app xmlns="http://caucho.com/ns/resin"dd&gt;
@@ -3449,7 +3482,7 @@ element jndi-link {
 <defun title="&lt;jpa-persistence>" name="jpa-persistence" occur="*" version="Resin 3.1">
 <parents>resin, cluster, host, web-app</parents>
 
-<deftable title="&lt;jpa-persistence> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -3490,9 +3523,9 @@ element jndi-link {
   <td>database to use in transactions</td>
   <td>data-source</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;jpa-persistence> schema">
+<schema>
 element jpa-persistence {
   create-database-schema?
   &amp; cache-size?
@@ -3529,7 +3562,7 @@ element properties {
      &amp; value
   }*
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3538,7 +3571,7 @@ element properties {
 
 <p>Configures JSF behavior.</p>
 
-<deftable-childtags>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -3571,13 +3604,13 @@ element properties {
   </td>
   <td>position:absolute; bottom:0; right:0</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;jsf> schema">
+<schema>
 element jsf {
   &amp; fast-jsf?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3586,7 +3619,7 @@ element jsf {
 
 <p>Configures JSP behavior.</p>
 
-<deftable-childtags>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -3704,9 +3737,9 @@ handle invalid .tld files</td>
   <td>Sets JSP response character encoding; overrides character encoding defined at web-app level</td>
   <td></td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;jsp> schema">
+<schema>
 element jsp {
   auto-compile
   &amp; deferred-syntax-allowed-as-literal?
@@ -3731,7 +3764,7 @@ element jsp {
   &amp; validate-taglib-schema?
   &amp; velocity-enabled?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3739,7 +3772,7 @@ element jsp {
 
 <p>&lt;jsp-config> configure standard settings for JSP files.</p>
 
-<deftable title="&lt;jsp-config> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -3785,9 +3818,9 @@ element jsp {
   <td>Includes JSP fragments before the JSP page as footers</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;jsp-config> schema">
+<schema>
 element jsp-config {
   taglib*,
   jsp-property-group*
@@ -3804,7 +3837,7 @@ element jsp-property-group {
   include-prelude*
   include-coda*
 }
-</def>
+</schema>
 
 </defun>
 
@@ -3967,11 +4000,11 @@ web.xml files which include servlets with no available classes.
 Since Resin will normally send an error in this
 situation, &lt;lazy-servlet-validate> lets you turn the validation off.</p>
 
-<def title="&lt;lazy-servlet-validate> schema">
+<schema>
 element lazy-servlet-validate {
   r_boolean-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -4003,7 +4036,7 @@ Jar files are recognized wihen they have a filename extension of
 </tr>
 </deftable>
 
-<def title="&lt;library-loader> schema">
+<schema>
 element library-loader {
   fileset
   | path
@@ -4014,7 +4047,7 @@ element fileset {
   &amp; exclude*
   &amp; include*
 }
-</def>
+</schema>
 
 <p>See <a href="http://caucho.com/resin-javadoc/javadoc/com/caucho/loader/LibraryLoader.html">DirectoryLoader</a>.</p>
 
@@ -4027,7 +4060,7 @@ are registered based on interfaces they implement.  The listener
 instances are fully <a href="config-candi.xtp">Resin-IoC</a> aware,
 including dependency injection, observing events, and supporting aspects.</p>
 
-<deftable title="&lt;listener> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -4040,7 +4073,7 @@ including dependency injection, observing events, and supporting aspects.</p>
   <td>init</td>
   <td>IoC initialization of the listener</td>
 </tr>
-</deftable>
+</attributes>
 
 <deftable title="listener interfaces">
 <tr>
@@ -4077,12 +4110,12 @@ including dependency injection, observing events, and supporting aspects.</p>
 </tr>
 </deftable>
 
-<def title="&lt;listener> schema">
+<schema>
 element listener {
   listener-class,
   init?
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;load-balance-connect-timeout>" name="load-balance-connect-timeout" version="Resin 3.1">
@@ -4261,7 +4294,7 @@ DIGEST or FORM.</p>
 <p>See also: <a href="security-overview.xtp">Resin security</a> for an
 overview.</p>
 
-<deftable-childtags title="&lt;login-config> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -4290,14 +4323,14 @@ overview.</p>
   <td>realm-name</td>
   <td>The realm name to use in HTTP authentication</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
 <p>HTTP Authentication is defined in the RFC <a href="http://www.faqs.org/rfcs/rfc2617.html">HTTP Authentication: Basic and
 Digest</a>.</p> 
 
 <p>HTTP digest authentication is discussed in <a href="security-overview.xtp">Digest Passwords</a>.</p>
 
-<def title="&lt;login-config> schema">
+<schema>
 element login-config {
   class?
   &amp; auth-method?
@@ -4305,7 +4338,7 @@ element login-config {
   &amp; form-login-config?
   &amp; init?
   &amp; realm-name?
-</def>
+</schema>
 
 </defun>
 
@@ -4323,7 +4356,7 @@ most common configuration build-in: logging to a rotating file.  Most of the
 configuration attributes are used for the rotating file and are shared
 with the other logging configuration.</p>
 
-<deftable-childtags title="&lt;log-handler> values">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -4410,9 +4443,9 @@ The handler will be registered with the Logger with the matching name.</td>
     </td>
   <td>1mb</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;log-handler> schema">
+<schema>
 element log-handler {
   archive-format?
   &amp; class?
@@ -4430,7 +4463,7 @@ element log-handler {
   &amp; timestamp?
   &amp; use-parent-handlers?
 }
-</def>
+</schema>
 
 <p>The following example is a standard log handler writing to a rollover
 file.  Because the handler's level is "all", the &lt;logger> configuration
@@ -4622,7 +4655,7 @@ it available in Resin-IoC/WebBeans.  Mail properties can be
 configured using the properties attribute.  Some of the most common
 properties can be configured directly on the &lt;mail> tag.</p>
 
-<deftable title="&lt;mail> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -4734,9 +4767,9 @@ properties can be configured directly on the &lt;mail> tag.</p>
   <td>sets the mail.user property</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;mail> schema">
+<schema>
 element mail {
   authenticator?
   &amp; debug?
@@ -4758,7 +4791,7 @@ element mail {
   &amp; transport-protocol?
   &amp; user?
 }
-</def>
+</schema>
 
 <example title="Example: mail">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -4879,11 +4912,11 @@ allows a site to limit to total time of that connection.</p>
 
 <p>Sets limit on longest URIs that can be served by Resin.</p>
 
-<def title="&lt;max-uri-length> schema">
+<schema>
 element max-uri-length {
   r_int-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -4934,7 +4967,7 @@ the memory leak can be found and fixed.</p>
 <parents>web-app</parents>
 <p>Maps url patterns to mime-types.</p>
 
-<deftable-childtags title="&lt;mime-mapping> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -4947,14 +4980,14 @@ the memory leak can be found and fixed.</p>
   <td>mime-type</td>
   <td>the mime-type</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
-<def title="&lt;mime-mapping> schema">
+<schema>
 element mime-mapping {
   extension,
   mime-type
 }
-</def>
+</schema>
 
 <example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -4986,7 +5019,7 @@ file.  <var>foo.filename</var> contains the uploaded filename, and
 <var>foo.content-type</var> contains the content-type of the uploaded file.
 </p>
 
-<deftable title="&lt;multipart-form> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -4997,7 +5030,7 @@ file.  <var>foo.filename</var> contains the uploaded filename, and
   <td>maximum size of an upload request (in kb).</td>
   <td>no limit</td>
 </tr>
-</deftable>
+</attributes>
 
 <p>If the upload is larger than the limit or if multipart-form processing
 is disabled, Resin will not parse the request and will set an error message
@@ -5010,12 +5043,12 @@ The "<var>caucho.multipart.form.error.size</var>" will contain the attempted upl
 
 <p>By default, multipart-form is disabled.</p>
 
-<def title="&lt;multipart-form> schema">
+<schema>
 element multipart-form {
   enable?
   &amp; upload-max?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -5025,7 +5058,7 @@ element multipart-form {
 <p>Maps url patterns to real paths.  If using a server like
 IIS, you may need to match the server's path aliases.</p>
 
-<deftable title="&lt;path-mapping> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -5042,15 +5075,15 @@ IIS, you may need to match the server's path aliases.</p>
   <td>real-path</td>
   <td>The prefix of the real path.  When used with <var>url-regexp</var>, allows substitution variables like <var>$1</var>.</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;path-mapping> schema">
+<schema>
 element path-mapping {
   (url-pattern | url-regexp)
 
   &amp; real-path
 }
-</def>
+</schema>
 
 <example title="Example: resin-web.xml aliasing paths">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -5097,7 +5130,7 @@ same process as Resin itself.  If the entire JDK freezes, this
 thread will freeze as well.  Assuming the JDK doesn't freeze, the
 PingThread will catch errors like deadlocks.</p>
 
-<deftable title="&lt;ping> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -5133,7 +5166,7 @@ PingThread will catch errors like deadlocks.</p>
   <td>time to wait for server to start responding to the tcp connection before giving up</td>
   <td>10s</td>
 </tr>
-</deftable>
+</attributes>
 
 <example title="Example: resin.xml - simple usage of server ping">
 &lt;resin xmlns="http://caucho.com/ns/resin"
@@ -5315,7 +5348,7 @@ and &lt;servlet-mapping> tags, since it will process HTTP URL requests.</p>
 
 <p>Protocol drivers extend the <a href="http://caucho.com/resin-javadoc/com/caucho/remote/server/AbstractProtocolServletFactory.html">AbstractProtocolServletFactory</a> interface and can register a URI alias to simplify configuration.</p>
 
-<deftable title="&lt;protocol> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -5332,7 +5365,7 @@ and &lt;servlet-mapping> tags, since it will process HTTP URL requests.</p>
   <td>uri</td>
   <td>Protocol configuration shortcut</td>
 </tr>
-</deftable>
+</attributes>
 
 <deftable title="Current drivers">
 <tr>
@@ -5357,12 +5390,12 @@ and &lt;servlet-mapping> tags, since it will process HTTP URL requests.</p>
 </tr>
 </deftable>
 
-<def title="&lt;protocol> schema">
+<schema>
 element protocol {
   (class | uri)
   &amp; init?
 }
-</def>
+</schema>
 
 <example title="Example: Hessian service in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -5385,11 +5418,11 @@ element protocol {
 check if a .war file has been updated or added to a
 &lt;web-app-deploy> directory.</p>
 
-<def title="&lt;redeploy-check-interval> schema">
+<schema>
 element redeploy-check-interval {
   r_period-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -5433,7 +5466,7 @@ element redeploy-mode {
 <p>&lt;rewrite-real-path> lets you rewrite the URL to physical path
 mapping, to allow aliasing or for filesystem organization.</p>
 
-<deftable title="&lt;rewrite-real-path> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -5458,9 +5491,9 @@ mapping, to allow aliasing or for filesystem organization.</p>
   <td>target</td>
   <td>specifies the target for URL to real-path mapping</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;rewrite-real-path> schema">
+<schema>
 element rewrite-real-path {
   element rewrite {
     regexp
@@ -5472,7 +5505,7 @@ element rewrite-real-path {
     &amp; target
   }*
 }
-</def>
+</schema>
 
 <example title="Example: aliasing /foo to /bar">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -5548,7 +5581,7 @@ resources should use &lt;bean> or &lt;component> for IoC configuration.</p>
 <p>JNDI ObjectFactories are used to create objects from JNDI references.
 The &lt;reference&gt; tag configures the ObjectFactory and stores it in JNDI.</p>
 
-<deftable title="&lt;reference> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -5569,15 +5602,15 @@ The &lt;reference&gt; tag configures the ObjectFactory and stores it in JNDI.</p
   <td>Bean-style initialization for the factory</td>
   <td>none</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;reference> schema">
+<schema>
 element reference {
   factory 
   &amp; jndi-name
   &amp; init-param*
 }
-</def>
+</schema>
 
 <example title="Example: Hessian client reference">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -5610,7 +5643,7 @@ information, including how to write an adapter for Resin remoting.</li>
 for an example.</li>
 </ul>
 
-<deftable title="&lt;remote-client> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -5641,7 +5674,7 @@ for an example.</li>
   <td>Shortcut alias name for the protocol class</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
 <deftable title="remote-client protocols">
 
@@ -5692,7 +5725,7 @@ Because the &lt;resin&gt; environment does not have a dynamic class loader,
 dynamically loaded classes, like custom jars
 in resin/lib are not available.</p>
 
-<def title="&lt;resin> schema">
+<schema>
 element resin {
   <var>env resources</var>
   &amp; cluster*
@@ -5706,7 +5739,7 @@ element resin {
   &amp; security-provider?
   &amp; watchdog-manager?
 }
-</def>
+</schema>
 
 
 <example title="Example: minimal resin.xml">
@@ -5737,11 +5770,11 @@ element resin {
 and data files, including persistent caching, sessions, and administration
 logs.</p>
 
-<def title="&lt;resin-data-directory> schema">
+<schema>
 element resin-data-directory {
   r_path-Type
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;resin:AdminAuthenticator>" name="resin:AdminAuthenticator">
@@ -5763,7 +5796,7 @@ constraint. All access attempts that do not satisfy the authorization rule are d
 access. This tag is the most common type of top level authorization tag.</p>
 <p>Following are the attributes of this tag:</p>
 <!-- XXX: What are the defaults for this? -->
-<deftable title="resin:Allow Attributes">
+<attributes>
 <tr>
   <td>url-pattern</td>
   <td>URL pattern describing the resource to be secured.</td>
@@ -5772,7 +5805,7 @@ access. This tag is the most common type of top level authorization tag.</p>
   <td>http-method</td>
   <td>HTTP methods that the restriction applies to.</td>
 </tr>
-</deftable>
+</attributes>
 <p>The following is a typical example of how the &lt;resin:Allow> is used:</p>
 <example title="Protecting all pages for logged-in users">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -5859,7 +5892,7 @@ tag is used to configure basic authentication.
 in a &lt;web-app> will have &lt;web-app> content, while a &lt;resin:choose>
 in a &lt;host> will have &lt;host> content.</p>
 
-<def title="&lt;resin:choose> schema">
+<schema>
 element resin:choose {
   resin:when*,
   resin:otherwise
@@ -5874,7 +5907,7 @@ element resin:when {
 element resin:otherwise {
   <var>context-dependent content</var>
 }
-</def>
+</schema>
 
 <example title="Example: resin:choose usage pattern">
 &lt;resin:choose&gt;
@@ -5933,7 +5966,7 @@ DataSource specified by the <var>data-source</var> attribute. <var>data-source</
 refers to an existing <a href="database-ref.xtp">configured</a> DataSource.
 </p>
 <p>The following are the attributes for the DatabaseAuthenticator:</p>
-<deftable title="DatabaseAuthenticator Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Meaning</th>
@@ -5990,7 +6023,7 @@ refers to an existing <a href="database-ref.xtp">configured</a> DataSource.
   <td>If true, the user will be logged out when the session times out.</td>
   <td>true</td>
 </tr>
-</deftable>
+</attributes>
 <p>The following is an example of how the database authenticator may be configured:</p>
 <example title="WEB-INF/resin-web.xml for DatabaseAuthenticator">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -6031,7 +6064,7 @@ match the condition are denied access. If no conditions are specified, all acces
 pattern is restricted.</p>
 <p>Following are the attributes of this tag:</p>
 <!-- XXX: What are the defaults for this? -->
-<deftable title="resin:Allow Attributes">
+<attributes>
 <tr>
   <td>url-pattern</td>
   <td>URL pattern describing the resource to be secured.</td>
@@ -6040,7 +6073,7 @@ pattern is restricted.</p>
   <td>http-method</td>
   <td>HTTP methods that the restriction applies to.</td>
 </tr>
-</deftable>
+</attributes>
 <p>The following is an example of how the &lt;resin:Allow> might be used:</p>
 <example title="Security-constraint to protect static files">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -6304,7 +6337,7 @@ can be particularly useful in combination with Java command-line properties
 like -Dfoo=bar to enable development mode or testing configuration.
 </p>
 
-<deftable title="&lt;resin:if> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -6315,19 +6348,19 @@ like -Dfoo=bar to enable development mode or testing configuration.
   <td>the test to perform</td>
   <td>required</td>
 </tr>
-</deftable>
+</attributes>
 
 <p>The resin:if schema is context-dependent.  For example, resin:if in
 a &lt;web-app> will have web-app content while resin:if in a &lt;host>
 will have host content.</p>
 
-<def title="&lt;resin:if> schema">
+<schema>
 element resin:if {
   attribute test { string }
 
   <var>context-dependent content</var>
 }
-</def>
+</schema>
 
 <example title="Example: enable debugging for -Ddevelopment">
 &lt;resin xmlns="http://caucho.com/ns/resin"
@@ -6531,7 +6564,7 @@ this configuration.</p>
 <a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfUserInRole.html">&lt;resin:IfUserInRole></a>
 condition enforces role-based security. It requires that 
 authenticated users have a specified role. The following are the attributes of the tag:</p>
-<deftable title="IfUserInRole Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -6540,7 +6573,7 @@ authenticated users have a specified role. The following are the attributes of t
   <td>role</td>
   <td>Roles which are allowed to access the resource.</td>
 </tr>
-</deftable>
+</attributes>
 <p>The following is an example of how &lt;resin:IfUserInRole> might be used:</p>
 <example title="WEB-INF/resin-web.xml Protecting WebDav for WebDav Users">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -6565,7 +6598,7 @@ top-level of &lt;web-app&gt;, and a resin:import in &lt;cluster> will have
 a top-level tag of &lt;cluster>.
 </p>
 
-<deftable title="&lt;resin:import> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -6587,9 +6620,9 @@ the files to import.</td>
   <td>if true, no error when file does not exist</td>
   <td>false</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;resin:import> schema">
+<schema>
 element import {
   (path | fileset)
   &amp; optional?
@@ -6600,7 +6633,7 @@ element fileset {
   &amp; exclude*
   &amp; include*
 }
-</def>
+</schema>
 
 <p>The following example shows how Resin implements the WEB-INF/web.xml
 and WEB-INF/resin-web.xml files.  Both are simply resin:import in a
@@ -6672,7 +6705,7 @@ login module.
 </p>
 <!-- XXX: Need an external reference to the JAAS modules in the JDK -->
 <p>The following are the attributes for the JaasAuthenticator:</p>
-<deftable title="JaasAuthenticator Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Meaning</th>
@@ -6701,7 +6734,7 @@ login module.
   </td>
   <td>md5-base64</td>
 </tr>
-</deftable>
+</attributes>
 <p>The following is an example of how the JAAS authenticator may be configured:</p>
 <example title="WEB-INF/resin-web.xml for JaasAuthenticator">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -6995,11 +7028,11 @@ The following example shows the usage of the <code>jndi-env</code> configuration
 <p>Logs a message to the given log file. The content of the element is the
 message.</p>
 
-<def title="&lt;resin:message> schema">
+<schema>
 element resin:message {
   string
 }
-</def>
+</schema>
 
 <example title="logging in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -7056,11 +7089,11 @@ element resin:message {
 <p>&lt;resin:otherwise> is the catch-all configuration for a &lt;resin:choose>
 block when none of the &lt;resin:when> items match.</p>
 
-<def title="&lt;resin:otherwise> schema">
+<schema>
 element resin:otherwise {
   <var>context-dependent content</var>
 }
-</def>
+</schema>
 
 </defun>
 
@@ -7104,7 +7137,7 @@ properties file.
 </p>
 <p>The following are the attributes for the PropertiesAuthenticator:</p>
 <!-- XXX: Check this attributes table for completeness -->
-<deftable title="PropertiesAuthenticator Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Meaning</th>
@@ -7123,7 +7156,7 @@ properties file.
   </td>
   <td>md5-base64</td>
 </tr>
-</deftable>
+</attributes>
 <p>
   The following is an example of in-lining properties with the authenticator. This is 
   useful for extremely simple web-sites maintained by developers as well as testing.
@@ -7181,16 +7214,113 @@ are also separated by a comma.
 </p>
 </description>
 </defun>
-<defun title="&lt;resin:ScheduledTask>" name="resin:ScheduledTask">
-<description>
-<p>
 
-  cron-style task scheduling.
+<defun title="&lt;resin:ScheduledTask>" name="resin:ScheduledTask">
+
+<description>
+<p>&lt;resin:ScheduledTask> schedules a job to be executed at specific times
+or after specific delays.  The times can be specified by a cron syntax or
+by a simple delay parameter.  The job can be either a <code>Runnable</code>
+bean, a method specified by an EL expression, or a URL.</p>
+
+<p>When specified as an Java Injection bean, the bean task
+has full IoC capabilities,
+including injection, @TransactionAttribute aspects, interception and
+@Observes.</p>
+
+<s2 title="cron trigger syntax">
+
+<p>Some ascii art from the <a href="http://en.wikipedia.org/wiki/Crontab">wikipedia
+cron entry</a></p>
+
+<def title="cron fields">
+# +---------------- minute (0 - 59)
+# |  +------------- hour (0 - 23)
+# |  |  +---------- day of month (1 - 31)
+# |  |  |  +------- month (1 - 12)
+# |  |  |  |  +---- day of week (0 - 6) (Sunday=0 or 7)
+# |  |  |  |  |
+  *  *  *  *  *
+</def>
+
+<deftable title="cron patterns">
+<tr>
+  <th>Pattern</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>*</td>
+  <td>matches all time periods</td>
+</tr>
+<tr>
+  <td>15</td>
+  <td>matches the specific time, e.g. 15 for minutes</td>
+</tr>
+<tr>
+  <td>15,45</td>
+  <td>matches a list of times, e.g. every :15 and :45</td>
+</tr>
+<tr>
+  <td>*/5</td>
+  <td>matches every <var>n</var> times, e.g. every 5 minutes</td>
+</tr>
+<tr>
+  <td>1-5</td>
+  <td>matches a range of times, e.g. mon, tue, wed, thu, fri (1-5)</td>
+</tr>
+</deftable>
+</s2>
+
+<p>
 <a href="http://caucho.com/resin-javadoc/com/caucho/resources/ScheduledTask.html">&lt;resin:ScheduledTask> JavaDoc</a>
 </p>
-</description>
-</defun>
 
+</description>
+
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>class</td>
+  <td>the classname of the singleton bean to create</td>
+</tr>
+<tr>
+  <td>cron</td>
+  <td>a cron-style scheduling description</td>
+</tr>
+<tr>
+  <td>delay</td>
+  <td>a simple delay-based execution</td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>IoC initialization for the bean</td>
+</tr>
+<tr>
+  <td>mbean-name</td>
+  <td>optional MBean name for JMX registration</td>
+</tr>
+<tr>
+  <td>method</td>
+  <td>EL expression for a method to be invoked as the task</td>
+</tr>
+<tr>
+  <td>name</td>
+  <td>optional IoC name for registering the task</td>
+</tr>
+<tr>
+  <td>period</td>
+  <td>how often the task should be invoked in simple mode</td>
+</tr>
+<tr>
+  <td>task</td>
+  <td>alternate task assignment for predefined beans</td>
+</tr>
+</attributes>
+
+</defun>
 
 <defun title="&lt;resin:SendError>" name="resin:SendError">
 <description>
@@ -7202,14 +7332,11 @@ are also separated by a comma.
 </description>
 </defun>
 
-
-
-
 <defun title="&lt;resin:set>" name="resin:set" version="Resin 3.0.7">
 
 <p>resin:set adds an EL variable to the current context.</p>
 
-<deftable title="&lt;resin:set> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -7225,16 +7352,16 @@ are also separated by a comma.
   <td>value</td>
   <td>required</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;resin:set> schema">
+<schema>
 element set {
   name
   &amp; value
   &amp; default
   &amp; attribute * { string }
 }
-</def>
+</schema>
 
 <example title="Example: resin:set in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"
@@ -7287,7 +7414,7 @@ element set {
 &lt;resin:choose> block.  If the <var>test</var> matches, Resin will
 use the enclosed configuration.</p>
 
-<deftable title="&lt;resin:when> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -7296,15 +7423,15 @@ use the enclosed configuration.</p>
   <td>test</td>
   <td>the test to perform</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;resin:when> schema">
+<schema>
 element resin:when {
   attribute test { string },
 
   <var>context-dependent content</var>
 }
-</def>
+</schema>
 
 </defun>
 
@@ -7433,7 +7560,7 @@ directly.</p>
 
 <p>A symbolic URI can be used in place of the ResourceAdapter's class name.</p>
 
-<deftable title="&lt;resource-adapter> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -7464,16 +7591,16 @@ directly.</p>
   <td>Alias schema for the ResourceAdapter class name</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;resource-adapter> schema">
+<schema>
 element resource-adapter {
   (class | uri)
   &amp; init?
   &amp; name?
   &amp; jndi-name?
 }
-</def>
+</schema>
 
 </defun> 
 
@@ -7488,7 +7615,7 @@ before they can be configured by <a config-tag="connector">connector</a>.
 The &lt;resource-deploy&gt; tag specifies the directory for that deployment.
 </p>
 
-<deftable title="&lt;resource-deploy> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -7509,16 +7636,16 @@ The &lt;resource-deploy&gt; tag specifies the directory for that deployment.
   <td>Configures the directory where Resin will expand rar files</td>
   <td>the path value</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;resource-deploy> schema">
+<schema>
 element resource-deploy {
   path
   &amp; expand-directory?
   &amp; expand-path?
   &amp; resource-default?
 }
-</def>
+</schema>
 
 <example title="Example: resource-deploy">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -7549,7 +7676,7 @@ database, and ejb-server tags.</p>
 may still use resource-ref to configure resources, but it's recommended to
 convert the configuration.</p>
 
-<def title="&lt;resource-ref> schema">
+<schema>
 element resource-ref {
   attribute id?,
   description*,
@@ -7558,7 +7685,7 @@ element resource-ref {
   res-auth,
   res-sharing-scope?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -7574,159 +7701,6 @@ print the allocation stack trace, which is more informative for
 tracking down errors.</p>
 
 </defun>
-<defun title="&lt;scheduled-task>" name="scheduled-task"> version="Resin 3.1.6">
-
-<p>&lt;scheduled-task> schedules a job to be executed at specific times
-or after specific delays.  The times can be specified by a cron syntax or
-by a simple delay parameter.  The job can be either a <code>Runnable</code>
-bean, a method specified by an EL expression, or a URL.</p>
-
-<p>When specified as an IoC bean, the bean task has full IoC capabilities,
-including injection, @TransactionAttribute aspects, interception and
-@Observes.</p>
-
-<deftable title="&lt;scheduled-task> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>class</td>
-  <td>the classname of the singleton bean to create</td>
-</tr>
-<tr>
-  <td>cron</td>
-  <td>a cron-style scheduling description</td>
-</tr>
-<tr>
-  <td>delay</td>
-  <td>a simple delay-based execution</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC initialization for the bean</td>
-</tr>
-<tr>
-  <td>mbean-name</td>
-  <td>optional MBean name for JMX registration</td>
-</tr>
-<tr>
-  <td>method</td>
-  <td>EL expression for a method to be invoked as the task</td>
-</tr>
-<tr>
-  <td>name</td>
-  <td>optional IoC name for registering the task</td>
-</tr>
-<tr>
-  <td>period</td>
-  <td>how often the task should be invoked in simple mode</td>
-</tr>
-<tr>
-  <td>task</td>
-  <td>alternate task assignment for predefined beans</td>
-</tr>
-</deftable>
-
-<def title="&lt;scheduled-task> schema">
-element scheduled-task {
-  class?
-  &amp; cron?
-  &amp; delay?
-  &amp; init?
-  &amp; mbean-name?
-  &amp; method?
-  &amp; name?
-  &amp; period?
-  &amp; task?
-}
-</def>
-
-<s2 title="bean-style job configuration">
-
-<p>The most common and flexible job configuration uses standard IoC
-bean-style configuration.  The bean must implement <code>Runnable</code>.
-Like the &lt;bean> tag, the <var>class</var> attribute specifies the
-<code>Runnable</code> class, and any <var>init</var> section configures
-the bean using <a href="config-candi.xtp">Resin IoC</a> configuration.</p>
-
-<example title="Example: 5min cron bean task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;scheduled-task class="qa.MyTask">
-    &lt;cron>*/5&lt;/cron>
-  &lt;/scheduled-task>
-
-&lt;/web-app>
-</example>
-
-</s2>
-
-<s2 title="task reference job configuration">
-
-<p>The task bean can also be passed to the &lt;scheduled-task> using
-a Resin-IoC EL reference.  The name of the task bean would be defined
-previously, either in a &lt;bean> or &lt;component> or picked up by classpath
-scanning.  Like the bean-style job configuration, the reference bean must
-implement <code>Runnable</code>.</p>
-
-<example title="Example: midnight cron bean task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;scheduled-task task="#{taskBean}">
-    &lt;cron>0 0 *&lt;/cron>
-  &lt;/scheduled-task>
-
-&lt;/web-app>
-</example>
-
-</s2>
-
-<s2 title="method reference job configuration">
-
-<p>&lt;scheduled-task> can execute a method on a defined bean as the
-scheduler's task.  The method is specified using EL reference syntax.
-At each trigger time, &lt;scheduled-task> will invoke the EL method
-expression.</p>
-
-<p>In the following example, the task invokes <code>myMethod()</code>
-on the <var>myBean</var> singleton every 1 hour.</p>
-
-<example title="Example: 1h period method task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;bean name="myBean" class="qa.MyBean"/>
-
-  &lt;scheduled-task method="#{myBean.myMethod}">
-    &lt;delay>10m&lt;/delay>
-    &lt;period>1h&lt;/period>
-  &lt;/scheduled-task>
-
-&lt;/web-app>
-</example>
-
-</s2>
-
-<s2 title="url job configuration">
-
-<p>In a &lt;web-app>, the &lt;scheduled-task> can invoke a servlet URL
-at the trigger times.  The task uses the servlet <code>RequestDispatcher</code>
-and forwards to the specified URL.  The URL is relative to the &lt;web-app>
-which contains the &lt;scheduled-task.</p>
-
-<example title="Example: sunday cron url task">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;scheduled-task url="/cron.php">
-    &lt;cron>0 15 * * 0&lt;/cron>
-  &lt;/scheduled-task>
-
-&lt;/web-app>
-</example>
-
-</s2>
-
-</defun> <!-- scheduled-task -->
 
 <defun title="&lt;secure>" name="secure">
 <parents>web-app</parents>
@@ -7734,11 +7708,11 @@ which contains the &lt;scheduled-task.</p>
 <p>The &lt;secure> flag requires that the web-app only be accessed
 in a secure/SSL mode.  Equivalent to a &lt;security-constraint>.</p>
 
-<def title="&lt;secure> schema">
+<schema>
 element secure {
   r_boolean-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -7774,7 +7748,7 @@ security</a> for an overview.</p>
 <p>See <a href="security-overview.xtp">Resin security</a> for an overview of
 security issues and configuration.</p>
 
-<deftable title="&lt;security-constraint> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -7807,9 +7781,9 @@ security issues and configuration.</p>
   <td>web-resource-collection</td>
   <td>URL patterns and HTTP methods defining the constraint</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;security-constraint> content">
+<schema>
 element security-constraint {
   auth-constraint*
   &amp; constraint*
@@ -7819,7 +7793,7 @@ element security-constraint {
   &amp; url-pattern?
   &amp; web-resource-collection*
 }
-</def>
+</schema>
 
 <example title="Example: 'user' role required in WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -7845,11 +7819,11 @@ recommend enabling it for server applications.  Instead, see the
 methods for securiting the JVM in ISP configurations.
 </p>
 
-<def title="&lt;security-manager> schema">
+<schema>
 element security-manager {
   r_boolean-Type
 }
-</def>
+</schema>
 
 <example title="Example: enabling security-manager">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -7870,11 +7844,11 @@ object, which is then passed to
 <a href="javadoc|java.security.Security|addProvider">Security.addProvider</a>.
 </p>
 
-<def title="&lt;security-provider> schema">
+<schema>
 element security-provider {
   string
 }
-</def>
+</schema>
 
 <example title="Example: adding custom security providers">
 &lt;resin xmlns="http://caucho.com/ns/resin"
@@ -8155,11 +8129,11 @@ server instances and therefore belong in a server-default.</p>
 <p>Configures the HTTP Server: header which Resin sends back to any
 HTTP client.</p>
 
-<def title="&lt;server-header> schema">
+<schema>
 element server-header {
   string
 }
-</def>
+</schema>
 
 <example title="server-header">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -8182,7 +8156,7 @@ like Hessian to handle remoting requests.</p>
 they can use dependency injection, EJB aspects like @TransactionAttribute,
 custom @InterceptorType interceptors, and listen for @Observes events.</p>
 
-<deftable title="&lt;servlet> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -8215,9 +8189,9 @@ custom @InterceptorType interceptors, and listen for @Observes events.</p>
   <td>servlet-class</td>
   <td>The servlet's class (In Resin, defaults to servlet-name)</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;servlet> schema">
+<schema>
 element servlet {
   servlet-name
   &lt; (servlet-class | jsp-file)
@@ -8228,7 +8202,7 @@ element servlet {
   &lt; run-as?
   &lt; run-at?
 }
-</def>
+</schema>
 
 <example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns">
@@ -8315,11 +8289,11 @@ produce surprising ClassCastExceptions.</p>
 Instead of parent classloaders having priority, child classloaders
 have priority.</p>
 
-<def title="&lt;servlet-hack> schema">
+<schema>
 element servlet-hack {
   boolean
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;servlet-mapping>" name="servlet-mapping" version="Servlet 2.2">
@@ -8327,7 +8301,7 @@ element servlet-hack {
 children, <var>url-pattern</var> and <var>servlet-name</var>.
 <var>url-pattern</var> selects the urls which should execute the servlet.</p>
 
-<deftable title="&lt;servlet-mapping> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -8358,9 +8332,9 @@ protocol.</td>
   <td>url-regexp</td>
   <td>A regular expression matching the portion of the url that follows the <g>context path</g></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;servlet-mapping> schema">
+<schema>
 element servlet-mapping {
   init?
   &amp; protocol?
@@ -8369,7 +8343,7 @@ element servlet-mapping {
   &lt; url-pattern*
   &lt; url-regexp*
 }
-</def>
+</schema>
 
 <example title="Example: WEB-INF/resin-web.xml &lt;servlet-mapping>">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
@@ -8465,14 +8439,14 @@ to define a sub-url the web server should handle, not Resin. (Resin 1.2.2)
 <defun title="&lt;servlet-regexp>" name="servlet-regexp" version="Resin 3.0" type="defun">
 <p>Maps URL by regular expressions to custom servlets.</p>
 
-<def title="&lt;servlet-regexp> schema">
+<schema>
 element servlet-regexp {
   init?
   &amp; servlet-class?
   &amp; servlet-name?
   &amp; url-regexp
 }
-</def>
+</schema>
 
 <example>
 &lt;servlet-regexp url-regexp="/([^.]*).do"
@@ -8530,11 +8504,11 @@ public class IfMyTest extends ServletRequestPredicate {
 
 <p>Configures the cookie used for servlet sessions.</p>
 
-<def title="&lt;session-cookie> schema">
+<schema>
 element session-cookie {
   string
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;session-config>" name="session-config" version="Servlet 2.2">
@@ -8545,7 +8519,7 @@ cookies Resin sends, the maximum sessions, and session persistence and clusterin
 <p>See also: <a href="cluster-overview.xtp">Resin clustering</a> for more
 information about distributed sessions and persistence.</p>
 
-<deftable title="&lt;session-config> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -8632,9 +8606,9 @@ been called</td>
   <td>Uses the current <a href="deploy-ref.xtp#session-config">persistent-store</a> to save sessions. (resin 3.0.8)</td>
   <td>none</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;session-config> schema">
+<schema>
 element session-config {
   always-load-session?
   &amp; always-save-session?
@@ -8657,7 +8631,7 @@ element session-config {
   &amp; session-timeout?
   &amp; use-persistent-store?
 }
-</def>
+</schema>
 
 <p>The <var>session-timeout</var> and <var>session-max</var> are usually
 used together to control the number of
@@ -8698,11 +8672,11 @@ id amongst different web-apps.</p>
 
 <p>Disables sticky sessions from the load balancer.</p>
 
-<def title="&lt;session-sticky-disable> schema">
+<schema>
 element session-sticky-disable {
   r_boolean-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -8714,11 +8688,11 @@ element session-sticky-disable {
 
 <note>Session rewriting is discouraged as a potential security issue.</note>
 
-<def title="&lt;session-cookie> schema">
+<schema>
 element session-cookie {
   string
 }
-</def>
+</schema>
 
 </defun>
 
@@ -8730,11 +8704,11 @@ will wait for the graceful shutdown before forcing an exit.</p>
 
 <default>60s</default>
 
-<def title="&lt;shutdown-wait-max> schema">
+<schema>
 element shutdown-wait-max {
   r_period-Type
 }
-</def>
+</schema>
 
 
 </defun>
@@ -8749,7 +8723,7 @@ simple <var>WEB-INF/classes</var>-style class loader.</p>
 <p>.class files in the specified directory will be loaded without any
 special compilation steps (in contrast with compiling-loader.)</p>
 
-<deftable title="&lt;simple-loader> attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -8765,14 +8739,14 @@ special compilation steps (in contrast with compiling-loader.)</p>
   <td>Class package prefix to only load to a subset of classes. Resin 3.0</td>
   <td>none</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;simple-loader> schema">
+<schema>
 element simple-loader {
   path
   &amp; prefix?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -8836,11 +8810,11 @@ database queries, or to improve query performance.</p>
 <p>Defines an alternative session cookie to be used for a SSL
 connection.  Having two separate cookies increases security.</p>
 
-<def title="&lt;session-cookie> schema">
+<schema>
 element ssl-session-cookie {
   string
 }
-</def>
+</schema>
 
 <example title="Example: ssl-session-cookie">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -8893,7 +8867,7 @@ element startup-mode {
 <p>&lt;stat-service> periodically checks the status of the server,
 and reports errors as necessary.</p>
 
-<deftable title="&lt;stat-service> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -8929,9 +8903,9 @@ and reports errors as necessary.</p>
   <td>minimum time between thread dumps</td>
   <td>15m</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;stat-service> schema">
+<schema>
 element stat-service {
   cpu-load-exit-threshold?
   &amp; cpu-load-log-info-threshold?
@@ -8940,7 +8914,7 @@ element stat-service {
   &amp; sample-period?
   &amp; thread-dump-interval?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -8951,11 +8925,11 @@ element stat-service {
 <code>WebAppMXBean</code> administration.  The statistics gathering
 is disabled by default for performance reasons.</p>
 
-<def title="&lt;statistics-enable> schema">
+<schema>
 element statistics-enable {
   r_boolean-Type
 }
-</def>
+</schema>
 
 </defun>
 
@@ -8967,7 +8941,7 @@ element statistics-enable {
 <p>The <a href="logging-ref.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 
-<deftable title="&lt;stderr-log> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -9008,9 +8982,9 @@ stderr-log in detail.</p>
   <td>sets the formatting string for the timestamp label</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;stderr-log> schema">
+<schema>
 element stderr-log {
   (path | path-format)
   &amp; archive-format?
@@ -9019,7 +8993,7 @@ element stderr-log {
   &amp; rollover-count?
   &amp; timestamp?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9031,7 +9005,7 @@ element stderr-log {
 <p>The <a href="logging-ref.xtp">log configuration</a> describes
 stderr-log in detail.</p>
 
-<deftable title="&lt;stdout-log> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -9072,9 +9046,9 @@ stderr-log in detail.</p>
   <td>sets the formatting string for the timestamp label</td>
   <td></td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;stdout-log> schema">
+<schema>
 element stdout-log {
   (path | path-format)
   &amp; archive-format?
@@ -9083,7 +9057,7 @@ element stdout-log {
   &amp; rollover-count?
   &amp; timestamp?
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;strict-mapping>" name="strict-mapping" version="Resin 1.2" type="defun">
@@ -9091,11 +9065,11 @@ element stdout-log {
 <p>Forces servlet-mapping to follow strict Servlet 2.2, disallowing
 PATH_INFO. Value is <var>true</var> or <var>false</var>.</p>
 
-<def title="&lt;strict-mapping> schema">
+<schema>
 element strict-mapping {
   r_boolean-Type
 }
-</def>
+</schema>
 
 <example title="Example: enabling strict-mapping in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -9111,11 +9085,11 @@ element strict-mapping {
 <p>Sets a Java system property.  The effect is the same as if you
 had called <a href="javadoc|java.lang.System|setProperty(String,String)"/> before starting Resin.</p>
 
-<def title="&lt;system-property> schema">
+<schema>
 element system-property {
   attribute * { string }+
 }
-</def>
+</schema>
 
 <example title="Example: setting system property">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -9132,11 +9106,11 @@ element system-property {
 This is the path used in
 <var>javax.servlet.context.tempdir</var>.</p>
 
-<def title="&lt;temp-dir> schema">
+<schema>
 element temp-dir {
   string
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9276,7 +9250,7 @@ can be alive before a mandatory rollback.</p>
 <a config-tag="library-loader"/>, but will also find <code>.jar</code> and
 <code>.zip</code> files in subdirectories.</p>
 
-<deftable title="&lt;tree-loader> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -9287,13 +9261,13 @@ can be alive before a mandatory rollback.</p>
   <td>Filesystem path for the class loader.  Since Resin 3.0</td>
   <td>required</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;tree-loader> schema">
+<schema>
 element tree-loader {
   path
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9306,11 +9280,11 @@ element tree-loader {
 <p>The HTTP specification does not define the character-encoding for
 URLs, so the server must make assumptions about the encoding.</p>
 
-<def title="&lt;url-character-encoding> schema">
+<schema>
 element url-character-encoding {
   string
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9319,7 +9293,7 @@ element url-character-encoding {
 
 <p>Restricts access to secure transports, such as SSL</p>
 
-<deftable title="&lt;user-data-constraints> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -9329,13 +9303,13 @@ element url-character-encoding {
   <td>Required transport properties.  NONE,
 INTEGRAL, and CONFIDENTIAL are allowed values.</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;user-data-constraint> schema">
+<schema>
 element user-data-constraint {
   transport-guarantee
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9462,7 +9436,7 @@ not readable by the instance users.</p>
 resin.xml configurations, and specifies the resin.xml, the root directory
 and resin-user.</p>
 
-<deftable title="&lt;watchdog> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -9504,9 +9478,9 @@ for ports that require root access</td>
   <td>Root directory for the Resin instance</td>
   <td>same as for watchdog</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;watchdog> schema">
+<schema>
 element watchdog {
   attribute id { string }
   &amp; chroot?
@@ -9519,7 +9493,7 @@ element watchdog {
   &amp; open-port { address &amp; port }*
   &amp; user-name?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9558,7 +9532,7 @@ resin.xml just to configure the watchdog-manager itself.  The
 ports, and Resin home directories before giving access to the user's
 Resin instance.</p>
 
-<deftable title="&lt;watchdog-manager> Attributes">
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -9589,9 +9563,9 @@ Resin instance.</p>
   <td>The TCP port the watchdog-manager listens for start, stop, status</td>
   <td>6700</td>
 </tr>
-</deftable>
+</attributes>
 
-<def title="&lt;watchdog-manager> schema">
+<schema>
 element watchdog-manager {
   watchdog*
   &amp; watchdog-address?
@@ -9599,7 +9573,7 @@ element watchdog-manager {
   &amp; watchdog-jvm-arg*
   &amp; watchdog-port?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9626,7 +9600,7 @@ address.</p>
 
 <p>web-app configures a web application.</p>
 
-<deftable-childtags>
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -9682,7 +9656,7 @@ address.</p>
   <td>A regexp to select this application.</td>
   <td>n/a</td>
 </tr>
-</deftable-childtags>
+</attributes>
 
 <p>When specified by <var>id</var>, the application will be initialized on
 server start.  When specified by <var>url-regexp</var>, the application
@@ -9940,13 +9914,13 @@ See <a href="security-overview.xtp">Resin security</a> for an overview.</p>
 </tr>
 </attributes>
 
-<def title="&lt;web-resource-collection> schema">
+<schema>
 element web-resource-collection {
   url-method*
   &amp; http-method*
   &amp; web-resource-name?
 }
-</def>
+</schema>
 
 </defun>
 
@@ -9957,12 +9931,12 @@ element web-resource-collection {
 url. According to the spec, each file is in a &lt;welcome-file&gt;
 element.</p>
 
-<def title="&lt;welcome-file-list> schema">
+<schema>
 element welcome-file-list {
   string
   | welcome-file*
 }
-</def>
+</schema>
 
 <example title="Example: WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -9995,11 +9969,11 @@ element welcome-file-list {
 <p>&lt;work-dir> configures a work directory for automatically generated
 code, e.g. for JSP, PHP, and JPA classes.</p>
 
-<def title="&lt;work-dir> schema">
+<schema>
 element work-dir {
   string
 }
-</def>
+</schema>
 
 </defun>
 
@@ -10008,11 +9982,11 @@ element work-dir {
 <p>&lt;xa-log-service> enables the transaction-manager logging.  The XA log
 enables Resin to recover from server crashes and complete XA commits.</p>
 
-<def title="&lt;xa-log-service> schema">
+<schema>
 element xa-log-service {
   enable?
 }
-</def>
+</schema>
 </defun>
 
 

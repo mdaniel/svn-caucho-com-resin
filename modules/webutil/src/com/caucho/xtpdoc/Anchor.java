@@ -66,69 +66,81 @@ public class Anchor extends FormattedText {
     }
   }
 
+  private void writeConfigTagHtml(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    ReferenceDocument referenceDocument 
+      = getDocument().getReferenceDocument();
+
+    if (referenceDocument != null) {
+      out.writeStartElement("a");
+      out.writeAttribute("href", referenceDocument.getURI() 
+                                 + '#' + _configTag);
+
+      if (getDocument().isJavascriptEnabled()) {
+        out.writeAttribute("onmouseover", 
+                           "popup.mouseOverHandler(this, "
+                                                + "'" + _configTag + "')");
+        out.writeAttribute("onmouseout", "popup.mouseOutHandler()");
+      }
+    }
+
+    setDefaultText(_configTag);
+    super.writeHtml(out);
+
+    if (referenceDocument != null)
+      out.writeEndElement(); // a
+  }
+
+  private void writeJavadocHtml(XMLStreamWriter out)
+    throws XMLStreamException
+  {
+    String name = _href.substring("javadoc|".length());
+
+    // XXX: method name is just stripped here
+    int i = name.indexOf('|');
+
+    while (i >= 0) {
+      if (i == 0)
+        name = name.substring(1);
+      else if (i > 0)
+        name = name.substring(0, i);
+
+      i = name.indexOf('|');
+    }
+
+    setDefaultText(name);
+
+    name = name.replace('.', '/') + ".html";
+
+    out.writeAttribute("href", "http://www.caucho.com/resin-javadoc/" + name);
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
     if (_configTag != null) {
-      ReferenceDocument referenceDocument 
-        = getDocument().getReferenceDocument();
+      writeConfigTagHtml(out);
+    }
+    else {
+      out.writeStartElement("a");
 
-      if (referenceDocument != null) {
-        out.writeStartElement("a");
-        out.writeAttribute("href", referenceDocument.getURI() 
-                                   + '#' + _configTag);
-
-        if (getDocument().isJavascriptEnabled()) {
-          out.writeAttribute("onmouseover", 
-                             "popup.mouseOverHandler(this, "
-                                                  + "'" + _configTag + "')");
-          out.writeAttribute("onmouseout", "popup.mouseOutHandler()");
-        }
+      if (_href.startsWith("javadoc|")) {
+        writeJavadocHtml(out);
       }
+      else if (_href.indexOf('|') >= 0) {
+        String href 
+          = getDocument().getContextPath() + '/' + _href.replace('|', '/');
 
-      setDefaultText(_configTag);
+        out.writeAttribute("href", href);
+      }
+      else
+        out.writeAttribute("href", _href);
+
       super.writeHtml(out);
 
-      if (referenceDocument != null)
-        out.writeEndElement(); // a
-
-      return;
+      out.writeEndElement();
     }
-
-    out.writeStartElement("a");
-
-    if (_href.startsWith("javadoc|")) {
-      String name = _href.substring("javadoc|".length());
-
-      // XXX: method name is just stripped here
-      int i = name.indexOf('|');
-
-      while (i >= 0) {
-        if (i == 0)
-          name = name.substring(1);
-        else if (i > 0)
-          name = name.substring(0, i);
-
-        i = name.indexOf('|');
-      }
-
-      setDefaultText(name);
-
-      name = name.replace('.', '/') + ".html";
-
-      out.writeAttribute("href", "http://www.caucho.com/resin-javadoc/" + name);
-    }
-    else if (_href.indexOf('|') >= 0) {
-      String href = getDocument().getContextPath() + '/' + _href.replace('|', '/');
-      
-      out.writeAttribute("href", href);
-    }
-    else
-      out.writeAttribute("href", _href);
-
-    super.writeHtml(out);
-
-    out.writeEndElement();
   }
 
   public void writeLaTeX(PrintWriter out)

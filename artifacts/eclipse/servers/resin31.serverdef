@@ -78,7 +78,7 @@
       -conf "${resin.configuration.file}"
     </programArguments>
     <vmParameters>
-      -Djava.library.path="${resin.home}/libexec:${resin.home}/libexec64"
+      -Djava.library.path="${resin.home}/libexec:${resin.home}/libexec64:;${resin.home}\win32;${resin.home}\win64"
       -Djava.util.logging.manager=com.caucho.log.LogManagerImpl 
       -Djava.system.class.loader=com.caucho.loader.SystemClassLoader
       -Djavax.management.builder.initial=com.caucho.jmx.MBeanServerBuilderImpl 

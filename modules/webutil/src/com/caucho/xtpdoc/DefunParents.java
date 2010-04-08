@@ -61,7 +61,7 @@ public class DefunParents extends ContainerNode implements Iterable<String> {
       addItem(anchor);
 
       if (i < parents.length - 1)
-        anchor.addItem(COMMA);
+        addItem(COMMA);
     }
   }
 

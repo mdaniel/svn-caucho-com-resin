@@ -2,6 +2,16 @@
   <header>
     <product>resin</product>
     <title>Resin 4.0.4 Release Notes</title>
+    <description>
+<ul>
+<li>Pass Servlet 3.0 TCK for  JavaEE 6 web profile</li>
+<li>com.caucho.resin.ResinBeanContainer for embedded Resin use</li>
+<li>com.caucho.junit.ResinJUnitRunner for embedded junit use</li>
+<li>Quercus support for PHP 5.3 Namespaces</li>
+<li>Quercus support for PHP 5.3 Closures</li>
+</ul>
+    </description>
+
   </header>
 
 <body>

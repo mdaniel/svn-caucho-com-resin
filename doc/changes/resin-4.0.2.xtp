@@ -2,6 +2,24 @@
   <header>
     <product>resin</product>
     <title>Resin 4.0.2 Release Notes</title>
+    <description>
+<ul>
+<li>CanDI updates to match changes to the JSR-299 and JSR-330 specifications.</li>
+<li>Servlet 3.0 early access updates</li>
+<li>Continued EJB Lite development</li>
+<li>Clustered/Cloud .war deployment enhancements,
+including staging, versioning, and ant/maven tasks.</li>
+<li>Regression (QA) cleanup and stress test work to bring Resin 4.0.2 up to
+a production level.</li>
+<li>WebSocket, HMTP and JMTP support.</li>
+<li>JMS clustered singleton queue and clustered topics</li>
+<li>/resin-admin support for REST-based management tools such as nagios.</li>
+<li>Enhanced /resin-admin monitoring to better illustrate the server status.</li>
+<li>HTTP Proxy and FastCGI load balancing with failover.</li>
+<li>Eclipse plugin enhancements.</li>
+</ul>
+
+    </description>
   </header>
 
 <body>

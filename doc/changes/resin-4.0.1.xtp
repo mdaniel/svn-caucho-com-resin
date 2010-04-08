@@ -2,6 +2,18 @@
   <header>
     <product>resin</product>
     <title>Resin 4.0.1 Release Notes</title>
+    <description>
+<ul>
+<li>CanDI major refactor to match major changes to the JSR-299
+specification.</li>
+<li>Servlet 3.0  early access implementation, including replacing Resin's
+experimental comet support with Servlet 3.0 async</li>
+<li>Quercus Pro support for other application servers, and increased
+support for Google App Engine.</li>
+<li>Stability and performance work for clustered caching and sessions</li>
+</ul>
+
+    </description>
   </header>
 
 <body>

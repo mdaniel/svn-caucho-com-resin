@@ -70,4 +70,9 @@ public class Text implements ContentItem {
   {
     writeLaTeX(out);
   }
+
+  public String toString()
+  {
+    return "Text[" + _text + "]";
+  }
 }

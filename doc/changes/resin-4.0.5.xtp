@@ -2,6 +2,17 @@
   <header>
     <product>resin</product>
     <title>Resin 4.0.5 Release Notes</title>
+    <description>
+<ul>
+<li>JSP for JavaEE 6 Web Profile passes TCK</li>
+<li>Hibernate second level cache</li>
+<li>@TransactionScoped</li>
+<li>Windows setup.exe/resin.exe refactor</li>
+<li>java.util.logging Handler integration with CDI</li>
+<li>distributed session store bugs</li>
+</ul>
+
+    </description>
   </header>
 
 <body>
