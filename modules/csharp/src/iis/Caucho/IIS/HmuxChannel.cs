@@ -206,7 +206,7 @@ namespace Caucho.IIS
          * RelayHeader("CERT_SUBJECT", clientCertificate.Subject);
          * RelayHeader("CERT_SERVER_ISSUER", clientCertificate.ServerIssuer);
          * RelayHeader("CERT_SERVER_SUBJECT", clientCertificate.ServerSubject);
-         */ 
+         */
       }
     }
 
@@ -220,17 +220,7 @@ namespace Caucho.IIS
 
     public void RelayRequestBody(HttpRequest request)
     {
-      int contentLength = request.ContentLength;
-      if (contentLength == 0)
-        return;
-
-      Trace.TraceInformation("Hmux[{0}] D-r:({1})", _traceId, contentLength);
-      Write((byte)HMUX_DATA);
-      WriteHmuxLength(contentLength);
-
-      if (_hmuxOutBuffer.Offset == _hmuxOutBuffer.Capacity) {
-        FlushBuffer();
-      }
+      FlushBuffer();
 
       int len;
       while ((len
@@ -239,6 +229,14 @@ namespace Caucho.IIS
         _hmuxOutBuffer.Offset,
         _hmuxOutBuffer.Capacity - _hmuxOutBuffer.Offset)) > 0) {
         _hmuxOutBuffer.Offset = _hmuxOutBuffer.Offset + len;
+        Trace.TraceInformation("Hmux[{0}] D-r:({1})", _traceId, _hmuxOutBuffer.Offset);
+
+        byte[] meta = new byte[3];
+        meta[0] = (byte)HMUX_DATA;
+        meta[1] = (byte)((_hmuxOutBuffer.Offset >> 8) & 0xff);
+        meta[2] = (byte)(_hmuxOutBuffer.Offset & 0xff);
+        SendHmux(meta, 0, 3);
+
         FlushBuffer();
       }
     }
