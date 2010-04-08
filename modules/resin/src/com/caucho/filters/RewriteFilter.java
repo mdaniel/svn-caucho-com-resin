@@ -89,32 +89,34 @@ public class RewriteFilter implements Filter
       Matcher matcher = pattern.matcher(url);
 
       if (! matcher.find(0))
-	continue;
+        continue;
 
       String replacement = replace(matcher, entry.getTarget());
 
       String query = req.getQueryString();
 
       if (query != null) {
-	if (replacement.indexOf('?') > 0)
-	  replacement = replacement + '&' + query;
-	else
-	  replacement = replacement + '?' + query;
+        if (replacement.indexOf('?') > 0)
+          replacement = replacement + '&' + query;
+        else
+          replacement = replacement + '?' + query;
       }
 
       if (log.isLoggable(Level.FINER))
-	log.finer(L.l("forwarding `{0}' to `{1}'",
-		      url, replacement));
+        log.finer(L.l("forwarding `{0}' to `{1}'",
+                      url, replacement));
 
       if (replacement.startsWith("/")) {
-	RequestDispatcher disp = _app.getRequestDispatcher(replacement);
-	disp.forward(request, response);
-	return;
+        RequestDispatcher disp = _app.getRequestDispatcher(replacement);
+
+        if (disp != null) {
+          disp.forward(request, response);
+          return;
+        }
       }
-      else {
-	res.sendRedirect(res.encodeRedirectURL(replacement));
-	return;
-      }
+
+      res.sendRedirect(res.encodeRedirectURL(replacement));
+      return;
     }
 
     nextFilter.doFilter(request, response);
@@ -133,7 +135,7 @@ public class RewriteFilter implements Filter
         ch = target.charAt(i + 1);
         if (ch >= '0' && ch <= '9') {
           int group = ch - '0';
-	  cb.append(matcher.group(group));
+          cb.append(matcher.group(group));
           i++;
         }
         else if (ch == '$') {
