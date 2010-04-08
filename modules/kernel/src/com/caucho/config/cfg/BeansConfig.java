@@ -31,7 +31,6 @@ package com.caucho.config.cfg;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.Bean;
@@ -46,17 +45,16 @@ import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 /**
  * Configuration for a classloader root containing webbeans
  */
+@Module
 public class BeansConfig {
   private static final L10N L = new L10N(BeansConfig.class);
-  private static final Logger log
-    = Logger.getLogger(BeansConfig.class.getName());
-
   private InjectManager _injectManager;
   private Path _root;
 
@@ -65,13 +63,13 @@ public class BeansConfig {
   private ArrayList<Class<?>> _deployList
     = new ArrayList<Class<?>>();
 
-  private ArrayList<Interceptor> _interceptorList;
+  private ArrayList<Interceptor<?>> _interceptorList;
 
-  private ArrayList<Class> _decoratorList
-    = new ArrayList<Class>();
+  private ArrayList<Class<?>> _decoratorList
+    = new ArrayList<Class<?>>();
 
-  private ArrayList<Class> _pendingClasses
-    = new ArrayList<Class>();
+  private ArrayList<Class<?>> _pendingClasses
+    = new ArrayList<Class<?>>();
 
   private boolean _isConfigured;
 
@@ -115,7 +113,7 @@ public class BeansConfig {
   /**
    * Adds a scanned class
    */
-  public void addScannedClass(Class cl)
+  public void addScannedClass(Class<?> cl)
   {
     _pendingClasses.add(cl);
   }
@@ -148,7 +146,7 @@ public class BeansConfig {
   /**
    * Adds a namespace bean
    */
-  public void addCustomBean(CustomBeanConfig bean)
+  public void addCustomBean(CustomBeanConfig<?> bean)
   {
   }
 
@@ -191,8 +189,8 @@ public class BeansConfig {
   @PostConstruct
   public void init()
   {
-    for (Class cl : _decoratorList) {
-      DecoratorBean decorator = new DecoratorBean(_injectManager, cl);
+    for (Class<?> cl : _decoratorList) {
+      DecoratorBean<?> decorator = new DecoratorBean(_injectManager, cl);
 
       _injectManager.addDecorator(decorator);
     }
@@ -212,11 +210,11 @@ public class BeansConfig {
 
     try {
       if (_pendingClasses.size() > 0) {
-        ArrayList<Class> pendingClasses
-          = new ArrayList<Class>(_pendingClasses);
+        ArrayList<Class<?>> pendingClasses
+          = new ArrayList<Class<?>>(_pendingClasses);
         _pendingClasses.clear();
 
-        for (Class cl : pendingClasses) {
+        for (Class<?> cl : pendingClasses) {
           /*
           if (injectManager.getWebComponent(cl) != null)
             continue;
@@ -239,7 +237,7 @@ public class BeansConfig {
 
           injectManager.addBean(bean);
 
-          for (Bean producerBean : bean.getProducerBeans()) {
+          for (Bean<?> producerBean : bean.getProducerBeans()) {
             injectManager.addBean(producerBean);
           }
 
@@ -251,17 +249,17 @@ public class BeansConfig {
     }
   }
 
-  public ScopeContext getScopeContext(Class cl)
+  public ScopeContext getScopeContext(Class<?> cl)
   {
     return _injectManager.getScopeContext(cl);
   }
 
-  public void addInterceptor(Class cl)
+  public <T> void addInterceptor(Class<T> cl)
   {
     if (_interceptorList == null)
-      _interceptorList = new ArrayList<Interceptor>();
+      _interceptorList = new ArrayList<Interceptor<?>>();
 
-    InterceptorBean bean = new InterceptorBean(_injectManager, cl);
+    InterceptorBean<T> bean = new InterceptorBean<T>(_injectManager, cl);
     bean.init();
 
     _interceptorList.add(bean);
@@ -277,14 +275,14 @@ public class BeansConfig {
   }
 
   public class Interceptors {
-    public void addClass(Class cl)
+    public void addClass(Class<?> cl)
     {
       addInterceptor(cl);
     }
 
     public void addCustomBean(CustomBeanConfig config)
     {
-      Class cl = config.getClassType();
+      Class<?> cl = config.getClassType();
 
       if (cl.isInterface())
         throw new ConfigException(L.l("'{0}' is not valid because <Interceptors> can only contain interceptor implementations",
@@ -299,21 +297,18 @@ public class BeansConfig {
   }
 
   public class Decorators {
-    private String _location;
-
     public void setConfigLocation(String location)
     {
-      _location = location;
     }
 
-    public void addClass(Class cl)
+    public void addClass(Class<?> cl)
     {
       _decoratorList.add(cl);
     }
 
     public void addCustomBean(CustomBeanConfig config)
     {
-      Class cl = config.getClassType();
+      Class<?> cl = config.getClassType();
 
       if (cl.isInterface())
         throw new ConfigException(L.l("'{0}' is not valid because <Decorators> can only contain decorator implementations",
@@ -331,16 +326,13 @@ public class BeansConfig {
   }
 
   public class DeployConfig {
-    private String _location;
-
     public void setConfigLocation(String location)
     {
-      _location = location;
     }
 
     public void addAnnotation(Annotation ann)
     {
-      Class cl = ann.annotationType();
+      Class<?> cl = ann.annotationType();
 
       /*
       if (! cl.isAnnotationPresent(DeploymentType.class))
@@ -353,12 +345,12 @@ public class BeansConfig {
   }
 
   public class AlternativesConfig {
-    public void addClass(Class cl)
+    public void addClass(Class<?> cl)
     {
       _deployList.add(cl);
     }
 
-    public void addStereotype(Class cl)
+    public void addStereotype(Class<?> cl)
     {
       _deployList.add(cl);
     }

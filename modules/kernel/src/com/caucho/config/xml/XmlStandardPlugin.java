@@ -99,13 +99,7 @@ public class XmlStandardPlugin implements Extension
 
     try {
       for (Path root : paths) {
-        configurePath(root.lookup("META-INF/beans.xml"));
-        configurePath(root.lookup("META-INF/resin-beans.xml"));
-
-        if (root.getFullPath().endsWith("WEB-INF/classes/")) {
-          configurePath(root.lookup("../beans.xml"));
-          configurePath(root.lookup("../resin-beans.xml"));
-        }
+        configureRoot(root);
       }
 
       for (int i = 0; i < _pendingBeans.size(); i++) {
@@ -122,6 +116,18 @@ public class XmlStandardPlugin implements Extension
         _configException = e;
 
       throw ConfigException.create(e);
+    }
+  }
+  
+  private void configureRoot(Path root)
+    throws IOException
+  {
+    configurePath(root.lookup("META-INF/beans.xml"));
+    configurePath(root.lookup("META-INF/resin-beans.xml"));
+
+    if (root.getFullPath().endsWith("WEB-INF/classes/")) {
+      configurePath(root.lookup("../beans.xml"));
+      configurePath(root.lookup("../resin-beans.xml"));
     }
   }
 

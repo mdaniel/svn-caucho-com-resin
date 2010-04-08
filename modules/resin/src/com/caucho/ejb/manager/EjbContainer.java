@@ -419,14 +419,14 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   }
 
   @Override
-  public ScanClass scanClass(String className, int modifiers)
+  public ScanClass scanClass(Path root, String className, int modifiers)
   {
     if (Modifier.isInterface(modifiers))
       return null;
     else if (Modifier.isAbstract(modifiers))
       return null;
     else
-      return ScanClassAllow.ALLOW;
+      return new EjbScanClass(root, className, this);
   }
 
   public boolean isScanMatchAnnotation(CharBuffer annotationName)
@@ -434,8 +434,9 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     if (annotationName.matches("javax.ejb.Stateless")) {
       return true;
     }
-    else if (annotationName.matches("javax.ejb.Stateful"))
+    else if (annotationName.matches("javax.ejb.Stateful")) {
       return true;
+    }
     else if (annotationName.matches("javax.ejb.MessageDriven")) {
       return true;
     }
@@ -449,6 +450,13 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   public void classMatchEvent(EnvironmentClassLoader loader,
                               Path root,
                               String className)
+  {
+    EjbRootConfig config = _configManager.createRootConfig(root);
+    config.addClassName(className);
+  }
+  
+  void addScanClass(Path root,
+                    String className)
   {
     EjbRootConfig config = _configManager.createRootConfig(root);
     config.addClassName(className);

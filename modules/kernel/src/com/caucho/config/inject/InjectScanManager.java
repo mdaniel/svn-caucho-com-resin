@@ -49,7 +49,6 @@ import com.caucho.vfs.Path;
 class InjectScanManager
   implements ScanListener
 {
-  private static final L10N L = new L10N(InjectScanManager.class);
   private static final Logger log
     = Logger.getLogger(InjectScanManager.class.getName());
   
@@ -63,6 +62,9 @@ class InjectScanManager
   
   private final ConcurrentHashMap<String,InjectScanClass> _scanClassMap
     = new ConcurrentHashMap<String,InjectScanClass>();
+  private boolean _isCustomExtension;
+  private ArrayList<InjectScanClass> _pendingScanClassList
+    = new ArrayList<InjectScanClass>();
 
   InjectScanManager(InjectManager injectManager)
   {
@@ -75,6 +77,57 @@ class InjectScanManager
   public InjectManager getInjectManager()
   {
     return _injectManager;
+  }
+
+  /**
+   * True if a custom extension exists.
+   */
+  public void setIsCustomExtension(boolean isCustomExtension)
+  {
+    _isCustomExtension = isCustomExtension;
+    
+    if (isCustomExtension) {
+      for (InjectScanClass scanClass : _scanClassMap.values()) {
+        scanClass.register();
+      }
+    }
+  }
+  
+  public boolean isCustomExtension()
+  {
+    return _isCustomExtension;
+  }
+  
+  public ArrayList<ScanRootContext> getPendingScanRootList()
+  {
+    ArrayList<ScanRootContext> contextList
+      = new ArrayList<ScanRootContext>(_pendingScanRootList);
+    
+    _pendingScanRootList.clear();
+    
+    return contextList;
+  }
+  
+
+  public void addDiscoveredClass(InjectScanClass injectScanClass)
+  {
+    if (! _pendingScanClassList.contains(injectScanClass))
+      _pendingScanClassList.add(injectScanClass);
+  }
+  
+  /**
+   * discovers pending beans.
+   */
+  public void discover()
+  {
+    ArrayList<InjectScanClass> pendingScanClassList
+      = new ArrayList<InjectScanClass>(_pendingScanClassList);
+    
+    _pendingScanClassList.clear();
+    
+    for (InjectScanClass scanClass : pendingScanClassList) {
+      getInjectManager().discoverBean(scanClass.getClassName());
+    }
   }
   
   //
@@ -121,7 +174,7 @@ class InjectScanManager
    * Checks if the class can be a simple class
    */
   @Override
-  public ScanClass scanClass(String className, int modifiers)
+  public ScanClass scanClass(Path root, String className, int modifiers)
   {
     // ioc/0j0k - package private allowed
     
@@ -129,8 +182,10 @@ class InjectScanManager
       return null;
     else if (Modifier.isPrivate(modifiers))
       return null;
-    else if (Modifier.isAbstract(modifiers))
-      return createScanClass(className);
+    else if (Modifier.isAbstract(modifiers)) {
+      // ioc/0j02 (decorator?)
+      return null;//createScanClass(className);
+    }
     else
       return createScanClass(className);
   }
@@ -170,5 +225,4 @@ class InjectScanManager
                               String className)
   {
   }
-
 }

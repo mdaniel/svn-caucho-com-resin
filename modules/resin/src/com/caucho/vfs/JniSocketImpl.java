@@ -328,9 +328,9 @@ public final class JniSocketImpl extends QSocket {
   public int read(byte []buffer, int offset, int length, long timeout)
     throws IOException
   {
-    long expires = timeout + Alarm.getCurrentTimeActual();
-
     synchronized (_readLock) {
+      long expires = timeout + Alarm.getCurrentTimeActual();
+
       int result = 0;
 
       do {

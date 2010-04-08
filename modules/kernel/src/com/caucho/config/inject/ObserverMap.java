@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import com.caucho.config.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.reflect.BaseType;
+import com.caucho.inject.Module;
 import com.caucho.util.*;
 
 import java.lang.annotation.*;
@@ -44,22 +45,23 @@ import javax.enterprise.inject.spi.ObserverMethod;
 /**
  * Matches bindings
  */
+@Module
 public class ObserverMap {
   private static final Logger log
     = Logger.getLogger(ObserverMap.class.getName());
   private static final L10N L = new L10N(ObserverMap.class);
 
-  private Class _type;
+  private Class<?> _type;
 
   private ArrayList<ObserverEntry> _observerList
     = new ArrayList<ObserverEntry>();
 
-  public ObserverMap(Class type)
+  public ObserverMap(Class<?> type)
   {
     _type = type;
   }
 
-  public void addObserver(ObserverMethod observer,
+  public void addObserver(ObserverMethod<?> observer,
                           BaseType type,
                           Annotation []bindings)
   {
@@ -129,6 +131,7 @@ public class ObserverMap {
     boolean isMatch(BaseType type, Annotation []bindings)
     {
       if (! _type.isAssignableFrom(type)) {
+        System.out.println("  NOTYPE: " + _type + " " + _type.getClass() + " " + type);
         return false;
       }
 

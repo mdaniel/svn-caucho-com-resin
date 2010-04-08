@@ -120,7 +120,6 @@ class InjectScanClass implements ScanClass
       
       if (_registerAnnotationSet.contains(annType)) {
         _isRegisterRequired = true;
-        System.out.println("ANN: " + annType);
       }
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
@@ -144,7 +143,7 @@ class InjectScanClass implements ScanClass
   @Override
   public void finishScan()
   {
-    if (_isRegisterRequired) {
+    if (_isRegisterRequired || _scanManager.isCustomExtension()) {
       register();
     }
   }  
@@ -170,7 +169,7 @@ class InjectScanClass implements ScanClass
     if (! _isRegistered) {
       _isRegistered = true;
 
-      _scanManager.getInjectManager().discoverBean(_className);
+      _scanManager.addDiscoveredClass(this);
     }
     
     if (_children != null) {

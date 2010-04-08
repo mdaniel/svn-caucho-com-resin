@@ -216,8 +216,8 @@ public class ScanManager {
   }
     
   abstract static class ScanByteCodeMatcher implements ByteCodeClassMatcher {
-    private final EnvironmentClassLoader _loader;
-    private final Path _root;
+    private Path _root;
+    
     private final ScanListener []_listeners;
     private final ScanListener []_currentListeners;
     private final ScanClass []_currentClasses;
@@ -226,7 +226,6 @@ public class ScanManager {
 			Path root,
 			ScanListener []listeners)
     {
-      _loader = loader;
       _root = root;
       
       _listeners = listeners;
@@ -256,7 +255,7 @@ public class ScanManager {
 	if (listener == null)
 	  continue;
 
-	ScanClass scanClass = listener.scanClass(className, modifiers);
+	ScanClass scanClass = listener.scanClass(_root, className, modifiers);
 	
 	if (scanClass != null) {
 	  activeCount++;

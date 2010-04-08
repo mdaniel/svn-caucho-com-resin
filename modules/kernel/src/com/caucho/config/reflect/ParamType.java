@@ -29,35 +29,27 @@
 
 package com.caucho.config.reflect;
 
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
+import com.caucho.inject.Module;
 
 /**
  * param type matching
  */
+@Module
 public class ParamType extends BaseType implements ParameterizedType
 {
-  private Class _type;
+  private Class<?> _type;
   private BaseType []_param;
   private Type []_actualArguments;
-  private HashMap _paramMap;
+  private HashMap<String,BaseType> _paramMap;
 
-  public ParamType(Class type,
+  public ParamType(Class<?> type,
 		   BaseType []param,
-		   HashMap paramMap)
+		   HashMap<String,BaseType> paramMap)
   {
     _type = type;
     _param = param;
@@ -69,7 +61,8 @@ public class ParamType extends BaseType implements ParameterizedType
     }
   }
   
-  public Class getRawClass()
+  @Override
+  public Class<?> getRawClass()
   {
     return _type;
   }
@@ -80,27 +73,31 @@ public class ParamType extends BaseType implements ParameterizedType
     return this;
   }
 
+  @Override
   public Type []getActualTypeArguments()
   {
     return _actualArguments;
   }
 
+  @Override
   public Type getOwnerType()
   {
     return null;
   }
   
+  @Override
   public BaseType []getParameters()
   {
     return _param;
   }
 
   @Override
-  public HashMap getParamMap()
+  public HashMap<String,BaseType> getParamMap()
   {
     return _paramMap;
   }
 
+  @Override
   public Type getRawType()
   {
     return _type;
@@ -129,7 +126,7 @@ public class ParamType extends BaseType implements ParameterizedType
   }
 
   @Override
-  public BaseType findClass(InjectManager manager, Class cl)
+  public BaseType findClass(InjectManager manager, Class<?> cl)
   {
     if (_type.equals(cl))
       return this;
@@ -143,7 +140,7 @@ public class ParamType extends BaseType implements ParameterizedType
 	return baseType;
     }
 
-    Class superclass = _type.getSuperclass();
+    Class<?> superclass = _type.getSuperclass();
 
     if (superclass == null)
       return null;
@@ -153,6 +150,7 @@ public class ParamType extends BaseType implements ParameterizedType
     return superType.findClass(manager, cl);
   }
   
+  @Override
   public boolean isMatch(Type type)
   {
     if (! (type instanceof ParameterizedType))

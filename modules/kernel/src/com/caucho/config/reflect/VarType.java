@@ -29,24 +29,16 @@
 
 package com.caucho.config.reflect;
 
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
+import java.lang.reflect.GenericDeclaration;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
+import com.caucho.inject.Module;
 
 /**
  * class type matching
  */
+@Module
 public class VarType<D extends GenericDeclaration> extends BaseType
   implements TypeVariable<D>
 {
@@ -59,21 +51,25 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     _bounds = bounds;
   }
 
+  @Override
   public String getName()
   {
     return _name;
   }
 
+  @Override
   public D getGenericDeclaration()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public boolean isWildcard()
   {
     return true;
   }
 
+  @Override
   public Type []getBounds()
   {
     Type []bounds = new Type[_bounds.length];
@@ -85,7 +81,8 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     return bounds;
   }
   
-  public Class getRawClass()
+  @Override
+  public Class<?> getRawClass()
   {
     return Object.class; // technically bounds
   }
@@ -95,11 +92,13 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     return null;
   }
 
+  @Override
   public Type toType()
   {
     return this;
   }
 
+  @Override
   public boolean isAssignableFrom(BaseType type)
   {
     if (type.isWildcard())
@@ -113,26 +112,29 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     return true;
   }
   
+  @Override
   public boolean isMatch(Type type)
   {
-    if (type instanceof TypeVariable) {
+    if (type instanceof TypeVariable<?>) {
       return true;
     }
     else
       return false;
   }
 
+  @Override
   public int hashCode()
   {
     return 17 + 37 * _name.hashCode();
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == this)
       return true;
-    else if (o instanceof TypeVariable) {
-      TypeVariable var = (TypeVariable) o;
+    else if (o instanceof TypeVariable<?>) {
+      // TypeVariable<?> var = (TypeVariable<?>) o;
 
       return true;
     }

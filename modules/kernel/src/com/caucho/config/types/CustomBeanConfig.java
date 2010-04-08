@@ -67,7 +67,7 @@ import org.w3c.dom.Node;
 /**
  * Custom bean configured by namespace
  */
-public class CustomBeanConfig {
+public class CustomBeanConfig<T> {
   private static final Logger log
     = Logger.getLogger(CustomBeanConfig.class.getName());
 
@@ -78,10 +78,10 @@ public class CustomBeanConfig {
 
   private InjectManager _beanManager;
 
-  private Class _class;
-  private AnnotatedTypeImpl<?> _annotatedType;
-  private Bean _bean;
-  private ConfigType _configType;
+  private Class<T> _class;
+  private AnnotatedTypeImpl<T> _annotatedType;
+  private Bean<T> _bean;
+  private ConfigType<T> _configType;
 
   private ArrayList<ConfigProgram> _args;
 
@@ -95,7 +95,7 @@ public class CustomBeanConfig {
   private boolean _hasInterceptorBindings;
   private boolean _hasDeployment;
 
-  public CustomBeanConfig(QName name, Class cl)
+  public CustomBeanConfig(QName name, Class<T> cl)
   {
     _name = name;
 
@@ -107,7 +107,7 @@ public class CustomBeanConfig {
       // XXX:
       // _component = new SimpleBean(cl);
       // _component.setScopeClass(Dependent.class);
-      _annotatedType = new AnnotatedTypeImpl(cl, cl);
+      _annotatedType = new AnnotatedTypeImpl<T>(cl, cl);
     }
 
     _configType = TypeFactory.getCustomBeanType(cl);
@@ -119,19 +119,19 @@ public class CustomBeanConfig {
     for (AnnotatedMethod<?> method : _annotatedType.getMethods()) {
       // ioc/0614
 
-      AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) method;
+      AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) method;
 
       if (methodImpl.isAnnotationPresent(Produces.class))
         methodImpl.addAnnotation(ConfiguredLiteral.create());
     }
   }
 
-  public ConfigType getConfigType()
+  public ConfigType<T> getConfigType()
   {
     return _configType;
   }
 
-  public Class getClassType()
+  public Class<T> getClassType()
   {
     return _class;
   }
@@ -206,12 +206,12 @@ public class CustomBeanConfig {
       return;
     }
 
-    Class cl = createClass(name);
+    Class<?> cl = createClass(name);
 
     if (cl == null) {
     }
     else if (Annotation.class.isAssignableFrom(cl)) {
-      ConfigType type = TypeFactory.getType(cl);
+      ConfigType<?> type = TypeFactory.getType(cl);
 
       Object bean = type.create(null, name);
 
@@ -358,18 +358,7 @@ public class CustomBeanConfig {
     }
   }
 
-  private Annotation getAnnotation(AnnotatedTypeImpl beanType,
-                                   Class<? extends Annotation> annType)
-  {
-    for (Annotation ann : beanType.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(annType))
-        return ann;
-    }
-
-    return null;
-  }
-
-  private Class createClass(QName name)
+  private Class<?> createClass(QName name)
   {
     String uri = name.getNamespaceURI();
     String localName = name.getLocalName();
@@ -386,11 +375,11 @@ public class CustomBeanConfig {
     return TypeFactory.loadClass(pkg, name.getLocalName());
   }
 
-  private Class createResinClass(String name)
+  private Class<?> createResinClass(String name)
   {
     ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-    Class cl = TypeFactory.loadClass("ee", name);
+    Class<?> cl = TypeFactory.loadClass("ee", name);
 
     if (cl != null)
       return cl;
@@ -423,15 +412,15 @@ public class CustomBeanConfig {
 
     beanManager.addConfiguredClass(_annotatedType.getJavaClass().getName());
 
-    ManagedBeanImpl<?> managedBean = beanManager.createManagedBean(_annotatedType);
+    ManagedBeanImpl<T> managedBean = beanManager.createManagedBean(_annotatedType);
 
-    Arg []newProgram = null;
-    Constructor javaCtor = null;
+    Arg<?> []newProgram = null;
+    Constructor<?> javaCtor = null;
 
     if (_args != null) {
-      AnnotatedConstructor ctor = null;
+      AnnotatedConstructor<T> ctor = null;
 
-      for (AnnotatedConstructor<?> testCtor
+      for (AnnotatedConstructor<T> testCtor
              : managedBean.getAnnotatedType().getConstructors()) {
         if (testCtor.getParameters().size() == _args.size())
           ctor = testCtor;
@@ -448,7 +437,8 @@ public class CustomBeanConfig {
       newProgram = new Arg[newList.size()];
 
       Type []genericParam = javaCtor.getGenericParameterTypes();
-      List<AnnotatedParameter> parameters = ctor.getParameters();
+      List<AnnotatedParameter<T>> parameters
+        = (List<AnnotatedParameter<T>>) ctor.getParameters();
       String loc = null;
 
       for (int i = 0; i < _args.size(); i++) {

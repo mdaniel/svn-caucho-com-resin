@@ -29,90 +29,149 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.annotation.StartupType;
-import com.caucho.config.el.WebBeansContextResolver;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.BeanArg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.program.FieldEventProgram;
-import com.caucho.config.reflect.BaseType;
-import com.caucho.config.scope.*;
-import com.caucho.lifecycle.Lifecycle;
-import com.caucho.loader.*;
-import com.caucho.loader.enhancer.*;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
-import com.caucho.server.util.*;
-import com.caucho.config.*;
-import com.caucho.config.cfg.*;
-import com.caucho.config.event.*;
-
-import java.io.*;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.lang.ref.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.*;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.logging.*;
+import java.util.ArrayList;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
-import javax.decorator.Delegate;
-import javax.el.*;
-import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
-import javax.enterprise.context.ContextNotActiveException;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.Conversation;
-import javax.enterprise.context.ConversationScoped;
-import javax.enterprise.context.NormalScope;
-import javax.enterprise.context.spi.Context;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.*;
-import javax.enterprise.inject.spi.*;
-import javax.inject.Inject;
-import javax.inject.Qualifier;
-import javax.inject.Scope;
-import javax.naming.*;
+import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.spi.Extension;
+
+import com.caucho.config.program.BeanArg;
+import com.caucho.config.reflect.BaseType;
+import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
+import com.caucho.vfs.ReadStream;
+import com.caucho.vfs.Vfs;
 
 /**
- * The web beans container for a given environment.
+ * Manages custom extensions for the inject manager.
  */
-public class ExtensionManager
+class ExtensionManager
 {
   private static final L10N L = new L10N(ExtensionManager.class);
   private static final Logger log
     = Logger.getLogger(ExtensionManager.class.getName());
+  
+  private final InjectManager _injectManager;
 
-  private static final EnvironmentLocal<ExtensionManager> _localExtension
-    = new EnvironmentLocal<ExtensionManager>();
-
+  private HashSet<URL> _extensionSet = new HashSet<URL>();
+  
   private HashMap<Class<?>,ExtensionItem> _extensionMap
     = new HashMap<Class<?>,ExtensionItem>();
+  
+  private boolean _isCustomExtension;
 
-  private ExtensionManager()
+  ExtensionManager(InjectManager injectManager)
   {
+    _injectManager = injectManager;
+  }
+  
+  boolean isCustomExtension()
+  {
+    return _isCustomExtension;
   }
 
-  public static void addExtension(InjectManager inject, Extension ext)
+  void updateExtensions()
   {
-    ExtensionManager extManager;
+    try {
+      ClassLoader loader = _injectManager.getClassLoader();
 
-    synchronized (_localExtension) {
-      ClassLoader loader = ext.getClass().getClassLoader();
+      if (loader == null)
+        return;
 
-      extManager = _localExtension.get(loader);
+      Enumeration<URL> e = loader.getResources("META-INF/services/" + Extension.class.getName());
 
-      if (extManager == null) {
-        extManager = new ExtensionManager();
-        _localExtension.set(extManager, loader);
+      while (e.hasMoreElements()) {
+        URL url = (URL) e.nextElement();
+
+        if (_extensionSet.contains(url))
+          continue;
+
+        _extensionSet.add(url);
+
+        InputStream is = null;
+        try {
+          is = url.openStream();
+          ReadStream in = Vfs.openRead(is);
+
+          String line;
+
+          while ((line = in.readLine()) != null) {
+            int p = line.indexOf('#');
+            if (p >= 0)
+              line = line.substring(0, p);
+            line = line.trim();
+
+            if (line.length() > 0) {
+              loadExtension(line);
+            }
+          }
+
+          in.close();
+        } catch (IOException e1) {
+          log.log(Level.WARNING, e1.toString(), e1);
+        } finally {
+          IoUtil.close(is);
+        }
       }
+    } catch (IOException e) {
+      log.log(Level.WARNING, e.toString(), e);
     }
+  }
 
-    ExtensionItem item = extManager.introspect(ext.getClass());
+  void createExtension(String className)
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      Class<?> cl = Class.forName(className, false, loader);
+      Constructor<?> ctor= cl.getConstructor(new Class[] { InjectManager.class });
+
+      Extension extension = (Extension) ctor.newInstance(this);
+
+      addExtension(extension);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+    }
+  }
+
+  void loadExtension(String className)
+  {
+    _injectManager.getScanManager().setIsCustomExtension(true);
+//    _isCustomExtension = true;
+    
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      Class<?> cl = Class.forName(className, false, loader);
+
+      if (! Extension.class.isAssignableFrom(cl))
+        throw new InjectionException(L.l("'{0}' is not a valid extension because it does not implement {1}",
+                                         cl, Extension.class.getName()));
+
+      Extension extension = (Extension) cl.newInstance();
+
+      addExtension(extension);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
+  }
+
+  void addExtension(Extension ext)
+  {
+    ExtensionItem item = introspect(ext.getClass());
 
     for (ExtensionMethod method : item.getExtensionMethods()) {
       ExtensionObserver observer;
@@ -120,9 +179,9 @@ public class ExtensionManager
                                        method.getMethod(),
                                        method.getArgs());
 
-      inject.addExtensionObserver(observer,
-                                  method.getBaseType(),
-                                  method.getQualifiers());
+      _injectManager.addExtensionObserver(observer,
+                                          method.getBaseType(),
+                                          method.getQualifiers());
     }
   }
 
@@ -138,16 +197,12 @@ public class ExtensionManager
     return item;
   }
 
-  static class ExtensionItem {
-    private final Class<?> _cl;
-
+  class ExtensionItem {
     private ArrayList<ExtensionMethod> _observers
       = new ArrayList<ExtensionMethod>();
 
     ExtensionItem(Class<?> cl)
     {
-      _cl = cl;
-
       for (Method method : cl.getDeclaredMethods()) {
         ExtensionMethod extMethod = bindObserver(cl, method);
 
@@ -161,7 +216,7 @@ public class ExtensionManager
       return _observers;
     }
 
-    private ExtensionMethod bindObserver(Class cl, Method method)
+    private ExtensionMethod bindObserver(Class<?> cl, Method method)
     {
       Type []param = method.getGenericParameterTypes();
 
@@ -173,9 +228,9 @@ public class ExtensionManager
       if (! hasObserver(paramAnn))
         return null;
 
-      InjectManager inject = InjectManager.create();
+      InjectManager inject = _injectManager;
 
-      BeanArg []args = new BeanArg[param.length];
+      BeanArg<?> []args = new BeanArg[param.length];
 
       for (int i = 1; i < param.length; i++) {
         Annotation []bindings = inject.getQualifiers(paramAnn[i]);
@@ -210,12 +265,12 @@ public class ExtensionManager
     private final Method _method;
     private final BaseType _type;
     private final Annotation []_qualifiers;
-    private final BeanArg []_args;
+    private final BeanArg<?> []_args;
 
     ExtensionMethod(Method method,
                     BaseType type,
                     Annotation []qualifiers,
-                    BeanArg []args)
+                    BeanArg<?> []args)
     {
       _method = method;
       _type = type;
@@ -228,7 +283,7 @@ public class ExtensionManager
       return _method;
     }
 
-    public BeanArg []getArgs()
+    public BeanArg<?> []getArgs()
     {
       return _args;
     }
@@ -247,11 +302,11 @@ public class ExtensionManager
   static class ExtensionObserver extends AbstractObserverMethod<Object> {
     private Extension _extension;
     private Method _method;
-    private BeanArg []_args;
+    private BeanArg<?> []_args;
 
     ExtensionObserver(Extension extension,
                       Method method,
-                      BeanArg []args)
+                      BeanArg<?> []args)
     {
       _extension = extension;
       _method = method;

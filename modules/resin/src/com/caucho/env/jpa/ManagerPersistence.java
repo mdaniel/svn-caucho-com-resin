@@ -541,7 +541,7 @@ public class ManagerPersistence
   }
 
   @Override
-  public ScanClass scanClass(String className, int modifiers)
+  public ScanClass scanClass(Path root, String className, int modifiers)
   {
     return null;
   }

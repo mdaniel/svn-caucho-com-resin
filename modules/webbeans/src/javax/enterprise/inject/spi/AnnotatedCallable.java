@@ -29,9 +29,6 @@
 
 package javax.enterprise.inject.spi;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-import java.lang.reflect.Member;
 import java.util.List;
 
 /**

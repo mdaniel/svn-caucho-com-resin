@@ -4103,7 +4103,8 @@ public class WebApp extends ServletContextImpl
     return true;
   }
 
-  public ScanClass scanClass(String name, int modifiers)
+  @Override
+  public ScanClass scanClass(Path root, String name, int modifiers)
   {
     return null;
   }

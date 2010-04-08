@@ -35,12 +35,15 @@ import java.io.OutputStream;
 import java.net.Socket;
 import java.util.logging.*;
 
+import com.caucho.inject.Module;
+
 /**
  * Specialized stream to handle sockets.
  *
  * <p>Unlike VfsStream, when the read() throws and IOException or
  * a SocketException, SocketStream will throw a ClientDisconnectException.
  */
+@Module
 public class SocketStream extends StreamImpl {
   private static final Logger log
     = Logger.getLogger(SocketStream.class.getName());
@@ -116,6 +119,7 @@ public class SocketStream extends StreamImpl {
     _newline = newline;
   }
 
+  @Override
   public byte []getNewline()
   {
     return _newline;
@@ -124,6 +128,7 @@ public class SocketStream extends StreamImpl {
   /**
    * Returns true if stream is readable and bytes can be skipped.
    */
+  @Override
   public boolean hasSkip()
   {
     return canRead();
@@ -136,6 +141,7 @@ public class SocketStream extends StreamImpl {
    *
    * @return the actual bytes skipped.
    */
+  @Override
   public long skip(long n)
     throws IOException
   {
@@ -152,6 +158,7 @@ public class SocketStream extends StreamImpl {
   /**
    * Returns true since the socket stream can be read.
    */
+  @Override
   public boolean canRead()
   {
     return _is != null || _s != null;
@@ -166,6 +173,7 @@ public class SocketStream extends StreamImpl {
    * @return number of bytes read or -1
    * @exception throws ClientDisconnectException if the connection is dropped
    */
+  @Override
   public int read(byte []buf, int offset, int length) throws IOException
   {
     try {
@@ -214,6 +222,7 @@ public class SocketStream extends StreamImpl {
    * @return number of bytes read or -1
    * @exception throws ClientDisconnectException if the connection is dropped
    */
+  @Override
   public int readTimeout(byte []buf, int offset, int length, long timeout)
     throws IOException
   {
@@ -238,6 +247,7 @@ public class SocketStream extends StreamImpl {
   /**
    * Returns the number of bytes available to be read from the input stream.
    */
+  @Override
   public int getAvailable() throws IOException
   {
     if (_is == null) {
@@ -250,6 +260,7 @@ public class SocketStream extends StreamImpl {
     return _is.available();
   }
 
+  @Override
   public boolean canWrite()
   {
     return _os != null || _s != null;
@@ -265,6 +276,7 @@ public class SocketStream extends StreamImpl {
    *
    * @exception throws ClientDisconnectException if the connection is dropped
    */
+  @Override
   public void write(byte []buf, int offset, int length, boolean isEnd)
     throws IOException
   {
@@ -292,6 +304,7 @@ public class SocketStream extends StreamImpl {
   /**
    * Flushes the socket.
    */
+  @Override
   public void flush() throws IOException
   {
     if (_os == null || ! _needsFlush)
@@ -329,6 +342,7 @@ public class SocketStream extends StreamImpl {
   /**
    * Closes the write half of the stream.
    */
+  @Override
   public void closeWrite() throws IOException
   {
     OutputStream os = _os;
@@ -352,6 +366,7 @@ public class SocketStream extends StreamImpl {
   /**
    * Closes the underlying sockets and socket streams.
    */
+  @Override
   public void close() throws IOException
   {
     Socket s = _s;
@@ -375,6 +390,7 @@ public class SocketStream extends StreamImpl {
     }
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _s + "]";

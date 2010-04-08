@@ -1048,7 +1048,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   }
 
   @Override
-  public ScanClass scanClass(String className, int modifiers)
+  public ScanClass scanClass(Path root, String className, int modifiers)
   {
     if (Modifier.isInterface(modifiers))
       return null;

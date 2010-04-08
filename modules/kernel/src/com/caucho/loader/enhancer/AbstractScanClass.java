@@ -30,48 +30,64 @@
 package com.caucho.loader.enhancer;
 
 import com.caucho.inject.Module;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.Path;
 
 /**
- * Interface for a scan manager
+ * Interface for a scanned class.
  */
 @Module
-public interface ScanListener {
+public class AbstractScanClass implements ScanClass {
   /**
-   * Returns the listener's priority.
-   *
-   *  0 is an enhancer like Amber
-   *  1 is an extender like CanDI
-   *  2 is an extender like WebApp 3.0
+   * Adds the superclass information to the scan class.
    */
-  public int getScanPriority();
-  
-  /**
-   * Called to check if the archive should be scan.
-   */
-  public boolean isRootScannable(Path root);
+  @Override
+  public void addSuperClass(char[] buffer, int offset, int length)
+  {
+  }
 
   /**
-   * Returns the state when scanning the class
-   *
-   * @param name the class name
-   * @param modifiers the class modifiers
-   *
-   * @return the ScanClass object
+   * Adds interface information to the scan class.
    */
-  public ScanClass scanClass(Path root, String name, int modifiers);
+  @Override
+  public void addInterface(char[] buffer, int offset, int length)
+  {
+  }
   
   /**
-   * Returns true if the string matches an annotation class.
+   * Adds a class annotation
    */
-  public boolean isScanMatchAnnotation(CharBuffer string);
+  @Override
+  public void addClassAnnotation(char [] buffer, int offset, int length)
+  {
+  }
   
   /**
-   * Callback to note the class matches
+   * Adds a pool string of the form "L...;" to test for annotations.
    */
-  public void classMatchEvent(EnvironmentClassLoader loader,
-			      Path root,
-			      String className);
+  @Override
+  public void addPoolString(char []buffer, int offset, int length)
+  {
+  }
+
+  /**
+   * Complete scan processing.
+   */
+  @Override
+  public void finishScan()
+  {
+  }
+  
+  protected final boolean isMatch(char []bufferA, int offset, int length,
+                                  char []bufferB)
+  {
+    if (length != bufferB.length)
+      return false;
+    
+    for (length--; length >= 0; length--) {
+      if (bufferA[offset + length] != bufferB[length])
+        return false;
+    }
+    
+    return true;
+  }
+  
 }
