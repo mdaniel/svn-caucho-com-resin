@@ -1717,6 +1717,14 @@ public class DynamicClassLoader extends java.net.URLClassLoader
     return cl;
   }
 
+  public Class<?> loadClass(String className, byte []bytecode)
+  {
+    Class<?> cl = defineClass(className,
+                              bytecode, 0, bytecode.length);
+
+    return cl;
+  }
+
   /**
    * Gets the named resource
    *

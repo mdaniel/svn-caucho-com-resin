@@ -54,15 +54,15 @@ public class InterceptorEntry<X> {
 
   private Interceptor<X> _interceptor;
   
-  private ArrayList<Binding> _bindings
-    = new ArrayList<Binding>();
+  private ArrayList<QualifierBinding> _bindings
+    = new ArrayList<QualifierBinding>();
 
   public InterceptorEntry(Interceptor<X> interceptor)
   {
     _interceptor = interceptor;
 
     for (Annotation ann : interceptor.getInterceptorBindings()) {
-      _bindings.add(new Binding(ann));
+      _bindings.add(new QualifierBinding(ann));
     }
 
     /*
@@ -78,7 +78,7 @@ public class InterceptorEntry<X> {
 
   public boolean isMatch(Annotation []bindingAnn)
   {
-    for (Binding binding : _bindings) {
+    for (QualifierBinding binding : _bindings) {
       if (! isMatch(binding, bindingAnn)) {
 	return false;
       }
@@ -87,7 +87,7 @@ public class InterceptorEntry<X> {
     return true;
   }
 
-  public boolean isMatch(Binding binding, Annotation []bindingAnn)
+  public boolean isMatch(QualifierBinding binding, Annotation []bindingAnn)
   {
     for (Annotation ann : bindingAnn) {
       if (binding.isMatch(ann))

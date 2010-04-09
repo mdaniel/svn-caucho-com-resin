@@ -48,9 +48,29 @@ public class ProxyClassLoader extends DynamicClassLoader {
 
   public Class<?> loadClass(String className, byte []bytecode)
   {
+    /*
+    int p = className.lastIndexOf('.');
+    String packageName = null;
+    
+    if (p > 0)
+      packageName = className.substring(0, p);
+
+    Package pkg = getPackage(packageName);
+
+    if (pkg == null) {
+      definePackage(packageName,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null);
+    }
+    */
+    
     Class<?> cl = defineClass(className,
-                              bytecode, 0, bytecode.length,
-                              (java.security.CodeSource) null);
+                              bytecode, 0, bytecode.length);
 
     return cl;
   }

@@ -103,7 +103,7 @@ public class AnnotatedConstructorImpl<T>
     
     for (int i = 0; i < paramTypes.length; i++) {
       AnnotatedParameterImpl<T> param
-	= new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i]);
+	= new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i], i);
 	
       _parameterList.add(param);
     }

@@ -239,6 +239,9 @@ public class InjectManager
 
   private HashMap<Type,Bean<?>> _newBeanMap
     = new HashMap<Type,Bean<?>>();
+  
+  private HashSet<Class<? extends Annotation>> _qualifierSet
+    = new HashSet<Class<? extends Annotation>>();
 
   private HashMap<Class<?>,Context> _contextMap
     = new HashMap<Class<?>,Context>();
@@ -774,9 +777,10 @@ public class InjectManager
   @Override
   public boolean isQualifier(Class<? extends Annotation> annotationType)
   {
-    return annotationType.isAnnotationPresent(Qualifier.class);
+    return (annotationType.isAnnotationPresent(Qualifier.class)
+            || _qualifierSet.contains(annotationType));
   }
-
+  
   /**
    * Tests if an annotation is an enabled interceptor binding type
    */
@@ -1532,8 +1536,8 @@ public class InjectManager
   {
     Bean<?> bean = resolveByInjectionPoint(ij);
 
-    if (bean instanceof ScopeAdapterBean) {
-      ScopeAdapterBean simpleBean = (ScopeAdapterBean) bean;
+    if (bean instanceof ScopeAdapterBean<?>) {
+      ScopeAdapterBean simpleBean = (ScopeAdapterBean<?>) bean;
 
       Object adapter = simpleBean.getScopeAdapter(bean, parentCxt);
 
@@ -1541,8 +1545,10 @@ public class InjectManager
         return adapter;
     }
 
-    CreationalContextImpl<?> parentEnv
-      = (CreationalContextImpl<?>) parentCxt;
+    CreationalContextImpl<?> parentEnv = null;
+    
+    if (parentCxt instanceof CreationalContextImpl<?>)
+      parentEnv = (CreationalContextImpl<?>) parentCxt;
 
     Object value = CreationalContextImpl.find(parentEnv, bean);
 
@@ -1550,7 +1556,7 @@ public class InjectManager
       return value;
 
     CreationalContext<?> cxt
-      = new CreationalContextImpl(bean, parentCxt, ij);
+      = new CreationalContextImpl(bean, parentEnv, ij);
 
     /*
     if (cxt instanceof ConfigContext) {
@@ -1970,6 +1976,12 @@ public class InjectManager
       = new HashSet<ObserverMethod<? super T>>();
 
     BaseType eventType = createBaseType(event.getClass());
+    
+    for (Annotation qualifier : qualifiers) {
+      if (! isQualifier(qualifier.annotationType()))
+        throw new IllegalArgumentException(L.l("{0} is not a valid qualifier because it is missing a @Qualifier annotation",
+                                               qualifier));
+    }
 
     for (ObserverMap map : getLocalObserverList(event.getClass())) {
       map.resolveObservers(set, eventType, qualifiers);
@@ -2918,8 +2930,10 @@ public class InjectManager
     public void addAnnotatedType(AnnotatedType<?> annType)
     {
     }
+    
     public void addQualifier(Class<? extends Annotation> qualifier)
     {
+      _qualifierSet.add(qualifier);
     }
 
     public void addScope(Class<? extends Annotation> scopeType,

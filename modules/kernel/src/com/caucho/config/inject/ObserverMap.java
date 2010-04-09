@@ -108,7 +108,7 @@ public class ObserverMap {
   static class ObserverEntry {
     private final ObserverMethod _observer;
     private final BaseType _type;
-    private final Binding []_bindings;
+    private final QualifierBinding []_bindings;
 
     ObserverEntry(ObserverMethod observer,
                   BaseType type,
@@ -117,9 +117,9 @@ public class ObserverMap {
       _observer = observer;
       _type = type;
 
-      _bindings = new Binding[bindings.length];
+      _bindings = new QualifierBinding[bindings.length];
       for (int i = 0; i < bindings.length; i++) {
-        _bindings[i] = new Binding(bindings[i]);
+        _bindings[i] = new QualifierBinding(bindings[i]);
       }
     }
 
@@ -138,7 +138,7 @@ public class ObserverMap {
       if (bindings.length < _bindings.length)
         return false;
 
-      for (Binding binding : _bindings) {
+      for (QualifierBinding binding : _bindings) {
         if (binding.isAny()) {
         }
         else if (! binding.isMatch(bindings)) {

@@ -35,45 +35,58 @@ import java.lang.reflect.Member;
 import java.util.Set;
 import java.util.HashSet;
 import javax.enterprise.inject.spi.*;
+import javax.inject.Named;
 import javax.inject.Qualifier;
 
 /**
  */
 public class InjectionPointImpl<T> implements InjectionPoint
 {
+  private final InjectManager _manager;
+  
   private final Bean<T> _bean;
   private final Annotated _annotated;
   private final Member _member;
   private final HashSet<Annotation> _bindings = new HashSet<Annotation>();
 
-  InjectionPointImpl(Bean<T> bean,
+  InjectionPointImpl(InjectManager manager,
+                     Bean<T> bean,
                      AnnotatedField<T> field)
   {
-    this(bean, field, field.getJavaMember());
+    this(manager, bean, field, field.getJavaMember());
   }
 
-  InjectionPointImpl(Bean<T> bean,
+  InjectionPointImpl(InjectManager manager,
+                     Bean<T> bean,
                      AnnotatedParameter<?> param)
   {
-    this(bean, param, param.getDeclaringCallable().getJavaMember());
+    this(manager, bean, param, param.getDeclaringCallable().getJavaMember());
   }
 
-  InjectionPointImpl(Bean<T> bean,
+  InjectionPointImpl(InjectManager manager,
+                     Bean<T> bean,
                      Annotated annotated,
                      Member member)
   {
+    _manager = manager;
     _bean = bean;
     _annotated = annotated;
     _member = member;
+    
+    boolean isQualifier = false;
 
     for (Annotation ann : annotated.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+      if (_manager.isQualifier(ann.annotationType())) {
         _bindings.add(ann);
+        
+        if (! Named.class.equals(ann.annotationType()))
+          isQualifier = true;
       }
     }
 
-    if (_bindings.size() == 0)
-      _bindings.add(CurrentLiteral.CURRENT);
+    if (! isQualifier) {
+      _bindings.add(DefaultLiteral.DEFAULT);
+    }
   }
 
   /**

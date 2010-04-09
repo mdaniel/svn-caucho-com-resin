@@ -46,10 +46,12 @@ public class AnnotatedParameterImpl<T>
   extends AnnotatedElementImpl implements AnnotatedParameter<T>
 {
   private AnnotatedCallable<T> _callable;
+  private int _position;
   
   public AnnotatedParameterImpl(AnnotatedCallable<T> callable,
 				Type type,
-				Annotation []annList)
+				Annotation []annList,
+				int position)
   {
     super(type, null, annList);
 
@@ -65,6 +67,6 @@ public class AnnotatedParameterImpl<T>
   @Override
   public int getPosition()
   {
-    return -1;
+    return _position;
   }
 }

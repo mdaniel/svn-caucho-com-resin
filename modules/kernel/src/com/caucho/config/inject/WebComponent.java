@@ -194,7 +194,7 @@ public class WebComponent {
   class BeanEntry implements Comparable<BeanEntry> {
     private Bean<?> _bean;
     private BaseType _type;
-    private Binding []_qualifiers;
+    private QualifierBinding []_qualifiers;
 
     BeanEntry(BaseType type, Bean<?> bean)
     {
@@ -204,11 +204,11 @@ public class WebComponent {
 
       Set<Annotation> qualifiers = bean.getQualifiers();
 
-      _qualifiers = new Binding[qualifiers.size()];
+      _qualifiers = new QualifierBinding[qualifiers.size()];
 
       int i = 0;
       for (Annotation qualifier : qualifiers) {
-        _qualifiers[i++] = new Binding(qualifier);
+        _qualifiers[i++] = new QualifierBinding(qualifier);
       }
     }
 
@@ -242,10 +242,13 @@ public class WebComponent {
     {
       for (Annotation arg : qualifierArgs) {
         if (! isMatch(arg)) {
+          // ioc/0270
+          /*
           if (! arg.annotationType().isAnnotationPresent(Qualifier.class)) {
             throw new ConfigException(L.l("'{0}' is an invalid binding annotation because it does not have a @Qualifier meta-annotation.",
                                           arg));
           }
+          */
 
           return false;
         }
@@ -259,7 +262,7 @@ public class WebComponent {
       if (arg.annotationType() == Any.class)
         return true;
 
-      for (Binding binding : _qualifiers) {
+      for (QualifierBinding binding : _qualifiers) {
         if (binding.isMatch(arg))
           return true;
       }

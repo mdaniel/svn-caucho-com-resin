@@ -680,7 +680,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       else if (hasQualifierAnnotation(field)) {
         // boolean isOptional = isQualifierOptional(field);
 
-        InjectionPoint ij = new InjectionPointImpl(this, field);
+        InjectionPoint ij = new InjectionPointImpl(getBeanManager(), this, field);
 
         _injectionPointSet.add(ij);
 
@@ -710,7 +710,8 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         InjectionPoint []args = new InjectionPoint[params.size()];
 
         for (int i = 0; i < args.length; i++) {
-          InjectionPoint ij = new InjectionPointImpl(this, params.get(i));
+          InjectionPoint ij
+            = new InjectionPointImpl(getBeanManager(), this, params.get(i));
 
           _injectionPointSet.add(ij);
 

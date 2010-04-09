@@ -29,31 +29,24 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.*;
-
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.Any;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.Nonbinding;
+
+import com.caucho.inject.Module;
 
 /**
  * Introspected annotation binding
  */
-public class Binding {
-  private static final Logger log = Logger.getLogger(Binding.class.getName());
-  private static final L10N L = new L10N(Binding.class);
-
-  private static final Class []NULL_ARG = new Class[0];
+@Module
+public class QualifierBinding {
+  private static final Logger log = Logger.getLogger(QualifierBinding.class.getName());
+  private static final Class<?> []NULL_ARG = new Class[0];
 
   private Annotation _ann;
   private Class<? extends Annotation> _annType;
@@ -61,7 +54,7 @@ public class Binding {
   private ArrayList<Method> _methodList
     = new ArrayList<Method>();
 
-  Binding(Annotation ann)
+  QualifierBinding(Annotation ann)
   {
     _ann = ann;
     _annType = ann.annotationType();
@@ -79,6 +72,8 @@ public class Binding {
         continue;
       else if (Annotation.class.equals(method.getDeclaringClass()))
         continue;
+      
+      method.setAccessible(true);
 
       _methodList.add(method);
     }

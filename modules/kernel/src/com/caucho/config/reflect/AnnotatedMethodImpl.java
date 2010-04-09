@@ -55,8 +55,7 @@ public class AnnotatedMethodImpl<T>
   
   private Method _method;
 
-  private ArrayList<AnnotatedParameter<T>> _parameterList
-    = new ArrayList<AnnotatedParameter<T>>();
+  private List<AnnotatedParameter<T>> _parameterList;
   
   public AnnotatedMethodImpl(Method method)
   {
@@ -71,8 +70,6 @@ public class AnnotatedMethodImpl<T>
 
     _declaringType = declaringType;
     _method = method;
-
-    introspect(method);
   }
 
   @Override
@@ -96,6 +93,9 @@ public class AnnotatedMethodImpl<T>
   @Override
   public List<AnnotatedParameter<T>> getParameters()
   {
+    if (_parameterList == null)
+      _parameterList = introspectParameters(_method);
+    
     return _parameterList;
   }
 
@@ -105,17 +105,22 @@ public class AnnotatedMethodImpl<T>
     return Modifier.isStatic(_method.getModifiers());
   }
 
-  private void introspect(Method method)
+  private List<AnnotatedParameter<T>> introspectParameters(Method method)
   {
+    ArrayList<AnnotatedParameter<T>> parameterList
+      = new ArrayList<AnnotatedParameter<T>>();
+    
     Type []paramTypes = method.getGenericParameterTypes();
     Annotation [][]annTypes = method.getParameterAnnotations();
     
     for (int i = 0; i < paramTypes.length; i++) {
       AnnotatedParameterImpl<T> param
-	= new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i]);
+	= new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i], i);
     
-      _parameterList.add(param);
+      parameterList.add(param);
     }
+    
+    return parameterList;
   }
 
   public static boolean isMatch(Method methodA, Method methodB)

@@ -85,13 +85,10 @@ public class ScopeAdapter {
     try {
       Constructor<?> zeroCtor = null;
 
-      for (Constructor<?> ctorItem : cl.getConstructors()) {
+      for (Constructor<?> ctorItem : cl.getDeclaredConstructors()) {
         if (ctorItem.getParameterTypes().length == 0) {
-          if (Modifier.isPublic(ctorItem.getModifiers())
-              || Modifier.isProtected(ctorItem.getModifiers())) {
-            zeroCtor = ctorItem;
-            break;
-          }
+          zeroCtor = ctorItem;
+          break;
         }
       }
 
@@ -99,6 +96,8 @@ public class ScopeAdapter {
         throw new ConfigException(L.l("'{0}' does not have a zero-arg public or protected constructor.  Scope adapter components need a zero-arg constructor, e.g. @RequestScoped stored in @ApplicationScoped.",
                                       cl.getName()));
       }
+      
+      zeroCtor.setAccessible(true);
 
       JavaClassLoader jLoader = new JavaClassLoader(cl.getClassLoader());
 
@@ -119,7 +118,7 @@ public class ScopeAdapter {
       else
         superClassName = "java/lang/Object";
       
-      String thisClassName = typeClassName + "$ScopeProxy";
+      String thisClassName = typeClassName + "__ResinScopeProxy";
 
       jClass.setSuperClass(superClassName);
       jClass.setThisClass(thisClassName);
@@ -185,9 +184,12 @@ public class ScopeAdapter {
       } catch (IOException e) {
       }
       */
-
+      
       String cleanName = thisClassName.replace('/', '.');
-      _proxyClass = new ProxyClassLoader(cl.getClassLoader()).loadClass(cleanName, buffer);
+      DynamicClassLoader loader = (DynamicClassLoader) Thread.currentThread().getContextClassLoader();
+      
+      // ioc/0517
+      _proxyClass = loader.loadClass(cleanName, buffer);
       _proxyCtor = _proxyClass.getConstructors()[0];
     } catch (RuntimeException e) {
       throw e;

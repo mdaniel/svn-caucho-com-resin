@@ -61,6 +61,22 @@ public abstract class AnnotationLiteral<T extends Annotation>
     else
       throw new UnsupportedOperationException(type.toString());
   }
+  
+  @Override
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (! (o instanceof Annotation))
+      return false;
+    
+    Annotation ann = (Annotation) o;
+    
+    if (annotationType() != ann.annotationType())
+      return false;
+    
+    return true;
+  }
 
   @Override
   public String toString()

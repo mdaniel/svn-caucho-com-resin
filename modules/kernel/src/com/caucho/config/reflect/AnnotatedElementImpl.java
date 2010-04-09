@@ -31,6 +31,7 @@ package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -44,13 +45,14 @@ import com.caucho.inject.Module;
 @Module
 public class AnnotatedElementImpl implements Annotated
 {
+  private static final Set<Annotation> NULL_ANN_SET
+    = Collections.unmodifiableSet(new LinkedHashSet<Annotation>());
+  
   private Type _type;
 
-  private LinkedHashSet<Type> _typeSet
-    = new LinkedHashSet<Type>();
+  private LinkedHashSet<Type> _typeSet;
 
-  private LinkedHashSet<Annotation> _annSet
-    = new LinkedHashSet<Annotation>();
+  private LinkedHashSet<Annotation> _annSet;
 
   protected AnnotatedElementImpl(Type type,
                                  Annotated annotated,
@@ -58,15 +60,19 @@ public class AnnotatedElementImpl implements Annotated
   {
     _type = type;
 
-    _typeSet.add(type);
-
     if (annList == null)
       annList = new Annotation[0];
 
     if (annotated != null) {
-      _annSet.addAll(annotated.getAnnotations());
+      Set<Annotation> annSet = annotated.getAnnotations();
+      
+      if (annSet != null && annSet.size() > 0) {
+        _annSet = new LinkedHashSet<Annotation>(annSet);
+      }
     }
-    else {
+    else if (annList != null && annList.length > 0) {
+      _annSet = new LinkedHashSet<Annotation>();
+      
       for (Annotation ann : annList) {
         _annSet.add(ann);
       }
@@ -87,11 +93,21 @@ public class AnnotatedElementImpl implements Annotated
   @Override
   public Set<Type> getTypeClosure()
   {
+    if (_typeSet == null) {
+      LinkedHashSet<Type> typeSet = new LinkedHashSet<Type>();
+      typeSet.add(_type);
+      
+      _typeSet = typeSet;
+    }
+
     return _typeSet;
   }
 
   public void addAnnotation(Annotation newAnn)
   {
+    if (_annSet == null)
+      _annSet = new LinkedHashSet<Annotation>();
+    
     for (Annotation oldAnn : _annSet) {
       if (newAnn.annotationType().equals(oldAnn.annotationType())) {
         _annSet.remove(oldAnn);
@@ -105,6 +121,9 @@ public class AnnotatedElementImpl implements Annotated
 
   public void removeAnnotation(Annotation ann)
   {
+    if (_annSet == null)
+      return;
+    
     for (Annotation oldAnn : _annSet) {
       if (ann.annotationType().equals(oldAnn.annotationType())) {
         _annSet.remove(oldAnn);
@@ -115,7 +134,7 @@ public class AnnotatedElementImpl implements Annotated
 
   public void clearAnnotations()
   {
-    _annSet.clear();
+    _annSet = null;
   }
 
   /**
@@ -124,18 +143,26 @@ public class AnnotatedElementImpl implements Annotated
   @Override
   public Set<Annotation> getAnnotations()
   {
-    return _annSet;
+    if (_annSet != null)
+      return _annSet;
+    else
+      return NULL_ANN_SET;
   }
 
   /**
    * Returns the matching annotation
    */
   @Override
+  @SuppressWarnings("unchecked")
   public <T extends Annotation> T getAnnotation(Class<T> annType)
   {
-    for (Annotation ann : getAnnotations()) {
-      if (annType.equals(ann.annotationType()))
+    if (_annSet == null)
+      return null;
+    
+    for (Annotation ann : _annSet) {
+      if (annType.equals(ann.annotationType())) {
         return (T) ann;
+      }
     }
 
     return null;
@@ -147,7 +174,10 @@ public class AnnotatedElementImpl implements Annotated
   @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annType)
   {
-    for (Annotation ann : getAnnotations()) {
+    if (_annSet == null)
+      return false;
+    
+    for (Annotation ann : _annSet) {
       if (annType.equals(ann.annotationType()))
         return true;
     }
