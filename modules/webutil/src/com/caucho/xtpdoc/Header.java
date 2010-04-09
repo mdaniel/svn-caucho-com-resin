@@ -170,9 +170,10 @@ public class Header {
 
     out.writeStartElement("script");
     out.writeAttribute("type", "text/javascript");
-    out.writeCharacters("  var popup = null;\n\n");
+
+    // this init() function is in default.js
     out.writeCharacters("  window.onload = function() {\n");
-    out.writeCharacters("    popup = new Popup();\n");
+    out.writeCharacters("    init();\n");
     out.writeCharacters("  };\n");
     out.writeEndElement(); // script
 

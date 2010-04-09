@@ -29,79 +29,81 @@
 
 package com.caucho.xtpdoc;
 
+import com.caucho.config.types.RawString;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.net.URI;
+import java.util.logging.Logger;
 
-public class DefunParents extends ContainerNode implements Iterable<String> {
-  private static final Text COMMA = new Text(",");
+public class DefunJavadoc implements ContentItem {
+  private static final Logger log 
+    = Logger.getLogger(DefunJavadoc.class.getName());
 
-  private final HashSet<String> _parents = new HashSet<String>();
+  private final Defun _defun;
+  private String _class;
 
-  public DefunParents(Document document)
+  public DefunJavadoc(Defun defun)
   {
-    super(document);
+    _defun = defun;
   }
 
-  public void setText(String text)
+  public void setClass(String cl)
   {
-    String []parents = text.split("[ ,]+");
-
-    for (int i = 0; i < parents.length; i++) {
-      String parent = parents[i];
-
-      _parents.add(parent);
-
-      Anchor anchor = new Anchor(getDocument());
-      anchor.setConfigTag(parent);
-
-      addItem(anchor);
-
-      if (i < parents.length - 1)
-        addItem(COMMA);
-    }
+    _class = cl;
   }
 
-  public Iterator<String> iterator()
+  private String getHref()
   {
-    return _parents.iterator();
+    String path = _class.replace('.', '/') + ".html";
+
+    return "http://www.caucho.com/resin-javadoc/" + path;
   }
 
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
     out.writeStartElement("div");
-    out.writeAttribute("class", "reference-parents");
+    out.writeAttribute("class", "javadoc");
 
     out.writeStartElement("span");
-    out.writeAttribute("class", "child-of");
-    out.writeCharacters("child of ");
+    out.writeAttribute("class", "javadoc");
+    out.writeCharacters("javadoc ");
     out.writeEndElement(); // span
-    
-    super.writeHtml(out);
 
+    out.writeStartElement("a");
+
+    out.writeAttribute("href", getHref());
+
+    out.writeCharacters(_defun.getTitle());
+
+    out.writeEndElement(); // a
     out.writeEndElement(); // div
-  }
-
-  public void writeLaTeXTop(PrintWriter out)
-    throws IOException
-  {
   }
 
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("child of ");
+    out.print("\\href{" + getHref() + "}");
 
-    super.writeLaTeX(out);
+    out.print("{");
+
+    out.print(_defun.getTitle());
+    out.print(" Javadoc");
+
+    out.print("}\\\n");
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
     writeLaTeX(out);
+  }
+
+  public void writeLaTeXTop(PrintWriter out)
+    throws IOException
+  {
   }
 }

@@ -49,6 +49,7 @@ public class ReferenceLegend implements ContentItem {
 
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
+    out.writeAttribute("id", "reference-description-checkbox");
     out.writeAttribute("checked", "true");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-description')");
@@ -57,6 +58,7 @@ public class ReferenceLegend implements ContentItem {
 
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
+    out.writeAttribute("id", "reference-schema-checkbox");
     out.writeAttribute("checked", "true");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-schema')");
@@ -65,6 +67,7 @@ public class ReferenceLegend implements ContentItem {
 
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
+    out.writeAttribute("id", "reference-attributes-checkbox");
     out.writeAttribute("checked", "true");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-attributes')");
@@ -73,6 +76,7 @@ public class ReferenceLegend implements ContentItem {
 
     out.writeStartElement("input");
     out.writeAttribute("type", "checkbox");
+    out.writeAttribute("id", "reference-example-checkbox");
     out.writeAttribute("checked", "true");
     out.writeAttribute("onchange", 
                        "toggleElementsByClass(this, 'reference-example')");

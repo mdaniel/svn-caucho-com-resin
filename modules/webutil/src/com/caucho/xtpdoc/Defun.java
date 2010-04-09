@@ -38,6 +38,7 @@ import java.util.HashSet;
 
 public class Defun extends Section {
   private DefunParents _parents;
+  private DefunJavadoc _javadoc;
 
   public Defun(Document document)
   {
@@ -59,10 +60,19 @@ public class Defun extends Section {
     return _parents;
   }
 
+  public DefunJavadoc createJavadoc()
+  {
+    _javadoc = new DefunJavadoc(this);
+    addItem(_javadoc);
+
+    return _javadoc;
+  }
+
   public DefunSchema createSchema()
   {
     DefunSchema schema = new DefunSchema(this);
     addItem(schema);
+
     return schema;
   }
 
@@ -70,6 +80,7 @@ public class Defun extends Section {
   {
     DefunExample example = new DefunExample(getDocument());
     addItem(example);
+
     return example;
   }
 
@@ -77,6 +88,7 @@ public class Defun extends Section {
   {
     DefunAttributes attributes = new DefunAttributes(this);
     addItem(attributes);
+
     return attributes;
   }
 
@@ -84,6 +96,7 @@ public class Defun extends Section {
   {
     DefunDescription description = new DefunDescription(getDocument());
     addItem(description);
+
     return description;
   }
 
@@ -97,7 +110,7 @@ public class Defun extends Section {
   {
     out.writeCharacters("\n");
     out.writeStartElement("div");
-    out.writeAttribute("class", "s1");
+    out.writeAttribute("class", "s1 defun");
     
     out.writeStartElement("a");
     out.writeAttribute("name", getHref());
