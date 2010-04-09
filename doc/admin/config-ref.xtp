@@ -584,12 +584,12 @@ reserved ports as root.</d>
     </ix>
     <ix id="filter-class" h="deploy-ref.xtp#filter">
       <d><i>As a child of <a config-tag="filter"/></i>.
-        The filter's class (defaults to filter-name), which extends <a href="javadoc|javax.servlet.Filter|"/>
+        The filter's class (defaults to filter-name), which extends <a javadoc="javax.servlet.Filter"/>
       </d>
     </ix>
     <ix id="init-param" h="deploy-ref.xtp#filter">
       <d><i>As a child of <a config-tag="filter"/></i>.
-        Initialization parameters, see <a href="javadoc|javax.servlet.FilterConfig|getInitParameter(String)"/>
+        Initialization parameters, see <a javadoc="javax.servlet.FilterConfig#getInitParameter(String)"/>
       </d>
     </ix>
     <ix id="filter-mapping" h="deploy-ref.xtp#filter-mapping">
@@ -833,7 +833,7 @@ java.util.logging.* API.</d>
     <ix id="formatter&#10;    " h="logging-ref.xtp#log">
       <d><i>As a child of <a config-tag="log"/></i>.
         set a custom Formatter, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Formatter|"/>
+        <a javadoc="java.util.logging.Formatter"/>
           </d>
     </ix>
     <!-- generated from file init.xtp -->
@@ -891,7 +891,7 @@ jndi:lookup can be used to lookup a JNDI value for the configuration.</d>
     <ix id="handler" h="logging-ref.xtp#log">
       <d><i>As a child of <a config-tag="log"/></i>.
         add a custom Handler, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Handler|"/>
+        <a javadoc="java.util.logging.Handler"/>
           </d>
     </ix>
       
@@ -1189,7 +1189,7 @@ of &lt;server&gt;.
     
     <ix id="resin:type" h="deploy-ref.xtp#constraint">
       <d><i>As a child of <a config-tag="constraint"/></i>.
-        A class that extends <a href="javadoc|com.caucho.http.security.AbstractConstraint|"/>
+        A class that extends <a javadoc="com.caucho.http.security.AbstractConstraint"/>
       </d>
     </ix>
     

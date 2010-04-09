@@ -78,7 +78,7 @@ Jar files are recognized wihen they have a filename extension of
 <tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
 </td></tr></deftable-childtags>
 
-<p>See <a href="javadoc|com.caucho.loader.DirectoryLoader|"/>.</p>
+<p>See <a javadoc="com.caucho.loader.DirectoryLoader"/>.</p>
 </defun>
 
 <defun title="tree-loader" occur="*" version="Resin 3.0">
@@ -93,7 +93,7 @@ Jar files are recognized wihen they have a filename extension of
 <tr><td>path</td><td>Filesystem path for the class loader.  Since Resin 3.0</td><td>required
 </td></tr></deftable-childtags>
 
-<p>See <a href="javadoc|com.caucho.loader.TreeLoader|"/>.</p>
+<p>See <a javadoc="com.caucho.loader.TreeLoader"/>.</p>
 </defun>
 
 <defun title="make-loader" occur="*" version="Resin 3.0">

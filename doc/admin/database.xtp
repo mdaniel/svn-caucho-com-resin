@@ -315,7 +315,7 @@ the pool</td>
 </td></tr><tr><td>D</td><td>days
 </td></tr></deftable>
 
-<p>The class that corresponds to &lt;database&gt; is <a href="javadoc|com.caucho.sql.DBPool|"/></p>
+<p>The class that corresponds to &lt;database&gt; is <a javadoc="com.caucho.sql.DBPool"/></p>
 
 </defun>
 
@@ -373,7 +373,7 @@ although it is often best to place your datbase driver's jar file in
 your web applications.
 </p>
 
-<p>The class that corresponds to &lt;driver&gt; is <a href="javadoc|com.caucho.sql.DriverConfig"/></p>
+<p>The class that corresponds to &lt;driver&gt; is <a javadoc="com.caucho.sql.DriverConfig"/></p>
 
 <deftable-childtags>
 <tr>
@@ -724,7 +724,7 @@ public class MyBean()
 
 <p>
 The connection obtained by <code>pool.getConnection()</code> is an instance of 
-<a href="javadoc|com.caucho.sql.UserConnection|"/>.
+<a javadoc="com.caucho.sql.UserConnection"/>.
 </p>
 
 <p>

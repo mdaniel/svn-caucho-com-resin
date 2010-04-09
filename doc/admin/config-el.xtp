@@ -369,7 +369,7 @@ to print after the decimal point for floating points.</p>
 </tr>
 <tr>
   <td>date</td>
-  <td>an object with <a href="javadoc|java.util.Date|"/> or <a href="javadoc|java.util.Calendar|"/> or <a href="javadoc|com.caucho.util.QDate|"/></td>
+  <td>an object with <a javadoc="java.util.Date"/> or <a javadoc="java.util.Calendar"/> or <a javadoc="com.caucho.util.QDate"/></td>
   <td>the current date and time</td>
 </tr>
 </deftable-parameters>
@@ -633,7 +633,7 @@ identifiers; in that case the <var>system</var> variable is used, for example
 
 <p>
 A full list of standard java system properties is provided in the javadoc for
-<a href="javadoc|java.lang.System">java.lang.System</a>.
+<a javadoc="java.lang.System">java.lang.System</a>.
 </p>
 
 <deftable title="Standard system properties">
@@ -739,7 +739,7 @@ useful formatting methods.</p>
 
 <deftable-parameters>
 <tr><td>format</td><td>the format string (see below)</td><td>required
-</td></tr><tr><td>date</td><td>an object with <a href="javadoc|java.util.Date|"/> or <a href="javadoc|java.util.Calendar|"/> or <a href="javadoc|com.caucho.util.QDate|"/></td><td>the current date and time
+</td></tr><tr><td>date</td><td>an object with <a javadoc="java.util.Date"/> or <a javadoc="java.util.Calendar"/> or <a javadoc="com.caucho.util.QDate"/></td><td>the current date and time
 </td></tr></deftable-parameters>
 
 <example>

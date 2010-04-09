@@ -278,7 +278,7 @@ appropriate value for most situations.
 </deftable>
 
 <p><code>-Xss</code> determines the size of the stack: <code>-Xss1024k</code>.
-If the stack space is too small, eventually you will see an exception <a href="javadoc|java.lang.StackOverflowError|"/>.
+If the stack space is too small, eventually you will see an exception <a javadoc="java.lang.StackOverflowError"/>.
 
 </p><p>Some people have reported that it is necessary to change stack size settings
 at the OS level for Linux.  A call to <code>ulimit</code> may be necessary, and
@@ -621,7 +621,7 @@ appropriate value for most situations.</p>
 </deftable>
 
 <p><code>-Xss</code> determines the size of the stack: <code>-Xss1024k</code>.
-If the stack space is too small, eventually you will see an exception <a href="javadoc|java.lang.StackOverflowError|"/>.
+If the stack space is too small, eventually you will see an exception <a javadoc="java.lang.StackOverflowError"/>.
 
 </p><p>Some people have reported that it is necessary to change stack size settings
 at the OS level for Linux.  A call to <code>ulimit</code> may be necessary, and

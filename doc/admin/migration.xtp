@@ -27,10 +27,14 @@
       no longer be used:
     </p>
     <ul>
-      <li>&lt;management> (see <a config-tag="resin:JmxService"/>, <a config-tag="resin:LogService"/>, <a config-tag="resin:XaLogService"/>, <a config-tag="resin:AdminAuthenticator"/>)</li>
+      <li>&lt;authenticator> (see <a config-tag="resin:PropertiesAuthenticator"/>, <a config-tag="resin:JaasAuthenticator"/>, <a config-tag="resin:DatabaseAuthenticator"/>, <a config-tag="resin:XmlAuthenticator"/>)</li>
+      <li>&lt;jms-connection-factory> (see <a config-tag="resin:JmsConnectionFactory"/>)</li>
+      <li>&lt;jmx-service> (see <a config-tag="resin:JmxService"/>)</li>
       <li>&lt;log> (see <a config-tag="log-handler"/>)</li>
-      <li>&lt;scheduled-task> (see <a config-tag="resin:ScheduledTask"/>)</li>
+      <li>&lt;log-service> (see <a config-tag="resin:LogService"/>)</li>
+      <li>&lt;management> (see <a config-tag="resin:JmxService"/>, <a config-tag="resin:LogService"/>, <a config-tag="resin:XaLogService"/>, <a config-tag="resin:AdminAuthenticator"/>)</li>
       <li>&lt;persistent-store> (No longer necessary. See <a href="cluster.xtp">clustering</a>.)</li>
+      <li>&lt;scheduled-task> (see <a config-tag="resin:ScheduledTask"/>)</li>
       <li>resin:type attribute (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
       <li>uri: convention (see <a href="config-candi.xtp">CanDI documentation</a>)</li>
     </ul>

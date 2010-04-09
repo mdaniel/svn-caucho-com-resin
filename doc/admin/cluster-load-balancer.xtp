@@ -195,12 +195,12 @@ manager to efficiently wait for many connections at once.</p>
 
 <p>In most cases, the web-tier will dispatch
 everything to the app-tier servers.  Because of Resin's
-<a href="../doc/proxy-cache.xtp">proxy cache</a>, the web-tier servers
+<a href="http-proxy-cache.xtp">proxy cache</a>, the web-tier servers
 will serve static pages as fast as if they were local pages.</p>
 
 <p>In some cases, though, it may be important to send different
 requests to different backend clusters.  The
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/LoadBalance.html">&lt;resin:LoadBalance></a> tag can choose clusters based on URL patterns.</p>
+<a javadoc="com.caucho.rewrite.LoadBalance">&lt;resin:LoadBalance></a> tag can choose clusters based on URL patterns.</p>
 
 <p>The following <a href="http-rewrite.xtp">rewrite</a>
 keeps all *.png, *.gif, and *.jpg files on the web-tier, sends

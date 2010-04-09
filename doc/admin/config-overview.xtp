@@ -363,7 +363,7 @@ element security-manager {
 specifies the name of a security provider class.  The name is used
 to instantiate an instance of the
 object, which is then passed to 
-<a href="javadoc|java.security.Security|addProvider">Security.addProvider</a>.
+<a javadoc="java.security.Security#addProvider()">Security.addProvider</a>.
 </p>
 
 <def title="&lt;security-provider> schema">

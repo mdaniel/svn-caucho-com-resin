@@ -761,7 +761,7 @@ performance and reduce database load by several orders of magnitude.</p>
 cache to save large amounts of data with little overhead.</p>
 
 <p>Management of the proxy cache uses the
-<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
+<a javadoc="com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
 
 <deftable title="&lt;cache> Attributes">
 <tr>
@@ -1621,7 +1621,7 @@ PingThread will catch errors like deadlocks.</p>
 
 <p>
 The class that corresponds to &lt;ping&gt; is 
-<a href="javadoc|com.caucho.server.admin.PingThread|">PingThread</a>.  
+<a javadoc="com.caucho.server.admin.PingThread">PingThread</a>.  
 </p>
 
 <s2 title="Mail notification when ping fails">
@@ -1754,11 +1754,11 @@ the -server-id command line argument.</p>
 for more details of the &lt;server> tag and its children.</p>
 
 <p>The current server is managed with a
-<a href="javadoc|com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
+<a javadoc="com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
 The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 
 <p>Peer servers are managed with 
-<a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
+<a javadoc="com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 
 <deftable title="&lt;server> Attributes">
 <tr>

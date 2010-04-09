@@ -130,7 +130,7 @@ useful logs.</p>
 
 <s2 title="Log levels">
 <p>The <var>level</var> for log tags matches the levels in the JDK 
-<a href="javadoc|java.util.logging.Level|"/>.</p>
+<a javadoc="java.util.logging.Level"/>.</p>
 
 <deftable title="Logging Level values">
 <tr>
@@ -439,16 +439,16 @@ java.util.logging.* API.</p>
 <tr>
   <td>handler</td>
   <td>add a custom Handler, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Handler"/>
+        <a javadoc="java.util.logging.Handler"/>
     </td>
   <td>&#160;</td>
 </tr>
 <tr>
   <td>formatter</td>
   <td>set a custom Formatter, the name of a class that extends 
-        <a href="javadoc|java.util.logging.Formatter"/>
+        <a javadoc="java.util.logging.Formatter"/>
     </td>
-  <td>none, or <a href="javadoc|com.caucho.log.ELFormatter"/> if 
+  <td>none, or <a javadoc="com.caucho.log.ELFormatter"/> if 
         <var>format</var> is used.</td>
 </tr>
 </deftable-childtags>
@@ -484,14 +484,14 @@ java.util.logging.* API.</p>
 &lt;/resin&gt;
 </example>
 
-<p>The class that corresponds to &lt;log&gt; is <a href="javadoc|com.caucho.log.LogConfig|"/>.</p>
+<p>The class that corresponds to &lt;log&gt; is <a javadoc="com.caucho.log.LogConfig"/>.</p>
 
 <s2 name="Format-String" title="Log format string">
 
 <p>The <var>format</var> for log tags is used to specify a format string for each
 log message.  <code>format</code> recognizes EL-expressions. The EL variable
 <var>log</var> is a 
-<a href="javadoc|com.caucho.log.ELFormatter.ELFormatterLogRecord|"/>
+<a javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
  object.</p>
 
 <example title="log format string">
@@ -511,7 +511,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 </td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
 </td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
 </td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
-</td></tr><tr><td>${log.thrown}</td><td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
+</td></tr><tr><td>${log.thrown}</td><td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
 </td></tr></deftable>
 
 <p>You can also use the <a href="config-el.xtp">Environment EL variables</a> in your format string:</p>
@@ -1032,7 +1032,7 @@ in.</p>
     </td><td>true to flush the memory buffer with each request
     </td><td>false
 </td></tr><tr><td>resin:type
-    </td><td>a class extending <a href="javadoc|com.caucho.server.log.AccessLog|"/>
+    </td><td>a class extending <a javadoc="com.caucho.server.log.AccessLog"/>
         for custom logging
     </td><td>com.caucho.server.log.AccessLog
 </td></tr><tr><td>init</td><td>bean-style initialization for the custom class</td><td>n/a
@@ -1093,7 +1093,7 @@ in.</p>
 </def>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
-extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
+extend a custom class from <a javadoc="com.caucho.http.log.AccessLog"/>.  
 <a href="config-candi.xtp">Bean-style initialization</a> can be used to set bean
 parameters in the custom class.</p>
 

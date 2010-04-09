@@ -147,7 +147,7 @@ Enable the use of the security manager for the JVM.
 Add one or more security providers.  Each entry specifies the name of a
 security provider class.  The name is used to instantiate an instance of the
 object, which is then passed to 
-<a href="javadoc|java.security.Security|addProvider"/>.
+<a javadoc="java.security.Security#addProvider()"/>.
 </p>
 
 <example>
@@ -231,7 +231,7 @@ thread pool.</p>
 <tr><th>function</th>
     <th>corresponding API</th></tr>
 <tr><td>jndi</td>
-    <td><a href="javadoc|com.caucho.naming.Jndi|lookup(String)">Jndi.lookup(String)</a></td></tr>
+    <td><a javadoc="com.caucho.naming.Jndi#lookup(String)">Jndi.lookup(String)</a></td></tr>
 </deftable>
 
 </s2>
@@ -516,7 +516,7 @@ which ports the server should listen to.</p>
     <td>true</td></tr>
 </deftable-childtags>
 
-<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
+<p>The class that corresponds to &lt;srun&gt; is <a javadoc="com.caucho.server.cluster.ClusterPort"/></p>
 
 </defun>
 
@@ -1026,11 +1026,11 @@ e.g. 192.168.0.10:6800 for clustering, load balancing,
 and administration.</p>
 
 <p>The current server is managed with a
-<a href="javadoc|com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
+<a javadoc="com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
 The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 
 <p>Peer servers are managed with 
-<a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
+<a javadoc="com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 
 <deftable-childtags>
 <tr><td>id</td>
@@ -1124,7 +1124,7 @@ thread pool.</p>
 <tr><th>function</th>
     <th>corresponding API</th></tr>
 <tr><td>jndi</td>
-    <td><a href="javadoc|com.caucho.naming.Jndi|lookup(String)">Jndi.lookup(String)</a></td></tr>
+    <td><a javadoc="com.caucho.naming.Jndi#lookup(String)">Jndi.lookup(String)</a></td></tr>
 </deftable>
 
 </s2>
@@ -1648,7 +1648,7 @@ chance of session collisions.</p>
 <p><var>reuse-session-id</var> defaults to true so that Resin can share the session
 id amongst different web-apps.</p>
 
-<p>The class that corresponds to &lt;session-config&gt; is <a href="javadoc|com.caucho.server.session.SessionManager|"/></p>
+<p>The class that corresponds to &lt;session-config&gt; is <a javadoc="com.caucho.server.session.SessionManager"/></p>
 
 </defun>
 
@@ -2392,7 +2392,7 @@ which ports the server should listen to.</p>
     <td>true</td></tr>
 </deftable-childtags>
 
-<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
+<p>The class that corresponds to &lt;srun&gt; is <a javadoc="com.caucho.server.cluster.ClusterPort"/></p>
 
 </defun>
 

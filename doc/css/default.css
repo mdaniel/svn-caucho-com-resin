@@ -425,6 +425,14 @@ dl.atoc-top > dt {
     margin : 0.5em;
 }
 
+div.reference-parents > span.child-of {
+  font-weight: bold;
+}
+
+div.javadoc > span.javadoc {
+  font-weight: bold;
+}
+
 div#reference-legend {
   position : fixed; 
   bottom : 0; 

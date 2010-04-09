@@ -16,7 +16,7 @@ While this case is rare, it may sometimes be useful to
 create your own Resin custom authenticator (for example
 to use a legacy resource as an authentication store). The
 Resin security framework provides an abtract base class (<a
-href="javadoc|com.caucho.security.AbstractAuthenticator|"/>) that
+javadoc="com.caucho.security.AbstractAuthenticator"/>) that
 you can extend to do this.
 </p>
 <p>
@@ -62,6 +62,7 @@ public class MyAuthenticator extends AbstractAuthenticator {
 
 <defun title="&lt;accept-listen-backlog>" name="accept-listen-backlog" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
+<default>100</default>
 
 <description>
 <p>&lt;accept-listen-backlog> configures operating system TCP listen
@@ -74,13 +75,13 @@ connections in a small queue, until the application is ready to
 receive them.  When the queue fills up, the operating system will
 start refusing new connections.</p>
 
-<default>100</default>
 </description>
 
 </defun>
 
 <defun title="&lt;accept-thread-max>" name="accept-thread-max" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
+<default>10</default>
 <description>
 
 <p>&lt;accept-thread-max> configures the maximum number of 
@@ -98,7 +99,6 @@ a new connection.</p>
 to wait for the connections.  Smaller values use less threads, but may
 be slower handling spikes.</p>
 
-<default>10</default>
 </description>
 
 </defun>
@@ -106,6 +106,7 @@ be slower handling spikes.</p>
 <defun title="&lt;accept-thread-min>" name="accept-thread-min" version="Resin 3.1">
 <parents>http, connection-port, protocol</parents>
 
+<description>
 <p>&lt;accept-thread-min> configures the minimum number of 
 threads listening for new connections on this port   &lt;accept-thread-min>
 works with &lt;accept-thread-max> to handle spiky loads without
@@ -122,6 +123,7 @@ may pause until a new thread is available for the new connection.</p>
 <p>Larger values handle spiky loads better but require more threads
 to wait for the connections.  Smaller values use less threads, but may
 be slower handling spikes.</p>
+</description>
 
 </defun>
 
@@ -186,7 +188,7 @@ in.</p>
 </def>
 
 <p><var>resin:type</var> allows for custom logging.  Applications can
-extend a custom class from <a href="javadoc|com.caucho.http.log.AccessLog|"/>.  
+extend a custom class from <a javadoc="com.caucho.http.log.AccessLog"/>.  
 <a href="config-candi.xtp">Resin-IoC initialization</a> can be used to set bean
 parameters in the custom class.</p>
 
@@ -239,7 +241,7 @@ see <a href="logging-ref.xtp#path">"Log Paths"</a>.</td>
 </tr>
 <tr>
   <td>resin:type</td>
-  <td>a class extending <a href="javadoc|com.caucho.server.log.AccessLog|"/>
+  <td>a class extending <a javadoc="com.caucho.server.log.AccessLog"/>
         for custom logging
   </td>
   <td>com.caucho.server.log.AccessLog</td>
@@ -322,6 +324,7 @@ element active-wait-time {
 
 <defun title="&lt;address>" name="address" version="Resin 3.1">
 <parents>server</parents>
+<default>127.0.0.1</default>
 
 <description>
 <p>The server &lt;address> defines the IP interface for Resin
@@ -331,7 +334,6 @@ or 127.* for a single-server configuration.  No wild cards are allowed
 because the other cluster servers and load balancer use the address
 to connect to the server.</p>
 
-<default>127.0.0.1</default>
 </description>
 
 <example title="server address">
@@ -457,6 +459,7 @@ element auth-constraint {
 }
 </schema>
 
+<!-- XXX URI
 <p>The following example protects the /admin subdirectory of a web-app
 by requiring a user to logon with Resin's &lt;management> users, i.e.
 using the same requirement as /resin-admin.</p>
@@ -472,115 +475,7 @@ using the same requirement as /resin-admin.</p>
 
 &lt;/web-app>
 </example>
-
-</defun>
-
-<defun title="&lt;authenticator>" name="authenticator" occur="*">
-<parents>resin, cluster, host, web-app, login-config</parents>
-  <!-- com.caucho.config.types.Authenticator -->
-
-<p>&lt;authenticator> configures an authentication resource
-for the current environment context.  The authenticator is used for
-login and also for the <code>getUserPrincipal</code>
-and <code>isUserInRole</code> methods of the
-<code>HttpServletRequest</code> object.</p>
-
-<p>The authenticators are scoped to their containing environment.
-An authenticator defined in WEB-INF/resin-web.xml applies only to
-the web-app, while an authenticator defined in the &lt;cluster>
-section of the resin.xml applies to the entire cluster.  The <a
-href="security-overview.xtp#Authentication">&lt;resin:AdminAuthenticator></a>
-configuration provides an authenticator which is available to all
-applications.</p>
-
-<p>Resin's servlet authentication uses an authentication resource to
-validate user login and to provide single-signon capability.
-The authenticator is configured in the environment context
-where it is shared.  An authenticator configured in the web-app
-only applies to the web-app, but an authenticator configured in
-the host will apply to all hosts.</p>
-
-<p>The authenticator class is selected with the <var>uri</var> or
-<var>class</var> attribute.  The <var>class</var> can be any custom class
-extending <code>com.caucho.server.security.AbstractAuthenticator</code>.
-The <var>uri</var> is a symbolic name for the authenticator class.
-More details on the predefined authenticators are in the
-<a href="security.xtp">Resin security</a> documentation.</p>
-
-<ul>
-<li><var>properties:</var>  Java properties-style authentication.</li>
-<li><var>jaas:</var>  JAAS authentication.</li>
-<li><var>jdbc:</var>  JDBC password-based authentication.</li>
-<li><var>xml:</var>  XML JDBC password-based authentication.</li>
-</ul>
-
-<p>Configuration of the authenticator uses bean-style configuration in the
-&lt;init&gt; tag.</p>
-
-<p>See also: the <a href="security.xtp">Resin security</a> section.</p>
-
-<attributes>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>binding</td>
-  <td>Custom WebBeans binding.  Since Resin 3.1.5</td>
-  <td></td>
-</tr>
-<tr>
-  <td>class</td>
-  <td>The implementing class for the authenticator.  Since Resin 3.0</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jndi-name</td>
-  <td>The JNDI name where the authenticator is stored.  Since Resin 3.0</td>
-  <td></td>
-</tr>
-<tr>
-  <td>name</td>
-  <td>The Resin-IoC name where the authenticator is stored.  Since Resin 3.1.5</td>
-  <td></td>
-</tr>
-<tr>
-  <td>uri</td>
-  <td>shortcut alias for the authenticator class.  Can also include inline
-parameters.  Examples include xml:, property:, jdbc:, jndi:.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>A bean-style configuration section.  Since Resin 3.0</td>
-  <td></td>
-</tr>
-</attributes>
-
-<schema>
-r_authenticator = element authenticator {
-  (r_class | r_uri)
-  &amp; r_binding*
-  &amp; r_init?
-  &amp; r_jndi-name?
-  &amp; r_name?
-  &amp; r_scope?
-}
-</schema>
-
-<example title="Example: WEB-INF/resin-web.xml properties-based authenticator">
-&lt;web-app xmlns="http://caucho.com/ns/resin">
-
-  &lt;authenticator uri="properties:password-digest=none">
-    &lt;init>
-harry=quidditch,user
-ron=cannons,user,prefect
-    &lt;/init>
-  &lt;/authenticator>
-
-&lt;/web-app>
-</example>
+-->
 
 </defun>
 
@@ -597,7 +492,7 @@ performance and reduce database load by several orders of magnitude.</p>
 cache to save large amounts of data with little overhead.</p>
 
 <p>Management of the proxy cache uses the
-<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
+<a javadoc="com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
 </description>
 
 <attributes>
@@ -661,7 +556,8 @@ element cache {
 </defun>
 <defun title="&lt;cache-mapping>" name="cache-mapping" version="Resin 1.1">
 <parents>web-app</parents>
-      
+
+<description>
 <p>&lt;cache-mapping> specifies <var>max-age</var> and <var>Expires</var> times for cacheable pages.</p>
 
 <p>See <a href="http-proxy-cache.xtp">caching</a> for more information.</p>
@@ -675,6 +571,18 @@ cache-mapping lets cacheable pages be configured in a standard manner.</p>
 <p>&lt;cache-mapping> does not automatically make pages cacheable.  Your
 servlets must already set the <var>ETag</var> (or Last-Modified) header
 to activate &lt;cache-mapping>.</p>
+
+<ul>
+<li>cache-mapping requires an enabled &lt;cache&gt;.  If the cache is disabled,
+cache-mapping will be ignored.</li>
+<li>cache-mapping does not automatically make a page cacheable.  Only
+cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-Modified.</li>
+</ul>
+
+<p>The time intervals default to seconds, but will allow other 
+  <a config-tag="time intervals"/>.</p>
+
+</description>
       
 <attributes>
 <tr>
@@ -709,31 +617,6 @@ s-max-age affects proxy caches (including Resin), but not browsers.</td>
 </tr>
 </attributes>
 
-<p>The time interval defaults to seconds, but will allow other periods:</p>
-
-<deftable>
-<tr>
-  <th>Suffix</th>
-  <th>Meaning</th>
-</tr>
-<tr>
-  <td>s</td>
-  <td>seconds</td>
-</tr>
-<tr>
-  <td>m</td>
-  <td>minutes</td>
-</tr>
-<tr>
-  <td>h</td>
-  <td>hours</td>
-</tr>
-<tr>
-  <td>D</td>
-  <td>days</td>
-</tr>
-</deftable>
-
 <schema>
 element cache-mapping {
   (url-pattern | url-regexp)
@@ -742,13 +625,6 @@ element cache-mapping {
   &amp; s-max-age?
 }
 </schema>
-
-<ul>
-<li>cache-mapping requires an enabled &lt;cache&gt;.  If the cache is disabled,
-cache-mapping will be ignored.</li>
-<li>cache-mapping does not automatically make a page cacheable.  Only
-cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-Modified.</li>
-</ul>
 
 <example title="Example: cache-mapping in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"&gt;
@@ -767,6 +643,7 @@ cacheable pages are affected by cache-mapping, i.e. pages with an ETag or Last-M
 <parents>resin, cluster, host, web-app</parents>
 <default>true on Windows, false on Unix.</default>
 
+<description>
 <p>&lt;case-insensitive> specifies whether the environment
 context is case sensitive or insensitive.</p>
 
@@ -775,6 +652,8 @@ for security reasons for Resin to behave differently for case-sensitive
 and case-insensitive directories.  For example, when case-insensitive
 is true, url-patterns will match in a case-insensitive manner, so TEST.JSP
 will work like test.jsp.</p>
+
+</description>
 
 <schema>
 r_case-insensitive = element case-insensitive {
@@ -788,8 +667,11 @@ r_case-insensitive = element case-insensitive {
 <parents>resin, cluster, host, web-app</parents>
 <default>The default value is ISO-8859-1.</default>
 
+<description>
 <p>&lt;character-encoding> specifies the default character
 encoding for the environment.</p>
+
+</description>
 
 <schema>
 r_character-encoding = element character-encoding {
@@ -811,6 +693,7 @@ r_character-encoding = element character-encoding {
   <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.loader.EnvironmentClassLoader -->
 
+<description>
 <p>&lt;class-loader> configures a dynamic classloader
 for the current environment.</p>
 
@@ -824,8 +707,9 @@ WEB-INF/classes.</p>
 section, which ensures that Resin evaluates them first.  The evaluation
 order is particularly important in cases like resin-web.xml vs web.xml,
 because the resin-web.xml is evaluated after the web.xml.</p>
+</description>
 
-<deftable title="classloader types">
+<attributes>
 <tr>
   <th>Element</th>
   <th>Description</th>
@@ -850,7 +734,7 @@ automatically.</td>
   <td>Loads jar files from a directory, recursively searching subdirectories.
 </td>
 </tr>
-</deftable>
+</attributes>
 
 <schema>
 r_class-loader = element class-loader {
@@ -878,14 +762,15 @@ r_class-loader = element class-loader {
 
 </defun>
 
-
 <defun title="&lt;close-dangling-connections>" name="close-dangling-connections" version="Resin 3.1.1">
 <parents>database</parents>
+<default>true</default>
 
+<description>
 <p>&lt;close-dangling-connections> closes open connections at the
 end of a request and logs a warning and stack trace.</p>
+</description>
 
-<default>true</default>
 
 </defun>
 
@@ -1112,7 +997,10 @@ element cluster {
 <defun title="&lt;cluster-default>" version="Resin 3.1" name="cluster-default">
 <parents>resin</parents>
 
-<p>&lt;cluster-default> defines default cluster configuration for all clusters in the &lt;resin&gt; server.</p>
+<description>
+<p>&lt;cluster-default> defines default cluster configuration for all
+clusters in the &lt;resin&gt; server.</p>
+</description>
 
 <example title="Example: cluster-default">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -1132,57 +1020,14 @@ element cluster {
 
 </defun>
 
-<defun title="&lt;cluster-port>" name="cluster-port" version="Resin 3.0">
-<parents>server</parents>
-
-<p>&lt;cluster-port> configures the cluster and load balancing socket,
-for load balancing, distributed sessions, and distributed management.</p>
-
-<p>When configuring Resin in a load-balanced cluster, each Resin instance
-will have its own &lt;srun&gt; configuration, which Resin uses for distributed
-session management and for the load balancing itself.</p>
-
-<p>When configuring multiple JVMs, each &lt;srun&gt; has a
-unique &lt;id&gt; which allows the -server command-line to select
-which ports the server should listen to.</p>
-
-<attributes>
-<tr><td>address</td>
-    <td>hostname of the interface to listen to</td>
-    <td>*</td></tr>
-<tr><td>jsse-ssl</td>
-    <td>configures the port to use JSSE for SSL</td>
-    <td>none</td></tr>
-<tr><td>openssl</td>
-    <td>configures the port to use OpenSSL</td>
-    <td>none</td></tr>
-<tr><td>port</td>
-    <td>port to listen to</td>
-    <td>required</td></tr>
-<tr><td>read-timeout</td>
-    <td>timeout waiting to read from idle client</td>
-    <td>65s</td></tr>
-<tr><td>write-timeout</td>
-     <td>timeout waiting to write to idle client</td>
-     <td>65s</td></tr>
-<tr><td>accept-listen-backlog</td>
-    <td>The socket factory's listen backlog for receiving sockets</td>
-    <td>100</td></tr>
-<tr><td>tcp-no-delay</td>
-    <td>sets the NO_DELAY socket parameter</td>
-    <td>true</td></tr>
-</attributes>
-
-<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
-
-</defun>
-
 <defun title="&lt;compiling-loader>" name="compiling-loader" occur="*" version="Resin 3.0" type="defun">
   <parents>class-loader</parents>
   <!-- com.caucho.loader.CompilingLoader -->
 
+<description>
 <p>&lt;compiling-loader> automatically compiles Java code into .class
 files before loading them.</p>
+</description>
 
 <attributes>
 <tr>
@@ -1233,15 +1078,17 @@ files before loading them.</p>
 <defun title="&lt;connection-error-page>" version="Resin 3.1" name="connection-error-page">
 <parents>cluster</parents>
 
+<description>
 <p>&lt;connection-error-page> specifies an error page to be used
 by IIS when it can't contact an app-tier Resin.  This directive
 only applies to IIS.</p>
+</description>
 
-<def title="connection-error-page">
+<schema>
 element connection-error-page {
   string
 }
-</def>
+</schema>
 
 </defun>
 <defun title="&lt;connection-factory>" name="connection-factory" occur="*" version="Resin 3.1.5">
@@ -1352,13 +1199,13 @@ r_connection-factory = element connection-factory {
 
 <defun title="&lt;connection-wait-time>" version="Resin 4.0" name="connection-wait-time">
 <parents>database</parents>
+<default>10m</default>
 
 <description>
 <p>&lt;connection-wait-time> configures the time a <code>getConnection</code>
 call should wait when then pool is full before trying to create an
 overflow connection.</p>
 
-<default>10m</default>
 </description>
 
 </defun>
@@ -1379,7 +1226,7 @@ security constraints to handle custom authentication requirements.
 </tr>
 <tr>
   <td>resin:type</td>
-  <td>A class that extends <a href="javadoc|com.caucho.server.security.AbstractConstraint">AbstractConstraint</a></td>
+  <td>A class that extends <a javadoc="com.caucho.server.security.AbstractConstraint">AbstractConstraint</a></td>
 </tr>
 <tr>
   <td>init</td>
@@ -1402,7 +1249,7 @@ element constraint {
 <description>
 <p>Initializes application (ServletContext) variables.  <var>context-param</var>
 defines initial values for <code>application.getInitParameter("foo")</code>.  See also
-<a href="javadoc|javax.servlet.ServletContext">ServletContext.getInitParameter()</a>.</p>
+<a javadoc="javax.servlet.ServletContext">ServletContext.getInitParameter()</a>.</p>
 </description>
 
 <attributes>
@@ -1810,6 +1657,7 @@ element dependency {
 
 <defun title="&lt;dependency-check-interval>" name="dependency-check-interval" occur="?" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>
+<default>2s</default>
 
 <description>
 <p>&lt;dependency-check-interval> Configures how often the environment context
@@ -1824,7 +1672,6 @@ amount of time, deployment servers should use high values like 60s or more while
 <p>The interval defaults to the parent's interval.  So the web-app will
 default to the host's value.</p>
 
-<default>2s</default>
 </description>
 
 <schema>
@@ -1975,6 +1822,7 @@ element ear-deploy {
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.ejb.EJBServer -->
 
+<description>
 <p>&lt;ejb-message-bean> configures a bean as a message listener.
 The listener can be a simple bean that just implements the
 <code>javax.jms.MessageListener interface</code>.  No other packaging
@@ -1990,6 +1838,7 @@ dependency injection, transaction attributes, and aspect interception.
 <p>The message bean can plug into custom messaging systems.  The
 application will need to define a <a href="http://caucho.com/resin-javadoc/javax/resource/spi/ResourceAdapter.html">ResourceAdapter</a> and
 an <code>ActivationSpec</code>.  </p>
+</description>
 
 <attributes>
 <tr>
@@ -2001,8 +1850,7 @@ an <code>ActivationSpec</code>.  </p>
   <td>activation-spec</td>
   <td>Configures a custom message-listener driver</td>
   <td></td>
-</tr>
-<tr>
+</tr> <tr>
   <td>class</td>
   <td>Classname of the listener bean</td>
   <td>required</td>
@@ -2042,6 +1890,8 @@ element ejb-message-bean {
 }
 </schema>
 
+<!-- XXX  convert these from uris
+
 <example title="Example: JMS listener in WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
@@ -2068,6 +1918,7 @@ element ejb-message-bean {
 
 &lt;/web-app>
 </example>
+-->
 
 </defun>
 
@@ -2076,8 +1927,11 @@ element ejb-message-bean {
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.ejb.EJBServer -->
 
-<p>Configures an EJB server.  See <a href="../doc/resin-ejb.xtp">Resin EJB</a>
-for more details.</p>
+<description>
+  <p>Configures an EJB server.</p>
+<!-- XXX broken link
+    See <a href="../doc/resin-ejb.xtp">Resin EJB</a> for more details.-->
+</description>
 
 <attributes>
 <tr>
@@ -2157,10 +2011,13 @@ element ejb-server {
 <defun title="&lt;ejb-stateful-bean>" name="ejb-stateful-bean">
 <parents>resin, host-default, host, web-app-default, web-app</parents>
 
+<description>
 <p>&lt;ejb-stateful-bean> configures an EJB @Stateful bean.  The
 @Stateful bean is a single-threaded component bean suitable for
-transaction processing.  See <a href="../doc/resin-ejb.xtp">Resin EJB</a>
-for more details.</p>
+transaction processing.</p>
+
+<!-- XXX broken link
+     See <a href="../doc/resin-ejb.xtp">Resin EJB</a> for more details. -->
 
 <p>The stateful-bean is registered in the Resin-IoC/WebBeans context and
 optionally with JNDI.</p>
@@ -2171,6 +2028,7 @@ never singletons.  For singleton-style beans, either use a &lt;bean> or
 a @Stateless session bean.</p>
 
 <p>@Stateful beans may optionally implement a <a href="http://caucho.com/resin-javadoc/javax/ejb/SessionSynchronization.html">SessionSynchronization</a> interface for transaction callbacks.</p>
+</description>
 
 <attributes>
 <tr>
@@ -2222,7 +2080,9 @@ element ejb-stateful-bean {
 
 <p>&lt;ejb-stateless-bean> configures an EJB @Stateless bean.  The
 @Statelesss bean is a pooled, proxied, singleton component bean suitable.
-See <a href="../doc/resin-ejb.xtp">Resin EJB</a> for more details.</p>
+<!-- XXX broken link
+See <a href="../doc/resin-ejb.xtp">Resin EJB</a> for more details.-->
+</p>
 
 <p>The stateless-bean is registered in the Resin-IoC/WebBeans context and
 optionally with JNDI.</p>
@@ -2572,7 +2432,7 @@ with @InterceptorType, and event handling with @Observes.
 </tr>
 <tr>
   <td>filter-class</td>
-  <td>The filter's class (defaults to filter-name), which extends <a href="javadoc|javax.servlet.Filter">javax.servlet.Filter</a></td>
+  <td>The filter's class (defaults to filter-name), which extends <a javadoc="javax.servlet.Filter">javax.servlet.Filter</a></td>
 </tr>
 <tr>
   <td>init</td>
@@ -2580,7 +2440,7 @@ with @InterceptorType, and event handling with @Observes.
 </tr>
 <tr>
   <td>init-param</td>
-  <td>Initialization parameters, see <a href="javadoc|javax.servlet.FilterConfig">FilterConfig.getInitParameter</a></td>
+  <td>Initialization parameters, see <a javadoc="javax.servlet.FilterConfig">FilterConfig.getInitParameter</a></td>
 </tr>
 </attributes>
 
@@ -3212,13 +3072,33 @@ element invocation-cache-max-url-length {
 </defun>
 <defun title="&lt;javac>" name="javac" occur="?">
 <parents>resin, cluster, host, web-app</parents>
+<default>internal</default>
   <!-- com.caucho.java.JavacConfig -->
 
-<p>&lt;javac> configures the Java compiler for automatically
-compiled files.</p>
+<description>
+<p>&lt;javac> configures the Java compiler for automatically compiled
+files.</p>
 
-<p>The javac configuration is used for JSP, PHP, EJB and
-compiling-loader configuration.</p>
+<p>The javac configuration is used for JSP, PHP, EJB and compiling-loader
+configuration. Thus you can deploy JSPs to Resin and it will use the
+compiler to generate classes at runtime. In other words, you do not need
+to precompile your JSPs, Java files, et al. to deploy them on Resin.</p>
+
+<p>
+The internal compiler (recommended) requires tools.jar from the JDK
+installation, so a JDK must be used (not a JRE).  Sometimes the internal
+compiler causes errors, creating exceptions or simply hanging and taking
+up a thread. The solution is to change the compiler to use an external
+compiler.
+</p>
+
+<p>
+The javac compiler is included with the JDK. It performs the same function
+as the internal compiler, however it is executed as an external process
+and is less prone to the problems described for the internal compiler.
+In resin.xml with the javac configuration option:
+</p>
+</description>
 
 <attributes>
 <tr>
@@ -3257,29 +3137,6 @@ element javac {
 }
 </schema>
 
-<p>
-The eclipse compiler requires the presence of
-$RESIN_HOME/lib/eclipse-compiler.jar (which is included with Resin). It is a
-very fast compiler that was developed as part of the Eclipse project. 
-</p>
-
-<example title="Example: eclipse compiler">
-&lt;resin xmlns="http://caucho.com/ns/resin">
-
- &lt;javac compiler="eclipse" args="-source 1.5"/&gt;
-
-  ...
-
-&lt;/resin>
-</example>
-
-<p>
-The internal compiler requires tools.jar from the JDK installation, so a JDK
-must be used (not a JRE).  Sometimes the internal compiler causes errors,
-creating exceptions or simply hanging and taking up a thread. The solution is
-to change the compiler to use an external compiler. 
-</p>
-
 <example title="Internal compiler">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 
@@ -3287,13 +3144,6 @@ to change the compiler to use an external compiler.
 
 &lt;/resin>
 </example>
-
-<p>
-The javac compiler is included with the JDK. It executes that same as the
-internal compiler, however it is executed as an external process and is less
-prone to the problems described for the internal compiler.  In resin.xml with
-the javac configuration option: 
-</p>
 
 <example title="javac JDK compiler">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -3307,104 +3157,19 @@ the javac configuration option:
 
 </defun>
 
-<defun title="&lt;jms-connection-factory>" name="jms-connection-factory" occur="*" version="Resin 3.1.5">
-<parents>resin, cluster, host, web-app</parents>
-
-<p>&lt;jms-connection-factory> configures a JMS <code>ConnectionFactory</code>
-and registers it with Resin-IoC/WebBeans.  The <code>ConnectionFactory</code>
-can be specified by it's class or a URI alias.</p>
-
-<deftable title="jms-connection-factory URIs">
-<tr>
-  <th>Scheme</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>resin:</td>
-  <td>Resin's ConnectionFactory implementation</td>
-</tr>
-</deftable>
-
-<attributes>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>class</td>
-  <td>class name of the ConnectionFactory implementation</td>
-  <td>required (or <var>uri</var>)</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC initialization configuration for the factory</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jndi-name</td>
-  <td>Name for registering in JNDI, relative to java:comp/env</td>
-  <td></td>
-</tr>
-<tr>
-  <td>name</td>
-  <td><a href="config-candi.xtp#@Named">@Named</a> binding in Resin-IoC</td>
-  <td></td>
-</tr>
-<tr>
-  <td>uri</td>
-  <td>URI alias for the ConnectionFactory class</td>
-  <td></td>
-</tr>
-</attributes>
-
-<schema>
-element jms-connection-factory {
-  (class | uri)
-  &amp; init?
-  &amp; jndi-name?
-  &amp; name?
-}
-</schema>
-
-</defun>
-<defun title="&lt;jmx-service>" name="jmx-service">
-
-<p>&lt;jmx-service> enables the clustered JMX management.</p>
-
-<schema>
-element jmx-service {
-  enable?
-}
-</schema>
-
-</defun>
-
-<defun title="&lt;log-service>" name="log-service">
-
-<p>&lt;log-service> enables persistent storage of warning and critical
-log messages in the administration.</p>
-
-<schema>
-element log-service {
-  enable?
-  &amp; level?
-}
-</schema>
-
-</defun>
-
-
 <defun title="&lt;jndi-link>" name="jndi-link" occur="*" version="Resin 1.2">
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.naming.LinkProxy -->
 
-<p>&lt;jndi-link> creates a symbolic link from one jndi name to another, or links to a foreign JNDI context.</p>
+<description>
+<p>&lt;jndi-link> creates a symbolic link from one jndi name to another,
+or links to a foreign JNDI context.</p>
 
-<p>Resin's JNDI can link to foreign JNDI contexts.  For example, third-party
-EJB servers will often expose their EJB beans through a JNDI context.
-jndi-link will create the appropriate InitialContextFactory, configure it,
-and lookup the foreign JNDI objects.</p>
+<p>Resin's JNDI can link to foreign JNDI contexts.  For example,
+third-party EJB servers will often expose their EJB beans through a JNDI
+context.  jndi-link will create the appropriate InitialContextFactory,
+configure it, and lookup the foreign JNDI objects.</p>
+</description>
 
 <attributes>
 <tr>
@@ -3569,7 +3334,9 @@ element properties {
 <defun title="&lt;jsf>" name="jsf" type="defun">
 <parents>web-app</parents>
 
+<description>
 <p>Configures JSF behavior.</p>
+</description>
 
 <attributes>
 <tr>
@@ -3886,7 +3653,9 @@ the command line, typically -X memory parameters and -D defines.</p>
 </defun>
 <defun title="&lt;keepalive-max>" name="keepalive-max" version="Resin 3.1">
 <parents>server</parents>
+<default>100</default>
 
+<description>
 <p>&lt;keepalive-max> configures the maximum number of sockets
 which can be used directly for <g>keepalive</g> connections.
 In Resin Professional, the <g>select manager</g> allows for
@@ -3908,8 +3677,7 @@ more efficient.</p>
 
 <p>Higher values of &lt;keepalive-max> improve network efficiency
 but increase the number of threads waiting for new client data.</p>
-
-<default>100</default>
+</description>
 
 <example title="keepalive-thread-max in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -3932,29 +3700,35 @@ but increase the number of threads waiting for new client data.</p>
 
 <defun title="&lt;keepalive-select-enable>" name="keepalive-select-enable" version="Resin 3.1">
 <parents>server</parents>
+<default>true</default>
 
+<description>
 <p>&lt;keepalive-select-enable> enables the select manager for
 keepalives.  The select manager is a Resin Professional feature allowing
 more keepalives by detaching threads from sockets.</p>
 
 <p>Normally, this should be left enabled.</p>
+</description>
 
-<default>true</default>
 </defun>
 
 <defun title="&lt;keepalive-select-thread-timeout>" name="keepalive-select-thread-timeout" version="Resin 3.1">
 <parents>server</parents>
+<default>1s</default>
 
+<description>
 <p>&lt;keepalive-select-thread-timeout> is a short timeout allowing
 the select manager to wait for a keepalive before detaching the
-thread.  This value would not normally be changed.d wou</p>
+thread.  This value would not normally be changed.</p>
+</description>
 
-<default>1s</default>
 </defun>
 
 <defun title="&lt;keepalive-timeout>" name="keepalive-timeout" version="Resin 3.1">
 <parents>server</parents>
+<default>10s</default>
 
+<description>
 <p>&lt;keepalive-timeout> configures how long a keepalive
 connection should wait for a new request before closing.  </p>
 
@@ -3968,8 +3742,7 @@ burst is complete.  A value of 5s or 10s is generally sufficient.</p>
 <p>The load-balancing and clustering keepalives have a different
 timeout behavior.  Since load-balancing sockets are reused for multiple
 clients, they can have longer timeouts.</p>
-
-<default>10s</default>
+</description>
 
 <example title="keepalive-thread-max in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -3994,11 +3767,13 @@ clients, they can have longer timeouts.</p>
 <defun title="&lt;lazy-servlet-validate>" name="lazy-servlet-validate">
 <default>false</default>
 
+<description>
 <p>&lt;lazy-servlet-validate> defers validation of servlet classes
 until the servlet is used.  Some servlet libraries are bundled with
 web.xml files which include servlets with no available classes.
 Since Resin will normally send an error in this
 situation, &lt;lazy-servlet-validate> lets you turn the validation off.</p>
+</description>
 
 <schema>
 element lazy-servlet-validate {
@@ -4009,16 +3784,20 @@ element lazy-servlet-validate {
 </defun>
 
 <defun title="&lt;library-loader>" name="library-loader" occur="*" version="Resin 3.0">
-  <parents>class-loader</parents>
+<parents>class-loader</parents>
 
-<p>&lt;library-loader> configures a jar
-library, <var>WEB-INF/lib</var>-style class loader.</p>
+<description>
+<p>&lt;library-loader> configures a jar library,
+<var>WEB-INF/lib</var>-style class loader.</p>
 
-<p>The library-loader will add jar files in its path to the current classpath.
-Jar files are recognized wihen they have a filename extension of
-<code>.jar</code> or <code>.zip</code>.</p>
+<p>The library-loader will add jar files in its path to the current
+classpath.  Jar files are recognized wihen they have a filename extension
+of <code>.jar</code> or <code>.zip</code>.</p>
 
-<deftable>
+<p>See <a href="http://caucho.com/resin-javadoc/javadoc/com/caucho/loader/LibraryLoader.html">DirectoryLoader</a>.</p>
+</description>
+
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Description</th>
@@ -4034,7 +3813,7 @@ Jar files are recognized wihen they have a filename extension of
   <td>Filesystem path for the class loader.  Since Resin 3.0</td>
   <td>required</td>
 </tr>
-</deftable>
+</attributes>
 
 <schema>
 element library-loader {
@@ -4049,31 +3828,15 @@ element fileset {
 }
 </schema>
 
-<p>See <a href="http://caucho.com/resin-javadoc/javadoc/com/caucho/loader/LibraryLoader.html">DirectoryLoader</a>.</p>
-
 </defun>
 
 <defun title="&lt;listener>" name="listener" version="Servlet">
 
+<description>
 <p>&lt;listener> configures servlet event listeners.  The listeners
 are registered based on interfaces they implement.  The listener
 instances are fully <a href="config-candi.xtp">Resin-IoC</a> aware,
 including dependency injection, observing events, and supporting aspects.</p>
-
-<attributes>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>listener-class</td>
-  <td>classname of the listener implementation</td>
-</tr>
-<tr>
-  <td>init</td>
-  <td>IoC initialization of the listener</td>
-</tr>
-</attributes>
 
 <deftable title="listener interfaces">
 <tr>
@@ -4110,6 +3873,24 @@ including dependency injection, observing events, and supporting aspects.</p>
 </tr>
 </deftable>
 
+
+</description>
+
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>
+<tr>
+  <td>listener-class</td>
+  <td>classname of the listener implementation</td>
+</tr>
+<tr>
+  <td>init</td>
+  <td>IoC initialization of the listener</td>
+</tr>
+</attributes>
+
 <schema>
 element listener {
   listener-class,
@@ -4120,7 +3901,9 @@ element listener {
 </defun>
 <defun title="&lt;load-balance-connect-timeout>" name="load-balance-connect-timeout" version="Resin 3.1">
 <parents>server</parents>
+<default>5s</default>
 
+<description>
 <p>&lt;load-balance-connect-timeout> configures the maximum time
 a client connection to a cluster-port should
 take.  The <a href="cluster-load-balancer.xtp">load balance</a> and
@@ -4129,8 +3912,7 @@ to connect to backend or peer servers in the cluster.</p>
 
 <p>Lower values detect failed servers more quickly, but a too-low value
 can timeout too quickly for a live server with some network congestion.</p>
-
-<default>5s</default>
+</description>
 
 <example title="load-balance-connect-timeout">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -4152,7 +3934,9 @@ can timeout too quickly for a live server with some network congestion.</p>
 
 <defun title="&lt;load-balance-recover-time>" name="load-balance-recover-time" version="Resin 3.1">
 <parents>server</parents>
+<default>15s</default>
 
+<description>
 <p>&lt;load-balance-recover-time> is the maximum time
 the <a href="cluster-load-balancer.xtp">load balancer</a>
 will consider the server dead after a failure before retrying
@@ -4164,8 +3948,7 @@ connect to an unavailable app-tier server.</p>
 <p>Lower values let the load balancer use a restarted <g>app-tier</g> server
 faster, but lower values also increase the overhead of trying to
 contact unavailable servers.</p>
-
-<default>15s</default>
+</description>
 
 <example title="load-balance-recover-time">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -4187,17 +3970,19 @@ contact unavailable servers.</p>
 
 <defun title="&lt;load-balance-idle-time>" name="load-balance-idle-time" version="Resin 3.1">
 <parents>server</parents>
+<default>keepalive-timeout - 1s</default>
 
-<p>&lt;load-balance-idle-time> is the maximum time
-the <a href="cluster-load-balancer.xtp">load balancer</a>
-and <a href="deploy-ref.xtp#session-config">distributed sessions</a> will leave an
-idle socket before closing it.</p>
+<description>
+<p>&lt;load-balance-idle-time> is the maximum time the
+<a href="cluster-load-balancer.xtp">load balancer</a> and <a
+href="deploy-ref.xtp#session-config">distributed sessions</a> will leave
+an idle socket before closing it.</p>
 
-<p>The default value is normally sufficient, since it tracks the
-keepalive of the cluster port.</p>
+<p>The default value is normally sufficient, since it tracks the keepalive
+of the cluster port.</p>
 
-<p>load-balance-idle-time must be less than the <var>keepalive</var> value of
-the target <a config-tag="cluster-port">cluster-port</a>.</p>
+<p>load-balance-idle-time must be less than the <var>keepalive</var>
+value of the target <a config-tag="cluster-port">cluster-port</a>.</p>
 
 <p>The load balancer and distributed sessions reuse sockets to the
 cluster peer and <g>app-tier</g> servers to improve TCP performance.
@@ -4206,14 +3991,16 @@ remain idle.</p>
 
 <p>Higher values may improve the socket pooling, but may also increase
 the chance of connecting to a closed server.</p>
+</description>
 
-<default>keepalive-timeout - 1s</default>
 
 </defun>
 
 <defun title="&lt;load-balance-warmup-time>" name="load-balance-warmup-time" version="Resin 3.1">
 <parents>server</parents>
+<default>60s</default>
 
+<description>
 <p>The time the <a href="cluster-load-balancer.xtp">load balancer</a>
 uses to throttle connections to an <g>app-tier</g> server that's just
 starting up.</p>
@@ -4225,8 +4012,7 @@ Resin's reliability by limiting the number of requests to a new
 app-tier server until the server has warmed up.</p>
 
 <p>Larger values give the application a longer time to warm up.</p>
-
-<default>60s</default>
+</description>
 
 <example title="load-balance-warmup-time">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -4248,7 +4034,9 @@ app-tier server until the server has warmed up.</p>
 
 <defun title="&lt;load-balance-weight>" name="load-balance-weight" version="Resin 3.1">
 <parents>server</parents>
+<default>100</default>
 
+<description>
 <p>load-balance-weight assigns a load-balance weight to a backend server.
 Servers with higher values get more requests.  Servers with lower
 values get fewer requests.</p>
@@ -4262,8 +4050,7 @@ small number of connections for profiling purposes.</p>
 
 <p>Larger values tell the load-balancer to assign more requests to
 the app-tier server.</p>
-
-<default>100</default>
+</description>
 
 <example title="load-balance-weight">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -4282,7 +4069,6 @@ the app-tier server.</p>
 </example>
 
 </defun>
-
 
 <defun title="&lt;login-config>" name="login-config" version="Servlet 2.2">
 <parents>web-app</parents>
@@ -4555,7 +4341,7 @@ element logger {
 <p>The <var>format</var> for log tags is used to specify a format string for each
 log message.  <code>format</code> recognizes EL-expressions. The EL variable
 <var>log</var> is a 
-<a href="javadoc|com.caucho.log.ELFormatter.ELFormatterLogRecord|"/>
+<a javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
  object.</p>
 
 <example title="log format string">
@@ -4575,7 +4361,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 </td></tr><tr><td>${log.sourceClassName}</td><td>Get the name of the class that issued the logging request (may not be available at runtime)
 </td></tr><tr><td>${log.sourceMethodName}</td><td>Get the name of the method that issued the logging request (may not be available at runtime)
 </td></tr><tr><td>${log.threadID}</td><td>Get an <var>int</var> identifier of the thread where the logging request originated
-</td></tr><tr><td>${log.thrown}</td><td>Get any <a href="javadoc|java.lang.Throwable|"/> associated with the logging request
+</td></tr><tr><td>${log.thrown}</td><td>Get any <a javadoc="java.lang.Throwable"/> associated with the logging request
 </td></tr></deftable>
 
 <p>You can also use the <a href="config-el.xtp">Environment EL variables</a> in your format string:</p>
@@ -5202,7 +4988,7 @@ PingThread will catch errors like deadlocks.</p>
 
 <p>
 The class that corresponds to &lt;ping&gt; is 
-<a href="javadoc|com.caucho.admin.PingThread|">PingThread</a>.  
+<a javadoc="com.caucho.admin.PingThread">PingThread</a>.  
 </p>
 
 <s2 title="Mail notification when ping fails">
@@ -5397,6 +5183,7 @@ element protocol {
 }
 </schema>
 
+<!-- XXX uri
 <example title="Example: Hessian service in resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin">
 
@@ -5407,6 +5194,7 @@ element protocol {
 
 &lt;/web-app>
 </example>
+-->
 
 </defun>
 
@@ -5637,7 +5425,7 @@ It uses a Java interface and a URI to select the web-service.</p>
 location is typically a HTTP URL.</p>
 
 <ul>
-<li>See <a href="../doc/resin-remoting.xtp">Resin remoting</a> for more
+<li>See <a href="../examples/remoting.xtp">Resin remoting</a> for more
 information, including how to write an adapter for Resin remoting.</li>
 <li>See the <a href="../examples/remote-hello-world/">hello world tutorial</a>
 for an example.</li>
@@ -5777,6 +5565,7 @@ element resin-data-directory {
 </schema>
 
 </defun>
+
 <defun title="&lt;resin:AdminAuthenticator>" name="resin:AdminAuthenticator">
 <description>
 <p>
@@ -5786,15 +5575,19 @@ element resin-data-directory {
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:Allow>" name="resin:Allow">
 <parents>web-app</parents>
-<p>The 
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/Allow.html">&lt;resin:Allow></a> 
-tag is used to secure a particular URL pattern. Because it is 
-affirmative, it must always include a nested condition expressing an authorization 
-constraint. All access attempts that do not satisfy the authorization rule are denied 
-access. This tag is the most common type of top level authorization tag.</p>
-<p>Following are the attributes of this tag:</p>
+<javadoc class="com.caucho.security.Allow"/>
+
+<description>
+<p>The &lt;resin:Allow> tag is used to secure a particular URL
+pattern. Because it is affirmative, it must always include a nested
+condition expressing an authorization constraint. All access attempts
+that do not satisfy the authorization rule are denied access. This tag
+is the most common type of top level authorization tag.</p> 
+</description>
+
 <!-- XXX: What are the defaults for this? -->
 <attributes>
 <tr>
@@ -5818,30 +5611,34 @@ access. This tag is the most common type of top level authorization tag.</p>
 &lt;/web-app&gt;
 </example>
 </defun>
-<defun title="&lt;resin:And>" name="resin:And">
-<description>
-<p>
 
-  Matches if all children match.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/And.html">&lt;resin:And> JavaDoc</a>
+<defun title="&lt;resin:And>" name="resin:And">
+<javadoc class="com.caucho.rewrite.And"/>
+<description>
+<p>Matches if all children match.
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:BasicLogin>" name="resin:BasicLogin">
 <parents>web-app</parents>
+<javadoc class="com.caucho.security.BasicLogin"/>
+<description>
 <p>
-As the name implies, HTTP basic authentication is the simplest mechanism for gathering 
-login data for web applications. When a web page is secured through HTTP basic 
-authentication, the brower renders a simple dialog box for the user to enter login 
-information. This information is then sent to the server in clear-text using well-defined 
-HTTP headers. This authentication mechanism can be convenient for quick protection of 
-internal pages or administration when writing a form isn't necessary. If you use basic 
-authentication for applications outside the fire-wall, it is highly recommended that you
-secure the transport layer using <a href="security-ssl.xtp">SSL</a>. The 
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/BasicLogin.html">&lt;resin:BasicLogin></a>
-tag is used to configure basic authentication.
+As the name implies, HTTP basic authentication is the simplest mechanism
+for gathering login data for web applications. When a web page is secured
+through HTTP basic authentication, the brower renders a simple dialog
+box for the user to enter login information. This information is then
+sent to the server in clear-text using well-defined HTTP headers. This
+authentication mechanism can be convenient for quick protection of
+internal pages or administration when writing a form isn't necessary. If
+you use basic authentication for applications outside the fire-wall,
+it is highly recommended that you secure the transport layer using <a
+href="security-ssl.xtp">SSL</a>. The &lt;resin:BasicLogin> tag is
+used to configure basic authentication.
 </p>
-<p>The following is an example of how basic login may be configured for an application:</p>
+</description>
+
 <example title="WEB-INF/resin-web.xml resin:BasicLogin">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
@@ -5859,19 +5656,26 @@ tag is used to configure basic authentication.
 &lt;/web-app>  
 </example>
 </defun>
+
 <defun title="&lt;resin:ByteStreamCache>" name="resin:ByteStreamCache">
+<javadoc class="com.caucho.distcache.ByteStreamCache"/>
 <description>
 <p>
-
-  Distributed cache of InputStream/OutputStream byte streams across a cluster pod.
-<a href="http://caucho.com/resin-javadoc/com/caucho/distcache/ByteStreamCache.html">&lt;resin:ByteStreamCache> JavaDoc</a>
+Distributed cache of InputStream/OutputStream byte streams across a cluster pod.
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:choose>" name="resin:choose" version="Resin 3.0.7">
 
+<description>
 <p>resin:choose implements an if, elsif, else.</p>
+
+<p>The &lt;resin:choose> schema is context-dependent.  A &lt;resin:choose>
+in a &lt;web-app> will have &lt;web-app> content, while a &lt;resin:choose>
+in a &lt;host> will have &lt;host> content.</p>
+
+</description>
 
 <attributes>
 <tr>
@@ -5887,10 +5691,6 @@ tag is used to configure basic authentication.
   <td>A fallback section executed when the tests fail</td>
 </tr>
 </attributes>
-
-<p>The &lt;resin:choose> schema is context-dependent.  A &lt;resin:choose>
-in a &lt;web-app> will have &lt;web-app> content, while a &lt;resin:choose>
-in a &lt;host> will have &lt;host> content.</p>
 
 <schema>
 element resin:choose {
@@ -5926,46 +5726,46 @@ element resin:otherwise {
 </example>
 </defun>
 
-
 <defun title="&lt;resin:ClusterCache>" name="resin:ClusterCache">
+<javadoc class="com.caucho.distcache.ClusterCache"/>
 <description>
 <p>
-
   JCache-style distributed object cache across a cluster pod (java.util.Map).
-<a href="http://caucho.com/resin-javadoc/com/caucho/distcache/ClusterCache.html">&lt;resin:ClusterCache> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:ClusterQueue>" name="resin:ClusterQueue">
+<javadoc class="com.caucho.jms.ClusterQueue"/>
 <description>
 <p>
-
   Clustered queue.
-<a href="http://caucho.com/resin-javadoc/com/caucho/jms/ClusterQueue.html">&lt;resin:ClusterQueue> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 
 <defun title="&lt;resin:ClusterSingleSignon>" name="resin:ClusterSingleSignon">
+<javadoc class="com.caucho.security.ClusterSingleSignon"/>
 <description>
 <p>
 
   Cluster-based single signon.
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/ClusterSingleSignon.html">&lt;resin:ClusterSingleSignon> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:DatabaseAuthenticator>" name="resin:DatabaseAuthenticator">
 <parents>cluster, host, web-app</parents>
+<javadoc class="com.caucho.security.DatabaseAuthenticator"/>
+<description>
 <p>
-The DatabaseAuthenticator (<a href="javadoc|com.caucho.security.DatabaseAuthenticator|"/>)
-asks a back-end relational database for the password matching a user's name. It uses the
-DataSource specified by the <var>data-source</var> attribute. <var>data-source</var> 
-refers to an existing <a href="database-ref.xtp">configured</a> DataSource.
-</p>
-<p>The following are the attributes for the DatabaseAuthenticator:</p>
+The DatabaseAuthenticator asks a back-end relational database for the
+password matching a user's name. It uses the DataSource specified by
+the <var>data-source</var> attribute. <var>data-source</var> refers to
+an existing <a href="database-ref.xtp">configured</a> DataSource.  </p>
+</description>
+
 <attributes>
 <tr>
   <th>Attribute</th>
@@ -6024,7 +5824,7 @@ refers to an existing <a href="database-ref.xtp">configured</a> DataSource.
   <td>true</td>
 </tr>
 </attributes>
-<p>The following is an example of how the database authenticator may be configured:</p>
+
 <example title="WEB-INF/resin-web.xml for DatabaseAuthenticator">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin"&gt;
@@ -6055,14 +5855,18 @@ refers to an existing <a href="database-ref.xtp">configured</a> DataSource.
 &lt;/web-app&gt;
 </example>
 </defun>
+
 <defun title="&lt;resin:Deny>" name="resin:Deny">
-<p>The 
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/Deny.html">&lt;resin:Deny></a> 
-tag is the opposite of the top level &lt;resin:Allow>. It restricts 
-access to a particular URL pattern based on any nested conditions. Access attempts that 
-match the condition are denied access. If no conditions are specified, all access to a URL 
+<javadoc class="com.caucho.security.Deny"/>
+
+<description>
+<p>The &lt;resin:Deny> tag is the opposite of the top level
+&lt;resin:Allow>. It restricts access to a particular URL pattern based
+on any nested conditions. Access attempts that match the condition
+are denied access. If no conditions are specified, all access to a URL
 pattern is restricted.</p>
-<p>Following are the attributes of this tag:</p>
+</description>
+
 <!-- XXX: What are the defaults for this? -->
 <attributes>
 <tr>
@@ -6074,7 +5878,7 @@ pattern is restricted.</p>
   <td>HTTP methods that the restriction applies to.</td>
 </tr>
 </attributes>
-<p>The following is an example of how the &lt;resin:Allow> might be used:</p>
+
 <example title="Security-constraint to protect static files">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin"&gt;
@@ -6088,43 +5892,51 @@ pattern is restricted.</p>
 &lt;/web-app&gt;
 </example>
 </defun>
+
 <defun title="&lt;resin:DigestLogin>" name="resin:DigestLogin">
 <parents>web-app</parents>
+<javadoc class="com.caucho.security.DigestLogin"/>
+
+<description>
 <p>
-The HTTP protocol includes a method to indicate to the client that it should digest the 
-password before sending it to the server. This is basically a more secure variant of HTTP 
-basic authentication. The browser submits a digest to Resin instead of submitting a 
-clear-text password. HTTP digest authentication protects the password in transmission.
+The HTTP protocol includes a method to indicate to the client that
+it should digest the password before sending it to the server. This
+is basically a more secure variant of HTTP basic authentication. The
+browser submits a digest to Resin instead of submitting a clear-text
+password. HTTP digest authentication protects the password in
+transmission.
 </p>
+
 <p>
-When using the HTTP digest, Resin will respond to the browser when a secure URL is accessed 
-and ask it to calculate a digest. The steps involved are:
+When using the HTTP digest, Resin will respond to the browser when
+a secure URL is accessed and ask it to calculate a digest. The steps
+involved are:
 </p>
 <ul>
   <li>Resin provides the client a realm and some other information.</li>
   <li>
-    The client obtains a user-name and password (usually through a dialog box with a web 
-    browser).
+    The client obtains a user-name and password (usually through a dialog
+    box with a web browser).
   </li>
   <li>
-    The client calculates a digest using the user-name, realm, password, and other 
-    information supplied by Resin.
+    The client calculates a digest using the user-name, realm, password,
+    and other information supplied by Resin.
   </li>
   <li>The client submits the digest to Resin.</li>
   <li>Resin does the same digest calculation as the client did.</li>
   <li>
-    Resin compares the submitted digest and the digest it calculated. If they match, 
-    the user is authenticated.
+    Resin compares the submitted digest and the digest it calculated. If
+    they match, the user is authenticated.
   </li>
 </ul>
 <p>
-The advantage of this method is that the clear-text password is protected in transmission, 
-it cannot be determined from the digest that is submitted by the client to the server.
-The
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/DigestLogin.html">&lt;resin:DigestLogin></a>
-tag is used to configure digest login.
+The advantage of this method is that the clear-text password is protected
+in transmission, it cannot be determined from the digest that is submitted
+by the client to the server.  The &lt;resin:DigestLogin> tag is used
+to configure digest login.
 </p>
-<p>The following is an example of how digest login may be configured for an application:</p>
+</description>
+
 <example title="Using HTTP Digest Authentication">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
@@ -6134,82 +5946,133 @@ tag is used to configure digest login.
 &lt;/web-app>
 </example>
 </defun>
+
 <defun title="&lt;resin:Dispatch>" name="resin:Dispatch">
+<javadoc class="com.caucho.rewrite.Dispatch"/>
 <description>
 <p>
 
   Normal servlet dispatching with optional <em>target</em> rewriting.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Dispatch.html">&lt;resin:Dispatch> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:FastCgiPort>" name="resin:FastCgiPort">
+<javadoc class="com.caucho.protocols.FastCgiPort"/>
 <description>
 <p>
-
   FastCGI requests, e.g. from nginx.
-<a href="http://caucho.com/resin-javadoc/com/caucho/protocols/FastCgiPort.html">&lt;resin:FastCgiPort> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:FastCgiProxy>" name="resin:FastCgiProxy">
+<javadoc class="com.caucho.rewrite.FastCgiProxy"/>
 <description>
 <p>
-
   Proxies the request to a backend server using FastCGI as a proxy protocol.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/FastCgiProxy.html">&lt;resin:FastCgiProxy> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:FileQueue>" name="resin:FileQueue">
+<javadoc class="com.caucho.jms.FileQueue"/>
 <description>
 <p>
-
   Filesystem based queue.
-<a href="http://caucho.com/resin-javadoc/com/caucho/jms/FileQueue.html">&lt;resin:FileQueue> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:FileTopic>" name="resin:FileTopic">
+<javadoc class="com.caucho.jms.FileTopic"/>
 <description>
 <p>
-
   Filesystem based topic.
-<a href="http://caucho.com/resin-javadoc/com/caucho/jms/FileTopic.html">&lt;resin:FileTopic> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:Forbidden>" name="resin:Forbidden">
+<javadoc class="com.caucho.rewrite.Forbidden"/>
 <description>
 <p>
 
   Send a HTTP forbidden response.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Forbidden.html">&lt;resin:Forbidden> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:FormLogin>" name="resin:FormLogin">
+<javadoc class="com.caucho.security.FormLogin"/>
+
+<description>
+<p> Form-based login is the most common way collecting login
+information. Using this login mechanism, you can plug-in a custom
+login page with a form storing login information (usually two input
+text fields for user-name and password). This custom login page can
+then be used with the Resin security framework. This allows for a much
+more seamless login mechanism integrated closely with your application,
+especially in terms of look and feel.  </p>
 <p>
-Form-based login is the most common way collecting login information. Using this login 
-mechanism, you can plug-in a custom login page with a form storing login information 
-(usually two input text fields for user-name and password). This custom login page can 
-then be used with the Resin security framework. This allows for a much more seamless login 
-mechanism integrated closely with your application, especially in terms of look and feel.
+When a URL is secured via form based login, the custom login form page is
+used to collect authentication information. If authentication succeeds,
+the user is redirected to the originally requested page. Otherwise,
+the user is forwarded to an error page (that can also be configured).
 </p>
+
+<!-- XXX is this really a separate reference? -->
 <p>
-When a URL is secured via form based login, the custom login form page is used to 
-collect authentication information. If authentication succeeds, the user is redirected to 
-the originally requested page. Otherwise, the user is forwarded to an error page (that can 
-also be configured).
+A login page can be anything that renders a valid login form such
+as HTML, Servlet, JSP or JSF. A valid login form must have the
+action <var>j_security_check</var>. It must also have the parameters
+<var>j_username</var> and <var>j_password</var> holding the username
+and password. Optionally, it can also have <var>j_uri</var> and
+<var>j_use_cookie_auth</var>.  <var>j_uri</var> gives the next page to
+display when login succeeds. If the form-uri-priority is set to true,
+the user will be forwarded to the <var>j_uri</var> page regardless of
+what the originally requested page was. If the attribute is set to false
+(the default), the <var>j_uri</var> page is only used when the originally
+requested page was the login page itself. <var>j_use_cookie_auth</var>
+allows Resin to send a persistent cookie to the client to make subsequent
+logins automatic. When <var>j_use_cookie_auth</var> is set, Resin will
+store a persistent cookie on the client's machine after authentication
+succeeds. On all subsequent access, Resin detects the persistent
+cookie and automatically logs the user in instead of prompting for
+authentication. This essentially lets you implement "remember me"
+functionality common in many web-sites. By default, the authentication
+only lasts for a single session and no persistent login cookie is sent
+to the client.
 </p>
-<p>
-The 
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/FormLogin.html">&lt;resin:FormLogin/&gt;</a> 
-element is used to configure form-based authentication. Here 
-are the attributes of the element:
-</p>
-<deftable title="FormLogin attribute">
+
+<p>The following table outlines all the login parameters recognized by Resin:</p>
+<deftable title="j_security_check Parameters">
+<tr>
+  <th>Parameter</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>j_username</td>
+  <td>The user name.</td>
+</tr>
+<tr>
+  <td>j_password</td>
+  <td>The password.</td>
+</tr>
+<tr>
+  <td>j_uri</td>
+  <td>Resin extension for the successful display page (optional).</td>
+</tr>
+<tr>
+  <td>j_use_cookie_auth</td>
+  <td>Resin extension to allow cookie login (optional).</td>
+</tr>
+</deftable>
+
+
+</description>
+
+<attributes>
 <tr>
   <th>attribute</th>
   <th>description</th>
@@ -6235,9 +6098,8 @@ are the attributes of the element:
   <td>If true, the login form's j_uri will override the originally requested URI.</td>
   <td>false</td>
 </tr>
-</deftable>
-<p>The following is an example of how form-based login may be configured for an 
-application:</p>
+</attributes>
+
 <example title="WEB-INF/resin-web.xml resin:FormLogin">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
@@ -6247,48 +6109,7 @@ application:</p>
   ...
 &lt;/web-app>
 </example>
-<p>
-A login page can be anything that renders a valid login form such as HTML, Servlet, JSP or 
-JSF. A valid login form must have the action <var>j_security_check</var>. It must also have 
-the parameters <var>j_username</var> and <var>j_password</var> holding the username and 
-password. Optionally, it can also have <var>j_uri</var> and <var>j_use_cookie_auth</var>. 
-<var>j_uri</var> gives the next page to display when login succeeds. If the 
-form-uri-priority is set to true, the user will be forwarded to the <var>j_uri</var> page 
-regardless of what the originally requested page was. If the attribute is set to 
-false (the default), the <var>j_uri</var> page is only used when the originally requested 
-page was the login page itself. <var>j_use_cookie_auth</var> allows Resin to send a
-persistent cookie to the client to make subsequent logins automatic. When 
-<var>j_use_cookie_auth</var> is set, Resin will store a persistent cookie on the client's 
-machine after authentication succeeds. On all subsequent access, Resin detects the 
-persistent cookie and automatically logs the user in instead of prompting for 
-authentication. This essentially lets you implement "remember me" functionality common in
-many web-sites. By default, the authentication only lasts for a single session and no
-persistent login cookie is sent to the client.
-</p>
-<p>The following table outlines all the login parameters recognized by Resin:</p>
-<deftable title="j_security_check Parameters">
-<tr>
-  <th>Parameter</th>
-  <th>Meaning</th>
-</tr>
-<tr>
-  <td>j_username</td>
-  <td>The user name.</td>
-</tr>
-<tr>
-  <td>j_password</td>
-  <td>The password.</td>
-</tr>
-<tr>
-  <td>j_uri</td>
-  <td>Resin extension for the successful display page (optional).</td>
-</tr>
-<tr>
-  <td>j_use_cookie_auth</td>
-  <td>Resin extension to allow cookie login (optional).</td>
-</tr>
-</deftable>
-<p>The following is an example of a very simple login page:</p>
+
 <example title="j_security_check form">
 &lt;form action='j_security_check' method='POST'&gt;
 &lt;table&gt;
@@ -6300,42 +6121,49 @@ persistent login cookie is sent to the client.
 &lt;/form&gt;
 </example>
 </defun>
+
 <defun title="&lt;resin:Forward>" name="resin:Forward">
+<javadoc class="com.caucho.rewrite.Forward"/>
 <description>
 <p>
 
   Forwards to the new URL using RequestDispatcher.forward with the <em>target</em> URL.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Forward.html">&lt;resin:Forward> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:GlobalCache>" name="resin:GlobalCache">
+<javadoc class="com.caucho.distcache.GlobalCache"/>
 <description>
 <p>
 
   JCache-style distributed object cache across the entire Resin system.
-<a href="http://caucho.com/resin-javadoc/com/caucho/distcache/GlobalCache.html">&lt;resin:GlobalCache> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:HttpProxy>" name="resin:HttpProxy">
+<javadoc class="com.caucho.rewrite.HttpProxy"/>
 <description>
 <p>
 
   Proxies the request to a backend server using HTTP as a proxy protocol.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/HttpProxy.html">&lt;resin:HttpProxy> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:if>" name="resin:if" version="Resin 3.0.7">
 
+<description>
 <p>resin:if executes part of the configuration file conditionally.  resin:if
 can be particularly useful in combination with Java command-line properties
 like -Dfoo=bar to enable development mode or testing configuration.
 </p>
+
+<p>The resin:if schema is context-dependent.  For example, resin:if in
+a &lt;web-app> will have web-app content while resin:if in a &lt;host>
+will have host content.</p>
+</description>
 
 <attributes>
 <tr>
@@ -6349,10 +6177,6 @@ like -Dfoo=bar to enable development mode or testing configuration.
   <td>required</td>
 </tr>
 </attributes>
-
-<p>The resin:if schema is context-dependent.  For example, resin:if in
-a &lt;web-app> will have web-app content while resin:if in a &lt;host>
-will have host content.</p>
 
 <schema>
 element resin:if {
@@ -6377,89 +6201,90 @@ element resin:if {
 </defun> <!-- resin:if -->
 
 <defun title="&lt;resin:IfAuthType>" name="resin:IfAuthType">
+<javadoc class="com.caucho.rewrite.IfAuthType"/>
 <description>
 <p>
 
   Checks for the authentication type, request.getAuthType().
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfAuthType.html">&lt;resin:IfAuthType> JavaDoc</a>
 </p>
 </description>
 </defun>
 <defun title="&lt;resin:IfCookie>" name="resin:IfCookie">
+<javadoc class="com.caucho.rewrite.IfCookie"/>
 <description>
 <p>
-
   Checks for the presence of a named HTTP cookie from request.getCookies().
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfCookie.html">&lt;resin:IfCookie> JavaDoc</a>
 </p>
 </description>
 </defun>
 <defun title="&lt;resin:IfCron>" name="resin:IfCron">
+<javadoc class="com.caucho.rewrite.IfCron"/>
 <description>
 <p>
 
   Matches if the current time is in an active range configured by cron-style times.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfCron.html">&lt;resin:IfCron> JavaDoc</a>
 </p>
 </description>
 </defun>
 <defun title="&lt;resin:IfFileExists>" name="resin:IfFileExists">
+<javadoc class="com.caucho.rewrite.IfFileExists"/>
 <description>
 <p>
 
   Matches if the URL corresponds to an actual file.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfFileExists.html">&lt;resin:IfFileExists> JavaDoc</a>
 </p>
 </description>
 </defun>
 <defun title="&lt;resin:IfHeader>" name="resin:IfHeader">
+<javadoc class="com.caucho.rewrite.IfHeader"/>
 <description>
 <p>
 
   Tests for a HTTP header and value match.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfHeader.html">&lt;resin:IfHeader> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:IfLocale>" name="resin:IfLocale">
+<javadoc class="com.caucho.rewrite.IfLocale"/>
 <description>
 <p>
 
   Tests for a Locale match from the HTTP request.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfLocale.html">&lt;resin:IfLocale> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:IfLocalPort>" name="resin:IfLocalPort">
+<javadoc class="com.caucho.rewrite.IfLocalPort"/>
 <description>
 <p>
 
   Compares the local port of the request, request.getLocalPort().
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfLocalPort.html">&lt;resin:IfLocalPort> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:IfMethod>" name="resin:IfMethod">
+<javadoc class="com.caucho.rewrite.IfMethod"/>
 <description>
 <p>
 
   Compares the HTTP method, request.getMethod().
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfMethod.html">&lt;resin:IfMethod> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:IfNetwork>" name="resin:IfNetwork">
+<javadoc class="com.caucho.rewrite.IfNetwork"/>
 <parents>resin:Allow,resin:Deny</parents>
-<p>The 
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfNetwork.html">&lt;resin:IfNetwork></a> 
-tag allows or denies requests based on the IP address of the client. IP-constraint 
-is very useful for protecting administration resources to an internal network. It can also 
-be useful for denying service to known problem IPs.</p>
+<description>
+<p>The &lt;resin:IfNetwork> tag allows or denies requests based on the
+IP address of the client. IP-constraint is very useful for protecting
+administration resources to an internal network. It can also be useful
+for denying service to known problem IPs.</p>
+</description>
 <!-- XXX: Need to list the attributes here -->
-<p>
-The following example demonstrates how the &lt;resin:IfAddress> tag can be used to secure 
-an admin page to be accessible only via a specific IP:
-</p>
 <example title="Admin Pages Allowed Only from 192.168.17.0/24">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
@@ -6490,44 +6315,49 @@ match. The usage of <var>/bits</var> is optional.</p>
   ...
 &lt;/web-app&gt;
 </example>
-<p>Be careful with deny - some ISP's (like AOL) use proxies and the IP of many different 
-users may appear to be the same IP to your server.</p>
-<p>If only <var>deny</var> is used, then all IPs are allowed if they do not match a 
-<code>deny</code>. If only <var>allow</var> is used, then an IP is denied unless it 
-matches an <code>allow</code>. If both are used, then the IP must match both an 
-<code>allow</code> and a <code>deny</code></p>
+<p>Be careful with deny - some ISP's (like AOL) use proxies and the IP
+of many different users may appear to be the same IP to your server.</p>
+
+<p>If only <var>deny</var> is used, then all IPs are allowed if they
+do not match a <code>deny</code>. If only <var>allow</var> is used,
+then an IP is denied unless it matches an <code>allow</code>. If both
+are used, then the IP must match both an <code>allow</code> and a
+<code>deny</code></p>
+
 </defun>
+
 <defun title="&lt;resin:IfQueryParam>" name="resin:IfQueryParam">
+<javadoc class="com.caucho.rewrite.IfQueryParam"/>
 <description>
 <p>
 
   Tests for a HTTP query parameger, request.getParameter().
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfQueryParam.html">&lt;resin:IfQueryParam> JavaDoc</a>
 </p>
 </description>
 </defun>
 <defun title="&lt;resin:IfRemoteAddr>" name="resin:IfRemoteAddr">
+<javadoc class="com.caucho.rewrite.IfRemoteAddr"/>
 <description>
 <p>
 
   Tests against the remote IP address, request.getRemoteAddr().
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteAddr.html">&lt;resin:IfRemoteAddr> JavaDoc</a>
 </p>
 </description>
 </defun>
 <defun title="&lt;resin:IfRemoteUser>" name="resin:IfRemoteUser">
+<javadoc class="com.caucho.rewrite.IfRemoteUser"/>
 <description>
 <p>
 
   Tests against the remote user, request.getRemoteUser().
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteUser.html">&lt;resin:IfRemoteUser> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:IfSecure>" name="resin:IfSecure">
 <parents>resin:Allow,resin:Deny</parents>
-<p>The
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfSecure.html">&lt;resin:IfSecure></a> 
+<javadoc class="com.caucho.rewrite.IfSecure"/>
+<p>The &lt;resin:IfSecure>
 tag restricts access to secure transports, usually SSL.</p>
 <!-- XXX: Need to list the attributes here -->
 <p>The following is an example of the typical use of this tag. In the example, all pages 
@@ -6560,6 +6390,7 @@ this configuration.</p>
 
 <defun title="&lt;resin:IfUserInRole>" name="resin:IfUserInRole">
 <parents>resin:Allow,resin:Deny</parents>
+<javadoc class="com.caucho.rewrite.IfUserInRole"/>
 <p>The 
 <a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfUserInRole.html">&lt;resin:IfUserInRole></a>
 condition enforces role-based security. It requires that 
@@ -6588,6 +6419,7 @@ authenticated users have a specified role. The following are the attributes of t
 </defun>
 <defun title="&lt;resin:import>" name="resin:import" version="Resin 3.0.7">
 
+<description>
 <p>&lt;resin:import> reads configuration from another file or set of
 files.  For example, the WEB-INF/web.xml and WEB-INF/resin-web.xml files
 are implemented as &lt;resin:import> in the app-default.xml.</p>
@@ -6597,6 +6429,7 @@ So a resin:import in &lt;web-app-default&gt; will have a target with a
 top-level of &lt;web-app&gt;, and a resin:import in &lt;cluster> will have
 a top-level tag of &lt;cluster>.
 </p>
+</description>
 
 <attributes>
 <tr>
@@ -6694,17 +6527,21 @@ the web-app flexibility in which bean files to create.</p>
 </example>
 
 </defun>
+
 <defun title="&lt;resin:JaasAuthenticator>" name="resin:JaasAuthenticator">
 <parents>cluster, host, web-app</parents>
+<javadoc class="com.caucho.security.JaasAuthenticator"/>
+<description>
 <p>
-The JaasAuthenticator (<a href="javadoc|com.caucho.security.JaasAuthenticator|"/>) uses a
-JAAS LoginModule for authentication. A common use of the JaasAuthenticator is to serve as
-an adapter for the large number of JAAS LoginModule's included in the Sun JDK for 
-authentication purposes. However, the JAAS authenticator can be used with any valid JAAS
-login module.
+The JaasAuthenticator uses a JAAS LoginModule for authentication. A common
+use of the JaasAuthenticator is to serve as an adapter for the large
+number of JAAS LoginModule's included in the Sun JDK for authentication
+purposes. However, the JAAS authenticator can be used with any valid
+JAAS login module.
 </p>
 <!-- XXX: Need an external reference to the JAAS modules in the JDK -->
-<p>The following are the attributes for the JaasAuthenticator:</p>
+</description>
+
 <attributes>
 <tr>
   <th>Attribute</th>
@@ -6735,7 +6572,7 @@ login module.
   <td>md5-base64</td>
 </tr>
 </attributes>
-<p>The following is an example of how the JAAS authenticator may be configured:</p>
+
 <example title="WEB-INF/resin-web.xml for JaasAuthenticator">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin"&gt;
@@ -6850,31 +6687,33 @@ public class TestLoginModule implements javax.security.auth.spi.LoginModule {
 </s2>
 </defun>
 <defun title="&lt;resin:JmsConnectionFactory>" name="resin:JmsConnectionFactory">
+<javadoc class="com.caucho.jms.JmsConnectionFactory"/>
 <description>
 <p>
 
   Combined Queue and Topic ConnectionFactory.
-<a href="http://caucho.com/resin-javadoc/com/caucho/jms/JmsConnectionFactory.html">&lt;resin:JmsConnectionFactory> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:JmxService>" name="resin:JmxService">
+<javadoc class="com.caucho.admin.JmsService"/>
 <description>
 <p>
   Enables cluster-wide JMX administration.
-<a href="http://caucho.com/resin-javadoc/com/caucho/admin/JmsService.html">&lt;resin:JmxService> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:LdapAuthenticator>" name="resin:LdapAuthenticator">
 <parents>cluster, host, web-app</parents>
-<p>
-The LdapAuthenticator (<a href="javadoc|com.caucho.security.LdapAuthenticator|"/>) uses 
-JNDI to connect to an LDAP (or Active Directory) server for authentication.
-</p>
-<p>The following are the attributes for the LdapAuthenticator:</p>
-<deftable>
+<javadoc class="com.caucho.security.LdapAuthenticator"/>
+<description>
+<p> The LdapAuthenticator uses JNDI to connect to an LDAP (or Active
+Directory) server for authentication.  </p>
+</description>
+
+<attributes>
 <tr>
   <th>Attribute</th>
   <th>Meaning</th>
@@ -6937,8 +6776,8 @@ JNDI to connect to an LDAP (or Active Directory) server for authentication.
   <td>The URL for the server.</td>
   <td>ldap://localhost:389</td>
 </tr>
-</deftable>
-<p>The following is an example of how the LDAP authenticator may be configured:</p>
+</attributes>
+
 <example title="WEB-INF/resin-web.xml for LdapAuthenticator">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin"&gt;
@@ -6950,6 +6789,7 @@ JNDI to connect to an LDAP (or Active Directory) server for authentication.
   ...
 &lt;/web-app>
 </example>
+
 <s2 title="jndi-env">
 <p>
 <code>jndi-env</code> configures properties of the LDAP provider implementation. Prior 
@@ -6973,52 +6813,49 @@ The following example shows the usage of the <code>jndi-env</code> configuration
 </example>
 </s2>
 </defun>
+
 <defun title="&lt;resin:LoadBalance>" name="resin:LoadBalance">
+<javadoc class="com.caucho.rewrite.LoadBalance"/>
 <description>
 <p>
-
   Load balance to a cluster of backend Resin servers.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/LoadBalance.html">&lt;resin:LoadBalance> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:LogService>" name="resin:LogService">
+<javadoc class="com.caucho.admin.LogService"/>
 <description>
 <p>
-
   Stores high-priority log messages in a database.
-<a href="http://caucho.com/resin-javadoc/com/caucho/admin/LogService.html">&lt;resin:LogService> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:MemoryQueue>" name="resin:MemoryQueue">
+<javadoc class="com.caucho.jms.MemoryQueue"/>
 <description>
 <p>
-
   Memory based queue.
-<a href="http://caucho.com/resin-javadoc/com/caucho/jms/MemoryQueue.html">&lt;resin:MemoryQueue> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:MemorySingleSignon>" name="resin:MemorySingleSignon">
+<javadoc class="com.caucho.security.MemorySingleSignon"/>
 <description>
 <p>
-
   Memory-based single signon.
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/MemorySingleSignon.html">&lt;resin:MemorySingleSignon> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 
 <defun title="&lt;resin:MemoryTopic>" name="resin:MemoryTopic">
+<javadoc class="com.caucho.jms.MemoryTopic"/>
 <description>
 <p>
-
   Memory based topic.
-<a href="http://caucho.com/resin-javadoc/com/caucho/jms/MemoryTopic.html">&lt;resin:MemoryTopic> JavaDoc</a>
 </p>
 </description>
 </defun>
@@ -7044,7 +6881,6 @@ element resin:message {
 </example>
 
 </defun> <!-- resin:message -->
-
 
 <defun title="&lt;resin:Not>" name="resin:Not">
 <description>
@@ -7129,7 +6965,7 @@ element resin:otherwise {
 <parents>cluster, host, web-app</parents>
 <p>
 The PropertiesAuthenticator 
-(<a href="javadoc|com.caucho.security.PropertiesAuthenticator|"/>)
+(<a javadoc="com.caucho.security.PropertiesAuthenticator"/>)
 allows you to use Java properties to store authentication information. This is very useful
 for a variety of applications such as very small sites, developement, unit testing or 
 integration testing. You can either specify properties in-line in XML or via an external
@@ -7513,6 +7349,7 @@ user.</p>
 &lt;users>
 </example>
 </defun>
+
 <defun title="&lt;resin:XmlRoleMap>" name="resin:XmlRoleMap">
 <description>
 <p>
@@ -7841,7 +7678,7 @@ element security-manager {
 specifies the name of a security provider class.  The name is used
 to instantiate an instance of the
 object, which is then passed to 
-<a href="javadoc|java.security.Security|addProvider">Security.addProvider</a>.
+<a javadoc="java.security.Security#addProvider()">Security.addProvider</a>.
 </p>
 
 <schema>
@@ -7883,11 +7720,11 @@ e.g. 192.168.0.10:6800 for clustering, load balancing,
 and administration.</p>
 
 <p>The current server is managed with a
-<a href="javadoc|com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
+<a javadoc="com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
 The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
 
 <p>Peer servers are managed with 
-<a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
+<a javadoc="com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
 </description>
 
 <attributes>
@@ -8661,7 +8498,7 @@ chance of session collisions.</p>
 <p><var>reuse-session-id</var> defaults to true so that Resin can share the session
 id amongst different web-apps.</p>
 
-<p>The class that corresponds to &lt;session-config&gt; is <a href="javadoc|com.caucho.server.session.SessionManager|"/></p>
+<p>The class that corresponds to &lt;session-config&gt; is <a javadoc="com.caucho.server.session.SessionManager"/></p>
 
 </defun>
 
@@ -9083,7 +8920,7 @@ element strict-mapping {
 <parents>resin, cluster, host, web-app</parents>
 
 <p>Sets a Java system property.  The effect is the same as if you
-had called <a href="javadoc|java.lang.System|setProperty(String,String)"/> before starting Resin.</p>
+had called <a javadoc="java.lang.System#setProperty(String,String)"/> before starting Resin.</p>
 
 <schema>
 element system-property {
@@ -9096,6 +8933,37 @@ element system-property {
   &lt;system-property foo="bar"/&gt;
 &lt;/resin&gt;
 </example>
+</defun>
+
+<defun title="Time intervals" name="time intervals">
+<description>
+  <p>Time intervals are used throughout Resin configuration. To specify the
+    units for a given interval, use the appropriate suffix as shown below.</p>
+
+<deftable>
+<tr>
+  <th>Suffix</th>
+  <th>Meaning</th>
+</tr>
+<tr>
+  <td>s</td>
+  <td>seconds</td>
+</tr>
+<tr>
+  <td>m</td>
+  <td>minutes</td>
+</tr>
+<tr>
+  <td>h</td>
+  <td>hours</td>
+</tr>
+<tr>
+  <td>D</td>
+  <td>days</td>
+</tr>
+</deftable>
+
+</description>
 </defun>
 
 <defun title="&lt;temp-dir>" name="temp-dir" occur="?" version="Resin 1.1">

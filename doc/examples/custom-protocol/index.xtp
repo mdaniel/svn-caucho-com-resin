@@ -28,9 +28,9 @@ public web server.  The <var>magic8ball</var> protocol is at the same level as
 <tr><td><viewfile-link file="src/example/Magic8Ball.java"/>
     </td><td>The orignal Magic8Ball class, it knows nothing about the code that uses it.
 </td></tr><tr><td><viewfile-link file="src/example/Magic8BallProtocol.java"/>
-    </td><td>The implementation of <a href="javadoc|com.caucho.server.port.Protocol|"/> that Resin uses to create a Request object.
+    </td><td>The implementation of <a javadoc="com.caucho.server.port.Protocol"/> that Resin uses to create a Request object.
 </td></tr><tr><td><viewfile-link file="src/example/Magic8BallRequest.java"/>
-    </td><td>The implementation of interface <a href="javadoc|com.caucho.server.port.ServerRequest|"/> that represents a single request.
+    </td><td>The implementation of interface <a javadoc="com.caucho.server.port.ServerRequest"/> that represents a single request.
 </td></tr><tr><td><viewfile-link file="src/example/Parser.java"/>
     </td><td>protocol-specific parsing class to parse the ReadStream and determine commands.
 </td></tr><tr><td><viewfile-link file="src/example/AbstractCommand.java"/>
@@ -55,18 +55,18 @@ implementation of that code. </p>
 
 <p>Applications take advantage of Resin's highly tested and configurable server
 architecture and only need to implement some simple objects.  Two classes are
-required, one which extends the abstract class <a href="javadoc|com.caucho.server.port.Protocol|"/> and one which implements the
-interface <a href="javadoc|com.caucho.server.port.ServerRequest|"/>.</p>
+required, one which extends the abstract class <a javadoc="com.caucho.server.port.Protocol"/> and one which implements the
+interface <a javadoc="com.caucho.server.port.ServerRequest"/>.</p>
 </s1>
 
 <s1 title="com.caucho.server.port.Protocol">
 
 <p>A custom class derived from 
-<a href="javadoc|com.caucho.server.port.Protocol|"/>
+<a javadoc="com.caucho.server.port.Protocol"/>
 is a factory that produces custom Request objects.</p>
 
 <p>The Protocol passes a 
-<a href="javadoc|com.caucho.server.connection.Connection|"/> 
+<a javadoc="com.caucho.server.connection.Connection"/> 
 object to the Request object it creates.  The Request object uses the
 <code>Connection</code> to obtain a read stream and a write stream.</p>
 
@@ -115,7 +115,7 @@ object to the Request object it creates.  The Request object uses the
 
 <s1 title="com.caucho.server.port.ServerRequest">
 
-<p><a href="javadoc|com.caucho.server.port.ServerRequest|"/> is the interface
+<p><a javadoc="com.caucho.server.port.ServerRequest"/> is the interface
 used for implementing the class that handles a request.  This is where the bulk
 of the work is done.</p>
  
@@ -129,7 +129,7 @@ single request at a time.</p>
 <p>This means that any member variables must be initialized at the
 beginning of the code in <code>handleRequest()</code>.</p>
 
-<p>The first step in handleRequest() is usually to obtain a <a href="javadoc|com.caucho.vfs.ReadStream|"/> and a <a href="javadoc|com.caucho.vfs.WriteStream|"/> from the Connection that was
+<p>The first step in handleRequest() is usually to obtain a <a javadoc="com.caucho.vfs.ReadStream"/> and a <a javadoc="com.caucho.vfs.WriteStream"/> from the Connection that was
 stored with the constructor.  These streams are used to read raw data from the client and write raw data to the client.</p>
 
 <p>This tutorial then goes on to initialize a parser and perform appropriate
@@ -287,15 +287,15 @@ Connection closed by foreign host.
 
 <s1 title="Compatibility">
 
-<p>The <a href="javadoc|com.caucho.server.port.Protocol|"/> and
-<a href="javadoc|com.caucho.server.port.ServerRequest|"/> classes are of
-course Resin specific.  The <a href="javadoc|com.caucho.vfs.ReadStream|"/> and
-<a href="javadoc|com.caucho.vfs.ReadStream|"/> are as well.</p>
+<p>The <a javadoc="com.caucho.server.port.Protocol"/> and
+<a javadoc="com.caucho.server.port.ServerRequest"/> classes are of
+course Resin specific.  The <a javadoc="com.caucho.vfs.ReadStream"/> and
+<a javadoc="com.caucho.vfs.ReadStream"/> are as well.</p>
 
 <p>If portability is a concern, implement a class that is similar in
-functionality to <a href="javadoc|com.caucho.server.port.ServerRequest|"/>.
-Code that class to get passed a <a href="javadoc|java.io.InputStream|"/> and a
-<a href="javadoc|java.io.OutputStream|"/>.  A bare-bones Resin-specific
+functionality to <a javadoc="com.caucho.server.port.ServerRequest"/>.
+Code that class to get passed a <a javadoc="java.io.InputStream"/> and a
+<a javadoc="java.io.OutputStream"/>.  A bare-bones Resin-specific
 <code>Protocol</code> and <code>ServerRequest</code> can be used as a thin
 wrapper to your custom <var>Request</var> class, and the Resin's ReadStream and
 WriteStream can be passed as the <code>InputStream</code> and

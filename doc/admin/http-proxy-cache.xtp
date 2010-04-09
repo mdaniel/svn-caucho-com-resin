@@ -399,7 +399,7 @@ performance and reduce database load by several orders of magnitude.</p>
 cache to save large amounts of data with little overhead.</p>
 
 <p>Management of the proxy cache uses the
-<a href="javadoc|com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
+<a javadoc="com.caucho.management.server.ProxyCacheMXBean">ProxyCacheMXBean</a>.</p>
 
 <deftable title="&lt;cache> Attributes">
 <tr>

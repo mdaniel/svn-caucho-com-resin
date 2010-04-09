@@ -1,3 +1,21 @@
+// X-browser
+function getScrollTop()
+{
+  if (typeof pageYOffset == "undefined") {
+    if (document.documentElement.clientHeight) {
+      return document.documentElement.scrollTop;
+    }
+    else {
+      return document.body.scrollTop;
+    }
+  }
+  else {
+    return pageYOffset;
+  }
+}
+
+// DOM util
+
 function hideElement(element) 
 {
   element.style.display = 'none';
@@ -30,14 +48,60 @@ function mapElementsByClass(cssClass, f)
   }
 }
 
+function findFirst(tagName, test)
+{
+  var tags = document.getElementsByTagName(tagName);
+
+  for (i = 0; i < tags.length; i++) {
+    if (test(tags[i])) {
+      return tags[i];
+    }
+  }
+
+  return null;
+}
+
+function findFirstElementOnScreen()
+{
+  var scrollTop = getScrollTop();
+
+  var onScreen = function(tag) {
+    return findElementTop(tag) >= scrollTop;
+  };
+
+  return findFirst("*", onScreen);
+}
+
+function scrollToElement(element)
+{
+  window.scrollTo(findElementLeft(element), findElementTop(element));
+}
+
+/** 
+ * Hides all elements of a certain class. The page position is retained
+ * by finding the first element visible in the screen, then scrolling to it
+ * after the hide.
+ */
 function hideElementsByClass(cssClass)
 {
+  var first = findFirstElementOnScreen();
+
   mapElementsByClass(cssClass, hideElement);
+
+  if (first) {
+    scrollToElement(first);
+  }
 }
 
 function showElementsByClass(cssClass)
 {
+  var first = findFirstElementOnScreen();
+
   mapElementsByClass(cssClass, showElement);
+
+  if (first) {
+    scrollToElement(first);
+  }
 }
 
 function toggleElementsByClass(checkbox, cssClass)
@@ -189,3 +253,29 @@ function findElementTop(element)
   };
 }
 
+var popup = null;
+
+function init()
+{
+  popup = new Popup();
+
+  // when you uncheck a box and then do a refresh, the hidden class will
+  // reappear, but the box will appear unchecked.  This code hides anything
+  // the user should expect to be hidden.
+  var checkboxClasses = [
+    "reference-description",
+    "reference-schema",
+    "reference-attributes",
+    "reference-example"
+  ];
+
+  for (var i in checkboxClasses) {
+    var checkboxClass = checkboxClasses[i];
+    var checkboxId = checkboxClass + "-checkbox";
+    var checkbox = document.getElementById(checkboxId);
+
+    if (checkbox && ! checkbox.checked) {
+      hideElementsByClass(checkboxClass);
+    }
+  }
+}
