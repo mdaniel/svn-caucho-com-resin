@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2009 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -31,13 +31,10 @@ package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
+
 import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 
 /**
  * Annotated object based only on reflection.
@@ -130,6 +127,7 @@ public class ReflectionAnnotated implements Annotated
   /**
    * Returns true if the annotation is present)
    */
+  @Override
   public boolean isAnnotationPresent(Class<? extends Annotation> annType)
   {
     for (Annotation ann : _annArray) {

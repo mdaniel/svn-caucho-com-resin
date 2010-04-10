@@ -32,6 +32,7 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -55,12 +56,14 @@ import javax.interceptor.Interceptors;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
  * Represents the interception
  */
+@Module
 public class InterceptorCallChain
   extends AbstractCallChain
 {
@@ -98,11 +101,11 @@ public class InterceptorCallChain
   private InterceptionBinding _bindingEntry;
 
   // map from the interceptor class to the local variable for the interceptor
-  private HashMap<Interceptor, String> _interceptorVarMap
-    = new HashMap<Interceptor, String>();
+  private HashMap<Interceptor<?>, String> _interceptorVarMap
+    = new HashMap<Interceptor<?>, String>();
 
   // interceptors we're responsible for initializing
-  private ArrayList<Class> _ownInterceptors = new ArrayList<Class>();
+  private ArrayList<Class<?>> _ownInterceptors = new ArrayList<Class<?>>();
 
   // decorators
   private HashSet<Class<?>> _decoratorSet;
@@ -277,6 +280,9 @@ public class InterceptorCallChain
 
   private void introspectDecorators(ApiMethod apiMethod)
   {
+    if (apiMethod.getMethod().getDeclaringClass().equals(Object.class))
+      return;
+    
     ArrayList<Type> decorators = _view.getBean().getDecoratorTypes();
     
     HashSet<Class<?>> decoratorSet = new HashSet<Class<?>>();
@@ -915,13 +921,32 @@ public class InterceptorCallChain
 
     out.println();
     out.print("class ");
-    out.print(className + " implements ");
+    out.print(className);
 
     for (int i = 0; i < decorators.size(); i++) {
-      if (i != 0)
-        out.print(", ");
+      Class <?> cl = (Class<?>) decorators.get(i);
+      
+      if (! cl.isInterface())
+        out.print(" extends ");
 
-      out.printClass((Class<?>) decorators.get(i));
+      out.printClass(cl);
+    }
+
+    boolean isFirst = true;
+    for (int i = 0; i < decorators.size(); i++) {
+      Class <?> cl = (Class<?>) decorators.get(i);
+      
+      if (! cl.isInterface())
+        continue;
+      
+      if (isFirst)
+        out.print(" implements ");
+      else
+        out.print(", ");
+      
+      isFirst = false;
+
+      out.printClass(cl);
     }
 
     out.println(" {");
@@ -952,6 +977,14 @@ public class InterceptorCallChain
       Class<?> decoratorClass = (Class<?>) decorator;
 
       for (Method method : decoratorClass.getMethods()) {
+        if (Modifier.isFinal(method.getModifiers())
+            || Modifier.isStatic(method.getModifiers())
+            || Modifier.isPrivate(method.getModifiers())
+            || (method.getDeclaringClass() == Object.class
+                && ! method.getName().equals("toString"))) {
+          continue;
+        }
+        
         if (! containsMethod(methodList, method)) {
           methodList.add(method);
 

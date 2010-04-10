@@ -78,7 +78,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     super(type, null, javaClass.getDeclaredAnnotations());
 
     _javaClass = javaClass;
-
+    
     introspect(javaClass);
   }
 
@@ -109,9 +109,9 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   /**
    * Returns the matching method, creating one if necessary.
    */
-  public AnnotatedMethod createMethod(Method method)
+  public AnnotatedMethod<?> createMethod(Method method)
   {
-    for (AnnotatedMethod annMethod : _methodSet) {
+    for (AnnotatedMethod<?> annMethod : _methodSet) {
       if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
         return annMethod;
       }

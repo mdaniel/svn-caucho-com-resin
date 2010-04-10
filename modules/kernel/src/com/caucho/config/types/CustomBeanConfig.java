@@ -280,7 +280,7 @@ public class CustomBeanConfig<T> {
     Method method = methodConfig.getMethod();
     Annotation []annList = methodConfig.getAnnotations();
 
-    AnnotatedMethod annMethod = _annotatedType.createMethod(method);
+    AnnotatedMethod<?> annMethod = _annotatedType.createMethod(method);
 
     if (annMethod instanceof AnnotatedMethodImpl) {
       AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) annMethod;

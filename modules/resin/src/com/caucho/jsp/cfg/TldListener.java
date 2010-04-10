@@ -30,7 +30,7 @@
 package com.caucho.jsp.cfg;
 
 import com.caucho.config.ConfigException;
-import com.caucho.server.webapp.Listener;
+import com.caucho.server.webapp.ListenerConfig;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.util.Alarm;
 
@@ -93,7 +93,7 @@ public class TldListener {
     }
 
     try {
-      Listener listener = new Listener();
+      ListenerConfig listener = new ListenerConfig();
       listener.setListenerClass(_listenerClass);
       //listener.init();
 

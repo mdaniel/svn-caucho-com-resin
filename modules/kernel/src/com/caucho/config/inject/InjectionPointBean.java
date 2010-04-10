@@ -33,27 +33,29 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
-
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.BeanManager;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * Configuration for the xml web bean component.
  */
-public class InjectionPointBean<T> implements Bean<T>
+public class InjectionPointBean implements Bean<InjectionPoint>
 {
-  public InjectionPointBean(BeanManager manager)
+  private InjectionPoint _ij;
+  
+  public InjectionPointBean(BeanManager manager, InjectionPoint ij)
   {
+    _ij = ij;
   }
 
   //
   // metadata for the bean
   //
 
-  public Class<T> getBeanClass()
+  public Class<InjectionPoint> getBeanClass()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -128,7 +130,7 @@ public class InjectionPointBean<T> implements Bean<T>
    */
   public Class<? extends Annotation> getScope()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return Dependent.class;
   }
 
   /**
@@ -139,44 +141,45 @@ public class InjectionPointBean<T> implements Bean<T>
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public T create(CreationalContext<T> creationalContext)
+  @Override
+  public InjectionPoint create(CreationalContext<InjectionPoint> creationalContext)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _ij;
   }
   /**
    * Instantiate the bean.
    */
+  /*
   public T instantiate()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   /**
    * Inject the bean.
    */
-  public void inject(T instance)
+  public void inject(InjectionPoint instance)
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
    * Call post-construct
    */
-  public void postConstruct(T instance)
+  public void postConstruct(InjectionPoint instance)
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
    * Call pre-destroy
    */
-  public void preDestroy(T instance)
+  public void preDestroy(InjectionPoint instance)
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public void destroy(T instance, CreationalContext<T> env)
+  @Override
+  public void destroy(InjectionPoint instance, 
+                      CreationalContext<InjectionPoint> env)
   {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 }

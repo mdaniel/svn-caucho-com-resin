@@ -36,6 +36,8 @@ import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
@@ -48,6 +50,8 @@ abstract public class BaseType
 {
   private static final BaseType []NULL_PARAM = new BaseType[0];
   
+  private LinkedHashSet<Type> _typeSet;
+  
   public static BaseType create(Type type, 
                                 HashMap<String,BaseType> paramMap)
   {
@@ -57,7 +61,7 @@ abstract public class BaseType
       TypeVariable<?> []typeParam = cl.getTypeParameters();
       
       if (typeParam == null || typeParam.length == 0)
-	return new ClassType(cl);
+	return ClassType.create(cl);
 
       BaseType []args = new BaseType[typeParam.length];
 
@@ -159,7 +163,7 @@ abstract public class BaseType
     TypeVariable<?> []typeParam = type.getTypeParameters();
       
     if (typeParam == null || typeParam.length == 0)
-      return new ClassType(type);
+      return ClassType.create(type);
 
     BaseType []args = new BaseType[typeParam.length];
 
@@ -192,7 +196,7 @@ abstract public class BaseType
 
     return baseTypes;
   }
-  
+
   abstract public Class<?> getRawClass();
 
   public HashMap<String,BaseType> getParamMap()
@@ -230,6 +234,28 @@ abstract public class BaseType
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  /**
+   * Returns the type closure of the base type.
+   */
+  public final Set<Type> getTypeClosure()
+  {
+    if (_typeSet == null) {
+      LinkedHashSet<Type> typeSet = new LinkedHashSet<Type>();
+    
+      fillTypeClosure(typeSet);
+      
+      _typeSet = typeSet;
+    }
+    
+    return _typeSet;
+  }
+  
+  protected void fillTypeClosure(Set<Type> typeSet)
+  {
+    typeSet.add(toType());
+    typeSet.add(Object.class);
+  }
+  
   public BaseType findClass(InjectManager manager, Class<?> cl)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -244,4 +270,5 @@ abstract public class BaseType
   {
     return getRawClass().getName();
   }
+
 }

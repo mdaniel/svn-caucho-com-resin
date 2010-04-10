@@ -272,7 +272,7 @@ public class WebApp extends ServletContextImpl
     = new HashMap<String,String>();
 
   // List of all the listeners.
-  private ArrayList<Listener> _listeners = new ArrayList<Listener>();
+  private ArrayList<ListenerConfig> _listeners = new ArrayList<ListenerConfig>();
 
   // List of the ServletContextListeners from the configuration file
   private ArrayList<ServletContextListener> _webAppListeners
@@ -1899,7 +1899,7 @@ public class WebApp extends ServletContextImpl
   }
 
   @Configurable
-  public void addListener(Listener listener)
+  public void addListener(ListenerConfig listener)
     throws Exception
   {
     if (! hasListener(listener.getListenerClass())) {
@@ -1917,7 +1917,7 @@ public class WebApp extends ServletContextImpl
   public boolean hasListener(Class listenerClass)
   {
     for (int i = 0; i < _listeners.size(); i++) {
-      Listener listener = _listeners.get(i);
+      ListenerConfig listener = _listeners.get(i);
 
       if (listenerClass.equals(listener.getListenerClass()))
         return true;
@@ -2624,11 +2624,6 @@ public class WebApp extends ServletContextImpl
           validator.validate();
         }
       }
-
-      callInitializers();
-
-      //Servlet 3.0
-      initAnnotated();
     } finally {
       _lifecycle.toInit();
     }
@@ -2905,7 +2900,7 @@ public class WebApp extends ServletContextImpl
         = listenerClass.getAnnotation(WebListener.class);
 
       if (webListener != null) {
-        Listener listener = new Listener();
+        ListenerConfig listener = new ListenerConfig();
         listener.setListenerClass(listenerClass);
 
         addListener(listener);
@@ -2990,9 +2985,14 @@ public class WebApp extends ServletContextImpl
 
       _jspApplicationContext.addELResolver(new WebBeansELResolver());
 
+      callInitializers();
+
+      //Servlet 3.0
+      initAnnotated();
+
       ServletContextEvent event = new ServletContextEvent(this);
 
-      for (Listener listener : _listeners) {
+      for (ListenerConfig listener : _listeners) {
         try {
           addListenerObject(listener.createListenerObject(), false);
         } catch (Exception e) {
@@ -3030,6 +3030,8 @@ public class WebApp extends ServletContextImpl
       clearCache();
 
       isOkay = true;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     } finally {
       if (! isOkay)
         _lifecycle.toError();
@@ -4004,7 +4006,7 @@ public class WebApp extends ServletContextImpl
 
       // server/10g8 -- webApp listeners after session
       for (int i = _listeners.size() - 1; i >= 0; i--) {
-        Listener listener = _listeners.get(i);
+        ListenerConfig listener = _listeners.get(i);
 
         try {
           listener.destroy();

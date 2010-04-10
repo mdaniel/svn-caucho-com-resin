@@ -29,49 +29,55 @@
 
 package com.caucho.config.reflect;
 
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
+import java.lang.reflect.Type;
+import java.util.HashMap;
+
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
+import com.caucho.inject.Module;
 
 /**
  * class type matching
  */
+@Module
 public class ClassType extends BaseType
 {
   public static final BaseType OBJECT_TYPE;
   
-  private static final HashMap<Class,Class> _boxTypeMap
-    = new HashMap<Class,Class>();
+  private static final HashMap<Class<?>,ClassType> _classTypeMap
+    = new HashMap<Class<?>,ClassType>();
     
-  private Class _type;
+  private Class<?> _type;
 
-  public ClassType(Class type)
+  protected ClassType(Class<?> type)
   {
-    Class boxType = _boxTypeMap.get(type);
+    // ioc/0706
+    /*
+    Class<?> boxType = _boxTypeMap.get(type);
 
     if (boxType != null)
       type = boxType;
+      */
     
     _type = type;
   }
   
-  public Class getRawClass()
+  public static ClassType create(Class<?> type)
+  {
+    ClassType classType = _classTypeMap.get(type);
+    
+    if (classType != null)
+      return classType;
+    else
+      return new ClassType(type);
+  }
+  
+  @Override
+  public Class<?> getRawClass()
   {
     return _type;
   }
   
+  @Override
   public Type toType()
   {
     return _type;
@@ -112,7 +118,7 @@ public class ClassType extends BaseType
   }
 
   @Override
-  public BaseType findClass(InjectManager manager, Class cl)
+  public BaseType findClass(InjectManager manager, Class<?> cl)
   {
     if (_type.equals(cl))
       return this;
@@ -126,7 +132,7 @@ public class ClassType extends BaseType
 	return baseType;
     }
 
-    Class superclass = _type.getSuperclass();
+    Class<?> superclass = _type.getSuperclass();
 
     if (superclass == null)
       return null;
@@ -136,11 +142,13 @@ public class ClassType extends BaseType
     return superType.findClass(manager, cl);
   }
 
+  @Override
   public int hashCode()
   {
     return _type.hashCode();
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == this)
@@ -153,21 +161,41 @@ public class ClassType extends BaseType
     return _type.equals(type._type);
   }
 
+  @Override
   public String toString()
   {
     return getRawClass().toString();
   }
 
   static {
-    _boxTypeMap.put(boolean.class, Boolean.class);
-    _boxTypeMap.put(byte.class, Byte.class);
-    _boxTypeMap.put(short.class, Short.class);
-    _boxTypeMap.put(int.class, Integer.class);
-    _boxTypeMap.put(long.class, Long.class);
-    _boxTypeMap.put(float.class, Float.class);
-    _boxTypeMap.put(double.class, Double.class);
-    _boxTypeMap.put(char.class, Character.class);
-
-    OBJECT_TYPE = BaseType.create(Object.class, new HashMap());
+    _classTypeMap.put(boolean.class, new BoxType(boolean.class, Boolean.class));
+    _classTypeMap.put(Boolean.class, new ClassType(Boolean.class));
+    
+    _classTypeMap.put(char.class, new BoxType(char.class, Character.class));
+    _classTypeMap.put(Character.class, new ClassType(Character.class));
+    
+    _classTypeMap.put(byte.class, new BoxType(byte.class, Byte.class));
+    _classTypeMap.put(Byte.class, new ClassType(Byte.class));
+    
+    _classTypeMap.put(short.class, new BoxType(short.class, Short.class));
+    _classTypeMap.put(Short.class, new ClassType(Short.class));
+    
+    _classTypeMap.put(int.class, new BoxType(int.class, Integer.class));
+    _classTypeMap.put(Integer.class, new ClassType(Integer.class));
+    
+    _classTypeMap.put(long.class, new BoxType(long.class, Long.class));
+    _classTypeMap.put(Long.class, new ClassType(Long.class));
+    
+    _classTypeMap.put(float.class, new BoxType(float.class, Float.class));
+    _classTypeMap.put(Float.class, new ClassType(Float.class));
+    
+    _classTypeMap.put(double.class, new BoxType(double.class, Double.class));
+    _classTypeMap.put(Double.class, new ClassType(Double.class));
+    
+    _classTypeMap.put(Object.class, new ClassType(Object.class));
+    _classTypeMap.put(String.class, new ClassType(String.class));
+    
+    OBJECT_TYPE = BaseType.create(Object.class, 
+                                  new HashMap<String,BaseType>());
   }
 }

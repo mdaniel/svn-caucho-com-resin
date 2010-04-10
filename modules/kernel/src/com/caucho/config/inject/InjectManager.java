@@ -190,8 +190,6 @@ public class InjectManager
   private final ExtensionManager _extensionManager
     = new ExtensionManager(this);
   
-  private boolean _isCustomExtension;
-
   private AtomicLong _version = new AtomicLong();
 
   private HashSet<String> _configuredClasses
@@ -241,6 +239,15 @@ public class InjectManager
     = new HashMap<Type,Bean<?>>();
   
   private HashSet<Class<? extends Annotation>> _qualifierSet
+    = new HashSet<Class<? extends Annotation>>();
+  
+  private HashSet<Class<? extends Annotation>> _scopeTypeSet
+    = new HashSet<Class<? extends Annotation>>();
+  
+  private HashSet<Class<? extends Annotation>> _normalScopeSet
+    = new HashSet<Class<? extends Annotation>>();
+  
+  private HashSet<Class<? extends Annotation>> _passivatingScopeSet
     = new HashSet<Class<? extends Annotation>>();
 
   private HashMap<Class<?>,Context> _contextMap
@@ -740,7 +747,8 @@ public class InjectManager
   public boolean isScope(Class<? extends Annotation> annotationType)
   {
     return (annotationType.isAnnotationPresent(Scope.class)
-            || annotationType.isAnnotationPresent(NormalScope.class));
+            || annotationType.isAnnotationPresent(NormalScope.class)
+            || _scopeTypeSet.contains(annotationType));
   }
 
   /**
@@ -749,7 +757,8 @@ public class InjectManager
   @Override
   public boolean isNormalScope(Class<? extends Annotation> annotationType)
   {
-    return annotationType.isAnnotationPresent(NormalScope.class);
+    return (annotationType.isAnnotationPresent(NormalScope.class)
+            || _normalScopeSet.contains(annotationType));
   }
 
   /**
@@ -760,15 +769,10 @@ public class InjectManager
   {
     NormalScope scope =  annotationType.getAnnotation(NormalScope.class);
 
-    return scope != null && scope.passivating();
-  }
-
-  /**
-   * Returns the scope definition for a scope type
-   */
-  public Scope getScopeDefinition(Class<? extends Annotation> scopeType)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (scope != null && scope.passivating())
+      return true;
+    
+    return _passivatingScopeSet.contains(annotationType);
   }
 
   /**
@@ -840,7 +844,7 @@ public class InjectManager
   /**
    * Creates a BaseType from a Type
    */
-  public BaseType createBaseType(Type type, HashMap paramMap)
+  public BaseType createBaseType(Type type, HashMap<String,BaseType> paramMap)
   {
     return _baseTypeFactory.create(type, paramMap);
   }
@@ -1583,10 +1587,12 @@ public class InjectManager
     Type type = ij.getType();
     Set<Annotation> qualifiers = ij.getQualifiers();
 
-    return resolveByInjectionPoint(type, qualifiers);
+    return resolveByInjectionPoint(type, qualifiers, ij);
   }
 
-  public Bean<?> resolveByInjectionPoint(Type type, Set<Annotation> bindingSet)
+  public Bean<?> resolveByInjectionPoint(Type type,
+                                         Set<Annotation> bindingSet,
+                                         InjectionPoint ij)
   {
     Annotation []bindings;
 
@@ -1605,6 +1611,9 @@ public class InjectManager
     Set<Bean<?>> set = getBeans(type, bindings);
 
     if (set == null || set.size() == 0) {
+      if (InjectionPoint.class.equals(type))
+        return new InjectionPointBean(this, ij);
+      
       throw unsatisfiedException(type, bindings);
     }
 
@@ -2289,7 +2298,6 @@ public class InjectManager
 
       cl = Class.forName(className, false, _classLoader);
 
-
       if (! isValidSimpleBean(cl))
         return;
 
@@ -2311,40 +2319,40 @@ public class InjectManager
         return;
 
       AnnotatedType<?> type = createAnnotatedType(cl);
-      type = processAnnotatedType(type);
-
-      if (type == null) {
-        return;
-      }
-
-      if (type.isAnnotationPresent(Specializes.class)) {
-        for (Class<?> parent = cl.getSuperclass();
-             parent != null;
-             parent = parent.getSuperclass()) {
-          _specializedClasses.add(parent);
-        }
-      }
-
-      _pendingAnnotatedTypes.add(type);
+      
+      processAnnotatedType(type);
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
     }
   }
-
+ 
   /**
    * Creates a discovered annotated type.
    */
-  private <T> AnnotatedType<T> processAnnotatedType(AnnotatedType<T> type)
+  private <T> void processAnnotatedType(AnnotatedType<T> type)
   {
     ProcessAnnotatedTypeImpl<T> processType
       = new ProcessAnnotatedTypeImpl<T>(type);
 
     fireExtensionEvent(processType);
 
-    if (! processType.isVeto())
-      return processType.getAnnotatedType();
-    else
-      return null;
+    if (processType.isVeto())
+      return;
+    
+    type = processType.getAnnotatedType();
+
+    if (type == null)
+      return;
+    
+    if (type.isAnnotationPresent(Specializes.class)) {
+      for (Class<?> parent = type.getJavaClass().getSuperclass();
+           parent != null;
+           parent = parent.getSuperclass()) {
+        _specializedClasses.add(parent);
+      }
+    }
+
+    _pendingAnnotatedTypes.add(type);
   }
 
   private boolean isDisabled(Class<?> type)
@@ -2370,6 +2378,10 @@ public class InjectManager
   private boolean isValidSimpleBean(Class<?> type)
   {
     if (type.isInterface())
+      return false;
+    else if (type.isAnonymousClass())
+      return false;
+    else if (type.isMemberClass())
       return false;
 
     /* XXX: ioc/024d
@@ -2402,6 +2414,10 @@ public class InjectManager
   {
     if (_specializedClasses.contains(type.getJavaClass()))
       return;
+    
+    // XXX: not sure this is correct.
+    if (Throwable.class.isAssignableFrom(type.getJavaClass()))
+      return;
 
     InjectionTarget<T> target = createInjectionTarget(type);
 
@@ -2430,13 +2446,23 @@ public class InjectManager
       return;
 
     addDiscoveredBean(bean);
+    
+    fillProducerBeans(bean);
 
     // beans.addScannedClass(cl);
+  }
+  
+  private void fillProducerBeans(ManagedBeanImpl<?> bean)
+  {
   }
 
   private <X> void addDiscoveredBean(ManagedBeanImpl<X> managedBean)
   {
     addBean(managedBean);
+    
+    for (Bean<?> producerBean : managedBean.getProducerBeans()) {
+      addBean(producerBean);
+    }
 
     for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
       // observer = processObserver(observer);
@@ -2451,10 +2477,6 @@ public class InjectManager
 
         addObserver(observer, baseType, bindings);
       }
-    }
-
-    for (Bean<?> producerBean : managedBean.getProducerBeans()) {
-      addBean(producerBean);
     }
   }
 
@@ -2931,15 +2953,24 @@ public class InjectManager
     {
     }
     
+    @Override
     public void addQualifier(Class<? extends Annotation> qualifier)
     {
       _qualifierSet.add(qualifier);
     }
 
+    @Override
     public void addScope(Class<? extends Annotation> scopeType,
                          boolean isNormal,
                          boolean isPassivating)
     {
+      _scopeTypeSet.add(scopeType);
+      
+      if (isNormal)
+        _normalScopeSet.add(scopeType);
+      
+      if (isPassivating)
+        _passivatingScopeSet.add(scopeType);
     }
 
     public void addStereotype(Class<? extends Annotation> stereotype,

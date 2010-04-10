@@ -48,18 +48,25 @@ import java.lang.reflect.*;
 public abstract class AnnotationLiteral<T extends Annotation>
   implements Annotation
 {
+  private transient Class<T> _annotationType;
+  
   @SuppressWarnings("unchecked")
+  @Override
   public final Class<T> annotationType()
   {
-    Type type = getClass().getGenericSuperclass();
+    if (_annotationType == null) {
+      Type type = getClass().getGenericSuperclass();
 
-    if (type instanceof ParameterizedType) {
-      ParameterizedType pType = (ParameterizedType) type;
+      if (type instanceof ParameterizedType) {
+        ParameterizedType pType = (ParameterizedType) type;
 
-      return (Class) pType.getActualTypeArguments()[0];
+        _annotationType = (Class) pType.getActualTypeArguments()[0];
+      }
+      else
+        throw new UnsupportedOperationException(type.toString());
     }
-    else
-      throw new UnsupportedOperationException(type.toString());
+    
+    return _annotationType;
   }
   
   @Override
@@ -69,13 +76,63 @@ public abstract class AnnotationLiteral<T extends Annotation>
       return true;
     else if (! (o instanceof Annotation))
       return false;
+
+    Class<?> type = annotationType();
     
-    Annotation ann = (Annotation) o;
-    
-    if (annotationType() != ann.annotationType())
+    if (! type.isInstance(o))
       return false;
     
+    for (Method method : type.getMethods()) {
+      if (method.getParameterTypes().length > 0 
+          || method.getDeclaringClass() == Annotation.class
+          || method.getDeclaringClass() == Object.class) {
+        continue;
+      }
+      
+      try {
+        Object a = method.invoke(this);
+        Object b = method.invoke(o);
+        
+        if (a != b && (a == null || ! a.equals(b)))
+          return false;
+      } catch (Exception e) {
+        return false;
+      }
+    }
+    
     return true;
+  }
+  
+  @Override
+  public int hashCode()
+  {
+    int hash = 0;
+    
+    for (Method method : annotationType().getMethods()) {
+      if (method.getParameterTypes().length > 0 
+          || method.getDeclaringClass() == Annotation.class
+          || method.getDeclaringClass() == Object.class) {
+        continue;
+      }
+      
+      hash += (127 * method.getName().hashCode() ^ valueHashCode(method));
+    }
+
+    return hash;
+  }
+  
+  private int valueHashCode(Method method)
+  {
+    try {
+      Object value = method.invoke(this);
+      
+      if (value != null)
+        return value.hashCode();
+      else
+        return 0;
+    } catch (Exception e) {
+      return 0;
+    }
   }
 
   @Override

@@ -81,7 +81,7 @@ public class ValueArg<T> extends Arg<T> {
       HashSet<Annotation> bindings = new HashSet<Annotation>();
       
       try {
-	_bean = (Bean<T>) _beanManager.resolveByInjectionPoint(_type, bindings);
+	_bean = (Bean<T>) _beanManager.resolveByInjectionPoint(_type, bindings, null);
       } catch (RuntimeException e) {
 	_bindException = e;
       }

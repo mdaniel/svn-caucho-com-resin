@@ -521,7 +521,7 @@ public class ServletContextImpl extends ServletContextCompat
   }
   
   @Configurable
-  public void addListener(Listener config)
+  public void addListener(ListenerConfig config)
     throws Exception
   {
     

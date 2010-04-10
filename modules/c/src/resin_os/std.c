@@ -337,7 +337,7 @@ std_accept(server_socket_t *ss, connection_t *conn)
     return 0;
 
   memset(sin_data, 0, sizeof(sin_data));
-  sin = (struct sockaddr_in *) &sin_data;
+  sin = (struct sockaddr *) &sin_data;
   sin_len = sizeof(sin_data);
 
 #ifdef WIN32
@@ -398,11 +398,11 @@ std_accept(server_socket_t *ss, connection_t *conn)
   conn->fd = sock;
   conn->sock = 0;
   conn->ops = &std_ops;
-  conn->client_sin = (struct sockaddr_in *) &conn->client_data;
+  conn->client_sin = (struct sockaddr *) &conn->client_data;
   memcpy(conn->client_sin, sin, sizeof(conn->client_data));
   conn->is_init = 0;
 
-  conn->server_sin = (struct sockaddr_in *) &conn->server_data;
+  conn->server_sin = (struct sockaddr *) &conn->server_data;
   sin_len = sizeof(conn->server_data);
   getsockname(sock, conn->server_sin, &sin_len);
 

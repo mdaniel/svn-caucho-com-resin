@@ -77,15 +77,10 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   implements ScopeAdapterBean<X>
 {
   private static final L10N L = new L10N(ManagedBeanImpl.class);
-  private static final Logger log
-    = Logger.getLogger(ManagedBeanImpl.class.getName());
-
+  
   private AnnotatedType<X> _annotatedType;
 
   private InjectionTarget<X> _injectionTarget;
-
-  private Set<InjectionPoint> _injectionPointSet
-    = new LinkedHashSet<InjectionPoint>();
 
   private HashSet<Bean<?>> _producerBeans
     = new LinkedHashSet<Bean<?>>();
@@ -93,8 +88,6 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   private HashSet<ObserverMethodImpl<X,?>> _observerMethods
     = new LinkedHashSet<ObserverMethodImpl<X,?>>();
 
-  private Class<X> _instanceClass;
-  private boolean _isBound;
   private Object _scopeAdapter;
 
   public ManagedBeanImpl(InjectManager webBeans,
@@ -121,11 +114,13 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     _injectionTarget = injectionTarget;
   }
 
+  @Override
   public AnnotatedType<X> getAnnotatedType()
   {
     return _annotatedType;
   }
 
+  @Override
   public InjectionTarget<X> getInjectionTarget()
   {
     return _injectionTarget;

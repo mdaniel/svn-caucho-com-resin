@@ -29,26 +29,22 @@
 
 package com.caucho.config.inject;
 
-import java.lang.annotation.Annotation;
-
 import javax.enterprise.inject.Any;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
  * Represents the @Default annotation
  */
-public class AnyLiteral {
-  public static final Any ANY = new Any() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public Class annotationType()
-      { 
-        return Any.class; 
-      }
+public class AnyLiteral extends AnnotationLiteral<Any> implements Any {
+  public static final Any ANY = new AnyLiteral();
+  
+  private AnyLiteral()
+  {
+  }
       
-      @Override
-      public String toString()
-      { 
-        return "@Any()"; 
-      }
-    };
+  @Override
+  public String toString()
+  { 
+    return "@Any()"; 
+  }
 }

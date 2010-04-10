@@ -233,7 +233,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
 
   protected InjectionPointBean createInjectionPointBean(BeanManager manager)
   {
-    return new InjectionPointBean(manager);
+    return new InjectionPointBean(manager, null);
   }
 
   public String toString()

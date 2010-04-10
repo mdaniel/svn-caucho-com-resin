@@ -110,7 +110,12 @@ public class SessionScope extends ScopeContext {
 
     Bean<T> comp = (Bean) bean;
 
-    String id = ((PassivationCapable) bean).getId();
+    String id;
+    
+    if (bean instanceof PassivationCapable)
+      id = ((PassivationCapable) bean).getId();
+    else
+      id = comp.getBeanClass().getName();
 
     ContextContainer context
       = (ContextContainer) session.getAttribute("webbeans.resin");

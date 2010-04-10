@@ -62,7 +62,9 @@ class InjectScanManager
   
   private final ConcurrentHashMap<String,InjectScanClass> _scanClassMap
     = new ConcurrentHashMap<String,InjectScanClass>();
+  
   private boolean _isCustomExtension;
+  
   private ArrayList<InjectScanClass> _pendingScanClassList
     = new ArrayList<InjectScanClass>();
 
@@ -186,8 +188,17 @@ class InjectScanManager
       // ioc/0j02 (decorator?)
       return null;//createScanClass(className);
     }
-    else
-      return createScanClass(className);
+    else if (className.indexOf('$') >= 0) {
+      // ioc/0j0l
+      return null;
+    }
+    else {
+      InjectScanClass scanClass = createScanClass(className);
+      
+      scanClass.setScanClass();
+      
+      return scanClass;
+    }
   }
   
   InjectScanClass getScanClass(String className)

@@ -29,36 +29,30 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.Arg;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.config.*;
-import com.caucho.config.bytecode.ScopeAdapter;
-import com.caucho.config.cfg.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.*;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.Producer;
 
+import com.caucho.config.bytecode.ScopeAdapter;
+import com.caucho.config.program.Arg;
+import com.caucho.inject.Module;
+import com.caucho.util.L10N;
+
 /*
  * Configuration for a @Produces method
  */
+@Module
 public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   implements InjectionTarget<T>, ScopeAdapterBean<X>
 {
@@ -90,6 +84,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     _producerBean = producerBean;
     _producesMethod = producesMethod;
     _disposesMethod = disposesMethod;
+    
+    if (producesMethod != null)
+      producesMethod.getJavaMember().setAccessible(true);
+    
+    if (disposesMethod != null)
+      disposesMethod.getJavaMember().setAccessible(true);
 
     _args = args;
 
@@ -395,11 +395,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   public AnnotatedParameter<X> getDisposedParameter()
   {
     throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  protected InjectionPointBean createInjectionPointBean(BeanManager manager)
-  {
-    return new InjectionPointBean(manager);
   }
 
   public String toString()

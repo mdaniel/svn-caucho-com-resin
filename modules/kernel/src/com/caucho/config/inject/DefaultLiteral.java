@@ -32,26 +32,23 @@ package com.caucho.config.inject;
 import java.lang.annotation.Annotation;
 
 import javax.enterprise.inject.Default;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
  * Represents the @Default annotation
  */
-public class DefaultLiteral {
-  public static final Default DEFAULT = new Default() {
-      @SuppressWarnings("unchecked")
-      @Override
-      public Class annotationType()
-      { 
-        return Default.class; 
-      }
-      
-      @Override
-      public String toString()
-      { 
-        return "@Default()"; 
-      }
-    };
-
+public class DefaultLiteral extends AnnotationLiteral<Default> implements Default {
+  public static final Default DEFAULT = new DefaultLiteral();
+  
+  private DefaultLiteral()
+  {
+  }
+  
+  public String toString()
+  { 
+    return "@Default()"; 
+  }
+  
   public static final Annotation []DEFAULT_ANN_LIST
     = new Annotation[] { DEFAULT };
 }

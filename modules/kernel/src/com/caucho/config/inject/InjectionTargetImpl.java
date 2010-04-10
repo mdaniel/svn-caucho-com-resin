@@ -529,7 +529,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
    */
   public void introspect(AnnotatedType<X> beanType)
   {
-    Class<X> cl = getIntrospectionClass();
+    Class<X> cl = (Class<X>) getIntrospectionClass();
     introspectConstructor(beanType);
     //introspectBindings(beanType);
     //introspectName(beanType);

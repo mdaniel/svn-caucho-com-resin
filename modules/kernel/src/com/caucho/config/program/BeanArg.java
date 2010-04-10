@@ -68,7 +68,7 @@ public class BeanArg<T> extends Arg<T> {
 	bindings.add(ann);
       }
       
-      _bean = _beanManager.resolveByInjectionPoint(_type, bindings);
+      _bean = _beanManager.resolveByInjectionPoint(_type, bindings, null);
       /*
       for (Bean bean : _beanManager.getBeans(_type, _bindings)) {
 	_bean = bean;

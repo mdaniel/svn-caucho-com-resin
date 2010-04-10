@@ -29,18 +29,8 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.inject.BeanInstance;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.DescriptionGroupConfig;
-import com.caucho.util.L10N;
-
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.InjectionTarget;
-
 import javax.servlet.ServletContextAttributeListener;
 import javax.servlet.ServletContextListener;
 import javax.servlet.ServletRequestAttributeListener;
@@ -49,26 +39,35 @@ import javax.servlet.http.HttpSessionActivationListener;
 import javax.servlet.http.HttpSessionAttributeListener;
 import javax.servlet.http.HttpSessionListener;
 
+import com.caucho.config.Config;
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.types.DescriptionGroupConfig;
+import com.caucho.util.L10N;
+
 /**
  * Configuration for the listener
  */
-public class Listener extends DescriptionGroupConfig {
-  static L10N L = new L10N(Listener.class);
+@Configurable
+public class ListenerConfig<T> extends DescriptionGroupConfig {
+  static L10N L = new L10N(ListenerConfig.class);
 
   // The listener class
-  private Class _listenerClass;
+  private Class<T> _listenerClass;
 
   // The listener object
-  private Object _object;
+  private T _object;
 
-  private InjectionTarget _target;
+  private InjectionTarget<T> _target;
 
   private ContainerProgram _init;
 
   /**
    * Sets the listener class.
    */
-  public void setListenerClass(Class cl)
+  public void setListenerClass(Class<T> cl)
     throws ConfigException
   {
     Config.checkCanInstantiate(cl);
@@ -97,7 +96,7 @@ public class Listener extends DescriptionGroupConfig {
   /**
    * Gets the listener class.
    */
-  public Class getListenerClass()
+  public Class<?> getListenerClass()
   {
     return _listenerClass;
   }
@@ -130,7 +129,7 @@ public class Listener extends DescriptionGroupConfig {
     InjectManager webBeans = InjectManager.create();
     _target = webBeans.createInjectionTarget(_listenerClass);
 
-    CreationalContext env = webBeans.createCreationalContext(null);
+    CreationalContext<T> env = webBeans.createCreationalContext(null);
 
     _object = _target.produce(env);
     _target.inject(_object, env);
@@ -149,7 +148,8 @@ public class Listener extends DescriptionGroupConfig {
 
   public void destroy()
   {
-    _target.preDestroy(_object);
+    if (_target != null)
+      _target.preDestroy(_object);
   }
 
   public String toString()

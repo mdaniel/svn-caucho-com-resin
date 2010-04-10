@@ -73,7 +73,7 @@ public class BaseTypeFactory
     return baseType;
   }
 
-  public BaseType createClass(Class type)
+  public BaseType createClass(Class<?> type)
   {
     BaseType baseType = _classCache.get(type);
 
@@ -89,7 +89,7 @@ public class BaseTypeFactory
     return baseType;
   }
 
-  public BaseType create(Type type, HashMap paramMap)
+  public BaseType create(Type type, HashMap<String,BaseType> paramMap)
   {
     return BaseType.create(type, paramMap);
   }

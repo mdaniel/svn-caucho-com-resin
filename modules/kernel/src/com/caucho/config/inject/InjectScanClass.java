@@ -67,6 +67,7 @@ class InjectScanClass implements ScanClass
   
   private ArrayList<InjectScanClass> _children;
   
+  private boolean _isScanClass;
   private boolean _isRegisterRequired;
   private boolean _isRegistered;
   
@@ -82,6 +83,16 @@ class InjectScanClass implements ScanClass
   public String getClassName()
   {
     return _className;
+  }
+  
+  public void setScanClass()
+  {
+    _isScanClass = true;
+  }
+  
+  public boolean isScanClass()
+  {
+    return _isScanClass;
   }
   
   /**
@@ -166,7 +177,7 @@ class InjectScanClass implements ScanClass
   
   void register()
   {
-    if (! _isRegistered) {
+    if (_isScanClass && ! _isRegistered) {
       _isRegistered = true;
 
       _scanManager.addDiscoveredClass(this);

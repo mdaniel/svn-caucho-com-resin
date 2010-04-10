@@ -29,38 +29,37 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.AbstractBean;
-import com.caucho.util.*;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.enterprise.context.spi.CreationalContext;
 import javax.decorator.Delegate;
-import javax.enterprise.inject.Default;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Qualifier;
 
+import com.caucho.config.ConfigException;
+import com.caucho.inject.Module;
+import com.caucho.util.L10N;
+
 /**
  * DecoratorBean represents a Java decorator
  */
+@Module
 public class DecoratorBean<T> implements Decorator<T>
 {
   private static final L10N L = new L10N(DecoratorBean.class);
 
-  private InjectManager _beanManager;
+  private Class<T> _type;
 
-  private Class _type;
-
-  private AbstractBean _bean;
+  private AbstractBean<T> _bean;
 
   private Field _delegateField;
-
-  private ArrayList<Class> _types
-    = new ArrayList<Class>();
 
   private HashSet<Annotation> _bindings
     = new HashSet<Annotation>();
@@ -68,8 +67,6 @@ public class DecoratorBean<T> implements Decorator<T>
   public DecoratorBean(InjectManager beanManager,
                        Class<T> type)
   {
-    _beanManager = beanManager;
-
     _type = type;
 
     _bean = beanManager.createManagedBean(type);
@@ -93,6 +90,7 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the bean's deployment type
    */
+  @Override
   public Set<Class<? extends Annotation>> getStereotypes()
   {
     return _bean.getStereotypes();
@@ -102,6 +100,7 @@ public class DecoratorBean<T> implements Decorator<T>
    * Returns the bean's name or null if the bean does not have a
    * primary name.
    */
+  @Override
   public String getName()
   {
     return _bean.getName();
@@ -110,6 +109,7 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns true if the bean can be null
    */
+  @Override
   public boolean isNullable()
   {
     return false;
@@ -117,15 +117,8 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns true if the bean can be null
    */
+  @Override
   public boolean isAlternative()
-  {
-    return false;
-  }
-
-  /**
-   * Returns true if the bean is serializable
-   */
-  public boolean isPassivationCapable()
   {
     return false;
   }
@@ -133,6 +126,7 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the bean's scope
    */
+  @Override
   public Class<? extends Annotation> getScope()
   {
     return _bean.getScope();
@@ -141,6 +135,7 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the types that the bean implements
    */
+  @Override
   public Set<Type> getTypes()
   {
     return _bean.getTypes();
@@ -149,6 +144,7 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the types for the decorated
    */
+  @Override
   public Set<Type> getDecoratedTypes()
   {
     throw new UnsupportedOperationException();
@@ -158,6 +154,7 @@ public class DecoratorBean<T> implements Decorator<T>
   // lifecycle
   //
 
+  @Override
   public T create(CreationalContext<T> creationalContext)
   {
     return (T) _bean.create(creationalContext);
@@ -173,12 +170,14 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the set of injection points, for validation.
    */
+  @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
     return _bean.getInjectionPoints();
   }
 
-  public Class getBeanClass()
+  @Override
+  public Class<?> getBeanClass()
   {
     return _bean.getBeanClass();
   }
@@ -209,6 +208,7 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the type of the delegated object
    */
+  @Override
   public Class<?> getDelegateType()
   {
     if (_delegateField != null)
@@ -220,6 +220,7 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Returns the bindings for the delegated object
    */
+  @Override
   public Set<Annotation> getDelegateQualifiers()
   {
     return _bindings;
@@ -281,16 +282,21 @@ public class DecoratorBean<T> implements Decorator<T>
         if (! field.isAnnotationPresent(Delegate.class))
           continue;
 
-        Class fieldType = field.getType();
+        Class<?> fieldType = field.getType();
 
+        /*
         if (! fieldType.isInterface()) {
           throw new ConfigException(L.l("{0}.{1} is an invalid @Delegate field because its type '{2}' is not an interface",
                                         _type.getName(),
                                         field.getName(),
                                         fieldType.getName()));
         }
+        */
 
-        for (Class iface : _type.getInterfaces()) {
+        for (Class<?> iface : _type.getInterfaces()) {
+          if (Serializable.class.equals(iface))
+            continue;
+          
           if (! iface.isAssignableFrom(fieldType)) {
             throw new ConfigException(L.l("{0}.{1} is an invalid @Delegate field because {2} does not implement the API {3}",
                                           _type.getName(),
@@ -338,40 +344,43 @@ public class DecoratorBean<T> implements Decorator<T>
   /**
    * Inject the bean.
    */
+  /*
   public void inject(T instance)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   /**
    * Call post-construct
    */
+  /*
   public void postConstruct(Object instance)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   /**
    * Call pre-destroy
    */
+  /*
   public void preDestroy(Object instance)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   /**
    * Call destroy
    */
+  @Override
   public void destroy(T instance, CreationalContext<T> env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  private void addType(Class type)
-  {
-    _types.add(type);
-  }
-
+  @Override
   public String toString()
   {
     StringBuilder sb = new StringBuilder();

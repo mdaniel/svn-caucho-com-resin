@@ -116,9 +116,9 @@ public class ReflectionAnnotatedType<T>
   /**
    * Returns the matching method, creating one if necessary.
    */
-  public AnnotatedMethod createMethod(Method method)
+  public AnnotatedMethod<?> createMethod(Method method)
   {
-    for (AnnotatedMethod annMethod : _methodSet) {
+    for (AnnotatedMethod<?> annMethod : _methodSet) {
       if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
         return annMethod;
       }
@@ -139,7 +139,7 @@ public class ReflectionAnnotatedType<T>
     return _fieldSet;
   }
 
-  private void introspect(Class cl)
+  private void introspect(Class<T> cl)
   {
     try {
       introspectInheritedAnnotations(cl.getSuperclass());
@@ -148,18 +148,18 @@ public class ReflectionAnnotatedType<T>
 
       for (Method method : cl.getDeclaredMethods()) {
         if (hasBeanAnnotation(method)) {
-          _methodSet.add(new AnnotatedMethodImpl(this, null, method));
+          _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
         }
       }
 
       if (! cl.isInterface()) {
-        for (Constructor ctor : cl.getDeclaredConstructors()) {
+        for (Constructor<?> ctor : cl.getDeclaredConstructors()) {
           _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
         }
 
         if (_constructorSet.size() == 0) {
           try {
-            Constructor ctor = cl.getConstructor(new Class[0]);
+            Constructor<?> ctor = cl.getConstructor(new Class[0]);
             _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
           } catch (NoSuchMethodException e) {
             log.log(Level.FINE, e.toString(), e);
@@ -173,7 +173,7 @@ public class ReflectionAnnotatedType<T>
     }
   }
 
-  private void introspectFields(Class cl)
+  private void introspectFields(Class<?> cl)
   {
     if (cl == null)
       return;
@@ -182,9 +182,8 @@ public class ReflectionAnnotatedType<T>
 
     for (Field field : cl.getDeclaredFields()) {
       try {
-	if (hasBeanAnnotation(field.getAnnotations())) {
-	  _fieldSet.add(new AnnotatedFieldImpl(this, field));
-	}
+        // ioc/0p23
+        _fieldSet.add(new AnnotatedFieldImpl(this, field));
       } catch (ConfigException e) {
 	throw e;
       } catch (Throwable e) {
@@ -193,7 +192,7 @@ public class ReflectionAnnotatedType<T>
     }
   }
 
-  private void introspectInheritedAnnotations(Class cl)
+  private void introspectInheritedAnnotations(Class<?> cl)
   {
     if (cl == null)
       return;
@@ -203,7 +202,7 @@ public class ReflectionAnnotatedType<T>
         continue;
       }
 
-      if (isAnnotationPresent(cl)) {
+      if (isAnnotationPresent(ann.annotationType())) {
         continue;
       }
 

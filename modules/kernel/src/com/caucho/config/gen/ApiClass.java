@@ -59,6 +59,8 @@ public class ApiClass {
   private ArrayList<Type> _typeParam;
     
   private ArrayList<ApiMethod> _methods = new ArrayList<ApiMethod>();
+  
+  private ApiClass _superClass;
 
   private ArrayList<ApiClass> _interfaces
     = new ArrayList<ApiClass>();
@@ -88,7 +90,7 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
-  public ApiClass(Class apiClass, AnnotatedType annotatedType)
+  public ApiClass(Class<?> apiClass, AnnotatedType<?> annotatedType)
   {
     this(apiClass, annotatedType, null, false);
   }
@@ -98,7 +100,7 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
-  public ApiClass(AnnotatedType annotatedType, boolean isReadOnly)
+  public ApiClass(AnnotatedType<?> annotatedType, boolean isReadOnly)
   {
     this(annotatedType.getJavaClass(), annotatedType, null, isReadOnly);
   }
@@ -108,8 +110,8 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
-  public ApiClass(Class apiClass,
-		  AnnotatedType annotatedType,
+  public ApiClass(Class<?> apiClass,
+		  AnnotatedType<?> annotatedType,
 		  HashMap<String,Type> parentTypeMap,
 		  boolean isReadOnly)
   {
@@ -145,8 +147,8 @@ public class ApiClass {
    *
    * @param topClass the api class
    */
-  public ApiClass(Class apiClass,
-		  AnnotatedType annotatedType,
+  public ApiClass(Class<?> apiClass,
+		  AnnotatedType<?> annotatedType,
 		  HashMap<String,Type> parentTypeMap,
 		  ArrayList<Type> param,
 		  boolean isReadOnly)
@@ -190,12 +192,12 @@ public class ApiClass {
 
       Type type = (Type) _typeParam.get(i);
 
-      if (type instanceof Class) {
-	sb.append(((Class) type).getName());
+      if (type instanceof Class<?>) {
+	sb.append(((Class<?>) type).getName());
       }
       else if (type instanceof ParameterizedType) {
 	ParameterizedType pType = (ParameterizedType) type;
-	Class rawType = (Class) pType.getRawType();
+	Class<?> rawType = (Class<?>) pType.getRawType();
 
 	sb.append(rawType.getName());
       }
@@ -216,7 +218,7 @@ public class ApiClass {
     return _typeMap;
   }
 
-  public Class getJavaClass()
+  public Class<?> getJavaClass()
   {
     return _apiClass;
   }
@@ -261,7 +263,7 @@ public class ApiClass {
     return _apiClass.isPrimitive();
   }
 
-  public boolean isAssignableFrom(Class cl)
+  public boolean isAssignableFrom(Class<?> cl)
   {
     return _apiClass.isAssignableFrom(cl);
   }
@@ -274,6 +276,10 @@ public class ApiClass {
     return _apiClass.getFields();
   }
 
+  public ApiClass getSuperClass()
+  {
+    return _superClass;
+  }
   /**
    * Returns the interfaces (should be ApiClass?)
    */
@@ -283,7 +289,7 @@ public class ApiClass {
     return _interfaces;
   }
 
-  public Constructor getConstructor(Class []param)
+  public Constructor<?> getConstructor(Class<?> []param)
     throws NoSuchMethodException
   {
     return _apiClass.getConstructor(param);
@@ -316,7 +322,7 @@ public class ApiClass {
   /**
    * Returns true if the method exists
    */
-  public boolean hasMethod(String name, Class []args)
+  public boolean hasMethod(String name, Class<?> []args)
   {
     return getMethod(name, args) != null;
   }
@@ -324,7 +330,7 @@ public class ApiClass {
   /**
    * Returns the matching method.
    */
-  public ApiMethod getMethod(String name, Class []param)
+  public ApiMethod getMethod(String name, Class<?> []param)
   {
     for (int i = 0; i < _methods.size(); i++) {
       ApiMethod method = _methods.get(i);
@@ -378,7 +384,7 @@ public class ApiClass {
   }
   
 
-  private void introspectClass(Class cl, HashMap<String,Type> typeMap)
+  private void introspectClass(Class<?> cl, HashMap<String,Type> typeMap)
   {
     if (cl == null || Object.class.equals(cl))
       return;
@@ -386,7 +392,7 @@ public class ApiClass {
     HashSet<ApiMethod> methodSet = new HashSet<ApiMethod>();
 
     for (Method method : cl.getDeclaredMethods()) {
-      AnnotatedMethod annMethod = findAnnotatedMethod(method);
+      AnnotatedMethod<?> annMethod = findAnnotatedMethod(method);
       
       ApiMethod apiMethod = new ApiMethod(this, method, annMethod, typeMap);
 
@@ -395,7 +401,7 @@ public class ApiClass {
 
     _methods.addAll(methodSet);
 
-    introspectGenericClass(cl.getGenericSuperclass(), typeMap);
+    _superClass = introspectGenericClass(cl.getGenericSuperclass(), typeMap);
 
     for (Type subClass : cl.getGenericInterfaces()) {
       ApiClass iface = introspectGenericClass(subClass, typeMap);

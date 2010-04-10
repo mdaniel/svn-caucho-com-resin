@@ -29,6 +29,7 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 
@@ -58,7 +59,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
                                  ApiMethod implMethod, int index)
   {
     _view = view;
-
+    
     _apiMethod = apiMethod;
     _implMethod = implMethod;
 

@@ -90,7 +90,7 @@ abstract public class BeanGenerator extends GenClass
     _dependency.addDependency(depend);
   }
 
-  protected void addDependency(Class cl)
+  protected void addDependency(Class<?> cl)
   {
     _dependency.addDependency(new ClassDependency(cl));
   }
@@ -153,8 +153,12 @@ abstract public class BeanGenerator extends GenClass
     InjectManager webBeans = InjectManager.create();
 
     HashSet<Type> types = new HashSet<Type>();
+    boolean isExtends = false;
+    
+    isExtends = fillTypes(types, cl.getJavaClass().getSuperclass(), isExtends);
+    
     for (ApiClass iface : cl.getInterfaces()) {
-      fillTypes(types, iface.getJavaClass());
+      isExtends = fillTypes(types, iface.getJavaClass(), isExtends);
     }
 
     _decoratorBindings = new HashSet<Annotation>();
@@ -187,38 +191,59 @@ abstract public class BeanGenerator extends GenClass
     List<Decorator<?>> decorators
       = webBeans.resolveDecorators(types, decoratorBindings);
     
-    for (Decorator decorator : decorators) {
+    isExtends = false;
+    for (Decorator<?> decorator : decorators) {
       // XXX:
-      fillTypes(_decorators, (Class) decorator.getDelegateType());
+      isExtends = fillTypes(_decorators, 
+                            (Class<?>) decorator.getDelegateType(),
+                            isExtends);
     }
   }
 
-  protected void fillTypes(HashSet<Type> types, Class type)
+  private boolean fillTypes(HashSet<Type> types, Class<?> type,
+                            boolean isExtends)
   {
-    if (type == null)
-      return;
+    if (type == null || Object.class.equals(type))
+      return isExtends;
     
     types.add(type);
 
-    fillTypes(types, type.getSuperclass());
-
-    for (Class iface : type.getInterfaces()) {
-      fillTypes(types, iface);
+    if (! type.isInterface()) {
+      if (! isExtends)
+        types.add(type);
+      
+      isExtends = true;
     }
+
+    isExtends = fillTypes(types, type.getSuperclass(), isExtends);
+
+    for (Class<?> iface : type.getInterfaces()) {
+      isExtends = fillTypes(types, iface, isExtends);
+    }
+    
+    return isExtends;
   }
 
-  protected void fillTypes(ArrayList<Type> types, Class type)
+  protected boolean fillTypes(ArrayList<Type> types, Class<?> type,
+                              boolean isExtends)
   {
-    if (type == null || types.contains(type))
-      return;
+    if (type == null || types.contains(type) || Object.class.equals(type))
+      return isExtends;
 
-    types.add(type);
-
-    fillTypes(types, type.getSuperclass());
-
-    for (Class iface : type.getInterfaces()) {
-      fillTypes(types, iface);
+    if (! type.isInterface()) {
+      if (! isExtends)
+        types.add(type);
+      
+      isExtends = true;
     }
+    
+    isExtends = fillTypes(types, type.getSuperclass(), isExtends);
+
+    for (Class<?> iface : type.getInterfaces()) {
+      isExtends = fillTypes(types, iface, isExtends);
+    }
+    
+    return isExtends;
   }
 
   /**

@@ -58,25 +58,21 @@ import javax.inject.Scope;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.reflect.BaseType;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
 /**
  * Common bean introspection for Produces and ManagedBean.
  */
 //  implements ObjectProxy
+@Module
 public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   implements PassivationCapable, PassivationSetter
 {
   private static final L10N L = new L10N(AbstractIntrospectedBean.class);
   private static final Logger log
     = Logger.getLogger(AbstractIntrospectedBean.class.getName());
-
-  private static final Object []NULL_ARGS = new Object[0];
-  private static final ConfigProgram []NULL_INJECT = new ConfigProgram[0];
-
-  private static final Method _namedValueMethod;
 
   private static final HashSet<Class<?>> _reservedTypes
     = new HashSet<Class<?>>();
@@ -87,14 +83,11 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   // AnnotatedType for ManagedBean, AnnotatedMethod for produces
   private Annotated _annotated;
 
-  private Type _type;
   private BaseType _baseType;
 
-  private LinkedHashSet<BaseType> _types
-    = new LinkedHashSet<BaseType>();
+  private Set<BaseType> _types;
 
-  private LinkedHashSet<Type> _typeClasses
-    = new LinkedHashSet<Type>();
+  private Set<Type> _typeClasses;
 
   private ArrayList<Annotation> _qualifiers
     = new ArrayList<Annotation>();
@@ -108,25 +101,21 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   private String _passivationId;
 
-  private boolean _isNullable;
-
-  // protected ScopeContext _scope;
-
   public AbstractIntrospectedBean(InjectManager manager,
                                   Type type,
                                   Annotated annotated)
   {
     super(manager);
     _annotated = annotated;
-
-    _type = type;
-
-    if (type instanceof Class) {
+    
+    if (type instanceof Class<?>) {
       // ioc/024d
-      _baseType = manager.createClassBaseType((Class) type);
+      _baseType = manager.createClassBaseType((Class<?>) type);
     }
     else
       _baseType = manager.createBaseType(type);
+    
+    _typeClasses = _baseType.getTypeClosure();
   }
 
   public BaseType getBaseType()
@@ -134,7 +123,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _baseType;
   }
 
-  public Class getBeanClass()
+  public Class<?> getBeanClass()
   {
     return _baseType.getRawClass();
   }
@@ -154,7 +143,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _baseType.toString();
   }
 
-  public Class getTargetClass()
+  public Class<?> getTargetClass()
   {
     return _baseType.getRawClass();
   }
@@ -172,7 +161,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   }
   */
 
-  protected Class getIntrospectionClass()
+  protected Class<?> getIntrospectionClass()
   {
     return getTargetClass();
   }
@@ -244,6 +233,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Returns the scope
    */
+  @Override
   public Class<? extends Annotation> getScope()
   {
     return _scope;
@@ -276,18 +266,18 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Introspects all the types implemented by the class
    */
-  private void introspectTypes(Type type, HashMap paramMap)
+  private void introspectTypes(Type type, HashMap<String,BaseType> paramMap)
   {
     if (type == null || _reservedTypes.contains(type))
       return;
-
+    
     BaseType baseType = addType(type, paramMap);
 
     if (baseType == null)
       return;
 
-    HashMap newParamMap = baseType.getParamMap();
-    Class cl = baseType.getRawClass();
+    HashMap<String,BaseType> newParamMap = baseType.getParamMap();
+    Class<?> cl = baseType.getRawClass();
 
     introspectTypes(cl.getGenericSuperclass(), newParamMap);
 
@@ -296,7 +286,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     }
   }
 
-  protected BaseType addType(Type type, HashMap paramMap)
+  protected BaseType addType(Type type, HashMap<String,BaseType> paramMap)
   {
     BaseType baseType = BaseType.create(type, paramMap);
 
@@ -322,7 +312,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     super.introspect();
 
-    introspectTypes(_baseType.toType());
     introspect(getIntrospectedAnnotated());
   }
 
@@ -483,6 +472,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   protected String getDefaultName()
   {
     String name = getTargetSimpleName();
+    
+    if ("".equals(name)) {
+      log.info("TYPE:" + name + " " + this + " " + _baseType);
+    }
 
     return Character.toLowerCase(name.charAt(0)) + name.substring(1);
   }
@@ -651,7 +644,5 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     } catch (Exception e) {
       e.printStackTrace();
     }
-
-    _namedValueMethod = namedValueMethod;
   }
 }
