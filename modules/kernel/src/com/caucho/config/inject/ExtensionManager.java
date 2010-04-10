@@ -137,9 +137,9 @@ class ExtensionManager
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
       Class<?> cl = Class.forName(className, false, loader);
-      Constructor<?> ctor= cl.getConstructor(new Class[] { InjectManager.class });
+      Constructor<?> ctor = cl.getConstructor(new Class[] { InjectManager.class });
 
-      Extension extension = (Extension) ctor.newInstance(this);
+      Extension extension = (Extension) ctor.newInstance(_injectManager);
 
       addExtension(extension);
     } catch (Exception e) {
@@ -296,6 +296,11 @@ class ExtensionManager
     public Annotation []getQualifiers()
     {
       return _qualifiers;
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _method + "]";
     }
   }
 

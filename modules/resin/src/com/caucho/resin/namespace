@@ -2,6 +2,7 @@ com.caucho.admin
 com.caucho.config
 com.caucho.distcache
 com.caucho.ejb
+com.caucho.inject
 com.caucho.jms
 com.caucho.log
 com.caucho.protocols

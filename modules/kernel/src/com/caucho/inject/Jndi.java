@@ -27,25 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config;
+package com.caucho.inject;
 
 import static java.lang.annotation.ElementType.METHOD;
 import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
+import java.lang.annotation.Documented;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import javax.enterprise.context.NormalScope;
-import javax.inject.Scope;
-
 /**
- * The @TransactionScoped marks a bean as scoped to the current XA.
+ * The @Jndi annotation registers a bean in JNDI.
  */
 
-@Scope
-@NormalScope
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
-public @interface TransactionScoped {
+@Documented
+public @interface Jndi {
+  public String value() default "";
 }

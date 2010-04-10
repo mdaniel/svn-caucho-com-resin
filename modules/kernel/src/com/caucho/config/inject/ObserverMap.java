@@ -131,7 +131,6 @@ public class ObserverMap {
     boolean isMatch(BaseType type, Annotation []bindings)
     {
       if (! _type.isAssignableFrom(type)) {
-        System.out.println("  NOTYPE: " + _type + " " + _type.getClass() + " " + type);
         return false;
       }
 

@@ -376,7 +376,6 @@ public class InjectManager
       addExtension(_xmlExtension);
       _extensionManager.createExtension("com.caucho.server.webbeans.ResinStandardPlugin");
       
-      
 
       if (_classLoader != null && isSetLocal) {
         // _classLoader.addScanListener(this);
