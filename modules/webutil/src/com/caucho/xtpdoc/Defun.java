@@ -60,6 +60,14 @@ public class Defun extends Section {
     return _parents;
   }
 
+  public DefunPro createPro()
+  {
+    DefunPro pro = new DefunPro(this);
+    addItem(pro);
+
+    return pro;
+  }
+
   public DefunJavadoc createJavadoc()
   {
     _javadoc = new DefunJavadoc(this);
@@ -74,6 +82,14 @@ public class Defun extends Section {
     addItem(schema);
 
     return schema;
+  }
+
+  public DefunExamples createExamples()
+  {
+    DefunExamples examples = new DefunExamples(getDocument());
+    addItem(examples);
+
+    return examples;
   }
 
   public DefunExample createExample()

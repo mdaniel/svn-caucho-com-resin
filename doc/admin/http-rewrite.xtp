@@ -3,11 +3,11 @@
 <title>URL Rewriting and Dispatching</title>
 <description>
 
-<p>When you need to rewrite an external URL to a more convenient internal
-format, like rewriting to *.php files, you can use Resin's rewrite
-capabilities.  Because Resin's rewrite is patterned after Apache's
-mod_rewrite, you can translate older mod_rewrite rules to Resin's rewrite
-tags.</p>
+<p>When you need to rewrite an external URL to a more convenient
+internal format, like rewriting to *.php files, you can use Resin's
+rewrite capabilities.  Because Resin's rewrite mechanism contains
+much of the same functionality as Apache's mod_rewrite, you can
+translate older mod_rewrite rules to Resin's rewrite tags.</p>
 
 </description>
 </header>
@@ -15,247 +15,17 @@ tags.</p>
 
 <localtoc/>
 
-<s1 title="Samples">
-
-<s2 title="MediaWiki rewrites">
-
-<p>PHP frameworks like MediaWiki often rewrite the public URLs to a server
-URL based on a PHP file, but pass through known file types like .jpg, .js,
-and .css file for normal webserver processing.  The &lt;resin:Dispatch> tag
-matches a URL with a regular expression, and optionally rewrites the URL.
-MediaWiki uses two: one to match the known files, and one to rewrite
-to a .php file.</p>
-
-<example title="Example: MediaWiki /Main_Page to /index.php/Main_Page">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:Dispatch regexp="\.(php|jpg|html|txt|gif|png|js|css)"/>
-  
-  &lt;resin:Dispatch regexp="^" target="/index.php"/>
-	    
-&lt;/web-app>
-</example>
-
-<p>Because the first matching rewrite rule stops processing, a URL
-like "/default.css" would match the first Dispatch and be processed like
-a normal URL.  But a URL like "/foo" doesn't match the first tag, so
-falls through to the second, where it is rewritten to "/index.php/foo".</p>
-
-<p>Other PHP packages like Drupal use the same kind of rewriting:</p>
-
-<example title="Example: Drupal node/1924">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:Dispatch regexp="\.(php|jpg|html|txt|gif|png|js|css)"/>
-  
-  &lt;resin:Dispatch regexp="^/" target="/index.php?q="/>
-	    
-&lt;/web-app>
-</example>
-
-<example title="Example: Wordpress Rewriting">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:Dispatch>
-    &lt;resin:IfFileExists/>
-  &lt;/resin:Dispatch>
-
-  &lt;resin:Forward regexp="^" target='/index.php'/>
-
-&lt;/web-app>
-</example>
-
-</s2>
-
-<s2 title="Redirects">
-
-<example title="Example: redirecting old pages">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin">
-
-  &lt;resin:Redirect regexp="^/old-page.html" target="/new-page.html"/>
-  &lt;resin:Redirect regexp="^/old/" target="/new/"/>
-	    
-&lt;/web-app>
-</example>
-
-</s2>
-
-</s1>
-
-<s1 title="Overview">
-
-<deftable title="Dispatch rules">
-<tr>
-  <th>name</th>
-  <th>description</th>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Dispatch.html">&lt;resin:Dispatch></a></td>
-  <td>Normal servlet dispatching with optional <em>target</em> rewriting.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/FastCgiProxy.html">&lt;resin:FastCgiProxy></a></td>
-  <td>Proxies the request to a backend server using FastCGI as a proxy protocol.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Forbidden.html">&lt;resin:Forbidden></a></td>
-  <td>Send a HTTP forbidden response.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Forward.html">&lt;resin:Forward></a></td>
-  <td>Forwards to the new URL using RequestDispatcher.forward with the <em>target</em> URL.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/HttpProxy.html">&lt;resin:HttpProxy></a></td>
-  <td>Proxies the request to a backend server using HTTP as a proxy protocol.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/LoadBalance.html">&lt;resin:LoadBalance></a></td>
-  <td>Load balance to a cluster of backend Resin servers.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Redirect.html">&lt;resin:Redirect></a></td>
-  <td>Send a HTTP redirect to a new URL specified by <em>target</em>.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SendError.html">&lt;resin:SendError></a></td>
-  <td>Send a HTTP error response.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/AbstractTargetDispatchRule.html">AbstractTargetDispatchRule</a></td>
-  <td>Base class for custom dispatch rules.</td>
-</tr>
-</deftable>
-
-<deftable title="Basic conditions">
-<tr>
-  <th>name</th>
-  <th>description</th>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfAuthType.html">&lt;resin:IfAuthType></a></td>
-  <td>Checks for the authentication type, request.getAuthType().</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfCookie.html">&lt;resin:IfCookie></a></td>
-  <td>Checks for the presence of a named HTTP cookie from request.getCookies().</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfCron.html">&lt;resin:IfCron></a></td>
-  <td>Matches if the current time is in an active range configured by cron-style times.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfFileExists.html">&lt;resin:IfFileExists></a></td>
-  <td>Matches if the URL corresponds to an actual file.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfHeader.html">&lt;resin:IfHeader></a></td>
-  <td>Tests for a HTTP header and value match.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfLocale.html">&lt;resin:IfLocale></a></td>
-  <td>Tests for a Locale match from the HTTP request.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfLocalPort.html">&lt;resin:IfLocalPort></a></td>
-  <td>Compares the local port of the request, request.getLocalPort().</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfMethod.html">&lt;resin:IfMethod></a></td>
-  <td>Compares the HTTP method, request.getMethod().</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfNetwork.html">&lt;resin:IfNetwork></a></td>
-  <td>Compares the remote IP address to a network pattern like 192.168/16.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfQueryParam.html">&lt;resin:IfQueryParam></a></td>
-  <td>Tests for a HTTP query parameger, request.getParameter().</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteAddr.html">&lt;resin:IfRemoteAddr></a></td>
-  <td>Tests against the remote IP address, request.getRemoteAddr().</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteUser.html">&lt;resin:IfRemoteUser></a></td>
-  <td>Tests against the remote user, request.getRemoteUser().</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfSecure.html">&lt;resin:IfSecure></a></td>
-  <td>True for SSL requests, i.e. if request.isSecure() is true.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfUserInRole.html">&lt;resin:IfUserInRole></a></td>
-  <td>Tests is the user is in the servlet security role.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/RequestPredicate.html">RequestPredicate</a></td>
-  <td>Interface for custom request predicates.</td>
-</tr>
-</deftable>
-
-<deftable title="Combining conditions">
-<tr>
-  <th>name</th>
-  <th>description</th>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/And.html">&lt;resin:And></a></td>
-  <td>Matches if all children match.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Or.html">&lt;resin:Or></a></td>
-  <td>Matches if any children match.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Not.html">&lt;resin:Not></a></td>
-  <td>Matches if the child does not match.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/NotAnd.html">&lt;resin:NotAnd></a></td>
-  <td>Matches if any child does not match.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/NotOr.html">&lt;resin:NotOr></a></td>
-  <td>Matches if all the children do not match.</td>
-</tr>
-</deftable>
-
-<deftable title="Rewrite filters">
-<tr>
-  <th>name</th>
-  <th>description</th>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SetHeader.html">&lt;resin:SetHeader></a></td>
-  <td>Sets a response header.</td>
-</tr>
-<tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SetRequestSecure.html">&lt;resin:SetRequestSecure></a></td>
-  <td>Marks the request as secure.</td>
-</tr>
-<tr>
-  <td>&lt;mypkg:MyFilter></td>
-  <td>Servlet filters.</td>
-</tr>
-</deftable>
-
-</s1>
 
 <s1 title="Dispatch Rules">
 
-<p>Resin's dispatching is based on a list of
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/DispatchRule.html">dispatch rules</a>
-configured
-in the resin-web.xml or the resin.xml configuration files.  Each rule has a
-regular expression matching request URLs.  The first dispatch rule that
-matches takes control of the request.  For example, a 
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Redirect.html">&lt;resin:Redirect></a> sends a HTTP redirect, and a 
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Dispatch.html">&lt;resin:Dispatch></a> dispatches the request as normal.</p>
+<p>Resin's dispatching is based on a list of <a
+javadoc="com.caucho.rewrite.DispatchRule">dispatch rules</a>
+configured in the resin-web.xml or the resin.xml configuration
+files.  Each rule has a regular expression matching request URLs.
+The first dispatch rule that matches takes control of the request.
+For example, a &lt;<a config-tag="resin:Redirect"/>> sends a HTTP
+redirect, and a &lt;<a config-tag="resin:Dispatch"/>> dispatches
+the request as normal.</p> 
 
 <p>Each matching rule can rewrite the URL using a <em>target</em> attribute.
 The target uses regexp replacement syntax like Perl's rewrite or sed.  The
@@ -468,6 +238,166 @@ successful and unsuccessful matches are logged.
 &lt;/resin&gt;
   </example>
 </s2>
+</s1>
+
+<s1 title="Overview">
+
+<deftable title="Dispatch rules">
+<tr>
+  <th>name</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td><a config-tag="resin:Dispatch">&lt;resin:Dispatch></a></td>
+  <td>Normal servlet dispatching with optional <em>target</em> rewriting.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:FastCgiProxy">&lt;resin:FastCgiProxy></a></td>
+  <td>Proxies the request to a backend server using FastCGI as a proxy protocol.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:Forbidden">&lt;resin:Forbidden></a></td>
+  <td>Send a HTTP forbidden response.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:Forward">&lt;resin:Forward></a></td>
+  <td>Forwards to the new URL using RequestDispatcher.forward with the <em>target</em> URL.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:HttpProxy">&lt;resin:HttpProxy></a></td>
+  <td>Proxies the request to a backend server using HTTP as a proxy protocol.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:LoadBalance">&lt;resin:LoadBalance></a></td>
+  <td>Load balance to a cluster of backend Resin servers.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:Redirect">&lt;resin:Redirect></a></td>
+  <td>Send a HTTP redirect to a new URL specified by <em>target</em>.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:SendError">&lt;resin:SendError></a></td>
+  <td>Send a HTTP error response.</td>
+</tr>
+<tr>
+  <td><a javadoc="com.caucho.rewrite.AbstractTargetDispatchRule">AbstractTargetDispatchRule</a></td>
+  <td>Base class for custom dispatch rules.</td>
+</tr>
+</deftable>
+
+<deftable title="Basic conditions">
+<tr>
+  <th>name</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfAuthType">&lt;resin:IfAuthType></a></td>
+  <td>Checks for the authentication type, request.getAuthType().</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfCookie">&lt;resin:IfCookie></a></td>
+  <td>Checks for the presence of a named HTTP cookie from request.getCookies().</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfCron">&lt;resin:IfCron></a></td>
+  <td>Matches if the current time is in an active range configured by cron-style times.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfFileExists">&lt;resin:IfFileExists></a></td>
+  <td>Matches if the URL corresponds to an actual file.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfHeader">&lt;resin:IfHeader></a></td>
+  <td>Tests for a HTTP header and value match.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfLocale">&lt;resin:IfLocale></a></td>
+  <td>Tests for a Locale match from the HTTP request.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfLocalPort">&lt;resin:IfLocalPort></a></td>
+  <td>Compares the local port of the request, request.getLocalPort().</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfMethod">&lt;resin:IfMethod></a></td>
+  <td>Compares the HTTP method, request.getMethod().</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfNetwork">&lt;resin:IfNetwork></a></td>
+  <td>Compares the remote IP address to a network pattern like 192.168/16.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfQueryParam">&lt;resin:IfQueryParam></a></td>
+  <td>Tests for a HTTP query parameger, request.getParameter().</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfRemoteAddr">&lt;resin:IfRemoteAddr></a></td>
+  <td>Tests against the remote IP address, request.getRemoteAddr().</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfRemoteUser">&lt;resin:IfRemoteUser></a></td>
+  <td>Tests against the remote user, request.getRemoteUser().</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfSecure">&lt;resin:IfSecure></a></td>
+  <td>True for SSL requests, i.e. if request.isSecure() is true.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:IfUserInRole">&lt;resin:IfUserInRole></a></td>
+  <td>Tests is the user is in the servlet security role.</td>
+</tr>
+<tr>
+  <td><a javadoc="com.caucho.rewrite.RequestPredicate">RequestPredicate</a></td>
+  <td>Interface for custom request predicates.</td>
+</tr>
+</deftable>
+
+<deftable title="Combining conditions">
+<tr>
+  <th>name</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td><a config-tag="resin:And">&lt;resin:And></a></td>
+  <td>Matches if all children match.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:Or">&lt;resin:Or></a></td>
+  <td>Matches if any children match.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:Not">&lt;resin:Not></a></td>
+  <td>Matches if the child does not match.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:NotAnd">&lt;resin:NotAnd></a></td>
+  <td>Matches if any child does not match.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:NotOr">&lt;resin:NotOr></a></td>
+  <td>Matches if all the children do not match.</td>
+</tr>
+</deftable>
+
+<deftable title="Rewrite filters">
+<tr>
+  <th>name</th>
+  <th>description</th>
+</tr>
+<tr>
+  <td><a config-tag="resin:SetHeader">&lt;resin:SetHeader></a></td>
+  <td>Sets a response header.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:SetRequestSecure">&lt;resin:SetRequestSecure></a></td>
+  <td>Marks the request as secure.</td>
+</tr>
+<tr>
+  <td>&lt;mypkg:MyFilter></td>
+  <td>Servlet filters.</td>
+</tr>
+</deftable>
+
 </s1>
 
 </body>

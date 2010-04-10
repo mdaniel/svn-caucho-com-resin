@@ -2078,6 +2078,7 @@ element ejb-stateful-bean {
 <defun title="&lt;ejb-stateless-bean>" name="ejb-stateless-bean">
 <parents>resin, host-default, host, web-app-default, web-app</parents>
 
+<description>
 <p>&lt;ejb-stateless-bean> configures an EJB @Stateless bean.  The
 @Statelesss bean is a pooled, proxied, singleton component bean suitable.
 <!-- XXX broken link
@@ -2093,6 +2094,7 @@ singletons which are multithreaded like servlets.  Both styles can
 use the same aspect capabilities like dependency injection, transactions,
 and interceptors.  Because @Stateless beans are singletons, they
 do not have a scope attribute.</p>
+</description>
 
 <attributes>
 <tr>
@@ -2136,10 +2138,12 @@ element ejb-stateless-bean {
 <defun title="&lt;environment-system-properties>" name="environment-system-properties">
 <default>true</default>
 
+<description>
 <p>By default, Resin's <code>System.getProperties()</code> is
 environment-dependent, so the settings in on web-app do not affect the
 properties in any other web-app.  Some sites may need to disable
 this virtualization capability, when using certain JVM agents.</p>
+</description>
 
 <schema>
 element environment-system-properties {
@@ -2153,6 +2157,7 @@ element environment-system-properties {
 <parents>resin, host-default, host, web-app-default, web-app</parents>
   <!-- com.caucho.config.types.EnvEntry -->
 
+<description>
 <p>&lt;env-entry> configures a JNDI scalar value
 for JNDI-based application configuration.</p>
 
@@ -2160,6 +2165,7 @@ for JNDI-based application configuration.</p>
 including String, Integer, and Double constants.  env-entry configures
 that data in the current context.  As with other Resin configuration, the
 value can use JSP-EL expressions.</p>
+</description>
 
 <attributes>
 <tr>
@@ -2346,11 +2352,13 @@ was not found.
 
 <defun title="&lt;fileset>" name="fileset" version="Resin 3.0.7">
 
+<description>
 <p>&lt;fileset&gt; provides the ability to match a set of files.  It is
 modelled after the ant tag by the same name.  The fileset matches
 files from a base directory defined by 'dir'.  Files can be included
 by patterns defined by &lt;include> tags or excluded by patterns defined in
 &lt;exclude> tags.</p>
+</description>
 
 <attributes>
 <tr>
@@ -2415,11 +2423,13 @@ MATCH    lib/baz/foo.jar
 
 <defun title="&lt;filter>" name="filter" version="Servlet 2.3">
 
+<description>
 <p>Defines a filter name for later mapping.  Because Filters are fully
 integrated with <a href="config-candi.xtp">Resin CanDI</a>, they can
 use dependency-injection, transactional aspects, custom interception
 with @InterceptorType, and event handling with @Observes.
 </p>
+</description>
 
 <attributes>
 <tr>
@@ -2494,6 +2504,8 @@ well as a simple shortcut.</p>
 </defun>
 
 <defun title="&lt;filter-mapping>" name="filter-mapping" version="Servlet 2.3" type="defun">
+
+<description>
 <p>Maps url patterns to filters.  <var>filter-mapping</var> has two
 children, <var>url-pattern</var> and <var>filter-name</var>.
 <var>url-pattern</var> selects the urls which should execute the filter.
@@ -2502,6 +2514,7 @@ children, <var>url-pattern</var> and <var>filter-name</var>.
 <p><code>filter-name</code> can either specify a servlet class directly or it
 can specify a servlet alias defined by <code>filter</code>.
 </p>
+</description>
 
 <attributes>
 <tr>
@@ -2579,10 +2592,12 @@ purposes of the regular expression match, because "/baz" is the context path.
 <defun title="&lt;form-login-config>" name="form-login-config" version="Servlet" type="defun">
 <parents>login-config</parents>
 
+<description>
 <p>Configures authentication using forms.  The login form has
 specific parameters that the servlet engine's login form processing
 understands.  If the login succeeds, the user will see the original
 page.  If it fails, she will see the error page.</p>
+</description>
 
 <attributes>
 <tr>
@@ -2677,10 +2692,12 @@ element form-login-config {
 <defun title="&lt;group-name>" version="Resin 4.0" name="group-name">
 <parents>server</parents>
 
+<description>
 <p>&lt;group-name> configures the operating system group Resin should
 run as.  Since the HTTP port 80 is protected in Unix, the web server
 needs to start as root to bind to port 80.  For security, Resin should
 switch to a non-root user after binding to port 80.</p>
+</description>
 
 <example title="resin.xml with user-name">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -2847,10 +2864,12 @@ element host-alias-regexp {
 <defun title="&lt;host-default>" version="Resin 3.0" name="host-default">
 <parents>cluster</parents>
 
+<description>
 <p>Defaults for a virtual host.</p>
 
 <p>The host-default can contain any of the host configuration tags.
 It will be used as defaults for any virtual host.</p>
+</description>
 
 </defun>
 
@@ -2958,11 +2977,13 @@ element host-name {
 <defun title="&lt;http>" name="http" version="Resin 3.0">
 <parents>server</parents>
 
+<description>
 <p>&lt;http> configures a HTTP or HTTPS port listening for HTTP requests.</p>
 
 <p>When configuring multiple JVMs, each &lt;http&gt; will have a
 unique &lt;server-id&gt; which allows the -server command-line to select
 which ports the server should listen to.</p>
+</description>
 
 <attributes>
 <tr><td>address</td>
@@ -3006,6 +3027,7 @@ will use @virtual-host.</p>
 <defun title="&lt;idle-time>" name="idle-time">
 <parents>web-app</parents>
 
+<description>
 <p>The &lt;idle-time> specifies the timeout for lazy-idle web-apps.
 In some configurations, web-apps are created only on demand and are
 closed when no requests access the web-app.  The idle-time configures
@@ -3014,6 +3036,7 @@ when those web-apps should be freed.</p>
 <p>For example, the resin-doc web-app uses idle-time for its
 child web-apps because there are a large number of sub-web-apps for
 the individual tutorials.</p>
+</description>
 
 <schema>
 element idle-time {
@@ -3028,9 +3051,11 @@ element idle-time {
 <parents>cluster</parents>
 <default>true</default>
 
+<description>
 <p>ignore-client-disconnect configures whether Resin should ignore
 disconnection exceptions from the client, or if it should send those
 exceptions to the application.</p>
+</description>
 
 <schema>
 element ignore-client-disconnect {
@@ -3044,9 +3069,11 @@ element ignore-client-disconnect {
 <parents>cluster</parents>
 <default>8192</default>
 
+<description>
 <p>Configures the number of entries in the invocation cache.
 The invocation cache is used to store pre-calculated servlet and filter
 chains from the URLs.  It's also used as the basis for proxy caching.</p>
+</description>
 
 <schema>
 element invocation-cache-size {
@@ -3060,8 +3087,10 @@ element invocation-cache-size {
 <parents>cluster</parents>
 <default>256</default>
 
+<description>
 <p>Configures the longest entry cacheable in the invocation cache.
 It is used to avoid certain types of denial-of-service attacks.</p>
+</description>
 
 <schema>
 element invocation-cache-max-url-length {
@@ -3384,7 +3413,9 @@ element jsf {
 <defun title="&lt;jsp>" name="jsp" type="defun">
 <parents>web-app</parents>
 
+<description>
 <p>Configures JSP behavior.</p>
+</description>
 
 <attributes>
 <tr>
@@ -3537,7 +3568,9 @@ element jsp {
 
 <defun title="&lt;jsp-config>" name="jsp-config" version="Servlet">
 
+<description>
 <p>&lt;jsp-config> configure standard settings for JSP files.</p>
+</description>
 
 <attributes>
 <tr>
@@ -3611,8 +3644,10 @@ element jsp-property-group {
 <defun title="&lt;jvm-arg>" name="jvm-arg" version="Resin 3.1">
 <parents>server</parents>
 
+<description>
 <p>&lt;jvm-arg> configures JVM arguments to be passed to Resin on
 the command line, typically -X memory parameters and -D defines.</p>
+</description>
 
 <example title="standard jvm-args">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -3634,7 +3669,9 @@ the command line, typically -X memory parameters and -D defines.</p>
 <defun title="&lt;jvm-classpath>" name="jvm-classpath" version="Resin 3.1.6">
 <parents>server</parents>
 
+<description>
 <p>&lt;jvm-classpath> adds a classpath entry when starting the JVM.</p>
+</description>
 
 <example title="adding a classpath">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -4074,11 +4111,13 @@ the app-tier server.</p>
 <parents>web-app</parents>
 <default>no authentication</default>
 
+<description>
 <p>Configures the login method for authentication, one of BASIC,
 DIGEST or FORM.</p>
 
 <p>See also: <a href="security-overview.xtp">Resin security</a> for an
 overview.</p>
+</description>
 
 <attributes>
 <tr>
@@ -4131,6 +4170,7 @@ element login-config {
 <defun title="&lt;log-handler>" version="Resin 4.0" name="log-handler">
 <parents>resin, server, host-default, host, web-app-default, web-app</parents>
    
+<description>
 <p>Configure a log handler for the JDK java.util.logging.* API.
 java.util.logging has two steps: configure a set of log handlers,
 and configure the levels for each logger.  The &lt;log-handler> creates
@@ -4141,6 +4181,7 @@ and attaches the handler to a logging name.</p>
 most common configuration build-in: logging to a rotating file.  Most of the
 configuration attributes are used for the rotating file and are shared
 with the other logging configuration.</p>
+</description>
 
 <attributes>
 <tr>
@@ -4338,11 +4379,13 @@ element logger {
 
 <defun name="log format string" title="Log format string">
 
-<p>The <var>format</var> for log tags is used to specify a format string for each
-log message.  <code>format</code> recognizes EL-expressions. The EL variable
-<var>log</var> is a 
-<a javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
+<description>
+<p>The <var>format</var> for log tags is used to specify
+a format string for each log message.  <code>format</code>
+recognizes EL-expressions. The EL variable <var>log</var> is a <a
+javadoc="com.caucho.log.ELFormatter.ELFormatterLogRecord"/>
  object.</p>
+</description>
 
 <example title="log format string">
 
@@ -4431,15 +4474,15 @@ space pad the values and make the results look a little nicer:</p>
 
 </defun> <!-- Format-String -->
 
-
-
 <defun title="&lt;mail>" name="mail" occur="*" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>
 
+<description>
 <p>&lt;mail> configures a javax.mail.Session object and makes
 it available in Resin-IoC/WebBeans.  Mail properties can be
 configured using the properties attribute.  Some of the most common
 properties can be configured directly on the &lt;mail> tag.</p>
+</description>
 
 <attributes>
 <tr>
@@ -4598,20 +4641,24 @@ element mail {
 
 <defun title="&lt;max-active-time>" name="max-active-time" version="Resin 3.1">
 <parents>database</parents>
+<default>6h</default>
 
+<description>
 <p>&lt;max-active-time> configures the maximum time a connection
 can be active before Resin will automatically close it.  Normally,
 the max-active-time should not be configured, since Resin will
 also automatically close a connection at the end of a request.</p>
 
 <p>Sites should generally leave max-active-time at the default.</p>
+</description>
 
-<default>6h</default>
 </defun>
 
 <defun title="&lt;max-close-statements>" name="max-close-statements" version="Resin 3.1">
 <parents>database</parents>
+<default>256</default>
 
+<description>
 <p>&lt;max-close-statements> configures how many open statements Resin
 should save to for the connection close.  Since the JDBC
 <code>Connection.close()</code> call automatically closes any open
@@ -4619,14 +4666,14 @@ statements, Resin's database pool needs to keep track of any open
 statements to close them in case the application has forgotten.  The
 &lt;max-close-statements> is primarily needed for older database drivers
 implementing the <code>java.sql.Driver</code> interface.</p>
-
-<default>256</default>
-
+</description>
 </defun>
 
 <defun title="&lt;max-connections>" name="max-connections" version="Resin 3.1">
 <parents>database</parents>
+<default>128</default>
 
+<description>
 <p>&lt;max-connections> configures the maximum number of
 open connections allowed for Resin's database pool.  Sites
 can use &lt;max-connections> to throttle the number of database
@@ -4634,26 +4681,27 @@ connections for an overloaded server.  When <code>max-connections</code>
 is reached and an application calls <code>getConnection</code>, Resin will
 wait <a config-tag="connection-wait-time">connection-wait-time</a> or until
 a connection is freed before allocating a new connection.</p>
-
-<default>128</default>
+</description>
 </defun>
 
 <defun title="&lt;max-create-connections>" name="max-create-connections" version="Resin 3.1">
 <parents>database</parents>
+<default>5</default>
 
+<description>
 <p>&lt;max-create-connections> configures the maximum number of
 simultaneous connection creations.  Since connection creation is slow
 and database access can be spiky, Resin's pool limits the number
 of new connections to the database at any time.  Once a connection
 has succeeded, a new connection can proceed.</p>
-
-<default>5</default>
-
+</description>
 </defun>
 
 <defun title="&lt;max-idle-time>" name="max-idle-time" version="Resin 3.1">
 <parents>database</parents>
+<default>30s</default>
 
+<description>
 <p>&lt;max-idle-time> configures the maximum time a connection
 can remain idle before Resin automatically closes it.  Since idle databases
 tie up resources, Resin will slowly close idle connections that are no
@@ -4662,41 +4710,41 @@ longer needed.</p>
 <p>Higher values of &lt;max-idle-time> will connections to remain in the
 idle pool for a longer time.  Lower values will close idle connections
 more quickly.</p>
-
-<default>30s</default>
-
+</description>
 </defun>
 
 <defun title="&lt;max-overflow-connections>" name="max-overflow-connections" version="Resin 3.1">
 <parents>database</parents>
+<default>0</default>
 
+<description>
 <p>&lt;max-overflow-connections> extends &lt;connection-max> temporarily
 in case of overflow.  After the &lt;connection-wait-time> expires, Resin can
 create an overflow connection to handle unforseen load spikes.</p>
-
-<default>0</default>
-
+</description>
 </defun>
 
 <defun title="&lt;max-pool-time>" name="max-pool-time" version="Resin 3.1">
 <parents>database</parents>
+<default>24h</default>
 
+<description>
 <p>&lt;max-pool-time> configures the maximum time the connection
 can remain open.  A connection could theoretically remain open, switching
 between active and idle, for an indefinite time.  The &lt;max-pool-time>
 allows a site to limit to total time of that connection.</p>
 
 <p>Most sites will leave &lt;max-pool-time> at the default.</p>
-
-<default>24h</default>
-
+</description>
 </defun>
 
 <defun title="&lt;max-uri-length>" version="Resin 4.0.2" name="max-uri-length">
 <parents>cluster</parents>
 <default>1024</default>
 
+<description>
 <p>Sets limit on longest URIs that can be served by Resin.</p>
+</description>
 
 <schema>
 element max-uri-length {
@@ -4708,7 +4756,9 @@ element max-uri-length {
 
 <defun title="&lt;memory-free-min>" name="memory-free-min" version="Resin 3.1">
 <parents>server</parents>
+<default>1m</default>
 
+<description>
 <p>&lt;memory-free-min> improves server reliability by detecting
 low-memory situations caused by memory leaks and forcing a
 clean server restart.  Since Resin's <g>watchdog</g> service
@@ -4729,8 +4779,7 @@ restart the server when free memory becomes too low.</p>
 memory profiler, find the leaking memory and fix it.  &lt;memory-free-min>
 is just a temporary bandage to keep the site running reliably until
 the memory leak can be found and fixed.</p>
-
-<default>1m</default>
+</description>
 
 <example title="memory-free-min resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -4751,7 +4800,9 @@ the memory leak can be found and fixed.</p>
 
 <defun title="&lt;mime-mapping>" name="mime-mapping" version="Servlet 2.2">
 <parents>web-app</parents>
+<description>
 <p>Maps url patterns to mime-types.</p>
+</description>
 
 <attributes>
 <tr>
@@ -4796,6 +4847,7 @@ element mime-mapping {
 <defun title="&lt;multipart-form>" name="multipart-form" version="Resin 1.2">
 <parents>web-app</parents>
 
+<description>
 <p>Enables multipart-mime for forms and file uploads.  multipart-mime
 is disabled by default.</p>
 
@@ -4804,6 +4856,7 @@ value contains the path name to a temporary file containing the uploaded
 file.  <var>foo.filename</var> contains the uploaded filename, and
 <var>foo.content-type</var> contains the content-type of the uploaded file.
 </p>
+</description>
 
 <attributes>
 <tr>
@@ -4841,8 +4894,10 @@ element multipart-form {
 <defun title="&lt;path-mapping>" name="path-mapping">
 <parents>web-app</parents>
 
+<description>
 <p>Maps url patterns to real paths.  If using a server like
 IIS, you may need to match the server's path aliases.</p>
+</description>
 
 <attributes>
 <tr>
@@ -4888,16 +4943,19 @@ element path-mapping {
 <defun title="&lt;password>" name="password" version="Resin 3.1">
 <parents>database</parents>
 
+<description>
 <p>&lt;password> configures the database connection password.
 Sites requiring additional security for their passwords can use
 the &lt;mypkg:MyDecryptor/> syntax
 to configure a password decoder.</p>
+</description>
 
 </defun>
 
 <defun title="&lt;ping>" occur="*" version="Resin 3.0" name="ping">
 <parents>cluster</parents>
 
+<description>
 <p>Starts a thread that periodically makes a request to the server, and
 restarts Resin if it fails.  This facility is used to increase server
 reliability - if there is a problem with the server (perhaps from a deadlock or
@@ -4915,6 +4973,7 @@ the host.</p>
 same process as Resin itself.  If the entire JDK freezes, this
 thread will freeze as well.  Assuming the JDK doesn't freeze, the
 PingThread will catch errors like deadlocks.</p>
+</description>
 
 <attributes>
 <tr>
@@ -5030,7 +5089,9 @@ System properties are used to configure a different SMTP server.
 
 <defun title="&lt;ping>" name="ping" version="Resin 3.1">
 <parents>database</parents>
+<default>false</default>
 
+<description>
 <p>&lt;ping> enables connection validation.  When &lt;ping> is enabled,
 Resin will test the connection with <a config-tag="ping-query">&lt;ping-query></a>
 or <a config-tag="ping-table">&lt;ping-table></a> before returning a connection
@@ -5040,31 +5101,35 @@ return a new connection.</p>
 <p>For efficiency, Resin will only validate the connection if it
 has been idle for longer than <a config-tag="ping-interval">&lt;ping-interval></a>.
 </p>
-
-<default>false</default>
-
+</description>
 </defun>
 
 <defun title="&lt;ping-table>" name="ping-table" version="Resin 3.1">
 <parents>database</parents>
 
+<description>
 <p>&lt;ping-table> configures the database table Resin should
 use to verify if a connection is still valid when returned from the pool.
 </p>
+</description>
 
 </defun>
 
 <defun title="&lt;ping-query>" name="ping-query" version="Resin 3.1">
 <parents>database</parents>
 
+<description>
 <p>&lt;ping-query> specifies the query to use for validating if a
 database connection is still valid when returned from the idle pool.</p>
+</description>
 
 </defun>
 
 <defun title="&lt;ping-interval>" name="ping-interval" version="Resin 3.1">
 <parents>database</parents>
+<default>1s</default>
 
+<description>
 <p>&lt;ping-interval> configures when Resin should validate an
 idle connection.  Connections which have been idle for less than
 &lt;ping-interval> are assumed to be still valid without validation.
@@ -5072,22 +5137,21 @@ Connections idle for longer than &lt;ping-interval> are validated.
 </p>
 
 <p>Sites can force a validation by setting &lt;ping-interval> to 0.</p>
-
-<default>1s</default>
-
+</description>
 </defun>
 
 <defun title="&lt;port>" name="port" version="Resin 3.1">
 <parents>server</parents>
+<default>6800</default>
 
+<description>
 <p>The server &lt;port> defines the TCP port for Resin
 cluster communication and load balancing.  Most server instances
 will use a common port like 6800, while machines with multiple
 servers may use multiple ports like 6800 and 6801.</p>
+</description>
 
-<default>6800</default>
-
-<example title="multipl servers on a machine ">
+<example title="multiple servers on a machine ">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="app-tier"&gt;
     &lt;server id="app-a" address="192.168.1.11" port="6800"/>
@@ -5106,8 +5170,10 @@ servers may use multiple ports like 6800 and 6801.</p>
 <defun title="&lt;port-default>" name="port-default" version="Resin 3.2.1">
 <parents>server</parents>
 
+<description>
 <p>Defines default port parameters for all &lt;http>, &lt;protocol>, and
 &lt;cluster-port>.</p>
+</description>
 
 </defun>
 
@@ -5115,24 +5181,28 @@ servers may use multiple ports like 6800 and 6801.</p>
 
 <defun title="&lt;prepared-statement-cache-size>" name="prepared-statement-cache-size" version="Resin 3.1">
 <parents>database</parents>
+<default>0</default>
 
+<description>
 <p>&lt;prepared-statement-cache-size> configures how many prepared
 statements Resin should cache for each connection.  Caching prepared
 statement can improve performance for some database drivers by avoiding
 repeated parsing of the query SQL.</p>
-
-<default>0</default>
-
+</description>
 </defun>
 
 <defun title="&lt;protocol>" name="protocol">
 <parents>servlet, servlet-mapping</parents>
 
+<description>
 <p>&lt;protocol> configures a remoting
 protocol for a Java bean.  The bean is configured with the &lt;servlet>
 and &lt;servlet-mapping> tags, since it will process HTTP URL requests.</p>
 
-<p>Protocol drivers extend the <a href="http://caucho.com/resin-javadoc/com/caucho/remote/server/AbstractProtocolServletFactory.html">AbstractProtocolServletFactory</a> interface and can register a URI alias to simplify configuration.</p>
+<p>Protocol drivers extend the <a
+javadoc="com.caucho.remote.server.AbstractProtocolServletFactory"/>
+interface and can register a URI alias to simplify configuration.</p>
+</description>
 
 <attributes>
 <tr>
@@ -5202,9 +5272,11 @@ element protocol {
 <parents>web-app</parents>
 <default>60s</default>
 
+<description>
 <p>&lt;redeploy-check-interval> specifies how often Resin should
 check if a .war file has been updated or added to a
 &lt;web-app-deploy> directory.</p>
+</description>
 
 <schema>
 element redeploy-check-interval {
@@ -5216,13 +5288,12 @@ element redeploy-check-interval {
 
 <defun title="&lt;redeploy-mode>" name="redeploy-mode">
 <parents>web-app</parents>
-<description>
+<default>automatic</default>
 
+<description>
 <p>&lt;redeploy-mode> specifies how Resin handles updates to
 web-apps and .war files.  By default, Resin restarts web-apps when
 classes or configuration files change.</p>
-
-<default>automatic</default>
 </description>
 
 <attributes>
@@ -5251,8 +5322,10 @@ element redeploy-mode {
 <defun title="&lt;rewrite-real-path>" name="rewrite-real-path" version="Resin 3.1">
 <parents>cluster, host, web-app</parents>
 
+<description>
 <p>&lt;rewrite-real-path> lets you rewrite the URL to physical path
 mapping, to allow aliasing or for filesystem organization.</p>
+</description>
 
 <attributes>
 <tr>
@@ -5361,6 +5434,7 @@ element root-directory {
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.ReferenceConfig -->
 
+<description>
 <p>&lt;reference> configures a JNDI ObjectFactory.  Some legacy
 resources are configured using an ObjectFactory syntax.  The &lt;reference>
 tag provides a compatible way to configure those objects.  More modern
@@ -5368,6 +5442,7 @@ resources should use &lt;bean> or &lt;component> for IoC configuration.</p>
 
 <p>JNDI ObjectFactories are used to create objects from JNDI references.
 The &lt;reference&gt; tag configures the ObjectFactory and stores it in JNDI.</p>
+</description>
 
 <attributes>
 <tr>
@@ -5418,6 +5493,7 @@ element reference {
 <defun title="&lt;remote-client>" name="remote-client">
 <parents>cluster, host, web-app</parents>
 
+<description>
 <p>&lt;remote-client> configures a proxy to a web-service.
 It uses a Java interface and a URI to select the web-service.</p>
 
@@ -5430,6 +5506,7 @@ information, including how to write an adapter for Resin remoting.</li>
 <li>See the <a href="../examples/remote-hello-world/">hello world tutorial</a>
 for an example.</li>
 </ul>
+</description>
 
 <attributes>
 <tr>
@@ -5501,6 +5578,7 @@ element remote-client {
 
 <defun title="&lt;resin>" version="Resin 3.0" name="resin">
       
+<description>
 <p>&lt;resin> is the top-level configuration tag for
 the resin.xml file.  The &lt;resin&gt;
 tag needs to specify the Resin namespace, to allow for validation
@@ -5512,6 +5590,7 @@ for threads which run with using only the global class loader.
 Because the &lt;resin&gt; environment does not have a dynamic class loader,
 dynamically loaded classes, like custom jars
 in resin/lib are not available.</p>
+</description>
 
 <schema>
 element resin {
@@ -5554,9 +5633,11 @@ element resin {
 <defun title="&lt;resin-data-directory>" version="Resin 4.0.0" name="resin-data-directory">
 <parents>resin</parents>
 
+<description>
 <p>&lt;resin-data-directory> specifies the location of Resin's administration
 and data files, including persistent caching, sessions, and administration
 logs.</p>
+</description>
 
 <schema>
 element resin-data-directory {
@@ -5567,12 +5648,10 @@ element resin-data-directory {
 </defun>
 
 <defun title="&lt;resin:AdminAuthenticator>" name="resin:AdminAuthenticator">
-<description>
-<p>
+<javadoc class="com.caucho.security.AdminAuthenticator"/>
 
-  Resin administration authentication (same syntax as XmlAuthenticator).
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/AdminAuthenticator.html">&lt;resin:AdminAuthenticator> JavaDoc</a>
-</p>
+<description>
+<p>Resin administration authentication (same syntax as XmlAuthenticator).</p>
 </description>
 </defun>
 
@@ -5599,7 +5678,7 @@ is the most common type of top level authorization tag.</p>
   <td>HTTP methods that the restriction applies to.</td>
 </tr>
 </attributes>
-<p>The following is a typical example of how the &lt;resin:Allow> is used:</p>
+
 <example title="Protecting all pages for logged-in users">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
@@ -5615,9 +5694,24 @@ is the most common type of top level authorization tag.</p>
 <defun title="&lt;resin:And>" name="resin:And">
 <javadoc class="com.caucho.rewrite.And"/>
 <description>
-<p>Matches if all children match.
-</p>
+<p>Matches if all children match.</p>
 </description>
+
+<example title="Matching both of two query parameters">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp="" target="/match">
+    &lt;resin:And>
+      &lt;resin:IfQueryParam name="foo" regexp="foo"/>
+      &lt;resin:IfQueryParam name="bar" regexp="bar"/>
+    &lt;/resin:And>
+  &lt;/resin:Redirect>
+  
+&lt;/web-app>
+</example>
+
+
 </defun>
 
 <defun title="&lt;resin:BasicLogin>" name="resin:BasicLogin">
@@ -5951,10 +6045,19 @@ to configure digest login.
 <javadoc class="com.caucho.rewrite.Dispatch"/>
 <description>
 <p>
-
   Normal servlet dispatching with optional <em>target</em> rewriting.
 </p>
 </description>
+
+<example title="Dispatching static resources directly">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:Dispatch regexp="\.(jpg|html|txt|gif|png|js|css)$"/>
+  &lt;resin:Dispatch regexp="^" target="/controller"/>
+
+&lt;/web-app>
+</example>
 </defun>
 
 <defun title="&lt;resin:FastCgiPort>" name="resin:FastCgiPort">
@@ -5973,6 +6076,19 @@ to configure digest login.
   Proxies the request to a backend server using FastCGI as a proxy protocol.
 </p>
 </description>
+
+<example title="Proxying requests to local FastCGI processes">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+   &lt;resin:FastCgiProxy regexp="\.rb$">
+     &lt;address>127.0.0.1:12345&lt;/address>
+     &lt;address>127.0.0.1:67890&lt;/address>
+   &lt;/resin:FastCgiProxy>
+
+&lt;/web-app>
+</example>
+
 </defun>
 
 <defun title="&lt;resin:FileQueue>" name="resin:FileQueue">
@@ -5997,10 +6113,22 @@ to configure digest login.
 <javadoc class="com.caucho.rewrite.Forbidden"/>
 <description>
 <p>
-
   Send a HTTP forbidden response.
 </p>
 </description>
+
+<example title="Forbidding access based for unsecured connections">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Forbidden regexp="/foo">
+    &lt;resin:Not>
+      &lt;resin:IfSecure/>
+    &lt;/resin:Not>
+  &lt;/resin:Forbidden>
+  
+&lt;/web-app>
+</example>
 </defun>
 
 <defun title="&lt;resin:FormLogin>" name="resin:FormLogin">
@@ -6126,10 +6254,18 @@ to the client.
 <javadoc class="com.caucho.rewrite.Forward"/>
 <description>
 <p>
-
   Forwards to the new URL using RequestDispatcher.forward with the <em>target</em> URL.
 </p>
 </description>
+
+<example title="Forwarding requests across web-apps">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:Forward regexp='^/foo' target='/bar/'/>
+
+&lt;/web-app>
+</example>
 </defun>
 
 <defun title="&lt;resin:GlobalCache>" name="resin:GlobalCache">
@@ -6150,6 +6286,20 @@ to the client.
   Proxies the request to a backend server using HTTP as a proxy protocol.
 </p>
 </description>
+
+<example title="Proxying requests to local HTTP servers">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+   &lt;resin:HttpProxy regexp="\.cgi$">
+     &lt;address>127.0.0.1:12345&lt;/address>
+     &lt;address>127.0.0.1:67890&lt;/address>
+   &lt;/resin:HttpProxy>
+
+&lt;/web-app>
+</example>
+
+
 </defun>
 
 <defun title="&lt;resin:if>" name="resin:if" version="Resin 3.0.7">
@@ -6204,11 +6354,30 @@ element resin:if {
 <javadoc class="com.caucho.rewrite.IfAuthType"/>
 <description>
 <p>
-
   Checks for the authentication type, request.getAuthType().
 </p>
+
+<example title="Redirecting based on authentication type">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+            xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp='^/user-area' target='/secret'>
+    &lt;resin:IfAuthType value="BASIC"/>
+  &lt;/resin:Redirect>
+
+  &lt;resin:Redirect regexp='^/user-area' target='/login'/>
+
+  &lt;resin:XmlAuthenticator password-digest='none'>
+    &lt;user name="Aladdin" password="open sesame" group="user"/>
+  &lt;/resin:XmlAuthenticator>
+
+  &lt;resin:BasicLogin realm-name="foobar"/>
+
+&lt;/web-app>
+</example>
 </description>
 </defun>
+
 <defun title="&lt;resin:IfCookie>" name="resin:IfCookie">
 <javadoc class="com.caucho.rewrite.IfCookie"/>
 <description>
@@ -6216,33 +6385,92 @@ element resin:if {
   Checks for the presence of a named HTTP cookie from request.getCookies().
 </p>
 </description>
+
+<example title="Redirecting if a cookie is set">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp='^/welcome' target='/user-area'>
+    &lt;resin:IfCookie name="session"/>
+  &lt;/resin:Redirect>
+
+  &lt;resin:Redirect regexp='^/welcome' target='/login'/>
+  
+&lt;/web-app>
+</example>
 </defun>
+
 <defun title="&lt;resin:IfCron>" name="resin:IfCron">
+<!-- XXX -->
 <javadoc class="com.caucho.rewrite.IfCron"/>
 <description>
 <p>
-
   Matches if the current time is in an active range configured by cron-style times.
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:IfFileExists>" name="resin:IfFileExists">
 <javadoc class="com.caucho.rewrite.IfFileExists"/>
 <description>
 <p>
-
   Matches if the URL corresponds to an actual file.
 </p>
 </description>
+
+<example title="Dispatch only if the URL represents an existant file">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:Dispatch>
+    &lt;resin:IfFileExists/>
+  &lt;/resin:Dispatch>
+
+  &lt;resin:Redirect regexp="^" target='/does-not-exist'/>
+&lt;/web-app>
+</example>
 </defun>
+
 <defun title="&lt;resin:IfHeader>" name="resin:IfHeader">
 <javadoc class="com.caucho.rewrite.IfHeader"/>
 <description>
 <p>
-
   Tests for a HTTP header and value match.
 </p>
 </description>
+
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+</tr>  
+<tr>
+  <td>name</td>
+  <td>The name of the header to match.</td>
+</tr>
+<tr>
+  <td>regexp</td>
+  <td>A regular expression to match the value of the header.</td>
+</tr>
+<tr>
+  <td>value</td>
+  <td>A regular expression to match the value of the header. (synonym for regexp)</td>
+</tr>
+</attributes>
+
+<example title="Redirect based on referrer">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp='^/foo' target='/foo-for-example-customers'>
+    &lt;resin:IfHeader name="Referer" value="example.com"/>
+  &lt;/resin:Redirect>
+
+  &lt;resin:Redirect regexp='^/foo' target='/everyone-else'/>
+&lt;/web-app>
+
+</example>
+
 </defun>
 
 <defun title="&lt;resin:IfLocale>" name="resin:IfLocale">
@@ -6278,13 +6506,21 @@ element resin:if {
 <defun title="&lt;resin:IfNetwork>" name="resin:IfNetwork">
 <javadoc class="com.caucho.rewrite.IfNetwork"/>
 <parents>resin:Allow,resin:Deny</parents>
+
 <description>
 <p>The &lt;resin:IfNetwork> tag allows or denies requests based on the
 IP address of the client. IP-constraint is very useful for protecting
 administration resources to an internal network. It can also be useful
 for denying service to known problem IPs.</p>
 </description>
+
 <!-- XXX: Need to list the attributes here -->
+<examples>
+<p>The <code>/24</code> in the IP <code>192.168.17.0/24</code>
+means that the first 24 bits of the IP are matched - any IP address
+that begins with <code>192.168.17.</code> will match. The usage of
+<var>/bits</var> is optional.</p>
+
 <example title="Admin Pages Allowed Only from 192.168.17.0/24">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
@@ -6295,10 +6531,10 @@ for denying service to known problem IPs.</p>
   ...
 &lt;/web-app>
 </example>
-<p>The <code>/24</code> in the IP <code>192.168.17.0/24</code> means that the first 24 bits 
-of the IP are matched - any IP address that begins with <code>192.168.17.</code> will 
-match. The usage of <var>/bits</var> is optional.</p>
-<p>The following example shows how the tag can be used to construct an IP block list:</p>
+
+<p>The following example shows
+how the tag can be used to construct an IP block list:</p>
+
 <example title="Block-out Known Trouble-Makers">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin">
@@ -6323,6 +6559,7 @@ do not match a <code>deny</code>. If only <var>allow</var> is used,
 then an IP is denied unless it matches an <code>allow</code>. If both
 are used, then the IP must match both an <code>allow</code> and a
 <code>deny</code></p>
+</examples>
 
 </defun>
 
@@ -6357,11 +6594,17 @@ are used, then the IP must match both an <code>allow</code> and a
 <defun title="&lt;resin:IfSecure>" name="resin:IfSecure">
 <parents>resin:Allow,resin:Deny</parents>
 <javadoc class="com.caucho.rewrite.IfSecure"/>
+<description>
 <p>The &lt;resin:IfSecure>
 tag restricts access to secure transports, usually SSL.</p>
+</description>
+
 <!-- XXX: Need to list the attributes here -->
-<p>The following is an example of the typical use of this tag. In the example, all pages 
-in the web application are enforced to be accessible via SSL only.</p>
+
+<examples>
+<p>In the following example, all pages in the web application are
+enforced to be accessible via SSL only.</p>
+
 <example title="WEB-INF/resin-web.xml">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
             xmlns:resin="urn:java:com.caucho.resin"
@@ -6372,11 +6615,14 @@ in the web application are enforced to be accessible via SSL only.</p>
   ...  
 &lt;/web-app&gt;
 </example>
-<p>The default behaviour is for Resin to rewrite any URL that starts with "http:" by 
-replacing the "http:" part with "https:", and then send a redirect to the browser because 
-this configuration.</p>
-<p>If the default rewriting of the host is not appropriate, you can set the 
-<a config-tag="secure-host-name"/> for the host:</p>
+
+<p>The default behaviour is for Resin to rewrite any URL that starts
+with "http:" by replacing the "http:" part with "https:", and then
+send a redirect to the browser because this configuration.</p> 
+
+<p>If the default rewriting of the host is not appropriate, you
+can set the <a config-tag="secure-host-name"/> for the host:</p>
+
 <example title="WEB-INF/resin-web.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
 &lt;cluster id="app-tier">
@@ -6386,15 +6632,19 @@ this configuration.</p>
     ...
 &lt;/resin> 
 </example>
+</examples>
 </defun>
 
 <defun title="&lt;resin:IfUserInRole>" name="resin:IfUserInRole">
 <parents>resin:Allow,resin:Deny</parents>
 <javadoc class="com.caucho.rewrite.IfUserInRole"/>
-<p>The 
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfUserInRole.html">&lt;resin:IfUserInRole></a>
-condition enforces role-based security. It requires that 
-authenticated users have a specified role. The following are the attributes of the tag:</p>
+
+<description>
+<p>The <a config-tag="resin:IfUserInRole"/> condition enforces
+role-based security. It requires that authenticated users have a
+specified role.</p>
+</description>
+
 <attributes>
 <tr>
   <th>Attribute</th>
@@ -6405,6 +6655,7 @@ authenticated users have a specified role. The following are the attributes of t
   <td>Roles which are allowed to access the resource.</td>
 </tr>
 </attributes>
+
 <p>The following is an example of how &lt;resin:IfUserInRole> might be used:</p>
 <example title="WEB-INF/resin-web.xml Protecting WebDav for WebDav Users">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -6417,6 +6668,7 @@ authenticated users have a specified role. The following are the attributes of t
 &lt;/web-app>
 </example>
 </defun>
+
 <defun title="&lt;resin:import>" name="resin:import" version="Resin 3.0.7">
 
 <description>
@@ -6468,6 +6720,7 @@ element fileset {
 }
 </schema>
 
+<examples>
 <p>The following example shows how Resin implements the WEB-INF/web.xml
 and WEB-INF/resin-web.xml files.  Both are simply resin:import in a
 web-app-default.  When Resin configures the web-app, it will process
@@ -6525,6 +6778,7 @@ the web-app flexibility in which bean files to create.</p>
 
 &lt;/web-app>
 </example>
+</examples>
 
 </defun>
 
@@ -6586,106 +6840,9 @@ JAAS login module.
   ...
 &lt;/web-app&gt;
 </example>
-<s2 name="jaas-is-user-in-role" title="isUserInRole">
-<p>
-The isUserInRole method is supported if the LoginModule provides either an isUserInRole
-method in the Principal returned by the LoginModule, or a getRoles() method returning a 
-java.util.Set.
-</p>
-</s2>
-<s2 name="jaas-init-param" title="init-param">
-<p>
-&lt;init-param&gt; tags are used to configure the properties of the LoginModule. Existing
-pluggable LoginModules provide documentation of the init-param values that are accepted. 
-Custom LoginModule implementations retrieve the init-param values in the 
-<code>initialize</code> method.
-</p>
-</s2>
-<s2 name="jaas-custom" title="Custom LoginModule">
-<p>
-Although not very common, it is sometimes very useful to create your own JAAS module (for 
-example as a single sign-on solution across multiple Java products/application servers).
-The following code example shows a custom JAAS module using init parameters with the Resin
-security framework:
-</p>
-<example title="Custom LoginModule - Java code">
-import java.util.*;
 
-import javax.security.auth.*;
-import javax.security.auth.spi.*;
-import javax.security.auth.callback.*;
-import javax.security.auth.login.*;
-
-public class TestLoginModule implements javax.security.auth.spi.LoginModule {
-  private Subject _subject;
-  private CallbackHandler _handler;
-  private Map _state;
- 
-  private String _userName;
-  private String _password;
-
-  public void initialize(Subject subject,
-                         CallbackHandler handler,
-                         Map sharedState,
-                         Map options)
-   {
-     _subject = subject;
-     _handler = handler;
-     _state = sharedState;
-
-     _userName = (String) _options.get("user");
-     _password = (String) _options.get("password");
-   }
-
-   public boolean login()
-     throws LoginException
-   {
-     NameCallback name = new NameCallback("");
-     PasswordCallback password = new PasswordCallback("", false);
- 
-     _handler.handle(new Callback[] { name, password });
-
-     if (_userName.equals(name.getName()) &amp;&amp; 
-         _password.equals(password.getPassword()) {
-         _subject.getPrincipals().add(new TestPrincipal(_userName));
-       return true;
-     }
-     else
-       return false;
-   }
-
-   public boolean abort()
-   {
-     return true;
-   }
-
-   public boolean commit()
-   {
-     return _subject.getPrincipals().size() > 0;
-   }
-
-   public boolean logout()
-   {
-      return true;
-   }
-}
-</example>
-<example title="Custom LoginModule - resin-web.xml Configuration">
-&lt;web-app xmlns="http://caucho.com/ns/resin"
-            xmlns:resin="urn:java:com.caucho.resin"&gt;
-  ...
-  &lt;resin:JaasAuthenticator&gt;
-    &lt;resin:login-module&gt;example.TestModule&lt;/resin:login-module&gt;
-    &lt;resin:init-param&gt;
-      &lt;user&gt;Harry&lt;/user&gt;
-      &lt;password&gt;quidditch&lt;/password&gt;
-    &lt;/resin:init-param&gt;
-  &lt;/resin:JaasAuthenticator&gt;
-  ...
-&lt;/web-app&gt;
-</example>
-</s2>
 </defun>
+
 <defun title="&lt;resin:JmsConnectionFactory>" name="resin:JmsConnectionFactory">
 <javadoc class="com.caucho.jms.JmsConnectionFactory"/>
 <description>
@@ -6821,6 +6978,29 @@ The following example shows the usage of the <code>jndi-env</code> configuration
   Load balance to a cluster of backend Resin servers.
 </p>
 </description>
+
+<example title="Load Balancing to a backend cluster">
+&lt;resin xmlns="http://caucho.com/ns/resin"
+       xmlns:resin="urn:java:com.caucho.resin">
+   
+  &lt;cluster id='app-tier'>
+    &lt;server id='a' port='6810'/>
+    &lt;server id='b' port='6820'/>
+
+    ...
+  &lt;/cluster>
+
+  &lt;cluster id='web-tier'>
+    &lt;server id='http' port='80'/>
+
+    &lt;host id=''>
+    
+      &lt;resin:LoadBalance cluster="app-tier"/>
+      
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
+</example>
 </defun>
 
 <defun title="&lt;resin:LogService>" name="resin:LogService">
@@ -6862,8 +7042,10 @@ The following example shows the usage of the <code>jndi-env</code> configuration
 
 <defun title="&lt;resin:message>" name="resin:message" version="Resin 3.0.7">
 
+<description>
 <p>Logs a message to the given log file. The content of the element is the
 message.</p>
+</description>
 
 <schema>
 element resin:message {
@@ -6883,41 +7065,97 @@ element resin:message {
 </defun> <!-- resin:message -->
 
 <defun title="&lt;resin:Not>" name="resin:Not">
+<javadoc class="com.caucho.rewrite.Not"/>
 <description>
 <p>
-
-  Matches if the child does not match.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Not.html">&lt;resin:Not> JavaDoc</a>
+Matches if the child does not match.
 </p>
 </description>
+
+<example title="Negative matching of a query parameter">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp="" target="/match">
+    &lt;resin:Not>
+      &lt;resin:IfQueryParam name="foo" regexp="bar"/>
+    &lt;/resin:Not>
+  &lt;/resin:Redirect>
+  
+&lt;/web-app>
+</example>
+
 </defun>
 <defun title="&lt;resin:NotAnd>" name="resin:NotAnd">
+<javadoc class="com.caucho.rewrite.NotAnd"/>
 <description>
 <p>
-
   Matches if any child does not match.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/NotAnd.html">&lt;resin:NotAnd> JavaDoc</a>
 </p>
 </description>
+
+<example title="Negative matching of at least one of two query parameters">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp="" target="/match">
+    &lt;resin:NotAnd>
+      &lt;resin:IfQueryParam name="foo" regexp="foo"/>
+      &lt;resin:IfQueryParam name="bar" regexp="bar"/>
+    &lt;/resin:NotAnd>
+  &lt;/resin:Redirect>
+  
+&lt;/web-app>
+</example>
 </defun>
+
 <defun title="&lt;resin:NotOr>" name="resin:NotOr">
+<javadoc class="com.caucho.rewrite.NotOr"/>
 <description>
 <p>
-
   Matches if all the children do not match.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/NotOr.html">&lt;resin:NotOr> JavaDoc</a>
 </p>
 </description>
+
+<example title="Negative matching of two query parameters">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp="" target="/match">
+    &lt;resin:NotOr>
+      &lt;resin:IfQueryParam name="foo" regexp="foo"/>
+      &lt;resin:IfQueryParam name="bar" regexp="bar"/>
+    &lt;/resin:NotOr>
+  &lt;/resin:Redirect>
+  
+&lt;/web-app>
+</example>
+
+
 </defun>
 
 <defun title="&lt;resin:Or>" name="resin:Or">
+<javadoc class="com.caucho.rewrite.Or"/>
 <description>
 <p>
-
   Matches if any children match.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Or.html">&lt;resin:Or> JavaDoc</a>
 </p>
 </description>
+
+<example title="Matching at least one of two query parameters">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+	 
+  &lt;resin:Redirect regexp="" target="/match">
+    &lt;resin:Or>
+      &lt;resin:IfQueryParam name="foo" regexp="foo"/>
+      &lt;resin:IfQueryParam name="foo" regexp="bar"/>
+    &lt;/resin:Or>
+  &lt;/resin:Redirect>
+  
+&lt;/web-app>
+</example>
+
 </defun>
 
 <defun title="&lt;resin:otherwise>" name="resin:otherwise" version="Resin 3.0.7">
@@ -6935,43 +7173,46 @@ element resin:otherwise {
 
   
 <defun title="&lt;resin:PingMailer>" name="resin:PingMailer">
+<javadoc class="com.caucho.admin/PingMailer.html"/>
 <description>
 <p>
-
   Mails a notification when a ping check fails.
-<a href="http://caucho.com/resin-javadoc/com/caucho/admin/PingMailer.html">&lt;resin:PingMailer> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:PingThread>" name="resin:PingThread">
+<javadoc class="com.caucho.admin/PingThread.html"/>
 <description>
 <p>
-
   Checks status of Resin sutomatically.
-<a href="http://caucho.com/resin-javadoc/com/caucho/admin/PingThread.html">&lt;resin:PingThread> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:ProjectJarRepository>" name="resin:ProjectJarRepository">
+<javadoc class="com.caucho.repository.ProjectJarRepository"/>
 <description>
 <p>
-
   Maven-style library jar management for webapps.
-<a href="http://caucho.com/resin-javadoc/com/caucho/server/repository/ProjectJarRepository.html">&lt;resin:ProjectJarRepository> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:PropertiesAuthenticator>" name="resin:PropertiesAuthenticator">
 <parents>cluster, host, web-app</parents>
+<javadoc class="com.caucho.security.PropertiesAuthenticator"/>
+
+<description>
 <p>
-The PropertiesAuthenticator 
-(<a javadoc="com.caucho.security.PropertiesAuthenticator"/>)
-allows you to use Java properties to store authentication information. This is very useful
-for a variety of applications such as very small sites, developement, unit testing or 
-integration testing. You can either specify properties in-line in XML or via an external
-properties file.
+The PropertiesAuthenticator allows you to use Java properties to
+store authentication information. This is very useful for a variety
+of applications such as very small sites, developement, unit testing
+or integration testing. You can either specify properties in-line
+in XML or via an external properties file.
 </p>
-<p>The following are the attributes for the PropertiesAuthenticator:</p>
+</description>
+
 <!-- XXX: Check this attributes table for completeness -->
 <attributes>
 <tr>
@@ -6993,9 +7234,11 @@ properties file.
   <td>md5-base64</td>
 </tr>
 </attributes>
+
 <p>
-  The following is an example of in-lining properties with the authenticator. This is 
-  useful for extremely simple web-sites maintained by developers as well as testing.
+  The following is an example of in-lining properties with the
+  authenticator. This is useful for extremely simple web-sites
+  maintained by developers as well as testing.
 </p>
 <example title="WEB-INF/resin-web.xml - in-line Properties">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -7008,10 +7251,12 @@ properties file.
   ...
 &lt;/web-app>
 </example>
+
 <p>
-  Alternatively, external properties files can be used as in the example below. This is
-  useful for a simple site where authentication may be managed by administrators or 
-  non-technical users.
+  Alternatively, external properties files can be used as in
+  the example below. This is useful for a simple site where
+  authentication may be managed by administrators or non-technical
+  users.
 </p>
 <example title="WEB-INF/resin-web.xml - File Property">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -7025,33 +7270,45 @@ properties file.
 harry=/Tj/54ylCloUeMi2YQIVCQ===,user,admin
 </example>
 <p>
-As the example indicates, the properties file includes the user as property name while the
-value is the password (that may be hashed as in the example or may be in plain-text) and
-any roles that are assigned to the user separated by commas. The password and role values
-are also separated by a comma.
+As the example indicates, the properties file includes the user as
+property name while the value is the password (that may be hashed
+as in the example or may be in plain-text) and any roles that are
+assigned to the user separated by commas. The password and role
+values are also separated by a comma.
 </p>
 </defun>
+
 <defun title="&lt;resin:Redirect>" name="resin:Redirect">
+<javadoc class="com.caucho.rewrite.Redirect"/>
+
 <description>
 <p>
-
   Send a HTTP redirect to a new URL specified by <em>target</em>.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/Redirect.html">&lt;resin:Redirect> JavaDoc</a>
 </p>
 </description>
+
+<example title="Flipping elements of a path with a Redirect">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+  &lt;resin:Redirect regexp='^/([^/]+)/([^/]+)' target='/$2/$1'/>
+  
+&lt;/web-app>
+</example>
 </defun>
 
 <defun title="&lt;resin:RemoteAdminService>" name="resin:RemoteAdminService">
+<javadoc class="com.caucho.admin.RemoteAdminService"/>
+
 <description>
 <p>
-
   Enables administration by remote agents, like an eclipse console.
-<a href="http://caucho.com/resin-javadoc/com/caucho/admin/RemoteAdminService.html">&lt;resin:RemoteAdminService> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:ScheduledTask>" name="resin:ScheduledTask">
+<javadoc class="com.caucho.resources.ScheduledTask"/>
 
 <description>
 <p>&lt;resin:ScheduledTask> schedules a job to be executed at specific times
@@ -7107,10 +7364,6 @@ cron entry</a></p>
 </deftable>
 </s2>
 
-<p>
-<a href="http://caucho.com/resin-javadoc/com/caucho/resources/ScheduledTask.html">&lt;resin:ScheduledTask> JavaDoc</a>
-</p>
-
 </description>
 
 <attributes>
@@ -7159,18 +7412,28 @@ cron entry</a></p>
 </defun>
 
 <defun title="&lt;resin:SendError>" name="resin:SendError">
+<javadoc class="com.caucho.rewrite.SendError"/>
 <description>
 <p>
-
   Send a HTTP error response.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SendError.html">&lt;resin:SendError> JavaDoc</a>
 </p>
 </description>
+
+<example title="Sending an error code based on request path">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+	&lt;resin:SendError regexp="/upcoming" code="501" message="Not Implemented"/>
+
+&lt;/web-app>
+</example>
 </defun>
 
 <defun title="&lt;resin:set>" name="resin:set" version="Resin 3.0.7">
 
+<description>
 <p>resin:set adds an EL variable to the current context.</p>
+</description>
 
 <attributes>
 <tr>
@@ -7215,30 +7478,28 @@ element set {
 </defun>
 
 <defun title="&lt;resin:SetHeader>" name="resin:SetHeader">
+<javadoc class="com.caucho.rewrite.SetHeader"/>
 <description>
 <p>
-
   Sets a response header.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SetHeader.html">&lt;resin:SetHeader> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:SetRequestSecure>" name="resin:SetRequestSecure">
+<javadoc class="com.caucho.rewrite.SetRequestSecure"/>
 <description>
 <p>
-
   Marks the request as secure.
-<a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/SetRequestSecure.html">&lt;resin:SetRequestSecure> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="&lt;resin:StatService>" name="resin:StatService">
+<javadoc class="com.caucho.rewrite.StatService"/>
 <description>
 <p>
-
   Gathers timed runtime status of Resin for graphing.
-<a href="http://caucho.com/resin-javadoc/com/caucho/admin/StatService.html">&lt;resin:StatService> JavaDoc</a>
 </p>
 </description>
 </defun>
@@ -7246,9 +7507,12 @@ element set {
 
 <defun title="&lt;resin:when>" name="resin:when" version="Resin 3.0.7">
 <parents>resin:choose</parents>
+
+<description>
 <p>&lt;resin:when> conditionally configures a block within a
 &lt;resin:choose> block.  If the <var>test</var> matches, Resin will
 use the enclosed configuration.</p>
+</description>
 
 <attributes>
 <tr>
@@ -7272,24 +7536,29 @@ element resin:when {
 </defun>
 
 <defun title="&lt;resin:XaLogService>" name="resin:XaLogService">
+<javadoc class="com.caucho.admin.XaLogService"/>
+<pro/>
+
 <description>
 <p>
-
   Transaction log service.
-<a href="http://caucho.com/resin-javadoc/com/caucho/admin/XaLogService.html">&lt;resin:XaLogService> JavaDoc</a>
 </p>
 </description>
 </defun>
+
 <defun title="&lt;resin:XmlAuthenticator>" name="resin:XmlAuthenticator">
 <parents>cluster, host, web-app</parents>
+<javadoc class="com.caucho.security.XmlAuthenticator"/>
+
+<description>
 <p>
-In a similar vein to the properties authenticator, the XML authenticator 
-(<a href="http://caucho.com/resin-javadoc/com/caucho/security/XmlAuthenticator.html">com.caucho.security.XmlAuthenticator</a>)
-allows you to store authentication information in XML - either in-line or in an external 
-file. This authenticator has some of the same use-cases as the properties file 
-authenticator, in a slight more human readable form, especially for a non-technical user.
-</p>
-<p>The following are the attributes for the XmlAuthenticator:</p>
+In a similar vein to the properties authenticator, the XML
+authenticator allows you to store authentication information in XML -
+either in-line or in an external file. This authenticator has some of
+the same use-cases as the properties file authenticator, in a slight
+more human readable form, especially for a non-technical user.  </p>
+</description>
+
 <deftable>
 <tr>
   <th>Attribute</th>
@@ -7351,34 +7620,32 @@ user.</p>
 </defun>
 
 <defun title="&lt;resin:XmlRoleMap>" name="resin:XmlRoleMap">
+<javadoc class="com.caucho.security.XmlRoleMap"/>
 <description>
 <p>
-
   Role to group permission mapping.
-<a href="http://caucho.com/resin-javadoc/com/caucho/security/XmlRoleMap.html">&lt;resin:XmlRoleMap> JavaDoc</a>
 </p>
 </description>
 </defun>
 
 <defun title="RequestPredicate" name="RequestPredicate">
-<description>
-  <p>
+<javadoc class="com.caucho.rewrite.RequestPredicate"/>
 
+<description>
+<p>
   Interface for custom request predicates.
-    <a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/RequestPredicate.html">RequestPredicate JavaDoc</a>
 </p>
 </description>
 </defun>
-
-
-
 
 <defun title="&lt;resource>" name="resource" occur="*" version="Resin 3.0">
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.Resource -->
 
+<description>
 <p>&lt;resource> is an obsolete synonym for &lt;bean> to define custom
 singletons.  Applications should use the &lt;bean> syntax instead.</p>
+</description>
 
 </defun> 
 
@@ -7386,16 +7653,20 @@ singletons.  Applications should use the &lt;bean> syntax instead.</p>
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.Resource -->
 
-<p>&lt;resource-adapter> configures a JCA <code>ResourceAdapter</code>
-in combination with <a config-tag="connection-factory">&lt;connection-factory></a>
-for connections or <a config-tag="activation-spec">&lt;activation-spec</a> for
-message listeners.  </p>
+<description>
+<p>&lt;resource-adapter> configures a JCA <code>ResourceAdapter</code> 
+in combination with <a
+config-tag="connection-factory">&lt;connection-factory></a>
+for connections or <a config-tag="activation-spec">&lt;activation-spec</a> 
+for message listeners.</p>
 
-<p><code>ResourceAdapters</code> can be deployed in .rar files, but this
-is not required by Resin.  Instead, you can configure the ResourceAdapter
-directly.</p>
+<p><code>ResourceAdapters</code> can be deployed in .rar files,
+but this is not required by Resin.  Instead, you can configure the
+ResourceAdapter directly.</p>
 
-<p>A symbolic URI can be used in place of the ResourceAdapter's class name.</p>
+<p>A symbolic URI can be used in place of the ResourceAdapter's
+class name.</p>
+</description>
 
 <attributes>
 <tr>
@@ -7445,12 +7716,14 @@ element resource-adapter {
 <parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
   <!-- com.caucho.jca.ResourceDeploy -->
 
+<description>
 <p>&lt;resource-deploy> defines a deployment directory for .rar files.</p>
 
 <p>Connectors and resources defined in .rar files must be deployed
 before they can be configured by <a config-tag="connector">connector</a>.
 The &lt;resource-deploy&gt; tag specifies the directory for that deployment.
 </p>
+</description>
 
 <attributes>
 <tr>
@@ -7501,6 +7774,7 @@ element resource-deploy {
 <parents>resin, cluster, host, web-app</parents>
   <!-- com.caucho.config.types.ResourceRef -->
 
+<description>
 <p>&lt;resource-ref> declares that the application needs
 a resouce configuration.</p>
 
@@ -7512,6 +7786,7 @@ database, and ejb-server tags.</p>
 <p>For backwards compatibility, Resin 2.1-style configuration files
 may still use resource-ref to configure resources, but it's recommended to
 convert the configuration.</p>
+</description>
 
 <schema>
 element resource-ref {
@@ -7530,20 +7805,24 @@ element resource-ref {
 <defun title="&lt;save-allocation-stack-trace>" name="save-allocation-stack-trace" version="Resin 3.1">
 <parents>database</parents>
 
+<description>
 <p>&lt;save-allocation-stack-trace> helps debugging application with
 a missing <code>Connection.close()</code> by saving the stack trace
 where the <code>Connection.getConnection()</code> was called.  When
 Resin detects that the connection has failed to close, it can then
 print the allocation stack trace, which is more informative for
 tracking down errors.</p>
+</description>
 
 </defun>
 
 <defun title="&lt;secure>" name="secure">
 <parents>web-app</parents>
 
+<description>
 <p>The &lt;secure> flag requires that the web-app only be accessed
 in a secure/SSL mode.  Equivalent to a &lt;security-constraint>.</p>
+</description>
 
 <schema>
 element secure {
@@ -7575,6 +7854,7 @@ element secure-host-name {
 <defun title="&lt;security-constraint>" name="security-constraint" version="Servlet">
 <parents>web-app</parents>
 
+<description>
 <p>Specifies protected areas of the web site.  Sites using
 authentication as an optional personalization feature will typically
 not use any security constraints.  See <a href="security-overview.xtp">Resin
@@ -7584,6 +7864,7 @@ security</a> for an overview.</p>
 
 <p>See <a href="security-overview.xtp">Resin security</a> for an overview of
 security issues and configuration.</p>
+</description>
 
 <attributes>
 <tr>
@@ -7648,6 +7929,7 @@ element security-constraint {
 
 
 <defun title="&lt;security-manager>" name="security-manager">
+<description>
 <p>
 &lt;security-manager> enables the use of the security manager for the JVM.
 Because the JVM security manager is very slow, we generally do not
@@ -7655,6 +7937,7 @@ recommend enabling it for server applications.  Instead, see the
 <a href="starting-resin-watchdog.xtp">watchdog</a> configuration for alternative
 methods for securiting the JVM in ISP configurations.
 </p>
+</description>
 
 <schema>
 element security-manager {
@@ -7673,6 +7956,7 @@ element security-manager {
 </defun>
 
 <defun title="&lt;security-provider>" name="security-provider">
+<description>
 <p>
 &lt;security-provider> adds one or more security providers.  Each entry
 specifies the name of a security provider class.  The name is used
@@ -7680,6 +7964,7 @@ to instantiate an instance of the
 object, which is then passed to 
 <a javadoc="java.security.Security#addProvider()">Security.addProvider</a>.
 </p>
+</description>
 
 <schema>
 element security-provider {
@@ -7963,8 +8248,10 @@ server instances and therefore belong in a server-default.</p>
 <parents>cluster</parents>
 <default>Resin/4.0.x</default>
 
+<description>
 <p>Configures the HTTP Server: header which Resin sends back to any
 HTTP client.</p>
+</description>
 
 <schema>
 element server-header {
@@ -7981,8 +8268,9 @@ element server-header {
 </example>
 
 </defun>
-<defun title="&lt;servlet>" name="servlet" version="Servlet 2.2">
 
+<defun title="&lt;servlet>" name="servlet" version="Servlet 2.2">
+<description>
 <p>Defines a servlet to process HTTP URL
 requests.  The servlet class can either implement <a
 href="http://caucho.com/resin-javadoc/javax/servlet/Servlet.html">javax.servlet.Servlet</a>
@@ -7992,6 +8280,7 @@ like Hessian to handle remoting requests.</p>
 <p>Since servlets are full <a href="config-candi.xtp">Resin-CanDI</a> beans,
 they can use dependency injection, EJB aspects like @TransactionAttribute,
 custom @InterceptorType interceptors, and listen for @Observes events.</p>
+</description>
 
 <attributes>
 <tr>
@@ -8118,6 +8407,7 @@ available to a Resin application, as defined in
 <defun title="&lt;servlet-hack>" name="servlet-hack" occur="*" version="Resin 3.0">
   <parents>class-loader</parents>
 
+<description>
 <p>Use of servlet-hack is discouraged.  Using servlet-hack violates
 the JDK's classloader delegation model and can
 produce surprising ClassCastExceptions.</p>
@@ -8125,6 +8415,7 @@ produce surprising ClassCastExceptions.</p>
 <p>servlet-hack reverses the normal class loader order.
 Instead of parent classloaders having priority, child classloaders
 have priority.</p>
+</description>
 
 <schema>
 element servlet-hack {
@@ -8133,10 +8424,13 @@ element servlet-hack {
 </schema>
 
 </defun>
+
 <defun title="&lt;servlet-mapping>" name="servlet-mapping" version="Servlet 2.2">
+<description>
 <p>Maps url patterns to servlets.  <var>servlet-mapping</var> has two
 children, <var>url-pattern</var> and <var>servlet-name</var>.
 <var>url-pattern</var> selects the urls which should execute the servlet.</p>
+</description>
 
 <attributes>
 <tr>
@@ -8145,8 +8439,7 @@ children, <var>url-pattern</var> and <var>servlet-name</var>.
 </tr>
 <tr>
   <td>init</td>
-  <td><a href="config-candi.xtp">Resin-IoC</a> configuration of the
-servlet.</td>
+  <td><a href="config-candi.xtp">Resin-IoC</a> configuration of the servlet.</td>
 </tr>
 <tr>
   <td>protocol</td>
@@ -8203,17 +8496,18 @@ element servlet-mapping {
 </example>
 
 <p>
-<code>url-regexp</code> matches the portion of the url that follows the <g>context path</g>.  
-A webapp in <code>webapps/ROOT</code>, and a url
-<code>http://localhost/foo/hello.html</code> will have a value of <code>"/foo/hello.html"</code> for the
-purposes of the regular expression match.
-A webapp in <code>webapps/baz</code> and a url
-<code>http://localhost/baz/hello.html</code> will have a url of <code>"/hello.html"</code> for the
-purposes of the regular expression match, because "/baz" is the context path.
+<code>url-regexp</code> matches the portion of the url that follows
+the <g>context path</g>.  A webapp in <code>webapps/ROOT</code>,
+and a url <code>http://localhost/foo/hello.html</code> will have
+a value of <code>"/foo/hello.html"</code> for the purposes of the
+regular expression match.  A webapp in <code>webapps/baz</code>
+and a url <code>http://localhost/baz/hello.html</code> will have a
+url of <code>"/hello.html"</code> for the purposes of the regular
+expression match, because "/baz" is the context path.
 </p>
 
-<p>In Resin, the special <code>servlet-name</code> <var>'invoker'</var> is used to dispatch
-servlets by class name.
+<p>In Resin, the special <code>servlet-name</code>
+<var>'invoker'</var> is used to dispatch servlets by class name.
 </p>
 
 <warn>Enabling the <var>invoker</var> servlet can
@@ -8293,13 +8587,18 @@ element servlet-regexp {
 </example>
 
 </defun>
+
 <defun title="ServletRequestPredicate" name="ServletRequestPredicate">
+<description>
 <p>
-Although extremely rare, it is sometimes useful to create a custom predicate (for example 
-for encapsulating complex custom authorization logic). You can easily do this by extending 
-<a href="javadoc:com.caucho.security.RequestPredicate">com.caucho.security.RequestPredicate</a>. 
+Although extremely rare, it is sometimes useful to create
+a custom predicate (for example for encapsulating complex
+custom authorization logic). You can easily do this by extending <a
+href="javadoc:com.caucho.security.RequestPredicate">com.caucho.security.RequestPredicate</a>.
 This essentially allows you to create your own &lt;IfXXX> rule.
 </p>
+</description>
+
 <p>The following example demonstrates how to create a custom Resin predicate:</p>
 <example title="WEB-INF/resin-web.xml - Custom rule">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
@@ -8339,7 +8638,9 @@ public class IfMyTest extends ServletRequestPredicate {
 <parents>cluster</parents>
 <default>JSESSIONID</default>
 
+<description>
 <p>Configures the cookie used for servlet sessions.</p>
+</description>
 
 <schema>
 element session-cookie {
@@ -8350,11 +8651,13 @@ element session-cookie {
 </defun>
 <defun title="&lt;session-config>" name="session-config" version="Servlet 2.2">
 
+<description>
 <p>&lt;session-config> configures Resin's session handling, including the
 cookies Resin sends, the maximum sessions, and session persistence and clustering.</p>
 
 <p>See also: <a href="cluster-overview.xtp">Resin clustering</a> for more
 information about distributed sessions and persistence.</p>
+</description>
 
 <attributes>
 <tr>
@@ -8489,7 +8792,6 @@ longer than <code>session-timeout</code> are purged.</p>
 &lt;/web-app&gt;
 </example>
 
-
 <p><var>cookie-length</var> is used to limit the maximum length for
 the session's generated cookie for special situations like WAP devices.
 Reducing this value reduces the randomness in the cookie and increases the
@@ -8507,7 +8809,9 @@ id amongst different web-apps.</p>
 <parents>cluster</parents>
 <default>false</default>
 
+<description>
 <p>Disables sticky sessions from the load balancer.</p>
+</description>
 
 <schema>
 element session-sticky-disable {
@@ -8521,9 +8825,11 @@ element session-sticky-disable {
 <parents>cluster</parents>
 <default>;jsessionid=</default>
 
+<description>
 <p>Configures the URL prefix used for session rewriting.</p>
 
 <note>Session rewriting is discouraged as a potential security issue.</note>
+</description>
 
 <schema>
 element session-cookie {
@@ -8536,8 +8842,10 @@ element session-cookie {
 <defun title="&lt;shutdown-wait-max>" version="Resin 3.0" name="shutdown-wait-max">
 <parents>server</parents>
 
+<description>
 <p>&lt;shutdown-wait-max> configures the maximum time the server
 will wait for the graceful shutdown before forcing an exit.</p>
+</description>
 
 <default>60s</default>
 
@@ -8554,11 +8862,13 @@ element shutdown-wait-max {
   <parents>class-loader</parents>
   <!-- com.caucho.loader.SimpleLoader -->
 
+<description>
 <p>&lt;simple-loader> Configures a
 simple <var>WEB-INF/classes</var>-style class loader.</p>
 
 <p>.class files in the specified directory will be loaded without any
 special compilation steps (in contrast with compiling-loader.)</p>
+</description>
 
 <attributes>
 <tr>
@@ -8589,7 +8899,9 @@ element simple-loader {
 
 <defun title="&lt;socket-timeout>" name="socket-timeout" version="Resin 3.1">
 <parents>http, cluster-port, protocol, server</parents>
+<default>60s</default>
 
+<description>
 <p>&lt;socket-timeout> is the maximum time
 a socket <a href="cluster-load-balancer.xtp">load balancer</a>
 and <a href="deploy-ref.xtp#session-config">distributed sessions</a> will wait for
@@ -8600,8 +8912,7 @@ The socket-timeout lets Resin recover from these kinds of crashes.</p>
 
 <p>Lower values can detect crashes more quickly, but too-low values may
 report bogus failures when the server machine is just a little slow.</p>
-
-<default>60s</default>
+</description>
 
 <example title="socket-timeout">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -8623,13 +8934,14 @@ report bogus failures when the server machine is just a little slow.</p>
 
 <defun title="&lt;spy>" name="spy" version="Resin 3.1">
 <parents>database</parents>
+<default>false</default>
 
+<description>
 <p>The &lt;spy> tag is a very useful logging tag for debugging database
 problems.  If &lt;spy> is enabled, all database queries will be logged
 at the "fine" level.  Applications can use &lt;spy> to debug unexpected
 database queries, or to improve query performance.</p>
-
-<default>false</default>
+</description>
 
 <example title="Example: spy output">
 0.6:setString(1,1)
@@ -8644,8 +8956,10 @@ database queries, or to improve query performance.</p>
 <parents>cluster</parents>
 <default>value of session-cookie</default>
 
+<description>
 <p>Defines an alternative session cookie to be used for a SSL
 connection.  Having two separate cookies increases security.</p>
+</description>
 
 <schema>
 element ssl-session-cookie {
@@ -8701,8 +9015,10 @@ element startup-mode {
 
 <defun title="&lt;stat-service>" name="stat-service">
 
+<description>
 <p>&lt;stat-service> periodically checks the status of the server,
 and reports errors as necessary.</p>
+</description>
 
 <attributes>
 <tr>
@@ -8758,9 +9074,11 @@ element stat-service {
 <defun title="&lt;statistics-enable>" name="statistics-enable">
 <default>false</default>
 
+<description>
 <p>&lt;statistics-enable> enables more detailed statistics for the
 <code>WebAppMXBean</code> administration.  The statistics gathering
 is disabled by default for performance reasons.</p>
+</description>
 
 <schema>
 element statistics-enable {
@@ -8773,7 +9091,9 @@ element statistics-enable {
 <defun title="&lt;stderr-log>" name="stderr-log" occur="?">
 <parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
 
+<description>
 <p>Configures the destination for <code>System.err</code>.</p>
+</description>
 
 <p>The <a href="logging-ref.xtp">log configuration</a> describes
 stderr-log in detail.</p>
@@ -8837,10 +9157,12 @@ element stderr-log {
 <defun title="&lt;stdout-log>" name="stdout-log" occur="?">
 <parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
 
+<description>
 <p>Configures the destination for <code>System.out</code>.</p>
 
 <p>The <a href="logging-ref.xtp">log configuration</a> describes
 stderr-log in detail.</p>
+</description>
 
 <attributes>
 <tr>
@@ -8897,10 +9219,14 @@ element stdout-log {
 </schema>
 
 </defun>
+
 <defun title="&lt;strict-mapping>" name="strict-mapping" version="Resin 1.2" type="defun">
 <default>false, allowing /foo/bar.jsp/foo.</default>
+
+<description>
 <p>Forces servlet-mapping to follow strict Servlet 2.2, disallowing
 PATH_INFO. Value is <var>true</var> or <var>false</var>.</p>
+</description>
 
 <schema>
 element strict-mapping {
@@ -8919,8 +9245,10 @@ element strict-mapping {
 <defun title="&lt;system-property>" name="system-property" occur="*" version="Resin 2.0">
 <parents>resin, cluster, host, web-app</parents>
 
+<description>
 <p>Sets a Java system property.  The effect is the same as if you
 had called <a javadoc="java.lang.System#setProperty(String,String)"/> before starting Resin.</p>
+</description>
 
 <schema>
 element system-property {
@@ -8970,9 +9298,11 @@ element system-property {
 <parents>resin, cluster, host-default, host, web-app-default, web-app</parents>
 <default>Defaults to <var>WEB-INF/tmp</var></default>
 
+<description>
 <p>&lt;temp-dir> configures the application temp directory.
 This is the path used in
 <var>javax.servlet.context.tempdir</var>.</p>
+</description>
 
 <schema>
 element temp-dir {
@@ -8984,7 +9314,9 @@ element temp-dir {
 
 <defun title="&lt;thread-idle-max>" name="thread-idle-max" version="Resin 3.1">
 <parents>server</parents>
+<default>10</default>
 
+<description>
 <p>&lt;thread-idle-max> configures the maximum number of idle
 threads in the thread pool.  &lt;thread-idle-max> works
 with &lt;thread-idle-min> to maintain a steady number of idle
@@ -8993,8 +9325,7 @@ threads, avoiding the creation or destruction threads when possible.</p>
 <p>&lt;thread-idle-max> should be set high enough beyond
 &lt;thread-idle-min> so a spiky load will avoid
 creating a thread and then  immediately destroying it.</p>
-
-<default>10</default>
+</description>
 
 <example title="thread-idle-max in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -9018,7 +9349,9 @@ creating a thread and then  immediately destroying it.</p>
 
 <defun title="&lt;thread-idle-min>" name="thread-idle-min" version="Resin 3.1">
 <parents>server</parents>
+<default>5</default>
 
+<description>
 <p>&lt;thread-idle-min> configures the minimum number of idle
 threads in the thread pool.  &lt;thread-idle-min> helps spiky loads,
 avoiding delays for thread requests by keeping threads ready for future
@@ -9034,8 +9367,7 @@ especially since these threads are idle, waiting for a new job.</p>
 avoid thread allocation thrashing, i.e. avoiding creating a new thread
 because of &lt;thread-idle-min> and then quickly destroying it
 because of &lt;thread-idle-max>.</p>
-
-<default>5</default>
+</description>
 
 <example title="thread-idle-min in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -9059,7 +9391,9 @@ because of &lt;thread-idle-max>.</p>
 
 <defun title="&lt;thread-max>" name="thread-max" version="Resin 3.1">
 <parents>server</parents>
+<default>4096</default>
 
+<description>
 <p>&lt;thread-max> configures the maximum number of threads
 managed by Resin's thread pool.  Resin's thread pool is used
 for connection threads, timers, and Resin worker threads for JMS, JCA
@@ -9080,6 +9414,7 @@ number of threads is somewhat less than 1024.</p>
 freezing or throwing out of memory errors.  Although it may be necessary
 to limit the number of threads to avoid running out of memory,
 &lt;thread-max> should generally be set to a high value.</p>
+</description>
 
 <example title="thread-max in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
@@ -9095,28 +9430,27 @@ to limit the number of threads to avoid running out of memory,
   &lt;/cluster>
 &lt;/resin>
 </example>
-
-<default>4096</default>
-
 </defun>
-
 
 <defun title="&lt;transaction-timeout>" name="transaction-timeout" version="Resin 3.1">
 <parents>database</parents>
-
-<p>&lt;transaction-timeout> configures the maximum time a transaction
-can be alive before a mandatory rollback.</p>
-
 <default>-1</default>
 
+<description>
+<p>&lt;transaction-timeout> configures the maximum time a transaction
+can be alive before a mandatory rollback.</p>
+</description>
 </defun>
-<defun title="&lt;tree-loader>" name="tree-loader" occur="*" version="Resin 3.0">
-  <parents>class-loader</parents>
-  <!-- com.caucho.loader.TreeLoader -->
 
+<defun title="&lt;tree-loader>" name="tree-loader" occur="*" version="Resin 3.0">
+<parents>class-loader</parents>
+<!-- com.caucho.loader.TreeLoader -->
+
+<description>
 <p>&lt;tree-loader> configures a jar library, <var>WEB-INF/lib</var>-style class loader similar to
 <a config-tag="library-loader"/>, but will also find <code>.jar</code> and
 <code>.zip</code> files in subdirectories.</p>
+</description>
 
 <attributes>
 <tr>
@@ -9143,10 +9477,12 @@ element tree-loader {
 <parents>cluster</parents>
 <default>UTF-8</default>
 
+<description>
 <p>Defines the character encoding for decoding URLs.</p>
 
 <p>The HTTP specification does not define the character-encoding for
 URLs, so the server must make assumptions about the encoding.</p>
+</description>
 
 <schema>
 element url-character-encoding {
@@ -9159,7 +9495,9 @@ element url-character-encoding {
 <defun title="&lt;user-data-constraint>" name="user-data-constraint" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 
+<description>
 <p>Restricts access to secure transports, such as SSL</p>
+</description>
 
 <attributes>
 <tr>
@@ -9184,10 +9522,12 @@ element user-data-constraint {
 <defun title="&lt;user-name>" version="Resin 4.0" name="user-name">
 <parents>server</parents>
 
+<description>
 <p>&lt;user-name> configures the operating system user Resin should
 run as.  Since the HTTP port 80 is protected in Unix, the web server
 needs to start as root to bind to port 80.  For security, Resin should
 switch to a non-root user after binding to port 80.</p>
+</description>
 
 <example title="resin.xml with user-name">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -9295,6 +9635,7 @@ value.</p>
 
 <defun title="&lt;watchdog>" name="watchdog">
 
+<description>
 <p>The &lt;watchdog> tag is used in ISP-style
 configurations where the &lt;watchdog-manager> is configured separately
 from the resin.xml instances, and where the configuration file is generally
@@ -9303,6 +9644,7 @@ not readable by the instance users.</p>
 <p>The &lt;watchdog> tag corresponds to the &lt;server> tag in standard
 resin.xml configurations, and specifies the resin.xml, the root directory
 and resin-user.</p>
+</description>
 
 <attributes>
 <tr>
@@ -9368,12 +9710,14 @@ element watchdog {
 <defun title="&lt;watchdog-arg>" version="Resin 4.0" name="watchdog-arg">
 <parents>server</parents>
 
+<description>
 <p>The &lt;watchdog-arg> configures arguments for the
 watchdog process.  The watchdog improves reliability by
 monitoring the Resin instance, restarting it if necessary.</p>
 
 <p>The &lt;watchdog-arg> typically is used to enable <g>jconsole</g>
 for the watchdog JVM.</p>
+</description>
 
 <example title="resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin">
@@ -9394,11 +9738,13 @@ for the watchdog JVM.</p>
 
 <defun title="&lt;watchdog-manager>" name="watchdog-manager">
 
+<description>
 <p>For ISP configurations, &lt;watchdog-manager> is used for a separate
 resin.xml just to configure the watchdog-manager itself.  The
 &lt;watchdog-manager> selects the &lt;user-name>, &lt;resin.xml>,
 ports, and Resin home directories before giving access to the user's
 Resin instance.</p>
+</description>
 
 <attributes>
 <tr>
@@ -9447,7 +9793,9 @@ element watchdog-manager {
 
 <defun title="&lt;watchdog-port>" version="Resin 4.0" name="watchdog-port">
 <parents>server</parents>
+<default>6700</default>
 
+<description>
 <p>&lt;watchdog-port> configures the administration port for the
 watchdog JVM.  The watchdog launches the server JVM and monitors its
 health, restarting the JVM when necessary to improve site reliability.
@@ -9459,14 +9807,21 @@ for watchdog administration.</p>
 <p>The watchdog port will use the same &lt;address> as the server, so it
 will always be an internal network address, never an external internet
 address.</p>
-
-<default>6700</default>
-
+</description>
 </defun>
+
 <defun title="&lt;web-app>" name="web-app">
 <parents>host, web-app</parents>
 
+<description>
 <p>web-app configures a web application.</p>
+
+<p>When specified by <var>id</var>, the application will be initialized on
+server start.  When specified by <var>url-regexp</var>, the application
+will be initialized at the first request.  This means that
+<var>load-on-startup</var> servlets may start later than expected for
+<var>url-regexp</var> applications.</p>
+</description>
 
 <attributes>
 <tr>
@@ -9526,12 +9881,7 @@ address.</p>
 </tr>
 </attributes>
 
-<p>When specified by <var>id</var>, the application will be initialized on
-server start.  When specified by <var>url-regexp</var>, the application
-will be initialized at the first request.  This means that
-<var>load-on-startup</var> servlets may start later than expected for
-<var>url-regexp</var> applications.</p>
-
+<examples>
 <p>The following example creates a web-app for /apache
 using the Apache htdocs directory to serve pages.</p>
 
@@ -9569,6 +9919,7 @@ application using <var>~user</var>.</p>
 
 &lt;/host&gt;
 </example>
+</examples>
 
 </defun>
 
@@ -9752,8 +10103,10 @@ the application upgrade.</p>
 <defun title="&lt;web-resource-collection>" name="web-resource-collection" version="Servlet" type="defun">
 <parents>security-constraint</parents>
 
+<description>
 <p>Specifies a collection of areas of the web site for security purposes.
 See <a href="security-overview.xtp">Resin security</a> for an overview.</p>
+</description>
 
 <attributes>
 <tr>
@@ -9795,9 +10148,11 @@ element web-resource-collection {
 <defun title="&lt;welcome-file-list>" name="welcome-file-list" version="Servlet 2.2" type="defun">
 <parents>web-app</parents>
 
+<description>
 <p>Sets the files to use as when no filename is present in
 url. According to the spec, each file is in a &lt;welcome-file&gt;
 element.</p>
+</description>
 
 <schema>
 element welcome-file-list {
@@ -9834,8 +10189,10 @@ element welcome-file-list {
 <parents>resin, config, host, web-app</parents>
 <default>Defaults to <var>WEB-INF/work</var></default>
 
+<description>
 <p>&lt;work-dir> configures a work directory for automatically generated
 code, e.g. for JSP, PHP, and JPA classes.</p>
+</description>
 
 <schema>
 element work-dir {
@@ -9844,19 +10201,6 @@ element work-dir {
 </schema>
 
 </defun>
-
-<defun title="&lt;xa-log-service>" name="xa-log-service">
-
-<p>&lt;xa-log-service> enables the transaction-manager logging.  The XA log
-enables Resin to recover from server crashes and complete XA commits.</p>
-
-<schema>
-element xa-log-service {
-  enable?
-}
-</schema>
-</defun>
-
 
 </body>
 </document>

@@ -451,3 +451,27 @@ div#popup {
   overflow : auto;
   padding : 1em;
 }
+
+div.note {
+  background-color: #fef3dd;
+  min-height: 65px;
+  border: solid 1px #fdba31;
+  padding: 1em;
+  margin : 1em 1em;
+  width : 87.5%;
+}
+
+div.note > div.note-header {
+  font-weight: bold;
+  font-size: 1.1em;
+}
+
+div.note > img.note {
+  float: left;
+  padding-right: 1em;
+  padding-bottom: 1em;
+}
+
+div.pro {
+  font-style: italic;
+}

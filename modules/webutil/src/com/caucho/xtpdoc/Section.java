@@ -259,8 +259,8 @@ public abstract class Section extends ContainerNode {
 
   public FormattedTextWithAnchors createNote()
   {
-    FormattedTextWithAnchors note = new FormattedTextWithAnchors(getDocument());
-    addItem(new NamedText("Note", note));
+    Note note = new Note(getDocument());
+    addItem(note);
     return note;
   }
 
