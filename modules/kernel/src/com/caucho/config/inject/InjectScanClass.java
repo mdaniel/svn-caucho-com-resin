@@ -41,6 +41,7 @@ import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
 import com.caucho.inject.Jndi;
+import com.caucho.inject.Managed;
 import com.caucho.loader.enhancer.ScanClass;
 
 /**
@@ -214,5 +215,6 @@ class InjectScanClass implements ScanClass
     _registerAnnotationSet.add(Named.class);
     _registerAnnotationSet.add(Startup.class);
     _registerAnnotationSet.add(Jndi.class);
+    _registerAnnotationSet.add(Managed.class);
   }
 }

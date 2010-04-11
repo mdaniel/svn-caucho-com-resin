@@ -270,7 +270,7 @@ public class Jmx {
     else if (obj instanceof DynamicMBean)
       return (DynamicMBean) obj;
 
-    Class ifc = getMBeanInterface(obj.getClass());
+    Class<?> ifc = getMBeanInterface(obj.getClass());
 
     if (ifc == null)
       return null;

@@ -52,7 +52,9 @@ import com.caucho.ejb.inject.EjbGeneratedBean;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.inject.Jndi;
+import com.caucho.inject.Managed;
 import com.caucho.jms.JmsMessageListener;
+import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
 import com.caucho.server.admin.AdminService;
 import com.caucho.server.cluster.Server;
@@ -142,6 +144,22 @@ public class ResinStandardPlugin implements Extension {
                  
       try {
         com.caucho.naming.Jndi.bindDeepShort(jndiName, proxy);
+      } catch (Exception e) {
+        log.log(Level.FINE, e.toString(), e);
+      }
+    }
+    
+    if (annotated.isAnnotationPresent(Managed.class)) {
+      Managed manage = annotated.getAnnotation(Managed.class);
+      
+      String mbeanName = manage.value();
+      if ("".equals(mbeanName))
+        mbeanName = "type=" + bean.getBeanClass().getSimpleName();
+      
+      AnnotatedType<?> annType = (AnnotatedType<?>) annotated;
+      
+      try {
+        Jmx.register(new BeanMBean(_injectManager, bean, annType), mbeanName);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }
