@@ -100,7 +100,7 @@ that is required.  In JSP/Servlet terminology, this is called <var>Declarative S
         
   &lt;resin:Allow url-pattern="/professors/*">
     &lt;resin:IfUserInRole role="professor"/>
-  &lt;/resin:Allow url-pattern="/professors/*">
+  &lt;/resin:Allow>
 
 &lt;/web-app>
 </example>
