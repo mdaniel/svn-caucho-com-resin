@@ -134,7 +134,8 @@ public class StatefulManager<T> extends SessionServer<T>
       return null;
   }
 
-  protected Bean createBean(ManagedBeanImpl mBean, Class api)
+  @Override
+  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, Class<?> api)
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
@@ -143,7 +144,7 @@ public class StatefulManager<T> extends SessionServer<T>
 					 api, getStatefulContext()));
     
     StatefulBeanImpl statefulBean
-      = new StatefulBeanImpl(this, mBean, provider);
+      = new StatefulBeanImpl(this, mBean, api, provider);
 
     return statefulBean;
   }

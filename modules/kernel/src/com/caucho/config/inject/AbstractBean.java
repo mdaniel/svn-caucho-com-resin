@@ -116,17 +116,17 @@ abstract public class AbstractBean<T>
     return null;
   }
 
-  public AnnotatedType getAnnotatedType()
+  public AnnotatedType<T> getAnnotatedType()
   {
     Annotated annotated = getAnnotated();
 
-    if (annotated instanceof AnnotatedType)
-      return (AnnotatedType) annotated;
+    if (annotated instanceof AnnotatedType<?>)
+      return (AnnotatedType<T>) annotated;
     else
       return null;
   }
 
-  public InjectionTarget getInjectionTarget()
+  public InjectionTarget<T> getInjectionTarget()
   {
     return null;
   }

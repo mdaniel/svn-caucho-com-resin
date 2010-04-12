@@ -35,8 +35,6 @@ import java.util.logging.Logger;
 
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
-import javax.ejb.EJBHome;
-import javax.ejb.EJBLocalHome;
 import javax.ejb.SessionContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
@@ -58,8 +56,8 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
   private final static Logger log
      = Logger.getLogger(SessionServer.class.getName());
 
-  private HashMap<Class, InjectionTarget> _componentMap
-    = new HashMap<Class, InjectionTarget>();
+  private HashMap<Class<?>, InjectionTarget<?>> _componentMap
+    = new HashMap<Class<?>, InjectionTarget<?>>();
 
   private Bean<T> _bean;
   
@@ -182,24 +180,23 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
     if (beanClass != null && (localApiList != null || remoteApiList != null)) {
       InjectManager beanManager = InjectManager.create();
 
-      String beanName = getEJBName();
       Named named = (Named) beanClass.getAnnotation(Named.class);
 
-      if (named != null)
-        beanName = named.value();
+      if (named != null) {
+      }
 
-      ManagedBeanImpl mBean = beanManager.createManagedBean(getAnnotatedType());
+      ManagedBeanImpl<T> mBean = beanManager.createManagedBean(getAnnotatedType());
 
-      Class baseApi = beanClass;
+      Class<?> baseApi = beanClass;
 
       if (localApiList != null) {
-        for (Class api : localApiList) {
+        for (Class<?> api : localApiList) {
           baseApi = api;
         }
       }
 
       if (remoteApiList != null) {
-        for (Class api : remoteApiList) {
+        for (Class<?> api : remoteApiList) {
           baseApi = api;
         }
       }
@@ -218,20 +215,20 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
     }
   }
 
-  protected Bean getBean()
+  protected Bean<T> getBean()
   {
     return _bean;
   }
 
-  protected Bean createBean(ManagedBeanImpl mBean, Class api)
+  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, Class<?> api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  abstract protected InjectionTarget createSessionComponent(Class api,
-      Class beanClass);
+  abstract protected InjectionTarget<T> createSessionComponent(Class<?> api,
+                                                               Class<T> beanClass);
 
-  protected InjectionTarget getComponent(Class api)
+  protected InjectionTarget<?> getComponent(Class<?> api)
   {
     return _componentMap.get(api);
   }

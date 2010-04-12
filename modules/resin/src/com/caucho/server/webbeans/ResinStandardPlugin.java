@@ -93,8 +93,8 @@ public class ResinStandardPlugin implements Extension {
         && (annotatedType.isAnnotationPresent(Stateful.class)
             || annotatedType.isAnnotationPresent(Stateless.class)
             || annotatedType.isAnnotationPresent(Singleton.class)
-            || annotatedType.isAnnotationPresent(MessageDriven.class) || annotatedType
-            .isAnnotationPresent(JmsMessageListener.class))) {
+            || annotatedType.isAnnotationPresent(MessageDriven.class)
+            || annotatedType.isAnnotationPresent(JmsMessageListener.class))) {
       EjbContainer ejbContainer = EjbContainer.create();
       ejbContainer.createBean(annotatedType, null);
       event.veto();

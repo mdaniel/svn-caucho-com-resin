@@ -100,21 +100,22 @@ public class StatelessManager<T> extends SessionServer<T> {
    * Returns the object implementation
    */
   @Override
-  public Object getLocalObject(Class api)
+  public Object getLocalObject(Class<?> api)
   {
     return getStatelessContext().getProvider(api);
   }
 
-  protected Bean createBean(ManagedBeanImpl mBean, Class api)
+  @Override
+  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, Class<?> api)
   {
-    StatelessProvider provider = getStatelessContext().getProvider(api);
+    StatelessProvider<T> provider = getStatelessContext().getProvider(api);
 
     if (provider == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
           api, getStatelessContext()));
 
-    StatelessBeanImpl statelessBean
-      = new StatelessBeanImpl(this, mBean, provider);
+    StatelessBeanImpl<T> statelessBean
+      = new StatelessBeanImpl<T>(this, mBean, api, provider);
 
     return statelessBean;
   }
