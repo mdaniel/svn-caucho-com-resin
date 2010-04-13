@@ -46,8 +46,7 @@
     </item>
     
     <item link="config.xtp" title="Configuration"
-          description="Configuration principles for the Resin Server"
-          reference="config-ref.xtp">
+        description="Configuration principles for the Resin Server">
 
       <item link="config-overview.xtp" title="Overview"
             description="Overview of Resin configuration"

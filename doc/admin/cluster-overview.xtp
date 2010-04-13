@@ -729,17 +729,6 @@ tab of the administration application should look like this:
 <figure src="dynamic-server-started.png"/>
 </s1>
 
-<s1 title="See Also">
-
-<ul>
-<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="cluster-ref.xtp#server">Server tags</a> for ports, threads, and JVM configuration.</li>
-<li>See <a href="logging-ref.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
-</ul>
-
-</s1>
-
 <defun title="&lt;access-log>">
 
 <p>&lt;access-log> configures a HTTP access log for all virtual hosts
@@ -921,17 +910,17 @@ matching the -server-id on the command line.</p>
   <td>automatic</td>
 </tr>
 <tr>
-  <td><a href="config-ref.xtp#resin:choose">resin:choose</a></td>
+  <td><a config-tag="resin:choose">resin:choose</a></td>
   <td>Conditional configuration based on EL expressions</td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="config-ref.xtp#resin:import">resin:import</a></td>
+  <td><a config-tag="resin:import">resin:import</a></td>
   <td>Imports a custom cluster.xml files for a configuration management </td>
   <td></td>
 </tr>
 <tr>
-  <td><a href="config-ref.xtp#resin:if">resin:if</a></td>
+  <td><a config-tag="resin:if">resin:if</a></td>
   <td>Conditional configuration based on EL expressions</td>
   <td></td>
 </tr>
@@ -990,7 +979,7 @@ matching the -server-id on the command line.</p>
 <def title="&lt;cluster> schema">
 element cluster {
   attribute id { string }
-  &amp; <a href="config-ref.xtp">environment resources</a>
+  &amp; <a href="config-overview.xtp">environment resources</a>
   &amp; access-log?
   &amp; cache?
   &amp; connection-error-page?
@@ -1170,7 +1159,7 @@ configured explicitly.</p>
     <td>Root directory for host files</td>
     <td>parent directory</td></tr>
 <tr><td>startup-mode</td>
-    <td>'automatic', 'lazy', or 'manual', see <a href="deploy.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+    <td>'automatic', 'lazy', or 'manual', see <a config-tag="startup-mode"/></td>
     <td>automatic</td></tr>
 </deftable-childtags>
 
@@ -1664,7 +1653,7 @@ System properties are used to configure a different SMTP server.
 <defun title="Resource Tags" version="Resin 3.1">
 <parents>cluster</parents>
 
-<p>All <a href="config-ref.xtp">Environment tags</a> are
+<p>All <a href="config-overview.xtp">Environment tags</a> are
 available to the &lt;cluster&gt;.  For example,
 resources like &lt;database&gt;.</p>
 

@@ -6,10 +6,12 @@
 
   <description>
 
-  <p>The top-level &lt;resin> tag contains any
-&lt;<a config-tag="cluster"/>&gt; defined for a deployment.
-It also provides an <a href="config-ref.xtp">resources</a> for
-class-loaders, logging and shared resources.</p>
+    <p>
+      The top-level &lt;resin> tag contains any &lt;<a
+      config-tag="cluster"/>&gt; defined for a deployment.  It also
+      provides a resources for class-loaders, logging and shared
+      resources.
+    </p>
 
   </description>
 </header>

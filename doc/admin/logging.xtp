@@ -539,7 +539,7 @@ log message.  <code>format</code> recognizes EL-expressions. The EL variable
 
 </results>
 
-<p>The <a href="config-el.xtp#sprintf">fmt.sprintf()</a> function can
+<p>The <a href="config-el.xtp#fmt.sprintf">fmt.sprintf()</a> function can
 space pad the values and make the results look a little nicer:</p>
 
 <example title="fmt.sprintf() in log format string">
@@ -556,7 +556,7 @@ space pad the values and make the results look a little nicer:</p>
 </results>
 
 
-<p><a href="config-el.xtp#sprintf">fmt.sprintf()</a> and <a href="config-el.xtp#timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
+<p><a href="config-el.xtp#fmt.sprintf">fmt.sprintf()</a> and <a href="config-el.xtp#fmt.timestamp">fmt.timestamp()</a> can be used to produce CSV files:</p>
 
 <example title="CSV log files">
 &lt;log name='' level='all' path='log/debug.csv' timestamp=""

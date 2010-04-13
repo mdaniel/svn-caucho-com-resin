@@ -205,7 +205,7 @@ successful and unsuccessful matches are logged.
 
 <s2 title="Forward based on host name">
   <p>
-  The desired behaviour is to internally forward requests based on the host name.
+  The desired behaviour is to forward requests internally based on the host name.
   </p>
 
   <example title="Desired behaviour">
@@ -240,7 +240,7 @@ successful and unsuccessful matches are logged.
 </s2>
 </s1>
 
-<s1 title="Overview">
+<s1 title="Tag listing by function">
 
 <deftable title="Dispatch rules">
 <tr>
@@ -331,10 +331,6 @@ successful and unsuccessful matches are logged.
   <td>Tests for a HTTP query parameger, request.getParameter().</td>
 </tr>
 <tr>
-  <td><a config-tag="resin:IfRemoteAddr">&lt;resin:IfRemoteAddr></a></td>
-  <td>Tests against the remote IP address, request.getRemoteAddr().</td>
-</tr>
-<tr>
   <td><a config-tag="resin:IfRemoteUser">&lt;resin:IfRemoteUser></a></td>
   <td>Tests against the remote user, request.getRemoteUser().</td>
 </tr>
@@ -391,6 +387,10 @@ successful and unsuccessful matches are logged.
 <tr>
   <td><a config-tag="resin:SetRequestSecure">&lt;resin:SetRequestSecure></a></td>
   <td>Marks the request as secure.</td>
+</tr>
+<tr>
+  <td><a config-tag="resin:SetVary">&lt;resin:SetVary></a></td>
+  <td>Sets the Vary header.</td>
 </tr>
 <tr>
   <td>&lt;mypkg:MyFilter></td>

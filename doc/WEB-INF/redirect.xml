@@ -66,7 +66,7 @@
                   target="${app.contextPath}/admin/http-virtual-hosts-ref.xtp"/>
 
   <resin:Redirect regexp="^/admin/index-tags.xtp"
-                  target="${app.contextPath}/admin/config-ref.xtp"/>
+                  target="${app.contextPath}/admin/reference.xtp"/>
 
   <resin:Redirect regexp="^/admin/ioc-bean.xtp"
                   target="${app.contextPath}/admin/config-candi.xtp"/>
@@ -400,7 +400,7 @@
                   target="${app.contextPath}/admin/starting-resin.xtp"/>
 
   <resin:Redirect regexp="^/doc/tags.xtp"
-                  target="${app.contextPath}/admin/config-ref.xtp"/>
+                  target="${app.contextPath}/admin/reference.xtp"/>
 
   <resin:Redirect regexp="^/doc/tcp-sessions.xtp"
                   target="${app.contextPath}/admin/cluster-overview.xtp"/>
@@ -523,7 +523,7 @@
                   target="${app.contextPath}/admin/http-proxy-cache.xtp"/>
 
   <resin:Redirect regexp="^/ref/config-index.xtp"
-                  target="${app.contextPath}/admin/config-ref.xtp"/>
+                  target="${app.contextPath}/admin/reference.xtp"/>
 
   <resin:Redirect regexp="^/ref/config.xtp"
                   target="${app.contextPath}/admin/config.xtp"/>
@@ -562,7 +562,7 @@
                   target="${app.contextPath}/admin/http-virtual-hosts-ref.xtp"/>
 
   <resin:Redirect regexp="^/reference/index-tags.xtp"
-                  target="${app.contextPath}/admin/config-ref.xtp"/>
+                  target="${app.contextPath}/admin/reference.xtp"/>
 
   <resin:Redirect regexp="^/reference/index.xtp"
                   target="${app.contextPath}/admin/"/>
@@ -857,7 +857,7 @@
                   target="${app.contextPath}/examples/remoting.xtp"/>
 
   <resin:Redirect regexp="^/doc/schema.xtp"
-                  target="${app.contextPath}/admin/config-ref.xtp"/>
+                  target="${app.contextPath}/admin/reference.xtp"/>
 
   <resin:Redirect regexp="^/doc/server-tags.xtp"
                   target="${app.contextPath}/admin/http-server-ref.xtp"/>

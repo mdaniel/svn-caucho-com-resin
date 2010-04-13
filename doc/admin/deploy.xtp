@@ -77,6 +77,35 @@ archive files should be placed, beyond the standard webapps directory.</p>
 
 </s1>
 
+<s1 title="Startup and Redeploy Modes">
+<p>
+The startup-mode is used in a number of places to determine the behaviour of a resource when the server starts.
+</p>
+
+<p>
+The startup-mode has three values: "automatic", "lazy", and "manual".
+</p>
+
+<ul>
+  <li>automatic - starts the resource on server start (default)</li>
+  <li>lazy - starts the resource on the first use</li>
+  <li>manual - waits for JMX to start the resource</li>
+</ul>
+
+<p>
+The redeploy-mode is used in a number of places to determine the behaviour of a resource when it is replaced or modified while the server is running.
+</p>
+
+<p>
+The redeploy-mode has two values: "automatic", and "manual".
+</p>
+
+<ul>
+  <li>automatic - restarts the resource when it is modified (web.xml, *.class, *.war, etc).</li>
+  <li>manual - waits for JMX to restart the resource when changes occur.</li>
+</ul>
+</s1>
+
 <s1 title="web-app versioning">
 
 <p>Resin can deploy multiple versions of a web-app simultaneously,

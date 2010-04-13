@@ -6,28 +6,18 @@
 
   <description>
 
-  <p>The top-level &lt;resin> tag contains any
-  &lt;<a config-tag="cluster"/>&gt; defined for a deployment.
-It also provides an <a href="config-ref.xtp">resources</a> for
-class-loaders, logging and shared resources.</p>
+    <p>
+      The top-level &lt;resin> tag contains any &lt;<a
+      config-tag="cluster"/>&gt; defined for a deployment.  It also
+      provides an resources for class-loaders, logging and shared
+      resources.
+    </p>
 
   </description>
 </header>
 <body>
 
 <localtoc/>
-
-<s1 title="See Also">
-
-<ul>
-<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
-<li>See the <a config-tag="server"/> tag for JVM-specific configuration like thread-max, JVM settings, ports, etc.</li>
-<li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="config-ref.xtp">Resource</a> configuration: classloader, databases, connectors, and beans.</li>
-<li>See <a href="logging-ref.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
-</ul>
-
-</s1>
 
 <defun title="&lt;cluster>" version="Resin 3.0">
 <parents>resin</parents>
@@ -93,138 +83,6 @@ element environment-system-properties {
 
 </defun>
 
-<defun title="&lt;jmx-service>">
-
-<p>&lt;jmx-service> enables the clustered JMX management.</p>
-
-<def title="&lt;jmx-service> schema">
-element jmx-service {
-  enable?
-}
-</def>
-
-</defun>
-
-<defun title="&lt;log-service>">
-
-<p>&lt;log-service> enables persistent storage of warning and critical
-log messages in the administration.</p>
-
-<def title="&lt;log-service> schema">
-element log-service {
-  enable?
-  &amp; level?
-}
-</def>
-
-</defun>
-
-<defun title="&lt;management>" version="Resin 3.0">
-
-<p>&lt;management> controls system-wide management capabilities, like
-the clustered JMX reporting, transaction logging, and persistence logging.
-It also defines a system-wide administration authenticator, providing a
-centralized place to manage administration identity.</p>
-
-<p>The &lt;user> configuration is particularly important since it is used
-as a security measure for the <a href="starting-resin-watchdog.xtp">watchdog</a>
-as well as for remote JMX capabilities.</p>
-
-<deftable title="&lt;management> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>jmx-service</td>
-  <td>enables the remote JMX administration (Resin-Pro)</td>
-</tr>
-<tr>
-  <td>log-service</td>
-  <td>enables persistent log management (Resin-Pro)</td>
-</tr>
-<tr>
-  <td>path</td>
-  <td>configures the directory for storing management data</td>
-</tr>
-<tr>
-  <td>user</td>
-  <td>configures system-wide administration accounts</td>
-</tr>
-<tr>
-  <td>xa-log-service</td>
-  <td>enables XA logging (Resin-Pro)</td>
-</tr>
-</deftable>
-
-<def title="&lt;management> schema">
-element management {
-  jmx-service?
-  &amp; log-service?
-  &amp; path
-  &amp; secure?
-  &amp; user*
-}
-
-element user {
-  name
-  &amp; password
-  &amp; disable?
-}
-</def>
-
-<s2 title="user">
-
-<p>The &lt;user> tags in &lt;management> define Resin administrators for
-the /resin-admin service and also add security for JMX remoting and the
-watchdog.</p>
-
-<p>Since the authenticator is available to all web-apps, you can
-use the &lt;management> login as a simple security authenticator for
-the entire site.  The role of the logged-in user is <var>resin-admin</var>,
-for configuring security authentication and for the <code>isUserInRole</code>
-method.</p>
-
-<p>The password field is an MD5 hash of the username and password for security.
-The /resin-admin or <code>PasswordDigest</code> can be used to create the
-hash.  See <a href="../admin/security.xtp">Resin security</a> for more
-information.</p>
-
-<deftable title="&lt;user> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>name</td>
-  <td>The user's name</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>password</td>
-  <td>An MD5 hash of the username and password.  The /resin-admin page
-provides an easy way of generating the hash.</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>disable</td>
-  <td>disable the user from logging in</td>
-  <td>false</td>
-</tr>
-</deftable>
-
-<def title="&lt;user> schema">
-element user {
-  name
-  &amp; password
-  &amp; disable?
-}
-</def>
-</s2>
-
-</defun>
-
 <defun title="&lt;resin>" version="Resin 3.0">
       
 <p>&lt;resin> is the top-level configuration tag for
@@ -280,7 +138,7 @@ element resin {
 <defun title="Resources" version="Resin 3.1">
 <parents>resin, cluster, host, web-app</parents>
 
-<p>All <a href="config-ref.xtp">Resource tags</a> are
+<p>All Resource tags are
 available to the &lt;host&gt;, for example, resources
 like &lt;database&gt; or &lt;authenticator>.  Resources defined at
 the host level are available for all web-apps in the host.</p>
@@ -459,62 +317,6 @@ element security-provider {
 
 </s2>
 
-<defun title="&lt;stat-service>">
-
-<p>&lt;stat-service> periodically checks the status of the server,
-and reports errors as necessary.</p>
-
-<deftable title="&lt;stat-service> Attributes">
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>cpu-load-exit-threshold</td>
-  <td>CPU load triggering a Resin exit (and restart)</td>
-  <td>100.0</td>
-</tr>
-<tr>
-  <td>cpu-load-log-info-threshold</td>
-  <td>CPU load triggering a log message at the info level</td>
-  <td>1.0</td>
-</tr>
-<tr>
-  <td>cpu-load-log-warning-threshold</td>
-  <td>CPU load triggering a log message at the warning level</td>
-  <td>5.0</td>
-</tr>
-<tr>
-  <td>cpu-load-log-thread-dump-threshold</td>
-  <td>CPU load triggering thread dump to the log</td>
-  <td>5.0</td>
-</tr>
-<tr>
-  <td>sample-period</td>
-  <td>how often to sample the statistics</td>
-  <td>60s</td>
-</tr>
-<tr>
-  <td>thread-dump-interval</td>
-  <td>minimum time between thread dumps</td>
-  <td>15m</td>
-</tr>
-</deftable>
-
-<def title="&lt;stat-service> schema">
-element stat-service {
-  cpu-load-exit-threshold?
-  &amp; cpu-load-log-info-threshold?
-  &amp; cpu-load-log-warning-threshold?
-  &amp; cpu-load-thread-dump-threshold?
-  &amp; sample-period?
-  &amp; thread-dump-interval?
-}
-</def>
-
-</defun>
-
 <s2 title="system">
 
 <p>The ${system} variable return the <code>System.getProperties()</code>
@@ -656,18 +458,6 @@ element watchdog-manager {
 }
 </def>
 
-</defun>
-
-<defun title="xa-log-service">
-
-<p>&lt;xa-log-service> enables the transaction-manager logging.  The XA log
-enables Resin to recover from server crashes and complete XA commits.</p>
-
-<def title="&lt;xa-log-service> schema">
-element xa-log-service {
-  enable?
-}
-</def>
 </defun>
 
 </body>

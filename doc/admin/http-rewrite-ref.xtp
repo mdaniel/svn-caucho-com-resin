@@ -105,10 +105,6 @@
   <td>Tests for a HTTP query parameger, request.getParameter().</td>
 </tr>
 <tr>
-  <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteAddr.html">&lt;resin:IfRemoteAddr></a></td>
-  <td>Tests against the remote IP address, request.getRemoteAddr().</td>
-</tr>
-<tr>
   <td><a href="http://caucho.com/resin-javadoc/com/caucho/rewrite/IfRemoteUser.html">&lt;resin:IfRemoteUser></a></td>
   <td>Tests against the remote user, request.getRemoteUser().</td>
 </tr>

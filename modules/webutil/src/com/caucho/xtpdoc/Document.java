@@ -278,7 +278,7 @@ public class Document {
         try {
           _referenceDocument = 
             new ReferenceDocument(_webApp, ref, _contextPath, 
-                                  uri + "/reference.xtp", _encoding);
+                                  uri + "reference.xtp", _encoding);
 
           config.configure(_referenceDocument, ref);
         }

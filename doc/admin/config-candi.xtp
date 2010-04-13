@@ -1347,7 +1347,7 @@ to a field or property.  Typically, the resource will be stored in JNDI.</p>
 <deftable title="Known types">
 <tr>
   <td>DataSource</td>
-  <td>Configured by &lt;<a href="config-ref.xtp#database">database</a>&gt;</td>
+  <td>Configured by &lt;<a config-tag="database">database</a>&gt;</td>
 </tr>
 <tr>
   <td>UserTransaction</td>

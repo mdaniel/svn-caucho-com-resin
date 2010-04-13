@@ -507,7 +507,7 @@ location for the &lt;host-alias> in a dynamic hosting configuration.</p>
 
 <p>The <code>host.xml</code> is configured in a &lt;host-deploy>
 or &lt;host-default> by adding a
-<a href="config-ref.xtp#import">&lt;resin:import></a> tag
+<a config-tag="resin:import">&lt;resin:import></a> tag
 specifying the host.xml name and location.  Because the &lt;host-default>
 applies the &lt;resin:import> to every virtual host, it becomes a common
 system-wide configuration file.</p>
@@ -683,18 +683,6 @@ computer that the client is running on.</p>
 127.0.0.1       www.gryffindor.com
 127.0.0.1       www.slytherin.com
 </example>
-
-</s1>
-
-
-<s1 title="See Also">
-
-<ul>
-<li>See the <a href="config-ref.xtp">index</a> for a list of all the tags.</li>
-<li>See <a href="deploy-ref.xtp">Web Application</a> configuration for web.xml (Servlet) configuration.</li>
-<li>See <a href="config-ref.xtp">Resource</a> configuration for resources: classloader, databases, JMS, EJB, and IoC beans.</li>
-<li>See <a href="logging-ref.xtp">Log</a> configuration for access log configuration, java.util.logging, and stdout/stderr logging.</li>
-</ul>
 
 </s1>
 
@@ -1002,7 +990,7 @@ configured explicitly.</p>
     <td>Root directory for host files</td>
     <td>parent directory</td></tr>
 <tr><td>startup-mode</td>
-    <td>'automatic', 'lazy', or 'manual', see <a href="deploy.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+    <td>'automatic', 'lazy', or 'manual', see <a config-tag="startup-mode"/></td>
     <td>automatic</td></tr>
 </deftable>
 
@@ -1223,40 +1211,10 @@ element host-name {
 
 </defun>
 
-<defun title="&lt;redeploy-mode>">
-
-<p>&lt;redeploy-mode> configures the virtual-host's behavior when
-it detects changes in configuration files or classes.  The
-&lt;dependency-check-interval> controls how often the virtual host
-will check for updates.</p>
-
-<deftable title="startup-mode values">
-<tr>
-  <th>Mode</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>automatic</td>
-  <td>automatically restart when detecting changes</td>
-</tr>
-<tr>
-  <td>manual</td>
-  <td>only restart only on a JMX administration request</td>
-</tr>
-</deftable>
-
-<def title="&lt;restart-mode> schema">
-element startup-mode {
-  string
-}
-</def>
-
-</defun>
-
 <defun title="Resources" version="Resin 3.1">
 <parents>resin, cluster, host, web-app</parents>
 
-<p>All <a href="config-ref.xtp">Resource tags</a> are
+<p>All <a href="config-overview.xtp">Resource tags</a> are
 available to the &lt;host&gt;, for example, resources
 like &lt;database&gt; or &lt;authenticator>.  Resources defined at
 the host level are available for all web-apps in the host.</p>
@@ -1340,38 +1298,6 @@ element secure-host-name {
 
 </defun>
 
-<defun title="&lt;startup-mode>">
-
-<p>&lt;startup-mode> configures the virtual-host's behavior on Resin startup,
-either "automatic", "lazy" or "manual".</p>
-
-<deftable title="startup-mode values">
-<tr>
-  <th>Mode</th>
-  <th>Description</th>
-</tr>
-<tr>
-  <td>automatic</td>
-  <td>automatically start when Resin starts</td>
-</tr>
-<tr>
-  <td>lazy</td>
-  <td>start only when the first request is received</td>
-</tr>
-<tr>
-  <td>manual</td>
-  <td>start only when JMX administration requests a start</td>
-</tr>
-</deftable>
-
-<def title="&lt;startup-mode> schema">
-element startup-mode {
-  string
-}
-</def>
-
-</defun>
-
 <defun title="&lt;web-app>">
 <parents>host, web-app</parents>
 
@@ -1401,12 +1327,12 @@ the application, corresponding to a url of <var>/<i>id</i>/</var>. A relative pa
 </tr>
 <tr>
   <td>startup-mode</td>
-  <td>'automatic', 'lazy', or 'manual', see <a href="deploy-ref.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>'automatic', 'lazy', or 'manual', see <a config-tag="startup-mode"/></td>
   <td>automatic</td>
 </tr>
 <tr>
   <td>redeploy-mode</td>
-  <td>'automatic' or 'manual', see <a href="deploy-ref.xtp#startup-mode">Startup and Redeploy Mode</a></td>
+  <td>'automatic' or 'manual', see <a config-tag="redeploy-mode"/></td>
   <td>automatic</td>
 </tr>
 </deftable>

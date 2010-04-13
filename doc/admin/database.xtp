@@ -319,41 +319,6 @@ the pool</td>
 
 </defun>
 
-<defun title="connection" version="Resin 3.0">
-<parents>database</parents>
-
-<p>Initialize <code>java.sql.Connection</code> object managed by <var>database</var>.</p>
-
-<deftable-childtags>
-<tr>
-  <th>attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>catalog</td>
-  <td>Sets catalog property on <code>java.sql.Connection</code> object.</td>
-  <td> </td>
-</tr>
-<tr>
-  <td>read-only</td>
-  <td>Sets readOnly property on <code>java.sql.Connection</code> object.</td>
-  <td>false</td>
-</tr>
-<tr>
-  <td>transaction-isolation</td>
-  <td>Sets transaction isolation property on <code>java.sql.Connection</code> object.
-    All levels defined in <code>java.sql.Connection.TRANSACTION_*</code>
-    are supported via value set:
-    none, read-committed, read-uncommitted, repeatable-read, serializable.
-  </td>
-  <td> unspecified </td>
-</tr>
-</deftable-childtags>
-
-<p>The class that corresponds to &lt;connection&gt; is <a href="http://java.sun.com/j2se/1.5.0/docs/api/java/sql/Connection.html">Connection (Java 2 Platform SE 5.0)</a></p>
-
-</defun>
 
 </s1>
 
