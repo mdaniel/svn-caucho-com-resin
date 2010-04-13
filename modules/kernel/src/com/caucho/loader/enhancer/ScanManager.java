@@ -156,7 +156,7 @@ public class ScanManager {
       
 	ReadStream is = Vfs.openRead(zipFile.getInputStream(entry));
 	try {
-	  classScanner.init(path.getPath(), is, matcher);
+	  classScanner.init(entryName, is, matcher);
 
 	  classScanner.scan();
 	} finally {

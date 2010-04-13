@@ -206,14 +206,14 @@ abstract public class BeanGenerator extends GenClass
     if (type == null || Object.class.equals(type))
       return isExtends;
     
-    types.add(type);
-
     if (! type.isInterface()) {
       if (! isExtends)
         types.add(type);
       
       isExtends = true;
     }
+    else
+      types.add(type);
 
     isExtends = fillTypes(types, type.getSuperclass(), isExtends);
 
@@ -235,6 +235,9 @@ abstract public class BeanGenerator extends GenClass
         types.add(type);
       
       isExtends = true;
+    }
+    else {
+      types.add(type);
     }
     
     isExtends = fillTypes(types, type.getSuperclass(), isExtends);

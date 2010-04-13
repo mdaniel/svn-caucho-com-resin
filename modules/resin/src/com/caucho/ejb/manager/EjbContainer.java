@@ -316,7 +316,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   // Bean configuration and management
   //
 
-  public void createBean(AnnotatedType type, InjectionTarget injectionTarget)
+  public <T> void createBean(AnnotatedType<T> type, InjectionTarget<T> injectionTarget)
   {
     _configManager.addAnnotatedType(type, injectionTarget);
   }
@@ -328,7 +328,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Adds a server.
    */
-  public void addServer(AbstractServer server)
+  public void addServer(AbstractServer<?> server)
   {
     _serverList.add(server);
 

@@ -100,6 +100,13 @@ public class BoxType extends ClassType
   }
 
   @Override
+  public void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
+  {
+    typeSet.add(toType());
+    typeSet.add(Object.class);
+  }
+
+  @Override
   public int hashCode()
   {
     return _boxType.hashCode();

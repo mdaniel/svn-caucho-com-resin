@@ -49,6 +49,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.loader.enhancer.AbstractScanClass;
 import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.loader.enhancer.ScanListener;
@@ -113,6 +114,7 @@ import java.util.regex.Matcher;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.lang.reflect.Modifier;
 import java.net.URL;
 
 /**
@@ -133,6 +135,9 @@ public class WebApp extends ServletContextImpl
   private static final int JSP_NONE = 0;
   private static final int JSP_1 = 1;
   private static final int JSP_2 = 2;
+  
+  private static final char []SERVLET_ANNOTATION
+    = "javax.servlet.annotation.".toCharArray();
 
   private static EnvironmentLocal<AbstractAccessLog> _accessLogLocal
     = new EnvironmentLocal<AbstractAccessLog>("caucho.server.access-log");
@@ -4108,7 +4113,10 @@ public class WebApp extends ServletContextImpl
   @Override
   public ScanClass scanClass(Path root, String name, int modifiers)
   {
-    return null;
+    if (Modifier.isPublic(modifiers))
+      return new WebScanClass(name);
+    else
+      return null;
   }
 
   public boolean isScanMatchAnnotation(CharBuffer string)
@@ -4196,6 +4204,41 @@ public class WebApp extends ServletContextImpl
     boolean isAsyncSupported() {
       return _isAsyncSupported;
     }
+  }
+  
+  class WebScanClass extends AbstractScanClass {
+    private String _className;
+    private boolean _isValid;
+    
+    WebScanClass(String className)
+    {
+      _className = className;
+    }
+    
+    @Override
+    public void addClassAnnotation(char [] buffer, int offset, int length)
+    {
+      if (length < SERVLET_ANNOTATION.length)
+        return;
+      
+      for (int i = SERVLET_ANNOTATION.length - 1; i >= 0; i--) {
+        if (buffer[offset + i] != SERVLET_ANNOTATION[i])
+          return;
+      }
+      
+      _isValid = true;      
+    }
+
+    /**
+     * Complete scan processing.
+     */
+    @Override
+    public void finishScan()
+    {
+      if (_isValid) {
+        _pendingClasses.add(_className);
+      }
+  }    
   }
 
   static {

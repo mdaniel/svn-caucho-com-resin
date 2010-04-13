@@ -79,8 +79,12 @@ public class InjectionPointImpl<T> implements InjectionPoint
       if (_manager.isQualifier(ann.annotationType())) {
         _bindings.add(ann);
         
+        // ioc/5006
+        /*
         if (! Named.class.equals(ann.annotationType()))
           isQualifier = true;
+          */
+        isQualifier = true;
       }
     }
 

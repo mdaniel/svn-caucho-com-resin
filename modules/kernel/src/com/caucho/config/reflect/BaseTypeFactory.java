@@ -29,40 +29,30 @@
 
 package com.caucho.config.reflect;
 
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
+import com.caucho.inject.Module;
+import com.caucho.util.LruCache;
 
 /**
  * type matching the web bean
  */
+@Module
 public class BaseTypeFactory
 {
   private LruCache<Type,BaseType> _cache
     = new LruCache<Type,BaseType>(128);
   
-  private LruCache<Class,BaseType> _classCache
-    = new LruCache<Class,BaseType>(128);
+  private LruCache<Class<?>,BaseType> _classCache
+    = new LruCache<Class<?>,BaseType>(128);
 
   public BaseType create(Type type)
   {
     BaseType baseType = _cache.get(type);
 
     if (baseType == null) {
-      baseType = BaseType.create(type, new HashMap());
+      baseType = BaseType.create(type, new HashMap<String,BaseType>());
 
       if (baseType == null)
 	throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());

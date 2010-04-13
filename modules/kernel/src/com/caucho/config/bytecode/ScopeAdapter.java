@@ -31,6 +31,8 @@ package com.caucho.config.bytecode;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.lang.reflect.*;
 
 import javax.enterprise.inject.spi.Bean;
@@ -50,6 +52,8 @@ import com.caucho.vfs.*;
 @Module
 public class ScopeAdapter {
   private static final L10N L = new L10N(ScopeAdapter.class);
+  private static final Logger log 
+    = Logger.getLogger(ScopeAdapter.class.getName());
 
   private final Class<?> _cl;
 
@@ -98,98 +102,104 @@ public class ScopeAdapter {
       }
       
       zeroCtor.setAccessible(true);
-
-      JavaClassLoader jLoader = new JavaClassLoader(cl.getClassLoader());
-
-      JavaClass jClass = new JavaClass(jLoader);
-      jClass.setAccessFlags(Modifier.PUBLIC);
       
-      jClass.setWrite(true);
-
-      jClass.setMajor(49);
-      jClass.setMinor(0);
-
       String typeClassName = cl.getName().replace('.', '/');
       
-      String superClassName;
-      
-      if (! cl.isInterface())
-        superClassName = typeClassName;
-      else
-        superClassName = "java/lang/Object";
-      
       String thisClassName = typeClassName + "__ResinScopeProxy";
-
-      jClass.setSuperClass(superClassName);
-      jClass.setThisClass(thisClassName);
-      
-      if (cl.isInterface())
-        jClass.addInterface(typeClassName);
-
-      JavaField managerField
-        = jClass.createField("_manager",
-                             "Lcom/caucho/config/inject/InjectManager;");
-      managerField.setAccessFlags(Modifier.PRIVATE);
-
-      JavaField beanField
-        = jClass.createField("_bean", "Ljavax/enterprise/inject/spi/Bean;");
-      beanField.setAccessFlags(Modifier.PRIVATE);
-
-      JavaMethod ctor
-        = jClass.createMethod("<init>",
-                              "(Lcom/caucho/config/inject/InjectManager;"
-                              + "Ljavax/enterprise/inject/spi/Bean;)V");
-      ctor.setAccessFlags(Modifier.PUBLIC);
-
-      CodeWriterAttribute code = ctor.createCodeWriter();
-      code.setMaxLocals(3);
-      code.setMaxStack(4);
-
-      code.pushObjectVar(0);
-      code.invokespecial(superClassName, "<init>", "()V", 1, 0);
-      code.pushObjectVar(0);
-      code.pushObjectVar(1);
-      code.putField(thisClassName, managerField.getName(),
-                    managerField.getDescriptor());
-      code.pushObjectVar(0);
-      code.pushObjectVar(2);
-      code.putField(thisClassName, beanField.getName(),
-                    beanField.getDescriptor());
-      code.addReturn();
-      code.close();
-
-      for (Method method : _cl.getMethods()) {
-        if (Modifier.isStatic(method.getModifiers()))
-          continue;
-        if (Modifier.isFinal(method.getModifiers()))
-          continue;
-
-        createProxyMethod(jClass, method, cl.isInterface());
-      }
-
-      ByteArrayOutputStream bos = new ByteArrayOutputStream();
-      WriteStream out = Vfs.openWrite(bos);
-
-      jClass.write(out);
-
-      out.close();
-
-      byte []buffer = bos.toByteArray();
-
-      /*
-      try {
-        out = Vfs.lookup("file:/tmp/caucho/qa/temp.class").openWrite();
-        out.write(buffer, 0, buffer.length);
-        out.close();
-      } catch (IOException e) {
-      }
-      */
-      
       String cleanName = thisClassName.replace('/', '.');
+      
       DynamicClassLoader loader = (DynamicClassLoader) Thread.currentThread().getContextClassLoader();
       
-      // ioc/0517
-      _proxyClass = loader.loadClass(cleanName, buffer);
+      try {
+        _proxyClass = Class.forName(cleanName, false, loader);
+      } catch (ClassNotFoundException e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+      
+      if (_proxyClass == null) {
+        JavaClassLoader jLoader = new JavaClassLoader(cl.getClassLoader());
+
+        JavaClass jClass = new JavaClass(jLoader);
+        jClass.setAccessFlags(Modifier.PUBLIC);
+
+        jClass.setWrite(true);
+
+        jClass.setMajor(49);
+        jClass.setMinor(0);
+
+        String superClassName;
+
+        if (!cl.isInterface())
+          superClassName = typeClassName;
+        else
+          superClassName = "java/lang/Object";
+
+        jClass.setSuperClass(superClassName);
+        jClass.setThisClass(thisClassName);
+
+        if (cl.isInterface())
+          jClass.addInterface(typeClassName);
+
+        JavaField managerField =
+          jClass.createField("_manager",
+                             "Lcom/caucho/config/inject/InjectManager;");
+        managerField.setAccessFlags(Modifier.PRIVATE);
+
+        JavaField beanField =
+          jClass.createField("_bean", "Ljavax/enterprise/inject/spi/Bean;");
+        beanField.setAccessFlags(Modifier.PRIVATE);
+
+        JavaMethod ctor =
+          jClass.createMethod("<init>",
+                              "(Lcom/caucho/config/inject/InjectManager;"
+                                  + "Ljavax/enterprise/inject/spi/Bean;)V");
+        ctor.setAccessFlags(Modifier.PUBLIC);
+
+        CodeWriterAttribute code = ctor.createCodeWriter();
+        code.setMaxLocals(3);
+        code.setMaxStack(4);
+
+        code.pushObjectVar(0);
+        code.invokespecial(superClassName, "<init>", "()V", 1, 0);
+        code.pushObjectVar(0);
+        code.pushObjectVar(1);
+        code.putField(thisClassName, managerField.getName(), managerField
+            .getDescriptor());
+        code.pushObjectVar(0);
+        code.pushObjectVar(2);
+        code.putField(thisClassName, beanField.getName(), beanField
+            .getDescriptor());
+        code.addReturn();
+        code.close();
+
+        for (Method method : _cl.getMethods()) {
+          if (Modifier.isStatic(method.getModifiers()))
+            continue;
+          if (Modifier.isFinal(method.getModifiers()))
+            continue;
+
+          createProxyMethod(jClass, method, cl.isInterface());
+        }
+
+        ByteArrayOutputStream bos = new ByteArrayOutputStream();
+        WriteStream out = Vfs.openWrite(bos);
+
+        jClass.write(out);
+
+        out.close();
+
+        byte[] buffer = bos.toByteArray();
+
+        /*
+         * try { out = Vfs.lookup("file:/tmp/caucho/qa/temp.class").openWrite();
+         * out.write(buffer, 0, buffer.length); out.close(); } catch
+         * (IOException e) { }
+         */
+
+        // ioc/0517
+        _proxyClass = loader.loadClass(cleanName, buffer);
+      }
+      
       _proxyCtor = _proxyClass.getConstructors()[0];
     } catch (RuntimeException e) {
       throw e;

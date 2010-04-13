@@ -37,6 +37,7 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -112,7 +113,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   private ArrayList<ConfigProgram> _injectProgramList
     = new ArrayList<ConfigProgram>();
-
+  
   public InjectionTargetImpl(InjectManager beanManager,
                              AnnotatedType<X> beanType)
   {
@@ -504,7 +505,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _injectionPointSet;
   }
 
   //

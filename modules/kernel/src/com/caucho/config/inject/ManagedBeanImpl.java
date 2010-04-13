@@ -227,18 +227,11 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     getInjectionTarget().preDestroy(instance);
   }
 
-  /**
-   * Returns the injection points.
-   */
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
   //
   // introspection
   //
 
+  @Override
   public void introspect()
   {
     super.introspect();
@@ -251,7 +244,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   /**
    * Called for implicit introspection.
    */
-  public void introspect(AnnotatedType beanType)
+  @Override
+  public void introspect(AnnotatedType<X> beanType)
   {
     super.introspect(beanType);
 

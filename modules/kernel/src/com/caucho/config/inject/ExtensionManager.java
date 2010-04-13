@@ -171,6 +171,9 @@ class ExtensionManager
 
   void addExtension(Extension ext)
   {
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " add extension " + ext);
+    
     ExtensionItem item = introspect(ext.getClass());
 
     for (ExtensionMethod method : item.getExtensionMethods()) {
@@ -195,6 +198,11 @@ class ExtensionManager
     }
 
     return item;
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _injectManager + "]";
   }
 
   class ExtensionItem {

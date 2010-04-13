@@ -34,14 +34,17 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.MessageDriven;
 import javax.ejb.Startup;
+import javax.ejb.Stateless;
+import javax.ejb.Stateful;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.inject.Named;
 
 import com.caucho.inject.Jndi;
-import com.caucho.inject.Managed;
+import com.caucho.inject.MBean;
 import com.caucho.loader.enhancer.ScanClass;
 
 /**
@@ -181,7 +184,7 @@ class InjectScanClass implements ScanClass
   {
     if (_isScanClass && ! _isRegistered) {
       _isRegistered = true;
-
+      
       _scanManager.addDiscoveredClass(this);
     }
     
@@ -215,6 +218,10 @@ class InjectScanClass implements ScanClass
     _registerAnnotationSet.add(Named.class);
     _registerAnnotationSet.add(Startup.class);
     _registerAnnotationSet.add(Jndi.class);
-    _registerAnnotationSet.add(Managed.class);
+    _registerAnnotationSet.add(MBean.class);
+    _registerAnnotationSet.add(Stateless.class);
+    _registerAnnotationSet.add(Stateful.class);
+    _registerAnnotationSet.add(javax.ejb.Singleton.class);
+    _registerAnnotationSet.add(MessageDriven.class);
   }
 }

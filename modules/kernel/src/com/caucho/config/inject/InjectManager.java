@@ -162,8 +162,8 @@ public class InjectManager
     "javax.ejb.Stateful",
     "javax.ejb.Stateless",
     "javax.ejb.Singleton",
-    */
     "javax.ejb.MessageDriven"
+    */
   };
 
   private static final String []FORBIDDEN_CLASSES = {
@@ -1573,14 +1573,6 @@ public class InjectManager
     return getReference(bean, ij.getType(), cxt);
   }
 
-  /**
-   * Internal callback during creation to get a new injection instance.
-   */
-  public <T> T getInstanceToInject(InjectionPoint ij)
-  {
-    return (T) getInjectableReference(ij, null);
-  }
-
   public Bean<?> resolveByInjectionPoint(InjectionPoint ij)
   {
     Type type = ij.getType();
@@ -2225,8 +2217,11 @@ public class InjectManager
 
   public void update()
   {
-    if (! _isUpdateNeeded)
+    if (! _isUpdateNeeded 
+        && ! _scanManager.isPending()
+        && _pendingAnnotatedTypes.size() == 0) {
       return;
+    }
 
     _isUpdateNeeded = false;
 
@@ -2247,7 +2242,8 @@ public class InjectManager
 
       _isBeforeBeanDiscoveryComplete = true;
       fireExtensionEvent(new BeforeBeanDiscoveryImpl());
-
+      
+      /*
       // ioc/0061
       if (rootContextList.size() == 0)
         return;
@@ -2259,6 +2255,7 @@ public class InjectManager
           }
         }
       }
+      */
 
       processPendingAnnotatedTypes();
     } catch (ConfigException e) {
@@ -2277,7 +2274,7 @@ public class InjectManager
     
     ArrayList<AnnotatedType<?>> types = new ArrayList<AnnotatedType<?>>(_pendingAnnotatedTypes);
     _pendingAnnotatedTypes.clear();
-
+    
     for (AnnotatedType<?> type : types) {
       discoverBean(type);
     }
@@ -2335,8 +2332,9 @@ public class InjectManager
 
     fireExtensionEvent(processType);
 
-    if (processType.isVeto())
+    if (processType.isVeto()) {
       return;
+    }
     
     type = processType.getAnnotatedType();
 
@@ -2344,11 +2342,10 @@ public class InjectManager
       return;
     
     if (type.isAnnotationPresent(Specializes.class)) {
-      for (Class<?> parent = type.getJavaClass().getSuperclass();
-           parent != null;
-           parent = parent.getSuperclass()) {
+      Class<?> parent = type.getJavaClass().getSuperclass();
+
+      if (parent != null)
         _specializedClasses.add(parent);
-      }
     }
 
     _pendingAnnotatedTypes.add(type);
@@ -2380,10 +2377,14 @@ public class InjectManager
       return false;
     else if (type.isAnonymousClass())
       return false;
+    /*
     else if (type.isMemberClass())
       return false;
+      */
 
-    /* XXX: ioc/024d
+    /* XXX: ioc/024d */
+    // ioc/070c, ioc/0j0g
+    /*
     if (type.getTypeParameters() != null
         && type.getTypeParameters().length > 0) {
       return false;
@@ -2587,9 +2588,6 @@ public class InjectManager
 
   public void addExtension(Extension extension)
   {
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " add extension " + extension);
-    
     _extensionManager.addExtension(extension);
   }
 
@@ -3017,6 +3015,7 @@ public class InjectManager
       return _isVeto;
     }
 
+    @Override
     public void veto()
     {
       _isVeto = true;

@@ -164,11 +164,14 @@ public class XmlStandardPlugin implements Extension
       return;
     }
 
+    // XXX: managed by ResinStandardPlugin
+    /*
     if (type.isAnnotationPresent(Stateful.class)
         || type.isAnnotationPresent(Stateless.class)
         || type.isAnnotationPresent(MessageDriven.class)) {
       event.veto();
     }
+    */
   }
 
   public void processType(@Observes AfterBeanDiscovery event)

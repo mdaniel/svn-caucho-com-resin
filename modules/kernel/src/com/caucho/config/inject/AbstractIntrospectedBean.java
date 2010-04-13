@@ -115,7 +115,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     else
       _baseType = manager.createBaseType(type);
     
-    _typeClasses = _baseType.getTypeClosure();
+    _typeClasses = _baseType.getTypeClosure(manager);
   }
 
   public BaseType getBaseType()

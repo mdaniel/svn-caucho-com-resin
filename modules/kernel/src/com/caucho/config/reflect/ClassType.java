@@ -29,8 +29,11 @@
 
 package com.caucho.config.reflect;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Set;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
@@ -45,6 +48,9 @@ public class ClassType extends BaseType
   
   private static final HashMap<Class<?>,ClassType> _classTypeMap
     = new HashMap<Class<?>,ClassType>();
+  
+  private static final HashSet<Class<?>> _classTypeIgnoreSet
+    = new HashSet<Class<?>>();
     
   private Class<?> _type;
 
@@ -143,6 +149,34 @@ public class ClassType extends BaseType
   }
 
   @Override
+  public void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
+  {
+    Type ownType = toType();
+    
+    if (_classTypeIgnoreSet.contains(ownType))
+      return;
+    
+    typeSet.add(ownType);
+
+    for (Type type : _type.getGenericInterfaces()) {
+      BaseType ifaceType = manager.createBaseType(type);
+      
+      ifaceType.fillTypeClosure(manager, typeSet);
+    }
+
+    Class<?> superclass = _type.getSuperclass();
+
+    if (superclass != null) {
+      BaseType superType = manager.createBaseType(superclass);
+      
+      superType.fillTypeClosure(manager, typeSet);
+    }
+    else if (_type.isInterface()) {
+      typeSet.add(Object.class);
+    }
+  }
+
+  @Override
   public int hashCode()
   {
     return _type.hashCode();
@@ -197,5 +231,8 @@ public class ClassType extends BaseType
     
     OBJECT_TYPE = BaseType.create(Object.class, 
                                   new HashMap<String,BaseType>());
+    
+    _classTypeIgnoreSet.add(Serializable.class);
+    _classTypeIgnoreSet.add(Cloneable.class);
   }
 }

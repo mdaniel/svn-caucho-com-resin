@@ -32,6 +32,7 @@ package com.caucho.config.reflect;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.HashMap;
+import java.util.Set;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
@@ -148,6 +149,28 @@ public class ParamType extends BaseType implements ParameterizedType
     BaseType superType = manager.createBaseType(superclass, _paramMap);
 
     return superType.findClass(manager, cl);
+  }
+
+  @Override
+  protected void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
+  {
+    typeSet.add(toType());
+    
+    for (Type type : _type.getGenericInterfaces()) {
+      BaseType ifaceType = manager.createBaseType(type, _paramMap);
+
+      ifaceType.fillTypeClosure(manager, typeSet);
+    }
+
+    Class<?> superclass = _type.getSuperclass();
+    
+    if (superclass == null)
+      return;
+
+    BaseType superType = manager.createBaseType(superclass, _paramMap);
+
+    superType.fillTypeClosure(manager, typeSet);
+
   }
   
   @Override

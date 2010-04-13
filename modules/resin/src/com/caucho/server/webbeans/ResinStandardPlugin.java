@@ -52,7 +52,7 @@ import com.caucho.ejb.inject.EjbGeneratedBean;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.inject.Jndi;
-import com.caucho.inject.Managed;
+import com.caucho.inject.MBean;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
@@ -105,7 +105,7 @@ public class ResinStandardPlugin implements Extension {
   {
     Annotated annotated = event.getAnnotated();
     Bean<T> bean = event.getBean();
-    
+
     if (annotated == null || bean instanceof EjbGeneratedBean
         || !(bean instanceof AbstractBean<?>)) {
       return;
@@ -149,8 +149,8 @@ public class ResinStandardPlugin implements Extension {
       }
     }
     
-    if (annotated.isAnnotationPresent(Managed.class)) {
-      Managed manage = annotated.getAnnotation(Managed.class);
+    if (annotated.isAnnotationPresent(MBean.class)) {
+      MBean manage = annotated.getAnnotation(MBean.class);
       
       String mbeanName = manage.value();
       if ("".equals(mbeanName))

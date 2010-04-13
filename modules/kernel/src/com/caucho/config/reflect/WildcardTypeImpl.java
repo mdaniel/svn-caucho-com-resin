@@ -29,24 +29,16 @@
 
 package com.caucho.config.reflect;
 
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
+import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
+import java.lang.reflect.WildcardType;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
+import com.caucho.inject.Module;
 
 /**
  * class type matching
  */
+@Module
 public class WildcardTypeImpl extends BaseType implements WildcardType
 {
   private BaseType []_lowerBounds;
@@ -78,7 +70,7 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     return upperBounds;
   }
   
-  public Class getRawClass()
+  public Class<?> getRawClass()
   {
     return Object.class; // technically bounds(?)
   }
@@ -115,7 +107,7 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
   
   public boolean isMatch(Type type)
   {
-    if (type instanceof WildcardType || type instanceof TypeVariable)
+    if (type instanceof WildcardType || type instanceof TypeVariable<?>)
       return true;
     else
       return false;
@@ -131,8 +123,6 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     if (o == this)
       return true;
     else if (o instanceof WildcardType) {
-      WildcardType var = (WildcardType) o;
-
       return true;
     }
     else

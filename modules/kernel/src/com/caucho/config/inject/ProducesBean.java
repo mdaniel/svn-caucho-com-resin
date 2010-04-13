@@ -30,11 +30,15 @@
 package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.CreationException;
+import javax.enterprise.inject.IllegalProductException;
 import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -249,12 +253,24 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       _producesMethod.getJavaMember().setAccessible(true);
       
       T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
-
-      return value;
+      
+      if (value != null)
+        return value;
+      
+      if (Dependent.class.equals(getScope()))
+        return null;
+      
+      throw new IllegalProductException(L.l("producer {0} returned null, which is not allowed by the CDI spec.",
+                                            this));
     } catch (RuntimeException e) {
       throw e;
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+        throw (RuntimeException) e.getCause();
+      else
+        throw new CreationException(e.getCause());
     } catch (Exception e) {
-      throw new RuntimeException(e);
+      throw new CreationException(e);
     }
   }
 

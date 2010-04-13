@@ -38,12 +38,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 /**
- * The @Manage annotation registers a bean instance with JMX.
+ * The @MBean annotation registers a bean instance with JMX.
  */
 
 @Target({TYPE, METHOD})
 @Retention(RUNTIME)
 @Documented
-public @interface Managed {
+public @interface MBean {
   public String value() default "";
 }

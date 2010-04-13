@@ -922,14 +922,16 @@ public class InterceptorCallChain
     out.println();
     out.print("class ");
     out.print(className);
+    out.print(" ");
 
     for (int i = 0; i < decorators.size(); i++) {
       Class <?> cl = (Class<?>) decorators.get(i);
       
-      if (! cl.isInterface())
+      if (! cl.isInterface()) {
         out.print(" extends ");
 
-      out.printClass(cl);
+        out.printClass(cl);
+      }
     }
 
     boolean isFirst = true;

@@ -237,12 +237,12 @@ abstract public class BaseType
   /**
    * Returns the type closure of the base type.
    */
-  public final Set<Type> getTypeClosure()
+  public final Set<Type> getTypeClosure(InjectManager manager)
   {
     if (_typeSet == null) {
       LinkedHashSet<Type> typeSet = new LinkedHashSet<Type>();
-    
-      fillTypeClosure(typeSet);
+      
+      fillTypeClosure(manager, typeSet);
       
       _typeSet = typeSet;
     }
@@ -250,10 +250,9 @@ abstract public class BaseType
     return _typeSet;
   }
   
-  protected void fillTypeClosure(Set<Type> typeSet)
+  protected void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
   {
     typeSet.add(toType());
-    typeSet.add(Object.class);
   }
   
   public BaseType findClass(InjectManager manager, Class<?> cl)

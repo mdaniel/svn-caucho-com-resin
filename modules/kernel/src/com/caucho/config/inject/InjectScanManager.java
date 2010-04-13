@@ -110,11 +110,16 @@ class InjectScanManager
     return contextList;
   }
   
+  public boolean isPending()
+  {
+    return _pendingScanClassList.size() > 0;
+  }
 
   public void addDiscoveredClass(InjectScanClass injectScanClass)
   {
-    if (! _pendingScanClassList.contains(injectScanClass))
+    if (! _pendingScanClassList.contains(injectScanClass)) {
       _pendingScanClassList.add(injectScanClass);
+    }
   }
   
   /**
@@ -147,13 +152,13 @@ class InjectScanManager
   @Override
   public boolean isRootScannable(Path root)
   {
+    ScanRootContext context = _scanRootMap.get(root);
+
     if (! (root.lookup("META-INF/beans.xml").canRead()
            || (root.getFullPath().endsWith("WEB-INF/classes/")
                && root.lookup("../beans.xml").canRead()))) {
       return false;
     }
-
-    ScanRootContext context = _scanRootMap.get(root);
 
     if (context == null) {
       context = new ScanRootContext(root);
@@ -188,10 +193,12 @@ class InjectScanManager
       // ioc/0j02 (decorator?)
       return null;//createScanClass(className);
     }
+    /*
     else if (className.indexOf('$') >= 0) {
       // ioc/0j0l
       return null;
     }
+    */
     else {
       InjectScanClass scanClass = createScanClass(className);
       
@@ -235,5 +242,11 @@ class InjectScanManager
                               Path root,
                               String className)
   {
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _injectManager + "]";
   }
 }
