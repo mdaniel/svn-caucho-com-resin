@@ -202,7 +202,6 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
       }
 
       _bean = createBean(mBean, baseApi);
-      System.out.println("BEAN: " + _bean + " " + _bean.getTypes());
 
       beanManager.addBean(_bean);
 
