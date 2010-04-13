@@ -4105,13 +4105,15 @@ public class WebApp extends ServletContextImpl
     return 2;
   }
 
-  public boolean isRootScannable(Path root)
+  @Override
+  public boolean isRootScannable(Path root, String packageRoot)
   {
     return true;
   }
 
   @Override
-  public ScanClass scanClass(Path root, String name, int modifiers)
+  public ScanClass scanClass(Path root, String packageRoot,
+                             String name, int modifiers)
   {
     if (Modifier.isPublic(modifiers))
       return new WebScanClass(name);
@@ -4119,6 +4121,7 @@ public class WebApp extends ServletContextImpl
       return null;
   }
 
+  @Override
   public boolean isScanMatchAnnotation(CharBuffer string)
   {
     if (string.startsWith("javax.servlet.annotation."))
@@ -4127,6 +4130,7 @@ public class WebApp extends ServletContextImpl
     return false;
   }
 
+  @Override
   public void classMatchEvent(EnvironmentClassLoader loader,
                               Path root,
                               String className)

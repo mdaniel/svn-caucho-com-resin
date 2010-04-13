@@ -29,11 +29,19 @@
 
 package com.caucho.resin;
 
+import java.lang.annotation.Annotation;
+import java.net.URL;
+import java.util.Set;
+
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
 import com.caucho.config.cfg.BeansConfig;
-import com.caucho.config.inject.BeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.EJBServer;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
@@ -46,16 +54,6 @@ import com.caucho.server.webbeans.ResinWebBeansProducer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
-import javax.enterprise.context.RequestScoped;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.Context;
-import javax.enterprise.inject.spi.Bean;
 
 /**
  * Embeddable Resin context for unit testing of
@@ -165,6 +163,25 @@ public class ResinBeanContainer
       CompilingLoader loader = new CompilingLoader(_classLoader);
       loader.setPath(path);
       loader.init();
+    }
+  }
+  
+  /**
+   * Adds a package as module root.
+   * 
+   * @param packageName the name of the package to be treated as a virtual
+   * module root.
+   */
+  public void addPackageModule(String modulePath, String packageName)
+  {
+    Path root = Vfs.lookup(modulePath);
+    
+    try {
+      URL url = new URL(root.getURL());
+    
+      _classLoader.addScanPackage(url, packageName);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
     }
   }
 

@@ -49,19 +49,22 @@ public interface ScanListener {
   public int getScanPriority();
   
   /**
-   * Called to check if the archive should be scan.
+   * Called to check if the archive should be scanned.
    */
-  public boolean isRootScannable(Path root);
+  public boolean isRootScannable(Path root, String packageRoot);
 
   /**
    * Returns the state when scanning the class
    *
+   * @param root the module/jar's root path
+   * @param packageRoot the virtual package root (usually for Testing) 
    * @param name the class name
    * @param modifiers the class modifiers
    *
    * @return the ScanClass object
    */
-  public ScanClass scanClass(Path root, String name, int modifiers);
+  public ScanClass scanClass(Path root, String packageRoot, 
+                             String name, int modifiers);
   
   /**
    * Returns true if the string matches an annotation class.

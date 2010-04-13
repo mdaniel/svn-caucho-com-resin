@@ -42,7 +42,7 @@ public class ScanRootContext  {
   private ArrayList<String> _classList = new ArrayList<String>();
   private boolean _isScanComplete;
   
-  public ScanRootContext(Path root)
+  public ScanRootContext(Path root, String packageRoot)
   {
     _root = root;
   }

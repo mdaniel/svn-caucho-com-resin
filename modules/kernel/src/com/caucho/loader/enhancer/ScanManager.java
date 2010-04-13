@@ -59,13 +59,15 @@ public class ScanManager {
     listeners.toArray(_listeners);
   }
 
-  public void scan(EnvironmentClassLoader loader, URL url)
+  public void scan(EnvironmentClassLoader loader, URL url, String packageRoot)
   {
     // #3576
-    scan(loader, Vfs.lookup(url));
+    scan(loader, Vfs.lookup(url), packageRoot);
   }
   
-  public void scan(EnvironmentClassLoader loader, Path root)
+  public void scan(EnvironmentClassLoader loader, 
+                   Path root,
+                   String packageRoot)
   {
     if (root.getPath().endsWith(".jar") && ! (root instanceof JarPath)) {
       root = JarPath.create(root);
@@ -75,7 +77,7 @@ public class ScanManager {
 
     boolean hasListener = false;
     for (int i = 0; i < _listeners.length; i++) {
-      if (_listeners[i].isRootScannable(root)) {
+      if (_listeners[i].isRootScannable(root, packageRoot)) {
 	listeners[i] = _listeners[i];
 	hasListener = true;
       }
@@ -86,18 +88,29 @@ public class ScanManager {
     }
     
     ByteCodeClassScanner scanner = new ByteCodeClassScanner();
+    
+    String packagePath = null;
+    
+    if (packageRoot != null)
+      packagePath = packageRoot.replace('.', '/');
 
     if (root instanceof JarPath) {
       JarByteCodeMatcher matcher
-	= new JarByteCodeMatcher(loader, root, listeners);
+	= new JarByteCodeMatcher(loader, root, packageRoot, listeners);
     
-      scanForJarClasses(((JarPath) root).getContainer(), scanner, matcher);
+      scanForJarClasses(((JarPath) root).getContainer(), packageRoot,
+                        scanner, matcher);
     }
     else {
       PathByteCodeMatcher matcher
-	= new PathByteCodeMatcher(loader, root, listeners);
+	= new PathByteCodeMatcher(loader, root, packageRoot, listeners);
       
-      scanForClasses(root, root, scanner, matcher);
+      Path scanRoot = root;
+      
+      if (packagePath != null)
+        scanRoot = scanRoot.lookup(packagePath);
+      
+      scanForClasses(root, scanRoot, scanner, matcher);
     }
   }
 
@@ -135,6 +148,7 @@ public class ScanManager {
   }
 
   private void scanForJarClasses(Path path,
+                                 String packagePath,
                                  ByteCodeClassScanner classScanner,
                                  JarByteCodeMatcher matcher)
   {
@@ -150,6 +164,9 @@ public class ScanManager {
 
 	String entryName = entry.getName();
 	if (! entryName.endsWith(".class"))
+	  continue;
+	
+	if (packagePath != null && ! entryName.startsWith(packagePath))
 	  continue;
 
 	matcher.init();
@@ -177,9 +194,10 @@ public class ScanManager {
   static class JarByteCodeMatcher extends ScanByteCodeMatcher {
     JarByteCodeMatcher(EnvironmentClassLoader loader,
 		       Path root,
+		       String packageName,
 		       ScanListener []listeners)
     {
-      super(loader, root, listeners);
+      super(loader, root, packageName, listeners);
     }
   }
 
@@ -189,9 +207,10 @@ public class ScanManager {
 
     PathByteCodeMatcher(EnvironmentClassLoader loader,
 			Path root,
+			String packageName,
 			ScanListener []listeners)
     {
-      super(loader, root, listeners);
+      super(loader, root, packageName, listeners);
     }
 
     void init(Path root, Path path)
@@ -217,6 +236,7 @@ public class ScanManager {
     
   abstract static class ScanByteCodeMatcher implements ByteCodeClassMatcher {
     private Path _root;
+    private String _packageRoot;
     
     private final ScanListener []_listeners;
     private final ScanListener []_currentListeners;
@@ -224,9 +244,11 @@ public class ScanManager {
 
     ScanByteCodeMatcher(EnvironmentClassLoader loader,
 			Path root,
+			String packageRoot,
 			ScanListener []listeners)
     {
       _root = root;
+      _packageRoot = packageRoot;
       
       _listeners = listeners;
       _currentListeners = new ScanListener[listeners.length];
@@ -255,7 +277,8 @@ public class ScanManager {
 	if (listener == null)
 	  continue;
 
-	ScanClass scanClass = listener.scanClass(_root, className, modifiers);
+	ScanClass scanClass = listener.scanClass(_root, _packageRoot, 
+	                                         className, modifiers);
 	
 	if (scanClass != null) {
 	  activeCount++;

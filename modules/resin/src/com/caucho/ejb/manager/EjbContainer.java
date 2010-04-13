@@ -396,7 +396,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns true if the root is a valid scannable root.
    */
-  public boolean isRootScannable(Path root)
+  @Override
+  public boolean isRootScannable(Path root, String packageRoot)
   {
     if (! root.lookup("META-INF/ejb-jar.xml").canRead()) {
       return false;
@@ -419,7 +420,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   }
 
   @Override
-  public ScanClass scanClass(Path root, String className, int modifiers)
+  public ScanClass scanClass(Path root, String packageRoot,
+                             String className, int modifiers)
   {
     if (Modifier.isInterface(modifiers))
       return null;

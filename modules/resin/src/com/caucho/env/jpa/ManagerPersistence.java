@@ -531,7 +531,7 @@ public class ManagerPersistence
    * Returns true if the root is a valid scannable root.
    */
   @Override
-  public boolean isRootScannable(Path root)
+  public boolean isRootScannable(Path root, String packageRoot)
   {
     if (root.lookup("META-INF/persistence.xml").canRead()) {
       _pendingRootList.add(root);
@@ -541,7 +541,8 @@ public class ManagerPersistence
   }
 
   @Override
-  public ScanClass scanClass(Path root, String className, int modifiers)
+  public ScanClass scanClass(Path root, String packageRoot,
+                             String className, int modifiers)
   {
     return null;
   }

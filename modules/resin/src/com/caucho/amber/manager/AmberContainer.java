@@ -1022,7 +1022,8 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns true if the root is a valid scannable root.
    */
-  public boolean isRootScannable(Path root)
+  @Override
+  public boolean isRootScannable(Path root, String packageRoot)
   {
     if (! root.lookup("META-INF/persistence.xml").canRead())
       return false;
@@ -1048,7 +1049,8 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
   }
 
   @Override
-  public ScanClass scanClass(Path root, String className, int modifiers)
+  public ScanClass scanClass(Path root, String packageRoot,
+                             String className, int modifiers)
   {
     if (Modifier.isInterface(modifiers))
       return null;
@@ -1062,6 +1064,7 @@ public class AmberContainer implements ScanListener, EnvironmentListener {
       return ScanClassAllow.ALLOW;
   }
 
+  @Override
   public boolean isScanMatchAnnotation(CharBuffer annotationName)
   {
     if (annotationName.matches("javax.persistence.Entity"))

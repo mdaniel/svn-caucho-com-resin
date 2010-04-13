@@ -73,14 +73,13 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     = new Hashtable<String,Object>(8);
 
   private ArrayList<ScanListener> _scanListeners;
-  private ArrayList<URL> _pendingScanUrls = new ArrayList<URL>();
+  private ArrayList<ScanRoot> _pendingScanRoots = new ArrayList<ScanRoot>();
 
   private AtomicReference<ArtifactManager> _artifactManagerRef
     = new AtomicReference<ArtifactManager>();
   private ArtifactManager _artifactManager;
 
   // Array of listeners
-  // XXX: this used to be a weak reference list, but that caused problems
   // server/306i  - can't be weak reference, instead create WeakStopListener
   private ArrayList<EnvironmentListener> _listeners
     = new ArrayList<EnvironmentListener>();
@@ -502,6 +501,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Adds a listener to detect class loader changes.
    */
+  @Override
   protected void configurePostEnhancerEvent()
   {
     ArrayList<AddLoaderListener> listeners = getLoaderListeners();
@@ -527,12 +527,29 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     super.addURL(url);
 
-    _pendingScanUrls.add(url);
+    _pendingScanRoots.add(new ScanRoot(url, null));
+  }
+  
+  /**
+   * Adds a virtual module root for scanning.
+   * 
+   * @param rootPackage
+   */
+  public void addScanPackage(URL url, String rootPackage)
+  {
+    if (! containsURL(url)) {
+      super.addURL(url);
+    }
+    
+    _pendingScanRoots.add(new ScanRoot(url, rootPackage));
+    
+    sendAddLoaderEvent();
   }
 
   /**
    * Tells the classloader to scan the root classpath.
    */
+  @Override
   public void scanRoot()
   {
     super.scanRoot();
@@ -545,7 +562,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       URLClassLoader urlParent = (URLClassLoader) parent;
 
       for (URL url : urlParent.getURLs()) {
-        _pendingScanUrls.add(url);
+        _pendingScanRoots.add(new ScanRoot(url, null));
       }
 
       return;
@@ -569,7 +586,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
     ArrayList<URL> urlList = new ArrayList<URL>();
     for (URL url : getURLs()) {
-      if (! _pendingScanUrls.contains(url))
+      if (isScanRootAvailable(url))
         urlList.add(url);
     }
 
@@ -588,9 +605,19 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       ScanManager scanManager = new ScanManager(selfList);
 
       for (URL url : urlList) {
-        scanManager.scan(this, url);
+        scanManager.scan(this, url, null);
       }
     }
+  }
+  
+  private boolean isScanRootAvailable(URL url)
+  {
+    for (ScanRoot scanRoot : _pendingScanRoots) {
+      if (url.equals(scanRoot.getUrl()))
+        return false;
+    }
+    
+    return true;
   }
 
   /**
@@ -619,6 +646,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Returns any import class, e.g. from an artifact
    */
+  @Override
   protected Class<?> findImportClass(String name)
   {
     if (_artifactManager != null)
@@ -630,6 +658,7 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   /**
    * Get resource from an artifact
    */
+  @Override
   protected URL getImportResource(String name)
   {
     if (_artifactManager != null)
@@ -681,11 +710,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   {
     configureEnhancerEvent();
 
-    ArrayList<URL> urlList = new ArrayList<URL>(_pendingScanUrls);
-    _pendingScanUrls.clear();
-
+    ArrayList<ScanRoot> rootList = new ArrayList<ScanRoot>(_pendingScanRoots);
+    _pendingScanRoots.clear();
+    
     try {
-      if (_scanListeners != null && urlList.size() > 0) {
+      if (_scanListeners != null && rootList.size() > 0) { 
         try {
           make();
         } catch (Exception e) {
@@ -697,8 +726,8 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
         ScanManager scanManager = new ScanManager(_scanListeners);
 
-        for (URL url : urlList) {
-          scanManager.scan(this, url);
+        for (ScanRoot root : rootList) {
+          scanManager.scan(this, root.getUrl(), root.getPackageName());
         }
       }
 
@@ -829,30 +858,6 @@ public class EnvironmentClassLoader extends DynamicClassLoader
   }
 
   /**
-   * Copies the loader.
-   */
-  protected void replace(EnvironmentClassLoader source)
-  {
-    super.replace(source);
-
-    // XXX: might need separate class
-    _owner = source._owner;
-    _attributes = source._attributes;
-    if (source._listeners != null) {
-      if (_listeners == null)
-        _listeners = new ArrayList<EnvironmentListener>();
-      _listeners.addAll(source._listeners);
-      source._listeners.clear();
-    }
-
-    /*
-    _isStarted = source._isStarted;
-    _isActive = source._isActive;
-    _isStopped = source._isStopped;
-    */
-  }
-
-  /**
    * Destroys the class loader.
    */
   @Override
@@ -915,5 +920,32 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       _log = Logger.getLogger(EnvironmentClassLoader.class.getName());
 
     return _log;
+  }
+  
+  static class ScanRoot {
+    private final URL _url;
+    private final String _pkg;
+    
+    ScanRoot(URL url, String pkg)
+    {
+      _url = url;
+      _pkg = pkg;
+    }
+    
+    URL getUrl()
+    {
+      return _url;
+    }
+    
+    String getPackageName()
+    {
+      return _pkg;
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _url + "," + _pkg + "]";
+    }
   }
 }

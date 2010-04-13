@@ -40,7 +40,6 @@ import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.util.CharBuffer;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 
 /**
@@ -150,18 +149,26 @@ class InjectScanManager
   }
   
   @Override
-  public boolean isRootScannable(Path root)
+  public boolean isRootScannable(Path root, String packageRoot)
   {
     ScanRootContext context = _scanRootMap.get(root);
-
-    if (! (root.lookup("META-INF/beans.xml").canRead()
+    
+    Path scanRoot = root;
+    
+    if (packageRoot != null) {
+      scanRoot = scanRoot.lookup(packageRoot.replace('.', '/'));
+      
+      if (! scanRoot.lookup("beans.xml").canRead())
+        return false;
+    }
+    else if (! (root.lookup("META-INF/beans.xml").canRead()
            || (root.getFullPath().endsWith("WEB-INF/classes/")
                && root.lookup("../beans.xml").canRead()))) {
       return false;
     }
 
     if (context == null) {
-      context = new ScanRootContext(root);
+      context = new ScanRootContext(root, packageRoot);
       _scanRootMap.put(root, context);
       _pendingScanRootList.add(context);
     }
@@ -181,7 +188,8 @@ class InjectScanManager
    * Checks if the class can be a simple class
    */
   @Override
-  public ScanClass scanClass(Path root, String className, int modifiers)
+  public ScanClass scanClass(Path root, String packageRoot,
+                             String className, int modifiers)
   {
     // ioc/0j0k - package private allowed
     
