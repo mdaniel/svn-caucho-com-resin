@@ -884,12 +884,15 @@ public class InjectManager
     AnnotatedType<T> annotatedType = null;
     
     if (target instanceof InjectionTargetImpl<?>)
-      annotatedType = ((InjectionTargetImpl) target).getAnnotatedType();
+      annotatedType = ((InjectionTargetImpl<T>) target).getAnnotatedType();
     
-    ProcessInjectionTargetImpl processTarget
-      = new ProcessInjectionTargetImpl(target, annotatedType);
+    ProcessInjectionTargetImpl<T> processTarget
+      = new ProcessInjectionTargetImpl<T>(target, annotatedType);
+    
+    BaseType eventType = createBaseType(ProcessInjectionTargetImpl.class);
+    eventType = eventType.fill(createBaseType(annotatedType.getBaseType()));
 
-    fireExtensionEvent(processTarget);
+    fireExtensionEvent(processTarget, eventType);
 
     return (InjectionTarget<T>) processTarget.getInjectionTarget();
   }
@@ -2016,12 +2019,25 @@ public class InjectManager
     fireLocalEvent(_extObserverMap, event, bindings);
   }
 
+  private void fireExtensionEvent(Object event, BaseType eventType, Annotation... bindings)
+  {
+    fireLocalEvent(_extObserverMap, event, eventType, bindings);
+  }
+
   private void fireLocalEvent(HashMap<Class<?>,ObserverMap> localMap,
                               Object event, Annotation... bindings)
   {
-    ArrayList<ObserverMap> observerList = new ArrayList<ObserverMap>();
     // ioc/0062 - class with type-param handled specially
     BaseType eventType = createClassBaseType(event.getClass());
+
+    fireLocalEvent(localMap, event, eventType, bindings);
+  }
+  
+  private void fireLocalEvent(HashMap<Class<?>,ObserverMap> localMap,
+                              Object event, BaseType eventType,
+                              Annotation... bindings)
+  {
+    ArrayList<ObserverMap> observerList = new ArrayList<ObserverMap>();
 
     fillLocalObserverList(localMap, observerList, eventType);
 
@@ -2330,7 +2346,10 @@ public class InjectManager
     ProcessAnnotatedTypeImpl<T> processType
       = new ProcessAnnotatedTypeImpl<T>(type);
 
-    fireExtensionEvent(processType);
+    BaseType baseType = createBaseType(ProcessAnnotatedTypeImpl.class);
+    baseType = baseType.fill(createBaseType(type.getBaseType()));
+    
+    fireExtensionEvent(processType, baseType);
 
     if (processType.isVeto()) {
       return;

@@ -235,6 +235,14 @@ abstract public class BaseType
   }
 
   /**
+   * Fills in a parameter with a given name.
+   */
+  public BaseType fill(BaseType ... baseType)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
    * Returns the type closure of the base type.
    */
   public final Set<Type> getTypeClosure(InjectManager manager)
