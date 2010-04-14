@@ -323,6 +323,21 @@ public class DynamicClassLoader extends java.net.URLClassLoader
   }
 
   /**
+   * Removes a loader (this should only be used by generating code, for example
+   * EJB to deal with package-private).
+   */
+  public void removeLoader(Loader loader)
+  {
+    synchronized (_loaders) {
+      for (int i = _loaders.size() - 1; i >= 0; i--) {
+        if (_loaders.get(i) == loader) {
+          _loaders.remove(i);
+        }
+      }
+    }
+  }
+
+  /**
    * Adds a resource loader.
    */
   public void addLoader(Loader loader, int offset)

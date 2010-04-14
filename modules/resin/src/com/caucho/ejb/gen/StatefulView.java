@@ -86,7 +86,9 @@ public class StatefulView extends View {
 
   public String getBeanClassName()
   {
-    return getViewClass().getSimpleName() + "__Bean";
+    // XXX:
+    // return getViewClass().getSimpleName() + "__Bean";
+    return getViewClass().getSimpleName();
   }
 
   /**
@@ -181,6 +183,10 @@ public class StatefulView extends View {
   public void generateBean(JavaWriter out)
     throws IOException
   {
+    if (true) {
+      return;
+    }
+    
     out.println();
     out.println("public static class " + getBeanClassName());
     out.println("  extends " + getBeanClass().getName());
@@ -251,7 +257,12 @@ public class StatefulView extends View {
 
     // ejb/1143
     if (isProxy()) {
-      out.println("_bean = new " + getBeanClassName() + "(this);");
+      // out.println("_bean = new " + getBeanClassName() + "(this);");
+      out.println("try {");
+      out.println("_bean = (" + getBeanClassName() + ") _ctor.newInstance();");
+      out.println("} catch (Exception e) {");
+      out.println("  throw new RuntimeException(e);");
+      out.println("}");
     }
 
     out.popDepth();

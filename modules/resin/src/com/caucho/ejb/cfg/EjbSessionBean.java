@@ -346,8 +346,7 @@ public class EjbSessionBean extends EjbBean {
       // Session bean no-interface view.
     } else if (interfaceList.size() != 1)
       throw new ConfigException(
-          L
-              .l(
+          L.l(
                  "'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
                  type.getName(), interfaceList.toString()));
     else {
@@ -368,7 +367,7 @@ public class EjbSessionBean extends EjbBean {
 
     // ejb/0f6f
     if (localHomeAnn != null) {
-      Class localHome = localHomeAnn.value();
+      Class<?> localHome = localHomeAnn.value();
       setLocalHome(localHome);
     }
 
@@ -376,7 +375,7 @@ public class EjbSessionBean extends EjbBean {
 
     // ejb/0f6f
     if (remoteHomeAnn != null) {
-      Class home = remoteHomeAnn.value();
+      Class<?> home = remoteHomeAnn.value();
       setHome(home);
     }
   }
@@ -424,7 +423,7 @@ public class EjbSessionBean extends EjbBean {
 
     ArrayList<ApiClass> localList = _sessionBean.getLocalApi();
     if (localList.size() > 0) {
-      ArrayList<Class> classList = new ArrayList<Class>();
+      ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
       for (ApiClass apiClass : localList) {
         classList.add(loadClass(apiClass.getName()));
       }
@@ -437,15 +436,16 @@ public class EjbSessionBean extends EjbBean {
      * server.setLocal21(loadClass(getLocal21().getName()));
      */
 
-    Class contextImplClass = javaGen.loadClass(getSkeletonName());
+    Class<?> contextImplClass = javaGen.loadClass(getSkeletonName());
+    
+    // Class<?> contextImplClass = javaGen.loadClassParentLoader(getSkeletonName(), getEJBClass());
+    // contextImplClass.getDeclaredConstructors();
 
     server.setContextImplClass(contextImplClass);
 
-    Class beanClass = javaGen.loadClass(getEJBClass().getName());
+    Class<?>[] classes = contextImplClass.getDeclaredClasses();
 
-    Class[] classes = contextImplClass.getDeclaredClasses();
-
-    for (Class aClass : classes) {
+    for (Class<?> aClass : classes) {
       if (getEJBClass().isAssignableFrom(aClass)) {
         server.setBeanImplClass(aClass);
 

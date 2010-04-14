@@ -121,7 +121,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 
     _configManager = new EjbConfigManager(this);
 
-    _workDir = WorkDir.getLocalWorkDir().lookup("ejb");
+    // _workDir = WorkDir.getLocalWorkDir().lookup("ejb");
 
     _classLoader.addScanListener(this);
 
@@ -267,7 +267,10 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
    */
   public Path getWorkDir()
   {
-    return _workDir;
+    if (_workDir != null)
+      return _workDir;
+    else
+      return WorkDir.getLocalWorkDir().lookup("ejb");
   }
 
   /**

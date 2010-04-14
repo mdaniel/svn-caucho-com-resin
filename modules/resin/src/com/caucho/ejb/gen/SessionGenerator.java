@@ -55,9 +55,10 @@ abstract public class SessionGenerator extends BeanGenerator {
 
   public SessionGenerator(String ejbName, ApiClass ejbClass,
                           ArrayList<ApiClass> localApi,
-                          ArrayList<ApiClass> remoteApi, String beanType) {
-    super(toFullClassName(ejbName, ejbClass.getSimpleName(), beanType),
-        ejbClass);
+                          ArrayList<ApiClass> remoteApi, String beanType)
+  {
+    super(toFullClassName(ejbName, ejbClass.getName(), beanType),
+          ejbClass);
 
     _contextClassName = "dummy";
 
@@ -67,11 +68,16 @@ abstract public class SessionGenerator extends BeanGenerator {
   }
 
   public static String toFullClassName(String ejbName, String className,
-                                       String beanType) {
+                                       String beanType)
+  {
     StringBuilder sb = new StringBuilder();
 
-    sb.append("_ejb.");
-
+    sb.append(className);
+    
+    sb.append("__");
+    
+    // XXX: restore this to distinguish similar beans
+    /*
     if (!Character.isJavaIdentifierStart(ejbName.charAt(0)))
       sb.append('_');
 
@@ -89,41 +95,49 @@ abstract public class SessionGenerator extends BeanGenerator {
     sb.append(".");
     sb.append(className);
     sb.append("__");
+    */
+    
     sb.append(beanType);
     sb.append("Context");
 
     return sb.toString();
   }
 
-  public boolean isStateless() {
+  public boolean isStateless() 
+  {
     return false;
   }
 
   /**
    * Returns the local API list.
    */
-  public ArrayList<ApiClass> getLocalApi() {
+  public ArrayList<ApiClass> getLocalApi()
+  {
     return _localApi;
   }
 
   /**
    * Returns the remote API list.
    */
-  public ArrayList<ApiClass> getRemoteApi() {
+  public ArrayList<ApiClass> getRemoteApi()
+  {
     return _remoteApi;
   }
 
   /**
    * Returns the views
    */
-  public ArrayList<View> getViews() {
+  @Override
+  public ArrayList<View> getViews()
+  {
     return _views;
   }
 
   /**
    * Returns the view matching the given class
    */
-  public View getView(Class api) {
+  public View getView(Class<?> api)
+  {
     for (View view : _views) {
       if (view.getViewClass().getName().equals(api.getName()))
         return view;
@@ -136,7 +150,8 @@ abstract public class SessionGenerator extends BeanGenerator {
    * Introspects the bean.
    */
   @Override
-  public void introspect() {
+  public void introspect()
+  {
     super.introspect();
 
     if (_localApi.size() == 0 && _remoteApi.size() == 0) {
@@ -148,7 +163,8 @@ abstract public class SessionGenerator extends BeanGenerator {
    * Generates the views for the bean
    */
   @Override
-  public void createViews() {
+  public void createViews()
+  {
     for (ApiClass api : _localApi) {
       View view = createLocalView(api);
 
@@ -168,138 +184,38 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates the local view for the given class
    */
-  protected View createLocalView(ApiClass api) {
+  protected View createLocalView(ApiClass api)
+  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
    * Generates the remote view for the given class
    */
-  protected View createRemoteView(ApiClass api) {
+  protected View createRemoteView(ApiClass api)
+  {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
    * Scans for the @Local interfaces
    */
-  protected ArrayList<ApiClass> introspectLocalDefault() {
-    throw new ConfigException(L
-        .l("'{0}' does not have any interfaces defined.", getBeanClass()
-            .getName()));
-  }
-
-  /**
-   * Scans for the @Local interfaces
-   */
-  private ArrayList<ApiClass> introspectLocalApi() {
-    ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
-
-    Local local = (Local) getBeanClass().getAnnotation(Local.class);
-    Remote remote = (Remote) getBeanClass().getAnnotation(Remote.class);
-
-    if (local != null && local.value().length > 0) {
-      for (Class<?> api : local.value()) {
-        apiList.add(new ApiClass(api));
-      }
-
-      return apiList;
-    }
-
-    boolean hasRemote = remote != null;
-
-    for (ApiClass api : getBeanClass().getInterfaces()) {
-      if (api.getJavaClass().isAnnotationPresent(Local.class))
-        apiList.add(api);
-      if (api.getJavaClass().isAnnotationPresent(Remote.class))
-        hasRemote = true;
-    }
-
-    if (apiList.size() > 0 || hasRemote)
-      return apiList;
-
-    ApiClass singleApi = null;
-    for (ApiClass api : getBeanClass().getInterfaces()) {
-      Class javaApi = api.getJavaClass();
-
-      if (javaApi.equals(java.io.Serializable.class))
-        continue;
-      if (javaApi.equals(java.io.Externalizable.class))
-        continue;
-      if (javaApi.equals(javax.ejb.SessionBean.class))
-        continue;
-      if (javaApi.getName().startsWith("javax.ejb."))
-        continue;
-      if (javaApi.isAnnotationPresent(Remote.class)) {
-        continue;
-      }
-
-      if (singleApi != null) {
-        throw new ConfigException(
-            L
-                .l(
-                   "{0}: does not have a unique local API.  Both '{1}' and '{2}' are local.",
-                   getBeanClass().getName(), singleApi.getName(), api.getName()));
-      }
-
-      singleApi = api;
-    }
-
-    if (singleApi != null) {
-      apiList.add(singleApi);
-
-      return apiList;
-    }
-
-    // XXX: only for stateful?
-    // apiList.add(getBeanClass());
-
-    return apiList;
-  }
-
-  /**
-   * Scans for the @Remote interfaces
-   */
-  private ArrayList<ApiClass> introspectRemoteApi() {
-    ArrayList<ApiClass> apiList = new ArrayList<ApiClass>();
-
-    Remote remote = (Remote) getBeanClass().getAnnotation(Remote.class);
-
-    if (remote != null && remote.value().length > 0) {
-      for (Class api : remote.value()) {
-        apiList.add(new ApiClass(api));
-      }
-
-      return apiList;
-    }
-
-    for (ApiClass api : getBeanClass().getInterfaces()) {
-      Class javaApi = api.getJavaClass();
-
-      if (java.io.Serializable.class.equals(javaApi))
-        continue;
-      else if (java.io.Externalizable.class.equals(javaApi))
-        continue;
-      else if (javaApi.getName().startsWith("javax.ejb"))
-        continue;
-
-      if (javaApi.isAnnotationPresent(Remote.class) || remote != null)
-        apiList.add(api);
-    }
-
-    if (apiList.size() > 0)
-      return apiList;
-
-    return apiList;
+  protected ArrayList<ApiClass> introspectLocalDefault()
+  {
+    throw new ConfigException(L.l("'{0}' does not have any interfaces defined.", 
+                                  getBeanClass().getName()));
   }
 
   abstract protected void generateContext(JavaWriter out) throws IOException;
 
   protected void generateNewInstance(JavaWriter out, String suffix)
-      throws IOException {
+      throws IOException
+  {
   }
 
   protected void generateNewRemoteInstance(JavaWriter out, String suffix)
-      throws IOException {
+      throws IOException
+  {
     // ejb/0g27
     /*
      * if (_bean.getRemoteHome() == null && _bean.getRemoteList().size() == 0)
@@ -311,7 +227,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     out.pushDepth();
 
     out.println(_contextClassName + " cxt = new " + _contextClassName
-        + "(_server);");
+                + "(_server);");
 
     if (isStateless())
       out.println("Bean bean = new Bean(cxt);");
@@ -339,7 +255,8 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates injection initialization.
    */
-  protected void generateInitInjection(JavaWriter out) throws IOException {
+  protected void generateInitInjection(JavaWriter out) throws IOException 
+  {
     /*
      * // ejb/0fd0 out.println();
      * out.println("private void __caucho_initInjection()"); out.println("{");
@@ -390,8 +307,9 @@ abstract public class SessionGenerator extends BeanGenerator {
    */
   protected void generateInjection(JavaWriter out,
                                    InjectionTarget injectionTarget,
-                                   String value, Class cl,
-                                   boolean isEscapeString) throws IOException {
+                                   String value, Class<?> cl,
+                                   boolean isEscapeString) throws IOException
+  {
     // ejb/0fd1, ejb/0fd3
     value = generateTypeCasting(value, cl, isEscapeString);
 
@@ -482,7 +400,8 @@ abstract public class SessionGenerator extends BeanGenerator {
                                                  String methodName,
                                                  String paramVar,
                                                  String classVar)
-      throws IOException {
+      throws IOException
+  {
     out.print("java.lang.reflect.Method ");
     out.print(methodVar);
     out.print(" = com.caucho.ejb.util.EjbUtil.getMethod(");
@@ -497,25 +416,25 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates reflection to access a class method.
    */
-  protected void generateReflectionGetMethod(JavaWriter out) throws IOException {
+  protected void generateReflectionGetMethod(JavaWriter out) throws IOException
+  {
     // moved to EjbUtil
   }
 
   /**
    * Makes private methods accessible before invoking them.
    */
-  protected void generateInvokeMethod(JavaWriter out) throws IOException {
+  protected void generateInvokeMethod(JavaWriter out) throws IOException
+  {
     out.println();
-    out
-        .println("private static void invokeMethod(Bean bean, String methodName, Class paramTypes[], Object paramValues[])");
+    out.println("private static void invokeMethod(Bean bean, String methodName, Class paramTypes[], Object paramValues[])");
     out.println("{");
     out.pushDepth();
 
     out.println("try {");
     out.pushDepth();
 
-    out
-        .println("java.lang.reflect.Method m = com.caucho.ejb.util.EjbUtil.getMethod(bean.getClass(), methodName, paramTypes);");
+    out.println("java.lang.reflect.Method m = com.caucho.ejb.util.EjbUtil.getMethod(bean.getClass(), methodName, paramTypes);");
     out.println("m.setAccessible(true);");
     out.println("m.invoke(bean, paramValues);");
 
@@ -523,8 +442,7 @@ abstract public class SessionGenerator extends BeanGenerator {
     out.println("} catch (Exception e) {");
     out.pushDepth();
 
-    out
-        .println("__caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
+    out.println("__caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
     out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
 
     out.popDepth();
@@ -537,12 +455,14 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Returns true if the method is implemented.
    */
-  public boolean hasMethod(String methodName, Class[] paramTypes) {
+  public boolean hasMethod(String methodName, Class[] paramTypes)
+  {
     return getBeanClass().hasMethod(methodName, paramTypes);
   }
 
   private String generateTypeCasting(String value, Class<?> cl,
-                                     boolean isEscapeString) {
+                                     boolean isEscapeString)
+  {
     if (cl.equals(String.class)) {
       if (isEscapeString)
         value = "\"" + value + "\"";

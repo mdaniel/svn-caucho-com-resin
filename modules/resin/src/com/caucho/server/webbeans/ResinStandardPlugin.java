@@ -42,7 +42,6 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.AbstractBean;
@@ -124,8 +123,8 @@ public class ResinStandardPlugin implements Extension {
       if (annType != null) {
         ejbContainer.createBean(annType, absBean.getInjectionTarget());
         
-        if (event instanceof ProcessBeanImpl)
-          ((ProcessBeanImpl) event).veto();
+        if (event instanceof ProcessBeanImpl<?>)
+          ((ProcessBeanImpl<?>) event).veto();
       }
     }
     

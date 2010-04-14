@@ -34,13 +34,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Hashtable;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.management.Attribute;
@@ -56,24 +53,22 @@ import javax.management.MBeanInfo;
 import javax.management.MBeanNotificationInfo;
 import javax.management.MBeanOperationInfo;
 import javax.management.ReflectionException;
-import javax.naming.NamingException;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.naming.ObjectProxy;
+import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
 /**
  * Jndi proxy class for injection.
  */
+@Module
 public class BeanMBean<T> implements DynamicMBean {
   private static final L10N L = new L10N(BeanMBean.class);
   private static final Logger log = Logger.getLogger(BeanMBean.class.getName());
   
   private InjectManager _injectManager;
   private Bean<T> _bean;
-  private AnnotatedType<T> _annType;
-  
   private MBeanInfo _info;
   private HashMap<String,Method> _attrMap
     = new HashMap<String,Method>();
@@ -83,8 +78,6 @@ public class BeanMBean<T> implements DynamicMBean {
     try {
       _injectManager = manager;
       _bean = bean;
-      _annType = type;
-      
       MBeanAttributeInfo []attrInfo;
     
       attrInfo = parseMethods(_bean, type);

@@ -34,31 +34,38 @@ import java.util.ArrayList;
 
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.View;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import javax.ejb.Stateful;
 
 /**
  * Generates the skeleton for a stateful bean.
  */
+@Module
 public class StatefulGenerator extends SessionGenerator {
   public StatefulGenerator(String ejbName, ApiClass ejbClass,
                            ArrayList<ApiClass> localApi,
-                           ArrayList<ApiClass> remoteApi) {
-    super(ejbName, ejbClass, localApi, remoteApi, Stateful.class
-        .getSimpleName());
+                           ArrayList<ApiClass> remoteApi)
+  {
+    super(ejbName, ejbClass, localApi, remoteApi, 
+          Stateful.class.getSimpleName());
   }
 
-  public boolean isStateless() {
+  @Override
+  public boolean isStateless()
+  {
     return false;
   }
 
   @Override
-  protected View createLocalView(ApiClass api) {
+  protected View createLocalView(ApiClass api)
+  {
     return new StatefulView(this, api);
   }
 
   @Override
-  protected View createRemoteView(ApiClass api) {
+  protected View createRemoteView(ApiClass api)
+  {
     return new StatefulView(this, api);
   }
 
@@ -66,7 +73,8 @@ public class StatefulGenerator extends SessionGenerator {
    * Scans for the @Local interfaces
    */
   @Override
-  protected ArrayList<ApiClass> introspectLocalDefault() {
+  protected ArrayList<ApiClass> introspectLocalDefault() 
+  {
     ArrayList<ApiClass> apiClass = new ArrayList<ApiClass>();
 
     apiClass.add(getBeanClass());
@@ -78,7 +86,8 @@ public class StatefulGenerator extends SessionGenerator {
    * Generates the stateful session bean
    */
   @Override
-  public void generate(JavaWriter out) throws IOException {
+  public void generate(JavaWriter out) throws IOException
+  {
     generateTopComment(out);
 
     out.println();
@@ -97,6 +106,26 @@ public class StatefulGenerator extends SessionGenerator {
     out.println("  extends StatefulContext");
     out.println("{");
     out.pushDepth();
+    
+    // XXX: temp for JSR-299 TCK
+    out.println("static java.lang.reflect.Constructor _ctor;");
+    out.println("static {");
+    out.println("try {");
+    out.print("Class cl = Class.forName(\"");
+    out.print(getBeanClass().getName());
+    out.println("\");");
+    // out.println("cl.setAccessible(true);");
+    out.println("java.lang.reflect.Constructor ctor = null;");
+    out.println("for (java.lang.reflect.Constructor tCtor : cl.getDeclaredConstructors()) {");
+    out.println("  if (tCtor.getParameterTypes().length == 0)");
+    out.println("    ctor = tCtor;");
+    out.println("}");
+    out.println("_ctor = ctor;");
+    out.println("_ctor.setAccessible(true);");
+    out.println("} catch (Exception e) {");
+    out.println("  e.printStackTrace();");
+    out.println("}");
+    out.println("}");
 
     out.println();
     out.println("public " + getClassName() + "(StatefulManager server)");
@@ -113,9 +142,8 @@ public class StatefulGenerator extends SessionGenerator {
     out.println("}");
 
     out.println();
-    out
-        .println("public " + getClassName() + "(" + getClassName()
-            + " context)");
+    out.println("public " + getClassName() + "(" + getClassName()
+                + " context)");
     out.println("{");
     out.pushDepth();
 
@@ -139,7 +167,8 @@ public class StatefulGenerator extends SessionGenerator {
     out.println("}");
   }
 
-  protected void generateCreateProvider(JavaWriter out) throws IOException {
+  protected void generateCreateProvider(JavaWriter out) throws IOException
+  {
     out.println();
     out.println("@Override");
     out.println("public StatefulProvider getProvider(Class api)");
@@ -163,12 +192,15 @@ public class StatefulGenerator extends SessionGenerator {
    * Creates any additional code in the constructor
    */
   public void generateContextObjectConstructor(JavaWriter out)
-      throws IOException {
+      throws IOException
+  {
     for (View view : getViews()) {
       view.generateContextObjectConstructor(out);
     }
   }
 
-  protected void generateContext(JavaWriter out) {
+  @Override
+  protected void generateContext(JavaWriter out)
+  {
   }
 }

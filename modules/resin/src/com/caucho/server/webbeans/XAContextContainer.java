@@ -27,58 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.scope;
+package com.caucho.server.webbeans;
 
-import java.lang.annotation.Annotation;
+import javax.transaction.Synchronization;
 
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.Contextual;
-
+import com.caucho.config.scope.ContextContainer;
 import com.caucho.inject.Module;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
 
 /**
- * The application scope value
+ * Container for an @TransactionScoped bean
  */
 @Module
-public class ApplicationScope extends AbstractScopeContext {
-  private ContextContainer _context = new ContextContainer();
-
-  /**
-   * Returns the current application scope
-   */
-  public ApplicationScope()
-  {
-  }
-
-  /**
-   * Returns true if the scope is currently active.
-   */
+@SuppressWarnings("serial")
+public class XAContextContainer extends ContextContainer
+  implements Synchronization
+{
   @Override
-  public boolean isActive()
+  public void afterCompletion(int status)
   {
-    return true;
-   }
-
-  /**
-   * Returns the scope annotation type.
-   */
-  @Override
-  public Class<? extends Annotation> getScope()
-  {
-    return ApplicationScoped.class;
+    close();
   }
 
   @Override
-  protected ContextContainer getContextContainer()
+  public void beforeCompletion()
   {
-    return _context;
-  }
-
-  @Override
-  protected ContextContainer createContextContainer()
-  {
-    return _context;
   }
 }

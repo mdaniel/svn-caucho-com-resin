@@ -29,27 +29,11 @@
 
 package com.caucho.resin;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.SchemaBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.loader.CompilingLoader;
-import com.caucho.loader.EnvironmentBean;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import java.io.IOException;
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Set;
-
-import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.Context;
-import javax.enterprise.inject.spi.Bean;
+
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.scope.ContextContainer;
 
 /**
  * Request context for an embedded Resin request.
@@ -60,8 +44,7 @@ public class RequestContext
   private RequestContext _oldContext;
   private ResinBeanContainer _cdiContainer;
   
-  private HashMap<Contextual<?>,Object> _requestScope
-    = new HashMap<Contextual<?>,Object>(8);
+  private ContextContainer _context = new ContextContainer();
 
   RequestContext(ResinBeanContainer cdiContainer,
                  ClassLoader oldClassLoader,
@@ -82,25 +65,23 @@ public class RequestContext
     return _oldContext;
   }
   
-  @SuppressWarnings("unchecked")
   <T> T get(Contextual<T> bean)
   {
-    return (T) _requestScope.get(bean);
+    return (T) _context.get(bean);
   }
   
-  @SuppressWarnings("unchecked")
   <T> T get(Contextual<T> bean,
             CreationalContext<T> env,
             InjectManager manager)
   {
-    Object value = _requestScope.get(bean);
+    T value = _context.get(bean);
     
     if (value != null)
       return (T) value;
     
     value = bean.create(env);
     
-    _requestScope.put(bean, value);
+    _context.put(bean, bean, value, env);
     
     return (T) value;
   }
@@ -109,6 +90,13 @@ public class RequestContext
   {
     ResinBeanContainer cdiContainer = _cdiContainer;
     _cdiContainer = null;
+    
+    ContextContainer context = _context;
+    _context = null;
+    
+    if (context != null) {
+      context.close();
+    }
     
     if (cdiContainer != null)
       cdiContainer.completeRequest(this);

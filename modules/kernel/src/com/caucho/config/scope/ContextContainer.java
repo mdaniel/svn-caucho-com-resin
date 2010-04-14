@@ -29,30 +29,26 @@
 
 package com.caucho.config.scope;
 
-import java.lang.annotation.Annotation;
-import java.util.HashMap;
-import java.util.Map;
-
 import java.io.Serializable;
 
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.inject.HandleAware;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.inject.Module;
 
 /**
- * Context for a named EL bean scope
+ * Serializable container for a bean scope.
  */
+@Module
+@SuppressWarnings("serial")
 public class ContextContainer implements Serializable, ScopeRemoveListener
 {
   private transient InjectManager _beanManager = InjectManager.create();
   
   private ContextItem<?> _values;
 
-  public Object get(String id)
+  public Object get(Object id)
   {
     for (ContextItem<?> ptr = _values; ptr != null; ptr = ptr.getNext()) {
       if (id.equals(ptr.getId()))
@@ -73,7 +69,7 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
   }
 
   public <T> void put(Contextual<T> bean, 
-                      String id, 
+                      Object id, 
                       T value, 
                       CreationalContext<T> env)
   {
@@ -92,15 +88,17 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
     
     for (; entry != null; entry = entry.getNext()) {
       Contextual bean = entry.getBean();
-      String id = entry.getId();
+      Object id = entry.getId();
       Object value = entry.getObject();
 
-      if (bean == null)
-        bean = _beanManager.getPassivationCapableBean(id);
+      if (bean == null && id instanceof String)
+        bean = _beanManager.getPassivationCapableBean((String) id);
       
       CreationalContext<?> env = entry.getEnv();
 
       bean.destroy(value, env);
+      
+      env.release();
     }
   }
   
@@ -108,13 +106,13 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
     private final ContextItem<?> _next;
     
     private final transient Contextual<T> _bean;
-    private final String _id;
+    private final Object _id;
     private final T _object;
     private final transient CreationalContext<T> _env;
     
     ContextItem(ContextItem<?> next,
                 Contextual<T> bean, 
-                String id,
+                Object id,
                 T object, 
                 CreationalContext<T> env)
     {
@@ -135,7 +133,7 @@ public class ContextContainer implements Serializable, ScopeRemoveListener
       return _bean;
     }
     
-    String getId()
+    Object getId()
     {
       return _id;
     }

@@ -206,6 +206,7 @@ public abstract class AbstractGenerator {
   public void setClassDir(Path workPath)
   {
     _workPath = workPath;
+    Thread.dumpStack();
   }
   
   /**
@@ -214,7 +215,7 @@ public abstract class AbstractGenerator {
   public Path getClassDir()
   {
     if (_workPath == null)
-      return CauchoSystem.getWorkPath();
+      return WorkDir.getLocalWorkDir();
     else
       return _workPath;
   }
@@ -224,7 +225,7 @@ public abstract class AbstractGenerator {
    *
    * @return true if the preloaded class is still valid.
    */
-  public Class preload()
+  public Class<?> preload()
     throws IOException
   {
     return loadClass(true);
@@ -242,7 +243,7 @@ public abstract class AbstractGenerator {
 
     Path javaPath = getClassDir().lookup(javaPathName);
     Path classPath = getClassDir().lookup(classPathName);
-
+    
     try {
       classPath.remove();
     } catch (IOException e) {

@@ -29,15 +29,9 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.AbstractInjectionTarget;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.xml.XmlConfigContext;
-
-import java.lang.annotation.*;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
+
+import com.caucho.config.inject.AbstractInjectionTarget;
 
 /**
  * Component for session beans

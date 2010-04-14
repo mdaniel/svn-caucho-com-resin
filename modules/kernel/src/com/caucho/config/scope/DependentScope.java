@@ -48,25 +48,11 @@ public class DependentScope {
 
   private AbstractBean<?> _owner;
   private Object _value;
-  private ScopeContext _scope;
 
   private IdentityHashMap<AbstractBean<?>,Object> _map;
 
   public DependentScope()
   {
-  }
-  
-  public DependentScope(AbstractBean<?> owner, Object value, ScopeContext scope)
-  {
-    _owner = owner;
-    _value = value;
-    
-    _scope = scope;
-  }
-  
-  public DependentScope(ScopeContext scope)
-  {
-    _scope = scope;
   }
   
   /**
@@ -77,28 +63,6 @@ public class DependentScope {
     return _threadScope.get();
   }
   
-  /**
-   * Begins a new instanceof the dependent scope
-   */
-  public static DependentScope begin(ScopeContext ownerScope)
-  {
-    throw new UnsupportedOperationException();
-    
-    //DependentScope scope = new DependentScope(ownerScope);
-
-    //_threadScope.set(scope);
-
-    //return scope;
-  }
-
-  /**
-   * Closes the scope
-   */
-  public static void end(DependentScope oldScope)
-  {
-    _threadScope.set(oldScope);
-  }
-
   /**
    * Returns the object with the given name.
    */
@@ -150,42 +114,23 @@ public class DependentScope {
       _map.remove(comp);
   }
 
-  public boolean canInject(ScopeContext scope)
-  {
-    if (scope == null)
-      return true;
-    else if (_scope == null)
-      return scope instanceof ApplicationScope;
-    else
-      return _scope.canInject(scope);
-  }
-
-  public boolean canInject(Class<?> scopeType)
-  {
-    if (scopeType == null)
-      return true;
-    else if (_scope == null)
-      return (scopeType.equals(ApplicationScoped.class)
-	      || scopeType.equals(Dependent.class));
-    else
-      return _scope.canInject(scopeType);
-  }
-
   /**
    * Adds a @PreDestroy destructor
    */
   public <T> void addDestructor(AbstractBean<T> comp, T value)
   {
+    /*
     if (_scope != null)
       _scope.addDestructor(comp, value);
     else {
       // add to env?
       Environment.addCloseListener(new ComponentDestructor(comp, value));
     }
+    */
   }
 
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _owner + "," + _scope + "]";
+    return getClass().getSimpleName() + "[]";
   }
 }

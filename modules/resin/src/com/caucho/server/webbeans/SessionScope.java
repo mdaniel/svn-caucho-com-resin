@@ -29,30 +29,27 @@
 
 package com.caucho.server.webbeans;
 
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.scope.DestructionListener;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.server.dispatch.ServletInvocation;
-
 import java.lang.annotation.Annotation;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.enterprise.inject.spi.PassivationCapable;
+
+import javax.enterprise.context.SessionScoped;
+import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+
+import com.caucho.config.scope.AbstractScopeContext;
+import com.caucho.config.scope.ContextContainer;
+import com.caucho.inject.Module;
+import com.caucho.server.dispatch.ServletInvocation;
 
 /**
  * The session scope value
  */
-public class SessionScope extends ScopeContext {
-  private ScopeIdMap _idMap = new ScopeIdMap();
-
+@Module
+public class SessionScope extends AbstractScopeContext {
   /**
    * Returns true if the scope is currently active.
    */
+  @Override
   public boolean isActive()
   {
     ServletRequest request = ServletInvocation.getContextRequest();
@@ -74,7 +71,24 @@ public class SessionScope extends ScopeContext {
     return SessionScoped.class;
   }
 
-  public <T> T get(Contextual<T> bean)
+  @Override
+  protected ContextContainer getContextContainer()
+  {
+    ServletRequest request = ServletInvocation.getContextRequest();
+
+    if (request == null)
+      return null;
+
+    HttpSession session = ((HttpServletRequest) request).getSession();
+
+    if (session == null)
+      return null;
+
+    return (ContextContainer) session.getAttribute("resin.candi.scope");
+  }
+
+  @Override
+  protected ContextContainer createContextContainer()
   {
     ServletRequest request = ServletInvocation.getContextRequest();
 
@@ -87,88 +101,13 @@ public class SessionScope extends ScopeContext {
       return null;
 
     ContextContainer context
-      = (ContextContainer) session.getAttribute("webbeans.resin");
-
-    if (context != null) {
-      String id = ((PassivationCapable) bean).getId();
-
-      return (T) context.get(id);
-    }
-
-    return null;
-  }
-
-  public <T> T get(Contextual<T> bean,
-                   CreationalContext<T> creationalContext)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request == null)
-      return null;
-
-    HttpSession session = ((HttpServletRequest) request).getSession();
-
-    Bean<T> comp = (Bean) bean;
-
-    String id;
+      = (ContextContainer) session.getAttribute("resin.candi.scope");
     
-    if (bean instanceof PassivationCapable)
-      id = ((PassivationCapable) bean).getId();
-    else
-      id = comp.getBeanClass().getName();
-
-    ContextContainer context
-      = (ContextContainer) session.getAttribute("webbeans.resin");
-
     if (context == null) {
       context = new SessionContextContainer();
-      session.setAttribute("webbeans.resin", context);
+      session.setAttribute("resin.candi.scope", context);
     }
-
-    T result = (T) context.get(id);
-
-    if (result != null || creationalContext == null)
-      return result;
-
-    result = comp.create(creationalContext);
-
-    context.put(comp, id, result, creationalContext);
-
-    return (T) result;
-  }
-
-  @Override
-  public boolean canInject(Class scopeType)
-  {
-    return (scopeType == ApplicationScoped.class
-            || scopeType == SessionScoped.class
-            || scopeType == ConversationScoped.class
-            || scopeType == Dependent.class);
-  }
-
-  @Override
-  public boolean canInject(ScopeContext scope)
-  {
-    return (scope instanceof ApplicationScope
-            || scope instanceof SessionScope);
-  }
-
-  public void addDestructor(Bean comp, Object value)
-  {
-    ServletRequest request = ServletInvocation.getContextRequest();
-
-    if (request != null) {
-      HttpSession session = ((HttpServletRequest) request).getSession();
-      DestructionListener listener
-        = (DestructionListener) session.getAttribute("caucho.destroy");
-
-      if (listener == null) {
-        listener = new DestructionListener();
-        session.setAttribute("caucho.destroy", listener);
-      }
-
-      // XXX:
-      //listener.addValue(comp, value);
-    }
+    
+    return context;
   }
 }

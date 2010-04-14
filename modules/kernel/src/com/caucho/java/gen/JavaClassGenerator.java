@@ -45,6 +45,7 @@ import com.caucho.vfs.WriteStream;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -225,14 +226,14 @@ public class JavaClassGenerator {
    *
    * @return true if the preloaded class is still valid.
    */
-  public Class preload(String fullClassName)
+  public Class<?> preload(String fullClassName)
   {
     try {
-      Class cl = loadClass(fullClassName, true);
+      Class<?> cl = loadClass(fullClassName, true);
 
       if (cl != null) {
         // force validation of the class
-        Constructor []ctors = cl.getConstructors();
+        Constructor<?> []ctors = cl.getConstructors();
       }
 
       return cl;
@@ -252,14 +253,14 @@ public class JavaClassGenerator {
    *
    * @return true if the preloaded class is still valid.
    */
-  public Class load(String fullClassName)
+  public Class<?> load(String fullClassName)
   {
     try {
-      Class cl = loadClass(fullClassName, false);
+      Class<?> cl = loadClass(fullClassName, false);
 
       if (cl != null) {
         // force validation of the class
-        Constructor []ctors = cl.getConstructors();
+        Constructor<?> []ctors = cl.getConstructors();
       }
 
       return cl;
@@ -395,7 +396,7 @@ public class JavaClassGenerator {
    * Loads the generated class.  If any class dependencies have
    * changed, return null.
    */
-  public Class loadClass(String fullClassName)
+  public Class<?> loadClass(String fullClassName)
     throws ClassNotFoundException
   {
     return loadClass(fullClassName, false);
@@ -406,8 +407,6 @@ public class JavaClassGenerator {
    */
   public boolean preloadExists(String fullClassName)
   {
-    DynamicClassLoader preloadLoader = null;
-    
     Path workDir = getWorkDir();
 
     String classFile = fullClassName.replace('.', '/') + ".class";
@@ -419,7 +418,7 @@ public class JavaClassGenerator {
    * Loads the generated class.  If any class dependencies have
    * changed, return null.
    */
-  public Class loadClass(String fullClassName, boolean preload)
+  public Class<?> loadClass(String fullClassName, boolean preload)
     throws ClassNotFoundException
   {
     DynamicClassLoader preloadLoader = null;
@@ -447,7 +446,7 @@ public class JavaClassGenerator {
 	}
       }
 
-      Class cl = Class.forName(fullClassName, false, loader);
+      Class<?> cl = Class.forName(fullClassName, false, loader);
 
       if (cl == null)
 	return null;
@@ -498,9 +497,36 @@ public class JavaClassGenerator {
   }
 
   /**
+   * Loads the generated class into the parent loader.
+   */
+  public Class<?> loadClassParentLoader(String fullClassName,
+                                        Class<?> parentClass)
+    throws ClassNotFoundException
+  {
+    ClassLoader parentLoader = parentClass.getClassLoader();
+    
+    if (! (parentLoader instanceof DynamicClassLoader)) {
+      throw new IllegalStateException(parentClass + " must belong to a Resin class loader " + parentLoader);
+    }
+    
+    DynamicClassLoader dynParentLoader
+      = (DynamicClassLoader) parentLoader;
+
+    SimpleLoader simpleLoader
+      = new SimpleLoader(dynParentLoader, getWorkDir(), fullClassName);
+    simpleLoader.init();
+
+    try {
+      return Class.forName(fullClassName, false, dynParentLoader);
+    } finally {
+      // XXX: parentLoader.removeLoader(simpleLoader);
+    }
+  }
+
+  /**
    * Returns true if the class is modified.
    */
-  public boolean isModified(Class cl)
+  public boolean isModified(Class<?> cl)
   {
     Path searchPath = getSearchPath();
       

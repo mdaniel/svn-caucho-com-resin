@@ -27,24 +27,61 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.server.webbeans;
-
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.scope.DestructionListener;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.ContextContainer;
-import com.caucho.server.dispatch.ServletInvocation;
+package com.caucho.config.scope;
 
 import java.lang.annotation.Annotation;
-import javax.servlet.*;
-import javax.enterprise.context.*;
-import javax.enterprise.context.spi.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
+
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.inject.Module;
 
 /**
- * Configuration for the xml web bean component.
+ * Context to wrap errors.
  */
-public class RequestContextContainer extends ContextContainer
-{
+@Module
+public class ErrorContext implements Context {
+  private RuntimeException _exn;
+  private Context _context;
+  
+  public ErrorContext(RuntimeException exn, Context context)
+  {
+    _exn = exn;
+    _context = context;
+  }
+  
+  public RuntimeException getException()
+  {
+    return _exn;
+  }
+  
+  public Context getContext()
+  {
+    return _context;
+  }
+
+  @Override
+  public <T> T get(Contextual<T> bean)
+  {
+    return null;
+  }
+
+  @Override
+  public <T> T get(Contextual<T> bean, CreationalContext<T> creationalContext)
+  {
+    return null;
+  }
+
+  @Override
+  public Class<? extends Annotation> getScope()
+  {
+    return null;
+  }
+
+  @Override
+  public boolean isActive()
+  {
+    return false;
+  }
 }

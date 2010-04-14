@@ -331,7 +331,7 @@ public class EjbBean extends DescriptionGroupConfig
     return _loader;
   }
 
-  protected Class loadClass(String className)
+  protected Class<?> loadClass(String className)
   {
     try {
       return Class.forName(className, false, _loader);
@@ -448,7 +448,7 @@ public class EjbBean extends DescriptionGroupConfig
   /**
    * Sets the ejb implementation class.
    */
-  public void setEJBClass(Class ejbClass)
+  public void setEJBClass(Class<?> ejbClass)
     throws ConfigException
   {
     setEJBClassWrapper(new ApiClass(ejbClass, _annotatedType));
@@ -467,7 +467,11 @@ public class EjbBean extends DescriptionGroupConfig
 
     _ejbClass = ejbClass;
 
+    /*
     if (! _ejbClass.isPublic())
+      throw error(L.l("'{0}' must be public.  Bean implementations must be public.", ejbClass.getName()));
+      */
+    if (_ejbClass.isPrivate())
       throw error(L.l("'{0}' must be public.  Bean implementations must be public.", ejbClass.getName()));
 
     if (_ejbClass.isFinal())
@@ -477,17 +481,20 @@ public class EjbBean extends DescriptionGroupConfig
       throw error(L.l("'{0}' must not be an interface.  Bean implementations must be classes.", ejbClass.getName()));
 
     // ejb/02e5
-    Constructor constructor = null;
+    Constructor<?> constructor = null;
     try {
-      constructor = ejbClass.getConstructor(new Class[0]);
+      for (Constructor<?> ctor : ejbClass.getDeclaredConstructors()) {
+        if (ctor.getParameterTypes().length == 0)
+          constructor = ctor;
+      }
     } catch (Exception e) {
       log.log(Level.FINE, e.toString(), e);
     }
 
     if (constructor == null)
-      throw error(L.l("'{0}' needs a public zero-arg constructor.  Bean implementations need a public zero-argument constructor.", ejbClass.getName()));
+      throw error(L.l("'{0}' needs a zero-arg constructor.  Bean implementations need a zero-argument constructor.", ejbClass.getName()));
 
-    for (Class exn : constructor.getExceptionTypes()) {
+    for (Class<?> exn : constructor.getExceptionTypes()) {
       if (! RuntimeException.class.isAssignableFrom(exn)) {
         throw error(L.l("{0}: constructor must not throw '{1}'.  Bean constructors must not throw checked exceptions.", ejbClass.getName(), exn.getName()));
       }
@@ -510,7 +517,7 @@ public class EjbBean extends DescriptionGroupConfig
   /**
    * Gets the ejb implementation class.
    */
-  public Class getEJBClass()
+  public Class<?> getEJBClass()
   {
     try {
       if (_ejbClass == null)
@@ -1481,7 +1488,7 @@ public class EjbBean extends DescriptionGroupConfig
    *
    * @return the matching method
    */
-  protected ApiMethod validateMethod(String methodName, Class []param,
+  protected ApiMethod validateMethod(String methodName, Class<?> []param,
 			   ApiMethod sourceMethod, ApiClass sourceClass,
 			   boolean isOptional)
     throws ConfigException
@@ -1542,6 +1549,7 @@ public class EjbBean extends DescriptionGroupConfig
 
   public String getSkeletonName()
   {
+    /*
     String className = getEJBClass().getName();
     int p = className.lastIndexOf('.');
 
@@ -1551,14 +1559,23 @@ public class EjbBean extends DescriptionGroupConfig
     String ejbName = getEJBName();
 
     String fullClassName = "_ejb." + ejbName + "." + className + "__" + getBeanType() + "Context";
+    */
+    
+    // XXX: needs to match generator
+    
+    StringBuilder sb = new StringBuilder();
+    sb.append(getEJBClass().getName());
+    sb.append("__");
+    sb.append(getBeanType()).append("Context");
 
-    return JavaClassGenerator.cleanClassName(fullClassName);
+    return JavaClassGenerator.cleanClassName(sb.toString());
   }
 
   /**
    * @return Type of bean (Stateful, Stateless, etc.)
    */
-  protected String getBeanType() {
+  protected String getBeanType()
+  {
     return "Bean";
   }
 

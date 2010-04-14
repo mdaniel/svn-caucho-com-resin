@@ -29,34 +29,27 @@
 
 package com.caucho.server.webbeans;
 
-import com.caucho.util.*;
-import com.caucho.config.scope.ApplicationScope;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.server.dispatch.ServletInvocation;
-
 import java.lang.annotation.Annotation;
-import java.util.*;
+import java.util.HashMap;
+import java.util.Map;
 
-import javax.faces.*;
-import javax.faces.context.*;
-import javax.faces.component.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
-import javax.enterprise.context.ConversationScoped;
 import javax.enterprise.context.Conversation;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.context.ConversationScoped;
+import javax.faces.component.UIViewRoot;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
+import com.caucho.config.scope.AbstractScopeContext;
+import com.caucho.config.scope.ContextContainer;
+import com.caucho.util.L10N;
 
 /**
  * The conversation scope value
  */
-public class ConversationScope extends ScopeContext
+public class ConversationScope extends AbstractScopeContext
   implements Conversation, java.io.Serializable
 {
   private static final L10N L = new L10N(ConversationScope.class);
-
-  private ScopeIdMap _idMap = new ScopeIdMap();
 
   public ConversationScope()
   {
@@ -88,109 +81,44 @@ public class ConversationScope extends ScopeContext
   /**
    * Returns the current value of the component in the conversation scope.
    */
-  public <T> T get(Contextual<T> bean)
+  @Override
+  protected ContextContainer getContextContainer()
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
     if (facesContext == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
+      return null;
 
     ExternalContext extContext = facesContext.getExternalContext();
     Map<String,Object> sessionMap = extContext.getSessionMap();
 
-    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+    ContextContainer scope = (ContextContainer) sessionMap.get("caucho.conversation");
 
-    // XXX: create
-    if (scope == null)
-      return null;
-
-    UIViewRoot root = facesContext.getViewRoot();
-    String id = root.getViewId();
-
-    HashMap map = scope._conversationMap.get(id);
-
-    if (map == null) {
-      map = scope._extendedConversation;
-
-      if (map != null)
-        scope._conversationMap.put(id, map);
-    }
-
-    Bean comp = (Bean) bean;
-
-    String scopeId = _idMap.getId(comp);
-
-    if (map != null)
-      return (T) map.get(scopeId);
-    else
-      return null;
+    return scope;
   }
 
   /**
    * Returns the current value of the component in the conversation scope.
    */
-  public <T> T get(Contextual<T> bean,
-                   CreationalContext<T> cxt)
+  @Override
+  protected ContextContainer createContextContainer()
   {
-    T instance = get(bean);
-
-    if (instance != null || cxt == null)
-      return instance;
-
-    Bean comp = (Bean) bean;
-
-    String scopeId = _idMap.getId(comp);
-
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
     if (facesContext == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
+      return null;
 
     ExternalContext extContext = facesContext.getExternalContext();
     Map<String,Object> sessionMap = extContext.getSessionMap();
 
-    Scope scope = (Scope) sessionMap.get("caucho.conversation");
-
+    ContextContainer scope = (ContextContainer) sessionMap.get("caucho.conversation");
+    
     if (scope == null) {
-      scope = new Scope();
+      scope = new ContextContainer();
       sessionMap.put("caucho.conversation", scope);
     }
 
-    UIViewRoot root = facesContext.getViewRoot();
-    String id = root.getViewId();
-
-    HashMap map = scope._conversationMap.get(id);
-
-    if (map == null) {
-      map = scope._extendedConversation;
-
-      if (map != null)
-        scope._conversationMap.put(id, map);
-      else {
-        map = new HashMap();
-        scope._conversationMap.put(id, map);
-      }
-    }
-
-    if (map != null) {
-      instance = bean.create(cxt);
-
-      map.put(scopeId, instance);
-    }
-
-    return instance;
-  }
-
-  /**
-   * returns true if the argument scope can be safely injected in a
-   * scope-instance.
-   */
-  @Override
-  public boolean canInject(ScopeContext scope)
-  {
-    return (scope instanceof ApplicationScope
-            || scope instanceof SessionScope
-            || scope instanceof ConversationScope);
+    return scope;
   }
 
   //

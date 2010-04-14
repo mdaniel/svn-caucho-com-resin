@@ -37,8 +37,8 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.transaction.Synchronization;
 
 import com.caucho.inject.TransactionScoped;
+import com.caucho.config.scope.AbstractScopeContext;
 import com.caucho.config.scope.ContextContainer;
-import com.caucho.config.scope.ScopeContext;
 import com.caucho.inject.Module;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
@@ -48,7 +48,7 @@ import com.caucho.util.L10N;
  * Scope based on the current transaction.
  */
 @Module
-public class TransactionScope extends ScopeContext
+public class TransactionScope extends AbstractScopeContext
 {
   private static final L10N L = new L10N(TransactionScope.class);
   private TransactionManagerImpl _xaManager;
@@ -77,21 +77,36 @@ public class TransactionScope extends ScopeContext
   }
 
   @Override
-  public <T> T get(Contextual<T> bean)
+  protected ContextContainer getContextContainer()
   {
     TransactionImpl xa = _xaManager.getCurrent();
     
     if (xa == null || ! xa.isActive()) {
-      throw new ContextNotActiveException(L.l("'{0}' cannot be created because @TransactionScoped requires an active transaction.",
-                                              bean));
+      return null;
     }
     
-    ScopeContext cxt = (ScopeContext) xa.getResource("caucho.xa.scope");
+    return (ContextContainer) xa.getResource("caucho.xa.scope");
+  }
 
-    if (cxt != null)
-      return cxt.get(bean);
-    else
+  @Override
+  protected ContextContainer createContextContainer()
+  {
+    TransactionImpl xa = _xaManager.getCurrent();
+    
+    if (xa == null || ! xa.isActive()) {
       return null;
+    }
+    
+    XAContextContainer context 
+      = (XAContextContainer) xa.getResource("caucho.xa.scope");
+    
+    if (context == null) {
+      context = new XAContextContainer();
+      xa.setAttribute("caucho.xa.scope", context);
+      xa.registerSynchronization(context);
+    }
+    
+    return context;
   }
 
   @Override

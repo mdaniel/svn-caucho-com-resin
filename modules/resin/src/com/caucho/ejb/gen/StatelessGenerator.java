@@ -32,15 +32,17 @@ package com.caucho.ejb.gen;
 import java.io.IOException;
 import java.util.ArrayList;
 
+import javax.ejb.Stateless;
+
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.View;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
-import javax.ejb.Stateful;
-import javax.ejb.Stateless;
 
 /**
  * Generates the skeleton for a session bean.
  */
+@Module
 public class StatelessGenerator extends SessionGenerator {
   public StatelessGenerator(String ejbName, ApiClass ejbClass,
                             ArrayList<ApiClass> localApi,
@@ -50,17 +52,20 @@ public class StatelessGenerator extends SessionGenerator {
           Stateless.class.getSimpleName());
   }
 
-  public boolean isStateless() {
+  public boolean isStateless()
+  {
     return true;
   }
 
   @Override
-  protected View createLocalView(ApiClass api) {
+  protected View createLocalView(ApiClass api)
+  {
     return new StatelessView(this, api);
   }
 
   @Override
-  protected View createRemoteView(ApiClass api) {
+  protected View createRemoteView(ApiClass api)
+  {
     return new StatelessView(this, api);
   }
 

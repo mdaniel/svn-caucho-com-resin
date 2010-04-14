@@ -126,7 +126,7 @@ public class ResinBeanContainer
   {
     _classLoader = EnvironmentClassLoader.create("resin-context");
     _injectManager = InjectManager.create(_classLoader);
-    _injectManager.addContext(new RequestScope());
+    _injectManager.replaceContext(new RequestScope());
 
     _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
 
@@ -216,7 +216,7 @@ public class ResinBeanContainer
    */
   public void setWorkDirectory(String path)
   {
-    WorkDir.setLocalWorkDir(Vfs.lookup(path));
+    WorkDir.setLocalWorkDir(Vfs.lookup(path), _classLoader);
   }
 
   /**

@@ -29,52 +29,13 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.annotation.ServiceType;
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.reflect.AnnotatedTypeImpl;
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
-import com.caucho.config.*;
-import com.caucho.config.bytecode.*;
-import com.caucho.config.cfg.*;
-import com.caucho.config.event.ObserverImpl;
-import com.caucho.config.program.BeanArg;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-import java.util.logging.*;
-import java.io.*;
-
-import javax.annotation.*;
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Observes;
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
-import javax.enterprise.inject.Default;
-import javax.enterprise.inject.Disposes;
-import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
-import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.ObserverMethod;
-import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
-import javax.inject.Named;
-import javax.inject.Qualifier;
 
 /**
  * Common bean introspection for Produces and ManagedBean.

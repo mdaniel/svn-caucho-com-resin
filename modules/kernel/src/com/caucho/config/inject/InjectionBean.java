@@ -29,18 +29,16 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.scope.ScopeContext;
-import com.caucho.config.scope.ApplicationScope;
-
 import java.io.Closeable;
-import java.lang.annotation.*;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
+
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
+
+import com.caucho.inject.Module;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -51,6 +49,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
  * manager.addBean(new SingletonBean(myValue));
  * </pre></code>
  */
+@Module
 public class InjectionBean<T> extends AbstractSingletonBean<T>
   implements Closeable
 {

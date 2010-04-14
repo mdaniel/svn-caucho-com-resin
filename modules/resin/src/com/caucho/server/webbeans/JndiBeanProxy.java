@@ -36,11 +36,13 @@ import javax.enterprise.inject.spi.Bean;
 import javax.naming.NamingException;
 
 import com.caucho.config.inject.InjectManager;
+import com.caucho.inject.Module;
 import com.caucho.naming.ObjectProxy;
 
 /**
  * Jndi proxy class for injection.
  */
+@Module
 public class JndiBeanProxy<T> implements ObjectProxy {
   private InjectManager _injectManager;
   private Bean<T> _bean;
@@ -52,6 +54,7 @@ public class JndiBeanProxy<T> implements ObjectProxy {
   }
   
   @Override
+  @SuppressWarnings("unchecked")
   public Object createObject(Hashtable env) throws NamingException
   {
     CreationalContext<T> cxt = _injectManager.createCreationalContext(_bean);

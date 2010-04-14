@@ -119,7 +119,7 @@ import com.caucho.config.reflect.BaseTypeFactory;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DependentContext;
-import com.caucho.config.scope.ScopeContext;
+import com.caucho.config.scope.ErrorContext;
 import com.caucho.config.scope.SingletonScope;
 import com.caucho.config.xml.XmlStandardPlugin;
 import com.caucho.inject.Module;
@@ -285,8 +285,8 @@ public class InjectManager
   private ELResolver _elResolver = new WebBeansContextResolver();
 
   private DependentContext _dependentContext = new DependentContext();
-  private SingletonScope _singletonScope = new SingletonScope();
-  private ApplicationScope _applicationScope = new ApplicationScope();
+  private SingletonScope _singletonScope;
+  private ApplicationScope _applicationScope;
   private XmlStandardPlugin _xmlExtension;
 
   private RuntimeException _configException;
@@ -344,6 +344,9 @@ public class InjectManager
         log.log(Level.FINEST, e.toString(), e);
       }
 
+      _singletonScope = new SingletonScope();
+      _applicationScope = new ApplicationScope();
+      
       addContext("com.caucho.server.webbeans.RequestScope");
       addContext("com.caucho.server.webbeans.SessionScope");
       addContext("com.caucho.server.webbeans.ConversationScope");
@@ -599,26 +602,6 @@ public class InjectManager
     _beanMap.remove(rawType);
 
     beanSet.add(new TypedBean(type, bean));
-  }
-
-  /**
-   * Returns the scope context corresponding to the scope annotation type.
-   *
-   * @param scope the scope annotation type identifying the scope
-   */
-  public ScopeContext getScopeContext(Class<?> scope)
-  {
-    if (scope == null)
-      throw new NullPointerException();
-    else if (Dependent.class.equals(scope))
-      return null;
-
-    Context context = _contextMap.get(scope);
-
-    if (context instanceof ScopeContext)
-      return (ScopeContext) context;
-    else
-      return null;
   }
 
   /**
@@ -1688,17 +1671,24 @@ public class InjectManager
    */
   public void addContext(Context context)
   {
-    /*
     Class<? extends Annotation> scopeType = context.getScope();
     
     Context oldContext = _contextMap.get(scopeType);
     
-    if (oldContext != null && oldContext != context) {
-      throw new IllegalStateException(L.l("{0} is an invalid new context because @{1} is already registered as a scope",
-                                          context, scopeType.getName()));
+    if (oldContext == null) {
+      _contextMap.put(context.getScope(), context);
     }
-    */
-    
+    else {
+      RuntimeException exn
+        = new IllegalStateException(L.l("{0} is an invalid new context because @{1} is already registered as a scope",
+                                        context, scopeType.getName()));
+      
+      _contextMap.put(context.getScope(), new ErrorContext(exn, context));
+    }
+  }
+  
+  public void replaceContext(Context context)
+  {
     _contextMap.put(context.getScope(), context);
   }
 
@@ -1714,8 +1704,14 @@ public class InjectManager
       return context;
     }
     
+    if (context instanceof ErrorContext) {
+      ErrorContext cxt = (ErrorContext) context;
+      
+      throw cxt.getException();
+    }
+    
     /*
-    else if (! isScope(scopeType)) {
+    if (! isScope(scopeType)) {
       throw new IllegalStateException(L.l("'@{0}' is not a valid scope because it does not have a @Scope annotation",
                                           scopeType));
     }

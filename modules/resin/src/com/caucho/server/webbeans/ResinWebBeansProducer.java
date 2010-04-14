@@ -29,40 +29,28 @@
 
 package com.caucho.server.webbeans;
 
-import com.caucho.config.ConfigException;
+import java.security.Principal;
+import java.util.concurrent.ScheduledExecutorService;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Conversation;
+import javax.enterprise.inject.Produces;
+import javax.management.MBeanServer;
+import javax.transaction.TransactionManager;
+import javax.transaction.TransactionSynchronizationRegistry;
+import javax.transaction.UserTransaction;
+
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
-import com.caucho.config.annotation.ServiceBinding;
-import com.caucho.config.inject.BeanStartupEvent;
-import com.caucho.config.inject.CauchoBean;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.ejb.timer.EjbTimerService;
 import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
-import com.caucho.remote.BamService;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.server.util.ScheduledThreadPool;
-import com.caucho.transaction.*;
-import com.caucho.util.L10N;
-
-import java.lang.annotation.Annotation;
-import java.security.Principal;
-import java.util.Dictionary;
-import java.util.Hashtable;
-import java.util.Set;
-import java.util.concurrent.*;
-import java.util.logging.*;
-
-import javax.ejb.*;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.Conversation;
-import javax.enterprise.event.Observes;
-import javax.management.*;
-import javax.transaction.*;
-import javax.enterprise.inject.*;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
+import com.caucho.transaction.TransactionManagerImpl;
 
 /**
  * Resin WebBeans producer for the main singletons.
@@ -74,8 +62,7 @@ public class ResinWebBeansProducer
 {
   private static final Logger log
     = Logger.getLogger(ResinWebBeansProducer.class.getName());
-  private static final L10N L = new L10N(ResinWebBeansProducer.class);
-
+  
   public ResinWebBeansProducer()
   {
   }

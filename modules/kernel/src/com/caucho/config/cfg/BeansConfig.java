@@ -43,7 +43,6 @@ import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.scope.ScopeContext;
 import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -247,11 +246,6 @@ public class BeansConfig {
     } catch (Exception e) {
       throw LineConfigException.create(_beansFile.getURL(), 1, e);
     }
-  }
-
-  public ScopeContext getScopeContext(Class<?> cl)
-  {
-    return _injectManager.getScopeContext(cl);
   }
 
   public <T> void addInterceptor(Class<T> cl)

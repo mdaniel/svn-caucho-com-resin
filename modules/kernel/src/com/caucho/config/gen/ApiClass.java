@@ -232,6 +232,14 @@ public class ApiClass {
   }
 
   /**
+   * Returns true for a private class.
+   */
+  public boolean isPrivate()
+  {
+    return Modifier.isPrivate(_apiClass.getModifiers());
+  }
+
+  /**
    * Returns true for an interface
    */
   public boolean isInterface()
@@ -293,6 +301,11 @@ public class ApiClass {
     throws NoSuchMethodException
   {
     return _apiClass.getConstructor(param);
+  }
+
+  public Constructor<?> []getDeclaredConstructors()
+  {
+    return _apiClass.getDeclaredConstructors();
   }
 
   /**
