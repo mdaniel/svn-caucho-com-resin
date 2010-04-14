@@ -107,6 +107,8 @@ public class Book {
     out.println("\\definecolor{example-gray}{gray}{0.8}");
     out.println("\\definecolor{results-gray}{gray}{0.6}");
     out.println();
+    out.println("\\newcommand{\\verbbf}[1]{\\textbf{\\Verb #1}}");
+    out.println();
     out.println("\\title{" + _title + "}");
 
     out.println("\\begin{document}");

@@ -34,6 +34,8 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import com.caucho.config.ConfigException;
+
 public class ViewFileLink implements ContentItem {
   private String _file;
   private Document _document;
@@ -68,6 +70,12 @@ public class ViewFileLink implements ContentItem {
     throws IOException
   {
     out.print("\\href{" + _file + "}{" + _file + "}");
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<viewfile-link> not allowed in a verbatim context");
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)

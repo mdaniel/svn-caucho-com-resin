@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
+import com.caucho.config.ConfigException;
+
 public class Table extends Node implements ContentItem {
   private static int _count = 0;
 
@@ -122,6 +124,12 @@ public class Table extends Node implements ContentItem {
     out.println("\\LTXtable{\\linewidth}{ltx" + _myCount + "}");
 
     out.println("\\end{center}");
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<table> not allowed in a verbatim context");
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)

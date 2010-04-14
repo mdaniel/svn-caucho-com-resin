@@ -38,6 +38,8 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
+
 public class DefunPro implements ContentItem {
   private static final Logger log = Logger.getLogger(DefunPro.class.getName());
 
@@ -75,5 +77,11 @@ public class DefunPro implements ContentItem {
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<pro> not allowed in a verbatim context");
   }
 }

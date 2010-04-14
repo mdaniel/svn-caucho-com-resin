@@ -59,4 +59,15 @@ public class BoldText extends FormattedTextWithAnchors {
 
     out.print("}");
   }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    // XXX using a textbf in this way destroys newlines
+    //out.print("\u0001textbf\u0002");
+
+    super.writeLaTeXVerbatim(out);
+
+    //out.print("\u0003");
+  }
 }

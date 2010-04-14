@@ -44,6 +44,9 @@ public interface ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException;
 
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException;
+
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException;
 }

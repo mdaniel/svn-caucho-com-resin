@@ -73,6 +73,12 @@ public class VerboseText implements ContentItem {
     out.print(_text);
   }
 
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    writeLaTeX(out);
+  }
+
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {

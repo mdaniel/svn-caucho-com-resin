@@ -94,9 +94,10 @@ public class DefunParents extends ContainerNode implements Iterable<String> {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("child of ");
+    out.print("{\\bf child of }");
 
     super.writeLaTeX(out);
+    out.print("\\\\");
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)

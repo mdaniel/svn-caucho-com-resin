@@ -35,6 +35,8 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
+
 public class Summary implements ContentItem {
   private static final Logger log = Logger.getLogger(Summary.class.getName());
 
@@ -125,5 +127,11 @@ public class Summary implements ContentItem {
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<summary> not allowed in a verbatim context");
   }
 }

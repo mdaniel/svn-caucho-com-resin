@@ -59,6 +59,12 @@ public class Text implements ContentItem {
     out.print(LaTeXUtil.escapeForLaTeX(_text));
   }
 
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    out.print(_text);
+  }
+
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {

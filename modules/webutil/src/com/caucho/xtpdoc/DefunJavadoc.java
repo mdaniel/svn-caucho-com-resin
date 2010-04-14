@@ -38,6 +38,8 @@ import java.io.PrintWriter;
 import java.net.URI;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
+
 public class DefunJavadoc implements ContentItem {
   private static final Logger log 
     = Logger.getLogger(DefunJavadoc.class.getName());
@@ -86,14 +88,12 @@ public class DefunJavadoc implements ContentItem {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    out.print("\\href{" + getHref() + "}");
-
-    out.print("{");
-
-    out.print(_defun.getTitle());
-    out.print(" Javadoc");
-
-    out.print("}\\\n");
+    out.print("{\\bf javadoc}");
+    out.print("\\href{");
+    out.print(getHref());
+    out.print("}{");
+    out.print(LaTeXUtil.escapeForLaTeX(_defun.getTitle()));
+    out.print("}\\\\");
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)
@@ -105,5 +105,11 @@ public class DefunJavadoc implements ContentItem {
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
+  }
+  
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<javadoc> not allowed in a verbatim context");
   }
 }

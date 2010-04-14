@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,6 +33,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import com.caucho.config.ConfigException;
 
 public class IndexItem implements ContentItem {
   private String _id;
@@ -93,5 +95,11 @@ public class IndexItem implements ContentItem {
     throws IOException
   {
     writeLaTeX(out);
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<ix> not allowed in a verbatim context");
   }
 }

@@ -61,7 +61,7 @@ public class PreFormattedText extends FormattedText {
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
-    writeLaTeX(out);
+    super.writeLaTeXEnclosed(new PrintWriter(new PreFormatFilterWriter(out)));
   }
 
   public void writeLaTeXTop(PrintWriter out)

@@ -168,9 +168,18 @@ public class Anchor extends FormattedText {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    if (_href == null) {
+    if (_configTag != null) {
+      setDefaultText(_configTag);
       super.writeLaTeX(out);
-    } else if (_href.startsWith("doc|")) {
+    }
+    else if (_javadoc != null) {
+      setDefaultText(_javadoc);
+      super.writeLaTeX(out);
+    }
+    else if (_href == null) {
+      super.writeLaTeX(out);
+    } 
+    else if (_href.startsWith("doc|")) {
       String link = _href.substring("doc|".length()).replace("|", "/");
       link = link.replace("#", ":");
 
@@ -179,7 +188,8 @@ public class Anchor extends FormattedText {
       super.writeLaTeX(out);
 
       out.print("}");
-    } else {
+    }
+    else {
       // XXX javadoc?
       try {
         URI uri = new URI(_href);

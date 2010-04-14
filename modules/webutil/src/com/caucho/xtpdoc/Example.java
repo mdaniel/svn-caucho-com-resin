@@ -34,6 +34,8 @@ import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 
+import com.caucho.config.ConfigException;
+
 public class Example extends VerboseFormattedTextWithAnchors {
   private String _title;
   private String _file;
@@ -104,6 +106,7 @@ public class Example extends VerboseFormattedTextWithAnchors {
     out.println("\\begin{Verbatim}[frame=single,fontfamily=courier,");
     out.println("                  framerule=1pt,");
     out.println("                  fontsize=\\footnotesize,");
+    out.println("                  commandchars=\\\u0001\\\u0002\\\u0003,");
 
     if (_title != null && ! "".equals(_title)) {
       out.print("                  labelposition=bottomline,label=\\fbox{");
@@ -112,7 +115,7 @@ public class Example extends VerboseFormattedTextWithAnchors {
 
     out.println("                  samepage=true]");
 
-    super.writeLaTeX(out);
+    super.writeLaTeXVerbatim(out);
 
     // make room for the title box
     if (_title != null)
@@ -125,5 +128,11 @@ public class Example extends VerboseFormattedTextWithAnchors {
 
     if (_language != null)
       out.println("\\lstset{fancyvrb=false}");
+  }
+
+  @Override
+  public void writeLaTeXVerbatim(PrintWriter out)
+  {
+    throw new ConfigException("<example> should not be in a verbatim context");
   }
 }

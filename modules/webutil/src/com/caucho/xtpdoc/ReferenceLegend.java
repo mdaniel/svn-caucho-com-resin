@@ -104,4 +104,10 @@ public class ReferenceLegend implements ContentItem {
   {
     // irrelevant to latex
   }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    // irrelevant to latex
+  }
 }

@@ -53,11 +53,10 @@ public class Code extends FormattedText {
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    //XXX
-    out.print("\n\\begin{verbatim}\n");
+    out.print("{\\tt ");
 
     super.writeLaTeX(out);
 
-    out.print("\n\\end{verbatim}\n");
+    out.print("}");
   }
 }

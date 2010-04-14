@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,6 +33,8 @@ import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import com.caucho.config.ConfigException;
 
 public class Localtoc implements ContentItem {
   Document _document;
@@ -106,5 +108,11 @@ public class Localtoc implements ContentItem {
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<localtoc> not allowed in a verbatim context");
   }
 }

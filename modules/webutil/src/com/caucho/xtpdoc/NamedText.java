@@ -65,6 +65,14 @@ public class NamedText implements ContentItem {
     _text.writeLaTeX(out);
   }
 
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    out.print("\u0001textbf\u0002" + _name + ":\u0003 ");
+
+    _text.writeLaTeX(out);
+  }
+
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {

@@ -75,4 +75,9 @@ public class GlossaryText implements ContentItem {
   {
     writeLaTeX(out);
   }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+  {
+    out.print(_value);
+  }
 }

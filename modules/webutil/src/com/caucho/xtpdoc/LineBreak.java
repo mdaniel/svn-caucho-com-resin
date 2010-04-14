@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -49,6 +49,12 @@ public class LineBreak implements ContentItem {
   }
 
   public void writeLaTeX(PrintWriter out)
+    throws IOException
+  {
+    out.println("\\\\");
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
     throws IOException
   {
     out.println("\\\\");

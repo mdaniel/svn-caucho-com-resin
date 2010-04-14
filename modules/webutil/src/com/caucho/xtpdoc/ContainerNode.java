@@ -47,7 +47,6 @@ public abstract class ContainerNode implements ContentItem {
   {
     _document = document;
   }
-
   public Document getDocument()
   {
     return _document;
@@ -78,6 +77,11 @@ public abstract class ContainerNode implements ContentItem {
     return _items;
   }
 
+  protected void setItems(ArrayList<ContentItem> items)
+  {
+    _items = items;
+  }
+
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -104,6 +108,13 @@ public abstract class ContainerNode implements ContentItem {
   {
     for (ContentItem item : _items)
       item.writeLaTeXEnclosed(out);
+  }
+
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    for (ContentItem item : _items)
+      item.writeLaTeXVerbatim(out);
   }
 
   public void writeLaTeXArticle(PrintWriter out)

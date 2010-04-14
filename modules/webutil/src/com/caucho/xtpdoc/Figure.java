@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2000 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -28,10 +28,13 @@
  */
 
 package com.caucho.xtpdoc;
+
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+
+import com.caucho.config.ConfigException;
 
 public class Figure implements ContentItem {
   private int _height = -1;
@@ -94,11 +97,15 @@ public class Figure implements ContentItem {
     out.writeEndElement(); // center
   }
 
+  public void writeLaTeXVerbatim(PrintWriter out)
+    throws IOException
+  {
+    throw new ConfigException("<figure> not allowed in a verbatim context");
+  }
+
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
-    //out.println("\\begin{figure}[h]");
-
     int dot = _source.lastIndexOf('.');
 
     String basename = _source.substring(0, dot);
@@ -114,18 +121,6 @@ public class Figure implements ContentItem {
     out.println("\\epsfig{file=../images/" + basename + ",width=\\linewidth}");
     out.println();
     out.println();
-
-    /*
-    if (_height >= 0)
-      out.print(",height=" + _height);
-
-    if (_width >= 0)
-      out.print(",width=" + _width);
-
-    out.println("}");
-    */
-
-    //out.println("\\end{figure}");
   }
 
   public void writeLaTeXEnclosed(PrintWriter out)
