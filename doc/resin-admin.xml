@@ -1,4 +1,4 @@
-<book>
+<book title="Resin Administration">
   <chapter title="Starting Resin">
     <linked-section link="admin/starting-resin.xtp" />
     <linked-section link="admin/starting-resin-command-line.xtp" />
@@ -7,7 +7,7 @@
   </chapter>
 
   <chapter title="Migrating to Resin 4.0">
-    <linked-section link="admin/migrating.xtp" />
+    <linked-section link="admin/migration.xtp" />
   </chapter>
 
   <chapter title="Deployment">
@@ -67,5 +67,4 @@
   <chapter title="Reference">
     <linked-section link="admin/reference.xtp" />
   </chapter>
-
 </book>

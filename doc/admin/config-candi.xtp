@@ -90,10 +90,7 @@ while lightweight components do not need this extra housekeeping overhead.</p>
 
 <s2 title="Component overview">
 
-<deftable title="Component/Bean configuration template">
-<tr>
-<td>
-<code><pre>
+<def title="Component/Bean configuration template">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
          xmlns:mypkg="urn:java:com.mycom.mypkg">
 	   
@@ -108,9 +105,7 @@ while lightweight components do not need this extra housekeeping overhead.</p>
   &lt;/mypkg:MyBean>
   
 &lt;/web-app>
-</pre></code>
-</td></tr>
-</deftable>
+</def>
 
 <ol>
 <li>The Bean/Component name and package is the Java class which implements
@@ -586,11 +581,11 @@ services.
   </td>
   <td>BAM service</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyBean>
   &lt;resin:BamService name="my-service"/>
 &lt;/mypkg:MyBean>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -600,12 +595,12 @@ services.
   </td>
   <td>Hessian client proxy</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyApi>
   &lt;resin:HessianClient
                url="http://localhost:8080/test"/>
 &lt;/mypkg:MyApi>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -615,11 +610,11 @@ services.
   </td>
   <td>Hessian service</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyBean>
   &lt;resin:HessianService urlPattern="/test"/>
 &lt;/mypkg:MyBean>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -629,11 +624,11 @@ services.
   </td>
   <td>JMS based EJB message driven bean</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyBean>
   &lt;resin:JmsListener destination="my_queue"/>
 &lt;/mypkg:MyBean>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -643,7 +638,7 @@ services.
   </td>
   <td>EJB message driven bean</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyBean>
   &lt;ee:MessageDriven>
     &lt;ee:activationConfig
@@ -651,7 +646,7 @@ services.
                propertyValue="my_queue"/>
   &lt;/ee:MessageDriven>
 &lt;/mypkg:MyBean>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -661,11 +656,11 @@ services.
   </td>
   <td>Start on initialization</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyBean>
   &lt;ee:Startup/>
 &lt;/mypkg:MyBean>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -675,11 +670,11 @@ services.
   </td>
   <td>EJB stateful session bean</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyBean>
   &lt;ee:Stateful/>
 &lt;/mypkg:MyBean>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -689,11 +684,11 @@ services.
   </td>
   <td>EJB stateless session bean</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyBean>
   &lt;ee:Stateless/>
 &lt;/mypkg:MyBean>
-</code></pre>
+</def>
   </td>
 </tr>
 
@@ -703,11 +698,11 @@ services.
   </td>
   <td>Servlet mapping</td>
   <td>
-<pre><code>
+<def>
 &lt;mypkg:MyServlet>
   &lt;ee:WebServlet value="/test"/>
 &lt;/mypkg:MyServlet>
-</code></pre>
+</def>
   </td>
 </tr>
 
