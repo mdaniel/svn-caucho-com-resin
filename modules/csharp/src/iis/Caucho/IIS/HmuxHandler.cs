@@ -320,9 +320,9 @@ namespace Caucho.IIS
         WriteRequestData(ws, HmuxChannel.HMUX_DATA, buf, len, traceId);
 
         Trace.TraceInformation("Hmux[{0}] >>Y: (yield)", traceId);
-
         ws.WriteByte(HmuxChannel.HMUX_YIELD);
         ws.Flush();
+
         Trace.TraceInformation(":::1");
         while (true) {
           code = rs.ReadByte();
@@ -510,11 +510,11 @@ namespace Caucho.IIS
           int channel = sublen;
           Trace.TraceInformation("Hmux[{0}] <<C: (channel) ({1})", traceId, channel);
         } else if (code == 0) {
-          Trace.TraceInformation("Hmux[{0}] <<0: unknown code ({1})", traceId, code);
+          Trace.TraceInformation("Hmux[{0}] <<0: unknown code (0)", traceId);
 
           return FAIL | EXIT;
         } else {
-          Trace.TraceInformation("Hmux[{0}] <<0: unknown code ({1})", traceId, code);
+          Trace.TraceInformation("Hmux[{0}] <<?: unknown code ({1})", traceId, code);
           Skip(rs, sublen);
         }
       }
@@ -561,9 +561,9 @@ namespace Caucho.IIS
 
     private void RelayResponseHeader(HttpResponse response, String name, String value)
     {
-      response.Headers.Add(name, value);
-
       if ("Content-Type".Equals(name)) {
+        response.ContentType = value;
+
         int charsetIdx = value.IndexOf("charset");
         if (charsetIdx > -1) {
           String charset = null;
@@ -588,6 +588,8 @@ namespace Caucho.IIS
             response.Charset = charset;
           }
         }
+      } else {
+        response.Headers.Add(name, value);
       }
     }
 
