@@ -19,53 +19,25 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package javax.enterprise.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.util.*;
-
+import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.RetentionPolicy.*;
 import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.LinkedHashSet;
-import java.util.HashSet;
-import java.util.Set;
-import java.util.logging.*;
-
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * Introspected annotation binding
+ * Allows specific type information for scanning.
  */
-public class Destructor {
-  private Bean _bean;
-  private Object _value;
-  private CreationalContext<?> _env;
-
-  public Destructor(Bean bean, Object value)
-  {
-    _bean = bean;
-    _value = value;
-  }
-
-  public void destroy()
-  {
-    _bean.destroy(_value, _env);
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _bean + "," + _value + "]";
-  }
+@Target({TYPE})
+@Retention(RUNTIME)
+@Documented
+public @interface Typed {
+  Class<?> []value();
 }

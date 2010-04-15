@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -33,6 +33,7 @@ package javax.enterprise.inject;
  * When bean creation fails, the injection
  * {@link javax.enterprise.inject.spi.BeanManager} will throw this exception.
  */
+@SuppressWarnings("serial")
 public class ResolutionException extends InjectionException
 {
   public ResolutionException()

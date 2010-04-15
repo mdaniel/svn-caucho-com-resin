@@ -78,7 +78,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     = new HashSet<Class<?>>();
 
   public static final Annotation []CURRENT_ANN
-    = new Annotation[] { CurrentLiteral.CURRENT };
+    = new Annotation[] { DefaultLiteral.DEFAULT };
 
   // AnnotatedType for ManagedBean, AnnotatedMethod for produces
   private Annotated _annotated;
@@ -222,7 +222,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   public Annotation []getQualifierArray()
   {
     if (_qualifiers == null || _qualifiers.size() == 0)
-      return new Annotation[] { CurrentLiteral.CURRENT };
+      return new Annotation[] { DefaultLiteral.DEFAULT };
 
     Annotation []qualifiers = new Annotation[_qualifiers.size()];
     _qualifiers.toArray(qualifiers);

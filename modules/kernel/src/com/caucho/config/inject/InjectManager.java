@@ -1282,6 +1282,12 @@ public class InjectManager
     return new CreationalContextImpl<T>(bean);
   }
 
+  public <T> CreationalContextImpl<T> createCreationalContext(Contextual<T> bean,
+                                                              CreationalContext<?> env)
+  {
+    return new CreationalContextImpl<T>(bean, env);
+  }
+
   /**
    * Convenience-class for Resin.
    */
@@ -1391,8 +1397,16 @@ public class InjectManager
 
       if (instance != null)
         return instance;
-      else
-        return bean.create(env);
+      else {
+        instance = bean.create(env);
+        
+        if (env.isTop()) {
+          // ioc/07b0
+          bean.destroy(instance, env);
+        }
+        
+        return instance;
+      }
     }
 
     if (scopeType == null) {

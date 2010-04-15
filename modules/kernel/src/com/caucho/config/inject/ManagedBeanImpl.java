@@ -222,9 +222,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   /**
    * Call pre-destroy
    */
+  @Override
   public void destroy(X instance, CreationalContext<X> env)
   {
     getInjectionTarget().preDestroy(instance);
+    
+    env.release();
   }
 
   //
@@ -274,12 +277,12 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     }
   }
 
-  protected void addProduces(AnnotatedMethod producesMethod,
-                             AnnotatedMethod disposesMethod)
+  protected <T> void addProduces(AnnotatedMethod producesMethod,
+                                 AnnotatedMethod disposesMethod)
   {
-    Arg<?> []args = introspectArguments(producesMethod.getParameters());
+    Arg<T> []args = introspectArguments(producesMethod.getParameters());
 
-    ProducesBean<?,?> bean = ProducesBean.create(getBeanManager(), this, 
+    ProducesBean<X,T> bean = ProducesBean.create(getBeanManager(), this, 
                                                  producesMethod, args,
                                                  disposesMethod);
 

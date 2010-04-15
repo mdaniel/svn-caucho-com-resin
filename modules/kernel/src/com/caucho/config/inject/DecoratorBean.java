@@ -330,7 +330,7 @@ public class DecoratorBean<T> implements Decorator<T>
     }
 
     if (_bindings.size() == 0)
-      _bindings.add(CurrentLiteral.CURRENT);
+      _bindings.add(DefaultLiteral.DEFAULT);
   }
 
   /**

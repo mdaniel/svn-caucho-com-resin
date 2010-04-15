@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 1998-2007 Caucho Technology -- all rights reserved
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
  *
@@ -51,6 +51,7 @@ package javax.enterprise.inject;
  * }
  * </code></pre>
  */
+@SuppressWarnings("serial")
 public class AmbiguousResolutionException extends ResolutionException
 {
   public AmbiguousResolutionException()

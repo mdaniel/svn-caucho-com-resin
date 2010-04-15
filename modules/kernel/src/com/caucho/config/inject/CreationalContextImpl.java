@@ -39,7 +39,8 @@ import com.caucho.inject.Module;
  */
 @Module
 public class CreationalContextImpl<T> implements CreationalContext<T> {
-  private final CreationalContextImpl<?> _next;
+  private CreationalContextImpl<?> _next;
+  private CreationalContextImpl<?> _top;
   private final Contextual<T> _bean;
   private final InjectionPoint _injectionPoint;
   private T _value;
@@ -48,31 +49,36 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
                                CreationalContext<?> next,
                                InjectionPoint ij)
   {
-    _next = (CreationalContextImpl<?>) next;
     _bean = bean;
     _injectionPoint = ij;
+    
+    if (next instanceof CreationalContextImpl<?>) {
+      CreationalContextImpl<?> nextEnv = (CreationalContextImpl<?>) next;
+
+      _top = nextEnv._top;
+      _next = _top._next;
+      _top._next = this;
+    }
+    else {
+      _top = this;
+      // _next = next;
+    }
   }
   
   public CreationalContextImpl()
   {
-    _next = null;
-    _bean = null;
-    _injectionPoint = null;
+    this(null, null, null);
   }
   
   public CreationalContextImpl(Contextual<T> bean,
                                CreationalContext<?> next)
   {
-    _bean = bean;
-    _next = (CreationalContextImpl<?>) next;
-    _injectionPoint = null;
+    this(bean, next, null);
   }
   
   CreationalContextImpl(Contextual<T> bean)
   {
-    _next = null;
-    _bean = bean;
-    _injectionPoint = null;
+    this(bean, null, null);
   }
   
   public static CreationalContextImpl<Object> create()
@@ -80,9 +86,14 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     return new CreationalContextImpl<Object>();
   }
   
+  public boolean isTop()
+  {
+    return this == _top;
+  }
+  
   public <X> X get(Contextual<X> bean)
   {
-    return find(this, bean);    
+    return find(_top, bean);    
   }
   
   @SuppressWarnings("unchecked")
@@ -132,7 +143,19 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   @Override
   public void release()
   {
-    // Bean.remove?
+    _value = null;
+    
+    if (_next != null)
+      _next.releaseImpl();
+  }
+  
+  void releaseImpl()
+  {
+    T value = _value;
+    _value = null;
+    
+    if (value != null)
+      _bean.destroy(value, this);
   }
 
   @Override

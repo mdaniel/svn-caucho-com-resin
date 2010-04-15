@@ -296,6 +296,6 @@ abstract public class AbstractBean<T>
 
   static {
     _currentBindings = new HashSet<Annotation>();
-    _currentBindings.add(CurrentLiteral.CURRENT);
+    _currentBindings.add(DefaultLiteral.DEFAULT);
   }
 }

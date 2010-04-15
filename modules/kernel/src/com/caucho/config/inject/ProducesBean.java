@@ -43,7 +43,6 @@ import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.Producer;
@@ -70,8 +69,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   private Producer<T> _producer;
 
-  // XXX: needs to be InjectionPoint
-  private Arg []_args;
+  private Arg<T> []_args;
 
   private boolean _isBound;
 
@@ -80,7 +78,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   protected ProducesBean(InjectManager manager,
                          Bean<X> producerBean,
                          AnnotatedMethod<X> producesMethod,
-                         Arg<?> []args,
+                         Arg<T> []args,
                          AnnotatedMethod<X> disposesMethod)
   {
     super(manager, producesMethod.getBaseType(), producesMethod);
@@ -108,7 +106,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   create(InjectManager manager,
          Bean<X> producer,
          AnnotatedMethod<X> producesMethod,
-         Arg<?> []args,
+         Arg<T> []args,
          AnnotatedMethod<X> disposesMethod)
   {
     ProducesBean<X,T> bean = new ProducesBean<X,T>(manager, producer, 
@@ -129,40 +127,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     _producer = producer;
   }
-
-  /*
-  protected AnnotatedMethod<T> getMethod()
-  {
-    return _producesMethod;
-  }
-  */
-
-  /*
-  protected Annotation []getAnnotationList()
-  {
-    return _annotationList;
-  }
-
-  protected void initDefault()
-  {
-    if (getDeploymentType() == null
-        && _producer.getDeploymentType() != null) {
-      setDeploymentType(_producer.getDeploymentType());
-    }
-
-    super.initDefault();
-  }
-  */
-
-  /*
-  protected Class getDefaultDeploymentType()
-  {
-    if (_producerBean.getDeploymentType() != null)
-      return _producerBean.getDeploymentType();
-
-    return null;// super.getDefaultDeploymentType();
-  }
-  */
 
   @Override
   protected String getDefaultName()
@@ -195,11 +159,13 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     return _producerBean;
   }
 
+  @Override
   public T create(CreationalContext<T> createEnv)
   {
     return produce(createEnv);
   }
 
+  @Override
   public InjectionTarget<T> getInjectionTarget()
   {
     return this;
@@ -208,42 +174,51 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   /**
    * Produces a new bean instance
    */
+  @Override
   public T produce(CreationalContext<T> cxt)
   {
     Class<?> type = _producerBean.getBeanClass();
+    
+    CreationalContext<X> parentEnv
+      = getBeanManager().createCreationalContext(_producerBean, cxt);
 
-    X factory = (X) getBeanManager().getReference(_producerBean, type, cxt);
+    X factory = (X) getBeanManager().getReference(_producerBean, type, parentEnv);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
                                           this, _producerBean));
     }
     
-    CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
-
-    return produce(factory, env.getInjectionPoint());
+    return produce(factory, cxt);
   }
 
   /**
    * Produces a new bean instance
    */
-  private T produce(X bean, InjectionPoint ij)
+  private T produce(X bean, CreationalContext<T> cxt)
+  
   {
+    InjectionPoint ij = null;
+    
+    if (cxt instanceof CreationalContextImpl<?>) {
+      CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
+
+      ij = env.getInjectionPoint();
+    }
+    
     try {
+      // InjectManager inject = getBeanManager();
+
       Object []args;
 
       if (_args.length > 0) {
         args = new Object[_args.length];
 
-        InjectManager inject = getBeanManager();
-
-        CreationalContext<?> env = inject.createCreationalContext(_producerBean);
-
         for (int i = 0; i < args.length; i++) {
           if (_args[i] instanceof InjectionPointArg<?>)
             args[i] = ij;
           else
-            args[i] = _args[i].eval(env);
+            args[i] = _args[i].eval(cxt);
         }
       }
       else
@@ -307,10 +282,12 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     return null;
   } 
   
+  @Override
   public void inject(T instance, CreationalContext<T> cxt)
   {
   }
 
+  @Override
   public void postConstruct(T instance)
   {
   }
@@ -324,6 +301,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
       _isBound = true;
 
+      /*
       Method method = _producesMethod.getJavaMember();
 
       String loc = InjectManager.location(method);
@@ -331,7 +309,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       // Annotation [][]paramAnn = _method.getParameterAnnotations();
       // List<AnnotatedParameter<T>> beanParams = _producesMethod.getParameters();
 
-      /*
       _args = new Arg[param.length];
 
       for (int i = 0; i < param.length; i++) {
@@ -352,9 +329,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     }
   }
 
-  public Bean bindInjectionPoint(InjectionPoint ij)
+  public Bean<T> bindInjectionPoint(InjectionPoint ij)
   {
-    return new ProducesInjectionPointBean(this, ij);
+    return new ProducesInjectionPointBean<T>(this, ij);
   }
 
   /**
@@ -365,7 +342,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     if (_disposesMethod != null) {
       try {
-        CreationalContextImpl env = (CreationalContextImpl) cxt;
+        CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
         
         Object producer = null;
         
@@ -374,14 +351,22 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
         else
           Thread.dumpStack();
         
-        if (producer == null)
-          producer = getBeanManager().getReference(_producerBean, _producerBean.getBeanClass(), cxt);
+        if (producer == null) {
+          CreationalContext<X> parentEnv
+            = getBeanManager().createCreationalContext(_producerBean, env);
+
+          producer = getBeanManager().getReference(_producerBean, 
+                                                   _producerBean.getBeanClass(), 
+                                                   parentEnv);
+        }
        
         _disposesMethod.getJavaMember().invoke(producer, instance);
       } catch (Exception e) {
         throw new RuntimeException(_disposesMethod.getJavaMember() + ":" + e, e);
       }
     }
+    
+    cxt.release();
   }
 
   /**
