@@ -9122,7 +9122,7 @@ element servlet-regexp {
 Although extremely rare, it is sometimes useful to create
 a custom predicate (for example for encapsulating complex
 custom authorization logic). You can easily do this by extending <a
-href="javadoc:com.caucho.security.RequestPredicate">com.caucho.security.RequestPredicate</a>.
+javadoc="com.caucho.rewrite.RequestPredicate">com.caucho.rewrite.RequestPredicate</a>.
 This essentially allows you to create your own &lt;IfXXX> rule.
 </p>
 </description>
