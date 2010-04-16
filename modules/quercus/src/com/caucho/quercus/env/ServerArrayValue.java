@@ -30,10 +30,14 @@
 package com.caucho.quercus.env;
 
 import com.caucho.quercus.QuercusRequestAdapter;
+import com.caucho.util.Base64;
+import com.caucho.vfs.WriteStream;
 
 import javax.servlet.http.HttpServletRequest;
 
+import java.io.IOException;
 import java.util.Enumeration;
+import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 
@@ -141,6 +145,16 @@ public class ServerArrayValue extends ArrayValueImpl
     = new ConstStringValue("PHP_AUTH_USER");
   private static final StringValue PHP_AUTH_USER_VU
     = new UnicodeBuilderValue("PHP_AUTH_USER");
+  
+  private static final StringValue PHP_AUTH_PW_V
+    = new ConstStringValue("PHP_AUTH_PW");
+  private static final StringValue PHP_AUTH_PW_VU
+    = new UnicodeBuilderValue("PHP_AUTH_PW");
+  
+  private static final StringValue PHP_AUTH_DIGEST_V
+    = new ConstStringValue("PHP_AUTH_DIGEST");
+  private static final StringValue PHP_AUTH_DIGEST_VU
+    = new UnicodeBuilderValue("PHP_AUTH_DIGEST");
   
   private static final StringValue AUTH_TYPE_V
     = new ConstStringValue("AUTH_TYPE");
@@ -292,6 +306,32 @@ public class ServerArrayValue extends ArrayValueImpl
   {
     return get(key).isset();
   }
+  
+  @Override
+  public void varDumpImpl(Env env,
+                          WriteStream out,
+                          int depth,
+                          IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    if (! _isFilled)
+      fillMap();
+    
+    super.varDumpImpl(env, out, depth, valueSet);
+  }
+  
+  @Override
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    if (! _isFilled)
+      fillMap();
+    
+    super.printRImpl(env, out, depth, valueSet);
+  }
 
   /**
    * Fills the map.
@@ -395,14 +435,39 @@ public class ServerArrayValue extends ArrayValueImpl
         super.put(isUnicode ? PHP_SELF_VU : PHP_SELF_V,
                   _env.createString(contextPath + servletPath + pathInfo));
 
-      if (request.getAuthType() != null) {
-	super.put(isUnicode ? AUTH_TYPE_VU : AUTH_TYPE_V,
-                  _env.createString(request.getAuthType()));
+      // authType is not set on Tomcat
+      //String authType = request.getAuthType();
+      String authHeader = request.getHeader("Authorization");
 
-	if (request.getRemoteUser() != null) {
-	  super.put(isUnicode ? PHP_AUTH_USER_VU : PHP_AUTH_USER_V,
-		    _env.createString(request.getRemoteUser()));
-	}
+      if (authHeader != null) {
+        if (authHeader.indexOf("Basic") == 0) {   
+          super.put(isUnicode ? AUTH_TYPE_VU : AUTH_TYPE_V,
+                    _env.createString("Basic"));
+
+          if (request.getRemoteUser() != null) {
+            super.put(isUnicode ? PHP_AUTH_USER_VU : PHP_AUTH_USER_V,
+                      _env.createString(request.getRemoteUser()));
+
+            String digest = authHeader.substring("Basic ".length());
+            
+            String userPass = Base64.decode(digest);
+              
+            int i = userPass.indexOf(':');
+            if (i > 0) {
+              super.put(isUnicode ? PHP_AUTH_PW_VU : PHP_AUTH_PW_V,
+                  _env.createString(userPass.substring(i + 1)));
+            }
+          }
+        }
+        else if (authHeader.indexOf("Digest") == 0) {
+          super.put(isUnicode ? AUTH_TYPE_VU : AUTH_TYPE_V,
+                    _env.createString("Digest"));
+          
+          String digest = authHeader.substring("Digest ".length());
+          
+          super.put(isUnicode ? PHP_AUTH_DIGEST_VU : PHP_AUTH_DIGEST_V,
+              _env.createString(digest));
+        }
       }
 
       Enumeration e = request.getHeaderNames();
