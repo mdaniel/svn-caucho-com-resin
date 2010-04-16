@@ -561,9 +561,32 @@ namespace Caucho.IIS
 
     private void RelayResponseHeader(HttpResponse response, String name, String value)
     {
-      if ("Content-Type".Equals(name)) {
+      if ("Cache-Control".Equals(name)) {
+        String []directives = value.Split(',', '=', ' ');
+        for(int i = 0; i < directives.Length; i++) {
+          String directive = directives[i];
+          if ("no-cache".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.SetCacheability(HttpCacheability.NoCache);
+          } else if ("public".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.SetCacheability(HttpCacheability.Public);
+          } else if ("private".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.SetCacheability(HttpCacheability.Private);
+          } else if ("must-revalidate".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.SetRevalidation(HttpCacheRevalidation.AllCaches);
+          } else if ("proxy-revalidate".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.SetRevalidation(HttpCacheRevalidation.ProxyCaches);
+          } else if ("max-age".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.SetMaxAge(TimeSpan.FromSeconds(int.Parse(directives[++i])));
+          } else if ("s-maxage".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.SetProxyMaxAge(TimeSpan.FromSeconds(int.Parse(directives[++i])));
+          } else if ("post-check".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.AppendCacheExtension("post-check="+directives[++i]);
+          } else if ("pre-check".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
+            response.Cache.AppendCacheExtension("pre-check="+directives[++i]);
+          }
+        }
+      } else if ("Content-Type".Equals(name)) {
         response.ContentType = value;
-
         int charsetIdx = value.IndexOf("charset");
         if (charsetIdx > -1) {
           String charset = null;
@@ -589,7 +612,7 @@ namespace Caucho.IIS
           }
         }
       } else {
-        response.Headers.Add(name, value);
+        response.Headers.Set(name, value);
       }
     }
 
