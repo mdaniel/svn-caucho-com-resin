@@ -28,13 +28,11 @@
  */
 
 using System;
-using System.Collections.Generic;
 using System.Collections.Specialized;
-using System.Text;
-using System.Web;
-using System.Net.Sockets;
 using System.Diagnostics;
 using System.IO;
+using System.Text;
+using System.Web;
 
 namespace Caucho.IIS
 {
@@ -612,7 +610,7 @@ namespace Caucho.IIS
           }
         }
       } else {
-        response.Headers.Set(name, value);
+        response.Headers.Add(name, value);
       }
     }
 
