@@ -38,29 +38,32 @@ import javax.ejb.AccessTimeout;
 import javax.ejb.ConcurrencyManagement;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.Configurable;
 import com.caucho.config.types.Period;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
 
 /**
  * Represents EJB lock type specification interception. The specification gears
  * it towards EJB singletons, but it can be used for other bean types.
  */
-public class LockCallChain extends AbstractCallChain {
+@Module
+public class LockCallChain<X,T> extends AbstractCallChain<X,T> {
   private static final int DEFAULT_TIMEOUT = 10000;
 
-  private EjbCallChain _next;
+  private EjbCallChain<X,T> _next;
 
   private boolean _isContainerManaged;
   private LockType _lockType;
   private long _lockTimeout;
   private TimeUnit _lockTimeoutUnit;
 
-  public LockCallChain(BusinessMethodGenerator businessMethod, EjbCallChain next)
+  public LockCallChain(BusinessMethodGenerator<X,T> businessMethod,
+                       EjbCallChain<X,T> next)
   {
-    super(next);
+    super(businessMethod, next);
 
     _next = next;
 
@@ -76,7 +79,6 @@ public class LockCallChain extends AbstractCallChain {
    * @param timeout
    *          The timeout period.
    */
-  @Configurable
   public void setTimeout(Period timeout)
   {
     _lockTimeout = timeout.getPeriod();
@@ -95,9 +97,10 @@ public class LockCallChain extends AbstractCallChain {
    * Introspects the method for locking attributes.
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implementationMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod,
+                         AnnotatedMethod<? super X> implementationMethod)
   {
-    ApiClass apiClass = apiMethod.getDeclaringClass();
+    AnnotatedType<T> apiClass = getApiType();
 
     ConcurrencyManagement concurrencyManagementAnnotation
       = apiClass.getAnnotation(ConcurrencyManagement.class);
@@ -108,14 +111,10 @@ public class LockCallChain extends AbstractCallChain {
       return;
     }
 
-    ApiClass implementationClass = null;
-
-    if (implementationMethod != null) {
-      implementationClass = implementationMethod.getDeclaringClass();
-    }
+    AnnotatedType<X> implementationClass = getImplType();
 
     Lock lockAttribute = getAnnotation(Lock.class, apiMethod, apiClass,
-        implementationMethod, implementationClass);
+                                       implementationMethod, implementationClass);
 
     if (lockAttribute != null) {
       _lockType = lockAttribute.value();
@@ -157,7 +156,6 @@ public class LockCallChain extends AbstractCallChain {
   @Override
   public void generatePreTry(JavaWriter out) throws IOException
   {
-    // TODO Is this too much code to be in-lined?
     if (_isContainerManaged && (_lockType != null)) {
       out.println();
 

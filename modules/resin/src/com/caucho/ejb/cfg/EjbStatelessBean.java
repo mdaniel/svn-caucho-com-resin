@@ -40,7 +40,7 @@ import java.lang.reflect.*;
 /**
  * Configuration for an ejb stateless session bean.
  */
-public class EjbStatelessBean extends EjbSessionBean {
+public class EjbStatelessBean<X> extends EjbSessionBean<X> {
   private static final L10N L = new L10N(EjbStatelessBean.class);
 
   /**

@@ -29,57 +29,48 @@
 
 package com.caucho.ejb.inject;
 
-import com.caucho.ejb.session.SingletonManager;
-import com.caucho.ejb.session.SingletonProxyFactory;
-import com.caucho.ejb.session.StatefulProvider;
-import com.caucho.ejb.session.StatefulManager;
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ScopeAdapterBean;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.util.L10N;
-import javax.enterprise.inject.spi.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.session.SingletonManager;
+import com.caucho.ejb.session.SingletonProxyFactory;
+import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean
  */
+@Module
 public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
 {
-  private static final L10N L = new L10N(SingletonBeanImpl.class);
-
-  private SingletonManager<X> _manager;
-  private String _name;
   private SingletonProxyFactory _factory;
 
-  private InjectionTarget<X> _target;
-  
   public SingletonBeanImpl(SingletonManager<X> manager,
                            ManagedBeanImpl<X> bean,
                            SingletonProxyFactory factory)
   {
     super(bean);
 
-    _manager = manager;
     _factory = factory;
 
     if (factory == null)
       throw new NullPointerException();
 
-    _target = bean.getInjectionTarget();
+    bean.getInjectionTarget();
+  }
+  
+  @Override
+  public Set<Type> getTypes()
+  {
+    return getBean().getTypes();
   }
 
   @Override
-  public X create(CreationalContext context)
+  public X create(CreationalContext<X> context)
   {
-    return (X) _factory.__caucho_createNew(getInjectionTarget(), context);
+    return _factory.__caucho_createNew(getInjectionTarget(), context);
   }
 }
 

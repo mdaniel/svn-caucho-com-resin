@@ -29,21 +29,18 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.gen.ApiMethod;
-import com.caucho.util.L10N;
+import java.lang.reflect.Method;
 
-import java.lang.reflect.*;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.inject.Module;
 
 /**
  * Configuration for bean-method.
  */
+@Module
 public class BeanMethod {
-  private static final L10N L = new L10N(BeanMethod.class);
-
   private String _methodName;
-
-  private MethodParams _methodParams;
 
   public BeanMethod()
   {
@@ -61,12 +58,11 @@ public class BeanMethod {
 
   public void setMethodParams(MethodParams methodParams)
   {
-    _methodParams = methodParams;
   }
 
-  public boolean isMatch(ApiMethod otherMethod)
+  public boolean isMatch(AnnotatedMethod<?> otherMethod)
   {
-    return _methodName.equals(otherMethod.getName());
+    return _methodName.equals(otherMethod.getJavaMember().getName());
   }
 
   public boolean isMatch(Method otherMethod)

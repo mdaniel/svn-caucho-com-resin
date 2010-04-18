@@ -33,21 +33,23 @@ import java.io.IOException;
 
 import javax.ejb.Remove;
 import javax.ejb.TransactionAttributeType;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * Represents a stateful local business method
  */
-public class SingletonMethod extends BusinessMethodGenerator
+@Module
+public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
 {
   private boolean _isRemoveRetainIfException;
   
-  public SingletonMethod(SingletonView view,
-                         ApiMethod apiMethod,
-                         ApiMethod implMethod,
+  public SingletonMethod(SingletonView<X,T> view,
+                         AnnotatedMethod<? super T> apiMethod,
+                         AnnotatedMethod<? super X> implMethod,
                          int index)
   {
     super(view, apiMethod, implMethod, index);
@@ -68,13 +70,15 @@ public class SingletonMethod extends BusinessMethodGenerator
    * Session bean default is REQUIRED
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod,
+                         AnnotatedMethod<? super X> implMethod)
   {
     // getXa().setTransactionType(getDefaultTransactionType());
 
     super.introspect(apiMethod, implMethod);
 
     Remove remove = implMethod.getAnnotation(Remove.class);
+    
     if (remove != null) {
       _isRemoveRetainIfException = remove.retainIfException();
     }
@@ -104,12 +108,12 @@ public class SingletonMethod extends BusinessMethodGenerator
         && hasException(java.rmi.NoSuchObjectException.class)) {
       out.println("if (! _isValid)");
       out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
-                  + getBeanClass().getSimpleName() + " is no longer valid\");");
+                  + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
     }
     else {
       out.println("if (! _isValid)");
       out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
-                  + getBeanClass().getSimpleName() + " is no longer valid\");");
+                  + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
     }
 
     out.println("boolean isValid = false;");
@@ -185,6 +189,7 @@ public class SingletonMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
+  @Override
   protected void generateThis(JavaWriter out)
     throws IOException
   {

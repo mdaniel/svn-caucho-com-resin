@@ -31,6 +31,9 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
@@ -58,7 +61,8 @@ import com.caucho.java.JavaWriter;
  * }
  * </pre></code>
  */
-public interface EjbCallChain {
+@Module
+public interface EjbCallChain<X,T> {
   /**
    * Returns true if this filter will generate code.
    */
@@ -67,8 +71,8 @@ public interface EjbCallChain {
   /**
    * Introspects the method for the default values
    */
-  public void introspect(ApiMethod apiMethod, 
-                         ApiMethod implMethod);
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod);
 
   /**
    * Generates the static class prologue

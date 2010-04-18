@@ -278,11 +278,13 @@ public class TcpSocketLink extends AbstractSocketLink
     return _state.isCometActive() && ! _isCompleteRequested;
   }
 
+  @Override
   public boolean isCometSuspend()
   {
     return _state.isCometSuspend();
   }
 
+  @Override
   public boolean isCometComplete()
   {
     return _state.isCometComplete();
@@ -314,6 +316,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the local address of the socket.
    */
+  @Override
   public InetAddress getLocalAddress()
   {
     return _socket.getLocalAddress();
@@ -322,6 +325,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the local host name.
    */
+  @Override
   public String getLocalHost()
   {
     return _socket.getLocalHost();
@@ -330,6 +334,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the socket's local TCP port.
    */
+  @Override
   public int getLocalPort()
   {
     return _socket.getLocalPort();
@@ -338,6 +343,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the socket's remote address.
    */
+  @Override
   public InetAddress getRemoteAddress()
   {
     return _socket.getRemoteAddress();
@@ -364,6 +370,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the socket's remote port
    */
+  @Override
   public int getRemotePort()
   {
     return _socket.getRemotePort();
@@ -552,7 +559,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Handles a new connection/socket from the client.
    */
-  RequestState handleRequests()
+  RequestState handleRequests(boolean isKeepalive)
     throws IOException
   {
     Thread thread = Thread.currentThread();
@@ -563,7 +570,7 @@ public class TcpSocketLink extends AbstractSocketLink
       // clear the interrupted flag
       Thread.interrupted();
 
-      result = handleRequestsImpl();
+      result = handleRequestsImpl(isKeepalive);
     } catch (ClientDisconnectException e) {
       _port.addLifetimeClientDisconnectCount();
 
@@ -596,7 +603,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Handles a new connection/socket from the client.
    */
-  private RequestState handleRequestsImpl()
+  private RequestState handleRequestsImpl(boolean isKeepalive)
     throws IOException
   {
     RequestState result = null;
@@ -606,7 +613,7 @@ public class TcpSocketLink extends AbstractSocketLink
         return RequestState.EXIT;
       }
 
-      if ((result = processKeepalive()) != RequestState.REQUEST) {
+      if (isKeepalive && (result = processKeepalive()) != RequestState.REQUEST) {
         return result;
       }
 
@@ -622,6 +629,8 @@ public class TcpSocketLink extends AbstractSocketLink
       if (_state.isCometActive() && toSuspend()) {
         return RequestState.THREAD_DETACHED;
       }
+      
+      isKeepalive = true;
     } while (_state.isKeepaliveAllocated());
 
     return result;
@@ -1144,7 +1153,8 @@ public class TcpSocketLink extends AbstractSocketLink
 
         _request.onStartConnection();
 
-        result = handleRequests();
+        boolean isKeepalive = false;
+        result = handleRequests(isKeepalive);
 
         if (result == RequestState.THREAD_DETACHED) {
           return result;
@@ -1193,7 +1203,8 @@ public class TcpSocketLink extends AbstractSocketLink
     public RequestState doTask()
       throws IOException
     {
-      RequestState result = handleRequests();
+      boolean isKeepalive = true;
+      RequestState result = handleRequests(isKeepalive);
 
       if (result == RequestState.THREAD_DETACHED) {
         return result;

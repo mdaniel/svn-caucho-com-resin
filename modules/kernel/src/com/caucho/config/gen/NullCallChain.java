@@ -31,12 +31,16 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.util.HashMap;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * Represents a filter for invoking a method
  */
-public class NullCallChain implements EjbCallChain {
+@Module
+public class NullCallChain<X,T> implements EjbCallChain<X,T> {
   NullCallChain()
   {
   }
@@ -58,7 +62,8 @@ public class NullCallChain implements EjbCallChain {
    * Introspects the method for the default values
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod)
   {
   }
   
@@ -205,6 +210,7 @@ public class NullCallChain implements EjbCallChain {
   /**
    * Generates finally code for the method
    */
+  @Override
   public void generateFinally(JavaWriter out)
     throws IOException
   {

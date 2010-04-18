@@ -29,34 +29,39 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.HashMap;
 import java.util.HashSet;
 
 import javax.ejb.ApplicationException;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.java.JavaWriter;
 
 /**
  * Represents a business method
  */
-public class BusinessMethodGenerator implements EjbCallChain {
-  private final View _view;
+public class BusinessMethodGenerator<X,T> implements EjbCallChain<X,T> {
+  private final View<X,T> _view;
 
-  private final ApiMethod _apiMethod;
-  private final ApiMethod _implMethod;
+  private final AnnotatedMethod<? super T> _apiMethod;
+  private final AnnotatedMethod<? super X> _implMethod;
 
-  private SecurityCallChain _security;
+  private SecurityCallChain<X,T> _security;
   // private SchedulingCallChain _scheduling;
-  private LockCallChain _lock;
-  private XaCallChain _xa;
-  private InterceptorCallChain _interceptor;
-  private AsynchronousCallChain _async;
+  private LockCallChain<X,T> _lock;
+  private XaCallChain<X,T> _xa;
+  private InterceptorCallChain<X,T> _interceptor;
+  private AsynchronousCallChain<X,T> _async;
 
-  private EjbCallChain _next;
+  private EjbCallChain<X,T> _next;
 
-  public BusinessMethodGenerator(View view, ApiMethod apiMethod,
-                                 ApiMethod implMethod, int index)
+  public BusinessMethodGenerator(View<X,T> view, 
+                                 AnnotatedMethod<? super T> apiMethod,
+                                 AnnotatedMethod<? super X> implMethod, 
+                                 int index)
   {
     _view = view;
     
@@ -65,28 +70,28 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     _next = createTailCallChain();
 
-    _next = _interceptor = new InterceptorCallChain(_next, this, view);
+    _next = _interceptor = new InterceptorCallChain<X,T>(_next, this, view);
     _next = _xa = createXa(_next);
-    _next = _lock = new LockCallChain(this, _next);
+    _next = _lock = new LockCallChain<X,T>(this, _next);
     // _scheduling = new SchedulingCallChain(this, _lock);
-    _next = _async = new AsynchronousCallChain(this, _next);
-    _next = _security = new SecurityCallChain(this, _next);
+    _next = _async = new AsynchronousCallChain<X,T>(this, _next);
+    _next = _security = new SecurityCallChain<X,T>(this, _next);
   }
 
-  protected EjbCallChain createTailCallChain()
+  protected EjbCallChain<X,T> createTailCallChain()
   {
-    return new MethodTailCallChain(this);
+    return new MethodTailCallChain<X,T>(this);
   }
 
-  protected XaCallChain createXa(EjbCallChain next)
+  protected XaCallChain<X,T> createXa(EjbCallChain<X,T> next)
   {
-    return new XaCallChain(this, next);
+    return new XaCallChain<X,T>(this, next);
   }
 
   /**
    * Returns the owning view.
    */
-  public View getView()
+  public View<X,T> getView()
   {
     return _view;
   }
@@ -94,25 +99,30 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Returns the bean's ejbclass
    */
-  protected ApiClass getBeanClass()
+  protected AnnotatedType<X> getBeanClass()
   {
     return _view.getBeanClass();
   }
-
-  /**
-   * Returns the api method
-   */
-  public ApiMethod getApiMethod()
+  
+  protected AnnotatedType<T> getApiType()
   {
-    return _apiMethod;
+    return _view.getViewClass();
   }
 
   /**
    * Returns the implementation method
    */
-  public ApiMethod getImplMethod()
+  public AnnotatedMethod<? super X> getImplMethod()
   {
     return _implMethod;
+  }
+
+  /**
+   * Returns the api method
+   */
+  public AnnotatedMethod<? super T> getApiMethod()
+  {
+    return _apiMethod;
   }
 
   /**
@@ -150,7 +160,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Returns the xa call chain
    */
-  public XaCallChain getXa()
+  public XaCallChain<X,T> getXa()
   {
     return _xa;
   }
@@ -158,7 +168,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Returns the security call chain
    */
-  public SecurityCallChain getSecurity()
+  public SecurityCallChain<X,T> getSecurity()
   {
     return _security;
   }
@@ -166,7 +176,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   /**
    * Returns the interceptor call chain
    */
-  public InterceptorCallChain getInterceptor()
+  public InterceptorCallChain<X,T> getInterceptor()
   {
     return _interceptor;
   }
@@ -199,7 +209,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
   // introspection
   //
 
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  @Override
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod)
   {
     _security.introspect(apiMethod, implMethod);
     // _scheduling.introspect(apiMethod, implMethod);
@@ -327,27 +339,31 @@ public class BusinessMethodGenerator implements EjbCallChain {
     throws IOException
   {
     out.println();
-    if (_apiMethod.isPublic())
+    
+    Method apiJavaMethod = _apiMethod.getJavaMember();
+    int apiModifiers = apiJavaMethod.getModifiers();
+    
+    if (Modifier.isPublic(apiModifiers))
       out.print("public ");
-    else if (_apiMethod.isProtected())
+    else if (Modifier.isProtected(apiModifiers))
       out.print("protected ");
     else
       throw new IllegalStateException(_apiMethod.toString()
           + " must be public or protected");
 
-    out.printClass(_apiMethod.getReturnType());
+    out.printClass(apiJavaMethod.getReturnType());
     out.print(" ");
-    out.print(_apiMethod.getName() + suffix);
+    out.print(apiJavaMethod.getName() + suffix);
     out.print("(");
 
-    Class<?>[] types = _apiMethod.getParameterTypes();
+    Class<?>[] types = apiJavaMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
       Class<?> type = types[i];
 
       if (i != 0)
         out.print(", ");
 
-      if (i == types.length - 1 && type.isArray() && _apiMethod.isVarArgs()) {
+      if (i == types.length - 1 && type.isArray() && isVarArgs(_apiMethod)) {
         out.printClass(type.getComponentType());
         out.print("...");
       } else
@@ -358,9 +374,14 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     out.println(")");
     if (_implMethod != null)
-      generateThrows(out, _implMethod.getExceptionTypes());
+      generateThrows(out, _implMethod.getJavaMember().getExceptionTypes());
     else
-      generateThrows(out, _apiMethod.getExceptionTypes());
+      generateThrows(out, apiJavaMethod.getExceptionTypes());
+  }
+  
+  private boolean isVarArgs(AnnotatedMethod<?> annMethod)
+  {
+    return annMethod.getJavaMember().isVarArgs();
   }
 
   /**
@@ -430,8 +451,10 @@ public class BusinessMethodGenerator implements EjbCallChain {
     out.println("try {");
     out.pushDepth();
 
-    if (! void.class.equals(_apiMethod.getReturnType())) {
-      out.printClass(_apiMethod.getReturnType());
+    Method javaApiMethod = _apiMethod.getJavaMember();
+    
+    if (! void.class.equals(javaApiMethod.getReturnType())) {
+      out.printClass(javaApiMethod.getReturnType());
       out.println(" result;");
     }
 
@@ -441,7 +464,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
     generatePostCall(out);
 
-    if (! void.class.equals(_implMethod.getReturnType()))
+    if (! void.class.equals(javaApiMethod.getReturnType()))
       out.println("return result;");
 
     out.popDepth();
@@ -464,7 +487,7 @@ public class BusinessMethodGenerator implements EjbCallChain {
   public void generatePreTry(JavaWriter out)
     throws IOException
   {
-      _next.generatePreTry(out);
+    _next.generatePreTry(out);
   }
 
   /**
@@ -579,13 +602,15 @@ public class BusinessMethodGenerator implements EjbCallChain {
   {
     out.println();
 
-    if (! void.class.equals(_implMethod.getReturnType())) {
+    Method javaImplMethod = _implMethod.getJavaMember();
+    
+    if (! void.class.equals(javaImplMethod.getReturnType())) {
       out.print("result = ");
     }
 
-    out.print(superVar + "." + _implMethod.getName() + "(");
+    out.print(superVar + "." + javaImplMethod.getName() + "(");
 
-    Class<?>[] types = _implMethod.getParameterTypes();
+    Class<?>[] types = javaImplMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
       if (i != 0)
         out.print(", ");
@@ -640,14 +665,17 @@ public class BusinessMethodGenerator implements EjbCallChain {
     throws IOException
   {
     if (_interceptor.isEnhanced()) {
+      Method javaImplMethod = _implMethod.getJavaMember();
+      Method javaApiMethod = _apiMethod.getJavaMember();
+      
       out.println();
       out.print("private ");
-      out.printClass(_implMethod.getReturnType());
+      out.printClass(javaImplMethod.getReturnType());
       out.print(" __caucho_");
-      out.print(_apiMethod.getName());
+      out.print(javaApiMethod.getName());
       out.print("(");
 
-      Class<?>[] types = _implMethod.getParameterTypes();
+      Class<?>[] types = javaImplMethod.getParameterTypes();
       for (int i = 0; i < types.length; i++) {
         Class<?> type = types[i];
 
@@ -659,19 +687,19 @@ public class BusinessMethodGenerator implements EjbCallChain {
       }
 
       out.println(")");
-      generateThrows(out, _implMethod.getExceptionTypes());
+      generateThrows(out, javaImplMethod.getExceptionTypes());
       out.println();
       out.println("{");
       out.pushDepth();
 
-      if (! void.class.equals(_apiMethod.getReturnType())) {
-        out.printClass(_apiMethod.getReturnType());
+      if (! void.class.equals(javaApiMethod.getReturnType())) {
+        out.printClass(javaApiMethod.getReturnType());
         out.println(" result;");
       }
 
       generateTailCall(out, "super");
 
-      if (! void.class.equals(_implMethod.getReturnType()))
+      if (! void.class.equals(javaImplMethod.getReturnType()))
         out.println("return result;");
 
       out.popDepth();
@@ -685,7 +713,9 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
   protected boolean hasException(Class<?> exn)
   {
-    for (Class<?> apiExn : _implMethod.getExceptionTypes()) {
+    Method javaImplMethod = _implMethod.getJavaMember();
+    
+    for (Class<?> apiExn : javaImplMethod.getExceptionTypes()) {
       if (apiExn.isAssignableFrom(exn))
         return true;
     }
@@ -695,10 +725,12 @@ public class BusinessMethodGenerator implements EjbCallChain {
 
   boolean matches(String name, Class<?>[] parameterTypes)
   {
-    if (!_apiMethod.getName().equals(name))
+    Method javaApiMethod = _apiMethod.getJavaMember();
+    
+    if (! javaApiMethod.getName().equals(name))
       return false;
 
-    Class<?>[] methodTypes = _apiMethod.getParameterTypes();
+    Class<?>[] methodTypes = javaApiMethod.getParameterTypes();
     if (methodTypes.length != parameterTypes.length)
       return false;
 
@@ -739,23 +771,25 @@ public class BusinessMethodGenerator implements EjbCallChain {
   protected Class<?>[] getExceptionTypes()
   {
     if (_implMethod != null)
-      return _implMethod.getExceptionTypes();
+      return _implMethod.getJavaMember().getExceptionTypes();
     else
-      return _apiMethod.getExceptionTypes();
+      return _apiMethod.getJavaMember().getExceptionTypes();
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (this == o)
       return true;
-    else if (!(o instanceof BusinessMethodGenerator))
+    else if (!(o instanceof BusinessMethodGenerator<?,?>))
       return false;
 
-    BusinessMethodGenerator bizMethod = (BusinessMethodGenerator) o;
+    BusinessMethodGenerator<?,?> bizMethod = (BusinessMethodGenerator<?,?>) o;
 
-    return _apiMethod.getName().equals(bizMethod._apiMethod.getName());
+    return _apiMethod.getJavaMember().getName().equals(bizMethod._apiMethod.getJavaMember().getName());
   }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _apiMethod + "]";

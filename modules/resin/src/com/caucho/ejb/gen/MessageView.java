@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import com.caucho.config.gen.*;
 import com.caucho.config.*;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
@@ -38,25 +39,29 @@ import java.io.IOException;
 import java.util.*;
 import java.lang.reflect.Method;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
 /**
  * Represents a public interface to a stateful bean, e.g. a stateful view
  */
-public class MessageView extends View {
+@Module
+public class MessageView<X,T> extends View<X,T> {
   private static final L10N L = new L10N(MessageView.class);
 
-  private MessageGenerator _messageBean;
+  private MessageGenerator<X> _messageBean;
   
-  private ArrayList<BusinessMethodGenerator> _businessMethods
-    = new ArrayList<BusinessMethodGenerator>();
+  private ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
+    = new ArrayList<BusinessMethodGenerator<X,T>>();
 
-  public MessageView(MessageGenerator bean, ApiClass api)
+  public MessageView(MessageGenerator<X> bean, AnnotatedType<T> api)
   {
     super(bean, api);
 
     _messageBean = bean;
   }
 
-  public MessageGenerator getMessageBean()
+  public MessageGenerator<X> getMessageBean()
   {
     return _messageBean;
   }
@@ -66,7 +71,7 @@ public class MessageView extends View {
     return getMessageBean().getClassName();
   }
 
-
+  @Override
   public String getViewClassName()
   {
     return getMessageBean().getClassName();
@@ -75,7 +80,8 @@ public class MessageView extends View {
   /**
    * Returns the introspected methods
    */
-  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  @Override
+  public ArrayList<? extends BusinessMethodGenerator<X,T>> getMethods()
   {
     return _businessMethods;
   }
@@ -87,20 +93,20 @@ public class MessageView extends View {
   @Override
   public void introspect()
   {
-    ApiClass apiClass = getViewClass();
+    AnnotatedType<T> apiClass = getViewClass();
 
-    for (ApiMethod apiMethod : apiClass.getMethods()) {
+    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
       Method javaMethod = apiMethod.getJavaMember();
       
       if (javaMethod.getDeclaringClass().equals(Object.class))
 	continue;
       if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
-	  && ! apiMethod.getName().equals("remove"))
+	  && ! javaMethod.getName().equals("remove"))
 	continue;
 
       int index = _businessMethods.size();
       
-      BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
+      BusinessMethodGenerator<X,T> bizMethod = createMethod(apiMethod, index);
       
       if (bizMethod != null) {
 	bizMethod.introspect(bizMethod.getApiMethod(),
@@ -114,6 +120,7 @@ public class MessageView extends View {
   /**
    * Generates the view code.
    */
+  @Override
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -131,37 +138,42 @@ public class MessageView extends View {
     }
     */
     
-    for (BusinessMethodGenerator bizMethod : _businessMethods) {
+    for (BusinessMethodGenerator<X,T> bizMethod : _businessMethods) {
       bizMethod.generate(out, map);
     }
   }
 
-  protected BusinessMethodGenerator
-    createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator<X,T>
+    createMethod(AnnotatedMethod<? super T> apiMethod, int index)
   {
-    ApiMethod implMethod = findImplMethod(apiMethod);
+    AnnotatedMethod<? super X> implMethod = findImplMethod(apiMethod);
 
     if (implMethod == null)
       return null;
     
-    BusinessMethodGenerator bizMethod
-      = new MessageMethod(this,
-			  apiMethod,
-			  implMethod,
-			  index);
+    BusinessMethodGenerator<X,T> bizMethod
+      = new MessageMethod<X,T>(this,
+                               apiMethod,
+                               implMethod,
+                               index);
 
     return bizMethod;
   }
   
-  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super T> apiMethod)
   {
-    ApiMethod implMethod = getBeanClass().getMethod(apiMethod);
+    AnnotatedMethod<? super X> implMethod = getMethod(getBeanClass(), apiMethod.getJavaMember());
 
     if (implMethod != null)
       return implMethod;
   
-    throw ConfigException.create(apiMethod.getMethod(),
+    throw ConfigException.create(apiMethod.getJavaMember(),
 				 L.l("api method has no corresponding implementation in '{0}'",
-				     getBeanClass().getName()));
+				     getBeanClass().getJavaClass().getName()));
+  }
+  
+  protected AnnotatedMethod<? super X> getImplMethod(String name, Class<?> []param)
+  {
+    return getMethod(getBeanClass(), name, param);
   }
 }

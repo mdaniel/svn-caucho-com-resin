@@ -31,24 +31,27 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 
-import com.caucho.config.gen.ApiClass;
-import com.caucho.config.gen.ApiMethod;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
 import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * Represents a stateless local business method
  */
-public class StatelessMethod extends BusinessMethodGenerator
+@Module
+public class StatelessMethod<X,T> extends BusinessMethodGenerator<X,T>
 {
   private String _beanClassName;
   
-  public StatelessMethod(ApiClass ejbClass,
-                              String beanClassName,
-                              StatelessView view,
-                              ApiMethod apiMethod,
-                              ApiMethod implMethod,
-                              int index)
+  public StatelessMethod(AnnotatedType<X> ejbClass,
+                         String beanClassName,
+                         StatelessView<X,T> view,
+                         AnnotatedMethod<? super T> apiMethod,
+                         AnnotatedMethod<? super X> implMethod,
+                         int index)
   {
     super(view, apiMethod, implMethod, index);
 
@@ -67,7 +70,8 @@ public class StatelessMethod extends BusinessMethodGenerator
    * Session bean default is REQUIRED
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod)
   {
     // getXa().setTransactionType(TransactionAttributeType.REQUIRED);
 

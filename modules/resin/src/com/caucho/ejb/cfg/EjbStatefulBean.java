@@ -29,20 +29,18 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
-
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
 
-import javax.ejb.*;
+import javax.ejb.Stateful;
 import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.inject.Module;
 
 /**
  * Configuration for an ejb stateless session bean.
  */
-public class EjbStatefulBean extends EjbSessionBean {
-  private static final L10N L = new L10N(EjbStatefulBean.class);
-
+@Module
+public class EjbStatefulBean<X> extends EjbSessionBean<X> {
   /**
    * Creates a new session bean configuration.
    */
@@ -55,7 +53,7 @@ public class EjbStatefulBean extends EjbSessionBean {
    * Creates a new session bean configuration.
    */
   public EjbStatefulBean(EjbConfig ejbConfig,
-			 AnnotatedType annType,
+			 AnnotatedType<X> annType,
 			 Stateful stateful)
   {
     super(ejbConfig, annType, stateful.name());
@@ -70,6 +68,7 @@ public class EjbStatefulBean extends EjbSessionBean {
   /**
    * Returns the kind of bean.
    */
+  @Override
   public String getEJBKind()
   {
     return "stateful";

@@ -280,11 +280,15 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   protected <T> void addProduces(AnnotatedMethod producesMethod,
                                  AnnotatedMethod disposesMethod)
   {
-    Arg<T> []args = introspectArguments(producesMethod.getParameters());
+    Arg []producesArgs = introspectArguments(producesMethod.getParameters());
+    Arg []disposesArgs = null;
+    
+    if (disposesMethod != null)
+      disposesArgs = introspectDisposesArgs(disposesMethod.getParameters());
 
     ProducesBean<X,T> bean = ProducesBean.create(getBeanManager(), this, 
-                                                 producesMethod, args,
-                                                 disposesMethod);
+                                                 producesMethod, producesArgs,
+                                                 disposesMethod, disposesArgs);
 
     // bean.init();
 
@@ -298,7 +302,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     for (AnnotatedMethod beanMethod : beanType.getMethods()) {
       List<AnnotatedParameter<?>> params = beanMethod.getParameters();
       
-      if (params.size() != 1)
+      if (params.size() == 0)
         continue;
       
       AnnotatedParameter<?> param = params.get(0);
@@ -328,15 +332,31 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     _producerBeans.add(bean);
   }
 
-  protected Arg []introspectArguments(List<AnnotatedParameter<X>> params)
+  protected Arg<X> []introspectArguments(List<AnnotatedParameter<X>> params)
   {
-    Arg []args = new Arg[params.size()];
+    Arg<X> []args = new Arg[params.size()];
 
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter<X> param = params.get(i);
 
       if (InjectionPoint.class.equals(param.getBaseType()))
         args[i] = new InjectionPointArg();
+      else
+        args[i] = new BeanArg(param.getBaseType(), getQualifiers(param));
+    }
+
+    return args;
+  }
+
+  protected Arg<X> []introspectDisposesArgs(List<AnnotatedParameter<X>> params)
+  {
+    Arg<X> []args = new Arg[params.size()];
+
+    for (int i = 0; i < args.length; i++) {
+      AnnotatedParameter<X> param = params.get(i);
+
+      if (param.isAnnotationPresent(Disposes.class))
+        args[i] = null;
       else
         args[i] = new BeanArg(param.getBaseType(), getQualifiers(param));
     }

@@ -33,21 +33,23 @@ import java.io.IOException;
 
 import javax.ejb.Remove;
 import javax.ejb.TransactionAttributeType;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * Represents a stateful local business method
  */
-public class StatefulMethod extends BusinessMethodGenerator
+@Module
+public class StatefulMethod<X,T> extends BusinessMethodGenerator<X,T>
 {
   private boolean _isRemoveRetainIfException;
   
-  public StatefulMethod(StatefulView view,
-                        ApiMethod apiMethod,
-                        ApiMethod implMethod,
+  public StatefulMethod(StatefulView<X,T> view,
+                        AnnotatedMethod<? super T> apiMethod,
+                        AnnotatedMethod<? super X> implMethod,
                         int index)
   {
     super(view, apiMethod, implMethod, index);
@@ -68,7 +70,8 @@ public class StatefulMethod extends BusinessMethodGenerator
    * Session bean default is REQUIRED
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod,
+                         AnnotatedMethod<? super X> implMethod)
   {
     // getXa().setTransactionType(getDefaultTransactionType());
 
@@ -104,12 +107,12 @@ public class StatefulMethod extends BusinessMethodGenerator
         && hasException(java.rmi.NoSuchObjectException.class)) {
       out.println("if (! _isValid)");
       out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
-                  + getBeanClass().getSimpleName() + " is no longer valid\");");
+                  + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
     }
     else {
       out.println("if (! _isValid)");
       out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
-                  + getBeanClass().getSimpleName() + " is no longer valid\");");
+                  + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
     }
 
     out.println("boolean isValid = false;");
@@ -185,6 +188,7 @@ public class StatefulMethod extends BusinessMethodGenerator
   /**
    * Generates the underlying bean instance
    */
+  @Override
   protected void generateThis(JavaWriter out)
     throws IOException
   {

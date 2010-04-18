@@ -30,15 +30,17 @@ package com.caucho.config.gen;
 
 import java.io.IOException;
 
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * The actual method call for a interceptor chain
  */
-public class MethodTailCallChain extends NullCallChain {
-  private final BusinessMethodGenerator _bizMethod;
+@Module
+public class MethodTailCallChain<X,T> extends NullCallChain<X,T> {
+  private final BusinessMethodGenerator<X,T> _bizMethod;
 
-  public MethodTailCallChain(BusinessMethodGenerator bizMethod)
+  public MethodTailCallChain(BusinessMethodGenerator<X,T> bizMethod)
   {
     _bizMethod = bizMethod;
   }

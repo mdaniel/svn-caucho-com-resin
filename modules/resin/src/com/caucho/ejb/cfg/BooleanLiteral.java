@@ -28,16 +28,12 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
-
 /**
  * <pre>
  * boolean-literal ::= (true="1", false="0")
  * </pre>            
  */
 public class BooleanLiteral {
-  private static L10N L = new L10N(BooleanLiteral.class);
-
   private String _true = "1";
   private String _false = "0";
 

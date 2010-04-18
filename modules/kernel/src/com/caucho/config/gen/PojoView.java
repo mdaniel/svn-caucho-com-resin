@@ -33,16 +33,18 @@ import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 import javax.ejb.*;
+import javax.enterprise.inject.spi.AnnotatedType;
+
 import java.io.IOException;
 import java.util.ArrayList;
 
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class PojoView extends View {
+public class PojoView<X> extends View<X,X> {
   private static final L10N L = new L10N(PojoView.class);
 
-  public PojoView(BeanGenerator bean, ApiClass api)
+  public PojoView(BeanGenerator<X> bean, AnnotatedType<X> api)
   {
     super(bean, api);
   }
@@ -55,9 +57,9 @@ public class PojoView extends View {
   /**
    * Returns the introspected methods
    */
-  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  public ArrayList<? extends BusinessMethodGenerator<X,X>> getMethods()
   {
-    PojoBean bean = (PojoBean) getBean();
+    PojoBean<X> bean = (PojoBean<X>) getBean();
     
     return bean.getBusinessMethods();
   }

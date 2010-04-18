@@ -38,6 +38,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
@@ -56,6 +57,8 @@ import javax.enterprise.inject.spi.ObserverMethod;
  * Internal implementation for a producer Bean
  */
 public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
+  private static final Logger log = Logger.getLogger(ObserverMethodImpl.class.getName());
+  
   private InjectManager _beanManager;
 
   private Bean<X> _bean;

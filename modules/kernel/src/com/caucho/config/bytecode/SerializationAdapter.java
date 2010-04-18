@@ -29,40 +29,49 @@
 
 package com.caucho.config.bytecode;
 
-import java.io.*;
-import java.util.*;
-import java.lang.reflect.*;
+import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
 
-import com.caucho.bytecode.*;
-import com.caucho.config.*;
-import com.caucho.config.inject.*;
-import com.caucho.loader.*;
-import com.caucho.config.cfg.*;
-import com.caucho.vfs.*;
+import com.caucho.bytecode.CodeWriterAttribute;
+import com.caucho.bytecode.ConstantPool;
+import com.caucho.bytecode.JavaClass;
+import com.caucho.bytecode.JavaClassLoader;
+import com.caucho.bytecode.JavaField;
+import com.caucho.bytecode.JavaMethod;
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.HandleAware;
+import com.caucho.inject.Module;
+import com.caucho.loader.ProxyClassLoader;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 /**
  * interceptor generation
  */
-public class SerializationAdapter {
-  private final Class _cl;
+@Module
+public class SerializationAdapter<X> {
+  private final Class<X> _cl;
   
-  private Class _proxyClass;
+  private Class<X> _proxyClass;
 
-  private SerializationAdapter(Class cl)
+  private SerializationAdapter(Class<X> cl)
   {
     _cl = cl;
   }
 
-  public static Class gen(Class cl)
+  public static <X> Class<X> gen(Class<X> cl)
   {
     if (Modifier.isFinal(cl.getModifiers()))
       return cl;
     if (HandleAware.class.isAssignableFrom(cl))
       return cl;
 
-    SerializationAdapter gen = new SerializationAdapter(cl);
+    SerializationAdapter<X> gen = new SerializationAdapter<X>(cl);
 
-    Class proxyClass = gen.generateProxy();
+    Class<X> proxyClass = gen.generateProxy();
 
     return proxyClass;
   }
@@ -132,7 +141,7 @@ public class SerializationAdapter {
       }
       
       String cleanName = thisClassName.replace('/', '.');
-      _proxyClass = new ProxyClassLoader().loadClass(cleanName, buffer);
+      _proxyClass = (Class<X>) new ProxyClassLoader().loadClass(cleanName, buffer);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

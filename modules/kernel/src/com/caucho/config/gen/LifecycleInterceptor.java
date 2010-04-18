@@ -39,6 +39,7 @@ import java.util.*;
 import javax.annotation.security.*;
 import javax.ejb.*;
 import javax.interceptor.*;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 
 /**
@@ -47,26 +48,26 @@ import javax.enterprise.inject.spi.Bean;
 public class LifecycleInterceptor {
   private static final L10N L = new L10N(LifecycleInterceptor.class);
 
-  private Class _annType;
+  private Class<? extends Annotation> _annType;
   
-  private ArrayList<Class> _defaultInterceptors = new ArrayList<Class>();
-  private ArrayList<Class> _classInterceptors = new ArrayList<Class>();
+  private ArrayList<Class<?>> _defaultInterceptors = new ArrayList<Class<?>>();
+  private ArrayList<Class<?>> _classInterceptors = new ArrayList<Class<?>>();
 
   private boolean _isExcludeDefaultInterceptors;
   private boolean _isExcludeClassInterceptors;
 
   private String _uniqueName;
   
-  private ArrayList<Class> _interceptors = new ArrayList<Class>();
+  private ArrayList<Class<?>> _interceptors = new ArrayList<Class<?>>();
 
   // map from the interceptor class to the local variable for the interceptor
-  private HashMap<Class,String> _interceptorVarMap
-    = new HashMap<Class,String>();
+  private HashMap<Class<?>,String> _interceptorVarMap
+    = new HashMap<Class<?>,String>();
   
   // interceptors we're responsible for initializing
-  private ArrayList<Class> _ownInterceptors = new ArrayList<Class>();
+  private ArrayList<Class<?>> _ownInterceptors = new ArrayList<Class<?>>();
 
-  public LifecycleInterceptor(Class annType)
+  public LifecycleInterceptor(Class<? extends Annotation> annType)
   {
     _annType = annType;
   }
@@ -79,7 +80,7 @@ public class LifecycleInterceptor {
     return _interceptors.size() > 0;
   }
 
-  public ArrayList<Class> getInterceptors()
+  public ArrayList<Class<?>> getInterceptors()
   {
     return _interceptors;
   }
@@ -88,14 +89,14 @@ public class LifecycleInterceptor {
    * Introspects the @Interceptors annotation on the method
    * and the class.
    */
-  public void introspect(ApiClass implClass)
+  public void introspect(AnnotatedType<?> implClass)
   {
     Interceptors iAnn;
     
     iAnn = implClass.getAnnotation(Interceptors.class);
 
     if (iAnn != null) {
-      for (Class iClass : iAnn.value()) {
+      for (Class<?> iClass : iAnn.value()) {
 	introspectClass(iClass);
       }
     }
@@ -103,14 +104,14 @@ public class LifecycleInterceptor {
     _interceptors.addAll(_classInterceptors);
   }
 
-  private void introspectClass(Class iClass)
+  private void introspectClass(Class<?> iClass)
   {
     if (findInterceptorMethod(iClass) != null) {
       _classInterceptors.add(iClass);
     }
   }
 
-  private Method findInterceptorMethod(Class cl)
+  private Method findInterceptorMethod(Class<?> cl)
   {
     for (Method method : cl.getMethods()) {
       if (method.isAnnotationPresent(_annType)

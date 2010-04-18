@@ -57,12 +57,12 @@ public abstract class TypeLiteral<T>
   {
     Type type = getType();
 
-    if (type instanceof Class)
-      return (Class) type;
+    if (type instanceof Class<?>)
+      return (Class<T>) type;
     else if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
 
-      return (Class) pType.getRawType();
+      return (Class<T>) pType.getRawType();
     }
     else
       throw new UnsupportedOperationException(type.toString());
@@ -79,10 +79,10 @@ public abstract class TypeLiteral<T>
   {
     if (this == o)
       return true;
-    else if (! (o instanceof TypeLiteral))
+    else if (! (o instanceof TypeLiteral<?>))
       return false;
 
-    TypeLiteral lit = (TypeLiteral) o;
+    TypeLiteral<?> lit = (TypeLiteral<?>) o;
 
     return getType().equals(lit.getType());
   }

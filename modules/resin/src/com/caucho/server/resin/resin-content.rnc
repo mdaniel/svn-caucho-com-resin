@@ -495,6 +495,10 @@ r_port-Parameters =
    & (attribute keepalive-max { r_int-Type }
       | element keepalive-max { r_int-Type })?
 
+   & r_keepalive-select-enable?
+
+   & r_keepalive-select-thread-timeout?
+
    & (attribute keepalive-timeout { r_period-Type }
       | element keepalive-timeout { r_period-Type })?
 

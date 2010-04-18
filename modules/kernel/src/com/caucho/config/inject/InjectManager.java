@@ -47,6 +47,7 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,7 +109,7 @@ import com.caucho.config.ContextDependent;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.ModulePrivate;
 import com.caucho.config.ModulePrivateLiteral;
-import com.caucho.config.el.WebBeansContextResolver;
+import com.caucho.config.el.CandiContextResolver;
 import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
@@ -216,8 +217,8 @@ public class InjectManager
   private HashMap<String,ArrayList<Bean<?>>> _selfNamedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
 
-  private HashMap<Class<?>,ObserverMap> _extObserverMap
-    = new HashMap<Class<?>,ObserverMap>();
+  private ConcurrentHashMap<Class<?>,ObserverMap> _extObserverMap
+    = new ConcurrentHashMap<Class<?>,ObserverMap>();
 
   private HashMap<String,Bean<?>> _selfPassivationBeanMap
     = new HashMap<String,Bean<?>>();
@@ -232,8 +233,8 @@ public class InjectManager
   private HashMap<String,ArrayList<Bean<?>>> _namedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
 
-  private HashMap<Class<?>,ObserverMap> _observerMap
-    = new HashMap<Class<?>,ObserverMap>();
+  private ConcurrentHashMap<Class<?>,ObserverMap> _observerMap
+    = new ConcurrentHashMap<Class<?>,ObserverMap>();
 
   private HashMap<Type,Bean<?>> _newBeanMap
     = new HashMap<Type,Bean<?>>();
@@ -253,8 +254,8 @@ public class InjectManager
   private HashMap<Class<?>,Context> _contextMap
     = new HashMap<Class<?>,Context>();
 
-  private HashMap<Class<?>,ArrayList<ObserverMap>> _observerListCache
-    = new HashMap<Class<?>,ArrayList<ObserverMap>>();
+  private ConcurrentHashMap<Class<?>,ArrayList<ObserverMap>> _observerListCache
+    = new ConcurrentHashMap<Class<?>,ArrayList<ObserverMap>>();
 
   private ArrayList<InterceptorEntry<?>> _interceptorList
     = new ArrayList<InterceptorEntry<?>>();
@@ -282,7 +283,7 @@ public class InjectManager
   private boolean _isAfterBeanDiscoveryComplete;
 
   // XXX: needs to be a local resolver
-  private ELResolver _elResolver = new WebBeansContextResolver();
+  private ELResolver _elResolver = new CandiContextResolver(this);
 
   private DependentContext _dependentContext = new DependentContext();
   private SingletonScope _singletonScope;
@@ -1664,6 +1665,7 @@ public class InjectManager
                                                 listToLines(matchBeans)));
   }
 
+  @Override
   public ELResolver getELResolver()
   {
     return _elResolver;
@@ -1673,7 +1675,7 @@ public class InjectManager
   public ExpressionFactory
     wrapExpressionFactory(ExpressionFactory expressionFactory)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return expressionFactory;
   }
 
   //
@@ -1812,21 +1814,19 @@ public class InjectManager
     }
     */
 
-    synchronized (_observerMap) {
-      ObserverMap map = _observerMap.get(eventType);
+    ObserverMap map = _observerMap.get(eventType);
 
-      if (map == null) {
-        map = new ObserverMap(eventType);
-        _observerMap.put(eventType, map);
-      }
-
-      map.addObserver(observer, eventBaseType, bindings);
+    if (map == null) {
+      map = new ObserverMap(eventType);
+      ObserverMap oldMap = _observerMap.putIfAbsent(eventType, map);
+        
+      if (oldMap != null)
+        map = oldMap;
     }
 
-    synchronized (_observerListCache) {
-      // XXX: mark the map as changed
-      _observerListCache.clear();
-    }
+    map.addObserver(observer, eventBaseType, bindings);
+
+    _observerListCache.clear();
   }
 
   /**
@@ -1848,7 +1848,7 @@ public class InjectManager
    * @param observer the observer object
    * @param bindings the binding set for the event
    */
-  private void addObserver(HashMap<Class<?>,ObserverMap> observerMap,
+  private void addObserver(ConcurrentHashMap<Class<?>,ObserverMap> observerMap,
                            ObserverMethod<?> observer,
                            BaseType eventBaseType,
                            Annotation... bindings)
@@ -1865,21 +1865,22 @@ public class InjectManager
     }
     */
 
-    synchronized (observerMap) {
-      ObserverMap map = observerMap.get(eventType);
+    ObserverMap map = observerMap.get(eventType);
 
-      if (map == null) {
-        map = new ObserverMap(eventType);
-        observerMap.put(eventType, map);
-      }
-
-      map.addObserver(observer, eventBaseType, bindings);
+    if (map == null) {
+      map = new ObserverMap(eventType);
+      
+      ObserverMap oldMap;
+      
+      oldMap = observerMap.putIfAbsent(eventType, map);
+      
+      if (oldMap != null)
+        map = oldMap;
     }
 
-    synchronized (_observerListCache) {
-      // XXX: mark the map as changed
-      _observerListCache.clear();
-    }
+    map.addObserver(observer, eventBaseType, bindings);
+
+    _observerListCache.clear();
   }
 
   /**
@@ -1958,19 +1959,18 @@ public class InjectManager
 
     ArrayList<ObserverMap> observerList;
 
-    synchronized (_observerListCache) {
-      observerList = _observerListCache.get(event.getClass());
+    observerList = _observerListCache.get(event.getClass());
+    
+    if (observerList == null) {
+      observerList = new ArrayList<ObserverMap>();
 
-      if (observerList == null) {
-        observerList = new ArrayList<ObserverMap>();
+      fillLocalObserverList(_observerMap, observerList, eventType);
 
-        fillLocalObserverList(_observerMap, observerList, eventType);
-
-        _observerListCache.put(event.getClass(), observerList);
-      }
+      _observerListCache.put(event.getClass(), observerList);
     }
-
+    
     int size = observerList.size();
+    
     for (int i = 0; i < size; i++) {
       observerList.get(i).fireEvent(event, eventType, bindings);
     }
@@ -2007,18 +2007,16 @@ public class InjectManager
   {
     ArrayList<ObserverMap> observerList;
 
-    synchronized (_observerListCache) {
-      observerList = _observerListCache.get(cl);
+    observerList = _observerListCache.get(cl);
 
-      if (observerList == null) {
-        observerList = new ArrayList<ObserverMap>();
+    if (observerList == null) {
+      observerList = new ArrayList<ObserverMap>();
 
-        BaseType eventType = createClassBaseType(cl);
+      BaseType eventType = createClassBaseType(cl);
 
-        fillLocalObserverList(_observerMap, observerList, eventType);
+      fillLocalObserverList(_observerMap, observerList, eventType);
 
-        _observerListCache.put(cl, observerList);
-      }
+      _observerListCache.put(cl, observerList);
     }
 
     return observerList;
@@ -2034,7 +2032,7 @@ public class InjectManager
     fireLocalEvent(_extObserverMap, event, eventType, bindings);
   }
 
-  private void fireLocalEvent(HashMap<Class<?>,ObserverMap> localMap,
+  private void fireLocalEvent(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
                               Object event, Annotation... bindings)
   {
     // ioc/0062 - class with type-param handled specially
@@ -2043,7 +2041,7 @@ public class InjectManager
     fireLocalEvent(localMap, event, eventType, bindings);
   }
   
-  private void fireLocalEvent(HashMap<Class<?>,ObserverMap> localMap,
+  private void fireLocalEvent(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
                               Object event, BaseType eventType,
                               Annotation... bindings)
   {
@@ -2057,24 +2055,25 @@ public class InjectManager
     }
   }
 
-  private void fillLocalObserverList(HashMap<Class<?>,ObserverMap> localMap,
+  private void fillLocalObserverList(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
                                      ArrayList<ObserverMap> list,
                                      BaseType eventType)
   {
-    Class<?> cl = eventType.getRawClass();
+    for (Type type : eventType.getTypeClosure(this)) {
+      Class<?> rawClass = null;
+      
+      if (type instanceof Class<?>)
+        rawClass = (Class<?>) type;
+      else if (type instanceof BaseType)
+        rawClass = ((BaseType) type).getRawClass();
+      else
+        throw new IllegalStateException();
 
-    // XXX: generic
-    if (cl.getSuperclass() != null)
-      fillLocalObserverList(localMap, list, createBaseType(cl.getSuperclass()));
+      ObserverMap map = localMap.get(rawClass);
 
-    for (Class<?> iface : cl.getInterfaces()) {
-      fillLocalObserverList(localMap, list, createBaseType(iface));
+      if (map != null && ! list.contains(map))
+        list.add(map);
     }
-
-    ObserverMap map = localMap.get(eventType.getRawClass());
-    
-    if (map != null)
-      list.add(map);
   }
 
   //
@@ -2999,11 +2998,13 @@ public class InjectManager
         _passivatingScopeSet.add(scopeType);
     }
 
+    @Override
     public void addStereotype(Class<? extends Annotation> stereotype,
                               Annotation... stereotypeDef)
     {
     }
 
+    @Override
     public void addInterceptorBinding(Class<? extends Annotation> bindingType,
                                       Annotation... bindings)
     {

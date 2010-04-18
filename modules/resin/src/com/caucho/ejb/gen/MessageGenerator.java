@@ -37,29 +37,32 @@ import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.ejb.MessageDrivenBean;
+import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.BusinessMethodGenerator;
 import com.caucho.config.gen.View;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * Generates the skeleton for a message bean.
  */
-public class MessageGenerator extends BeanGenerator {
-  private MessageView _view;
-  private ArrayList<View> _views = new ArrayList<View>();
+@Module
+public class MessageGenerator<X> extends BeanGenerator<X> {
+  private MessageView<X,?> _view;
+  private ArrayList<View<X,?>> _views = new ArrayList<View<X,?>>();
   
-  public MessageGenerator(String ejbName, ApiClass ejbClass)
+  public MessageGenerator(String ejbName, AnnotatedType<X> ejbClass)
   {
-    super(toFullClassName(ejbName, ejbClass.getSimpleName()), ejbClass);
+    super(toFullClassName(ejbName, ejbClass.getJavaClass().getName()), ejbClass);
   }
 
   private static String toFullClassName(String ejbName, String className)
   {
     StringBuilder sb = new StringBuilder();
 
+    /*
     sb.append("_ejb.");
 
     if (! Character.isJavaIdentifierStart(ejbName.charAt(0)))
@@ -78,18 +81,21 @@ public class MessageGenerator extends BeanGenerator {
 
     sb.append(".");
     sb.append(className);
+    */
+    sb.append(className);
     sb.append("__BeanContext");
 
     return sb.toString();
   }
 
-  public void setApi(ApiClass api)
+  public <T> void setApi(AnnotatedType<T> api)
   {
-    _view = new MessageView(this, api);
+    _view = new MessageView<X,T>(this, api);
     _views.add(_view);
   }
 
-  public ArrayList<View> getViews()
+  @Override
+  public ArrayList<View<X,?>> getViews()
   {
     return _views;
   }
@@ -102,7 +108,7 @@ public class MessageGenerator extends BeanGenerator {
   {
     super.introspect();
     
-    for (View view : getViews())
+    for (View<X,?> view : getViews())
       view.introspect();
   }
   
@@ -132,7 +138,7 @@ public class MessageGenerator extends BeanGenerator {
     
     out.println();
     out.println("public class " + getClassName()
-		+ " extends " + getBeanClass().getName()
+		+ " extends " + getBeanClass().getJavaClass().getName()
 		+ " implements MessageEndpoint, CauchoMessageEndpoint");
     out.println("{");
     out.pushDepth();
@@ -152,7 +158,7 @@ public class MessageGenerator extends BeanGenerator {
 
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("caucho.ejb.xa", "true");
-    for (View view : getViews()) {
+    for (View<X,?> view : getViews()) {
       // view.generateContextPrologue(out);
       view.generateBeanPrologue(out, map);
     }
@@ -179,9 +185,9 @@ public class MessageGenerator extends BeanGenerator {
     out.println("try {");
     out.pushDepth();
 
-    for (BusinessMethodGenerator bizMethod : _view.getMethods()) {
+    for (BusinessMethodGenerator<X,?> bizMethod : _view.getMethods()) {
       if (REQUIRED.equals(bizMethod.getXa().getTransactionType())) {
-	Method api = bizMethod.getApiMethod().getMethod();
+	Method api = bizMethod.getApiMethod().getJavaMember();
 	
 	out.print("_xaMethods.add(");
 	out.printClass(api.getDeclaringClass());
@@ -233,7 +239,7 @@ public class MessageGenerator extends BeanGenerator {
     out.println("{");
     out.pushDepth();
 
-    if (getBeanClass().hasMethod("ejbRemove", new Class[0])) {
+    if (_view.getImplMethod("ejbRemove", new Class[0]) != null) {
       out.println("ejbRemove();");
     }
     

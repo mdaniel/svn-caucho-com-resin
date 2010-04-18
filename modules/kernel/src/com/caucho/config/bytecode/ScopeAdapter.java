@@ -29,22 +29,29 @@
 
 package com.caucho.config.bytecode;
 
-import java.io.*;
-import java.util.*;
+import java.io.ByteArrayOutputStream;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.*;
 
 import javax.enterprise.inject.spi.Bean;
 
-import com.caucho.bytecode.*;
-import com.caucho.config.*;
-import com.caucho.inject.Module;
-import com.caucho.loader.*;
-import com.caucho.config.cfg.*;
+import com.caucho.bytecode.CodeWriterAttribute;
+import com.caucho.bytecode.JavaClass;
+import com.caucho.bytecode.JavaClassLoader;
+import com.caucho.bytecode.JavaField;
+import com.caucho.bytecode.JavaMethod;
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.util.*;
-import com.caucho.vfs.*;
+import com.caucho.inject.Module;
+import com.caucho.loader.DynamicClassLoader;
+import com.caucho.loader.ProxyClassLoader;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Vfs;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Scope adapting
@@ -108,7 +115,19 @@ public class ScopeAdapter {
       String thisClassName = typeClassName + "__ResinScopeProxy";
       String cleanName = thisClassName.replace('/', '.');
       
-      DynamicClassLoader loader = (DynamicClassLoader) Thread.currentThread().getContextClassLoader();
+      boolean isPackagePrivate = false;
+      
+      DynamicClassLoader loader;
+      
+      if (! Modifier.isPublic(cl.getModifiers()) 
+          && ! Modifier.isProtected(cl.getModifiers())) {
+        isPackagePrivate = true;
+      }
+
+      if (isPackagePrivate)
+        loader = (DynamicClassLoader) cl.getClassLoader();
+      else
+        loader = (DynamicClassLoader) Thread.currentThread().getContextClassLoader();
       
       try {
         _proxyClass = Class.forName(cleanName, false, loader);
@@ -196,8 +215,15 @@ public class ScopeAdapter {
          * (IOException e) { }
          */
 
-        // ioc/0517
-        _proxyClass = loader.loadClass(cleanName, buffer);
+        if (isPackagePrivate) {
+          // ioc/0517
+          _proxyClass = loader.loadClass(cleanName, buffer);
+        }
+        else {
+          ProxyClassLoader proxyLoader = new ProxyClassLoader(loader);
+          
+          _proxyClass = proxyLoader.loadClass(cleanName, buffer);
+        }
       }
       
       _proxyCtor = _proxyClass.getConstructors()[0];

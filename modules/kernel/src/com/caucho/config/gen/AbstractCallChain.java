@@ -32,20 +32,55 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.util.HashMap;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * Represents a filter for invoking a method
  */
-abstract public class AbstractCallChain implements EjbCallChain {
-  private EjbCallChain _next;
+@Module
+abstract public class AbstractCallChain<X,T> implements EjbCallChain<X,T> {
+  private BusinessMethodGenerator<X,T> _bizMethod;
+  
+  private EjbCallChain<X,T> _next;
 
-  AbstractCallChain(EjbCallChain next)
+  AbstractCallChain(BusinessMethodGenerator<X,T> bizMethod,
+                    EjbCallChain<X,T> next)
   {
+    _bizMethod = bizMethod;
+    
     if (next == null)
       throw new NullPointerException();
 
     _next = next;
+  }
+
+  protected BusinessMethodGenerator<X,T> getBusinessMethod()
+  {
+    return _bizMethod;
+  }
+  
+  protected AnnotatedType<T> getApiType()
+  {
+    return _bizMethod.getApiType();
+  }
+  
+  protected AnnotatedType<X> getImplType()
+  {
+    return _bizMethod.getBeanClass();
+  }
+  
+  protected AnnotatedMethod<? super T> getApiMethod()
+  {
+    return _bizMethod.getApiMethod();
+  }
+  
+  protected AnnotatedMethod<? super X> getImplMethod()
+  {
+    return _bizMethod.getImplMethod();
   }
   
   //
@@ -62,7 +97,8 @@ abstract public class AbstractCallChain implements EjbCallChain {
    * Introspects the method for the default values
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod)
   {
   }
   
@@ -119,6 +155,7 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Generates pre-async dispatch code.
    */
+  @Override
   public void generateAsync(JavaWriter out)
     throws IOException
   {
@@ -128,6 +165,7 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Generates code before the try block
    */
+  @Override
   public void generatePreTry(JavaWriter out)
     throws IOException
   {
@@ -146,6 +184,7 @@ abstract public class AbstractCallChain implements EjbCallChain {
    * }
    * </pre></code>
    */
+  @Override
   public void generatePreCall(JavaWriter out)
     throws IOException
   {
@@ -155,6 +194,7 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Generates the method interception code
    */
+  @Override
   public void generateCall(JavaWriter out) 
     throws IOException
   {
@@ -177,6 +217,7 @@ abstract public class AbstractCallChain implements EjbCallChain {
    * }
    * </pre></code>
    */
+  @Override
   public void generatePostCall(JavaWriter out)
     throws IOException
   {
@@ -210,17 +251,18 @@ abstract public class AbstractCallChain implements EjbCallChain {
   /**
    * Generates finally code for the method
    */
+  @Override
   public void generateFinally(JavaWriter out)
     throws IOException
   {
     _next.generateFinally(out);
   }
 
-  protected <T extends Annotation> T getAnnotation(Class<T> annotationType,
-                                                   ApiMethod apiMethod, 
-                                                   ApiMethod implMethod)
+  protected <Z extends Annotation> Z getAnnotation(Class<Z> annotationType,
+                                                   AnnotatedMethod<?> apiMethod, 
+                                                   AnnotatedMethod<?> implMethod)
   {
-    Annotation annotation;
+    Z annotation;
 
     annotation = apiMethod.getAnnotation(annotationType);
 
@@ -228,14 +270,14 @@ abstract public class AbstractCallChain implements EjbCallChain {
       annotation = implMethod.getAnnotation(annotationType);
     }
 
-    return (T) annotation;
+    return annotation;
   }
   
-  protected <T extends Annotation> T getAnnotation(Class<T> annotationType,
-                                                   ApiClass apiClass,
-                                                   ApiClass implClass)
+  protected <Z extends Annotation> Z getAnnotation(Class<Z> annotationType,
+                                                   AnnotatedType<?> apiClass,
+                                                   AnnotatedType<?> implClass)
   {
-    Annotation annotation;
+    Z annotation;
 
     annotation = apiClass.getAnnotation(annotationType);
   
@@ -243,16 +285,16 @@ abstract public class AbstractCallChain implements EjbCallChain {
       annotation = implClass.getAnnotation(annotationType);
     }
 
-    return (T) annotation;    
+    return annotation;    
   }
   
-  protected <T extends Annotation> T getAnnotation(Class<T> annotationType,
-                                                   ApiMethod apiMethod, 
-                                                   ApiClass apiClass,
-                                                   ApiMethod implementationMethod, 
-                                                   ApiClass implementationClass) 
+  protected <Z extends Annotation> Z getAnnotation(Class<Z> annotationType,
+                                                   AnnotatedMethod<?> apiMethod, 
+                                                   AnnotatedType<?> apiClass,
+                                                   AnnotatedMethod<?> implementationMethod, 
+                                                   AnnotatedType<?> implementationClass) 
   {
-    Annotation annotation;
+    Z annotation;
 
     annotation = apiMethod.getAnnotation(annotationType);
 
@@ -268,6 +310,12 @@ abstract public class AbstractCallChain implements EjbCallChain {
       annotation = implementationClass.getAnnotation(annotationType);
     }
 
-    return (T) annotation;
+    return annotation;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _bizMethod + "]";
   }
 }

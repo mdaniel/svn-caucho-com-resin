@@ -29,42 +29,32 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.ApiMethod;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
 import com.caucho.config.gen.BusinessMethodGenerator;
 import com.caucho.config.gen.EjbCallChain;
 import com.caucho.config.gen.XaCallChain;
+import com.caucho.inject.Module;
 
 /**
  * Represents a message local business method
  */
-public class MessageMethod extends BusinessMethodGenerator
+@Module
+public class MessageMethod<X,T> extends BusinessMethodGenerator<X,T>
 {
-  public MessageMethod(MessageView view,
-		       ApiMethod apiMethod,
-		       ApiMethod implMethod,
+  public MessageMethod(MessageView<X,T> view,
+		       AnnotatedMethod<? super T> apiMethod,
+		       AnnotatedMethod<? super X> implMethod,
 		       int index)
   {
     super(view, apiMethod, implMethod, index);
   }
 
   @Override
-  protected XaCallChain createXa(EjbCallChain next)
+  protected XaCallChain<X,T> createXa(EjbCallChain<X,T> next)
   {
-    return new MessageXaCallChain(this, next);
+    return new MessageXaCallChain<X,T>(this, next);
   }
-
-  /**
-   * Session bean default is REQUIRED
-   */
-  /*
-  @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
-  {
-    getXa().setTransactionType(TransactionAttributeType.REQUIRED);
-
-    super.introspect(apiMethod, implMethod);
-  }
-  */
 
   /**
    * Returns true if any interceptors enhance the business method

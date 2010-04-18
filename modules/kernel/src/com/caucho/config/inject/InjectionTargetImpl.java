@@ -348,9 +348,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (_isGenerateInterception) {
         if (! _beanType.isAnnotationPresent(javax.interceptor.Interceptor.class)
             && ! _beanType.isAnnotationPresent(javax.decorator.Decorator.class)) {
-          ApiClass apiClass = new ApiClass(_beanType, true);
-
-          PojoBean bean = new PojoBean(apiClass);
+          PojoBean<X> bean = new PojoBean<X>(_beanType);
           bean.introspect();
 
           instanceClass = (Class<X>) bean.generateClass();
@@ -364,7 +362,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (instanceClass != null && instanceClass != _instanceClass) {
         try {
           if (_javaCtor != null) {
-            _javaCtor = instanceClass.getConstructor(_javaCtor.getParameterTypes());
+            _javaCtor = (Constructor<X>) getConstructor(instanceClass, _javaCtor.getParameterTypes());
             _javaCtor.setAccessible(true);
           }
 
@@ -376,6 +374,29 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         }
       }
     }
+  }
+  
+  private static Constructor<?> getConstructor(Class<?> cl, Class<?> []paramTypes)
+  {
+    for (Constructor<?> ctor : cl.getDeclaredConstructors()) {
+      if (isMatch(ctor.getParameterTypes(), paramTypes))
+        return ctor;
+    }
+    
+    throw new IllegalStateException("No matching constructor found for " + cl);
+  }
+  
+  private static boolean isMatch(Class<?> []paramTypesA, Class<?> []paramTypesB)
+  {
+    if (paramTypesA.length != paramTypesB.length)
+      return false;
+    
+    for (int i = paramTypesA.length - 1; i >= 0; i--) {
+      if (! paramTypesA[i].equals(paramTypesB[i]))
+        return false;
+    }
+    
+    return true;
   }
 
   public static void

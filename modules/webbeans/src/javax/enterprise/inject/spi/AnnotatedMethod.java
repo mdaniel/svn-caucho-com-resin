@@ -29,9 +29,7 @@
 
 package javax.enterprise.inject.spi;
 
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Method;
-import java.util.List;
 
 /**
  * Abstract introspected view of a Bean injectible method

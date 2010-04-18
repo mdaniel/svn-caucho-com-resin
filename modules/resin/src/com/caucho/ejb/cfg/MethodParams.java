@@ -29,58 +29,54 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.gen.ApiMethod;
-import com.caucho.util.L10N;
-
+import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.lang.reflect.*;
+
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.inject.Module;
 
 /**
  * Configuration for method-params.
  */
+@Module
 public class MethodParams {
-  private static final L10N L = new L10N(MethodParams.class);
-
-  private ArrayList<Class> _methodParams
-    = new ArrayList<Class>();
+  private ArrayList<Class<?>> _methodParams
+    = new ArrayList<Class<?>>();
 
   public MethodParams()
   {
   }
 
-  public void addMethodParam(Class methodParam)
+  public void addMethodParam(Class<?> methodParam)
   {
     _methodParams.add(methodParam);
   }
 
-  public boolean isMatch(ApiMethod otherMethod)
+  public boolean isMatch(AnnotatedMethod<?> otherMethod)
   {
-    Class otherParams[] = otherMethod.getParameterTypes();
+    Class<?> otherParams[] = otherMethod.getJavaMember().getParameterTypes();
 
-    if (otherParams.length != _methodParams.size())
-      return false;
-
-    for (int i = 0; i < otherParams.length; i++) {
-      if (! _methodParams.get(i).equals(otherParams[i]))
-        return false;
-    }
-
-    return true;
+    return isMatch(otherParams);
   }
 
   public boolean isMatch(Method otherMethod)
   {
-    Class otherParams[] = otherMethod.getParameterTypes();
+    Class<?> otherParams[] = otherMethod.getParameterTypes();
 
+    return isMatch(otherParams);
+  }
+  
+  private boolean isMatch(Class<?> []otherParams)
+  {
     if (otherParams.length != _methodParams.size())
       return false;
-
+    
     for (int i = 0; i < otherParams.length; i++) {
-      if (! _methodParams.get(i).equals(otherParams[i]))
+      if (! otherParams[i].equals(_methodParams.get(i)))
         return false;
     }
-
+    
     return true;
   }
 }

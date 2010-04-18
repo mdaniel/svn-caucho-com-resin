@@ -32,42 +32,51 @@ package com.caucho.ejb.gen;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import com.caucho.config.gen.ApiClass;
-import com.caucho.config.gen.View;
-import com.caucho.java.JavaWriter;
 import javax.ejb.Singleton;
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.config.gen.View;
+import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
 
 /**
  * Generates the skeleton for a singleton bean.
  */
-public class SingletonGenerator extends SessionGenerator {
-  public SingletonGenerator(String ejbName, ApiClass ejbClass,
-                           ArrayList<ApiClass> localApi,
-                           ArrayList<ApiClass> remoteApi) {
-    super(ejbName, ejbClass, localApi, remoteApi, Singleton.class
-        .getSimpleName());
+@Module
+public class SingletonGenerator<X> extends SessionGenerator<X> {
+  public SingletonGenerator(String ejbName, AnnotatedType<X> ejbClass,
+                            ArrayList<AnnotatedType<?>> localApi,
+                            ArrayList<AnnotatedType<?>> remoteApi)
+  {
+    super(ejbName, ejbClass, localApi, remoteApi, 
+          Singleton.class.getSimpleName());
   }
 
-  public boolean isStateless() {
+  @Override
+  public boolean isStateless()
+  {
     return false;
   }
 
   @Override
-  protected View createLocalView(ApiClass api) {
-    return new SingletonView(this, api);
+  protected <T> View<X,T> createLocalView(AnnotatedType<T> api)
+  {
+    return new SingletonView<X,T>(this, api);
   }
 
   @Override
-  protected View createRemoteView(ApiClass api) {
-    return new SingletonView(this, api);
+  protected <T> View<X,T> createRemoteView(AnnotatedType<T> api)
+  {
+    return new SingletonView<X,T>(this, api);
   }
 
   /**
    * Scans for the @Local interfaces
    */
   @Override
-  protected ArrayList<ApiClass> introspectLocalDefault() {
-    ArrayList<ApiClass> apiClass = new ArrayList<ApiClass>();
+  protected ArrayList<AnnotatedType<?>> introspectLocalDefault()
+  {
+    ArrayList<AnnotatedType<?>> apiClass = new ArrayList<AnnotatedType<?>>();
 
     apiClass.add(getBeanClass());
 
@@ -78,7 +87,8 @@ public class SingletonGenerator extends SessionGenerator {
    * Generates the singleton session bean
    */
   @Override
-  public void generate(JavaWriter out) throws IOException {    
+  public void generate(JavaWriter out) throws IOException
+  {    
     generateTopComment(out);
 
     out.println();
@@ -105,7 +115,7 @@ public class SingletonGenerator extends SessionGenerator {
 
     out.println("super(manager);");
 
-    for (View view : getViews()) {
+    for (View<X,?> view : getViews()) {
       view.generateContextHomeConstructor(out);
     }
 
@@ -113,9 +123,8 @@ public class SingletonGenerator extends SessionGenerator {
     out.println("}");
 
     out.println();
-    out
-        .println("public " + getClassName() + "(" + getClassName()
-            + " context)");
+    out.println("public " + getClassName() + "(" + getClassName()
+                + " context)");
     out.println("{");
     out.pushDepth();
 
@@ -126,7 +135,7 @@ public class SingletonGenerator extends SessionGenerator {
     out.popDepth();
     out.println("}");
 
-    for (View view : getViews()) {
+    for (View<X,?> view : getViews()) {
       view.generateContextPrologue(out);
     }
 
@@ -139,15 +148,16 @@ public class SingletonGenerator extends SessionGenerator {
     out.println("}");
   }
 
-  protected void generateCreateProvider(JavaWriter out) throws IOException {
+  protected void generateCreateProvider(JavaWriter out) throws IOException
+  {
     out.println();
     out.println("@Override");
     out.println("public SingletonProxyFactory getProxyFactory(Class api)");
     out.println("{");
     out.pushDepth();
 
-    for (View view : getViews()) {
-      SingletonView sView = (SingletonView) view;
+    for (View<X,?> view : getViews()) {
+      SingletonView<X,?> sView = (SingletonView<X,?>) view;
 
       sView.generateCreateProvider(out, "api");
     }
@@ -163,12 +173,15 @@ public class SingletonGenerator extends SessionGenerator {
    * Creates any additional code in the constructor
    */
   public void generateContextObjectConstructor(JavaWriter out)
-      throws IOException {
-    for (View view : getViews()) {
+      throws IOException
+  {
+    for (View<X,?> view : getViews()) {
       view.generateContextObjectConstructor(out);
     }
   }
 
-  protected void generateContext(JavaWriter out) {
+  @Override
+  protected void generateContext(JavaWriter out)
+  {
   }
 }

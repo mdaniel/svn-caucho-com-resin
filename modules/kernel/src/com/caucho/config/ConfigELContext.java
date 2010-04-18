@@ -31,7 +31,7 @@ package com.caucho.config;
 
 import com.caucho.el.StackELResolver;
 import com.caucho.el.SystemPropertiesResolver;
-import com.caucho.config.el.WebBeansContextResolver;
+import com.caucho.config.el.CandiContextResolver;
 import com.caucho.config.el.ConfigContextResolver;
 
 import javax.el.*;
@@ -93,7 +93,7 @@ public class ConfigELContext extends ELContext {
     
     _stackResolver.push(new SystemPropertiesResolver());
     _stackResolver.push(new ConfigPropertiesResolver());
-    _stackResolver.push(new WebBeansContextResolver());
+    _stackResolver.push(new CandiContextResolver());
     _stackResolver.push(new ConfigContextResolver());
     
     EL_CONTEXT = new ConfigELContext();

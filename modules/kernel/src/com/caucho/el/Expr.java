@@ -64,17 +64,12 @@ public abstract class Expr extends ValueExpression {
     = Logger.getLogger(Expr.class.getName());
   protected static final L10N L = new L10N(Expr.class);
 
-  private static final Character NULL_CHAR
-    = new Character((char) 0);
-  
-  private static final long DAY = 24L * 3600L * 1000L;
-
   private static final BigDecimal BIG_DECIMAL_ZERO = new BigDecimal("0");
 
   private static final BigInteger BIG_INTEGER_ZERO = new BigInteger("0");
   
-  private static final HashMap<Class,CoerceType> _coerceMap
-    = new HashMap<Class,CoerceType>();
+  private static final HashMap<Class<?>,CoerceType> _coerceMap
+    = new HashMap<Class<?>,CoerceType>();
 
   // lexeme codes
   final static int ADD = 1;

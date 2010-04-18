@@ -30,7 +30,6 @@
 package javax.enterprise.inject.spi;
 
 import java.lang.reflect.Member;
-import java.util.List;
 
 /**
  * Abstract introspected view of a Bean injectible method

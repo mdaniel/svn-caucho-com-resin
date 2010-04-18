@@ -34,33 +34,36 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
 import com.caucho.config.ConfigException;
-import com.caucho.config.gen.ApiClass;
-import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BusinessMethodGenerator;
 import com.caucho.config.gen.View;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
  * Represents a public interface to a stateful bean, e.g. a stateful view
  */
-public class StatefulView extends View {
+@Module
+public class StatefulView<X,T> extends View<X,T> {
   private static final L10N L = new L10N(StatefulView.class);
 
-  private StatefulGenerator _sessionBean;
+  private StatefulGenerator<X> _sessionBean;
 
-  private ArrayList<BusinessMethodGenerator> _businessMethods
-    = new ArrayList<BusinessMethodGenerator>();
+  private ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
+    = new ArrayList<BusinessMethodGenerator<X,T>>();
 
-  public StatefulView(StatefulGenerator bean, ApiClass api)
+  public StatefulView(StatefulGenerator<X> bean, AnnotatedType<T> api)
   {
     super(bean, api);
 
     _sessionBean = bean;
   }
 
-  public StatefulGenerator getSessionBean()
+  public StatefulGenerator<X> getSessionBean()
   {
     return _sessionBean;
   }
@@ -79,22 +82,25 @@ public class StatefulView extends View {
     return ! getViewClass().equals(getBeanClass());
   }
 
+  @Override
   public String getViewClassName()
   {
-    return getViewClass().getSimpleName() + "__LocalProxy";
+    return getViewClass().getJavaClass().getSimpleName() + "__LocalProxy";
   }
 
+  @Override
   public String getBeanClassName()
   {
     // XXX:
     // return getViewClass().getSimpleName() + "__Bean";
-    return getViewClass().getSimpleName();
+    return getViewClass().getJavaClass().getSimpleName();
   }
 
   /**
    * Returns the introspected methods
    */
-  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  @Override
+  public ArrayList<BusinessMethodGenerator<X,T>> getMethods()
   {
     return _businessMethods;
   }
@@ -106,26 +112,26 @@ public class StatefulView extends View {
   @Override
   public void introspect()
   {
-    ApiClass apiClass = getViewClass();
-
-    for (ApiMethod apiMethod : apiClass.getMethods()) {
+    AnnotatedType<T> apiClass = getViewClass();
+    
+    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
       Method javaMethod = apiMethod.getJavaMember();
 
       if (javaMethod.getDeclaringClass().equals(Object.class))
         continue;
       if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
-          && ! apiMethod.getName().equals("remove"))
+          && ! javaMethod.getName().equals("remove"))
         continue;
 
-      if (apiMethod.getName().startsWith("ejb")) {
+      if (javaMethod.getName().startsWith("ejb")) {
         throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
                                       javaMethod.getDeclaringClass(),
-                                      apiMethod.getName()));
+                                      javaMethod.getName()));
       }
 
       int index = _businessMethods.size();
 
-      BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
+      BusinessMethodGenerator<X,T> bizMethod = createMethod(apiMethod, index);
 
       if (bizMethod != null) {
         bizMethod.introspect(bizMethod.getApiMethod(),
@@ -143,13 +149,14 @@ public class StatefulView extends View {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
+    out.println("if (" + var + " == " + getViewClass().getJavaClass().getName() + ".class)");
     out.println("  return new " + getViewClassName() + "(getStatefulManager(), true);");
   }
 
   /**
    * Generates the view code.
    */
+  @Override
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -161,10 +168,10 @@ public class StatefulView extends View {
     if (isProxy()) {
       generateExtends(out);
       out.print("  implements StatefulProvider, ");
-      out.println(getViewClass().getName());
+      out.println(getViewClass().getJavaClass().getName());
     }
     else {
-      out.println("  extends " + getBeanClass().getName());
+      out.println("  extends " + getBeanClass().getJavaClass().getName());
       out.println("  implements StatefulProvider");
     }
 
@@ -189,7 +196,7 @@ public class StatefulView extends View {
     
     out.println();
     out.println("public static class " + getBeanClassName());
-    out.println("  extends " + getBeanClass().getName());
+    out.println("  extends " + getBeanClass().getJavaClass().getName());
     out.println("{");
     out.pushDepth();
     
@@ -345,19 +352,19 @@ public class StatefulView extends View {
     out.println("}");
   }
 
-  protected BusinessMethodGenerator
-    createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator<X,T>
+    createMethod(AnnotatedMethod<? super T> apiMethod, int index)
   {
-    ApiMethod implMethod = findImplMethod(apiMethod);
+    AnnotatedMethod<? super X> implMethod = getMethod(apiMethod);
 
     if (implMethod == null)
       return null;
 
-    StatefulMethod bizMethod
-      = new StatefulMethod(this,
-                           apiMethod,
-                           implMethod,
-                           index);
+    StatefulMethod<X,T> bizMethod
+      = new StatefulMethod<X,T>(this,
+                                apiMethod,
+                                implMethod,
+                                index);
 
     return bizMethod;
   }
@@ -372,16 +379,18 @@ public class StatefulView extends View {
   {
   }
 
-  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super T> apiMethod)
   {
-    ApiMethod implMethod = getBeanClass().getMethod(apiMethod);
+    AnnotatedMethod<? super X> implMethod = getMethod(apiMethod);
 
     if (implMethod != null)
       return implMethod;
 
+    Method javaMethod = apiMethod.getJavaMember();
+    
     throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
-                                  apiMethod.getMethod().getDeclaringClass().getSimpleName(),
-                                  apiMethod.getFullName(),
-                                  getBeanClass().getName()));
+                                  javaMethod.getDeclaringClass().getSimpleName(),
+                                  javaMethod.getName(),
+                                  getBeanClass().getJavaClass().getName()));
   }
 }

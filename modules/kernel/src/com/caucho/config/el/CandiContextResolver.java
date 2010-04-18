@@ -43,17 +43,26 @@ import javax.enterprise.inject.spi.Bean;
 /**
  * Variable resolution for webbeans variables
  */
-public class WebBeansContextResolver extends ELResolver {
-  public WebBeansContextResolver()
+public class CandiContextResolver extends ELResolver {
+  private InjectManager _injectManager;
+  
+  public CandiContextResolver(InjectManager injectManager)
+  {
+    _injectManager = injectManager;
+  }
+  
+  public CandiContextResolver()
   {
   }
 
+  @Override
   public Class<?> getCommonPropertyType(ELContext context,
                                         Object base)
   {
     return Object.class;
   }
 
+  @Override
   public Iterator<FeatureDescriptor>
     getFeatureDescriptors(ELContext context, Object base)
   {
@@ -62,6 +71,7 @@ public class WebBeansContextResolver extends ELResolver {
     return list.iterator();
   }
 
+  @Override
   public Class<?> getType(ELContext context,
                           Object base,
                           Object property)
@@ -74,6 +84,7 @@ public class WebBeansContextResolver extends ELResolver {
       return value.getClass();
   }
 
+  @Override
   public Object getValue(ELContext context,
                          Object base,
                          Object property)
@@ -85,10 +96,14 @@ public class WebBeansContextResolver extends ELResolver {
 
     String name = (String) property;
 
-    InjectManager webBeans = InjectManager.getCurrent();
+    InjectManager webBeans = _injectManager;
 
-    if (webBeans == null)
-      return null;
+    if (webBeans == null) {
+      webBeans = InjectManager.getCurrent();
+      
+      if (webBeans == null)
+        return null;
+    }
 
     Set<Bean<?>> beans = webBeans.getBeans(name);
 
@@ -130,6 +145,7 @@ public class WebBeansContextResolver extends ELResolver {
       return null;
   }
 
+  @Override
   public boolean isReadOnly(ELContext context,
                             Object base,
                             Object property)
@@ -139,6 +155,7 @@ public class WebBeansContextResolver extends ELResolver {
     return true;
   }
 
+  @Override
   public void setValue(ELContext context,
                        Object base,
                        Object property,

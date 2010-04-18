@@ -29,42 +29,43 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.util.HashMap;
 
-import java.io.*;
-import java.lang.reflect.*;
-import java.util.*;
-import javax.annotation.security.*;
-import javax.ejb.*;
-import javax.interceptor.*;
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.annotation.security.RunAs;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents the security interception
  */
-public class SecurityCallChain extends AbstractCallChain {
-  private static final L10N L = new L10N(SecurityCallChain.class);
-
-  private BusinessMethodGenerator _bizMethod;
-  private EjbCallChain _next;
+@Module
+public class SecurityCallChain<X,T> extends AbstractCallChain<X,T> {
+  private EjbCallChain<X,T> _next;
 
   private String []_roles;
   private String _roleVar;
 
   private String _runAs;
  
-  public SecurityCallChain(BusinessMethodGenerator bizMethod,
-			   EjbCallChain next)
+  public SecurityCallChain(BusinessMethodGenerator<X,T> bizMethod,
+			   EjbCallChain<X,T> next)
   {
-    super(next);
+    super(bizMethod, next);
     
-    _bizMethod = bizMethod;
     _next = next;
   }
   
   /**
    * Returns true if the business method has any active XA annotation.
    */
+  @Override
   public boolean isEnhanced()
   {
     if (_roles != null)
@@ -76,18 +77,6 @@ public class SecurityCallChain extends AbstractCallChain {
   }
 
   /**
-   * Sets the transaction type
-   */
-  /*
-  public void setRoles(ArrayList<String> roles)
-  {
-    _roles = new String[roles.size()];
-
-    roles.toArray(_roles);
-  }
-  */
-
-  /**
    * Introspect EJB security annotations:
    *   @RunAs
    *   @RolesAllowed
@@ -95,14 +84,11 @@ public class SecurityCallChain extends AbstractCallChain {
    *   @DenyAll
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod)
   {
-    ApiClass apiClass = apiMethod.getDeclaringClass();
-    ApiClass implClass = null;
-
-    if (implMethod != null) {
-      implClass = implMethod.getDeclaringClass();
-    }
+    AnnotatedType<? super T> apiClass = apiMethod.getDeclaringType();
+    AnnotatedType<X> implClass = getImplType();
 
     RunAs runAs = getAnnotation(RunAs.class, apiClass, implClass);
     

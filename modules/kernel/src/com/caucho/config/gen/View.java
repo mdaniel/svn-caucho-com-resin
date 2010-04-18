@@ -29,29 +29,33 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import javax.decorator.Decorator;
-import javax.enterprise.inject.Stereotype;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorBinding;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
-import java.util.*;
+import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import javax.decorator.Decorator;
+import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.interceptor.Interceptor;
+import javax.interceptor.InterceptorBinding;
+
+import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-abstract public class View {
-  protected final BeanGenerator _bean;
-  protected final ApiClass _viewClass;
+@Module
+abstract public class View<X,T> {
+  protected final BeanGenerator<X> _bean;
+  protected final AnnotatedType<T> _viewClass;
 
   protected ArrayList<Annotation> _interceptorBindings;
 
-  protected View(BeanGenerator bean, ApiClass viewClass)
+  protected View(BeanGenerator<X> bean, AnnotatedType<T> viewClass)
   {
     _bean = bean;
     _viewClass = viewClass;
@@ -62,7 +66,7 @@ abstract public class View {
   /**
    * Returns the owning bean.
    */
-  protected BeanGenerator getBean()
+  protected BeanGenerator<X> getBean()
   {
     return _bean;
   }
@@ -70,7 +74,7 @@ abstract public class View {
   /**
    * Returns the bean's ejbclass
    */
-  protected ApiClass getBeanClass()
+  protected AnnotatedType<X> getBeanClass()
   {
     return _bean.getBeanClass();
   }
@@ -83,7 +87,7 @@ abstract public class View {
   /**
    * Returns the API class.
    */
-  public ApiClass getViewClass()
+  public AnnotatedType<T> getViewClass()
   {
     return _viewClass;
   }
@@ -114,7 +118,7 @@ abstract public class View {
     introspectClass(getViewClass());
   }
 
-  protected void introspectClass(ApiClass cl)
+  protected void introspectClass(AnnotatedType<T> cl)
   {
     if (cl.isAnnotationPresent(Interceptor.class)
         || cl.isAnnotationPresent(Decorator.class)) {
@@ -157,7 +161,7 @@ abstract public class View {
   /**
    * Returns the introspected methods
    */
-  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  public ArrayList<? extends BusinessMethodGenerator<X,T>> getMethods()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -165,7 +169,7 @@ abstract public class View {
   /**
    * Returns any around-invoke method
    */
-  public ApiMethod getAroundInvokeMethod()
+  public AnnotatedMethod<? super X> getAroundInvokeMethod()
   {
     return getBean().getAroundInvokeMethod();
   }
@@ -236,7 +240,7 @@ abstract public class View {
     throws IOException;
 
   /**
-   * Generates constructor addiontions
+   * Generates constructor additions
    */
   public void generateBeanConstructor(JavaWriter out)
     throws IOException
@@ -246,13 +250,13 @@ abstract public class View {
   }
 
   /**
-   * Generates constructor addiontions
+   * Generates constructor additions
    */
   public void generateBeanConstructor(JavaWriter out, 
-                                          HashMap<String,Object> map)
+                                      HashMap<String,Object> map)
     throws IOException
   {
-    for (BusinessMethodGenerator method : getMethods()) {
+    for (BusinessMethodGenerator<X,T> method : getMethods()) {
       method.generateBeanConstructor(out, map);
     }
   }
@@ -270,10 +274,10 @@ abstract public class View {
    * Generates prologue additions
    */
   public void generateBeanPrologue(JavaWriter out, 
-                                       HashMap<String,Object> map)
+                                   HashMap<String,Object> map)
     throws IOException
   {
-    for (BusinessMethodGenerator method : getMethods()) {
+    for (BusinessMethodGenerator<X,T> method : getMethods()) {
       method.generateBeanPrologue(out, map);
     }
   }
@@ -287,7 +291,7 @@ abstract public class View {
      out.pushDepth();
 
      HashMap<String,Object> map = new HashMap<String,Object>();
-     for (BusinessMethodGenerator method : getMethods()) {
+     for (BusinessMethodGenerator<X,T> method : getMethods()) {
        method.generatePostConstruct(out, map);
      }
 
@@ -303,11 +307,58 @@ abstract public class View {
     throws IOException
   {
     HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator method : getMethods()) {
+    for (BusinessMethodGenerator<X,T> method : getMethods()) {
       method.generate(out, map);
     }
   }
+  
+  protected AnnotatedMethod<? super X> 
+  getMethod(AnnotatedMethod<? super T> method)
+  {
+    Method javaMethod = method.getJavaMember();
+    
+    return getMethod(getBeanClass(), 
+                     javaMethod.getName(), 
+                     javaMethod.getParameterTypes());
+  }
+  
+  protected <Z> AnnotatedMethod<? super Z> getMethod(AnnotatedType<Z> type,
+                                                     Method javaMethod)
+  {
+    return getMethod(type, javaMethod.getName(), javaMethod.getParameterTypes());
+  }
+  
+  protected <Z> AnnotatedMethod<? super Z> getMethod(AnnotatedType<Z> type,
+                                                     String methodName,
+                                                     Class<?> []params)
+  {
+    for (AnnotatedMethod<? super Z> annMethod : type.getMethods()) {
+      Method method = annMethod.getJavaMember();
+      
+      if (! method.getName().equals(methodName))
+        continue;
+      
+      if (isMatch(method.getParameterTypes(), params))
+        return annMethod;
+    }
+    
+    return null;
+  }
+  
+  private boolean isMatch(Class<?> []typesA, Class<?> []typesB)
+  {
+    if (typesA.length != typesB.length)
+      return false;
+    
+    for (int i = typesA.length - 1; i >= 0; i--) {
+      if (! typesA[i].equals(typesB[i]))
+        return false;
+    }
+    
+    return true;
+  }
 
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + getBeanClass() + "]";

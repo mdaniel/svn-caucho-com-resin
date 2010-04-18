@@ -42,42 +42,41 @@ import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
 import javax.ejb.TransactionManagementType;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
  * Represents the XA interception
  */
-public class XaCallChain extends AbstractCallChain {
-  private BusinessMethodGenerator _bizMethod;
-  private EjbCallChain _next;
+@Module
+public class XaCallChain<X,T> extends AbstractCallChain<X,T> {
+  private EjbCallChain<X,T> _next;
 
   private TransactionAttributeType _transactionType;
   private boolean _isContainerManaged = true;
   private boolean _isSessionSynchronization;
 
-  public XaCallChain(BusinessMethodGenerator bizMethod, EjbCallChain next)
+  public XaCallChain(BusinessMethodGenerator<X,T> bizMethod,
+                     EjbCallChain<X,T> next)
   {
-    super(next);
+    super(bizMethod, next);
 
-    _bizMethod = bizMethod;
     _next = next;
 
     _isContainerManaged = bizMethod.isXaContainerManaged();
   }
 
-  protected BusinessMethodGenerator getBusinessMethod()
-  {
-    return _bizMethod;
-  }
-
   /**
    * Returns true if the business method has any active XA annotation.
    */
+  @Override
   public boolean isEnhanced()
   {
-    return (_isContainerManaged && _transactionType != null && !_transactionType
-        .equals(SUPPORTS));
+    return (_isContainerManaged && _transactionType != null 
+            && ! _transactionType.equals(SUPPORTS));
   }
 
   /**
@@ -91,13 +90,15 @@ public class XaCallChain extends AbstractCallChain {
   /**
    * Introspects the method for the default values
    */
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  @Override
+  public void introspect(AnnotatedMethod<? super T> apiMethod,
+                         AnnotatedMethod<? super X> implMethod)
   {
-    ApiClass apiClass = apiMethod.getDeclaringClass();
-    ApiClass beanClass = _bizMethod.getBeanClass();
+    AnnotatedType<T> apiClass = getApiType();
+    AnnotatedType<X> beanClass = getImplType();
 
-    TransactionManagement xaManagement = beanClass
-        .getAnnotation(TransactionManagement.class);
+    TransactionManagement xaManagement
+      = beanClass.getAnnotation(TransactionManagement.class);
 
     if (xaManagement == null)
       xaManagement = apiClass.getAnnotation(TransactionManagement.class);
@@ -250,7 +251,7 @@ public class XaCallChain extends AbstractCallChain {
 
     if (_isContainerManaged && _isSessionSynchronization) {
       out.print("_xa.registerSynchronization(");
-      _bizMethod.generateThis(out);
+      getBusinessMethod().generateThis(out);
       out.println(");");
     }
 
@@ -363,10 +364,5 @@ public class XaCallChain extends AbstractCallChain {
       }
       }
     }
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _bizMethod + "]";
   }
 }

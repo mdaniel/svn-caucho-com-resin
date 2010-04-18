@@ -56,17 +56,14 @@ import javax.enterprise.inject.spi.InjectionTarget;
  */
 public class EjbConfig {
   private static final L10N L = new L10N(EjbConfig.class);
-  private static final Logger log
-    = Logger.getLogger(EjbConfig.class.getName());
-
   private final EjbContainer _ejbContainer;
 
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
 
-  private HashMap<String,EjbBean> _cfgBeans = new HashMap<String,EjbBean>();
+  private HashMap<String,EjbBean<?>> _cfgBeans = new HashMap<String,EjbBean<?>>();
 
-  private ArrayList<EjbBean> _pendingBeans = new ArrayList<EjbBean>();
-  private ArrayList<EjbBean> _deployingBeans = new ArrayList<EjbBean>();
+  private ArrayList<EjbBean<?>> _pendingBeans = new ArrayList<EjbBean<?>>();
+  private ArrayList<EjbBean<?>> _deployingBeans = new ArrayList<EjbBean<?>>();
 
   private ArrayList<EjbBeanConfigProxy> _proxyList
     = new ArrayList<EjbBeanConfigProxy>();
@@ -175,7 +172,7 @@ public class EjbConfig {
   /**
    * Returns the cfg bean with the given name.
    */
-  public EjbBean getBeanConfig(String name)
+  public EjbBean<?> getBeanConfig(String name)
   {
     assert name != null;
 
@@ -185,12 +182,12 @@ public class EjbConfig {
   /**
    * Sets the cfg bean with the given name.
    */
-  public void setBeanConfig(String name, EjbBean bean)
+  public void setBeanConfig(String name, EjbBean<?> bean)
   {
     if (name == null || bean == null)
       throw new NullPointerException();
 
-    EjbBean oldBean = _cfgBeans.get(name);
+    EjbBean<?> oldBean = _cfgBeans.get(name);
 
     if (oldBean == bean)
       return;
@@ -318,34 +315,33 @@ public class EjbConfig {
     return _isAllowPOJO;
   }
 
-  public void addIntrospectableClass(String className)
+  public <X> void addIntrospectableClass(String className)
   {
     try {
-      ClassLoader tempLoader = _ejbContainer.getIntrospectionClassLoader();
       ClassLoader loader = _ejbContainer.getClassLoader();
 
       // ejb/0f20
-      Class type = Class.forName(className, false, loader);
+      Class<X> type = (Class<X>) Class.forName(className, false, loader);
 
       if (findBeanByType(type) != null)
 	return;
 
       if (type.isAnnotationPresent(javax.ejb.Stateless.class)) {
-	EjbStatelessBean bean = new EjbStatelessBean(this, "resin-ejb");
+	EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, "resin-ejb");
 	bean.setEJBClass(type);
 	bean.setAllowPOJO(true);
 
 	setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.Stateful.class)) {
-	EjbStatefulBean bean = new EjbStatefulBean(this, "resin-ejb");
+	EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, "resin-ejb");
 	bean.setAllowPOJO(true);
 	bean.setEJBClass(type);
 		
 	setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
-	EjbMessageBean bean = new EjbMessageBean(this, "resin-ejb");
+	EjbMessageBean<X> bean = new EjbMessageBean<X>(this, "resin-ejb");
 	bean.setAllowPOJO(true);
 	bean.setEJBClass(type);
 	
@@ -358,13 +354,11 @@ public class EjbConfig {
     }
   }
 
-  public void addAnnotatedType(AnnotatedType annType,
-			       InjectionTarget injectTarget)
+  public <X> void addAnnotatedType(AnnotatedType<X> annType,
+                                   InjectionTarget<X> injectTarget)
   {
     try {
-      ClassLoader loader = _ejbContainer.getIntrospectionClassLoader();
-
-      Class type = annType.getJavaClass();
+      Class<?> type = annType.getJavaClass();
 
       if (findBeanByType(type) != null)
 	return;
@@ -372,7 +366,7 @@ public class EjbConfig {
       if (annType.isAnnotationPresent(Stateless.class)) {
 	Stateless stateless = annType.getAnnotation(Stateless.class);
 	
-	EjbStatelessBean bean = new EjbStatelessBean(this, annType, stateless);
+	EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, annType, stateless);
 	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
@@ -380,7 +374,7 @@ public class EjbConfig {
       else if (annType.isAnnotationPresent(Stateful.class)) {
 	Stateful stateful = annType.getAnnotation(Stateful.class);
 	
-	EjbStatefulBean bean = new EjbStatefulBean(this, annType, stateful);
+	EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, annType, stateful);
 	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
@@ -388,14 +382,14 @@ public class EjbConfig {
       else if (annType.isAnnotationPresent(Singleton.class)) {
         Singleton singleton = annType.getAnnotation(Singleton.class);
         
-        EjbSingletonBean bean = new EjbSingletonBean(this, annType, singleton);
+        EjbSingletonBean<X> bean = new EjbSingletonBean<X>(this, annType, singleton);
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);
       }      
       else if (annType.isAnnotationPresent(MessageDriven.class)) {
 	MessageDriven message = annType.getAnnotation(MessageDriven.class);
-	EjbMessageBean bean = new EjbMessageBean(this, annType, message);
+	EjbMessageBean<X> bean = new EjbMessageBean<X>(this, annType, message);
 	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
@@ -404,8 +398,9 @@ public class EjbConfig {
 	JmsMessageListener listener
 	  = annType.getAnnotation(JmsMessageListener.class);
 	
-	EjbMessageBean bean = new EjbMessageBean(this, annType,
-						 listener.destination());
+	EjbMessageBean<X> bean
+	  = new EjbMessageBean<X>(this, annType, listener.destination());
+	
 	bean.setInjectionTarget(injectTarget);
 
 	setBeanConfig(bean.getEJBName(), bean);
@@ -420,12 +415,12 @@ public class EjbConfig {
   /**
    * Finds an entity bean by its abstract schema.
    */
-  public EjbBean findBeanByType(Class type)
+  public <X> EjbBean<X> findBeanByType(Class<X> type)
   {
-    for (EjbBean bean : _cfgBeans.values()) {
+    for (EjbBean<?> bean : _cfgBeans.values()) {
       // ejb/0j03
       if (type.getName().equals(bean.getEJBClass().getName()))
-	return bean;
+	return (EjbBean<X>) bean;
     }
 
     return null;
@@ -456,7 +451,7 @@ public class EjbConfig {
     findConfigurationFiles();
 
     try {
-      ArrayList<EjbBean> beanConfig = new ArrayList<EjbBean>(_pendingBeans);
+      ArrayList<EjbBean<?>> beanConfig = new ArrayList<EjbBean<?>>(_pendingBeans);
       _pendingBeans.clear();
 
       _deployingBeans.addAll(beanConfig);
@@ -473,19 +468,19 @@ public class EjbConfig {
       configureRelations();
 
       for (EjbBeanConfigProxy proxy : _proxyList) {
-        EjbBean bean = _cfgBeans.get(proxy.getEJBName());
+        EjbBean<?> bean = _cfgBeans.get(proxy.getEJBName());
 
         if (bean != null)
           proxy.getBuilderProgram().configure(bean);
       }
 
-      for (EjbBean bean : beanConfig) {
+      for (EjbBean<?> bean : beanConfig) {
         bean.init();
       }
 
       // Collections.sort(beanConfig, new BeanComparator());
 
-      for (EjbBean bean : beanConfig) {
+      for (EjbBean<?> bean : beanConfig) {
         bean.generate(javaGen, _ejbContainer.isAutoCompile());
       }
 
@@ -526,8 +521,8 @@ public class EjbConfig {
       javaGen.setWorkDir(workDir);
       javaGen.setParentLoader(parentLoader);
 
-      ArrayList<EjbBean> deployingBeans
-	= new ArrayList<EjbBean>(_deployingBeans);
+      ArrayList<EjbBean<?>> deployingBeans
+	= new ArrayList<EjbBean<?>>(_deployingBeans);
       _deployingBeans.clear();
 
       deployBeans(deployingBeans, javaGen);
@@ -541,7 +536,7 @@ public class EjbConfig {
   /**
    * Configures the pending beans.
    */
-  public void deployBeans(ArrayList<EjbBean> beanConfig,
+  public void deployBeans(ArrayList<EjbBean<?>> beanConfig,
                           JavaClassGenerator javaGen)
     throws Exception
   {
@@ -552,24 +547,24 @@ public class EjbConfig {
       thread.setContextClassLoader(_ejbContainer.getClassLoader());
 
       // ejb/0g1c, ejb/0f68, ejb/0f69
-      ArrayList<EjbBean> beanList = new ArrayList<EjbBean>();
+      ArrayList<EjbBean<?>> beanList = new ArrayList<EjbBean<?>>();
 
-      for (EjbBean bean : beanConfig) {
+      for (EjbBean<?> bean : beanConfig) {
         if (beanList.contains(bean))
           continue;
 
-        AbstractServer server = initBean(bean, javaGen);
+        AbstractServer<?> server = initBean(bean, javaGen);
         ArrayList<String> dependList = bean.getBeanDependList();
 
         for (String depend : dependList) {
-          for (EjbBean b : beanConfig) {
+          for (EjbBean<?> b : beanConfig) {
             if (bean == b)
               continue;
 
             if (depend.equals(b.getEJBName())) {
               beanList.add(b);
 
-              AbstractServer dependServer = initBean(b, javaGen);
+              AbstractServer<?> dependServer = initBean(b, javaGen);
 
               initResources(b, dependServer);
 
@@ -585,17 +580,17 @@ public class EjbConfig {
     }
   }
 
-  private AbstractServer initBean(EjbBean bean, JavaClassGenerator javaGen)
+  private AbstractServer<?> initBean(EjbBean<?> bean, JavaClassGenerator javaGen)
     throws Exception
   {
-    AbstractServer server = bean.deployServer(_ejbContainer, javaGen);
+    AbstractServer<?> server = bean.deployServer(_ejbContainer, javaGen);
 
     server.init();
 
     return server;
   }
 
-  private void initResources(EjbBean bean, AbstractServer server)
+  private <X> void initResources(EjbBean<?> bean, AbstractServer<?> server)
     throws Exception
   {
     /*

@@ -13,6 +13,7 @@
 
 <s2 title="4.0.7 - snapshot">
 <ul>
+<li>network: keepalive-timeout was incorrectly applied to initial read</li>
 </ul>
 </s2>
 

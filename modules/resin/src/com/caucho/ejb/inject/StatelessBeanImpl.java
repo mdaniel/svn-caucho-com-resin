@@ -29,39 +29,26 @@
 
 package com.caucho.ejb.inject;
 
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ScopeAdapterBean;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.ejb.session.StatelessProvider;
-import com.caucho.ejb.session.StatelessManager;
-import com.caucho.util.L10N;
-
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.enterprise.inject.spi.*;
-import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.session.StatelessManager;
+import com.caucho.ejb.session.StatelessProvider;
+import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean
  */
+@Module
 public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
 {
-  private StatelessManager<X> _server;
-  private String _name;
   private StatelessProvider<X> _producer;
-  private Class<?> _api;
-  
   private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
 
-  private InjectionTarget<X> _target;
-  
   public StatelessBeanImpl(StatelessManager<X> server,
 			   ManagedBeanImpl<X> bean,
 			   Class<?> api,
@@ -69,20 +56,16 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
   {
     super(bean);
     
-    _api = api;
-    _server = server;
     _producer = producer;
 
     if (producer == null)
       throw new NullPointerException();
 
-    _target = bean.getInjectionTarget();
-    
     _types.add(api);
   }
 
   @Override
-  public X create(CreationalContext context)
+  public X create(CreationalContext<X> context)
   {
     return (X) _producer.__caucho_get();
   }

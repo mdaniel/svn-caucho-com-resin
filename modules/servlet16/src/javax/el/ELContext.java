@@ -36,7 +36,7 @@ import java.util.Locale;
  * ELContext a context for EL resolution.
  */
 public abstract class ELContext {
-  private HashMap<Class,Object> _contextMap;
+  private HashMap<Class<?>,Object> _contextMap;
 
   private Locale _locale;
 
@@ -62,7 +62,7 @@ public abstract class ELContext {
       throw new NullPointerException();
 
     if (_contextMap == null)
-      _contextMap = new HashMap<Class,Object>(8);
+      _contextMap = new HashMap<Class<?>,Object>(8);
     
     _contextMap.put(key, contextObject);
   }

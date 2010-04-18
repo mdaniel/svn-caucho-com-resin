@@ -29,11 +29,6 @@
 
 package javax.enterprise.inject.spi;
 
-import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Field;
-
-import java.util.Set;
-import javax.enterprise.context.spi.CreationalContext;
 
 /**
  * Abstract introspected view of a Bean injectible field

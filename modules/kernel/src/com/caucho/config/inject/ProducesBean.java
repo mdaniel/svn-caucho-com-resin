@@ -69,7 +69,8 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   private Producer<T> _producer;
 
-  private Arg<T> []_args;
+  private Arg<T> []_producesArgs;
+  private Arg<T> []_disposesArgs;
 
   private boolean _isBound;
 
@@ -78,14 +79,18 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   protected ProducesBean(InjectManager manager,
                          Bean<X> producerBean,
                          AnnotatedMethod<X> producesMethod,
-                         Arg<T> []args,
-                         AnnotatedMethod<X> disposesMethod)
+                         Arg<T> []producesArgs,
+                         AnnotatedMethod<X> disposesMethod,
+                         Arg<T> []disposesArgs)
   {
     super(manager, producesMethod.getBaseType(), producesMethod);
 
     _producerBean = producerBean;
     _producesMethod = producesMethod;
     _disposesMethod = disposesMethod;
+    _producesArgs = producesArgs;
+    _disposesArgs = disposesArgs;
+
     
     if (producesMethod != null)
       producesMethod.getJavaMember().setAccessible(true);
@@ -93,12 +98,10 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     if (disposesMethod != null)
       disposesMethod.getJavaMember().setAccessible(true);
 
-    _args = args;
-
     if (producesMethod == null)
       throw new NullPointerException();
 
-    if (args == null)
+    if (producesArgs == null)
       throw new NullPointerException();
   }
 
@@ -106,12 +109,13 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   create(InjectManager manager,
          Bean<X> producer,
          AnnotatedMethod<X> producesMethod,
-         Arg<T> []args,
-         AnnotatedMethod<X> disposesMethod)
+         Arg<T> []producesArgs,
+         AnnotatedMethod<X> disposesMethod,
+         Arg<T> []disposesArgs)
   {
     ProducesBean<X,T> bean = new ProducesBean<X,T>(manager, producer, 
-                                                   producesMethod, args,
-                                                   disposesMethod);
+                                                   producesMethod, producesArgs,
+                                                   disposesMethod, disposesArgs);
     bean.introspect();
     bean.introspect(producesMethod);
 
@@ -211,14 +215,14 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
       Object []args;
 
-      if (_args.length > 0) {
-        args = new Object[_args.length];
+      if (_producesArgs.length > 0) {
+        args = new Object[_producesArgs.length];
 
         for (int i = 0; i < args.length; i++) {
-          if (_args[i] instanceof InjectionPointArg<?>)
+          if (_producesArgs[i] instanceof InjectionPointArg<?>)
             args[i] = ij;
           else
-            args[i] = _args[i].eval(cxt);
+            args[i] = _producesArgs[i].eval(cxt);
         }
       }
       else
@@ -228,6 +232,8 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       _producesMethod.getJavaMember().setAccessible(true);
       
       T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
+      
+      cxt.push(value);
       
       if (value != null)
         return value;
@@ -347,7 +353,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
         Object producer = null;
         
         if (env != null)
-          producer = env.get(_producerBean);
+          producer = env.getAny(_producerBean);
         else
           Thread.dumpStack();
         
@@ -359,8 +365,17 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
                                                    _producerBean.getBeanClass(), 
                                                    parentEnv);
         }
-       
-        _disposesMethod.getJavaMember().invoke(producer, instance);
+        
+        Object []args = new Object[_disposesArgs.length];
+        for (int i = 0; i < args.length; i++) {
+          if (_disposesArgs[i] == null)
+            args[i] = instance;
+          else {
+            args[i] = _disposesArgs[i].eval(env);
+          }
+        }
+        
+        _disposesMethod.getJavaMember().invoke(producer, args);
       } catch (Exception e) {
         throw new RuntimeException(_disposesMethod.getJavaMember() + ":" + e, e);
       }

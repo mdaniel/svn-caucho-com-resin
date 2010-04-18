@@ -34,33 +34,36 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
 import com.caucho.config.ConfigException;
-import com.caucho.config.gen.ApiClass;
-import com.caucho.config.gen.ApiMethod;
 import com.caucho.config.gen.BusinessMethodGenerator;
 import com.caucho.config.gen.View;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
  * Represents a public interface to a singleton bean, e.g. a singleton view
  */
-public class SingletonView extends View {
+@Module
+public class SingletonView<X,T> extends View<X,T> {
   private static final L10N L = new L10N(SingletonView.class);
 
-  private SingletonGenerator _sessionBean;
+  private SingletonGenerator<X> _sessionBean;
 
-  private ArrayList<BusinessMethodGenerator> _businessMethods
-    = new ArrayList<BusinessMethodGenerator>();
+  private ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
+    = new ArrayList<BusinessMethodGenerator<X,T>>();
 
-  public SingletonView(SingletonGenerator bean, ApiClass api)
+  public SingletonView(SingletonGenerator<X> bean, AnnotatedType<T> api)
   {
     super(bean, api);
 
     _sessionBean = bean;
   }
 
-  public SingletonGenerator getSessionBean()
+  public SingletonGenerator<X> getSessionBean()
   {
     return _sessionBean;
   }
@@ -79,20 +82,23 @@ public class SingletonView extends View {
     return ! getViewClass().equals(getBeanClass());
   }
 
+  @Override
   public String getViewClassName()
   {
-    return getViewClass().getSimpleName() + "__LocalProxy";
+    return getViewClass().getJavaClass().getSimpleName() + "__LocalProxy";
   }
 
+  @Override
   public String getBeanClassName()
   {
-    return getViewClass().getSimpleName() + "__Bean";
+    return getViewClass().getJavaClass().getSimpleName() + "__Bean";
   }
 
   /**
    * Returns the introspected methods
    */
-  public ArrayList<? extends BusinessMethodGenerator> getMethods()
+  @Override
+  public ArrayList<? extends BusinessMethodGenerator<X,T>> getMethods()
   {
     return _businessMethods;
   }
@@ -104,26 +110,26 @@ public class SingletonView extends View {
   @Override
   public void introspect()
   {
-    ApiClass apiClass = getViewClass();
+    AnnotatedType<T> apiClass = getViewClass();
 
-    for (ApiMethod apiMethod : apiClass.getMethods()) {
+    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
       Method javaMethod = apiMethod.getJavaMember();
 
       if (javaMethod.getDeclaringClass().equals(Object.class))
         continue;
       if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
-          && ! apiMethod.getName().equals("remove"))
+          && ! javaMethod.getName().equals("remove"))
         continue;
 
-      if (apiMethod.getName().startsWith("ejb")) {
+      if (javaMethod.getName().startsWith("ejb")) {
         throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
                                       javaMethod.getDeclaringClass(),
-                                      apiMethod.getName()));
+                                      javaMethod.getName()));
       }
 
       int index = _businessMethods.size();
 
-      BusinessMethodGenerator bizMethod = createMethod(apiMethod, index);
+      BusinessMethodGenerator<X,T> bizMethod = createMethod(apiMethod, index);
 
       if (bizMethod != null) {
         bizMethod.introspect(bizMethod.getApiMethod(),
@@ -141,13 +147,15 @@ public class SingletonView extends View {
     throws IOException
   {
     out.println();
-    out.println("if (" + var + " == " + getViewClass().getName() + ".class)");
+    out.println("if (" + var + " == " 
+                + getViewClass().getJavaClass().getName() + ".class)");
     out.println("  return new " + getViewClassName() + "(getServer(), true);");
   }
 
   /**
    * Generates the view code.
    */
+  @Override
   public void generate(JavaWriter out)
     throws IOException
   {
@@ -159,10 +167,10 @@ public class SingletonView extends View {
     if (isProxy()) {
       generateExtends(out);
       out.print("  implements SingletonProxyFactory, ");
-      out.println(getViewClass().getName());
+      out.println(getViewClass().getJavaClass().getName());
     }
     else {
-      out.println("  extends " + getBeanClass().getName());
+      out.println("  extends " + getBeanClass().getJavaClass().getName());
       out.println("  implements SingletonProxyFactory");
     }
 
@@ -183,7 +191,7 @@ public class SingletonView extends View {
   {
     out.println();
     out.println("public static class " + getBeanClassName());
-    out.println("  extends " + getBeanClass().getName());
+    out.println("  extends " + getBeanClass().getJavaClass().getName());
     out.println("{");
     out.pushDepth();
     
@@ -299,19 +307,16 @@ public class SingletonView extends View {
     out.println("}");
   }
 
-  protected BusinessMethodGenerator
-    createMethod(ApiMethod apiMethod, int index)
+  protected BusinessMethodGenerator<X,T>
+    createMethod(AnnotatedMethod<? super T> apiMethod, int index)
   {
-    ApiMethod implMethod = findImplMethod(apiMethod);
+    AnnotatedMethod<? super X> implMethod = findImplMethod(apiMethod);
 
     if (implMethod == null)
       return null;
 
-    SingletonMethod bizMethod
-      = new SingletonMethod(this,
-                           apiMethod,
-                           implMethod,
-                           index);
+    SingletonMethod<X,T> bizMethod
+      = new SingletonMethod<X,T>(this, apiMethod, implMethod, index);
 
     return bizMethod;
   }
@@ -326,16 +331,18 @@ public class SingletonView extends View {
   {
   }
 
-  protected ApiMethod findImplMethod(ApiMethod apiMethod)
+  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super T> apiMethod)
   {
-    ApiMethod implMethod = getBeanClass().getMethod(apiMethod);
+    AnnotatedMethod<? super X> implMethod = getMethod(apiMethod);
 
     if (implMethod != null)
       return implMethod;
+    
+    Method javaApiMethod = apiMethod.getJavaMember();
 
     throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
-                                  apiMethod.getMethod().getDeclaringClass().getSimpleName(),
-                                  apiMethod.getFullName(),
-                                  getBeanClass().getName()));
+                                  javaApiMethod.getDeclaringClass().getSimpleName(),
+                                  javaApiMethod.getName(),
+                                  getBeanClass().getJavaClass().getName()));
   }
 }

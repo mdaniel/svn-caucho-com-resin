@@ -100,7 +100,7 @@ class ExtensionManager
           continue;
 
         _extensionSet.add(url);
-
+        
         InputStream is = null;
         try {
           is = url.openStream();

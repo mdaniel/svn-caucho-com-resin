@@ -47,7 +47,7 @@ public class ActivationSpecConfig extends BeanConfig {
   }
 
   @Override
-  public Class getBeanConfigClass()
+  public Class<?> getBeanConfigClass()
   {
     return ActivationSpec.class;
   }
@@ -56,7 +56,7 @@ public class ActivationSpecConfig extends BeanConfig {
    * Override the old meaning of type for backward compat.
    */
   @Override
-  public void setType(Class cl)
+  public void setType(Class<?> cl)
   {
     setClass(cl);
   }
@@ -65,7 +65,7 @@ public class ActivationSpecConfig extends BeanConfig {
    * Check for correct type.
    */
   @Override
-  public void setClass(Class cl)
+  public void setClass(Class<?> cl)
   {
     super.setClass(cl);
 

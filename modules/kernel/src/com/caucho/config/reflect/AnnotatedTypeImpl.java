@@ -34,6 +34,7 @@ import java.lang.annotation.Inherited;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -81,10 +82,30 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     
     introspect(javaClass);
   }
+  
+  public AnnotatedTypeImpl(AnnotatedType<X> annType)
+  {
+    super(annType);
+    
+    _javaClass = annType.getJavaClass();
+  
+    _constructorSet.addAll(annType.getConstructors());
+    _fieldSet.addAll(annType.getFields());
+    _methodSet.addAll(annType.getMethods());
+  }
+  
+  public static <X> AnnotatedTypeImpl<X> create(AnnotatedType<X> annType)
+  {
+    if (annType instanceof AnnotatedTypeImpl<?>)
+      return (AnnotatedTypeImpl<X>) annType;
+    else
+      return new AnnotatedTypeImpl<X>(annType);
+  }
 
   /**
    * Returns the concrete Java class
    */
+  @Override
   public Class<X> getJavaClass()
   {
     return _javaClass;
@@ -93,6 +114,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   /**
    * Returns the abstract introspected constructors
    */
+  @Override
   public Set<AnnotatedConstructor<X>> getConstructors()
   {
     return _constructorSet;
@@ -101,6 +123,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   /**
    * Returns the abstract introspected methods
    */
+  @Override
   public Set<AnnotatedMethod<? super X>> getMethods()
   {
     return _methodSet;
@@ -109,15 +132,15 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   /**
    * Returns the matching method, creating one if necessary.
    */
-  public AnnotatedMethod<?> createMethod(Method method)
+  public AnnotatedMethod<? super X> createMethod(Method method)
   {
-    for (AnnotatedMethod<?> annMethod : _methodSet) {
+    for (AnnotatedMethod<? super X> annMethod : _methodSet) {
       if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
         return annMethod;
       }
     }
 
-    AnnotatedMethod annMethod = new AnnotatedMethodImpl(this, null, method);
+    AnnotatedMethod<X> annMethod = new AnnotatedMethodImpl<X>(this, null, method);
 
     _methodSet.add(annMethod);
 
@@ -127,6 +150,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   /**
    * Returns the abstract introspected fields
    */
+  @Override
   public Set<AnnotatedField<? super X>> getFields()
   {
     return _fieldSet;
@@ -140,12 +164,12 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
 
     for (Method method : cl.getDeclaredMethods()) {
       if (hasBeanAnnotation(method)) {
-        _methodSet.add(new AnnotatedMethodImpl(this, null, method));
+        _methodSet.add(new AnnotatedMethodImpl<X>(this, null, method));
       }
     }
 
     if (! cl.isInterface()) {
-      for (Constructor ctor : cl.getDeclaredConstructors()) {
+      for (Constructor<?> ctor : cl.getDeclaredConstructors()) {
         _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
       }
 
@@ -160,7 +184,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     }
   }
 
-  private void introspectFields(Class cl)
+  private void introspectFields(Class<?> cl)
   {
     if (cl == null)
       return;
@@ -174,19 +198,19 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     }
   }
 
-  private void introspectInheritedAnnotations(Class cl)
+  private void introspectInheritedAnnotations(Class<?> cl)
   {
     if (cl == null)
       return;
 
     for (Annotation ann : cl.getDeclaredAnnotations()) {
-      Class annType = ann.annotationType();
+      Class<? extends Annotation> annType = ann.annotationType();
 
       if (! annType.isAnnotationPresent(Inherited.class)) {
         continue;
       }
 
-      if (isAnnotationPresent(cl)) {
+      if (isAnnotationPresent(annType)) {
         continue;
       }
 
@@ -212,6 +236,9 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
 
   private boolean hasBeanAnnotation(Method method)
   {
+    if (Modifier.isPublic(method.getModifiers()))
+      return true;
+    
     if (hasBeanAnnotation(method.getAnnotations()))
       return true;
 
@@ -245,7 +272,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   }
 
   private boolean hasMetaAnnotation(Set<Annotation> annotations,
-                                    Class metaAnnType)
+                                    Class<?> metaAnnType)
   {
     if (annotations == null)
       return false;
@@ -261,7 +288,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     return false;
   }
 
-  private boolean isBeanAnnotation(Class annType)
+  private boolean isBeanAnnotation(Class<?> annType)
   {
     String name = annType.getName();
 

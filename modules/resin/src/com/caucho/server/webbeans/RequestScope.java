@@ -85,7 +85,7 @@ public class RequestScope extends AbstractScopeContext
       return null;
 
     ContextContainer context
-      = (ContextContainer) request.getAttribute("webbeans.resin");
+      = (ContextContainer) request.getAttribute("resin.candi.context");
 
     if (context == null) {
       context = new ContextContainer();

@@ -43,7 +43,8 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.util.Nonbinding;
@@ -58,25 +59,19 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
 
 /**
  * Represents the interception
  */
 @Module
-public class InterceptorCallChain
-  extends AbstractCallChain
+public class InterceptorCallChain<X,T>
+  extends AbstractCallChain<X,T>
 {
-  private static final L10N L = new L10N(InterceptorCallChain.class);
-
-  private static final Annotation[] NULL_ANN_LIST = new Annotation[0];
-
-  private View _view;
-  private BusinessMethodGenerator _bizMethod;
+  private View<X,T> _view;
 
   private String _uniqueName;
   private String _chainName;
-  private ApiMethod _implMethod;
+  private AnnotatedMethod<X> _implMethod;
 
   private ArrayList<Interceptor<?>> _defaultInterceptors
     = new ArrayList<Interceptor<?>>();
@@ -117,23 +112,23 @@ public class InterceptorCallChain
   private final String _delegateVar = "__caucho_delegate";
   private String _decoratorSetName;
   
-  public InterceptorCallChain(EjbCallChain next,
-                              BusinessMethodGenerator bizMethod,
-                              View view)
+  public InterceptorCallChain(EjbCallChain<X,T> next,
+                              BusinessMethodGenerator<X,T> bizMethod,
+                              View<X,T> view)
   {
-    super(next);
+    super(bizMethod, next);
 
-    _bizMethod = bizMethod;
     _view = view;
   }
 
   /**
    * Returns true if the method is an interceptor
    */
+  @Override
   public boolean isEnhanced()
   {
-    if (_view.getViewClass().isAnnotationPresent(Interceptor.class)
-        || _view.getViewClass().isAnnotationPresent(Decorator.class)) {
+    if (getApiType().isAnnotationPresent(javax.interceptor.Interceptor.class)
+        || getApiType().isAnnotationPresent(javax.decorator.Decorator.class)) {
       return false;
     }
     else {
@@ -156,7 +151,7 @@ public class InterceptorCallChain
     return _interceptors;
   }
 
-  public ApiMethod getAroundInvokeMethod()
+  public AnnotatedMethod<? super X> getAroundInvokeMethod()
   {
     return _view.getAroundInvokeMethod();
   }
@@ -169,7 +164,8 @@ public class InterceptorCallChain
    * Introspects the @Interceptors annotation on the method and the class.
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod)
   {
     if (implMethod == null)
       return;
@@ -178,15 +174,13 @@ public class InterceptorCallChain
       return;
     }
 
-    ApiClass apiClass = apiMethod.getDeclaringClass();
+    AnnotatedType<T> apiClass = getApiType();
 
-    ApiClass implClass = implMethod.getDeclaringClass();
-
-    _implMethod = implMethod;
+    AnnotatedType<X> implClass = getImplType();
 
     // interceptors aren't intercepted
-    if (_view.getBeanClass().isAnnotationPresent(Interceptor.class)
-        || _view.getBeanClass().isAnnotationPresent(Decorator.class)) {
+    if (getImplType().isAnnotationPresent(javax.interceptor.Interceptor.class)
+        || getImplType().isAnnotationPresent(javax.decorator.Decorator.class)) {
       return;
     }
     
@@ -203,10 +197,10 @@ public class InterceptorCallChain
     introspectDefaults();
   }
   
-  private void introspectInterceptors(ApiClass apiClass,
-                                      ApiClass implClass,
-                                      ApiMethod apiMethod,
-                                      ApiMethod implMethod)
+  private void introspectInterceptors(AnnotatedType<T> apiClass,
+                                      AnnotatedType<X> implClass,
+                                      AnnotatedMethod<? super T> apiMethod,
+                                      AnnotatedMethod<? super X> implMethod)
   {
     if (apiMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
       _isExcludeClassInterceptors = true;
@@ -278,9 +272,9 @@ public class InterceptorCallChain
     }
   }
 
-  private void introspectDecorators(ApiMethod apiMethod)
+  private void introspectDecorators(AnnotatedMethod<? super T> apiMethod)
   {
-    if (apiMethod.getMethod().getDeclaringClass().equals(Object.class))
+    if (apiMethod.getJavaMember().getDeclaringClass().equals(Object.class))
       return;
     
     ArrayList<Type> decorators = _view.getBean().getDecoratorTypes();
@@ -291,7 +285,7 @@ public class InterceptorCallChain
       Class<?> decoratorClass = (Class<?>) decorator;
 
       for (Method method : decoratorClass.getMethods()) {
-        if (isMatch(method, apiMethod.getMethod()))
+        if (isMatch(method, apiMethod.getJavaMember()))
           decoratorSet.add(decoratorClass); 
       }
     }
@@ -345,7 +339,7 @@ public class InterceptorCallChain
 
     generateBeanInterceptorChain(out, map);
     
-    _bizMethod.generateInterceptorTarget(out);
+    getBusinessMethod().generateInterceptorTarget(out);
   }
 
   @Override
@@ -430,7 +424,7 @@ public class InterceptorCallChain
       if (interceptors == null)
         interceptors = new ArrayList<Class<?>>();
 
-      int []indexChain = new int[_interceptors.size()];
+      // int []indexChain = new int[_interceptors.size()];
     }
   }
   
@@ -570,6 +564,8 @@ public class InterceptorCallChain
                                         HashMap<String,Object> map)
     throws IOException
   {
+    Method javaMethod = _implMethod.getJavaMember();
+    
     out.println();
     out.println("private static java.lang.reflect.Method "
                 + getUniqueName(out) + "_method;");
@@ -595,35 +591,35 @@ public class InterceptorCallChain
 
     out.print(getUniqueName(out) + "_method = ");
     generateGetMethod(out,
-                      _implMethod.getDeclaringClass().getName(),
-                      _implMethod.getName(),
-                      _implMethod.getParameterTypes());
+                      javaMethod.getDeclaringClass().getName(),
+                      javaMethod.getName(),
+                      javaMethod.getParameterTypes());
     out.println(";");
     out.println(getUniqueName(out) + "_method.setAccessible(true);");
 
     String superMethodName;
 
     if (hasDecorator())
-      superMethodName = "__caucho_" + _implMethod.getName() + "_decorator";
+      superMethodName = "__caucho_" + javaMethod.getName() + "_decorator";
     else
-      superMethodName = "__caucho_" + _implMethod.getName();
+      superMethodName = "__caucho_" + javaMethod.getName();
 
     out.print(getUniqueName(out) + "_implMethod = ");
     generateGetMethod(out,
-                      _bizMethod.getView().getBeanClassName(),
+                      getBusinessMethod().getView().getBeanClassName(),
                       superMethodName,
-                      _implMethod.getParameterTypes());
+                      javaMethod.getParameterTypes());
     out.println(";");
     out.println(getUniqueName(out) + "_implMethod.setAccessible(true);");
 
     if (isAroundInvokePrologue) {
-      ApiMethod aroundInvoke = getAroundInvokeMethod();
+      AnnotatedMethod<? super X> aroundInvoke = getAroundInvokeMethod();
 
       out.print("__caucho_aroundInvokeMethod = ");
       generateGetMethod(out,
-                        aroundInvoke.getDeclaringClass().getName(),
-                        aroundInvoke.getName(),
-                        aroundInvoke.getParameterTypes());
+                        aroundInvoke.getJavaMember().getDeclaringClass().getName(),
+                        aroundInvoke.getJavaMember().getName(),
+                        aroundInvoke.getJavaMember().getParameterTypes());
       out.println(";");
       out.println("__caucho_aroundInvokeMethod.setAccessible(true);");
     }
@@ -754,14 +750,16 @@ public class InterceptorCallChain
   private void generateInterceptorCall(JavaWriter out)
     throws IOException
   {
+    Method javaMethod = _implMethod.getJavaMember();
+    
     String uniqueName = getUniqueName(out);
     
     out.println("try {");
     out.pushDepth();
 
-    if (! void.class.equals(_implMethod.getReturnType())) {
+    if (! void.class.equals(javaMethod.getReturnType())) {
       out.print("result = (");
-      printCastClass(out, _implMethod.getReturnType());
+      printCastClass(out, javaMethod.getReturnType());
       out.print(") ");
     }
 
@@ -779,14 +777,14 @@ public class InterceptorCallChain
     // generateThis(out);
     out.print(_chainName + "_objectIndexChain, ");
 
-    Class<?>[] paramTypes = _implMethod.getParameterTypes();
+    Class<?>[] paramTypes = javaMethod.getParameterTypes();
 
     if (paramTypes.length == 0) {
       out.print("com.caucho.config.gen.EjbUtil.NULL_OBJECT_ARRAY");
     }
     else {
       out.print("new Object[] { ");
-      for (int i = 0; i < _implMethod.getParameterTypes().length; i++) {
+      for (int i = 0; i < javaMethod.getParameterTypes().length; i++) {
         out.print("a" + i + ", ");
       }
       out.print("}");
@@ -807,7 +805,7 @@ public class InterceptorCallChain
     out.println("  throw e;");
 
     boolean isException = false;
-    Class<?>[] exnList = _implMethod.getExceptionTypes();
+    Class<?>[] exnList = javaMethod.getExceptionTypes();
     for (Class<?> cl : exnList) {
       if (RuntimeException.class.isAssignableFrom(cl))
         continue;
@@ -964,10 +962,10 @@ public class InterceptorCallChain
     
     out.println();
     out.print("final ");
-    out.print(_bizMethod.getView().getViewClassName());
+    out.print(getBusinessMethod().getView().getViewClassName());
     out.println(" __caucho_getBean()");
     out.println("{");
-    out.println("  return " + _bizMethod.getView().getViewClassName()
+    out.println("  return " + getBusinessMethod().getView().getViewClassName()
                 + ".this;");
     out.println("}");
 
@@ -1021,8 +1019,6 @@ public class InterceptorCallChain
                                        HashMap<ArrayList<Class<?>>, String> apiMap)
     throws IOException
   {
-    String decoratorSetName = _decoratorSetName;
-
     String uniqueName = getUniqueName(out);
 
     ArrayList<Class<?>> apis = getMethodApis(method);
@@ -1152,14 +1148,16 @@ public class InterceptorCallChain
   protected void generateDecoratorMethod(JavaWriter out)
     throws IOException
   {
+    Method javaMethod = _implMethod.getJavaMember();
+    
     out.println();
     out.print("private ");
-    out.printClass(_implMethod.getReturnType());
+    out.printClass(javaMethod.getReturnType());
     out.print(" __caucho_");
-    out.print(_implMethod.getName());
+    out.print(javaMethod.getName());
     out.print("_decorator(");
 
-    Class<?>[] types = _implMethod.getParameterTypes();
+    Class<?>[] types = javaMethod.getParameterTypes();
     for (int i = 0; i < types.length; i++) {
       Class<?> type = types[i];
 
@@ -1171,19 +1169,19 @@ public class InterceptorCallChain
     }
 
     out.println(")");
-    _bizMethod.generateThrows(out, _implMethod.getExceptionTypes());
+    getBusinessMethod().generateThrows(out, javaMethod.getExceptionTypes());
 
     out.println("{");
     out.pushDepth();
 
-    if (! void.class.equals(_implMethod.getReturnType())) {
-      out.printClass(_implMethod.getReturnType());
+    if (! void.class.equals(javaMethod.getReturnType())) {
+      out.printClass(javaMethod.getReturnType());
       out.println(" result;");
     }
 
     generateDecoratorCall(out);
 
-    if (! void.class.equals(_implMethod.getReturnType())) {
+    if (! void.class.equals(javaMethod.getReturnType())) {
       out.println("return result;");
     }
 
@@ -1223,16 +1221,18 @@ public class InterceptorCallChain
     String decoratorSetName = _decoratorSetName;
     
     assert(decoratorSetName != null);
+    
+    Method javaMethod = _implMethod.getJavaMember();
 
     //_bizMethod.generateTailCall(out);
-    if (! void.class.equals(_implMethod.getReturnType()))
+    if (! void.class.equals(javaMethod.getReturnType()))
       out.print("result = ");
 
     out.print("__caucho_delegate.");
-    out.print(_implMethod.getName());
+    out.print(javaMethod.getName());
     out.print("(");
 
-    for (int i = 0; i < _implMethod.getParameterTypes().length; i++) {
+    for (int i = 0; i < javaMethod.getParameterTypes().length; i++) {
       if (i != 0)
         out.print(", ");
 
@@ -1255,8 +1255,10 @@ public class InterceptorCallChain
   
   private String getUniqueName(JavaWriter out)
   {
+    Method javaMethod = _implMethod.getJavaMember();
+    
     if (_uniqueName == null)
-      _uniqueName = "_" + _implMethod.getName() + "_v" + out.generateId();
+      _uniqueName = "_" + javaMethod.getName() + "_v" + out.generateId();
 
     return _uniqueName;
   }
@@ -1400,7 +1402,7 @@ public class InterceptorCallChain
   protected void generateThis(JavaWriter out)
     throws IOException
   {
-    _bizMethod.generateThis(out);
+    getBusinessMethod().generateThis(out);
   }
 
   private boolean containsMethod(ArrayList<Method> methodList, Method method)
@@ -1500,7 +1502,7 @@ public class InterceptorCallChain
                       method.getParameterTypes());
   }
 
-  protected boolean isValidMethod(ApiMethod implMethod)
+  protected static boolean isValidMethod(AnnotatedMethod<?> implMethod)
   {
     if (implMethod == null) {
       return false;
@@ -1510,11 +1512,14 @@ public class InterceptorCallChain
       return false;
     }
 
-    if (implMethod.isFinal()) {
+    int methodModifiers = implMethod.getJavaMember().getModifiers();
+    
+    if (Modifier.isFinal(methodModifiers)) {
       return false;
     }
 
-    if (! implMethod.isPublic() && ! implMethod.isProtected()) {
+    if (! Modifier.isPublic(methodModifiers)
+        && ! Modifier.isProtected(methodModifiers)) {
       return false;
     }
 

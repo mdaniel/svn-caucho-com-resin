@@ -29,23 +29,19 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.gen.ApiMethod;
-import com.caucho.config.types.Signature;
-import com.caucho.util.CharBuffer;
-import com.caucho.util.IntMap;
-import com.caucho.util.L10N;
-
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.types.Signature;
+import com.caucho.inject.Module;
+import com.caucho.util.CharBuffer;
+
+@Module
 public class MethodSignature {
-  private static L10N L = new L10N(MethodSignature.class);
-
-  private static IntMap _methodElements;
-
   private String _ejbName;
-  private EjbBean _bean;
   
   private String _methodName;
   private String _methodIntf;
@@ -65,10 +61,7 @@ public class MethodSignature {
 
   public String getEJBName()
   {
-    if (_bean != null)
-      return _bean.getEJBName();
-    else
-      return _ejbName;
+    return _ejbName;
   }
 
   public void setMethodName(String name)
@@ -193,15 +186,17 @@ public class MethodSignature {
       return isMatch(method.getName(), method.getParameterTypes(), intf);
   }
 
-  public boolean isMatch(ApiMethod method, String intf)
+  public boolean isMatch(AnnotatedMethod<?> annMethod, String intf)
   {
-    if (method == null)
+    if (annMethod == null)
       return _methodName.equals("*");
-    else
-      return isMatch(method.getName(), method.getParameterTypes(), intf);
+    
+    Method method = annMethod.getJavaMember();
+
+    return isMatch(method.getName(), method.getParameterTypes(), intf);
   }
   
-  public boolean isMatch(String methodName, Class []params, String intf)
+  public boolean isMatch(String methodName, Class<?> []params, String intf)
   {
     if (_methodIntf != null && ! _methodIntf.equals(intf))
       return false;
@@ -209,7 +204,7 @@ public class MethodSignature {
       return isMatch(methodName, params);
   }
   
-  public boolean isMatch(String methodName, Class []params)
+  public boolean isMatch(String methodName, Class<?> []params)
   {
     if (_methodName == null)
       return false;

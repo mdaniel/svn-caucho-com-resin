@@ -30,8 +30,8 @@
 package javax.enterprise.inject.spi;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
 import java.util.Set;
+
 import javax.interceptor.InvocationContext;
 
 /**

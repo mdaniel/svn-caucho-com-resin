@@ -30,36 +30,36 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import javax.ejb.Asynchronous;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
  * Represents the @Asynchronous interception
  */
-public class AsynchronousCallChain extends AbstractCallChain {
+@Module
+public class AsynchronousCallChain<X,T> extends AbstractCallChain<X,T> {
   private static final L10N L = new L10N(AsynchronousCallChain.class);
 
-  private BusinessMethodGenerator _bizMethod;
-  private EjbCallChain _next;
-
+  private BusinessMethodGenerator<X,T> _bizMethod;
   private boolean _isAsynchronous;
-
-  private String _methodId;
 
   private String _varName;
  
-  public AsynchronousCallChain(BusinessMethodGenerator bizMethod,
-                               EjbCallChain next)
+  public AsynchronousCallChain(BusinessMethodGenerator<X,T> bizMethod,
+                               EjbCallChain<X,T> next)
   {
-    super(next);
+    super(bizMethod, next);
     
     _bizMethod = bizMethod;
-    _next = next;
   }
   
   /**
@@ -83,14 +83,11 @@ public class AsynchronousCallChain extends AbstractCallChain {
    *   @DenyAll
    */
   @Override
-  public void introspect(ApiMethod apiMethod, ApiMethod implMethod)
+  public void introspect(AnnotatedMethod<? super T> apiMethod, 
+                         AnnotatedMethod<? super X> implMethod)
   {
-    ApiClass apiClass = apiMethod.getDeclaringClass();
-    ApiClass implClass = null;
-
-    if (implMethod != null) {
-      implClass = implMethod.getDeclaringClass();
-    }
+    AnnotatedType<T> apiClass = getApiType();
+    AnnotatedType<X> implClass = getImplType();
     
     if (implMethod != null && implMethod.isAnnotationPresent(Asynchronous.class))
       _isAsynchronous = true;
@@ -107,8 +104,8 @@ public class AsynchronousCallChain extends AbstractCallChain {
     if (! _isAsynchronous)
       return;
 
-    if (! void.class.equals(apiMethod.getReturnType())) {
-      throw ConfigException.create(apiMethod.getMethod(),
+    if (! void.class.equals(apiMethod.getBaseType())) {
+      throw ConfigException.create(apiMethod.getJavaMember(),
                                    L.l("@Asynchronous method must return void"));
     }
   }
@@ -139,7 +136,9 @@ public class AsynchronousCallChain extends AbstractCallChain {
       return;
     }
     
-    Class<?> []paramType = _bizMethod.getApiMethod().getParameterTypes();
+    Method javaApiMethod = _bizMethod.getApiMethod().getJavaMember(); 
+    
+    Class<?> []paramType = javaApiMethod.getParameterTypes();
     
     for (int i = 0; i < paramType.length; i++) {
       out.print("final ");
@@ -155,7 +154,7 @@ public class AsynchronousCallChain extends AbstractCallChain {
     out.println("{");
     out.pushDepth();
     
-    out.print(_bizMethod.getApiMethod().getName() + "__caucho_async(");
+    out.print(javaApiMethod.getName() + "__caucho_async(");
     
     for (int i = 0; i < paramType.length; i++) {
       if (i != 0)

@@ -29,46 +29,57 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.SerializeHandle;
-import com.caucho.config.inject.HandleAware;
-import com.caucho.java.JavaWriter;
-import com.caucho.java.gen.JavaClassGenerator;
-import com.caucho.util.L10N;
-import java.io.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
+import java.io.IOException;
+import java.io.Serializable;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Set;
+
 import javax.decorator.Decorator;
 import javax.enterprise.inject.Stereotype;
-import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.inject.Qualifier;
 import javax.interceptor.Interceptor;
 import javax.interceptor.InterceptorBinding;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.SerializeHandle;
+import com.caucho.config.inject.HandleAware;
+import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.util.L10N;
+
 /**
  * Generates the skeleton for a session bean.
  */
-public class PojoBean extends BeanGenerator {
+@Module
+public class PojoBean<X> extends BeanGenerator<X> {
   private static final L10N L = new L10N(PojoBean.class);
 
-  private ApiClass _beanClass;
+  private AnnotatedType<X> _beanClass;
 
-  private PojoView _view;
+  private PojoView<X> _view;
 
-  private ArrayList<BusinessMethodGenerator> _businessMethods
-    = new ArrayList<BusinessMethodGenerator>();
+  private ArrayList<BusinessMethodGenerator<X,X>> _businessMethods
+    = new ArrayList<BusinessMethodGenerator<X,X>>();
 
   private boolean _isEnhanced;
   private boolean _hasReadResolve;
   private boolean _isSingleton;
   private boolean _isSerializeHandle;
 
-  public PojoBean(ApiClass beanClass)
+  public PojoBean(AnnotatedType<X> beanClass)
   {
-    super(beanClass.getName() + "__ResinWebBean", beanClass);
+    super(beanClass.getJavaClass().getName() + "__ResinWebBean", beanClass);
 
-    setSuperClassName(beanClass.getName());
+    setSuperClassName(beanClass.getJavaClass().getName());
 
     if (beanClass.isAnnotationPresent(SerializeHandle.class)) {
       _isSerializeHandle = true;
@@ -81,7 +92,7 @@ public class PojoBean extends BeanGenerator {
 
     addImport("javax.transaction.*");
 
-    _view = new PojoView(this, getBeanClass());
+    _view = new PojoView<X>(this, getBeanClass());
 
     _beanClass = beanClass;
   }
@@ -91,7 +102,7 @@ public class PojoBean extends BeanGenerator {
     _isSingleton = isSingleton;
   }
   
-  public ArrayList<BusinessMethodGenerator> getBusinessMethods()
+  public ArrayList<? extends BusinessMethodGenerator<X,X>> getBusinessMethods()
   {
     return _businessMethods;
   }
@@ -103,18 +114,20 @@ public class PojoBean extends BeanGenerator {
 
     introspectClass(_beanClass);
 
-    for (ApiMethod method : _beanClass.getMethods()) {
-      if (Object.class.equals(method.getDeclaringClass()))
+    for (AnnotatedMethod<? super X> method : _beanClass.getMethods()) {
+      Method javaMethod = method.getJavaMember();
+      
+      if (Object.class.equals(method.getBaseType()))
         continue;
 
-      if (method.getName().equals("readResolve")
-          && method.getParameterTypes().length == 0) {
+      if (javaMethod.getName().equals("readResolve")
+          && javaMethod.getParameterTypes().length == 0) {
         _hasReadResolve = true;
       }
 
       int index = _businessMethods.size();
-      BusinessMethodGenerator bizMethod
-        = new BusinessMethodGenerator(_view, method, method, index);
+      BusinessMethodGenerator<X,X> bizMethod
+        = new BusinessMethodGenerator<X,X>(_view, method, method, index);
 
       // ioc/0i10
       if (_businessMethods.contains(bizMethod))
@@ -125,11 +138,12 @@ public class PojoBean extends BeanGenerator {
       if (! bizMethod.isEnhanced())
         continue;
 
-      if (! method.isPublic() && ! method.isProtected())
+      int modifiers = method.getJavaMember().getModifiers();
+      if (! Modifier.isPublic(modifiers) && ! Modifier.isProtected(modifiers))
         throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on private methods.", bizMethod));
       if (method.isStatic())
         throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on static methods.", bizMethod));
-      if (method.isFinal())
+      if (Modifier.isFinal(modifiers))
         throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on final methods.", bizMethod));
 
       _isEnhanced = true;
@@ -147,7 +161,7 @@ public class PojoBean extends BeanGenerator {
       _isEnhanced = true;
   }
 
-  protected void introspectClass(ApiClass cl)
+  protected void introspectClass(AnnotatedType<X> cl)
   {
     if (cl.isAnnotationPresent(Interceptor.class)
         || cl.isAnnotationPresent(Decorator.class)) {
@@ -272,7 +286,7 @@ public class PojoBean extends BeanGenerator {
     generatePostConstruct(out);
 
     HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator method : _businessMethods) {
+    for (BusinessMethodGenerator<X,X> method : _businessMethods) {
       method.generate(out, map);
     }
 
@@ -344,7 +358,7 @@ public class PojoBean extends BeanGenerator {
     out.pushDepth();
 
     HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator method : _businessMethods) {
+    for (BusinessMethodGenerator<X,X> method : _businessMethods) {
       method.generatePostConstruct(out, map);
     }
 
@@ -368,7 +382,7 @@ public class PojoBean extends BeanGenerator {
     }
   }
 
-  protected void generateConstructor(JavaWriter out, Constructor ctor)
+  protected void generateConstructor(JavaWriter out, Constructor<?> ctor)
     throws IOException
   {
     Class<?> []paramTypes = ctor.getParameterTypes();
@@ -401,7 +415,7 @@ public class PojoBean extends BeanGenerator {
     out.println(");");
 
     HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator method : _businessMethods) {
+    for (BusinessMethodGenerator<X,X> method : _businessMethods) {
       method.generateBeanConstructor(out, map);
     }
 

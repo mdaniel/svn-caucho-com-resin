@@ -40,7 +40,6 @@ public class ContainerTransaction {
   private static final L10N L = new L10N(ContainerTransaction.class);
 
   private EjbConfig _config;
-  private String _location;
   private MethodSignature _method;
   private String _trans;
 
@@ -54,7 +53,6 @@ public class ContainerTransaction {
 
   public void setConfigLocation(String filename, int line)
   {
-    _location = filename + ":" + line;
   }
 
   public void setDescription(String description)
@@ -91,7 +89,7 @@ public class ContainerTransaction {
   public void init()
     throws ConfigException
   {
-    EjbBean bean = _config.getBeanConfig(_method.getEJBName());
+    EjbBean<?> bean = _config.getBeanConfig(_method.getEJBName());
 
     if (bean == null)
       throw new ConfigException(L.l("'{0}' is an unknown entity bean.",
@@ -108,7 +106,7 @@ public class ContainerTransaction {
     setInternalTransactionAttribute("ejbHome", bean);
   }
 
-  private void setInternalTransactionAttribute(String prefix, EjbBean bean)
+  private void setInternalTransactionAttribute(String prefix, EjbBean<?> bean)
   {
     // XXX: it might need to check <method-intf>
 

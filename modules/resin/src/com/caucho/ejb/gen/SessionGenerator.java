@@ -29,42 +29,50 @@
 
 package com.caucho.ejb.gen;
 
-import com.caucho.config.gen.*;
-import com.caucho.config.*;
+import java.io.IOException;
+import java.util.ArrayList;
+
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.View;
 import com.caucho.config.types.InjectionTarget;
+import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import java.io.IOException;
-import java.util.*;
 
 /**
  * Generates the skeleton for a session bean.
  */
-abstract public class SessionGenerator extends BeanGenerator {
+@Module
+abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private static final L10N L = new L10N(SessionGenerator.class);
 
-  private ArrayList<ApiClass> _localApi = new ArrayList<ApiClass>();
+  private ArrayList<AnnotatedType<?>> _localApi
+    = new ArrayList<AnnotatedType<?>>();
 
-  private ArrayList<ApiClass> _remoteApi = new ArrayList<ApiClass>();
+  private ArrayList<AnnotatedType<?>> _remoteApi
+    = new ArrayList<AnnotatedType<?>>();
 
-  private ArrayList<View> _views = new ArrayList<View>();
+  private ArrayList<View<X,?>> _views = new ArrayList<View<X,?>>();
 
   protected String _contextClassName = "dummy";
 
-  public SessionGenerator(String ejbName, ApiClass ejbClass,
-                          ArrayList<ApiClass> localApi,
-                          ArrayList<ApiClass> remoteApi, String beanType)
+  public SessionGenerator(String ejbName, 
+                          AnnotatedType<X> ejbClass,
+                          ArrayList<AnnotatedType<?>> localApi,
+                          ArrayList<AnnotatedType<?>> remoteApi, 
+                          String beanType)
   {
-    super(toFullClassName(ejbName, ejbClass.getName(), beanType),
+    super(toFullClassName(ejbName, ejbClass.getJavaClass().getName(), beanType),
           ejbClass);
 
     _contextClassName = "dummy";
 
-    _localApi = new ArrayList<ApiClass>(localApi);
+    _localApi = new ArrayList<AnnotatedType<?>>(localApi);
 
-    _remoteApi = new ArrayList<ApiClass>(remoteApi);
+    _remoteApi = new ArrayList<AnnotatedType<?>>(remoteApi);
   }
 
   public static String toFullClassName(String ejbName, String className,
@@ -111,7 +119,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Returns the local API list.
    */
-  public ArrayList<ApiClass> getLocalApi()
+  public ArrayList<AnnotatedType<?>> getLocalApi()
   {
     return _localApi;
   }
@@ -119,7 +127,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Returns the remote API list.
    */
-  public ArrayList<ApiClass> getRemoteApi()
+  public ArrayList<AnnotatedType<?>> getRemoteApi()
   {
     return _remoteApi;
   }
@@ -128,7 +136,7 @@ abstract public class SessionGenerator extends BeanGenerator {
    * Returns the views
    */
   @Override
-  public ArrayList<View> getViews()
+  public ArrayList<View<X,?>> getViews()
   {
     return _views;
   }
@@ -136,11 +144,12 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Returns the view matching the given class
    */
-  public View getView(Class<?> api)
+  @SuppressWarnings("unchecked")
+  public <T> View<X,T> getView(Class<T> api)
   {
-    for (View view : _views) {
-      if (view.getViewClass().getName().equals(api.getName()))
-        return view;
+    for (View<X,?> view : _views) {
+      if (view.getViewClass().getJavaClass().getName().equals(api.getName()))
+        return (View<X,T>) view;
     }
 
     return null;
@@ -165,26 +174,27 @@ abstract public class SessionGenerator extends BeanGenerator {
   @Override
   public void createViews()
   {
-    for (ApiClass api : _localApi) {
-      View view = createLocalView(api);
+    for (AnnotatedType<?> api : _localApi) {
+      View<X,?> view = createLocalView(api);
 
       _views.add(view);
     }
 
-    for (ApiClass api : _remoteApi) {
-      View view = createRemoteView(api);
+    for (AnnotatedType<?> api : _remoteApi) {
+      View<X,?> view = createRemoteView(api);
 
       _views.add(view);
     }
 
-    for (View view : _views)
+    for (View<X,?> view : _views) {
       view.introspect();
+    }
   }
 
   /**
    * Generates the local view for the given class
    */
-  protected View createLocalView(ApiClass api)
+  protected <T> View<X,T> createLocalView(AnnotatedType<T> api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -192,7 +202,7 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Generates the remote view for the given class
    */
-  protected View createRemoteView(ApiClass api)
+  protected <T> View<X,T> createRemoteView(AnnotatedType<T> api)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -200,10 +210,10 @@ abstract public class SessionGenerator extends BeanGenerator {
   /**
    * Scans for the @Local interfaces
    */
-  protected ArrayList<ApiClass> introspectLocalDefault()
+  protected ArrayList<AnnotatedType<?>> introspectLocalDefault()
   {
     throw new ConfigException(L.l("'{0}' does not have any interfaces defined.", 
-                                  getBeanClass().getName()));
+                                  getBeanClass().getJavaClass().getName()));
   }
 
   abstract protected void generateContext(JavaWriter out) throws IOException;
@@ -450,14 +460,6 @@ abstract public class SessionGenerator extends BeanGenerator {
 
     out.popDepth();
     out.println("}");
-  }
-
-  /**
-   * Returns true if the method is implemented.
-   */
-  public boolean hasMethod(String methodName, Class[] paramTypes)
-  {
-    return getBeanClass().hasMethod(methodName, paramTypes);
   }
 
   private String generateTypeCasting(String value, Class<?> cl,

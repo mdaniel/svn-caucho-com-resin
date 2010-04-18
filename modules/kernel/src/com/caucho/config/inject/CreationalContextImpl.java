@@ -39,23 +39,26 @@ import com.caucho.inject.Module;
  */
 @Module
 public class CreationalContextImpl<T> implements CreationalContext<T> {
-  private CreationalContextImpl<?> _next;
   private CreationalContextImpl<?> _top;
+  private CreationalContextImpl<?> _next; // next in the dependent chain
+  private CreationalContextImpl<?> _parent; // parent in the creation chain
+  
   private final Contextual<T> _bean;
   private final InjectionPoint _injectionPoint;
   private T _value;
   
   public CreationalContextImpl(Contextual<T> bean,
-                               CreationalContext<?> next,
+                               CreationalContext<?> parent,
                                InjectionPoint ij)
   {
     _bean = bean;
     _injectionPoint = ij;
     
-    if (next instanceof CreationalContextImpl<?>) {
-      CreationalContextImpl<?> nextEnv = (CreationalContextImpl<?>) next;
-
-      _top = nextEnv._top;
+    if (parent instanceof CreationalContextImpl<?>) {
+      CreationalContextImpl<?> parentEnv = (CreationalContextImpl<?>) parent;
+      
+      _parent = parentEnv;
+      _top = parentEnv._top;
       _next = _top._next;
       _top._next = this;
     }
@@ -93,14 +96,36 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   
   public <X> X get(Contextual<X> bean)
   {
-    return find(_top, bean);    
+    return find(this, bean);    
   }
   
   @SuppressWarnings("unchecked")
   public
   static <X> X find(CreationalContextImpl<?> ptr, Contextual<X> bean)
   {
-    for (; ptr != null; ptr = ptr._next){
+    for (; ptr != null; ptr = ptr._parent) {
+      Contextual<?> testBean = ptr._bean;
+      
+      if (testBean == bean) {
+        return (X) ptr._value;
+      }
+    }
+    
+    return null;
+  }
+  
+  /**
+   * Find any bean, for disposers.
+   */
+  public <X> X getAny(Contextual<X> bean)
+  {
+    return findAny(_top, bean);    
+  }
+  
+  @SuppressWarnings("unchecked")
+  static <X> X findAny(CreationalContextImpl<?> ptr, Contextual<X> bean)
+  {
+    for (; ptr != null; ptr = ptr._next) {
       Contextual<?> testBean = ptr._bean;
       
       if (testBean == bean) {
@@ -113,7 +138,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   
   public static Object findByName(CreationalContextImpl<?> ptr, String name)
   {
-    for (; ptr != null; ptr = ptr._next) {
+    for (; ptr != null; ptr = ptr._parent) {
       Contextual<?> testBean = ptr._bean;
       
       if (! (testBean instanceof Bean<?>))
@@ -143,7 +168,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   @Override
   public void release()
   {
-    _value = null;
+    //_value = null;
     
     if (_next != null)
       _next.releaseImpl();
@@ -152,10 +177,12 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   void releaseImpl()
   {
     T value = _value;
-    _value = null;
+    // _value = null;
     
     if (value != null)
       _bean.destroy(value, this);
+    else
+      release();
   }
 
   @Override

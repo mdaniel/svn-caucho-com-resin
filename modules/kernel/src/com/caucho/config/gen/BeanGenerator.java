@@ -29,41 +29,44 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.make.*;
-import com.caucho.util.L10N;
+import java.io.IOException;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Decorator;
+import javax.inject.Named;
+import javax.inject.Qualifier;
+import javax.interceptor.AroundInvoke;
+import javax.interceptor.InvocationContext;
+
 import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.java.*;
-import com.caucho.java.gen.*;
-import com.caucho.vfs.*;
-
-import java.io.*;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Set;
-import javax.interceptor.*;
-import javax.inject.Named;
-import javax.inject.Qualifier;
-import javax.enterprise.inject.spi.Decorator;
-import javax.enterprise.inject.spi.AnnotatedMethod;
+import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
+import com.caucho.java.gen.DependencyComponent;
+import com.caucho.java.gen.GenClass;
+import com.caucho.make.ClassDependency;
+import com.caucho.vfs.PersistentDependency;
 
 /**
  * Generates the skeleton for a bean.
  */
-abstract public class BeanGenerator extends GenClass
+@Module
+abstract public class BeanGenerator<X> extends GenClass
 {
-  private static final L10N L = new L10N(BeanGenerator.class);
-
-  protected final ApiClass _beanClass;
+  protected final AnnotatedType<X> _beanClass;
 
   protected DependencyComponent _dependency = new DependencyComponent();
   
-  private ApiMethod _aroundInvokeMethod;
+  private AnnotatedMethod<? super X> _aroundInvokeMethod;
 
   private Set<Annotation> _decoratorBindings;
   private Set<Annotation> _interceptorBindings;
@@ -71,7 +74,8 @@ abstract public class BeanGenerator extends GenClass
   private ArrayList<Type> _decorators
     = new ArrayList<Type>();
 
-  protected BeanGenerator(String fullClassName, ApiClass beanClass)
+  protected BeanGenerator(String fullClassName,
+                          AnnotatedType<X> beanClass)
   {
     super(fullClassName);
     
@@ -80,7 +84,7 @@ abstract public class BeanGenerator extends GenClass
     addDependency(beanClass.getJavaClass());
   }
 
-  public ApiClass getBeanClass()
+  public AnnotatedType<X> getBeanClass()
   {
     return _beanClass;
   }
@@ -112,26 +116,6 @@ abstract public class BeanGenerator extends GenClass
   }
 
   /**
-   * Adds the method annotations
-   */
-  /*
-  public void setMethodAnnotations(Method method, AnnotatedMethod annMethod)
-  {
-    _methodAnnotations.put(method, annMethod);
-  }
-  */
-
-  /**
-   * Adds the method annotations
-   */
-  /*
-  public AnnotatedMethod getMethodAnnotations(Method method)
-  {
-    return _methodAnnotations.get(method);
-  }
-  */
-
-  /**
    * Introspects the bean.
    */
   public void introspect()
@@ -145,26 +129,19 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Finds the matching decorators for the class
    */
-  protected void introspectDecorators(ApiClass cl)
+  protected void introspectDecorators(AnnotatedType<X> type)
   {
-    if (cl.isAnnotationPresent(javax.decorator.Decorator.class))
+    if (type.isAnnotationPresent(javax.decorator.Decorator.class))
       return;
     
-    InjectManager webBeans = InjectManager.create();
+    InjectManager inject = InjectManager.create();
 
-    HashSet<Type> types = new HashSet<Type>();
-    boolean isExtends = false;
+    Set<Type> types = type.getTypeClosure();
     
-    isExtends = fillTypes(types, cl.getJavaClass().getSuperclass(), isExtends);
-    
-    for (ApiClass iface : cl.getInterfaces()) {
-      isExtends = fillTypes(types, iface.getJavaClass(), isExtends);
-    }
-
     _decoratorBindings = new HashSet<Annotation>();
     
     boolean isQualifier = false;
-    for (Annotation ann : cl.getAnnotations()) {
+    for (Annotation ann : type.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
 	_decoratorBindings.add(ann);
 	
@@ -189,9 +166,9 @@ abstract public class BeanGenerator extends GenClass
       decoratorBindings = new Annotation[0];
 
     List<Decorator<?>> decorators
-      = webBeans.resolveDecorators(types, decoratorBindings);
+      = inject.resolveDecorators(types, decoratorBindings);
     
-    isExtends = false;
+    boolean isExtends = false;
     for (Decorator<?> decorator : decorators) {
       // XXX:
       isExtends = fillTypes(_decorators, 
@@ -257,15 +234,15 @@ abstract public class BeanGenerator extends GenClass
     return _decorators;
   }
 
-  private static ApiMethod findAroundInvokeMethod(ApiClass cl)
+  private static <X> AnnotatedMethod<? super X> findAroundInvokeMethod(AnnotatedType<X> cl)
   {
     if (cl == null)
       return null;
 
-    for (ApiMethod method : cl.getMethods()) {
+    for (AnnotatedMethod<? super X> method : cl.getMethods()) {
       if (method.isAnnotationPresent(AroundInvoke.class)
-	  && method.getParameterTypes().length == 1
-	  && method.getParameterTypes()[0].equals(InvocationContext.class)) {
+	  && method.getJavaMember().getParameterTypes().length == 1
+	  && method.getJavaMember().getParameterTypes()[0].equals(InvocationContext.class)) {
 	return method;
       }
     }
@@ -276,7 +253,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Returns the around-invoke method
    */
-  public ApiMethod getAroundInvokeMethod()
+  public AnnotatedMethod<? super X> getAroundInvokeMethod()
   {
     return _aroundInvokeMethod;
   }
@@ -294,7 +271,7 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Returns the views.
    */
-  public ArrayList<View> getViews()
+  public ArrayList<View<X,?>> getViews()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -312,7 +289,7 @@ abstract public class BeanGenerator extends GenClass
   public void generateViews(JavaWriter out)
     throws IOException
   {
-    for (View view : getViews()) {
+    for (View<X,?> view : getViews()) {
       out.println();
 
       view.generate(out);
@@ -325,7 +302,7 @@ abstract public class BeanGenerator extends GenClass
   public void generateDestroyViews(JavaWriter out)
     throws IOException
   {
-    for (View view : getViews()) {
+    for (View<X,?> view : getViews()) {
       out.println();
 
       view.generateDestroy(out);
@@ -341,13 +318,40 @@ abstract public class BeanGenerator extends GenClass
   /**
    * Returns true if the method is implemented.
    */
-  public boolean hasMethod(String methodName, Class []paramTypes)
+  public boolean hasMethod(String methodName, Class<?> []paramTypes)
   {
-    return _beanClass.hasMethod(methodName, paramTypes);
+    for (AnnotatedMethod<? super X> method : _beanClass.getMethods()) {
+      Method javaMethod = method.getJavaMember();
+      
+      if (! javaMethod.getName().equals(methodName))
+        continue;
+      
+      if (! isMatch(javaMethod.getParameterTypes(), paramTypes))
+        continue;
+      
+      return true;
+    }
+    
+    return false;
+  }
+  
+  private static boolean isMatch(Class<?> []typesA, Class<?> []typesB)
+  {
+    if (typesA.length != typesB.length)
+      return false;
+    
+    for (int i = typesA.length - 1; i >= 0; i--) {
+      if (! typesA[i].equals(typesB[i]))
+        return false;
+    }
+    
+    return true;
   }
 
+  @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _beanClass.getSimpleName() + "]";
+    return (getClass().getSimpleName()
+            + "[" + _beanClass.getJavaClass().getSimpleName() + "]");
   }
 }

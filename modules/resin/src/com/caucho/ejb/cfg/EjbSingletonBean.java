@@ -34,26 +34,28 @@ import java.lang.annotation.Annotation;
 import javax.ejb.Singleton;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.util.L10N;
+import com.caucho.inject.Module;
 
 /**
  * Configuration for an ejb singleton session bean.
  */
-public class EjbSingletonBean extends EjbSessionBean {
-  private static final L10N L = new L10N(EjbSingletonBean.class);
-
+@Module
+public class EjbSingletonBean<X> extends EjbSessionBean<X> {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbSingletonBean(EjbConfig ejbConfig, String ejbModuleName) {
+  public EjbSingletonBean(EjbConfig ejbConfig, String ejbModuleName)
+  {
     super(ejbConfig, ejbModuleName);
   }
 
   /**
    * Creates a new session bean configuration.
    */
-  public EjbSingletonBean(EjbConfig ejbConfig, AnnotatedType annType,
-                          Singleton singleton) {
+  public EjbSingletonBean(EjbConfig ejbConfig, 
+                          AnnotatedType<X> annType,
+                          Singleton singleton)
+  {
     super(ejbConfig, annType, singleton.name());
   }
 
@@ -61,7 +63,8 @@ public class EjbSingletonBean extends EjbSessionBean {
    * Returns the kind of bean.
    */
   @Override
-  public String getEJBKind() {
+  public String getEJBKind()
+  {
     return "singleton";
   }
 

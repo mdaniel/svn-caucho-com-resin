@@ -29,8 +29,6 @@
 
 package javax.enterprise.inject.spi;
 
-import java.lang.annotation.Annotation;
-
 /**
  * {@link javax.enterprise.inject.spi.Extension} callback while processing
  * a producer method.

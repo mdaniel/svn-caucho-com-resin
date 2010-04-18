@@ -29,35 +29,33 @@
 
 package com.caucho.ejb.inject;
 
-import com.caucho.config.inject.BeanWrapper;
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ScopeAdapterBean;
-import com.caucho.config.program.Arg;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.util.L10N;
-import javax.enterprise.inject.spi.*;
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
+
+import com.caucho.config.inject.BeanWrapper;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.ScopeAdapterBean;
+import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean
  */
-public class SessionBeanImpl<X> extends BeanWrapper<X>
+@Module
+abstract public class SessionBeanImpl<X> extends BeanWrapper<X>
   implements ScopeAdapterBean<X>, PassivationCapable, EjbGeneratedBean
 {
-  private static final L10N L = new L10N(SessionBeanImpl.class);
-
   public SessionBeanImpl(ManagedBeanImpl<X> bean)
   {
     super(bean.getBeanManager(), bean);
   }
+  
+  @Override
+  abstract public Set<Type> getTypes();
 
   @Override
   public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> context)
@@ -66,7 +64,7 @@ public class SessionBeanImpl<X> extends BeanWrapper<X>
   }
 
   @Override
-  public X create(CreationalContext context)
+  public X create(CreationalContext<X> context)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

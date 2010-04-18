@@ -29,50 +29,44 @@
 
 package com.caucho.config.reflect;
 
-import com.caucho.config.program.FieldComponentProgram;
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ContainerProgram;
-import com.caucho.config.types.*;
-import com.caucho.naming.*;
-import com.caucho.util.*;
+import java.lang.reflect.GenericArrayType;
+import java.lang.reflect.Type;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
+import com.caucho.inject.Module;
 
 /**
  * class type matching
  */
+@Module
 public class ArrayType extends BaseType implements GenericArrayType
 {
   private BaseType _componentType;
-  private Class _rawType;
+  private Class<?> _rawType;
 
-  public ArrayType(BaseType componentType, Class rawType)
+  public ArrayType(BaseType componentType, Class<?> rawType)
   {
     _componentType = componentType;
     _rawType = rawType;
   }
   
-  public Class getRawClass()
+  public Class<?> getRawClass()
   {
     return _rawType;
   }
 
+  @Override
   public Type getGenericComponentType()
   {
     return _componentType.toType();
   }
 
+  @Override
   public Type toType()
   {
     return this;
   }
   
+  @Override
   public boolean isMatch(Type type)
   {
     if (type instanceof GenericArrayType) {
@@ -90,11 +84,13 @@ public class ArrayType extends BaseType implements GenericArrayType
     return equals(type);
   }
 
+  @Override
   public int hashCode()
   {
     return 17 + 37 * _componentType.hashCode();
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == this)
@@ -114,6 +110,7 @@ public class ArrayType extends BaseType implements GenericArrayType
     return _componentType.getSimpleName() + "[]";
   }
 
+  @Override
   public String toString()
   {
     return _componentType + "[]";

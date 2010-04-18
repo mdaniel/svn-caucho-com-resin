@@ -36,6 +36,8 @@ import com.caucho.config.gen.ApiMethod;
 import com.caucho.util.L10N;
 import java.lang.reflect.*;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
 /**
  * Configuration for remove-method.
  */
@@ -75,13 +77,13 @@ public class RemoveMethod {
   /**
    * Configures the bean with the override values
    */
-  public void configure(BeanGenerator bean)
+  public <X> void configure(BeanGenerator<X> bean)
   {
-    for (View view : bean.getViews()) {
+    for (View<X,?> view : bean.getViews()) {
       // XXX: check for type
       
-      for (BusinessMethodGenerator bizMethod : view.getMethods()) {
-	ApiMethod apiMethod = bizMethod.getApiMethod();
+      for (BusinessMethodGenerator<X,?> bizMethod : view.getMethods()) {
+	AnnotatedMethod<?> apiMethod = bizMethod.getApiMethod();
 	
 	if (_beanMethod.isMatch(apiMethod)) {
 	  bizMethod.setRemove(true);

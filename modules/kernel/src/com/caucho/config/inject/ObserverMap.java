@@ -29,18 +29,16 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.reflect.BaseType;
-import com.caucho.inject.Module;
-import com.caucho.util.*;
-
-import java.lang.annotation.*;
-import java.lang.reflect.*;
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Set;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.enterprise.inject.spi.ObserverMethod;
+
+import com.caucho.config.reflect.BaseType;
+import com.caucho.inject.Module;
 
 /**
  * Matches bindings
@@ -49,8 +47,7 @@ import javax.enterprise.inject.spi.ObserverMethod;
 public class ObserverMap {
   private static final Logger log
     = Logger.getLogger(ObserverMap.class.getName());
-  private static final L10N L = new L10N(ObserverMap.class);
-
+  
   private Class<?> _type;
 
   private ArrayList<ObserverEntry> _observerList
@@ -108,18 +105,18 @@ public class ObserverMap {
   static class ObserverEntry {
     private final ObserverMethod _observer;
     private final BaseType _type;
-    private final QualifierBinding []_bindings;
+    private final QualifierBinding []_qualifiers;
 
-    ObserverEntry(ObserverMethod observer,
+    ObserverEntry(ObserverMethod<?> observer,
                   BaseType type,
-                  Annotation []bindings)
+                  Annotation []qualifiers)
     {
       _observer = observer;
       _type = type;
 
-      _bindings = new QualifierBinding[bindings.length];
-      for (int i = 0; i < bindings.length; i++) {
-        _bindings[i] = new QualifierBinding(bindings[i]);
+      _qualifiers = new QualifierBinding[qualifiers.length];
+      for (int i = 0; i < qualifiers.length; i++) {
+        _qualifiers[i] = new QualifierBinding(qualifiers[i]);
       }
     }
 
@@ -128,19 +125,21 @@ public class ObserverMap {
       return _observer;
     }
 
-    boolean isMatch(BaseType type, Annotation []bindings)
+    boolean isMatch(BaseType type, Annotation []qualifiers)
     {
       if (! _type.isAssignableFrom(type)) {
         return false;
       }
 
-      if (bindings.length < _bindings.length)
+      /*
+      if (qualifiers.length < _qualifiers.length)
         return false;
+        */
 
-      for (QualifierBinding binding : _bindings) {
-        if (binding.isAny()) {
+      for (QualifierBinding qualifier : _qualifiers) {
+        if (qualifier.isAny()) {
         }
-        else if (! binding.isMatch(bindings)) {
+        else if (! qualifier.isMatch(qualifiers)) {
           return false;
         }
       }

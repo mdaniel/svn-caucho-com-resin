@@ -35,6 +35,7 @@ import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
@@ -92,6 +93,7 @@ public class ReflectionAnnotatedType<T>
   /**
    * Returns the concrete Java class
    */
+  @Override
   public Class<T> getJavaClass()
   {
     return _javaClass;
@@ -100,6 +102,7 @@ public class ReflectionAnnotatedType<T>
   /**
    * Returns the abstract introspected constructors
    */
+  @Override
   public Set<AnnotatedConstructor<T>> getConstructors()
   {
     return _constructorSet;
@@ -108,6 +111,7 @@ public class ReflectionAnnotatedType<T>
   /**
    * Returns the abstract introspected methods
    */
+  @Override
   public Set<AnnotatedMethod<? super T>> getMethods()
   {
     return _methodSet;
@@ -134,6 +138,7 @@ public class ReflectionAnnotatedType<T>
   /**
    * Returns the abstract introspected fields
    */
+  @Override
   public Set<AnnotatedField<? super T>> getFields()
   {
     return _fieldSet;
@@ -147,7 +152,8 @@ public class ReflectionAnnotatedType<T>
       introspectFields(cl);
 
       for (Method method : cl.getDeclaredMethods()) {
-        if (hasBeanAnnotation(method)) {
+        if (hasBeanAnnotation(method)
+            || Modifier.isPublic(method.getModifiers())) {
           _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
         }
       }
@@ -261,7 +267,7 @@ public class ReflectionAnnotatedType<T>
   }
 
   private boolean hasMetaAnnotation(Set<Annotation> annotations,
-                                    Class metaAnnType)
+                                    Class<?> metaAnnType)
   {
     if (annotations == null)
       return false;
@@ -277,7 +283,7 @@ public class ReflectionAnnotatedType<T>
     return false;
   }
 
-  private boolean isBeanAnnotation(Class annType)
+  private boolean isBeanAnnotation(Class<?> annType)
   {
     String name = annType.getName();
 
