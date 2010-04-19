@@ -36,7 +36,7 @@
       <li>&lt;log-service> (see <a config-tag="resin:LogService"/>)</li>
       <li>&lt;min-free-memory> (see <a config-tag="memory-free-min"/>)</li>
       <li>&lt;management> (see <a config-tag="resin:JmxService"/>, <a config-tag="resin:LogService"/>, <a config-tag="resin:XaLogService"/>, <a config-tag="resin:AdminAuthenticator"/>)</li>
-      <li>&lt;persistent-store> (No longer necessary. See <a href="cluster.xtp">clustering</a>.)</li>
+      <li>&lt;persistent-store> (No longer necessary. See <a href="clustering.xtp">clustering</a>.)</li>
       <li>&lt;resin:IfRemoteAddr> (see <a config-tag="resin:IfNetwork"/>)</li>
       <li>&lt;scheduled-task> (see <a config-tag="resin:ScheduledTask"/>)</li>
       <li>&lt;stat-service> (see <a config-tag="resin:StatService"/>)</li>

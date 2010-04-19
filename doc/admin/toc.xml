@@ -129,16 +129,12 @@
     <item link="scheduled-tasks.xtp" title="Scheduled tasks"
           description="Scheduled tasks"/>
     
-    <item link="cluster.xtp" title="Clustering"
+    <item link="clustering.xtp" title="Clustering"
           description="Clustering and load balancing of multiple coordinated Resin servers"
-          reference="cluster-ref.xtp">
+          reference="clustering-ref.xtp">
     
-      <item link="cluster-overview.xtp" title="Overview"
-        description="Overview of Resin's triad-based clustering architecture"/>
-    
-      <item link="cluster-load-balancer.xtp" title="Load Balancing"
-          description="HTTP load balancing to a Resin cluster"/>
-      
+      <item link="clustering-overview.xtp" title="Overview"
+        description="Overview of Resin's triad-based clustering architecture"/>      
     </item>
     
     <item link="resin-admin.xtp" title="resin-admin"

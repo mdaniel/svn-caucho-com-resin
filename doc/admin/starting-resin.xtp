@@ -17,7 +17,7 @@ starting Resin with a Java command line.</p>
 
 <p>The Resin web server starts  listening to HTTP requests on
 port 8080 and listens on port 6800
-for <a href="cluster-load-balancer.xtp">load balancer</a>
+for <a href="clustering-overview.xtp">load balancer</a>
 or cluster messages.  Resin can then be
 used for development or evaluation.  The steps are:</p>
 

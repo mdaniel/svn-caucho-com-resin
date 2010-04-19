@@ -752,7 +752,7 @@ clients, they can have longer timeouts.</p>
 
 <p>&lt;load-balance-connect-timeout> configures the maximum time
 a client connection to a cluster-port should
-take.  The <a href="resin-clustering.xtp">load balance</a> and
+take.  The <a href="clustering-overview.xtp">load balance</a> and
 <a href="config-sessions.xtp">persistent sessions</a> use load-balance-connect-timeout
 to connect to backend or peer servers in the cluster.</p>
 
@@ -783,7 +783,7 @@ can timeout too quickly for a live server with some network congestion.</p>
 <parents>server</parents>
 
 <p>&lt;load-balance-recover-time> is the maximum time
-the <a href="resin-clustering.xtp">load balancer</a>
+the <a href="clustering-overview.xtp">load balancer</a>
 will consider the server dead after a failure before retrying
 the connection.</p>
 
@@ -818,7 +818,7 @@ contact unavailable servers.</p>
 <parents>server</parents>
 
 <p>&lt;load-balance-idle-time> is the maximum time
-the <a href="resin-clustering.xtp">load balancer</a>
+the <a href="clustering-overview.xtp">load balancer</a>
 and <a href="config-sessions.xtp">distributed sessions</a> will leave an
 idle socket before closing it.</p>
 
@@ -843,7 +843,7 @@ the chance of connecting to a closed server.</p>
 <defun title="&lt;load-balance-warmup-time>" version="Resin 3.1">
 <parents>server</parents>
 
-<p>The time the <a href="resin-clustering.xtp">load balancer</a>
+<p>The time the <a href="clustering-overview.xtp">load balancer</a>
 uses to throttle connections to an <g>app-tier</g> server that's just
 starting up.</p>
 
@@ -1178,7 +1178,7 @@ will wait for the graceful shutdown before forcing an exit.</p>
 <parents>http, cluster-port, protocol, server</parents>
 
 <p>&lt;socket-timeout> is the maximum time
-a socket <a href="resin-clustering.xtp">load balancer</a>
+a socket <a href="clustering-overview.xtp">load balancer</a>
 and <a href="config-sessions.xtp">distributed sessions</a> will wait for
 a read or write to a cluster socket.</p>
 

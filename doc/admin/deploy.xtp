@@ -178,7 +178,7 @@ As of Resin 4.0.0, it is now possible to deploy web applications remotely
 to a shared repository that is distributed across the cluster.  This feature
 allows you to deploy once to any triad server and have the application
 be updated automatically across the entire cluster.  When a new 
-<a href="cluster-overview.xtp">dynamic server</a> joins the cluster, the
+<a href="clustering-overview.xtp">dynamic server</a> joins the cluster, the
 triad will populate it with these applications as well.
 </p>
 <p>

@@ -161,7 +161,7 @@ app-default.xml or the webapps, you will see <code>404 Not Found</code> for
 any requests.</p>
 
 <p>The example below is a complete, working <code>resin.xml</code> listening
-to HTTP at port 8080.  The <a href="cluster-overview.xtp">cluster</a>
+to HTTP at port 8080.  The <a href="clustering-overview.xtp">cluster</a>
 consists of a single server.  It includes a &lt;<a config-tag="development-mode-error-page"/>&gt; to help debugging
 the configuration.  Many sites will omit the error-page to
 hide configuration details in case an error occurs on a live site.</p>
@@ -325,7 +325,7 @@ server port.</p>
 <p>In this example, the virtual hosts <code>www.gryffindor.com</code> and
 <code>www.slytherin.com</code> each get their own server.  The backend
 clusters have their own virtual host.  The frontend load-balancer dispatches
-the <a href="cluster-load-balancer.xtp">&lt;resin:LoadBalance></a> tags
+the <a href="clustering-overview.xtp">&lt;resin:LoadBalance></a> tags
 to the backend.</p>
 
 <p>This example is split into two blocks to emphasize the frontend and
@@ -393,7 +393,7 @@ It receives all requests and dispatches to the back-end servers.</p>
 
 <figure src="config-jvmpervirtualhost-resin.png" width="481" height="145"/>
 
-<p>The Resin web server is configured using <a href="http-rewrite.xtp">rewrite</a> with a <a href="cluster-load-balancer.xtp">&lt;resin:LoadBalance</a> directive to dispatch to the back-end server.  A cluster is
+<p>The Resin web server is configured using <a href="http-rewrite.xtp">rewrite</a> with a <a href="clustering-overview.xtp">&lt;resin:LoadBalance</a> directive to dispatch to the back-end server.  A cluster is
 defined for each back-end host, so that the
 &lt;load-balance> knows how to find them.</p>
 

@@ -4068,7 +4068,7 @@ element listener {
 <description>
 <p>&lt;load-balance-connect-timeout> configures the maximum time
 a client connection to a cluster-port should
-take.  The <a href="cluster-load-balancer.xtp">load balance</a> and
+take.  The <a href="clustering-overview.xtp">load balance</a> and
 <a href="deploy-ref.xtp#session-config">persistent sessions</a> use load-balance-connect-timeout
 to connect to backend or peer servers in the cluster.</p>
 
@@ -4100,7 +4100,7 @@ can timeout too quickly for a live server with some network congestion.</p>
 
 <description>
 <p>&lt;load-balance-recover-time> is the maximum time
-the <a href="cluster-load-balancer.xtp">load balancer</a>
+the <a href="clustering-overview.xtp">load balancer</a>
 will consider the server dead after a failure before retrying
 the connection.</p>
 
@@ -4136,7 +4136,7 @@ contact unavailable servers.</p>
 
 <description>
 <p>&lt;load-balance-idle-time> is the maximum time the
-<a href="cluster-load-balancer.xtp">load balancer</a> and <a
+<a href="clustering-overview.xtp">load balancer</a> and <a
 href="deploy-ref.xtp#session-config">distributed sessions</a> will leave
 an idle socket before closing it.</p>
 
@@ -4163,7 +4163,7 @@ the chance of connecting to a closed server.</p>
 <default>60s</default>
 
 <description>
-<p>The time the <a href="cluster-load-balancer.xtp">load balancer</a>
+<p>The time the <a href="clustering-overview.xtp">load balancer</a>
 uses to throttle connections to an <g>app-tier</g> server that's just
 starting up.</p>
 
@@ -9183,7 +9183,7 @@ element session-cookie {
 <p>&lt;session-config> configures Resin's session handling, including the
 cookies Resin sends, the maximum sessions, and session persistence and clustering.</p>
 
-<p>See also: <a href="cluster-overview.xtp">Resin clustering</a> for more
+<p>See also: <a href="clustering-overview.xtp">Resin clustering</a> for more
 information about distributed sessions and persistence.</p>
 </description>
 
@@ -9431,7 +9431,7 @@ element simple-loader {
 
 <description>
 <p>&lt;socket-timeout> is the maximum time
-a socket <a href="cluster-load-balancer.xtp">load balancer</a>
+a socket <a href="clustering-overview.xtp">load balancer</a>
 and <a href="deploy-ref.xtp#session-config">distributed sessions</a> will wait for
 a read or write to a cluster socket.</p>
 

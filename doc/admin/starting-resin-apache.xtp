@@ -574,7 +574,7 @@ $ bin/resin.sh -pid gryffindor.pid stop
 
 <s1 name="balance" title="Load Balancing">
 
-<p>The <a href="cluster-overview.xtp">Reliability and Load Balancing</a>
+<p>The <a href="clustering-overview.xtp">Reliability and Load Balancing</a>
 section provides an introduction to the concepts of load balancing.</p>
 
 <p>mod_caucho recognizes cluster configurations for load balancing. 

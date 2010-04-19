@@ -126,7 +126,7 @@ and <code>./start.sh stop</code> to stop.</p>
 <p>The <code>-server</code> argument is only
 necessary if you have multiple servers (JVM instances) either
 on different machines or the same machine.
-The <a href="cluster-overview.xtp">load balancing</a> and
+The <a href="clustering-overview.xtp">load balancing</a> and
 <a href="deploy-ref.xtp#session-config">distributed sessions</a> pages describe when
 you might use <code>-server</code>.</p>
 
@@ -232,7 +232,7 @@ in resin.jar's manifest. The <var>-conf</var> argument specifies the
 path to your Resin configuration file. Lastly, Resin accepts <var>start</var>,
 <var>stop</var>, and <var>restart</var> arguments which are passed to the <a href="#The Watchdog Process">watchdog
 process</a>. An additional command-line option, <var>-server</var> is used
-in <a href="cluster-overview.xtp">load-balanced deployments</a>.</p>
+in <a href="clustering-overview.xtp">load-balanced deployments</a>.</p>
 
 <p>JDK 1.5 includes a
 <a href="http://java.sun.com/j2se/1.5.0/docs/tooldocs/share/jps.html">jps</a>
