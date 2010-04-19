@@ -24,7 +24,7 @@
                   target="${app.contextPath}/admin/config-candi.xtp"/>
 
   <resin:Redirect regexp="^/admin/clustering.xtp" 
-                  target="${app.contextPath}/admin/cluster-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/admin/cluster-tags.xtp" 
                   target="${app.contextPath}/admin/cluster-ref.xtp"/>
@@ -51,7 +51,7 @@
                   target="${app.contextPath}/admin/deploy.xtp"/>
 
   <resin:Redirect regexp="^/admin/dynamic-servers.xtp"
-                  target="${app.contextPath}/admin/cluster-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/admin/el-var.xtp"
                   target="${app.contextPath}/admin/config-el-ref.xtp"/>
@@ -78,7 +78,7 @@
                   target="${app.contextPath}/admin/advanced-jmx.xtp"/>
 
   <resin:Redirect regexp="^/admin/load-balancing.xtp"
-                  target="${app.contextPath}/admin/cluster-load-balancer.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/admin/port-tags.xtp"
                   target="${app.contextPath}/admin/http-server-ref.xtp"/>
@@ -96,7 +96,7 @@
                   target="${app.contextPath}/admin/"/>
 
   <resin:Redirect regexp="^/admin/resin-clustering.xtp"
-                  target="${app.contextPath}/admin/cluster-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/admin/resin/index.xtp"
                   target="${app.contextPath}/admin/"/>
@@ -187,7 +187,7 @@
                   target="${app.contextPath}/admin/security-overview.xtp"/>
 
   <resin:Redirect regexp="^/doc/balance.xtp"
-                  target="${app.contextPath}/admin/cluster-load-balancer.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/doc/candi.xtp"
                   target="${app.contextPath}/admin/config-candi.xtp"/>
@@ -196,7 +196,7 @@
                   target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/doc/cluster.xtp"
-                  target="${app.contextPath}/admin/cluster-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/doc/config-cmdline.xtp"
                   target="${app.contextPath}/admin/starting-resin-command-line.xtp"/>
@@ -337,7 +337,7 @@
                   target="${app.contextPath}/admin/resin-admin-console.xtp"/>
 
   <resin:Redirect regexp="^/doc/resin-clustering.xtp"
-                  target="${app.contextPath}/admin/cluster-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/doc/resin-comet.xtp"
                   target="${app.contextPath}/admin/http-server.xtp"/>
@@ -403,7 +403,7 @@
                   target="${app.contextPath}/admin/reference.xtp"/>
 
   <resin:Redirect regexp="^/doc/tcp-sessions.xtp"
-                  target="${app.contextPath}/admin/cluster-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/doc/virtual-host.xtp"
                   target="${app.contextPath}/admin/http-virtual-hosts.xtp"/>
@@ -502,7 +502,7 @@
                   target="${app.contextPath}/admin/scheduled-tasks.xtp"/>
 
   <resin:Redirect regexp="^/java_tut/tcp-sessions.xtp"
-                  target="${app.contextPath}/admin/cluster-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/jms.xtp"
                   target="${app.contextPath}/examples/jms.xtp"/>
@@ -514,7 +514,7 @@
                   target="${app.contextPath}/admin/deploy-ref.xtp"/>
 
   <resin:Redirect regexp="^/ref/balance.xtp"
-                  target="${app.contextPath}/admin/cluster-load-balancer.xtp"/>
+                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
 
   <resin:Redirect regexp="^/ref/basic-config.xtp"
                   target="${app.contextPath}/admin/config.xtp"/>

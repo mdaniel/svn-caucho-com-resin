@@ -51,8 +51,7 @@
   </chapter>
 
   <chapter title="Clustering">
-    <linked-section link="admin/cluster-overview.xtp" />
-    <linked-section link="admin/cluster-load-balancer.xtp" />
+    <linked-section link="admin/clustering-overview.xtp" />
   </chapter>
 
   <chapter title="Resin monitoring and administration web application">

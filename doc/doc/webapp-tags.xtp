@@ -2052,7 +2052,7 @@ element servlet-regexp {
 <p>&lt;session-config> configures Resin's session handling, including the
 cookies Resin sends, the maximum sessions, and session persistence and clustering.</p>
 
-<p>See also: <a href="resin-clustering.xtp">Resin clustering</a> for more
+<p>See also: <a href="clustering-overview.xtp">Resin clustering</a> for more
 information about distributed sessions and persistence.</p>
 
 <deftable title="&lt;session-config> Attributes">

@@ -28,7 +28,7 @@ available in the resin.xml.  For example some sites have have
 more sophisticated requirements, either
 adding many <a href="virtual-host.xtp">virtual hosts</a>, 
 <a href="cluster-tags.xtp#cache">proxy caching</a>, 
-<a href="resin-clustering.xtp">load-balancing</a>, or adding
+<a href="clustering-overview.xtp">load-balancing</a>, or adding
 <a href="sessions.xtp">distributed sessions.</a></p>
 
 
@@ -121,7 +121,7 @@ of virtual hosts, possibly including a default virtual host.  Each
 <a href="server-tags.xtp#server">&lt;server&gt;</a> in
 a &lt;cluster> handles the same requests.</p>
 
-<p>A web-site using Resin's <a href="resin-clustering.xtp">load
+<p>A web-site using Resin's <a href="clustering-overview.xtp">load
 balancing</a> might have two clusters: a web-tier handling the HTTP requests
 and an app-tier handling servlets, PHP and JSP pages.</p>
 
@@ -294,7 +294,7 @@ resin.xml file.  The server will also have a
 unique <var>address</var> and <var>port</var> which allows
 the servers in the cluster to communicate with each other.</p>
 
-<p>Clustering is used for <a href="resin-clustering.xtp">load-balancing</a>,
+<p>Clustering is used for <a href="clustering-overview.xtp">load-balancing</a>,
 <a href="sessions.xtp">distributed sessions</a> and remote
 administration.  Adding servers to a cluster lets sites handle more traffic
 and improves reliability by providing redundant servers.</p>
