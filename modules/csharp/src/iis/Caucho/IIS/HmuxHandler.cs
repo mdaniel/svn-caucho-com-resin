@@ -33,6 +33,8 @@ using System.Diagnostics;
 using System.IO;
 using System.Text;
 using System.Web;
+using System.Configuration;
+using System.Web.Configuration;
 
 namespace Caucho.IIS
 {
@@ -49,12 +51,37 @@ namespace Caucho.IIS
     private const int BUSY = 0x2; // server sends busy (retry GET/POST)
     private const int FAIL = 0x4; // server failed (retry GET)
 
-    bool _isStickySessions = true;
-    LoadBalancer _loadBalancer;
+    private bool _isStickySessions = true;
+    private LoadBalancer _loadBalancer;
+    private Logger _logger;
 
     public HmuxHandler()
     {
+      init();
+
+    }
+
+    private void init()
+    {
       _loadBalancer = new LoadBalancer();
+      _logger = Logger.GetLogger();
+
+      Object obj = WebConfigurationManager.GetSection("appSettings");
+      if (obj != null)
+        _logger.Info("settings: {0}", obj.GetType());
+
+      /**      System.Configuration.Configuration rootWebConfig1 =
+              System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration(null);
+            if (0 < rootWebConfig1.AppSettings.Settings.Count) {
+              System.Configuration.KeyValueConfigurationElement customSetting =
+                rootWebConfig1.AppSettings.Settings["customsetting1"];
+              if (null != customSetting)
+                Console.WriteLine("customsetting1 application string = \"{0}\"",
+                  customSetting.Value);
+              else
+                Console.WriteLine("No customsetting1 application string");
+            }
+            */
     }
 
     public bool IsReusable
@@ -560,8 +587,8 @@ namespace Caucho.IIS
     private void RelayResponseHeader(HttpResponse response, String name, String value)
     {
       if ("Cache-Control".Equals(name)) {
-        String []directives = value.Split(',', '=', ' ');
-        for(int i = 0; i < directives.Length; i++) {
+        String[] directives = value.Split(',', '=', ' ');
+        for (int i = 0; i < directives.Length; i++) {
           String directive = directives[i];
           if ("no-cache".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
             response.Cache.SetCacheability(HttpCacheability.NoCache);
@@ -578,9 +605,9 @@ namespace Caucho.IIS
           } else if ("s-maxage".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
             response.Cache.SetProxyMaxAge(TimeSpan.FromSeconds(int.Parse(directives[++i])));
           } else if ("post-check".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
-            response.Cache.AppendCacheExtension("post-check="+directives[++i]);
+            response.Cache.AppendCacheExtension("post-check=" + directives[++i]);
           } else if ("pre-check".Equals(directive, StringComparison.OrdinalIgnoreCase)) {
-            response.Cache.AppendCacheExtension("pre-check="+directives[++i]);
+            response.Cache.AppendCacheExtension("pre-check=" + directives[++i]);
           }
         }
       } else if ("Content-Type".Equals(name)) {
