@@ -325,7 +325,6 @@ element active-wait-time {
 <defun title="&lt;address>" name="address" version="Resin 3.1">
 <parents>server</parents>
 <default>127.0.0.1</default>
-
 <description>
 <p>The server &lt;address> defines the IP interface for Resin
 cluster communication and load balancing.  It will be an
@@ -333,9 +332,7 @@ internal IP address like 192.168.* for a clustered configuration
 or 127.* for a single-server configuration.  No wild cards are allowed
 because the other cluster servers and load balancer use the address
 to connect to the server.</p>
-
 </description>
-
 <example title="server address">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="web-tier"&gt;
@@ -357,7 +354,6 @@ to connect to the server.</p>
   &lt;/cluster>
 &lt;/resin>
 </example>
-
 </defun>
 
 <defun title="&lt;allow-forward-after-flush>" name="allow-forward-after-flush">
@@ -777,17 +773,14 @@ end of a request and logs a warning and stack trace.</p>
 
 <defun title="&lt;cluster>" name="cluster">
 <parents>resin</parents>
-
 <description>
 <p>&lt;cluster> configures a set of identically-configured servers.
 The cluster typically configures a set of &lt;server&gt;s, each with some
 ports, and a set of virtual &lt;host&gt;s.</p>
-
 <p>Only one &lt;cluster&gt; is active in any on server.  At runtime,
 the &lt;cluster&gt; is selected by the &lt;server&gt; with <var>id</var>
 matching the -server-id on the command line.</p>
 </description>
-
 <attributes>
 <tr>
   <th>Attribute</th>
@@ -996,12 +989,10 @@ element cluster {
 
 <defun title="&lt;cluster-default>" version="Resin 3.1" name="cluster-default">
 <parents>resin</parents>
-
 <description>
 <p>&lt;cluster-default> defines default cluster configuration for all
 clusters in the &lt;resin&gt; server.</p>
 </description>
-
 <example title="Example: cluster-default">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster-default&gt;
@@ -1017,7 +1008,45 @@ clusters in the &lt;resin&gt; server.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
+</defun>
 
+<defun title="&lt;cluster-port>" version="Resin 3.0">
+<parents>server</parents>
+<p>&lt;cluster-port> configures the cluster and load balancing socket,
+for load balancing, distributed sessions, and distributed management.</p>
+<p>When configuring Resin in a load-balanced cluster, each Resin instance
+will have its own &lt;srun&gt; configuration, which Resin uses for distributed
+session management and for the load balancing itself.</p>
+<p>When configuring multiple JVMs, each &lt;srun&gt; has a
+unique &lt;id&gt; which allows the -server command-line to select
+which ports the server should listen to.</p>
+<deftable-childtags>
+<tr><td>address</td>
+    <td>hostname of the interface to listen to</td>
+    <td>*</td></tr>
+<tr><td>jsse-ssl</td>
+    <td>configures the port to use JSSE for SSL</td>
+    <td>none</td></tr>
+<tr><td>openssl</td>
+    <td>configures the port to use OpenSSL</td>
+    <td>none</td></tr>
+<tr><td>port</td>
+    <td>port to listen to</td>
+    <td>required</td></tr>
+<tr><td>read-timeout</td>
+    <td>timeout waiting to read from idle client</td>
+    <td>65s</td></tr>
+<tr><td>write-timeout</td>
+     <td>timeout waiting to write to idle client</td>
+     <td>65s</td></tr>
+<tr><td>accept-listen-backlog</td>
+    <td>The socket factory's listen backlog for receiving sockets</td>
+    <td>100</td></tr>
+<tr><td>tcp-no-delay</td>
+    <td>sets the NO_DELAY socket parameter</td>
+    <td>true</td></tr>
+</deftable-childtags>
+<p>The class that corresponds to &lt;srun&gt; is <a href="javadoc|com.caucho.server.cluster.ClusterPort|"/></p>
 </defun>
 
 <defun title="&lt;compiling-loader>" name="compiling-loader" occur="*" version="Resin 3.0" type="defun">
@@ -3816,7 +3845,6 @@ the command line, typically -X memory parameters and -D defines.</p>
 <defun title="&lt;keepalive-max>" name="keepalive-max" version="Resin 3.1">
 <parents>server</parents>
 <default>100</default>
-
 <description>
 <p>&lt;keepalive-max> configures the maximum number of sockets
 which can be used directly for <g>keepalive</g> connections.
@@ -3824,9 +3852,7 @@ In Resin Professional, the <g>select manager</g> allows for
 a much larger number of keepalive sockets, since it can detach
 threads from connections.  Without the select manager, each
 connection is associated with a thread.</p>
-
 <p>A value of -1 disables keepalives.</p>
-
 <p>Keepalives are an important TCP technique used with HTTP and
 Resin's load-balancing to avoid the heavy network cost of creating
 a new socket.  Since an initial HTTP request is usually immediately
@@ -3836,11 +3862,9 @@ instead of creating a new one.  The socket keepalive is even more
 important for Resin's load balancing, to avoid creating extra sockets
 between the web-tier and the app-tier and to make distributed sessions
 more efficient.</p>
-
 <p>Higher values of &lt;keepalive-max> improve network efficiency
 but increase the number of threads waiting for new client data.</p>
 </description>
-
 <example title="keepalive-thread-max in resin.xml">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="web-tier"&gt;
@@ -3857,7 +3881,6 @@ but increase the number of threads waiting for new client data.</p>
   &lt;/cluster>
 &lt;/resin>
 </example>
-
 </defun>
 
 <defun title="&lt;keepalive-select-enable>" name="keepalive-select-enable" version="Resin 3.1">
@@ -4091,7 +4114,6 @@ can timeout too quickly for a live server with some network congestion.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
 </defun>
 
 <defun title="&lt;load-balance-recover-time>" name="load-balance-recover-time" version="Resin 3.1">
@@ -4127,7 +4149,6 @@ contact unavailable servers.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
 </defun>
 
 <defun title="&lt;load-balance-idle-time>" name="load-balance-idle-time" version="Resin 3.1">
@@ -4154,8 +4175,6 @@ remain idle.</p>
 <p>Higher values may improve the socket pooling, but may also increase
 the chance of connecting to a closed server.</p>
 </description>
-
-
 </defun>
 
 <defun title="&lt;load-balance-warmup-time>" name="load-balance-warmup-time" version="Resin 3.1">
@@ -4197,23 +4216,18 @@ app-tier server until the server has warmed up.</p>
 <defun title="&lt;load-balance-weight>" name="load-balance-weight" version="Resin 3.1">
 <parents>server</parents>
 <default>100</default>
-
 <description>
 <p>load-balance-weight assigns a load-balance weight to a backend server.
 Servers with higher values get more requests.  Servers with lower
 values get fewer requests.</p>
-
 <p>In some cases, some <g>app-tier</g> servers may be more powerful than
 others.  load-balance-weight lets the load-balancer assign more connections
 to the more powerful machines.</p>
-
 <p>Test and profiling servers can also use load-balance-weight to receive a
 small number of connections for profiling purposes.</p>
-
 <p>Larger values tell the load-balancer to assign more requests to
 the app-tier server.</p>
 </description>
-
 <example title="load-balance-weight">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="app-tier"&gt;
@@ -4229,7 +4243,6 @@ the app-tier server.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
 </defun>
 
 <defun title="&lt;login-config>" name="login-config" version="Servlet 2.2">
@@ -5074,8 +5087,46 @@ Sites requiring additional security for their passwords can use
 the &lt;mypkg:MyDecryptor/> syntax
 to configure a password decoder.</p>
 </description>
-
 </defun>
+
+<defun title="&lt;persistent-store>" version="Resin 3.0.8">
+<parents>cluster</parents>
+
+<p>Defines the cluster-aware persistent store used for
+sharing distributed sessions.  The allowed types are "cluster"
+and "file".  The "file" type is only recommended in single-server
+configurations.</p>
+
+<p>The &lt;persistent-store&gt; configuration is in the &lt;server&gt; level
+because it needs to share update information across the
+active cluster and the &lt;cluster&gt; definition is at the &lt;server&gt; level.
+Sessions activate the persistent store with the &lt;use-persistent-store&gt;
+tag of the &lt;session-config&gt;.</p>
+
+<deftable title="&lt;persistent-store> Attributes">
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>
+<tr>
+  <td>init</td>
+  <td>initialization parameters for the persistent-store</td>
+  <td></td>
+</tr>
+<tr>
+  <td>type</td>
+  <td>cluster, jdbc, or file</td>
+  <td>required</td>
+</tr>
+</deftable>
+
+<def title="&lt;persistent-store> schema">
+element persistent-store {
+  type
+  &amp; init?
+}
+</def>
 
 <defun title="&lt;ping>" occur="*" version="Resin 3.0" name="ping">
 <parents>cluster</parents>
@@ -5268,14 +5319,12 @@ Connections idle for longer than &lt;ping-interval> are validated.
 <defun title="&lt;port>" name="port" version="Resin 3.1">
 <parents>server</parents>
 <default>6800</default>
-
 <description>
 <p>The server &lt;port> defines the TCP port for Resin
 cluster communication and load balancing.  Most server instances
 will use a common port like 6800, while machines with multiple
 servers may use multiple ports like 6800 and 6801.</p>
 </description>
-
 <example title="multiple servers on a machine ">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
   &lt;cluster id="app-tier"&gt;
@@ -5289,20 +5338,15 @@ servers may use multiple ports like 6800 and 6801.</p>
   &lt;/cluster>
 &lt;/resin>
 </example>
-
 </defun>
 
 <defun title="&lt;port-default>" name="port-default" version="Resin 3.2.1">
 <parents>server</parents>
-
 <description>
 <p>Defines default port parameters for all &lt;http>, &lt;protocol>, and
 &lt;cluster-port>.</p>
 </description>
-
 </defun>
-
-
 
 <defun title="&lt;prepared-statement-cache-size>" name="prepared-statement-cache-size" version="Resin 3.1">
 <parents>database</parents>
@@ -8337,9 +8381,37 @@ element resource-ref {
   res-sharing-scope?
 }
 </schema>
-
 </defun>
 
+<defun title="&lt;save-mode>">
+<parents>session-config</parents>
+<p>&lt;save-mode> configures when Resin should save a persistence
+session during a request.  The values are:</p>
+<deftable>
+<tr>
+  <td>after-request</td>
+  <td>Save the session after the request has been served and completed</td>
+</tr>
+<tr>
+  <td>before-headers</td>
+  <td>Save the session before sending headers to the browser</td>
+</tr>
+<tr>
+  <td>on-shutdown</td>
+  <td>Only save the session when Resin is shutting down</td>
+</tr>
+</deftable>
+<p>In some situations, like redirects, a fast browser can send a request
+back to Resin before the session is persisted with the
+<var>after-request</var> save-mode.  If the server is configured
+without <g>sticky sessions</g>, the load balancer might send the request
+to a different server, which may not get the updated session.
+In the situation, either the save-mode should be changed to
+<var>before-headers</var> or sticky sessions should be enabled.</p>
+<p>If the save-mode is <var>before-headers</var>, the application should
+take care to make any session changes before sending data to the browser.</p>
+<default>after-request</default>
+</defun>
 
 <defun title="&lt;save-allocation-stack-trace>" name="save-allocation-stack-trace" version="Resin 3.1">
 <parents>database</parents>
@@ -8530,201 +8602,32 @@ element security-provider {
 
 </defun> <!-- security-provider -->
 
-<defun title="&lt;server>" version="Resin 3.1" name="server">
+<defun title="&lt;server>" version="Resin 3.1">
 <parents>cluster</parents>
-
-<description>
 <p>&lt;server> configures a JVM instance in the cluster.
 Each &lt;server&gt; is uniquely identified by
 its <var>id</var> attribute.  The <var>id</var> will match
 the -server-id command line argument.</p>
-
 <p>The server listens to an internal network address,
 e.g. 192.168.0.10:6800 for clustering, load balancing,
 and administration.</p>
-
 <p>The current server is managed with a
-<a javadoc="com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
+<a href="javadoc|com.caucho.management.server.ServerMXBean">ServerMXBean</a>.
 The <g>ObjectName</g> is <var>resin:type=Server</var>.</p>
-
 <p>Peer servers are managed with 
-<a javadoc="com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
-</description>
-
-<attributes>
-<tr>
-  <th>Attribute</th>
-  <th>Description</th>
-  <th>Default</th>
-</tr>
-<tr>
-  <td>address</td>
-  <td>IP address of the cluster port</td>
-  <td>127.0.0.1</td>
-</tr>
-<tr>
-  <td>bind-ports-after-start</td>
-  <td>If true, listen to the ports only after all initialization has
-completed, allowing load-balance failover.</td>
-  <td>true</td>
-</tr>
-<tr>
-  <td>cluster-port</td>
-  <td>Configures the cluster port in detail, allowing for customization
-of timeouts, etc.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>group-name</td>
-  <td>Used by the watchdog to switch setgid before starting the Resin
-JVM instance for security.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>http</td>
-  <td>Adds a HTTP port (see <a href="http-server-ref.xtp">port tags</a>)</td>
-  <td></td>
-</tr>
-<tr>
-  <td>id</td>
-  <td>Unique server identifier</td>
-  <td>required</td>
-</tr>
-<tr>
-  <td>java-exe</td>
-  <td>The specific Java executable for the watchdog
-to launch the JVM</td>
-  <td>java</td>
-</tr>
-<tr>
-  <td>jvm-arg</td>
-  <td>Adds a JVM argument when the watchdog launches Resin.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>jvm-classpath</td>
-  <td>Adds a JVM classpath when the watchdog launches Resin.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>keepalive-connection-time-max</td>
-  <td>The total time a connection can be used for requests and keepalives</td>
-  <td>10min</td>
-</tr>
-<tr>
-  <td>keepalive-max</td>
-  <td>The maximum keepalives enabled at one time.</td>
-  <td>128</td>
-</tr>
-<tr>
-  <td>keepalive-select-enable</td>
-  <td>Enables epoll/select for keepalive requests to reduce threads (unix only)</td>
-  <td>true</td>
-</tr>
-<tr>
-  <td>keepalive-timeout</td>
-  <td>Timeout for a keepalive to wait for a new request</td>
-  <td>15s</td>
-</tr>
-<tr>
-  <td>load-balance-connect-timeout</td>
-  <td>How long the load-balancer should wait for a connection to this server</td>
-  <td>5s</td>
-</tr>
-<tr>
-  <td>load-balance-idle-time</td>
-  <td>How long the load balancer can keep an idle socket open to this server (see keepalive-timeout)</td>
-  <td>keepalive-time - 2s</td>
-</tr>
-<tr>
-  <td>load-balance-recover-time</td>
-  <td>How long the load balancer should treat this server as dead after a failure before retrying</td>
-  <td>15s</td>
-</tr>
-<tr>
-  <td>load-balance-socket-timeout</td>
-  <td>timeout for the load balancer reading/writing to this server</td>
-  <td>65s</td>
-</tr>
-<tr>
-  <td>load-balance-warmup-time</td>
-  <td>Warmup time for the load-balancer to throttle requests before sending the full load</td>
-  <td>60s</td>
-</tr>
-<tr>
-  <td>load-balance-weight</td>
-  <td>relative weight used by the load balancer to send traffic to this server</td>
-  <td>100</td>
-</tr>
-<tr>
-  <td>memory-free-min</td>
-  <td>minimum memory allowed for the JVM before Resin forces a restart</td>
-  <td>1M</td>
-</tr>
-<tr>
-  <td>ping</td>
-  <td>Configures a periodic ping of the server to force restarts when non-responsive</td>
-  <td></td>
-</tr>
-<tr>
-  <td>port</td>
-  <td>Configures the cluster port (shortcut for &lt;cluster-port>)</td>
-  <td>6800</td>
-</tr>
-<tr>
-  <td>protocol</td>
-  <td>Adds a custom socket protocol, e.g. for IIOP or SNMP.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>shutdown-wait-max</td>
-  <td>The maximum of time to wait for a graceful Resin shutdown before forcing a close</td>
-  <td>60s</td>
-</tr>
-<tr>
-  <td>socket-timeout</td>
-  <td>The read/write timeout for the socket</td>
-  <td>65s</td>
-</tr>
-<tr>
-  <td>thread-max</td>
-  <td>The maximum number of threads managed by Resin (JVM threads will be larger because of non-Resin threads)</td>
-  <td>4096</td>
-</tr>
-<tr>
-  <td>thread-executor-thread-max</td>
-  <td>Limits the threads allocated to application ScheduledExecutors from Resin</td>
-  <td></td>
-</tr>
-<tr>
-  <td>thread-idle-max</td>
-  <td>Maximum number of idle threads in the thread pool</td>
-  <td>10</td>
-</tr>
-<tr>
-  <td>thread-idle-min</td>
-  <td>Minimum number of idle threads in the thread pool</td>
-  <td>5</td>
-</tr>
-<tr>
-  <td>user-name</td>
-  <td>The setuid user-name for the <a href="starting-resin-watchdog-ref.xtp">watchdog</a>
-when launching Resin for Unix security.</td>
-  <td></td>
-</tr>
-<tr>
-  <td>watchdog-jvm-arg</td>
-  <td>Additional JVM arguments when launching the watchdog manager</td>
-  <td></td>
-</tr>
-<tr>
-  <td>watchdog-port</td>
-  <td>The port for the watchdog-manager to listen for start/stop/status
-requests</td>
-  <td>6700</td>
-</tr>
-</attributes>
-
+<a href="javadoc|com.caucho.management.server.ServerConnectorMXBean">ServerConnectorMXBean</a>. 
+The ObjectName is <var>resin:type=ServerConnector,name=server-id</var>.</p>
+<deftable-childtags>
+<tr><td>id</td>
+    <td>unique server identifier</td>
+    <td>required</td></tr>
+<tr><td>address</td>
+    <td>IP address of the cluster port</td>
+    <td>127.0.0.1</td></tr>
+<tr><td>port</td>
+    <td>The cluster port</td>
+    <td>6800</td></tr>
+</deftable-childtags>
 <example title="server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
@@ -8745,12 +8648,65 @@ requests</td>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
+<p>Main configuration for the server, configuring ports,
+threads and virtual hosts.</p>
+<ul>
+<li>Common resources for all virtual hosts and web-apps.</li>
+<li>Thread pooling</li>
+<li>HTTP and SRUN/Cluster ports</li>
+<li>Caching</li>
+<li>virtual host configuration and common web-app-default</li>
+</ul>
+<p>The &lt;server&gt; will generally contain a &lt;class-loader&gt; configuration
+which loads the resin/lib jars dynamically, allowing for system-wide jars
+to be dropped into resin/lib.  &lt;server&gt; configures
+the main dynamic environment.  Database pools common to all virtual hosts,
+for example, should be configured in the &lt;server&gt; block.</p>
+<p>The &lt;server&gt; configures the &lt;thread-pool&gt; and a set
+of &lt;http&gt; and &lt;srun&gt; ports which share the thread pool.
+Requests received on those ports will use worker threads from the
+thread pool.</p>
+<deftable-childtags>
+<tr><td>alternate-session-url-prefix</td>
+    <td>a prefix to add the session to the beginning of the URL as a path
+        prefix instead of the standard ;jsessionid= suffix. For clients like
+        mobile devices with limited memory, this will allow careful web
+        designers to minimize the page size.</td>
+    <td>null</td></tr>
+<tr><td>keepalive-max</td>
+    <td>the maximum number of keepalive connections</td>
+    <td>512</td></tr>
+<tr><td>keepalive-thread-timeout</td>
+    <td>the maximum time a connection is maintained in the keepalive state</td>
+    <td>120s</td></tr>
+</deftable-childtags>
+<example title="alternate-session-url-prefix">
+&lt;server&gt;
+  ...
+  &lt;alternate-session-url-prefix&gt;/~J=&lt;/alternate-session-url-prefix&gt;
+  ...
+</example>
+<s2 name="server-el" title="EL variables and functions">
+<deftable title="EL variables defined by &lt;server&gt;">
+<tr><th>variable</th>
+    <th>corresponding API</th></tr>
+<tr><td>serverId</td>
+    <td><i>server</i>.getServerId()</td></tr>
+<tr><td>root-dir</td>
+    <td><i>server</i>.getRootDirectory()</td></tr>
+<tr><td>server-root</td><td><i>server</i>.getRootDirectory()</td></tr>
+</deftable>
+<deftable title="EL functions defined by &lt;server&gt;">
+<tr><th>function</th>
+    <th>corresponding API</th></tr>
+<tr><td>jndi</td>
+    <td><a href="javadoc|com.caucho.naming.Jndi|lookup(String)">Jndi.lookup(String)</a></td></tr>
+</deftable>
+</s2>
 </defun>
 
 <defun title="&lt;server-default>" version="Resin 3.1" name="server-default">
 <parents>cluster</parents>
-
 <description>
 <p>&lt;server-default> defines default values for
 all &lt;server&gt; instances.  Since most &lt;server> configuration
@@ -8759,7 +8715,6 @@ in a &lt;server-default>.  For example, &lt;http> ports, timeouts,
 JVM arguments, and keepalives are typically identical for all
 server instances and therefore belong in a server-default.</p>
 </description>
-
 <example title="server">
 &lt;resin xmlns="http://caucho.com/ns/resin"&gt;
     &lt;cluster id="web-tier"&gt;
@@ -8780,7 +8735,6 @@ server instances and therefore belong in a server-default.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
 </defun>
 
 <defun title="&lt;server-header>" version="Resin 3.1" name="server-header">
@@ -9457,7 +9411,6 @@ report bogus failures when the server machine is just a little slow.</p>
     &lt;/cluster&gt;
 &lt;/resin&gt;
 </example>
-
 </defun>
 
 <defun title="&lt;spy>" name="spy" version="Resin 3.1">
