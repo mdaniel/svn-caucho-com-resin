@@ -274,6 +274,7 @@ this case, this is how the Resin configuration might look like:
 Each server will be started as <var>-server a</var>, <var>-server b</var>, etc to grab 
 its specific configuration.
 </p>
+</s2>
 <s2 title="Socket Pooling, Timeouts, and Failover">
 <p>For efficiency, Resin's load balancer manages a pool of sockets connecting to the 
 app-tier servers. If Resin forwards a new request to an app-tier server and it has an 
@@ -538,6 +539,7 @@ to the file persistence feature discussed below.
      the cluster storage model -->
 <!-- XXX: Does JDBC store still need to be discussed? -->
 <s2 title="File Persistence">
+<p>
 Besides TCP based clustering, you can use file based storage as a very simple 
 mechanism for improving reliability. In this model, the session is stored as files in 
 the <var>resin-data</var> directory. When the session changes, the updates are written 
@@ -798,16 +800,17 @@ on the server, which is disabled by default. You do this using the following Res
 configuration:
 </p>
 <example title="Enabling Resin Clustered Deployment">
-<resin xmlns=http://caucho.com/ns/resin
+&lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:resin="urn:java:com.caucho.resin">
-  <cluster id="app-tier">
-    <resin:AdminAuthenticator password-digest="none">
-      <resin:user name="admin" password="myadminpass"/>
-    </resin:AdminAuthenticator>
-    <resin:RemoteAdminService/>
-    <resin:DeployService/>
+  &lt;cluster id="app-tier">
+    &lt;resin:AdminAuthenticator password-digest="none">
+      &lt;resin:user name="admin" password="myadminpass"/>
+    &lt;/resin:AdminAuthenticator>
+    &lt;resin:RemoteAdminService/>
+    &lt;resin:DeployService/>
   ...
-</resin>
+  &lt;/cluster>
+&lt;/resin>
 </example>
 <p>
 In the example above, both the remote admin service and the deployment service is 
@@ -820,27 +823,26 @@ Once the cluster is up and running, you can use the Ant snippet below to do a re
 deployment:
 </p>
 <example title="Clustered Deployment via Ant">
-<?xml version="1.0"?>
-<project name="test" default="test" basedir=".">
-  <property name="resin.home" value="/usr/share/resin"/>
-  <target name="test">
-    <taskdef name="resin-upload-war"
+&lt;project name="test" default="test" basedir=".">
+  &lt;property name="resin.home" value="/usr/share/resin"/>
+  &lt;target name="test">
+    &lt;taskdef name="resin-upload-war"
              classname="com.caucho.ant.ResinUploadWar">
-      <classpath>
-        <fileset dir="${resin.home}">
-          <include name="lib/*.jar"/>
-          <include name="plugins/resin-ant.jar"/>
-        </fileset>
-      </classpath>
-    </taskdef>
+      &lt;classpath>
+        &lt;fileset dir="${resin.home}">
+          &lt;include name="lib/*.jar"/>
+          &lt;include name="plugins/resin-ant.jar"/>
+        &lt;/fileset>
+      &lt;/classpath>
+    &lt;/taskdef>
 
-    <resin-upload-war server="localhost"
+    &lt;resin-upload-war server="localhost"
                       port="8080"
                       user="admin"
                       password="myadminpass"
                       warFile="foo.war"/>
-  </target>
-</project>
+  &lt;/target>
+&lt;/project>
 </example>
 <p>
 After you run the Ant script above, you will see output like this:
@@ -859,10 +861,10 @@ of file, development stage, virtual host, web application context root name and
 version. The format used is this:
 </p>
 <example>
-<type>/<stage>/<virtual host>/<context root>[-<version>]
+type/stage/virtual host/context root[-version]
 </example>
 <p>
-In the example, all web applications are stored under <var>wars</var>, we didn’t 
+In the example, all web applications are stored under <var>wars</var>, we didnï¿½t 
 specify a stage or virtual host in the Ant task so <var>default</var> is used, the 
 web application root is foo and no version is used since one was not specified. 
 This format is key to the versioning and staging featured we will discuss shortly.
@@ -874,52 +876,52 @@ added to the cluster at a later point in time after initial propagation happens.
 </p>
 <figure src="deployment.png"/>
 <p>
-Doing remote deployment with the Resin Maven plug-in is very similar. You’ll need to 
+Doing remote deployment with the Resin Maven plug-in is very similar. Youï¿½ll need to 
 setup the plug-in like this:
 </p>
 <example title="Clustered Deployment via Maven">
-<project xmlns="http://maven.apache.org/POM/4.0.0"
+&lt;project xmlns="http://maven.apache.org/POM/4.0.0"
          xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
          http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.test</groupId>
-  <artifactId>test</artifactId>
-  <packaging>war</packaging>
-  <version>1.0-SNAPSHOT</version>
-  <name>Test Maven Web Application</name>
-  <url>http://maven.apache.org</url>
-  <dependencies>
-  </dependencies>
-  <pluginRepositories>
-    <pluginRepository>
-      <snapshots>
-        <enabled>true</enabled>
-        <updatePolicy>always</updatePolicy>
-        <checksumPolicy>ignore</checksumPolicy>
-      </snapshots>
-      <id>caucho</id>
-      <name>Caucho</name>
-      <url>http://caucho.com/m2-snapshot</url>
-    </pluginRepository>
-  </pluginRepositories>
-  <build>
-    <finalName>foo</finalName>
-    <plugins>
-      <plugin>
-        <groupId>com.caucho</groupId>
-        <artifactId>resin-maven-plugin</artifactId>
-        <version>4.0-SNAPSHOT</version>
-        <configuration>
-          <server>127.0.0.1</server>
-          <port>8086</port>
-          <user>admin</user>
-          <password>myadminpass</password>
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-</project>
+  &lt;modelVersion>4.0.0&lt;/modelVersion>
+  &lt;groupId>com.test&lt;/groupId>
+  &lt;artifactId>test&lt;/artifactId>
+  &lt;packaging>war&lt;/packaging>
+  &lt;version>1.0-SNAPSHOT&lt;/version>
+  &lt;name>Test Maven Web Application&lt;/name>
+  &lt;url>http://maven.apache.org&lt;/url>
+  &lt;dependencies>
+  &lt;/dependencies>
+  &lt;pluginRepositories>
+    &lt;pluginRepository>
+      &lt;snapshots>
+        &lt;enabled>true&lt;/enabled>
+        &lt;updatePolicy>always&lt;/updatePolicy>
+        &lt;checksumPolicy>ignore&lt;/checksumPolicy>
+      &lt;/snapshots>
+      &lt;id>caucho&lt;/id>
+      &lt;name>Caucho&lt;/name>
+      &lt;url>http://caucho.com/m2-snapshot&lt;/url>
+    &lt;/pluginRepository>
+  &lt;/pluginRepositories>
+  &lt;build>
+    &lt;finalName>foo&lt;/finalName>
+    &lt;plugins>
+      &lt;plugin>
+        &lt;groupId>com.caucho&lt;/groupId>
+        &lt;artifactId>resin-maven-plugin&lt;/artifactId>
+        &lt;version>4.0-SNAPSHOT&lt;/version>
+        &lt;configuration>
+          &lt;server>127.0.0.1&lt;/server>
+          &lt;port>8086&lt;/port>
+          &lt;user>admin&lt;/user>
+          &lt;password>myadminpass&lt;/password>
+        &lt;/configuration>
+      &lt;/plugin>
+    &lt;/plugins>
+  &lt;/build>
+&lt;/project>
 </example>
 <p>
 You can then remote deploy your application from the command line using Maven like so:
@@ -945,7 +947,7 @@ The best way to understand how this works is through a simple example. Here is a
 modified version of the previous Ant deployment example:
 </p>
 <example title="Deployment Versioning via Ant">
-<resin-upload-war server="localhost"
+&lt;resin-upload-war server="localhost"
                   port="8080"
                   user="admin"
                   password="myadminpass"
@@ -953,7 +955,7 @@ modified version of the previous Ant deployment example:
                   version="1.0"/>
 </example>
 <p>
-Notice in this case we’ve explicitly set a version number (in a real life Ant script 
+Notice in this case weï¿½ve explicitly set a version number (in a real life Ant script 
 you would of course likely externalize things like versions through properties instead 
 of hard-coding them). After you run the Ant script, you should see something like 
 this:
@@ -973,7 +975,7 @@ mvn resin:upload-war -Dresin.version="1.0"
 This application could be upgraded with the following Ant script:
 </p>
 <example title="Upgrading Application Version via Ant">
-<resin-upload-war server="localhost"
+&lt;resin-upload-war server="localhost"
                   port="8080"
                   user="admin"
                   password="myadminpass"
@@ -1002,22 +1004,21 @@ quickly. This can be done by simply copying back the older file to the head tag 
 this:
 </p>
 <example title="Reverting to Old Application Version via Ant">
-<?xml version="1.0"?>
-<project name="test" default="test" basedir=".">
-  <property name="resin.home" value="/usr/share/resin"/>
-  <target name="test">
-    <taskdef name="resin-copy-tag"
-             classname="com.caucho.ant.ResinCopyTag">
+&lt;project name="test" default="test" basedir=".">
+  &lt;property name="resin.home" value="/usr/share/resin"/>
+  &lt;target name="test">
+    &lt;taskdef name="resin-copy-tag"
+             classname="com.caucho.ant.ResinCopyTag"/>
     ...
-    <resin-copy-tag server="localhost"
+    &lt;resin-copy-tag server="localhost"
                     port="8080"
                     user="admin"
                     password="myadminpass"
                     sourceVersion="1.0"
                     sourceContextRoot="foo"
                     contextRoot="foo"/>
-  </target>
-</project>
+  &lt;/target>
+&lt;/project>
 </example>
 <p>
 The key here is specifying the source version to be 1.0. <var>resin-copy-tag</var> 
@@ -1035,32 +1036,31 @@ Here is the Maven version of the command:
 mvn resin:copy-tag -Dresin.sourceContextRoot='foo' -Dresin.sourceVersion="1.0" -Dresin.contextRoot="foo"
 </example>
 <p>
-If you feel you don’t need extra versions of applications in the repository, you can 
+If you feel you donï¿½t need extra versions of applications in the repository, you can 
 always delete them. For example, you can delete the faulty 2.0 deployment like this:
 </p>
 <example title="Deleting Application Version via Ant">
-<?xml version="1.0"?>
-<project name="test" default="test" basedir=".">
-  <property name="resin.home" value="/usr/share/resin"/>
-  <target name="test">
-    <taskdef name="resin-delete-tag"
+&lt;project name="test" default="test" basedir=".">
+  &lt;property name="resin.home" value="/usr/share/resin"/>
+  &lt;target name="test">
+    &lt;taskdef name="resin-delete-tag"
              classname="com.caucho.ant.ResinDeleteTag">
-      <classpath>
-        <fileset dir="${resin.home}">
-          <include name="lib/*.jar"/>
-          <include name="plugins/resin-ant.jar"/>
-        </fileset>
-      </classpath>
-    </taskdef>
+      &lt;classpath>
+        &lt;fileset dir="${resin.home}">
+          &lt;include name="lib/*.jar"/>
+          &lt;include name="plugins/resin-ant.jar"/>
+        &lt;/fileset>
+      &lt;/classpath>
+    &lt;/taskdef>
     ...
-    <resin-delete-tag server="localhost"
+    &lt;resin-delete-tag server="localhost"
                       port="8080"
                       user="admin"
                       password="myadminpass"
                       version="2.0"
                       contextRoot="foo"/>
-  </target>
-</project>
+  &lt;/target>
+&lt;/project>
 </example>
 <p>
 The Maven version is:
@@ -1073,20 +1073,19 @@ You can also always check out what versions of the application are currently
 installed in the Resin deployment repository:
 </p>
 <example title="Query Application Versions via Ant">
-<?xml version="1.0"?>
-<project name="test" default="test" basedir=".">
-  <property name="resin.home" value="/usr/share/resin"/>
-  <target name="test">
-    <taskdef name="resin-query-tags"
-             classname="com.caucho.ant.ResinQueryTags">
+&lt;project name="test" default="test" basedir=".">
+  &lt;property name="resin.home" value="/usr/share/resin"/>
+  &lt;target name="test">
+    &lt;taskdef name="resin-query-tags"
+             classname="com.caucho.ant.ResinQueryTags"/>
     ...
-    <resin-query-tags server="localhost"
+    &lt;resin-query-tags server="localhost"
                       port="8080"
                       user="admin"
                       password="myadminpass"
                       contextRoot="foo"/>
-  </target>
-</project>
+  &lt;/target>
+&lt;/project>
 </example>
 <p>The output from the query should look something like this:</p>
 <example>
@@ -1119,7 +1118,7 @@ the default stage. This application is propagated to all instances in the cluste
 This is how you do it using Ant:
 </p>
 <example title="Deployment Staging Using Ant">
-<resin-upload-war server="localhost"
+&lt;resin-upload-war server="localhost"
                   port="8080"
                   user="admin"
                   password="myadminpass"
@@ -1156,7 +1155,7 @@ users). Once you are satisfied with the results, you can change the application
 to the default stage by doing a copy as below:
 </p>
 <example title="Changing Deployment Stage Using Ant">
-<resin-copy-tag server="localhost"
+&lt;resin-copy-tag server="localhost"
                 port="8080"
                 user="admin"
                 password="myadminpass"
@@ -1199,18 +1198,18 @@ You configure a named distributed cache at the web application level like this:
 </p>
 <!-- XXX: Is this accurate? Why can't you configure a cache at the cluster level? -->
 <example title="Configuring Resin Distributed Cache">
-<resin xmlns="http://caucho.com/ns/resin"
+&lt;resin xmlns="http://caucho.com/ns/resin"
        xmlns:cluster="urn:java:com.caucho.distcache">
-  <cluster id="">
-    <host id="">
-      <web-app id="">
-        <cluster:ClusterCache>
-          <cluster:name>test</cluster:name>
-        </cluster:ClusterCache> 
-      </web-app>
-    </host>
-  </cluster>
-</resin>
+  &lt;cluster id="">
+    &lt;host id="">
+      &lt;web-app id="">
+        &lt;cluster:ClusterCache>
+          &lt;cluster:name>test&lt;/cluster:name>
+        &lt;/cluster:ClusterCache> 
+      &lt;/web-app>
+    &lt;/host>
+  &lt;/cluster>
+&lt;/resin>
 </example>
 <p>
 You may then inject the cache through CDI and use it in your application via the 
