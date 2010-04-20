@@ -74,7 +74,7 @@ cluster.
 <s1 title="Load Balancing">
 <!-- XXX: Should we add some images here? -->
 <p>
-Clustering and load-balancing are intrinsic to resin.xml configuration. You may only 
+Clustering and load-balancing are intrinsic to resin.xml configuration - you may only 
 define &lt;server> and &lt;host> inside a &lt;cluster> tag. The &lt;cluster> tag 
 defines a logically grouped set of servers to be load-balanced and clustered across. 
 Although you can definitely use a hardware load balancer with Resin, it is easier to 

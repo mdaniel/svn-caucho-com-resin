@@ -5127,6 +5127,7 @@ element persistent-store {
   &amp; init?
 }
 </def>
+</defun>
 
 <defun title="&lt;ping>" occur="*" version="Resin 3.0" name="ping">
 <parents>cluster</parents>
@@ -10698,7 +10699,6 @@ element work-dir {
   string
 }
 </schema>
-
 </defun>
 
 </body>
