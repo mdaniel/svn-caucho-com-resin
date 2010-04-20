@@ -20,8 +20,8 @@ javadoc="com.caucho.security.AbstractAuthenticator"/>) that
 you can extend to do this.
 </p>
 <p>
-  The following is a simple example that you can use a starting point for your 
-  application:
+The following is a simple example that you can use a starting point for your 
+application:
 </p>
 </description>
 <example title="WEB-INF/resin-web.xml - Custom Authenticator Configuration">
