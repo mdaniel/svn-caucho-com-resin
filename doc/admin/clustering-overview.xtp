@@ -396,7 +396,7 @@ clustering does not scale very well across a mildly large set of servers and oft
 floods internal network traffic with frivolous synchronization requests. Instead of 
 opting for this "brute force" approach, Resin opts to do what is sometimes referred 
 to as "buddy replication" clustering (most specofically in reference to replication
-in JBossCache).
+in <a href="http://www.jboss.org/jbosscache">JBossCache</a>).
 </p>
 <p>
 In this scheme, the session state is stored on a 
@@ -864,7 +864,7 @@ version. The format used is this:
 type/stage/virtual host/context root[-version]
 </example>
 <p>
-In the example, all web applications are stored under <var>wars</var>, we didn�t 
+In the example, all web applications are stored under <var>wars</var>, we didn't 
 specify a stage or virtual host in the Ant task so <var>default</var> is used, the 
 web application root is foo and no version is used since one was not specified. 
 This format is key to the versioning and staging featured we will discuss shortly.
@@ -876,7 +876,7 @@ added to the cluster at a later point in time after initial propagation happens.
 </p>
 <figure src="deployment.png"/>
 <p>
-Doing remote deployment with the Resin Maven plug-in is very similar. You�ll need to 
+Doing remote deployment with the Resin Maven plug-in is very similar. You'll need to 
 setup the plug-in like this:
 </p>
 <example title="Clustered Deployment via Maven">
@@ -955,7 +955,7 @@ modified version of the previous Ant deployment example:
                   version="1.0"/>
 </example>
 <p>
-Notice in this case we�ve explicitly set a version number (in a real life Ant script 
+Notice in this case we've explicitly set a version number (in a real life Ant script 
 you would of course likely externalize things like versions through properties instead 
 of hard-coding them). After you run the Ant script, you should see something like 
 this:
@@ -1036,7 +1036,7 @@ Here is the Maven version of the command:
 mvn resin:copy-tag -Dresin.sourceContextRoot='foo' -Dresin.sourceVersion="1.0" -Dresin.contextRoot="foo"
 </example>
 <p>
-If you feel you don�t need extra versions of applications in the repository, you can 
+If you feel you don't need extra versions of applications in the repository, you can 
 always delete them. For example, you can delete the faulty 2.0 deployment like this:
 </p>
 <example title="Deleting Application Version via Ant">
