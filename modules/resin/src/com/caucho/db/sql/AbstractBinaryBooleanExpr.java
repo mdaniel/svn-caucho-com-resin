@@ -30,15 +30,16 @@
 package com.caucho.db.sql;
 
 import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.logging.Logger;
 
+import com.caucho.inject.Module;
+
+@Module
 abstract class AbstractBinaryBooleanExpr extends AbstractBinaryExpr {
   /**
    * Returns the type of the expression.
    */
   @Override
-  public Class getType()
+  public Class<?> getType()
   {
     return boolean.class;
   }

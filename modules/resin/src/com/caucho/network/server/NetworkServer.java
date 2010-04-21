@@ -30,7 +30,6 @@
 package com.caucho.network.server;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.TreeSet;
 import java.util.concurrent.ConcurrentHashMap;
@@ -71,7 +70,7 @@ public class NetworkServer
 
   private Throwable _configException;
 
-  private long _shutdownWaitMax = 60 * 1000;
+  // private long _shutdownWaitMax = 60 * 1000;
 
   // private ServerAdmin _admin;
 
@@ -141,7 +140,7 @@ public class NetworkServer
   /**
    * Returns the classLoader
    */
-  public ClassLoader getClassLoader()
+  public EnvironmentClassLoader getClassLoader()
   {
     return _classLoader;
   }

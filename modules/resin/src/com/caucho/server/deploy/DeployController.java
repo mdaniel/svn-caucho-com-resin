@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.deploy.DeployTagItem;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.Period;
 import com.caucho.lifecycle.Lifecycle;
@@ -81,6 +83,8 @@ abstract public class DeployController<I extends DeployInstance>
 
   private Alarm _alarm = new WeakAlarm(this);
   private long _redeployCheckInterval = REDEPLOY_CHECK_INTERVAL;
+  
+  private DeployTagItem _deployItem;
 
   private long _startTime;
   private I _deployInstance;
@@ -122,6 +126,14 @@ abstract public class DeployController<I extends DeployInstance>
   {
     return _parentLoader;
   }
+  
+  /**
+   * Returns the deploy tag name.
+   */
+  public String getDeployTag()
+  {
+    return null;
+  }
 
   /**
    * Returns true for a versioning controller
@@ -162,7 +174,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Merges with the old controller.
    */
-  protected void mergeController(DeployController oldController)
+  protected void mergeController(DeployController<I> oldController)
   {
     _parentLoader = oldController._parentLoader = _parentLoader;
 
@@ -305,7 +317,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the deploy admin.
    */
-  protected DeployControllerAdmin getDeployAdmin()
+  protected DeployControllerAdmin<?> getDeployAdmin()
   {
     return null;
   }
@@ -366,6 +378,12 @@ abstract public class DeployController<I extends DeployInstance>
    */
   protected void initEnd()
   {
+    DeployNetworkService deployService = DeployNetworkService.getCurrent();
+    if (deployService != null && getDeployTag() != null) {
+      deployService.addTag(getDeployTag());
+      
+      _deployItem = deployService.getTagItem(getDeployTag());
+    }
   }
 
   protected String getMBeanTypeName()
@@ -695,6 +713,9 @@ abstract public class DeployController<I extends DeployInstance>
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
       _lifecycle.toError();
+      
+      if (_deployItem != null)
+        _deployItem.toError(e);
 
       if (deployInstance != null)
 	deployInstance.setConfigException(e);
@@ -704,14 +725,21 @@ abstract public class DeployController<I extends DeployInstance>
       }
     } catch (Throwable e) {
       _lifecycle.toError();
+      
+      if (_deployItem != null)
+        _deployItem.toError(e);
 
       if (deployInstance != null)
 	deployInstance.setConfigException(e);
       else
 	log.log(Level.SEVERE, e.toString(), e);
     } finally {
-      if (isStarting)
+      if (isStarting) {
 	_lifecycle.toActive();
+	
+	if (_deployItem != null && _lifecycle.isActive())
+	  _deployItem.toStart();
+      }
 
       // server/
       if (loader instanceof DynamicClassLoader)
@@ -776,8 +804,12 @@ abstract public class DeployController<I extends DeployInstance>
 	oldInstance.destroy();
       }
     } finally  {
-      if (isStopping)
+      if (isStopping) {
 	_lifecycle.toStop();
+	
+	if (_deployItem != null)
+	  _deployItem.toStop();
+      }
       
       thread.setContextClassLoader(oldLoader);
     }

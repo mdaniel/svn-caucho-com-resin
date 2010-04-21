@@ -27,52 +27,29 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
-
-import java.io.Serializable;
-
-import com.caucho.inject.Module;
+package com.caucho.cloud.deploy;
 
 /**
- * Authentication result returns the jid on success
+ * Exception during deployment of a tag.
  */
-@Module
 @SuppressWarnings("serial")
-public class AuthResult implements Serializable {
-  private final String _jid;
-
-  /**
-   * null constructor for Hessian.
-   */
-  @SuppressWarnings("unused")
-  private AuthResult()
+public class DeployException extends RuntimeException {
+  public DeployException()
   {
-    _jid = null;
   }
-
-  /**
-   * login packet
-   */
-  public AuthResult(final String jid)
+  
+  public DeployException(String message)
   {
-    _jid = jid;
+    super(message);
   }
-
-  public String getJid()
+  
+  public DeployException(String message, Throwable cause)
   {
-    return _jid;
+    super(message, cause);
   }
-
-  @Override
-  public String toString()
+  
+  public DeployException(Throwable cause)
   {
-    final StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-    sb.append(_jid);
-    sb.append("]");
-
-    return sb.toString();
+    super(cause);
   }
 }

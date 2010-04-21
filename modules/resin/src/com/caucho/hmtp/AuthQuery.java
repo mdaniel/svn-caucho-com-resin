@@ -34,6 +34,7 @@ import java.io.Serializable;
 /**
  * Authentication query merges the Hmtp authentication and bind steps
  */
+@SuppressWarnings("serial")
 public class AuthQuery implements Serializable {
   private final String _uid;
   private final Serializable _credentials;
@@ -43,6 +44,7 @@ public class AuthQuery implements Serializable {
   /**
    * null constructor for Hessian.
    */
+  @SuppressWarnings("unused")
   private AuthQuery()
   {
     _uid = null;

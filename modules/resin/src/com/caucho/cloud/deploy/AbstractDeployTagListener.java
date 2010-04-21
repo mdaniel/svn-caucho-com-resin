@@ -27,52 +27,20 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.hmtp;
-
-import java.io.Serializable;
-
-import com.caucho.inject.Module;
+package com.caucho.cloud.deploy;
 
 /**
- * Authentication result returns the jid on success
+ * Interface for NetworkDeployService tag listeners, i.e. when tags are
+ * added or removed.
  */
-@Module
-@SuppressWarnings("serial")
-public class AuthResult implements Serializable {
-  private final String _jid;
-
-  /**
-   * null constructor for Hessian.
-   */
-  @SuppressWarnings("unused")
-  private AuthResult()
-  {
-    _jid = null;
-  }
-
-  /**
-   * login packet
-   */
-  public AuthResult(final String jid)
-  {
-    _jid = jid;
-  }
-
-  public String getJid()
-  {
-    return _jid;
-  }
-
+public class AbstractDeployTagListener implements DeployTagListener {
   @Override
-  public String toString()
+  public void onTagAdd(String tag)
   {
-    final StringBuilder sb = new StringBuilder();
-
-    sb.append(getClass().getSimpleName());
-    sb.append("[");
-    sb.append(_jid);
-    sb.append("]");
-
-    return sb.toString();
+  }
+  
+  @Override
+  public void onTagRemove(String tag)
+  {
   }
 }

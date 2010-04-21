@@ -39,12 +39,13 @@ import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
+import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.deploy.DeployTagItem;
 import com.caucho.config.types.FileSetType;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.server.repository.Repository;
 import com.caucho.util.L10N;
-import com.caucho.util.Log;
 import com.caucho.vfs.Depend;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -193,7 +194,7 @@ abstract public class ExpandDeployController<I extends DeployInstance>
     Attributes attr = _manifest.getMainAttributes();
 
     if (attr != null) {
-      for (Map.Entry entry : attr.entrySet()) {
+      for (Map.Entry<Object,Object> entry : attr.entrySet()) {
 	map.put(String.valueOf(entry.getKey()),
 		String.valueOf(entry.getValue()));
       }
@@ -496,7 +497,14 @@ abstract public class ExpandDeployController<I extends DeployInstance>
                 }
               }
             } catch (IOException e) {
-              Exception ex = new Exception("IOException when expanding entry "+entry+" in "+archivePath+", entry.length: "+entryLength+" entry.compressed: "+entry.getCompressedSize()+", bufferLen: "+bufferLen+", read len: "+len+", remaining: "+length,e);
+              Exception ex = new Exception("IOException when expanding entry "
+                                           + entry
+                                           +" in " + archivePath
+                                           + ", entry.length: " + entryLength
+                                           + " entry.compressed: " + entry.getCompressedSize()
+                                           + ", bufferLen: " + bufferLen
+                                           + ", read len: " + len
+                                           + ", remaining: " + length, e);
 
               log.log(Level.FINE, ex.toString(), ex);
             } finally {

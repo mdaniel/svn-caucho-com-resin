@@ -26,7 +26,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.db;
+package com.caucho.db.sql;
 
 import java.sql.SQLException;
 

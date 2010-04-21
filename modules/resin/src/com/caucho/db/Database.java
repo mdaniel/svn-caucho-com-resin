@@ -29,6 +29,14 @@
 
 package com.caucho.db;
 
+import java.io.IOException;
+import java.sql.SQLException;
+import java.util.HashMap;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+
 import com.caucho.db.block.BlockManager;
 import com.caucho.db.block.BlockStore;
 import com.caucho.db.lock.Lock;
@@ -39,17 +47,9 @@ import com.caucho.db.table.TableFactory;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.CloseListener;
 import com.caucho.loader.Environment;
-import com.caucho.sql.SQLExceptionWrapper;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
-import java.io.IOException;
-import java.sql.SQLException;
-import java.util.HashMap;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * Manager for a basic Java-based database.
@@ -70,8 +70,6 @@ public class Database
   private Lock _databaseLock = new Lock("db");
 
   private boolean _removeOnError;
-
-  private long _timeout = 1000L;
 
   private final Lifecycle _lifecycle = new Lifecycle(log, null, Level.FINER);
 
@@ -137,8 +135,6 @@ public class Database
   {
     if (! _lifecycle.toActive())
       return;
-
-    Path dir = _dir;
   }
 
   /**

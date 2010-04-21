@@ -47,7 +47,7 @@ public final class Lifecycle implements LifecycleState {
   private Level _level = Level.FINE;
   private Level _lowLevel = Level.FINER;
   
-  private final AtomicInteger _state = new AtomicInteger();;
+  private final AtomicInteger _state = new AtomicInteger();
 
   private long _activeCount;
   private long _failCount;
@@ -455,7 +455,6 @@ public final class Lifecycle implements LifecycleState {
     do {
       state = _state.get();
 
-      // XXX: test used to allow IS_FAILED
       if (IS_ACTIVE <= state && state != IS_STOPPED)
         return false;
     } while (! _state.compareAndSet(state, IS_ACTIVE));
@@ -491,13 +490,25 @@ public final class Lifecycle implements LifecycleState {
    */
   public boolean toFail()
   {
-    if (toNextState(IS_FAILED)) {
-      _failCount++;
+    int state;
+    
+    do {
+      state = _state.get();
+      
+      if (IS_DESTROYING <= state)
+        return false;
+    } while (! _state.compareAndSet(state, IS_FAILED));
 
-      return true;
-    }
-    else
-      return false;
+    _lastChangeTime = Alarm.getCurrentTime();
+
+    if (_log != null && _log.isLoggable(_level))
+      _log.log(_level, _name + " fail");
+
+    notifyListeners(state, IS_FAILED);
+
+    _failCount++;
+    
+    return true;
   }
   
   /**

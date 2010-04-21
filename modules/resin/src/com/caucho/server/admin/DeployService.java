@@ -46,6 +46,8 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.QueryGet;
 import com.caucho.bam.QuerySet;
 import com.caucho.bam.SimpleActor;
+import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.deploy.DeployTagItem;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Service;
 import com.caucho.jmx.Jmx;
@@ -159,6 +161,30 @@ public class DeployService extends SimpleActor
                            query.getMessage(), query.getVersion());
 
     getLinkStream().queryResult(id, from, to, result);
+  }
+
+  @QueryGet
+  public void tagState(long id,
+                       String to,
+                       String from,
+                       TagStateQuery query)
+  {
+    String tag = query.getTag();
+    
+    DeployNetworkService deploy = DeployNetworkService.getCurrent();
+    DeployTagItem item = null;
+    
+    if (deploy != null)
+      item = deploy.getTagItem(tag);
+    
+    if (item != null) {
+      TagStateQuery result = new TagStateQuery(tag, item.getState(), 
+                                               item.getDeployException());
+      
+      getLinkStream().queryResult(id, from, to, result);
+    }
+    else
+      getLinkStream().queryResult(id, from, to, null);
   }
 
   @QuerySet

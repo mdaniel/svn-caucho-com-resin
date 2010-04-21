@@ -29,35 +29,41 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.CauchoDeployment;
-import com.caucho.config.Config;
-import com.caucho.config.inject.BeanFactory;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.PathBuilder;
-import com.caucho.server.deploy.DeployConfig;
-import com.caucho.server.deploy.DeployControllerAdmin;
-import com.caucho.server.deploy.EnvironmentDeployController;
-import com.caucho.server.host.Host;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.L10N;
-import com.caucho.util.Alarm;
-import com.caucho.vfs.Path;
-
-import javax.servlet.ServletContext;
-import javax.servlet.jsp.el.ELException;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.servlet.ServletContext;
+import javax.servlet.jsp.el.ELException;
+
+import com.caucho.config.Config;
+import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.types.PathBuilder;
+import com.caucho.inject.Module;
+import com.caucho.server.deploy.DeployConfig;
+import com.caucho.server.deploy.DeployControllerAdmin;
+import com.caucho.server.deploy.EnvironmentDeployController;
+import com.caucho.server.host.Host;
+import com.caucho.server.util.CauchoSystem;
+import com.caucho.util.Alarm;
+import com.caucho.vfs.Path;
+
 /**
- * A configuration entry for a web-app.
+ * Manages the lifecycle of a web-app. The same WebAppController is used for
+ * each web-app instantiation, for example on restarts. It's only created or
+ * destroyed if the web-app-deploy indicates it should be created/destroyed.
+ * 
+ * Each WebAppController corresponds to a DeployNetworkService tag with the
+ * name "WebApp/[host]/[context-path]"
  */
+@Module
 public class WebAppController
   extends EnvironmentDeployController<WebApp,WebAppConfig>
 {
-  private static final L10N L = new L10N(WebAppController.class);
   private static final Logger log
     = Logger.getLogger(WebAppController.class.getName());
 
@@ -70,6 +76,8 @@ public class WebAppController
   private final String _versionContextPath;
   private final String _baseContextPath;
   private String _version = "";
+  
+  private final String _deployTagName;
 
   // true if the versioned web-app is an alias for the base web-app
   private boolean _isVersionAlias;
@@ -118,6 +126,22 @@ public class WebAppController
     _baseContextPath = baseContextPath;
 
     _contextPath = contextPath;
+    
+    String hostName;
+    
+    if (container != null)
+      hostName = container.getHostName();
+    else
+      hostName = "default";
+    
+    String webAppName;
+    
+    if ("".equals(_versionContextPath))
+      webAppName = "/default";
+    else
+      webAppName = _versionContextPath;
+    
+    _deployTagName = "WebApp/" + hostName + webAppName;
   }
 
   /**
@@ -177,6 +201,14 @@ public class WebAppController
     }
 
     return _contextPath;
+  }
+  
+  /**
+   * Returns the deploy tag
+   */
+  public String getDeployTag()
+  {
+    return _deployTagName;
   }
 
   /**
@@ -389,7 +421,7 @@ public class WebAppController
    * Returns the deploy admin.
    */
   @Override
-  protected DeployControllerAdmin getDeployAdmin()
+  protected DeployControllerAdmin<?> getDeployAdmin()
   {
     return _admin;
   }
@@ -465,21 +497,6 @@ public class WebAppController
   }
 
   /**
-   * Returns the webApp object.
-   */
-  @Override
-  public boolean destroy()
-  {
-    if (! super.destroy())
-      return false;
-
-    if (_container != null)
-      _container.removeWebApp(this);
-
-    return true;
-  }
-
-  /**
    * Any extra steps needed to deploy the webApp.
    */
   protected void protectedWebApp()
@@ -549,7 +566,7 @@ public class WebAppController
     throws Throwable
   {
     InjectManager beanManager = InjectManager.create();
-    BeanFactory factory = beanManager.createBeanFactory(WebApp.class);
+    BeanFactory<WebApp> factory = beanManager.createBeanFactory(WebApp.class);
     factory.type(WebApp.class);
     factory.type(ServletContext.class);
     // factory.stereotype(CauchoDeploymentLiteral.create());
@@ -569,6 +586,21 @@ public class WebAppController
     }
 
     super.configureInstanceVariables(webApp);
+  }
+
+  /**
+   * Destroy the controller
+   */
+  @Override
+  public boolean destroy()
+  {
+    if (! super.destroy())
+      return false;
+
+    if (_container != null)
+      _container.removeWebApp(this);
+
+    return true;
   }
 
   @Override

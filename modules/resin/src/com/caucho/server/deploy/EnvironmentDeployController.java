@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.deploy.DeployTagItem;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.PathBuilder;
@@ -36,6 +38,7 @@ import com.caucho.jmx.Jmx;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
+import com.caucho.network.server.NetworkServer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;

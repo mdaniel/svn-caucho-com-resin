@@ -47,6 +47,7 @@ import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActorClient;
+import com.caucho.cloud.deploy.DeployNetworkService;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SchemaBean;
@@ -249,10 +250,10 @@ public class Server extends ProtocolDispatchServer
 
     // pod id can't include the server since it's used as part of
     // cache ids
-    String podId
-      = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
+    //String podId
+    //  = (cluster.getId() + ":" + _selfServer.getClusterPod().getId());
 
-    _classLoader = EnvironmentClassLoader.create("server:" + podId);
+    _classLoader = _networkServer.getClassLoader();
 
     _serverLocal.set(this, _classLoader);
 
@@ -292,13 +293,15 @@ public class Server extends ProtocolDispatchServer
   
   protected void preInit()
   {
+    _webBeans = InjectManager.create();
+    
+    _networkServer.addService(new DeployNetworkService());
+    
     _hostContainer = new HostContainer();
     _hostContainer.setClassLoader(_classLoader);
     _hostContainer.setDispatchServer(this);
 
     _alarm = new Alarm(this);
-
-    _webBeans = InjectManager.create();
 
     _brokerManager = createBrokerManager();
     _domainManager = createDomainManager();

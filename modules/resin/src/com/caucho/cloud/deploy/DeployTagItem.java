@@ -27,47 +27,79 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.network.server;
+package com.caucho.cloud.deploy;
+
+import com.caucho.lifecycle.Lifecycle;
 
 /**
  * Interface for a service registered with the Resin Server.
  */
-public interface NetworkService
-{
-  public static final int START_PRIORITY_CLASSLOADER = 999;
-  public static final int START_PRIORITY_DEFAULT = 1000;
+public class DeployTagItem {
+  private final String _tag;
   
+  private final Lifecycle _lifecycle = new Lifecycle();
+  
+  private Throwable _deployException;
 
-  public static final int STOP_PRIORITY_DEFAULT = 1000;
-  public static final int STOP_PRIORITY_CLASSLOADER = 1001;
-
-  /**
-   * Returns the start priority of the service, used to determine which
-   * services to start first.
-   */
-  public int getStartPriority();
+  public DeployTagItem(String tag)
+  {
+    _tag = tag;
+  }
   
   /**
-   * Starts the service.
-   * @throws Exception 
+   * Returns the tag name.
    */
-  public void start()
-    throws Exception;
+  public String getTag()
+  {
+    return _tag;
+  }
   
   /**
-   * Returns the stop priority of the service, used to determine which
-   * services to stop first.
+   * Returns the lifecycle state of the item.
    */
-  public int getStopPriority();
-
-  /**
-   * Stops the service.
-   * @throws Exception 
-   */
-  public void stop() throws Exception;
+  public String getState()
+  {
+    return _lifecycle.getStateName();
+  }
   
   /**
-   * Destroys the service.
+   * Change the state to an active state.
    */
-  public void destroy();
+  public void toStart()
+  {
+    if (_lifecycle.toActive()) {
+      _deployException = null;
+    }
+  }
+  
+  /**
+   * Change the state to the stopped state.
+   */
+  public void toStop()
+  {
+    _lifecycle.toStop();
+  }
+  
+  /**
+   * Change the state to an error state.
+   */
+  public void toError(Throwable exn)
+  {
+    _lifecycle.toError();
+    
+    _deployException = exn;
+  }
+  
+  /**
+   * Returns the deployment exception
+   */
+  public Throwable getDeployException()
+  {
+    return _deployException;
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _tag + "]";
+  }
 }

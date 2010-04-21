@@ -19,14 +19,61 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.db;
+package com.caucho.server.admin;
 
-public class DB {
+import com.caucho.inject.Module;
+
+@Module
+@SuppressWarnings("serial")
+public class TagStateQuery implements java.io.Serializable
+{
+  private String _tag;
+  private String _state;
+  private Throwable _exn;
+
+  @SuppressWarnings("unused")
+  private TagStateQuery()
+  {
+  }
+  
+  public TagStateQuery(String tag)
+  {
+    _tag = tag;
+  }
+  
+  public TagStateQuery(String tag, String state, Throwable exn)
+  {
+    _tag = tag;
+    _state = state;
+    _exn = exn;
+  }
+  
+  public String getTag()
+  {
+    return _tag;
+  }
+  
+  public String getState()
+  {
+    return _state;
+  }
+  
+  public Throwable getThrowable()
+  {
+    return _exn;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _tag + "]";
+  }
 }
