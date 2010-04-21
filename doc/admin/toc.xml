@@ -130,11 +130,13 @@
           description="Scheduled tasks"/>
     
     <item link="clustering.xtp" title="Clustering"
-          description="Clustering and load balancing of multiple coordinated Resin servers"
-          reference="clustering-ref.xtp">
-    
+          description="Clustering and load balancing of multiple coordinated Resin servers">  
       <item link="clustering-overview.xtp" title="Overview"
-        description="Overview of Resin's triad-based clustering architecture"/>      
+        description="Overview of Resin's clustering, load-balancing, elastic-computing and distributed caching features"/>
+      <item link="clustering-ref.xtp" title="Clustering Tags Reference"
+        description="Resin clustering and load-balancing tags reference"/>
+      <item link="clustering-deployment-ref.xtp" title="Clustered Deployment Reference"
+        description="ANT and Maven clustered deployment API reference"/>
     </item>
     
     <item link="resin-admin.xtp" title="resin-admin"

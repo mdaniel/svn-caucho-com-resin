@@ -23,9 +23,6 @@
   <resin:Redirect regexp="^/admin/candi.xtp" 
                   target="${app.contextPath}/admin/config-candi.xtp"/>
 
-  <resin:Redirect regexp="^/admin/clustering.xtp" 
-                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
-
   <resin:Redirect regexp="^/admin/cluster-tags.xtp" 
                   target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
@@ -96,7 +93,7 @@
                   target="${app.contextPath}/admin/"/>
 
   <resin:Redirect regexp="^/admin/resin-clustering.xtp"
-                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering.xtp"/>
 
   <resin:Redirect regexp="^/admin/resin/index.xtp"
                   target="${app.contextPath}/admin/"/>
@@ -196,7 +193,7 @@
                   target="${app.contextPath}/admin/cluster-ref.xtp"/>
 
   <resin:Redirect regexp="^/doc/cluster.xtp"
-                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering.xtp"/>
 
   <resin:Redirect regexp="^/doc/config-cmdline.xtp"
                   target="${app.contextPath}/admin/starting-resin-command-line.xtp"/>
@@ -337,7 +334,7 @@
                   target="${app.contextPath}/admin/resin-admin-console.xtp"/>
 
   <resin:Redirect regexp="^/doc/resin-clustering.xtp"
-                  target="${app.contextPath}/admin/clustering-overview.xtp"/>
+                  target="${app.contextPath}/admin/clustering.xtp"/>
 
   <resin:Redirect regexp="^/doc/resin-comet.xtp"
                   target="${app.contextPath}/admin/http-server.xtp"/>
