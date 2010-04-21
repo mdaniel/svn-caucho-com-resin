@@ -101,7 +101,7 @@ public class XmlStandardPlugin implements Extension
       for (Path root : paths) {
         configureRoot(root);
       }
-
+      
       for (int i = 0; i < _pendingBeans.size(); i++) {
         BeansConfig config = _pendingBeans.get(i);
 
@@ -128,6 +128,13 @@ public class XmlStandardPlugin implements Extension
     if (root.getFullPath().endsWith("WEB-INF/classes/")) {
       configurePath(root.lookup("../beans.xml"));
       configurePath(root.lookup("../resin-beans.xml"));
+    }
+    else if (! root.lookup("META-INF/beans.xml").canRead()
+             && ! root.lookup("META-INF/resin-beans.xml").canRead()) {
+      // ejb/11h0
+      configurePath(root.lookup("beans.xml"));
+      configurePath(root.lookup("resin-beans.xml"));
+      
     }
   }
 

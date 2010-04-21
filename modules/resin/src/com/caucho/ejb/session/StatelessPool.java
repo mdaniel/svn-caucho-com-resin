@@ -31,37 +31,32 @@ package com.caucho.ejb.session;
 
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
-import java.util.logging.Logger;
 
-import com.caucho.config.gen.BeanProducer;
 import com.caucho.ejb.server.EjbProducer;
+import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 
 /**
  * Pool of stateless session beans.
  */
-public class StatelessPool<T> {
+@Module
+public class StatelessPool<X> {
   private static final L10N L = new L10N(StatelessPool.class);
 
-  private static Logger log
-    = Logger.getLogger(StatelessPool.class.getName());
+  private final SessionServer<X> _server;
   
-  private final SessionServer<T> _server;
-  
-  private final FreeList<T> _freeList;
+  private final FreeList<X> _freeList;
   private final Semaphore _concurrentSemaphore;
   private final long _concurrentTimeout;
 
-  private EjbProducer<T> _ejbProducer;
+  private EjbProducer<X> _ejbProducer;
  
-  StatelessPool(SessionServer<T> server,
-                BeanProducer<T> producer)
+  StatelessPool(SessionServer<X> server)
   {
     _server = server;
     
     _ejbProducer = server.getProducer();
-    _ejbProducer.setBeanProducer(producer);
     
     int idleMax = server.getSessionIdleMax();
     int concurrentMax = server.getSessionConcurrentMax();
@@ -72,7 +67,7 @@ public class StatelessPool<T> {
     if (idleMax < 0)
       idleMax = 16;
     
-    _freeList = new FreeList<T>(idleMax);
+    _freeList = new FreeList<X>(idleMax);
     
     if (concurrentMax == 0)
       throw new IllegalArgumentException(L.l("maxConcurrent may not be zero")); 
@@ -90,7 +85,7 @@ public class StatelessPool<T> {
       _concurrentSemaphore = null;
   }
   
-  public T allocate()
+  public X allocate()
   {
     Semaphore semaphore = _concurrentSemaphore;
     
@@ -107,7 +102,7 @@ public class StatelessPool<T> {
     boolean isValid = false;
     
     try {
-      T bean = _freeList.allocate();
+      X bean = _freeList.allocate();
     
       if (bean == null) {
         bean = _ejbProducer.newInstance();
@@ -122,7 +117,7 @@ public class StatelessPool<T> {
     }
   }
 
-  public void free(T bean)
+  public void free(X bean)
   {
     Semaphore semaphore = _concurrentSemaphore;
     if (semaphore != null)
@@ -133,7 +128,7 @@ public class StatelessPool<T> {
     }
   }
   
-  public void destroy(T bean)
+  public void destroy(X bean)
   {
     if (bean == null)
       return;
@@ -145,7 +140,7 @@ public class StatelessPool<T> {
     destroyImpl(bean);
   }
   
-  public void discard(T bean)
+  public void discard(X bean)
   {
     if (bean == null)
       return;
@@ -155,20 +150,21 @@ public class StatelessPool<T> {
       semaphore.release();
   }
   
-  private void destroyImpl(T bean)
+  private void destroyImpl(X bean)
   {
     _ejbProducer.destroyInstance(bean);
   }
   
   public void destroy()
   {
-    T bean;
+    X bean;
     
     while ((bean = _freeList.allocate()) != null) {
       destroyImpl(bean);
     }
   }
   
+  @Override
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _server + "]";

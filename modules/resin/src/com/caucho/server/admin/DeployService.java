@@ -29,33 +29,7 @@
 
 package com.caucho.server.admin;
 
-import com.caucho.bam.Broker;
-import com.caucho.bam.ActorError;
-import com.caucho.bam.ActorStream;
-import com.caucho.bam.SimpleActor;
-import com.caucho.bam.QueryGet;
-import com.caucho.bam.QuerySet;
-import com.caucho.config.ConfigException;
-import com.caucho.config.Service;
-import com.caucho.git.GitWorkingTree;
-import com.caucho.jmx.Jmx;
-import com.caucho.management.server.DeployControllerMXBean;
-import com.caucho.management.server.EAppMXBean;
-import com.caucho.management.server.EarDeployMXBean;
-import com.caucho.management.server.WebAppMXBean;
-import com.caucho.management.server.WebAppDeployMXBean;
-import com.caucho.server.cluster.Server;
-import com.caucho.server.repository.RepositoryManager;
-import com.caucho.server.repository.RepositoryTagEntry;
-import com.caucho.server.resin.Resin;
-import com.caucho.server.host.HostController;
-import com.caucho.server.webapp.WebAppController;
-import com.caucho.util.L10N;
-import com.caucho.util.IoUtil;
-import com.caucho.vfs.*;
-
 import java.io.InputStream;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -63,8 +37,32 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.regex.Pattern;
+
 import javax.annotation.PostConstruct;
 import javax.management.ObjectName;
+
+import com.caucho.bam.ActorError;
+import com.caucho.bam.Broker;
+import com.caucho.bam.QueryGet;
+import com.caucho.bam.QuerySet;
+import com.caucho.bam.SimpleActor;
+import com.caucho.config.ConfigException;
+import com.caucho.config.Service;
+import com.caucho.jmx.Jmx;
+import com.caucho.management.server.DeployControllerMXBean;
+import com.caucho.management.server.EAppMXBean;
+import com.caucho.management.server.EarDeployMXBean;
+import com.caucho.management.server.WebAppDeployMXBean;
+import com.caucho.management.server.WebAppMXBean;
+import com.caucho.server.cluster.Server;
+import com.caucho.server.host.HostController;
+import com.caucho.server.repository.RepositoryManager;
+import com.caucho.server.repository.RepositoryTagEntry;
+import com.caucho.server.webapp.WebAppController;
+import com.caucho.util.IoUtil;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 @Service
 public class DeployService extends SimpleActor
@@ -270,8 +268,8 @@ public class DeployService extends SimpleActor
       return L.l("'{0}' is an unknown type", gitPath);
 
     String type = gitPath.substring(0, p);
-    String stage = gitPath.substring(p + 1, q);
-    String host = gitPath.substring(q + 1, r);
+    // String stage = gitPath.substring(p + 1, q);
+    // String host = gitPath.substring(q + 1, r);
     String name = gitPath.substring(r + 1);
 
     try {
@@ -579,7 +577,7 @@ public class DeployService extends SimpleActor
           continue;
 
         String host = tag.substring(p, q);
-        String name = tag.substring(q + 1);
+        // String name = tag.substring(q + 1);
 
         tags.add(new TagQuery(host, tag));
       }
@@ -649,11 +647,11 @@ public class DeployService extends SimpleActor
       return L.l("'{0}' is an unknown type", tag);
 
     String type = tag.substring(0, p);
-    String stage = tag.substring(p + 1, q);
+    // String stage = tag.substring(p + 1, q);
     String host = tag.substring(q + 1, r);
     String name = tag.substring(r + 1);
 
-    String state = null;
+    // String state = null;
     String errorMessage = tag + " is an unknown resource";
 
     try {
@@ -665,7 +663,7 @@ public class DeployService extends SimpleActor
 
         if (ear != null) {
           ear.update();
-          state = ear.getState();
+          // state = ear.getState();
           errorMessage = ear.getErrorMessage();
 
           return errorMessage;
@@ -681,7 +679,7 @@ public class DeployService extends SimpleActor
 
         if (war != null) {
           war.update();
-          state = war.getState();
+          // state = war.getState();
           errorMessage = war.getErrorMessage();
 
           return errorMessage;
@@ -708,7 +706,7 @@ public class DeployService extends SimpleActor
       return null;
 
     String type = tag.substring(0, p);
-    String stage = tag.substring(p + 1, q);
+    // String stage = tag.substring(p + 1, q);
 
     String host;
     String name;
@@ -721,8 +719,6 @@ public class DeployService extends SimpleActor
       host = tag.substring(q + 1);
       name = "";
     }
-
-    String state = null;
 
     try {
       if (type.equals("ears")) {

@@ -54,14 +54,14 @@ import com.caucho.util.L10N;
 /**
  * Server home container for a stateless session bean
  */
-public class StatelessManager<T> extends SessionServer<T> {
+public class StatelessManager<X> extends SessionServer<X> {
   private static final L10N L = new L10N(StatelessManager.class);
 
   protected static Logger log
     = Logger.getLogger(StatelessManager.class.getName());
 
-  private StatelessContext<T> _homeContext;
-  private StatelessProvider<T> _remoteProvider;
+  private StatelessContext<X,?> _homeContext;
+  private StatelessProvider<X> _remoteProvider;
 
   /**
    * Creates a new stateless server.
@@ -74,7 +74,7 @@ public class StatelessManager<T> extends SessionServer<T> {
    *          the session configuration from the ejb.xml
    */
   public StatelessManager(EjbContainer ejbContainer, 
-                         AnnotatedType<T> annotatedType)
+                          AnnotatedType<X> annotatedType)
   {
     super(ejbContainer, annotatedType);
   }
@@ -106,16 +106,16 @@ public class StatelessManager<T> extends SessionServer<T> {
   }
 
   @Override
-  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, Class<?> api)
+  protected Bean<X> createBean(ManagedBeanImpl<X> mBean, Class<?> api)
   {
-    StatelessProvider<T> provider = getStatelessContext().getProvider(api);
+    StatelessProvider<X> provider = getStatelessContext().getProvider(api);
 
     if (provider == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
           api, getStatelessContext()));
 
-    StatelessBeanImpl<T> statelessBean
-      = new StatelessBeanImpl<T>(this, mBean, api, provider);
+    StatelessBeanImpl<X> statelessBean
+      = new StatelessBeanImpl<X>(this, mBean, api, provider);
 
     return statelessBean;
   }
@@ -192,7 +192,7 @@ public class StatelessManager<T> extends SessionServer<T> {
     ScheduleIntrospector introspector = new ScheduleIntrospector();
 
     InjectManager manager = InjectManager.create();
-    AnnotatedType<T> type = manager.createAnnotatedType(getEjbClass());
+    AnnotatedType<X> type = manager.createAnnotatedType(getEjbClass());
     ArrayList<TimerTask> timers;
 
     timers = introspector.introspect(new StatelessTimeoutCaller(), type);

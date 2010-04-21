@@ -415,9 +415,17 @@ public class EjbSessionBean<X> extends EjbBean<X> {
      * server.setLocal21(loadClass(getLocal21().getName()));
      */
 
-    Class<?> contextImplClass = javaGen.loadClass(getSkeletonName());
+    // Class<?> contextImplClass = javaGen.loadClassParentLoader(getSkeletonName());
     
-    // Class<?> contextImplClass = javaGen.loadClassParentLoader(getSkeletonName(), getEJBClass());
+    Class<?> contextImplClass;
+    
+    if (Modifier.isPublic(getEJBClass().getModifiers())) {
+      contextImplClass = javaGen.loadClass(getSkeletonName());
+    }
+    else {
+      // ejb/1103
+      contextImplClass = javaGen.loadClassParentLoader(getSkeletonName(), getEJBClass());
+    }
     // contextImplClass.getDeclaredConstructors();
 
     server.setContextImplClass(contextImplClass);

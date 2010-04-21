@@ -162,17 +162,17 @@ class InjectScanManager
         return false;
     }
     else if (! (root.lookup("META-INF/beans.xml").canRead()
-           || (root.getFullPath().endsWith("WEB-INF/classes/")
-               && root.lookup("../beans.xml").canRead()))) {
+             || (root.getFullPath().endsWith("WEB-INF/classes/")
+                 && root.lookup("../beans.xml").canRead()))) {
       return false;
     }
 
     if (context == null) {
-      context = new ScanRootContext(root, packageRoot);
+      context = new ScanRootContext(scanRoot, packageRoot);
       _scanRootMap.put(root, context);
       _pendingScanRootList.add(context);
     }
-
+    
     if (context.isScanComplete())
       return false;
     else {

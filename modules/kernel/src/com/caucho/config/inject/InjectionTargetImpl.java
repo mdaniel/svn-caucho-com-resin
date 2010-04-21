@@ -65,7 +65,7 @@ import com.caucho.config.SerializeHandle;
 import com.caucho.config.bytecode.SerializationAdapter;
 import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.BeanInjectionTarget;
-import com.caucho.config.gen.PojoBean;
+import com.caucho.config.gen.CandiBeanGenerator;
 import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.j2ee.PreDestroyInject;
 import com.caucho.config.program.Arg;
@@ -348,7 +348,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (_isGenerateInterception) {
         if (! _beanType.isAnnotationPresent(javax.interceptor.Interceptor.class)
             && ! _beanType.isAnnotationPresent(javax.decorator.Decorator.class)) {
-          PojoBean<X> bean = new PojoBean<X>(_beanType);
+          CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(_beanType);
           bean.introspect();
 
           instanceClass = (Class<X>) bean.generateClass();

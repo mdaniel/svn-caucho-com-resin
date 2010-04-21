@@ -57,6 +57,7 @@ import javax.interceptor.Interceptors;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -71,7 +72,6 @@ public class InterceptorCallChain<X,T>
 
   private String _uniqueName;
   private String _chainName;
-  private AnnotatedMethod<X> _implMethod;
 
   private ArrayList<Interceptor<?>> _defaultInterceptors
     = new ArrayList<Interceptor<?>>();
@@ -104,6 +104,8 @@ public class InterceptorCallChain<X,T>
 
   // decorators
   private HashSet<Class<?>> _decoratorSet;
+  
+  private boolean _isEnhanced;
 
   private final String _decoratorClass = "__caucho_decorator_class";
   private final String _decoratorBeansVar = "__caucho_decorator_beans";
@@ -120,6 +122,11 @@ public class InterceptorCallChain<X,T>
 
     _view = view;
   }
+  
+  private View<X,T> getView()
+  {
+    return _view;
+  }
 
   /**
    * Returns true if the method is an interceptor
@@ -127,16 +134,15 @@ public class InterceptorCallChain<X,T>
   @Override
   public boolean isEnhanced()
   {
+    return _isEnhanced;
+    
+    /*
     if (getApiType().isAnnotationPresent(javax.interceptor.Interceptor.class)
         || getApiType().isAnnotationPresent(javax.decorator.Decorator.class)) {
       return false;
     }
     else {
       return (_defaultInterceptors.size() > 0
-              /*
-              || (! _isExcludeDefaultInterceptors
-                  && _view.getBean().getDefaultInterceptors().size() > 0)
-              */
               || _classInterceptors.size() > 0
               || _interceptorBinding.size() > 0
               || _interceptors.size() > 0
@@ -144,6 +150,7 @@ public class InterceptorCallChain<X,T>
               || _decoratorSet != null
               || getAroundInvokeMethod() != null);
     }
+     */
   }
 
   public ArrayList<Class<?>> getInterceptors()
@@ -195,6 +202,20 @@ public class InterceptorCallChain<X,T>
     introspectDecorators(apiMethod);
    
     introspectDefaults();
+
+    if (_defaultInterceptors.size() > 0
+        /*
+        || (! _isExcludeDefaultInterceptors
+            && _view.getBean().getDefaultInterceptors().size() > 0)
+        */
+        || _classInterceptors.size() > 0
+        || _interceptorBinding.size() > 0
+        || _interceptors.size() > 0
+        || _methodInterceptors.size() > 0
+        || _decoratorSet != null
+        || getAroundInvokeMethod() != null) {
+      _isEnhanced = true;
+    }
   }
   
   private void introspectInterceptors(AnnotatedType<T> apiClass,
@@ -294,7 +315,7 @@ public class InterceptorCallChain<X,T>
       _decoratorSet = decoratorSet;
   }
 
-  public void introspectDefaults()
+  private void introspectDefaults()
   {
     // XXX: this code should be a pre-generation
     // ejb/0fb6
@@ -349,11 +370,12 @@ public class InterceptorCallChain<X,T>
   {
     super.generateBeanConstructor(out, map);
     
-    if (! isEnhanced())
+    if (! isEnhanced()) {
       return;
+    }
     
     if (hasInterceptor()) {
-      generateInterceptorConstructor(out, map);
+      generateInterceptorBeanConstructor(out, map);
     }
     
     if (hasDecorator()) {
@@ -361,7 +383,22 @@ public class InterceptorCallChain<X,T>
     }
   }
 
-  private void generateInterceptorConstructor(JavaWriter out,
+  @Override
+  public void generateProxyConstructor(JavaWriter out, 
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
+    super.generateProxyConstructor(out, map);
+    
+    if (! isEnhanced())
+      return;
+    
+    if (hasDecorator()) {
+      generateDecoratorProxyConstructor(out, map);
+    }
+  }
+
+  private void generateInterceptorBeanConstructor(JavaWriter out,
                                               HashMap<String,Object> map)
     throws IOException
   {
@@ -538,11 +575,10 @@ public class InterceptorCallChain<X,T>
   // interceptor
   //
 
-  public void generateInterceptorMethodPrologue(JavaWriter out, 
-                                          HashMap<String,Object> map)
+  private void generateInterceptorMethodPrologue(JavaWriter out, 
+                                                 HashMap<String,Object> map)
     throws IOException
   {
-
     if (map.get("__caucho_interceptor_beans") == null) {
       map.put("__caucho_interceptor_beans", true);
 
@@ -560,11 +596,11 @@ public class InterceptorCallChain<X,T>
     generateInterceptorChain(out, map);
   }
 
-  public void generateInterceptorMethod(JavaWriter out, 
-                                        HashMap<String,Object> map)
+  private void generateInterceptorMethod(JavaWriter out, 
+                                         HashMap<String,Object> map)
     throws IOException
   {
-    Method javaMethod = _implMethod.getJavaMember();
+    Method javaMethod = getImplMethod().getJavaMember();
     
     out.println();
     out.println("private static java.lang.reflect.Method "
@@ -626,7 +662,6 @@ public class InterceptorCallChain<X,T>
 
     out.popDepth();
     out.println("} catch (Exception e) {");
-    out.println("  e.printStackTrace();");
     out.println("  throw new RuntimeException(e);");
     out.println("}");
     out.popDepth();
@@ -750,7 +785,7 @@ public class InterceptorCallChain<X,T>
   private void generateInterceptorCall(JavaWriter out)
     throws IOException
   {
-    Method javaMethod = _implMethod.getJavaMember();
+    Method javaMethod = getImplMethod().getJavaMember();
     
     String uniqueName = getUniqueName(out);
     
@@ -836,6 +871,12 @@ public class InterceptorCallChain<X,T>
                                                 HashMap<String,Object> map)
     throws IOException
   {
+  }
+    
+  private void generateDecoratorProxyConstructor(JavaWriter out,
+                                                 HashMap<String,Object> map)
+    throws IOException
+  {
     if (_decoratorSet == null)
       return;
     
@@ -848,7 +889,7 @@ public class InterceptorCallChain<X,T>
     out.println("if (" + _decoratorBeansVar + " == null) {");
     out.pushDepth();
     
-    out.println(_delegateVar + " = new " + _decoratorClass + "(0);");
+    out.println(_delegateVar + " = new " + _decoratorClass + "(0, null);");
     
     out.println();
     out.print(_decoratorBeansVar);
@@ -866,8 +907,8 @@ public class InterceptorCallChain<X,T>
     out.println("}");
   }
 
-  public void generateDecoratorMethodPrologue(JavaWriter out, 
-                                              HashMap<String,Object> map)
+  private void generateDecoratorMethodPrologue(JavaWriter out, 
+                                               HashMap<String,Object> map)
     throws IOException
   {
     generateDecoratorClass(out, map);
@@ -951,22 +992,27 @@ public class InterceptorCallChain<X,T>
 
     out.println(" {");
     out.pushDepth();
+    
+    String beanClassName = getBusinessMethod().getView().getBeanClassName();
 
     out.println("private int _index;");
+    out.println("private " + beanClassName + " _bean;");
 
     out.println();
-    out.println(className + "(int index)");
+    out.print(className + "(int index, " + beanClassName + " bean)");
     out.println("{");
     out.println("  _index = index;");
+    out.println("  _bean = bean;");
     out.println("}");
     
     out.println();
-    out.print("final ");
-    out.print(getBusinessMethod().getView().getViewClassName());
-    out.println(" __caucho_getBean()");
+    out.println("final " + beanClassName + " __caucho_getBean()");
     out.println("{");
+    /*
     out.println("  return " + getBusinessMethod().getView().getViewClassName()
                 + ".this;");
+                */
+    out.println("  return _bean;");
     out.println("}");
 
     ArrayList<Method> methodList = new ArrayList<Method>();
@@ -984,7 +1030,7 @@ public class InterceptorCallChain<X,T>
                 && ! method.getName().equals("toString"))) {
           continue;
         }
-        
+
         if (! containsMethod(methodList, method)) {
           methodList.add(method);
 
@@ -1019,6 +1065,11 @@ public class InterceptorCallChain<X,T>
                                        HashMap<ArrayList<Class<?>>, String> apiMap)
     throws IOException
   {
+    AnnotatedMethod<? super X> annMethod
+      = AnnotatedTypeUtil.findMethod(getView().getBean().getBeanClass(),
+                                      method.getName(),
+                                      method.getParameterTypes());
+    
     String uniqueName = getUniqueName(out);
 
     ArrayList<Class<?>> apis = getMethodApis(method);
@@ -1063,50 +1114,83 @@ public class InterceptorCallChain<X,T>
 
     out.println("{");
     out.pushDepth();
-
-    out.println(_decoratorClass + " var = " + _decoratorLocalVar + ".get();");
-
-    out.println("Object []delegates = var.__caucho_getBean()." + _decoratorIndexVar + ";");
     
-    out.println();
-    out.print("var._index = com.caucho.config.gen.EjbUtil.nextDelegate(");
-    out.print("delegates, ");
-    if (apis.size() > 1) {
-      out.print(apiName);
+    if (annMethod != null && annMethod.isAnnotationPresent(Inject.class)) {
+      out.println("throw new UnsupportedOperationException();");
     }
     else {
-      out.printClass(decoratorType);
-      out.print(".class");
-    }
-    out.println(", var._index);");
+      out.println(_decoratorClass + " var = " + _decoratorLocalVar + ".get();");
 
-    out.println();
-    out.println("if (var._index >= 0) {");
-    out.pushDepth();
-
-    out.println("Object delegate = delegates[var._index];");
-
-    for (int j = 0; j < apis.size(); j++) {
-      if (j > 0)
-        out.print("else ");
-
-      if (j + 1 < apis.size()) {
-        out.print("if (delegate instanceof ");
-        out.printClass(apis.get(j));
-        out.print(")");
-      }
-
+      // out.println("Object []delegates = var.__caucho_getBean()." + _decoratorIndexVar + ";");
+      out.println("Object []delegates = " + _decoratorIndexVar + ";");
+    
+      out.println();
+      out.print("var._index = com.caucho.config.gen.EjbUtil.nextDelegate(");
+      out.print("delegates, ");
       if (apis.size() > 1) {
-        out.println();
-        out.print("  ");
+        out.print(apiName);
       }
+      else {
+        out.printClass(decoratorType);
+        out.print(".class");
+      }
+      out.println(", var._index);");
+
+      out.println();
+      out.println("if (var._index >= 0) {");
+      out.pushDepth();
+
+      out.println("Object delegate = delegates[var._index];");
+
+      for (int j = 0; j < apis.size(); j++) {
+        if (j > 0)
+          out.print("else ");
+
+        if (j + 1 < apis.size()) {
+          out.print("if (delegate instanceof ");
+          out.printClass(apis.get(j));
+          out.print(")");
+        }
+
+        if (apis.size() > 1) {
+          out.println();
+          out.print("  ");
+        }
+
+        if (! void.class.equals(method.getReturnType()))
+          out.print("return ");
+
+        out.print("((");
+        out.printClass(apis.get(j));
+        out.print(") delegate)." + method.getName() + "(");
+        for (int i = 0; i < paramTypes.length; i++) {
+          if (i != 0)
+            out.print(", ");
+
+          out.print("a" + i);
+        }
+        out.println(");");
+      }
+
+      out.popDepth();
+      out.println("}");
+
+      out.println("else");
+      out.pushDepth();
 
       if (! void.class.equals(method.getReturnType()))
         out.print("return ");
 
-      out.print("((");
-      out.printClass(apis.get(j));
-      out.print(") delegate)." + method.getName() + "(");
+      if (getView().isProxy()) {
+        out.print("var.__caucho_getBean().");
+        out.print(method.getName());
+      }
+      else {
+        out.print("var.__caucho_getBean().");
+        out.print("__caucho_" + method.getName());
+      }
+    
+      out.print("(");
       for (int i = 0; i < paramTypes.length; i++) {
         if (i != 0)
           out.print(", ");
@@ -1114,29 +1198,10 @@ public class InterceptorCallChain<X,T>
         out.print("a" + i);
       }
       out.println(");");
+
+      out.popDepth();
     }
-
-    out.popDepth();
-    out.println("}");
-
-    out.println("else");
-    out.pushDepth();
-
-    if (! void.class.equals(method.getReturnType()))
-      out.print("return ");
-
-    out.print("var.__caucho_getBean().");
-    out.print("__caucho_" + method.getName());
-    out.print("(");
-    for (int i = 0; i < paramTypes.length; i++) {
-      if (i != 0)
-        out.print(", ");
-
-      out.print("a" + i);
-    }
-    out.println(");");
-
-    out.popDepth();
+    
     out.popDepth();
     out.println("}");
   }
@@ -1145,10 +1210,10 @@ public class InterceptorCallChain<X,T>
   // method generators
   //
 
-  protected void generateDecoratorMethod(JavaWriter out)
+  private void generateDecoratorMethod(JavaWriter out)
     throws IOException
   {
-    Method javaMethod = _implMethod.getJavaMember();
+    Method javaMethod = getImplMethod().getJavaMember();
     
     out.println();
     out.print("private ");
@@ -1189,14 +1254,14 @@ public class InterceptorCallChain<X,T>
     out.println("}");
   }
   
-  protected void generateDecoratorPreTry(JavaWriter out)
+  private void generateDecoratorPreTry(JavaWriter out)
     throws IOException
   {
     out.print(_decoratorClass + " oldDecorator = ");
     out.println(_decoratorLocalVar + ".get();");
   }
   
-  protected void generateDecoratorPreCall(JavaWriter out)
+  private void generateDecoratorPreCall(JavaWriter out)
     throws IOException
   {
     String decoratorSetName = _decoratorSetName;
@@ -1206,7 +1271,7 @@ public class InterceptorCallChain<X,T>
     out.println();
     out.print(_decoratorClass + " delegate = ");
     out.print("new " + _decoratorClass + "(");
-    out.println(_decoratorIndexVar + ".length);");
+    out.println(_decoratorIndexVar + ".length, bean);");
  
     out.print(_decoratorLocalVar);
     out.println(".set(delegate);");
@@ -1215,14 +1280,14 @@ public class InterceptorCallChain<X,T>
   /**
    * Generates the low-level decorator call at the end of the chain.
    */
-  protected void generateDecoratorCall(JavaWriter out)
+  private void generateDecoratorCall(JavaWriter out)
     throws IOException
   {
     String decoratorSetName = _decoratorSetName;
     
     assert(decoratorSetName != null);
     
-    Method javaMethod = _implMethod.getJavaMember();
+    Method javaMethod = getImplMethod().getJavaMember();
 
     //_bizMethod.generateTailCall(out);
     if (! void.class.equals(javaMethod.getReturnType()))
@@ -1242,7 +1307,7 @@ public class InterceptorCallChain<X,T>
     out.println(");");
   }
   
-  protected void generateDecoratorFinally(JavaWriter out)
+  private void generateDecoratorFinally(JavaWriter out)
     throws IOException
   {
     out.print(_decoratorLocalVar);
@@ -1255,7 +1320,9 @@ public class InterceptorCallChain<X,T>
   
   private String getUniqueName(JavaWriter out)
   {
-    Method javaMethod = _implMethod.getJavaMember();
+    AnnotatedMethod<? super X> implMethod = getImplMethod();
+    
+    Method javaMethod = implMethod.getJavaMember();
     
     if (_uniqueName == null)
       _uniqueName = "_" + javaMethod.getName() + "_v" + out.generateId();
@@ -1290,7 +1357,7 @@ public class InterceptorCallChain<X,T>
     return name;
   }
 
-  protected void generateAnnotation(JavaWriter out,
+  private void generateAnnotation(JavaWriter out,
                                     Annotation ann)
     throws IOException
   {
@@ -1399,7 +1466,7 @@ public class InterceptorCallChain<X,T>
     return _decoratorSet != null;
   }
 
-  protected void generateThis(JavaWriter out)
+  private void generateThis(JavaWriter out)
     throws IOException
   {
     getBusinessMethod().generateThis(out);
@@ -1459,7 +1526,7 @@ public class InterceptorCallChain<X,T>
     return true;
   }
 
-  protected Method findInterceptorMethod(Class<?> cl)
+  private Method findInterceptorMethod(Class<?> cl)
   {
     if (cl == null)
       return null;
@@ -1472,28 +1539,7 @@ public class InterceptorCallChain<X,T>
     return findInterceptorMethod(cl.getSuperclass());
   }
 
-  /*
-  protected void generateObjectChain(JavaWriter out)
-    throws IOException
-  {
-    generateThis(out);
-    out.print("." + _uniqueName + "_objectChain = new Object[] { ");
-
-    for (Interceptor interceptor : _interceptors) {
-      generateThis(out);
-      out.print("." + _interceptorVarMap.get(interceptor) + ", ");
-    }
-
-    if (getAroundInvokeMethod() != null) {
-      generateThis(out);
-      out.print(", ");
-    }
-
-    out.println("};");
-  }
-  */
-
-  protected void generateGetMethod(JavaWriter out, Method method)
+  private void generateGetMethod(JavaWriter out, Method method)
     throws IOException
   {
     generateGetMethod(out,
@@ -1502,7 +1548,7 @@ public class InterceptorCallChain<X,T>
                       method.getParameterTypes());
   }
 
-  protected static boolean isValidMethod(AnnotatedMethod<?> implMethod)
+  private static boolean isValidMethod(AnnotatedMethod<?> implMethod)
   {
     if (implMethod == null) {
       return false;
@@ -1545,7 +1591,7 @@ public class InterceptorCallChain<X,T>
     return true;
   }
 
-  protected void generateGetMethod(JavaWriter out,
+  private void generateGetMethod(JavaWriter out,
                                    String className,
                                    String methodName,
                                    Class<?>[] paramTypes)

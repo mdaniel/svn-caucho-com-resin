@@ -324,9 +324,6 @@ class WatchdogChildProcess
     Path chroot = _watchdog.getChroot();
     Path processPwd = _watchdog.getPwd();
 
-    Path resinHome = _watchdog.getResinHome();
-    Path resinRoot = _watchdog.getResinRoot();
-
     HashMap<String,String> env = buildEnv();
 
     ArrayList<String> jvmArgs = buildJvmArgs();
@@ -650,7 +647,7 @@ class WatchdogChildProcess
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      Class cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
+      Class<?> cl = Class.forName("com.caucho.bootjni.JniBoot", false, loader);
       _jniBoot = (Boot) cl.newInstance();
     } catch (ClassNotFoundException e) {
       log.fine(e.toString());
@@ -678,8 +675,6 @@ class WatchdogChildProcess
       return Vfs.openWrite(System.out);
     }
 
-    String name;
-    String id = _watchdog.getId();
     Path jvmPath = _watchdog.getLogPath();
 
     try {
@@ -731,6 +726,7 @@ class WatchdogChildProcess
       _out = out;
     }
 
+    @Override
     public void run()
     {
       Thread thread = Thread.currentThread();
@@ -745,7 +741,7 @@ class WatchdogChildProcess
 
         byte []data = new byte[4096];
 
-        while ((len = _is.read(data, 0, data.length)) >= 0) {
+        while ((len = _is.read(data, 0, data.length)) > 0) {
           out.write(data, 0, len);
           out.flush();
         }

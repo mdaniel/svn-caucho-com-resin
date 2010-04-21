@@ -128,6 +128,17 @@ abstract public class AbstractCallChain<X,T> implements EjbCallChain<X,T> {
   }
 
   /**
+   * Generates initialization in the proxy constructor
+   */
+  @Override
+  public void generateProxyConstructor(JavaWriter out, 
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateProxyConstructor(out, map);
+  }
+
+  /**
    * Generates @PostConstruct code
    */
   @Override

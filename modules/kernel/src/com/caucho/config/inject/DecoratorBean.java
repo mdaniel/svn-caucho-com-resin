@@ -160,13 +160,6 @@ public class DecoratorBean<T> implements Decorator<T>
     return (T) _bean.create(creationalContext);
   }
 
-  /*
-  public void destroy(Object instance)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
-
   /**
    * Returns the set of injection points, for validation.
    */
@@ -181,25 +174,6 @@ public class DecoratorBean<T> implements Decorator<T>
   {
     return _bean.getBeanClass();
   }
-
-  /**
-   * Create a new instance of the bean.
-   */
-  /*
-  public Object create()
-  {
-    return _bean.create();
-  }
-  */
-
-  /**
-   * Destroys a bean instance
-   */
-  /*
-  public void destroy(Object instance)
-  {
-  }
-  */
 
   //
   // decorator
@@ -342,42 +316,12 @@ public class DecoratorBean<T> implements Decorator<T>
   }
 
   /**
-   * Inject the bean.
-   */
-  /*
-  public void inject(T instance)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
-
-  /**
-   * Call post-construct
-   */
-  /*
-  public void postConstruct(Object instance)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
-
-  /**
-   * Call pre-destroy
-   */
-  /*
-  public void preDestroy(Object instance)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
-
-  /**
    * Call destroy
    */
   @Override
   public void destroy(T instance, CreationalContext<T> env)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _bean.destroy(instance, env);
   }
 
   @Override

@@ -260,9 +260,15 @@ public class EjbProducer<T> {
 
   public T newInstance()
   {
-    T instance = _beanProducer.__caucho_new();
+    InjectManager inject = InjectManager.create();
+    
+    // XXX: circular for stateful
+    CreationalContext<T> env = inject.createCreationalContext(_bean);
+    
+    T instance = _bean.create(env);
+    // Producer.__caucho_new();
     initInstance(instance);
-    _beanProducer.__caucho_postConstruct(instance);
+    // _beanProducer.__caucho_postConstruct(instance);
     
     return instance;
   }

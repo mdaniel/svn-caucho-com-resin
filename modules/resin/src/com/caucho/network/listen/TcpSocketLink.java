@@ -1228,6 +1228,7 @@ public class TcpSocketLink extends AbstractSocketLink
       _duplex = duplex;
     }
 
+    @Override
     public void run()
     {
       runThread();

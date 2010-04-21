@@ -618,10 +618,12 @@ public class EjbBean<X> extends DescriptionGroupConfig
     throws ConfigException
   {
     Class<?> localClass = local.getJavaClass();
+    /*
     int modifiers = localClass.getModifiers();
     
     if (! Modifier.isPublic(modifiers))
       throw error(L.l("'{0}' must be public.  <local> interfaces must be public.", localClass.getName()));
+      */
 
     if (! localClass.isInterface())
       throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", localClass.getName()));
@@ -1042,9 +1044,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
     String objectName = objectClass.getName();
 
     int modifiers = objectClass.getModifiers();
-    
+
+    /*
     if (! Modifier.isPublic(modifiers))
       throw error(L.l("'{0}' must be public", objectName));
+      */
 
     if (! objectClass.isInterface())
       throw error(L.l("'{0}' must be an interface", objectName));

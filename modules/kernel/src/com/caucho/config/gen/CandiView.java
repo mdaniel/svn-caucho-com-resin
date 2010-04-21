@@ -29,26 +29,25 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import javax.enterprise.inject.spi.AnnotatedType;
-
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents a public interface to a bean, e.g. a local stateful view
  */
-public class PojoView<X> extends View<X,X> {
-  private static final L10N L = new L10N(PojoView.class);
-
-  public PojoView(BeanGenerator<X> bean, AnnotatedType<X> api)
+@Module
+public class CandiView<X> extends View<X,X> {
+  public CandiView(BeanGenerator<X> bean, AnnotatedType<X> api)
   {
     super(bean, api);
   }
 
+  @Override
   public String getViewClassName()
   {
     return getBean().getFullClassName();
@@ -57,9 +56,10 @@ public class PojoView<X> extends View<X,X> {
   /**
    * Returns the introspected methods
    */
+  @Override
   public ArrayList<? extends BusinessMethodGenerator<X,X>> getMethods()
   {
-    PojoBean<X> bean = (PojoBean<X>) getBean();
+    CandiBeanGenerator<X> bean = (CandiBeanGenerator<X>) getBean();
     
     return bean.getBusinessMethods();
   }

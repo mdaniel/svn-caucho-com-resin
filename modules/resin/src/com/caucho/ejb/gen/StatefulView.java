@@ -77,6 +77,7 @@ public class StatefulView<X,T> extends View<X,T> {
    * True if the implementation is a proxy, i.e. an interface stub which
    * calls an instance class.
    */
+  @Override
   public boolean isProxy()
   {
     return ! getViewClass().equals(getBeanClass());
@@ -91,9 +92,9 @@ public class StatefulView<X,T> extends View<X,T> {
   @Override
   public String getBeanClassName()
   {
-    // XXX:
-    // return getViewClass().getSimpleName() + "__Bean";
-    return getViewClass().getJavaClass().getSimpleName();
+    // XXX: 4.0.7
+    // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
+    return getBeanClass().getJavaClass().getName();
   }
 
   /**
@@ -160,7 +161,7 @@ public class StatefulView<X,T> extends View<X,T> {
   public void generate(JavaWriter out)
     throws IOException
   {
-    generateBean(out);
+    // generateBean(out);
 
     out.println();
     out.println("public static class " + getViewClassName());
@@ -190,10 +191,6 @@ public class StatefulView<X,T> extends View<X,T> {
   public void generateBean(JavaWriter out)
     throws IOException
   {
-    if (true) {
-      return;
-    }
-    
     out.println();
     out.println("public static class " + getBeanClassName());
     out.println("  extends " + getBeanClass().getJavaClass().getName());
@@ -261,15 +258,20 @@ public class StatefulView<X,T> extends View<X,T> {
 
     out.println("_server = server;");
     out.println("_isValid = true;");
+    
+    generateProxyConstructor(out);
 
     // ejb/1143
     if (isProxy()) {
-      // out.println("_bean = new " + getBeanClassName() + "(this);");
+      // XXX: 4.0.7
+      out.println("_bean = (" + getBeanClassName() + ") _server.getProducer().newInstance();");
+      /*
       out.println("try {");
       out.println("_bean = (" + getBeanClassName() + ") _ctor.newInstance();");
       out.println("} catch (Exception e) {");
       out.println("  throw new RuntimeException(e);");
       out.println("}");
+      */
     }
 
     out.popDepth();

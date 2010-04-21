@@ -91,6 +91,16 @@ public class NullCallChain<X,T> implements EjbCallChain<X,T> {
   }
 
   /**
+   * Generates bean instance interception
+   */
+  @Override
+  public void generateProxyConstructor(JavaWriter out,
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
+  }
+
+  /**
    * Generates bean post construct interception
    */
   @Override

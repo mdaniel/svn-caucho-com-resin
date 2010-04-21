@@ -60,12 +60,12 @@ import com.caucho.util.L10N;
  * Generates the skeleton for a session bean.
  */
 @Module
-public class PojoBean<X> extends BeanGenerator<X> {
-  private static final L10N L = new L10N(PojoBean.class);
+public class CandiBeanGenerator<X> extends BeanGenerator<X> {
+  private static final L10N L = new L10N(CandiBeanGenerator.class);
 
   private AnnotatedType<X> _beanClass;
 
-  private PojoView<X> _view;
+  private CandiView<X> _view;
 
   private ArrayList<BusinessMethodGenerator<X,X>> _businessMethods
     = new ArrayList<BusinessMethodGenerator<X,X>>();
@@ -75,7 +75,7 @@ public class PojoBean<X> extends BeanGenerator<X> {
   private boolean _isSingleton;
   private boolean _isSerializeHandle;
 
-  public PojoBean(AnnotatedType<X> beanClass)
+  public CandiBeanGenerator(AnnotatedType<X> beanClass)
   {
     super(beanClass.getJavaClass().getName() + "__ResinWebBean", beanClass);
 
@@ -92,7 +92,7 @@ public class PojoBean<X> extends BeanGenerator<X> {
 
     addImport("javax.transaction.*");
 
-    _view = new PojoView<X>(this, getBeanClass());
+    _view = new CandiView<X>(this, getBeanClass());
 
     _beanClass = beanClass;
   }
@@ -126,8 +126,8 @@ public class PojoBean<X> extends BeanGenerator<X> {
       }
 
       int index = _businessMethods.size();
-      BusinessMethodGenerator<X,X> bizMethod
-        = new BusinessMethodGenerator<X,X>(_view, method, method, index);
+      CandiMethod<X> bizMethod
+        = new CandiMethod<X>(_view, method, method, index);
 
       // ioc/0i10
       if (_businessMethods.contains(bizMethod))
@@ -252,6 +252,8 @@ public class PojoBean<X> extends BeanGenerator<X> {
       gen.compilePendingJava();
 
       return gen.loadClass(getFullClassName());
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -414,10 +416,8 @@ public class PojoBean<X> extends BeanGenerator<X> {
     }
     out.println(");");
 
-    HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator<X,X> method : _businessMethods) {
-      method.generateBeanConstructor(out, map);
-    }
+    _view.generateBeanConstructor(out);
+    _view.generateProxyConstructor(out);
 
     out.popDepth();
     out.println("}");

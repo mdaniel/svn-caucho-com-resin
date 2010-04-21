@@ -68,6 +68,11 @@ abstract public class SessionBeanImpl<X> extends BeanWrapper<X>
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  @Override
+  public void destroy(X instance, CreationalContext<X> context)
+  {
+  }
 
   /**
    * Returns the injection points.

@@ -181,10 +181,8 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     String beanClass = getBeanClass().getJavaClass().getName();
 
     out.println();
-    out
-        .println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
-    out
-        .println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
+    out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
+    out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
     out.println("{");
     out.pushDepth();
 

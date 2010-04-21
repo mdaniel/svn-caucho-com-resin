@@ -250,6 +250,17 @@ public class BusinessMethodGenerator<X,T> implements EjbCallChain<X,T> {
   }
 
   /**
+   * Generates interception for the proxy instance constructo
+   */
+  @Override
+  public void generateProxyConstructor(JavaWriter out,
+                                      HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateProxyConstructor(out, map);
+  }
+
+  /**
    * Generates interception for the bean @PostConstruct
    */
   @Override

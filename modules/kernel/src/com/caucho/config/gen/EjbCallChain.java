@@ -89,6 +89,13 @@ public interface EjbCallChain<X,T> {
     throws IOException;
 
   /**
+   * Generates initialization in the proxy constructor
+   */
+  public void generateProxyConstructor(JavaWriter out, 
+                                       HashMap<String,Object> map)
+    throws IOException;
+
+  /**
    * Generates @PostConstruct code
    */
   public void generatePostConstruct(JavaWriter out, 

@@ -32,6 +32,7 @@ package com.caucho.config.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -59,6 +60,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.program.Arg;
@@ -242,6 +244,28 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     // ioc/0e13
     if (_injectionTarget instanceof PassivationSetter)
       ((PassivationSetter) _injectionTarget).setPassivationId(getId());
+    
+    validatePassivation();
+  }
+  
+  private void validatePassivation()
+  {
+    Class<? extends Annotation> scopeType = getScope();
+    
+    if (scopeType == null)
+      return;
+    
+    if (! getBeanManager().isNormalScope(scopeType))
+      return;
+    
+    boolean isPassivation = getBeanManager().isPassivatingScope(scopeType);
+    
+    Class<?> cl = _annotatedType.getJavaClass();
+    
+    if (Modifier.isFinal(cl.getModifiers()))
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it is final.",
+                                    cl.getName(), scopeType.getName()));
+        
   }
 
   /**

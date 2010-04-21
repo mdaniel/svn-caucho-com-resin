@@ -109,7 +109,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("{");
     out.pushDepth();
     
-    // XXX: temp for JSR-299 TCK
+    // XXX: 4.0.7 temp for JSR-299 TCK
+    /*
     out.println("static java.lang.reflect.Constructor _ctor;");
     out.println("static {");
     out.println("try {");
@@ -128,6 +129,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("  e.printStackTrace();");
     out.println("}");
     out.println("}");
+    */
 
     out.println();
     out.println("public " + getClassName() + "(StatefulManager server)");

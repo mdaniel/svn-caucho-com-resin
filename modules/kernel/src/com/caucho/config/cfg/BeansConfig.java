@@ -193,6 +193,7 @@ public class BeansConfig {
 
       _injectManager.addDecorator(decorator);
     }
+    
     _decoratorList.clear();
 
     update();
@@ -274,7 +275,7 @@ public class BeansConfig {
       addInterceptor(cl);
     }
 
-    public void addCustomBean(CustomBeanConfig config)
+    public void addCustomBean(CustomBeanConfig<?> config)
     {
       Class<?> cl = config.getClassType();
 
@@ -300,7 +301,7 @@ public class BeansConfig {
       _decoratorList.add(cl);
     }
 
-    public void addCustomBean(CustomBeanConfig config)
+    public void addCustomBean(CustomBeanConfig<?> config)
     {
       Class<?> cl = config.getClassType();
 

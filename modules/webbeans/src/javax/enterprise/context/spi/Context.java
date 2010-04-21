@@ -30,7 +30,6 @@
 package javax.enterprise.context.spi;
 
 import java.lang.annotation.Annotation;
-import javax.enterprise.inject.spi.InjectionTarget;
 
 /**
  * Represents a bean scope, storing the bean instances available to the

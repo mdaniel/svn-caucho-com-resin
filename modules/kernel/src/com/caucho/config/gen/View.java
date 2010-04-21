@@ -101,6 +101,11 @@ abstract public class View<X,T> {
   {
     return false;
   }
+  
+  public boolean isProxy()
+  {
+    return false;
+  }
 
   /**
    * Returns any interceptor bindings
@@ -238,6 +243,28 @@ abstract public class View<X,T> {
    */
   abstract public void generate(JavaWriter out)
     throws IOException;
+
+  /**
+   * Generates constructor additions
+   */
+  public void generateProxyConstructor(JavaWriter out)
+    throws IOException
+  {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    generateProxyConstructor(out, map);
+  }
+
+  /**
+   * Generates constructor additions
+   */
+  public void generateProxyConstructor(JavaWriter out, 
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
+    for (BusinessMethodGenerator<X,T> method : getMethods()) {
+      method.generateProxyConstructor(out, map);
+    }
+  }
 
   /**
    * Generates constructor additions

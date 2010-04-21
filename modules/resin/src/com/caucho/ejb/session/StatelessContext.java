@@ -40,13 +40,13 @@ import com.caucho.util.*;
 /**
  * Abstract base class for an stateless session context
  */
-abstract public class StatelessContext<T> extends AbstractSessionContext {
+abstract public class StatelessContext<X,T> extends AbstractSessionContext {
   private static final L10N L = new L10N(StatelessContext.class);
   
-  private transient StatelessManager _server;
-  private StatelessPool<T> _statelessPool;
+  private transient StatelessManager<X> _server;
+  private StatelessPool<X> _statelessPool;
 
-  public StatelessContext(StatelessManager server)
+  public StatelessContext(StatelessManager<X> server)
   {
     assert(server != null);
 
@@ -56,7 +56,7 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public StatelessManager getStatelessManager()
+  public StatelessManager<X> getStatelessManager()
   {
     return _server;
   }
@@ -64,7 +64,7 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public AbstractServer getServer()
+  public AbstractServer<X> getServer()
   {
     return _server;
   }
@@ -83,12 +83,14 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
     return null;
   }
   
-  public StatelessPool<T> getStatelessPool(StatelessProvider<T> provider)
+  public StatelessPool<X> getStatelessPool(StatelessProvider<T> provider)
   {
     if (_statelessPool == null) {
+      // XXX: per-view?
       EjbProducer<T> producer = (EjbProducer<T>) getServer().getProducer();
       producer.setBeanProducer(provider);
-      _statelessPool = new StatelessPool<T>(_server, provider);
+
+      _statelessPool = new StatelessPool<X>(_server);
     }
     
     return _statelessPool;
@@ -97,6 +99,7 @@ abstract public class StatelessContext<T> extends AbstractSessionContext {
   /**
    * Returns the EJBObject stub for the container.
    */
+  @Override
   public EJBObject getEJBObject()
   {
     return (EJBObject) getStatelessManager().getRemoteObject();

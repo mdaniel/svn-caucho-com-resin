@@ -94,9 +94,15 @@ public class StatelessView<X,T> extends View<X,T> {
   public String getBeanClassName()
   {
     // XXX: 4.0.7 CDI TCK package-private issues
-    // return getViewClass().getSimpleName() + "__Bean";
-    // return getStatelessBean().getClassName();
     return getBeanClass().getJavaClass().getName();
+    // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
+    // return getStatelessBean().getClassName();
+  }
+  
+  @Override
+  public boolean isProxy()
+  {
+    return true;
   }
 
   /**
@@ -342,12 +348,9 @@ public class StatelessView<X,T> extends View<X,T> {
   /**
    * Generates code for a bean (pooled) instance.
    */
+  /* XXX: 4.0.7
   public void generateBean(JavaWriter out) throws IOException
   {
-    // XXX: disabled during 4.0.7 work for CDI TCK issues 
-    if (true)
-      return;
-    
     out.println();
     out.println("public static class " + getBeanClassName());
     out.println("  extends " + getBeanClass().getJavaClass().getName());
@@ -385,6 +388,7 @@ public class StatelessView<X,T> extends View<X,T> {
     out.popDepth();
     out.println("}");
   }
+  */
 
   /**
    * Generates the local/remote proxy.
@@ -422,6 +426,9 @@ public class StatelessView<X,T> extends View<X,T> {
     out.println("_context = context;");
 
     out.println("_statelessPool = context.getStatelessPool(this);");
+    
+    generateProxyConstructor(out);
+    
     out.popDepth();
     out.println("}");
 
@@ -430,8 +437,8 @@ public class StatelessView<X,T> extends View<X,T> {
     out.println("{");
     // XXX: 4.0.7 temp for CDI TCK package-private issues
     // out.println("  return new " + getBeanClassName() + "(this);");
-    // out.println("  throw new IllegalStateException();");
-    out.println("  return new " + getBeanClass().getJavaClass().getName() + "();");
+    out.println("  throw new IllegalStateException();");
+    // out.println("  return new " + getBeanClass().getJavaClass().getName() + "();");
     out.println("}");
 
     out.println("public void __caucho_preDestroy(Object instance)");
@@ -473,7 +480,7 @@ public class StatelessView<X,T> extends View<X,T> {
      * out.popDepth(); out.println("}"); }
      */
 
-    generateBean(out);
+    // generateBean(out);
 
     out.popDepth();
     out.println("}");
@@ -489,37 +496,7 @@ public class StatelessView<X,T> extends View<X,T> {
     out.pushDepth();
 
     out.println("return _statelessPool.allocate();");
-
-    /*
-    out.println(beanClass + " bean;");
-    out.println("synchronized (this) {");
-    out.println("  if (_freeBeanTop > 0) {");
-    out.println("    bean = _freeBeanStack[--_freeBeanTop];");
-    out.println("    return bean;");
-    out.println("  }");
-    out.println("}");
-    out.println();
-    out.println("try {");
-    out.println("  bean = new " + beanClass + "(this);");
-
-    Class implClass = getBean().getBeanClass().getJavaClass();
-
-    if (SessionBean.class.isAssignableFrom(implClass)) {
-      out.println("  bean.setSessionContext(_context);");
-    }
-
-    out.println("  getStatelessManager().initInstance(bean);");
-
-    if (getBean().hasMethod("ejbCreate", new Class[0])) {
-      // ejb/0fe0: ejbCreate can be private, out.println("  bean.ejbCreate();");
-      out.println("  bean.ejbCreate();");
-    }
-
-    out.println("  return bean;");
-    out.println("} catch (Exception e) {");
-    out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-    out.println("}");
-    */
+    
     out.popDepth();
     out.println("}");
 
@@ -532,19 +509,6 @@ public class StatelessView<X,T> extends View<X,T> {
     out.pushDepth();
 
     out.println("_statelessPool.free((" + beanClass + ") bean);");
-    /*
-    out.println("if (bean == null)");
-    out.println("  return;");
-    out.println();
-    out.println("synchronized (this) {");
-    out.println("  if (_freeBeanTop < _freeBeanStack.length) {");
-    out.println("    _freeBeanStack[_freeBeanTop++] = bean;");
-    out.println("    return;");
-    out.println("  }");
-    out.println("}");
-
-    out.println("_server.destroyInstance(bean);");
-    */
 
     out.popDepth();
     out.println("}");

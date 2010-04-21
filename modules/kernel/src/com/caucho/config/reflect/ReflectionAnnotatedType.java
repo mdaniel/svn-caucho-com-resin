@@ -151,12 +151,7 @@ public class ReflectionAnnotatedType<T>
 
       introspectFields(cl);
 
-      for (Method method : cl.getDeclaredMethods()) {
-        if (hasBeanAnnotation(method)
-            || Modifier.isPublic(method.getModifiers())) {
-          _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
-        }
-      }
+      introspectMethods(cl);
 
       if (! cl.isInterface()) {
         for (Constructor<?> ctor : cl.getDeclaredConstructors()) {
@@ -196,6 +191,21 @@ public class ReflectionAnnotatedType<T>
 	throw ConfigException.create(L.l("{0}: {1}\n", field, e), e);
       }
     }
+  }
+
+  private void introspectMethods(Class<?> cl)
+  {
+    if (cl == null)
+      return;
+    
+    for (Method method : cl.getDeclaredMethods()) {
+      if (hasBeanAnnotation(method)
+          || Modifier.isPublic(method.getModifiers())) {
+        _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
+      }
+    }
+
+    introspectMethods(cl.getSuperclass());
   }
 
   private void introspectInheritedAnnotations(Class<?> cl)

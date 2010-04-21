@@ -114,8 +114,13 @@ public class StatefulMethod<X,T> extends BusinessMethodGenerator<X,T>
       out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
                   + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
     }
+    
+    String beanClassName = getBeanClass().getJavaClass().getName();
 
     out.println("boolean isValid = false;");
+    // bean allocation must be last because it needs to be
+    // freed or discarded in the finally block
+    out.println(beanClassName + " bean = _bean;");
     
     out.println("if (_isActive)");
     out.println("  throw new EJBException(\"session bean is not reentrant\");");

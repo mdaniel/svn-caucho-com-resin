@@ -162,11 +162,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
 
     introspectFields(cl);
 
-    for (Method method : cl.getDeclaredMethods()) {
-      if (hasBeanAnnotation(method)) {
-        _methodSet.add(new AnnotatedMethodImpl<X>(this, null, method));
-      }
-    }
+    introspectMethods(cl);
 
     if (! cl.isInterface()) {
       for (Constructor<?> ctor : cl.getDeclaredConstructors()) {
@@ -196,6 +192,21 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
         _fieldSet.add(new AnnotatedFieldImpl(this, field));
       }
     }
+  }
+
+  private void introspectMethods(Class<?> cl)
+  {
+    if (cl == null)
+      return;
+    
+    for (Method method : cl.getDeclaredMethods()) {
+      if (hasBeanAnnotation(method)
+          || Modifier.isPublic(method.getModifiers())) {
+        _methodSet.add(new AnnotatedMethodImpl(this, null, method));
+      }
+    }
+
+    introspectMethods(cl.getSuperclass());
   }
 
   private void introspectInheritedAnnotations(Class<?> cl)
