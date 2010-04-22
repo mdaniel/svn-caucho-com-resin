@@ -47,7 +47,7 @@ import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.SingletonBeanImpl;
 import com.caucho.ejb.inject.StatefulBeanImpl;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -62,7 +62,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
 
   private SingletonContext<T> _sessionContext;
 
-  public SingletonManager(EjbContainer ejbContainer,
+  public SingletonManager(EjbManager ejbContainer,
                           AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);

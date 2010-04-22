@@ -83,10 +83,10 @@ class EjbScanClass extends AbstractScanClass {
   
   private Path _root;
   private String _className;
-  private EjbContainer _ejbContainer;
+  private EjbManager _ejbContainer;
   private boolean _isEjb;
   
-  EjbScanClass(Path root, String className, EjbContainer container)
+  EjbScanClass(Path root, String className, EjbManager container)
   {
     _root = root;
     _className = className;

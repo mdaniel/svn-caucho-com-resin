@@ -32,7 +32,7 @@ package com.caucho.ejb.cfg;
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.config.types.FileSetType;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jms.JmsMessageListener;
@@ -56,7 +56,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
  */
 public class EjbConfig {
   private static final L10N L = new L10N(EjbConfig.class);
-  private final EjbContainer _ejbContainer;
+  private final EjbManager _ejbContainer;
 
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
 
@@ -86,7 +86,7 @@ public class EjbConfig {
   private ArrayList<ApplicationExceptionConfig> _cfgApplicationExceptions
     = new ArrayList<ApplicationExceptionConfig>();
 
-  public EjbConfig(EjbContainer ejbContainer)
+  public EjbConfig(EjbManager ejbContainer)
   {
     _ejbContainer = ejbContainer;
   }
@@ -132,7 +132,7 @@ public class EjbConfig {
   /**
    * Returns the EJB manager.
    */
-  public EjbContainer getEjbContainer()
+  public EjbManager getEjbContainer()
   {
     return _ejbContainer;
   }

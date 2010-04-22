@@ -45,7 +45,7 @@ import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.SessionPool;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 
@@ -67,7 +67,7 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
   
   private String[] _declaredRoles;
 
-  public AbstractSessionManager(EjbContainer manager, AnnotatedType<T> annotatedType)
+  public AbstractSessionManager(EjbManager manager, AnnotatedType<T> annotatedType)
   {
     super(manager, annotatedType);
     

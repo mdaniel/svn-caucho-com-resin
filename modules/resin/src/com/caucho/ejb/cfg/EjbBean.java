@@ -60,7 +60,7 @@ import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.config.types.Period;
 import com.caucho.config.types.PostConstructType;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.GenClass;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -179,7 +179,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     return _ejbConfig;
   }
 
-  public EjbContainer getEjbContainer()
+  public EjbManager getEjbContainer()
   {
     return _ejbConfig.getEjbContainer();
   }
@@ -1017,7 +1017,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Deploys the bean.
    */
-  public AbstractEjbBeanManager<X> deployServer(EjbContainer ejbContainer,
+  public AbstractEjbBeanManager<X> deployServer(EjbManager ejbContainer,
                                         JavaClassGenerator javaGen)
     throws ClassNotFoundException, ConfigException
   {

@@ -32,7 +32,7 @@ package com.caucho.ejb.metadata;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ContainerProgram;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
 
@@ -48,7 +48,7 @@ public class Bean implements EnvironmentBean {
   private static final L10N L = new L10N(Bean.class);
   private static final Logger log = Log.open(Bean.class);
 
-  private EjbContainer _ejbContainer;
+  private EjbManager _ejbContainer;
 
   private ClassLoader _tempClassLoader;
 
@@ -57,7 +57,7 @@ public class Bean implements EnvironmentBean {
 
   private ArrayList<ContainerProgram> _initList = new ArrayList<ContainerProgram>();
 
-  public Bean(EjbContainer ejbContainer)
+  public Bean(EjbManager ejbContainer)
   {
     _ejbContainer = ejbContainer;
     

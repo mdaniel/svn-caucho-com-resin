@@ -46,7 +46,7 @@ import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatefulBeanImpl;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
@@ -65,7 +65,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   // XXX: need real lifecycle
   private LruCache<String,StatefulObject> _remoteSessions;
 
-  public StatefulManager(EjbContainer ejbContainer,
+  public StatefulManager(EjbManager ejbContainer,
 			AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);

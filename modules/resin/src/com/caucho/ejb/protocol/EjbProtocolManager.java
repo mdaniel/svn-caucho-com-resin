@@ -30,7 +30,7 @@
 package com.caucho.ejb.protocol;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.naming.Jndi;
@@ -62,7 +62,7 @@ public class EjbProtocolManager {
   private static Hashtable<String, WeakReference<AbstractEjbBeanManager>> _staticServerMap
     = new Hashtable<String, WeakReference<AbstractEjbBeanManager>>();
 
-  private final EjbContainer _ejbContainer;
+  private final EjbManager _ejbContainer;
   private final ClassLoader _loader;
 
   private String _localJndiPrefix; // = "java:comp/env/cmp";
@@ -80,12 +80,12 @@ public class EjbProtocolManager {
   /**
    * Create a server with the given prefix name.
    */
-  public EjbProtocolManager(EjbContainer ejbContainer) throws ConfigException
+  public EjbProtocolManager(EjbManager ejbContainer) throws ConfigException
   {
     _ejbContainer = ejbContainer;
     _loader = _ejbContainer.getClassLoader();
 
-    EjbContainer parent = ejbContainer.getParent();
+    EjbManager parent = ejbContainer.getParent();
     if (parent != null) {
       _localJndiPrefix = parent.getProtocolManager().getLocalJndiPrefix();
       _remoteJndiPrefix = parent.getProtocolManager().getRemoteJndiPrefix();
@@ -126,7 +126,7 @@ public class EjbProtocolManager {
   /**
    * Returns the EJB server.
    */
-  public EjbContainer getEjbContainer()
+  public EjbManager getEjbContainer()
   {
     return _ejbContainer;
   }

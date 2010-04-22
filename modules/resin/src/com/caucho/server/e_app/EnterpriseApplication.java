@@ -30,7 +30,7 @@
 package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.inject.Module;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
@@ -415,7 +415,7 @@ public class EnterpriseApplication
     }
 
     if (_ejbPaths.size() != 0) {
-      EjbContainer ejbContainer = EjbContainer.create();
+      EjbManager ejbContainer = EjbManager.create();
 
       for (Path path : _ejbPaths) {
         ejbContainer.addRoot(path);
@@ -797,7 +797,7 @@ public class EnterpriseApplication
       return;
 
     _ejbPaths.add(ejbPath);
-    EjbContainer ejbContainer = EjbContainer.create();
+    EjbManager ejbContainer = EjbManager.create();
 
     ejbContainer.addRoot(ejbPath);
   }

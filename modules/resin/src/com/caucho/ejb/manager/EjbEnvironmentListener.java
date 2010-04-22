@@ -52,7 +52,7 @@ public class EjbEnvironmentListener implements AddLoaderListener
   @Override
   public void addLoader(EnvironmentClassLoader loader)
   {
-    EjbContainer.create(loader);
+    EjbManager.create(loader);
   }
 }
 

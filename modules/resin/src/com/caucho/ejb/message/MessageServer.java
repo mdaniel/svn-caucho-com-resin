@@ -47,7 +47,7 @@ import javax.transaction.xa.XAResource;
 
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.ejb.server.EjbProducer;
@@ -72,7 +72,7 @@ public class MessageServer<T> extends AbstractEjbBeanManager<T>
 
   private Method _ejbCreate;
 
-  public MessageServer(EjbContainer ejbContainer, 
+  public MessageServer(EjbManager ejbContainer, 
                        AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);

@@ -342,6 +342,10 @@ public class BeansConfig {
   public class AlternativesConfig {
     public void addClass(Class<?> cl)
     {
+      if (! cl.isAnnotation())
+        throw new ConfigException(L.l("'{0}' is an invalid alternative because it is not an annotation.",
+                                      cl.getName()));
+      
       _deployList.add(cl);
     }
 

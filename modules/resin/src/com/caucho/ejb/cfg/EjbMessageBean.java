@@ -58,7 +58,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.types.JndiBuilder;
 import com.caucho.ejb.gen.MessageGenerator;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.message.JmsActivationSpec;
 import com.caucho.ejb.message.JmsResourceAdapter;
 import com.caucho.ejb.message.MessageServer;
@@ -565,7 +565,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
    * Deploys the bean.
    */
   @Override
-  public AbstractEjbBeanManager<X> deployServer(EjbContainer ejbManager,
+  public AbstractEjbBeanManager<X> deployServer(EjbManager ejbManager,
                                         JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
@@ -575,7 +575,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
       return deployJmsServer(ejbManager, javaGen);
   }
 
-  private AbstractEjbBeanManager<X> deployJmsServer(EjbContainer ejbManager,
+  private AbstractEjbBeanManager<X> deployJmsServer(EjbManager ejbManager,
                                             JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
@@ -600,7 +600,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
   /**
    * Deploys the bean.
    */
-  public AbstractEjbBeanManager<X> deployActivationSpecServer(EjbContainer ejbManager,
+  public AbstractEjbBeanManager<X> deployActivationSpecServer(EjbManager ejbManager,
                                                       JavaClassGenerator javaGen)
     throws ClassNotFoundException
   {
@@ -637,7 +637,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
   /**
    * Deploys the bean.
    */
-  public AbstractEjbBeanManager<X> deployMessageServer(EjbContainer ejbManager,
+  public AbstractEjbBeanManager<X> deployMessageServer(EjbManager ejbManager,
                                                JavaClassGenerator javaGen,
                                                ResourceAdapter ra,
                                                ActivationSpec spec)

@@ -48,7 +48,7 @@ import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ProcessBeanImpl;
 import com.caucho.ejb.inject.EjbGeneratedBean;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.inject.Jndi;
 import com.caucho.inject.MBean;
@@ -94,7 +94,7 @@ public class ResinStandardPlugin implements Extension {
             || annotatedType.isAnnotationPresent(Singleton.class)
             || annotatedType.isAnnotationPresent(MessageDriven.class)
             || annotatedType.isAnnotationPresent(JmsMessageListener.class))) {
-      EjbContainer ejbContainer = EjbContainer.create();
+      EjbManager ejbContainer = EjbManager.create();
       ejbContainer.createBean(annotatedType, null);
       event.veto();
     }
@@ -117,7 +117,7 @@ public class ResinStandardPlugin implements Extension {
         || annotated.isAnnotationPresent(Singleton.class)
         || annotated.isAnnotationPresent(MessageDriven.class)
         || annotated.isAnnotationPresent(JmsMessageListener.class)) {
-      EjbContainer ejbContainer = EjbContainer.create();
+      EjbManager ejbContainer = EjbManager.create();
       AnnotatedType<T> annType = absBean.getAnnotatedType();
 
       if (annType != null) {

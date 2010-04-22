@@ -38,6 +38,7 @@ import com.caucho.config.SchemaBean;
 import com.caucho.config.Config;
 import com.caucho.config.el.WebBeansELResolver;
 import com.caucho.config.types.*;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.jsp.JspServlet;
 import com.caucho.jsp.cfg.JspConfig;
@@ -403,6 +404,8 @@ public class WebApp extends ServletContextImpl
 
       Vfs.setPwd(_appDir, _classLoader);
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
+      
+      EjbManager.setScanAll();
 
       // map.put("app", _appVar);
 

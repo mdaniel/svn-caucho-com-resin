@@ -98,7 +98,7 @@ public class MessageBeanConfig extends AbstractBeanConfig
     if (getInstanceClass() == null)
       throw new ConfigException(L.l("ejb-message-bean requires a 'class' attribute"));
 
-    EjbContainer ejbContainer = EjbContainer.create();
+    EjbManager ejbContainer = EjbManager.create();
     EjbConfigManager configManager = ejbContainer.getConfigManager();
 
     EjbMessageBean bean = new EjbMessageBean(configManager, "config");

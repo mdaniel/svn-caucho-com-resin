@@ -48,6 +48,7 @@ import javax.enterprise.event.Observes;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Extension;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.util.IoUtil;
@@ -342,7 +343,10 @@ class ExtensionManager
       } catch (InvocationTargetException e) {
         String loc = (_extension + "." + _method.getName() + ": ");
 
-        throw new InjectionException(loc + e.getMessage(), e.getCause());
+        if (e.getCause() instanceof ConfigException)
+          throw (ConfigException) e.getCause();
+        
+        throw new InjectionException(loc + e.getCause().getMessage(), e.getCause());
       } catch (Exception e) {
         String loc = (_extension + "." + _method.getName() + ": ");
 

@@ -33,7 +33,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.config.*;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.loader.*;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
@@ -54,7 +54,7 @@ public class EjbConfigManager extends EjbConfig {
   
   private ArrayList<Path> _pathPendingList = new ArrayList<Path>();
 
-  public EjbConfigManager(EjbContainer ejbContainer)
+  public EjbConfigManager(EjbManager ejbContainer)
   {
     super(ejbContainer);
   }

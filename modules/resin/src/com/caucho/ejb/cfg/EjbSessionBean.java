@@ -54,7 +54,7 @@ import com.caucho.ejb.gen.SessionGenerator;
 import com.caucho.ejb.gen.SingletonGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.gen.StatelessGenerator;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.ejb.server.EjbProducer;
 import com.caucho.ejb.session.SingletonManager;
@@ -362,7 +362,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
    * Deploys the bean.
    */
   @Override
-  public AbstractEjbBeanManager<X> deployServer(EjbContainer ejbContainer,
+  public AbstractEjbBeanManager<X> deployServer(EjbManager ejbContainer,
                                         JavaClassGenerator javaGen)
       throws ClassNotFoundException, ConfigException
   {

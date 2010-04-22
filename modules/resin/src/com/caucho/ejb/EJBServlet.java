@@ -31,7 +31,7 @@ package com.caucho.ejb;
 
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.util.CauchoSystem;
@@ -72,7 +72,7 @@ public class EJBServlet extends GenericServlet {
   private Hashtable<CharSequence,Skeleton> _beanMap
     = new Hashtable<CharSequence,Skeleton>();
 
-  private EjbContainer _ejbManager;
+  private EjbManager _ejbManager;
   private ProtocolContainer _protocolContainer;
 
   private ServletException _exception;
@@ -103,7 +103,7 @@ public class EJBServlet extends GenericServlet {
   public void init()
     throws ServletException
   {
-    _ejbManager = EjbContainer.getCurrent();
+    _ejbManager = EjbManager.getCurrent();
 
     if (_ejbManager == null) {
       throw new ServletException(L.l("No <ejb-server> detected.  '{0}' requires a configured <ejb-server>",
@@ -313,7 +313,7 @@ public class EJBServlet extends GenericServlet {
     _protocolContainer.setURLPrefix(_urlPrefix);
     _protocolContainer.setWorkPath(_workPath);
 
-    EjbContainer manager = _ejbManager;
+    EjbManager manager = _ejbManager;
 
     for (; manager != null; manager = manager.getParent()) {
       manager.getProtocolManager().addProtocolContainer(_protocolContainer);
@@ -403,7 +403,7 @@ public class EJBServlet extends GenericServlet {
       _protocolContainer.setURLPrefix(_urlPrefix);
       _protocolContainer.setWorkPath(_workPath);
     
-      EjbContainer manager = _ejbManager;
+      EjbManager manager = _ejbManager;
 
       for (; manager != null; manager = manager.getParent()) {
 	manager.getProtocolManager().addProtocolContainer(_protocolContainer);
@@ -413,7 +413,7 @@ public class EJBServlet extends GenericServlet {
 
   public void destroy()
   {
-    EjbContainer manager = _ejbManager;
+    EjbManager manager = _ejbManager;
 
     for (; manager != null; manager = manager.getParent()) {
       manager.getProtocolManager().removeProtocolContainer(_protocolContainer);

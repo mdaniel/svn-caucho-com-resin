@@ -47,7 +47,7 @@ import com.caucho.config.timer.TimeoutCaller;
 import com.caucho.config.timer.TimerTask;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatelessBeanImpl;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
 
@@ -73,7 +73,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
    * @param config
    *          the session configuration from the ejb.xml
    */
-  public StatelessManager(EjbContainer ejbContainer, 
+  public StatelessManager(EjbManager ejbContainer, 
                           AnnotatedType<X> annotatedType)
   {
     super(ejbContainer, annotatedType);

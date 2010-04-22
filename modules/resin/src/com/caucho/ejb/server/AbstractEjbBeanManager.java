@@ -46,7 +46,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.AroundInvokeConfig;
-import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.lifecycle.Lifecycle;
@@ -63,7 +63,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
     = Logger.getLogger(AbstractEjbBeanManager.class.getName());
   private static final L10N L = new L10N(AbstractEjbBeanManager.class);
 
-  protected final EjbContainer _ejbContainer;
+  protected final EjbManager _ejbContainer;
 
   protected final UserTransaction _ut = UserTransactionProxy.getInstance();
 
@@ -118,7 +118,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
    * @param manager
    *          the owning server container
    */
-  public AbstractEjbBeanManager(EjbContainer container, 
+  public AbstractEjbBeanManager(EjbManager container, 
                         AnnotatedType<T> annotatedType)
   {
     _annotatedType = annotatedType;
@@ -374,7 +374,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   /**
    * Returns the owning container.
    */
-  public EjbContainer getEjbContainer()
+  public EjbManager getEjbContainer()
   {
     return _ejbContainer;
   }
