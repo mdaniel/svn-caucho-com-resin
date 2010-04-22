@@ -66,18 +66,21 @@ import com.caucho.vfs.Path;
 /**
  * Environment-based container.
  */
-public class EjbContainer implements ScanListener, EnvironmentListener {
-  private static final L10N L = new L10N(EjbContainer.class);
-  private static final Logger log = Logger.getLogger(EjbContainer.class
+public class EjbManager implements ScanListener, EnvironmentListener {
+  private static final L10N L = new L10N(EjbManager.class);
+  private static final Logger log = Logger.getLogger(EjbManager.class
       .getName());
 
-  private static final EnvironmentLocal<EjbContainer> _localContainer
-    = new EnvironmentLocal<EjbContainer>();
+  private static final EnvironmentLocal<EjbManager> _localContainer
+    = new EnvironmentLocal<EjbManager>();
+  
+  private static final EnvironmentLocal<Boolean> _localScanAll
+    = new EnvironmentLocal<Boolean>();
 
   private final EnvironmentClassLoader _classLoader;
   private final ClassLoader _tempClassLoader;
 
-  private final EjbContainer _parentContainer;
+  private final EjbManager _parentContainer;
 
   private final EjbConfigManager _configManager;
   private final EjbProtocolManager _protocolManager;
@@ -102,7 +105,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
 
   private ArrayList<AbstractEjbBeanManager> _serverList = new ArrayList<AbstractEjbBeanManager>();
 
-  private EjbContainer(ClassLoader loader)
+  private EjbManager(ClassLoader loader)
   {
     _parentContainer = _localContainer.get(loader);
 
@@ -131,7 +134,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the local container.
    */
-  public static EjbContainer create()
+  public static EjbManager create()
   {
     return create(Thread.currentThread().getContextClassLoader());
   }
@@ -139,13 +142,13 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the local container.
    */
-  public static EjbContainer create(ClassLoader loader)
+  public static EjbManager create(ClassLoader loader)
   {
     synchronized (_localContainer) {
-      EjbContainer container = _localContainer.getLevel(loader);
+      EjbManager container = _localContainer.getLevel(loader);
 
       if (container == null) {
-        container = new EjbContainer(loader);
+        container = new EjbManager(loader);
 
         _localContainer.set(container, loader);
       }
@@ -157,7 +160,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the local container.
    */
-  public static EjbContainer getCurrent()
+  public static EjbManager getCurrent()
   {
     return getCurrent(Thread.currentThread().getContextClassLoader());
   }
@@ -165,11 +168,16 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the current environment container.
    */
-  public static EjbContainer getCurrent(ClassLoader loader)
+  public static EjbManager getCurrent(ClassLoader loader)
   {
     synchronized (_localContainer) {
       return _localContainer.get(loader);
     }
+  }
+  
+  public static void setScanAll()
+  {
+    _localScanAll.set(true);
   }
 
   /**
@@ -196,7 +204,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
     return _configManager;
   }
 
-  public EjbContainer getParent()
+  public EjbManager getParent()
   {
     return _parentContainer;
   }
@@ -308,7 +316,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Copy defaults from the parent container when first created.
    */
-  private void copyContainerDefaults(EjbContainer parent)
+  private void copyContainerDefaults(EjbManager parent)
   {
     _isAutoCompile = parent._isAutoCompile;
     _jmsConnectionFactory = parent._jmsConnectionFactory;
@@ -402,10 +410,13 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   @Override
   public boolean isRootScannable(Path root, String packageRoot)
   {
-    if (! root.lookup("META-INF/ejb-jar.xml").canRead()) {
-      return false;
-    }
-    else if (_ejbUrls.contains(root.getURL())) {
+    if (! Boolean.TRUE.equals(_localScanAll.get())) {
+      if (! root.lookup("META-INF/ejb-jar.xml").canRead()) {
+        return false;
+      }
+    }     
+  
+    if (_ejbUrls.contains(root.getURL())) {
       return false;
     }
     
