@@ -36,10 +36,6 @@ using System.IO;
 using System.Net.Sockets;
 using System.Web;
 using System.Diagnostics;
-/*
-s\x00\x06200 OKM\x00\x08cpu-loadS\x00\x010H\x00\x0eContent-LengthS\x00\x0212H\x00\x0cContent-TypeS\x00\x18text/html; charset=utf-8G\x00\x00D\x00\x0cHello World
-Q
- */
 
 namespace Caucho.IIS
 {
@@ -86,11 +82,21 @@ namespace Caucho.IIS
 
     public const int CSE_SEND_HEADER = 'G';
 
+    private Logger _log;
+
     private Socket _socket;
     private BufferedStream _stream;
 
-    private String _traceId;
     private HmuxChannelFactory _pool;
+
+    private ActiveProbe _connProbe;
+    private ActiveTimeProbe _requestTimeProbe;
+    private ActiveProbe _idleProbe;
+
+    private String _traceId;
+    private long _requestStartTime;
+    private long _idleStartTime;
+    private bool _isIdle = false;
 
     public HmuxChannel(Socket socket, HmuxChannelFactory pool)
     {
@@ -98,6 +104,11 @@ namespace Caucho.IIS
       _stream = new BufferedStream(new NetworkStream(_socket));
       _pool = pool;
       _traceId = _socket.Handle.ToInt32().ToString();
+      _log = Logger.GetLogger();
+
+      _connProbe = pool.GetConnectionProbe();
+      _requestTimeProbe = pool.GetRequestTimeProbe();
+      _idleProbe = pool.GetIdleProbe();
     }
 
     public HmuxChannelFactory GetPool()
@@ -115,19 +126,77 @@ namespace Caucho.IIS
       return _traceId;
     }
 
-    public void Free(long requestStartTime)
+    public void Free(long idleStartTime)
     {
-      Trace.TraceInformation("HmuxChannel.Free() NYI");
+      if (_stream == null) {
+        _log.Info("{0} unexpected free of closed stream", this);
+
+        return;
+      }
+
+      long requestStartTime = _requestStartTime;
+      _requestStartTime = 0;
+
+      if (requestStartTime > 0)
+        _requestTimeProbe.End(requestStartTime);
+
+      _idleStartTime = idleStartTime;
+
+      _idleProbe.Start();
+      _isIdle = true;
+
+      _pool.Free(this);
     }
 
     public void Close()
     {
-      Trace.TraceInformation("HmuxChannel.Close() NYI");
+      if (_stream != null)
+        _pool.Close(this);
+
+      CloseImpl();
     }
 
-    public void SetIdleStartTime(long p)
+    internal void CloseImpl()
     {
-      Trace.TraceInformation("HmuxChannel.SetIdleStartTime() NYI");
+      BufferedStream stream = _stream;
+      _stream = null;
+
+      try {
+        if (stream != null)
+          stream.Close();
+      } catch (Exception e) {
+        _log.Info("Can't close stream '{0}' due to exception '{1}', '{2}'", stream, e.Message, e.StackTrace);
+      }
+
+      if (stream != null) {
+        _connProbe.End();
+
+        if (_requestStartTime > 0)
+          _requestTimeProbe.End(_requestStartTime);
+
+        if (_isIdle)
+          _idleProbe.End();
+      }
+    }
+
+    public void SetIdleStartTime(long idleStartTime)
+    {
+      _idleStartTime = idleStartTime;
+    }
+
+    internal long GetIdleStartTime()
+    {
+      return _idleStartTime;
+    }
+
+    internal void ClearIdleStartTime()
+    {
+      throw new NotImplementedException();
+    }
+
+    internal void ToActive()
+    {
+      throw new NotImplementedException();
     }
   }
 }

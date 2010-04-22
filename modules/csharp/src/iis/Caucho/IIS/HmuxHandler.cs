@@ -53,35 +53,31 @@ namespace Caucho.IIS
 
     private bool _isStickySessions = true;
     private LoadBalancer _loadBalancer;
-    private Logger _logger;
+    private Logger _log;
 
     public HmuxHandler()
     {
       init();
-
     }
 
     private void init()
     {
-      _loadBalancer = new LoadBalancer();
-      _logger = Logger.GetLogger();
+      NameValueCollection appSettings = WebConfigurationManager.GetSection("appSettings") as NameValueCollection;
 
-      Object obj = WebConfigurationManager.GetSection("appSettings");
-      if (obj != null)
-        _logger.Info("settings: {0}", obj.GetType());
+      _log = Logger.GetLogger();
 
-      /**      System.Configuration.Configuration rootWebConfig1 =
-              System.Web.Configuration.WebConfigurationManager.OpenWebConfiguration(null);
-            if (0 < rootWebConfig1.AppSettings.Settings.Count) {
-              System.Configuration.KeyValueConfigurationElement customSetting =
-                rootWebConfig1.AppSettings.Settings["customsetting1"];
-              if (null != customSetting)
-                Console.WriteLine("customsetting1 application string = \"{0}\"",
-                  customSetting.Value);
-              else
-                Console.WriteLine("No customsetting1 application string");
-            }
-            */
+      String servers = appSettings["resin.servers"];
+
+      if ("".Equals(servers)) {
+        servers = "127.0.0.1:6080";
+        _log.Info("application setting 'resin.servers' is not specified. Using '{0}'", servers);
+        Trace.TraceInformation("application setting 'resin.servers' is not specified. Using '{0}'", servers);
+      } else {
+        _log.Info("Setting servers to '{0}'", servers);
+        Trace.TraceInformation("Setting servers to '{0}'", servers);
+      }
+
+      _loadBalancer = new LoadBalancer(servers);
     }
 
     public bool IsReusable
@@ -145,7 +141,7 @@ namespace Caucho.IIS
         HmuxChannelFactory client = null;
         int result = OK | EXIT;
 
-        HmuxChannel channel = _loadBalancer.OpenServer(sessionId);
+        HmuxChannel channel = _loadBalancer.OpenServer(sessionId, null);
 
         // If everything fails, return an error
         if (channel == null) {
@@ -172,14 +168,12 @@ namespace Caucho.IIS
           else
             client.FailSocket();
         } catch (ClientDisconnectException e) {
-          //log.fine(stream.getDebugId() + e.toString());
-          //log.log(Level.FINER, stream.getDebugId() + e.toString(), e);
+          _log.Info("Client disconnect detected for '{0}'", channel.GetTraceId());
 
           return;
         } catch (IOException e) {
           client.FailSocket();
-
-          //log.log(Level.WARNING, stream.getDebugId() + e.toString(), e);
+          _log.Warning("IOException '{0}': '{1}' {2}", channel.GetTraceId(), e.Message, e.StackTrace);
         } finally {
           if ((result & EXIT_MASK) == QUIT)
             channel.Free(requestStartTime);
@@ -190,12 +184,11 @@ namespace Caucho.IIS
         // server/2675
         if (isComplete && (result & STATUS_MASK) == BUSY
             || "GET".Equals(request.HttpMethod)) {
-          channel = _loadBalancer.OpenServer(sessionId);
+          channel = _loadBalancer.OpenServer(sessionId, client);
 
           // If everything fails, return an error
           if (channel == null) {
-            //if (log.isLoggable(Level.INFO))
-            //log.info("load-balance failed" + (client != null ? (" for " + client.getDebugId()) : ""));
+            _log.Info("load-balance failed" + (client != null ? (" for " + client.GetDebugId()) : ""));
 
             response.StatusCode = HTTP_STATUS_SERVICE_UNAVAIL;
 
@@ -204,10 +197,11 @@ namespace Caucho.IIS
 
           HmuxChannelFactory client2 = channel.GetPool();
 
-          //if (log.isLoggable(Level.INFO))
-          //log.info("load-balance failing over"
-          //  + (client != null ? (" from " + client.getDebugId()) : "")
-          // + " to " + client2.getDebugId());
+          if (_log.IsLoggable(EventLogEntryType.Information)) {
+            _log.Info("load-balance failing over"
+              + (client != null ? (" from " + client.GetDebugId()) : "")
+             + " to " + client2.GetDebugId());
+          }
 
           rs = channel.GetSocketStream();
           ws = channel.GetSocketStream();
@@ -228,7 +222,7 @@ namespace Caucho.IIS
           } catch (IOException e) {
             client2.FailSocket();
 
-            //log.log(Level.FINE, e.toString(), e);
+            _log.Info("Failover to '{0}' did not succeed '{1}', {2} ", client2.GetDebugId(), e.Message, e.StackTrace);
           } finally {
             if ((result & EXIT_MASK) == QUIT)
               channel.Free(requestStartTime);
@@ -257,7 +251,7 @@ namespace Caucho.IIS
 
       StringBuilder cb = new StringBuilder();
 
-      bool isDebugFiner = true;//log.isLoggable(Level.FINER);
+      bool isDebugFiner = true;
 
       String uri = Uri.EscapeUriString(request.RawUrl);
       Trace.TraceInformation("Hmux[{0}] >>U:uri {1}->{2}", traceId, request.RawUrl, uri);
@@ -338,8 +332,6 @@ namespace Caucho.IIS
 
       int code;
 
-      Trace.TraceInformation(":::0");
-
       while (!isComplete && (len = requestStream.Read(buf, 0, buf.Length)) > 0) {
         Trace.TraceInformation("Hmux[{0}] >>D: data ({1})", traceId, length);
         WriteRequestData(ws, HmuxChannel.HMUX_DATA, buf, len, traceId);
@@ -348,7 +340,6 @@ namespace Caucho.IIS
         ws.WriteByte(HmuxChannel.HMUX_YIELD);
         ws.Flush();
 
-        Trace.TraceInformation(":::1");
         while (true) {
           code = rs.ReadByte();
 
@@ -444,15 +435,10 @@ namespace Caucho.IIS
         }
       }
 
-      Trace.TraceInformation(":::2");
-
       ws.WriteByte(HmuxChannel.HMUX_QUIT);
       ws.Flush();
 
-      Trace.TraceInformation(":::3");
-
       code = rs.ReadByte();
-      Trace.TraceInformation(":::4");
 
       // #2369 - A slow modem can cause the app-tier and web-tier times
       // to get out of sync, with the app-tier thinking it's completed
@@ -464,9 +450,7 @@ namespace Caucho.IIS
       hmuxChannel.SetIdleStartTime(DateTime.Now.Ticks);
 
       bool isBusy = false;
-      Trace.TraceInformation(":::5");
       for (; code >= 0; code = rs.ReadByte()) {
-        Trace.TraceInformation(":::6");
         if (code == HmuxChannel.HMUX_QUIT) {
           if (isDebugFiner)
             Trace.TraceInformation("Hmux[{0}] <<Q: (keepalive)", traceId);

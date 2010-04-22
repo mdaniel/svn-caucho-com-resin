@@ -31,55 +31,20 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Net.Sockets;
+using System.Diagnostics;
 
 namespace Caucho.IIS
 {
-  public class LoadBalancer
+  public class ActiveProbe
   {
-    HmuxChannelFactory _pool;
-    private Strategy _strategyType = Strategy.ADAPTIVE;
-
-    //supports just one server for now
-    public LoadBalancer(String servers)
+    internal void Start()
     {
-      int portIdx = servers.LastIndexOf(':');
-      String address = servers.Substring(0, portIdx);
-      int port = int.Parse(servers.Substring(portIdx + 1, servers.Length - portIdx - 1));
-
-      _pool = new HmuxChannelFactory(address, port);
-
-      Init();
+      Trace.TraceInformation("ActiveProbe.start() NYI");
     }
 
-    public void Init()
+    internal void End()
     {
-    }
-
-    public HmuxChannel OpenServer(String sessionId, HmuxChannelFactory xChannelFactory)
-    {
-      return _pool.OpenServer(sessionId, xChannelFactory);
-    }
-
-    public void SetStrategy(Strategy strategy)
-    {
-      _strategyType = strategy;
-    }
-
-    public Strategy GetStrategy()
-    {
-      return _strategyType;
-    }
-
-    public void Destroy()
-    {
-      _pool.Close();
-    }
-
-    public enum Strategy
-    {
-      ADAPTIVE,
-      ROUND_ROBIN
+      Trace.TraceInformation("ActiveProbe.end() NYI");
     }
   }
 }
