@@ -56,7 +56,7 @@ import java.util.logging.Logger;
 /**
  * The generator for the deploy
  */
-abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
+abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   extends DeployGenerator<E>
   implements AlarmListener
 {
@@ -521,7 +521,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   /**
    * Forces an update.
    */
-  public void update()
+  @Override
+  public final void update()
   {
     // force modify check
     _lastCheckTime = 0;
@@ -533,6 +534,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController>
   /**
    * Redeploys if modified.
    */
+  @Override
   public void request()
   {
     if (isModified()) {

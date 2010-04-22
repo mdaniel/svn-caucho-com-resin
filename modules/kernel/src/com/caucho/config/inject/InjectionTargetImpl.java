@@ -697,8 +697,13 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       if (field.getAnnotations().size() == 0)
         continue;
 
-      if (field.isAnnotationPresent(Delegate.class))
+      if (field.isAnnotationPresent(Delegate.class)) {
+        if (! type.isAnnotationPresent(javax.decorator.Decorator.class))
+          throw new IllegalStateException(L.l("'{0}' may not inject with @Delegate because it is not a @Decorator",
+                                              type.getJavaClass()));
+        
         continue;
+      }
       else if (hasQualifierAnnotation(field)) {
         // boolean isOptional = isQualifierOptional(field);
 

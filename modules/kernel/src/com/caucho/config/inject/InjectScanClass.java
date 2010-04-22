@@ -41,6 +41,7 @@ import javax.ejb.Stateful;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Stereotype;
 import javax.inject.Named;
 
 import com.caucho.inject.Jndi;
@@ -135,6 +136,9 @@ class InjectScanClass implements ScanClass
       Class<?> annType = Class.forName(className, false, loader);
       
       if (_registerAnnotationSet.contains(annType)) {
+        _isRegisterRequired = true;
+      }
+      else if (annType.isAnnotationPresent(Stereotype.class)) {
         _isRegisterRequired = true;
       }
     } catch (ClassNotFoundException e) {

@@ -2160,14 +2160,14 @@ public class InjectManager
     boolean isQualifier = false;                                                
 
     for (Annotation ann : type.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+      if (isQualifier(ann.annotationType())) {
         bindingList.add(ann);                                                   
 
         if (! Named.class.equals(ann.annotationType())) {
           isQualifier = true;                                                   
         }
       }
-   }
+    }
 
     if (! isQualifier)
       bindingList.add(DefaultLiteral.DEFAULT);                                  
@@ -2184,27 +2184,35 @@ public class InjectManager
    * Resolves the decorators for a given set of types
    *
    * @param types the types to match for the decorator
-   * @param bindings qualifying bindings
+   * @param qualifiers qualifying bindings
    *
    * @return the matching interceptors
    */
   public List<Decorator<?>> resolveDecorators(Set<Type> types,
-                                              Annotation... bindings)
+                                              Annotation... qualifiers)
   {
+    if (types.size() == 0)
+      throw new IllegalArgumentException(L.l("type set must contain at least one type"));
+      
     ArrayList<Decorator<?>> decorators = new ArrayList<Decorator<?>>();
 
-    if (bindings == null || bindings.length == 0)
-      bindings = CURRENT_ANN;
+    if (qualifiers == null || qualifiers.length == 0)
+      qualifiers = CURRENT_ANN;
 
     if (_decoratorList == null)
       return decorators;
+    
+    for (Annotation ann : qualifiers) {
+      if (! isQualifier(ann.annotationType()))
+        throw new IllegalArgumentException(L.l("@{0} must be a qualifier", ann.annotationType()));
+    }
 
     for (DecoratorEntry<?> entry : _decoratorList) {
       Decorator<?> decorator = entry.getDecorator();
 
       // XXX: delegateTypes
       if (isTypeContained(types, entry.getDelegateType())
-          && entry.isMatch(bindings)) {
+          && entry.isMatch(qualifiers)) {
         decorators.add(decorator);
       }
     }

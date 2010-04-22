@@ -33,12 +33,15 @@ import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.session.StatelessManager;
 import com.caucho.ejb.session.StatelessProvider;
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Internal implementation for a Bean
@@ -46,6 +49,8 @@ import com.caucho.inject.Module;
 @Module
 public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
 {
+  private static final L10N L = new L10N(StatelessBeanImpl.class);
+  
   private StatelessProvider<X> _producer;
   private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
 
@@ -62,6 +67,14 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
       throw new NullPointerException();
 
     _types.add(api);
+    
+    Class<?> scopeType = bean.getScope();
+    
+    if (scopeType != null
+        && ! scopeType.equals(Dependent.class)) {
+      throw new ConfigException(L.l("@{0} is an invalid scope for @Stateless session bean {1} because stateless session beans need @Dependent scope",
+                                    scopeType.getName(), getBeanClass().getName()));
+    }
   }
 
   @Override

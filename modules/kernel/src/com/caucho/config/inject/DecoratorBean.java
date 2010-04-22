@@ -44,6 +44,8 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.reflect.BaseType;
+import com.caucho.config.type.BeanType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -60,8 +62,10 @@ public class DecoratorBean<T> implements Decorator<T>
   private AbstractBean<T> _bean;
 
   private Field _delegateField;
+  
+  private Set<Type> _typeSet;
 
-  private HashSet<Annotation> _bindings
+  private HashSet<Annotation> _qualifiers
     = new HashSet<Annotation>();
 
   public DecoratorBean(InjectManager beanManager,
@@ -84,7 +88,7 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Set<Annotation> getQualifiers()
   {
-    return _bindings;
+    return _qualifiers;
   }
 
   /**
@@ -147,7 +151,7 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Set<Type> getDecoratedTypes()
   {
-    throw new UnsupportedOperationException();
+    return _typeSet;
   }
 
   //
@@ -197,7 +201,7 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Set<Annotation> getDelegateQualifiers()
   {
-    return _bindings;
+    return _qualifiers;
   }
 
   /**
@@ -243,12 +247,18 @@ public class DecoratorBean<T> implements Decorator<T>
   protected void introspect()
   {
     introspectDelegateField();
+
+    if (_delegateField != null) {
+      Class<?> delegateType = _delegateField.getType();
+      InjectManager manager = InjectManager.getCurrent();
+    
+      _typeSet = manager.createBaseType(delegateType).getTypeClosure(manager);
+    }
   }
 
   protected void introspectDelegateField()
   {
     if (_delegateField == null) {
-
       for (Field field : _type.getDeclaredFields()) {
         if (Modifier.isStatic(field.getModifiers()))
           continue;
@@ -299,12 +309,12 @@ public class DecoratorBean<T> implements Decorator<T>
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-        _bindings.add(ann);
+        _qualifiers.add(ann);
       }
     }
 
-    if (_bindings.size() == 0)
-      _bindings.add(DefaultLiteral.DEFAULT);
+    if (_qualifiers.size() == 0)
+      _qualifiers.add(DefaultLiteral.DEFAULT);
   }
 
   /**

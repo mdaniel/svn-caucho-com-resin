@@ -207,25 +207,34 @@ public class ReflectionAnnotatedType<T>
 
     introspectMethods(cl.getSuperclass());
   }
-
+  
   private void introspectInheritedAnnotations(Class<?> cl)
+  {
+    introspectInheritedAnnotations(cl, false);
+  }
+
+  private void introspectInheritedAnnotations(Class<?> cl,
+                                              boolean isScope)
   {
     if (cl == null)
       return;
 
     for (Annotation ann : cl.getDeclaredAnnotations()) {
-      if (! ann.annotationType().isAnnotationPresent(Inherited.class)) {
-        continue;
-      }
-
-      if (isAnnotationPresent(ann.annotationType())) {
-        continue;
-      }
+      Class<? extends Annotation> annType = ann.annotationType();
 
       if ((ann.annotationType().isAnnotationPresent(Scope.class)
-           || ann.annotationType().isAnnotationPresent(NormalScope.class))
-          && (hasMetaAnnotation(getAnnotations(), Scope.class)
-              || hasMetaAnnotation(getAnnotations(), NormalScope.class))) {
+           || ann.annotationType().isAnnotationPresent(NormalScope.class))) {
+        if (isScope)
+          continue;
+  
+        isScope = true;
+      }
+
+      if (! annType.isAnnotationPresent(Inherited.class)) {
+        continue;
+      }
+
+      if (isAnnotationPresent(annType)) {
         continue;
       }
 
@@ -239,7 +248,7 @@ public class ReflectionAnnotatedType<T>
       addAnnotation(ann);
     }
 
-    introspectInheritedAnnotations(cl.getSuperclass());
+    introspectInheritedAnnotations(cl.getSuperclass(), isScope);
   }
 
   private boolean hasBeanAnnotation(Method method)

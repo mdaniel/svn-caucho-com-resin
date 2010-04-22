@@ -130,7 +130,7 @@ abstract public class DeployController<I extends DeployInstance>
   /**
    * Returns the deploy tag name.
    */
-  public String getDeployTag()
+  protected String getDeployTag()
   {
     return null;
   }

@@ -31,6 +31,7 @@ package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.manager.EjbContainer;
+import com.caucho.inject.Module;
 import com.caucho.java.WorkDir;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.*;
@@ -52,6 +53,7 @@ import java.util.logging.Logger;
 /**
  * An enterprise application (ear)
  */
+@Module
 public class EnterpriseApplication
   implements EnvironmentBean, EnvironmentDeployInstance
 {
@@ -71,13 +73,7 @@ public class EnterpriseApplication
 
   private String _name;
 
-  private String _ejbServerJndiName = "java:comp/env/cmp";
-
   private Path _rootDir;
-
-  private Path _earPath;
-
-  private String _prefix = "";
 
   private EarDeployController _controller;
 
@@ -87,10 +83,6 @@ public class EnterpriseApplication
   private String _version;
 
   private String _libraryDirectory;
-
-  private boolean _hasModule;
-
-  // private WarDirApplicationGenerator _warDeploy;
 
   private ArrayList<Path> _ejbPaths
     = new ArrayList<Path>();
@@ -191,7 +183,6 @@ public class EnterpriseApplication
    */
   public void setEjbServerJndiName(String name)
   {
-    _ejbServerJndiName = name;
   }
 
   /**
@@ -231,7 +222,6 @@ public class EnterpriseApplication
    */
   public void setEarPath(Path earPath)
   {
-    _earPath = earPath;
   }
 
   /**
@@ -247,7 +237,6 @@ public class EnterpriseApplication
    */
   public void setPrefix(String prefix)
   {
-    _prefix = prefix;
   }
 
   /**
@@ -298,8 +287,6 @@ public class EnterpriseApplication
    */
   public Module createModule()
   {
-    _hasModule = true;
-
     return new Module();
   }
 
@@ -645,11 +632,6 @@ public class EnterpriseApplication
     }
 
     return null;
-  }
-
-  private void addDepend(Path path)
-  {
-    _loader.addDependency(new com.caucho.vfs.Depend(path));
   }
 
   /**

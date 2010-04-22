@@ -1560,9 +1560,12 @@ public class InterceptorCallChain<X,T>
 
     int methodModifiers = implMethod.getJavaMember().getModifiers();
     
+    // ioc/0i54
+    /*
     if (Modifier.isFinal(methodModifiers)) {
       return false;
     }
+    */
 
     if (! Modifier.isPublic(methodModifiers)
         && ! Modifier.isProtected(methodModifiers)) {

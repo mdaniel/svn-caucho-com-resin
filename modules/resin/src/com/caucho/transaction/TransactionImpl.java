@@ -1221,8 +1221,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
     _resourceCount = 0;
 
-    _mappedResources.clear();
+    Map<Object,Object> mappedResources = _mappedResources;
     _mappedResources = null;
+    
+    if (mappedResources != null)
+      mappedResources.clear();
 
     _xid = null;
   }

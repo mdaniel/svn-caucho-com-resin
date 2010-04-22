@@ -43,6 +43,7 @@ import java.util.logging.Logger;
 
 import javax.ejb.Timer;
 import javax.enterprise.context.ApplicationScoped;
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
@@ -245,7 +246,21 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     if (_injectionTarget instanceof PassivationSetter)
       ((PassivationSetter) _injectionTarget).setPassivationId(getId());
     
+    validateBean();
     validatePassivation();
+  }
+  
+  private void validateBean()
+  {
+    Class<X> javaClass = _annotatedType.getJavaClass();
+    Class<? extends Annotation> scopeType = getScope();
+    
+    if (javaClass.getTypeParameters().length != 0) {
+      if (! Dependent.class.equals(scopeType)) {
+        throw new ConfigException(L.l("'{0}' is an invalid bean because it has a generic type and a non-dependent scope.",
+                                      javaClass.getName()));
+      }
+    }
   }
   
   private void validatePassivation()

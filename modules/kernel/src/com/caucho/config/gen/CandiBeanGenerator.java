@@ -238,6 +238,13 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   {
     if (! isEnhanced())
       return _beanClass.getJavaClass();
+    
+    Class<?> baseClass = _beanClass.getJavaClass();
+    int modifiers = baseClass.getModifiers();
+
+    if (Modifier.isFinal(modifiers))
+      throw new IllegalStateException(L.l("'{0}' is an invalid enhanced class because it is final.",
+                                          baseClass.getName()));
 
     try {
       JavaClassGenerator gen = new JavaClassGenerator();
@@ -251,7 +258,10 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
       gen.compilePendingJava();
 
-      return gen.loadClass(getFullClassName());
+      if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers))
+        return gen.loadClass(getFullClassName());
+      else
+        return gen.loadClassParentLoader(getFullClassName(), baseClass);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

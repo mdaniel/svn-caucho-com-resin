@@ -211,6 +211,12 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
 
   private void introspectInheritedAnnotations(Class<?> cl)
   {
+    introspectInheritedAnnotations(cl, false);
+  }
+  
+  private void introspectInheritedAnnotations(Class<?> cl,
+                                              boolean isScope)
+  {
     if (cl == null)
       return;
 
@@ -226,10 +232,11 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
       }
 
       if ((ann.annotationType().isAnnotationPresent(Scope.class)
-           || ann.annotationType().isAnnotationPresent(NormalScope.class))
-          && (hasMetaAnnotation(getAnnotations(), Scope.class)
-              || hasMetaAnnotation(getAnnotations(), NormalScope.class))) {
-        continue;
+           || ann.annotationType().isAnnotationPresent(NormalScope.class))) {
+        if (isScope)
+          continue;
+        
+        isScope = true;
       }
 
       /*
@@ -242,7 +249,7 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
       addAnnotation(ann);
     }
 
-    introspectInheritedAnnotations(cl.getSuperclass());
+    introspectInheritedAnnotations(cl.getSuperclass(), isScope);
   }
 
   private boolean hasBeanAnnotation(Method method)

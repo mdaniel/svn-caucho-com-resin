@@ -49,8 +49,7 @@ public class EarDeployController
 {
   private static final Logger log
     = Logger.getLogger(EarDeployController.class.getName());
-  private static final L10N L = new L10N(EarDeployController.class);
-
+  
   private WebAppContainer _container;
 
   // private Var _hostVar = new Var();
@@ -59,6 +58,8 @@ public class EarDeployController
   private Path _earRootDir;
 
   private ArrayList<EarConfig> _eAppDefaults = new ArrayList<EarConfig>();
+  
+  private String _deployTagName;
 
   private EarAdmin _admin = new EarAdmin(this);
  
@@ -72,6 +73,11 @@ public class EarDeployController
     if (container != null) {
       _eAppDefaults.addAll(container.getEarDefaultList());
     }
+    
+    if (container != null)
+      _deployTagName = "EntApp/" + container.getHostName() + "/" + name;
+    else
+      _deployTagName = "EntApp/default/" + name;
   }
 
   EarDeployController(String name, Path rootDirectory,
@@ -84,6 +90,13 @@ public class EarDeployController
     if (container != null) {
       _eAppDefaults.addAll(container.getEarDefaultList());
     }
+    
+    if (container != null)
+      _deployTagName = "EntApp/" + container.getHostName() + "/" + name;
+    else
+      _deployTagName = "EntApp/default/" + name;
+    
+    log.info("DEPLOY: " + _deployTagName);
   }
 
   /**
@@ -120,11 +133,11 @@ public class EarDeployController
   {
     return _admin;
   }
-
+  
   @Override
-  protected void initEnd()
+  protected String getDeployTag()
   {
-    super.initEnd();
+    return _deployTagName;
   }
 
   /**

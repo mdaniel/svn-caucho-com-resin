@@ -169,6 +169,9 @@ public class DeployService extends SimpleActor
                        String from,
                        TagStateQuery query)
   {
+    // XXX: just ping the tag?
+    updateDeploy();
+    
     String tag = query.getTag();
     
     DeployNetworkService deploy = DeployNetworkService.getCurrent();
@@ -328,6 +331,28 @@ public class DeployService extends SimpleActor
       log.log(Level.FINE, e.toString(), e);
 
       return L.l("deploy '{0}' failed\n{1}", gitPath, e.toString());
+    }
+  }
+
+  private void updateDeploy()
+  {
+    try {
+      ObjectName pattern = new ObjectName("resin:type=EarDeploy,*");
+
+      for (Object proxy : Jmx.query(pattern)) {
+        EarDeployMXBean earDeploy = (EarDeployMXBean) proxy;
+        earDeploy.update();
+      }
+
+      pattern = new ObjectName("resin:type=WebAppDeploy,*");
+
+      for (Object proxy : Jmx.query(pattern)) {
+        WebAppDeployMXBean warDeploy = (WebAppDeployMXBean) proxy;
+
+        warDeploy.update();
+      }
+    } catch (Exception e) {
+      log.log(Level.FINE, e.toString(), e);
     }
   }
 

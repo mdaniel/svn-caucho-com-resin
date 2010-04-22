@@ -30,6 +30,7 @@
 package com.caucho.server.e_app;
 
 import com.caucho.config.ConfigException;
+import com.caucho.inject.Module;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.ExpandDeployGenerator;
@@ -41,6 +42,7 @@ import java.util.ArrayList;
 /**
  * The generator for the ear-deploy
  */
+@Module
 public class EarDeployGenerator
   extends ExpandDeployGenerator<EarDeployController>
 {
@@ -51,8 +53,6 @@ public class EarDeployGenerator
 
   private WebAppContainer _parentContainer;
   
-  private EarConfig _earDefault;
-
   private ArrayList<EarConfig> _earDefaultList
     = new ArrayList<EarConfig>();
 
