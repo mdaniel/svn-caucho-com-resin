@@ -31,7 +31,7 @@ package com.caucho.jca.ra;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ContainerProgram;
@@ -347,7 +347,7 @@ public class ConnectorConfig implements EnvironmentListener {
 
     InjectManager beanManager = InjectManager.create();
 
-    BeanFactory factory = beanManager.createBeanFactory(_ra.getClass());
+    BeanBuilder factory = beanManager.createBeanFactory(_ra.getClass());
     
     if (_resourceAdapter.getName() != null) {
       Jndi.bindDeepShort(_resourceAdapter.getName(), _ra);
@@ -694,7 +694,7 @@ public class ConnectorConfig implements EnvironmentListener {
       cm.start();
 
       InjectManager manager = InjectManager.create();
-      BeanFactory factory
+      BeanBuilder factory
 	= manager.createBeanFactory(connectionFactory.getClass());
       
       if (getName() != null) {
@@ -925,7 +925,7 @@ public class ConnectorConfig implements EnvironmentListener {
 
       InjectManager manager = InjectManager.create();
 
-      BeanFactory factory
+      BeanBuilder factory
 	= manager.createBeanFactory(resourceObject.getClass());
       
       if (getName() != null) {

@@ -67,6 +67,7 @@ public class EjbHandler extends JavaeeInjectionHandler {
   {
     String name = ejb.name();
     String mappedName = ejb.mappedName();
+    String beanName = ejb.beanName();
 
     Field javaField = field.getJavaMember();
     
@@ -79,9 +80,13 @@ public class EjbHandler extends JavaeeInjectionHandler {
       jndiName = pContext.name();
       */
 
-    Bean<?> bean;
+    Bean<?> bean = null;
     
-    bean = bind(location, bindType, name);
+    if (beanName != null)
+      bean = bind(location, bindType, new BeanNameLiteral(beanName));
+    
+    if (bean == null)
+      bean = bind(location, bindType, name);
     
     if (bean == null)
       bean = bind(location, bindType, mappedName);

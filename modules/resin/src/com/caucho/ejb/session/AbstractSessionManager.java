@@ -41,20 +41,20 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.inject.Named;
 
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.server.AbstractContext;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 
 /**
  * Server container for a session bean.
  */
-abstract public class SessionServer<T> extends AbstractServer<T> {
+abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T> {
   private final static Logger log
-     = Logger.getLogger(SessionServer.class.getName());
+     = Logger.getLogger(AbstractSessionManager.class.getName());
 
   private HashMap<Class<?>, InjectionTarget<?>> _componentMap
     = new HashMap<Class<?>, InjectionTarget<?>>();
@@ -67,7 +67,7 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
   
   private String[] _declaredRoles;
 
-  public SessionServer(EjbContainer manager, AnnotatedType<T> annotatedType)
+  public AbstractSessionManager(EjbContainer manager, AnnotatedType<T> annotatedType)
   {
     super(manager, annotatedType);
     
@@ -155,7 +155,7 @@ abstract public class SessionServer<T> extends AbstractServer<T> {
         
       }
 
-      BeanFactory<SessionContext> factory
+      BeanBuilder<SessionContext> factory
         = beanManager.createBeanFactory(SessionContext.class);
       
       AbstractContext context = getSessionContext();

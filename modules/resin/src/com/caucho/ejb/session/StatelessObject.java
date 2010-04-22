@@ -31,7 +31,7 @@ package com.caucho.ejb.session;
 
 import com.caucho.ejb.*;
 import com.caucho.ejb.protocol.*;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 
 import java.util.logging.*;
 import java.io.*;
@@ -66,7 +66,7 @@ abstract public class StatelessObject<T>
   /**
    * Returns the stateless server.
    */
-  public AbstractServer<T> getServer()
+  public AbstractEjbBeanManager<T> getServer()
   {
     return _server;
   }
@@ -74,7 +74,7 @@ abstract public class StatelessObject<T>
   /**
    * Returns the server.
    */
-  public AbstractServer<T> __caucho_getServer()
+  public AbstractEjbBeanManager<T> __caucho_getServer()
   {
     return getServer();
   }

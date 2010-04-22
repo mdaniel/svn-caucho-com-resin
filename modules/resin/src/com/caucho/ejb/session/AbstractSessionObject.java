@@ -29,7 +29,7 @@
 package com.caucho.ejb.session;
 
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 
 import javax.ejb.Handle;
 import javax.ejb.SessionBean;
@@ -53,12 +53,12 @@ abstract public class AbstractSessionObject
   /**
    * Returns the server.
    */
-  abstract public AbstractServer getServer();
+  abstract public AbstractEjbBeanManager getServer();
 
   /**
    * Returns the server.
    */
-  public AbstractServer __caucho_getServer()
+  public AbstractEjbBeanManager __caucho_getServer()
   {
     return getServer();
   }

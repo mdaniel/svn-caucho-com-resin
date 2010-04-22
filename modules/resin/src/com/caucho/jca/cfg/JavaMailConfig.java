@@ -31,7 +31,7 @@ package com.caucho.jca.cfg;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.AbstractBeanConfig;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 

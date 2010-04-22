@@ -196,8 +196,8 @@ public class InjectManager
   private HashSet<String> _configuredClasses
     = new HashSet<String>();
 
-  private HashSet<Class<?>> _specializedClasses
-    = new HashSet<Class<?>>();
+  private HashMap<Class<?>,Class<?>> _specializedMap
+    = new HashMap<Class<?>,Class<?>>();
 
   private HashMap<Class<?>,Integer> _deploymentMap
     = new HashMap<Class<?>,Integer>();
@@ -369,7 +369,7 @@ public class InjectManager
       // DEFAULT_PRIORITY
       _deploymentMap.put(Configured.class, 2);
 
-      BeanFactory<InjectManager> factory = createBeanFactory(InjectManager.class);
+      BeanBuilder<InjectManager> factory = createBeanFactory(InjectManager.class);
       // factory.deployment(Standard.class);
       factory.type(InjectManager.class);
       factory.type(BeanManager.class);
@@ -689,16 +689,16 @@ public class InjectManager
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public <T> BeanFactory<T> createBeanFactory(ManagedBeanImpl<T> managedBean)
+  public <T> BeanBuilder<T> createBeanFactory(ManagedBeanImpl<T> managedBean)
   {
-    return new BeanFactory<T>(managedBean);
+    return new BeanBuilder<T>(managedBean);
   }
 
   /**
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public <T> BeanFactory<T> createBeanFactory(Class<T> type)
+  public <T> BeanBuilder<T> createBeanFactory(Class<T> type)
   {
     return createBeanFactory(createManagedBean(type));
   }
@@ -707,7 +707,7 @@ public class InjectManager
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
    */
-  public <T> BeanFactory<T> createBeanFactory(AnnotatedType<T> type)
+  public <T> BeanBuilder<T> createBeanFactory(AnnotatedType<T> type)
   {
     return createBeanFactory(createManagedBean(type));
   }
@@ -1199,9 +1199,18 @@ public class InjectManager
     }
   }
 
+  @Override
   public <X> Bean<X> getMostSpecializedBean(Bean<X> bean)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    throw new UnsupportedOperationException();
+    /*
+    Bean<?> special = _specializedMap.get(bean.getBeanClass());
+    
+    if (special != null)
+      return (Bean<X>) special;
+    else
+      return bean;
+      */
   }
 
   public <X> Bean<? extends X> resolve(Set<Bean<? extends X>> beans)
@@ -1535,6 +1544,7 @@ public class InjectManager
   /**
    * Internal callback during creation to get a new injection instance.
    */
+  @Override
   public Object getInjectableReference(InjectionPoint ij,
                                        CreationalContext<?> parentCxt)
   {
@@ -2380,11 +2390,19 @@ public class InjectManager
     if (type.isAnnotationPresent(Specializes.class)) {
       Class<?> parent = type.getJavaClass().getSuperclass();
 
-      if (parent != null)
-        _specializedClasses.add(parent);
+      if (parent != null) {
+        addSpecialize(type.getJavaClass(), parent);
+      }
     }
 
     _pendingAnnotatedTypes.add(type);
+  }
+  
+  private void addSpecialize(Class<?> specializedType, Class<?> parentType)
+  {
+    _specializedMap.put(parentType, specializedType);
+    
+    
   }
 
   private boolean isDisabled(Class<?> type)
@@ -2448,7 +2466,7 @@ public class InjectManager
 
   private <T> void discoverBean(AnnotatedType<T> type)
   {
-    if (_specializedClasses.contains(type.getJavaClass()))
+    if (_specializedMap.get(type.getJavaClass()) != null)
       return;
     
     // XXX: not sure this is correct.
@@ -2668,7 +2686,13 @@ public class InjectManager
       */
 
       if (isBind) {
-        fireExtensionEvent(new AfterDeploymentValidationImpl());
+        AfterDeploymentValidationImpl event
+          = new AfterDeploymentValidationImpl();
+        
+        fireExtensionEvent(event);
+        
+        if (event.getDeploymentProblem() != null)
+          throw ConfigException.create(event.getDeploymentProblem());
       }
     } catch (ConfigException e) {
       if (_configException == null)
@@ -2997,6 +3021,10 @@ public class InjectManager
                          boolean isNormal,
                          boolean isPassivating)
     {
+      if (isPassivating && ! isNormal)
+        throw new ConfigException(L.l("@{0} must be 'normal' because it's using 'passivating'",
+                                      scopeType.getName()));
+
       _scopeTypeSet.add(scopeType);
       
       if (isNormal)
@@ -3151,13 +3179,17 @@ public class InjectManager
 
   class AfterDeploymentValidationImpl implements AfterDeploymentValidation
   {
-    public void addDeploymentProblem(Throwable t)
+    private Throwable _exn;
+    
+    @Override
+    public void addDeploymentProblem(Throwable exn)
     {
+      _exn = exn;
     }
-
-    public boolean hasDeploymentProgram()
+    
+    Throwable getDeploymentProblem()
     {
-      return false;
+      return _exn;
     }
 
     @Override

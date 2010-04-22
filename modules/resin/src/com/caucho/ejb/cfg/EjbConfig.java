@@ -33,7 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.gen.ApplicationExceptionConfig;
 import com.caucho.config.types.FileSetType;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -553,7 +553,7 @@ public class EjbConfig {
         if (beanList.contains(bean))
           continue;
 
-        AbstractServer<?> server = initBean(bean, javaGen);
+        AbstractEjbBeanManager<?> server = initBean(bean, javaGen);
         ArrayList<String> dependList = bean.getBeanDependList();
 
         for (String depend : dependList) {
@@ -564,7 +564,7 @@ public class EjbConfig {
             if (depend.equals(b.getEJBName())) {
               beanList.add(b);
 
-              AbstractServer<?> dependServer = initBean(b, javaGen);
+              AbstractEjbBeanManager<?> dependServer = initBean(b, javaGen);
 
               initResources(b, dependServer);
 
@@ -580,17 +580,17 @@ public class EjbConfig {
     }
   }
 
-  private AbstractServer<?> initBean(EjbBean<?> bean, JavaClassGenerator javaGen)
+  private AbstractEjbBeanManager<?> initBean(EjbBean<?> bean, JavaClassGenerator javaGen)
     throws Exception
   {
-    AbstractServer<?> server = bean.deployServer(_ejbContainer, javaGen);
+    AbstractEjbBeanManager<?> server = bean.deployServer(_ejbContainer, javaGen);
 
     server.init();
 
     return server;
   }
 
-  private <X> void initResources(EjbBean<?> bean, AbstractServer<?> server)
+  private <X> void initResources(EjbBean<?> bean, AbstractEjbBeanManager<?> server)
     throws Exception
   {
     /*

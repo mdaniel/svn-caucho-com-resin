@@ -33,7 +33,7 @@ import javax.ejb.TimerService;
 import com.caucho.config.*;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.*;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.util.*;
 
 /**

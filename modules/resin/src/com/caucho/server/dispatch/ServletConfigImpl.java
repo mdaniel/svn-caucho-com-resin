@@ -30,7 +30,7 @@
 package com.caucho.server.dispatch;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.InjectManager;
@@ -865,7 +865,7 @@ public class ServletConfigImpl
 
       Object servlet = createServlet(false);
 
-      BeanFactory factory = webBeans.createBeanFactory(servlet.getClass());
+      BeanBuilder factory = webBeans.createBeanFactory(servlet.getClass());
       factory.name(_var);
 
       webBeans.addBean(factory.singleton(servlet));

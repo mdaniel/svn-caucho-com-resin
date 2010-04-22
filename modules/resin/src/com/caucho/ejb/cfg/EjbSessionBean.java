@@ -55,7 +55,7 @@ import com.caucho.ejb.gen.SingletonGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.manager.EjbContainer;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.ejb.server.EjbProducer;
 import com.caucho.ejb.session.SingletonManager;
 import com.caucho.ejb.session.StatefulManager;
@@ -362,11 +362,11 @@ public class EjbSessionBean<X> extends EjbBean<X> {
    * Deploys the bean.
    */
   @Override
-  public AbstractServer<X> deployServer(EjbContainer ejbContainer,
+  public AbstractEjbBeanManager<X> deployServer(EjbContainer ejbContainer,
                                         JavaClassGenerator javaGen)
       throws ClassNotFoundException, ConfigException
   {
-    AbstractServer<X> server;
+    AbstractEjbBeanManager<X> server;
 
     if (Stateless.class.equals(getSessionType()))
       server = new StatelessManager<X>(ejbContainer, getAnnotatedType());

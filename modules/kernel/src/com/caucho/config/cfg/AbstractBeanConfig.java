@@ -31,7 +31,7 @@ package com.caucho.config.cfg;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ContainerProgram;
@@ -248,7 +248,7 @@ abstract public class AbstractBeanConfig {
       beanType.addAnnotation(ann);
     }
 
-    BeanFactory factory = beanManager.createBeanFactory(beanType);
+    BeanBuilder factory = beanManager.createBeanFactory(beanType);
 
     if (_scope != null)
       factory.scope(_scope);

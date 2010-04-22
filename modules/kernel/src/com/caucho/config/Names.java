@@ -30,31 +30,37 @@
 package com.caucho.config;
 
 import javax.inject.Named;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
  * Utility class for creating @Name annotations, used for generic
  * resources like DataSources.
  */
-public final class Names {
+public class Names extends AnnotationLiteral<Named> implements Named {
+  private final String _name;
+  
+  public Names(String name)
+  {
+    _name = name;
+  }
+  
   /**
    * Creates a new @Name annotation with the given value
    */
   public static Named create(String value)
   {
-    final String name = value;
+    return new Names(value);
+  }
 
-    return new Named() {
-      @Override
-      public Class annotationType() { return Named.class; }
+  @Override
+  public String value()
+  { 
+    return _name;
+  }
 
-      @Override
-      public String value() { return name; }
-
-      @Override
-      public String toString()
-      {
-        return "@" + Named.class.getSimpleName() + "('" + name + "')";
-      }
-    };
+  @Override
+  public String toString()
+  {
+    return "@" + Named.class.getSimpleName() + "('" + _name + "')";
   }
 }

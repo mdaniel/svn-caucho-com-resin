@@ -30,7 +30,7 @@
 package com.caucho.resin;
 
 import com.caucho.config.*;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.*;
 import com.caucho.server.cluster.*;
@@ -161,7 +161,7 @@ public class BeanEmbed
       InjectManager webBeans = InjectManager.create();
       
       if (_value != null) {
-	BeanFactory factory = webBeans.createBeanFactory(_value.getClass());
+	BeanBuilder factory = webBeans.createBeanFactory(_value.getClass());
 	
 	if (_name != null)
 	  factory.name(_name);
@@ -175,7 +175,7 @@ public class BeanEmbed
 	
 	Class cl = Class.forName(_className, false, loader);
 
-	BeanFactory factory = webBeans.createBeanFactory(cl);
+	BeanBuilder factory = webBeans.createBeanFactory(cl);
 
 	factory.scope(ApplicationScoped.class);
 

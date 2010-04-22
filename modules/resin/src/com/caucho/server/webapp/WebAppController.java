@@ -40,7 +40,7 @@ import javax.servlet.ServletContext;
 import javax.servlet.jsp.el.ELException;
 
 import com.caucho.config.Config;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.PathBuilder;
 import com.caucho.inject.Module;
@@ -566,7 +566,7 @@ public class WebAppController
     throws Throwable
   {
     InjectManager beanManager = InjectManager.create();
-    BeanFactory<WebApp> factory = beanManager.createBeanFactory(WebApp.class);
+    BeanBuilder<WebApp> factory = beanManager.createBeanFactory(WebApp.class);
     factory.type(WebApp.class);
     factory.type(ServletContext.class);
     // factory.stereotype(CauchoDeploymentLiteral.create());

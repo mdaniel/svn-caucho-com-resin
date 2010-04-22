@@ -36,7 +36,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
@@ -111,7 +111,7 @@ public class NetworkServer
       
       _injectManager = InjectManager.create();
       
-      BeanFactory<NetworkServer> beanFactory
+      BeanBuilder<NetworkServer> beanFactory
         = _injectManager.createBeanFactory(NetworkServer.class);
       // factory.deployment(Standard.class);
       beanFactory.type(NetworkServer.class);

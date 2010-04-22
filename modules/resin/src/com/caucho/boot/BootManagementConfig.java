@@ -125,7 +125,7 @@ public class BootManagementConfig
 	_auth.init();
       
 	InjectManager manager = InjectManager.create();
-	BeanFactory factory = manager.createBeanFactory(Authenticator.class);
+	BeanBuilder factory = manager.createBeanFactory(Authenticator.class);
 	factory.type(Authenticator.class);
 	factory.type(AdminAuthenticator.class);
 

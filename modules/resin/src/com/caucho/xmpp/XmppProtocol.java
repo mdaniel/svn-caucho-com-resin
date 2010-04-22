@@ -31,7 +31,7 @@ package com.caucho.xmpp;
 
 import javax.annotation.PostConstruct;
 
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.network.listen.ProtocolConnection;
@@ -70,7 +70,7 @@ public class XmppProtocol extends AbstractHttpProtocol
   {
     InjectManager manager = InjectManager.create();
     
-    BeanFactory<? extends XmppProtocol> factory = manager.createBeanFactory(getClass());
+    BeanBuilder<? extends XmppProtocol> factory = manager.createBeanFactory(getClass());
     manager.addBean(factory.singleton(this));
 
     _marshalFactory = new XmppMarshalFactory();

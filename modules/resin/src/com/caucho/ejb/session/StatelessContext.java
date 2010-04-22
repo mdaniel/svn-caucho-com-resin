@@ -33,7 +33,7 @@ import javax.ejb.*;
 import com.caucho.config.*;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.*;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.ejb.server.EjbProducer;
 import com.caucho.util.*;
 
@@ -64,7 +64,7 @@ abstract public class StatelessContext<X,T> extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public AbstractServer<X> getServer()
+  public AbstractEjbBeanManager<X> getServer()
   {
     return _server;
   }

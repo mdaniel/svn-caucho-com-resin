@@ -54,7 +54,7 @@ import com.caucho.util.L10N;
 /**
  * Server home container for a stateless session bean
  */
-public class StatelessManager<X> extends SessionServer<X> {
+public class StatelessManager<X> extends AbstractSessionManager<X> {
   private static final L10N L = new L10N(StatelessManager.class);
 
   protected static Logger log
@@ -142,12 +142,12 @@ public class StatelessManager<X> extends SessionServer<X> {
    * Returns the remote stub for the container
    */
   @Override
-  public Object getRemoteObject(Class api, String protocol)
+  public Object getRemoteObject(Class<?> api, String protocol)
   {
     if (api == null)
       return null;
 
-    StatelessProvider provider = getStatelessContext().getProvider(api);
+    StatelessProvider<?> provider = getStatelessContext().getProvider(api);
 
     if (provider != null) {
       Object result = provider.__caucho_get();

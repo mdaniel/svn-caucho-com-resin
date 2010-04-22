@@ -31,7 +31,7 @@ package com.caucho.remote.client;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.types.*;
 import com.caucho.util.*;
@@ -83,7 +83,7 @@ public class RemoteClient extends BeanConfig
 
     InjectManager beanManager = InjectManager.create();
 
-    BeanFactory factory = beanManager.createBeanFactory(_interface);
+    BeanBuilder factory = beanManager.createBeanFactory(_interface);
 
     if (getName() != null) {
       factory = factory.name(getName());

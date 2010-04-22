@@ -31,7 +31,7 @@ package com.caucho.jca.cfg;
 
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.Config;
@@ -103,7 +103,7 @@ public class ResourceAdapterBeanConfig extends BeanConfig {
       = new ResourceAdapterController((Bean<ResourceAdapter>) getComponent(), ra);
 
     InjectManager beanManager = InjectManager.create();
-    BeanFactory<T> factory = beanManager.createBeanFactory(type);
+    BeanBuilder<T> factory = beanManager.createBeanFactory(type);
     
     factory.type(ResourceAdapter.class, type);
     

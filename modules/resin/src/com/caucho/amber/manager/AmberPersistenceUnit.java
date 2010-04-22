@@ -54,7 +54,7 @@ import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.*;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jdbc.JdbcMetaData;

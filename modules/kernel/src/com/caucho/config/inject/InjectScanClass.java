@@ -41,6 +41,7 @@ import javax.ejb.Stateful;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Named;
 
@@ -220,6 +221,7 @@ class InjectScanClass implements ScanClass
 
   static {
     _registerAnnotationSet.add(Named.class);
+    _registerAnnotationSet.add(Specializes.class);
     _registerAnnotationSet.add(Startup.class);
     _registerAnnotationSet.add(Jndi.class);
     _registerAnnotationSet.add(MBean.class);

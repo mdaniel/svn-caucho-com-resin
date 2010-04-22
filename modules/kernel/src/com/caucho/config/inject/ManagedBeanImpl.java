@@ -412,7 +412,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
         String namedValue = getNamedValue(ann);
 
         if ("".equals(namedValue)) {
-          String name = getBeanClass().getSimpleName();
+          String name = getDefaultName();
 
           ann = Names.create(name);
         }

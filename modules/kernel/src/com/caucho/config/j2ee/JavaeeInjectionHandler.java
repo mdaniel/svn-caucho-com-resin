@@ -29,6 +29,7 @@
 
 package com.caucho.config.j2ee;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
@@ -91,6 +92,20 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
       if (name == null || name.equals(bean.getName()))
         return bean;
     }
+
+    return null;
+  }
+  
+  protected Bean<?> bind(String location, Class<?> type, Annotation qualifier)
+  {
+    InjectManager injectManager = getManager();
+
+    Set<Bean<?>> beans = null;
+
+    beans = injectManager.getBeans(type, qualifier);
+
+    if (beans != null && beans.size() == 1)
+      return injectManager.resolve(beans);
 
     return null;
   }

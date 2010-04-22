@@ -688,6 +688,7 @@ abstract public class DeployController<I extends DeployInstance>
     ClassLoader oldLoader = thread.getContextClassLoader();
     ClassLoader loader = null;
     boolean isStarting = false;
+    boolean isActive = false;
 
     try {
       thread.setContextClassLoader(_parentLoader);
@@ -710,6 +711,7 @@ abstract public class DeployController<I extends DeployInstance>
 
       deployInstance.start();
 
+      isActive = true;
       _startTime = Alarm.getCurrentTime();
     } catch (ConfigException e) {
       _lifecycle.toError();
@@ -734,12 +736,14 @@ abstract public class DeployController<I extends DeployInstance>
       else
 	log.log(Level.SEVERE, e.toString(), e);
     } finally {
-      if (isStarting) {
+      if (isActive) {
 	_lifecycle.toActive();
 	
-	if (_deployItem != null && _lifecycle.isActive())
+	if (_deployItem != null && ! "error".equals(_deployItem.getState()))
 	  _deployItem.toStart();
       }
+      else
+        _lifecycle.toError();
 
       // server/
       if (loader instanceof DynamicClassLoader)

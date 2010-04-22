@@ -34,7 +34,7 @@ import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.SingletonBean;
 import com.caucho.config.program.ConfigProgram;
@@ -446,7 +446,7 @@ public class Resource {
     
     InjectManager beanManager = InjectManager.create();
 
-    BeanFactory factory = beanManager.createBeanFactory(_object.getClass());
+    BeanBuilder factory = beanManager.createBeanFactory(_object.getClass());
 
     if (name != null) {
       factory.name(name);

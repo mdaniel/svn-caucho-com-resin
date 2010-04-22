@@ -30,7 +30,7 @@
 package com.caucho.ejb.message;
 
 import com.caucho.ejb.server.AbstractContext;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.transaction.*;
 import com.caucho.util.L10N;
 
@@ -59,7 +59,7 @@ public class MessageDrivenContextImpl extends AbstractContext
     _ut = ut;
   }
 
-  public AbstractServer getServer()
+  public AbstractEjbBeanManager getServer()
   {
     return _server;
   }

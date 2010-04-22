@@ -30,16 +30,16 @@ package com.caucho.ejb.timer;
 
 import javax.ejb.Timer;
 
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.config.timer.TimeoutInvoker;
 
 /**
  * Callback for a timer
  */
 public class EjbTimerInvocation extends TimeoutInvoker {
-  private AbstractServer _server;
+  private AbstractEjbBeanManager _server;
 
-  EjbTimerInvocation(AbstractServer server)
+  EjbTimerInvocation(AbstractEjbBeanManager server)
   {
     _server = server;
   }

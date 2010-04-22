@@ -29,7 +29,7 @@
 package com.caucho.ejb.session;
 
 import com.caucho.ejb.protocol.ObjectSkeletonWrapper;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 
 import javax.ejb.Handle;
 import java.io.ObjectStreamException;
@@ -48,7 +48,7 @@ abstract public class StatefulObject
   /**
    * Returns the server.
    */
-  public AbstractServer getServer()
+  public AbstractEjbBeanManager getServer()
   {
     return getStatefulServer();
   }
@@ -56,7 +56,7 @@ abstract public class StatefulObject
   /**
    * Returns the server which owns this bean.
    */
-  public AbstractServer __caucho_getServer()
+  public AbstractEjbBeanManager __caucho_getServer()
   {
     return getStatefulServer();
   }

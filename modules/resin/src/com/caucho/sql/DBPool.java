@@ -33,7 +33,7 @@ import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
 import com.caucho.config.Names;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBean;
@@ -752,7 +752,7 @@ public class DBPool
     }
 
     InjectManager manager = InjectManager.create();
-    BeanFactory<?> factory = manager.createBeanFactory(DataSource.class);
+    BeanBuilder<?> factory = manager.createBeanFactory(DataSource.class);
 
     String name = _name;
     

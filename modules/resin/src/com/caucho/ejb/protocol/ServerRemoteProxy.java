@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.protocol;
 
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.naming.AbstractModel;
 import com.caucho.naming.ContextImpl;
 import com.caucho.naming.ObjectProxy;
@@ -41,13 +41,13 @@ import java.util.Hashtable;
  */
 public class ServerRemoteProxy implements ObjectProxy, java.io.Serializable {
   // The server
-  private AbstractServer _server;
+  private AbstractEjbBeanManager _server;
   private Class _clientApi;
 
   /**
    * Creates a new server proxy
    */
-  public ServerRemoteProxy(AbstractServer server, Class clientApi)
+  public ServerRemoteProxy(AbstractEjbBeanManager server, Class clientApi)
   {
     _server = server;
     _clientApi = clientApi;

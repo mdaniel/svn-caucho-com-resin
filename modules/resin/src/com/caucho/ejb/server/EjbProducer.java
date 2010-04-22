@@ -43,7 +43,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.gen.BeanProducer;
 import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetImpl;
@@ -58,7 +58,7 @@ import com.caucho.ejb.timer.EjbTimerService;
  * Creates an configures an ejb instance
  */
 public class EjbProducer<T> {
-  private AbstractServer<T> _server;
+  private AbstractEjbBeanManager<T> _server;
   
   private Class<T> _ejbClass;
   private AnnotatedType<T> _annotatedType;
@@ -83,7 +83,7 @@ public class EjbProducer<T> {
   private Method _timeoutMethod;
   private TimerService _timerService;
   
-  EjbProducer(AbstractServer<T> server,
+  EjbProducer(AbstractEjbBeanManager<T> server,
               AnnotatedType<T> annotatedType)
   {
     _server = server;
@@ -200,7 +200,7 @@ public class EjbProducer<T> {
       _injectionTarget = inject.createInjectionTarget(_ejbClass);
 
     if (_timerService != null) {
-      BeanFactory<TimerService> factory = inject.createBeanFactory(TimerService.class);
+      BeanBuilder<TimerService> factory = inject.createBeanFactory(TimerService.class);
       inject.addBean(factory.singleton(_timerService));
     }
     /*

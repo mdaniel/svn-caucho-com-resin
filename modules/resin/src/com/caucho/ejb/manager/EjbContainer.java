@@ -47,7 +47,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.ejb.cfg.EjbConfigManager;
 import com.caucho.ejb.cfg.EjbRootConfig;
 import com.caucho.ejb.protocol.EjbProtocolManager;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -100,7 +100,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   // active servers
   //
 
-  private ArrayList<AbstractServer> _serverList = new ArrayList<AbstractServer>();
+  private ArrayList<AbstractEjbBeanManager> _serverList = new ArrayList<AbstractEjbBeanManager>();
 
   private EjbContainer(ClassLoader loader)
   {
@@ -331,7 +331,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Adds a server.
    */
-  public void addServer(AbstractServer<?> server)
+  public void addServer(AbstractEjbBeanManager<?> server)
   {
     _serverList.add(server);
 
@@ -341,9 +341,9 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the server specified by the ejbName, or null if not found.
    */
-  public AbstractServer getServer(String ejbName)
+  public AbstractEjbBeanManager getServer(String ejbName)
   {
-    for (AbstractServer server : _serverList) {
+    for (AbstractEjbBeanManager server : _serverList) {
       if (server.getEJBName().equals(ejbName)) {
         return server;
       }
@@ -355,11 +355,11 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
   /**
    * Returns the server specified by the path and ejbName, or null if not found.
    */
-  public AbstractServer getServer(Path path, String ejbName)
+  public AbstractEjbBeanManager getServer(Path path, String ejbName)
   {
     String mappedName = path.getFullPath() + "#" + ejbName;
 
-    for (AbstractServer server : _serverList) {
+    for (AbstractEjbBeanManager server : _serverList) {
       if (mappedName.equals(server.getId())) {
         return server;
       }
@@ -490,7 +490,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
 
-      for (AbstractServer server : _serverList) {
+      for (AbstractEjbBeanManager server : _serverList) {
         try {
           thread.setContextClassLoader(server.getClassLoader());
 
@@ -518,15 +518,15 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
      */
 
     try {
-      ArrayList<AbstractServer> servers;
-      servers = new ArrayList<AbstractServer>(_serverList);
+      ArrayList<AbstractEjbBeanManager> servers;
+      servers = new ArrayList<AbstractEjbBeanManager>(_serverList);
 
       _serverList.clear();
 
       // only purpose of the sort is to make the qa order consistent
       Collections.sort(servers, new ServerCmp());
 
-      for (AbstractServer server : servers) {
+      for (AbstractEjbBeanManager server : servers) {
         try {
           getProtocolManager().removeServer(server);
         } catch (Throwable e) {
@@ -534,7 +534,7 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
         }
       }
 
-      for (AbstractServer server : servers) {
+      for (AbstractEjbBeanManager server : servers) {
         try {
           server.destroy();
         } catch (Throwable e) {
@@ -586,8 +586,8 @@ public class EjbContainer implements ScanListener, EnvironmentListener {
    * Sorts the servers so they can be destroyed in a consistent order. (To make
    * QA sane.)
    */
-  static class ServerCmp implements Comparator<AbstractServer> {
-    public int compare(AbstractServer a, AbstractServer b)
+  static class ServerCmp implements Comparator<AbstractEjbBeanManager> {
+    public int compare(AbstractEjbBeanManager a, AbstractEjbBeanManager b)
     {
       return a.getEJBName().compareTo(b.getEJBName());
     }

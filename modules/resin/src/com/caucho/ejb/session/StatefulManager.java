@@ -54,7 +54,7 @@ import com.caucho.util.LruCache;
 /**
  * Server container for a session bean.
  */
-public class StatefulManager<T> extends SessionServer<T>
+public class StatefulManager<T> extends AbstractSessionManager<T>
 {
   private static final L10N L = new L10N(StatefulManager.class);
   private static final Logger log

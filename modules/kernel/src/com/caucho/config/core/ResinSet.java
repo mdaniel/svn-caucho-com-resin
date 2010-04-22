@@ -30,7 +30,7 @@
 package com.caucho.config.core;
 
 import com.caucho.config.Config;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;

@@ -47,7 +47,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.Names;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
@@ -359,14 +359,14 @@ public class ManagerPersistence
     try {
       InjectManager beanManager = InjectManager.create(_classLoader);
       
-      BeanFactory<EntityManagerFactory> emfFactory;
+      BeanBuilder<EntityManagerFactory> emfFactory;
       emfFactory = beanManager.createBeanFactory(EntityManagerFactory.class);
 
       emfFactory.binding(CurrentLiteral.CURRENT);
       emfFactory.binding(Names.create(pUnit.getName()));
       beanManager.addBean(emfFactory.singleton(pUnit.getEntityManagerFactoryProxy()));
 
-      BeanFactory<EntityManager> emFactory;
+      BeanBuilder<EntityManager> emFactory;
       emFactory = beanManager.createBeanFactory(EntityManager.class);
 
       emFactory.binding(CurrentLiteral.CURRENT);

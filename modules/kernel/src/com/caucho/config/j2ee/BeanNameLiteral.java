@@ -19,58 +19,42 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.e_app;
+package com.caucho.config.j2ee;
 
-import com.caucho.util.L10N;
-
-import javax.annotation.PostConstruct;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Configuration for the application.xml file.
+ * A @BeanName literal for EJB names
  */
-public class AppClientBinding {
-  private static final L10N L = new L10N(AppClientBinding.class);
 
-  private EntAppClient _appClient;
+public class BeanNameLiteral extends AnnotationLiteral<BeanName> implements BeanName {
+  private String _value;
   
-  AppClientBinding(EntAppClient appClient)
+  public BeanNameLiteral(String value)
   {
-    _appClient = appClient;
+    if (value == null)
+      value = "";
+    
+    _value = value;
+  }
+  
+  @Override
+  public String value()
+  {
+    return _value;
   }
 
-  /**
-   * Adds an ejb-link
-   */
-  public void addEjbLink(EjbLink link)
-    throws Exception
+  @Override
+  public String toString()
   {
-  }
-
-  class EjbLink {
-    public String _ejbName;
-    public String _jndiName;
-
-    public void setEjbName(String ejbName)
-    {
-      _ejbName = ejbName;
-    }
-
-    public void setJndiName(String jndiName)
-    {
-      _jndiName = jndiName;
-    }
-
-    @PostConstruct
-    public void init()
-    {
-      System.out.println("ENB: " + _ejbName + " " + _jndiName);
-    }
+    return "@BeanName('" + _value + "')";
   }
 }

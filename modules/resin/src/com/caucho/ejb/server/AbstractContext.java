@@ -83,7 +83,7 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Returns the server which owns this bean.
    */
-  public abstract AbstractServer getServer();
+  public abstract AbstractEjbBeanManager getServer();
 
   /**
    * Returns the EJB's meta data.

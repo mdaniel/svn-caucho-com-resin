@@ -58,10 +58,10 @@ import com.caucho.util.L10N;
 /**
  * Base server for a single home/object bean pair.
  */
-abstract public class AbstractServer<T> implements EnvironmentBean {
+abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   private final static Logger log
-    = Logger.getLogger(AbstractServer.class.getName());
-  private static final L10N L = new L10N(AbstractServer.class);
+    = Logger.getLogger(AbstractEjbBeanManager.class.getName());
+  private static final L10N L = new L10N(AbstractEjbBeanManager.class);
 
   protected final EjbContainer _ejbContainer;
 
@@ -118,7 +118,7 @@ abstract public class AbstractServer<T> implements EnvironmentBean {
    * @param manager
    *          the owning server container
    */
-  public AbstractServer(EjbContainer container, 
+  public AbstractEjbBeanManager(EjbContainer container, 
                         AnnotatedType<T> annotatedType)
   {
     _annotatedType = annotatedType;

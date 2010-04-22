@@ -31,23 +31,24 @@ package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Inherited;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
-import java.util.logging.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import javax.enterprise.context.NormalScope;
-import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.inject.Named;
+import javax.inject.Qualifier;
 import javax.inject.Scope;
 
 import com.caucho.config.ConfigException;
@@ -120,15 +121,15 @@ public class ReflectionAnnotatedType<T>
   /**
    * Returns the matching method, creating one if necessary.
    */
-  public AnnotatedMethod<?> createMethod(Method method)
+  public AnnotatedMethod<? super T> createMethod(Method method)
   {
-    for (AnnotatedMethod<?> annMethod : _methodSet) {
+    for (AnnotatedMethod<? super T> annMethod : _methodSet) {
       if (AnnotatedMethodImpl.isMatch(annMethod.getJavaMember(), method)) {
         return annMethod;
       }
     }
 
-    AnnotatedMethod annMethod = new AnnotatedMethodImpl(this, null, method);
+    AnnotatedMethod<T> annMethod = new AnnotatedMethodImpl<T>(this, null, method);
 
     _methodSet.add(annMethod);
 
@@ -148,6 +149,9 @@ public class ReflectionAnnotatedType<T>
   {
     try {
       introspectInheritedAnnotations(cl.getSuperclass());
+      
+      if (cl.isAnnotationPresent(Specializes.class))
+        introspectSpecializesAnnotations(cl.getSuperclass());
 
       introspectFields(cl);
 
@@ -160,8 +164,8 @@ public class ReflectionAnnotatedType<T>
 
         if (_constructorSet.size() == 0) {
           try {
-            Constructor<?> ctor = cl.getConstructor(new Class[0]);
-            _constructorSet.add(new AnnotatedConstructorImpl(this, ctor));
+            Constructor<T> ctor = cl.getConstructor(new Class[0]);
+            _constructorSet.add(new AnnotatedConstructorImpl<T>(this, ctor));
           } catch (NoSuchMethodException e) {
             log.log(Level.FINE, e.toString(), e);
           }
@@ -251,6 +255,23 @@ public class ReflectionAnnotatedType<T>
     introspectInheritedAnnotations(cl.getSuperclass(), isScope);
   }
 
+  private void introspectSpecializesAnnotations(Class<?> parentClass)
+  {
+    if (parentClass == null)
+      return;
+
+    for (Annotation ann : parentClass.getDeclaredAnnotations()) {
+      Class<? extends Annotation> annType = ann.annotationType();
+
+      if (annType.isAnnotationPresent(Qualifier.class)) {
+        addAnnotation(ann);
+      }
+      else if (Named.class.equals(annType)) {
+        addAnnotation(ann);
+      }
+    }
+  }
+
   private boolean hasBeanAnnotation(Method method)
   {
     if (hasBeanAnnotation(method.getAnnotations()))
@@ -279,23 +300,6 @@ public class ReflectionAnnotatedType<T>
       for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
         if (isBeanAnnotation(metaAnn.annotationType()))
           return true;
-      }
-    }
-
-    return false;
-  }
-
-  private boolean hasMetaAnnotation(Set<Annotation> annotations,
-                                    Class<?> metaAnnType)
-  {
-    if (annotations == null)
-      return false;
-
-    for (Annotation ann : annotations) {
-      for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-        if (metaAnnType.equals(metaAnn.annotationType())) {
-          return true;
-        }
       }
     }
 

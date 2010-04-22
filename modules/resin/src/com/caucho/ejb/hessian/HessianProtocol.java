@@ -33,7 +33,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.ejb.message.MessageServer;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.hessian.io.HessianRemoteResolver;
 import com.caucho.util.L10N;
 
@@ -51,8 +51,8 @@ public class HessianProtocol extends ProtocolContainer {
   private static final Logger log
     = Logger.getLogger(HessianProtocol.class.getName());
 
-  private HashMap<String,AbstractServer> _serverMap
-    = new HashMap<String,AbstractServer>();
+  private HashMap<String,AbstractEjbBeanManager> _serverMap
+    = new HashMap<String,AbstractEjbBeanManager>();
 
   private WeakHashMap<Class,HessianSkeleton> _skeletonMap
     = new WeakHashMap<Class,HessianSkeleton>();
@@ -75,7 +75,7 @@ public class HessianProtocol extends ProtocolContainer {
   /**
    * Adds a server to the protocol.
    */
-  public void addServer(AbstractServer server)
+  public void addServer(AbstractEjbBeanManager server)
   {
     log.finer(this + " add " + server);
 
@@ -85,7 +85,7 @@ public class HessianProtocol extends ProtocolContainer {
   /**
    * Removes a server from the protocol.
    */
-  public void removeServer(AbstractServer server)
+  public void removeServer(AbstractEjbBeanManager server)
   {
     log.finer(this + " remove " + server);
 
@@ -111,7 +111,7 @@ public class HessianProtocol extends ProtocolContainer {
         objectId = queryString;
     }
 
-    AbstractServer server = _serverMap.get(serverId);
+    AbstractEjbBeanManager server = _serverMap.get(serverId);
     
     if (server == null)
       server = getProtocolManager().getServerByEJBName(serverId);

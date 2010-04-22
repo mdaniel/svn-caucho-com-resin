@@ -44,7 +44,7 @@ import com.caucho.util.L10N;
 public class StatelessPool<X> {
   private static final L10N L = new L10N(StatelessPool.class);
 
-  private final SessionServer<X> _server;
+  private final AbstractSessionManager<X> _server;
   
   private final FreeList<X> _freeList;
   private final Semaphore _concurrentSemaphore;
@@ -52,7 +52,7 @@ public class StatelessPool<X> {
 
   private EjbProducer<X> _ejbProducer;
  
-  StatelessPool(SessionServer<X> server)
+  StatelessPool(AbstractSessionManager<X> server)
   {
     _server = server;
     

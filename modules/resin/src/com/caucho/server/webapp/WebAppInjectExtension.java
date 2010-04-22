@@ -32,7 +32,7 @@ package com.caucho.server.webapp;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Enhanced;
 import com.caucho.config.EnhancedLiteral;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ProcessBeanImpl;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
@@ -152,7 +152,7 @@ public class WebAppInjectExtension implements Extension
 
 	  annotatedType.addAnnotation(EnhancedLiteral.ANNOTATION);
 
-	  BeanFactory factory
+	  BeanBuilder factory
 	    = _beanManager.createBeanFactory(annotatedType);
 
 	  /*

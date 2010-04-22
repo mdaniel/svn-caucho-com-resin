@@ -46,6 +46,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -169,6 +170,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Gets the bean's EL qualifier name.
    */
+  @Override
   public String getName()
   {
     return _name;
@@ -326,6 +328,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     introspectQualifiers(annotated);
     introspectName(annotated);
     introspectStereotypes(annotated);
+    introspectSpecializes(annotated);
 
     introspectDefault();
   }
@@ -442,7 +445,36 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
     if (_scope == null)
       _scope = scope;
-}
+  }
+
+  /**
+   * Adds the stereotypes from the bean's annotations
+   */
+  protected void introspectSpecializes(Annotated annotated)
+  {
+    if (! annotated.isAnnotationPresent(Specializes.class))
+      return;
+    
+    if (annotated.isAnnotationPresent(Named.class)) {
+      throw new ConfigException(L.l("{0}: invalid @Specializes bean because it also implements @Named.",
+                                    getTargetName()));
+    }
+    
+    Type baseType = annotated.getBaseType();
+    
+    if (! (baseType instanceof Class<?>)) {
+      throw new ConfigException(L.l("{0}: invalid @Specializes bean because '{1}' is not a class.",
+                                    getTargetName(), baseType));
+    }
+    
+    Class<?> baseClass = (Class<?>) baseType;
+
+    if (baseClass.getSuperclass() == null ||
+        baseClass.getSuperclass().equals(Object.class)) {
+      throw new ConfigException(L.l("{0}: invalid @Specializes bean because the superclass '{1}' is not a managed bean.",
+                                    getTargetName(), baseClass.getSuperclass()));
+    }
+  }
 
   protected void introspectDefault()
   {
@@ -471,12 +503,15 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   protected String getDefaultName()
   {
-    String name = getTargetSimpleName();
+    Class<?> targetClass = getTargetClass();
     
-    if ("".equals(name)) {
-      log.info("TYPE:" + name + " " + this + " " + _baseType);
-    }
-
+    String name;
+    
+    if (targetClass.isAnnotationPresent(Specializes.class))
+      name = targetClass.getSuperclass().getSimpleName();
+    else
+      name = targetClass.getSimpleName();
+    
     return Character.toLowerCase(name.charAt(0)) + name.substring(1);
   }
 

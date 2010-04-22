@@ -53,7 +53,7 @@ import javax.inject.Scope;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -492,7 +492,7 @@ public class BeanConfig {
     introspect();
 
     InjectManager beanManager = InjectManager.create();
-    BeanFactory factory =  beanManager.createBeanFactory(_cl);
+    BeanBuilder factory =  beanManager.createBeanFactory(_cl);
 
     _annotatedType = factory.getAnnotatedType();
 

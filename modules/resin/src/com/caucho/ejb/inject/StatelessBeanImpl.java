@@ -29,6 +29,7 @@
 
 package com.caucho.ejb.inject;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -38,6 +39,7 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.ejb.session.StatelessManager;
 import com.caucho.ejb.session.StatelessProvider;
 import com.caucho.inject.Module;
@@ -53,6 +55,8 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
   
   private StatelessProvider<X> _producer;
   private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
+  private LinkedHashSet<Annotation> _qualifiers
+    = new LinkedHashSet<Annotation>();
 
   public StatelessBeanImpl(StatelessManager<X> server,
 			   ManagedBeanImpl<X> bean,
@@ -67,6 +71,10 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
       throw new NullPointerException();
 
     _types.add(api);
+    
+    _qualifiers.addAll(bean.getQualifiers());
+    
+    _qualifiers.add(new BeanNameLiteral(server.getEJBName()));
     
     Class<?> scopeType = bean.getScope();
     
@@ -87,5 +95,11 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
   public Set<Type> getTypes()
   {
     return _types;
+  }
+  
+  @Override
+  public Set<Annotation> getQualifiers()
+  {
+    return _qualifiers;
   }
 }

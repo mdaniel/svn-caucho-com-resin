@@ -28,7 +28,7 @@
 
 package com.caucho.ejb.protocol;
 
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.naming.ObjectProxy;
 
 import javax.naming.NamingException;
@@ -39,13 +39,13 @@ import java.util.Hashtable;
  */
 public class ServerLocalProxy implements ObjectProxy, java.io.Serializable {
   // The server
-  private AbstractServer _server;
+  private AbstractEjbBeanManager _server;
   private Class _clientApi;
 
   /**
    * Creates a new server proxy
    */
-  public ServerLocalProxy(AbstractServer server, Class clientApi)
+  public ServerLocalProxy(AbstractEjbBeanManager server, Class clientApi)
   {
     _server = server;
     _clientApi = clientApi;

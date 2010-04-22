@@ -55,7 +55,7 @@ import com.caucho.util.LruCache;
 /**
  * Server container for a session bean.
  */
-public class SingletonManager<T> extends SessionServer<T> {
+public class SingletonManager<T> extends AbstractSessionManager<T> {
   private static final L10N L = new L10N(SingletonManager.class);
   private static final Logger log =
     Logger.getLogger(SingletonManager.class.getName());

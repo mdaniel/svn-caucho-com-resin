@@ -45,11 +45,11 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAResource;
 
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbContainer;
 import com.caucho.ejb.server.AbstractContext;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.ejb.server.EjbProducer;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -58,7 +58,7 @@ import com.caucho.util.L10N;
  * JCA activation-spec server container for a message bean.
  */
 @Module
-public class MessageServer<T> extends AbstractServer<T>
+public class MessageServer<T> extends AbstractEjbBeanManager<T>
   implements MessageEndpointFactory
 {
   private static final L10N L = new L10N(MessageServer.class);
@@ -150,7 +150,7 @@ public class MessageServer<T> extends AbstractServer<T>
     super.bindContext();
     
     InjectManager manager = InjectManager.create();
-    BeanFactory<?> factory = manager.createBeanFactory(_context.getClass());
+    BeanBuilder<?> factory = manager.createBeanFactory(_context.getClass());
 
     manager.addBean(factory.singleton(_context));
   }

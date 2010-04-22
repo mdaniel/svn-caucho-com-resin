@@ -47,7 +47,7 @@ import com.caucho.config.timer.EjbTimer;
 import com.caucho.config.timer.TimeoutInvoker;
 import com.caucho.config.timer.TimerTask;
 import com.caucho.config.types.Trigger;
-import com.caucho.ejb.server.AbstractServer;
+import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.resources.TimerTrigger;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -64,7 +64,7 @@ public class EjbTimerService implements TimerService {
   private static final Logger log = Logger.getLogger(EjbTimerService.class
       .getName());
 
-  private final AbstractServer _server;
+  private final AbstractEjbBeanManager _server;
   private final TimeoutInvoker _timeout;
 
   private final LinkedList<TimerTask> _timers = new LinkedList<TimerTask>();
@@ -75,7 +75,7 @@ public class EjbTimerService implements TimerService {
    * @param context
    *          EJB context.
    */
-  public EjbTimerService(AbstractServer server)
+  public EjbTimerService(AbstractEjbBeanManager server)
   {
     _server = server;
     _timeout = new EjbTimerInvocation(server);

@@ -19,61 +19,32 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.server.e_app;
+package com.caucho.config.j2ee;
 
-import com.caucho.config.types.EjbRef;
-import com.caucho.util.L10N;
+import static java.lang.annotation.RetentionPolicy.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
 
-import java.util.ArrayList;
+import javax.inject.Qualifier;
+
+import com.caucho.inject.Module;
 
 /**
- * Configuration for the application.xml file.
+ * The @BeanName annotation for EJB names
  */
-public class AppClientConfig {
-  private static final L10N L = new L10N(AppClientConfig.class);
 
-  private ArrayList<EjbRef> _ejbRefList = new ArrayList<EjbRef>();
-  
-  /**
-   * Sets the app client version.
-   */
-  public void setVersion(String version)
-  {
-  }
-
-  /**
-   * Sets the app client id.
-   */
-  public void setId(String id)
-  {
-  }
-
-  /**
-   * Sets the description.
-   */
-  public void setDescription(String desc)
-  {
-  }
-
-  /**
-   * Sets the display-name.
-   */
-  public void setDisplayName(String name)
-  {
-  }
-
-  /**
-   * Adds an ejb-ref
-   */
-  public void addEjbRef(EjbRef ejbRef)
-  {
-    _ejbRefList.add(ejbRef);
-  }
+@Qualifier
+@Documented
+@Retention(RUNTIME)
+@Module
+public @interface BeanName {
+  String value() default "";
 }

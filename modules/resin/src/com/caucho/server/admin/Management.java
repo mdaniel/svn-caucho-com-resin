@@ -32,7 +32,7 @@ package com.caucho.server.admin;
 import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.*;
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.BeanFactory;
+import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.RawString;
@@ -254,7 +254,7 @@ public class Management
         _auth.init();
 
         InjectManager webBeans = InjectManager.create();
-        BeanFactory factory = webBeans.createBeanFactory(Authenticator.class);
+        BeanBuilder factory = webBeans.createBeanFactory(Authenticator.class);
         factory.type(Authenticator.class);
         factory.type(AdminAuthenticator.class);
 

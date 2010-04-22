@@ -52,7 +52,7 @@ import com.caucho.config.reflect.AnnotatedElementImpl;
  * manager.addBean(new SingletonBean(myValue));
  * </pre></code>
  */
-public class BeanFactory<T>
+public class BeanBuilder<T>
 {
   private ManagedBeanImpl<T> _managedBean;
 
@@ -66,7 +66,7 @@ public class BeanFactory<T>
   private InjectionTarget<T> _injectionTarget;
   private ContainerProgram _init;
 
-  public BeanFactory(ManagedBeanImpl<T> managedBean)
+  public BeanBuilder(ManagedBeanImpl<T> managedBean)
   {
     _managedBean = managedBean;
     _injectionTarget = managedBean.getInjectionTarget();
@@ -77,14 +77,14 @@ public class BeanFactory<T>
     return _managedBean.getAnnotatedType();
   }
 
-  public BeanFactory<T> name(String name)
+  public BeanBuilder<T> name(String name)
   {
     _name = name;
 
     return this;
   }
 
-  public BeanFactory<T> binding(Annotation ann)
+  public BeanBuilder<T> binding(Annotation ann)
   {
     if (_bindings == null)
       _bindings = new LinkedHashSet<Annotation>();
@@ -94,7 +94,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory<T> binding(Collection<Annotation> list)
+  public BeanBuilder<T> binding(Collection<Annotation> list)
   {
     if (_bindings == null)
       _bindings = new LinkedHashSet<Annotation>();
@@ -104,7 +104,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory<T> stereotype(Class<? extends Annotation> annType)
+  public BeanBuilder<T> stereotype(Class<? extends Annotation> annType)
   {
     if (_stereotypes == null)
       _stereotypes = new LinkedHashSet<Class<? extends Annotation>>();
@@ -114,7 +114,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory<T> stereotype(Collection<Class<? extends Annotation>> list)
+  public BeanBuilder<T> stereotype(Collection<Class<? extends Annotation>> list)
   {
     if (_stereotypes == null)
       _stereotypes = new LinkedHashSet<Class<? extends Annotation>>();
@@ -124,7 +124,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory<T> annotation(Annotation ann)
+  public BeanBuilder<T> annotation(Annotation ann)
   {
     if (_annotated == null)
       _annotated = new AnnotatedElementImpl(_managedBean.getAnnotated());
@@ -134,7 +134,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory<T> annotation(Collection<Annotation> list)
+  public BeanBuilder<T> annotation(Collection<Annotation> list)
   {
     if (_annotated == null)
       _annotated = new AnnotatedElementImpl(_managedBean.getAnnotated());
@@ -146,14 +146,14 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory<T> scope(Class<? extends Annotation> scopeType)
+  public BeanBuilder<T> scope(Class<? extends Annotation> scopeType)
   {
     _scopeType = scopeType;
 
     return this;
   }
 
-  public BeanFactory<T> type(Type ...types)
+  public BeanBuilder<T> type(Type ...types)
   {
     if (_types == null)
       _types = new LinkedHashSet<Type>();
@@ -167,7 +167,7 @@ public class BeanFactory<T>
     return this;
   }
 
-  public BeanFactory<T> init(ConfigProgram init)
+  public BeanBuilder<T> init(ConfigProgram init)
   {
     if (init != null) {
       if (_init == null) {
