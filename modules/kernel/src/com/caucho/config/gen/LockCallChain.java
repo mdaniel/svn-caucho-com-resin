@@ -126,7 +126,7 @@ public class LockCallChain<X,T> extends AbstractCallChain<X,T> {
                       implementationMethod, implementationClass);
 
     if (accessTimeoutAttribute != null) {
-      _lockTimeout = accessTimeoutAttribute.timeout();
+      _lockTimeout = accessTimeoutAttribute.value();
       _lockTimeoutUnit = accessTimeoutAttribute.unit();
     }
   }

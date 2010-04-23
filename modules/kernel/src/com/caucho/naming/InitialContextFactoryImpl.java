@@ -107,6 +107,7 @@ public class InitialContextFactoryImpl implements InitialContextFactory
   /**
    * Returns the initial context for the current thread.
    */
+  @Override
   public Context getInitialContext(Hashtable<?,?> env)
     throws NamingException
   {

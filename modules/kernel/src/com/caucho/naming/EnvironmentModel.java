@@ -56,9 +56,6 @@ public class EnvironmentModel extends AbstractModel
   {
     _root = root;
     _name = name;
-
-    if ("ejb".equals(name))
-      Thread.dumpStack();
   }
 
   /**
@@ -90,17 +87,17 @@ public class EnvironmentModel extends AbstractModel
       return null;
     
     EnvironmentModelRoot parentRoot
-      = EnvironmentModelRoot.getLocal(loader.getParent());
+      = EnvironmentModelRoot.getCurrent(loader.getParent());
 
     if (parentRoot != null) {
       EnvironmentModel parentModel = parentRoot.get(_name);
 
       if (parentModel != null) {
-	value = parentModel.lookup(name);
+        value = parentModel.lookup(name);
 
-	if (value instanceof EnvironmentModel) {
-	  value = createSubcontext(name);
-	}
+        if (value instanceof EnvironmentModel) {
+          value = createSubcontext(name);
+        }
       }
     }
       
@@ -180,7 +177,7 @@ public class EnvironmentModel extends AbstractModel
       return;
     
     EnvironmentModelRoot parentRoot
-      = EnvironmentModelRoot.getLocal(loader.getParent());
+      = EnvironmentModelRoot.getCurrent(loader.getParent());
 
     if (parentRoot != null) {
       EnvironmentModel parentModel = parentRoot.get(_name);

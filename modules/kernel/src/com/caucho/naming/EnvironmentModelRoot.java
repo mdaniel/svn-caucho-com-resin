@@ -34,6 +34,7 @@ import javax.naming.NamingException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.caucho.loader.*;
 
@@ -47,8 +48,8 @@ public class EnvironmentModelRoot
 
   private final ClassLoader _loader;
   
-  private HashMap<String,EnvironmentModel> _map
-    = new HashMap<String,EnvironmentModel>();
+  private ConcurrentHashMap<String,EnvironmentModel> _map
+    = new ConcurrentHashMap<String,EnvironmentModel>();
 
   /**
    * Creates a new instance of the memory model.
@@ -56,8 +57,8 @@ public class EnvironmentModelRoot
   private EnvironmentModelRoot(ClassLoader loader)
   {
     for (;
-	 loader != null && ! (loader instanceof EnvironmentClassLoader);
-	 loader = loader.getParent()) {
+	       loader != null && ! (loader instanceof EnvironmentClassLoader);
+	       loader = loader.getParent()) {
     }
     
     _loader = loader;
@@ -68,15 +69,18 @@ public class EnvironmentModelRoot
   /**
    * Return the local model if it exists.
    */
-  public static EnvironmentModelRoot getLocal()
+  public static EnvironmentModelRoot getCurrent()
   {
-    return _local.get();
+    Thread thread = Thread.currentThread();
+    ClassLoader loader = thread.getContextClassLoader();
+     
+    return getCurrent(loader);
   }
 
   /**
    * Return the local model if it exists.
    */
-  public static EnvironmentModelRoot getLocal(ClassLoader loader)
+  public static EnvironmentModelRoot getCurrent(ClassLoader loader)
   {
     return _local.get(loader);
   }
@@ -98,8 +102,8 @@ public class EnvironmentModelRoot
       EnvironmentModelRoot root = _local.getLevel(loader);
 
       if (root == null) {
-	root = new EnvironmentModelRoot(loader);
-	_local.set(root, loader);
+        root = new EnvironmentModelRoot(loader);
+        _local.set(root, loader);
       }
 
       return root;
@@ -116,9 +120,7 @@ public class EnvironmentModelRoot
    */
   public EnvironmentModel get(String path)
   {
-    synchronized (this) {
-      return _map.get(path);
-    }
+    return _map.get(path);
   }
 
   /**
@@ -126,9 +128,7 @@ public class EnvironmentModelRoot
    */
   public EnvironmentModel put(String path, EnvironmentModel value)
   {
-    synchronized (this) {
-      return _map.put(path, value);
-    }
+    return _map.put(path, value);
   }
 
   /**
@@ -136,8 +136,6 @@ public class EnvironmentModelRoot
    */
   public EnvironmentModel remove(String path)
   {
-    synchronized (this) {
-      return _map.remove(path);
-    }
+    return _map.remove(path);
   }
 }
