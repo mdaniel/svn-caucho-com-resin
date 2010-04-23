@@ -40,6 +40,6 @@ import java.util.concurrent.TimeUnit;
 @Target( { ElementType.METHOD, ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface AccessTimeout {
-  long timeout();
+  long value();
   TimeUnit unit() default TimeUnit.MILLISECONDS;
 }
