@@ -48,6 +48,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.Typed;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.BeanManager;
@@ -116,7 +117,26 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     else
       _baseType = manager.createBaseType(type);
     
-    _typeClasses = _baseType.getTypeClosure(manager);
+    Typed typed = annotated.getAnnotation(Typed.class);
+    
+    if (typed != null) {
+      _typeClasses = new LinkedHashSet<Type>();
+      
+      boolean isClass = false;
+      
+      for (Class<?> cl : typed.value()) {
+        _typeClasses.add(cl);
+        
+        if (! cl.isInterface())
+          isClass = true;
+      }
+      
+      if (isClass)
+        _typeClasses.add(Object.class);
+    }
+    else {
+      _typeClasses = _baseType.getTypeClosure(manager);
+    }
   }
 
   public BaseType getBaseType()
@@ -124,6 +144,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _baseType;
   }
 
+  @Override
   public Class<?> getBeanClass()
   {
     return _baseType.getRawClass();
@@ -328,7 +349,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     introspectQualifiers(annotated);
     introspectName(annotated);
     introspectStereotypes(annotated);
-    introspectSpecializes(annotated);
+//    introspectSpecializes(annotated);
 
     introspectDefault();
   }

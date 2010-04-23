@@ -193,15 +193,13 @@ class InjectScanManager
   {
     // ioc/0j0k - package private allowed
     
-    if (Modifier.isInterface(modifiers))
+    if (Modifier.isPrivate(modifiers))
       return null;
-    else if (Modifier.isPrivate(modifiers))
-      return null;
+    /*
     else if (Modifier.isAbstract(modifiers)) {
       // ioc/0j02 (decorator?)
       return null;//createScanClass(className);
     }
-    /*
     else if (className.indexOf('$') >= 0) {
       // ioc/0j0l
       return null;

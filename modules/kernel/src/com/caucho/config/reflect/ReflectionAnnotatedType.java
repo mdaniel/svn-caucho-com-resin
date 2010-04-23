@@ -151,7 +151,7 @@ public class ReflectionAnnotatedType<T>
       introspectInheritedAnnotations(cl.getSuperclass());
       
       if (cl.isAnnotationPresent(Specializes.class))
-        introspectSpecializesAnnotations(cl.getSuperclass());
+        introspectSpecializesAnnotations(cl);
 
       introspectFields(cl);
 
@@ -255,15 +255,31 @@ public class ReflectionAnnotatedType<T>
     introspectInheritedAnnotations(cl.getSuperclass(), isScope);
   }
 
-  private void introspectSpecializesAnnotations(Class<?> parentClass)
+  private void introspectSpecializesAnnotations(Class<?> cl)
   {
+    Class<?> parentClass = cl.getSuperclass();
+    
     if (parentClass == null)
       return;
+    
+    if (cl.isAnnotationPresent(Named.class))
+      throw new ConfigException(L.l("'{0}' is an invalid @Specializes bean because it has a @Named annotation.",
+                                    cl.getName()));
+    
+    boolean isQualifierPresent = false;
 
+    if (isMetaAnnotationPresent(cl.getAnnotations(), Qualifier.class)) {
+      isQualifierPresent = true;
+      /*
+      throw new ConfigException(L.l("'{0}' is an invalid @Specializes bean because it has a @Qualifier annotation.",
+                                    cl.getName()));
+                                    */
+    }
+    
     for (Annotation ann : parentClass.getDeclaredAnnotations()) {
       Class<? extends Annotation> annType = ann.annotationType();
 
-      if (annType.isAnnotationPresent(Qualifier.class)) {
+      if (! isQualifierPresent && annType.isAnnotationPresent(Qualifier.class)) {
         addAnnotation(ann);
       }
       else if (Named.class.equals(annType)) {
@@ -303,6 +319,20 @@ public class ReflectionAnnotatedType<T>
       }
     }
 
+    return false;
+  }
+
+  private boolean isMetaAnnotationPresent(Annotation []annotations,
+                                          Class<? extends Annotation> metaAnnType)
+  {
+    if (annotations == null)
+      return false;
+
+    for (Annotation ann : annotations) {
+      if (ann.annotationType().isAnnotationPresent(metaAnnType))
+        return true;
+    }
+    
     return false;
   }
 
