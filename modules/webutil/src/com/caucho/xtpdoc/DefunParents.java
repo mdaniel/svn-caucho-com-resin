@@ -36,7 +36,9 @@ import java.io.PrintWriter;
 import java.util.HashSet;
 import java.util.Iterator;
 
-public class DefunParents extends ContainerNode implements Iterable<String> {
+import com.caucho.config.types.RawString;
+
+public class DefunParents extends FormattedText implements Iterable<String> {
   private static final Text COMMA = new Text(",");
 
   private final HashSet<String> _parents = new HashSet<String>();
@@ -46,9 +48,10 @@ public class DefunParents extends ContainerNode implements Iterable<String> {
     super(document);
   }
 
-  public void setText(String text)
+  @Override
+  public void addText(RawString text)
   {
-    String []parents = text.split("[ ,]+");
+    String []parents = text.getValue().split("[ ,]+");
 
     for (int i = 0; i < parents.length; i++) {
       String parent = parents[i];
@@ -70,6 +73,7 @@ public class DefunParents extends ContainerNode implements Iterable<String> {
     return _parents.iterator();
   }
 
+  @Override
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException
   {
@@ -86,11 +90,13 @@ public class DefunParents extends ContainerNode implements Iterable<String> {
     out.writeEndElement(); // div
   }
 
+  @Override
   public void writeLaTeXTop(PrintWriter out)
     throws IOException
   {
   }
 
+  @Override
   public void writeLaTeX(PrintWriter out)
     throws IOException
   {
@@ -100,6 +106,7 @@ public class DefunParents extends ContainerNode implements Iterable<String> {
     out.print("\\\\");
   }
 
+  @Override
   public void writeLaTeXEnclosed(PrintWriter out)
     throws IOException
   {

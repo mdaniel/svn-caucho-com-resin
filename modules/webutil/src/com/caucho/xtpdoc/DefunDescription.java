@@ -35,15 +35,56 @@ import java.io.PrintWriter;
 import javax.xml.stream.XMLStreamException;
 import javax.xml.stream.XMLStreamWriter;
 
-public class DefunDescription extends Section {
-  public DefunDescription(Document document) 
+// This should really be a section, except the 3.1 docs allowed a section
+// to have a description 
+public class DefunDescription extends FormattedTextWithAnchors {
+  private final Defun _defun;
+
+  public DefunDescription(Defun defun) 
   {
-    super(document);
+    super(defun.getDocument());
+
+    _defun = defun;
+  }
+
+  public FormattedTextWithAnchors createNote()
+  {
+    Note note = new Note(getDocument());
+    addItem(note);
+    return note;
+  }
+
+  public Paragraph createP()
+  {
+    Paragraph paragraph = new Paragraph(getDocument());
+    addItem(paragraph);
+    return paragraph;
+  }
+
+  public DefinitionTable createDeftable()
+  {
+    DefinitionTable definitionTable = new DefinitionTable(getDocument());
+    addItem(definitionTable);
+    return definitionTable;
+  }
+
+  public Def createDef()
+  {
+    Def def = new Def(getDocument());
+    addItem(def);
+    return def;
+  }
+
+  public UnorderedList createUl()
+  {
+    UnorderedList unorderedList = new UnorderedList(getDocument());
+    addItem(unorderedList);
+    return unorderedList;
   }
 
   public S2 createS2()
   {
-    S2 s2 = new S2(getDocument(), getHref());
+    S2 s2 = new S2(getDocument(), _defun.getHref());
     addItem(s2);
     return s2;
   }

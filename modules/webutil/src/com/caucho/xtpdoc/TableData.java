@@ -57,6 +57,13 @@ public class TableData extends FormattedTextWithAnchors implements TableCell {
     _width = width;
   }
 
+  public Def createDef()
+  {
+    Def def = new Def(getDocument());
+    addItem(def);
+    return def;
+  }
+
   @Override
   public void writeHtml(XMLStreamWriter out)
     throws XMLStreamException

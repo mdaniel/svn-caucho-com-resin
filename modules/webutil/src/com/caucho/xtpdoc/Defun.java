@@ -52,7 +52,8 @@ public class Defun extends Section {
     return s2;
   }
 
-  public DefunParents createParents()
+  @Override
+  public FormattedText createParents()
   {
     _parents = new DefunParents(getDocument());
     addItem(_parents);
@@ -108,9 +109,10 @@ public class Defun extends Section {
     return attributes;
   }
 
-  public DefunDescription createDescription()
+  @Override
+  public FormattedTextWithAnchors createDescription()
   {
-    DefunDescription description = new DefunDescription(getDocument());
+    DefunDescription description = new DefunDescription(this);
     addItem(description);
 
     return description;
