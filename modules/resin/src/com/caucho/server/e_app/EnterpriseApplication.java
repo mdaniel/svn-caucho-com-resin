@@ -103,12 +103,10 @@ public class EnterpriseApplication
   EnterpriseApplication(WebAppContainer container,
                         EarDeployController controller, String name)
   {
-    if (container == null || controller == null)
-      throw new NullPointerException();
-
     _container = container;
 
     _controller = controller;
+    
     _name = name;
 
     ClassLoader parentLoader;
@@ -120,27 +118,32 @@ public class EnterpriseApplication
 
     _loader = EnvironmentClassLoader.create(parentLoader, "eapp:" + name);
 
-    _webappsPath = _controller.getRootDirectory().lookup("webapps");
-    WorkDir.setLocalWorkDir(_controller.getRootDirectory().lookup("META-INF/work"),
-                            _loader);
+    if (_controller != null) {
+      _webappsPath = _controller.getRootDirectory().lookup("webapps");
+      WorkDir.setLocalWorkDir(_controller.getRootDirectory().lookup("META-INF/work"),
+                              _loader);
+    }
 
     _lifecycle = new Lifecycle(log, toString(), Level.INFO);
 
-    if (controller.getArchivePath() != null)
-      Environment.addDependency(new Depend(controller.getArchivePath()), _loader);
+    if (_controller != null && _controller.getArchivePath() != null)
+      Environment.addDependency(new Depend(_controller.getArchivePath()), _loader);
 
     _localEApp.set(this, _loader);
   }
-
-  /*
-  // ejb/0fa0
-  public EnterpriseApplication()
+  
+  public static EnterpriseApplication create(String name)
   {
-    _lifecycle = new Lifecycle(log, toString(), Level.INFO);
+    EnterpriseApplication application = _localEApp.getLevel();
+    
+    if (application == null) {
+      application = new EnterpriseApplication(null, null, name);
+    }
+    
+    return application;
   }
-  */
 
-  public static EnterpriseApplication getLocal()
+  public static EnterpriseApplication getCurrent()
   {
     return _localEApp.get();
   }
@@ -531,8 +534,10 @@ public class EnterpriseApplication
 
       getClassLoader().start();
 
-      for (WebAppController webApp : _webApps) {
-        _container.getWebAppGenerator().update(webApp.getContextPath());
+      if (_container != null) {
+        for (WebAppController webApp : _webApps) {
+          _container.getWebAppGenerator().update(webApp.getContextPath());
+        }
       }
     } finally {
       _lifecycle.toActive();
@@ -689,7 +694,7 @@ public class EnterpriseApplication
       ArrayList<WebAppController> webApps = _webApps;
       _webApps = null;
 
-      if (webApps != null) {
+      if (webApps != null && _container != null) {
         for (WebAppController webApp : webApps) {
           _container.getWebAppGenerator().update(webApp.getContextPath());
         }

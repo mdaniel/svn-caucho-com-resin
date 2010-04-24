@@ -874,21 +874,21 @@ public class EjbBean<X> extends DescriptionGroupConfig
       _isInit = true;
 
       if (getAnnotatedType() == null)
-	throw error(L.l("ejb-class is not defined for '{0}'",
-			getEJBName()));
+        throw error(L.l("ejb-class is not defined for '{0}'",
+                        getEJBName()));
 
       for (EjbMethodPattern<X> methodPattern : _methodList) {
-	for (AnnotatedType<?> localList : _localList) {
-	  for (AnnotatedMethod<?> apiMethod : localList.getMethods()) {
-	    methodPattern.configure(apiMethod);
-	  }
-	}
-	
-	for (AnnotatedType<?> remoteList : _remoteList) {
-	  for (AnnotatedMethod<?> apiMethod : remoteList.getMethods()) {
-	    methodPattern.configure(apiMethod);
-	  }
-	}
+        for (AnnotatedType<?> localList : _localList) {
+          for (AnnotatedMethod<?> apiMethod : localList.getMethods()) {
+            methodPattern.configure(apiMethod);
+          }
+        }
+
+        for (AnnotatedType<?> remoteList : _remoteList) {
+          for (AnnotatedMethod<?> apiMethod : remoteList.getMethods()) {
+            methodPattern.configure(apiMethod);
+          }
+        }
       }
 
       // XXX: add local api
@@ -907,22 +907,22 @@ public class EjbBean<X> extends DescriptionGroupConfig
       _bean.createViews();
 
       InterceptorBinding interceptor
-	= getConfig().getInterceptorBinding(getEJBName(), false);
+        = getConfig().getInterceptorBinding(getEJBName(), false);
 
       if (_aroundInvokeMethodName != null) {
-	AnnotatedMethod<? super X> method
-	  = getMethod(_aroundInvokeMethodName,
-	              new Class[] { InvocationContext.class });
+        AnnotatedMethod<? super X> method
+          = getMethod(_aroundInvokeMethodName,
+                      new Class[] { InvocationContext.class });
 
-	if (method == null)
-	  throw error(L.l("'{0}' is an unknown around-invoke method",
-			  _aroundInvokeMethodName));
+        if (method == null)
+          throw error(L.l("'{0}' is an unknown around-invoke method",
+                          _aroundInvokeMethodName));
 	
-	// XXX: _bean.setAroundInvokeMethod(method.getMethod());
+        // XXX: _bean.setAroundInvokeMethod(method.getMethod());
       }
 
       for (RemoveMethod method : _removeMethods) {
-	method.configure(_bean);
+        method.configure(_bean);
       }
     } catch (ConfigException e) {
       throw ConfigException.createLine(_location, e);

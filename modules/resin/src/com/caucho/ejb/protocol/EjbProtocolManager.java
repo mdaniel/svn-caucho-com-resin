@@ -245,6 +245,7 @@ public class EjbProtocolManager {
       // with the local prefix
 
       bindDefaultJndi(_jndiPrefix, server);
+      bindPortableJndiApis(server);
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -258,14 +259,14 @@ public class EjbProtocolManager {
   private void bindDefaultJndi(String prefix, AbstractEjbBeanManager server)
   {
     try {
-      EnterpriseApplication eApp = EnterpriseApplication.getLocal();
+      EnterpriseApplication eApp = EnterpriseApplication.getCurrent();
 
       if (prefix == null)
         prefix = "";
       else if (!prefix.endsWith("/"))
         prefix = prefix + "/";
 
-      if (eApp != null)
+      if (eApp != null && eApp.getName() != null)
         prefix = prefix + eApp.getName() + "/";
 
       prefix = prefix + server.getEJBName();
@@ -294,6 +295,100 @@ public class EjbProtocolManager {
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
+    }
+  }
+
+  private void bindPortableJndi(String appName,
+                                String moduleName, 
+                                String suffix, 
+                                ServerLocalProxy proxy)
+  {
+    try {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      
+      try {
+        thread.setContextClassLoader(_loader);
+
+        String jndiName = null;
+        
+        // global _may_ mean across applications, but is not required
+        // (EJB 3.1 spec. sec. 3.2.2).
+        if (appName != null)
+          jndiName = "java:global/" + appName + '/' + moduleName + '/' + suffix;
+        else
+          jndiName = "java:global/" + moduleName + '/' + suffix;
+
+        Jndi.bindDeep(jndiName, proxy);
+        log.fine(proxy + " global binding to '" + jndiName + "' "
+                 + _loader);
+        
+        // application means across modules within an application
+        jndiName = "java:app/" + moduleName + '/' + suffix;
+        Jndi.bindDeep(jndiName, proxy);
+        log.fine(proxy + " application binding to '" + jndiName + "' "
+                 + _loader);
+
+        // XXX module binding - this is problematic because this will
+        // expose a module-level binding to the application context
+        // used by the EJBContainer
+        
+        // module means local to a single module within an application
+        jndiName = "java:module/" + suffix;
+        Jndi.bindDeep(jndiName, proxy);
+        
+        log.fine(proxy + " module binding to '" + jndiName + "' "
+                 + _loader);
+      }
+      finally {
+        Thread.currentThread().setContextClassLoader(oldLoader);
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  private void bindPortableJndiApis(AbstractEjbBeanManager manager)
+  {
+    String jndiName = null;
+    String appName = null;
+
+    EnterpriseApplication app = EnterpriseApplication.getCurrent();
+    if (app != null)
+      appName = app.getName();
+    
+    String moduleName = manager.getModuleName();
+
+    if (moduleName != null) {
+      ArrayList<Class> apiList = manager.getLocalApiList();
+
+      if (apiList == null) {
+        String suffix = manager.getEJBName();
+        Class api = manager.getEjbClass();
+
+        ServerLocalProxy proxy = new ServerLocalProxy(manager, api); 
+
+        bindPortableJndi(appName, moduleName, suffix, proxy);
+      }
+      else if (apiList.size() == 1) {
+        String suffix = manager.getEJBName();
+        Class api = apiList.get(0);
+
+        ServerLocalProxy proxy = new ServerLocalProxy(manager, api); 
+
+        bindPortableJndi(appName, moduleName, suffix, proxy);
+
+        suffix = suffix + '!' + api.getName();
+        bindPortableJndi(appName, moduleName, suffix, proxy);
+      }
+      else {
+        for (Class api : apiList) {
+          String suffix = manager.getEJBName() + '!' + api.getName();
+
+          ServerLocalProxy proxy = new ServerLocalProxy(manager, api); 
+          bindPortableJndi(appName, moduleName, suffix, proxy);
+        }
+      }
     }
   }
 

@@ -45,6 +45,7 @@ import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.EJBServer;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
+import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
@@ -138,10 +139,8 @@ public class ResinBeanContainer
 
       Environment.init();
 
-      EJBServer ejbServer = new EJBServer();
-      ejbServer.init();
-
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
+      Environment.addChildLoaderListener(new EjbEnvironmentListener());
 
       _classLoader.scanRoot();
     } finally {
@@ -383,6 +382,11 @@ public class ResinBeanContainer
     if (loader != null) {
       loader.destroy();
     }
+  }
+
+  public ClassLoader getClassLoader()
+  {
+    return _classLoader;
   }
 
   public String toString()

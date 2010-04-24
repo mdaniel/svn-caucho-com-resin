@@ -43,7 +43,7 @@ public class EjbJar extends DescriptionGroupConfig {
   private static final L10N L = new L10N(EjbJar.class);
 
   private final EjbConfig _config;
-  private final String _ejbModuleName;
+  private String _ejbModuleName;
 
   private boolean _isMetadataComplete;
 
@@ -51,6 +51,16 @@ public class EjbJar extends DescriptionGroupConfig {
   {
     _config = config;
     _ejbModuleName = ejbModuleName;
+  }
+
+  public String getModuleName()
+  {
+    return _ejbModuleName;
+  }
+
+  public void setModuleName(String moduleName)
+  {
+    _ejbModuleName = moduleName;
   }
 
   public void setVersion(String version)
@@ -122,7 +132,7 @@ public class EjbJar extends DescriptionGroupConfig {
     public void setRoleName(String roleName)
     {
       if (_roles == null)
-	_roles = new ArrayList<String>();
+        _roles = new ArrayList<String>();
 
       _roles.add(roleName);
     }
@@ -133,19 +143,19 @@ public class EjbJar extends DescriptionGroupConfig {
     }
 
     @PostConstruct
-      public void init()
+    public void init()
       throws ConfigException
     {
       EjbBean bean = _config.getBeanConfig(_method.getEJBName());
 
       if (bean == null)
-	throw new ConfigException(L.l("'{0}' is an unknown bean.",
-				      _method.getEJBName()));
+        throw new ConfigException(L.l("'{0}' is an unknown bean.",
+                                      _method.getEJBName()));
 
       EjbMethodPattern method = bean.createMethod(_method);
 
       if (_roles != null)
-	method.setRoles(_roles);
+        method.setRoles(_roles);
     }
   }
 

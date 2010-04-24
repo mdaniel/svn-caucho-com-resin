@@ -103,7 +103,8 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   // active servers
   //
 
-  private ArrayList<AbstractEjbBeanManager> _serverList = new ArrayList<AbstractEjbBeanManager>();
+  private final ArrayList<AbstractEjbBeanManager> _serverList 
+    = new ArrayList<AbstractEjbBeanManager>();
 
   private EjbManager(ClassLoader loader)
   {

@@ -122,22 +122,22 @@ public class MessageServer<T> extends AbstractEjbBeanManager<T>
       super.init();
 
       if (_activationSpec == null)
-	throw error(L.l("ActivationSpec is missing from message-driven bean '{0}'.",
+        throw error(L.l("ActivationSpec is missing from message-driven bean '{0}'.",
 			getEJBName()));
 
 
       if (_ra == null)
-	throw error(L.l("ResourceAdapter is missing from message-driven bean '{0}'.",
+        throw error(L.l("ResourceAdapter is missing from message-driven bean '{0}'.",
 			getEJBName()));
 
       try {
-	Class<?> beanClass = getBeanSkelClass();
+        Class<?> beanClass = getBeanSkelClass();
 
-	_ejbCreate = beanClass.getMethod("ejbCreate", new Class[0]);
-	  
-	// getProducer().bindInjection();
+        _ejbCreate = beanClass.getMethod("ejbCreate", new Class[0]);
+
+        // getProducer().bindInjection();
       } catch (Exception e) {
-	log.log(Level.FINEST, e.toString(), e);
+        log.log(Level.FINEST, e.toString(), e);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
@@ -207,11 +207,11 @@ public class MessageServer<T> extends AbstractEjbBeanManager<T>
       throw e;
     } catch (InvocationTargetException e) {
       if (e.getCause() instanceof RuntimeException)
-	throw (RuntimeException) e.getCause();
+        throw (RuntimeException) e.getCause();
       if (e.getCause() != null)
-	throw new UnavailableException(e.getCause());
+        throw new UnavailableException(e.getCause());
       else
-	throw new UnavailableException(e);
+        throw new UnavailableException(e);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -247,7 +247,7 @@ public class MessageServer<T> extends AbstractEjbBeanManager<T>
       producer.initInstance(listener);
 
       if (_ejbCreate != null)
-	_ejbCreate.invoke(listener);
+        _ejbCreate.invoke(listener);
 
       return listener;
     } finally {

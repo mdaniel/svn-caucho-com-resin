@@ -42,8 +42,6 @@ import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.logging.Logger;
-
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
@@ -315,7 +313,7 @@ public class EjbConfig {
     return _isAllowPOJO;
   }
 
-  public <X> void addIntrospectableClass(String className)
+  public <X> void addIntrospectableClass(String className, String moduleName)
   {
     try {
       ClassLoader loader = _ejbContainer.getClassLoader();
@@ -324,28 +322,28 @@ public class EjbConfig {
       Class<X> type = (Class<X>) Class.forName(className, false, loader);
 
       if (findBeanByType(type) != null)
-	return;
+        return;
 
       if (type.isAnnotationPresent(javax.ejb.Stateless.class)) {
-	EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, "resin-ejb");
-	bean.setEJBClass(type);
-	bean.setAllowPOJO(true);
+        EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, moduleName);
+        bean.setEJBClass(type);
+        bean.setAllowPOJO(true);
 
-	setBeanConfig(bean.getEJBName(), bean);
+        setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.Stateful.class)) {
-	EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, "resin-ejb");
-	bean.setAllowPOJO(true);
-	bean.setEJBClass(type);
-		
-	setBeanConfig(bean.getEJBName(), bean);
+        EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, moduleName);
+        bean.setAllowPOJO(true);
+        bean.setEJBClass(type);
+
+        setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
-	EjbMessageBean<X> bean = new EjbMessageBean<X>(this, "resin-ejb");
-	bean.setAllowPOJO(true);
-	bean.setEJBClass(type);
-	
-	setBeanConfig(bean.getEJBName(), bean);
+        EjbMessageBean<X> bean = new EjbMessageBean<X>(this, moduleName);
+        bean.setAllowPOJO(true);
+        bean.setEJBClass(type);
+
+        setBeanConfig(bean.getEJBName(), bean);
       }
     } catch (ConfigException e) {
       throw e;
@@ -361,49 +359,49 @@ public class EjbConfig {
       Class<?> type = annType.getJavaClass();
 
       if (findBeanByType(type) != null)
-	return;
+        return;
 
       if (annType.isAnnotationPresent(Stateless.class)) {
-	Stateless stateless = annType.getAnnotation(Stateless.class);
-	
-	EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, annType, stateless);
-	bean.setInjectionTarget(injectTarget);
+        Stateless stateless = annType.getAnnotation(Stateless.class);
 
-	setBeanConfig(bean.getEJBName(), bean);
+        EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, annType, stateless);
+        bean.setInjectionTarget(injectTarget);
+
+        setBeanConfig(bean.getEJBName(), bean);
       }
       else if (annType.isAnnotationPresent(Stateful.class)) {
-	Stateful stateful = annType.getAnnotation(Stateful.class);
-	
-	EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, annType, stateful);
-	bean.setInjectionTarget(injectTarget);
+        Stateful stateful = annType.getAnnotation(Stateful.class);
 
-	setBeanConfig(bean.getEJBName(), bean);
+        EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, annType, stateful);
+        bean.setInjectionTarget(injectTarget);
+
+        setBeanConfig(bean.getEJBName(), bean);
       }
       else if (annType.isAnnotationPresent(Singleton.class)) {
         Singleton singleton = annType.getAnnotation(Singleton.class);
-        
+
         EjbSingletonBean<X> bean = new EjbSingletonBean<X>(this, annType, singleton);
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);
       }      
       else if (annType.isAnnotationPresent(MessageDriven.class)) {
-	MessageDriven message = annType.getAnnotation(MessageDriven.class);
-	EjbMessageBean<X> bean = new EjbMessageBean<X>(this, annType, message);
-	bean.setInjectionTarget(injectTarget);
+        MessageDriven message = annType.getAnnotation(MessageDriven.class);
+        EjbMessageBean<X> bean = new EjbMessageBean<X>(this, annType, message);
+        bean.setInjectionTarget(injectTarget);
 
-	setBeanConfig(bean.getEJBName(), bean);
+        setBeanConfig(bean.getEJBName(), bean);
       }
       else if (annType.isAnnotationPresent(JmsMessageListener.class)) {
-	JmsMessageListener listener
-	  = annType.getAnnotation(JmsMessageListener.class);
-	
-	EjbMessageBean<X> bean
-	  = new EjbMessageBean<X>(this, annType, listener.destination());
-	
-	bean.setInjectionTarget(injectTarget);
+        JmsMessageListener listener
+        = annType.getAnnotation(JmsMessageListener.class);
 
-	setBeanConfig(bean.getEJBName(), bean);
+        EjbMessageBean<X> bean
+        = new EjbMessageBean<X>(this, annType, listener.destination());
+
+        bean.setInjectionTarget(injectTarget);
+
+        setBeanConfig(bean.getEJBName(), bean);
       }
     } catch (ConfigException e) {
       throw e;
@@ -420,7 +418,7 @@ public class EjbConfig {
     for (EjbBean<?> bean : _cfgBeans.values()) {
       // ejb/0j03
       if (type.getName().equals(bean.getEJBClass().getName()))
-	return (EjbBean<X>) bean;
+        return (EjbBean<X>) bean;
     }
 
     return null;
@@ -522,7 +520,7 @@ public class EjbConfig {
       javaGen.setParentLoader(parentLoader);
 
       ArrayList<EjbBean<?>> deployingBeans
-	= new ArrayList<EjbBean<?>>(_deployingBeans);
+        = new ArrayList<EjbBean<?>>(_deployingBeans);
       _deployingBeans.clear();
 
       deployBeans(deployingBeans, javaGen);

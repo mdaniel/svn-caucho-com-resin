@@ -41,6 +41,7 @@ public class EjbRootConfig  {
   
   private ArrayList<String> _classList = new ArrayList<String>();
   private boolean _isScanComplete;
+  private String _moduleName;
   
   EjbRootConfig(Path root)
   {
@@ -71,5 +72,15 @@ public class EjbRootConfig  {
   public void setScanComplete(boolean isScanComplete)
   {
     _isScanComplete = isScanComplete;
+  }
+
+  public String getModuleName()
+  {
+    return _moduleName;
+  }
+
+  public void setModuleName(String moduleName)
+  {
+    _moduleName = moduleName;
   }
 }

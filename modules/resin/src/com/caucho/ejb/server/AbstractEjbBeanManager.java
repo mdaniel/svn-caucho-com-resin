@@ -285,7 +285,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   /**
    * Sets the ejb class
    */
-  protected Class<T> getEjbClass()
+  public Class<T> getEjbClass()
   {
     return _ejbClass;
   }

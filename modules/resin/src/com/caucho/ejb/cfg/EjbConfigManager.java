@@ -71,9 +71,26 @@ public class EjbConfigManager extends EjbConfig {
       _rootConfigMap.put(root, rootConfig);
       _rootPendingList.add(rootConfig);
 
-      Path ejbJar = root.lookup("META-INF/ejb-jar.xml");
-      if (ejbJar.canRead())
-	addEjbPath(ejbJar);
+      Path ejbJarXml = root.lookup("META-INF/ejb-jar.xml");
+
+      if (ejbJarXml.canRead()) {
+        EjbJar ejbJar = configurePath(ejbJarXml);
+        rootConfig.setModuleName(ejbJar.getModuleName());
+      }
+      else {
+        String ejbModuleName = null;
+
+        if (root instanceof JarPath) {
+          String jarName = ((JarPath) root).getContainer().getTail();
+          ejbModuleName 
+            = jarName.substring(0, jarName.length() - ".jar".length());
+        }
+        else {
+          ejbModuleName = root.getPath();
+        }
+
+        rootConfig.setModuleName(ejbModuleName);
+      }
     }
 
     return rootConfig;
@@ -87,7 +104,7 @@ public class EjbConfigManager extends EjbConfig {
 
     for (EjbRootConfig rootConfig : pendingList) {
       for (String className : rootConfig.getClassNameList()) {
-	addIntrospectableClass(className);
+        addIntrospectableClass(className, rootConfig.getModuleName());
       }
     }
 
@@ -110,38 +127,46 @@ public class EjbConfigManager extends EjbConfig {
     _pathPendingList.add(path);
   }
 
+  public EjbJar configurePath(Path path)
+  {
+    if (path.getScheme().equals("jar"))
+      path.setUserPath(path.getURL());
+
+    Environment.addDependency(path);
+
+    String ejbModuleName;
+
+    if (path instanceof JarPath) {
+      String jarName = ((JarPath) path).getContainer().getTail();
+      ejbModuleName = jarName.substring(0, jarName.length() - ".jar".length());
+    }
+    else {
+      ejbModuleName = path.getPath();
+    }
+
+    EjbJar ejbJar = new EjbJar(this, ejbModuleName);
+
+    try {
+      if (log.isLoggable(Level.FINE))
+        log.fine(this + " reading " + path.getURL());
+
+      new Config().configure(ejbJar, path, getSchema());
+
+      return ejbJar;
+    } catch (ConfigException e) {
+      throw e;
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
   private void configurePaths()
   {
     ArrayList<Path> pathList = new ArrayList<Path>(_pathPendingList);
     _pathPendingList.clear();
 
     for (Path path : pathList) {
-      if (path.getScheme().equals("jar"))
-	path.setUserPath(path.getURL());
-
-      Environment.addDependency(path);
-
-      String ejbModuleName;
-
-      if (path instanceof JarPath) {
-	ejbModuleName = ((JarPath) path).getContainer().getPath();
-      }
-      else {
-	ejbModuleName = path.getPath();
-      }
-
-      EjbJar ejbJar = new EjbJar(this, ejbModuleName);
-
-      try {
-	if (log.isLoggable(Level.FINE))
-	  log.fine(this + " reading " + path.getURL());
-
-	new Config().configure(ejbJar, path, getSchema());
-      } catch (ConfigException e) {
-	throw e;
-      } catch (Exception e) {
-	throw ConfigException.create(e);
-      }
+      configurePath(path);
     }
   }
 }
