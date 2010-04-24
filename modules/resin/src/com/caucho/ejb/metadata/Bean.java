@@ -90,7 +90,7 @@ public class Bean implements EnvironmentBean {
     throws ConfigException
   {
     _type = type;
-    _ejbContainer.getConfigManager().addIntrospectableClass(_type.getName());
+    _ejbContainer.getConfigManager().addIntrospectableClass(_type.getName(), getEJBModuleName());
   }
 
   /**
