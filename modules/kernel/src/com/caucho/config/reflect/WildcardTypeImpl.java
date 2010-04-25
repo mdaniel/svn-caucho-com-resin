@@ -50,6 +50,7 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     _upperBounds = upperBounds;
   }
 
+  @Override
   public Type []getLowerBounds()
   {
     Type []lowerBounds = new Type[_lowerBounds.length];
@@ -60,6 +61,7 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     return lowerBounds;
   }
 
+  @Override
   public Type []getUpperBounds()
   {
     Type []upperBounds = new Type[_upperBounds.length];
@@ -69,15 +71,23 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
       
     return upperBounds;
   }
-  
-  public Class<?> getRawClass()
-  {
-    return Object.class; // technically bounds(?)
-  }
 
+  @Override
   public boolean isWildcard()
   {
     return true;
+  }
+  
+  @Override
+  protected BaseType []getWildcardBounds()
+  {
+    return _upperBounds;
+  }
+  
+  @Override
+  public Class<?> getRawClass()
+  {
+    return Object.class; // technically bounds(?)
   }
 
   public Type getGenericComponentType()
@@ -85,11 +95,13 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     return null;
   }
 
+  @Override
   public Type toType()
   {
     return this;
   }
 
+  @Override
   public boolean isAssignableFrom(BaseType type)
   {
     for (BaseType bound : _lowerBounds) {
@@ -105,19 +117,30 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
     return true;
   }
   
-  public boolean isMatch(Type type)
+  @Override
+  public boolean isParamAssignableFrom(BaseType type)
   {
-    if (type instanceof WildcardType || type instanceof TypeVariable<?>)
-      return true;
-    else
-      return false;
+    for (BaseType bound : _lowerBounds) {
+      if (! type.isAssignableFrom(bound))
+        return false;
+    }
+    
+    for (BaseType bound : _upperBounds) {
+      if (! bound.isAssignableFrom(type)) {
+        return false;
+      }
+    }
+    
+    return true;
   }
 
+  @Override
   public int hashCode()
   {
     return 17;
   }
 
+  @Override
   public boolean equals(Object o)
   {
     if (o == this)
@@ -129,8 +152,21 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
       return false;
   }
 
+  @Override
   public String toString()
   {
-    return "?";
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append("?");
+    
+    for (BaseType type : _lowerBounds) {
+      sb.append(" super ").append(type);
+    }
+    
+    for (BaseType type : _upperBounds) {
+      sb.append(" extends ").append(type);
+    }
+    
+    return sb.toString();
   }
 }

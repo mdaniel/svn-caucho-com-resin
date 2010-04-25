@@ -194,7 +194,25 @@ public class ConversationScope extends AbstractScopeContext
 
   public String getId()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
+
+    ExternalContext extContext = facesContext.getExternalContext();
+    Map<String,Object> sessionMap = extContext.getSessionMap();
+
+    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+
+    if (scope == null) {
+      scope = new Scope();
+      sessionMap.put("caucho.conversation", scope);
+    }
+
+    UIViewRoot root = facesContext.getViewRoot();
+    String id = root.getViewId();
+    
+    return id;
   }
 
   public long getTimeout()

@@ -137,6 +137,7 @@ public class BeanType<T> extends ConfigType<T>
   /**
    * Returns the given type.
    */
+  @Override
   public Class<T> getType()
   {
     return _beanClass;

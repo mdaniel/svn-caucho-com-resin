@@ -41,46 +41,50 @@ import com.caucho.util.LruCache;
 @Module
 public class BaseTypeFactory
 {
-  private LruCache<Type,BaseType> _cache
+  private LruCache<Type,BaseType> _sourceCache
     = new LruCache<Type,BaseType>(128);
   
+  private LruCache<Type,BaseType> _targetCache
+    = new LruCache<Type,BaseType>(128);
+
   private LruCache<Class<?>,BaseType> _classCache
     = new LruCache<Class<?>,BaseType>(128);
 
-  public BaseType create(Type type)
+  public BaseType createForSource(Type type)
   {
-    BaseType baseType = _cache.get(type);
+    if (type instanceof BaseType)
+      return (BaseType) type;
+    
+    BaseType baseType = _sourceCache.get(type);
 
     if (baseType == null) {
-      baseType = BaseType.create(type, new HashMap<String,BaseType>());
+      baseType = BaseType.createForSource(type, new HashMap<String,BaseType>());
 
       if (baseType == null)
 	throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
 
-      _cache.put(type, baseType);
+      _sourceCache.put(type, baseType);
     }
 
     return baseType;
   }
 
-  public BaseType createClass(Class<?> type)
+  public BaseType createForTarget(Type type)
   {
-    BaseType baseType = _classCache.get(type);
+    if (type instanceof BaseType)
+      return (BaseType) type;
+    
+    BaseType baseType = _targetCache.get(type);
 
     if (baseType == null) {
-      baseType = BaseType.createClass(type);
+      baseType = BaseType.createForTarget(type, new HashMap<String,BaseType>());
 
       if (baseType == null)
-	throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
+        throw new NullPointerException("unsupported BaseType: " + type + " " + type.getClass());
 
-      _classCache.put(type, baseType);
+      _targetCache.put(type, baseType);
     }
 
     return baseType;
-  }
-
-  public BaseType create(Type type, HashMap<String,BaseType> paramMap)
-  {
-    return BaseType.create(type, paramMap);
   }
 }

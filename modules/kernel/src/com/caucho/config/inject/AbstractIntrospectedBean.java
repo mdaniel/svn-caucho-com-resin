@@ -35,7 +35,6 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -45,6 +44,7 @@ import java.util.logging.Logger;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
@@ -100,6 +100,8 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     = new ArrayList<Annotation>();
 
   private String _name;
+  
+  private boolean _isAlternative;
 
   private String _passivationId;
 
@@ -108,37 +110,66 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
                                   Annotated annotated)
   {
     super(manager);
+    
     _annotated = annotated;
     
+    /*
     if (type instanceof Class<?>) {
       // ioc/024d
       _baseType = manager.createClassBaseType((Class<?>) type);
     }
     else
       _baseType = manager.createBaseType(type);
+      */
     
+    _baseType = manager.createSourceBaseType(type);
     Typed typed = annotated.getAnnotation(Typed.class);
     
     if (typed != null) {
-      _typeClasses = new LinkedHashSet<Type>();
-      
-      boolean isClass = false;
-      
-      for (Class<?> cl : typed.value()) {
-        _typeClasses.add(cl);
-        
-        if (! cl.isInterface())
-          isClass = true;
-      }
-      
-      if (isClass)
-        _typeClasses.add(Object.class);
+      _typeClasses = fillTyped(_baseType.getTypeClosure(manager), 
+                               typed.value());
     }
     else {
       _typeClasses = _baseType.getTypeClosure(manager);
     }
   }
 
+  private LinkedHashSet<Type> fillTyped(Set<Type> closure,
+                                        Class<?> []values)
+  {
+    LinkedHashSet<Type> typeClasses = new LinkedHashSet<Type>();
+  
+    for (Class<?> cl : values) {
+      fillType(typeClasses, closure, cl);
+    }
+
+    /*
+    if (isClass)
+      typeClasses.add(Object.class);
+      */
+    
+    typeClasses.add(Object.class);
+    
+    return typeClasses;
+  }
+  
+  private void fillType(LinkedHashSet<Type> types, 
+                        Set<Type> closure,
+                        Class<?> cl)
+  {
+    for (Type type : closure) {
+      if (type.equals(cl)) {
+        types.add(type);
+      }
+      else if (type instanceof BaseType) {
+        BaseType baseType = (BaseType) type;
+        
+        if (baseType.getRawClass().equals(cl))
+          types.add(type);
+      }
+    }
+  }
+  
   public BaseType getBaseType()
   {
     return _baseType;
@@ -277,58 +308,11 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     return _types;
   }
-
-  /**
-   * Introspects all the types implemented by the class
-   */
-  protected void introspectTypes(Type type)
+  
+  @Override
+  public boolean isAlternative()
   {
-    introspectTypes(type, null);
-  }
-
-  /**
-   * Introspects all the types implemented by the class
-   */
-  private void introspectTypes(Type type, HashMap<String,BaseType> paramMap)
-  {
-    if (type == null || _reservedTypes.contains(type))
-      return;
-    
-    BaseType baseType = addType(type, paramMap);
-
-    if (baseType == null)
-      return;
-
-    HashMap<String,BaseType> newParamMap = baseType.getParamMap();
-    Class<?> cl = baseType.getRawClass();
-
-    introspectTypes(cl.getGenericSuperclass(), newParamMap);
-
-    for (Type iface : cl.getGenericInterfaces()) {
-      introspectTypes(iface, newParamMap);
-    }
-  }
-
-  protected BaseType addType(Type type, HashMap<String,BaseType> paramMap)
-  {
-    BaseType baseType = BaseType.create(type, paramMap);
-
-    if (baseType == null)
-      return null;
-
-    if (_types.contains(baseType))
-      return null;
-
-    _types.add(baseType);
-
-    /*
-    if (! _typeClasses.contains(baseType.getRawClass()))
-      _typeClasses.add(baseType.getRawClass());
-    */
-    if (! _typeClasses.contains(baseType.toType()))
-      _typeClasses.add(baseType.toType());
-
-    return baseType;
+    return _isAlternative;
   }
 
   public void introspect()
@@ -348,8 +332,13 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     introspectScope(annotated);
     introspectQualifiers(annotated);
     introspectName(annotated);
+    
+    if (annotated.isAnnotationPresent(Alternative.class))
+      _isAlternative = true;
+    
     introspectStereotypes(annotated);
 //    introspectSpecializes(annotated);
+    
 
     introspectDefault();
   }
@@ -461,6 +450,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
           throw new ConfigException(L.l("'{0}' is not allowed on @Stereotype '{1}' because stereotypes may not have @Qualifier annotations",
                                         ann, stereotype));
         }
+        
+        if (annType.equals(Alternative.class))
+          _isAlternative = true;
       }
     }
 

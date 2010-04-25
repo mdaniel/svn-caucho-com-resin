@@ -156,6 +156,7 @@ abstract public class AbstractBean<T>
     return null;
   }
 
+  @Override
   public boolean isAlternative()
   {
     return false;

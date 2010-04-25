@@ -33,6 +33,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Interceptor;
 
@@ -342,8 +343,8 @@ public class BeansConfig {
   public class AlternativesConfig {
     public void addClass(Class<?> cl)
     {
-      if (! cl.isAnnotation())
-        throw new ConfigException(L.l("'{0}' is an invalid alternative because it is not an annotation.",
+      if (cl.isAnnotation())
+        throw new ConfigException(L.l("'{0}' is an invalid alternative because it is an annotation.",
                                       cl.getName()));
       
       _deployList.add(cl);
@@ -351,6 +352,14 @@ public class BeansConfig {
 
     public void addStereotype(Class<?> cl)
     {
+      if (! cl.isAnnotation())
+        throw new ConfigException(L.l("'{0}' is an invalid alternative because it is not an annotation.",
+                                      cl.getName()));
+      
+      if (! cl.isAnnotationPresent(Alternative.class))
+        throw new ConfigException(L.l("'{0}' is an invalid alternative because it is missing an @Alternative.",
+                                      cl.getName()));
+      
       _deployList.add(cl);
     }
   }

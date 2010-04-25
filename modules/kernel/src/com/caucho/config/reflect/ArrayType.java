@@ -31,7 +31,9 @@ package com.caucho.config.reflect;
 
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
+import java.util.Set;
 
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 /**
@@ -49,6 +51,7 @@ public class ArrayType extends BaseType implements GenericArrayType
     _rawType = rawType;
   }
   
+  @Override
   public Class<?> getRawClass()
   {
     return _rawType;
@@ -67,10 +70,10 @@ public class ArrayType extends BaseType implements GenericArrayType
   }
   
   @Override
-  public boolean isMatch(Type type)
+  public boolean isParamAssignableFrom(BaseType type)
   {
-    if (type instanceof GenericArrayType) {
-      GenericArrayType aType = (GenericArrayType) type;
+    if (type instanceof ArrayType) {
+      ArrayType aType = (ArrayType) type;
 
       return _componentType.equals(aType.getGenericComponentType());
     }
@@ -78,6 +81,13 @@ public class ArrayType extends BaseType implements GenericArrayType
       return false;
   }
 
+  @Override
+  protected void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
+  {
+    typeSet.add(toType());
+    typeSet.add(Object.class);
+  }
+  
   @Override
   public boolean isAssignableFrom(BaseType type)
   {

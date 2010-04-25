@@ -252,7 +252,7 @@ public class DecoratorBean<T> implements Decorator<T>
       Class<?> delegateType = _delegateField.getType();
       InjectManager manager = InjectManager.getCurrent();
     
-      _typeSet = manager.createBaseType(delegateType).getTypeClosure(manager);
+      _typeSet = manager.createSourceBaseType(delegateType).getTypeClosure(manager);
     }
   }
 

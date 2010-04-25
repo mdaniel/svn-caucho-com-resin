@@ -250,7 +250,7 @@ class ExtensionManager
         args[i] = new BeanArg(param[i], bindings);
       }
 
-      BaseType baseType = inject.createBaseType(param[0]);
+      BaseType baseType = inject.createTargetBaseType(param[0]);
 
       return new ExtensionMethod(method, baseType,
                                  inject.getQualifiers(paramAnn[0]),

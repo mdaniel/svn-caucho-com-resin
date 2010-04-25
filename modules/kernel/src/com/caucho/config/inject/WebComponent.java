@@ -40,21 +40,17 @@ import java.util.Set;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.Bean;
-import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
-import com.caucho.util.L10N;
 
 /**
  * Configuration for the web bean component.
  */
 @Module
 public class WebComponent {
-  private static final L10N L = new L10N(WebComponent.class);
-
   private InjectManager _beanManager;
 
   private Class<?> _rawType;
@@ -80,28 +76,10 @@ public class WebComponent {
         && ((ProducesBean<?,?>) bean).isInjectionPoint()) {
       _injectionPointEntry = new BeanEntry(type, bean);
     }
-
+    
     _beanList.add(new BeanEntry(type, bean));
     
     Collections.sort(_beanList);
-
-    /*
-    for (int i = _componentList.size() - 1; i >= 0; i--) {
-      ComponentImpl oldComponent = _componentList.get(i);
-
-      if (! comp.getClassName().equals(oldComponent.getClassName())) {
-      }
-      else if (comp.isFromClass() && ! oldComponent.isFromClass())
-        return;
-      else if (! comp.isFromClass() && oldComponent.isFromClass())
-        _componentList.remove(i);
-      else if (comp.equals(oldComponent)) {
-        return;
-      }
-    }
-
-    _componentList.add(comp);
-    */
   }
 
   public void createProgram(ArrayList<ConfigProgram> initList,
@@ -118,7 +96,7 @@ public class WebComponent {
 
   public Set<Bean<?>> resolve(Type type, Annotation []bindings)
   {
-    BaseType baseType = _beanManager.createBaseType(type);
+    BaseType baseType = _beanManager.createTargetBaseType(type);
 
     return resolve(baseType, bindings);
   }

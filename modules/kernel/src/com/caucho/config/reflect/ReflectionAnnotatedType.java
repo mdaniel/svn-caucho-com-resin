@@ -148,7 +148,7 @@ public class ReflectionAnnotatedType<T>
   private void introspect(Class<T> cl)
   {
     try {
-      introspectInheritedAnnotations(cl.getSuperclass());
+      introspectInheritedAnnotations(cl);
       
       if (cl.isAnnotationPresent(Specializes.class))
         introspectSpecializesAnnotations(cl);
@@ -214,11 +214,12 @@ public class ReflectionAnnotatedType<T>
   
   private void introspectInheritedAnnotations(Class<?> cl)
   {
-    introspectInheritedAnnotations(cl, false);
+    introspectInheritedAnnotations(cl, false, false);
   }
 
   private void introspectInheritedAnnotations(Class<?> cl,
-                                              boolean isScope)
+                                              boolean isScope,
+                                              boolean isQualifier)
   {
     if (cl == null)
       return;
@@ -233,6 +234,16 @@ public class ReflectionAnnotatedType<T>
   
         isScope = true;
       }
+
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
+        if (isQualifier)
+          continue;
+  
+        isQualifier = true;
+      }
+      
+      if (cl == _javaClass)
+        continue;
 
       if (! annType.isAnnotationPresent(Inherited.class)) {
         continue;
@@ -252,7 +263,7 @@ public class ReflectionAnnotatedType<T>
       addAnnotation(ann);
     }
 
-    introspectInheritedAnnotations(cl.getSuperclass(), isScope);
+    introspectInheritedAnnotations(cl.getSuperclass(), isScope, isQualifier);
   }
 
   private void introspectSpecializesAnnotations(Class<?> cl)

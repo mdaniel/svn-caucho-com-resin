@@ -66,7 +66,9 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   @Override
   public boolean isWildcard()
   {
+    // ioc/024j vs ioc/024k
     return true;
+    // return false;
   }
 
   @Override
@@ -79,6 +81,12 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     }
 
     return bounds;
+  }
+  
+  @Override
+  protected BaseType []getWildcardBounds()
+  {
+    return _bounds;
   }
   
   @Override
@@ -113,9 +121,9 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   }
   
   @Override
-  public boolean isMatch(Type type)
+  public boolean isParamAssignableFrom(BaseType type)
   {
-    if (type instanceof TypeVariable<?>) {
+    if (type instanceof VarType<?>) {
       return true;
     }
     else
@@ -144,6 +152,15 @@ public class VarType<D extends GenericDeclaration> extends BaseType
 
   public String toString()
   {
-    return _name;
+    if (_bounds.length == 0)
+      return _name;
+    
+    StringBuilder sb = new StringBuilder(_name);
+    
+    for (BaseType type : _bounds) {
+      sb.append(" extends ").append(type);
+    }
+    
+    return sb.toString();
   }
 }

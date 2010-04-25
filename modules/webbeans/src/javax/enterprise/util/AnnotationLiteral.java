@@ -48,25 +48,40 @@ import java.lang.reflect.*;
 public abstract class AnnotationLiteral<T extends Annotation>
   implements Annotation
 {
-  private transient Class<T> _annotationType;
+  private static final Class []ZERO_CLASS = new Class[0];
   
-  @SuppressWarnings("unchecked")
+  private transient Class<T> _annotationType;
+  private transient int _hashCode;
+  
+  protected AnnotationLiteral()
+  {
+  }
+  
   @Override
   public final Class<T> annotationType()
   {
     if (_annotationType == null) {
-      Type type = getClass().getGenericSuperclass();
-
-      if (type instanceof ParameterizedType) {
-        ParameterizedType pType = (ParameterizedType) type;
-
-        _annotationType = (Class) pType.getActualTypeArguments()[0];
-      }
-      else
-        throw new UnsupportedOperationException(type.toString());
+      fillAnnotationType(getClass());
     }
     
     return _annotationType;
+  }
+  
+  private void fillAnnotationType(Class<?> cl)
+  {
+    if (cl == null)
+      throw new UnsupportedOperationException(getClass().toString());
+      
+    Type type = cl.getGenericSuperclass();
+
+    if (type instanceof ParameterizedType) {
+      ParameterizedType pType = (ParameterizedType) type;
+
+      _annotationType = (Class) pType.getActualTypeArguments()[0];
+    }
+    else {
+      fillAnnotationType(cl.getSuperclass());
+    }
   }
   
   @Override
@@ -82,20 +97,24 @@ public abstract class AnnotationLiteral<T extends Annotation>
     if (! type.isInstance(o))
       return false;
     
-    for (Method method : type.getMethods()) {
-      if (method.getParameterTypes().length > 0 
-          || method.getDeclaringClass() == Annotation.class
-          || method.getDeclaringClass() == Object.class) {
+    for (Method annMethod : type.getMethods()) {
+      if (annMethod.getParameterTypes().length > 0 
+          || annMethod.getDeclaringClass() == Annotation.class
+          || annMethod.getDeclaringClass() == Object.class) {
         continue;
       }
       
       try {
+        Method method = getClass().getMethod(annMethod.getName());
+        method.setAccessible(true);
         Object a = method.invoke(this);
-        Object b = method.invoke(o);
+        Object b = annMethod.invoke(o);
         
         if (a != b && (a == null || ! a.equals(b)))
           return false;
       } catch (Exception e) {
+        e.printStackTrace();
+        
         return false;
       }
     }
@@ -106,17 +125,31 @@ public abstract class AnnotationLiteral<T extends Annotation>
   @Override
   public int hashCode()
   {
+    if (_hashCode != 0)
+      return _hashCode;
+    
     int hash = 0;
     
-    for (Method method : annotationType().getMethods()) {
-      if (method.getParameterTypes().length > 0 
-          || method.getDeclaringClass() == Annotation.class
-          || method.getDeclaringClass() == Object.class) {
+    Method []annMethods = annotationType().getMethods();
+    
+    for (Method annMethod : annMethods) {
+      if (annMethod.getParameterTypes().length > 0 
+          || annMethod.getDeclaringClass() == Annotation.class
+          || annMethod.getDeclaringClass() == Object.class) {
         continue;
       }
       
-      hash += (127 * method.getName().hashCode() ^ valueHashCode(method));
+      try {
+        Method method = getClass().getMethod(annMethod.getName());
+        
+        method.setAccessible(true);
+
+        hash += (127 * method.getName().hashCode()) ^ valueHashCode(method);
+      } catch (Exception e) {
+      }
     }
+    
+    _hashCode = hash;
 
     return hash;
   }
@@ -125,7 +158,7 @@ public abstract class AnnotationLiteral<T extends Annotation>
   {
     try {
       Object value = method.invoke(this);
-      
+
       if (value != null)
         return value.hashCode();
       else

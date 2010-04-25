@@ -88,28 +88,19 @@ public class ClassType extends BaseType
   {
     return _type;
   }
-  
-  @Override
-  public boolean isMatch(Type type)
-  {
-    return _type.equals(type);
-  }
-
-  @Override
-  public boolean isParamAssignableFrom(BaseType type)
-  {
-    if (_type.equals(type.getRawClass()))
-      return true;
-    else if (type.isWildcard())
-      return true;
-    else
-      return false;
-  }
-    
+ 
   @Override
   public boolean isAssignableFrom(BaseType type)
   {
-    if (! _type.isAssignableFrom(type.getRawClass()))
+    if (type.isWildcard()) {
+      for (BaseType bound : type.getWildcardBounds()) {
+        if (! isAssignableFrom(bound))
+          return false;
+      }
+      
+      return true;
+    }
+    else if (! _type.isAssignableFrom(type.getRawClass()))
       return false;
     else if (type.getParameters().length > 0) {
       for (BaseType param : type.getParameters()) {
@@ -124,30 +115,24 @@ public class ClassType extends BaseType
   }
 
   @Override
-  public BaseType findClass(InjectManager manager, Class<?> cl)
+  public boolean isParamAssignableFrom(BaseType type)
   {
-    if (_type.equals(cl))
-      return this;
-
-    for (Type type : _type.getGenericInterfaces()) {
-      BaseType ifaceType = manager.createBaseType(type);
-
-      BaseType baseType = ifaceType.findClass(manager, cl);
-
-      if (baseType != null)
-	return baseType;
+    if (type.isWildcard()) {
+      for (BaseType bound : type.getWildcardBounds()) {
+        if (! isAssignableFrom(bound))
+          return false;
+      }
+      
+      return true;
     }
-
-    Class<?> superclass = _type.getSuperclass();
-
-    if (superclass == null)
-      return null;
-
-    BaseType superType = manager.createBaseType(superclass);
-
-    return superType.findClass(manager, cl);
+    else if (_type.equals(type.getRawClass()))
+      return true;
+    else if (type.isWildcard())
+      return true;
+    else
+      return false;
   }
-
+   
   @Override
   public void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
   {
@@ -157,17 +142,17 @@ public class ClassType extends BaseType
       return;
     
     typeSet.add(ownType);
-
+    
     for (Type type : _type.getGenericInterfaces()) {
-      BaseType ifaceType = manager.createBaseType(type);
+      BaseType ifaceType = manager.createSourceBaseType(type);
       
       ifaceType.fillTypeClosure(manager, typeSet);
     }
 
-    Class<?> superclass = _type.getSuperclass();
+    Type superclass = _type.getGenericSuperclass();
 
     if (superclass != null) {
-      BaseType superType = manager.createBaseType(superclass);
+      BaseType superType = manager.createSourceBaseType(superclass);
       
       superType.fillTypeClosure(manager, typeSet);
     }
@@ -229,8 +214,8 @@ public class ClassType extends BaseType
     _classTypeMap.put(Object.class, new ClassType(Object.class));
     _classTypeMap.put(String.class, new ClassType(String.class));
     
-    OBJECT_TYPE = BaseType.create(Object.class, 
-                                  new HashMap<String,BaseType>());
+    OBJECT_TYPE = BaseType.createForSource(Object.class, 
+                                           new HashMap<String,BaseType>());
     
     _classTypeIgnoreSet.add(Serializable.class);
     _classTypeIgnoreSet.add(Cloneable.class);
