@@ -29,6 +29,7 @@
 
 package com.caucho.config.reflect;
 
+import com.caucho.config.inject.InjectManager;
 import com.caucho.loader.EnvironmentLocal;
 
 import java.lang.ref.SoftReference;
@@ -42,11 +43,11 @@ public class ReflectionAnnotatedFactory
   private static EnvironmentLocal<ReflectionAnnotatedFactory> _current
     = new EnvironmentLocal<ReflectionAnnotatedFactory>();
 
-  private WeakHashMap<Class,SoftReference<ReflectionSimpleAnnotatedType>> _simpleTypeMap
-    = new WeakHashMap<Class,SoftReference<ReflectionSimpleAnnotatedType>>();
+  private WeakHashMap<Class<?>,SoftReference<ReflectionSimpleAnnotatedType>> _simpleTypeMap
+    = new WeakHashMap<Class<?>,SoftReference<ReflectionSimpleAnnotatedType>>();
 
-  private WeakHashMap<Class,SoftReference<ReflectionAnnotatedType>> _typeMap
-    = new WeakHashMap<Class,SoftReference<ReflectionAnnotatedType>>();
+  private WeakHashMap<Class<?>,SoftReference<ReflectionAnnotatedType>> _typeMap
+    = new WeakHashMap<Class<?>,SoftReference<ReflectionAnnotatedType>>();
 
   /**
    * Returns the factory for the given loader.
@@ -69,7 +70,7 @@ public class ReflectionAnnotatedFactory
    * Introspects a simple reflection type, i.e. a type without
    * fields and methods.
    */
-  public static ReflectionSimpleAnnotatedType introspectSimpleType(Class cl)
+  public static ReflectionSimpleAnnotatedType introspectSimpleType(Class<?> cl)
   {
     return create(cl.getClassLoader()).introspectSimpleTypeImpl(cl);
   }
@@ -89,7 +90,10 @@ public class ReflectionAnnotatedFactory
       type = typeRef.get();
 
     if (type == null) {
-      type = new ReflectionSimpleAnnotatedType(cl);
+      InjectManager inject = InjectManager.create();
+      BaseType baseType = inject.createSourceBaseType(cl);
+      
+      type = new ReflectionSimpleAnnotatedType(inject, baseType);
 
       typeRef = new SoftReference<ReflectionSimpleAnnotatedType>(type);
 
@@ -103,7 +107,7 @@ public class ReflectionAnnotatedFactory
    * Introspects a simple reflection type, i.e. a type without
    * fields and methods.
    */
-  public static ReflectionAnnotatedType introspectType(Class cl)
+  public static <X> ReflectionAnnotatedType<X> introspectType(Class<X> cl)
   {
     return create(cl.getClassLoader()).introspectTypeImpl(cl);
   }
@@ -112,7 +116,7 @@ public class ReflectionAnnotatedFactory
    * Introspects the reflection type
    */
   synchronized
-  private ReflectionAnnotatedType introspectTypeImpl(Class cl)
+  private <X> ReflectionAnnotatedType<X> introspectTypeImpl(Class<X> cl)
   {
     SoftReference<ReflectionAnnotatedType> typeRef
       = _typeMap.get(cl);
@@ -123,7 +127,9 @@ public class ReflectionAnnotatedFactory
       type = typeRef.get();
 
     if (type == null) {
-      type = new ReflectionAnnotatedType(cl);
+      InjectManager inject = InjectManager.create();
+      
+      type = new ReflectionAnnotatedType(inject, inject.createSourceBaseType(cl));
 
       typeRef = new SoftReference<ReflectionAnnotatedType>(type);
 

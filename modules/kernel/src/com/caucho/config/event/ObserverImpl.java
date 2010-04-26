@@ -29,33 +29,35 @@
 
 package com.caucho.config.event;
 
-import java.util.*;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import javax.enterprise.event.Observes;
-import javax.enterprise.event.Reception;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.Iterator;
+import java.util.Set;
+
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.event.Observes;
+import javax.enterprise.event.Reception;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ObserverMethod;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.AbstractBean;
-import com.caucho.config.inject.InjectManager;
+import com.caucho.config.ConfigException;
+import com.caucho.config.LineConfigException;
 import com.caucho.config.inject.AbstractObserverMethod;
-import com.caucho.util.*;
-import com.caucho.config.cfg.*;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.util.L10N;
 
 /**
  * Implements a single observer.
  */
-public class ObserverImpl extends AbstractObserverMethod {
+public class ObserverImpl<X,T> extends AbstractObserverMethod<T> {
   private static final L10N L = new L10N(ObserverImpl.class);
 
   private static final Object []NULL_ARGS = new Object[0];
 
   private final InjectManager _inject;
-  private final AbstractBean _bean;
+  private final Bean<X> _bean;
 
   private final Method _method;
   private final int _paramIndex;
@@ -63,10 +65,10 @@ public class ObserverImpl extends AbstractObserverMethod {
   private boolean _hasBinding;
   private boolean _ifExists;
 
-  private Bean []_args;
+  private Bean<?> []_args;
 
   public ObserverImpl(InjectManager webBeans,
-                      AbstractBean bean,
+                      Bean<X> bean,
                       Method method,
                       int paramIndex)
   {
@@ -86,7 +88,7 @@ public class ObserverImpl extends AbstractObserverMethod {
     bind();
   }
 
-  public Class getType()
+  public Class<?> getType()
   {
     return _method.getParameterTypes()[_paramIndex];
   }
@@ -134,7 +136,7 @@ public class ObserverImpl extends AbstractObserverMethod {
         if (hasObserves(annList[i]))
           continue;
 
-        Set beans = _inject.getBeans(param[i], annList[i]);
+        Set<Bean<?>> beans = _inject.getBeans(param[i], annList[i]);
 
         if (beans == null || beans.size() == 0) {
           throw new ConfigException(loc
@@ -142,12 +144,12 @@ public class ObserverImpl extends AbstractObserverMethod {
                                           getSimpleName(param[i])));
         }
 
-        Bean comp = null;
+        Bean<?> comp = null;
 
         // XXX: error checking
-        Iterator iter = beans.iterator();
+        Iterator<Bean<?>> iter = beans.iterator();
         if (iter.hasNext()) {
-          comp = (Bean) iter.next();
+          comp = iter.next();
         }
 
         _args[i] = comp;
@@ -177,7 +179,7 @@ public class ObserverImpl extends AbstractObserverMethod {
     }
     else {
       // XXX: perf
-      CreationalContext env = _inject.createCreationalContext(_bean);
+      CreationalContext<X> env = _inject.createCreationalContext(_bean);
 
       obj = _inject.getReference(_bean, _bean.getBeanClass(), env);
     }
@@ -213,10 +215,10 @@ public class ObserverImpl extends AbstractObserverMethod {
   {
     if (this == obj)
       return true;
-    else if (! (obj instanceof ObserverImpl))
+    else if (! (obj instanceof ObserverImpl<?,?>))
       return false;
 
-    ObserverImpl comp = (ObserverImpl) obj;
+    ObserverImpl<?,?> comp = (ObserverImpl<?,?>) obj;
 
     if (! _bean.equals(comp._bean)) {
       return false;
@@ -245,8 +247,8 @@ public class ObserverImpl extends AbstractObserverMethod {
 
   protected static String getSimpleName(Type type)
   {
-    if (type instanceof Class)
-      return ((Class) type).getSimpleName();
+    if (type instanceof Class<?>)
+      return ((Class<?>) type).getSimpleName();
     else
       return String.valueOf(type);
   }

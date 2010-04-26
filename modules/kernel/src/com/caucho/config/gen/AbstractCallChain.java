@@ -288,9 +288,10 @@ abstract public class AbstractCallChain<X,T> implements EjbCallChain<X,T> {
                                                    AnnotatedType<?> apiClass,
                                                    AnnotatedType<?> implClass)
   {
-    Z annotation;
+    Z annotation = null;
 
-    annotation = apiClass.getAnnotation(annotationType);
+    if (apiClass != null)
+      annotation = apiClass.getAnnotation(annotationType);
   
     if ((annotation == null) && (implClass != null)) {
       annotation = implClass.getAnnotation(annotationType);
@@ -305,11 +306,13 @@ abstract public class AbstractCallChain<X,T> implements EjbCallChain<X,T> {
                                                    AnnotatedMethod<?> implementationMethod, 
                                                    AnnotatedType<?> implementationClass) 
   {
-    Z annotation;
+    Z annotation = null;
 
-    annotation = apiMethod.getAnnotation(annotationType);
+    if (apiMethod != null) {
+      annotation = apiMethod.getAnnotation(annotationType);
+    }
 
-    if (annotation == null) {
+    if (annotation == null && apiClass != null) {
       annotation = apiClass.getAnnotation(annotationType);
     }
 

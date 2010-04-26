@@ -56,6 +56,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.MessageDestinationRef;
 import com.caucho.config.types.Period;
@@ -439,7 +440,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public void setEJBClass(Class<X> ejbClass)
     throws ConfigException
   {
-    AnnotatedTypeImpl<X> annType = new AnnotatedTypeImpl<X>(ejbClass);
+    AnnotatedTypeImpl<X> annType;
+    
+    AnnotatedType<?> refType = ReflectionAnnotatedFactory.introspectType(ejbClass);
+    
+    annType = new AnnotatedTypeImpl(refType);
     
     setEJBClassWrapper(annType);
   }
@@ -608,7 +613,13 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public <T> void addLocal(Class<T> local)
     throws ConfigException
   {
-    addLocalWrapper(new AnnotatedTypeImpl<T>(local));
+    AnnotatedTypeImpl<X> annType;
+    
+    AnnotatedType<?> refType = ReflectionAnnotatedFactory.introspectType(local);
+    
+    annType = new AnnotatedTypeImpl(refType);
+    
+    addLocalWrapper(annType);
   }
 
   /**

@@ -27,34 +27,23 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.scope;
+package com.caucho.inject;
 
-import com.caucho.config.inject.AbstractBean;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.ElementType.FIELD;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-import java.io.Closeable;
-import javax.enterprise.context.spi.CreationalContext;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * The application scope value
+ * @LazyExtension marks a CDI extension as processing beans lazily, i.e.
+ * not requiring scanning of all classes.
  */
-public class ComponentDestructor implements Closeable {
-  private AbstractBean _owner;
-  private Object _value;
-  private CreationalContext _env;
-
-  public ComponentDestructor(AbstractBean owner, Object value)
-  {
-    _owner = owner;
-    _value = value;
-  }
-
-  public void close()
-  {
-    _owner.destroy(_value, _env);
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _owner + "," + _value + "]";
-  }
+@Documented  
+@Retention(RUNTIME)
+@Target({TYPE, FIELD, METHOD})
+public @interface LazyExtension {
 }

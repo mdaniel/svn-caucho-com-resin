@@ -183,9 +183,9 @@ public class BeanConfig {
       return _cl;
   }
 
-  public AbstractBean<?> getComponent()
+  public Bean<?> getComponent()
   {
-    return (AbstractBean<?>) _bean;
+    return _bean;
   }
 
   /**
@@ -323,13 +323,13 @@ public class BeanConfig {
   /**
    * Returns the configured component factory.
    */
-  public AbstractBean getComponentFactory()
+  private Bean getComponentFactory()
   {
-    return (AbstractBean) _bean;
+    return _bean;
   }
 
   // XXX: temp for OSGI
-  public boolean isService()
+  private boolean isService()
   {
     return _isService;
   }
@@ -447,7 +447,7 @@ public class BeanConfig {
     return _uri;
   }
 
-  public void addCustomBean(CustomBeanConfig customBean)
+  public void addCustomBean(CustomBeanConfig<?> customBean)
   {
     _customBean = customBean;
   }

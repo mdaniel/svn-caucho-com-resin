@@ -76,7 +76,7 @@ import com.caucho.util.L10N;
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
 @Module
-public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
+public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   implements ScopeAdapterBean<X>
 {
   private static final L10N L = new L10N(ManagedBeanImpl.class);
@@ -93,10 +93,10 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
 
   private Object _scopeAdapter;
 
-  public ManagedBeanImpl(InjectManager webBeans,
+  public ManagedBeanImpl(InjectManager injectManager,
                          AnnotatedType<X> beanType)
   {
-    super(webBeans, beanType);
+    super(injectManager, beanType.getBaseType(), beanType);
 
     _annotatedType = beanType;
 
@@ -105,7 +105,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
       validateType((Class) beanType.getType());
     */
 
-    _injectionTarget = this;
+    _injectionTarget = new InjectionTargetImpl(injectManager, beanType);
   }
 
   public ManagedBeanImpl(InjectManager webBeans,
@@ -241,6 +241,8 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   public void introspect()
   {
     super.introspect();
+    
+    introspect(_annotatedType);
 
     // ioc/0e13
     if (_injectionTarget instanceof PassivationSetter)
@@ -286,10 +288,9 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   /**
    * Called for implicit introspection.
    */
-  @Override
-  public void introspect(AnnotatedType<X> beanType)
+  protected void introspect(AnnotatedType<X> beanType)
   {
-    super.introspect(beanType);
+    // super.introspect(beanType);
 
     introspectProduces(beanType);
 
@@ -437,10 +438,10 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
   /**
    * Introspects the methods for any @Produces
    */
-  protected void introspectObservers(AnnotatedType<?> beanType)
+  protected void introspectObservers(AnnotatedType<X> beanType)
   {
-    for (AnnotatedMethod<?> beanMethod : beanType.getMethods()) {
-      for (AnnotatedParameter param : beanMethod.getParameters()) {
+    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+      for (AnnotatedParameter<? super X> param : beanMethod.getParameters()) {
         if (param.isAnnotationPresent(Observes.class)) {
           addObserver(beanMethod);
           break;
@@ -449,7 +450,7 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     }
   }
 
-  protected void addObserver(AnnotatedMethod beanMethod)
+  protected void addObserver(AnnotatedMethod<? super X> beanMethod)
   {
     int param = findObserverAnnotation(beanMethod);
 
@@ -488,18 +489,18 @@ public class ManagedBeanImpl<X> extends InjectionTargetImpl<X>
     _observerMethods.add(observerMethod);
   }
 
-  private <X> int findObserverAnnotation(AnnotatedMethod<X> method)
+  private <Z> int findObserverAnnotation(AnnotatedMethod<Z> method)
   {
-    List<AnnotatedParameter<X>> params = method.getParameters();
+    List<AnnotatedParameter<Z>> params = method.getParameters();
     int size = params.size();
     int observer = -1;
 
     for (int i = 0; i < size; i++) {
-      AnnotatedParameter param = params.get(i);
+      AnnotatedParameter<?> param = params.get(i);
 
       for (Annotation ann : param.getAnnotations()) {
         if (ann instanceof Observes) {
-          if (observer >= 0)
+          if (observer >= 0 && observer != i)
             throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
 
           observer = i;

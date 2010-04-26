@@ -182,31 +182,12 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
 
   private void introspectFields(Class<?> cl)
   {
-    if (cl == null)
-      return;
-
-    introspectFields(cl.getSuperclass());
-
-    for (Field field : cl.getDeclaredFields()) {
-      if (hasBeanAnnotation(field.getAnnotations())) {
-        _fieldSet.add(new AnnotatedFieldImpl(this, field));
-      }
-    }
+    throw new UnsupportedOperationException();
   }
 
   private void introspectMethods(Class<?> cl)
   {
-    if (cl == null)
-      return;
-    
-    for (Method method : cl.getDeclaredMethods()) {
-      if (hasBeanAnnotation(method)
-          || Modifier.isPublic(method.getModifiers())) {
-        _methodSet.add(new AnnotatedMethodImpl(this, null, method));
-      }
-    }
-
-    introspectMethods(cl.getSuperclass());
+    throw new UnsupportedOperationException();
   }
 
   private void introspectInheritedAnnotations(Class<?> cl)

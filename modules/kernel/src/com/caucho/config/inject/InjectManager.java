@@ -92,6 +92,7 @@ import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.ObserverMethod;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -192,9 +193,6 @@ public class InjectManager
     = new ExtensionManager(this);
   
   private AtomicLong _version = new AtomicLong();
-
-  private HashSet<String> _configuredClasses
-    = new HashSet<String>();
 
   private HashMap<Class<?>,Class<?>> _specializedMap
     = new HashMap<Class<?>,Class<?>>();
@@ -379,7 +377,6 @@ public class InjectManager
       _xmlExtension = new XmlStandardPlugin(this);
       addExtension(_xmlExtension);
       _extensionManager.createExtension("com.caucho.server.webbeans.ResinStandardPlugin");
-      
 
       if (_classLoader != null && isSetLocal) {
         // _classLoader.addScanListener(this);
@@ -909,27 +906,46 @@ public class InjectManager
     return createManagedBean(type);
   }
 
-  /**
-   * Processes the discovered bean
-   */
-  public <T> Bean<T> processBean(Bean<T> bean)
+  public <T> Bean<T> processBean(Bean<T> bean, ProcessBean<T> processBean)
   {
-    ProcessBeanImpl<T> processBean = new ProcessBeanImpl<T>(this, bean);
+    BaseType baseType = createTargetBaseType(processBean.getClass());
+    baseType = baseType.fill(createTargetBaseType(bean.getBeanClass()));
 
-    fireExtensionEvent(processBean);
+    fireExtensionEvent(processBean, baseType);
 
-    if (processBean.isVeto())
+    if (processBean instanceof ProcessBeanImpl<?>
+        && ((ProcessBeanImpl<?>) processBean).isVeto())
       return null;
     else
       return processBean.getBean();
   }
 
   /**
-   * Adds a new bean definition to the manager
+   * Processes the discovered bean
    */
   public <T> void addBean(Bean<T> bean)
   {
-    bean = processBean(bean);
+    AnnotatedType<T> ann = null;
+    
+    if (bean instanceof AbstractBean<?>)
+      ann = ((AbstractBean<T>) bean).getAnnotatedType();
+    
+    ProcessBeanImpl<T> processBean;
+    
+    if (bean instanceof ManagedBeanImpl<?>)
+      processBean = new ProcessManagedBeanImpl<T>(this, bean, ann);
+    else
+      processBean = new ProcessBeanImpl<T>(this, bean, ann);
+    
+    addBean(bean, processBean);
+  }
+  
+  /**
+   * Adds a new bean definition to the manager
+   */
+  public <T> void addBean(Bean<T> bean, ProcessBean<T> processBean)
+  {
+    bean = processBean(bean, processBean);
 
     if (bean == null)
       return;
@@ -1049,7 +1065,7 @@ public class InjectManager
     else if (New.class.equals(bindings[0].annotationType())) {
       // ioc/0721
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
-      AbstractBean<?> newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      NewBean<?> newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
       newBean.introspect();
 
       set.add(newBean);
@@ -1652,14 +1668,16 @@ public class InjectManager
 */
   }
 
-  private Bean<?> createNewBean(Type type)
+  private <T> Bean<?> createNewBean(Type type)
   {
     Bean<?> bean = _newBeanMap.get(type);
 
     if (bean == null) {
       BaseType baseType = createTargetBaseType(type);
+      Class<T> rawClass = (Class<T>) baseType.getRawClass();
+      AnnotatedType<T> annType = new AnnotatedTypeImpl<T>(rawClass, rawClass);
 
-      AbstractBean<?> newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      NewBean<T> newBean = new NewBean<T>(this, annType);
       newBean.introspect();
 
       _newBeanMap.put(type, bean);
@@ -2069,6 +2087,8 @@ public class InjectManager
 
     fillLocalObserverList(localMap, observerList, eventType);
 
+    log.warning("FIRE: " + eventType + " " + observerList);
+    
     int size = observerList.size();
     for (int i = 0; i < size; i++) {
       observerList.get(i).fireEvent(event, eventType, bindings);

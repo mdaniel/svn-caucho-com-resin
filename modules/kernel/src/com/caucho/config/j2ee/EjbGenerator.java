@@ -38,6 +38,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.naming.*;
 import com.caucho.util.L10N;
 
+import javax.enterprise.inject.spi.Bean;
 import javax.naming.*;
 import javax.persistence.*;
 import java.lang.reflect.AccessibleObject;
@@ -64,7 +65,7 @@ public class EjbGenerator extends ValueGenerator {
   
   private final String _location;
 
-  private AbstractBean _component;
+  private Bean _component;
   private boolean _isBound;
 
   EjbGenerator(Class type,

@@ -52,6 +52,7 @@ import javax.inject.Qualifier;
 import javax.inject.Scope;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 
 /**
@@ -77,18 +78,15 @@ public class ReflectionAnnotatedType<T>
   private Set<AnnotatedMethod<? super T>> _methodSet
     = new LinkedHashSet<AnnotatedMethod<? super T>>();
 
-  ReflectionAnnotatedType(Class<T> javaClass)
+  ReflectionAnnotatedType(InjectManager manager, BaseType type)
   {
-    this(javaClass, javaClass);
-  }
+    super(type.getRawClass(),
+          type.getTypeClosure(manager),
+          type.getRawClass().getDeclaredAnnotations());
 
-  ReflectionAnnotatedType(Type type, Class<T> javaClass)
-  {
-    super(type, javaClass.getDeclaredAnnotations());
+    _javaClass = (Class<T>) type.getRawClass();
 
-    _javaClass = javaClass;
-
-    introspect(javaClass);
+    introspect(_javaClass);
   }
 
   /**
@@ -182,13 +180,13 @@ public class ReflectionAnnotatedType<T>
   {
     if (cl == null)
       return;
-
+    
     introspectFields(cl.getSuperclass());
 
     for (Field field : cl.getDeclaredFields()) {
       try {
         // ioc/0p23
-        _fieldSet.add(new AnnotatedFieldImpl(this, field));
+        _fieldSet.add(new AnnotatedFieldImpl<T>(this, field));
       } catch (ConfigException e) {
 	throw e;
       } catch (Throwable e) {
@@ -203,12 +201,15 @@ public class ReflectionAnnotatedType<T>
       return;
     
     for (Method method : cl.getDeclaredMethods()) {
+      if (method.getDeclaringClass().equals(Object.class))
+        continue;
+      
       if (hasBeanAnnotation(method)
           || Modifier.isPublic(method.getModifiers())) {
         _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
       }
     }
-
+    
     introspectMethods(cl.getSuperclass());
   }
   

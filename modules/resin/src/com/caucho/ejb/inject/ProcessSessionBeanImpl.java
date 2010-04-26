@@ -27,63 +27,48 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.reflect;
+package com.caucho.ejb.inject;
 
-import java.lang.reflect.Field;
-import java.lang.reflect.Modifier;
-
-import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.ProcessSessionBean;
+import javax.enterprise.inject.spi.SessionBeanType;
 
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ProcessManagedBeanImpl;
 import com.caucho.inject.Module;
 
-
 /**
- * Abstract introspected view of a Bean
+ * Internal implementation for a Bean
  */
 @Module
-public class AnnotatedFieldImpl<X>
-  extends AnnotatedElementImpl implements AnnotatedField<X>
+public class ProcessSessionBeanImpl<X> extends ProcessManagedBeanImpl<Object>
+  implements ProcessSessionBean<X>
 {
-  private AnnotatedType<X> _declaringType;
+  private String _ejbName;
+  private SessionBeanType _sessionBeanType;
   
-  private Field _field;
-  
-  public AnnotatedFieldImpl(AnnotatedType<X> declaringType, Field field)
+  public ProcessSessionBeanImpl(InjectManager manager,
+                                Bean<Object> bean,
+                                AnnotatedType<Object> beanAnnType,
+                                String ejbName,
+                                SessionBeanType type)
   {
-    super(field.getGenericType(), null, field.getAnnotations());
-
-    _declaringType = declaringType;
-    _field = field;
-
-    introspect(field);
-  }
-
-  public AnnotatedType<X> getDeclaringType()
-  {
-    return _declaringType;
-  }
-  
-  /**
-   * Returns the reflected Method
-   */
-  public Field getJavaMember()
-  {
-    return _field;
-  }
-
-  public boolean isStatic()
-  {
-    return Modifier.isStatic(_field.getModifiers());
-  }
-
-  private void introspect(Field field)
-  {
+    super(manager, bean, beanAnnType);
+    
+    _ejbName = ejbName;
+    _sessionBeanType = type;
   }
 
   @Override
-  public String toString()
+  public String getEjbName()
   {
-    return getClass().getSimpleName() + "[" + _field + "]";
+    return _ejbName;
+  }
+
+  @Override
+  public SessionBeanType getSessionBeanType()
+  {
+    return _sessionBeanType;
   }
 }

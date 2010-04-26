@@ -44,9 +44,8 @@ package javax.enterprise.inject.spi;
  * }
  * </pre></code>
  */
-public interface ProcessSessionBean<X> extends ProcessBean<Object>
+public interface ProcessSessionBean<X> extends ProcessManagedBean<Object>
 {
-  public AnnotatedType<X> getAnnotatedSessionBeanClass();
   public String getEjbName();
   public SessionBeanType getSessionBeanType();
 }

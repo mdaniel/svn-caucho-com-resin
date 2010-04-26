@@ -33,6 +33,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.Config;
@@ -111,7 +112,7 @@ public class ProtocolPortConfig extends SocketLinkListener
       Protocol protocol
         = (Protocol) webBeans.createTransientObjectNoInit(_protocolClass);
       */
-      InjectionTarget target = webBeans.createManagedBean(_protocolClass);
+      InjectionTarget target = webBeans.createInjectionTarget(_protocolClass);
       CreationalContext env = webBeans.createCreationalContext(null);
 
       AbstractProtocol protocol = (AbstractProtocol) target.produce(env);

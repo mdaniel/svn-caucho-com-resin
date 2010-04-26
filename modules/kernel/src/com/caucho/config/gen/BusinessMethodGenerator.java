@@ -360,7 +360,7 @@ public class BusinessMethodGenerator<X,T> implements EjbCallChain<X,T> {
       out.print("protected ");
     else
       throw new IllegalStateException(_apiMethod.toString()
-          + " must be public or protected");
+                                      + " must be public or protected");
 
     out.printClass(apiJavaMethod.getReturnType());
     out.print(" ");

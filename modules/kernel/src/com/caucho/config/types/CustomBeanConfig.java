@@ -38,6 +38,8 @@ import com.caucho.config.program.*;
 import com.caucho.config.reflect.AnnotatedElementImpl;
 import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotated;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.type.*;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.*;
@@ -55,6 +57,7 @@ import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.util.AnnotationLiteral;
@@ -107,7 +110,8 @@ public class CustomBeanConfig<T> {
       // XXX:
       // _component = new SimpleBean(cl);
       // _component.setScopeClass(Dependent.class);
-      _annotatedType = new AnnotatedTypeImpl<T>(cl, cl);
+      AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(cl); 
+      _annotatedType = new AnnotatedTypeImpl<T>(annType);
     }
 
     _configType = TypeFactory.getCustomBeanType(cl);

@@ -48,18 +48,18 @@ public class ReflectionAnnotated implements Annotated
 
   private Type _type;
 
-  private LinkedHashSet<Type> _typeSet
-    = new LinkedHashSet<Type>();
+  private Set<Type> _typeSet;
 
   private LinkedHashSet<Annotation> _annSet;
 
   private Annotation []_annArray;
 
   protected ReflectionAnnotated(Type type,
+                                Set<Type> typeClosure,
                                 Annotation []annList)
   {
     _type = type;
-    _typeSet.add(type);
+    _typeSet = typeClosure;
 
     if (annList != null && annList.length > 0) {
       _annSet = new LinkedHashSet<Annotation>();

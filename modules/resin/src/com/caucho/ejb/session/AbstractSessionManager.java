@@ -39,12 +39,14 @@ import javax.ejb.SessionContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.SessionBeanType;
 import javax.inject.Named;
 
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.SessionPool;
+import com.caucho.ejb.inject.ProcessSessionBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
@@ -202,8 +204,15 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
       }
 
       _bean = createBean(mBean, baseApi);
+      
+      ProcessSessionBeanImpl process
+        = new ProcessSessionBeanImpl(beanManager,
+                                     _bean,
+                                     mBean.getAnnotatedType(),
+                                     getEJBName(),
+                                     getSessionBeanType());
 
-      beanManager.addBean(_bean);
+      beanManager.addBean(_bean, process);
 
       /*
        * if (remoteApiList != null) { for (Class api : remoteApiList) {
@@ -224,7 +233,12 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-
+  
+  protected SessionBeanType getSessionBeanType()
+  {
+    return SessionBeanType.STATELESS;
+  }
+  
   abstract protected InjectionTarget<T> createSessionComponent(Class<?> api,
                                                                Class<T> beanClass);
 

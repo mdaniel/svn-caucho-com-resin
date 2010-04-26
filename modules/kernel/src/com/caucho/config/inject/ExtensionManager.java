@@ -47,10 +47,13 @@ import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessBean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.reflect.BaseType;
+import com.caucho.inject.LazyExtension;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -96,7 +99,7 @@ class ExtensionManager
 
       while (e.hasMoreElements()) {
         URL url = (URL) e.nextElement();
-
+        
         if (_extensionSet.contains(url))
           continue;
 
@@ -150,7 +153,6 @@ class ExtensionManager
 
   void loadExtension(String className)
   {
-    _injectManager.getScanManager().setIsCustomExtension(true);
 //    _isCustomExtension = true;
     
     try {
@@ -178,6 +180,9 @@ class ExtensionManager
     ExtensionItem item = introspect(ext.getClass());
 
     for (ExtensionMethod method : item.getExtensionMethods()) {
+      Method javaMethod = method.getMethod();
+      Class<?> rawType = method.getBaseType().getRawClass();
+      
       ExtensionObserver observer;
       observer = new ExtensionObserver(ext,
                                        method.getMethod(),
@@ -186,6 +191,17 @@ class ExtensionManager
       _injectManager.addExtensionObserver(observer,
                                           method.getBaseType(),
                                           method.getQualifiers());
+      
+      
+      if ((ProcessAnnotatedType.class.isAssignableFrom(rawType))
+          && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
+        _injectManager.getScanManager().setIsCustomExtension(true);
+      }
+
+      if ((ProcessBean.class.isAssignableFrom(rawType))
+          && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
+        _injectManager.getScanManager().setIsCustomExtension(true);
+      }
     }
   }
 
@@ -245,7 +261,7 @@ class ExtensionManager
         Annotation []bindings = inject.getQualifiers(paramAnn[i]);
 
         if (bindings.length == 0)
-          bindings = new Annotation[] { CurrentLiteral.CURRENT };
+          bindings = new Annotation[] { DefaultLiteral.DEFAULT };
 
         args[i] = new BeanArg(param[i], bindings);
       }

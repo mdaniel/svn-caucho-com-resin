@@ -36,6 +36,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.types.*;
 import com.caucho.naming.*;
 import com.caucho.util.*;
@@ -51,6 +52,7 @@ import javax.enterprise.context.Dependent;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
@@ -230,7 +232,10 @@ abstract public class AbstractBeanConfig {
 
     InjectManager beanManager = InjectManager.create();
 
-    AnnotatedTypeImpl beanType = new AnnotatedTypeImpl(_cl, _cl);
+    AnnotatedType<?> annType = ReflectionAnnotatedFactory.introspectType(_cl);
+    AnnotatedTypeImpl beanType;
+    
+    beanType = new AnnotatedTypeImpl(annType);
 
     if (_name != null) {
       beanType.addAnnotation(Names.create(_name));

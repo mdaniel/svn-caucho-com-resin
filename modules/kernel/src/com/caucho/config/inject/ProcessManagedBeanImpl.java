@@ -27,47 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.amber.manager;
+package com.caucho.config.inject;
 
-import java.lang.reflect.Type;
-import java.util.HashSet;
-import java.util.Set;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.ProcessManagedBean;
 
-import javax.persistence.*;
-import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.InjectionPoint;
+import com.caucho.inject.Module;
 
-import com.caucho.config.inject.*;
-import com.caucho.env.jpa.EntityManagerJtaProxy;
+@Module
+public class ProcessManagedBeanImpl<X> extends ProcessBeanImpl<X>
+  implements ProcessManagedBean<X>
+{
+  private AnnotatedType<X> _annotatedType;
 
-/**
- * The @PersistenceContext webbeans component
- */
-public class PersistenceContextComponent extends AbstractBean {
-  private final EntityManagerJtaProxy _proxy;
-
-  private HashSet<Type> _types = new HashSet<Type>();
-  
-  public PersistenceContextComponent(String name,
-				     EntityManagerJtaProxy proxy)
+  protected ProcessManagedBeanImpl(InjectManager manager, 
+                                   Bean<X> bean,
+                                   AnnotatedType<X> annotatedType)
   {
-    super(InjectManager.create());
+    super(manager, bean, annotatedType);
     
-    _types.add(EntityManager.class);
-    
-    _proxy = proxy;
+    _annotatedType = annotatedType;
   }
 
   @Override
-  public Set<Type> getTypes()
+  public AnnotatedType<X> getAnnotatedBeanClass()
   {
-    return _types;
-  }
-
-  @Override
-  public Object create(CreationalContext context)
-  {
-    return _proxy;
+    return _annotatedType;
   }
 }

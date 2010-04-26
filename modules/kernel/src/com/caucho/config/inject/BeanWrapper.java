@@ -29,17 +29,21 @@
 
 package com.caucho.config.inject;
 
-import javax.enterprise.inject.spi.*;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
-import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
+
+import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean
  */
+@Module
 public class BeanWrapper<T> extends AbstractBean<T>
 {
   private final Bean<T> _bean;
@@ -65,6 +69,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
     return getBean().create(env);
   }
 
+  @Override
   public void destroy(T instance, CreationalContext<T> env)
   {
     getBean().destroy(instance, env);
@@ -74,9 +79,10 @@ public class BeanWrapper<T> extends AbstractBean<T>
   // metadata for the bean
   //
 
+  @Override
   public Annotated getAnnotated()
   {
-    Bean bean = getBean();
+    Bean<T> bean = getBean();
 
     if (bean instanceof AnnotatedBean)
       return ((AnnotatedBean) bean).getAnnotated();
@@ -84,6 +90,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
       return null;
   }
 
+  @Override
   public Set<Annotation> getQualifiers()
   {
     return getBean().getQualifiers();
@@ -93,17 +100,20 @@ public class BeanWrapper<T> extends AbstractBean<T>
   {
     return getBean().getStereotypes();
   }
-
+  
+  @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
     return getBean().getInjectionPoints();
   }
 
+  @Override
   public String getName()
   {
     return getBean().getName();
   }
 
+  @Override
   public boolean isAlternative()
   {
     return getBean().isAlternative();
@@ -112,6 +122,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
   /**
    * Returns true if the bean can be null
    */
+  @Override
   public boolean isNullable()
   {
     return getBean().isNullable();
@@ -120,6 +131,7 @@ public class BeanWrapper<T> extends AbstractBean<T>
   /**
    * Returns the bean's scope type.
    */
+  @Override
   public Class<? extends Annotation> getScope()
   {
     return getBean().getScope();
@@ -128,12 +140,14 @@ public class BeanWrapper<T> extends AbstractBean<T>
   /**
    * Returns the types that the bean exports for bindings.
    */
+  @Override
   public Set<Type> getTypes()
   {
     return getBean().getTypes();
   }
 
-  public Class getBeanClass()
+  @Override
+  public Class<?> getBeanClass()
   {
     return getBean().getBeanClass();
   }

@@ -29,25 +29,22 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.AbstractInjectionPoint;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.scope.DependentScope;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.util.*;
-
-import java.util.Set;
-import java.util.HashSet;
-import java.util.logging.*;
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
+import java.lang.reflect.Member;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Qualifier;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.AbstractInjectionPoint;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.util.L10N;
 
 public class FieldComponentProgram extends ConfigProgram
 

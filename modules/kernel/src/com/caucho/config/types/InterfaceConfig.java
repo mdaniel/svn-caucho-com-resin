@@ -62,12 +62,12 @@ public class InterfaceConfig extends BeanConfig {
   {
   }
   
-  public InterfaceConfig(Class type)
+  public InterfaceConfig(Class<?> type)
   {
     setBeanConfigClass(type);
   }
   
-  public InterfaceConfig(Class type, String tagName)
+  public InterfaceConfig(Class<?> type, String tagName)
   {
     setBeanConfigClass(type);
     setTagName(tagName);
@@ -180,7 +180,7 @@ public class InterfaceConfig extends BeanConfig {
       Set<Bean<?>> beans = webBeans.getBeans(_valueName);
 
       if (beans.size() > 0) {
-	_bean = (AbstractBean) beans.iterator().next();
+	_bean = beans.iterator().next();
       }
 
       if (_bean == null) {

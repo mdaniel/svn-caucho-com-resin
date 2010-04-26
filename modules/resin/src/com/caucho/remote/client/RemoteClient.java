@@ -29,31 +29,23 @@
 
 package com.caucho.remote.client;
 
-import com.caucho.config.*;
-import com.caucho.config.inject.AbstractBean;
+import java.lang.annotation.Annotation;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configured;
+import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.types.*;
-import com.caucho.util.*;
-import com.caucho.config.cfg.*;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.Hashtable;
-import java.util.logging.Logger;
-
-import javax.annotation.PostConstruct;
+import com.caucho.util.L10N;
 
 /**
  * Configuration class for a remote client
  */
 public class RemoteClient extends BeanConfig
 {
-  private static final Logger log
-    = Logger.getLogger(RemoteClient.class.getName());
   private static final L10N L = new L10N(RemoteClient.class);
 
-  private Class _interface;
+  private Class<?> _interface;
 
   /**
    * Creates a new protocol configuration object.
@@ -66,7 +58,7 @@ public class RemoteClient extends BeanConfig
   /**
    * Sets the proxy interface class.
    */
-  public void setInterface(Class type)
+  public void setInterface(Class<?> type)
   {
     _interface = type;
 
@@ -75,33 +67,39 @@ public class RemoteClient extends BeanConfig
                                     type.getName()));
   }
 
+  @Override
   protected void deploy()
+  {
+    deployBean(_interface);
+  }
+  
+  private <T> void deployBean(Class<T> iface)
   {
     ProtocolProxyFactory proxyFactory = (ProtocolProxyFactory) getObject();
 
-    Object proxy = proxyFactory.createProxy(_interface);
+    Object proxy = proxyFactory.createProxy(iface);
 
     InjectManager beanManager = InjectManager.create();
-
-    BeanBuilder factory = beanManager.createBeanFactory(_interface);
+    
+    BeanBuilder<T> builder = beanManager.createBeanFactory(iface);
 
     if (getName() != null) {
-      factory = factory.name(getName());
+      builder = builder.name(getName());
 
       addOptionalStringProperty("name", getName());
     }
 
     for (Annotation binding : getBindingList()) {
-      factory = factory.binding(binding);
+      builder = builder.binding(binding);
     }
 
     for (Annotation stereotype : getStereotypeList()) {
-      factory = factory.stereotype(stereotype.annotationType());
+      builder = builder.stereotype(stereotype.annotationType());
     }
 
-    factory.stereotype(Configured.class);
+    builder.stereotype(Configured.class);
 
-    _bean = (AbstractBean) factory.singleton(proxy);
+    _bean = builder.singleton(proxy);
 
     beanManager.addBean(_bean);
   }

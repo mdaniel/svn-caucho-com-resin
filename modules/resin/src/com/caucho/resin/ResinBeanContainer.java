@@ -51,6 +51,7 @@ import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.ResourceLoader;
 import com.caucho.server.webbeans.ResinWebBeansProducer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -207,6 +208,12 @@ public class ResinBeanContainer
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  public void addResourceRoot(Path path)
+  {
+    ResourceLoader loader = new ResourceLoader(_classLoader, path);
+    loader.init();
   }
 
   /**

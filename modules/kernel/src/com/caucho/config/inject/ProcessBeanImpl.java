@@ -29,36 +29,28 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.config.Config;
-import com.caucho.config.ConfigException;
-import com.caucho.config.annotation.ServiceBinding;
-import com.caucho.config.ServiceStartup;
-import com.caucho.config.cfg.BeansConfig;
-import com.caucho.vfs.Path;
-
-import java.lang.annotation.Annotation;
-import java.util.ArrayList;
-import java.util.HashSet;
-
-import javax.enterprise.event.Observes;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
+import com.caucho.inject.Module;
+
+@Module
 public class ProcessBeanImpl<X> implements ProcessBean<X>
 {
   private InjectManager _manager;
   private Bean<X> _bean;
+  private Annotated _annotated;
   private boolean _isVeto;
 
-  ProcessBeanImpl(InjectManager manager, Bean<X> bean)
+  public ProcessBeanImpl(InjectManager manager, 
+                         Bean<X> bean,
+                         Annotated annotated)
   {
     _manager = manager;
     _bean = bean;
+    
+    _annotated = annotated;
   }
 
   public InjectManager getManager()
@@ -66,14 +58,13 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
     return _manager;
   }
 
+  @Override
   public Annotated getAnnotated()
   {
-    if (_bean instanceof AbstractBean)
-      return ((AbstractBean) _bean).getAnnotated();
-    else
-      return null;
+    return _annotated;
   }
 
+  @Override
   public Bean<X> getBean()
   {
     return _bean;
@@ -84,6 +75,7 @@ public class ProcessBeanImpl<X> implements ProcessBean<X>
     _bean = bean;
   }
 
+  @Override
   public void addDefinitionError(Throwable t)
   {
   }

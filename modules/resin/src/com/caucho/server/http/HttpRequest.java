@@ -635,15 +635,21 @@ public class HttpRequest extends AbstractHttpRequest
   /**
    * For SSL connections, use the SSL identifier.
    */
+  @Override
   public String findSessionIdFromConnection()
   {
-    TcpSocketLink tcpConn = (TcpSocketLink) getConnection();
+    SocketLink link = getConnection();
+    
+    TcpSocketLink tcpConn = null;
+    
+    if (link instanceof TcpSocketLink)
+      tcpConn = (TcpSocketLink) getConnection();
 
     if (tcpConn == null || ! tcpConn.isSecure())
       return null;
 
-    QSocket socket = tcpConn.getSocket(); // XXX:
     /*
+    QSocket socket = tcpConn.getSocket(); // XXX:
     if (! (socket instanceof SSLSocket))
       return null;
 

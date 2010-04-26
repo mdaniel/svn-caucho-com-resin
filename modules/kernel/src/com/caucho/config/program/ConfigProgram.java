@@ -33,7 +33,6 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.CreationalContextImpl;
-import com.caucho.config.scope.DependentScope;
 import com.caucho.config.type.*;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.xml.QName;

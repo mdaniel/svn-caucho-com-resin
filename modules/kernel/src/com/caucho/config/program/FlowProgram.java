@@ -30,7 +30,6 @@
 package com.caucho.config.program;
 
 import com.caucho.config.*;
-import com.caucho.config.scope.DependentScope;
 import com.caucho.config.type.*;
 
 /**

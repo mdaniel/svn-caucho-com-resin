@@ -29,20 +29,22 @@
 
 package com.caucho.security;
 
-import com.caucho.config.inject.InjectManager;
-import com.caucho.server.session.SessionImpl;
-
-import javax.annotation.PostConstruct;
-import javax.inject.Inject;
-import javax.enterprise.inject.Instance;
-import javax.servlet.*;
-import javax.servlet.http.*;
 import java.io.IOException;
 import java.lang.ref.SoftReference;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.annotation.PostConstruct;
+import javax.enterprise.inject.Instance;
+import javax.inject.Inject;
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+
+import com.caucho.server.session.SessionImpl;
 
 /**
  * Used to authenticate users in a servlet request.  AbstractLogin handles

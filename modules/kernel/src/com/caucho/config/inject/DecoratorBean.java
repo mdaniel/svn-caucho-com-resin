@@ -39,13 +39,12 @@ import java.util.Set;
 
 import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.reflect.BaseType;
-import com.caucho.config.type.BeanType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -59,7 +58,7 @@ public class DecoratorBean<T> implements Decorator<T>
 
   private Class<T> _type;
 
-  private AbstractBean<T> _bean;
+  private Bean<T> _bean;
 
   private Field _delegateField;
   

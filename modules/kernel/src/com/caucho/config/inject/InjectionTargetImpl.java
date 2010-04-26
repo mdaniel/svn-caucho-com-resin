@@ -54,6 +54,7 @@ import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.inject.Inject;
@@ -73,6 +74,7 @@ import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ValueArg;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -80,8 +82,7 @@ import com.caucho.util.L10N;
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
 @Module
-public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
-  implements InjectionTarget<X>
+public class InjectionTargetImpl<X> implements InjectionTarget<X>
 {
   private static final L10N L = new L10N(InjectionTargetImpl.class);
   private static final Logger log
@@ -90,10 +91,14 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   private static final Object []NULL_ARGS = new Object[0];
 
   private boolean _isBound;
+  
+  private InjectManager _beanManager;
 
   private Class<X> _instanceClass;
+  
+  private Bean<X> _bean;
 
-  private AnnotatedType<X> _beanType;
+  private AnnotatedType<X> _annotatedType;
 
   private Set<Annotation> _interceptorBindings;
 
@@ -117,9 +122,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   public InjectionTargetImpl(InjectManager beanManager,
                              AnnotatedType<X> beanType)
   {
-    super(beanManager, beanType.getBaseType(), beanType);
+    _beanManager = beanManager;
 
-    _beanType = beanType;
+    _annotatedType = beanType;
 
     /*
     if (beanType.getType() instanceof Class)
@@ -127,9 +132,24 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     */
   }
 
+  protected InjectManager getBeanManager()
+  {
+    return _beanManager;
+  }
+  
   public AnnotatedType<X> getAnnotatedType()
   {
-    return _beanType;
+    return _annotatedType;
+  }
+  
+  void setBean(Bean<X> bean)
+  {
+    _bean = bean;
+  }
+  
+  Bean<X> getBean()
+  {
+    return _bean;
   }
 
   /**
@@ -164,18 +184,6 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return false;
   }
 
-  public void setConstructor(Constructor ctor)
-  {
-    // XXX: handled differently now
-    throw new IllegalStateException();
-    // _ctor = ctor;
-  }
-
-  private Class<?> getInstanceClass()
-  {
-    return _instanceClass;
-  }
-  
   public void setGenerateInterception(boolean isEnable)
   {
     _isGenerateInterception = isEnable;
@@ -256,7 +264,12 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   protected Object getHandle()
   {
-    return new SingletonHandle(getId());
+    return new SingletonHandle(null);
+  }
+  
+  public String getPassivationId()
+  {
+    return null;
   }
 
   public void inject(X instance, CreationalContext<X> env)
@@ -317,7 +330,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         return;
       _isBound = true;
 
-      Class<?> cl = getTargetClass();
+      Class<?> cl = (Class<?>) _annotatedType.getBaseType();
 
       HashMap<Method,Annotation[]> methodMap
         = new HashMap<Method,Annotation[]>();
@@ -334,7 +347,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
       if (_beanCtor == null) {
         // XXX:
-        AnnotatedType beanType = _beanType;
+        AnnotatedType beanType = _annotatedType;
         if (beanType != null)
           beanType = new AnnotatedTypeImpl(cl, cl);
 
@@ -346,15 +359,15 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       Class<X> instanceClass = null;
 
       if (_isGenerateInterception) {
-        if (! _beanType.isAnnotationPresent(javax.interceptor.Interceptor.class)
-            && ! _beanType.isAnnotationPresent(javax.decorator.Decorator.class)) {
-          CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(_beanType);
+        if (! _annotatedType.isAnnotationPresent(javax.interceptor.Interceptor.class)
+            && ! _annotatedType.isAnnotationPresent(javax.decorator.Decorator.class)) {
+          CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(_annotatedType);
           bean.introspect();
 
           instanceClass = (Class<X>) bean.generateClass();
         }
 
-        if (instanceClass == getTargetClass() && isSerializeHandle()) {
+        if (instanceClass == cl && isSerializeHandle()) {
           instanceClass = SerializationAdapter.gen(instanceClass);
         }
       }
@@ -483,7 +496,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   private boolean isSerializeHandle()
   {
-    return getAnnotated().isAnnotationPresent(SerializeHandle.class);
+    return getAnnotatedType().isAnnotationPresent(SerializeHandle.class);
   }
 
   /**
@@ -533,17 +546,9 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
   // introspection
   //
 
-  public void introspect()
+  protected void introspect()
   {
-    super.introspect();
-
-    introspect(_beanType);
-  }
-
-  @Override
-  protected Annotated getIntrospectedAnnotated()
-  {
-    return _beanType;
+    introspect(_annotatedType);
   }
 
   /**
@@ -551,18 +556,11 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
    */
   public void introspect(AnnotatedType<X> beanType)
   {
-    Class<X> cl = (Class<X>) getIntrospectionClass();
+    Class<X> cl = (Class<X>) beanType.getBaseType();
+    
     introspectConstructor(beanType);
-    //introspectBindings(beanType);
-    //introspectName(beanType);
 
     introspectInject(beanType);
-
-    //introspectProduces(beanType);
-
-    //introspectObservers(beanType);
-
-    //introspectMBean();
 
     _injectProgram = new ConfigProgram[_injectProgramList.size()];
     _injectProgramList.toArray(_injectProgram);
@@ -691,6 +689,21 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
   private void introspectInject(AnnotatedType<?> type)
   {
+    Class<?> rawType = (Class<?>) type.getBaseType();
+
+    if (rawType == null || Object.class.equals(rawType))
+      return;
+    
+    Class<?> parentClass = rawType.getSuperclass();
+    
+    if (parentClass != null && ! Object.class.equals(parentClass)) {
+      // XXX:
+      AnnotatedType<?> parentType
+        = ReflectionAnnotatedFactory.introspectType(parentClass);
+      
+      introspectInject(parentType);
+    }
+    
     // configureClassResources(injectList, type);
 
     for (AnnotatedField<?> field : type.getFields()) {
@@ -707,7 +720,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
       else if (hasQualifierAnnotation(field)) {
         // boolean isOptional = isQualifierOptional(field);
 
-        InjectionPoint ij = new InjectionPointImpl(getBeanManager(), this, field);
+        InjectionPoint ij = new InjectionPointImpl(getBeanManager(), getBean(), field);
 
         _injectionPointSet.add(ij);
 
@@ -738,7 +751,7 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
 
         for (int i = 0; i < args.length; i++) {
           InjectionPoint ij
-            = new InjectionPointImpl(getBeanManager(), this, params.get(i));
+            = new InjectionPointImpl(getBeanManager(), getBean(), params.get(i));
 
           _injectionPointSet.add(ij);
 
@@ -759,24 +772,12 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
         }
       }
     }
-
-    /*
-    for (Method method : type.getDeclaredMethods()) {
-      String fieldName = method.getName();
-      Class []param = method.getParameterTypes();
-
-      if (param.length != 1)
-        continue;
-
-      introspect(injectList, method);
-    }
-    */
   }
 
-  private static boolean hasQualifierAnnotation(AnnotatedField field)
+  private static boolean hasQualifierAnnotation(AnnotatedField<?> field)
   {
     for (Annotation ann : field.getAnnotations()) {
-      Class annType = ann.annotationType();
+      Class<?> annType = ann.annotationType();
 
       if (annType.equals(Inject.class))
         return true;
@@ -790,21 +791,14 @@ public class InjectionTargetImpl<X> extends AbstractIntrospectedBean<X>
     return false;
   }
 
-  private static boolean isQualifierOptional(AnnotatedField field)
-  {
-    for (Annotation ann : field.getAnnotations()) {
-      Class annType = ann.annotationType();
-
-      if (annType.isAnnotationPresent(Qualifier.class))
-        return false;
-    }
-
-    return false;
-  }
-
-  private static boolean hasQualifierAnnotation(AnnotatedConstructor ctor)
+  private static boolean hasQualifierAnnotation(AnnotatedConstructor<?> ctor)
   {
     return ctor.isAnnotationPresent(Inject.class);
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _annotatedType + "]";
   }
 
   class FieldInjectProgram extends ConfigProgram {

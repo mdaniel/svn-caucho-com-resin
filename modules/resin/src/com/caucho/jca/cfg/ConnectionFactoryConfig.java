@@ -122,7 +122,7 @@ public class ConnectionFactoryConfig extends BeanConfig {
   {
     super.init();
 
-    Bean comp = getComponent();
+    Bean<?> comp = getComponent();
 
     InjectManager manager = InjectManager.create();
 
@@ -130,7 +130,7 @@ public class ConnectionFactoryConfig extends BeanConfig {
       = (ManagedConnectionFactory) manager.getReference(comp);
 
     if (managedFactory instanceof ResourceAdapterAssociation) {
-      Class cl = managedFactory.getClass();
+      Class<?> cl = managedFactory.getClass();
 
       ResourceAdapter ra = findResourceAdapter(cl);
 

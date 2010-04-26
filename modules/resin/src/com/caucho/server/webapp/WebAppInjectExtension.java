@@ -36,6 +36,8 @@ import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ProcessBeanImpl;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.inject.LazyExtension;
+import com.caucho.inject.Module;
 import com.caucho.remote.annotation.ServiceType;
 import com.caucho.remote.annotation.ProxyType;
 import com.caucho.remote.client.ProtocolProxyFactory;
@@ -59,6 +61,7 @@ import javax.inject.Qualifier;
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
+@Module
 public class WebAppInjectExtension implements Extension
 {
   private InjectManager _beanManager;
@@ -71,7 +74,8 @@ public class WebAppInjectExtension implements Extension
     _webApp = webApp;
   }
 
-  public void processBean(@Observes ProcessBeanImpl event)
+  @LazyExtension
+  public void processBean(@Observes ProcessBeanImpl<?> event)
   {
     try {
       Annotated annotated = event.getAnnotated();
@@ -84,7 +88,7 @@ public class WebAppInjectExtension implements Extension
       }
 
       for (Annotation ann : annotated.getAnnotations()) {
-	Class annType = ann.annotationType();
+	Class<?> annType = ann.annotationType();
 	
 	if (annType.equals(WebServlet.class)) {
 	  WebServlet webServlet = (WebServlet) ann;
@@ -111,7 +115,7 @@ public class WebAppInjectExtension implements Extension
 	  ServiceType serviceType
 	    = (ServiceType) annType.getAnnotation(ServiceType.class);
 
-	  Class factoryClass = serviceType.defaultFactory();
+	  Class<?> factoryClass = serviceType.defaultFactory();
 	  ProtocolServletFactory factory
 	    = (ProtocolServletFactory) factoryClass.newInstance();
 
@@ -147,12 +151,12 @@ public class WebAppInjectExtension implements Extension
 
 	  Object proxy = proxyFactory.createProxy((Class) annotated.getBaseType());
 
-	  AnnotatedTypeImpl annotatedType
+	  AnnotatedTypeImpl<?> annotatedType
 	    = new AnnotatedTypeImpl((Class) annotated.getBaseType());
 
 	  annotatedType.addAnnotation(EnhancedLiteral.ANNOTATION);
 
-	  BeanBuilder factory
+	  BeanBuilder<?> factory
 	    = _beanManager.createBeanFactory(annotatedType);
 
 	  /*
@@ -164,7 +168,7 @@ public class WebAppInjectExtension implements Extension
 
 	  */
 	  for (Annotation binding : annotated.getAnnotations()) {
-	    Class bindingType = binding.annotationType();
+	    Class<?> bindingType = binding.annotationType();
 	    
 	    if (bindingType.isAnnotationPresent(Qualifier.class))
 	      factory.binding(binding);

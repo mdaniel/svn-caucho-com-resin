@@ -34,10 +34,7 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 
-import javax.ejb.MessageDriven;
 import javax.ejb.Startup;
-import javax.ejb.Stateful;
-import javax.ejb.Stateless;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
@@ -57,11 +54,14 @@ import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ProcessBeanImpl;
+import com.caucho.inject.LazyExtension;
+import com.caucho.inject.Module;
 import com.caucho.vfs.Path;
 
 /**
  * Standard XML behavior for META-INF/beans.xml
  */
+@Module
 public class XmlStandardPlugin implements Extension
 {
   private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
@@ -159,6 +159,7 @@ public class XmlStandardPlugin implements Extension
     _configuredBeans.add(className);
   }
 
+  @LazyExtension
   public void processType(@Observes ProcessAnnotatedType<?> event)
   {
     AnnotatedType<?> type = event.getAnnotatedType();
@@ -187,6 +188,7 @@ public class XmlStandardPlugin implements Extension
       event.addDefinitionError(_configException);
   }
 
+  @LazyExtension
   public void processBean(@Observes ProcessBean<?> event)
   {
     ProcessBeanImpl<?> eventImpl = (ProcessBeanImpl<?>) event;
