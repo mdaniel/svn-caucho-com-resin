@@ -47,7 +47,7 @@ public class StatefulComponent<X> implements InjectionTarget<X> {
   private final Class _beanClass;
 
   public StatefulComponent(StatefulProvider provider,
-			   Class beanClass)
+                           Class beanClass)
   {
     _provider = provider;
     _beanClass = beanClass;

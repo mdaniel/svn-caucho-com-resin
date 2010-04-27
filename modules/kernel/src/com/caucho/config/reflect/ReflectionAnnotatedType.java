@@ -210,7 +210,12 @@ public class ReflectionAnnotatedType<T>
       }
     }
     
-    introspectMethods(cl.getSuperclass());
+    if (cl.isInterface()) {
+      for (Class<?> superInterface : cl.getInterfaces()) 
+        introspectMethods(superInterface);
+    }
+    else
+      introspectMethods(cl.getSuperclass());
   }
   
   private void introspectInheritedAnnotations(Class<?> cl)

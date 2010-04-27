@@ -287,7 +287,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
     if (_remoteSessions != null) {
       Iterator<StatefulObject> iter = _remoteSessions.values();
       while (iter.hasNext()) {
-	values.add(iter.next());
+        values.add(iter.next());
       }
     }
 

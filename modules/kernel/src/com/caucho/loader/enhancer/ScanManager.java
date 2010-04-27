@@ -78,8 +78,8 @@ public class ScanManager {
     boolean hasListener = false;
     for (int i = 0; i < _listeners.length; i++) {
       if (_listeners[i].isRootScannable(root, packageRoot)) {
-	listeners[i] = _listeners[i];
-	hasListener = true;
+        listeners[i] = _listeners[i];
+        hasListener = true;
       }
     }
 
@@ -96,14 +96,14 @@ public class ScanManager {
 
     if (root instanceof JarPath) {
       JarByteCodeMatcher matcher
-	= new JarByteCodeMatcher(loader, root, packageRoot, listeners);
+        = new JarByteCodeMatcher(loader, root, packageRoot, listeners);
     
       scanForJarClasses(((JarPath) root).getContainer(), packageRoot,
                         scanner, matcher);
     }
     else {
       PathByteCodeMatcher matcher
-	= new PathByteCodeMatcher(loader, root, packageRoot, listeners);
+        = new PathByteCodeMatcher(loader, root, packageRoot, listeners);
       
       Path scanRoot = root;
       
@@ -160,32 +160,32 @@ public class ScanManager {
       Enumeration<? extends ZipEntry> e = zipFile.entries();
 
       while (e.hasMoreElements()) {
-	ZipEntry entry = e.nextElement();
+        ZipEntry entry = e.nextElement();
 
-	String entryName = entry.getName();
-	if (! entryName.endsWith(".class"))
-	  continue;
-	
-	if (packagePath != null && ! entryName.startsWith(packagePath))
-	  continue;
+        String entryName = entry.getName();
+        if (! entryName.endsWith(".class"))
+          continue;
 
-	matcher.init();
-      
-	ReadStream is = Vfs.openRead(zipFile.getInputStream(entry));
-	try {
-	  classScanner.init(entryName, is, matcher);
+        if (packagePath != null && ! entryName.startsWith(packagePath))
+          continue;
 
-	  classScanner.scan();
-	} finally {
-	  is.close();
-	}
+        matcher.init();
+
+        ReadStream is = Vfs.openRead(zipFile.getInputStream(entry));
+        try {
+          classScanner.init(entryName, is, matcher);
+
+          classScanner.scan();
+        } finally {
+          is.close();
+        }
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
     } finally {
       try {
-	if (zipFile != null)
-	  zipFile.close();
+        if (zipFile != null)
+          zipFile.close();
       } catch (Exception e) {
       }
     }
@@ -193,9 +193,9 @@ public class ScanManager {
 
   static class JarByteCodeMatcher extends ScanByteCodeMatcher {
     JarByteCodeMatcher(EnvironmentClassLoader loader,
-		       Path root,
-		       String packageName,
-		       ScanListener []listeners)
+                       Path root,
+                       String packageName,
+                       ScanListener []listeners)
     {
       super(loader, root, packageName, listeners);
     }
@@ -206,9 +206,9 @@ public class ScanManager {
     private Path _path;
 
     PathByteCodeMatcher(EnvironmentClassLoader loader,
-			Path root,
-			String packageName,
-			ScanListener []listeners)
+                        Path root,
+                        String packageName,
+                        ScanListener []listeners)
     {
       super(loader, root, packageName, listeners);
     }
@@ -243,9 +243,9 @@ public class ScanManager {
     private final ScanClass []_currentClasses;
 
     ScanByteCodeMatcher(EnvironmentClassLoader loader,
-			Path root,
-			String packageRoot,
-			ScanListener []listeners)
+                        Path root,
+                        String packageRoot,
+                        ScanListener []listeners)
     {
       _root = root;
       _packageRoot = packageRoot;
@@ -258,8 +258,8 @@ public class ScanManager {
     void init()
     {
       for (int i = 0; i < _listeners.length; i++) {
-	_currentListeners[i] = _listeners[i];
-	_currentClasses[i] = null;
+        _currentListeners[i] = _listeners[i];
+        _currentClasses[i] = null;
       }
     }
     
@@ -272,21 +272,21 @@ public class ScanManager {
       int activeCount = 0;
 
       for (int i = _listeners.length - 1; i >= 0; i--) {
-	ScanListener listener = _currentListeners[i];
+        ScanListener listener = _currentListeners[i];
 
-	if (listener == null)
-	  continue;
+        if (listener == null)
+          continue;
 
-	ScanClass scanClass = listener.scanClass(_root, _packageRoot, 
-	                                         className, modifiers);
-	
-	if (scanClass != null) {
-	  activeCount++;
-	  _currentClasses[i] = scanClass;
-	}
-	else {
+        ScanClass scanClass = listener.scanClass(_root, _packageRoot, 
+                                                 className, modifiers);
+
+        if (scanClass != null) {
+          activeCount++;
+          _currentClasses[i] = scanClass;
+        }
+        else {
           _currentListeners[i] = null;
-	}
+        }
       }
 
       return activeCount > 0;
@@ -350,16 +350,16 @@ public class ScanManager {
       int activeCount = 0;
 
       for (int i = _listeners.length - 1; i >= 0; i--) {
-	ScanListener listener = _currentListeners[i];
+        ScanListener listener = _currentListeners[i];
 
-	if (listener == null)
-	  continue;
+        if (listener == null)
+          continue;
 
-	if (listener.isScanMatchAnnotation(annotationClassName)) {
-	  _currentListeners[i] = null;
-	}
-	else
-	  activeCount++;
+        if (listener.isScanMatchAnnotation(annotationClassName)) {
+          _currentListeners[i] = null;
+        }
+        else
+          activeCount++;
       }
 
       return activeCount == 0;

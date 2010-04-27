@@ -388,6 +388,7 @@ abstract public class View<X,T> {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + getBeanClass() + "]";
+    return getClass().getSimpleName() + "[beanClass=" + getBeanClass() 
+                                      + ",viewClass=" + getViewClass() + "]";
   }
 }

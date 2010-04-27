@@ -143,11 +143,11 @@ abstract public class BeanGenerator<X> extends GenClass
     boolean isQualifier = false;
     for (Annotation ann : type.getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-	_decoratorBindings.add(ann);
-	
-	if (! Named.class.equals(ann.annotationType())) {
-	  isQualifier = true;
-	}
+        _decoratorBindings.add(ann);
+
+        if (! Named.class.equals(ann.annotationType())) {
+          isQualifier = true;
+        }
       }
     }
     
@@ -234,15 +234,16 @@ abstract public class BeanGenerator<X> extends GenClass
     return _decorators;
   }
 
-  private static <X> AnnotatedMethod<? super X> findAroundInvokeMethod(AnnotatedType<X> cl)
+  private static <X> AnnotatedMethod<? super X> 
+    findAroundInvokeMethod(AnnotatedType<X> cl)
   {
     if (cl == null)
       return null;
 
     for (AnnotatedMethod<? super X> method : cl.getMethods()) {
       if (method.isAnnotationPresent(AroundInvoke.class)
-	  && method.getJavaMember().getParameterTypes().length == 1
-	  && method.getJavaMember().getParameterTypes()[0].equals(InvocationContext.class)) {
+          && method.getJavaMember().getParameterTypes().length == 1
+          && method.getJavaMember().getParameterTypes()[0].equals(InvocationContext.class)) {
 	return method;
       }
     }

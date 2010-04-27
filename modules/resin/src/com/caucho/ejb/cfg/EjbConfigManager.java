@@ -46,13 +46,13 @@ public class EjbConfigManager extends EjbConfig {
   private static final Logger log
     = Logger.getLogger(EjbConfigManager.class.getName());
 
-  private HashMap<Path,EjbRootConfig> _rootConfigMap
+  private final HashMap<Path,EjbRootConfig> _rootConfigMap
     = new HashMap<Path,EjbRootConfig>();
 
-  private ArrayList<EjbRootConfig> _rootPendingList
+  private final ArrayList<EjbRootConfig> _rootPendingList
     = new ArrayList<EjbRootConfig>();
   
-  private ArrayList<Path> _pathPendingList = new ArrayList<Path>();
+  private final ArrayList<Path> _pathPendingList = new ArrayList<Path>();
 
   public EjbConfigManager(EjbManager ejbContainer)
   {

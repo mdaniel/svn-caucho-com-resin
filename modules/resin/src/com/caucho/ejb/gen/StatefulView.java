@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
@@ -53,7 +54,7 @@ public class StatefulView<X,T> extends View<X,T> {
 
   private StatefulGenerator<X> _sessionBean;
 
-  private ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
+  private final ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
     = new ArrayList<BusinessMethodGenerator<X,T>>();
 
   public StatefulView(StatefulGenerator<X> bean, AnnotatedType<T> api)
@@ -114,7 +115,7 @@ public class StatefulView<X,T> extends View<X,T> {
   public void introspect()
   {
     AnnotatedType<T> apiClass = getViewClass();
-    
+
     for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
       Method javaMethod = apiMethod.getJavaMember();
 
@@ -123,12 +124,34 @@ public class StatefulView<X,T> extends View<X,T> {
       if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
           && ! javaMethod.getName().equals("remove"))
         continue;
+      if (! Modifier.isPublic(javaMethod.getModifiers()))
+        continue;
+      if (Modifier.isFinal(javaMethod.getModifiers())
+          || Modifier.isStatic(javaMethod.getModifiers()))
+        continue;
 
       if (javaMethod.getName().startsWith("ejb")) {
         throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
                                       javaMethod.getDeclaringClass(),
                                       javaMethod.getName()));
       }
+
+      // ejb/11d4
+      // overridden methods may appear twice in the method list
+      BusinessMethodGenerator<X,T> oldMethod = null;
+
+      for (BusinessMethodGenerator<X,T> bizMethod : _businessMethods) {
+        String bizMethodName 
+          = bizMethod.getApiMethod().getJavaMember().getName();
+
+        if (javaMethod.getName().equals(bizMethodName)) {
+          oldMethod = bizMethod;
+          break;
+        }
+      }
+
+      if (oldMethod != null)
+        continue;
 
       int index = _businessMethods.size();
 

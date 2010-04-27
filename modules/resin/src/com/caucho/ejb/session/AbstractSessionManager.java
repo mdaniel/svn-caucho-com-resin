@@ -69,7 +69,8 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
   
   private String[] _declaredRoles;
 
-  public AbstractSessionManager(EjbManager manager, AnnotatedType<T> annotatedType)
+  public AbstractSessionManager(EjbManager manager, 
+                                AnnotatedType<T> annotatedType)
   {
     super(manager, annotatedType);
     
@@ -84,12 +85,12 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
                                   rolesAllowed.value().length];
 
       System.arraycopy(declareRoles.value(), 0, 
-          _declaredRoles, 0, 
-          declareRoles.value().length);
+                       _declaredRoles, 0, 
+                       declareRoles.value().length);
 
       System.arraycopy(rolesAllowed.value(), 0, 
-          _declaredRoles, declareRoles.value().length, 
-          rolesAllowed.value().length);
+                       _declaredRoles, declareRoles.value().length, 
+                       rolesAllowed.value().length);
     }
     else if (declareRoles != null) {
       _declaredRoles = declareRoles.value();
