@@ -158,7 +158,8 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     StringBuilder sb = new StringBuilder(_name);
     
     for (BaseType type : _bounds) {
-      sb.append(" extends ").append(type);
+      if (! type.getRawClass().equals(Object.class))
+        sb.append(" extends ").append(type);
     }
     
     return sb.toString();

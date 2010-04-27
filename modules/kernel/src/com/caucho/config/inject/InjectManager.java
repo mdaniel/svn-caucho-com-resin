@@ -2430,6 +2430,13 @@ public class InjectManager
   
   private void addSpecialize(Class<?> specializedType, Class<?> parentType)
   {
+    Class<?> oldSpecialized = _specializedMap.get(parentType);
+    
+    if (oldSpecialized != null)
+      throw new ConfigException(L.l("@Specialized on '{0}' is invalid because it conflicts with an older specialized '{1}'",
+                                    specializedType.getName(),
+                                    oldSpecialized.getName()));
+    
     _specializedMap.put(parentType, specializedType);
   }
 

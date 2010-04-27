@@ -231,6 +231,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
       SessionRegistrationBean regBean
         = new SessionRegistrationBean(beanManager, _bean, beanName);
+      
+      beanManager.addBean(regBean);
+      
       /*
        * if (remoteApiList != null) { for (Class api : remoteApiList) {
        * factory.type(api); } }

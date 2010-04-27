@@ -495,19 +495,19 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     }
     
     if ((annotated.isAnnotationPresent(Stateless.class)
-        && ! parentClass.isAnnotationPresent(Stateless.class))) {
+         != parentClass.isAnnotationPresent(Stateless.class))) {
       throw new ConfigException(L.l("{0}: invalid @Specializes bean because the bean is a @Stateless bean but its parent is not.",
                                     getTargetName()));
     }
     
     if ((annotated.isAnnotationPresent(Stateful.class)
-        && ! parentClass.isAnnotationPresent(Stateful.class))) {
+         != parentClass.isAnnotationPresent(Stateful.class))) {
       throw new ConfigException(L.l("{0}: invalid @Specializes bean because the bean is a @Stateful bean but its parent is not.",
                                     getTargetName()));
     }
     
     if ((annotated.isAnnotationPresent(Singleton.class)
-        && ! parentClass.isAnnotationPresent(Singleton.class))) {
+         != parentClass.isAnnotationPresent(Singleton.class))) {
       throw new ConfigException(L.l("{0}: invalid @Specializes bean because the bean is a @Singleton bean but its parent is not.",
                                     getTargetName()));
     }
