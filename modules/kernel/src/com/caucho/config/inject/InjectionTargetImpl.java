@@ -349,7 +349,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
         // XXX:
         AnnotatedType beanType = _annotatedType;
         if (beanType != null)
-          beanType = new AnnotatedTypeImpl(cl, cl);
+          beanType = ReflectionAnnotatedFactory.introspectType(cl);
 
         introspectConstructor(beanType);
       }

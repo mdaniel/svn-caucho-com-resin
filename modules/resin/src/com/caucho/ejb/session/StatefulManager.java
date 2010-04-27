@@ -30,8 +30,10 @@
 package com.caucho.ejb.session;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
@@ -43,7 +45,6 @@ import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatefulBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
@@ -135,7 +136,9 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   }
 
   @Override
-  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, Class<?> api)
+  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, 
+                               Class<?> api,
+                               Set<Type> apiList)
   {
     StatefulProvider provider = getStatefulContext().getProvider(api);
 
@@ -144,7 +147,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
 					 api, getStatefulContext()));
     
     StatefulBeanImpl statefulBean
-      = new StatefulBeanImpl(this, mBean, api, provider);
+      = new StatefulBeanImpl(this, mBean, api, apiList, provider);
 
     return statefulBean;
   }

@@ -124,8 +124,6 @@ public class EnterpriseApplication
     ResourceLoader loader = new ResourceLoader(_loader, entAppRoot);
     loader.init();
     
-    System.out.println("RESOURCE: " + entAppRoot);
-
     if (_controller != null) {
       _webappsPath = entAppRoot.lookup("webapps");
       WorkDir.setLocalWorkDir(entAppRoot.lookup("META-INF/work"),

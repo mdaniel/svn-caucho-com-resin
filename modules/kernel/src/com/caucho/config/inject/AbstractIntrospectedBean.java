@@ -41,6 +41,9 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
+import javax.ejb.Singleton;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
@@ -337,7 +340,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
       _isAlternative = true;
     
     introspectStereotypes(annotated);
-//    introspectSpecializes(annotated);
+    introspectSpecializes(annotated);
     
 
     introspectDefault();
@@ -467,11 +470,13 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   {
     if (! annotated.isAnnotationPresent(Specializes.class))
       return;
-    
+
+    /*
     if (annotated.isAnnotationPresent(Named.class)) {
       throw new ConfigException(L.l("{0}: invalid @Specializes bean because it also implements @Named.",
                                     getTargetName()));
     }
+    */
     
     Type baseType = annotated.getBaseType();
     
@@ -481,11 +486,30 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     }
     
     Class<?> baseClass = (Class<?>) baseType;
+    Class<?> parentClass = baseClass.getSuperclass();
 
     if (baseClass.getSuperclass() == null ||
         baseClass.getSuperclass().equals(Object.class)) {
       throw new ConfigException(L.l("{0}: invalid @Specializes bean because the superclass '{1}' is not a managed bean.",
                                     getTargetName(), baseClass.getSuperclass()));
+    }
+    
+    if ((annotated.isAnnotationPresent(Stateless.class)
+        && ! parentClass.isAnnotationPresent(Stateless.class))) {
+      throw new ConfigException(L.l("{0}: invalid @Specializes bean because the bean is a @Stateless bean but its parent is not.",
+                                    getTargetName()));
+    }
+    
+    if ((annotated.isAnnotationPresent(Stateful.class)
+        && ! parentClass.isAnnotationPresent(Stateful.class))) {
+      throw new ConfigException(L.l("{0}: invalid @Specializes bean because the bean is a @Stateful bean but its parent is not.",
+                                    getTargetName()));
+    }
+    
+    if ((annotated.isAnnotationPresent(Singleton.class)
+        && ! parentClass.isAnnotationPresent(Singleton.class))) {
+      throw new ConfigException(L.l("{0}: invalid @Specializes bean because the bean is a @Singleton bean but its parent is not.",
+                                    getTargetName()));
     }
   }
 
@@ -607,6 +631,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Returns the set of injection points, for validation.
    */
+  @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
     return new HashSet<InjectionPoint>();

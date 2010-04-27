@@ -49,6 +49,7 @@ public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
 
   public SingletonBeanImpl(SingletonManager<X> manager,
                            ManagedBeanImpl<X> bean,
+                           Set<Type> apiList,
                            SingletonProxyFactory factory)
   {
     super(bean);

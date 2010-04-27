@@ -347,6 +347,14 @@ public class BeansConfig {
         throw new ConfigException(L.l("'{0}' is an invalid alternative because it is an annotation.",
                                       cl.getName()));
       
+      if (! cl.isAnnotationPresent(Alternative.class))
+        throw new ConfigException(L.l("'{0}' is an invalid alternative because it does not have an @Alternative annotation.",
+                                      cl.getName()));
+     
+      if (_deployList.contains(cl))
+        throw new ConfigException(L.l("'{0}' is an invalid alternative because it is listed twice.",
+                                      cl.getName()));
+        
       _deployList.add(cl);
     }
 

@@ -49,6 +49,7 @@ import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
+import javax.enterprise.inject.spi.ProcessInjectionTarget;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.BeanArg;
@@ -199,6 +200,11 @@ class ExtensionManager
       }
 
       if ((ProcessBean.class.isAssignableFrom(rawType))
+          && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
+        _injectManager.getScanManager().setIsCustomExtension(true);
+      }
+
+      if ((ProcessInjectionTarget.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
         _injectManager.getScanManager().setIsCustomExtension(true);
       }

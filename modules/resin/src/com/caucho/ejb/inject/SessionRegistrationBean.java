@@ -29,52 +29,47 @@
 
 package com.caucho.ejb.inject;
 
-import java.lang.reflect.Type;
-import java.util.LinkedHashSet;
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
 import java.util.Set;
 
-import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
 
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.ejb.session.StatefulManager;
-import com.caucho.ejb.session.StatefulProvider;
+import com.caucho.config.inject.BeanWrapper;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.j2ee.BeanName;
 import com.caucho.inject.Module;
 
 /**
- * Internal implementation for a Bean
+ * Internal registration for the EJB.
  */
 @Module
-public class StatefulBeanImpl<X> extends SessionBeanImpl<X>
+public class SessionRegistrationBean<X> extends BeanWrapper<X>
 {
-  private StatefulProvider _producer;
+  private Set<Annotation> _qualifierSet;
   
-  private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
-  
-  public StatefulBeanImpl(StatefulManager<X> server,
-			  ManagedBeanImpl<X> bean,
-			  Class<?> api,
-			  Set<Type> apiList,
-			  StatefulProvider producer)
+  public SessionRegistrationBean(InjectManager beanManager,
+                                 Bean<X> bean,
+                                 BeanName beanName)
   {
-    super(bean);
-
-    _producer = producer;
-
-    if (producer == null)
-      throw new NullPointerException();
-
-    _types.addAll(apiList);
-  }
-
-  @Override
-  public X create(CreationalContext<X> context)
-  {
-    return (X) _producer.__caucho_createNew(getInjectionTarget(), context);
+    super(beanManager, bean);
+    
+    _qualifierSet = new HashSet<Annotation>();
+    _qualifierSet.add(beanName);
   }
   
   @Override
-  public Set<Type> getTypes()
+  public Set<Annotation> getQualifiers()
   {
-    return _types;
+    return _qualifierSet;
+  }
+
+  /**
+   * Returns the injection points.
+   */
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return getBean().getInjectionPoints();
   }
 }

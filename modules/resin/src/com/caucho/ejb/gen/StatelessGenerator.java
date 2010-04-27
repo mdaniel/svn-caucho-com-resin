@@ -196,30 +196,40 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     }
 
     if (objectView != null) {
-      out.print(beanClass + " bean = ");
-      objectView.generateNewInstance(out);
-      out.println(";");
-      out.println("method.invoke(bean, timer);");
-      objectView.generateFreeInstance(out, "bean");
+      // XXX: 4.0.7 - needs to be moved to view
+      /*
+      out.println("StatelessPool.Item<" + beanClass +"> item");
+      out.println("  = _statelessPool.allocate();");
+
+      out.println("try {");
+      out.println("  method.invoke(item.getValue(), timer);");
+      out.println("} finally {");
+      out.println("  _statelessPool.free(item);");
+      out.println("}");
+      */
     }
 
     out.popDepth();
     out.println("}");
 
     out.println();
-    out
-        .println("public void __caucho_timeout_callback(java.lang.reflect.Method method)");
-    out
-        .println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
+    out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method)");
+    out.println("  throws IllegalAccessException, java.lang.reflect.InvocationTargetException");
     out.println("{");
     out.pushDepth();
 
     if (objectView != null) {
-      out.print(beanClass + " bean = ");
-      objectView.generateNewInstance(out);
-      out.println(";");
-      out.println("method.invoke(bean);");
-      objectView.generateFreeInstance(out, "bean");
+      // XXX: 4.0.7 - must be moved to view
+      /*
+      out.println("StatelessPool.Item<" + beanClass +"> item");
+      out.println("  = _statelessPool.allocate();");
+
+      out.println("try {");
+      out.println("  method.invoke(item.getValue());");
+      out.println("} finally {");
+      out.println("  _statelessPool.free(item);");
+      out.println("}");
+      */
     }
 
     out.popDepth();

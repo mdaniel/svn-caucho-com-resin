@@ -286,7 +286,7 @@ public class ReflectionAnnotatedType<T>
     boolean isQualifierPresent = false;
 
     if (isMetaAnnotationPresent(cl.getAnnotations(), Qualifier.class)) {
-      isQualifierPresent = true;
+      // isQualifierPresent = true;
       /*
       throw new ConfigException(L.l("'{0}' is an invalid @Specializes bean because it has a @Qualifier annotation.",
                                     cl.getName()));
@@ -296,7 +296,12 @@ public class ReflectionAnnotatedType<T>
     for (Annotation ann : parentClass.getDeclaredAnnotations()) {
       Class<? extends Annotation> annType = ann.annotationType();
 
+      /*
       if (! isQualifierPresent && annType.isAnnotationPresent(Qualifier.class)) {
+        addAnnotation(ann);
+      }
+      */
+      if (annType.isAnnotationPresent(Qualifier.class)) {
         addAnnotation(ann);
       }
       else if (Named.class.equals(annType)) {

@@ -29,8 +29,11 @@
 
 package com.caucho.ejb.session;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashSet;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.annotation.security.DeclareRoles;
@@ -45,8 +48,11 @@ import javax.inject.Named;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.j2ee.BeanName;
+import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.inject.ProcessSessionBeanImpl;
+import com.caucho.ejb.inject.SessionRegistrationBean;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
@@ -54,14 +60,14 @@ import com.caucho.ejb.server.AbstractEjbBeanManager;
 /**
  * Server container for a session bean.
  */
-abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T> {
+abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X> {
   private final static Logger log
      = Logger.getLogger(AbstractSessionManager.class.getName());
 
   private HashMap<Class<?>, InjectionTarget<?>> _componentMap
     = new HashMap<Class<?>, InjectionTarget<?>>();
 
-  private Bean<T> _bean;
+  private Bean<X> _bean;
   
   private int _sessionIdleMax = 16;
   private int _sessionConcurrentMax = -1;
@@ -70,7 +76,7 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
   private String[] _declaredRoles;
 
   public AbstractSessionManager(EjbManager manager, 
-                                AnnotatedType<T> annotatedType)
+                                AnnotatedType<X> annotatedType)
   {
     super(manager, annotatedType);
     
@@ -107,7 +113,7 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
   }
 
   @Override
-  public Bean<T> getDeployBean()
+  public Bean<X> getDeployBean()
   {
     return _bean;
   }
@@ -188,15 +194,21 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
       if (named != null) {
       }
 
-      ManagedBeanImpl<T> mBean = beanManager.createManagedBean(getAnnotatedType());
+      ManagedBeanImpl<X> mBean = beanManager.createManagedBean(getAnnotatedType());
 
       Class<?> baseApi = beanClass;
+      
+      Set<Type> apiList = new LinkedHashSet<Type>();
 
       if (localApiList != null) {
         for (Class<?> api : localApiList) {
           baseApi = api;
+          
+          apiList.add(api);
         }
       }
+      
+      apiList.add(Object.class);
 
       if (remoteApiList != null) {
         for (Class<?> api : remoteApiList) {
@@ -204,7 +216,7 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
         }
       }
 
-      _bean = createBean(mBean, baseApi);
+      _bean = createBean(mBean, baseApi, apiList);
       
       ProcessSessionBeanImpl process
         = new ProcessSessionBeanImpl(beanManager,
@@ -214,7 +226,11 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
                                      getSessionBeanType());
 
       beanManager.addBean(_bean, process);
+      
+      BeanName beanName = new BeanNameLiteral(getEJBName());
 
+      SessionRegistrationBean regBean
+        = new SessionRegistrationBean(beanManager, _bean, beanName);
       /*
        * if (remoteApiList != null) { for (Class api : remoteApiList) {
        * factory.type(api); } }
@@ -225,27 +241,26 @@ abstract public class AbstractSessionManager<T> extends AbstractEjbBeanManager<T
     }
   }
 
-  protected Bean<T> getBean()
+  protected Bean<X> getBean()
   {
     return _bean;
   }
 
-  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, Class<?> api)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+  abstract protected Bean<X> createBean(ManagedBeanImpl<X> mBean,
+                                        Class<?> api,
+                                        Set<Type> apiList);
   
   protected SessionBeanType getSessionBeanType()
   {
     return SessionBeanType.STATELESS;
   }
   
-  abstract protected InjectionTarget<T> createSessionComponent(Class<?> api,
-                                                               Class<T> beanClass);
+  abstract protected <T> InjectionTarget<T> createSessionComponent(Class<T> api,
+                                                                   Class<X> beanClass);
 
-  protected InjectionTarget<?> getComponent(Class<?> api)
+  protected <T> InjectionTarget<T> getComponent(Class<T> api)
   {
-    return _componentMap.get(api);
+    return (InjectionTarget<T>) _componentMap.get(api);
   }
 
   @Override

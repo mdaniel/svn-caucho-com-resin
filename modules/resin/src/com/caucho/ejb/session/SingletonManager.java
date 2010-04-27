@@ -30,8 +30,10 @@
 package com.caucho.ejb.session;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
@@ -124,7 +126,10 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
       return null;
   }
 
-  protected Bean createBean(ManagedBeanImpl mBean, Class api)
+  @Override
+  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, 
+                               Class<?> api,
+                               Set<Type> apiList)
   {
     SingletonProxyFactory factory = getSessionContext().getProxyFactory(api);
 
@@ -133,7 +138,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
                                          api, getSessionContext()));
 
     SingletonBeanImpl singletonBean
-      = new SingletonBeanImpl(this, mBean, factory);
+      = new SingletonBeanImpl(this, mBean, apiList, factory);
 
     return singletonBean;
   }

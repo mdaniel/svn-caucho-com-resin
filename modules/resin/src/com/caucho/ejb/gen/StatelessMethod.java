@@ -112,7 +112,9 @@ public class StatelessMethod<X,T> extends BusinessMethodGenerator<X,T>
     
     // bean allocation must be last because it needs to be
     // freed or discarded in the finally block
-    out.println(_beanClassName + " bean = _statelessPool.allocate();");
+    out.println("StatelessPool.Item<" + _beanClassName + "> poolItem");
+    out.println(" = _statelessPool.allocate();");
+    out.println(_beanClassName + " bean = poolItem.getValue();");
   }
 
   /**
@@ -208,9 +210,9 @@ public class StatelessMethod<X,T> extends BusinessMethodGenerator<X,T>
     // XXX: (possibly free semaphore first and allow bean at
     // end, since it's the semaphore that's critical
     out.println("if (isValid)");
-    out.println("  _statelessPool.free(bean);");
+    out.println("  _statelessPool.free(poolItem);");
     out.println("else");
-    out.println("  _statelessPool.discard(bean);");
+    out.println("  _statelessPool.discard(poolItem);");
      
     super.generateFinally(out);
     
@@ -225,10 +227,21 @@ public class StatelessMethod<X,T> extends BusinessMethodGenerator<X,T>
   /**
    * Generates the underlying bean instance
    */
+  @Override
   protected void generateThis(JavaWriter out)
     throws IOException
   {
     out.print("bean");
+  }
+  
+  /**
+   * Generates data associated with the bean
+   */
+  @Override
+  protected void generateBeanInfo(JavaWriter out)
+    throws IOException
+  {
+    out.print("poolItem");
   }
   
   /**

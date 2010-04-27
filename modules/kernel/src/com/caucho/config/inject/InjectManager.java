@@ -1675,7 +1675,7 @@ public class InjectManager
     if (bean == null) {
       BaseType baseType = createTargetBaseType(type);
       Class<T> rawClass = (Class<T>) baseType.getRawClass();
-      AnnotatedType<T> annType = new AnnotatedTypeImpl<T>(rawClass, rawClass);
+      AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(rawClass);
 
       NewBean<T> newBean = new NewBean<T>(this, annType);
       newBean.introspect();

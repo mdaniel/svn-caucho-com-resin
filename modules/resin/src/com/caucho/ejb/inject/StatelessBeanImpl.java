@@ -61,6 +61,7 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
   public StatelessBeanImpl(StatelessManager<X> server,
 			   ManagedBeanImpl<X> bean,
 			   Class<?> api,
+			   Set<Type> types,
                            StatelessProvider<X> producer)
   {
     super(bean);
@@ -70,11 +71,9 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
     if (producer == null)
       throw new NullPointerException();
 
-    _types.add(api);
+    _types.addAll(types);
     
     _qualifiers.addAll(bean.getQualifiers());
-    
-    _qualifiers.add(new BeanNameLiteral(server.getEJBName()));
     
     Class<?> scopeType = bean.getScope();
     

@@ -49,13 +49,14 @@ import com.caucho.inject.Module;
 @Module
 public class NewBean<X> extends AbstractIntrospectedBean<X>
 {
-  private InjectionTarget<X> _target;
+  private InjectionTargetImpl<X> _target;
 
   NewBean(InjectManager inject, AnnotatedType<X> beanType)
   {
     super(inject, beanType.getBaseType(), beanType);
 
     _target = new InjectionTargetImpl<X>(inject, beanType);
+    _target.introspect(beanType);
 
     //addBinding(NewLiteral.NEW);
     //setScopeType(Dependent.class);

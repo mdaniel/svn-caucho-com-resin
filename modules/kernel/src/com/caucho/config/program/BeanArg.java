@@ -68,7 +68,7 @@ public class BeanArg<T> extends Arg<T> {
 	bindings.add(ann);
       }
       
-      _bean = _beanManager.resolveByInjectionPoint(_type, bindings, null);
+      _bean = (Bean<T>) _beanManager.resolveByInjectionPoint(_type, bindings, null);
       /*
       for (Bean bean : _beanManager.getBeans(_type, _bindings)) {
 	_bean = bean;
@@ -87,7 +87,7 @@ public class BeanArg<T> extends Arg<T> {
     if (_bean == null)
       bind();
 
-    CreationalContext<T> beanEnv = new CreationalContextImpl(_bean, parentEnv);
+    CreationalContext<?> beanEnv = new CreationalContextImpl(_bean, parentEnv);
     
     // XXX: getInstance for injection?
     return _beanManager.getReference(_bean, _type, beanEnv);

@@ -576,7 +576,13 @@ public class EjbBean<X> extends DescriptionGroupConfig
   public <T> void addRemote(Class<T> remote)
     throws ConfigException
   {
-    addRemoteWrapper(new AnnotatedTypeImpl<T>(remote));
+    AnnotatedTypeImpl<X> annType;
+    
+    AnnotatedType<?> refType = ReflectionAnnotatedFactory.introspectType(remote);
+    
+    annType = new AnnotatedTypeImpl(refType);
+    
+    addRemoteWrapper(annType);
   }
 
   /**

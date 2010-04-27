@@ -44,22 +44,22 @@ import com.caucho.util.L10N;
 public class StatelessPool<X> {
   private static final L10N L = new L10N(StatelessPool.class);
 
-  private final AbstractSessionManager<X> _server;
+  private final StatelessManager<X> _manager;
   
-  private final FreeList<X> _freeList;
+  private final FreeList<Item<X>> _freeList;
   private final Semaphore _concurrentSemaphore;
   private final long _concurrentTimeout;
 
   private EjbProducer<X> _ejbProducer;
  
-  StatelessPool(AbstractSessionManager<X> server)
+  StatelessPool(StatelessManager<X> manager)
   {
-    _server = server;
+    _manager = manager;
     
-    _ejbProducer = server.getProducer();
+    _ejbProducer = manager.getProducer();
     
-    int idleMax = server.getSessionIdleMax();
-    int concurrentMax = server.getSessionConcurrentMax();
+    int idleMax = manager.getSessionIdleMax();
+    int concurrentMax = manager.getSessionConcurrentMax();
     
     if (idleMax < 0)
       idleMax = concurrentMax;
@@ -67,12 +67,12 @@ public class StatelessPool<X> {
     if (idleMax < 0)
       idleMax = 16;
     
-    _freeList = new FreeList<X>(idleMax);
+    _freeList = new FreeList<Item<X>>(idleMax);
     
     if (concurrentMax == 0)
       throw new IllegalArgumentException(L.l("maxConcurrent may not be zero")); 
     
-    long concurrentTimeout = server.getSessionConcurrentTimeout();
+    long concurrentTimeout = manager.getSessionConcurrentTimeout();
     
     if (concurrentTimeout < 0)
       concurrentTimeout = Long.MAX_VALUE / 2;
@@ -85,7 +85,7 @@ public class StatelessPool<X> {
       _concurrentSemaphore = null;
   }
   
-  public X allocate()
+  public Item<X> allocate()
   {
     Semaphore semaphore = _concurrentSemaphore;
     
@@ -102,47 +102,48 @@ public class StatelessPool<X> {
     boolean isValid = false;
     
     try {
-      X bean = _freeList.allocate();
+      Item<X> beanItem = _freeList.allocate();
     
-      if (bean == null) {
-        bean = _ejbProducer.newInstance();
+      if (beanItem == null) {
+        beanItem = _manager.newInstance(_ejbProducer);
+        // _ejbProducer.newInstance();
       }
       
       isValid = true;
     
-      return bean;
+      return beanItem;
     } finally {
       if (! isValid && semaphore != null)
         semaphore.release();
     }
   }
 
-  public void free(X bean)
+  public void free(Item<X> beanItem)
   {
     Semaphore semaphore = _concurrentSemaphore;
     if (semaphore != null)
       semaphore.release();
     
-    if (! _freeList.free(bean)) {
-      destroyImpl(bean);
+    if (! _freeList.free(beanItem)) {
+      destroyImpl(beanItem);
     }
   }
   
-  public void destroy(X bean)
+  public void destroy(Item<X> beanItem)
   {
-    if (bean == null)
+    if (beanItem == null)
       return;
     
     Semaphore semaphore = _concurrentSemaphore;
     if (semaphore != null)
       semaphore.release();
     
-    destroyImpl(bean);
+    destroyImpl(beanItem);
   }
   
-  public void discard(X bean)
+  public void discard(Item<X> beanItem)
   {
-    if (bean == null)
+    if (beanItem == null)
       return;
     
     Semaphore semaphore = _concurrentSemaphore;
@@ -150,23 +151,44 @@ public class StatelessPool<X> {
       semaphore.release();
   }
   
-  private void destroyImpl(X bean)
+  private void destroyImpl(Item<X> beanItem)
   {
-    _ejbProducer.destroyInstance(bean);
+    _ejbProducer.destroyInstance(beanItem.getValue());
   }
   
   public void destroy()
   {
-    X bean;
+    Item<X> beanItem;
     
-    while ((bean = _freeList.allocate()) != null) {
-      destroyImpl(bean);
+    while ((beanItem = _freeList.allocate()) != null) {
+      destroyImpl(beanItem);
     }
   }
   
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _server + "]";
+    return getClass().getSimpleName() + "[" + _manager + "]";
+  }
+  
+  public static class Item<X> {
+    private X _value;
+    private Object []_interceptorObjects;
+    
+    Item(X value, Object []interceptorObjects)
+    {
+      _value = value;
+      _interceptorObjects = interceptorObjects;
+    }
+    
+    public X getValue()
+    {
+      return _value;
+    }
+    
+    public Object []_caucho_getInterceptorObjects()
+    {
+      return _interceptorObjects;
+    }
   }
 }

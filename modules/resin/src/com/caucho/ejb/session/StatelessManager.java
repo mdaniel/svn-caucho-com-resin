@@ -31,7 +31,9 @@ package com.caucho.ejb.session;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -49,6 +51,7 @@ import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatelessBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
+import com.caucho.ejb.server.EjbProducer;
 import com.caucho.util.L10N;
 
 /**
@@ -89,9 +92,9 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
    * Returns the JNDI proxy object to create instances of the local interface.
    */
   @Override
-  public Object getLocalProxy(Class api)
+  public Object getLocalProxy(Class<?> api)
   {
-    StatelessProvider provider = getStatelessContext().getProvider(api);
+    StatelessProvider<?> provider = getStatelessContext().getProvider(api);
 
     return new StatelessProviderProxy(provider);
   }
@@ -106,7 +109,9 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   }
 
   @Override
-  protected Bean<X> createBean(ManagedBeanImpl<X> mBean, Class<?> api)
+  protected Bean<X> createBean(ManagedBeanImpl<X> mBean,
+                               Class<?> api,
+                               Set<Type> apiList)
   {
     StatelessProvider<X> provider = getStatelessContext().getProvider(api);
 
@@ -115,14 +120,15 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
           api, getStatelessContext()));
 
     StatelessBeanImpl<X> statelessBean
-      = new StatelessBeanImpl<X>(this, mBean, api, provider);
+      = new StatelessBeanImpl<X>(this, mBean, api, apiList, provider);
 
     return statelessBean;
   }
 
-  protected InjectionTarget createSessionComponent(Class api, Class beanClass)
+  protected <T> InjectionTarget<T> createSessionComponent(Class<T> api, 
+                                                          Class<X> beanClass)
   {
-    StatelessProvider provider = getStatelessContext().getProvider(api);
+    StatelessProvider<?> provider = getStatelessContext().getProvider(api);
 
     return new StatelessComponent(provider, beanClass);
   }
@@ -219,6 +225,13 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   public AbstractSessionContext getSessionContext()
   {
     return getStatelessContext();
+  }
+  
+  StatelessPool.Item<X> newInstance(EjbProducer<X> producer)
+  {
+    X value = producer.newInstance();
+    
+    return new StatelessPool.Item<X>(value, null);
   }
   
   public void destroy()

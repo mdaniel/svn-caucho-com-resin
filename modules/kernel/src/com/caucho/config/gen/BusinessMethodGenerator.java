@@ -655,6 +655,15 @@ public class BusinessMethodGenerator<X,T> implements EjbCallChain<X,T> {
   }
 
   /**
+   * Generates bean info, for example interceptors and decorators
+   * associated with the bean.
+   */
+  protected void generateBeanInfo(JavaWriter out) throws IOException
+  {
+    out.print("this");
+  }
+
+  /**
    * Generates the underlying bean instance
    */
   protected void generateBean(JavaWriter out) throws IOException

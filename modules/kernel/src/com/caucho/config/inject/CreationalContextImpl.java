@@ -106,7 +106,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     for (; ptr != null; ptr = ptr._parent) {
       Contextual<?> testBean = ptr._bean;
       
-      if (testBean == bean) {
+      if (testBean == bean && ptr._value != null) {
         return (X) ptr._value;
       }
     }

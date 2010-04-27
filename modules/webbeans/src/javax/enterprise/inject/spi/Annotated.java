@@ -54,12 +54,12 @@ public interface Annotated
   public <T extends Annotation> T getAnnotation(Class<T> annotationType);
 
   /**
+   * Returns the specified annotation or null if no annotation is declared
+   */
+  public boolean isAnnotationPresent(Class<? extends Annotation> annotationType);
+
+  /**
    * Returns the set of declared annotations.
    */
   public Set<Annotation> getAnnotations();
-
-  /**
-   * Returns true if the annotation is declared on the object.
-   */
-  public boolean isAnnotationPresent(Class<? extends Annotation> annotationType);
 }

@@ -637,6 +637,8 @@ public class InterceptorCallChain<X,T>
 
     if (hasDecorator())
       superMethodName = "__caucho_" + javaMethod.getName() + "_decorator";
+    else if (getView().isProxy())
+      superMethodName = javaMethod.getName();
     else
       superMethodName = "__caucho_" + javaMethod.getName();
 
@@ -807,8 +809,10 @@ public class InterceptorCallChain<X,T>
     out.print(uniqueName + "_implMethod, ");
     // generateThis(out);
     out.print(_chainName + "_methodChain, ");
-    generateThis(out);
-    out.print(".__caucho_interceptor_objects, ");
+    
+    generateBeanInfo(out);
+    out.print("._caucho_getInterceptorObjects(), ");
+    
     // generateThis(out);
     out.print(_chainName + "_objectIndexChain, ");
 
@@ -1470,6 +1474,12 @@ public class InterceptorCallChain<X,T>
     throws IOException
   {
     getBusinessMethod().generateThis(out);
+  }
+
+  private void generateBeanInfo(JavaWriter out)
+    throws IOException
+  {
+    getBusinessMethod().generateBeanInfo(out);
   }
 
   private boolean containsMethod(ArrayList<Method> methodList, Method method)

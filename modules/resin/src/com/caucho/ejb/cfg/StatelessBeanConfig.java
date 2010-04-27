@@ -75,5 +75,10 @@ public class StatelessBeanConfig extends AbstractBeanConfig
 
     add(ann);
   }
+  
+  @Override
+  protected void deploy()
+  {
+  }
 }
 

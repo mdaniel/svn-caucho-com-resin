@@ -416,8 +416,10 @@ public class EjbConfig {
   public <X> EjbBean<X> findBeanByType(Class<X> type)
   {
     for (EjbBean<?> bean : _cfgBeans.values()) {
+      Class<?> cl = bean.getEJBClass();
+      
       // ejb/0j03
-      if (type.getName().equals(bean.getEJBClass().getName()))
+      if (cl != null && cl.getName().equals(type.getName()))
         return (EjbBean<X>) bean;
     }
 

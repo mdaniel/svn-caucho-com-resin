@@ -39,7 +39,6 @@ import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import javax.ejb.Timer;
 import javax.enterprise.context.ApplicationScoped;
@@ -199,6 +198,15 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     }
 
     return value;
+  }
+
+  /**
+   * Returns the set of injection points, for validation.
+   */
+  @Override
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return _injectionTarget.getInjectionPoints();
   }
 
   public Set<Bean<?>> getProducerBeans()

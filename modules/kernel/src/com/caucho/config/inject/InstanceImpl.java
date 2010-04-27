@@ -87,27 +87,30 @@ public class InstanceImpl<T> implements Instance<T>
   /**
    * Restricts the instance given a set of bindings
    */
+  @Override
   public Instance<T> select(Annotation ... bindings)
   {
-    return new InstanceImpl(_beanManager, _type, bindings);
+    return new InstanceImpl<T>(_beanManager, _type, bindings);
   }
 
   /**
    * Restricts the instance to a subtype and bindings.
    */
+  @Override
   public <U extends T> Instance<U> select(Class<U> subtype,
                                           Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new InstanceImpl<U>(_beanManager, subtype, bindings);
   }
 
   /**
    * Restricts the instance to a subtype and bindings.
    */
+  @Override
   public <U extends T> Instance<U> select(TypeLiteral<U> subtype,
                                           Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return new InstanceImpl<U>(_beanManager, subtype.getType(), bindings);
   }
 
   public Iterator<T> iterator()
