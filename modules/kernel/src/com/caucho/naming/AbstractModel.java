@@ -104,6 +104,15 @@ abstract public class AbstractModel {
   {
     throw new UnsupportedOperationException();
   }
+  
+  /**
+   * Renames a child.
+   */
+  public void rename(String newName)
+    throws NamingException
+  {
+    throw new UnsupportedOperationException();
+  }
 
   /**
    * Lists the child names.

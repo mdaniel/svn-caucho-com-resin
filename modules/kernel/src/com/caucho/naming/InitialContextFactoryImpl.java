@@ -89,7 +89,7 @@ public class InitialContextFactoryImpl implements InitialContextFactory
         try {
           AbstractModel javaComp = model.createSubcontext("java:comp");
           AbstractModel java = model.createSubcontext("java:");
-          // server/158i
+          // env/0g8i
           java.bind("comp", javaComp);
 
           // #3486, support/1101

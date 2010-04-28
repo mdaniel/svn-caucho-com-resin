@@ -102,14 +102,14 @@ public class QBindingEnumeration implements NamingEnumeration {
       String name = (String) list.get(i);
       
       if (i != 0)
-	cb.append(" ");
+        cb.append(" ");
       
       try {
-	String valueName = String.valueOf(_context.lookup(name));
+        String valueName = String.valueOf(_context.lookup(name));
 
-	// server/158a, for QA comparison
-	if (valueName.indexOf('@') >= 0)
-	  valueName = valueName.substring(0, valueName.indexOf('@'));
+        // server/158a, for QA comparison
+        if (valueName.indexOf('@') >= 0)
+          valueName = valueName.substring(0, valueName.indexOf('@'));
 	
         cb.append("{" + name + ", " + valueName + "}");
       } catch (Exception e) {

@@ -156,9 +156,14 @@ public class ContextImpl implements Context {
   {
     Object value = lookupImpl(name);
 
-    // server/1509
-    if (value != null)
+    if (value == NullValue.NULL) {
+      // env/0gc9
+      return null;
+    }
+    else if (value != null) {
+     // server/1509
       return value;
+    }
     else
       throw new NameNotFoundException(getFullPath(name));
   }
@@ -199,7 +204,7 @@ public class ContextImpl implements Context {
       else if (value instanceof Context)
         return ((Context) value).lookup(rest);
       else if (value != null)
-        throw new NotContextException(L.l("{0}: expected intermediate context at '{1}'",
+        throw new NotContextException(L.l("{0}: expected intermediate context at `{1}'",
                                           getFullPath(name), value));
       else
         throw new NameNotFoundException(getFullPath(name));
@@ -214,9 +219,25 @@ public class ContextImpl implements Context {
   public Object lookup(Name name)
     throws NamingException
   {
+    Object value = lookupImpl(name);
+
+    if (value == NullValue.NULL) {
+      // env/0gf9
+      return null;
+    }
+    else if (value != null) {
+      return value;
+    }
+    else
+      throw new NameNotFoundException(getFullPath(name));
+  }
+  
+  private Object lookupImpl(Name name)
+    throws NamingException
+  {
     if (log.isLoggable(Level.FINEST))
       log.finest(L.l("JNDI lookup `{0}'", name));
-    
+
     if (name == null)
       return create(_model, _env);
 
@@ -231,13 +252,15 @@ public class ContextImpl implements Context {
         model = (AbstractModel) value;
         continue;
       }
-
+      
       value = dereference(value, null, model);
 
-      if (i + 1 == name.size())
+      if (i + 1 == name.size()) {
         return value;
-      else if (value instanceof Context)
+      }
+      else if (value instanceof Context) {
         return ((Context) value).lookup(name.getSuffix(i + 1));
+      }
       else if (value != null)
         throw new NotContextException(L.l("{0}: expected intermediate context at `{1}'",
                                           getFullPath(name), value));
@@ -261,19 +284,26 @@ public class ContextImpl implements Context {
       String first = parseFirst(tail);
       String rest = parseRest(tail);
 
-      if (first == null)
+      if (first == null) {
         return create(getFullPath(name), model, _env);
+      }
 
       Object value = model.lookup(first);
-
+   
       if (value instanceof AbstractModel) {
         model = (AbstractModel) value;
         tail = rest;
         continue;
       }
 
-      if (rest == null)
-        return value;
+      if (rest == null) {
+        if (value == NullValue.NULL)
+          return null;
+        else if (value != null)
+          return value;
+        else
+          throw new NameNotFoundException(getFullPath(name));
+      }
 
       value = dereference(value, null, model);
 
@@ -311,8 +341,14 @@ public class ContextImpl implements Context {
         continue;
       }
 
-      if (i + 1 == name.size())
-        return value;
+      if (i + 1 == name.size()) {
+        if (value == NullValue.NULL)
+          return null;
+        else if (value != null)
+          return value;
+        else
+          throw new NameNotFoundException(getFullPath(name));
+      }
       
       value = dereference(value, null, model);
 
@@ -337,6 +373,9 @@ public class ContextImpl implements Context {
     String tail = name;
     AbstractModel model = _model;
 
+    if (obj == null)
+      obj = NullValue.NULL;
+    
     while (true) {
       String first = parseFirst(tail);
       String rest = parseRest(tail);
@@ -346,11 +385,13 @@ public class ContextImpl implements Context {
 
       if (rest == null) {
         Object value = model.lookup(first);
+
         if (value != null)
           throw new NamingException(L.l("`{0}' is already bound to `{1}'",
                                         name, value));
 
         model.bind(first, getReference(model, obj));
+
         return;
       }
 
@@ -361,18 +402,20 @@ public class ContextImpl implements Context {
         tail = rest;
         continue;
       }
-      
+
       value = dereference(value, null, model);
 
       if (value instanceof Context) {
         ((Context) value).bind(rest, obj);
         return;
       }
-      else if (value != null)
+      else if (value != null) {
         throw new NotContextException(L.l("{0}: expected intermediate context at `{1}'",
                                           getFullPath(name), value));
-      else
+      }
+      else {
         throw new NameNotFoundException(getFullPath(name));
+      }
     }
   }
   
@@ -421,6 +464,9 @@ public class ContextImpl implements Context {
       throw new NamingException(L.l("`{0}' is already bound to `{1}'",
                                     name, value));
 
+    if (obj == null)
+      obj = NullValue.NULL;
+    
     model.bind(first, getReference(model, obj));
   }
 
@@ -438,6 +484,10 @@ public class ContextImpl implements Context {
     
     String tail = name;
     AbstractModel model = _model;
+    
+    // env/0gde
+    if (obj == null)
+      obj = NullValue.NULL;
 
     while (true) {
       String first = parseFirst(tail);
@@ -507,6 +557,9 @@ public class ContextImpl implements Context {
 
     String first = name.get(i);
     
+    if (obj == null)
+      obj = NullValue.NULL;
+    
     model.bind(first, getReference(model, obj));
   }
 
@@ -523,6 +576,12 @@ public class ContextImpl implements Context {
   public void unbind(String name)
     throws NamingException
   {
+    unbindImpl(name, false);
+  }
+  
+  private void unbindImpl(String name, boolean isRename)
+    throws NamingException
+  {
     String tail = name;
     AbstractModel model = _model;
 
@@ -534,7 +593,7 @@ public class ContextImpl implements Context {
         throw new NamingException(L.l("can't unbind root"));
 
       if (rest == null) {
-        if (model.lookup(name) instanceof AbstractModel)
+        if (! isRename && model.lookup(name) instanceof AbstractModel)
           throw new NamingException(L.l("can't unbind subcontext; use destroySubcontext"));
           
         model.unbind(first);
@@ -562,7 +621,7 @@ public class ContextImpl implements Context {
         throw new NameNotFoundException(getFullPath(name));
     }
   }
-
+  
   private Object dereference(Object value, Name tail, AbstractModel model)
     throws NamingException
   {
@@ -624,17 +683,30 @@ public class ContextImpl implements Context {
   public void rename(String oldName, String newName)
     throws NamingException
   {
-    Object obj = lookup(oldName);
-    unbind(oldName);
-    bind(newName, obj);
+    Object value = lookup(oldName);
+    unbindImpl(oldName, true);
+    
+    if (value instanceof ContextImpl)
+      ((ContextImpl) value).setName(newName);
+    
+    bind(newName, value);
+  }
+  
+  private void setName(String newName)
+  {
+    _name = newName;
   }
 
   public void rename(Name oldName, Name newName)
     throws NamingException
   {
-    Object obj = lookup(oldName);
+    Object value = lookup(oldName);
     unbind(oldName);
-    bind(newName, obj);
+    
+    if (value instanceof ContextImpl)
+      ((ContextImpl) value).setName(newName.toString());
+    
+    bind(newName, value);
   }
 
   /**
@@ -833,7 +905,7 @@ public class ContextImpl implements Context {
     throws NamingException
   {
     if (name.size() == 0)
-      throw new NamingException(L.l("can't createSubcontext root"));
+      throw new NamingException(L.l("can't create root subcontext"));
       
     AbstractModel model = _model;
 
@@ -864,7 +936,7 @@ public class ContextImpl implements Context {
     
     model = model.createSubcontext(first);
 
-    return create(model, _env);
+    return create(getFullPath(name), model, _env);
   }
 
   /**
@@ -881,7 +953,7 @@ public class ContextImpl implements Context {
       String rest = parseRest(tail);
       
       if (first == null)
-        throw new NamingException(L.l("can't create root subcontext"));
+        throw new NamingException(L.l("can't destroy root subcontext"));
 
       if (rest == null) {
         model.unbind(first);
@@ -914,7 +986,7 @@ public class ContextImpl implements Context {
     throws NamingException
   {
     if (name.size() == 0)
-      throw new NamingException(L.l("can't createSubcontext root"));
+      throw new NamingException(L.l("can't destroy root subcontext"));
       
     AbstractModel model = _model;
 
@@ -975,7 +1047,6 @@ public class ContextImpl implements Context {
 
     if (obj instanceof Context)
       return ((Context) obj).getNameParser(name.getSuffix(1));
-
     else
       return new QNameParser(this);
   }
@@ -983,13 +1054,25 @@ public class ContextImpl implements Context {
   public String composeName(String suffix, String prefix)
     throws NamingException
   {
-    return prefix + "/" + suffix;
+    if (suffix == null)
+      throw new NamingException(L.l("suffix cannot be null"));
+    else if (prefix == null)
+      throw new NamingException(L.l("prefix cannot be null"));
+    else if (prefix.length() == 0)
+      return suffix;
+    else
+      return prefix + "/" + suffix;
   }
 
   public Name composeName(Name suffix, Name prefix)
     throws NamingException
   {
-    return prefix.addAll(suffix);
+    if (suffix == null)
+      throw new NamingException(L.l("suffix cannot be null"));
+    else if (prefix == null)
+      throw new NamingException(L.l("prefix cannot be null"));
+    else
+      return prefix.addAll(suffix);
   }
 
   public String getNameInNamespace()
@@ -1183,5 +1266,10 @@ public class ContextImpl implements Context {
   public String toString()
   {
     return "ContextImpl[" + _name + "]";
+  }
+  
+  private static class NullValue
+  {
+    static final NullValue NULL = new NullValue();
   }
 }
