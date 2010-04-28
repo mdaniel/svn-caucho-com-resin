@@ -29,9 +29,12 @@
 
 package com.caucho.quercus.env;
 
+import java.io.IOException;
 import java.io.Serializable;
+import java.util.IdentityHashMap;
 
 import com.caucho.quercus.Location;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents an array-get argument which might be a call to a reference.
@@ -56,6 +59,34 @@ abstract public class ArgValue extends Value
   public StringValue toStringValue()
   {
     return toLocalValue().toStringValue();
+  }
+  
+  /*
+   * Converts to a StringValue.
+   */
+  public StringValue toStringValue(Env env)
+  {
+    return toLocalValue().toStringValue(env);
+  }
+  
+  @Override
+  protected void varDumpImpl(Env env,
+                             WriteStream out,
+                             int depth,
+                             IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    toLocalValue().varDumpImpl(env, out, depth, valueSet);
+  }
+  
+  @Override
+  protected void printRImpl(Env env,
+                            WriteStream out,
+                            int depth,
+                            IdentityHashMap<Value, String> valueSet)
+    throws IOException
+  {
+    toLocalValue().printRImpl(env, out, depth, valueSet);
   }
 }
 
