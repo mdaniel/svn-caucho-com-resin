@@ -83,20 +83,20 @@ namespace Caucho.IIS
         _log.Info("Setting servers to '{0}'", servers);
         Trace.TraceInformation("Setting servers to '{0}'", servers);
       }
-      
-      if (appSettings["resin.session-cookie"] != null)
+
+      if (!String.IsNullOrEmpty(appSettings["resin.session-cookie"]))
         _sessionCookieName = appSettings["resin.session-cookie"];
 
-      if (appSettings["resin.ssl-session-cookie"] != null)
+      if (!String.IsNullOrEmpty(appSettings["resin.ssl-session-cookie"]))
         _sslSessionCookieName = appSettings["resin.ssl-session-cookie"];
 
       if ("false".Equals(appSettings["resin.sticky-sessions"], StringComparison.OrdinalIgnoreCase))
         _isStickySessions = false;
 
-      if (appSettings["resin.session-url-prefix"] != null)
+      if (!String.IsNullOrEmpty(appSettings["resin.session-url-prefix"]))
         _sessionUrlPrefix = appSettings["resin.session-url-prefix"];
 
-      if (appSettings["resin.alternate-session-url-prefix"] != null)
+      if (!String.IsNullOrEmpty(appSettings["resin.alternate-session-url-prefix"]))
         _sessionUrlPrefix = appSettings["resin.alternate-session-url-prefix"];
 
       _loadBalancer = new LoadBalancer(servers);
@@ -132,6 +132,8 @@ namespace Caucho.IIS
       if (sessionIdx > -1)
         sessionId = path.Substring(sessionIdx + _sessionUrlPrefix.Length);
 
+      Trace.TraceInformation("::: 0 ::: sessionid '{0}:{1}' ", _sessionUrlPrefix, sessionId);
+
       HttpCookie cookie = null;
       if (sessionId == null && request.IsSecureConnection)
         cookie = request.Cookies[_sslSessionCookieName];
@@ -139,11 +141,15 @@ namespace Caucho.IIS
       if (sessionId == null && cookie != null)
         sessionId = cookie.Value;
 
+      Trace.TraceInformation("::: 1 ::: sessionid" + sessionId);
+
       if (sessionId == null)
         cookie = request.Cookies[_sessionCookieName];
 
       if (sessionId == null && cookie != null)
         sessionId = cookie.Value;
+
+      Trace.TraceInformation("::: 2 ::: sessionid" + sessionId);
 
       return sessionId;
     }
