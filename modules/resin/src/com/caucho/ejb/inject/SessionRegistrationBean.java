@@ -59,6 +59,15 @@ public class SessionRegistrationBean<X> extends BeanWrapper<X>
     _qualifierSet.add(beanName);
   }
   
+  /**
+   * The registration bean is not registered by name
+   */
+  @Override
+  public String getName()
+  {
+    return null;
+  }
+  
   @Override
   public Set<Annotation> getQualifiers()
   {

@@ -29,14 +29,13 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.Configurable;
-import com.caucho.util.L10N;
-import com.caucho.server.dispatch.ErrorFilterChain;
-
 import javax.servlet.FilterChain;
 import javax.servlet.http.HttpServletResponse;
 
-/*
+import com.caucho.config.Configurable;
+import com.caucho.server.dispatch.ErrorFilterChain;
+
+/**
  * Sends a HTTP Forbidden response using response.sendError(SC_FORBIDDEN).
  *
  * <pre>
@@ -50,8 +49,6 @@ import javax.servlet.http.HttpServletResponse;
 @Configurable
 public class Forbidden extends AbstractTargetDispatchRule
 {
-  private static final L10N L = new L10N(Forbidden.class);
-
   @Override
   public FilterChain createDispatch(String uri,
 				    String queryString,

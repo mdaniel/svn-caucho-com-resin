@@ -29,18 +29,18 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
-import com.caucho.util.L10N;
+import java.util.regex.Matcher;
 
 import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-/*
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.server.dispatch.ForwardAbsoluteFilterChain;
+import com.caucho.server.dispatch.ForwardFilterChain;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.L10N;
+
+/**
  * Forwards a requests using the servlet RequestDispatcher.forward call
  * protocol.
  *
@@ -57,10 +57,6 @@ public class Forward extends AbstractDispatchRule
 {
   private static final L10N L = new L10N(Forward.class);
 
-  private static final Pattern ALL_PATTERN = Pattern.compile("^.*$");
-
-  private String _absoluteTarget;
-  private String _targetHost;
   private String _target;
 
   private boolean _isAbsolute;
@@ -82,7 +78,6 @@ public class Forward extends AbstractDispatchRule
   @Configurable
   public void setTargetHost(String target)
   {
-    _targetHost = target;
   }
 
   @Override

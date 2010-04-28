@@ -29,14 +29,12 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.FilterChain;
+
 import com.caucho.config.Configurable;
-import com.caucho.util.L10N;
 import com.caucho.server.dispatch.ErrorFilterChain;
 
-import javax.servlet.FilterChain;
-import javax.servlet.http.HttpServletResponse;
-
-/*
+/**
  * Sends a HTTP error response using response.sendError(code)
  *
  * <pre>
@@ -50,8 +48,6 @@ import javax.servlet.http.HttpServletResponse;
 @Configurable
 public class SendError extends AbstractTargetDispatchRule
 {
-  private static final L10N L = new L10N(SendError.class);
-
   private int _code = 403;
   private String _message;
 

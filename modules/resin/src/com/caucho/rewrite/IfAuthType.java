@@ -80,6 +80,7 @@ public class IfAuthType implements RequestPredicate
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     String authType = request.getAuthType();

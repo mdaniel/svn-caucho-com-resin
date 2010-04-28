@@ -29,15 +29,14 @@
 
 package com.caucho.rewrite;
 
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.annotation.PostConstruct;
-import java.util.regex.Pattern;
 
 /**
  * Passes if the named parameter exists and has a value
@@ -107,6 +106,7 @@ public class IfQueryParam implements RequestPredicate
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     String value = request.getParameter(_name);

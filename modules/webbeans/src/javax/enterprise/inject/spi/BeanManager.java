@@ -80,12 +80,12 @@ public interface BeanManager
   /**
    * Tests if an annotation is an enabled interceptor binding type
    */
-  public boolean isInterceptorBindingType(Class<? extends Annotation> annotationType);
+  public boolean isInterceptorBinding(Class<? extends Annotation> annotationType);
 
   /**
    * Returns the bindings for an interceptor binding type
    */
-  public Set<Annotation> getInterceptorBindingTypeDefinition(Class<? extends Annotation> bindingType);
+  public Set<Annotation> getInterceptorBindingDefinition(Class<? extends Annotation> bindingType);
 
   /**
    * Tests if an annotation is an enabled stereotype.

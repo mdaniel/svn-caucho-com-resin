@@ -30,7 +30,6 @@
 package com.caucho.rewrite;
 
 import java.io.IOException;
-import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.servlet.FilterChain;
@@ -42,12 +41,10 @@ import javax.servlet.http.HttpServletRequestWrapper;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.types.Period;
 import com.caucho.server.dispatch.ServletConfigImpl;
 import com.caucho.server.webapp.WebApp;
 import com.caucho.servlets.HttpProxyServlet;
-import com.caucho.util.L10N;
 
 /**
  * Dispatches a request to a backend server using HTTP as the proxy
@@ -66,16 +63,8 @@ import com.caucho.util.L10N;
 @Configurable
 public class HttpProxy extends AbstractTargetDispatchRule
 {
-  private static final L10N L = new L10N(HttpProxy.class);
-  private static final Logger log
-    = Logger.getLogger(HttpProxy.class.getName());
-
-  private WebApp _webApp = WebApp.getCurrent();
-
   private HttpProxyServlet _proxyServlet;
   private ServletConfigImpl _servlet;
-
-  private ContainerProgram _program = new ContainerProgram();
 
   public HttpProxy()
   {

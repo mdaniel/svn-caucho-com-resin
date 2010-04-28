@@ -47,6 +47,7 @@ import java.util.logging.Logger;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
@@ -268,8 +269,10 @@ class ExtensionManager
 
         if (bindings.length == 0)
           bindings = new Annotation[] { DefaultLiteral.DEFAULT };
+        
+        InjectionPoint ip = null;
 
-        args[i] = new BeanArg(param[i], bindings);
+        args[i] = new BeanArg(inject, param[i], bindings, ip);
       }
 
       BaseType baseType = inject.createTargetBaseType(param[0]);

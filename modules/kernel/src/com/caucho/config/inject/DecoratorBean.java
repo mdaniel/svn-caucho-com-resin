@@ -248,7 +248,7 @@ public class DecoratorBean<T> implements Decorator<T>
     introspectDelegateField();
 
     if (_delegateField != null) {
-      Class<?> delegateType = _delegateField.getType();
+      Type delegateType = _delegateField.getGenericType();
       InjectManager manager = InjectManager.getCurrent();
     
       _typeSet = manager.createSourceBaseType(delegateType).getTypeClosure(manager);

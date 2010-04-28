@@ -48,12 +48,12 @@ import javax.enterprise.inject.spi.InterceptionType;
 /**
  * Utilities
  */
-public class EjbUtil {
-  private static final L10N L = new L10N(EjbUtil.class);
+public class CandiUtil {
+  private static final L10N L = new L10N(CandiUtil.class);
 
   public static final Object []NULL_OBJECT_ARRAY = new Object[0];
 
-  private EjbUtil()
+  private CandiUtil()
   {
   }
 
@@ -115,6 +115,8 @@ public class EjbUtil {
         throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",
                                            type, beans.get(index)));
 
+      method.setAccessible(true);
+      
       methods[i] = method;
     }
 
@@ -123,7 +125,7 @@ public class EjbUtil {
 
   public static Method getMethod(Class cl,
                                  String methodName,
-                                 Class paramTypes[])
+                                 Class<?> paramTypes[])
     throws Exception
   {
     Method method = null;

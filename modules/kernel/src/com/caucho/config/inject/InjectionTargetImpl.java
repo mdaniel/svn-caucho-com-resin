@@ -658,9 +658,16 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       AnnotatedParameter<?> param = params.get(i);
 
       Annotation []qualifiers = getQualifiers(param);
+      
+      InjectionPoint ip = new InjectionPointImpl(getBeanManager(),
+                                                 getBean(),
+                                                 param);
 
-      if (qualifiers.length > 0)
-        args[i] = new BeanArg<X>(param.getBaseType(), qualifiers);
+      if (qualifiers.length > 0 || true)
+        args[i] = new BeanArg<X>(getBeanManager(),
+                                 param.getBaseType(), 
+                                 qualifiers,
+                                 ip);
       else
         args[i] = new ValueArg<X>(param.getBaseType());
     }
@@ -816,14 +823,17 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     public <T> void inject(T instance, CreationalContext<T> env)
     {
       try {
-        // server/30i1
-        InjectManager beanManager = InjectManager.getCurrent();
+        // server/30i1 vs ioc/0155
+        InjectManager beanManager = getBeanManager();
+        // InjectManager.getCurrent();
         
         Object value = beanManager.getInjectableReference(_ij, env);
 
         _field.set(instance, value);
       } catch (Exception e) {
-        throw ConfigException.create(_field, e);
+        // XXX:
+        // throw ConfigException.create(_field, e);
+        throw new RuntimeException(e);
       }
     }
   }

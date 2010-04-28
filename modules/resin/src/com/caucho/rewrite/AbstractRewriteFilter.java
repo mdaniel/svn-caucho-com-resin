@@ -29,15 +29,14 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.server.rewrite.MatchFilterChain;
-
 import java.util.ArrayList;
 import java.util.regex.Pattern;
-import java.util.regex.Matcher;
 
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+
+import com.caucho.server.rewrite.MatchFilterChain;
 
 abstract public class AbstractRewriteFilter implements RewriteFilter
 {
@@ -93,14 +92,13 @@ abstract public class AbstractRewriteFilter implements RewriteFilter
     add(new RewriteFilterAdapter(filter));
   }
   
+  @Override
   public FilterChain map(String uri,
 			 String queryString,
 			 FilterChain next)
     throws ServletException
   {
-    Matcher matcher = null;
-    
-    if (_regexp == null || (matcher = _regexp.matcher(uri)).find()) {
+    if (_regexp == null || (_regexp.matcher(uri)).find()) {
       FilterChain chain = createFilterChain(uri, queryString, next);
 
       for (int i = _filters.length - 1; i >= 0; i--) {

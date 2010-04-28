@@ -29,18 +29,19 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
-
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.Configurable;
+import com.caucho.util.L10N;
 
 /**
 * A rewrite condition that passes if the client has been authenticated
  * and the remote user has the specified name, as determined by
  * {@link javax.servlet.http.HttpServletRequest#getRemoteUser()}.
 */
+@Configurable
 public class IfRemoteUser implements RequestPredicate
 {
   private static final L10N L = new L10N(IfRemoteUser.class);

@@ -30,7 +30,10 @@
 package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.enterprise.inject.spi.Decorator;
 
@@ -48,8 +51,10 @@ public class DecoratorEntry<X> {
     = new ArrayList<QualifierBinding>();
 
   private BaseType _delegateType;
+  
+  private Set<BaseType> _decoratedTypes = new LinkedHashSet<BaseType>();
 
-  public DecoratorEntry(Decorator<X> decorator,
+  public DecoratorEntry(InjectManager manager, Decorator<X> decorator,
                         BaseType delegateType)
   {
     _decorator = decorator;
@@ -61,6 +66,10 @@ public class DecoratorEntry<X> {
 
     if (_bindings.size() == 0)
       _bindings.add(new QualifierBinding(DefaultLiteral.DEFAULT));
+    
+    for (Type type: decorator.getDecoratedTypes()) {
+      _decoratedTypes.add(manager.createSourceBaseType(type));
+    }
   }
 
   public Decorator<X> getDecorator()
@@ -71,6 +80,11 @@ public class DecoratorEntry<X> {
   public BaseType getDelegateType()
   {
     return _delegateType;
+  }
+  
+  public Set<BaseType> getDecoratedTypes()
+  {
+    return _decoratedTypes;
   }
 
   public boolean isMatch(Annotation []bindingAnn)

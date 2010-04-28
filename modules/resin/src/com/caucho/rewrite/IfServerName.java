@@ -29,15 +29,14 @@
 
 package com.caucho.rewrite;
 
+import java.util.regex.Pattern;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.annotation.PostConstruct;
-import java.util.regex.Pattern;
 
 /**
  * A rewrite condition that passes if the server name matches.
@@ -62,6 +61,7 @@ public class IfServerName implements RequestPredicate
 				    getClass().getSimpleName()));
   }
 
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     return _regexp.matcher(request.getServerName()).find();

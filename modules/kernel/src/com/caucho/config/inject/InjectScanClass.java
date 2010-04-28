@@ -34,6 +34,7 @@ import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.decorator.Delegate;
 import javax.ejb.MessageDriven;
 import javax.ejb.Startup;
 import javax.ejb.Stateless;
@@ -222,6 +223,7 @@ class InjectScanClass implements ScanClass
   static {
     _registerAnnotationSet.add(Named.class);
     _registerAnnotationSet.add(Specializes.class);
+    _registerAnnotationSet.add(Delegate.class);
     _registerAnnotationSet.add(Startup.class);
     _registerAnnotationSet.add(Jndi.class);
     _registerAnnotationSet.add(MBean.class);

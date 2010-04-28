@@ -36,7 +36,7 @@ import java.lang.annotation.*;
 /**
  * The @SessionScoped represents the servlet session scope
  */
-@NormalScope
+@NormalScope(passivating=true)
 @Documented
 @Target({TYPE, METHOD, FIELD})
 @Retention(RUNTIME)

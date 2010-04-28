@@ -356,6 +356,9 @@ public class InterceptorCallChain<X,T>
       out.println();
       out.print("private transient Object []");
       out.println("__caucho_interceptor_objects;");
+      
+      out.println("Object []_caucho_getInterceptorObjects()");
+      out.println("{ return __caucho_interceptor_objects; }");
     }
 
     generateBeanInterceptorChain(out, map);
@@ -756,7 +759,7 @@ public class InterceptorCallChain<X,T>
     throws IOException
   {
     out.println(_chainName + "_objectIndexChain =");
-    out.println("  com.caucho.config.gen.EjbUtil.createInterceptors(");
+    out.println("  com.caucho.config.gen.CandiUtil.createInterceptors(");
     out.println("    __caucho_manager,");
     out.println("    __caucho_interceptor_beans,");
     out.println(_chainName+ "_objectIndexChain,");
@@ -777,7 +780,7 @@ public class InterceptorCallChain<X,T>
 
     out.println();
     out.println(_chainName + "_methodChain = ");
-    out.println("  com.caucho.config.gen.EjbUtil.createMethods(");
+    out.println("  com.caucho.config.gen.CandiUtil.createMethods(");
     out.println("    __caucho_interceptor_beans,");
     out.println("    " + InterceptionType.class.getName()
                 + "." + _interceptionType + ",");
@@ -819,7 +822,7 @@ public class InterceptorCallChain<X,T>
     Class<?>[] paramTypes = javaMethod.getParameterTypes();
 
     if (paramTypes.length == 0) {
-      out.print("com.caucho.config.gen.EjbUtil.NULL_OBJECT_ARRAY");
+      out.print("com.caucho.config.gen.CandiUtil.NULL_OBJECT_ARRAY");
     }
     else {
       out.print("new Object[] { ");
@@ -903,7 +906,7 @@ public class InterceptorCallChain<X,T>
 
     out.println();
     out.print(_decoratorIndexVar + " = ");
-    out.print("com.caucho.config.gen.EjbUtil.generateProxyDelegate(");
+    out.print("com.caucho.config.gen.CandiUtil.generateProxyDelegate(");
     out.print("__caucho_manager, ");
     out.println(_decoratorBeansVar + ", " + _delegateVar + ");");
     
@@ -1129,7 +1132,7 @@ public class InterceptorCallChain<X,T>
       out.println("Object []delegates = " + _decoratorIndexVar + ";");
     
       out.println();
-      out.print("var._index = com.caucho.config.gen.EjbUtil.nextDelegate(");
+      out.print("var._index = com.caucho.config.gen.CandiUtil.nextDelegate(");
       out.print("delegates, ");
       if (apis.size() > 1) {
         out.print(apiName);
@@ -1610,7 +1613,7 @@ public class InterceptorCallChain<X,T>
                                    Class<?>[] paramTypes)
     throws IOException
   {
-    out.print("com.caucho.config.gen.EjbUtil.getMethod(");
+    out.print("com.caucho.config.gen.CandiUtil.getMethod(");
     out.print(className + ".class");
     out.print(", \"" + methodName + "\", new Class[] { ");
 

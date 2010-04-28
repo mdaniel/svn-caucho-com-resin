@@ -158,7 +158,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   @Override
   public boolean isNullable()
   {
-    return ! getBaseType().getRawClass().isPrimitive();
+    return ! getBaseType().isPrimitive();
   }
 
   /**

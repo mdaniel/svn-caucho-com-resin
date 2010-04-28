@@ -29,12 +29,9 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.util.L10N;
-
 import javax.servlet.http.HttpServletRequest;
-import javax.annotation.PostConstruct;
+
+import com.caucho.config.Configurable;
 
 /**
  * Match if the request is secure, i.e. if request.isSecure() matches.
@@ -51,8 +48,6 @@ import javax.annotation.PostConstruct;
 @Configurable
 public class IfSecure implements RequestPredicate
 {
-  private static final L10N L = new L10N(IfSecure.class);
-  
   private boolean _isSecure = true;
 
   /**
@@ -70,6 +65,7 @@ public class IfSecure implements RequestPredicate
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     return _isSecure == request.isSecure();

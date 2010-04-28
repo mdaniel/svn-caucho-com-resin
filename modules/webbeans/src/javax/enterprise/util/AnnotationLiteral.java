@@ -107,6 +107,8 @@ public abstract class AnnotationLiteral<T extends Annotation>
       try {
         Method method = getClass().getMethod(annMethod.getName());
         method.setAccessible(true);
+        annMethod.setAccessible(true);
+        
         Object a = method.invoke(this);
         Object b = annMethod.invoke(o);
         

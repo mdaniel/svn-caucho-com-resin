@@ -29,14 +29,11 @@
 
 package com.caucho.rewrite;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.Configurable;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Vfs;
-import com.caucho.vfs.Path;
-
-import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletRequest;
+
+import com.caucho.config.Configurable;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * Match if the file specified by getRealPath() exists in the filesystem.
@@ -53,13 +50,12 @@ import javax.servlet.http.HttpServletRequest;
 @Configurable
 public class IfFileExists implements RequestPredicate
 {
-  private static final L10N L = new L10N(IfFileExists.class);
-
   /**
    * True if the predicate matches.
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     String servletPath = request.getServletPath();

@@ -31,6 +31,7 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.inject.Module;
 
@@ -46,6 +47,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   private final Contextual<T> _bean;
   private final InjectionPoint _injectionPoint;
   private T _value;
+  private InjectionTarget<T> _injectionTarget;
   
   public CreationalContextImpl(Contextual<T> bean,
                                CreationalContext<?> parent,
@@ -164,6 +166,11 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   {
     _value = value;
   }
+  
+  public void setInjectionTarget(InjectionTarget<T> injectionTarget)
+  {
+    _injectionTarget = injectionTarget;
+  }
 
   @Override
   public void release()
@@ -183,6 +190,20 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
       _bean.destroy(value, this);
     else
       release();
+  }
+  
+  void postConstruct()
+  {
+    T value = _value;
+    // _value = null;
+    
+    if (value != null && _injectionTarget != null) {
+      _injectionTarget.postConstruct(value);
+      _injectionTarget = null;
+    }
+
+    if (_next != null)
+      _next.postConstruct();
   }
 
   @Override

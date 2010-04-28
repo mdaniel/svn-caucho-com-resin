@@ -29,30 +29,27 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.AbstractInjectionPoint;
-import com.caucho.config.inject.CurrentLiteral;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.util.*;
-
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Member;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.logging.Logger;
-import javax.inject.Qualifier;
+
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
+import javax.inject.Qualifier;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.AbstractInjectionPoint;
+import com.caucho.config.inject.CurrentLiteral;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.inject.Module;
 
+@Module
 public class PostConstructProgram extends ConfigProgram
 {
-  private static final Logger log
-    = Logger.getLogger(PostConstructProgram.class.getName());
-  private static final L10N L = new L10N(PostConstructProgram.class);
-
   private Method _init;
   private ParamProgram []_program;
 
@@ -121,7 +118,9 @@ public class PostConstructProgram extends ConfigProgram
       else
 	_init.invoke(bean);
     } catch (Exception e) {
-      throw ConfigException.create(_init, e);
+      throw new RuntimeException(e);
+      // XXX:
+      // throw ConfigException.create(_init, e);
     }
   }
 

@@ -29,17 +29,12 @@
 
 package com.caucho.rewrite;
 
+import javax.servlet.FilterChain;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
-import com.caucho.server.dispatch.*;
-import com.caucho.server.webapp.*;
 import com.caucho.server.rewrite.SetHeaderFilterChain;
 import com.caucho.util.L10N;
-
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Sets a response header in a rewrite rule or as a top-level filter.
@@ -53,8 +48,6 @@ import java.util.regex.Pattern;
 public class SetHeader extends AbstractRewriteFilter
 {
   private static final L10N L = new L10N(SetHeader.class);
-
-  private static final Pattern ALL_PATTERN = Pattern.compile("^.*$");
 
   private String _name;
   private String _value;
@@ -91,6 +84,7 @@ public class SetHeader extends AbstractRewriteFilter
     }
   }
 
+  @Override
   protected FilterChain createFilterChain(String uri,
 					  String queryString,
 					  FilterChain next)

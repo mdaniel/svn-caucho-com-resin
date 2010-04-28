@@ -134,14 +134,20 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
       AnnotatedParameter<?> param = parameters.get(i);
 
       Observes observes = param.getAnnotation(Observes.class);
-
+      
       if (observes != null) {
         _isIfExists = observes.notifyObserver() == Reception.IF_EXISTS;
         _transactionPhase = observes.during();
       }
       else {
-        _args[i] = new BeanArg<X>(param.getBaseType(),
-                                  _beanManager.getQualifiers(param.getAnnotations()));
+        InjectionPoint ip = new InjectionPointImpl(_beanManager,
+                                                   _bean,
+                                                   param);
+
+        _args[i] = new BeanArg<X>(_beanManager,
+                                  param.getBaseType(),
+                                  _beanManager.getQualifiers(param.getAnnotations()),
+                                  ip);
       }
     }
   }

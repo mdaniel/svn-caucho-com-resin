@@ -151,14 +151,34 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     return instance;
   }
 
+  /**
+   * Creates a new instance of the component.
+   */
+  public X createDependent(CreationalContextImpl<X> env)
+  {
+    X instance = _injectionTarget.produce(env);
+
+    if (env != null) {
+      env.push(instance);
+      env.setInjectionTarget(_injectionTarget);
+    }
+
+    _injectionTarget.inject(instance, env);
+    
+    if (env == null)
+      _injectionTarget.postConstruct(instance);
+    
+    return instance;
+  }
+
   @Override
   public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
   {
     NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
 
     // ioc/0520
-    if (scopeType != null
-        && ! getScope().equals(ApplicationScoped.class)) {
+    if (scopeType != null) {
+      //  && ! getScope().equals(ApplicationScoped.class)) {
       // && scopeType.normal()
       //  && ! env.canInject(getScope())) {
 
@@ -395,11 +415,18 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter<X> param = params.get(i);
+      
+      InjectionPoint ip = new InjectionPointImpl(getBeanManager(),
+                                                 this,
+                                                 param);
 
       if (InjectionPoint.class.equals(param.getBaseType()))
         args[i] = new InjectionPointArg();
       else
-        args[i] = new BeanArg(param.getBaseType(), getQualifiers(param));
+        args[i] = new BeanArg(getBeanManager(), 
+                              param.getBaseType(), 
+                              getQualifiers(param),
+                              ip);
     }
 
     return args;
@@ -411,11 +438,16 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter<X> param = params.get(i);
+      
+      InjectionPoint ip = null;
 
       if (param.isAnnotationPresent(Disposes.class))
         args[i] = null;
       else
-        args[i] = new BeanArg(param.getBaseType(), getQualifiers(param));
+        args[i] = new BeanArg(getBeanManager(),
+                              param.getBaseType(), 
+                              getQualifiers(param),
+                              ip);
     }
 
     return args;
@@ -467,7 +499,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     }
   }
 
-  protected void addObserver(AnnotatedMethod<? super X> beanMethod)
+  protected <Z> void addObserver(AnnotatedMethod<Z> beanMethod)
   {
     int param = findObserverAnnotation(beanMethod);
 
@@ -479,12 +511,10 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
     HashSet<Annotation> bindingSet = new HashSet<Annotation>();
 
-    Annotation [][]annList = method.getParameterAnnotations();
-    if (annList != null && annList[param] != null) {
-      for (Annotation ann : annList[param]) {
-        if (ann.annotationType().isAnnotationPresent(Qualifier.class))
-          bindingSet.add(ann);
-      }
+    List<AnnotatedParameter<Z>> paramList = beanMethod.getParameters();
+    for (Annotation ann : paramList.get(param).getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
+        bindingSet.add(ann);
     }
 
     if (method.isAnnotationPresent(Inject.class)) {

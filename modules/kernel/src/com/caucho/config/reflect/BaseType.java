@@ -237,6 +237,11 @@ abstract public class BaseType
     return false;
   }
   
+  public boolean isPrimitive()
+  {
+    return false;
+  }
+  
   protected BaseType []getWildcardBounds()
   {
     return NULL_PARAM;

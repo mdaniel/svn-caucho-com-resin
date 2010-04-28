@@ -29,15 +29,12 @@
 
 package com.caucho.rewrite;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.util.L10N;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.annotation.PostConstruct;
-import java.util.regex.Pattern;
 
 /**
  * Match if the HTTP method matches the value.
@@ -89,6 +86,7 @@ public class IfMethod implements RequestPredicate
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     return _method.equals(request.getMethod());

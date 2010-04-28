@@ -54,6 +54,7 @@ public class IfRemoteAddr implements RequestPredicate
     _networkList.toArray(_networks);
   }
 
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     String remoteAddr = request.getRemoteAddr();

@@ -85,6 +85,12 @@ public class BoxType extends ClassType
   }
 
   @Override
+  public boolean isPrimitive()
+  {
+    return true;
+  }
+  
+  @Override
   public void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
   {
     typeSet.add(toType());

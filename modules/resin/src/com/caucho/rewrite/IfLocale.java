@@ -79,6 +79,7 @@ public class IfLocale implements RequestPredicate
    *
    * @param request the servlet request to test
    */
+  @Override
   public boolean isMatch(HttpServletRequest request)
   {
     Locale locale = request.getLocale();
