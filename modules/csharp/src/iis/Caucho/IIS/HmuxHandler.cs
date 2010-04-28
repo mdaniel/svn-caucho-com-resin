@@ -51,9 +51,16 @@ namespace Caucho.IIS
     private const int BUSY = 0x2; // server sends busy (retry GET/POST)
     private const int FAIL = 0x4; // server failed (retry GET)
 
-    private bool _isStickySessions = true;
-    private LoadBalancer _loadBalancer;
     private Logger _log;
+
+    private LoadBalancer _loadBalancer;
+
+    //session config
+    private bool _isStickySessions = true;
+    private String _sessionCookieName = "JSESSIONID";
+    private String _sslSessionCookieName = "SSLJSESSIONID";
+    private bool _isUrlRewriteEnabled = true;
+    private String _sessionUrlPrefix = ";jsessionid=";
 
     public HmuxHandler()
     {
@@ -76,6 +83,21 @@ namespace Caucho.IIS
         _log.Info("Setting servers to '{0}'", servers);
         Trace.TraceInformation("Setting servers to '{0}'", servers);
       }
+      
+      if (appSettings["resin.session-cookie"] != null)
+        _sessionCookieName = appSettings["resin.session-cookie"];
+
+      if (appSettings["resin.ssl-session-cookie"] != null)
+        _sslSessionCookieName = appSettings["resin.ssl-session-cookie"];
+
+      if ("false".Equals(appSettings["resin.sticky-sessions"], StringComparison.OrdinalIgnoreCase))
+        _isStickySessions = false;
+
+      if (appSettings["resin.session-url-prefix"] != null)
+        _sessionUrlPrefix = appSettings["resin.session-url-prefix"];
+
+      if (appSettings["resin.alternate-session-url-prefix"] != null)
+        _sessionUrlPrefix = appSettings["resin.alternate-session-url-prefix"];
 
       _loadBalancer = new LoadBalancer(servers);
     }
@@ -88,11 +110,12 @@ namespace Caucho.IIS
     public void ProcessRequest(HttpContext context)
     {
       String path = context.Request.Path;
-      if ("/__caucho__test__basic".Equals(path)) {
+
+      if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__basic")) {
         DoTestBasic(context);
-      } else if ("/__caucho__test__chunked".Equals(path)) {
+      } else if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__chunked")) {
         DoTestChunked(context);
-      } else if ("/__caucho__test__ssl".Equals(path)) {
+      } else if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__ssl")) {
         DoTestSSL(context);
       } else {
         DoHmux(context);
@@ -101,7 +124,28 @@ namespace Caucho.IIS
 
     public String GetRequestedSessionId(HttpRequest request)
     {
-      return null;
+      String path = request.Path;
+
+      int sessionIdx = path.LastIndexOf(_sessionUrlPrefix);
+      String sessionId = null;
+
+      if (sessionIdx > -1)
+        sessionId = path.Substring(sessionIdx + _sessionUrlPrefix.Length);
+
+      HttpCookie cookie = null;
+      if (sessionId == null && request.IsSecureConnection)
+        cookie = request.Cookies[_sslSessionCookieName];
+
+      if (sessionId == null && cookie != null)
+        sessionId = cookie.Value;
+
+      if (sessionId == null)
+        cookie = request.Cookies[_sessionCookieName];
+
+      if (sessionId == null && cookie != null)
+        sessionId = cookie.Value;
+
+      return sessionId;
     }
 
     private void DoHmux(HttpContext context)
@@ -138,10 +182,10 @@ namespace Caucho.IIS
         } else
           isComplete = false;
 
-        HmuxChannelFactory client = null;
+        Server client = null;
         int result = OK | EXIT;
 
-        HmuxChannel channel = _loadBalancer.OpenServer(sessionId, null);
+        HmuxConnection channel = _loadBalancer.OpenServer(sessionId, null);
 
         // If everything fails, return an error
         if (channel == null) {
@@ -195,7 +239,7 @@ namespace Caucho.IIS
             return;
           }
 
-          HmuxChannelFactory client2 = channel.GetPool();
+          Server client2 = channel.GetPool();
 
           if (_log.IsLoggable(EventLogEntryType.Information)) {
             _log.Info("load-balance failing over"
@@ -240,7 +284,7 @@ namespace Caucho.IIS
 
     private int HandleRequest(HttpRequest request,
                             HttpResponse response,
-                            HmuxChannel hmuxChannel,
+                            HmuxConnection hmuxChannel,
                             BufferedStream rs,
                             BufferedStream ws,
                             byte[] buf, int length, bool isComplete,
@@ -255,43 +299,43 @@ namespace Caucho.IIS
 
       String uri = Uri.EscapeUriString(request.RawUrl);
       Trace.TraceInformation("Hmux[{0}] >>U:uri {1}->{2}", traceId, request.RawUrl, uri);
-      WriteRequestString(ws, HmuxChannel.HMUX_URI, uri, traceId);
+      WriteRequestString(ws, HmuxConnection.HMUX_URI, uri, traceId);
 
       Trace.TraceInformation("Hmux[{0}] >>m:method {1}", traceId, request.HttpMethod);
-      WriteRequestString(ws, HmuxChannel.HMUX_METHOD, request.HttpMethod, traceId);
+      WriteRequestString(ws, HmuxConnection.HMUX_METHOD, request.HttpMethod, traceId);
 
       Trace.TraceInformation("Hmux[{0}] >>u:server type {1}", traceId, "IIS");
-      WriteRequestString(ws, HmuxChannel.CSE_SERVER_TYPE, "IIS", traceId);
+      WriteRequestString(ws, HmuxConnection.CSE_SERVER_TYPE, "IIS", traceId);
 
       NameValueCollection serverVariables = request.ServerVariables;
 
       String serverPort = serverVariables.Get("SERVER_PORT");
       String serverName = serverVariables.Get("SERVER_NAME") + ':' + serverPort;
       Trace.TraceInformation("Hmux[{0}] >>v:server name {1}", traceId, serverName);
-      WriteRequestString(ws, HmuxChannel.HMUX_SERVER_NAME, serverName, traceId);
+      WriteRequestString(ws, HmuxConnection.HMUX_SERVER_NAME, serverName, traceId);
 
       Trace.TraceInformation("Hmux[{0}] >>g:server port {1}", traceId, serverPort);
-      WriteRequestString(ws, HmuxChannel.CSE_SERVER_PORT, serverPort, traceId);
+      WriteRequestString(ws, HmuxConnection.CSE_SERVER_PORT, serverPort, traceId);
 
       String remoteAddr = serverVariables.Get("REMOTE_ADDR");
       Trace.TraceInformation("Hmux[{0}] >>i:remote address {1}", traceId, remoteAddr);
-      WriteRequestString(ws, HmuxChannel.CSE_REMOTE_ADDR, remoteAddr, traceId);
+      WriteRequestString(ws, HmuxConnection.CSE_REMOTE_ADDR, remoteAddr, traceId);
 
       String remoteHost = serverVariables.Get("REMOTE_HOST");
       if (remoteHost == null)
         remoteHost = remoteAddr;
 
       Trace.TraceInformation("Hmux[{0}] >>h:remote host {1}", traceId, remoteHost);
-      WriteRequestString(ws, HmuxChannel.CSE_REMOTE_HOST, remoteHost, traceId);
+      WriteRequestString(ws, HmuxConnection.CSE_REMOTE_HOST, remoteHost, traceId);
 
       String protocol = serverVariables.Get("HTTP_VERSION");
       Trace.TraceInformation("Hmux[{0}] >>c:protocol {1}", traceId, protocol);
-      WriteRequestString(ws, HmuxChannel.CSE_PROTOCOL, protocol, traceId);
+      WriteRequestString(ws, HmuxConnection.CSE_PROTOCOL, protocol, traceId);
 
       HttpClientCertificate clientCertificate = request.ClientCertificate;
       if (request.IsSecureConnection) {
         Trace.TraceInformation("Hmux[{0}] >>r:secure", traceId);
-        WriteRequestString(ws, HmuxChannel.CSE_IS_SECURE, "", traceId);
+        WriteRequestString(ws, HmuxConnection.CSE_IS_SECURE, "", traceId);
 
         WriteRequestHeader(ws, "HTTPS", "on", traceId);
         WriteRequestHeader(ws, "SSL_SECRETKEYSIZE", clientCertificate.KeySize.ToString(), traceId);
@@ -299,7 +343,7 @@ namespace Caucho.IIS
 
       if (clientCertificate.IsPresent) {
         Trace.TraceInformation("Hmux[{0}] >>r:certificate ({1})", traceId, clientCertificate.Certificate.Length);
-        ws.WriteByte(HmuxChannel.CSE_CLIENT_CERT);
+        ws.WriteByte(HmuxConnection.CSE_CLIENT_CERT);
         WriteHmuxLength(ws, clientCertificate.Certificate.Length);
         ws.Write(clientCertificate.Certificate, 0, clientCertificate.Certificate.Length);
       }
@@ -325,7 +369,7 @@ namespace Caucho.IIS
 
       if (length > 0) {
         Trace.TraceInformation("Hmux[{0}] >>D: data ({1})", traceId, length);
-        WriteRequestData(ws, HmuxChannel.HMUX_DATA, buf, length, traceId);
+        WriteRequestData(ws, HmuxConnection.HMUX_DATA, buf, length, traceId);
       }
 
       int len;
@@ -334,10 +378,10 @@ namespace Caucho.IIS
 
       while (!isComplete && (len = requestStream.Read(buf, 0, buf.Length)) > 0) {
         Trace.TraceInformation("Hmux[{0}] >>D: data ({1})", traceId, length);
-        WriteRequestData(ws, HmuxChannel.HMUX_DATA, buf, len, traceId);
+        WriteRequestData(ws, HmuxConnection.HMUX_DATA, buf, len, traceId);
 
         Trace.TraceInformation("Hmux[{0}] >>Y: (yield)", traceId);
-        ws.WriteByte(HmuxChannel.HMUX_YIELD);
+        ws.WriteByte(HmuxConnection.HMUX_YIELD);
         ws.Flush();
 
         while (true) {
@@ -353,7 +397,7 @@ namespace Caucho.IIS
 
               return FAIL | EXIT;
             }
-          } else if (code == HmuxChannel.HMUX_QUIT) {
+          } else if (code == HmuxConnection.HMUX_QUIT) {
             Trace.TraceInformation("Hmux[{0}] <<Q: (keepalive)", traceId);
 
             if (hasStatus)
@@ -363,7 +407,7 @@ namespace Caucho.IIS
 
               return FAIL | QUIT;
             }
-          } else if (code == HmuxChannel.HMUX_EXIT) {
+          } else if (code == HmuxConnection.HMUX_EXIT) {
             Trace.TraceInformation("Hmux[{0}] <<X: (exit)", traceId);
 
             if (hasStatus) {
@@ -373,7 +417,7 @@ namespace Caucho.IIS
 
               return FAIL | EXIT;
             }
-          } else if (code == HmuxChannel.HMUX_YIELD) {
+          } else if (code == HmuxConnection.HMUX_YIELD) {
             Trace.TraceInformation("Hmux[{0}] <<Y: (yield)", traceId);
 
             continue;
@@ -381,15 +425,15 @@ namespace Caucho.IIS
 
           int sublen = ReadHmuxLength(rs);
 
-          if (code == HmuxChannel.HMUX_ACK) {
+          if (code == HmuxConnection.HMUX_ACK) {
             if (isDebugFiner)
               Trace.TraceInformation("Hmux[{0}] <<A: (ack) ({1})", traceId, sublen);
 
             break;
-          } else if (code == HmuxChannel.HMUX_CHANNEL) {
+          } else if (code == HmuxConnection.HMUX_CHANNEL) {
             int channel = sublen;
             Trace.TraceInformation("Hmux[{0}] <<C: (channel) ({1})", traceId, channel);
-          } else if (code == HmuxChannel.HMUX_STATUS && hasHeader) {
+          } else if (code == HmuxConnection.HMUX_STATUS && hasHeader) {
             String status = ReadHmuxString(rs, sublen);
             Trace.TraceInformation("Hmux[{0}] <<s: (status) ({1})", traceId, status);
             int statusCode = 0;
@@ -400,7 +444,7 @@ namespace Caucho.IIS
               response.StatusCode = statusCode;
 
             hasStatus = true;
-          } else if (code == HmuxChannel.HMUX_HEADER && hasHeader) {
+          } else if (code == HmuxConnection.HMUX_HEADER && hasHeader) {
             String name = ReadHmuxString(rs, sublen);
             rs.ReadByte();
             sublen = ReadHmuxLength(rs);
@@ -409,14 +453,14 @@ namespace Caucho.IIS
             Trace.TraceInformation("Hmux[{0}] <<H,S: (header) ({1}={2})", traceId, name, value);
 
             RelayResponseHeader(response, name, value);
-          } else if (code == HmuxChannel.HMUX_DATA) {
+          } else if (code == HmuxConnection.HMUX_DATA) {
             Trace.TraceInformation("Hmux[{0}] <<D: (data)({1})", traceId, sublen);
 
             if (responseStream == null)
               responseStream = response.OutputStream;
 
             RelayResponseData(rs, responseStream, sublen);
-          } else if (code == HmuxChannel.HMUX_META_HEADER) {
+          } else if (code == HmuxConnection.HMUX_META_HEADER) {
             String name = ReadHmuxString(rs, sublen);
             rs.ReadByte();
             sublen = ReadHmuxLength(rs);
@@ -435,7 +479,7 @@ namespace Caucho.IIS
         }
       }
 
-      ws.WriteByte(HmuxChannel.HMUX_QUIT);
+      ws.WriteByte(HmuxConnection.HMUX_QUIT);
       ws.Flush();
 
       code = rs.ReadByte();
@@ -451,17 +495,17 @@ namespace Caucho.IIS
 
       bool isBusy = false;
       for (; code >= 0; code = rs.ReadByte()) {
-        if (code == HmuxChannel.HMUX_QUIT) {
+        if (code == HmuxConnection.HMUX_QUIT) {
           if (isDebugFiner)
             Trace.TraceInformation("Hmux[{0}] <<Q: (keepalive)", traceId);
 
           return isBusy ? BUSY | QUIT : OK | QUIT;
-        } else if (code == HmuxChannel.HMUX_EXIT) {
+        } else if (code == HmuxConnection.HMUX_EXIT) {
 
           Trace.TraceInformation("Hmux[{0}] <<X: (exit)", traceId);
 
           return (isBusy || !hasStatus) ? BUSY | EXIT : OK | EXIT;
-        } else if (code == HmuxChannel.HMUX_YIELD) {
+        } else if (code == HmuxConnection.HMUX_YIELD) {
           Trace.TraceInformation("Hmux[{0}] <<Y: (yield)", traceId);
 
           continue;
@@ -469,7 +513,7 @@ namespace Caucho.IIS
 
         int sublen = (rs.ReadByte() << 8) + rs.ReadByte();
 
-        if (code == HmuxChannel.HMUX_DATA) {
+        if (code == HmuxConnection.HMUX_DATA) {
           if (responseStream == null)
             responseStream = response.OutputStream;
 
@@ -479,7 +523,7 @@ namespace Caucho.IIS
             RelayResponseData(rs, responseStream, sublen);
           else
             Skip(rs, sublen);
-        } else if (code == HmuxChannel.HMUX_STATUS && hasHeader) {
+        } else if (code == HmuxConnection.HMUX_STATUS && hasHeader) {
           hasStatus = true;
           String status = ReadHmuxString(rs, sublen);
           Trace.TraceInformation("Hmux[{0}] <<s: (status) ({1})", traceId, status);
@@ -492,7 +536,7 @@ namespace Caucho.IIS
             isBusy = true;
           else if (statusCode != 200)
             response.StatusCode = statusCode;
-        } else if (code == HmuxChannel.HMUX_HEADER && hasHeader) {
+        } else if (code == HmuxConnection.HMUX_HEADER && hasHeader) {
           String name = ReadHmuxString(rs, sublen);
           rs.ReadByte();
           sublen = ReadHmuxLength(rs);
@@ -502,7 +546,7 @@ namespace Caucho.IIS
 
           if (!isBusy)
             RelayResponseHeader(response, name, value);
-        } else if (code == HmuxChannel.HMUX_META_HEADER) {
+        } else if (code == HmuxConnection.HMUX_META_HEADER) {
           String name = ReadHmuxString(rs, sublen);
           rs.ReadByte();
           sublen = ReadHmuxLength(rs);
@@ -515,7 +559,7 @@ namespace Caucho.IIS
 
             hmuxChannel.GetPool().SetCpuLoadAvg(loadAvg);
           }
-        } else if (code == HmuxChannel.HMUX_CHANNEL) {
+        } else if (code == HmuxConnection.HMUX_CHANNEL) {
           int channel = sublen;
           Trace.TraceInformation("Hmux[{0}] <<C: (channel) ({1})", traceId, channel);
         } else if (code == 0) {
@@ -655,14 +699,14 @@ namespace Caucho.IIS
     private void WriteRequestHeader(BufferedStream stream, String name, String value, String traceId)
     {
       Trace.TraceInformation("Hmux[{0}] >>H:{1}", traceId, name);
-      WriteRequestString(stream, HmuxChannel.HMUX_HEADER, name, traceId);
+      WriteRequestString(stream, HmuxConnection.HMUX_HEADER, name, traceId);
       Trace.TraceInformation("Hmux[{0}] >>S:{1}", traceId, value);
-      WriteRequestString(stream, HmuxChannel.HMUX_STRING, value, traceId);
+      WriteRequestString(stream, HmuxConnection.HMUX_STRING, value, traceId);
     }
 
     private void WriteRequestData(BufferedStream stream, int code, byte[] data, int length, String traceId)
     {
-      stream.WriteByte(HmuxChannel.HMUX_DATA);
+      stream.WriteByte(HmuxConnection.HMUX_DATA);
       WriteHmuxLength(stream, length);
       stream.Write(data, 0, length);
     }
@@ -670,14 +714,14 @@ namespace Caucho.IIS
     private void WriteSSLCertificate(BufferedStream stream, byte[] cert, String traceId)
     {
       Trace.TraceInformation("Hmux[{0}] >>t:certificate({1})", traceId, cert.Length);
-      stream.WriteByte(HmuxChannel.CSE_CLIENT_CERT);
+      stream.WriteByte(HmuxConnection.CSE_CLIENT_CERT);
       WriteHmuxLength(stream, cert.Length);
       stream.Write(cert, 0, cert.Length);
     }
 
     public void DoTestBasic(HttpContext context)
     {
-      context.Response.Write("Basic");
+      Introspect(context);
     }
 
     public void DoTestChunked(HttpContext context)
@@ -708,6 +752,17 @@ namespace Caucho.IIS
       context.Response.Output.WriteLine("cert-cookie: " + certificate.Cookie);
       context.Response.Output.WriteLine("binary-cert: " + certificate.Certificate.Length);
       context.Response.Output.WriteLine("cert-encoding: " + certificate.CertEncoding);
+
+      Introspect(context);
+    }
+
+    public void Introspect(HttpContext context)
+    {
+      context.Response.Output.WriteLine("url: " + context.Request.Url);
+      context.Response.Output.WriteLine("raw-url: " + context.Request.RawUrl);
+      context.Response.Output.WriteLine("path: " + context.Request.Path);
+      context.Response.Output.WriteLine("path-info: " + context.Request.PathInfo);
+      context.Response.Output.WriteLine("file-path: " + context.Request.FilePath);
     }
   }
 }

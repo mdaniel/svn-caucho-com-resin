@@ -39,7 +39,7 @@ using System.Diagnostics;
 
 namespace Caucho.IIS
 {
-  public class HmuxChannel
+  public class HmuxConnection
   {
     public const int HMUX_CHANNEL = 'C';
     public const int HMUX_ACK = 'A';
@@ -87,31 +87,26 @@ namespace Caucho.IIS
     private Socket _socket;
     private BufferedStream _stream;
 
-    private HmuxChannelFactory _pool;
+    private Server _pool;
 
-    private ActiveProbe _connProbe;
-    private ActiveTimeProbe _requestTimeProbe;
-    private ActiveProbe _idleProbe;
-
+    private String _serverInternalId;
     private String _traceId;
     private long _requestStartTime;
     private long _idleStartTime;
     private bool _isIdle = false;
 
-    public HmuxChannel(Socket socket, HmuxChannelFactory pool)
+    public HmuxConnection(Socket socket, Server pool, String serverInternalId)
     {
       _socket = socket;
       _stream = new BufferedStream(new NetworkStream(_socket));
       _pool = pool;
+      _serverInternalId = serverInternalId;
+
       _traceId = _socket.Handle.ToInt32().ToString();
       _log = Logger.GetLogger();
-
-      _connProbe = pool.GetConnectionProbe();
-      _requestTimeProbe = pool.GetRequestTimeProbe();
-      _idleProbe = pool.GetIdleProbe();
     }
 
-    public HmuxChannelFactory GetPool()
+    public Server GetPool()
     {
       return _pool;
     }
@@ -137,12 +132,8 @@ namespace Caucho.IIS
       long requestStartTime = _requestStartTime;
       _requestStartTime = 0;
 
-      if (requestStartTime > 0)
-        _requestTimeProbe.End(requestStartTime);
-
       _idleStartTime = idleStartTime;
 
-      _idleProbe.Start();
       _isIdle = true;
 
       _pool.Free(this);
@@ -167,16 +158,6 @@ namespace Caucho.IIS
       } catch (Exception e) {
         _log.Info("Can't close stream '{0}' due to exception '{1}', '{2}'", stream, e.Message, e.StackTrace);
       }
-
-      if (stream != null) {
-        _connProbe.End();
-
-        if (_requestStartTime > 0)
-          _requestTimeProbe.End(_requestStartTime);
-
-        if (_isIdle)
-          _idleProbe.End();
-      }
     }
 
     public void SetIdleStartTime(long idleStartTime)
@@ -197,6 +178,11 @@ namespace Caucho.IIS
     internal void ToActive()
     {
       throw new NotImplementedException();
+    }
+
+    public override string ToString()
+    {
+      return String.Format("HmuxChannel [{0}->{1}]", null, _socket.RemoteEndPoint);
     }
   }
 }

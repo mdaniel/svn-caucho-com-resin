@@ -32,54 +32,126 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net.Sockets;
+using System.Diagnostics;
 
 namespace Caucho.IIS
 {
   public class LoadBalancer
   {
-    HmuxChannelFactory _pool;
-    private Strategy _strategyType = Strategy.ADAPTIVE;
+    private Logger _log;
+    private Server[] _servers;
+    private Random _random;
+    private volatile int _roundRobinIdx;
 
     //supports just one server for now
     public LoadBalancer(String servers)
     {
-      int portIdx = servers.LastIndexOf(':');
-      String address = servers.Substring(0, portIdx);
-      int port = int.Parse(servers.Substring(portIdx + 1, servers.Length - portIdx - 1));
+      _log = Logger.GetLogger();
 
-      _pool = new HmuxChannelFactory(address, port);
+      List<Server> pool = new List<Server>();
+      String[] sruns = servers.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
-      Init();
+      for (int i = 0; i < sruns.Length; i++) {
+        String server = sruns[i];
+        int portIdx = server.LastIndexOf(':');
+        String address = server.Substring(0, portIdx);
+        int port = int.Parse(server.Substring(portIdx + 1, server.Length - portIdx - 1));
+        char c = (char)('a' + i);
+        _log.Info("Adding Server '{0}:{1}:{2}'", c, address, port);
+        pool.Add(new Server("a", address, port));
+      }
+
+      _servers = pool.ToArray();
+
+      _random = new Random();      
     }
 
     public void Init()
     {
     }
 
-    public HmuxChannel OpenServer(String sessionId, HmuxChannelFactory xChannelFactory)
+    public HmuxConnection OpenServer(String sessionId, Server xChannelFactory)
     {
-      return _pool.OpenServer(sessionId, xChannelFactory);
+      Trace.TraceInformation("{0}:{1}", _servers.Length, _servers[0]);
+
+      HmuxConnection connection = null;
+      if (sessionId != null)
+        connection = OpenSessionServer(sessionId);
+
+      if (connection == null)
+        connection = OpenAnyServer(xChannelFactory);
+
+      return connection;
     }
 
-    public void SetStrategy(Strategy strategy)
+    public HmuxConnection OpenSessionServer(String sessionId)
     {
-      _strategyType = strategy;
+      char c = sessionId[0];
+
+      Server server = _servers[(c - 'a')];
+
+      HmuxConnection connection = null;
+
+      try {
+        if (server.IsActive())
+          connection = server.OpenServer();
+      } catch (Exception e) {
+        if (_log.IsLoggable(EventLogEntryType.Information))
+          _log.Info("Error openning session server '{0}'\t {1}", e.Message, e.StackTrace);
+      }
+
+      return connection;
     }
 
-    public Strategy GetStrategy()
+    public HmuxConnection OpenAnyServer(Server xChannelFactory)
     {
-      return _strategyType;
+      int serverCount = _servers.Length;
+
+      Server server = null;
+      HmuxConnection connection = null;
+
+      int id = 0;
+
+      lock (this) {
+        _roundRobinIdx = _roundRobinIdx % serverCount;
+        id = _roundRobinIdx;
+        _roundRobinIdx++;
+      }
+
+      try {
+        server = _servers[id];
+        if (server.IsActive())
+          connection = server.OpenServer();
+      } catch (Exception e) {
+        server.Close();
+      }
+
+      if (connection != null)
+        return connection;
+
+      lock (this) {
+        _roundRobinIdx = _random.Next(serverCount);
+        for (int i = 0; i < serverCount; i++) {
+          id = (i + _roundRobinIdx) % serverCount;
+          server = _servers[id];
+          try {
+            if (xChannelFactory != server && server.IsActive()) {
+              connection = server.OpenServer();
+            }
+          } catch (Exception e) {
+            server.Close();
+          }
+        }
+      }
+
+      return connection;
     }
 
     public void Destroy()
     {
-      _pool.Close();
-    }
-
-    public enum Strategy
-    {
-      ADAPTIVE,
-      ROUND_ROBIN
+      foreach (Server factory in _servers) {
+        factory.Close();
+      }
     }
   }
 }
