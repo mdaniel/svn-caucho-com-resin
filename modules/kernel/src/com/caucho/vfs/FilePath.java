@@ -640,7 +640,7 @@ public class FilePath extends FilesystemPath {
     if (_file != null)
       return _file;
 
-    if (com.caucho.util.Alarm.isTest())
+    if (com.caucho.util.Test.isTest())
       _file = new File(getFullPath());
     else
       _file = new File(getNativePath());

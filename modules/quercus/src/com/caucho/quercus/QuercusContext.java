@@ -58,12 +58,14 @@ import java.io.IOException;
 import java.sql.Connection;
 import java.util.*;
 import java.util.concurrent.*;
+import java.util.concurrent.locks.LockSupport;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
  * Facade for the PHP language.
  */
-public class QuercusContext implements AlarmListener
+public class QuercusContext
 {
   private static L10N L = new L10N(QuercusContext.class);
   private static final Logger log
@@ -182,7 +184,7 @@ public class QuercusContext implements AlarmListener
   private ConcurrentHashMap<String,DataSource> _databaseMap
     = new ConcurrentHashMap<String,DataSource>();
   
-  private ConcurrentHashMap<Env,Env> _activeEnvSet
+  protected ConcurrentHashMap<Env,Env> _activeEnvSet
     = new ConcurrentHashMap<Env,Env>();
 
   private long _staticId;
@@ -192,7 +194,15 @@ public class QuercusContext implements AlarmListener
 
   private ServletContext _servletContext;
   
-  private long _envTimeout = 60000L;
+  private QuercusTimer _quercusTimer;
+  
+  private EnvTimeoutThread _envTimeoutThread;
+  protected long _envTimeout = 60000L;
+  
+  // how long to sleep the env timeout thread,
+  // for fast, complete tomcat undeploys
+  protected static final long ENV_TIMEOUT_UPDATE_INTERVAL = 1000L;
+  
   private boolean _isClosed;
 
   /**
@@ -212,8 +222,30 @@ public class QuercusContext implements AlarmListener
        _serverEnvMap.put(createString(entry.getKey()),
                          createString(entry.getValue()));
     }
-    
-    new WeakAlarm(this).queue(_envTimeout);
+  }
+  
+  /**
+   * Returns the current time.
+   */
+  public long getCurrentTime()
+  {
+    return _quercusTimer.getCurrentTime();
+  }
+  
+  /**
+   * Returns the current time in nanoseconds.
+   */
+  public long getExactTimeNanoseconds()
+  {
+    return _quercusTimer.getExactTimeNanoseconds();
+  }
+  
+  /**
+   * Returns the exact current time in milliseconds.
+   */
+  public long getExactTime()
+  {
+    return _quercusTimer.getExactTime();
   }
 
   /**
@@ -280,12 +312,12 @@ public class QuercusContext implements AlarmListener
 
   public String getVersion()
   {
-    return "Open Source 4.0.2";
+    return "Open Source 4.0.7";
   }
 
   public String getVersionDate()
   {
-    return "20091124";
+    return "20100420";
   }
 
   /**
@@ -1881,7 +1913,7 @@ public class QuercusContext implements AlarmListener
    */
   public SessionArrayValue loadSession(Env env, String sessionId)
   {
-    long now = Alarm.getCurrentTime();
+    long now = env.getCurrentTime();
 
     SessionArrayValue session
       = _sessionManager.getSession(env, sessionId, now);
@@ -1971,6 +2003,14 @@ public class QuercusContext implements AlarmListener
 
   public void start()
   {
+    try {
+      _quercusTimer = new QuercusTimer();
+      
+      _envTimeoutThread = new EnvTimeoutThread();
+      _envTimeoutThread.start();
+    } catch (Exception e) {
+      log.log(Level.FINE, e.getMessage(), e);
+    }
   }
 
   public Env createEnv(QuercusPage page,
@@ -1995,23 +2035,8 @@ public class QuercusContext implements AlarmListener
   {
     _activeEnvSet.remove(env);
   }
-  @Override
-  public void handleAlarm(Alarm alarm)
-  {
-    try {
-      ArrayList<Env> activeEnv = new ArrayList<Env>(_activeEnvSet.keySet());
-    
-      for (Env env : activeEnv) {
-        env.updateTimeout();
-      }
-    } finally {
-      if (! isClosed()) {
-        alarm.queue(_envTimeout);
-      }
-    }
-  }
   
-  private boolean isClosed()
+  protected boolean isClosed()
   {
     return _isClosed;
   }
@@ -2022,16 +2047,13 @@ public class QuercusContext implements AlarmListener
     
     _sessionManager.close();
     _pageManager.close();
-  }
-
-  public static Value exnConstructor(Env env, Value obj, String msg)
-  {
-    if (obj != null) {
-      obj.putField(env, "message", new UnicodeValueImpl(msg));
+    
+    if (_envTimeoutThread != null)
+      _envTimeoutThread.shutdown();
+    
+    if (_quercusTimer != null) {
+      _quercusTimer.shutdown();
     }
-
-    return NullValue.NULL;
-
   }
 
   static class IncludeKey {
@@ -2074,6 +2096,50 @@ public class QuercusContext implements AlarmListener
               && _includePath.equals(key._includePath)
               && _pwd.equals(key._pwd)
               && _scriptPwd.equals(key._scriptPwd));
+    }
+  }
+  
+  class EnvTimeoutThread extends Thread {
+    private volatile boolean _isRunnable = true;
+    private final long _timeout = _envTimeout;
+    
+    private long _quantumCount;
+    
+    EnvTimeoutThread()
+    {
+      super("quercus-env-timeout");
+
+      setDaemon(true);
+      //setPriority(Thread.MAX_PRIORITY);
+    }
+    
+    public void shutdown()
+    {
+      _isRunnable = false;
+    }
+
+    public void run()
+    {
+      while (_isRunnable) {
+        if (_quantumCount >= _timeout) {
+          _quantumCount = 0;
+          
+          try {
+            ArrayList<Env> activeEnv = new ArrayList<Env>(_activeEnvSet.keySet());
+            
+            for (Env env : activeEnv) {
+              env.updateTimeout();
+            }
+
+          } catch (Throwable e) {
+          }
+        }
+        else {
+          _quantumCount += ENV_TIMEOUT_UPDATE_INTERVAL;
+        }
+
+        LockSupport.parkNanos(ENV_TIMEOUT_UPDATE_INTERVAL * 1000000L);
+      }
     }
   }
 

@@ -35,11 +35,9 @@ import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
 import com.caucho.quercus.module.AbstractQuercusModule;
-import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.QDate;
-import com.caucho.vfs.Path;
 
 import java.util.TimeZone;
 import java.util.logging.Level;
@@ -78,17 +76,13 @@ public class DateModule extends AbstractQuercusModule {
   private static final long HOUR = 60 * MINUTE;
   private static final long DAY = 24 * HOUR;
 
-  /*
-  private final QDate _localCalendar = QDate.createLocal();
-  private final QDate _gmtCalendar = new QDate();
-  */
-
   /**
    * Returns the days in a given month.
    */
-  public static int cal_days_in_month(int cal, int month, int year)
+  public static int cal_days_in_month(Env env,
+                                      int cal, int month, int year)
   {
-    QDate date = new QDate();
+    QDate date = new QDate(false, env.getCurrentTime());
 
     date.setYear(year);
     date.setMonth(month - 1);
@@ -99,7 +93,7 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the days in a given month.
    */
-  public static boolean checkdate(int month, int day, int year)
+  public static boolean checkdate(Env env, int month, int day, int year)
   {
     if (! (1 <= year && year <= 32767))
       return false;
@@ -107,15 +101,14 @@ public class DateModule extends AbstractQuercusModule {
     if (! (1 <= month && month <= 12))
       return false;
 
-    return 1 <= day && day <= cal_days_in_month(0, month, year);
+    return 1 <= day && day <= cal_days_in_month(env, 0, month, year);
   }
-
 
   /**
    * Returns the formatted date.
    */
   public String date(Env env,
-		     String format,
+                     String format,
                      @Optional("time()") long time)
   {
     return date(env, format, time, false);
@@ -125,8 +118,8 @@ public class DateModule extends AbstractQuercusModule {
    * Returns the formatted date as an int.
    */
   public Value idate(Env env,
-		     String format,
-		     @Optional("time()") long time)
+                     String format,
+                     @Optional("time()") long time)
   {
     if (format.length() != 1) {
       log.log(Level.FINE, L.l("idate format '{0}' needs to be of length one and only one", format));
@@ -184,12 +177,15 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the timestamp of easter.
    */
-  public static long easter_date(@Optional("-1") int year)
+  public static long easter_date(Env env,
+                                 @Optional("-1") int year)
   {
-    QDate date = new QDate();
+    long now = env.getCurrentTime();
+    
+    QDate date = new QDate(false, now);
     
     if (year < 0) {
-      date.setGMTTime(Alarm.getCurrentTime());
+      date.setGMTTime(now);
       
       year = date.getYear();
     }
@@ -221,10 +217,11 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the timestamp of easter.
    */
-  public static long easter_days(@Optional("-1") int year,
-				 @Optional int method)
+  public static long easter_days(Env env,
+                                 @Optional("-1") int year,
+                                 @Optional int method)
   {
-    return easter_date(year);
+    return easter_date(env, year);
   }
 
   /**
@@ -232,9 +229,7 @@ public class DateModule extends AbstractQuercusModule {
    */
   public Value getdate(@Optional("time()") long time)
   {
-    QDate date = new QDate(false);
-
-    date.setLocalTime(1000 * time);
+    QDate date = new QDate(false, 1000 * time);
 
     ArrayValue array = new ArrayValueImpl();
 
@@ -255,7 +250,7 @@ public class DateModule extends AbstractQuercusModule {
 
   public Value gettimeofday(Env env, @Optional boolean isFloatReturn)
   {
-    long gmtTime = Alarm.getExactTime();
+    long gmtTime = env.getExactTime();
 
     if (isFloatReturn) {
       return new DoubleValue(((double) gmtTime) / 1000.0);
@@ -293,7 +288,7 @@ public class DateModule extends AbstractQuercusModule {
    * Returns the formatted date.
    */
   public long gmmktime(Env env,
-		       @Optional() Value hourV,
+                       @Optional() Value hourV,
                        @Optional() Value minuteV,
                        @Optional() Value secondV,
                        @Optional() Value monthV,
@@ -301,7 +296,7 @@ public class DateModule extends AbstractQuercusModule {
                        @Optional() Value yearV)
   {
     QDate date = env.getGmtDate();
-    long now = Alarm.getCurrentTime();
+    long now = env.getCurrentTime();
 
     date.setLocalTime(now);
 
@@ -317,13 +312,14 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public String gmstrftime(String format,
-			   @Optional("-1") long phpTime)
+  public String gmstrftime(Env env,
+                           String format,
+                           @Optional("-1") long phpTime)
   {
     long time;
 
     if (phpTime == -1)
-      time = Alarm.getCurrentTime();
+      time = env.getCurrentTime();
     else
       time = 1000 * phpTime;
 
@@ -358,27 +354,20 @@ public class DateModule extends AbstractQuercusModule {
       QDate calendar;
       
       if (env.getDefaultTimeZone() != null)
-	calendar = new QDate(env.getDefaultTimeZone());
+        calendar = new QDate(env.getDefaultTimeZone(), env.getCurrentTime());
       else
-	calendar = env.getLocalDate();
+        calendar = env.getLocalDate();
 
       return dateImpl(format, time, calendar);
     }
   }
   
-  protected static String date(String format, long time, QDate calendar)
-  {
-    calendar = (QDate) calendar.clone();
-    
-    return dateImpl(format, time, calendar);
-  }
-  
   /**
    * Returns the formatted date.
    */
-  private static String dateImpl(String format,
-                                 long time,
-                                 QDate calendar)
+  protected static String dateImpl(String format,
+                                   long time,
+                                   QDate calendar)
   {
     long now = 1000 * time;
 
@@ -785,7 +774,7 @@ public class DateModule extends AbstractQuercusModule {
                               @Optional("false") boolean isAssociative)
   {
     if (time < 0)
-      time  = Alarm.getCurrentTime();
+      time  = env.getCurrentTime();
     else
       time = time * 1000;
 
@@ -877,11 +866,9 @@ public class DateModule extends AbstractQuercusModule {
     if (isDST != -1)
       env.deprecatedArgument("isDST");
 
-    QDate date = new QDate(true);
-
-    long now = Alarm.getCurrentTime();
-
-    date.setLocalTime(now);
+    long now = env.getCurrentTime();
+    
+    QDate date = new QDate(true, now);
     
     setMktime(date, hourV, minuteV, secondV, monthV, dayV, yearV);
 
@@ -947,13 +934,14 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the formatted date.
    */
-  public String strftime(String format,
+  public String strftime(Env env,
+                         String format,
                          @Optional("-1") long phpTime)
   {
     long time;
 
     if (phpTime == -1)
-      time = Alarm.getCurrentTime();
+      time = env.getCurrentTime();
     else
       time = 1000 * phpTime;
 
@@ -963,17 +951,17 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Parses the time
    */
-  public Value strtotime(String timeString,
+  public Value strtotime(Env env,
+                         String timeString,
                          @Optional("-1") long now)
   {
     try {
       if (now >= 0)
         now = 1000L * now;
       else
-        now = Alarm.getCurrentTime();
+        now = env.getCurrentTime();
 
-      QDate date = new QDate(true);
-      date.setGMTTime(now);
+      QDate date = new QDate(true, now);
 
       if (timeString.equals("")) {
         date.setHour(0);
@@ -996,9 +984,9 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns the current time in seconds.
    */
-  public static long time()
+  public static long time(Env env)
   {
-    return Alarm.getCurrentTime() / 1000L;
+    return env.getCurrentTime() / 1000L;
   }
 
   /**
@@ -1037,10 +1025,11 @@ public class DateModule extends AbstractQuercusModule {
     return localCalendar.getLocalTime() / 1000L;
   }
 
-  public static DateTime date_create(@Optional("now") String time,
+  public static DateTime date_create(Env env,
+                                     @Optional("now") String time,
                                      @Optional DateTimeZone dateTimeZone)
   {
-    return DateTime.__construct(time, dateTimeZone);
+    return DateTime.__construct(env, time, dateTimeZone);
   }
   
   public static void date_date_set(DateTime dateTime,
@@ -1097,9 +1086,9 @@ public class DateModule extends AbstractQuercusModule {
     return dateTime.getOffset();
   }
   
-  public static Value date_parse(String date)
+  public static Value date_parse(Env env, String date)
   {
-    DateTime dateTime = new DateTime(date);
+    DateTime dateTime = new DateTime(env, date);
     QDate qDate = dateTime.getQDate();
     
     ArrayValue array = new ArrayValueImpl();
@@ -1181,7 +1170,7 @@ public class DateModule extends AbstractQuercusModule {
       return;
     }
     
-    dateTime.setTimeZone(dateTimeZone);
+    dateTime.setTimeZone(env, dateTimeZone);
   }
   
   public static ArrayValue timezone_abbreviations_list()

@@ -69,11 +69,9 @@ public class ResinQuercusServlet extends QuercusServletImpl
    * initialize the script manager.
    */
   @Override
-  public void init(ServletConfig config)
+  protected void initImpl(ServletConfig config)
     throws ServletException
   {
-    super.init(config);
-
     _webApp = (WebApp) config.getServletContext();
 
     ResinQuercus quercus = (ResinQuercus) getQuercus();
@@ -82,8 +80,6 @@ public class ResinQuercusServlet extends QuercusServletImpl
     getQuercus().setPwd(Vfs.lookup());
 
     quercus.setIni("caucho.server_id", Resin.getLocal().getServerId());
-
-    quercus.start();
   }
 
   protected WriteStream openWrite(HttpServletResponse response)

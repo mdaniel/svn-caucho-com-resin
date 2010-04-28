@@ -49,8 +49,6 @@ import java.util.ArrayList;
 public class HttpModule extends AbstractQuercusModule {
   private static final L10N L = new L10N(HttpModule.class);
 
-  private final static QDate _calendar = new QDate(false);
-
   private static ArrayList<String> getHeaders(Env env)
   {
     ArrayList<String> headers
@@ -215,7 +213,7 @@ public class HttpModule extends AbstractQuercusModule {
                                   @Optional boolean secure,
                                   @Optional boolean httpOnly)
   {
-    long now = Alarm.getCurrentTime();
+    long now = env.getCurrentTime();
 
     if (value == null || value.equals(""))
       value = "";
@@ -292,9 +290,11 @@ public class HttpModule extends AbstractQuercusModule {
       cookieHeader.append("; expires=Thu, 01-Dec-1994 16:00:00 GMT");
     }
     else {
-      _calendar.setGMTTime(now + 1000L * (long) maxAge);
+      QDate date = env.getGmtDate();
+      
+      date.setGMTTime(now + 1000L * (long) maxAge);
       cookieHeader.append("; expires=");
-      cookieHeader.append(_calendar.format("%a, %d-%b-%Y %H:%M:%S GMT"));
+      cookieHeader.append(date.format("%a, %d-%b-%Y %H:%M:%S GMT"));
     }
 
     if (path != null && ! path.equals("")) {

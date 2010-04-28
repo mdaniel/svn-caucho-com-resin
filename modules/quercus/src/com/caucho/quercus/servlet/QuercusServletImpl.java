@@ -80,7 +80,7 @@ public class QuercusServletImpl extends HttpServlet
   /**
    * initialize the script manager.
    */
-  public void init(ServletConfig config)
+  public final void init(ServletConfig config)
     throws ServletException
   {
     _config = config;
@@ -99,6 +99,13 @@ public class QuercusServletImpl extends HttpServlet
     }
 
     getQuercus().init();
+    
+    getQuercus().start();
+  }
+  
+  protected void initImpl(ServletConfig config)
+    throws ServletException
+  {
   }
 
   /**
@@ -296,14 +303,14 @@ public class QuercusServletImpl extends HttpServlet
   {
     synchronized (this) {
       if (_quercus == null)
-	_quercus = new QuercusContext();
+        _quercus = new QuercusContext();
     }
 
     return _quercus;
   }
 
   /**
-   * Gets the script manager.
+   * Destroys the quercus instance.
    */
   public void destroy()
   {

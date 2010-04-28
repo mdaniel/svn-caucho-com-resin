@@ -60,22 +60,22 @@ public class DateTime
   private QDate _qDate;
   private DateTimeZone _dateTimeZone;
   
-  protected DateTime(String timeString)
+  protected DateTime(Env env, String timeString)
   {
-    this(timeString, new DateTimeZone());
+    this(env, timeString, new DateTimeZone());
   }
   
-  protected DateTime(String timeString, DateTimeZone dateTimeZone)
+  protected DateTime(Env env, String timeString, DateTimeZone dateTimeZone)
   {
-    _qDate = new QDate(dateTimeZone.getTimeZone());
+    _qDate = new QDate(dateTimeZone.getTimeZone(), env.getCurrentTime());
     _dateTimeZone = dateTimeZone;
     
-    init(timeString);
+    init(env, timeString);
   }
   
-  private void init(String timeString)
+  private void init(Env env, String timeString)
   {
-    long now = Alarm.getCurrentTime();
+    long now = env.getCurrentTime();
     _qDate.setGMTTime(now);
 
     if (timeString.equals("")) {
@@ -91,18 +91,23 @@ public class DateTime
     _qDate.setGMTTime(time);
   }
   
-  public static DateTime __construct(@Optional("now") String time,
+  public static DateTime __construct(Env env,
+                                     @Optional("now") String time,
                                      @Optional DateTimeZone timeZone)
   {
     if (timeZone == null)
-      return new DateTime(time);
+      return new DateTime(env, time);
     else
-      return new DateTime(time, timeZone);
+      return new DateTime(env, time, timeZone);
   }
   
   public String format(String format)
   {
-    return DateModule.date(format, _qDate.getLocalTime() / 1000, _qDate);
+    long time = _qDate.getLocalTime() / 1000;
+    
+    QDate calendar = new QDate(_qDate.getLocalTimeZone());
+
+    return DateModule.dateImpl(format, time, calendar);
   }
   
   public void modify(String modify)
@@ -119,13 +124,13 @@ public class DateTime
     return _dateTimeZone;
   }
   
-  public void setTimeZone(DateTimeZone dateTimeZone)
+  public void setTimeZone(Env env, DateTimeZone dateTimeZone)
   {
     _dateTimeZone = dateTimeZone;
     
     long time = _qDate.getGMTTime();
     
-    _qDate = new QDate(dateTimeZone.getTimeZone());
+    _qDate = new QDate(dateTimeZone.getTimeZone(), env.getCurrentTime());
     _qDate.setGMTTime(time);
   }
   

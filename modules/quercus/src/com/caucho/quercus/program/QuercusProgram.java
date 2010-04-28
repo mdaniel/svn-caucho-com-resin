@@ -89,11 +89,9 @@ public class QuercusProgram {
   // runtime function list for compilation
   private AbstractFunction []_runtimeFunList;
 
-  private BasicDependencyContainer _depend
-    = new BasicDependencyContainer();
+  private final BasicDependencyContainer _depend;
 
-  private BasicDependencyContainer _topDepend
-    = new BasicDependencyContainer();
+  private final BasicDependencyContainer _topDepend;
 
   /**
    * Creates a new quercus program
@@ -111,8 +109,13 @@ public class QuercusProgram {
                         Statement statement)
   {
     _quercus = quercus;
+    
+    _depend = new BasicDependencyContainer();
+    _depend.setUseAlarm(_quercus.isResin());
     _depend.setCheckInterval(quercus.getDependencyCheckInterval());
 
+    _topDepend = new BasicDependencyContainer();
+    _topDepend.setUseAlarm(_quercus.isResin());
     _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
     _topDepend.add(new PageDependency());
 
@@ -150,6 +153,11 @@ public class QuercusProgram {
     _sourceFile = sourceFile;
     _compiledPage = page;
 
+    _depend = new BasicDependencyContainer();
+    _depend.setUseAlarm(_quercus.isResin());
+    
+    _topDepend = new BasicDependencyContainer();
+    _topDepend.setUseAlarm(_quercus.isResin());
     _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
     _topDepend.add(new PageDependency());
   }

@@ -37,7 +37,8 @@ import java.util.logging.Logger;
 /**
  * Contains a set of dependencies.
  */
-public class BasicDependencyContainer implements Dependency
+public class BasicDependencyContainer
+  implements Dependency
 {
   private static Logger _log;
   
@@ -53,6 +54,9 @@ public class BasicDependencyContainer implements Dependency
   private long _lastCheckTime = 0;
 
   private volatile boolean _isChecking;
+  
+  // for quercus on tomcat (AlarmThread issues)
+  private boolean _isUseAlarm = true;
   
   /**
    * Adds a dependency.
@@ -117,6 +121,14 @@ public class BasicDependencyContainer implements Dependency
     _isModified = isModified;
     _lastCheckTime = 0;
   }
+  
+  /**
+   * Sets whether or not to use the Alarm.getCurrentTime().
+   */
+  public void setUseAlarm(boolean isUseAlarm)
+  {
+    _isUseAlarm = isUseAlarm;
+  }
       
   /**
    * Resets the check interval.
@@ -132,7 +144,11 @@ public class BasicDependencyContainer implements Dependency
   public void clearModified()
   {
     _isModified = false;
-    _lastCheckTime = Alarm.getCurrentTime();
+    
+    if (_isUseAlarm)
+      _lastCheckTime = Alarm.getCurrentTime();
+    else
+      _lastCheckTime = System.currentTimeMillis();
   }
 
   /**
@@ -142,30 +158,35 @@ public class BasicDependencyContainer implements Dependency
   {
     synchronized (this) {
       if (_isChecking || _isModified) {
-	return _isModified;
+        return _isModified;
       }
 
       _isChecking = true;
     }
 
     try {
-      long now = Alarm.getCurrentTime();
+      long now;
+      
+      if (_isUseAlarm)
+        now = Alarm.getCurrentTime();
+      else
+        now = System.currentTimeMillis();
 
       if (now < _lastCheckTime + _checkInterval)
-	return _isModified;
+        return _isModified;
 
       _lastCheckTime = now;
 
       for (int i = _dependencyList.size() - 1; i >= 0; i--) {
-	Dependency dependency = _dependencyList.get(i);
-	
-	if (dependency.isModified()) {
-	  dependency.logModified(log());
-
-	  _isModified = true;
+        Dependency dependency = _dependencyList.get(i);
         
-	  return _isModified;
-	}
+        if (dependency.isModified()) {
+          dependency.logModified(log());
+
+          _isModified = true;
+            
+          return _isModified;
+        }
       }
 
       // _isModified = false;
@@ -185,7 +206,7 @@ public class BasicDependencyContainer implements Dependency
       Dependency dependency = _dependencyList.get(i);
 	
       if (dependency.logModified(log))
-	return true;
+        return true;
     }
 
     return false;

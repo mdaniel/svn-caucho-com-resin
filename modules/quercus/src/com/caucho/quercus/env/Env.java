@@ -80,7 +80,8 @@ import java.util.logging.Logger;
 /**
  * Represents the Quercus environment.
  */
-public class Env {
+public class Env
+{
   private static final L10N L = new L10N(Env.class);
   private static final Logger log
     = Logger.getLogger(Env.class.getName());
@@ -908,7 +909,7 @@ public class Env {
   {
     _oldThreadEnv = _threadEnv.get();
 
-    _startTime = Alarm.getCurrentTime();
+    _startTime = _quercus.getCurrentTime();
     _timeLimit = getIniLong("max_execution_time") * 1000;
 
     if (_timeLimit > 0)
@@ -945,6 +946,22 @@ public class Env {
       listener.startup(this);
     
     _quercus.startEnv(this);
+  }
+  
+  /**
+   * Returns the current time (may be cached).
+   */
+  public long getCurrentTime()
+  {
+    return getQuercus().getCurrentTime();
+  }
+  
+  /**
+   * Returns the current time (not cached).
+   */
+  public long getExactTime()
+  {
+    return getQuercus().getExactTime();
   }
 
   /**
@@ -1112,7 +1129,7 @@ public class Env {
  
   public void updateTimeout()
   {
-    long now = Alarm.getCurrentTime();
+    long now = _quercus.getCurrentTime();
     
     if (_endTime < now)
       _isTimeout = true;
@@ -1120,7 +1137,7 @@ public class Env {
   
   public void resetTimeout()
   {
-    _startTime = Alarm.getCurrentTime();
+    _startTime = _quercus.getCurrentTime();
     _endTime = _startTime + _timeLimit;
     _isTimeout = false;
   }
@@ -1629,7 +1646,7 @@ public class Env {
    */
   public SessionArrayValue createSession(String sessionId, boolean create)
   {
-    long now = Alarm.getCurrentTime();
+    long now = _quercus.getCurrentTime();
 
     SessionCallback callback = getSessionCallback();
 
@@ -6783,12 +6800,12 @@ public class Env {
 
   public long getMicroTime()
   {
-    long nanoTime = Alarm.getExactTimeNanoseconds();
+    long nanoTime = _quercus.getExactTimeNanoseconds();
 
     if (_firstMicroTime <= 0) {
       _firstNanoTime = nanoTime;
 
-      _firstMicroTime = Alarm.getExactTime() * 1000
+      _firstMicroTime = _quercus.getExactTime() * 1000
                         + (_firstNanoTime % 1000000L) / 1000;
 
       return _firstMicroTime;

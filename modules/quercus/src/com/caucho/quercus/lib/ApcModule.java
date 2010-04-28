@@ -124,13 +124,13 @@ public class ApcModule extends AbstractQuercusModule
 	String key = keys.get(i);
 	Entry entryValue = values.get(i);
 
-	if (entryValue.isValid()) {
+	if (entryValue.isValid(env)) {
 	  ArrayValueImpl array = new ArrayValueImpl();
 	  cacheList.put(array);
 
 	  array.put(env.createString("info"), env.createString(key));
 	  array.put(env.createString("ttl"),
-		    LongValue.create(entryValue.getTTL()));
+		    LongValue.create(entryValue.getTTL(env)));
 	  array.put(env.createString("type"), env.createString("user"));
 	  array.put(env.createString("num_hits"),
 		    LongValue.create(entryValue.getHitCount()));
@@ -338,17 +338,17 @@ public class ApcModule extends AbstractQuercusModule
       if (ttl <= 0)
         _expire = Long.MAX_VALUE / 2;
       else
-        _expire = Alarm.getCurrentTime() + ttl * 1000L;
+        _expire = env.getCurrentTime() + ttl * 1000L;
 
-      _createTime = Alarm.getCurrentTime();
+      _createTime = env.getCurrentTime();
     }
 
-    public long getTTL()
+    public long getTTL(Env env)
     {
       if (_expire >= Long.MAX_VALUE / 2)
         return 0;
       else
-        return (_expire - Alarm.getCurrentTime()) / 1000L;
+        return (_expire - env.getCurrentTime()) / 1000L;
     }
 
     public long getHitCount()
@@ -356,9 +356,9 @@ public class ApcModule extends AbstractQuercusModule
       return _hitCount;
     }
 
-    public boolean isValid()
+    public boolean isValid(Env env)
     {
-      if (Alarm.getCurrentTime() <= _expire)
+      if (env.getCurrentTime() <= _expire)
         return true;
       else {
         clear();
@@ -369,8 +369,8 @@ public class ApcModule extends AbstractQuercusModule
 
     public Value getValue(Env env)
     {
-      if (Alarm.getCurrentTime() <= _expire) {
-        _accessTime = Alarm.getCurrentTime();
+      if (env.getCurrentTime() <= _expire) {
+        _accessTime = env.getCurrentTime();
         _hitCount++;
 	
         return super.getValue(env);

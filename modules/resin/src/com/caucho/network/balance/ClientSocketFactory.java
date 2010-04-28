@@ -929,6 +929,8 @@ public class ClientSocketFactory
     try {
       ReadWritePair pair = openTCPPair();
       ReadStream rs = pair.getReadStream();
+      rs.setEnableReadTime(true);
+      
       rs.setAttribute("timeout", new Integer((int) _loadBalanceSocketTimeout));
 
       synchronized (this) {

@@ -34,6 +34,7 @@ import com.caucho.quercus.expr.LiteralStringExpr;
 import com.caucho.quercus.function.AbstractFunction;
 import com.caucho.util.Primes;
 import com.caucho.util.Alarm;
+import com.caucho.util.Test;
 import com.caucho.vfs.WriteStream;
 
 import java.io.IOException;
@@ -1396,7 +1397,7 @@ public class ObjectExtValue extends ObjectValue
   @Override
   public String toString()
   {
-    if (Alarm.isTest())
+    if (Test.isTest())
       return getClass().getSimpleName() +  "[" + _className + "]";
     else
       return getClass().getSimpleName() + "@" + System.identityHashCode(this) +  "[" + _className + "]";

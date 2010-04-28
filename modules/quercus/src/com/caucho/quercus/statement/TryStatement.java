@@ -125,13 +125,21 @@ public class TryStatement extends Statement {
         Catch item = _catchList.get(i);
 
         if (item.getId().equals("Exception")) {
-          item.getExpr().evalAssignValue(env, env.createException(e));
+          Throwable cause = e;
+          
+          //if (e instanceof QuercusException && e.getCause() != null)
+            //cause = e.getCause();
+          
+          item.getExpr().evalAssignValue(env, env.createException(cause));
 
           return item.getBlock().execute(env);
         }
       }
-
-      throw new QuercusException(e);
+      
+      if (e instanceof QuercusException)
+        throw (QuercusException) e;
+      else
+        throw new QuercusException(e);
     }
   }
 

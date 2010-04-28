@@ -65,20 +65,14 @@ public class GoogleQuercusServletImpl extends QuercusServletImpl
    * initialize the script manager.
    */
   @Override
-  public void init(ServletConfig config)
+  protected void initImpl(ServletConfig config)
     throws ServletException
   {
-    super.init(config);
-
     _webApp = config.getServletContext();
-
-    GoogleQuercus quercus = (GoogleQuercus) getQuercus();
 
     // _quercus.setWebApp(_webApp);
     
     _quercus.setPwd(Vfs.lookup(_webApp.getRealPath(".")));
-
-    _quercus.start();
   }
 
   protected QuercusServletImpl getQuercusServlet()

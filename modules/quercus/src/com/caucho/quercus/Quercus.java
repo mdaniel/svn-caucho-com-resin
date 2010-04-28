@@ -44,7 +44,7 @@ public class Quercus
   extends QuercusContext
 {
   private static final Logger log
-    = Logger.getLogger(CliQuercus.class.getName());
+    = Logger.getLogger(Quercus.class.getName());
 
   private String _fileName;
   private String []_args;
@@ -69,6 +69,9 @@ public class Quercus
       printUsage();
       return;
     }
+    
+    quercus.init();
+    quercus.start();
 
     if (quercus.getFileName() != null) {
       quercus.execute();

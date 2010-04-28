@@ -472,24 +472,29 @@ public abstract class JdbcConnectionResource
   /**
    * Returns the table metadata.
    */
-  public JdbcTableMetaData getTableMetaData(String catalog,
+  public JdbcTableMetaData getTableMetaData(Env env,
+                                            String catalog,
                                             String schema,
                                             String table)
     throws SQLException
   {
     try {
       if (table == null || table.equals(""))
-	return null;
+        return null;
     
       TableKey key = new TableKey(getURL(), catalog, schema, table);
 
       // XXX: needs invalidation on DROP or ALTER
       JdbcTableMetaData tableMd = _tableMetadataMap.get(key);
     
-      if (tableMd != null && tableMd.isValid())
-	return tableMd;
+      if (tableMd != null && tableMd.isValid(env))
+        return tableMd;
     
-      tableMd = new JdbcTableMetaData(catalog, schema, table, getMetaData());
+      tableMd = new JdbcTableMetaData(env,
+                                      catalog,
+                                      schema,
+                                      table,
+                                      getMetaData());
 
       _tableMetadataMap.put(key, tableMd);
 

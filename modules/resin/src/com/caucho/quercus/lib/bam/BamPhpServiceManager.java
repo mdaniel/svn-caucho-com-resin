@@ -42,6 +42,7 @@ import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.HempBroker;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.ResinQuercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.BooleanValue;
@@ -70,7 +71,7 @@ public class BamPhpServiceManager implements BrokerListener {
   private static final Logger log
     = Logger.getLogger(BamPhpServiceManager.class.getName());
 
-  private final QuercusContext _quercus = new QuercusContext();
+  private final QuercusContext _quercus = new ResinQuercus();
 
   private final HashMap<String,BamPhpActor> _children = 
     new HashMap<String,BamPhpActor>();

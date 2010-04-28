@@ -33,6 +33,7 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
+import com.caucho.util.Test;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -190,20 +191,28 @@ class HttpStream extends StreamImpl {
       }
     }
 
-    if (stream == null) {
-    }
-    // if the stream is still valid, use it
-    else if (Alarm.getCurrentTime() < streamTime + 5000) {
-      stream.init(path);
-      return stream;
-    }
-    // if the stream has timed out, close it
-    else {
-      try {
-        stream._isKeepalive = false;
-        stream.close();
-      } catch (IOException e) {
-        log.log(Level.FINE, e.toString(), e);
+    if (stream != null) {
+      long now;
+      
+      // for quercus on tomcat (AlarmThread issues)
+      if (Test.isTest())
+        now = Alarm.getCurrentTime();
+      else
+        now = System.currentTimeMillis();
+      
+      if (now < streamTime + 5000) {
+        // if the stream is still valid, use it
+        stream.init(path);
+        return stream;
+      }
+      else {
+        // if the stream has timed out, close it
+        try {
+          stream._isKeepalive = false;
+          stream.close();
+        } catch (IOException e) {
+          log.log(Level.FINE, e.toString(), e);
+        }
       }
     }
 
@@ -871,12 +880,19 @@ class HttpStream extends StreamImpl {
       }
     }
 
-    if (com.caucho.util.Alarm.isTest())
+    if (com.caucho.util.Test.isTest())
       _isKeepalive = false; // XXX:
     
     if (_isKeepalive) {
       HttpStream oldSaved;
-      long now = Alarm.getCurrentTime();
+      
+      long now;
+      
+      if (Test.isTest())
+        now = Alarm.getCurrentTime();
+      else
+        now = System.currentTimeMillis();
+      
       synchronized (LOCK) {
         oldSaved = _savedStream;
         _savedStream = this;

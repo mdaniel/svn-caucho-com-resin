@@ -32,6 +32,7 @@ package com.caucho.quercus;
 import com.caucho.VersionFactory;
 import com.caucho.loader.*;
 import com.caucho.distcache.*;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.module.ModuleContext;
 import com.caucho.quercus.module.ResinModuleContext;
 import com.caucho.server.webapp.*;
@@ -44,6 +45,7 @@ import com.caucho.java.*;
 
 import javax.sql.DataSource;
 import java.sql.*;
+import java.util.ArrayList;
 import java.util.Map;
 import java.util.logging.Logger;
 
@@ -87,6 +89,33 @@ public class ResinQuercus extends QuercusContext
   public WebApp getWebApp()
   {
     return _webApp;
+  }
+  
+  /**
+   * Returns the current time.
+   */
+  @Override
+  public long getCurrentTime()
+  {
+    return Alarm.getCurrentTime();
+  }
+  
+  /**
+   * Returns the current time in nanoseconds.
+   */
+  @Override
+  public long getExactTimeNanoseconds()
+  {
+    return Alarm.getExactTimeNanoseconds();
+  }
+  
+  /**
+   * Returns the exact current time in milliseconds.
+   */
+  @Override
+  public long getExactTime()
+  {
+    return Alarm.getExactTime();
   }
 
   @Override
@@ -212,7 +241,7 @@ public class ResinQuercus extends QuercusContext
     }
   }
   
-  /*
+  /**
    * Marks the connection for removal from the connection pool.
    */
   @Override
@@ -249,6 +278,25 @@ public class ResinQuercus extends QuercusContext
   public void start()
   {
     new Alarm(getQuercusSessionManager()).queue(60000);
+    
+    new WeakAlarm(new EnvTimeoutAlarmListener()).queue(_envTimeout);
+  }
+  
+  class EnvTimeoutAlarmListener implements AlarmListener {
+    public void handleAlarm(Alarm alarm)
+    {
+      try {
+        ArrayList<Env> activeEnv = new ArrayList<Env>(_activeEnvSet.keySet());
+      
+        for (Env env : activeEnv) {
+          env.updateTimeout();
+        }
+      } finally {
+        if (! isClosed()) {
+          alarm.queue(_envTimeout);
+        }
+      }
+    }
   }
 }
 

@@ -516,7 +516,7 @@ public class MysqlModule extends AbstractQuercusModule {
 
         // php/141p
         JdbcTableMetaData tableMd
-          = conn.getTableMetaData(catalogName, null, tableName);
+          = conn.getTableMetaData(env, catalogName, null, tableName);
 
         if (tableMd != null)
           columnMd = tableMd.getColumn(columnName);

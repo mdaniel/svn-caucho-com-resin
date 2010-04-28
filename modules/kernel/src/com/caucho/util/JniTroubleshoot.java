@@ -149,7 +149,7 @@ public class JniTroubleshoot {
 
   private boolean isMacOSX()
   {
-    return  System.getProperty("os.name").equals("Mac OS X");
+    return System.getProperty("os.name").equals("Mac OS X");
   }
 
   private boolean isWin()

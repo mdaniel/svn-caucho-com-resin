@@ -41,6 +41,7 @@ import com.caucho.bam.Broker;
 import com.caucho.bam.SimpleActor;
 import com.caucho.config.ConfigException;
 import com.caucho.quercus.QuercusContext;
+import com.caucho.quercus.ResinQuercus;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.JavaValue;
 import com.caucho.quercus.env.LongValue;
@@ -71,7 +72,7 @@ public class BamPhpActor extends SimpleActor {
   private static final Logger log
     = Logger.getLogger(BamPhpActor.class.getName());
 
-  private final QuercusContext _quercus = new QuercusContext();
+  private final QuercusContext _quercus = new ResinQuercus();
 
   private final HashMap<String,BamPhpActor> _children
     = new HashMap<String,BamPhpActor>();

@@ -2965,7 +2965,8 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * sets the time to the current time
    */
-  public static boolean touch(Path path,
+  public static boolean touch(Env env,
+                              Path path,
                               @Optional int time,
                               @Optional int atime)
   {
@@ -2976,7 +2977,7 @@ public class FileModule extends AbstractQuercusModule {
         if (time > 0)
           path.setLastModified(1000L * time);
         else
-          path.setLastModified(Alarm.getCurrentTime());
+          path.setLastModified(env.getCurrentTime());
       }
       else {
         WriteStream ws = path.openWrite();

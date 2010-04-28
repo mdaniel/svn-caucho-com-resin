@@ -31,8 +31,6 @@ package com.caucho.util;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.ClassLoaderListener;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentListener;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
@@ -653,9 +651,13 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       }
 
       _currentTime = time;
+      
+      Test.setTest(true);
     }
     else {
       _currentTime = System.currentTimeMillis();
+      
+      Test.setTest(false);
     }
 
     Alarm alarm;

@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.lib.db;
 
+import com.caucho.quercus.env.Env;
 import com.caucho.util.Alarm;
 
 import java.sql.DatabaseMetaData;
@@ -55,16 +56,17 @@ public class JdbcTableMetaData {
   private final HashMap<String,JdbcColumnMetaData> _columnMap
     = new HashMap<String,JdbcColumnMetaData>();
 
-  public JdbcTableMetaData(String catalog,
-			   String schema,
-			   String name,
-			   DatabaseMetaData md)
+  public JdbcTableMetaData(Env env,
+                           String catalog,
+                           String schema,
+                           String name,
+                           DatabaseMetaData md)
     throws SQLException
   {
     _catalog = catalog;
     _schema = schema;
     _name = name;
-    _lastModified = Alarm.getCurrentTime();
+    _lastModified = env.getCurrentTime();
 
     ResultSet rs = md.getColumns(_catalog, _schema, _name, null);
     try {
@@ -135,9 +137,9 @@ public class JdbcTableMetaData {
     return _columnMap.get(name);
   }
 
-  public boolean isValid()
+  public boolean isValid(Env env)
   {
-    return Alarm.getCurrentTime() - _lastModified <= _maxIdleTime;
+    return env.getCurrentTime() - _lastModified <= _maxIdleTime;
   }
 
   public String toString()

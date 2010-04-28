@@ -51,7 +51,9 @@ import java.util.logging.Logger;
  * Stripped down version of com.caucho.server.session.SessionManager,
  * customized to PHP instead of J2EE sessions.
  */
-public class QuercusSessionManager implements AlarmListener {
+public class QuercusSessionManager
+  implements AlarmListener
+{
   private static final L10N L = new L10N(QuercusSessionManager.class);
   private static final Logger log
     = Logger.getLogger(QuercusSessionManager.class.getName());
@@ -357,7 +359,7 @@ public class QuercusSessionManager implements AlarmListener {
       CharBuffer sb = new CharBuffer();
 
       Base64.encode(sb, RandomUtil.getRandomLong());
-      Base64.encode(sb, Alarm.getCurrentTime());
+      Base64.encode(sb, env.getCurrentTime());
 
       id = sb.toString();
     } while (getSession(env, id, 0) != null);

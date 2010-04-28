@@ -485,10 +485,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value memory_get_peak_usage(Env env, @Optional boolean real)
   {
-    if (com.caucho.util.Alarm.isTest())
-      return LongValue.create(0);
-    else
-      return LongValue.create(Runtime.getRuntime().maxMemory());
+    return LongValue.create(Runtime.getRuntime().maxMemory());
   }
 
   /**
@@ -496,10 +493,7 @@ public class OptionsModule extends AbstractQuercusModule {
    */
   public static Value memory_get_usage(Env env, @Optional boolean real)
   {
-    if (com.caucho.util.Alarm.isTest())
-      return LongValue.create(0);
-    else
-      return LongValue.create(Runtime.getRuntime().maxMemory());
+    return LongValue.create(Runtime.getRuntime().maxMemory());
   }
 
   // XXX: php_ini_loaded_file
