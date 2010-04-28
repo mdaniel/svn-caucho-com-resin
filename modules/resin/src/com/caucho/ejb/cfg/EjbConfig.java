@@ -345,6 +345,13 @@ public class EjbConfig {
 
         setBeanConfig(bean.getEJBName(), bean);
       }
+      else if (type.isAnnotationPresent(javax.ejb.Singleton.class)) {
+        EjbSingletonBean<X> bean = new EjbSingletonBean<X>(this, moduleName);
+        bean.setAllowPOJO(true);
+        bean.setEJBClass(type);
+
+        setBeanConfig(bean.getEJBName(), bean);
+      }
     } catch (ConfigException e) {
       throw e;
     } catch (Exception e) {

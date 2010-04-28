@@ -28,6 +28,11 @@
 
 package com.caucho.ejb.embeddable;
 
+import java.net.URL;
+import java.net.MalformedURLException;
+import java.util.ArrayList;
+import java.util.logging.Logger;
+import java.util.logging.Level;
 import javax.ejb.EJBException;
 import javax.ejb.embeddable.EJBContainer;
 import javax.naming.Context;
@@ -35,6 +40,7 @@ import javax.naming.InitialContext;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
@@ -45,16 +51,22 @@ import com.caucho.naming.InitialContextFactoryImpl;
 import com.caucho.resin.ResinBeanContainer;
 import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.server.webbeans.ResinWebBeansProducer;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * Interface for the EJBClient.
  */
 @Module
 public class EJBContainerImpl extends EJBContainer {
+  private static final Logger log 
+    = Logger.getLogger(EJBContainerImpl.class.getName());
+
   private Context _context;
   private EnvironmentClassLoader _classLoader;
   private InjectManager _injectManager;
   private EnterpriseApplication _application;
+  private ArrayList<Path> _moduleRoots;
 
   public EJBContainerImpl()
     throws EJBException
@@ -68,8 +80,12 @@ public class EJBContainerImpl extends EJBContainer {
     preInit(name);
   }
 
-  void addModule(String modulePath)
+  void addModule(Path path)
   {
+    if (_moduleRoots == null)
+      _moduleRoots = new ArrayList<Path>();
+
+    _moduleRoots.add(path);
   }
 
   void preInit(String name)
@@ -109,10 +125,23 @@ public class EJBContainerImpl extends EJBContainer {
 
     try {
       thread.setContextClassLoader(_classLoader);
+
+      if (_moduleRoots != null) {
+        for (Path path : _moduleRoots)
+          _classLoader.addURL(new URL(path.getURL()));
+
+        EjbManager manager = EjbManager.getCurrent();
+
+        manager.setScannableRoots(_moduleRoots);
+      }
       
       _classLoader.scanRoot();
       _application.start();
-    } finally {
+    }
+    catch (MalformedURLException e) {
+      log.log(Level.FINE, e.toString(), e);
+    } 
+    finally {
       thread.setContextClassLoader(oldLoader);
     }
   }

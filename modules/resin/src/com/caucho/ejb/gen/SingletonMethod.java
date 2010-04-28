@@ -40,7 +40,7 @@ import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
 /**
- * Represents a stateful local business method
+ * Represents a singleton local business method
  */
 @Module
 public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
@@ -107,12 +107,12 @@ public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
     if (getView().isRemote()
         && hasException(java.rmi.NoSuchObjectException.class)) {
       out.println("if (! _isValid)");
-      out.println("  throw new java.rmi.NoSuchObjectException(\"stateful instance "
+      out.println("  throw new java.rmi.NoSuchObjectException(\"singleton instance "
                   + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
     }
     else {
       out.println("if (! _isValid)");
-      out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
+      out.println("  throw new javax.ejb.NoSuchEJBException(\"singleton instance "
                   + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
     }
 

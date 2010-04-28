@@ -118,13 +118,13 @@ public class EnterpriseApplication
 
     _loader = EnvironmentClassLoader.create(parentLoader, "eapp:" + name);
     
-    Path entAppRoot = _controller.getRootDirectory(); 
-    
-    // XXX: restrict to META-INF?
-    ResourceLoader loader = new ResourceLoader(_loader, entAppRoot);
-    loader.init();
-    
     if (_controller != null) {
+      Path entAppRoot = _controller.getRootDirectory(); 
+
+      // XXX: restrict to META-INF?
+      ResourceLoader loader = new ResourceLoader(_loader, entAppRoot);
+      loader.init();
+
       _webappsPath = entAppRoot.lookup("webapps");
       WorkDir.setLocalWorkDir(entAppRoot.lookup("META-INF/work"),
                               _loader);

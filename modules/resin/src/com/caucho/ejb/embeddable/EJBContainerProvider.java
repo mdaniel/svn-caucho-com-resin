@@ -29,48 +29,77 @@
 package com.caucho.ejb.embeddable;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.ejb.EJBException;
 import javax.ejb.embeddable.EJBContainer;
 import javax.naming.Context;
+import javax.xml.stream.*;
 
 import com.caucho.java.WorkDir;
 import com.caucho.vfs.JarPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
+import com.caucho.xml.stream.*;
 
 public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider 
 {
   public static final String WORK_DIR = "com.caucho.ejb.embeddable.workDir";
 
+  private static final Logger log 
+    = Logger.getLogger(EJBContainerProvider.class.getName());
+
+  private String scanEjbJarXml(Path ejbJarXml)
+  {
+    // XXX use Config.configure once com.caucho.ejb.cfg allows configuration
+    // without a live EjbManager
+    try {
+      XMLStreamReaderImpl reader 
+        = new XMLStreamReaderImpl(ejbJarXml.openRead());
+
+      while (reader.hasNext()) { 
+        if (reader.next() == XMLStreamReader.START_ELEMENT
+            && "module-name".equals(reader.getLocalName()))
+          return reader.getElementText();
+      }
+    }
+    catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+    catch (XMLStreamException e) {
+      log.log(Level.FINE, e.toString(), e);
+    }
+
+    return null;
+  }
+
   private String getModuleName(String classpathComponent)
   {
     Path path = Vfs.lookup(classpathComponent);
     String tail = path.getTail();
+    String moduleName = classpathComponent;
 
     if (classpathComponent.endsWith(".jar")
         || classpathComponent.endsWith(".war")) {
-      String moduleName = tail.substring(0, tail.length() - ".jar".length());
+      moduleName = tail.substring(0, tail.length() - ".jar".length());
 
-      JarPath jarPath = JarPath.create(path);
-
-      Path ejbJarXml = jarPath.lookup("META-INF/ejb-jar.xml");
-
-      if (ejbJarXml.canRead()) {
-        // XXX scan META-INF/ejb-jar.xml for module name override
-        return moduleName;
-      }
-
-      return null;
+      path = JarPath.create(path);
     }
-    else {
-      // XXX scan META-INF/ejb-jar.xml for module name override
-      //Path ejbJarXml = path.lookup("META-INF/ejb-jar.xml");
 
-      return classpathComponent;
+    Path ejbJarXml = path.lookup("META-INF/ejb-jar.xml");
+
+    if (ejbJarXml.canRead()) {
+      String ejbJarModuleName = scanEjbJarXml(ejbJarXml);
+
+      if (ejbJarModuleName != null)
+        moduleName = ejbJarModuleName;
     }
+
+    return moduleName;
   }
 
   private void addModulesFromClasspath(EJBContainerImpl container,
@@ -85,7 +114,7 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
       String moduleName = getModuleName(component);
 
       if (modules == null || modules.contains(moduleName)) {
-        container.addModule(component);
+        container.addModule(Vfs.lookup(component));
       }
     }
   }
@@ -114,13 +143,13 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
     else if (modulesValue instanceof File) {
       File file = (File) modulesValue;
 
-      container.addModule(file.getPath());
+      container.addModule(Vfs.lookup(file.getPath()));
     }
     else if (modulesValue instanceof File[]) {
       File []files = (File []) modulesValue;
 
       for (File file : files ) {
-        container.addModule(file.getPath());
+        container.addModule(Vfs.lookup(file.getPath()));
       }
     }
     else 
@@ -144,6 +173,10 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
       }
 
       WorkDir.setLocalWorkDir(workDir);
+    }
+    else {
+      Path tmpDir = Vfs.lookup(System.getProperty("java.io.tmpdir"));
+      WorkDir.setLocalWorkDir(tmpDir.lookup("caucho-ejb"));
     }
   }
 

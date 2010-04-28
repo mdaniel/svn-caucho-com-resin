@@ -81,8 +81,8 @@ public class EjbHandler extends JavaeeInjectionHandler {
       */
 
     Bean<?> bean = null;
-    
-    if (beanName != null)
+
+    if (! "".equals(beanName))
       bean = bind(location, bindType, new BeanNameLiteral(beanName));
     
     if (bean == null)

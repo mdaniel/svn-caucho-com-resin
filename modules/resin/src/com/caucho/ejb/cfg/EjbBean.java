@@ -32,6 +32,7 @@ package com.caucho.ejb.cfg;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
@@ -1082,7 +1083,8 @@ public class EjbBean<X> extends DescriptionGroupConfig
                         objectName));
       }
 
-      Class<?> returnType = javaMethod.getReturnType();
+      // ejb/11d6
+      Type returnType = javaMethod.getGenericReturnType();
 
       AnnotatedMethod<? super X> implMethod =
         validateRemoteImplMethod(javaMethod.getName(), param,

@@ -87,7 +87,10 @@ public class EjbManager implements ScanListener, EnvironmentListener {
 
   private AmberPersistenceUnit _ejbPersistenceUnit;
 
-  private HashSet<String> _ejbUrls = new HashSet<String>();
+  private final HashSet<String> _ejbUrls = new HashSet<String>();
+
+  // the exact list of root to scan - used by EJBContainer
+  private ArrayList<Path> _scannableRoots = null;
 
   //
   // configuration
@@ -399,10 +402,16 @@ public class EjbManager implements ScanListener, EnvironmentListener {
 
     // XXX: ejb/0fbn
     Path ejbJar = root.lookup("META-INF/ejb-jar.xml");
-    if (ejbJar.canRead())
+    if (ejbJar.canRead()) {
       getConfigManager().addEjbPath(ejbJar);
+    }
 
     _ejbUrls.add(root.getURL());
+  }
+
+  public void setScannableRoots(ArrayList<Path> roots)
+  {
+    _scannableRoots = roots;
   }
 
   /**
@@ -411,18 +420,29 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   @Override
   public boolean isRootScannable(Path root, String packageRoot)
   {
-    if (! Boolean.TRUE.equals(_localScanAll.get())) {
-      if (! root.lookup("META-INF/ejb-jar.xml").canRead()) {
+    if (_scannableRoots == null) {
+      if (! Boolean.TRUE.equals(_localScanAll.get())) {
+        if (! root.lookup("META-INF/ejb-jar.xml").canRead()) {
+          return false;
+        }
+      }     
+    
+      if (_ejbUrls.contains(root.getURL())) {
         return false;
       }
-    }     
-  
-    if (_ejbUrls.contains(root.getURL())) {
-      return false;
+    }
+    else {
+      Path path = root;
+
+      if (root instanceof JarPath)
+        path = ((JarPath) root).getContainer();
+
+      if (! _scannableRoots.contains(path))
+        return false;
     }
     
     if (log.isLoggable(Level.FINE))
-      log.fine("EJB scanning '" + root.getFullPath() + "'");
+      log.fine("EJB scanning '" + root + "'");
 
     EjbRootConfig context = _configManager.createRootConfig(root);
 
