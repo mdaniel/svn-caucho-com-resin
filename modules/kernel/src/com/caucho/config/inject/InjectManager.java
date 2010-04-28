@@ -1089,6 +1089,9 @@ public class InjectManager
       return set;
     }
     else if (Event.class.equals(rawType)) {
+      if (baseType.isGeneric())
+        throw new ConfigException(L.l("Event must have parameters because a non-parameterized Event would observe no events."));
+                                      
       BaseType []param = baseType.getParameters();
 
       Type beanType;
@@ -1978,14 +1981,36 @@ public class InjectManager
   /**
    * Sends the specified event to any observer instances in the scope
    */
-  public void fireEvent(Object event, Annotation... bindings)
+  @Override
+  public void fireEvent(Object event, Annotation... qualifiers)
   {
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " fireEvent " + event);
 
     BaseType eventType = createTargetBaseType(event.getClass());
+    
+    if (eventType.isGeneric())
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
+                                             eventType));
+    
+    int length = qualifiers.length;
+    for (int i = 0; i < length; i++) {
+      Annotation qualifierA = qualifiers[i];
+      
+      if (! isQualifier(qualifierA.annotationType()))
+        throw new IllegalArgumentException(L.l("'{0}' is an invalid event annotation because it's not a @Qualifier.",
+                                               qualifierA));
+      
+      for (int j = i + 1; j < length; j++) {
+        if (qualifierA.annotationType() == qualifiers[j].annotationType()) {
+          throw new IllegalArgumentException(L.l("fireEvent is invalid because the bindings are duplicate types: {0} and {1}",
+                                                 qualifiers[i], qualifiers[j]));
+          
+        }
+      }
+    }
 
-    fireEventImpl(event, eventType, bindings);
+    fireEventImpl(event, eventType, qualifiers);
   }
 
   protected void fireEventImpl(Object event,
@@ -2027,6 +2052,10 @@ public class InjectManager
       = new HashSet<ObserverMethod<? super T>>();
 
     BaseType eventType = createTargetBaseType(event.getClass());
+    
+    if (eventType.isGeneric())
+      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
+                                             eventType));
     
     for (Annotation qualifier : qualifiers) {
       if (! isQualifier(qualifier.annotationType()))
@@ -2367,8 +2396,10 @@ public class InjectManager
 
       cl = Class.forName(className, false, _classLoader);
 
+      /*
       if (! isValidSimpleBean(cl))
         return;
+        */
 
       if (cl.getDeclaringClass() != null
           && ! Modifier.isStatic(cl.getModifiers()))
@@ -2520,7 +2551,10 @@ public class InjectManager
     // XXX: not sure this is correct.
     if (Throwable.class.isAssignableFrom(type.getJavaClass()))
       return;
-
+    
+    if (! isValidSimpleBean(type.getJavaClass()))
+      return;
+    
     InjectionTarget<T> target = createInjectionTarget(type);
 
     if (target instanceof InjectionTargetImpl<?>) {

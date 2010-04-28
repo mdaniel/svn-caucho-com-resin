@@ -29,23 +29,21 @@
 
 package com.caucho.config.j2ee;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.util.*;
-
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.inject.Module;
 
+@Module
 public class PreDestroyInject extends ConfigProgram
 {
   private static final Logger log
     = Logger.getLogger(PreDestroyInject.class.getName());
-  private static final L10N L = new L10N(PreDestroyInject.class);
-
   private Method _destroy;
 
   public PreDestroyInject(Method destroy)
@@ -60,10 +58,8 @@ public class PreDestroyInject extends ConfigProgram
   {
     try {
       _destroy.invoke(value);
-    } catch (RuntimeException e) {
-      throw e;
     } catch (Exception e) {
-      throw ConfigException.create(e);
+      log.log(Level.WARNING, e.toString(), e);
     }
   }
 

@@ -95,7 +95,7 @@ abstract public class BaseType
 	newParamMap.put(typeParam[i].getName(), args[i]);
       }
 
-      return new ParamType(cl, args, newParamMap);
+      return new GenericParamType(cl, args, newParamMap);
     }
     else if (type instanceof ParameterizedType) {
       ParameterizedType pType = (ParameterizedType) type;
@@ -228,6 +228,11 @@ abstract public class BaseType
   }
 
   public boolean isWildcard()
+  {
+    return false;
+  }
+  
+  public boolean isGeneric()
   {
     return false;
   }

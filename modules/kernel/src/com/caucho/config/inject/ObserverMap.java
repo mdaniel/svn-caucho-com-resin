@@ -103,7 +103,7 @@ public class ObserverMap {
   }
 
   static class ObserverEntry {
-    private final ObserverMethod _observer;
+    private final ObserverMethod<?> _observer;
     private final BaseType _type;
     private final QualifierBinding []_qualifiers;
 

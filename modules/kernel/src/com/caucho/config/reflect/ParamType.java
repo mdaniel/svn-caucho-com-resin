@@ -49,6 +49,7 @@ public class ParamType extends BaseType implements ParameterizedType
   private BaseType []_param;
   private Type []_actualArguments;
   private HashMap<String,BaseType> _paramMap;
+  private boolean _isGeneric;
 
   public ParamType(Class<?> type,
 		   BaseType []param,

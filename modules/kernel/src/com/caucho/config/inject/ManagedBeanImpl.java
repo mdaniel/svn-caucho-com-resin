@@ -48,6 +48,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -328,6 +329,10 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   protected <T> void addProduces(AnnotatedMethod producesMethod,
                                  AnnotatedMethod disposesMethod)
   {
+    if (producesMethod.getJavaMember().getDeclaringClass() != getBeanClass()
+        && ! getBeanClass().isAnnotationPresent(Specializes.class))
+      return;
+    
     Arg []producesArgs = introspectArguments(producesMethod.getParameters());
     Arg []disposesArgs = null;
     
@@ -372,6 +377,10 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
   protected void addProduces(AnnotatedField<?> beanField)
   {
+    if (beanField.getJavaMember().getDeclaringClass() != getBeanClass()
+        && ! getBeanClass().isAnnotationPresent(Specializes.class))
+      return;
+    
     ProducesFieldBean bean
       = ProducesFieldBean.create(getBeanManager(), this, beanField);
 
@@ -507,7 +516,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
       AnnotatedParameter<?> param = params.get(i);
 
       for (Annotation ann : param.getAnnotations()) {
-        if (ann instanceof Observes) {
+        if (ann.annotationType() == Observes.class) {
           if (observer >= 0 && observer != i)
             throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
 

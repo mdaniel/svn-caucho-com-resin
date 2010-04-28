@@ -29,15 +29,15 @@
 
 package com.caucho.config.event;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 
 import javax.enterprise.event.Event;
-import javax.enterprise.inject.spi.ObserverMethod;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.util.TypeLiteral;
 
-public class EventImpl<T> implements Event<T>
+public class EventImpl<T> implements Event<T>, Serializable
 {
   private final BeanManager _manager;
   private final Type _type;

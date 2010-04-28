@@ -29,45 +29,26 @@
 
 package com.caucho.config.reflect;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-
-import javax.enterprise.inject.spi.AnnotatedCallable;
-import javax.enterprise.inject.spi.AnnotatedParameter;
+import java.util.HashMap;
 
 import com.caucho.inject.Module;
 
-
 /**
- * Abstract introspected view of a Bean
+ * param type matching
  */
 @Module
-public class AnnotatedParameterImpl<T>
-  extends AnnotatedElementImpl implements AnnotatedParameter<T>
+public class GenericParamType extends ParamType
 {
-  private AnnotatedCallable<T> _callable;
-  private int _position;
+  public GenericParamType(Class<?> type,
+		   BaseType []param,
+		   HashMap<String,BaseType> paramMap)
+  {
+    super(type, param, paramMap);
+  }
   
-  public AnnotatedParameterImpl(AnnotatedCallable<T> callable,
-				Type type,
-				Annotation []annList,
-				int position)
-  {
-    super(type, null, annList);
-
-    _callable = callable;
-    _position = position;
-  }
-
   @Override
-  public AnnotatedCallable<T> getDeclaringCallable()
+  public boolean isGeneric()
   {
-    return _callable;
-  }
-
-  @Override
-  public int getPosition()
-  {
-    return _position;
+    return true;
   }
 }
