@@ -34,7 +34,6 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 import com.caucho.util.QDate;
-import com.caucho.util.Test;
 
 import org.xml.sax.Attributes;
 import org.xml.sax.SAXException;
@@ -410,11 +409,7 @@ public class HttpPath extends FilesystemPath {
     
     long now;
     
-    // for quercus on tomcat (AlarmThread issues)
-    if (Test.isTest())
-      now = Alarm.getCurrentTime();
-    else
-      now = System.currentTimeMillis();
+    now = Alarm.getCurrentTime();
     
     synchronized (_cacheEntry) {
       try {

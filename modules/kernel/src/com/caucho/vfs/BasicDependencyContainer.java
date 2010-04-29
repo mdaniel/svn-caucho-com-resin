@@ -55,9 +55,6 @@ public class BasicDependencyContainer
 
   private volatile boolean _isChecking;
   
-  // for quercus on tomcat (AlarmThread issues)
-  private boolean _isUseAlarm = true;
-  
   /**
    * Adds a dependency.
    */
@@ -121,14 +118,6 @@ public class BasicDependencyContainer
     _isModified = isModified;
     _lastCheckTime = 0;
   }
-  
-  /**
-   * Sets whether or not to use the Alarm.getCurrentTime().
-   */
-  public void setUseAlarm(boolean isUseAlarm)
-  {
-    _isUseAlarm = isUseAlarm;
-  }
       
   /**
    * Resets the check interval.
@@ -145,10 +134,7 @@ public class BasicDependencyContainer
   {
     _isModified = false;
     
-    if (_isUseAlarm)
-      _lastCheckTime = Alarm.getCurrentTime();
-    else
-      _lastCheckTime = System.currentTimeMillis();
+    _lastCheckTime = Alarm.getCurrentTime();
   }
 
   /**
@@ -167,10 +153,7 @@ public class BasicDependencyContainer
     try {
       long now;
       
-      if (_isUseAlarm)
-        now = Alarm.getCurrentTime();
-      else
-        now = System.currentTimeMillis();
+      now = Alarm.getCurrentTime();
 
       if (now < _lastCheckTime + _checkInterval)
         return _isModified;

@@ -111,11 +111,9 @@ public class QuercusProgram {
     _quercus = quercus;
     
     _depend = new BasicDependencyContainer();
-    _depend.setUseAlarm(_quercus.isResin());
     _depend.setCheckInterval(quercus.getDependencyCheckInterval());
 
     _topDepend = new BasicDependencyContainer();
-    _topDepend.setUseAlarm(_quercus.isResin());
     _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
     _topDepend.add(new PageDependency());
 
@@ -154,10 +152,8 @@ public class QuercusProgram {
     _compiledPage = page;
 
     _depend = new BasicDependencyContainer();
-    _depend.setUseAlarm(_quercus.isResin());
     
     _topDepend = new BasicDependencyContainer();
-    _topDepend.setUseAlarm(_quercus.isResin());
     _topDepend.setCheckInterval(quercus.getDependencyCheckInterval());
     _topDepend.add(new PageDependency());
   }

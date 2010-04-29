@@ -33,7 +33,6 @@ import com.caucho.util.Alarm;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 import com.caucho.util.Log;
-import com.caucho.util.Test;
 
 import javax.net.ssl.SSLContext;
 import javax.net.ssl.SSLSocketFactory;
@@ -66,6 +65,8 @@ class HttpStream extends StreamImpl {
   // Time the stream was saved
   private static long _saveTime;
   
+  private static boolean _isKeepaliveAllowed;
+  
   private long _socketTimeout = 30000L;
 
   private boolean _isSSL;
@@ -97,7 +98,7 @@ class HttpStream extends StreamImpl {
   private MemoryStream _tempStream;
 
   // true if keepalive is allowed
-  private boolean _isKeepalive = true;
+  private boolean _isKeepalive = _isKeepaliveAllowed;
   // true after the request has been sent
   private boolean _didGet;
   // content length from the returned response
@@ -151,6 +152,11 @@ class HttpStream extends StreamImpl {
     return new HttpStreamWrapper(stream);
   }
 
+  public static void setAllowKeepalive(boolean isAllowKeepalive)
+  {
+    _isKeepaliveAllowed = isAllowKeepalive;
+  }
+  
   /**
    * Opens a new HTTP stream for reading and writing, i.e. a POST request.
    *
@@ -194,11 +200,7 @@ class HttpStream extends StreamImpl {
     if (stream != null) {
       long now;
       
-      // for quercus on tomcat (AlarmThread issues)
-      if (Test.isTest())
-        now = Alarm.getCurrentTime();
-      else
-        now = System.currentTimeMillis();
+      now = Alarm.getCurrentTime();
       
       if (now < streamTime + 5000) {
         // if the stream is still valid, use it
@@ -880,18 +882,12 @@ class HttpStream extends StreamImpl {
       }
     }
 
-    if (com.caucho.util.Test.isTest())
-      _isKeepalive = false; // XXX:
-    
     if (_isKeepalive) {
       HttpStream oldSaved;
       
       long now;
       
-      if (Test.isTest())
-        now = Alarm.getCurrentTime();
-      else
-        now = System.currentTimeMillis();
+      now = Alarm.getCurrentTime();
       
       synchronized (LOCK) {
         oldSaved = _savedStream;

@@ -735,7 +735,7 @@ public class BinaryBuilderValue
         length = 0;
 
     // QA needs to distinguish php5 string from php6 binary
-    if (Test.isTest())
+    if (Alarm.isTest())
       out.print("binary");
     else
       out.print("string");

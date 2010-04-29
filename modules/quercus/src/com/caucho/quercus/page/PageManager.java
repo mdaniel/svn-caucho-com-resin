@@ -32,9 +32,9 @@ package com.caucho.quercus.page;
 import com.caucho.quercus.QuercusContext;
 import com.caucho.quercus.parser.QuercusParser;
 import com.caucho.quercus.program.QuercusProgram;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
-import com.caucho.util.Test;
 import com.caucho.vfs.IOExceptionWrapper;
 import com.caucho.vfs.Path;
 
@@ -56,7 +56,7 @@ public class PageManager
   //private Path _pwd;
   private boolean _isLazyCompile;
   private boolean _isCompile;
-  private boolean _isCompileFailover = ! Test.isTest();
+  private boolean _isCompileFailover = Alarm.isActive();
 
   private boolean _isRequireSource = true;
 

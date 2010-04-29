@@ -69,7 +69,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
   private static long _testTime;
   private static long _testNanoDelta;
-
+  
   private long _wakeTime;
   private AlarmListener _listener;
   private ClassLoader _contextLoader;
@@ -185,6 +185,11 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
   protected void setName(String name)
   {
     _name = name;
+  }
+  
+  public static boolean isActive()
+  {
+    return _testTime == 0 && _alarmThread != null;
   }
 
   /**
@@ -640,7 +645,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       _heap[_heapTop] = null;
     }
   }
-
+  
   static void setTestTime(long time)
   {
     _testTime = time;
@@ -651,13 +656,9 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       }
 
       _currentTime = time;
-      
-      Test.setTest(true);
     }
     else {
       _currentTime = System.currentTimeMillis();
-      
-      Test.setTest(false);
     }
 
     Alarm alarm;
@@ -756,8 +757,6 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
      */
     public void run()
     {
-      Thread thread = this;
-
       while (true) {
         try {
           Alarm alarm;
@@ -826,11 +825,15 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     }
 
     try {
-      alarmThread = new AlarmThread();
-      alarmThread.start();
+      ClassLoader loader = Alarm.class.getClassLoader();
+      
+      if (loader == null || loader == systemLoader) {
+        alarmThread = new AlarmThread();
+        alarmThread.start();
 
-      coordinatorThread = new CoordinatorThread();
-      coordinatorThread.start();
+        coordinatorThread = new CoordinatorThread();
+        coordinatorThread.start();
+      }
     } catch (Throwable e) {
       // should display for security manager issues
     }
