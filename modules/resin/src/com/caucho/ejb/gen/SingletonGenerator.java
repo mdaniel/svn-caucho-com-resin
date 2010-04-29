@@ -163,7 +163,9 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     }
 
     out.println();
-    out.println("return super.getProxyFactory(api);");
+    // out.println("return super.getProxyFactory(api);");
+    
+    ((SingletonView<X,?>) getViews().get(0)).generateCreateProvider(out);
 
     out.popDepth();
     out.println("}");

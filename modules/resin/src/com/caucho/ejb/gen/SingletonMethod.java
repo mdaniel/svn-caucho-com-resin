@@ -118,9 +118,11 @@ public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
 
     out.println("boolean isValid = false;");
     
+    /*
     out.println("if (_isActive)");
     out.println("  throw new EJBException(\"session bean is not reentrant\");");
     out.println();
+    */
     
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
@@ -131,7 +133,7 @@ public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
     throws IOException
   {
     out.println("thread.setContextClassLoader(_manager.getClassLoader());");
-    out.println("_isActive = true;");
+    // out.println("_isActive = true;");
     
     super.generatePreCall(out);
   }

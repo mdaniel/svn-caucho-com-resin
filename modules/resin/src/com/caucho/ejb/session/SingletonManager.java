@@ -63,6 +63,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
     Logger.getLogger(SingletonManager.class.getName());
 
   private SingletonContext<T> _sessionContext;
+  private T _proxy;
 
   public SingletonManager(EjbManager ejbContainer,
                           AnnotatedType<T> annotatedType)
@@ -123,7 +124,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
       // XXX: should be bean
       return (T) factory.__caucho_createNew(null, env);
     } else
-      return null;
+      throw new NullPointerException();
   }
 
   @Override
@@ -131,14 +132,17 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
                                Class<?> api,
                                Set<Type> apiList)
   {
+    /*
     SingletonProxyFactory factory = getSessionContext().getProxyFactory(api);
 
     if (factory == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
                                          api, getSessionContext()));
 
+      */
+    
     SingletonBeanImpl<T> singletonBean
-      = new SingletonBeanImpl<T>(this, mBean, apiList, factory);
+      = new SingletonBeanImpl<T>(this, mBean, apiList);
 
     return singletonBean;
   }
@@ -175,6 +179,30 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
      * 
      * return cxt;
      */
+  }
+
+  /**
+   * @return
+   */
+  public T createProxy()
+  {
+    if (_proxy == null) {
+      SingletonProxyFactory factory = getSessionContext().getProxyFactory(null);
+      CreationalContextImpl env = new CreationalContextImpl();
+      
+      _proxy = (T) factory.__caucho_createNew(null, env);
+      
+      factory.__caucho_postConstruct();
+    }
+    
+    return _proxy;
+  }
+  
+  public T newInstance()
+  {
+    T object = getProducer().newInstance();
+    
+    return object;
   }
 
   /**

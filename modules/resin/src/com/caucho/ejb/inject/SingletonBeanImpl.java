@@ -45,21 +45,25 @@ import com.caucho.inject.Module;
 @Module
 public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
 {
-  private SingletonProxyFactory _factory;
+  // private SingletonProxyFactory _factory;
+  private SingletonManager<X> _manager;
   private Set<Type> _apiList;
+  private X _proxy;
 
   public SingletonBeanImpl(SingletonManager<X> manager,
                            ManagedBeanImpl<X> bean,
-                           Set<Type> apiList,
-                           SingletonProxyFactory factory)
+                           Set<Type> apiList)
   {
     super(bean);
 
+    /*
     _factory = factory;
 
     if (factory == null)
       throw new NullPointerException();
-    
+      */
+
+    _manager = manager;
     _apiList = apiList;
 
     bean.getInjectionTarget();
@@ -74,7 +78,8 @@ public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
   @Override
   public X create(CreationalContext<X> context)
   {
-    return _factory.__caucho_createNew(getInjectionTarget(), context);
+    // return _factory.__caucho_createNew(getInjectionTarget(), context);
+    return _manager.createProxy();
   }
 }
 

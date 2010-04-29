@@ -38,4 +38,6 @@ import javax.enterprise.context.spi.CreationalContext;
 public interface SingletonProxyFactory {
   public <X> X __caucho_createNew(InjectionTarget<X> bean, 
                                   CreationalContext<X> env);
+  
+  public void __caucho_postConstruct();
 }

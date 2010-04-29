@@ -813,14 +813,11 @@ public class TransactionImpl implements Transaction, AlarmListener {
 
         if (_rollbackException != null)
           throw new RollbackExceptionWrapper(
-              L
-                  .l(
-                      "Transaction can't commit because it has been marked rolled back\n  {0}",
-                      _rollbackException), _rollbackException);
+              L.l("Transaction can't commit because it has been marked rolled back\n  {0}",
+                  _rollbackException), _rollbackException);
         else
           throw new RollbackException(
-              L
-                  .l("Transaction can't commit because it has been marked rolled back."));
+              L.l("Transaction can't commit because it has been marked rolled back."));
       }
 
       if (_resourceCount > 0) {

@@ -149,7 +149,16 @@ public class SingletonView<X,T> extends View<X,T> {
     out.println();
     out.println("if (" + var + " == " 
                 + getViewClass().getJavaClass().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "(getServer(), true);");
+    out.println("  return new " + getViewClassName() + "(getServer());");
+  }
+
+  /**
+   * Generates code to create the provider
+   */
+  public void generateCreateProvider(JavaWriter out)
+    throws IOException
+  {
+    out.println("return new " + getViewClassName() + "(getServer());");
   }
 
   /**
@@ -233,9 +242,14 @@ public class SingletonView<X,T> extends View<X,T> {
     out.println("private transient SingletonContext _context;");
     out.println("private transient SingletonManager _manager;");
 
+    /*
     if (isProxy()) {
       out.println("private " + getBeanClassName() + " _bean;");
     }
+    */
+    String beanClassName = getBeanClass().getJavaClass().getName();
+    
+    out.println("private " + beanClassName + " _bean;");
 
     out.println("private transient boolean _isValid;");
     out.println("private transient boolean _isActive;");
@@ -257,14 +271,18 @@ public class SingletonView<X,T> extends View<X,T> {
     out.println("_manager = manager;");
     out.println("_isValid = true;");
 
+    /*
     // ejb/1143
     if (isProxy()) {
-      out.println("_bean = new " + getBeanClassName() + "(this);");
+      out.println("_bean = (" + beanClassName + ") manager.newInstance();");
     }
+    */
+    // out.println("_bean = (" + beanClassName + ") manager.newInstance();");
 
     out.popDepth();
     out.println("}");
 
+    /*
     out.println();
     out.println(getViewClassName()
                 + "(SingletonManager manager, boolean isProxyFactory)");
@@ -278,6 +296,7 @@ public class SingletonView<X,T> extends View<X,T> {
 
     out.popDepth();
     out.println("}");
+    */
 
     generateSessionProvider(out);
 
@@ -285,6 +304,12 @@ public class SingletonView<X,T> extends View<X,T> {
     out.println("void __caucho_setContext(SingletonContext context)");
     out.println("{");
     out.println("  _context = context;");
+    out.println("}");
+
+    out.println();
+    out.println("public void __caucho_postConstruct()");
+    out.println("{");
+    out.println("  _bean = (" + beanClassName + ") _manager.newInstance();");
     out.println("}");
 
     generateBusinessMethods(out);
@@ -296,6 +321,8 @@ public class SingletonView<X,T> extends View<X,T> {
     out.println();
     out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.InjectionTarget injectBean, javax.enterprise.context.spi.CreationalContext env)");
     out.println("{");
+
+    /*
     out.println("  " + getViewClassName() + " bean"
                 + " = new " + getViewClassName() + "(_manager);");
 
@@ -304,6 +331,10 @@ public class SingletonView<X,T> extends View<X,T> {
     else
       out.println("  _manager.initInstance(bean, injectBean, bean, env);");
     out.println("  return bean;");
+    */
+    
+    out.println("  return this;");
+
     out.println("}");
   }
 
