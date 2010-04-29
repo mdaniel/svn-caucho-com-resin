@@ -279,7 +279,7 @@ public class EjbProtocolManager {
 
         Jndi.bindDeep(jndiName, new ServerLocalProxy(server, apiList.get(0)));
 
-        log.fine(server + " local binding to '" + jndiName + "' " + loader);
+        log.finer(server + " local binding to '" + jndiName + "' " + loader);
       }
 
       Object localHome = null;
@@ -289,9 +289,8 @@ public class EjbProtocolManager {
 
         Jndi.bindDeep(jndiName, localHome);
 
-        log
-            .fine(server + " local-home binding to '" + jndiName + "' "
-                + loader);
+        log.finer(server + " local-home binding to '" + jndiName + "' "
+                   + loader);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -320,14 +319,14 @@ public class EjbProtocolManager {
           jndiName = "java:global/" + moduleName + '/' + suffix;
 
         Jndi.bindDeep(jndiName, proxy);
-        log.fine(proxy + " global binding to '" + jndiName + "' "
-                 + _loader);
+        log.finer(proxy + " global binding to '" + jndiName + "' "
+                  + _loader);
         
         // application means across modules within an application
         jndiName = "java:app/" + moduleName + '/' + suffix;
         Jndi.bindDeep(jndiName, proxy);
-        log.fine(proxy + " application binding to '" + jndiName + "' "
-                 + _loader);
+        log.finer(proxy + " application binding to '" + jndiName + "' "
+                  + _loader);
 
         // XXX module binding - this is problematic because this will
         // expose a module-level binding to the application context
@@ -337,8 +336,8 @@ public class EjbProtocolManager {
         jndiName = "java:module/" + suffix;
         Jndi.bindDeep(jndiName, proxy);
         
-        log.fine(proxy + " module binding to '" + jndiName + "' "
-                 + _loader);
+        log.finer(proxy + " module binding to '" + jndiName + "' "
+                  + _loader);
       }
       finally {
         Thread.currentThread().setContextClassLoader(oldLoader);

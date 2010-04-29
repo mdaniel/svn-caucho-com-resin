@@ -63,4 +63,11 @@ public class ServerLocalProxy implements ObjectProxy, java.io.Serializable {
   {
     return _server.getLocalObject(_clientApi);
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _server 
+                                      + ",clientApi=" + _clientApi + "]";
+  }
 }

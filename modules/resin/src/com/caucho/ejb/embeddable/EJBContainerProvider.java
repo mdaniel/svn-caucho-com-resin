@@ -190,6 +190,14 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
       addModulesFromClasspath(container, null);
     }
     else {
+      String provider = (String) properties.get(EJBContainer.PROVIDER);
+
+      // This is the EJBContainer implementation class and not the
+      // EJBContainerProvider implementation for some reason. The spec
+      // is ambiguous, but the TCK is not.
+      if (! EJBContainerImpl.class.getName().equals(provider))
+        return null;
+
       String name = (String) properties.get(EJBContainer.APP_NAME);
 
       container = new EJBContainerImpl(name);
