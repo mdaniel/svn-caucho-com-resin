@@ -32,6 +32,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Net.Sockets;
+using System.Net;
 using System.Diagnostics;
 
 namespace Caucho.IIS
@@ -42,11 +43,30 @@ namespace Caucho.IIS
     private Server[] _servers;
     private Random _random;
     private volatile int _roundRobinIdx;
+    private int _loadBalanceConnectTimeout;
+    private int _loadBalanceIdleTime;
+    private int _loadBalanceRecoverTime;
+    private int _loadBalanceSocketTimeout;
+    private int _keepaliveTimeout;
+    private int _socketTimeout;
 
     //supports just one server for now
-    public LoadBalancer(String servers)
+    public LoadBalancer(String servers,
+      int loadBalanceConnectTimeout,
+      int loadBalanceIdleTime,
+      int loadBalanceRecoverTime,
+      int loadBalanceSocketTimeout,
+      int keepaliveTimeout,
+      int socketTimeout)
     {
       _log = Logger.GetLogger();
+
+      _loadBalanceConnectTimeout = loadBalanceConnectTimeout;
+      _loadBalanceIdleTime = loadBalanceIdleTime;
+      _loadBalanceRecoverTime = loadBalanceRecoverTime;
+      _loadBalanceSocketTimeout = loadBalanceSocketTimeout;
+      _keepaliveTimeout = keepaliveTimeout;
+      _socketTimeout = socketTimeout;
 
       List<Server> pool = new List<Server>();
       String[] sruns = servers.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -54,16 +74,59 @@ namespace Caucho.IIS
       for (int i = 0; i < sruns.Length; i++) {
         String server = sruns[i];
         int portIdx = server.LastIndexOf(':');
-        String address = server.Substring(0, portIdx);
+        String host = server.Substring(0, portIdx);
+        IPAddress address = GetIPsForHost(host);
         int port = int.Parse(server.Substring(portIdx + 1, server.Length - portIdx - 1));
         char c = (char)('a' + i);
-        _log.Info("Adding Server '{0}:{1}:{2}'", c, address, port);
-        pool.Add(new Server("a", address, port));
+        _log.Info("Adding Server '{0}:{1}:{2}'", c, host, port);
+
+        pool.Add(new Server("a", address, port, _loadBalanceIdleTime, _socketTimeout));
       }
 
       _servers = pool.ToArray();
 
-      _random = new Random();      
+      _random = new Random();
+    }
+
+    private IPAddress GetIPsForHost(String host)
+    {
+      IPAddress result = null;
+      try {
+        result = IPAddress.Parse(host);
+
+        return result;
+      } catch (Exception e) {
+      }
+
+      try {
+        IPHostEntry hostEntry = Dns.GetHostEntry(host);
+
+        if (hostEntry != null && hostEntry.AddressList != null && hostEntry.AddressList.Length > 0) {
+          foreach (IPAddress address in hostEntry.AddressList) {
+            if (address.AddressFamily == AddressFamily.InterNetwork) {
+              result = address;
+
+              break;
+            } else {
+              result = address;
+            }
+          }
+        }
+
+
+        if (result == null) {
+          String message = String.Format("Can't resolve ip for host '{0}'.", host);
+          _log.Error(message);
+          throw new ConfigurationException(message);
+        }
+      } catch (ConfigurationException e) {
+        throw e;
+      } catch (Exception e) {
+        String message = String.Format("Can't resolve host '{0}'. Detailed error: {1}", host, e.Message);
+        throw new ConfigurationException(message, e);
+      }
+
+      return result;
     }
 
     public void Init()

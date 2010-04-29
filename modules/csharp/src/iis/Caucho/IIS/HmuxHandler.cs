@@ -52,6 +52,7 @@ namespace Caucho.IIS
     private const int FAIL = 0x4; // server failed (retry GET)
 
     private Logger _log;
+    private Exception _e;
 
     private LoadBalancer _loadBalancer;
 
@@ -69,37 +70,102 @@ namespace Caucho.IIS
 
     private void init()
     {
-      NameValueCollection appSettings = WebConfigurationManager.GetSection("appSettings") as NameValueCollection;
+      try {
+        NameValueCollection appSettings = WebConfigurationManager.GetSection("appSettings") as NameValueCollection;
 
-      _log = Logger.GetLogger();
+        _log = Logger.GetLogger();
 
-      String servers = appSettings["resin.servers"];
+        String servers = appSettings["resin.servers"];
 
-      if ("".Equals(servers)) {
-        servers = "127.0.0.1:6080";
-        _log.Info("application setting 'resin.servers' is not specified. Using '{0}'", servers);
-        Trace.TraceInformation("application setting 'resin.servers' is not specified. Using '{0}'", servers);
-      } else {
-        _log.Info("Setting servers to '{0}'", servers);
-        Trace.TraceInformation("Setting servers to '{0}'", servers);
+        if ("".Equals(servers)) {
+          servers = "127.0.0.1:6800";
+          _log.Info("application setting 'resin.servers' is not specified. Using '{0}'", servers);
+          Trace.TraceInformation("application setting 'resin.servers' is not specified. Using '{0}'", servers);
+        } else {
+          _log.Info("Setting servers to '{0}'", servers);
+          Trace.TraceInformation("Setting servers to '{0}'", servers);
+        }
+
+        if (!String.IsNullOrEmpty(appSettings["resin.session-cookie"]))
+          _sessionCookieName = appSettings["resin.session-cookie"];
+
+        if (!String.IsNullOrEmpty(appSettings["resin.ssl-session-cookie"]))
+          _sslSessionCookieName = appSettings["resin.ssl-session-cookie"];
+
+        if ("false".Equals(appSettings["resin.sticky-sessions"], StringComparison.OrdinalIgnoreCase))
+          _isStickySessions = false;
+
+        if (!String.IsNullOrEmpty(appSettings["resin.session-url-prefix"]))
+          _sessionUrlPrefix = appSettings["resin.session-url-prefix"];
+
+        if (!String.IsNullOrEmpty(appSettings["resin.alternate-session-url-prefix"]))
+          _sessionUrlPrefix = appSettings["resin.alternate-session-url-prefix"];
+
+        int loadBalanceConnectTimeout = 5 * 1000;
+        if (!String.IsNullOrEmpty(appSettings["resin.load-balance-connect-timeout"]))
+          loadBalanceConnectTimeout = int.Parse(appSettings["resin.load-balance-connect-timeout"]);
+
+        int loadBalanceIdleTime = 5 * 1000;
+        if (!String.IsNullOrEmpty(appSettings["resin.load-balance-idle-time"]))
+          loadBalanceIdleTime = ParseTime("resin.load-balance-idle-time", appSettings["resin.load-balance-idle-time"]);
+
+        int loadBalanceRecoverTime = 15 * 1000;
+        if (!String.IsNullOrEmpty(appSettings["resin.load-balance-recover-time"]))
+          loadBalanceRecoverTime = ParseTime("resin.load-balance-recover-time", appSettings["resin.load-balance-recover-time"]);
+
+        int loadBalanceSocketTimeout = 665 * 1000;
+        if (!String.IsNullOrEmpty(appSettings["resin.load-balance-socket-timeout"]))
+          loadBalanceSocketTimeout = ParseTime("resin.load-balance-socket-timeout", appSettings["resin.load-balance-socket-timeout"]);
+
+        int keepaliveTimeout = 15 * 1000;
+        if (!String.IsNullOrEmpty(appSettings["resin.keepalive-timeout"]))
+          keepaliveTimeout = ParseTime("resin.keepalive-timeout", appSettings["resin.keepalive-timeout"]);
+
+        int socketTimeout = 65 * 1000;
+        if (!String.IsNullOrEmpty(appSettings["resin.socket-timeout"]))
+          socketTimeout = ParseTime("resin.socket-timeout", appSettings["resin.socket-timeout"]);
+
+        _loadBalancer = new LoadBalancer(servers, loadBalanceConnectTimeout, loadBalanceIdleTime, loadBalanceRecoverTime, loadBalanceSocketTimeout, keepaliveTimeout, socketTimeout);
+      } catch (ConfigurationException e) {
+        _e = e;
+      } catch (FormatException e) {
+        _e = new ConfigurationException(e.Message, e);
+      }
+    }
+
+    private int ParseTime(String name, String str)
+    {
+      int value = 0;
+      bool isDigitExpected = true;
+
+      for (int i = 0; i < str.Length; i++) {
+        char c = str[i];
+        if (Char.IsDigit(c) && isDigitExpected) {
+          value = value * 10 + c - '0';
+          
+        } else if ('s' == c || 'S' == c || 'm' == c || 'M' == c) {
+          value = value * 1000;
+
+          if ('m' == c || 'M' == c)
+            value = value * 60;
+
+          if (i + 1 < str.Length || !isDigitExpected) {
+            String message = String.Format("Can't convert {0} ('{1}') to a number.", name, str);
+            _log.Error(message);
+            throw new FormatException(message);
+          }
+
+          isDigitExpected = false;
+
+          break;
+        } else {
+          String message = String.Format("Can't convert {0} ('{1}') to a number.", name, str);
+          _log.Error(message);
+          throw new FormatException(message);
+        }
       }
 
-      if (!String.IsNullOrEmpty(appSettings["resin.session-cookie"]))
-        _sessionCookieName = appSettings["resin.session-cookie"];
-
-      if (!String.IsNullOrEmpty(appSettings["resin.ssl-session-cookie"]))
-        _sslSessionCookieName = appSettings["resin.ssl-session-cookie"];
-
-      if ("false".Equals(appSettings["resin.sticky-sessions"], StringComparison.OrdinalIgnoreCase))
-        _isStickySessions = false;
-
-      if (!String.IsNullOrEmpty(appSettings["resin.session-url-prefix"]))
-        _sessionUrlPrefix = appSettings["resin.session-url-prefix"];
-
-      if (!String.IsNullOrEmpty(appSettings["resin.alternate-session-url-prefix"]))
-        _sessionUrlPrefix = appSettings["resin.alternate-session-url-prefix"];
-
-      _loadBalancer = new LoadBalancer(servers);
+      return value;
     }
 
     public bool IsReusable
@@ -110,8 +176,9 @@ namespace Caucho.IIS
     public void ProcessRequest(HttpContext context)
     {
       String path = context.Request.Path;
-
-      if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__basic")) {
+      if (_e != null) {
+        DoConfigurationError(context);
+      } else if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__basic")) {
         DoTestBasic(context);
       } else if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__chunked")) {
         DoTestChunked(context);
@@ -132,8 +199,6 @@ namespace Caucho.IIS
       if (sessionIdx > -1)
         sessionId = path.Substring(sessionIdx + _sessionUrlPrefix.Length);
 
-      Trace.TraceInformation("::: 0 ::: sessionid '{0}:{1}' ", _sessionUrlPrefix, sessionId);
-
       HttpCookie cookie = null;
       if (sessionId == null && request.IsSecureConnection)
         cookie = request.Cookies[_sslSessionCookieName];
@@ -141,15 +206,11 @@ namespace Caucho.IIS
       if (sessionId == null && cookie != null)
         sessionId = cookie.Value;
 
-      Trace.TraceInformation("::: 1 ::: sessionid" + sessionId);
-
       if (sessionId == null)
         cookie = request.Cookies[_sessionCookieName];
 
       if (sessionId == null && cookie != null)
         sessionId = cookie.Value;
-
-      Trace.TraceInformation("::: 2 ::: sessionid" + sessionId);
 
       return sessionId;
     }
@@ -769,6 +830,19 @@ namespace Caucho.IIS
       context.Response.Output.WriteLine("path: " + context.Request.Path);
       context.Response.Output.WriteLine("path-info: " + context.Request.PathInfo);
       context.Response.Output.WriteLine("file-path: " + context.Request.FilePath);
+    }
+
+    public void DoConfigurationError(HttpContext context)
+    {
+      context.Response.StatusDescription = "500 Configuration Error";
+      TextWriter output = context.Response.Output;
+      output.WriteLine(@"<html>
+<head><title>Resin IIS Plugin Configuration Error</title></head>
+<body>Resin IIS Plugin Configuration Error");
+      output.WriteLine(_e.Message);
+      output.WriteLine("</body></html>");
+      output.Flush();
+
     }
   }
 }

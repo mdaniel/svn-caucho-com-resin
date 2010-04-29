@@ -33,6 +33,7 @@ using System.Linq;
 using System.Text;
 using System.Diagnostics;
 using System.Net.Sockets;
+using System.Net;
 
 namespace Caucho.IIS
 {
@@ -49,7 +50,8 @@ namespace Caucho.IIS
 
     private int _maxConnections = int.MaxValue / 2;
 
-    private int _loadBalanceIdleTime = 10000;
+    private int _loadBalanceIdleTime;
+    private int _socketTimeout;
     private volatile int _keepaliveCountTotal;
 
     private volatile int _activeCount;
@@ -57,11 +59,13 @@ namespace Caucho.IIS
 
     private State _state;
 
-    private String _address;
+    private IPAddress _address;
     private int _port;
 
-    public Server(String serverInternalId, String address, int port)
+    public Server(String serverInternalId, IPAddress address, int port, int loadBalanceIdleTime, int socketTimeout)
     {
+      _socketTimeout = socketTimeout;
+      _loadBalanceIdleTime = loadBalanceIdleTime;
       _serverInternalId = serverInternalId;
       _address = address;
       _port = port;
@@ -85,7 +89,6 @@ namespace Caucho.IIS
 
       return Connect();
     }
-
 
     private HmuxConnection OpenRecycle()
     {
@@ -136,10 +139,10 @@ namespace Caucho.IIS
       }
 
       try {
-        Socket socket = new Socket(AddressFamily.InterNetwork, SocketType.Stream, ProtocolType.Tcp);
+        Socket socket = new Socket(_address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         socket.Connect(_address, _port);
         HmuxConnection channel = new HmuxConnection(socket, this, _serverInternalId);
-        
+
         lock (this) {
           _activeCount++;
         }
@@ -162,7 +165,6 @@ namespace Caucho.IIS
         }
       }
     }
-
 
     public void FailConnect()
     {
