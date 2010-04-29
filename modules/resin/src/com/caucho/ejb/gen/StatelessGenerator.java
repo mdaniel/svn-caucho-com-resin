@@ -57,6 +57,19 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     return true;
   }
 
+  /**
+   * Returns the interface itself for the no-interface view
+   */
+  @Override
+  protected ArrayList<AnnotatedType<?>> introspectLocalDefault() 
+  {
+    ArrayList<AnnotatedType<?>> apiClass = new ArrayList<AnnotatedType<?>>();
+
+    apiClass.add(getBeanClass());
+
+    return apiClass;
+  }
+
   @Override
   protected <T> View<X,T> createLocalView(AnnotatedType<T> api)
   {

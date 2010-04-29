@@ -46,6 +46,7 @@ import com.caucho.inject.Module;
 public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
 {
   private SingletonProxyFactory _factory;
+  private Set<Type> _apiList;
 
   public SingletonBeanImpl(SingletonManager<X> manager,
                            ManagedBeanImpl<X> bean,
@@ -58,6 +59,8 @@ public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
 
     if (factory == null)
       throw new NullPointerException();
+    
+    _apiList = apiList;
 
     bean.getInjectionTarget();
   }
@@ -65,7 +68,7 @@ public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
   @Override
   public Set<Type> getTypes()
   {
-    return getBean().getTypes();
+    return _apiList;
   }
 
   @Override

@@ -33,9 +33,10 @@ package javax.enterprise.inject;
  * the injection {@link javax.enterprise.inject.spi.BeanManager} will
  * throw this exception.
  */
-@SuppressWarnings("serial")
 public class UnproxyableResolutionException extends ResolutionException
 {
+  private static final long serialVersionUID = 1667539354548135465L;
+  
   public UnproxyableResolutionException()
   {
   }

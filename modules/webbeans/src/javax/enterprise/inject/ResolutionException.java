@@ -33,9 +33,10 @@ package javax.enterprise.inject;
  * When bean creation fails, the injection
  * {@link javax.enterprise.inject.spi.BeanManager} will throw this exception.
  */
-@SuppressWarnings("serial")
 public class ResolutionException extends InjectionException
 {
+  private static final long serialVersionUID = -6280627846071966243L;
+
   public ResolutionException()
   {
   }

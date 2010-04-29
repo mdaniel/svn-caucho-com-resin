@@ -40,19 +40,26 @@ import java.lang.reflect.*;
  */
 public abstract class TypeLiteral<T>
 {
+  private transient Type _type;
+  
   public final Type getType()
   {
-    Type type = getClass().getGenericSuperclass();
+    if (_type == null) {
+      Type type = getClass().getGenericSuperclass();
 
-    if (type instanceof ParameterizedType) {
-      ParameterizedType pType = (ParameterizedType) type;
+      if (type instanceof ParameterizedType) {
+        ParameterizedType pType = (ParameterizedType) type;
 
-      return pType.getActualTypeArguments()[0];
+        _type = pType.getActualTypeArguments()[0];
+      }
+      else
+        throw new UnsupportedOperationException(type.toString());
     }
-    else
-      throw new UnsupportedOperationException(type.toString());
+    
+    return _type;
   }
 
+  @SuppressWarnings("unchecked")
   public final Class<T> getRawType()
   {
     Type type = getType();

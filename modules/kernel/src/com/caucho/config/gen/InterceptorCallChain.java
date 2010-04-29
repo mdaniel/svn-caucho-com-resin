@@ -202,7 +202,7 @@ public class InterceptorCallChain<X,T>
     introspectDecorators(apiMethod);
    
     introspectDefaults();
-
+    
     if (_defaultInterceptors.size() > 0
         /*
         || (! _isExcludeDefaultInterceptors
@@ -1407,6 +1407,7 @@ public class InterceptorCallChain<X,T>
       Object value = null;
 
       try {
+        method.setAccessible(true);
         value = method.invoke(ann);
       }
       catch (Exception e) {

@@ -51,9 +51,10 @@ package javax.enterprise.inject;
  * }
  * </code></pre>
  */
-@SuppressWarnings("serial")
 public class AmbiguousResolutionException extends ResolutionException
 {
+  private static final long serialVersionUID =  -2132733164534544788L;
+
   public AmbiguousResolutionException()
   {
   }

@@ -101,7 +101,7 @@ public class WebComponent {
     return resolve(baseType, bindings);
   }
 
-  public Set<Bean<?>> resolve(BaseType type, Annotation []bindings)
+  public Set<Bean<?>> resolve(BaseType type, Annotation []qualifiers)
   {
     LinkedHashSet<Bean<?>> beans = null;
 
@@ -112,7 +112,7 @@ public class WebComponent {
     }
 
     for (BeanEntry beanEntry : _beanList) {
-      if (beanEntry.isMatch(type, bindings)) {
+      if (beanEntry.isMatch(type, qualifiers)) {
         if (beans == null)
           beans = new LinkedHashSet<Bean<?>>();
 
@@ -206,9 +206,9 @@ public class WebComponent {
       return _bean == bean;
     }
 
-    boolean isMatch(BaseType type, Annotation []bindings)
+    boolean isMatch(BaseType type, Annotation []qualifiers)
     {
-      return isMatch(type) && isMatch(bindings);
+      return isMatch(type) && isMatch(qualifiers);
     }
 
     boolean isMatch(BaseType type)

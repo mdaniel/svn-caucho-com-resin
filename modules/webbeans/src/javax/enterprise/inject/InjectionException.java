@@ -33,9 +33,10 @@ package javax.enterprise.inject;
  * Exceptions occuring during injection will extend from this
  * exception.
  */
-@SuppressWarnings("serial")
 public class InjectionException extends RuntimeException
 {
+  private static final long serialVersionUID = -2132733164534544788L;
+
   public InjectionException()
   {
   }

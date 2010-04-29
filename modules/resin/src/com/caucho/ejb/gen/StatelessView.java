@@ -83,6 +83,16 @@ public class StatelessView<X,T> extends View<X,T> {
     return getStatelessBean().getClassName();
   }
 
+  /**
+   * True if the implementation is a proxy, i.e. an interface stub which
+   * calls an instance class.
+   */
+  @Override
+  public boolean isProxy()
+  {
+    return ! getViewClass().equals(getBeanClass());
+  }
+
   @Override
   public String getViewClassName()
   {
@@ -96,12 +106,6 @@ public class StatelessView<X,T> extends View<X,T> {
     return getBeanClass().getJavaClass().getName();
     // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
     // return getStatelessBean().getClassName();
-  }
-  
-  @Override
-  public boolean isProxy()
-  {
-    return true;
   }
 
   /**
@@ -271,7 +275,10 @@ public class StatelessView<X,T> extends View<X,T> {
   protected void generateExtends(JavaWriter out)
     throws IOException
   {
-    out.println("extends StatelessObject");
+    if (! isProxy()) {
+      out.print("extends ");
+      out.printClass(getBeanClass().getJavaClass());
+    }
   }
 
   /**
@@ -352,8 +359,11 @@ public class StatelessView<X,T> extends View<X,T> {
     out.println();
     out.println("public static class " + getViewClassName());
     generateExtends(out);
-    out.print("  implements " + getViewClass().getJavaClass().getName());
-    out.println(", StatelessProvider");
+    out.print("  implements StatelessProvider");
+    
+    if (isProxy())
+      out.print(", " + getViewClass().getJavaClass().getName());
+    out.println();
     out.println("{");
     out.pushDepth();
 
@@ -366,8 +376,12 @@ public class StatelessView<X,T> extends View<X,T> {
         + " context)");
     out.println("{");
     out.pushDepth();
+    
+    /*
     generateSuper(out, "context.getStatelessManager(), "
                   + getViewClass().getJavaClass().getName() + ".class");
+                  */
+    
     out.println("_context = context;");
 
     out.println("_statelessPool = context.getStatelessPool(this);");

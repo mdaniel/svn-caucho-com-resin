@@ -50,6 +50,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.BeanName;
 import com.caucho.config.j2ee.BeanNameLiteral;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.inject.ProcessSessionBeanImpl;
 import com.caucho.ejb.inject.SessionRegistrationBean;
@@ -204,7 +205,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         for (Class<?> api : localApiList) {
           baseApi = api;
           
-          apiList.add(api);
+          BaseType sourceApi = beanManager.createSourceBaseType(api);
+          
+          apiList.addAll(sourceApi.getTypeClosure(beanManager));
         }
       }
       

@@ -35,14 +35,14 @@ import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.*;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.ejb.server.EjbProducer;
+import com.caucho.inject.Module;
 import com.caucho.util.*;
 
 /**
  * Abstract base class for an stateless session context
  */
+@Module
 abstract public class StatelessContext<X,T> extends AbstractSessionContext {
-  private static final L10N L = new L10N(StatelessContext.class);
-  
   private transient StatelessManager<X> _server;
   private StatelessPool<X> _statelessPool;
 

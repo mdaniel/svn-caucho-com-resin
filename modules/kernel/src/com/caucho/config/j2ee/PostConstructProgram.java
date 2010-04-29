@@ -118,9 +118,7 @@ public class PostConstructProgram extends ConfigProgram
       else
 	_init.invoke(bean);
     } catch (Exception e) {
-      throw new RuntimeException(e);
-      // XXX:
-      // throw ConfigException.create(_init, e);
+      throw ConfigException.create(_init, e);
     }
   }
 

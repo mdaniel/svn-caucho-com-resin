@@ -55,6 +55,9 @@ public class InvocationContextImpl implements InvocationContext {
                                int []chainIndex,
                                Object []param)
   {
+    System.out.println("T: " + target + " " + implMethod);
+    System.out.println("CM: " + chainMethods.length);
+    System.out.println("CO: " + chainObjects.length);
     _target = target;
     _apiMethod = apiMethod;
     _implMethod = implMethod;
@@ -64,33 +67,39 @@ public class InvocationContextImpl implements InvocationContext {
     _param = param;
   }
 
+  @Override
   public Object getTarget()
   {
     return _target;
   }
 
+  @Override
   public Method getMethod()
   {
     return _apiMethod;
   }
 
+  @Override
   public Object getTimer()
   {
     return null;
   }
 
+  @Override
   public Object[] getParameters()
     throws IllegalStateException
   {
     return _param;
   }
 
+  @Override
   public void setParameters(Object[] parameters)
     throws IllegalStateException
   {
     _param = parameters;
   }
 
+  @Override
   public Map<String, Object> getContextData()
   {
     if (_map == null)
@@ -119,5 +128,10 @@ public class InvocationContextImpl implements InvocationContext {
       else
         throw e;
     }
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _implMethod.getName() + "]";
   }
 }

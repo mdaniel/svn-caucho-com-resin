@@ -137,8 +137,8 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
                                          api, getSessionContext()));
 
-    SingletonBeanImpl singletonBean
-      = new SingletonBeanImpl(this, mBean, apiList, factory);
+    SingletonBeanImpl<T> singletonBean
+      = new SingletonBeanImpl<T>(this, mBean, apiList, factory);
 
     return singletonBean;
   }

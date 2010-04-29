@@ -286,11 +286,26 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       method.generatePrologueTop(out, map);
     }
     */
+    
+    boolean isCtor = false;
 
     for (Constructor<?> ctor
            : _beanClass.getJavaClass().getDeclaredConstructors()) {
-      if (Modifier.isPublic(ctor.getModifiers()))
+      if (Modifier.isPublic(ctor.getModifiers())
+          || Modifier.isProtected(ctor.getModifiers())) {
         generateConstructor(out, ctor);
+        isCtor = true;
+      }
+    }
+    
+    // ioc/0c1d
+    if (! isCtor) {
+      for (Constructor<?> ctor
+             : _beanClass.getJavaClass().getDeclaredConstructors()) {
+        if (! Modifier.isPrivate(ctor.getModifiers())) {
+          generateConstructor(out, ctor);
+        }
+      }
     }
     
     _view.generateBeanPrologue(out);

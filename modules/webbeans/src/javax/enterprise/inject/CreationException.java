@@ -33,9 +33,10 @@ package javax.enterprise.inject;
  * When bean creation fails, the injection
  * {@link javax.enterprise.inject.spi.BeanManager} will throw this exception.
  */
-@SuppressWarnings("serial")
 public class CreationException extends InjectionException
 {
+  private static final long serialVersionUID = 1002854668862145298L;
+
   public CreationException()
   {
   }

@@ -123,7 +123,7 @@ public class CandiUtil {
     return methods;
   }
 
-  public static Method getMethod(Class cl,
+  public static Method getMethod(Class<?> cl,
                                  String methodName,
                                  Class<?> paramTypes[])
     throws Exception

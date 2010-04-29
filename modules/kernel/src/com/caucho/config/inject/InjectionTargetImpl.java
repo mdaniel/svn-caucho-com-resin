@@ -831,9 +831,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
 
         _field.set(instance, value);
       } catch (Exception e) {
-        // XXX:
-        // throw ConfigException.create(_field, e);
-        throw new RuntimeException(e);
+        throw ConfigException.create(_field, e);
       }
     }
   }

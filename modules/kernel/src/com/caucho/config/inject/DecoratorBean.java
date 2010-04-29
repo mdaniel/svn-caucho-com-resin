@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.decorator.Delegate;
@@ -45,6 +46,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -248,10 +250,20 @@ public class DecoratorBean<T> implements Decorator<T>
     introspectDelegateField();
 
     if (_delegateField != null) {
-      Type delegateType = _delegateField.getGenericType();
       InjectManager manager = InjectManager.getCurrent();
-    
-      _typeSet = manager.createSourceBaseType(delegateType).getTypeClosure(manager);
+      
+      BaseType selfType = manager.createTargetBaseType(_type);
+            
+      _typeSet = new LinkedHashSet<Type>();
+      
+      for (Type type : selfType.getTypeClosure(manager)) {
+        BaseType baseType = manager.createSourceBaseType(type);
+        
+        if (baseType.getRawClass().isInterface()
+            && ! baseType.getRawClass().equals(Serializable.class)) {
+          _typeSet.add(type);
+        }
+      }
     }
   }
 

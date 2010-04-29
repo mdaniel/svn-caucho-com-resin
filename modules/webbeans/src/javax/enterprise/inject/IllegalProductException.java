@@ -32,9 +32,10 @@ package javax.enterprise.inject;
 /**
  * Exception during runtime for webbeans
  */
-@SuppressWarnings("serial")
 public class IllegalProductException extends InjectionException
 {
+  private static final long serialVersionUID = -6280627846071966243L;
+
   public IllegalProductException()
   {
   }

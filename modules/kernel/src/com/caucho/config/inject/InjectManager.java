@@ -156,8 +156,8 @@ public class InjectManager
 
   private static final int DEFAULT_PRIORITY = 1;
 
-  private static final Annotation []CURRENT_ANN
-    = CurrentLiteral.CURRENT_ANN_LIST;
+  private static final Annotation []DEFAULT_ANN
+    = DefaultLiteral.DEFAULT_ANN_LIST;
 
   private static final String []FORBIDDEN_ANNOTATIONS = {
     "javax.persistence.Entity",
@@ -574,14 +574,14 @@ public class InjectManager
    * @param type the interface type to expose the component
    * @param bean the component to register
    */
-  private void addBeanByType(Type type, Bean<?> comp)
+  private void addBeanByType(Type type, Bean<?> bean)
   {
     if (type == null)
       return;
     
     BaseType baseType = createSourceBaseType(type);
     
-    addBeanByType(baseType, comp);
+    addBeanByType(baseType, bean);
   }
 
   private void addBeanByType(BaseType type, Bean<?> bean)
@@ -1048,7 +1048,7 @@ public class InjectManager
       if (Object.class.equals(type))
         return resolveAllBeans();
 
-      bindings = CURRENT_ANN;
+      bindings = DEFAULT_ANN;
     }
 
     BaseType baseType = createTargetBaseType(type);
@@ -1064,22 +1064,22 @@ public class InjectManager
    * Returns the web beans component with a given binding list.
    */
   private Set<Bean<?>> resolve(BaseType baseType,
-                               Annotation []bindings)
+                               Annotation []qualifiers)
   {
     WebComponent component = getWebComponent(baseType);
-
+    
     if (component != null) {
-      Set<Bean<?>> beans = component.resolve(baseType, bindings);
+      Set<Bean<?>> beans = component.resolve(baseType, qualifiers);
 
       if (beans != null && beans.size() > 0) {
         if (log.isLoggable(Level.FINEST))
           log.finest(this + " bind(" + baseType.getSimpleName()
-                     + "," + toList(bindings) + ") -> " + beans);
+                     + "," + toList(qualifiers) + ") -> " + beans);
 
         return beans;
       }
     }
-    else if (New.class.equals(bindings[0].annotationType())) {
+    else if (New.class.equals(qualifiers[0].annotationType())) {
       // ioc/0721
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
       NewBean<?> newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
@@ -1102,7 +1102,7 @@ public class InjectManager
         beanType = Object.class;
 
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
-      set.add(new InstanceBeanImpl(this, beanType, bindings));
+      set.add(new InstanceBeanImpl(this, beanType, qualifiers));
       return set;
     }
     else if (Event.class.equals(rawType)) {
@@ -1118,15 +1118,15 @@ public class InjectManager
         beanType = Object.class;
 
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
-      set.add(new EventBeanImpl(this, beanType, bindings));
+      set.add(new EventBeanImpl(this, beanType, qualifiers));
       return set;
     }
 
     if (_parent != null) {
-      return _parent.resolve(baseType, bindings);
+      return _parent.resolve(baseType, qualifiers);
     }
 
-    for (Annotation ann : bindings) {
+    for (Annotation ann : qualifiers) {
       if (! ann.annotationType().isAnnotationPresent(Qualifier.class)) {
         throw new IllegalArgumentException(L.l("'{0}' is an invalid binding annotation because it does not have a @Qualifier meta-annotation",
                                                ann));
@@ -1135,7 +1135,7 @@ public class InjectManager
 
     if (log.isLoggable(Level.FINEST)) {
       log.finest(this + " bind(" + baseType.getSimpleName()
-                + "," + toList(bindings) + ") -> none");
+                + "," + toList(qualifiers) + ") -> none");
     }
 
     return null;
@@ -1188,15 +1188,14 @@ public class InjectManager
       Class<?> rawClass = baseType.getRawClass();
       
       beanSet = new WebComponent(this, rawClass);
-
+      _beanMap.put(rawClass, beanSet);
+      
       for (TypedBean typedBean : typedBeans) {
         if (getDeploymentPriority(typedBean.getBean()) < 0)
           continue;
-
+        
         beanSet.addComponent(typedBean.getType(), typedBean.getBean());
       }
-      
-      _beanMap.put(rawClass, beanSet);
     }
 
     return beanSet;
@@ -2160,8 +2159,6 @@ public class InjectManager
 
     fillLocalObserverList(localMap, observerList, eventType);
 
-    log.warning("FIRE: " + eventType + " " + observerList);
-    
     int size = observerList.size();
     for (int i = 0; i < size; i++) {
       observerList.get(i).fireEvent(event, eventType, bindings);
@@ -2321,7 +2318,7 @@ public class InjectManager
     ArrayList<Decorator<?>> decorators = new ArrayList<Decorator<?>>();
 
     if (qualifiers == null || qualifiers.length == 0)
-      qualifiers = CURRENT_ANN;
+      qualifiers = DEFAULT_ANN;
 
     if (_decoratorList == null)
       return decorators;
@@ -2339,9 +2336,9 @@ public class InjectManager
 
     for (DecoratorEntry<?> entry : _decoratorList) {
       Decorator<?> decorator = entry.getDecorator();
-
+      
       // XXX: delegateTypes
-      if (isBaseTypeContained(targetTypes, entry.getDecoratedTypes())
+      if (isBaseTypeContained(targetTypes, entry.getDelegateType())
           && entry.isMatch(qualifiers)) {
         decorators.add(decorator);
       }
@@ -2350,19 +2347,7 @@ public class InjectManager
     return decorators;
   }
 
-  private boolean isTypeContained(Set<Type> types,
-                                  BaseType delegateType)
-  {
-    for (Type type : types) {
-      BaseType baseType = createTargetBaseType(type);
-
-      if (delegateType.isAssignableFrom(baseType))
-        return true;
-    }
-
-    return false;
-  }
-
+  /*
   private boolean isBaseTypeContained(ArrayList<BaseType> targetTypes,
                                       Set<BaseType> sourceTypes)
   {
@@ -2373,11 +2358,31 @@ public class InjectManager
 
     return false;
   }
+  */
 
-  private boolean isBaseTypeContained(Set<BaseType> types,
+  private boolean isBaseTypeContained(ArrayList<BaseType> sourceTypes,
                                       BaseType delegateType)
   {
-    for (BaseType baseType : types) {
+    for (BaseType sourceType : sourceTypes) {
+      if (delegateType.isAssignableFrom(sourceType))
+        return true;
+    }
+
+    return false;
+  }
+
+  private boolean isTypeContained(Set<Type> types,
+                                  BaseType delegateType)
+  {
+    if (delegateType.getRawClass().equals(Object.class))
+      return false;
+    
+    for (Type type : types) {
+      if (type.equals(Object.class))
+        continue;
+      
+      BaseType baseType = createTargetBaseType(type);
+
       if (delegateType.isAssignableFrom(baseType))
         return true;
     }

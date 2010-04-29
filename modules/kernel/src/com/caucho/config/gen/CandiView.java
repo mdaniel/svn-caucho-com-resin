@@ -67,6 +67,7 @@ public class CandiView<X> extends View<X,X> {
   /**
    * Generates the view code.
    */
+  @Override
   public void generate(JavaWriter out)
     throws IOException
   {

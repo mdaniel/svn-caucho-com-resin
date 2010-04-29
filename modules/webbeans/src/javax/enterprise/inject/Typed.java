@@ -39,5 +39,5 @@ import java.lang.annotation.*;
 @Retention(RUNTIME)
 @Documented
 public @interface Typed {
-  Class<?> []value();
+  Class<?> []value() default {};
 }

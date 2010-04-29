@@ -114,4 +114,12 @@ public class InvocationContextImpl implements InvocationContext {
 	throw e;
     }
   }
+  
+  public String toString()
+  {
+    if (_target != null)
+      return getClass().getSimpleName() + "[" + _target.getClass() + "," + _method + "]";
+    else
+      return getClass().getSimpleName() + "[" + _method + "]"; 
+  }
 }
