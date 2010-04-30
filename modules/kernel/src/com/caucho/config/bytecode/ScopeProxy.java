@@ -27,20 +27,12 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.bytecode;
 
-import javax.enterprise.inject.New;
-import javax.enterprise.util.AnnotationLiteral;
+import java.io.Serializable;
 
 /**
- * Represents the @New annotation
+ * Scope adapting
  */
-public class NewLiteral extends AnnotationLiteral<New> implements New {
-  public static final NewLiteral NEW = new NewLiteral();
-  
-  @Override
-  public Class<?> value()
-  {
-    return New.class;
-  }
+public interface ScopeProxy extends Serializable {
 }

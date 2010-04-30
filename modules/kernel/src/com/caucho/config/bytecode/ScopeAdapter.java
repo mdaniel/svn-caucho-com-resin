@@ -33,6 +33,7 @@ import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -46,6 +47,7 @@ import com.caucho.bytecode.JavaField;
 import com.caucho.bytecode.JavaMethod;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.ProxyClassLoader;
@@ -81,6 +83,22 @@ public class ScopeAdapter {
     return adapter;
   }
 
+  public static void validateType(Type type)
+  {
+    BaseType baseType = InjectManager.getCurrent().createTargetBaseType(type);
+    Class<?> rawType = baseType.getRawClass();
+    
+    if (rawType.isPrimitive())
+      throw new ConfigException(L.l("'{0}' is an invalid @NormalScope bean because it's a Java primitive.",
+                                    baseType));
+    
+    
+    if (rawType.isArray())
+      throw new ConfigException(L.l("'{0}' is an invalid @NormalScope bean because it's a Java array.",
+                                    baseType));
+    
+  }
+  
   public Object wrap(InjectManager manager, Bean<?> comp)
   {
     try {
@@ -148,7 +166,7 @@ public class ScopeAdapter {
 
         String superClassName;
 
-        if (!cl.isInterface())
+        if (! cl.isInterface())
           superClassName = typeClassName;
         else
           superClassName = "java/lang/Object";
@@ -158,6 +176,8 @@ public class ScopeAdapter {
 
         if (cl.isInterface())
           jClass.addInterface(typeClassName);
+        
+        jClass.addInterface(ScopeProxy.class.getName().replace('.', '/'));
 
         JavaField managerField =
           jClass.createField("_manager",
@@ -380,4 +400,5 @@ public class ScopeAdapter {
     _prim.put(double.class, "D");
     _prim.put(void.class, "V");
   }
+
 }

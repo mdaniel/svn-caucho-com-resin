@@ -63,6 +63,7 @@ import javax.inject.Scope;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
+import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -351,6 +352,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     
 
     introspectDefault();
+    
+    if (getScope().isAnnotationPresent(NormalScope.class)) {
+      ScopeAdapter.validateType(annotated.getBaseType());
+    }
   }
 
   /**

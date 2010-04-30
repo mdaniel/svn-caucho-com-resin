@@ -44,6 +44,7 @@ import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
+import javax.inject.Inject;
 import javax.inject.Named;
 
 import com.caucho.inject.Jndi;
@@ -221,6 +222,7 @@ class InjectScanClass implements ScanClass
   }
 
   static {
+    _registerAnnotationSet.add(Inject.class);
     _registerAnnotationSet.add(Named.class);
     _registerAnnotationSet.add(Specializes.class);
     _registerAnnotationSet.add(Delegate.class);

@@ -1079,11 +1079,16 @@ public class InjectManager
         return beans;
       }
     }
-    else if (New.class.equals(qualifiers[0].annotationType())) {
+    
+    if (New.class.equals(qualifiers[0].annotationType())) {
       // ioc/0721
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
-      NewBean<?> newBean = new NewBean(this, new AnnotatedTypeImpl(baseType.getRawClass(), baseType.getRawClass()));
+      NewBean<?> newBean = new NewBean(this, ReflectionAnnotatedFactory.introspectType(baseType.getRawClass()));
       newBean.introspect();
+      
+      if (component != null) {
+        component.addComponent(baseType, newBean);
+      }
 
       set.add(newBean);
 

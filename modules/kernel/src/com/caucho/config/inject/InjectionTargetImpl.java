@@ -48,6 +48,7 @@ import javax.annotation.PreDestroy;
 import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.CreationException;
+import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
@@ -830,6 +831,8 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
         Object value = beanManager.getInjectableReference(_ij, env);
 
         _field.set(instance, value);
+      } catch (InjectionException e) {
+        throw e;
       } catch (Exception e) {
         throw ConfigException.create(_field, e);
       }

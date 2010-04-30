@@ -275,8 +275,8 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
 
     // ioc/0520
-    if (scopeType != null
-        && ! getScope().equals(ApplicationScoped.class)) {
+    if (scopeType != null) {
+      //  && ! getScope().equals(ApplicationScoped.class)) {
       // && scopeType.normal()
       //  && ! env.canInject(getScope())) {
 

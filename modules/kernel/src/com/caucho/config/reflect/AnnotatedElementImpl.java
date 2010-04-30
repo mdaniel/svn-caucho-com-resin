@@ -37,6 +37,7 @@ import java.util.Set;
 
 import javax.enterprise.inject.spi.Annotated;
 
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 /**
@@ -50,7 +51,7 @@ public class AnnotatedElementImpl implements Annotated
   
   private Type _type;
 
-  private LinkedHashSet<Type> _typeSet;
+  private Set<Type> _typeSet;
 
   private LinkedHashSet<Annotation> _annSet;
 
@@ -94,10 +95,11 @@ public class AnnotatedElementImpl implements Annotated
   public Set<Type> getTypeClosure()
   {
     if (_typeSet == null) {
-      LinkedHashSet<Type> typeSet = new LinkedHashSet<Type>();
-      typeSet.add(_type);
+      InjectManager manager = InjectManager.getCurrent();
       
-      _typeSet = typeSet;
+      BaseType type = manager.createSourceBaseType(_type);
+      
+      _typeSet = type.getTypeClosure(manager);
     }
 
     return _typeSet;

@@ -30,6 +30,8 @@
 package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
@@ -50,6 +52,7 @@ import com.caucho.inject.Module;
 public class NewBean<X> extends AbstractIntrospectedBean<X>
 {
   private InjectionTargetImpl<X> _target;
+  private LinkedHashSet<Annotation> _qualifiers;
 
   NewBean(InjectManager inject, AnnotatedType<X> beanType)
   {
@@ -58,6 +61,8 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
     _target = new InjectionTargetImpl<X>(inject, beanType);
     _target.introspect(beanType);
 
+    _qualifiers = new LinkedHashSet<Annotation>();
+    _qualifiers.add(NewLiteral.NEW);
     //addBinding(NewLiteral.NEW);
     //setScopeType(Dependent.class);
 
@@ -81,30 +86,19 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
   {
     return Dependent.class;
   }
+  
+  /**
+   * The qualifiers are @New
+   */
+  @Override
+  public Set<Annotation> getQualifiers()
+  {
+    return _qualifiers;
+  }
 
   //
   // introspection overrides
   //
-
-  /**
-   * @New disables produces introspection.
-   */
-  /*
-  @Override
-  protected void introspectProduces(Set<AnnotatedMethod> methods)
-  {
-  }
-  */
-
-  /**
-   * @New disables observer introspection.
-   */
-  /*
-  @Override
-  protected void introspectObservers(Set<AnnotatedMethod> methods)
-  {
-  }
-  */
 
   /**
    * Creates a new instance of the component.
