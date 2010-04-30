@@ -403,7 +403,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     // XXX: ejb/0fbn
     Path ejbJar = root.lookup("META-INF/ejb-jar.xml");
     if (ejbJar.canRead()) {
-      getConfigManager().addEjbPath(ejbJar);
+      getConfigManager().addEjbPath(root);
     }
 
     _ejbUrls.add(root.getURL());

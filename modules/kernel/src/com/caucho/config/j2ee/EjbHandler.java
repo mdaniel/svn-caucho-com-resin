@@ -119,12 +119,13 @@ public class EjbHandler extends JavaeeInjectionHandler {
 					       bindType));
     }
 
-    // bindJndi(location, jndiName, bean);
-
     // return new ComponentValueGenerator(location, (AbstractBean) bean);
     
     BeanValueGenerator gen
       = new BeanValueGenerator(location, bean);
+
+    if (name != null)
+      bindJndi(name, gen, name);
     
     return new FieldGeneratorProgram(javaField, gen);
   }

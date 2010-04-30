@@ -156,6 +156,11 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
       throw new EJBException("Value of '" + EJBContainer.MODULES + "' (EJBContainer.MODULES) must be one of the types String, String[], java.io.File, or java.io.File[]");
   }
 
+  private void setWorkDir()
+  {
+    setWorkDir(null);
+  }
+
   private void setWorkDir(Object workDirValue)
     throws EJBException
   {
@@ -176,7 +181,9 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
     }
     else {
       Path tmpDir = Vfs.lookup(System.getProperty("java.io.tmpdir"));
-      WorkDir.setLocalWorkDir(tmpDir.lookup("caucho-ejb"));
+      Path workDir = tmpDir.lookup("caucho-ejb");
+
+      WorkDir.setLocalWorkDir(workDir);
     }
   }
 
@@ -185,9 +192,13 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
   {
     EJBContainerImpl container = null;
 
+
     if (properties == null) {
       container = new EJBContainerImpl();
+
       addModulesFromClasspath(container, null);
+
+      setWorkDir();
     }
     else {
       String provider = (String) properties.get(EJBContainer.PROVIDER);
@@ -195,7 +206,8 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
       // This is the EJBContainer implementation class and not the
       // EJBContainerProvider implementation for some reason. The spec
       // is ambiguous, but the TCK is not.
-      if (! EJBContainerImpl.class.getName().equals(provider))
+      if (provider != null 
+          && ! EJBContainerImpl.class.getName().equals(provider))
         return null;
 
       String name = (String) properties.get(EJBContainer.APP_NAME);

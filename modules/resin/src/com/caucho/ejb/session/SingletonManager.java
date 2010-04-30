@@ -74,7 +74,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
   @Override
   protected String getType()
   {
-    return "stateful:";
+    return "singleton:";
   }
 
   @Override
@@ -117,14 +117,24 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
   @Override
   public T getLocalObject(Class<?> api)
   {
-    SingletonProxyFactory factory = getSessionContext().getProxyFactory(api);
+    return createProxy();
+  }
 
-    if (factory != null) {
+  /**
+   * @return
+   */
+  public T createProxy()
+  {
+    if (_proxy == null) {
+      SingletonProxyFactory factory = getSessionContext().getProxyFactory(null);
       CreationalContextImpl env = new CreationalContextImpl();
-      // XXX: should be bean
-      return (T) factory.__caucho_createNew(null, env);
-    } else
-      throw new NullPointerException();
+      
+      _proxy = (T) factory.__caucho_createNew(null, env);
+      
+      factory.__caucho_postConstruct();
+    }
+    
+    return _proxy;
   }
 
   @Override
@@ -181,22 +191,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
      */
   }
 
-  /**
-   * @return
-   */
-  public T createProxy()
-  {
-    if (_proxy == null) {
-      SingletonProxyFactory factory = getSessionContext().getProxyFactory(null);
-      CreationalContextImpl env = new CreationalContextImpl();
-      
-      _proxy = (T) factory.__caucho_createNew(null, env);
-      
-      factory.__caucho_postConstruct();
-    }
-    
-    return _proxy;
-  }
+
   
   public T newInstance()
   {

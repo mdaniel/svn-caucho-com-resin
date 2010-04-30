@@ -34,6 +34,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Local;
@@ -57,6 +58,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.types.DescriptionGroupConfig;
 import com.caucho.config.types.MessageDestinationRef;
@@ -81,6 +83,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   implements EnvironmentBean, DependencyBean
 {
   private static final L10N L = new L10N(EjbBean.class);
+  private static final Logger log = Logger.getLogger(EjbBean.class.getName());
 
   private final EjbConfig _ejbConfig;
   private final String _ejbModuleName;
@@ -1084,20 +1087,25 @@ public class EjbBean<X> extends DescriptionGroupConfig
       }
 
       // ejb/11d6
-      Type returnType = javaMethod.getGenericReturnType();
+      //Type returnType = javaMethod.getGenericReturnType();
 
       AnnotatedMethod<? super X> implMethod =
         validateRemoteImplMethod(javaMethod.getName(), param,
                                  method, objectType);
 
-      if (! returnType.equals(implMethod.getBaseType())) {
-        throw error(L.l("{0}: '{1}' must return {2} to match {3}.{4}.  Business methods must return the same type as the interface.",
+      /*
+      InjectManager manager = InjectManager.create();
+      BaseType target = manager.createTargetBaseType(returnType);
+      BaseType source = manager.createSourceBaseType(returnType);
+
+      if (! target.isAssignableFrom(source)) {
+        throw error(L.l("{0}: '{1}' must return {2} to match {3}.{4}.  Business methods must return a type assignable to interface return type.",
                         javaMethod.getDeclaringClass().getName(),
                         getFullMethodName(method),
                         implMethod.getJavaMember().getReturnType().getName(),
                         implMethod.getJavaMember().getDeclaringClass().getSimpleName(),
                         getFullMethodName(implMethod)));
-      }
+      }*/
 
       validateExceptions(method, implMethod.getJavaMember().getExceptionTypes());
     }

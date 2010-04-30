@@ -71,24 +71,16 @@ public class EjbConfigManager extends EjbConfig {
       _rootConfigMap.put(root, rootConfig);
       _rootPendingList.add(rootConfig);
 
+      String ejbModuleName = getEjbModuleName(root);
+
       Path ejbJarXml = root.lookup("META-INF/ejb-jar.xml");
 
       if (ejbJarXml.canRead()) {
-        EjbJar ejbJar = configurePath(ejbJarXml);
+        EjbJar ejbJar = configurePath(root, ejbModuleName);
+
         rootConfig.setModuleName(ejbJar.getModuleName());
       }
       else {
-        String ejbModuleName = null;
-
-        if (root instanceof JarPath) {
-          String jarName = ((JarPath) root).getContainer().getTail();
-          ejbModuleName 
-            = jarName.substring(0, jarName.length() - ".jar".length());
-        }
-        else {
-          ejbModuleName = root.getPath();
-        }
-
         rootConfig.setModuleName(ejbModuleName);
       }
     }
@@ -119,36 +111,44 @@ public class EjbConfigManager extends EjbConfig {
    * Adds a path for an EJB config file to the config list.
    */
   @Override
-  public void addEjbPath(Path path)
+  public void addEjbPath(Path root)
   {
-    if (_pathPendingList.contains(path))
+    if (_pathPendingList.contains(root))
       return;
 
-    _pathPendingList.add(path);
+    _pathPendingList.add(root);
   }
 
-  public EjbJar configurePath(Path path)
+  private String getEjbModuleName(Path root)
   {
-    if (path.getScheme().equals("jar"))
-      path.setUserPath(path.getURL());
+    if (root instanceof JarPath) {
+      String jarName = ((JarPath) root).getContainer().getTail();
+
+      return jarName.substring(0, jarName.length() - ".jar".length());
+    }
+
+    return root.getTail();
+  }
+
+  private EjbJar configurePath(Path root)
+  {
+    return configurePath(root, getEjbModuleName(root));
+  }
+
+  private EjbJar configurePath(Path root, String ejbModuleName)
+  {
+    if (root.getScheme().equals("jar"))
+      root.setUserPath(root.getURL());
+
+    Path path = root.lookup("META-INF/ejb-jar.xml");
 
     Environment.addDependency(path);
-
-    String ejbModuleName;
-
-    if (path instanceof JarPath) {
-      String jarName = ((JarPath) path).getContainer().getTail();
-      ejbModuleName = jarName.substring(0, jarName.length() - ".jar".length());
-    }
-    else {
-      ejbModuleName = path.getPath();
-    }
 
     EjbJar ejbJar = new EjbJar(this, ejbModuleName);
 
     try {
       if (log.isLoggable(Level.FINE))
-        log.fine(this + " reading " + path.getURL());
+        log.fine(this + " reading " + root.getURL());
 
       new Config().configure(ejbJar, path, getSchema());
 

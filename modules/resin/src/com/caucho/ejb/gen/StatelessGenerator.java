@@ -52,6 +52,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
           Stateless.class.getSimpleName());
   }
 
+  @Override
   public boolean isStateless()
   {
     return true;

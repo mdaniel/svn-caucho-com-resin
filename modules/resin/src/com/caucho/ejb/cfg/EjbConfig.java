@@ -92,21 +92,6 @@ public class EjbConfig {
   /**
    * Adds a path for an EJB config file to the config list.
    */
-  public void addFileSet(FileSetType fileSet)
-  {
-    if (_fileSetList.contains(fileSet))
-      return;
-
-    _fileSetList.add(fileSet);
-    
-    for (Path path : fileSet.getPaths()) {
-      addEjbPath(path);
-    }
-  }
-
-  /**
-   * Adds a path for an EJB config file to the config list.
-   */
   public void addEjbPath(Path path)
     throws ConfigException
   {

@@ -28,7 +28,13 @@
 
 package javax.ejb.embeddable;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.util.Enumeration;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.net.URL;
 
 import javax.ejb.EJBException;
 import javax.ejb.spi.EJBContainerProvider;
@@ -39,12 +45,15 @@ import javax.naming.Context;
  * The main ejb context.
  */
 public abstract class EJBContainer {
+  private static Logger log 
+    = Logger.getLogger(EJBContainer.class.getName());
+
+  private static final String PROVIDER_RESOURCE 
+    = "META-INF/services/javax.ejb.spi.EJBContainerProvider";
+
   public static final String APP_NAME = "javax.ejb.embeddable.appName";
   public static final String MODULES = "javax.ejb.embeddable.modules";
   public static final String PROVIDER = "javax.ejb.embeddable.provider";
-
-  private static final String CAUCHO_PROVIDER_CLASS
-    = "com.caucho.ejb.embeddable.EJBContainerProvider";
 
   public static EJBContainer createEJBContainer()
     throws EJBException
@@ -57,35 +66,84 @@ public abstract class EJBContainer {
   {
     Class cl = null;
 
-    String providerClass = CAUCHO_PROVIDER_CLASS;
-
-    if (properties != null && properties.get(PROVIDER) != null)
-      providerClass = (String) properties.get(PROVIDER);
-
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      cl = Class.forName(providerClass, false, loader);
+      Enumeration<URL> providerURLs = 
+        loader.getResources(PROVIDER_RESOURCE);
 
-      if (! EJBContainerProvider.class.isAssignableFrom(cl)) {
-        throw new EJBException("Provider class '" + providerClass + "' does not implement javax.ejb.spi.EJBContainerProvider");
+      while (providerURLs.hasMoreElements()) {
+        cl = loadProviderClass(providerURLs.nextElement(), loader);
+
+        try {
+          EJBContainerProvider provider 
+            = (EJBContainerProvider) cl.newInstance();
+
+          EJBContainer container = provider.createEJBContainer(properties);
+
+          if (container != null)
+            return container;
+        }
+        catch (IllegalAccessException e) {
+          throw new EJBException(e);
+        }
+        catch (InstantiationException e) {
+          throw new EJBException(e);
+        }
       }
 
-      EJBContainerProvider provider = (EJBContainerProvider) cl.newInstance();
-
-      return provider.createEJBContainer(properties);
+      return null;
     }
-    catch (IllegalAccessException e) {
-      throw new EJBException(e);
-    }
-    catch (InstantiationException e) {
-      throw new EJBException(e);
-    }
-    catch (ClassNotFoundException e) {
+    catch (IOException e) {
       throw new EJBException(e);
     }
   }
   
+  private static Class loadProviderClass(URL url, ClassLoader loader)
+  {
+    InputStream is = null;
+
+    try {
+      is = url.openStream();
+
+      int ch;
+
+      while ((ch = is.read()) >= 0) {
+        if (Character.isWhitespace((char) ch)) {
+        }
+        else if (ch == '#') {
+          for (; ch >= 0 && ch != '\n' && ch != '\r'; ch = is.read()) {
+          }
+        }
+        else {
+          StringBuilder sb = new StringBuilder();
+
+          for (;
+               ch >= 0 && ! Character.isWhitespace((char) ch);
+               ch = is.read()) {
+            sb.append((char) ch);
+          }
+
+          String className = sb.toString();
+
+          return Class.forName(className, false, loader);
+        }
+      }
+    } 
+    catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } 
+    finally {
+      try {
+        if (is != null)
+          is.close();
+      } catch (Throwable e) {
+      }
+    }
+
+    return null;
+  }
+
   public abstract Context getContext();
   public abstract void close();
 }

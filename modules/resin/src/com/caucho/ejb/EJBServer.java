@@ -248,42 +248,6 @@ public class EJBServer
   }
 
   /**
-   * Sets the directory for the *.ejb files.
-   */
-  public void setConfigDirectory(Path dir)
-    throws ConfigException
-  {
-    FileSetType fileSet = new FileSetType();
-
-    fileSet.setDir(dir);
-
-    fileSet.addInclude(new PathPatternType("**/*.ejb"));
-
-    Path pwd = Vfs.lookup();
-
-    String dirPath = dir.getPath();
-    String pwdPath = pwd.getPath();
-
-    if (dirPath.startsWith(pwdPath)) {
-      String prefix = dirPath.substring(pwdPath.length());
-
-      fileSet.setUserPathPrefix(prefix);
-    }
-
-    _ejbContainer.getConfigManager().addFileSet(fileSet);
-  }
-
-  /**
-   * Adds an ejb descriptor.
-   */
-  public void addEJBDescriptor(String ejbDescriptor)
-  {
-    Path path = _mergePath.lookup(ejbDescriptor);
-
-    _ejbContainer.getConfigManager().addEjbPath(path);
-  }
-
-  /**
    * Adds an ejb jar.
    */
   public void addEJBJar(Path ejbJar)
