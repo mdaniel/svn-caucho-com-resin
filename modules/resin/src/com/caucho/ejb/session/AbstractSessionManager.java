@@ -67,6 +67,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
   private HashMap<Class<?>, InjectionTarget<?>> _componentMap
     = new HashMap<Class<?>, InjectionTarget<?>>();
+  
+  private SessionContext _sessionContext;
 
   private Bean<X> _bean;
   
@@ -148,7 +150,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
       super.init();
 
-      InjectManager beanManager = InjectManager.create();
+      InjectManager beanManager = InjectManager.create(_loader);
       
       AnnotatedType<?> annType = getAnnotatedType();
       SessionPool sessionPool = annType.getAnnotation(SessionPool.class);
@@ -165,13 +167,18 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         
       }
 
-      BeanBuilder<SessionContext> factory
+      System.out.println("BM: " + beanManager);
+      if (_sessionContext == null) {
+        AbstractContext context = getSessionContext();
+        _sessionContext = (SessionContext) context;
+        
+        BeanBuilder<SessionContext> factory
         = beanManager.createBeanFactory(SessionContext.class);
       
-      AbstractContext context = getSessionContext();
-      context.setDeclaredRoles(_declaredRoles);
+        context.setDeclaredRoles(_declaredRoles);
 
-      beanManager.addBean(factory.singleton(context));
+        beanManager.addBean(factory.singleton(context));
+      }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

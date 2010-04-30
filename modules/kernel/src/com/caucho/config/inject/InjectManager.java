@@ -460,6 +460,8 @@ public class InjectManager
 
     // ejb doesn't create a new InjectManager even though it's a new
     // environment
+    // XXX: yes it does, because of the SessionContext
+    /*
     if (envLoader != null
         && Boolean.FALSE.equals(envLoader.getAttribute("caucho.inject"))) {
       manager = create(envLoader.getParent());
@@ -467,6 +469,7 @@ public class InjectManager
       if (manager != null)
         return manager;
     }
+    */
 
     String id;
 
