@@ -188,7 +188,18 @@ public class DecoratorBean<T> implements Decorator<T>
    * Returns the type of the delegated object
    */
   @Override
-  public Class<?> getDelegateType()
+  public Type getDelegateType()
+  {
+    if (_delegateField != null)
+      return _delegateField.getGenericType();
+    else
+      return null;
+  }
+
+  /**
+   * Returns the type of the delegated object
+   */
+  private Class<?> getDelegateClass()
   {
     if (_delegateField != null)
       return _delegateField.getType();
@@ -217,7 +228,7 @@ public class DecoratorBean<T> implements Decorator<T>
                                     _type.getName()));
     }
 
-    if (! getDelegateType().isAssignableFrom(delegate.getClass())) {
+    if (! getDelegateClass().isAssignableFrom(delegate.getClass())) {
       throw new ConfigException(L.l("{0} is an invalid @Decorator delegate because it does not implement the delegate {1}",
                                     delegate.getClass().getName(),
                                     getDelegateType()));
@@ -253,6 +264,8 @@ public class DecoratorBean<T> implements Decorator<T>
       InjectManager manager = InjectManager.getCurrent();
       
       BaseType selfType = manager.createTargetBaseType(_type);
+      BaseType delegateType 
+        = manager.createSourceBaseType(_delegateField.getGenericType());
             
       _typeSet = new LinkedHashSet<Type>();
       
@@ -260,7 +273,8 @@ public class DecoratorBean<T> implements Decorator<T>
         BaseType baseType = manager.createSourceBaseType(type);
         
         if (baseType.getRawClass().isInterface()
-            && ! baseType.getRawClass().equals(Serializable.class)) {
+            && ! baseType.getRawClass().equals(Serializable.class)
+            && baseType.isAssignableFrom(delegateType)) {
           _typeSet.add(type);
         }
       }

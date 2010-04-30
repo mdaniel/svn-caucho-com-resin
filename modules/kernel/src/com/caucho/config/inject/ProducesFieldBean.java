@@ -122,11 +122,13 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
     return _producerBean;
   }
 
+  @Override
   public T create(CreationalContext<T> createEnv)
   {
     return produce(createEnv);
   }
 
+  @Override
   public InjectionTarget<T> getInjectionTarget()
   {
     return this;
@@ -135,11 +137,15 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
   /**
    * Produces a new bean instance
    */
+  @Override
   public T produce(CreationalContext<T> cxt)
   {
     Class<?> type = _producerBean.getBeanClass();
+    
+    CreationalContextImpl<X> producerCxt
+      = new CreationalContextImpl<X>(_producerBean, cxt);
 
-    X factory = (X) getBeanManager().getReference(_producerBean, type, cxt);
+    X factory = (X) getBeanManager().getReference(_producerBean, type, producerCxt);
 
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",

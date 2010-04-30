@@ -82,12 +82,14 @@ public class FieldGeneratorProgram extends ConfigProgram
     try {
       value = _gen.create();
 
+      /*
       // XXX TCK: ejb30/bb/session/stateless/sessioncontext/descriptor/getBusinessObjectLocal1, needs QA
       if (value != null
 	  && ! _field.getType().isAssignableFrom(value.getClass())
 	  && ! _field.getType().isPrimitive()) {
 	value = PortableRemoteObject.narrow(value, _field.getType());
       }
+      */
 
       _field.set(bean, value);
     } catch (ConfigException e) {

@@ -3166,6 +3166,7 @@ public class WebApp extends ServletContextImpl
   /**
    * Fills the servlet instance.  (Generalize?)
    */
+  @Override
   public Invocation buildInvocation(Invocation invocation)
   {
     Thread thread = Thread.currentThread();

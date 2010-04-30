@@ -36,11 +36,23 @@ import javax.enterprise.util.AnnotationLiteral;
  * Represents the @New annotation
  */
 public class NewLiteral extends AnnotationLiteral<New> implements New {
-  public static final NewLiteral NEW = new NewLiteral();
+  public static final NewLiteral NEW = new NewLiteral(New.class);
+  
+  private Class<?> _value;
+  
+  public NewLiteral(Class<?> value)
+  {
+    _value = value;
+  }
   
   @Override
   public Class<?> value()
   {
-    return New.class;
+    return _value;
+  }
+  
+  public String toString()
+  {
+    return "@New(" + value() + ")";
   }
 }

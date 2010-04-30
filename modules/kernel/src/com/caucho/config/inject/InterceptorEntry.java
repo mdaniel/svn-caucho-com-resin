@@ -43,6 +43,7 @@ import java.util.Set;
 import java.util.logging.*;
 
 import javax.enterprise.inject.spi.Interceptor;
+import javax.interceptor.InterceptorBinding;
 
 /**
  * Represents an introspected interceptor
@@ -90,8 +91,16 @@ public class InterceptorEntry<X> {
   public boolean isMatch(QualifierBinding binding, Annotation []bindingAnn)
   {
     for (Annotation ann : bindingAnn) {
+      Class<? extends Annotation> annType = ann.annotationType();
+      
+      if (! annType.isAnnotationPresent(InterceptorBinding.class))
+        continue;
+      
       if (binding.isMatch(ann))
 	return true;
+      
+      if (isMatch(binding, annType.getAnnotations()))
+        return true;
     }
 
     return false;

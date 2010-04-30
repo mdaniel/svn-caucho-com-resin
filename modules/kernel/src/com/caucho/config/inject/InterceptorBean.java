@@ -29,34 +29,33 @@
 
 package com.caucho.config.inject;
 
-import com.caucho.util.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
+import java.util.HashSet;
+import java.util.Set;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
-
-import javax.annotation.*;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import javax.ejb.PostActivate;
+import javax.ejb.PrePassivate;
 import javax.enterprise.context.spi.CreationalContext;
-import javax.ejb.*;
+import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InterceptionType;
+import javax.enterprise.inject.spi.Interceptor;
 import javax.interceptor.AroundInvoke;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.InvocationContext;
-import javax.enterprise.inject.spi.Interceptor;
-import javax.enterprise.inject.spi.InterceptionType;
-import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * InterceptorBean represents a Java interceptor
  */
 public class InterceptorBean<X> implements Interceptor<X>
 {
-  private static final L10N L = new L10N(InterceptorBean.class);
+  private Class<X> _type;
 
-  private final InjectManager _beanManager;
-
-  private Class _type;
-
-  private ManagedBeanImpl _bean;
+  private ManagedBeanImpl<X> _bean;
 
   private Method _aroundInvoke;
   private Method _postConstruct;
@@ -68,10 +67,8 @@ public class InterceptorBean<X> implements Interceptor<X>
     = new HashSet<Annotation>();
 
   public InterceptorBean(InjectManager beanManager,
-                         Class type)
+                         Class<X> type)
   {
-    _beanManager = beanManager;
-
     _type = type;
 
     _bean = beanManager.createManagedBean(_type);
@@ -79,7 +76,7 @@ public class InterceptorBean<X> implements Interceptor<X>
     init();
   }
 
-  public InterceptorBean(Class type)
+  public InterceptorBean(Class<X> type)
   {
     this(InjectManager.create(), type);
   }

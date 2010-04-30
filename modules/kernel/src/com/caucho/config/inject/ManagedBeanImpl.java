@@ -105,7 +105,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
       validateType((Class) beanType.getType());
     */
 
-    _injectionTarget = new InjectionTargetImpl(injectManager, beanType);
+    _injectionTarget = new InjectionTargetImpl(injectManager, beanType, this);
   }
 
   public ManagedBeanImpl(InjectManager webBeans,
@@ -508,6 +508,10 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
     Method method = beanMethod.getJavaMember();
     Type eventType = method.getGenericParameterTypes()[param];
+    
+    // ioc/0b22
+    if (! method.getDeclaringClass().equals(getBeanClass()))
+      return;
 
     HashSet<Annotation> bindingSet = new HashSet<Annotation>();
 

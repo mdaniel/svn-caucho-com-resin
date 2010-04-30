@@ -29,6 +29,8 @@
 
 package com.caucho.server.deploy;
 
+import com.caucho.cloud.deploy.DeployNetworkService;
+import com.caucho.cloud.deploy.DeployUpdateListener;
 import com.caucho.config.ConfigException;
 import com.caucho.config.types.FileSetType;
 import com.caucho.config.types.Period;
@@ -58,7 +60,7 @@ import java.util.logging.Logger;
  */
 abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   extends DeployGenerator<E>
-  implements AlarmListener
+  implements AlarmListener, DeployUpdateListener
 {
   private static final Logger log
     = Logger.getLogger(ExpandDeployGenerator.class.getName());
@@ -75,6 +77,8 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
 
   private Repository _repository;
   private String _repositoryTag;
+  
+  private DeployNetworkService _deployService;
   
   private String _entryNamePrefix = "";
 
@@ -121,6 +125,11 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
       _cronInterval = MIN_CRON_INTERVAL;
 
     _loader = Thread.currentThread().getContextClassLoader();
+    
+    _deployService = DeployNetworkService.getCurrent();
+    
+    if (_deployService != null)
+      _deployService.addUpdateListener(this);
   }
 
   Path getContainerRootDirectory()
@@ -634,6 +643,15 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  //
+  // DeployNetworkService callbacks
+  //
+  
+  public void onUpdate(String tag)
+  {
+    update();
   }
 
   /**
@@ -1225,6 +1243,9 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   protected void stopImpl()
   {
     _alarm.dequeue();
+    
+    if (_deployService != null)
+      _deployService.removeUpdateListener(this);
 
     super.stopImpl();
   }
@@ -1232,6 +1253,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
   /**
    * Tests for equality.
    */
+  @Override
   public boolean equals(Object o)
   {
     if (o == null || ! getClass().equals(o.getClass()))
@@ -1250,6 +1272,7 @@ abstract public class ExpandDeployGenerator<E extends ExpandDeployController<?>>
     return true;
   }
 
+  @Override
   public String toString()
   {
     String name = getClass().getName();

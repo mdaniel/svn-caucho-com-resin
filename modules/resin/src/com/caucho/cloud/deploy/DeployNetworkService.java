@@ -56,6 +56,9 @@ public class DeployNetworkService extends AbstractNetworkService
   private final List<DeployTagListener> _tagListeners
     = new CopyOnWriteArrayList<DeployTagListener>();
   
+  private final List<DeployUpdateListener> _updateListeners
+    = new CopyOnWriteArrayList<DeployUpdateListener>();
+  
   //
   // Returns the current service if available.
   //
@@ -140,6 +143,36 @@ public class DeployNetworkService extends AbstractNetworkService
   public void removeTagListener(DeployTagListener listener)
   {
     _tagListeners.remove(listener);
+  }
+  
+  //
+  // update listeners
+  //
+  
+  /**
+   * Requests an update
+   */
+  public void update(String tag)
+  {
+    for (DeployUpdateListener listener : _updateListeners) {
+      listener.onUpdate(tag);
+    }
+  }
+  
+  /**
+   * Adds an update listener
+   */
+  public void addUpdateListener(DeployUpdateListener listener)
+  {
+    _updateListeners.add(listener);
+  }
+  
+  /**
+   * Removes an update listener
+   */
+  public void removeUpdateListener(DeployUpdateListener listener)
+  {
+    _updateListeners.remove(listener);
   }
   
   //

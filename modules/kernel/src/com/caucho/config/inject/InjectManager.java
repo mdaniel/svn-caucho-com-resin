@@ -461,6 +461,7 @@ public class InjectManager
     // ejb doesn't create a new InjectManager even though it's a new
     // environment
     // XXX: yes it does, because of the SessionContext
+    // ejb/2016
     /*
     if (envLoader != null
         && Boolean.FALSE.equals(envLoader.getAttribute("caucho.inject"))) {
@@ -843,6 +844,7 @@ public class InjectManager
   /**
    * Creates an annotated type.
    */
+  @Override
   public <T> AnnotatedType<T> createAnnotatedType(Class<T> cl)
   {
     return ReflectionAnnotatedFactory.introspectType(cl);
@@ -851,6 +853,7 @@ public class InjectManager
   /**
    * Creates an injection target
    */
+  @Override
   public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type)
   {
     InjectionTargetImpl<T> bean = new InjectionTargetImpl<T>(this, type);
@@ -960,6 +963,11 @@ public class InjectManager
       log.finer(this + " add bean " + bean);
 
     _version.incrementAndGet();
+    
+    if (bean instanceof Interceptor<?>) {
+      addInterceptor((Interceptor<?>) bean);
+      return;
+    }
 
     // bean = new InjectBean<T>(bean, this);
 
@@ -2108,10 +2116,20 @@ public class InjectManager
       throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
                                              eventType));
     
-    for (Annotation qualifier : qualifiers) {
-      if (! isQualifier(qualifier.annotationType()))
+    for (int i = 0; i < qualifiers.length; i++) {
+      Class<? extends Annotation> annType = qualifiers[i].annotationType();
+      
+      if (! isQualifier(annType))
         throw new IllegalArgumentException(L.l("{0} is not a valid qualifier because it is missing a @Qualifier annotation",
-                                               qualifier));
+                                               qualifiers[i]));
+      
+      for (int j = i + 1; j < qualifiers.length; j++) {
+        if (annType.equals(qualifiers[j].annotationType())) {
+          throw new IllegalArgumentException(L.l("duplicate qualifier {0} is not allowed.",
+                                                 qualifiers[i]));
+        }
+      }
+        
     }
 
     for (ObserverMap map : getLocalObserverList(event.getClass())) {
@@ -2229,10 +2247,23 @@ public class InjectManager
   {
     if (bindings == null || bindings.length == 0)
       throw new IllegalArgumentException(L.l("resolveInterceptors requires at least one @InterceptorBinding"));
+    
+    for (int i = 0; i < bindings.length; i++) {
+      Class<? extends Annotation> annType = bindings[i].annotationType();
+      
+      if (! annType.isAnnotationPresent(InterceptorBinding.class))
+        throw new IllegalArgumentException(L.l("Annotation must be an @InterceptorBinding at '{0}' in resolveInterceptors",
+                                               bindings[i]));
+        
+      for (int j = i + 1; j < bindings.length; j++) {
+        if (annType.equals(bindings[j].annotationType()))
+          throw new IllegalArgumentException(L.l("Duplicate binding '{0}' is not allowed in resolveInterceptors",
+                                                 bindings[i]));
+      }
+    }
 
     ArrayList<Interceptor<?>> interceptorList
       = new ArrayList<Interceptor<?>>();
-
 
     for (InterceptorEntry<?> entry : _interceptorList) {
       Interceptor<?> interceptor = entry.getInterceptor();
@@ -2346,7 +2377,7 @@ public class InjectManager
       Decorator<?> decorator = entry.getDecorator();
       
       // XXX: delegateTypes
-      if (isBaseTypeContained(targetTypes, entry.getDelegateType())
+      if (isDelegateAssignableFrom(entry.getDelegateType(), targetTypes)
           && entry.isMatch(qualifiers)) {
         decorators.add(decorator);
       }
@@ -2368,12 +2399,13 @@ public class InjectManager
   }
   */
 
-  private boolean isBaseTypeContained(ArrayList<BaseType> sourceTypes,
-                                      BaseType delegateType)
+  private boolean isDelegateAssignableFrom(BaseType delegateType,
+                                           ArrayList<BaseType> sourceTypes)
   {
     for (BaseType sourceType : sourceTypes) {
-      if (delegateType.isAssignableFrom(sourceType))
+      if (delegateType.isAssignableFrom(sourceType)) {
         return true;
+      }
     }
 
     return false;
@@ -2610,6 +2642,9 @@ public class InjectManager
     else if (type.isMemberClass())
       return false;
       */
+    
+    if (Modifier.isAbstract(type.getModifiers()))
+      return false;
 
     /* XXX: ioc/024d */
     // ioc/070c, ioc/0j0g
@@ -2666,6 +2701,12 @@ public class InjectManager
 
     ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type, target);
 
+    if (target instanceof InjectionTargetImpl<?>) {
+      InjectionTargetImpl<T> targetImpl = (InjectionTargetImpl<T>) target;
+
+      targetImpl.setBean(bean);
+    }
+
     bean.introspect();
 
     AnnotatedType<T> annType = bean.getAnnotatedType();
@@ -2693,6 +2734,9 @@ public class InjectManager
     if (managedBean.isAlternative() && ! isEnabled(managedBean))
       return;
     
+    if (! isValidSimpleBean(managedBean.getBeanClass()))
+      return;
+    
     addBean(managedBean);
     
     for (Bean<?> producerBean : managedBean.getProducerBeans()) {
@@ -2711,7 +2755,7 @@ public class InjectManager
         Annotation []bindings = new Annotation[annSet.size()];
         annSet.toArray(bindings);
 
-        BaseType baseType = createSourceBaseType(observer.getObservedEventType());
+        BaseType baseType = createSourceBaseType(observer.getObservedType());
 
         addObserver(observer, baseType, bindings);
       }
@@ -2731,7 +2775,7 @@ public class InjectManager
         Annotation []bindings = new Annotation[annSet.size()];
         annSet.toArray(bindings);
 
-        BaseType baseType = createSourceBaseType(observer.getObservedEventType());
+        BaseType baseType = createSourceBaseType(observer.getObservedType());
 
         addObserver(observer, baseType, bindings);
       }

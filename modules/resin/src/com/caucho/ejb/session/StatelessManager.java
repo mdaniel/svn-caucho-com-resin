@@ -94,7 +94,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   @Override
   public Object getLocalProxy(Class<?> api)
   {
-    StatelessProvider<?> provider = getStatelessContext().getProvider(api);
+    StatelessProvider<?> provider = getContext().getProvider(api);
 
     return new StatelessProviderProxy(provider);
   }
@@ -105,7 +105,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   @Override
   public Object getLocalObject(Class<?> api)
   {
-    return getStatelessContext().getProvider(api);
+    return getContext().getProvider(api);
   }
 
   @Override
@@ -113,11 +113,11 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
                                Class<?> api,
                                Set<Type> apiList)
   {
-    StatelessProvider<X> provider = getStatelessContext().getProvider(api);
+    StatelessProvider<X> provider = getContext().getProvider(api);
 
     if (provider == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
-          api, getStatelessContext()));
+          api, getContext()));
 
     StatelessBeanImpl<X> statelessBean
       = new StatelessBeanImpl<X>(this, mBean, api, apiList, provider);
@@ -128,7 +128,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   protected <T> InjectionTarget<T> createSessionComponent(Class<T> api, 
                                                           Class<X> beanClass)
   {
-    StatelessProvider<?> provider = getStatelessContext().getProvider(api);
+    StatelessProvider<?> provider = getContext().getProvider(api);
 
     return new StatelessComponent(provider, beanClass);
   }
@@ -153,7 +153,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     if (api == null)
       return null;
 
-    StatelessProvider<?> provider = getStatelessContext().getProvider(api);
+    StatelessProvider<?> provider = getContext().getProvider(api);
 
     if (provider != null) {
       Object result = provider.__caucho_get();
@@ -188,7 +188,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
       Class<?> api = remoteApiList.get(0);
 
       // XXX: concept of unique remote api not correct.
-      _remoteProvider = getStatelessContext().getProvider(api);
+      _remoteProvider = getContext().getProvider(api);
     }
   }
 
@@ -210,21 +210,10 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     }
   }
 
-  public AbstractContext getContext()
-  {
-    return getStatelessContext();
-  }
-
   @Override
   public AbstractContext getContext(Object key, boolean forceLoad)
   {
-    return getStatelessContext();
-  }
-
-  @Override
-  public AbstractSessionContext getSessionContext()
-  {
-    return getStatelessContext();
+    return getContext();
   }
   
   StatelessPool.Item<X> newInstance(EjbProducer<X> producer)
@@ -239,13 +228,13 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     super.destroy();
     
     try {
-      getStatelessContext().destroy();
+      getContext().destroy();
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
   }
 
-  private StatelessContext getStatelessContext()
+  public StatelessContext getContext()
   {
     synchronized (this) {
       if (_homeContext == null) {

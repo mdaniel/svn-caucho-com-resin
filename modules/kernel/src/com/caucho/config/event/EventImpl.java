@@ -36,9 +36,17 @@ import java.lang.reflect.Type;
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.util.TypeLiteral;
+import javax.inject.Qualifier;
 
+import com.caucho.inject.Module;
+import com.caucho.util.L10N;
+
+@Module
+@SuppressWarnings("serial")
 public class EventImpl<T> implements Event<T>, Serializable
 {
+  private static final L10N L = new L10N(EventImpl.class);
+  
   private final BeanManager _manager;
   private final Type _type;
   private final Annotation []_bindings;
@@ -52,41 +60,80 @@ public class EventImpl<T> implements Event<T>, Serializable
     _bindings = bindings;
   }
 
+  @Override
   public void fire(T event)
   {
     _manager.fireEvent(event, _bindings);
   }
 
-  /*
-  public void addObserver(ObserverMethod<T> observer)
-  {
-    _manager.addObserver(observer, _bindings);
-  }
-
-  public void removeObserver(ObserverMethod<T> observer)
-  {
-    _manager.removeObserver(observer);
-  }
-  */
-
+  @Override
   public Event<T> select(Annotation... bindings)
   {
     if (bindings == null)
       return this;
+    
+    validateBindings(bindings);
 
     // ioc/0b54 - union would cause problems with @Current
-    return new EventImpl(_manager, _type, bindings);
+    return new EventImpl<T>(_manager, _type, bindings);
   }
 
+  @Override
   public <U extends T> Event<U> select(Class<U> subtype,
                                        Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    validateType(subtype);
+    validateBindings(bindings);
+
+    return new EventImpl<U>(_manager, subtype, bindings);
   }
 
+  @Override
   public <U extends T> Event<U> select(TypeLiteral<U> subtype,
                                        Annotation... bindings)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    validateType(subtype.getType());
+    validateBindings(bindings);
+
+    return new EventImpl<U>(_manager, subtype.getType(), bindings);
+  }
+  
+  private void validateType(Type type)
+  {
+    if (! (type instanceof Class<?>))
+      return;
+    
+    Class<?> cl = (Class<?>) type; 
+
+    if (cl.getTypeParameters().length > 0)
+      throw new IllegalArgumentException(L.l("Generic class '{0}' is not allowed in select.",
+                                             type));
+  }
+  
+  private void validateBindings(Annotation ...bindings)
+  {
+    if (bindings == null)
+      return;
+    
+    for (int i = 0; i < bindings.length; i++) {
+      Class<? extends Annotation> annType = bindings[i].annotationType();
+      
+      if (! annType.isAnnotationPresent(Qualifier.class))
+        throw new IllegalArgumentException(L.l("select with non-@Qualifier annotation '{0}' is not allowed.",
+                                               bindings[i]));
+      
+      for (int j = i + 1; j < bindings.length; j++) {
+        if (annType.equals(bindings[j].annotationType())) {
+          throw new IllegalArgumentException(L.l("select with duplicate Qualifier '{0}' is not allowed.",
+                                                 bindings[i]));
+        }
+      }
+    }
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _type + "]";
   }
 }

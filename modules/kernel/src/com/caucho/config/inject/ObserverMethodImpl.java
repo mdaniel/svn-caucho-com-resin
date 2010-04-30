@@ -97,11 +97,18 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   {
     return _bean;
   }
+  
+  @Override
+  public Class<X> getBeanClass()
+  {
+    return (Class<X>) _bean.getBeanClass();
+  }
 
   /**
    * Returns the observed event type
    */
-  public Type getObservedEventType()
+  @Override
+  public Type getObservedType()
   {
     return _type;
   }
@@ -109,6 +116,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   /**
    * Returns the observed event bindings
    */
+  @Override
   public Set<Annotation> getObservedQualifiers()
   {
     return _qualifiers;

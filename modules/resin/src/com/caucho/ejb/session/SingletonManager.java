@@ -78,7 +78,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
   }
 
   @Override
-  public SingletonContext<T> getSessionContext()
+  public SingletonContext<T> getContext()
   {
     synchronized (this) {
       if (_sessionContext == null) {
@@ -102,7 +102,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
   @Override
   public Object getLocalProxy(Class api)
   {
-    SingletonProxyFactory factory = getSessionContext().getProxyFactory(api);
+    SingletonProxyFactory factory = getContext().getProxyFactory(api);
     /*
      * if (factory != null) return new SingletonFactoryJndiProxy(factory); else
      * return null;
@@ -126,7 +126,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
   public T createProxy()
   {
     if (_proxy == null) {
-      SingletonProxyFactory factory = getSessionContext().getProxyFactory(null);
+      SingletonProxyFactory factory = getContext().getProxyFactory(null);
       CreationalContextImpl env = new CreationalContextImpl();
       
       _proxy = (T) factory.__caucho_createNew(null, env);
@@ -159,7 +159,7 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
 
   protected InjectionTarget<T> createSessionComponent(Class api, Class beanClass)
   {
-    SingletonProxyFactory factory = getSessionContext().getProxyFactory(api);
+    SingletonProxyFactory factory = getContext().getProxyFactory(api);
 
     return new SingletonComponent(factory);
   }

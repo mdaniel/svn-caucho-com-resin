@@ -51,6 +51,7 @@ public class InjectionPointImpl<T> implements InjectionPoint
 {
   private final InjectManager _manager;
   
+  private InjectionTargetImpl _target;
   private final Bean<T> _bean;
   private final Annotated _annotated;
   private final Member _member;
@@ -64,10 +65,28 @@ public class InjectionPointImpl<T> implements InjectionPoint
   }
 
   InjectionPointImpl(InjectManager manager,
+                     InjectionTargetImpl target,
+                     AnnotatedField<T> field)
+  {
+    this(manager, target.getBean(), field, field.getJavaMember());
+    
+    _target = target;
+  }
+
+  InjectionPointImpl(InjectManager manager,
                      Bean<T> bean,
                      AnnotatedParameter<?> param)
   {
     this(manager, bean, param, param.getDeclaringCallable().getJavaMember());
+  }
+
+  InjectionPointImpl(InjectManager manager,
+                     InjectionTargetImpl target,
+                     AnnotatedParameter<?> param)
+  {
+    this(manager, target.getBean(), param, param.getDeclaringCallable().getJavaMember());
+    
+    _target = target;
   }
 
   InjectionPointImpl(InjectManager manager,
@@ -125,7 +144,12 @@ public class InjectionPointImpl<T> implements InjectionPoint
   @Override
   public Bean<?> getBean()
   {
-    return _bean;
+    if (_bean != null)
+      return _bean;
+    else if (_target != null)
+      return _target.getBean();
+    else
+      return null;
   }
 
   /**

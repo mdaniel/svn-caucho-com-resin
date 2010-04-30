@@ -167,9 +167,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         
       }
 
-      System.out.println("BM: " + beanManager);
       if (_sessionContext == null) {
-        AbstractContext context = getSessionContext();
+        AbstractContext context = getContext();
         _sessionContext = (SessionContext) context;
         
         BeanBuilder<SessionContext> factory
@@ -277,8 +276,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   }
 
   @Override
-  public AbstractContext getContext()
+  public AbstractSessionContext getContext()
   {
-    return getSessionContext();
+    return null;
   }
 }

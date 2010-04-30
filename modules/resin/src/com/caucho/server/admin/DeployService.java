@@ -170,15 +170,17 @@ public class DeployService extends SimpleActor
                        TagStateQuery query)
   {
     // XXX: just ping the tag?
-    updateDeploy();
+    // updateDeploy();
     
     String tag = query.getTag();
     
     DeployNetworkService deploy = DeployNetworkService.getCurrent();
     DeployTagItem item = null;
     
-    if (deploy != null)
+    if (deploy != null) {
+      deploy.update(tag);
       item = deploy.getTagItem(tag);
+    }
     
     if (item != null) {
       TagStateQuery result = new TagStateQuery(tag, item.getState(), 

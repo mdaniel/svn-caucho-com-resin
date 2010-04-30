@@ -44,7 +44,7 @@ import com.caucho.inject.Module;
 @Module
 public class ClassType extends BaseType
 {
-  public static final BaseType OBJECT_TYPE;
+  public static final ObjectType OBJECT_TYPE;
   
   private static final HashMap<Class<?>,ClassType> _classTypeMap
     = new HashMap<Class<?>,ClassType>();
@@ -211,11 +211,10 @@ public class ClassType extends BaseType
     _classTypeMap.put(double.class, new BoxType(double.class, Double.class));
     _classTypeMap.put(Double.class, new ClassType(Double.class));
     
-    _classTypeMap.put(Object.class, new ClassType(Object.class));
     _classTypeMap.put(String.class, new ClassType(String.class));
     
-    OBJECT_TYPE = BaseType.createForSource(Object.class, 
-                                           new HashMap<String,BaseType>());
+    OBJECT_TYPE = ObjectType.OBJECT_TYPE;
+    _classTypeMap.put(Object.class, OBJECT_TYPE);
     
     _classTypeIgnoreSet.add(Serializable.class);
     _classTypeIgnoreSet.add(Cloneable.class);

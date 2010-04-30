@@ -70,6 +70,12 @@ public class VarType<D extends GenericDeclaration> extends BaseType
     return true;
     // return false;
   }
+  
+  @Override
+  public boolean isGeneric()
+  {
+    return true;
+  }
 
   @Override
   public Type []getBounds()
@@ -113,8 +119,9 @@ public class VarType<D extends GenericDeclaration> extends BaseType
       return true;
     
     for (BaseType bound : _bounds) {
-      if (! bound.isAssignableFrom(type))
+      if (! bound.isAssignableFrom(type)) {
 	return false;
+      }
     }
     
     return true;
@@ -123,11 +130,8 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   @Override
   public boolean isParamAssignableFrom(BaseType type)
   {
-    if (type instanceof VarType<?>) {
-      return true;
-    }
-    else
-      return false;
+    // ioc/0i3m
+    return isAssignableFrom(type);
   }
 
   @Override

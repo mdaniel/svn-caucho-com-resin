@@ -55,9 +55,6 @@ public class InvocationContextImpl implements InvocationContext {
                                int []chainIndex,
                                Object []param)
   {
-    System.out.println("T: " + target + " " + implMethod);
-    System.out.println("CM: " + chainMethods.length);
-    System.out.println("CO: " + chainObjects.length);
     _target = target;
     _apiMethod = apiMethod;
     _implMethod = implMethod;

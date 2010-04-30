@@ -263,6 +263,10 @@ public class InterceptorCallChain<X,T>
 
     if (iAnn != null) {
       for (Class<?> iClass : iAnn.value()) {
+        if (! hasAroundInvoke(iClass)) {
+          System.out.println("MISSING: " + iClass);
+          continue;
+        }
         if (! _methodInterceptors.contains(iClass))
           _methodInterceptors.add(iClass);
       }
@@ -272,6 +276,10 @@ public class InterceptorCallChain<X,T>
 
     if (apiMethod != implMethod && iAnn != null) {
       for (Class<?> iClass : iAnn.value()) {
+        if (! hasAroundInvoke(iClass)) {
+          System.out.println("MISSING: " + iClass);
+          continue;
+        }
         if (! _methodInterceptors.contains(iClass))
           _methodInterceptors.add(iClass);
       }
@@ -291,6 +299,16 @@ public class InterceptorCallChain<X,T>
       _interceptionType = InterceptionType.AROUND_INVOKE;
       _interceptorBinding.addAll(interceptorTypes.values());
     }
+  }
+  
+  private boolean hasAroundInvoke(Class<?> cl)
+  {
+    for (Method m : cl.getMethods()) {
+      if (m.isAnnotationPresent(AroundInvoke.class))
+        return true;
+    }
+    
+    return false;
   }
 
   private void introspectDecorators(AnnotatedMethod<? super T> apiMethod)
@@ -904,14 +922,14 @@ public class InterceptorCallChain<X,T>
     out.printClass(_view.getBean().getBeanClass().getJavaClass());
     out.println(".class);");
 
+    out.popDepth();
+    out.println("}");
+
     out.println();
     out.print(_decoratorIndexVar + " = ");
     out.print("com.caucho.config.gen.CandiUtil.generateProxyDelegate(");
     out.print("__caucho_manager, ");
     out.println(_decoratorBeansVar + ", " + _delegateVar + ");");
-    
-    out.popDepth();
-    out.println("}");
   }
 
   private void generateDecoratorMethodPrologue(JavaWriter out, 

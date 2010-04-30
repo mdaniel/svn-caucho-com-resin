@@ -47,6 +47,7 @@ import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.AmbiguousResolutionException;
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Annotated;
@@ -121,16 +122,24 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     = new ArrayList<ConfigProgram>();
   
   public InjectionTargetImpl(InjectManager beanManager,
-                             AnnotatedType<X> beanType)
+                             AnnotatedType<X> beanType,
+                             Bean<X> bean)
   {
     _beanManager = beanManager;
 
     _annotatedType = beanType;
+    _bean = bean;
 
     /*
     if (beanType.getType() instanceof Class)
       validateType((Class) beanType.getType());
     */
+  }
+  
+  public InjectionTargetImpl(InjectManager beanManager,
+                             AnnotatedType<X> beanType)
+  {
+    this(beanManager, beanType, null);
   }
 
   protected InjectManager getBeanManager()
@@ -661,8 +670,10 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       Annotation []qualifiers = getQualifiers(param);
       
       InjectionPoint ip = new InjectionPointImpl(getBeanManager(),
-                                                 getBean(),
+                                                 this,
                                                  param);
+      
+      _injectionPointSet.add(ip);
 
       if (qualifiers.length > 0 || true)
         args[i] = new BeanArg<X>(getBeanManager(),
@@ -718,21 +729,22 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       if (field.getAnnotations().size() == 0)
         continue;
 
-      if (field.isAnnotationPresent(Delegate.class)) {
-        if (! type.isAnnotationPresent(javax.decorator.Decorator.class))
-          throw new IllegalStateException(L.l("'{0}' may not inject with @Delegate because it is not a @Decorator",
-                                              type.getJavaClass()));
-        
-        continue;
-      }
-      else if (hasQualifierAnnotation(field)) {
+      if (field.isAnnotationPresent(Inject.class)) {
         // boolean isOptional = isQualifierOptional(field);
 
-        InjectionPoint ij = new InjectionPointImpl(getBeanManager(), getBean(), field);
+        InjectionPoint ij = new InjectionPointImpl(getBeanManager(), this, field);
 
         _injectionPointSet.add(ij);
 
-        _injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
+        if (field.isAnnotationPresent(Delegate.class)) {
+          if (! type.isAnnotationPresent(javax.decorator.Decorator.class)) {
+            throw new IllegalStateException(L.l("'{0}' may not inject with @Delegate because it is not a @Decorator",
+                                                type.getJavaClass()));
+          }
+        }
+        else {
+          _injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
+        }
       }
       else {
         InjectionPointHandler handler
@@ -759,7 +771,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
 
         for (int i = 0; i < args.length; i++) {
           InjectionPoint ij
-            = new InjectionPointImpl(getBeanManager(), getBean(), params.get(i));
+            = new InjectionPointImpl(getBeanManager(), this, params.get(i));
 
           _injectionPointSet.add(ij);
 
@@ -831,11 +843,18 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
         Object value = beanManager.getInjectableReference(_ij, env);
 
         _field.set(instance, value);
+      } catch (AmbiguousResolutionException e) {
+        throw new AmbiguousResolutionException(getFieldName(_field) + e.getMessage(), e);
       } catch (InjectionException e) {
-        throw e;
+        throw new InjectionException(getFieldName(_field) + e.getMessage(), e);
       } catch (Exception e) {
         throw ConfigException.create(_field, e);
       }
+    }
+    
+    private String getFieldName(Field field)
+    {
+      return field.getDeclaringClass().getSimpleName() + "." + field.getName() + ": ";
     }
   }
 

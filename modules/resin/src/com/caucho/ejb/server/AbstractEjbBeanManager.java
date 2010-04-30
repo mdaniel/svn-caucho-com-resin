@@ -445,14 +445,6 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   }
 
   /**
-   * Returns the session context.
-   */
-  public AbstractSessionContext getSessionContext()
-  {
-    return null;
-  }
-
-  /**
    * Returns the remote skeleton for the given API
    *
    * @param api
