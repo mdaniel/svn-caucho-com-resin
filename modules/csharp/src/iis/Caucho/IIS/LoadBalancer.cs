@@ -49,6 +49,7 @@ namespace Caucho.IIS
     private int _loadBalanceSocketTimeout;
     private int _keepaliveTimeout;
     private int _socketTimeout;
+    private bool _isDebug;
 
     //supports just one server for now
     public LoadBalancer(String servers,
@@ -57,7 +58,8 @@ namespace Caucho.IIS
       int loadBalanceRecoverTime,
       int loadBalanceSocketTimeout,
       int keepaliveTimeout,
-      int socketTimeout)
+      int socketTimeout,
+      bool isDebug)
     {
       _log = Logger.GetLogger();
 
@@ -67,6 +69,7 @@ namespace Caucho.IIS
       _loadBalanceSocketTimeout = loadBalanceSocketTimeout;
       _keepaliveTimeout = keepaliveTimeout;
       _socketTimeout = socketTimeout;
+      _isDebug = isDebug;
 
       List<Server> pool = new List<Server>();
       String[] sruns = servers.Split(new char[] { ',', ' ' }, StringSplitOptions.RemoveEmptyEntries);
@@ -80,7 +83,9 @@ namespace Caucho.IIS
         char c = (char)('a' + i);
         _log.Info("Adding Server '{0}:{1}:{2}'", c, host, port);
 
-        pool.Add(new Server("a", address, port, _loadBalanceIdleTime, _socketTimeout));
+        Server srun = new Server(c, address, port, _loadBalanceIdleTime, _socketTimeout);
+        srun.SetDebug(_isDebug);
+        pool.Add(srun);
       }
 
       _servers = pool.ToArray();
@@ -95,7 +100,7 @@ namespace Caucho.IIS
         result = IPAddress.Parse(host);
 
         return result;
-      } catch (Exception e) {
+      } catch (Exception) {
       }
 
       try {
@@ -133,7 +138,7 @@ namespace Caucho.IIS
     {
     }
 
-    public HmuxConnection OpenServer(String sessionId, Server xChannelFactory)
+    public HmuxConnection OpenServer(String sessionId, Server xServer)
     {
       Trace.TraceInformation("{0}:{1}", _servers.Length, _servers[0]);
 
@@ -142,7 +147,7 @@ namespace Caucho.IIS
         connection = OpenSessionServer(sessionId);
 
       if (connection == null)
-        connection = OpenAnyServer(xChannelFactory);
+        connection = OpenAnyServer(xServer);
 
       return connection;
     }
@@ -186,6 +191,11 @@ namespace Caucho.IIS
         if (server.IsActive())
           connection = server.OpenServer();
       } catch (Exception e) {
+        String message = "Closing server '{0}' due to exception {1} \t {2}";
+        _log.Error(message, server, e.Message, e.StackTrace);
+
+        Trace.TraceInformation(message, server, e.Message, e.StackTrace);
+
         server.Close();
       }
 
@@ -202,6 +212,11 @@ namespace Caucho.IIS
               connection = server.OpenServer();
             }
           } catch (Exception e) {
+            String message = "Closing server '{0}' due to exception {1} \t {2}";
+            _log.Error(message, server, e.Message, e.StackTrace);
+
+            Trace.TraceInformation(message, server, e.Message, e.StackTrace);
+
             server.Close();
           }
         }
@@ -212,8 +227,8 @@ namespace Caucho.IIS
 
     public void Destroy()
     {
-      foreach (Server factory in _servers) {
-        factory.Close();
+      foreach (Server server in _servers) {
+        server.Close();
       }
     }
   }

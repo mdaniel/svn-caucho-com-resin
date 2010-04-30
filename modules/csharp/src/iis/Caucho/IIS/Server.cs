@@ -41,7 +41,7 @@ namespace Caucho.IIS
   {
     private Logger _log;
 
-    private String _serverInternalId;
+    private char _serverInternalId;
 
     private HmuxConnection[] _idle = new HmuxConnection[64];
     private volatile int _idleHead;
@@ -61,8 +61,11 @@ namespace Caucho.IIS
 
     private IPAddress _address;
     private int _port;
+    private bool _isDebug = false;
 
-    public Server(String serverInternalId, IPAddress address, int port, int loadBalanceIdleTime, int socketTimeout)
+    private volatile int _traceId = 0;
+
+    public Server(char serverInternalId, IPAddress address, int port, int loadBalanceIdleTime, int socketTimeout)
     {
       _socketTimeout = socketTimeout;
       _loadBalanceIdleTime = loadBalanceIdleTime;
@@ -73,6 +76,11 @@ namespace Caucho.IIS
       _log = Logger.GetLogger();
 
       _state = State.ACTVIE;
+    }
+
+    public void SetDebug(bool isDebug)
+    {
+      _isDebug = isDebug;
     }
 
     public bool IsActive()
@@ -92,7 +100,7 @@ namespace Caucho.IIS
 
     private HmuxConnection OpenRecycle()
     {
-      long now = DateTime.Now.Ticks;
+      long now = Utils.CurrentTimeMillis();
       HmuxConnection channel = null;
 
       lock (this) {
@@ -120,7 +128,9 @@ namespace Caucho.IIS
       if (channel != null) {
         if (_log.IsLoggable(EventLogEntryType.Information))
           _log.Info(this + " close idle " + channel
-                    + " expire=" + new DateTime(channel.GetIdleStartTime() + _loadBalanceIdleTime));
+                    + " expire=" + new DateTime(channel.GetIdleStartTime()*10 + _loadBalanceIdleTime*10));
+
+        //Trace.TraceInformation("closing expired channel '{0}'", channel);
 
         channel.CloseImpl();
       }
@@ -141,7 +151,16 @@ namespace Caucho.IIS
       try {
         Socket socket = new Socket(_address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
         socket.Connect(_address, _port);
-        HmuxConnection channel = new HmuxConnection(socket, this, _serverInternalId);
+
+        String traceId;
+        if (_isDebug) {
+          int i = _traceId++;
+          traceId = i.ToString();
+        } else {
+          traceId = socket.Handle.ToInt32().ToString();
+        }
+
+        HmuxConnection channel = new HmuxConnection(socket, this, _serverInternalId, traceId);
 
         lock (this) {
           _activeCount++;
@@ -185,12 +204,11 @@ namespace Caucho.IIS
 
     internal void SetCpuLoadAvg(double loadAvg)
     {
-      Trace.TraceInformation("HmuxChannelFactory.SetCpuLoadAvg() NYI");
     }
 
-    internal void Success()
+    private void Success()
     {
-      Trace.TraceInformation("HmuxChannelFactory.SetCpuLoadAvg() NYI");
+      _state = State.ACTVIE;
     }
 
     internal void Free(HmuxConnection channel)
@@ -201,8 +219,9 @@ namespace Caucho.IIS
         _activeCount--;
 
         int size = (_idleHead - _idleTail + _idle.Length) % _idle.Length;
-
+        
         if (_state != State.INACTIVE && size < _idleSize) {
+          Trace.TraceInformation("returning channel '{0}' to pool", channel);
           _idleHead = (_idleHead + 1) % _idle.Length;
           _idle[_idleHead] = channel;
 
@@ -210,7 +229,7 @@ namespace Caucho.IIS
         }
       }
 
-      long now = DateTime.Now.Ticks;
+      long now = Utils.CurrentTimeMillis();
       long maxIdleTime = _loadBalanceIdleTime;
       HmuxConnection oldChannel = null;
 
@@ -222,18 +241,20 @@ namespace Caucho.IIS
             int nextTail = (_idleTail + 1) % _idle.Length;
 
             oldChannel = _idle[nextTail];
-
             if (oldChannel != null
-                && oldChannel.GetIdleStartTime() + maxIdleTime < now) {
+                && (oldChannel.GetIdleStartTime() + maxIdleTime) < now) {
               _idle[nextTail] = null;
               _idleTail = nextTail;
-            } else
+            } else {
               oldChannel = null;
+            }
           }
         }
 
-        if (oldChannel != null)
+        if (oldChannel != null) {
           oldChannel.CloseImpl();
+          Trace.TraceInformation("closing expired channel '{0}'", oldChannel);
+        }
       } while (oldChannel != null);
 
       if (channel != null) {
@@ -241,12 +262,12 @@ namespace Caucho.IIS
       }
     }
 
-    internal void Close(HmuxConnection channel)
+    internal void Close(HmuxConnection connection)
     {
       if (_log.IsLoggable(EventLogEntryType.Information))
-        _log.Info("Close {0}", channel);
+        _log.Info("Close {0}", connection);
 
-      Trace.TraceInformation("Close '{0}'", channel);
+      Trace.TraceInformation("Close '{0}'", connection);
 
       lock (this) {
         _activeCount--;

@@ -89,20 +89,21 @@ namespace Caucho.IIS
 
     private Server _pool;
 
-    private String _serverInternalId;
+    private char _serverInternalId;
     private String _traceId;
     private long _requestStartTime;
     private long _idleStartTime;
     private bool _isIdle = false;
 
-    public HmuxConnection(Socket socket, Server pool, String serverInternalId)
+    public HmuxConnection(Socket socket, Server pool, char serverInternalId, String traceId)
     {
       _socket = socket;
       _stream = new BufferedStream(new NetworkStream(_socket));
       _pool = pool;
       _serverInternalId = serverInternalId;
 
-      _traceId = _socket.Handle.ToInt32().ToString();
+      
+      _traceId = traceId;
       _log = Logger.GetLogger();
     }
 
@@ -172,17 +173,16 @@ namespace Caucho.IIS
 
     internal void ClearIdleStartTime()
     {
-      throw new NotImplementedException();
+      _idleStartTime = 0;
     }
 
     internal void ToActive()
     {
-      throw new NotImplementedException();
     }
 
     public override string ToString()
     {
-      return String.Format("HmuxChannel [{0}->{1}]", null, _socket.RemoteEndPoint);
+      return String.Format(this.GetType().Name + " [{0}->{1}, {2}]", _serverInternalId, _socket.RemoteEndPoint, _traceId);
     }
   }
 }

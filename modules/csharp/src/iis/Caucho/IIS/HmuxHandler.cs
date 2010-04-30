@@ -62,6 +62,7 @@ namespace Caucho.IIS
     private String _sslSessionCookieName = "SSLJSESSIONID";
     private bool _isUrlRewriteEnabled = true;
     private String _sessionUrlPrefix = ";jsessionid=";
+    private bool _isDebug = false;
 
     public HmuxHandler()
     {
@@ -95,6 +96,8 @@ namespace Caucho.IIS
         if ("false".Equals(appSettings["resin.sticky-sessions"], StringComparison.OrdinalIgnoreCase))
           _isStickySessions = false;
 
+        _log.Info("Setting sticky sessions to {0}", _isStickySessions);
+
         if (!String.IsNullOrEmpty(appSettings["resin.session-url-prefix"]))
           _sessionUrlPrefix = appSettings["resin.session-url-prefix"];
 
@@ -125,7 +128,13 @@ namespace Caucho.IIS
         if (!String.IsNullOrEmpty(appSettings["resin.socket-timeout"]))
           socketTimeout = ParseTime("resin.socket-timeout", appSettings["resin.socket-timeout"]);
 
-        _loadBalancer = new LoadBalancer(servers, loadBalanceConnectTimeout, loadBalanceIdleTime, loadBalanceRecoverTime, loadBalanceSocketTimeout, keepaliveTimeout, socketTimeout);
+        _isDebug = "true".Equals(appSettings["resin.debug"], StringComparison.OrdinalIgnoreCase);
+
+        if (_isDebug)
+          Trace.TraceInformation("Setting debug to true");
+
+        _loadBalancer = new LoadBalancer(servers, loadBalanceConnectTimeout, loadBalanceIdleTime, loadBalanceRecoverTime, loadBalanceSocketTimeout, keepaliveTimeout, socketTimeout, _isDebug);
+
       } catch (ConfigurationException e) {
         _e = e;
       } catch (FormatException e) {
@@ -142,7 +151,7 @@ namespace Caucho.IIS
         char c = str[i];
         if (Char.IsDigit(c) && isDigitExpected) {
           value = value * 10 + c - '0';
-          
+
         } else if ('s' == c || 'S' == c || 'm' == c || 'M' == c) {
           value = value * 1000;
 
@@ -240,7 +249,7 @@ namespace Caucho.IIS
         else if (len < buf.Length) {
           int sublen = is_.Read(buf, len, 1);
 
-          if (sublen < 0)
+          if (sublen == 0) //.NET return 0 for Stream.EOF
             isComplete = true;
           else {
             len += sublen;
@@ -256,7 +265,7 @@ namespace Caucho.IIS
 
         // If everything fails, return an error
         if (channel == null) {
-          response.StatusCode = HTTP_STATUS_SERVICE_UNAVAIL;
+          SendNotAvailable(response);
 
           return;
         }
@@ -266,7 +275,7 @@ namespace Caucho.IIS
         BufferedStream rs = channel.GetSocketStream();
         BufferedStream ws = channel.GetSocketStream();
         result = FAIL | EXIT;
-        long requestStartTime = DateTime.Now.Ticks;
+        long requestStartTime = Utils.CurrentTimeMillis();
 
         try {
           result = HandleRequest(request, response, channel, rs, ws,
@@ -278,7 +287,7 @@ namespace Caucho.IIS
             client.Busy();
           else
             client.FailSocket();
-        } catch (ClientDisconnectException e) {
+        } catch (ClientDisconnectException) {
           _log.Info("Client disconnect detected for '{0}'", channel.GetTraceId());
 
           return;
@@ -301,7 +310,7 @@ namespace Caucho.IIS
           if (channel == null) {
             _log.Info("load-balance failed" + (client != null ? (" for " + client.GetDebugId()) : ""));
 
-            response.StatusCode = HTTP_STATUS_SERVICE_UNAVAIL;
+            SendNotAvailable(response);
 
             return;
           }
@@ -318,7 +327,7 @@ namespace Caucho.IIS
           ws = channel.GetSocketStream();
 
           result = FAIL | EXIT;
-          requestStartTime = DateTime.Now.Ticks;
+          requestStartTime = Utils.CurrentTimeMillis();
 
           try {
             result = HandleRequest(request, response, channel, rs, ws,
@@ -342,7 +351,7 @@ namespace Caucho.IIS
           }
         }
 
-        response.StatusCode = HTTP_STATUS_SERVICE_UNAVAIL;
+        SendNotAvailable(response);
       } finally {
         TempBuffer.Free(tempBuf);
         tempBuf = null;
@@ -358,6 +367,7 @@ namespace Caucho.IIS
                             bool allowBusy)
     //throws ServletException, IOException
     {
+      Trace.TraceInformation("Handle request: length: {0}, complete: {1}, allowBusy {2}", length, isComplete, allowBusy);
       String traceId = hmuxChannel.GetTraceId();
 
       StringBuilder cb = new StringBuilder();
@@ -425,6 +435,10 @@ namespace Caucho.IIS
         foreach (String value in values) {
           WriteRequestHeader(ws, key, value, traceId);
         }
+      }
+
+      if (_isDebug) {
+        WriteRequestHeader(ws, "X-Resin-Debug", traceId, traceId);
       }
 
       Stream requestStream = request.InputStream;
@@ -558,7 +572,7 @@ namespace Caucho.IIS
       // As a temporary measure, we start the idle time at the first data
       // read (later we might mark the time it takes to read an app-tier
       // packet.  If it's short, e.g. 250ms, don't update the time.)
-      hmuxChannel.SetIdleStartTime(DateTime.Now.Ticks);
+      hmuxChannel.SetIdleStartTime(Utils.CurrentTimeMillis());
 
       bool isBusy = false;
       for (; code >= 0; code = rs.ReadByte()) {
@@ -599,10 +613,11 @@ namespace Caucho.IIS
           for (int i = 0; i < 3; i++)
             statusCode = 10 * statusCode + status[i] - '0';
 
-          if (statusCode == 503 && allowBusy)
+          if (statusCode == 503 && allowBusy) {
             isBusy = true;
-          else if (statusCode != 200)
+          } else if (statusCode != 200) {
             response.StatusCode = statusCode;
+          }
         } else if (code == HmuxConnection.HMUX_HEADER && hasHeader) {
           String name = ReadHmuxString(rs, sublen);
           rs.ReadByte();
@@ -786,12 +801,27 @@ namespace Caucho.IIS
       stream.Write(cert, 0, cert.Length);
     }
 
-    public void DoTestBasic(HttpContext context)
+    private void SendNotAvailable(HttpResponse response)
+    {
+      response.StatusCode = HTTP_STATUS_SERVICE_UNAVAIL;
+      response.Output.WriteLine(@"<html>
+<head><title>503 Service Temporarily Unavailable</title></head>
+<body>
+<h1>503 Service Temporarily Unavailable</h1>
+<p /><hr />
+<small>
+Resin
+</small>
+</body></html>
+");
+    }
+
+    private void DoTestBasic(HttpContext context)
     {
       Introspect(context);
     }
 
-    public void DoTestChunked(HttpContext context)
+    private void DoTestChunked(HttpContext context)
     {
       for (int i = 0; i < 10; i++) {
         context.Response.Write("chunk:" + i);
@@ -799,7 +829,7 @@ namespace Caucho.IIS
       }
     }
 
-    public void DoTestSSL(HttpContext context)
+    private void DoTestSSL(HttpContext context)
     {
       HttpClientCertificate certificate = context.Request.ClientCertificate;
       context.Response.Output.WriteLine("issuer: " + certificate.Issuer);
@@ -823,7 +853,7 @@ namespace Caucho.IIS
       Introspect(context);
     }
 
-    public void Introspect(HttpContext context)
+    private void Introspect(HttpContext context)
     {
       context.Response.Output.WriteLine("url: " + context.Request.Url);
       context.Response.Output.WriteLine("raw-url: " + context.Request.RawUrl);
