@@ -26,42 +26,59 @@
  *
  * @author Scott Ferguson
  */
-
-package com.caucho.ejb.gen;
+package com.caucho.config.gen;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.gen.BusinessMethodGenerator;
-import com.caucho.config.gen.EjbCallChain;
-import com.caucho.config.gen.XaCallChain;
 import com.caucho.inject.Module;
 
 /**
- * Represents a message local business method
+ * Represents a filter for invoking a method
  */
 @Module
-public class MessageMethod<X,T> extends BusinessMethodGenerator<X,T>
-{
-  public MessageMethod(MessageView<X,T> view,
-		       AnnotatedMethod<? super T> apiMethod,
-		       AnnotatedMethod<? super X> implMethod,
-		       int index)
+public class MethodTailFactory<X> implements AspectFactory<X> {
+  private AspectBeanFactory<X> _beanFactory;
+  
+  protected MethodTailFactory(AspectBeanFactory<X> beanFactory)
   {
-    super(view, apiMethod, implMethod, index);
+    _beanFactory = beanFactory;
   }
-
-  @Override
-  protected XaCallChain<X,T> createXa(EjbCallChain<X,T> next)
-  {
-    return new MessageXaCallChain<X,T>(this, next);
-  }
-
+  
   /**
-   * Returns true if any interceptors enhance the business method
+   * Returns the bean factory
    */
   @Override
-  public boolean isEnhanced()
+  public AspectBeanFactory<X> getAspectBeanFactory()
   {
-    return true;
+    return _beanFactory;
+  }
+  
+  /**
+   * Returns the owning bean type.
+   */
+  @Override
+  public AnnotatedType<X> getBeanType()
+  {
+    return getAspectBeanFactory().getBeanType();
+  }
+  
+  /**
+   * Returns an aspect for the method if one exists.
+   */
+  @Override
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced)
+  {
+    if (isEnhanced)
+      return new MethodTailGenerator<X>(method);
+    else
+      return null;
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
   }
 }

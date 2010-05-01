@@ -29,44 +29,31 @@
 
 package com.caucho.ejb.gen;
 
-import static javax.ejb.TransactionAttributeType.REQUIRED;
-
-import java.io.IOException;
-
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.gen.AspectFactory;
 import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.XaFactory;
-import com.caucho.config.gen.XaGenerator;
+import com.caucho.config.gen.MethodHeadFactory;
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 
 /**
- * Represents the xa interception
+ * Represents a stateless local business method
  */
 @Module
-public class MessageXaCallChain<X> extends XaGenerator<X>
+public class StatefulMethodHeadFactory<X> extends MethodHeadFactory<X>
 {
-  public MessageXaCallChain(XaFactory<X> factory,
-                            AnnotatedMethod<? super X> method,
-			    AspectGenerator<X> next)
+  public StatefulMethodHeadFactory(StatefulAspectBeanFactory<X> beanFactory,
+                                    AspectFactory<X> next)
   {
-    super(factory, method, next);
+    super(beanFactory, next);
   }
-
+  
   @Override
-  public void generatePreCall(JavaWriter out)
-    throws IOException
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced)
   {
-    super.generatePreCall(out);
+    AspectGenerator<X> next = super.create(method, true);
     
-    if (REQUIRED.equals(getTransactionType())) {
-      out.println();
-      out.println("if (_xaResource != null)");
-      out.println("  _xa.enlist(_xaResource);");
-    }
-
-    out.println("/* ... */");
+    return new StatefulMethodHeadGenerator<X>(this, method, next);
   }
 }

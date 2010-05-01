@@ -29,21 +29,30 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.java.JavaWriter;
-import java.io.*;
-import java.lang.reflect.*;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.inject.Module;
 
 /**
- * Represents a method filter
+ * Aspect factory for generating @Asynchronous aspects.
  */
-public interface MethodGeneratorFilter {
-  public boolean isEnhanced();
-
-  public void introspect(Method apiMethod, Method implMethod);
-
-  public void generatePrologue(JavaWriter out)
-    throws IOException;
-
-  public void generate(JavaWriter out, MethodGeneratorFilter next)
-    throws IOException;
+@Module
+public class XaFactory<X>
+  extends AbstractAspectFactory<X>
+{
+  XaFactory(AspectBeanFactory<X> beanFactory,
+            AspectFactory<X> next)
+  {
+    super(beanFactory, next);
+  }
+  
+  /**
+   * Creates an aspect for interception if the method should be intercepted.
+   */
+  @Override
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced)
+  {
+    return super.create(method, isEnhanced);
+  }
 }

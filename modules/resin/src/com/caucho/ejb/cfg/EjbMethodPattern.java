@@ -36,8 +36,7 @@ import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.gen.BusinessMethodGenerator;
-import com.caucho.config.gen.SecurityCallChain;
+import com.caucho.config.gen.SecurityGenerator;
 import com.caucho.config.reflect.AnnotatedMethodImpl;
 import com.caucho.util.L10N;
 
@@ -352,15 +351,17 @@ public class EjbMethodPattern<X> {
     // xa.setTransactionType(_transactionType);
   }
 
-  private void configureSecurity(BusinessMethodGenerator bizMethod)
+  /*
+  private void configureSecurity(AspectGenerator bizMethod)
   {
     if (_roles == null)
       return;
 
-    SecurityCallChain security = bizMethod.getSecurity();
+    SecurityGenerator security = bizMethod.getSecurity();
 
     // security.setRoles(_roles);
   }
+  */
 
   /**
    * Returns true if these are equivalent.

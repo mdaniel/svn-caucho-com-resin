@@ -42,7 +42,8 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.AspectBeanFactory;
+import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.LifecycleInterceptor;
 import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
@@ -58,8 +59,10 @@ public class StatelessView<X,T> extends View<X,T> {
 
   private StatelessGenerator<X> _statelessBean;
 
-  private ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
-    = new ArrayList<BusinessMethodGenerator<X,T>>();
+  private AspectBeanFactory<X> _aspectBeanFactory;
+  
+  private ArrayList<AspectGenerator<X>> _businessMethods
+    = new ArrayList<AspectGenerator<X>>();
 
   private String _timeoutMethod;
 
@@ -71,6 +74,8 @@ public class StatelessView<X,T> extends View<X,T> {
     super(bean, api);
 
     _statelessBean = bean;
+    
+    _aspectBeanFactory = new StatelessAspectBeanFactory<X>(bean.getBeanClass());
   }
 
   public StatelessGenerator<X> getStatelessBean()
@@ -112,7 +117,7 @@ public class StatelessView<X,T> extends View<X,T> {
    * Returns the introspected methods
    */
   @Override
-  public ArrayList<BusinessMethodGenerator<X,T>> getMethods()
+  public ArrayList<AspectGenerator<X>> getMethods()
   {
     return _businessMethods;
   }
@@ -134,7 +139,7 @@ public class StatelessView<X,T> extends View<X,T> {
     _preDestroyInterceptor.introspect(getBeanClass());
 
     // XXX: type is incorrect here. Should be moved to stateless generator?
-    introspectTimer((AnnotatedType<T>) getBeanClass());
+    introspectTimer(getBeanClass());
   }
 
   /**
@@ -159,7 +164,7 @@ public class StatelessView<X,T> extends View<X,T> {
                                       javaMethod.getName()));
       }
 
-      addBusinessMethod(apiMethod);
+      addBusinessMethod((AnnotatedMethod<? super X>) apiMethod);
     }
   }
 
@@ -182,9 +187,9 @@ public class StatelessView<X,T> extends View<X,T> {
   /**
    * Introspects the lifecycle methods
    */
-  public void introspectTimer(AnnotatedType<T> apiClass)
+  public void introspectTimer(AnnotatedType<X> apiClass)
   {
-    Class<T> cl = apiClass.getJavaClass();
+    Class<X> cl = apiClass.getJavaClass();
 
     if (cl == null || cl.equals(Object.class))
       return;
@@ -194,7 +199,7 @@ public class StatelessView<X,T> extends View<X,T> {
       return;
     }
 
-    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
+    for (AnnotatedMethod<? super X> apiMethod : apiClass.getMethods()) {
       Method method = apiMethod.getJavaMember();
 
       if (method.isAnnotationPresent(Timeout.class)) {
@@ -213,50 +218,21 @@ public class StatelessView<X,T> extends View<X,T> {
     }
   }
 
-  protected void addBusinessMethod(AnnotatedMethod<? super T> apiMethod)
+  protected void addBusinessMethod(AnnotatedMethod<? super X> method)
   {
-    int index = _businessMethods.size();
-      
-    BusinessMethodGenerator<X,T> bizMethod = createMethod(apiMethod, index);
+    Method javaMethod = method.getJavaMember();
+    
+    if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
+      return;
+    }
+    
+    AspectGenerator<X> bizMethod = _aspectBeanFactory.create(method);
       
     if (bizMethod != null) {
-      bizMethod.introspect(bizMethod.getApiMethod(),
-                           bizMethod.getImplMethod());
-      
       _businessMethods.add(bizMethod);
     }
   }
 
-  protected BusinessMethodGenerator<X,T>
-  createMethod(AnnotatedMethod<? super T> apiMethod,
-               int index)
-  {
-    Method javaMethod = apiMethod.getJavaMember();
-    
-    if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
-      return null;
-    }
-    
-    AnnotatedMethod<? super X> implMethod = getMethod(apiMethod);
-
-    if (implMethod == null) {
-      throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
-                                    javaMethod.getDeclaringClass().getSimpleName(),
-                                    javaMethod.getName(),
-                                    getBeanClass().getJavaClass().getName()));
-    }
-
-    StatelessMethod<X,T> bizMethod
-      = new StatelessMethod<X,T>(getBeanClass(),
-                                 getBeanClassName(),
-                                 this,
-                                 apiMethod,
-                                 implMethod,
-                                 index);
-
-    return bizMethod;
-  }
-  
   //
   // code generation
   //

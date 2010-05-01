@@ -29,44 +29,46 @@
 
 package com.caucho.ejb.gen;
 
-import static javax.ejb.TransactionAttributeType.REQUIRED;
+import javax.enterprise.inject.spi.AnnotatedType;
 
-import java.io.IOException;
-
-import javax.enterprise.inject.spi.AnnotatedMethod;
-
-import com.caucho.config.gen.AspectFactory;
-import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.XaFactory;
-import com.caucho.config.gen.XaGenerator;
+import com.caucho.config.gen.CandiAspectBeanFactory;
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 
 /**
- * Represents the xa interception
+ * Represents a stateless local business method
  */
 @Module
-public class MessageXaCallChain<X> extends XaGenerator<X>
+public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
 {
-  public MessageXaCallChain(XaFactory<X> factory,
-                            AnnotatedMethod<? super X> method,
-			    AspectGenerator<X> next)
+  public StatelessAspectBeanFactory(AnnotatedType<X> beanType)
   {
-    super(factory, method, next);
+    super(beanType);
   }
-
+  
+  /**
+   * Generates the underlying bean object
+   */
   @Override
-  public void generatePreCall(JavaWriter out)
-    throws IOException
+  public String getBeanInstance()
   {
-    super.generatePreCall(out);
-    
-    if (REQUIRED.equals(getTransactionType())) {
-      out.println();
-      out.println("if (_xaResource != null)");
-      out.println("  _xa.enlist(_xaResource);");
-    }
-
-    out.println("/* ... */");
+    return "bean";
+  }
+  
+  /**
+   * Generates the proxy object.
+   */
+  @Override
+  public String getBeanProxy()
+  {
+    return "bean";
+  }
+  
+  /**
+   * Generates data associated with the bean
+   */
+  @Override
+  public String getBeanInfo()
+  {
+    return "poolItem";
   }
 }

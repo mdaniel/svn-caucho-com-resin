@@ -30,6 +30,7 @@ package com.caucho.config.gen;
 
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -42,68 +43,72 @@ import com.caucho.java.JavaWriter;
  * Represents a filter for invoking a method
  */
 @Module
-abstract public class AbstractCallChain<X,T> implements EjbCallChain<X,T> {
-  private BusinessMethodGenerator<X,T> _bizMethod;
-  
-  private EjbCallChain<X,T> _next;
+abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
+  private AspectFactory<X> _factory;
+  private AnnotatedMethod<? super X> _method;
+  private AspectGenerator<X> _next;
 
-  AbstractCallChain(BusinessMethodGenerator<X,T> bizMethod,
-                    EjbCallChain<X,T> next)
+  AbstractAspectGenerator(AspectFactory<X> factory,
+                          AnnotatedMethod<? super X> method,
+                          AspectGenerator<X> next)
   {
-    _bizMethod = bizMethod;
+    _factory = factory;
+    _method = method;
+    _next = next;
     
     if (next == null)
       throw new NullPointerException();
-
-    _next = next;
   }
 
-  protected BusinessMethodGenerator<X,T> getBusinessMethod()
+  protected AspectFactory<X> getFactory()
   {
-    return _bizMethod;
+    return _factory;
   }
-  
-  protected AnnotatedType<T> getApiType()
-  {
-    return _bizMethod.getApiType();
-  }
-  
-  protected AnnotatedType<X> getImplType()
-  {
-    return _bizMethod.getBeanClass();
-  }
-  
-  protected AnnotatedMethod<? super T> getApiMethod()
-  {
-    return _bizMethod.getApiMethod();
-  }
-  
-  protected AnnotatedMethod<? super X> getImplMethod()
-  {
-    return _bizMethod.getImplMethod();
-  }
-  
-  //
-  // introspection methods
-  //
 
+  protected AspectBeanFactory<X> getBeanFactory()
+  {
+    return _factory.getAspectBeanFactory();
+  }
+  
   /**
-   * Returns true if this filter will generate code.
+   * Returns the owning bean type.
    */
-  @Override
-  abstract public boolean isEnhanced();
-
-  /**
-   * Introspects the method for the default values
-   */
-  @Override
-  public void introspect(AnnotatedMethod<? super T> apiMethod, 
-                         AnnotatedMethod<? super X> implMethod)
+  protected AnnotatedType<X> getBeanType()
   {
+    return _factory.getBeanType();
+  }
+
+  protected Class<X> getJavaClass()
+  {
+    return getBeanType().getJavaClass();
+  }
+   
+  @Override
+  public AnnotatedMethod<? super X> getMethod()
+  {
+    return _method;
+  }
+  
+  /**
+   * Returns the JavaMethod for this aspect.
+   */
+  protected Method getJavaMethod()
+  {
+    return _method.getJavaMember();
+  }
+  
+  /**
+   * Top-level generator.
+   */
+  public void generate(JavaWriter out,
+                       HashMap<String,Object> prologueMap)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   //
-  // bean instance interception
+  // bean instance generation
   //
 
   /**
@@ -330,6 +335,6 @@ abstract public class AbstractCallChain<X,T> implements EjbCallChain<X,T> {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _bizMethod + "]";
+    return getClass().getSimpleName() + "[" + _method + "]";
   }
 }

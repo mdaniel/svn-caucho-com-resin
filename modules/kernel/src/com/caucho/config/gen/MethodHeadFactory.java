@@ -28,27 +28,33 @@
  */
 package com.caucho.config.gen;
 
-import java.io.IOException;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 
 /**
- * The actual method call for a interceptor chain
+ * Represents a filter for invoking a method
  */
 @Module
-public class MethodTailCallChain<X,T> extends NullCallChain<X,T> {
-  private final BusinessMethodGenerator<X,T> _bizMethod;
-
-  public MethodTailCallChain(BusinessMethodGenerator<X,T> bizMethod)
+public class MethodHeadFactory<X> extends AbstractAspectFactory<X> {
+  protected MethodHeadFactory(AspectBeanFactory<X> beanFactory,
+                              AspectFactory<X> next)
   {
-    _bizMethod = bizMethod;
+    super(beanFactory, next);
   }
   
+  /**
+   * Returns an aspect for the method if one exists.
+   */
   @Override
-  public void generateCall(JavaWriter out)
-    throws IOException
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced)
   {
-    _bizMethod.generateTailCall(out);
+    AspectGenerator<X> next = super.create(method, isEnhanced);
+    
+    if (next != null)
+      return new MethodHeadGenerator<X>(this, method, next);
+    else
+      return null;
   }
 }

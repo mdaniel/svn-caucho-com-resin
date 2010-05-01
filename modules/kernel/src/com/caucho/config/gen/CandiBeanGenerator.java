@@ -66,9 +66,11 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   private AnnotatedType<X> _beanClass;
 
   private CandiView<X> _view;
+  
+  private AspectBeanFactory<X> _aspectFactory;
 
-  private ArrayList<BusinessMethodGenerator<X,X>> _businessMethods
-    = new ArrayList<BusinessMethodGenerator<X,X>>();
+  private ArrayList<AspectGenerator<X>> _businessMethods
+    = new ArrayList<AspectGenerator<X>>();
 
   private boolean _isEnhanced;
   private boolean _hasReadResolve;
@@ -95,6 +97,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     _view = new CandiView<X>(this, getBeanClass());
 
     _beanClass = beanClass;
+    
+    _aspectFactory = new CandiAspectBeanFactory<X>(beanClass);
   }
 
   public void setSingleton(boolean isSingleton)
@@ -102,7 +106,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     _isSingleton = isSingleton;
   }
   
-  public ArrayList<? extends BusinessMethodGenerator<X,X>> getBusinessMethods()
+  public ArrayList<AspectGenerator<X>> getBusinessMethods()
   {
     return _businessMethods;
   }
@@ -113,6 +117,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     super.introspect();
 
     introspectClass(_beanClass);
+    
+    AspectFactory<X> aspectHeadFactory = _aspectFactory.getHeadAspectFactory();
 
     for (AnnotatedMethod<? super X> method : _beanClass.getMethods()) {
       Method javaMethod = method.getJavaMember();
@@ -125,17 +131,14 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
         _hasReadResolve = true;
       }
 
-      int index = _businessMethods.size();
-      CandiMethod<X> bizMethod
-        = new CandiMethod<X>(_view, method, method, index);
-
+      boolean isEnhance = false;
+      AspectGenerator<X> bizMethod = aspectHeadFactory.create(method, isEnhance);
+      
+      if (bizMethod == null)
+        continue;
+      
       // ioc/0i10
       if (_businessMethods.contains(bizMethod))
-        continue;
-
-      bizMethod.introspect(method, method);
-
-      if (! bizMethod.isEnhanced())
         continue;
 
       int modifiers = method.getJavaMember().getModifiers();
@@ -313,7 +316,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     generatePostConstruct(out);
 
     HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator<X,X> method : _businessMethods) {
+    for (AspectGenerator<X> method : _businessMethods) {
       method.generate(out, map);
     }
 
@@ -385,7 +388,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     out.pushDepth();
 
     HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator<X,X> method : _businessMethods) {
+    for (AspectGenerator<X> method : _businessMethods) {
       method.generatePostConstruct(out, map);
     }
 

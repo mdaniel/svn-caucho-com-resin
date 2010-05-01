@@ -51,7 +51,6 @@ import javax.interceptor.InvocationContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.LineConfigException;
-import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
@@ -108,13 +107,9 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   private InjectionTarget<X> _injectionTarget;
 
-  protected ApiClass _remoteHome;
-  
   protected ArrayList<AnnotatedType<?>> _remoteList
     = new ArrayList<AnnotatedType<?>>();
 
-  protected ApiClass _localHome;
-  
   protected ArrayList<AnnotatedType<?>> _localList
     = new ArrayList<AnnotatedType<?>>();
 

@@ -39,7 +39,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -53,15 +53,19 @@ public class StatefulView<X,T> extends View<X,T> {
   private static final L10N L = new L10N(StatefulView.class);
 
   private StatefulGenerator<X> _sessionBean;
+  
+  private StatefulAspectBeanFactory<X> _aspectBeanFactory;
 
-  private final ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
-    = new ArrayList<BusinessMethodGenerator<X,T>>();
+  private final ArrayList<AspectGenerator<X>> _businessMethods
+    = new ArrayList<AspectGenerator<X>>();
 
   public StatefulView(StatefulGenerator<X> bean, AnnotatedType<T> api)
   {
     super(bean, api);
 
     _sessionBean = bean;
+    
+    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(bean.getBeanClass());
   }
 
   public StatefulGenerator<X> getSessionBean()
@@ -102,7 +106,7 @@ public class StatefulView<X,T> extends View<X,T> {
    * Returns the introspected methods
    */
   @Override
-  public ArrayList<BusinessMethodGenerator<X,T>> getMethods()
+  public ArrayList<AspectGenerator<X>> getMethods()
   {
     return _businessMethods;
   }
@@ -138,11 +142,11 @@ public class StatefulView<X,T> extends View<X,T> {
 
       // ejb/11d4
       // overridden methods may appear twice in the method list
-      BusinessMethodGenerator<X,T> oldMethod = null;
+      AspectGenerator<X> oldMethod = null;
 
-      for (BusinessMethodGenerator<X,T> bizMethod : _businessMethods) {
+      for (AspectGenerator<X> bizMethod : _businessMethods) {
         String bizMethodName 
-          = bizMethod.getApiMethod().getJavaMember().getName();
+          = bizMethod.getMethod().getJavaMember().getName();
 
         if (javaMethod.getName().equals(bizMethodName)) {
           oldMethod = bizMethod;
@@ -155,12 +159,9 @@ public class StatefulView<X,T> extends View<X,T> {
 
       int index = _businessMethods.size();
 
-      BusinessMethodGenerator<X,T> bizMethod = createMethod(apiMethod, index);
+      AspectGenerator<X> bizMethod = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
 
       if (bizMethod != null) {
-        bizMethod.introspect(bizMethod.getApiMethod(),
-                             bizMethod.getImplMethod());
-
         _businessMethods.add(bizMethod);
       }
     }
@@ -375,23 +376,6 @@ public class StatefulView<X,T> extends View<X,T> {
       out.println("  _server.initInstance(bean, injectBean, bean, env);");
     out.println("  return bean;");
     out.println("}");
-  }
-
-  protected BusinessMethodGenerator<X,T>
-    createMethod(AnnotatedMethod<? super T> apiMethod, int index)
-  {
-    AnnotatedMethod<? super X> implMethod = getMethod(apiMethod);
-
-    if (implMethod == null)
-      return null;
-
-    StatefulMethod<X,T> bizMethod
-      = new StatefulMethod<X,T>(this,
-                                apiMethod,
-                                implMethod,
-                                index);
-
-    return bizMethod;
   }
 
   protected void generateSuper(JavaWriter out, String serverVar)

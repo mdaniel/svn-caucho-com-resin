@@ -31,11 +31,11 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 
-import javax.ejb.Remove;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.AspectGenerator;
+import com.caucho.config.gen.MethodHeadGenerator;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -43,59 +43,20 @@ import com.caucho.java.JavaWriter;
  * Represents a singleton local business method
  */
 @Module
-public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
+public class SingletonMethodHeadGenerator<X> extends MethodHeadGenerator<X>
 {
   private boolean _isRemoveRetainIfException;
   
-  public SingletonMethod(SingletonView<X,T> view,
-                         AnnotatedMethod<? super T> apiMethod,
-                         AnnotatedMethod<? super X> implMethod,
-                         int index)
+  public SingletonMethodHeadGenerator(SingletonMethodHeadFactory<X> factory,
+                                      AnnotatedMethod<? super X> method,
+                                      AspectGenerator<X> next)
   {
-    super(view, apiMethod, implMethod, index);
-  }
-
-  @Override
-  public void setRemoveRetainIfException(boolean isRetain)
-  {
-    _isRemoveRetainIfException = isRetain;
-  }
-
-  protected boolean isProxy()
-  {
-    return getApiMethod() != getImplMethod();
-  }
-
-  /**
-   * Session bean default is REQUIRED
-   */
-  @Override
-  public void introspect(AnnotatedMethod<? super T> apiMethod,
-                         AnnotatedMethod<? super X> implMethod)
-  {
-    // getXa().setTransactionType(getDefaultTransactionType());
-
-    super.introspect(apiMethod, implMethod);
-
-    Remove remove = implMethod.getAnnotation(Remove.class);
-    
-    if (remove != null) {
-      _isRemoveRetainIfException = remove.retainIfException();
-    }
+    super(factory, method, next);
   }
 
   protected TransactionAttributeType getDefaultTransactionType()
   {
     return TransactionAttributeType.REQUIRED;
-  }
-  
-  /**
-   * Returns true if any interceptors enhance the business method
-   */
-  @Override
-  public boolean isEnhanced()
-  {
-    return true;
   }
   
   @Override
@@ -104,25 +65,11 @@ public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
   {
     super.generatePreTry(out);
     
-    if (getView().isRemote()
-        && hasException(java.rmi.NoSuchObjectException.class)) {
-      out.println("if (! _isValid)");
-      out.println("  throw new java.rmi.NoSuchObjectException(\"singleton instance "
-                  + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
-    }
-    else {
-      out.println("if (! _isValid)");
-      out.println("  throw new javax.ejb.NoSuchEJBException(\"singleton instance "
-                  + getBeanClass().getJavaClass().getSimpleName() + " is no longer valid\");");
-    }
+    out.println("if (! _isValid)");
+    out.println("  throw new javax.ejb.NoSuchEJBException(\"singleton instance "
+                + getJavaClass().getSimpleName() + " is no longer valid\");");
 
     out.println("boolean isValid = false;");
-    
-    /*
-    out.println("if (_isActive)");
-    out.println("  throw new EJBException(\"session bean is not reentrant\");");
-    out.println();
-    */
     
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
@@ -176,7 +123,7 @@ public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
       out.println();
       out.println("if (isOldValid)");
       out.print("  _manager.destroyInstance(");
-      generateThis(out);
+      out.print(getBeanFactory().getBeanProxy());
       out.println(");");
     
       out.popDepth();
@@ -186,41 +133,5 @@ public class SingletonMethod<X,T> extends BusinessMethodGenerator<X,T>
     out.println("thread.setContextClassLoader(oldLoader);");
     
     super.generateFinally(out);
-  }
-
-  /**
-   * Generates the underlying bean instance
-   */
-  @Override
-  protected void generateThis(JavaWriter out)
-    throws IOException
-  {
-    if (isProxy())
-      out.print("_bean");
-    else
-      out.print("this");
-  }
-
-  /**
-   * Generates the underlying bean instance
-   */
-  protected void generateSuper(JavaWriter out)
-    throws IOException
-  {
-    out.print(getSuper());
-  }
-
-  /**
-   * Generates the underlying bean instance
-   */
-  @Override
-  protected String getSuper()
-    throws IOException
-  {
-    if (isProxy())
-      return "_bean";
-    else {
-      return "super";
-    }
   }
 }

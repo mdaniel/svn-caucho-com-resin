@@ -66,7 +66,6 @@ import javax.interceptor.InvocationContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
 import com.caucho.config.bytecode.SerializationAdapter;
-import com.caucho.config.gen.ApiClass;
 import com.caucho.config.gen.BeanInjectionTarget;
 import com.caucho.config.gen.CandiBeanGenerator;
 import com.caucho.config.j2ee.PostConstructProgram;

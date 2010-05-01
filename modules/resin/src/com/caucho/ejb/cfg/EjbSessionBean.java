@@ -344,8 +344,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
 
     // if (getLocalList().size() != 0 || getRemoteList().size() != 0) {
-    if (_localHome != null || _localList.size() != 0 || _remoteHome != null
-        || _remoteList.size() != 0) {
+    if (_localList.size() != 0 || _remoteList.size() != 0) {
     } else if (interfaceList.size() == 0) {
       // Session bean no-interface view.
     } else if (interfaceList.size() != 1)

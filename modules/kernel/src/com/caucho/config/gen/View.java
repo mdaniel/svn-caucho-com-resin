@@ -166,7 +166,7 @@ abstract public class View<X,T> {
   /**
    * Returns the introspected methods
    */
-  public ArrayList<? extends BusinessMethodGenerator<X,T>> getMethods()
+  public ArrayList<AspectGenerator<X>> getMethods()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -261,7 +261,7 @@ abstract public class View<X,T> {
                                        HashMap<String,Object> map)
     throws IOException
   {
-    for (BusinessMethodGenerator<X,T> method : getMethods()) {
+    for (AspectGenerator<X> method : getMethods()) {
       method.generateProxyConstructor(out, map);
     }
   }
@@ -283,7 +283,7 @@ abstract public class View<X,T> {
                                       HashMap<String,Object> map)
     throws IOException
   {
-    for (BusinessMethodGenerator<X,T> method : getMethods()) {
+    for (AspectGenerator<X> method : getMethods()) {
       method.generateBeanConstructor(out, map);
     }
   }
@@ -304,7 +304,7 @@ abstract public class View<X,T> {
                                    HashMap<String,Object> map)
     throws IOException
   {
-    for (BusinessMethodGenerator<X,T> method : getMethods()) {
+    for (AspectGenerator<X> method : getMethods()) {
       method.generateBeanPrologue(out, map);
     }
   }
@@ -318,7 +318,7 @@ abstract public class View<X,T> {
      out.pushDepth();
 
      HashMap<String,Object> map = new HashMap<String,Object>();
-     for (BusinessMethodGenerator<X,T> method : getMethods()) {
+     for (AspectGenerator<X> method : getMethods()) {
        method.generatePostConstruct(out, map);
      }
 
@@ -334,7 +334,7 @@ abstract public class View<X,T> {
     throws IOException
   {
     HashMap<String,Object> map = new HashMap<String,Object>();
-    for (BusinessMethodGenerator<X,T> method : getMethods()) {
+    for (AspectGenerator<X> method : getMethods()) {
       method.generate(out, map);
     }
   }

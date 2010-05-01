@@ -33,33 +33,25 @@ import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.HashMap;
 
-import javax.ejb.Asynchronous;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.ConfigException;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
-import com.caucho.util.L10N;
 
 /**
  * Represents the @Asynchronous interception
  */
 @Module
-public class AsynchronousCallChain<X,T> extends AbstractCallChain<X,T> {
-  private static final L10N L = new L10N(AsynchronousCallChain.class);
-
-  private BusinessMethodGenerator<X,T> _bizMethod;
+public class AsynchronousGenerator<X> extends AbstractAspectGenerator<X> {
   private boolean _isAsynchronous;
 
   private String _varName;
  
-  public AsynchronousCallChain(BusinessMethodGenerator<X,T> bizMethod,
-                               EjbCallChain<X,T> next)
+  public AsynchronousGenerator(AsynchronousFactory<X> factory,
+                               AnnotatedMethod<? super X> method,
+                               AspectGenerator<X> next)
   {
-    super(bizMethod, next);
-    
-    _bizMethod = bizMethod;
+    super(factory, method, next);
   }
   
   /**
@@ -82,7 +74,7 @@ public class AsynchronousCallChain<X,T> extends AbstractCallChain<X,T> {
    *   @PermitAll
    *   @DenyAll
    */
-  @Override
+  /*
   public void introspect(AnnotatedMethod<? super T> apiMethod, 
                          AnnotatedMethod<? super X> implMethod)
   {
@@ -109,6 +101,7 @@ public class AsynchronousCallChain<X,T> extends AbstractCallChain<X,T> {
                                    L.l("@Asynchronous method must return void"));
     }
   }
+  */
   
   //
   // business method interception
@@ -120,23 +113,17 @@ public class AsynchronousCallChain<X,T> extends AbstractCallChain<X,T> {
   {
     super.generateMethodPrologue(out, map);
     
-    if (_isAsynchronous) {
-      _varName = "_caucho_async_" + out.generateId();
+    _varName = "_caucho_async_" + out.generateId();
       
-      out.print("private com.caucho.config.async.AsyncQueue " + _varName);
-      out.println(" = new com.caucho.config.async.AsyncQueue();");
-    }
+    out.print("private com.caucho.config.async.AsyncQueue " + _varName);
+    out.println(" = new com.caucho.config.async.AsyncQueue();");
   }
   
   @Override
   public void generateAsync(JavaWriter out)
     throws IOException
   {
-    if (! _isAsynchronous) {
-      return;
-    }
-    
-    Method javaApiMethod = _bizMethod.getApiMethod().getJavaMember(); 
+    Method javaApiMethod = getJavaMethod();
     
     Class<?> []paramType = javaApiMethod.getParameterTypes();
     

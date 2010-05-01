@@ -38,96 +38,87 @@ import com.caucho.java.JavaWriter;
 
 /**
  * Represents a filter for invoking a method
+ * 
+ * <code><pre>
+ * [method-prologue]
+ * MyType foo(args)
+ * {
+ *   [pre-try]
+ *   try {
+ *     [pre-call]
+ *     value = [call]
+ *     [post-call]
+ *     return value;
+ *   } catch (ApplicationException e) {
+ *     [application-exception]
+ *     throw e;
+ *   } catch (RuntimeException e) {
+ *     [system-exception]
+ *     throw e;
+ *   } finally {
+ *     [finally]
+ *   }
+ * }
+ * </pre></code>
  */
 @Module
-public class NullCallChain<X,T> implements EjbCallChain<X,T> {
-  NullCallChain()
-  {
-  }
+public interface AspectGenerator<X> {  
+  /**
+   * Returns the underlying method.
+   */
+  public AnnotatedMethod<? super X> getMethod();
   
-  //
-  // introspection
-  //
+  /**
+   * Top-level generator.
+   */
+  public void generate(JavaWriter out,
+                       HashMap<String,Object> prologueMap)
+    throws IOException;
 
   /**
-   * Returns true if this filter will generate code.
+   * Generates the static class prologue
    */
-  @Override
-  public boolean isEnhanced()
-  {
-    return false;
-  }
+  public void generateBeanPrologue(JavaWriter out, 
+                                   HashMap<String,Object> map)
+    throws IOException;
 
   /**
-   * Introspects the method for the default values
+   * Generates initialization in the constructor
    */
-  @Override
-  public void introspect(AnnotatedMethod<? super T> apiMethod, 
-                         AnnotatedMethod<? super X> implMethod)
-  {
-  }
-  
-  //
-  // bean instance interception
-  //
-
-  /**
-   * Generates the bean instance class prologue
-   */
-  @Override
-  public void generateBeanPrologue(JavaWriter out, HashMap<String,Object> map)
-    throws IOException
-  {
-  }
-
-  /**
-   * Generates bean instance interception
-   */
-  @Override
-  public void generateBeanConstructor(JavaWriter out,
+  public void generateBeanConstructor(JavaWriter out, 
                                       HashMap<String,Object> map)
-    throws IOException
-  {
-  }
+    throws IOException;
 
   /**
-   * Generates bean instance interception
+   * Generates initialization in the proxy constructor
    */
-  @Override
-  public void generateProxyConstructor(JavaWriter out,
+  public void generateProxyConstructor(JavaWriter out, 
                                        HashMap<String,Object> map)
-    throws IOException
-  {
-  }
+    throws IOException;
 
   /**
-   * Generates bean post construct interception
+   * Generates @PostConstruct code
    */
-  @Override
-  public void generatePostConstruct(JavaWriter out,
+  public void generatePostConstruct(JavaWriter out, 
                                     HashMap<String,Object> map)
-    throws IOException
-  {
-  }
+    throws IOException;
   
   //
-  // business method interception
+  // method call interception
   //
 
   /**
    * Generates the static class prologue
    */
-  @Override
-  public void generateMethodPrologue(JavaWriter out, HashMap<String,Object> map)
-    throws IOException
-  {
-  }
-
-  @Override
+  public void generateMethodPrologue(JavaWriter out, 
+                                     HashMap<String,Object> map)
+    throws IOException;
+  
+  //
+  // async dispatch method
+  //
   public void generateAsync(JavaWriter out)
-    throws IOException
-  {
-  }
+    throws IOException;
   
   /**
    * Generates code before the try block
@@ -140,12 +131,9 @@ public class NullCallChain<X,T> implements EjbCallChain<X,T> {
    * }
    * </pre></code>
    */
-  @Override
   public void generatePreTry(JavaWriter out)
-    throws IOException
-  {
-  }
-
+    throws IOException;
+  
   /**
    * Generates code before the call, in the try block.
    * <code><pre>
@@ -158,21 +146,15 @@ public class NullCallChain<X,T> implements EjbCallChain<X,T> {
    * }
    * </pre></code>
    */
-  @Override
   public void generatePreCall(JavaWriter out)
-    throws IOException
-  {
-  }
+    throws IOException;
 
   /**
    * Generates the method interception code
    */
-  @Override
-  public void generateCall(JavaWriter out)
-    throws IOException
-  {
-  }
-
+  public void generateCall(JavaWriter out) 
+    throws IOException;
+  
   /**
    * Generates code after the call, before the return.
    * <code><pre>
@@ -189,40 +171,28 @@ public class NullCallChain<X,T> implements EjbCallChain<X,T> {
    * }
    * </pre></code>
    */
-  @Override
   public void generatePostCall(JavaWriter out)
-    throws IOException
-  {
-  }
-
+    throws IOException;
+  
   /**
    * Generates application (checked) exception code for
    * the method.
    */
-  @Override
   public void generateApplicationException(JavaWriter out,
                                            Class<?> exn)
-    throws IOException
-  {
-  }
-
+    throws IOException;
+  
   /**
    * Generates system (runtime) exception code for
    * the method.
    */
-  @Override
   public void generateSystemException(JavaWriter out,
                                       Class<?> exn)
-    throws IOException
-  {
-  }
-
+    throws IOException;
+  
   /**
    * Generates finally code for the method
    */
-  @Override
   public void generateFinally(JavaWriter out)
-    throws IOException
-  {
-  }
+    throws IOException;
 }

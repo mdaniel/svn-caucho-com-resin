@@ -29,48 +29,45 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.config.reflect.AnnotatedElementImpl;
+import java.io.IOException;
 
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-import java.util.*;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import javax.enterprise.inject.spi.Annotated;
+import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
 
 /**
- * Represents an introspected method.
+ * Represents a CDI local business method
  */
-abstract public class ApiMember extends AnnotatedElementImpl {
-  private ApiClass _declaringClass;
-  
-  /**
-   * Creates a new method.
-   *
-   * @param topClass the top class
-   * @param method the introspected method
-   */
-  public ApiMember(ApiClass declaringClass,
-		   Type type,
-		   Annotated annotated,
-		   Annotation []annotations)
+@Module
+public class CandiHeadGenerator<X> extends MethodHeadGenerator<X>
+{
+  public CandiHeadGenerator(MethodHeadFactory<X> factory,
+                            AnnotatedMethod<? super X> method,
+                            AspectGenerator<X> next)
   {
-    super(type, annotated, annotations);
-
-    _declaringClass = declaringClass;
+    super(factory, method, next);
   }
 
   /**
-   * Returns the declaring ApiClass
+   * Generates code before the "try" block
+   * <code><pre>
+   * retType myMethod(...)
+   * {
+   *   [pre-try]
+   *   try {
+   *     ...
+   * }
+   * </pre></code>
    */
-  public ApiClass getDeclaringClass()
+  @Override
+  public void generatePreTry(JavaWriter out)
+    throws IOException
   {
-    return _declaringClass;
-  }
+    super.generatePreTry(out);
+    
+    String beanClassName = getJavaClass().getName();
 
-  abstract public Member getJavaMember();
-  
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + getJavaMember() + "]";
+    out.println(beanClassName + " bean = this;");
   }
 }

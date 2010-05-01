@@ -29,11 +29,6 @@
 
 package com.caucho.config.gen;
 
-import com.caucho.config.inject.DecoratorBean;
-import com.caucho.config.inject.InterceptorBean;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.util.L10N;
-
 import java.lang.annotation.Annotation;
 
 import javax.ejb.TransactionAttribute;

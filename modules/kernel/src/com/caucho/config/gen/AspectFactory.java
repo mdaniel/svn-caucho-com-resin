@@ -26,17 +26,31 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.config.gen;
 
-import java.lang.reflect.*;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+
+import com.caucho.inject.Module;
 
 /**
- * Create call chain elements
+ * Creates an aspect generator for a method.
  */
-public interface CallChainFactory {
+@Module
+public interface AspectFactory<X> {
   /**
-   * Returns a call chain element, if the method matches
+   * Returns the owning AspectBeanFactory
    */
-  public EjbCallChain isValid(Method apiMethod, Method implMethod);
+  public AspectBeanFactory<X> getAspectBeanFactory();
+  
+  /**
+   * Returns the bean type.
+   */
+  public AnnotatedType<X> getBeanType();
+  
+  /**
+   * Returns an aspect for the method if one exists.
+   */
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced);
 }

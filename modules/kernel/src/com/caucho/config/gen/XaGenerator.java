@@ -52,31 +52,18 @@ import com.caucho.java.JavaWriter;
  * Represents the XA interception
  */
 @Module
-public class XaCallChain<X,T> extends AbstractCallChain<X,T> {
-  private EjbCallChain<X,T> _next;
-
+public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   private TransactionAttributeType _transactionType;
   private boolean _isContainerManaged = true;
   private boolean _isSessionSynchronization;
 
-  public XaCallChain(BusinessMethodGenerator<X,T> bizMethod,
-                     EjbCallChain<X,T> next)
+  public XaGenerator(XaFactory<X> factory,
+                     AnnotatedMethod<? super X> method,
+                     AspectGenerator<X> next)
   {
-    super(bizMethod, next);
+    super(factory, method, next);
 
-    _next = next;
-
-    _isContainerManaged = bizMethod.isXaContainerManaged();
-  }
-
-  /**
-   * Returns true if the business method has any active XA annotation.
-   */
-  @Override
-  public boolean isEnhanced()
-  {
-    return (_isContainerManaged && _transactionType != null 
-            && ! _transactionType.equals(SUPPORTS));
+    // _isContainerManaged = bizMethod.isXaContainerManaged();
   }
 
   /**
@@ -90,6 +77,7 @@ public class XaCallChain<X,T> extends AbstractCallChain<X,T> {
   /**
    * Introspects the method for the default values
    */
+  /*
   @Override
   public void introspect(AnnotatedMethod<? super T> apiMethod,
                          AnnotatedMethod<? super X> implMethod)
@@ -135,6 +123,7 @@ public class XaCallChain<X,T> extends AbstractCallChain<X,T> {
     if (xaAttr != null)
       _transactionType = xaAttr.value();
   }
+  */
 
   //
   // bean prologue generation
@@ -155,7 +144,7 @@ public class XaCallChain<X,T> extends AbstractCallChain<X,T> {
       out.println("  = new com.caucho.ejb.util.XAManager();");
     }
 
-    _next.generateMethodPrologue(out, map);
+    super.generateMethodPrologue(out, map);
   }
 
   //
@@ -251,7 +240,7 @@ public class XaCallChain<X,T> extends AbstractCallChain<X,T> {
 
     if (_isContainerManaged && _isSessionSynchronization) {
       out.print("_xa.registerSynchronization(");
-      getBusinessMethod().generateThis(out);
+      // XXX: getBusinessMethod().generateThis(out);
       out.println(");");
     }
 

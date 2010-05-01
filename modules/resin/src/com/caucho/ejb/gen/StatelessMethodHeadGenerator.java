@@ -32,9 +32,9 @@ package com.caucho.ejb.gen;
 import java.io.IOException;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.AspectGenerator;
+import com.caucho.config.gen.MethodHeadGenerator;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -42,49 +42,15 @@ import com.caucho.java.JavaWriter;
  * Represents a stateless local business method
  */
 @Module
-public class StatelessMethod<X,T> extends BusinessMethodGenerator<X,T>
+public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
 {
   private String _beanClassName;
   
-  public StatelessMethod(AnnotatedType<X> ejbClass,
-                         String beanClassName,
-                         StatelessView<X,T> view,
-                         AnnotatedMethod<? super T> apiMethod,
-                         AnnotatedMethod<? super X> implMethod,
-                         int index)
+  public StatelessMethodHeadGenerator(StatelessMethodHeadFactory<X> factory,
+                                      AnnotatedMethod<? super X> method,
+                                      AspectGenerator<X> next)
   {
-    super(view, apiMethod, implMethod, index);
-
-    _beanClassName = beanClassName;
-  }
-  
-  /*
-  @Override
-  protected EjbCallChain createTailCallChain()
-  {
-    return new MethodTailCallChain(this);
-  }
-  */
-
-  /**
-   * Session bean default is REQUIRED
-   */
-  @Override
-  public void introspect(AnnotatedMethod<? super T> apiMethod, 
-                         AnnotatedMethod<? super X> implMethod)
-  {
-    // getXa().setTransactionType(TransactionAttributeType.REQUIRED);
-
-    super.introspect(apiMethod, implMethod);
-  }
-
-  /**
-   * Returns true if any interceptors enhance the business method
-   */
-  @Override
-  public boolean isEnhanced()
-  {
-    return true;
+    super(factory, method, next);
   }
 
   /**
@@ -219,45 +185,4 @@ public class StatelessMethod<X,T> extends BusinessMethodGenerator<X,T>
     out.println();
     out.println("thread.setContextClassLoader(oldLoader);");
   }
-  
-  //
-  // lifecycle override code
-  //
-   
-  /**
-   * Generates the underlying bean instance
-   */
-  @Override
-  protected void generateThis(JavaWriter out)
-    throws IOException
-  {
-    out.print("bean");
-  }
-  
-  /**
-   * Generates data associated with the bean
-   */
-  @Override
-  protected void generateBeanInfo(JavaWriter out)
-    throws IOException
-  {
-    out.print("poolItem");
-  }
-  
-  /**
-   * Generates the underlying bean instance
-   */
-  @Override
-  protected String getSuper()
-  {
-    return "bean";
-  }
-  
-  /*
-  // XXX: move to InterceptorCallChain
-  @Override
-  public void generateInterceptorTarget(JavaWriter out) throws IOException
-  {
-  }
-  */
 }

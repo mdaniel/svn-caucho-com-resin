@@ -38,7 +38,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.gen.BusinessMethodGenerator;
+import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -52,15 +52,19 @@ public class SingletonView<X,T> extends View<X,T> {
   private static final L10N L = new L10N(SingletonView.class);
 
   private SingletonGenerator<X> _sessionBean;
+  
+  private SingletonAspectBeanFactory<X> _aspectBeanFactory;
 
-  private ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
-    = new ArrayList<BusinessMethodGenerator<X,T>>();
+  private ArrayList<AspectGenerator<X>> _businessMethods
+    = new ArrayList<AspectGenerator<X>>();
 
   public SingletonView(SingletonGenerator<X> bean, AnnotatedType<T> api)
   {
     super(bean, api);
 
     _sessionBean = bean;
+    
+    _aspectBeanFactory = new SingletonAspectBeanFactory<X>(bean.getBeanClass());
   }
 
   public SingletonGenerator<X> getSessionBean()
@@ -98,7 +102,7 @@ public class SingletonView<X,T> extends View<X,T> {
    * Returns the introspected methods
    */
   @Override
-  public ArrayList<? extends BusinessMethodGenerator<X,T>> getMethods()
+  public ArrayList<AspectGenerator<X>> getMethods()
   {
     return _businessMethods;
   }
@@ -129,12 +133,10 @@ public class SingletonView<X,T> extends View<X,T> {
 
       int index = _businessMethods.size();
 
-      BusinessMethodGenerator<X,T> bizMethod = createMethod(apiMethod, index);
+      AspectGenerator<X> bizMethod
+        = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
 
       if (bizMethod != null) {
-        bizMethod.introspect(bizMethod.getApiMethod(),
-                             bizMethod.getImplMethod());
-
         _businessMethods.add(bizMethod);
       }
     }
@@ -336,20 +338,6 @@ public class SingletonView<X,T> extends View<X,T> {
     out.println("  return this;");
 
     out.println("}");
-  }
-
-  protected BusinessMethodGenerator<X,T>
-    createMethod(AnnotatedMethod<? super T> apiMethod, int index)
-  {
-    AnnotatedMethod<? super X> implMethod = findImplMethod(apiMethod);
-
-    if (implMethod == null)
-      return null;
-
-    SingletonMethod<X,T> bizMethod
-      = new SingletonMethod<X,T>(this, apiMethod, implMethod, index);
-
-    return bizMethod;
   }
 
   protected void generateSuper(JavaWriter out, String serverVar)

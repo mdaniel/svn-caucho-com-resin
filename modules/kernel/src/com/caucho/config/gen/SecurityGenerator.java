@@ -46,34 +46,17 @@ import com.caucho.java.JavaWriter;
  * Represents the security interception
  */
 @Module
-public class SecurityCallChain<X,T> extends AbstractCallChain<X,T> {
-  private EjbCallChain<X,T> _next;
-
+public class SecurityGenerator<X> extends AbstractAspectGenerator<X> {
   private String []_roles;
   private String _roleVar;
 
   private String _runAs;
  
-  public SecurityCallChain(BusinessMethodGenerator<X,T> bizMethod,
-			   EjbCallChain<X,T> next)
+  public SecurityGenerator(SecurityFactory<X> factory,
+                           AnnotatedMethod<? super X> method,
+			   AspectGenerator<X> next)
   {
-    super(bizMethod, next);
-    
-    _next = next;
-  }
-  
-  /**
-   * Returns true if the business method has any active XA annotation.
-   */
-  @Override
-  public boolean isEnhanced()
-  {
-    if (_roles != null)
-      return true;
-    else if (_runAs != null)
-      return true;
-    else
-      return false;
+    super(factory, method, next);
   }
 
   /**
@@ -83,6 +66,7 @@ public class SecurityCallChain<X,T> extends AbstractCallChain<X,T> {
    *   @PermitAll
    *   @DenyAll
    */
+  /*
   @Override
   public void introspect(AnnotatedMethod<? super T> apiMethod, 
                          AnnotatedMethod<? super X> implMethod)
@@ -120,6 +104,7 @@ public class SecurityCallChain<X,T> extends AbstractCallChain<X,T> {
     if (denyAll != null)
       _roles = new String[0];
   }
+  */
   
   //
   // business method interception
@@ -150,7 +135,7 @@ public class SecurityCallChain<X,T> extends AbstractCallChain<X,T> {
       out.println("};");
     }
 
-    _next.generateMethodPrologue(out, map);
+    super.generateMethodPrologue(out, map);
   }
   
   //

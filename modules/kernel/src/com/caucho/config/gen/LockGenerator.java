@@ -50,22 +50,19 @@ import com.caucho.java.JavaWriter;
  * it towards EJB singletons, but it can be used for other bean types.
  */
 @Module
-public class LockCallChain<X,T> extends AbstractCallChain<X,T> {
+public class LockGenerator<X> extends AbstractAspectGenerator<X> {
   private static final int DEFAULT_TIMEOUT = 10000;
-
-  private EjbCallChain<X,T> _next;
 
   private boolean _isContainerManaged;
   private LockType _lockType;
   private long _lockTimeout;
   private TimeUnit _lockTimeoutUnit;
 
-  public LockCallChain(BusinessMethodGenerator<X,T> businessMethod,
-                       EjbCallChain<X,T> next)
+  public LockGenerator(LockFactory<X> factory,
+                       AnnotatedMethod<? super X> method,
+                       AspectGenerator<X> next)
   {
-    super(businessMethod, next);
-
-    _next = next;
+    super(factory, method, next);
 
     _isContainerManaged = true;
     _lockType = null;
@@ -85,17 +82,9 @@ public class LockCallChain<X,T> extends AbstractCallChain<X,T> {
   }
 
   /**
-   * Returns true if the business method has a lock annotation.
-   */
-  @Override
-  public boolean isEnhanced()
-  {
-    return (_isContainerManaged && (_lockType != null));
-  }
-
-  /**
    * Introspects the method for locking attributes.
    */
+  /*
   @Override
   public void introspect(AnnotatedMethod<? super T> apiMethod,
                          AnnotatedMethod<? super X> implementationMethod)
@@ -130,6 +119,7 @@ public class LockCallChain<X,T> extends AbstractCallChain<X,T> {
       _lockTimeoutUnit = accessTimeoutAttribute.unit();
     }
   }
+  */
 
   /**
    * Generates the class prologue.
@@ -147,7 +137,7 @@ public class LockCallChain<X,T> extends AbstractCallChain<X,T> {
       out.println("private transient final java.util.concurrent.locks.ReentrantReadWriteLock _readWriteLock = new java.util.concurrent.locks.ReentrantReadWriteLock();");
     }
 
-    _next.generateMethodPrologue(out, map);
+    super.generateMethodPrologue(out, map);
   }
 
   /**
@@ -209,10 +199,5 @@ public class LockCallChain<X,T> extends AbstractCallChain<X,T> {
         break;
       }
     }
-  }
-
-  protected void generateNext(JavaWriter out) throws IOException
-  {
-    _next.generateCall(out);
   }
 }

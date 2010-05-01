@@ -27,46 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.gen;
-
-import static javax.ejb.TransactionAttributeType.REQUIRED;
-
-import java.io.IOException;
+package com.caucho.config.gen;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.AspectFactory;
-import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.XaFactory;
-import com.caucho.config.gen.XaGenerator;
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 
 /**
- * Represents the xa interception
+ * Aspect factory for generating @Asynchronous aspects.
  */
 @Module
-public class MessageXaCallChain<X> extends XaGenerator<X>
+public class AsynchronousFactory<X>
+  extends AbstractAspectFactory<X>
 {
-  public MessageXaCallChain(XaFactory<X> factory,
-                            AnnotatedMethod<? super X> method,
-			    AspectGenerator<X> next)
+  AsynchronousFactory(AspectBeanFactory<X> beanFactory,
+                      AspectFactory<X> next)
   {
-    super(factory, method, next);
+    super(beanFactory, next);
   }
-
+  
+  /**
+   * Creates an aspect for interception if the method should be intercepted.
+   */
   @Override
-  public void generatePreCall(JavaWriter out)
-    throws IOException
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
+                                   boolean isEnhanced)
   {
-    super.generatePreCall(out);
-    
-    if (REQUIRED.equals(getTransactionType())) {
-      out.println();
-      out.println("if (_xaResource != null)");
-      out.println("  _xa.enlist(_xaResource);");
-    }
-
-    out.println("/* ... */");
+    return super.create(method, isEnhanced);
   }
 }

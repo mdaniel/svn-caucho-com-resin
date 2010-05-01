@@ -26,50 +26,50 @@
  *
  * @author Scott Ferguson
  */
-
 package com.caucho.config.gen;
 
-import java.io.IOException;
-
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 
 /**
- * Represents a CDI local business method
+ * Manages aspect factories for a bean.
  */
 @Module
-public class CandiMethod<X> extends BusinessMethodGenerator<X,X>
-{
-
-  public CandiMethod(CandiView<X> view,
-                     AnnotatedMethod<? super X> apiMethod,
-                     AnnotatedMethod<? super X> implMethod,
-                     int index)
-  {
-    super(view, apiMethod, implMethod, index);
-  }
-
+public interface AspectBeanFactory<X> {
   /**
-   * Generates code before the "try" block
-   * <code><pre>
-   * retType myMethod(...)
-   * {
-   *   [pre-try]
-   *   try {
-   *     ...
-   * }
-   * </pre></code>
+   * Returns the bean type.
    */
-  @Override
-  public void generatePreTry(JavaWriter out)
-    throws IOException
-  {
-    super.generatePreTry(out);
-    
-    String beanClassName = getView().getBeanClassName();
-
-    out.println(beanClassName + " bean = this;");
-  }
+  public AnnotatedType<X> getBeanType();
+  
+  /**
+   * Returns the head aspect factory
+   */
+  public AspectFactory<X> getHeadAspectFactory();
+  
+  /**
+   * Returns true for a proxied instance
+   */
+  public boolean isProxy();
+  
+  /**
+   * Returns the bean instance Java reference.
+   */
+  public String getBeanInstance();
+  
+  /**
+   * Returns the proxy Java reference.
+   */
+  public String getBeanProxy();
+  
+  /**
+   * Returns the beanInfo variable for shared bean instance information
+   */
+  public String getBeanInfo();
+  
+  /**
+   * Creates an aspect generator.
+   */
+  public AspectGenerator<X> create(AnnotatedMethod<? super X> method);
 }

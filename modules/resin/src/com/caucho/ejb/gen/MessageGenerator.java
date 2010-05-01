@@ -40,7 +40,6 @@ import javax.ejb.MessageDrivenBean;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.BusinessMethodGenerator;
 import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -185,7 +184,9 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     out.println("try {");
     out.pushDepth();
 
-    for (BusinessMethodGenerator<X,?> bizMethod : _view.getMethods()) {
+    // XXX: 4.0.7
+    /*
+    for (AspectGenerator<X> bizMethod : _view.getMethods()) {
       if (REQUIRED.equals(bizMethod.getXa().getTransactionType())) {
 	Method api = bizMethod.getApiMethod().getJavaMember();
 	
@@ -202,6 +203,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
 	out.println("}));");
       }
     }
+    */
 
     out.popDepth();
     out.println("} catch (Exception e) {");

@@ -29,14 +29,12 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.BusinessMethodGenerator;
-import com.caucho.config.gen.View;
-import com.caucho.config.gen.ApiMethod;
-import com.caucho.util.L10N;
-import java.lang.reflect.*;
+import java.lang.reflect.Method;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
+
+import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.View;
 
 /**
  * Configuration for remove-method.
@@ -82,6 +80,7 @@ public class RemoveMethod {
     for (View<X,?> view : bean.getViews()) {
       // XXX: check for type
       
+      /*
       for (BusinessMethodGenerator<X,?> bizMethod : view.getMethods()) {
 	AnnotatedMethod<?> apiMethod = bizMethod.getApiMethod();
 	
@@ -90,6 +89,7 @@ public class RemoveMethod {
 	  bizMethod.setRemoveRetainIfException(_retainIfException);
 	}
       }
+      */
     }
   }
 }

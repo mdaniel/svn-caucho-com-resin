@@ -51,14 +51,18 @@ public class MessageView<X,T> extends View<X,T> {
 
   private MessageGenerator<X> _messageBean;
   
-  private ArrayList<BusinessMethodGenerator<X,T>> _businessMethods
-    = new ArrayList<BusinessMethodGenerator<X,T>>();
+  private AspectBeanFactory<X> _aspectBeanFactory;
+  
+  private ArrayList<AspectGenerator<X>> _businessMethods
+    = new ArrayList<AspectGenerator<X>>();
 
   public MessageView(MessageGenerator<X> bean, AnnotatedType<T> api)
   {
     super(bean, api);
 
     _messageBean = bean;
+    
+    _aspectBeanFactory = new MessageAspectBeanFactory<X>(bean.getBeanClass());
   }
 
   public MessageGenerator<X> getMessageBean()
@@ -81,7 +85,7 @@ public class MessageView<X,T> extends View<X,T> {
    * Returns the introspected methods
    */
   @Override
-  public ArrayList<? extends BusinessMethodGenerator<X,T>> getMethods()
+  public ArrayList<AspectGenerator<X>> getMethods()
   {
     return _businessMethods;
   }
@@ -106,12 +110,10 @@ public class MessageView<X,T> extends View<X,T> {
 
       int index = _businessMethods.size();
       
-      BusinessMethodGenerator<X,T> bizMethod = createMethod(apiMethod, index);
+      AspectGenerator<X> bizMethod
+        = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
       
       if (bizMethod != null) {
-	bizMethod.introspect(bizMethod.getApiMethod(),
-			     bizMethod.getImplMethod());
-	
 	_businessMethods.add(bizMethod);
       }
     }
@@ -138,26 +140,9 @@ public class MessageView<X,T> extends View<X,T> {
     }
     */
     
-    for (BusinessMethodGenerator<X,T> bizMethod : _businessMethods) {
+    for (AspectGenerator<X> bizMethod : _businessMethods) {
       bizMethod.generate(out, map);
     }
-  }
-
-  protected BusinessMethodGenerator<X,T>
-    createMethod(AnnotatedMethod<? super T> apiMethod, int index)
-  {
-    AnnotatedMethod<? super X> implMethod = findImplMethod(apiMethod);
-
-    if (implMethod == null)
-      return null;
-    
-    BusinessMethodGenerator<X,T> bizMethod
-      = new MessageMethod<X,T>(this,
-                               apiMethod,
-                               implMethod,
-                               index);
-
-    return bizMethod;
   }
   
   protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super T> apiMethod)

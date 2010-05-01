@@ -58,7 +58,7 @@ public class CandiUtil {
   }
 
   public static int []createInterceptors(InjectManager manager,
-                                         ArrayList<Interceptor> beans,
+                                         ArrayList<Interceptor<?>> beans,
                                          int []indexList,
                                          InterceptionType type,
                                          Annotation ...bindings)
@@ -99,7 +99,7 @@ public class CandiUtil {
     return indexList;
   }
 
-  public static Method []createMethods(ArrayList<Interceptor> beans,
+  public static Method []createMethods(ArrayList<Interceptor<?>> beans,
                                        InterceptionType type,
                                        int []indexChain)
   {
@@ -109,7 +109,7 @@ public class CandiUtil {
       int index = indexChain[i];
 
       // XXX:
-      Method method = ((InterceptorBean) beans.get(index)).getMethod(type);
+      Method method = ((InterceptorBean<?>) beans.get(index)).getMethod(type);
 
       if (method == null)
         throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",
@@ -150,16 +150,16 @@ public class CandiUtil {
     return method;
   }
 
-  public static Object generateDelegate(List<Decorator> beans,
+  public static Object generateDelegate(List<Decorator<?>> beans,
                                         Object tail)
   {
     InjectManager webBeans = InjectManager.create();
 
-    Bean parentBean = null;
+    Bean<?> parentBean = null;
     CreationalContext env = webBeans.createCreationalContext(parentBean);
 
     for (int i = beans.size() - 1; i >= 0; i--) {
-      Decorator bean = beans.get(i);
+      Decorator<?> bean = beans.get(i);
 
       Object instance = webBeans.getReference(bean, bean.getBeanClass(), env);
 
@@ -182,12 +182,12 @@ public class CandiUtil {
     CreationalContext env = webBeans.createCreationalContext(parentBean);
 
     for (int i = 0; i < beans.size(); i++) {
-      Decorator bean = beans.get(i);
+      Decorator<?> bean = beans.get(i);
 
       Object instance = webBeans.getReference(bean, bean.getBeanClass(), env);
 
       // XXX:
-      ((DecoratorBean) bean).setDelegate(instance, proxy);
+      ((DecoratorBean<?>) bean).setDelegate(instance, proxy);
 
       instances[beans.size() - 1 - i] = instance;
     }
@@ -196,7 +196,7 @@ public class CandiUtil {
   }
 
   public static int nextDelegate(Object []beans,
-                                 Class api,
+                                 Class<?> api,
                                  int index)
   {
     for (index--; index >= 0; index--) {
@@ -209,11 +209,11 @@ public class CandiUtil {
   }
 
   public static int nextDelegate(Object []beans,
-                                 Class []apis,
+                                 Class<?> []apis,
                                  int index)
   {
     for (index--; index >= 0; index--) {
-      for (Class api : apis) {
+      for (Class<?> api : apis) {
         if (api.isAssignableFrom(beans[index].getClass()))
           return index;
       }
