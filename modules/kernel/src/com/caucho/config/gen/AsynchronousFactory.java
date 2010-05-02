@@ -40,7 +40,7 @@ import com.caucho.inject.Module;
 public class AsynchronousFactory<X>
   extends AbstractAspectFactory<X>
 {
-  AsynchronousFactory(AspectBeanFactory<X> beanFactory,
+  public AsynchronousFactory(AspectBeanFactory<X> beanFactory,
                       AspectFactory<X> next)
   {
     super(beanFactory, next);

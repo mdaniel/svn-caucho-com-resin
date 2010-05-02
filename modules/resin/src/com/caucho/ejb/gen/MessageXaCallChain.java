@@ -35,7 +35,6 @@ import java.io.IOException;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.config.gen.AspectFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.XaFactory;
 import com.caucho.config.gen.XaGenerator;
@@ -50,9 +49,9 @@ public class MessageXaCallChain<X> extends XaGenerator<X>
 {
   public MessageXaCallChain(XaFactory<X> factory,
                             AnnotatedMethod<? super X> method,
-			    AspectGenerator<X> next)
+                            AspectGenerator<X> next)
   {
-    super(factory, method, next);
+    super(factory, method, next, null);
   }
 
   @Override

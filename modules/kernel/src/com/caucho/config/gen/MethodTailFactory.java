@@ -40,7 +40,7 @@ import com.caucho.inject.Module;
 public class MethodTailFactory<X> implements AspectFactory<X> {
   private AspectBeanFactory<X> _beanFactory;
   
-  protected MethodTailFactory(AspectBeanFactory<X> beanFactory)
+  public MethodTailFactory(AspectBeanFactory<X> beanFactory)
   {
     _beanFactory = beanFactory;
   }
@@ -71,7 +71,7 @@ public class MethodTailFactory<X> implements AspectFactory<X> {
                                    boolean isEnhanced)
   {
     if (isEnhanced)
-      return new MethodTailGenerator<X>(method);
+      return new MethodTailGenerator<X>(this, method);
     else
       return null;
   }

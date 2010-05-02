@@ -44,8 +44,6 @@ import com.caucho.java.JavaWriter;
 @Module
 public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
 {
-  private String _beanClassName;
-  
   public StatelessMethodHeadGenerator(StatelessMethodHeadFactory<X> factory,
                                       AnnotatedMethod<? super X> method,
                                       AspectGenerator<X> next)
@@ -78,9 +76,9 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     
     // bean allocation must be last because it needs to be
     // freed or discarded in the finally block
-    out.println("StatelessPool.Item<" + _beanClassName + "> poolItem");
+    out.println("StatelessPool.Item<" + getJavaClass().getName() + "> poolItem");
     out.println(" = _statelessPool.allocate();");
-    out.println(_beanClassName + " bean = poolItem.getValue();");
+    out.println(getJavaClass().getName() + " bean = poolItem.getValue();");
   }
 
   /**

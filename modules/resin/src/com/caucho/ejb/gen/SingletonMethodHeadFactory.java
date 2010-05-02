@@ -42,7 +42,7 @@ import com.caucho.inject.Module;
 @Module
 public class SingletonMethodHeadFactory<X> extends MethodHeadFactory<X>
 {
-  public SingletonMethodHeadFactory(StatefulAspectBeanFactory<X> beanFactory,
+  public SingletonMethodHeadFactory(SingletonAspectBeanFactory<X> beanFactory,
                                     AspectFactory<X> next)
   {
     super(beanFactory, next);

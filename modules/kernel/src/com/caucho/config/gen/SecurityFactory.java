@@ -40,7 +40,7 @@ import com.caucho.inject.Module;
 public class SecurityFactory<X>
   extends AbstractAspectFactory<X>
 {
-  SecurityFactory(AspectBeanFactory<X> beanFactory,
+  public SecurityFactory(AspectBeanFactory<X> beanFactory,
                   AspectFactory<X> next)
   {
     super(beanFactory, next);

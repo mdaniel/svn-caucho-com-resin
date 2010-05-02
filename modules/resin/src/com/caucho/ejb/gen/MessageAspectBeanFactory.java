@@ -31,7 +31,15 @@ package com.caucho.ejb.gen;
 
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.gen.AspectFactory;
+import com.caucho.config.gen.AsynchronousFactory;
 import com.caucho.config.gen.CandiAspectBeanFactory;
+import com.caucho.config.gen.InterceptorFactory;
+import com.caucho.config.gen.LockFactory;
+import com.caucho.config.gen.MethodTailFactory;
+import com.caucho.config.gen.SecurityFactory;
+import com.caucho.config.gen.XaFactory;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 /**
@@ -70,5 +78,21 @@ public class MessageAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   public String getBeanInfo()
   {
     return "this";
+  }
+  
+  @Override
+  protected AspectFactory<X> createAspectFactory()
+  {
+    InjectManager manager = InjectManager.getCurrent();
+    
+    AspectFactory<X> next = new MethodTailFactory<X>(this);
+    
+    next = new InterceptorFactory<X>(this, next, manager);
+    next = new XaFactory<X>(this, next);
+    // next = new LockFactory<X>(this, next);
+    // next = new AsynchronousFactory<X>(this, next);
+    next = new SecurityFactory<X>(this, next);
+    
+    return new MessageMethodHeadFactory<X>(this, next);
   }
 }

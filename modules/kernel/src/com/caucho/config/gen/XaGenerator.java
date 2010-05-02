@@ -59,9 +59,12 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
 
   public XaGenerator(XaFactory<X> factory,
                      AnnotatedMethod<? super X> method,
-                     AspectGenerator<X> next)
+                     AspectGenerator<X> next,
+                     TransactionAttributeType xa)
   {
     super(factory, method, next);
+    
+    _transactionType = xa;
 
     // _isContainerManaged = bizMethod.isXaContainerManaged();
   }

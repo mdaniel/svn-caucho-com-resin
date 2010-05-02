@@ -29,7 +29,10 @@
 
 package com.caucho.config.gen;
 
+import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.inject.Module;
 
@@ -40,10 +43,18 @@ import com.caucho.inject.Module;
 public class XaFactory<X>
   extends AbstractAspectFactory<X>
 {
-  XaFactory(AspectBeanFactory<X> beanFactory,
-            AspectFactory<X> next)
+  private TransactionAttributeType _classXa;
+  
+  public XaFactory(AspectBeanFactory<X> beanFactory,
+                   AspectFactory<X> next)
   {
     super(beanFactory, next);
+    
+    AnnotatedType<X> beanType = beanFactory.getBeanType();
+    TransactionAttribute xa = beanType.getAnnotation(TransactionAttribute.class);
+    
+    if (xa != null)
+      _classXa = xa.value();
   }
   
   /**
@@ -53,6 +64,22 @@ public class XaFactory<X>
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
                                    boolean isEnhanced)
   {
+    TransactionAttribute xa = method.getAnnotation(TransactionAttribute.class);
+    TransactionAttributeType xaType = _classXa;
+    
+    
+    if (xa != null) {
+      xaType = xa.value();
+    }
+    
+    if (xaType != null) {
+      isEnhanced = true;
+      
+      AspectGenerator<X> next = super.create(method, isEnhanced);
+      
+      return new XaGenerator<X>(this, method, next, xaType);
+    }
+    
     return super.create(method, isEnhanced);
   }
 }

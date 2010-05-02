@@ -40,7 +40,7 @@ import com.caucho.inject.Module;
 public class LockFactory<X>
   extends AbstractAspectFactory<X>
 {
-  LockFactory(AspectBeanFactory<X> beanFactory,
+  public LockFactory(AspectBeanFactory<X> beanFactory,
               AspectFactory<X> next)
   {
     super(beanFactory, next);

@@ -82,9 +82,7 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     out.println("boolean isValid = false;");
     // bean allocation must be last because it needs to be
     // freed or discarded in the finally block
-    out.print(beanClassName + " bean = ");
-    out.print(getBeanFactory().getBeanInstance());
-    out.println(";");
+    out.print(beanClassName + " bean = _bean;");
     
     out.println("if (_isActive)");
     out.println("  throw new EJBException(\"session bean is not reentrant\");");

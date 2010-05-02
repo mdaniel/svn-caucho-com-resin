@@ -41,20 +41,14 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class MethodTailGenerator<X> extends NullGenerator<X> {
+  private final MethodTailFactory<X> _factory;
   private final AnnotatedMethod<? super X> _method;
 
-  public MethodTailGenerator(AnnotatedMethod<? super X> method)
+  public MethodTailGenerator(MethodTailFactory<X> factory,
+                             AnnotatedMethod<? super X> method)
   {
+    _factory = factory;
     _method = method;
-  }
-  
-  /**
-   * Returns the Java code for the next class, either the "super" class
-   * for an extension generator, or the implementation object for a proxy.   
-   */
-  protected String getSuper()
-  {
-    return "super";
   }
 
   /**
@@ -66,7 +60,7 @@ public class MethodTailGenerator<X> extends NullGenerator<X> {
   public void generateCall(JavaWriter out)
     throws IOException
   {
-    String superVar = getSuper();
+    String superVar = _factory.getAspectBeanFactory().getBeanInstance();
     
     out.println();
 

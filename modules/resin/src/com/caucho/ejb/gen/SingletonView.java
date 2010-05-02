@@ -131,8 +131,6 @@ public class SingletonView<X,T> extends View<X,T> {
                                       javaMethod.getName()));
       }
 
-      int index = _businessMethods.size();
-
       AspectGenerator<X> bizMethod
         = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
 

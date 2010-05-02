@@ -157,10 +157,8 @@ public class StatefulView<X,T> extends View<X,T> {
       if (oldMethod != null)
         continue;
 
-      int index = _businessMethods.size();
-
       AspectGenerator<X> bizMethod = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
-
+      
       if (bizMethod != null) {
         _businessMethods.add(bizMethod);
       }
