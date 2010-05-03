@@ -30,6 +30,7 @@
 package com.caucho.ejb.gen;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -91,7 +92,12 @@ abstract public class SessionView<X> extends View<X> {
       return;
     if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
       return;
- 
+    if (! Modifier.isPublic(javaMethod.getModifiers()))
+      return;
+    if (Modifier.isFinal(javaMethod.getModifiers())
+        || Modifier.isStatic(javaMethod.getModifiers()))
+      return;
+
     if (javaMethod.getName().startsWith("ejb")) {
       throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
                                     javaMethod.getDeclaringClass(),
