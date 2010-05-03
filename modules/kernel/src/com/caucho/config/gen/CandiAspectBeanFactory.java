@@ -58,6 +58,15 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   }
   
   /**
+   * Returns the generated bean name
+   */
+  @Override
+  public String getGeneratedClassName()
+  {
+    return getBeanType().getJavaClass().getSimpleName() + "__ResinWebBean";
+  }
+  
+  /**
    * Returns the head aspect factory
    */
   @Override
@@ -80,6 +89,15 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
    */
   @Override
   public String getBeanInstance()
+  {
+    return "this";
+  }
+  
+  /**
+   * Returns the bean super reference.
+   */
+  @Override
+  public String getBeanSuper()
   {
     return "super";
   }

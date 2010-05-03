@@ -81,7 +81,8 @@ public class InterceptorGenerator<X>
 
   private ArrayList<Annotation> _interceptorBinding;
 
-  private ArrayList<Class<?>> _interceptors;
+  private ArrayList<Class<?>> _interceptors
+    = new ArrayList<Class<?>>();
 
   private ArrayList<Class<?>> _methodInterceptors;
 
@@ -114,11 +115,17 @@ public class InterceptorGenerator<X>
     super(factory, method, next);
 
     _factory = factory;
+    
+    if (factory.getClassInterceptors() != null)
+      _interceptors = factory.getClassInterceptors();
 
-    _methodInterceptors = new ArrayList<Class<?>>(methodInterceptors);
+    if (methodInterceptors != null)
+      _methodInterceptors = new ArrayList<Class<?>>(methodInterceptors);
 
     if (methodInterceptorMap != null)
       _interceptorBinding = new ArrayList<Annotation>(methodInterceptorMap.values());
+    else if (factory.getClassInterceptorBinding() != null)
+      _interceptorBinding = factory.getClassInterceptorBinding();
 
     _decoratorSet = decoratorSet;
 
@@ -233,6 +240,8 @@ public class InterceptorGenerator<X>
     }
 
     generateBeanInterceptorChain(out, map);
+    
+    generateTail(out);
 
     // generateInterceptorTarget(out);
   }
@@ -429,10 +438,10 @@ public class InterceptorGenerator<X>
       out.print("private static final ");
       out.print("java.util.ArrayList<");
       out.printClass(Interceptor.class);
-      out.println("> __caucho_interceptor_beans");
+      out.println("<?>> __caucho_interceptor_beans");
       out.print("  = new java.util.ArrayList<");
       out.printClass(Interceptor.class);
-      out.println(">();");
+      out.println("<?>>();");
     }
 
     generateInterceptorMethod(out, map);
@@ -482,12 +491,13 @@ public class InterceptorGenerator<X>
       superMethodName = "__caucho_" + javaMethod.getName() + "_decorator";
     else if (isProxy())
       superMethodName = javaMethod.getName();
-    else
+    else {
       superMethodName = "__caucho_" + javaMethod.getName();
+    }
 
     out.print(getUniqueName(out) + "_implMethod = ");
     generateGetMethod(out,
-                      getBeanType().getJavaClass().getName(),
+                      getBeanFactory().getGeneratedClassName(),
                       superMethodName,
                       javaMethod.getParameterTypes());
     out.println(";");
@@ -653,7 +663,7 @@ public class InterceptorGenerator<X>
     // generateThis(out);
     out.print(_chainName + "_methodChain, ");
 
-    _factory.generateBeanInfo(out);
+    out.print(_factory.getAspectBeanFactory().getBeanInfo());
     out.print("._caucho_getInterceptorObjects(), ");
 
     // generateThis(out);
@@ -834,7 +844,8 @@ public class InterceptorGenerator<X>
     out.println(" {");
     out.pushDepth();
 
-    String beanClassName = getBeanType().getJavaClass().getName();
+    // String beanClassName = getBeanType().getJavaClass().getName();
+    String beanClassName = getFactory().getAspectBeanFactory().getGeneratedClassName();
 
     out.println("private int _index;");
     out.println("private " + beanClassName + " _bean;");
@@ -846,8 +857,10 @@ public class InterceptorGenerator<X>
     out.println("  _bean = bean;");
     out.println("}");
 
+    String generatedClassName = _factory.getAspectBeanFactory().getGeneratedClassName();
+    
     out.println();
-    out.println("final " + beanClassName + " __caucho_getBean()");
+    out.println("final " + generatedClassName + " __caucho_getBean()");
     out.println("{");
     /*
     out.println("  return " + getBusinessMethod().getView().getViewClassName()
@@ -1110,7 +1123,9 @@ public class InterceptorGenerator<X>
     out.println();
     out.print(_decoratorClass + " delegate = ");
     out.print("new " + _decoratorClass + "(");
-    out.println(_decoratorIndexVar + ".length, bean);");
+    out.print(_decoratorIndexVar + ".length, ");
+    out.print(_factory.getAspectBeanFactory().getBeanInstance());
+    out.println(");");
 
     out.print(_decoratorLocalVar);
     out.println(".set(delegate);");
@@ -1292,8 +1307,8 @@ public class InterceptorGenerator<X>
 
   private boolean hasInterceptor()
   {
-    return (_interceptors.size() > 0
-            || _interceptorBinding.size() > 0
+    return (_interceptors != null && _interceptors.size() > 0
+            || _interceptorBinding != null && _interceptorBinding.size() > 0
             || getAroundInvokeMethod() != null);
   }
 
@@ -1302,7 +1317,7 @@ public class InterceptorGenerator<X>
     return _decoratorSet != null;
   }
 
-  protected void generateTail(JavaWriter out)
+  private void generateTail(JavaWriter out)
     throws IOException
   {
     Method javaMethod = getJavaMethod();
@@ -1459,14 +1474,14 @@ public class InterceptorGenerator<X>
   }
 
   private void generateGetMethod(JavaWriter out,
-                                   String className,
-                                   String methodName,
-                                   Class<?>[] paramTypes)
+                                 String className,
+                                 String methodName,
+                                 Class<?>[] paramTypes)
     throws IOException
   {
     out.print("com.caucho.config.gen.CandiUtil.getMethod(");
-    out.print(className + ".class");
-    out.print(", \"" + methodName + "\", new Class[] { ");
+    out.print(className);
+    out.print(".class, \"" + methodName + "\", new Class[] { ");
 
     for (Class<?> type : paramTypes) {
       out.printClass(type);
@@ -1514,7 +1529,12 @@ public class InterceptorGenerator<X>
     @Override
     public int hashCode()
     {
-      return _type.hashCode() * 65521 + _binding.hashCode();
+      int hashCode = _type.hashCode() * 65521;
+      
+      if (_binding != null)
+        return hashCode + _binding.hashCode();
+      else
+        return hashCode;
     }
 
     @Override
@@ -1527,8 +1547,13 @@ public class InterceptorGenerator<X>
 
       InterceptionBinding binding = (InterceptionBinding) o;
 
-      return (_type.equals(binding._type)
-              && _binding.equals(binding._binding));
+      if (! _type.equals(binding._type))
+        return false;
+      
+      if (_binding == binding._binding)
+        return true;
+      
+      return _binding != null && _binding.equals(binding._binding);
     }
   }
 }

@@ -47,6 +47,11 @@ public interface AspectBeanFactory<X> {
    * Returns the head aspect factory
    */
   public AspectFactory<X> getHeadAspectFactory();
+
+  /**
+   * Returns the generated bean name.
+   */
+  public String getGeneratedClassName();
   
   /**
    * Returns true for a proxied instance
@@ -57,6 +62,11 @@ public interface AspectBeanFactory<X> {
    * Returns the bean instance Java reference.
    */
   public String getBeanInstance();
+  
+  /**
+   * Returns the bean instance call.
+   */
+  public String getBeanSuper();
   
   /**
    * Returns the proxy Java reference.

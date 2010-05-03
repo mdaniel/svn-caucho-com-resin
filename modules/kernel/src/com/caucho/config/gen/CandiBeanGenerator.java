@@ -65,8 +65,6 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
   private AnnotatedType<X> _beanClass;
 
-  private CandiView<X> _view;
-  
   private AspectBeanFactory<X> _aspectFactory;
 
   private ArrayList<AspectGenerator<X>> _businessMethods
@@ -99,6 +97,13 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     _aspectFactory = new CandiAspectBeanFactory<X>(beanClass);
   }
 
+  @Override
+  public CandiView<X> getView()
+  {
+    return (CandiView<X>) super.getView();
+  }
+  
+  @Override
   protected CandiView<X> createView()
   {
     return new CandiView<X>(this);
@@ -318,7 +323,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       }
     }
     
-    _view.generateBeanPrologue(out);
+    getView().generateBeanPrologue(out);
 
     generatePostConstruct(out);
 
@@ -451,8 +456,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     }
     out.println(");");
 
-    _view.generateBeanConstructor(out);
-    _view.generateProxyConstructor(out);
+    getView().generateBeanConstructor(out);
+    getView().generateProxyConstructor(out);
 
     out.popDepth();
     out.println("}");

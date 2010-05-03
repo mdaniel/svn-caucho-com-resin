@@ -32,8 +32,6 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.enterprise.inject.spi.AnnotatedType;
-
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
