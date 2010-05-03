@@ -41,10 +41,10 @@ import com.caucho.java.JavaWriter;
  * Represents a public interface to a bean, e.g. a local stateful view
  */
 @Module
-public class CandiView<X> extends View<X,X> {
-  public CandiView(BeanGenerator<X> bean, AnnotatedType<X> api)
+public class CandiView<X> extends View<X> {
+  public CandiView(BeanGenerator<X> bean)
   {
-    super(bean, api);
+    super(bean);
   }
 
   @Override

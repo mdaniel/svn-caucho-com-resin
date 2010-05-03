@@ -31,12 +31,14 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.View;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.types.InjectionTarget;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -48,31 +50,32 @@ import com.caucho.util.L10N;
 @Module
 abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private static final L10N L = new L10N(SessionGenerator.class);
+  
+  private ArrayList<AnnotatedType<? super X>> _localApi
+    = new ArrayList<AnnotatedType<? super X>>();
 
-  private ArrayList<AnnotatedType<?>> _localApi
-    = new ArrayList<AnnotatedType<?>>();
-
-  private ArrayList<AnnotatedType<?>> _remoteApi
-    = new ArrayList<AnnotatedType<?>>();
-
-  private ArrayList<View<X,?>> _views = new ArrayList<View<X,?>>();
+  private ArrayList<AnnotatedType<? super X>> _remoteApi
+    = new ArrayList<AnnotatedType<? super X>>();
+  
+  private ArrayList<AnnotatedMethod<? super X>> _annotatedMethods
+    = new ArrayList<AnnotatedMethod<? super X>>();
 
   protected String _contextClassName = "dummy";
 
   public SessionGenerator(String ejbName, 
-                          AnnotatedType<X> ejbClass,
-                          ArrayList<AnnotatedType<?>> localApi,
-                          ArrayList<AnnotatedType<?>> remoteApi, 
-                          String beanType)
+                          AnnotatedType<X> beanType,
+                          ArrayList<AnnotatedType<? super X>> localApi,
+                          ArrayList<AnnotatedType<? super X>> remoteApi, 
+                          String beanTypeName)
   {
-    super(toFullClassName(ejbName, ejbClass.getJavaClass().getName(), beanType),
-          ejbClass);
+    super(toFullClassName(ejbName, beanType.getJavaClass().getName(), beanTypeName),
+          beanType);
 
     _contextClassName = "dummy";
 
-    _localApi = new ArrayList<AnnotatedType<?>>(localApi);
+    _localApi = new ArrayList<AnnotatedType<? super X>>(localApi);
 
-    _remoteApi = new ArrayList<AnnotatedType<?>>(remoteApi);
+    _remoteApi = new ArrayList<AnnotatedType<? super X>>(remoteApi);
   }
 
   public static String toFullClassName(String ejbName, String className,
@@ -115,11 +118,17 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   {
     return false;
   }
+  
+  @Override
+  public SessionView<X> getView()
+  {
+    return (SessionView<X>) super.getView();
+  }
 
   /**
    * Returns the local API list.
    */
-  public ArrayList<AnnotatedType<?>> getLocalApi()
+  public ArrayList<AnnotatedType<? super X>> getLocalApi()
   {
     return _localApi;
   }
@@ -127,32 +136,17 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   /**
    * Returns the remote API list.
    */
-  public ArrayList<AnnotatedType<?>> getRemoteApi()
+  public ArrayList<AnnotatedType<? super X>> getRemoteApi()
   {
     return _remoteApi;
   }
-
+  
   /**
-   * Returns the views
+   * Returns the merged annotated methods
    */
-  @Override
-  public ArrayList<View<X,?>> getViews()
+  protected ArrayList<AnnotatedMethod<? super X>> getAnnotatedMethods()
   {
-    return _views;
-  }
-
-  /**
-   * Returns the view matching the given class
-   */
-  @SuppressWarnings("unchecked")
-  public <T> View<X,T> getView(Class<T> api)
-  {
-    for (View<X,?> view : _views) {
-      if (view.getViewClass().getJavaClass().getName().equals(api.getName()))
-        return (View<X,T>) view;
-    }
-
-    return null;
+    return _annotatedMethods;
   }
 
   /**
@@ -164,325 +158,69 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     super.introspect();
 
     if (_localApi.size() == 0 && _remoteApi.size() == 0) {
-      _localApi = introspectLocalDefault();
+      AnnotatedType<? super X> localDefault = introspectLocalDefault();
+      
+      _localApi.add(localDefault); 
     }
+    
+    for (AnnotatedType<? super X> type : _localApi) {
+      for (AnnotatedMethod<? super X> method : type.getMethods()) {
+        introspectMethod(method);
+      }
+    }
+    
+    for (AnnotatedType<? super X> type : _remoteApi) {
+      for (AnnotatedMethod<? super X> method : type.getMethods()) {
+        introspectMethod(method);
+      }
+    }
+    
+    getView().introspect();
   }
-
-  /**
-   * Generates the views for the bean
-   */
-  @Override
-  public void createViews()
+  
+  private void introspectMethod(AnnotatedMethod<? super X> method)
   {
-    for (AnnotatedType<?> api : _localApi) {
-      View<X,?> view = createLocalView(api);
-
-      _views.add(view);
+    AnnotatedMethod<? super X> oldMethod 
+      = findMethod(_annotatedMethods, method);
+    
+    if (oldMethod != null) {
+      // XXX: merge annotations
+      return;
     }
-
-    for (AnnotatedType<?> api : _remoteApi) {
-      View<X,?> view = createRemoteView(api);
-
-      _views.add(view);
+    
+    AnnotatedMethod<? super X> baseMethod
+      = findMethod(getBeanType().getMethods(), method);
+    
+    if (baseMethod == null)
+      throw new IllegalStateException(L.l("{0} does not have a matching base method in {1}",
+                                          method, getBeanType()));
+    
+    // XXX: merge annotations
+    
+    _annotatedMethods.add(baseMethod);
+  }
+  
+  private AnnotatedMethod<? super X> 
+  findMethod(Collection<AnnotatedMethod<? super X>> methodList,
+             AnnotatedMethod<? super X> method)
+  {
+    for (AnnotatedMethod<? super X> oldMethod : methodList) {
+      if (AnnotatedTypeUtil.isMatch(oldMethod, method)) {
+        return oldMethod;
+      }
     }
-
-    for (View<X,?> view : _views) {
-      view.introspect();
-    }
+    
+    return null;
   }
 
+  protected AnnotatedType<? super X> introspectLocalDefault()
+  {
+    return getBeanType();
+  }
   /**
    * Generates the local view for the given class
    */
-  protected <T> View<X,T> createLocalView(AnnotatedType<T> api)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Generates the remote view for the given class
-   */
-  protected <T> View<X,T> createRemoteView(AnnotatedType<T> api)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Scans for the @Local interfaces
-   */
-  protected ArrayList<AnnotatedType<?>> introspectLocalDefault()
-  {
-    throw new ConfigException(L.l("'{0}' does not have any interfaces defined.", 
-                                  getBeanClass().getJavaClass().getName()));
-  }
+  abstract protected View<X> createView();
 
   abstract protected void generateContext(JavaWriter out) throws IOException;
-
-  protected void generateNewInstance(JavaWriter out, String suffix)
-      throws IOException
-  {
-  }
-
-  protected void generateNewRemoteInstance(JavaWriter out, String suffix)
-      throws IOException
-  {
-    // ejb/0g27
-    /*
-     * if (_bean.getRemoteHome() == null && _bean.getRemoteList().size() == 0)
-     * return;
-     */
-    out.println();
-    out.println("protected Object _caucho_newRemoteInstance" + suffix + "()");
-    out.println("{");
-    out.pushDepth();
-
-    out.println(_contextClassName + " cxt = new " + _contextClassName
-                + "(_server);");
-
-    if (isStateless())
-      out.println("Bean bean = new Bean(cxt);");
-    else
-      out.println("Bean bean = new Bean(cxt, null);");
-
-    out.println("cxt._ejb_free(bean);");
-
-    out.println();
-
-    /*
-     * Class retType = getReturnType(); if ("RemoteHome".equals(_prefix))
-     * out.println("return (" + retType.getName() + ") cxt.getRemoteView();");
-     * else if ("LocalHome".equals(_prefix)) out.println("return (" +
-     * retType.getName() + ") cxt.getLocalView();"); else throw new
-     * IOException(L.l("trying to create unknown type {0}", _prefix));
-     */
-
-    out.println("return cxt.createRemoteView" + suffix + "();");
-
-    out.popDepth();
-    out.println("}");
-  }
-
-  /**
-   * Generates injection initialization.
-   */
-  protected void generateInitInjection(JavaWriter out) throws IOException 
-  {
-    /*
-     * // ejb/0fd0 out.println();
-     * out.println("private void __caucho_initInjection()"); out.println("{");
-     * out.pushDepth();
-     * 
-     * out.println("try {"); out.pushDepth();
-     * 
-     * out.println("java.lang.reflect.Field field;"); out.println();
-     * 
-     * for (EnvEntry envEntry : _bean.getEnvEntries()) { InjectionTarget
-     * injectionTarget = envEntry.getInjectionTarget();
-     * 
-     * if (injectionTarget == null) continue;
-     * 
-     * String value = envEntry.getEnvEntryValue();
-     * 
-     * // ejb/0fd4 if (value == null) continue;
-     * 
-     * Class cl = envEntry.getEnvEntryType();
-     * 
-     * generateInjection(out, injectionTarget, value, cl, true); }
-     * 
-     * // ejb/0f54 for (ResourceRef resourceRef : _bean.getResourceRefs()) {
-     * InjectionTarget injectionTarget = resourceRef.getInjectionTarget();
-     * 
-     * if (injectionTarget == null) continue;
-     * 
-     * String value = "com.caucho.naming.Jndi.lookup(\"java:comp/env/" +
-     * resourceRef.getResRefName() + "\")";
-     * 
-     * if (value == null) continue;
-     * 
-     * Class cl = resourceRef.getResType();
-     * 
-     * generateInjection(out, injectionTarget, value, cl, false); }
-     * 
-     * out.popDepth(); out.println("} catch (Throwable e) {");out.println(
-     * "  __caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
-     * out.println("  throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-     * out.println("}");
-     * 
-     * out.popDepth(); out.println("}");
-     */
-  }
-
-  /**
-   * Generates an individual injection.
-   */
-  protected void generateInjection(JavaWriter out,
-                                   InjectionTarget injectionTarget,
-                                   String value, Class<?> cl,
-                                   boolean isEscapeString) throws IOException
-  {
-    // ejb/0fd1, ejb/0fd3
-    value = generateTypeCasting(value, cl, isEscapeString);
-
-    String s = injectionTarget.getInjectionTargetName();
-
-    out.println("try {");
-    out.pushDepth();
-
-    String methodName = "set" + Character.toUpperCase(s.charAt(0));
-
-    if (s.length() > 1)
-      methodName += s.substring(1);
-
-    generateCallReflectionGetMethod(out, "method", methodName, "new Class[] { "
-        + cl.getName() + ".class }", "getClass().getSuperclass()");
-
-    out.println("method.setAccessible(true);");
-
-    out.print("method.invoke(this, ");
-    out.print(value);
-    out.println(");");
-
-    out.popDepth();
-    out.println("} catch (NoSuchMethodException e1) {");
-    out.pushDepth();
-
-    java.lang.reflect.Field field = null;
-
-    try {
-      field = cl.getDeclaredField("TYPE");
-    } catch (NoSuchFieldException e) {
-    }
-
-    boolean isPrimitiveWrapper = false;
-
-    if (field != null && Class.class.isAssignableFrom(field.getType())) { // if
-      // (cl.isPrimitive())
-      isPrimitiveWrapper = true;
-    }
-
-    // ejb/0fd2
-    if (isPrimitiveWrapper) {
-      out.println("try {");
-      out.pushDepth();
-
-      // ejb/0fd2 vs ejb/0fd3
-      generateCallReflectionGetMethod(out, "method", methodName,
-                                      "new Class[] { " + cl.getName()
-                                          + ".TYPE }",
-                                      "getClass().getSuperclass()");
-
-      out.println("method.setAccessible(true);");
-
-      out.print("method.invoke(this, ");
-      out.print(value);
-      out.println(");");
-
-      out.popDepth();
-      out.println("} catch (NoSuchMethodException e2) {");
-      out.pushDepth();
-    }
-
-    out.print("field  = getClass().getSuperclass().getDeclaredField(\"");
-    out.print(s);
-    out.println("\");");
-
-    out.println("field.setAccessible(true);");
-
-    out.print("field.set(this, ");
-    out.print(value);
-    out.println(");");
-
-    // ejb/0fd2 vs ejb/0fd3
-    if (isPrimitiveWrapper) { // if (! cl.equals(String.class)) {
-      out.popDepth();
-      out.println("}");
-    }
-
-    out.popDepth();
-    out.println("}");
-  }
-
-  /**
-   * Generates a call to get a class method.
-   */
-  protected void generateCallReflectionGetMethod(JavaWriter out,
-                                                 String methodVar,
-                                                 String methodName,
-                                                 String paramVar,
-                                                 String classVar)
-      throws IOException
-  {
-    out.print("java.lang.reflect.Method ");
-    out.print(methodVar);
-    out.print(" = com.caucho.ejb.util.EjbUtil.getMethod(");
-    out.print(classVar);
-    out.print(", \"");
-    out.print(methodName);
-    out.print("\", ");
-    out.print(paramVar);
-    out.println(");");
-  }
-
-  /**
-   * Generates reflection to access a class method.
-   */
-  protected void generateReflectionGetMethod(JavaWriter out) throws IOException
-  {
-    // moved to EjbUtil
-  }
-
-  /**
-   * Makes private methods accessible before invoking them.
-   */
-  protected void generateInvokeMethod(JavaWriter out) throws IOException
-  {
-    out.println();
-    out.println("private static void invokeMethod(Bean bean, String methodName, Class paramTypes[], Object paramValues[])");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("try {");
-    out.pushDepth();
-
-    out.println("java.lang.reflect.Method m = com.caucho.ejb.util.EjbUtil.getMethod(bean.getClass(), methodName, paramTypes);");
-    out.println("m.setAccessible(true);");
-    out.println("m.invoke(bean, paramValues);");
-
-    out.popDepth();
-    out.println("} catch (Exception e) {");
-    out.pushDepth();
-
-    out.println("__caucho_log.log(java.util.logging.Level.FINE, e.toString(), e);");
-    out.println("throw com.caucho.ejb.EJBExceptionWrapper.create(e);");
-
-    out.popDepth();
-    out.println("}");
-
-    out.popDepth();
-    out.println("}");
-  }
-
-  private String generateTypeCasting(String value, Class<?> cl,
-                                     boolean isEscapeString)
-  {
-    if (cl.equals(String.class)) {
-      if (isEscapeString)
-        value = "\"" + value + "\"";
-    } else if (cl.equals(Character.class))
-      value = "'" + value + "'";
-    else if (cl.equals(Byte.class))
-      value = "(byte) " + value;
-    else if (cl.equals(Short.class))
-      value = "(short) " + value;
-    else if (cl.equals(Integer.class))
-      value = "(int) " + value;
-    else if (cl.equals(Long.class))
-      value = "(long) " + value;
-    else if (cl.equals(Float.class))
-      value = "(float) " + value;
-    else if (cl.equals(Double.class))
-      value = "(double) " + value;
-
-    return value;
-  }
 }

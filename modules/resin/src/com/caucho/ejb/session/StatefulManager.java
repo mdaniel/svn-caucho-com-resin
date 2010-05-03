@@ -104,7 +104,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   @Override
   public Object getLocalProxy(Class api)
   {
-    StatefulProvider provider = getContext().getProvider(api);
+    StatefulProvider provider = getContext().getProvider();
 
     if (provider != null)
       return new StatefulProviderProxy(provider);
@@ -118,7 +118,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   @Override
   public Object getLocalObject(Class api)
   {
-    StatefulProvider provider = getContext().getProvider(api);
+    StatefulProvider provider = getContext().getProvider();
 
     if (provider != null) {
       CreationalContextImpl<?> env = CreationalContextImpl.create();
@@ -135,11 +135,11 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
                                Class<?> api,
                                Set<Type> apiList)
   {
-    StatefulProvider provider = getContext().getProvider(api);
+    StatefulProvider provider = getContext().getProvider();
 
     if (provider == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
-					 api, getContext()));
+                                         api, getContext()));
     
     StatefulBeanImpl statefulBean
       = new StatefulBeanImpl(this, mBean, api, apiList, provider);
@@ -149,7 +149,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
 
   protected InjectionTarget createSessionComponent(Class api, Class beanClass)
   {
-    StatefulProvider provider = getContext().getProvider(api);
+    StatefulProvider provider = getContext().getProvider();
     
     return new StatefulComponent(provider, beanClass);
   }
@@ -244,7 +244,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   @Override
   public Object getRemoteObject(Class api, String protocol)
   {
-    StatefulProvider provider = getContext().getProvider(api);
+    StatefulProvider provider = getContext().getProvider();
 
     if (provider != null) {
       // XXX: bean?

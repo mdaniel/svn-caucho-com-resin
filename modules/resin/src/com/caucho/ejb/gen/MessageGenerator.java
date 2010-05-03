@@ -49,8 +49,7 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class MessageGenerator<X> extends BeanGenerator<X> {
-  private MessageView<X,?> _view;
-  private ArrayList<View<X,?>> _views = new ArrayList<View<X,?>>();
+  private MessageView<X> _view;
   
   public MessageGenerator(String ejbName, AnnotatedType<X> ejbClass)
   {
@@ -86,17 +85,22 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
 
     return sb.toString();
   }
+  
+  @Override
+  public MessageView<X> getView()
+  {
+    return (MessageView<X>) super.getView();
+  }
+  
+  @Override
+  protected MessageView<X> createView()
+  {
+    return new MessageView<X>(this);
+  }
 
   public <T> void setApi(AnnotatedType<T> api)
   {
-    _view = new MessageView<X,T>(this, api);
-    _views.add(_view);
-  }
-
-  @Override
-  public ArrayList<View<X,?>> getViews()
-  {
-    return _views;
+    _view = new MessageView<X>(this);
   }
 
   /**
@@ -107,8 +111,8 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   {
     super.introspect();
     
-    for (View<X,?> view : getViews())
-      view.introspect();
+    // XXX: 4.0.7
+    // getView().introspect();
   }
   
   /**
@@ -137,7 +141,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     
     out.println();
     out.println("public class " + getClassName()
-		+ " extends " + getBeanClass().getJavaClass().getName()
+		+ " extends " + getBeanType().getJavaClass().getName()
 		+ " implements MessageEndpoint, CauchoMessageEndpoint");
     out.println("{");
     out.pushDepth();
@@ -157,10 +161,9 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
 
     HashMap<String,Object> map = new HashMap<String,Object>();
     map.put("caucho.ejb.xa", "true");
-    for (View<X,?> view : getViews()) {
-      // view.generateContextPrologue(out);
-      view.generateBeanPrologue(out, map);
-    }
+    
+    // view.generateContextPrologue(out);
+    getView().generateBeanPrologue(out, map);
 
     out.println();
     out.println("public " + getClassName() + "(MessageServer server)");
@@ -169,7 +172,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
 
     out.println("_server = server;");
 
-    if (MessageDrivenBean.class.isAssignableFrom(getBeanClass().getJavaClass())) {
+    if (MessageDrivenBean.class.isAssignableFrom(getBeanType().getJavaClass())) {
       out.println("setMessageDrivenContext(server.getMessageContext());");
     }
 

@@ -35,7 +35,6 @@ import java.util.ArrayList;
 import javax.ejb.Stateful;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -45,11 +44,11 @@ import com.caucho.java.JavaWriter;
 @Module
 public class StatefulGenerator<X> extends SessionGenerator<X> 
 {
-  public StatefulGenerator(String ejbName, AnnotatedType<X> ejbClass,
-                           ArrayList<AnnotatedType<?>> localApi,
-                           ArrayList<AnnotatedType<?>> remoteApi)
+  public StatefulGenerator(String ejbName, AnnotatedType<X> beanType,
+                           ArrayList<AnnotatedType<? super X>> localApi,
+                           ArrayList<AnnotatedType<? super X>> remoteApi)
   {
-    super(ejbName, ejbClass, localApi, remoteApi, 
+    super(ejbName, beanType, localApi, remoteApi, 
           Stateful.class.getSimpleName());
   }
 
@@ -60,28 +59,24 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   }
 
   @Override
-  protected <T> View<X,T> createLocalView(AnnotatedType<T> api)
+  public StatefulView<X> getView()
   {
-    return new StatefulView<X,T>(this, api);
+    return (StatefulView<X>) super.getView();
   }
-
+  
   @Override
-  protected <T> View<X,T> createRemoteView(AnnotatedType<T> api)
+  protected StatefulView<X> createView()
   {
-    return new StatefulView<X,T>(this, api);
+    return new StatefulView<X>(this);
   }
 
   /**
    * Scans for the @Local interfaces
    */
   @Override
-  protected ArrayList<AnnotatedType<?>> introspectLocalDefault() 
+  protected AnnotatedType<? super X> introspectLocalDefault() 
   {
-    ArrayList<AnnotatedType<?>> apiClass = new ArrayList<AnnotatedType<?>>();
-
-    apiClass.add(getBeanClass());
-
-    return apiClass;
+    return getBeanType();
   }
 
   /**
@@ -138,9 +133,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.println("super(server);");
 
-    for (View<X,?> view : getViews()) {
-      view.generateContextHomeConstructor(out);
-    }
+    getView().generateContextHomeConstructor(out);
 
     out.popDepth();
     out.println("}");
@@ -158,9 +151,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.popDepth();
     out.println("}");
 
-    for (View<X,?> view : getViews()) {
-      view.generateContextPrologue(out);
-    }
+    getView().generateContextPrologue(out);
 
     generateCreateProvider(out);
     generateViews(out);
@@ -175,18 +166,11 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   {
     out.println();
     out.println("@Override");
-    out.println("public StatefulProvider getProvider(Class api)");
+    out.println("public StatefulProvider getProvider()");
     out.println("{");
     out.pushDepth();
 
-    for (View<X,?> view : getViews()) {
-      StatefulView<X,?> sView = (StatefulView<X,?>) view;
-
-      sView.generateCreateProvider(out, "api");
-    }
-
-    out.println();
-    out.println("return super.getProvider(api);");
+    getView().generateCreateProvider(out);
 
     out.popDepth();
     out.println("}");
@@ -198,9 +182,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   public void generateContextObjectConstructor(JavaWriter out)
       throws IOException
   {
-    for (View<X,?> view : getViews()) {
-      view.generateContextObjectConstructor(out);
-    }
+    getView().generateContextObjectConstructor(out);
   }
 
   @Override

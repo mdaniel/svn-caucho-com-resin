@@ -77,7 +77,7 @@ public class RemoveMethod {
    */
   public <X> void configure(BeanGenerator<X> bean)
   {
-    for (View<X,?> view : bean.getViews()) {
+    View<X> view = bean.getView();
       // XXX: check for type
       
       /*
@@ -90,6 +90,5 @@ public class RemoveMethod {
 	}
       }
       */
-    }
   }
 }

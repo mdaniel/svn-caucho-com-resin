@@ -39,12 +39,12 @@ import com.caucho.util.*;
 /**
  * Abstract base class for an session context
  */
-abstract public class StatefulContext extends AbstractSessionContext {
+abstract public class StatefulContext<X> extends AbstractSessionContext {
   private static final L10N L = new L10N(StatefulContext.class);
     
-  private transient StatefulManager _server;
+  private transient StatefulManager<X> _server;
 
-  public StatefulContext(StatefulManager server)
+  public StatefulContext(StatefulManager<X> server)
   {
     assert(server != null);
 
@@ -54,7 +54,7 @@ abstract public class StatefulContext extends AbstractSessionContext {
   /**
    * Returns the server which owns this bean.
    */
-  public StatefulManager getStatefulManager()
+  public StatefulManager<X> getStatefulManager()
   {
     return _server;
   }
@@ -63,12 +63,12 @@ abstract public class StatefulContext extends AbstractSessionContext {
    * Returns the server which owns this bean.
    */
   @Override
-  public AbstractEjbBeanManager getServer()
+  public StatefulManager<X> getServer()
   {
     return _server;
   }
   
-  public StatefulProvider getProvider(Class api)
+  public StatefulProvider getProvider()
   {
     return null;
   }

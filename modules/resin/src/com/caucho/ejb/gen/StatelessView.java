@@ -54,7 +54,7 @@ import com.caucho.util.L10N;
  * Represents any stateless view.
  */
 @Module
-public class StatelessView<X,T> extends View<X,T> {
+public class StatelessView<X> extends SessionView<X> {
   private static final L10N L = new L10N(StatelessView.class);
 
   private StatelessGenerator<X> _statelessBean;
@@ -69,13 +69,13 @@ public class StatelessView<X,T> extends View<X,T> {
   private LifecycleInterceptor _postConstructInterceptor;
   private LifecycleInterceptor _preDestroyInterceptor;
 
-  public StatelessView(StatelessGenerator<X> bean, AnnotatedType<T> api)
+  public StatelessView(StatelessGenerator<X> bean)
   {
-    super(bean, api);
+    super(bean);
 
     _statelessBean = bean;
     
-    _aspectBeanFactory = new StatelessAspectBeanFactory<X>(bean.getBeanClass());
+    _aspectBeanFactory = new StatelessAspectBeanFactory<X>(bean.getBeanType());
   }
 
   public StatelessGenerator<X> getStatelessBean()
@@ -95,20 +95,20 @@ public class StatelessView<X,T> extends View<X,T> {
   @Override
   public boolean isProxy()
   {
-    return ! getViewClass().equals(getBeanClass());
+    return true;
   }
 
   @Override
   public String getViewClassName()
   {
-    return getViewClass().getJavaClass().getSimpleName() + "__EJBLocal";
+    return "StatelessLocal";
   }
 
   @Override
   public String getBeanClassName()
   {
     // XXX: 4.0.7 CDI TCK package-private issues
-    return getBeanClass().getJavaClass().getName();
+    return getBeanType().getJavaClass().getName();
     // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
     // return getStatelessBean().getClassName();
   }
@@ -128,44 +128,18 @@ public class StatelessView<X,T> extends View<X,T> {
   @Override
   public void introspect()
   {
-    introspectImpl();
-
-    introspectLifecycle(getBeanClass().getJavaClass());
+    super.introspect();
+    
+    introspectLifecycle(getBeanType().getJavaClass());
 
     _postConstructInterceptor = new LifecycleInterceptor(PostConstruct.class);
-    _postConstructInterceptor.introspect(getBeanClass());
+    _postConstructInterceptor.introspect(getBeanType());
 
     _preDestroyInterceptor = new LifecycleInterceptor(PreDestroy.class);
-    _preDestroyInterceptor.introspect(getBeanClass());
+    _preDestroyInterceptor.introspect(getBeanType());
 
     // XXX: type is incorrect here. Should be moved to stateless generator?
-    introspectTimer(getBeanClass());
-  }
-
-  /**
-   * Introspects the APIs methods, producing a business method for
-   * each.
-   */
-  private void introspectImpl()
-  {
-    AnnotatedType<T> apiClass = getViewClass();
-    
-    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
-      Method javaMethod = apiMethod.getJavaMember();
-      
-      if (javaMethod.getDeclaringClass().equals(Object.class))
-        continue;
-      if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
-        continue;
- 
-      if (javaMethod.getName().startsWith("ejb")) {
-        throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
-                                      javaMethod.getDeclaringClass(),
-                                      javaMethod.getName()));
-      }
-
-      addBusinessMethod((AnnotatedMethod<? super X>) apiMethod);
-    }
+    introspectTimer(getBeanType());
   }
 
   /**
@@ -218,6 +192,7 @@ public class StatelessView<X,T> extends View<X,T> {
     }
   }
 
+  @Override
   protected void addBusinessMethod(AnnotatedMethod<? super X> method)
   {
     Method javaMethod = method.getJavaMember();
@@ -253,16 +228,17 @@ public class StatelessView<X,T> extends View<X,T> {
   {
     if (! isProxy()) {
       out.print("extends ");
-      out.printClass(getBeanClass().getJavaClass());
+      out.printClass(getBeanType().getJavaClass());
     }
   }
 
   /**
    * Generates prologue for the context.
    */
+  @Override
   public void generateContextPrologue(JavaWriter out) throws IOException
   {
-    String localVar = "_local_" + getViewClass().getJavaClass().getSimpleName();
+    String localVar = "_local";
 
     out.println();
     out.println("private " + getViewClassName() + " " + localVar + ";");
@@ -274,7 +250,7 @@ public class StatelessView<X,T> extends View<X,T> {
   @Override
   public void generateContextHomeConstructor(JavaWriter out) throws IOException
   {
-    String localVar = "_local_" + getViewClass().getJavaClass().getSimpleName();
+    String localVar = "_local";
 
     out.println(localVar + " = new " + getViewClassName() + "(this);");
   }
@@ -282,14 +258,16 @@ public class StatelessView<X,T> extends View<X,T> {
   /**
    * Generates code to create the provider
    */
-  public void generateCreateProvider(JavaWriter out, String var)
+  public void generateCreateProvider(JavaWriter out)
       throws IOException
   {
-    String localVar = "_local_" + getViewClass().getJavaClass().getSimpleName();
+    String localVar = "_local";
+    
+    out.println("if (" + localVar + " == null)");
+    out.println("  " + localVar + " = new " + getViewClassName() + "(this);");
 
     out.println();
-    out.println("if (" + var + " == " + getViewClass().getJavaClass().getName() + ".class)");
-    out.println("  return " + localVar + ";");
+    out.println("return " + localVar + ";");
   }
 
   /**
@@ -298,7 +276,7 @@ public class StatelessView<X,T> extends View<X,T> {
   @Override
   public void generateDestroy(JavaWriter out) throws IOException
   {
-    String localVar = "_local_" + getViewClass().getJavaClass().getSimpleName();
+    String localVar = "_local";
 
     out.println();
     out.println(localVar + ".destroy();");
@@ -310,7 +288,7 @@ public class StatelessView<X,T> extends View<X,T> {
   @Override
   public void generateNewInstance(JavaWriter out) throws IOException
   {
-    String localVar = "_local_" + getViewClass().getJavaClass().getSimpleName();
+    String localVar = "_local";
 
     out.print(localVar + "._ejb_begin()");
   }
@@ -322,7 +300,7 @@ public class StatelessView<X,T> extends View<X,T> {
   public void generateFreeInstance(JavaWriter out, String bean)
       throws IOException
   {
-    String localVar = "_local_" + getViewClass().getJavaClass().getSimpleName();
+    String localVar = "_local";
 
     out.println(localVar + "._ejb_free(" + bean + ");");
   }
@@ -336,9 +314,12 @@ public class StatelessView<X,T> extends View<X,T> {
     out.println("public static class " + getViewClassName());
     generateExtends(out);
     out.print("  implements StatelessProvider");
-    
+
+    /*
     if (isProxy())
       out.print(", " + getViewClass().getJavaClass().getName());
+      */
+    
     out.println();
     out.println("{");
     out.pushDepth();
@@ -385,8 +366,7 @@ public class StatelessView<X,T> extends View<X,T> {
     out.println("}");
 
     out.println();
-    out.println("public " + getViewClass().getJavaClass().getName()
-                + " __caucho_get()");
+    out.println("public " + getViewClassName() + " __caucho_get()");
     out.println("{");
     out.println("  return this;");
     out.println("}");
@@ -455,7 +435,7 @@ public class StatelessView<X,T> extends View<X,T> {
     if (_timeoutMethod != null) {
       // String localVar = "_local_" + getViewClass().getJavaClass().getSimpleName();
       
-      String beanClassName = getBeanClass().getJavaClass().getName();
+      String beanClassName = getBeanType().getJavaClass().getName();
       
       out.println("StatelessPool.Item<" + beanClassName + "> item");
       out.println("  = _statelessPool.allocate();");

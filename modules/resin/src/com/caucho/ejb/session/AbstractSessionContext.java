@@ -40,8 +40,8 @@ import com.caucho.util.L10N;
 /**
  * Abstract base class for an session context
  */
-abstract public class AbstractSessionContext extends AbstractContext implements
-    SessionContext {
+abstract public class AbstractSessionContext<X> extends AbstractContext<X>
+  implements SessionContext {
   private static final L10N L = new L10N(AbstractSessionContext.class);
 
   /**

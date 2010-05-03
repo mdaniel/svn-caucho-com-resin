@@ -94,13 +94,16 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
     addImport("javax.transaction.*");
 
-    _view = new CandiView<X>(this, getBeanClass());
-
     _beanClass = beanClass;
     
     _aspectFactory = new CandiAspectBeanFactory<X>(beanClass);
   }
 
+  protected CandiView<X> createView()
+  {
+    return new CandiView<X>(this);
+  }
+  
   public void setSingleton(boolean isSingleton)
   {
     _isSingleton = isSingleton;
@@ -160,12 +163,15 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       _isEnhanced = true;
     }
 
+    /*
     if (getDecoratorTypes().size() > 0)
       _isEnhanced = true;
+      */
   }
 
   protected void introspectClass(AnnotatedType<X> cl)
   {
+    /*
     if (cl.isAnnotationPresent(Interceptor.class)
         || cl.isAnnotationPresent(Decorator.class)) {
       return;
@@ -200,6 +206,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
         }
       }
     }
+    */
 
     /*
     if (interceptorBindingList.size() > 0) {

@@ -107,11 +107,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   private InjectionTarget<X> _injectionTarget;
 
-  protected ArrayList<AnnotatedType<?>> _remoteList
-    = new ArrayList<AnnotatedType<?>>();
+  protected ArrayList<AnnotatedType<? super X>> _remoteList
+    = new ArrayList<AnnotatedType<? super X>>();
 
-  protected ArrayList<AnnotatedType<?>> _localList
-    = new ArrayList<AnnotatedType<?>>();
+  protected ArrayList<AnnotatedType<? super X>> _localList
+    = new ArrayList<AnnotatedType<? super X>>();
 
   protected BeanGenerator<X> _bean;
 
@@ -587,7 +587,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Sets the remote interface class.
    */
-  public void addRemoteWrapper(AnnotatedType<?> remote)
+  public void addRemoteWrapper(AnnotatedType<? super X> remote)
     throws ConfigException
   {
     Class<?> remoteClass = remote.getJavaClass();
@@ -607,7 +607,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Gets the remote interface class.
    */
-  public ArrayList<AnnotatedType<?>> getRemoteList()
+  public ArrayList<AnnotatedType<? super X>> getRemoteList()
   {
     return _remoteList;
   }
@@ -615,7 +615,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Sets the ejb local interface
    */
-  public <T> void addLocal(Class<T> local)
+  public void addLocal(Class<? super X> local)
     throws ConfigException
   {
     AnnotatedTypeImpl<X> annType;
@@ -630,7 +630,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Sets the local interface class.
    */
-  public void addLocalWrapper(AnnotatedType<?> local)
+  public void addLocalWrapper(AnnotatedType<? super X> local)
     throws ConfigException
   {
     Class<?> localClass = local.getJavaClass();
@@ -652,7 +652,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Gets the local interface class.
    */
-  public ArrayList<AnnotatedType<?>> getLocalList()
+  public ArrayList<AnnotatedType<? super X>> getLocalList()
   {
     return _localList;
   }
@@ -920,7 +920,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
       _bean.introspect();
 
-      _bean.createViews();
+      // _bean.createViews();
 
       InterceptorBinding interceptor
         = getConfig().getInterceptorBinding(getEJBName(), false);
@@ -1454,7 +1454,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
       Local local = type.getAnnotation(Local.class);
       if (local != null) {
-        for (Class<?> localClass : local.value()) {
+        for (Class localClass : local.value()) {
           addLocal(localClass);
         }
       }

@@ -44,12 +44,19 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class StatelessGenerator<X> extends SessionGenerator<X> {
-  public StatelessGenerator(String ejbName, AnnotatedType<X> ejbClass,
-                            ArrayList<AnnotatedType<?>> localApi,
-                            ArrayList<AnnotatedType<?>> remoteApi)
+  public StatelessGenerator(String ejbName, 
+                            AnnotatedType<X> beanType,
+                            ArrayList<AnnotatedType<? super X>> localApi,
+                            ArrayList<AnnotatedType<? super X>> remoteApi)
   {
-    super(ejbName, ejbClass, localApi, remoteApi, 
+    super(ejbName, beanType, localApi, remoteApi, 
           Stateless.class.getSimpleName());
+  }
+  
+  @Override
+  public StatelessView<X> getView()
+  {
+    return (StatelessView<X>) super.getView();
   }
 
   @Override
@@ -62,25 +69,15 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
    * Returns the interface itself for the no-interface view
    */
   @Override
-  protected ArrayList<AnnotatedType<?>> introspectLocalDefault() 
+  protected AnnotatedType<? super X> introspectLocalDefault() 
   {
-    ArrayList<AnnotatedType<?>> apiClass = new ArrayList<AnnotatedType<?>>();
-
-    apiClass.add(getBeanClass());
-
-    return apiClass;
+    return getBeanType();
   }
 
   @Override
-  protected <T> View<X,T> createLocalView(AnnotatedType<T> api)
+  protected View<X> createView()
   {
-    return new StatelessView<X,T>(this, api);
-  }
-
-  @Override
-  protected <T> View<X,T> createRemoteView(AnnotatedType<T> api)
-  {
-    return new StatelessView<X,T>(this, api);
+    return new StatelessView<X>(this);
   }
 
   /**
@@ -122,18 +119,12 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   protected void generateCreateProvider(JavaWriter out) throws IOException
   {
     out.println();
-    out.println("public StatelessProvider getProvider(Class api)");
+    out.println("@Override");
+    out.println("public StatelessProvider getProvider()");
     out.println("{");
     out.pushDepth();
 
-    for (View<X,?> view : getViews()) {
-      StatelessView<X,?> sView = (StatelessView<X,?>) view;
-
-      sView.generateCreateProvider(out, "api");
-    }
-
-    out.println();
-    out.println("return super.getProvider(api);");
+    getView().generateCreateProvider(out);
 
     out.popDepth();
     out.println("}");
@@ -154,25 +145,19 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println("super(server);");
     // out.println("_xaManager = server.getTransactionManager();");
 
-    for (View<X,?> view : getViews()) {
-      view.generateContextHomeConstructor(out);
-    }
+    getView().generateContextHomeConstructor(out);
 
     out.popDepth();
     out.println("}");
 
-    for (View<X,?> view : getViews()) {
-      view.generateContextPrologue(out);
-    }
+    getView().generateContextPrologue(out);
 
     out.println();
     out.println("public void __caucho_timeout_callback(javax.ejb.Timer timer)");
     out.println("{");
     out.pushDepth();
 
-    for (View<X,?> view : getViews()) {
-      view.generateTimer(out);
-    }
+    getView().generateTimer(out);
 
     out.popDepth();
     out.println("}");
@@ -192,7 +177,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
 
   protected void generateTimeoutCallback(JavaWriter out) throws IOException
   {
-    String beanClass = getBeanClass().getJavaClass().getName();
+    String beanClass = getBeanType().getJavaClass().getName();
 
     out.println();
     out.println("public void __caucho_timeout_callback(java.lang.reflect.Method method, javax.ejb.Timer timer)");
@@ -200,14 +185,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println("{");
     out.pushDepth();
 
-    View<X,?> objectView = null;
-
-    for (View<X,?> view : getViews()) {
-      if (view instanceof StatelessView<?,?>) {
-        objectView = view;
-        break;
-      }
-    }
+    View<X> objectView = getView();
 
     if (objectView != null) {
       // XXX: 4.0.7 - needs to be moved to view
@@ -253,11 +231,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   @Override
   public void generateViews(JavaWriter out) throws IOException
   {
-    for (View<X,?> view : getViews()) {
-      out.println();
-
-      view.generate(out);
-    }
+    getView().generate(out);
   }
 
   protected void generateNewInstance(JavaWriter out) throws IOException {

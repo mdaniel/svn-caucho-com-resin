@@ -85,9 +85,7 @@ public class AnnotatedTypeUtil {
     else if (methodA == null || methodB == null)
       return false;
     else {
-      Method javaMethod = methodB.getJavaMember();
-
-      return isMatch(methodA, javaMethod.getName(), javaMethod.getParameterTypes());
+      return isMatch(methodA.getJavaMember(), methodB.getJavaMember());
     }
   }
 
@@ -105,6 +103,18 @@ public class AnnotatedTypeUtil {
     Class<?> []mparam = javaMethod.getParameterTypes();
 
     return isMatch(mparam, param);
+  }
+
+  /**
+   * Tests if an annotated method matches a name and parameter types.
+   */
+  public static boolean isMatch(Method methodA, Method methodB)
+  {
+    if (! methodA.getName().equals(methodB.getName()))
+      return false;
+
+    return isMatch(methodA.getParameterTypes(),
+                   methodB.getParameterTypes());
   }
   
   /**

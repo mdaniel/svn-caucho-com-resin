@@ -63,7 +63,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   protected static Logger log
     = Logger.getLogger(StatelessManager.class.getName());
 
-  private StatelessContext<X,?> _homeContext;
+  private StatelessContext<X> _homeContext;
   private StatelessProvider<X> _remoteProvider;
 
   /**
@@ -94,7 +94,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   @Override
   public Object getLocalProxy(Class<?> api)
   {
-    StatelessProvider<?> provider = getContext().getProvider(api);
+    StatelessProvider<?> provider = getContext().getProvider();
 
     return new StatelessProviderProxy(provider);
   }
@@ -105,7 +105,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   @Override
   public Object getLocalObject(Class<?> api)
   {
-    return getContext().getProvider(api);
+    return getContext().getProvider();
   }
 
   @Override
@@ -113,7 +113,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
                                Class<?> api,
                                Set<Type> apiList)
   {
-    StatelessProvider<X> provider = getContext().getProvider(api);
+    StatelessProvider<X> provider = getContext().getProvider();
 
     if (provider == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
@@ -128,7 +128,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   protected <T> InjectionTarget<T> createSessionComponent(Class<T> api, 
                                                           Class<X> beanClass)
   {
-    StatelessProvider<?> provider = getContext().getProvider(api);
+    StatelessProvider<?> provider = getContext().getProvider();
 
     return new StatelessComponent(provider, beanClass);
   }
@@ -153,7 +153,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     if (api == null)
       return null;
 
-    StatelessProvider<?> provider = getContext().getProvider(api);
+    StatelessProvider<?> provider = getContext().getProvider();
 
     if (provider != null) {
       Object result = provider.__caucho_get();
@@ -188,7 +188,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
       Class<?> api = remoteApiList.get(0);
 
       // XXX: concept of unique remote api not correct.
-      _remoteProvider = getContext().getProvider(api);
+      _remoteProvider = getContext().getProvider();
     }
   }
 

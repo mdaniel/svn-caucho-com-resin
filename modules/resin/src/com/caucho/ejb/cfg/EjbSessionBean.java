@@ -296,7 +296,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
       Local local = localApi.getAnnotation(Local.class);
 
       if (local != null) {
-        addLocal(localApi);
+        addLocal((Class) localApi);
         continue;
       }
 
@@ -329,7 +329,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
       for (Class<?> api : local.value()) {
         // XXX: grab from type?
-        addLocal(api);
+        addLocal((Class) api);
       }
     }
 
@@ -353,7 +353,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
                  "'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
                  type.getJavaClass().getName(), interfaceList.toString()));
     else {
-      addLocal(interfaceList.get(0));
+      addLocal((Class) interfaceList.get(0));
     }
   }
 
@@ -384,7 +384,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
     server.setEjbClass((Class<X>) loadClass(getEJBClass().getName()));
 
-    ArrayList<AnnotatedType<?>> remoteList = _sessionBean.getRemoteApi();
+    ArrayList<AnnotatedType<? super X>> remoteList = _sessionBean.getRemoteApi();
     if (remoteList.size() > 0) {
       ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
       for (AnnotatedType<?> apiClass : remoteList) {
@@ -399,7 +399,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
      * server.setRemote21(loadClass(getRemote21().getName()));
      */
 
-    ArrayList<AnnotatedType<?>> localList = _sessionBean.getLocalApi();
+    ArrayList<AnnotatedType<? super X>> localList = _sessionBean.getLocalApi();
     if (localList.size() > 0) {
       ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
       for (AnnotatedType<?> apiClass : localList) {

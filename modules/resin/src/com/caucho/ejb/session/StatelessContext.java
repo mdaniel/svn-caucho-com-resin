@@ -42,7 +42,7 @@ import com.caucho.util.*;
  * Abstract base class for an stateless session context
  */
 @Module
-abstract public class StatelessContext<X,T> extends AbstractSessionContext {
+abstract public class StatelessContext<X> extends AbstractSessionContext<X> {
   private transient StatelessManager<X> _server;
   private StatelessPool<X> _statelessPool;
 
@@ -78,16 +78,17 @@ abstract public class StatelessContext<X,T> extends AbstractSessionContext {
     return _server.getTimerService();
   }
   
-  public StatelessProvider getProvider(Class<?> api)
+
+  public StatelessProvider<X> getProvider()
   {
     return null;
   }
   
-  public StatelessPool<X> getStatelessPool(StatelessProvider<T> provider)
+  public StatelessPool<X> getStatelessPool(StatelessProvider<X> provider)
   {
     if (_statelessPool == null) {
       // XXX: per-view?
-      EjbProducer<T> producer = (EjbProducer<T>) getServer().getProducer();
+      EjbProducer<X> producer = getServer().getProducer();
       producer.setBeanProducer(provider);
 
       _statelessPool = new StatelessPool<X>(_server);
@@ -108,7 +109,7 @@ abstract public class StatelessContext<X,T> extends AbstractSessionContext {
   /**
    * Returns the new instance for EJB 3.0
    */
-  protected T _caucho_newInstance()
+  protected X _caucho_newInstance()
   {
     return null;
   }
@@ -116,7 +117,7 @@ abstract public class StatelessContext<X,T> extends AbstractSessionContext {
   /**
    * Returns the new instance for EJB 3.0
    */
-  protected T _caucho_newInstance(XmlConfigContext env)
+  protected X _caucho_newInstance(XmlConfigContext env)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

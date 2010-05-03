@@ -30,25 +30,11 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Decorator;
-import javax.inject.Named;
-import javax.inject.Qualifier;
-import javax.interceptor.AroundInvoke;
-import javax.interceptor.InvocationContext;
 
-import com.caucho.config.inject.AnyLiteral;
-import com.caucho.config.inject.DefaultLiteral;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.DependencyComponent;
@@ -62,31 +48,27 @@ import com.caucho.vfs.PersistentDependency;
 @Module
 abstract public class BeanGenerator<X> extends GenClass
 {
-  protected final AnnotatedType<X> _beanClass;
-
-  protected DependencyComponent _dependency = new DependencyComponent();
+  private final AnnotatedType<X> _beanType;
   
-  private AnnotatedMethod<? super X> _aroundInvokeMethod;
+  private final View<X> _view;
 
-  private Set<Annotation> _decoratorBindings;
-  private Set<Annotation> _interceptorBindings;
-
-  private ArrayList<Type> _decorators
-    = new ArrayList<Type>();
+  private DependencyComponent _dependency = new DependencyComponent();
 
   protected BeanGenerator(String fullClassName,
-                          AnnotatedType<X> beanClass)
+                          AnnotatedType<X> beanType)
   {
     super(fullClassName);
     
-    _beanClass = beanClass;
+    _beanType = beanType;
 
-    addDependency(beanClass.getJavaClass());
+    addDependency(beanType.getJavaClass());
+    
+    _view = createView();
   }
 
-  public AnnotatedType<X> getBeanClass()
+  public AnnotatedType<X> getBeanType()
   {
-    return _beanClass;
+    return _beanType;
   }
 
   protected void addDependency(PersistentDependency depend)
@@ -100,201 +82,34 @@ abstract public class BeanGenerator<X> extends GenClass
   }
 
   /**
-   * Gets the bindings for the decorators
-   */
-  public Set<Annotation> getDecoratorBindings()
-  {
-    return _decoratorBindings;
-  }
-
-  /**
-   * Gets the bindings for the interceptors
-   */
-  public Set<Annotation> getInterceptorBindings()
-  {
-    return _interceptorBindings;
-  }
-
-  /**
-   * Introspects the bean.
-   */
-  public void introspect()
-  {
-    _aroundInvokeMethod = findAroundInvokeMethod(_beanClass);
-
-    // introspectClass(_beanClass);
-    introspectDecorators(_beanClass);
-  }
-  
-  /**
-   * Finds the matching decorators for the class
-   */
-  protected void introspectDecorators(AnnotatedType<X> type)
-  {
-    if (type.isAnnotationPresent(javax.decorator.Decorator.class))
-      return;
-    
-    InjectManager inject = InjectManager.create();
-
-    Set<Type> types = type.getTypeClosure();
-    
-    _decoratorBindings = new HashSet<Annotation>();
-    
-    boolean isQualifier = false;
-    for (Annotation ann : type.getAnnotations()) {
-      if (ann.annotationType().isAnnotationPresent(Qualifier.class)) {
-        _decoratorBindings.add(ann);
-
-        if (! Named.class.equals(ann.annotationType())) {
-          isQualifier = true;
-        }
-      }
-    }
-    
-    if (! isQualifier)
-      _decoratorBindings.add(DefaultLiteral.DEFAULT);
-    
-    _decoratorBindings.add(AnyLiteral.ANY);
-
-    Annotation []decoratorBindings;
-
-    if (_decoratorBindings != null) {
-      decoratorBindings = new Annotation[_decoratorBindings.size()];
-      _decoratorBindings.toArray(decoratorBindings);
-    }
-    else
-      decoratorBindings = new Annotation[0];
-
-    List<Decorator<?>> decorators
-      = inject.resolveDecorators(types, decoratorBindings);
-    
-    boolean isExtends = false;
-    for (Decorator<?> decorator : decorators) {
-      // XXX:
-      isExtends = fillTypes(_decorators, 
-                            (Class<?>) decorator.getDelegateType(),
-                            isExtends);
-    }
-  }
-
-  private boolean fillTypes(HashSet<Type> types, Class<?> type,
-                            boolean isExtends)
-  {
-    if (type == null || Object.class.equals(type))
-      return isExtends;
-    
-    if (! type.isInterface()) {
-      if (! isExtends)
-        types.add(type);
-      
-      isExtends = true;
-    }
-    else
-      types.add(type);
-
-    isExtends = fillTypes(types, type.getSuperclass(), isExtends);
-
-    for (Class<?> iface : type.getInterfaces()) {
-      isExtends = fillTypes(types, iface, isExtends);
-    }
-    
-    return isExtends;
-  }
-
-  protected boolean fillTypes(ArrayList<Type> types, Class<?> type,
-                              boolean isExtends)
-  {
-    if (type == null || types.contains(type) || Object.class.equals(type))
-      return isExtends;
-
-    if (! type.isInterface()) {
-      if (! isExtends)
-        types.add(type);
-      
-      isExtends = true;
-    }
-    else {
-      types.add(type);
-    }
-    
-    isExtends = fillTypes(types, type.getSuperclass(), isExtends);
-
-    for (Class<?> iface : type.getInterfaces()) {
-      isExtends = fillTypes(types, iface, isExtends);
-    }
-    
-    return isExtends;
-  }
-
-  /**
-   * Returns the decorator classes
-   */
-  public ArrayList<Type> getDecoratorTypes()
-  {
-    return _decorators;
-  }
-
-  private static <X> AnnotatedMethod<? super X> 
-    findAroundInvokeMethod(AnnotatedType<X> cl)
-  {
-    if (cl == null)
-      return null;
-
-    for (AnnotatedMethod<? super X> method : cl.getMethods()) {
-      if (method.isAnnotationPresent(AroundInvoke.class)
-          && method.getJavaMember().getParameterTypes().length == 1
-          && method.getJavaMember().getParameterTypes()[0].equals(InvocationContext.class)) {
-	return method;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Returns the around-invoke method
-   */
-  public AnnotatedMethod<? super X> getAroundInvokeMethod()
-  {
-    return _aroundInvokeMethod;
-  }
-
-  /**
-   * Gets the default interceptor
-   */
-  /*
-  public ArrayList<Class> getDefaultInterceptors()
-  {
-    return _defaultInterceptors;
-  }
-  */
-
-  /**
    * Returns the views.
    */
-  public ArrayList<View<X,?>> getViews()
+  public View<X> getView()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _view;
   }
 
   /**
    * Generates the views for the bean
    */
-  public void createViews()
-  {
-  }
+  abstract protected View<X> createView();
 
+  public void introspect()
+  {
+    
+  }
+  
   /**
    * Generates the view contents
    */
   public void generateViews(JavaWriter out)
     throws IOException
   {
-    for (View<X,?> view : getViews()) {
-      out.println();
+    View<X> view = getView();
+    
+    out.println();
 
-      view.generate(out);
-    }
+    view.generate(out);
   }
 
   /**
@@ -303,11 +118,11 @@ abstract public class BeanGenerator<X> extends GenClass
   public void generateDestroyViews(JavaWriter out)
     throws IOException
   {
-    for (View<X,?> view : getViews()) {
-      out.println();
+    View<X> view = getView();
+    
+    out.println();
 
-      view.generateDestroy(out);
-    }
+    view.generateDestroy(out);
   }
 
   protected void generateDependency(JavaWriter out)
@@ -321,7 +136,7 @@ abstract public class BeanGenerator<X> extends GenClass
    */
   public boolean hasMethod(String methodName, Class<?> []paramTypes)
   {
-    for (AnnotatedMethod<? super X> method : _beanClass.getMethods()) {
+    for (AnnotatedMethod<? super X> method : _beanType.getMethods()) {
       Method javaMethod = method.getJavaMember();
       
       if (! javaMethod.getName().equals(methodName))
@@ -353,6 +168,6 @@ abstract public class BeanGenerator<X> extends GenClass
   public String toString()
   {
     return (getClass().getSimpleName()
-            + "[" + _beanClass.getJavaClass().getSimpleName() + "]");
+            + "[" + _beanType.getJavaClass().getSimpleName() + "]");
   }
 }

@@ -39,7 +39,6 @@ import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectGenerator;
-import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -48,8 +47,8 @@ import com.caucho.util.L10N;
  * Represents a public interface to a singleton bean, e.g. a singleton view
  */
 @Module
-public class SingletonView<X,T> extends View<X,T> {
-  private static final L10N L = new L10N(SingletonView.class);
+public class SingletonView<X> extends SessionView<X> {
+  private static final L10N L = new L10N(SessionView.class);
 
   private SingletonGenerator<X> _sessionBean;
   
@@ -58,13 +57,13 @@ public class SingletonView<X,T> extends View<X,T> {
   private ArrayList<AspectGenerator<X>> _businessMethods
     = new ArrayList<AspectGenerator<X>>();
 
-  public SingletonView(SingletonGenerator<X> bean, AnnotatedType<T> api)
+  public SingletonView(SingletonGenerator<X> bean)
   {
-    super(bean, api);
+    super(bean);
 
     _sessionBean = bean;
     
-    _aspectBeanFactory = new SingletonAspectBeanFactory<X>(bean.getBeanClass());
+    _aspectBeanFactory = new SingletonAspectBeanFactory<X>(bean.getBeanType());
   }
 
   public SingletonGenerator<X> getSessionBean()
@@ -83,19 +82,19 @@ public class SingletonView<X,T> extends View<X,T> {
    */
   public boolean isProxy()
   {
-    return ! getViewClass().equals(getBeanClass());
+    return true;
   }
 
   @Override
   public String getViewClassName()
   {
-    return getViewClass().getJavaClass().getSimpleName() + "__LocalProxy";
+    return "SingletonView";
   }
 
   @Override
   public String getBeanClassName()
   {
-    return getViewClass().getJavaClass().getSimpleName() + "__Bean";
+    return "Bean";
   }
 
   /**
@@ -112,44 +111,14 @@ public class SingletonView<X,T> extends View<X,T> {
    * each.
    */
   @Override
-  public void introspect()
+  public void addBusinessMethod(AnnotatedMethod<? super X> method)
   {
-    AnnotatedType<T> apiClass = getViewClass();
+    AspectGenerator<X> bizMethod
+    = _aspectBeanFactory.create(method);
 
-    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
-      Method javaMethod = apiMethod.getJavaMember();
-
-      if (javaMethod.getDeclaringClass().equals(Object.class))
-        continue;
-      if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
-          && ! javaMethod.getName().equals("remove"))
-        continue;
-
-      if (javaMethod.getName().startsWith("ejb")) {
-        throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
-                                      javaMethod.getDeclaringClass(),
-                                      javaMethod.getName()));
-      }
-
-      AspectGenerator<X> bizMethod
-        = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
-
-      if (bizMethod != null) {
-        _businessMethods.add(bizMethod);
-      }
+    if (bizMethod != null) {
+      _businessMethods.add(bizMethod);
     }
-  }
-
-  /**
-   * Generates code to create the provider
-   */
-  public void generateCreateProvider(JavaWriter out, String var)
-    throws IOException
-  {
-    out.println();
-    out.println("if (" + var + " == " 
-                + getViewClass().getJavaClass().getName() + ".class)");
-    out.println("  return new " + getViewClassName() + "(getServer());");
   }
 
   /**
@@ -175,11 +144,15 @@ public class SingletonView<X,T> extends View<X,T> {
 
     if (isProxy()) {
       generateExtends(out);
-      out.print("  implements SingletonProxyFactory, ");
-      out.println(getViewClass().getJavaClass().getName());
+      out.print("  implements SingletonProxyFactory");
+      
+      for (AnnotatedType<? super X> apiType : getGenerator().getLocalApi()) {
+        out.print(", " + apiType.getJavaClass().getName());
+      }
+      out.println();
     }
     else {
-      out.println("  extends " + getBeanClass().getJavaClass().getName());
+      out.println("  extends " + getBeanType().getJavaClass().getName());
       out.println("  implements SingletonProxyFactory");
     }
 
@@ -200,7 +173,7 @@ public class SingletonView<X,T> extends View<X,T> {
   {
     out.println();
     out.println("public static class " + getBeanClassName());
-    out.println("  extends " + getBeanClass().getJavaClass().getName());
+    out.println("  extends " + getBeanType().getJavaClass().getName());
     out.println("{");
     out.pushDepth();
     
@@ -247,7 +220,7 @@ public class SingletonView<X,T> extends View<X,T> {
       out.println("private " + getBeanClassName() + " _bean;");
     }
     */
-    String beanClassName = getBeanClass().getJavaClass().getName();
+    String beanClassName = getBeanType().getJavaClass().getName();
     
     out.println("private " + beanClassName + " _bean;");
 
@@ -348,7 +321,7 @@ public class SingletonView<X,T> extends View<X,T> {
   {
   }
 
-  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super T> apiMethod)
+  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super X> apiMethod)
   {
     AnnotatedMethod<? super X> implMethod = getMethod(apiMethod);
 
@@ -360,6 +333,6 @@ public class SingletonView<X,T> extends View<X,T> {
     throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
                                   javaApiMethod.getDeclaringClass().getSimpleName(),
                                   javaApiMethod.getName(),
-                                  getBeanClass().getJavaClass().getName()));
+                                  getBeanType().getJavaClass().getName()));
   }
 }

@@ -30,17 +30,12 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import javax.decorator.Decorator;
-import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorBinding;
 
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -49,18 +44,12 @@ import com.caucho.java.JavaWriter;
  * Represents a public interface to a bean, e.g. a local stateful view
  */
 @Module
-abstract public class View<X,T> {
+abstract public class View<X> {
   protected final BeanGenerator<X> _bean;
-  protected final AnnotatedType<T> _viewClass;
 
-  protected ArrayList<Annotation> _interceptorBindings;
-
-  protected View(BeanGenerator<X> bean, AnnotatedType<T> viewClass)
+  protected View(BeanGenerator<X> bean)
   {
     _bean = bean;
-    _viewClass = viewClass;
-
-    _bean.addDependency(viewClass.getJavaClass());
   }
 
   /**
@@ -74,22 +63,14 @@ abstract public class View<X,T> {
   /**
    * Returns the bean's ejbclass
    */
-  protected AnnotatedType<X> getBeanClass()
+  protected AnnotatedType<X> getBeanType()
   {
-    return _bean.getBeanClass();
+    return _bean.getBeanType();
   }
 
   public String getBeanClassName()
   {
-    return getViewClassName();
-  }
-
-  /**
-   * Returns the API class.
-   */
-  public AnnotatedType<T> getViewClass()
-  {
-    return _viewClass;
+    return getBeanType().getJavaClass().getName();
   }
 
   public String getViewClassName()
@@ -108,77 +89,25 @@ abstract public class View<X,T> {
   }
 
   /**
-   * Returns any interceptor bindings
-   */
-  public ArrayList<Annotation> getInterceptorBindings()
-  {
-    return _interceptorBindings;
-  }
-
-  /**
-   * Introspects the view
-   */
-  public void introspect()
-  {
-    introspectClass(getViewClass());
-  }
-
-  protected void introspectClass(AnnotatedType<T> cl)
-  {
-    if (cl.isAnnotationPresent(Interceptor.class)
-        || cl.isAnnotationPresent(Decorator.class)) {
-      return;
-    }
-
-    ArrayList<Annotation> interceptorBindingList
-      = new ArrayList<Annotation>();
-
-    ArrayList<Annotation> xmlInterceptorBindings = getInterceptorBindings();
-
-    if (xmlInterceptorBindings != null) {
-      for (Annotation ann : xmlInterceptorBindings) {
-        interceptorBindingList.add(ann);
-      }
-    }
-    else {
-      for (Annotation ann : cl.getAnnotations()) {
-        Class<?> annType = ann.annotationType();
-
-        if (annType.isAnnotationPresent(Stereotype.class)) {
-          for (Annotation sAnn : ann.annotationType().getAnnotations()) {
-            Class<?> sAnnType = sAnn.annotationType();
-
-            if (sAnnType.isAnnotationPresent(InterceptorBinding.class)) {
-              interceptorBindingList.add(sAnn);
-            }
-          }
-        }
-
-        if (annType.isAnnotationPresent(InterceptorBinding.class)) {
-          interceptorBindingList.add(ann);
-        }
-      }
-    }
-
-    _interceptorBindings = interceptorBindingList;
-  }
-
-  /**
    * Returns the introspected methods
    */
   public ArrayList<AspectGenerator<X>> getMethods()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-
-  /**
-   * Returns any around-invoke method
-   */
-  public AnnotatedMethod<? super X> getAroundInvokeMethod()
+  
+  //
+  // introspection
+  //
+  
+  protected void introspect()
   {
-    return getBean().getAroundInvokeMethod();
   }
 
+  //
+  // Java generation
+  //
+  
   /**
    * Generates prologue for the context.
    */
@@ -339,12 +268,12 @@ abstract public class View<X,T> {
     }
   }
   
-  protected AnnotatedMethod<? super X> 
+  protected <T> AnnotatedMethod<? super X> 
   getMethod(AnnotatedMethod<? super T> method)
   {
     Method javaMethod = method.getJavaMember();
     
-    return getMethod(getBeanClass(), 
+    return getMethod(getBeanType(), 
                      javaMethod.getName(), 
                      javaMethod.getParameterTypes());
   }
@@ -388,7 +317,6 @@ abstract public class View<X,T> {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[beanClass=" + getBeanClass() 
-                                      + ",viewClass=" + getViewClass() + "]";
+    return getClass().getSimpleName() + "[" + getBeanType() + "]"; 
   }
 }

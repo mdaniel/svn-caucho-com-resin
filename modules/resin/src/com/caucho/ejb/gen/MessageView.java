@@ -46,7 +46,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
  * Represents a public interface to a stateful bean, e.g. a stateful view
  */
 @Module
-public class MessageView<X,T> extends View<X,T> {
+public class MessageView<X> extends View<X> {
   private static final L10N L = new L10N(MessageView.class);
 
   private MessageGenerator<X> _messageBean;
@@ -56,13 +56,13 @@ public class MessageView<X,T> extends View<X,T> {
   private ArrayList<AspectGenerator<X>> _businessMethods
     = new ArrayList<AspectGenerator<X>>();
 
-  public MessageView(MessageGenerator<X> bean, AnnotatedType<T> api)
+  public MessageView(MessageGenerator<X> bean)
   {
-    super(bean, api);
+    super(bean);
 
     _messageBean = bean;
     
-    _aspectBeanFactory = new MessageAspectBeanFactory<X>(bean.getBeanClass());
+    _aspectBeanFactory = new MessageAspectBeanFactory<X>(bean.getBeanType());
   }
 
   public MessageGenerator<X> getMessageBean()
@@ -89,33 +89,14 @@ public class MessageView<X,T> extends View<X,T> {
   {
     return _businessMethods;
   }
-
-  /**
-   * Introspects the APIs methods, producing a business method for
-   * each.
-   */
-  @Override
-  public void introspect()
+      
+  public void addBusinessMethod(AnnotatedMethod<? super X> method)
   {
-    AnnotatedType<T> apiClass = getViewClass();
-
-    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
-      Method javaMethod = apiMethod.getJavaMember();
+    AspectGenerator<X> bizMethod
+      = _aspectBeanFactory.create(method);
       
-      if (javaMethod.getDeclaringClass().equals(Object.class))
-	continue;
-      if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
-	  && ! javaMethod.getName().equals("remove"))
-	continue;
-
-      int index = _businessMethods.size();
-      
-      AspectGenerator<X> bizMethod
-        = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
-      
-      if (bizMethod != null) {
-	_businessMethods.add(bizMethod);
-      }
+    if (bizMethod != null) {
+      _businessMethods.add(bizMethod);
     }
   }
 
@@ -145,20 +126,20 @@ public class MessageView<X,T> extends View<X,T> {
     }
   }
   
-  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super T> apiMethod)
+  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super X> apiMethod)
   {
-    AnnotatedMethod<? super X> implMethod = getMethod(getBeanClass(), apiMethod.getJavaMember());
+    AnnotatedMethod<? super X> implMethod = getMethod(getBeanType(), apiMethod.getJavaMember());
 
     if (implMethod != null)
       return implMethod;
   
     throw ConfigException.create(apiMethod.getJavaMember(),
-				 L.l("api method has no corresponding implementation in '{0}'",
-				     getBeanClass().getJavaClass().getName()));
+                                 L.l("api method has no corresponding implementation in '{0}'",
+                                     getBeanType().getJavaClass().getName()));
   }
   
   protected AnnotatedMethod<? super X> getImplMethod(String name, Class<?> []param)
   {
-    return getMethod(getBeanClass(), name, param);
+    return getMethod(getBeanType(), name, param);
   }
 }

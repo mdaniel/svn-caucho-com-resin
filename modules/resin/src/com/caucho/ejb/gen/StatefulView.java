@@ -49,7 +49,7 @@ import com.caucho.util.L10N;
  * Represents a public interface to a stateful bean, e.g. a stateful view
  */
 @Module
-public class StatefulView<X,T> extends View<X,T> {
+public class StatefulView<X> extends SessionView<X> {
   private static final L10N L = new L10N(StatefulView.class);
 
   private StatefulGenerator<X> _sessionBean;
@@ -59,13 +59,13 @@ public class StatefulView<X,T> extends View<X,T> {
   private final ArrayList<AspectGenerator<X>> _businessMethods
     = new ArrayList<AspectGenerator<X>>();
 
-  public StatefulView(StatefulGenerator<X> bean, AnnotatedType<T> api)
+  public StatefulView(StatefulGenerator<X> bean)
   {
-    super(bean, api);
+    super(bean);
 
     _sessionBean = bean;
     
-    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(bean.getBeanClass());
+    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(bean.getBeanType());
   }
 
   public StatefulGenerator<X> getSessionBean()
@@ -85,13 +85,13 @@ public class StatefulView<X,T> extends View<X,T> {
   @Override
   public boolean isProxy()
   {
-    return ! getViewClass().equals(getBeanClass());
+    return true;
   }
 
   @Override
   public String getViewClassName()
   {
-    return getViewClass().getJavaClass().getSimpleName() + "__LocalProxy";
+    return "StatefulProxy";
   }
 
   @Override
@@ -99,7 +99,7 @@ public class StatefulView<X,T> extends View<X,T> {
   {
     // XXX: 4.0.7
     // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
-    return getBeanClass().getJavaClass().getName();
+    return getBeanType().getJavaClass().getName();
   }
 
   /**
@@ -110,69 +110,23 @@ public class StatefulView<X,T> extends View<X,T> {
   {
     return _businessMethods;
   }
-
-  /**
-   * Introspects the APIs methods, producing a business method for
-   * each.
-   */
+  
   @Override
-  public void introspect()
+  protected void addBusinessMethod(AnnotatedMethod<? super X> method)
   {
-    AnnotatedType<T> apiClass = getViewClass();
-
-    for (AnnotatedMethod<? super T> apiMethod : apiClass.getMethods()) {
-      Method javaMethod = apiMethod.getJavaMember();
-
-      if (javaMethod.getDeclaringClass().equals(Object.class))
-        continue;
-      if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")
-          && ! javaMethod.getName().equals("remove"))
-        continue;
-      if (! Modifier.isPublic(javaMethod.getModifiers()))
-        continue;
-      if (Modifier.isFinal(javaMethod.getModifiers())
-          || Modifier.isStatic(javaMethod.getModifiers()))
-        continue;
-
-      if (javaMethod.getName().startsWith("ejb")) {
-        throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
-                                      javaMethod.getDeclaringClass(),
-                                      javaMethod.getName()));
-      }
-
-      // ejb/11d4
-      // overridden methods may appear twice in the method list
-      AspectGenerator<X> oldMethod = null;
-
-      for (AspectGenerator<X> bizMethod : _businessMethods) {
-        String bizMethodName 
-          = bizMethod.getMethod().getJavaMember().getName();
-
-        if (javaMethod.getName().equals(bizMethodName)) {
-          oldMethod = bizMethod;
-          break;
-        }
-      }
-
-      if (oldMethod != null)
-        continue;
-
-      AspectGenerator<X> bizMethod = _aspectBeanFactory.create((AnnotatedMethod<? super X>) apiMethod);
+    AspectGenerator<X> bizMethod = _aspectBeanFactory.create(method);
       
-      if (bizMethod != null) {
-        _businessMethods.add(bizMethod);
-      }
+    if (bizMethod != null) {
+      _businessMethods.add(bizMethod);
     }
   }
 
   /**
    * Generates code to create the provider
    */
-  public void generateCreateProvider(JavaWriter out, String var)
+  public void generateCreateProvider(JavaWriter out)
     throws IOException
   {
-    out.println();
-    out.println("if (" + var + " == " + getViewClass().getJavaClass().getName() + ".class)");
     out.println("  return new " + getViewClassName() + "(getStatefulManager(), true);");
   }
 
@@ -190,11 +144,15 @@ public class StatefulView<X,T> extends View<X,T> {
 
     if (isProxy()) {
       generateExtends(out);
-      out.print("  implements StatefulProvider, ");
-      out.println(getViewClass().getJavaClass().getName());
+      out.print("  implements StatefulProvider");
+      
+      for (AnnotatedType<? super X> api : getGenerator().getLocalApi()) {
+        out.print(", " + api.getJavaClass().getName());
+      }
+      out.println();
     }
     else {
-      out.println("  extends " + getBeanClass().getJavaClass().getName());
+      out.println("  extends " + getBeanType().getJavaClass().getName());
       out.println("  implements StatefulProvider");
     }
 
@@ -215,7 +173,7 @@ public class StatefulView<X,T> extends View<X,T> {
   {
     out.println();
     out.println("public static class " + getBeanClassName());
-    out.println("  extends " + getBeanClass().getJavaClass().getName());
+    out.println("  extends " + getBeanType().getJavaClass().getName());
     out.println("{");
     out.pushDepth();
     
@@ -386,7 +344,7 @@ public class StatefulView<X,T> extends View<X,T> {
   {
   }
 
-  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super T> apiMethod)
+  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super X> apiMethod)
   {
     AnnotatedMethod<? super X> implMethod = getMethod(apiMethod);
 
@@ -398,6 +356,6 @@ public class StatefulView<X,T> extends View<X,T> {
     throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
                                   javaMethod.getDeclaringClass().getSimpleName(),
                                   javaMethod.getName(),
-                                  getBeanClass().getJavaClass().getName()));
+                                  getBeanType().getJavaClass().getName()));
   }
 }

@@ -56,7 +56,7 @@ import com.caucho.util.L10N;
 /**
  * Base class for an abstract context
  */
-abstract public class AbstractContext implements EJBContext {
+abstract public class AbstractContext<X> implements EJBContext {
   private static final L10N L = new L10N(AbstractContext.class);
   private static final Logger log = Logger.getLogger(AbstractContext.class
       .getName());
@@ -83,7 +83,7 @@ abstract public class AbstractContext implements EJBContext {
   /**
    * Returns the server which owns this bean.
    */
-  public abstract AbstractEjbBeanManager getServer();
+  public abstract AbstractEjbBeanManager<X> getServer();
 
   /**
    * Returns the EJB's meta data.
@@ -131,10 +131,8 @@ abstract public class AbstractContext implements EJBContext {
   public EJBLocalObject getEJBLocalObject() throws IllegalStateException
   {
     throw new IllegalStateException(
-        L
-            .l(
-                "`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
-                getServer()));
+        L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
+            getServer()));
   }
 
   /**
@@ -386,7 +384,7 @@ abstract public class AbstractContext implements EJBContext {
   }
 
   /**
-   * Runs the timeout callbacks.
+   * Runs the timeout callbacks
    */
   public void __caucho_timeout_callback(Method method)
     throws IllegalAccessException, InvocationTargetException
