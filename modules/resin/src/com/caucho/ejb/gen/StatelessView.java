@@ -46,6 +46,7 @@ import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.LifecycleInterceptor;
 import com.caucho.config.gen.View;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -75,7 +76,9 @@ public class StatelessView<X> extends SessionView<X> {
 
     _statelessBean = bean;
     
-    _aspectBeanFactory = new StatelessAspectBeanFactory<X>(bean.getBeanType());
+    InjectManager manager = InjectManager.create();
+    
+    _aspectBeanFactory = new StatelessAspectBeanFactory<X>(manager, bean.getBeanType());
   }
 
   public StatelessGenerator<X> getStatelessBean()

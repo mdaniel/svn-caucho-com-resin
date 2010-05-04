@@ -41,6 +41,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.View;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -95,12 +96,12 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   @Override
   protected MessageView<X> createView()
   {
-    return new MessageView<X>(this);
+    return new MessageView<X>(InjectManager.create(), this);
   }
 
   public <T> void setApi(AnnotatedType<T> api)
   {
-    _view = new MessageView<X>(this);
+    _view = new MessageView<X>(InjectManager.create(), this);
   }
 
   /**

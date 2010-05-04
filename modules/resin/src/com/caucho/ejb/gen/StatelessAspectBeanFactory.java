@@ -48,11 +48,17 @@ import com.caucho.inject.Module;
 @Module
 public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
 {
-  public StatelessAspectBeanFactory(AnnotatedType<X> beanType)
+  public StatelessAspectBeanFactory(InjectManager manager,
+                                    AnnotatedType<X> beanType)
   {
-    super(beanType);
+    super(manager, beanType);
   }
   
+  @Override
+  public boolean isProxy()
+  {
+    return true;
+  }
   /**
    * Generates the underlying bean object
    */
@@ -78,6 +84,15 @@ public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   public String getBeanInfo()
   {
     return "poolItem";
+  }
+  
+  /**
+   * Returns the generated bean name
+   */
+  @Override
+  public String getGeneratedClassName()
+  {
+    return getBeanType().getJavaClass().getName();
   }
   
   @Override

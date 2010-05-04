@@ -107,4 +107,9 @@ public class DecoratorEntry<X> {
 
     return false;
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _decorator + "]";
+  }
 }

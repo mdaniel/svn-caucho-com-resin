@@ -116,7 +116,6 @@ import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
 import com.caucho.config.j2ee.ResourceHandler;
-import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.BaseTypeFactory;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
@@ -461,7 +460,7 @@ public class InjectManager
     // ejb doesn't create a new InjectManager even though it's a new
     // environment
     // XXX: yes it does, because of the SessionContext
-    // ejb/2016
+    // ejb/2016 vs ejb/12h0
     /*
     if (envLoader != null
         && Boolean.FALSE.equals(envLoader.getAttribute("caucho.inject"))) {
@@ -1408,19 +1407,28 @@ public class InjectManager
         return adapter;
     }
     
-    CreationalContextImpl<?> env
-      = (CreationalContextImpl<?>) createContext;
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
+    
+    try {
+      thread.setContextClassLoader(getClassLoader());
+    
+      CreationalContextImpl<?> env
+        = (CreationalContextImpl<?>) createContext;
 
-    if (env != null) {
-      Object object = env.get(bean);
+      if (env != null) {
+        Object object = env.get(bean);
 
-      if (object != null)
-        return object;
+        if (object != null)
+          return object;
+      }
+
+      Object object = getInstanceRec(bean, type, env, this);
+
+      return object;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
-
-    Object object = getInstanceRec(bean, type, env, this);
-
-    return object;
   }
 
   /**
@@ -2325,7 +2333,12 @@ public class InjectManager
     Annotation []bindings = new Annotation[bindingList.size()];                 
     bindingList.toArray(bindings);                                              
 
-    return resolveDecorators(types, bindings);                                  
+    List<Decorator<?>> decorators = resolveDecorators(types, bindings);
+    
+    // XXX: 4.0.7
+    // log.info("DECORATORS: " + decorators + " " + types + " " + this);
+    
+    return decorators;
   }
 
 
@@ -2353,7 +2366,7 @@ public class InjectManager
         }
       }
     }
-      
+
     ArrayList<Decorator<?>> decorators = new ArrayList<Decorator<?>>();
 
     if (qualifiers == null || qualifiers.length == 0)

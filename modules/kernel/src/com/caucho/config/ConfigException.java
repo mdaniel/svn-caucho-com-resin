@@ -140,6 +140,14 @@ public class ConfigException
     return new ConfigException(loc(method) + msg);
   }
 
+  public static ConfigException createConfig(Throwable e)
+  {
+    if (e instanceof ConfigException)
+      return (ConfigException) e;
+    else
+      return new ConfigException(e);
+  }
+
   public static RuntimeException create(Throwable e)
   {
     while (e.getCause() != null

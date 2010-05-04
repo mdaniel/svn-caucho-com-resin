@@ -38,6 +38,8 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
@@ -50,11 +52,26 @@ import javax.enterprise.inject.spi.InterceptionType;
  */
 public class CandiUtil {
   private static final L10N L = new L10N(CandiUtil.class);
+  private static final Logger log = Logger.getLogger(CandiUtil.class.getName());
 
   public static final Object []NULL_OBJECT_ARRAY = new Object[0];
 
   private CandiUtil()
   {
+  }
+  
+  public static Object invoke(Method method, Object bean, Object ...args)
+  {
+    try {
+      return method.invoke(bean, args);
+    } catch (InvocationTargetException e) {
+      if (e.getCause() instanceof RuntimeException)
+        throw (RuntimeException) e.getCause();
+      else
+        throw new RuntimeException(method.getName() + ": " + e, e.getCause());
+    } catch (Exception e) {
+      throw new RuntimeException(method.getName() + ": " + e, e);
+    }
   }
 
   public static int []createInterceptors(InjectManager manager,
@@ -118,6 +135,26 @@ public class CandiUtil {
       method.setAccessible(true);
       
       methods[i] = method;
+    }
+
+    return methods;
+  }
+
+  public static Method []createDecoratorMethods(List<Decorator<?>> decorators,
+                                                String methodName,
+                                                Class<?> ...paramTypes)
+  {
+    Method []methods = new Method[decorators.size()];
+    
+    for (int i = 0; i < decorators.size(); i++) {
+      Decorator<?> decorator = decorators.get(i);
+      Class<?> beanClass = decorator.getBeanClass();
+      
+      try {
+        methods[decorators.size() - i - 1] = beanClass.getMethod(methodName, paramTypes);
+      } catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
     }
 
     return methods;
@@ -189,18 +226,18 @@ public class CandiUtil {
       // XXX:
       ((DecoratorBean<?>) bean).setDelegate(instance, proxy);
 
-      instances[beans.size() - 1 - i] = instance;
+      instances[beans.size() - i - 1] = instance;
     }
 
     return instances;
   }
 
   public static int nextDelegate(Object []beans,
-                                 Class<?> api,
+                                 Method []methods,
                                  int index)
   {
     for (index--; index >= 0; index--) {
-      if (api.isAssignableFrom(beans[index].getClass())) {
+      if (methods[index] != null) {
         return index;
       }
     }

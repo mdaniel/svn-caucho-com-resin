@@ -51,6 +51,7 @@ import javax.interceptor.InterceptorBinding;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
 import com.caucho.config.inject.HandleAware;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.JavaClassGenerator;
@@ -75,7 +76,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   private boolean _isSingleton;
   private boolean _isSerializeHandle;
 
-  public CandiBeanGenerator(AnnotatedType<X> beanClass)
+  public CandiBeanGenerator(InjectManager manager,
+                            AnnotatedType<X> beanClass)
   {
     super(beanClass.getJavaClass().getName() + "__ResinWebBean", beanClass);
 
@@ -94,7 +96,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
     _beanClass = beanClass;
     
-    _aspectFactory = new CandiAspectBeanFactory<X>(beanClass);
+    _aspectFactory = new CandiAspectBeanFactory<X>(manager, beanClass);
   }
 
   @Override

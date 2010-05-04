@@ -46,9 +46,10 @@ import com.caucho.inject.Module;
 @Module
 public class MessageAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
 {
-  public MessageAspectBeanFactory(AnnotatedType<X> beanType)
+  public MessageAspectBeanFactory(InjectManager manager,
+                                  AnnotatedType<X> beanType)
   {
-    super(beanType);
+    super(manager, beanType);
   }
   
   /**

@@ -51,6 +51,7 @@ import javax.interceptor.Interceptors;
 import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -114,7 +115,6 @@ public class InterceptorFactory<X>
     if (interceptors != null) {
       for (Class<?> iClass : interceptors.value()) {
         if (! hasAroundInvoke(iClass)) {
-          System.out.println("MISSING: " + iClass);
           continue;
         }
         
@@ -295,7 +295,7 @@ public class InterceptorFactory<X>
 
     for (Class<?> decoratorClass : _decoratorClasses) {
       for (Method method : decoratorClass.getMethods()) {
-        if (isMatch(method, annMethod.getJavaMember())) {
+        if (AnnotatedTypeUtil.isMatch(method, annMethod.getJavaMember())) {
           if (decoratorSet == null)
             decoratorSet = new HashSet<Class<?>>();
           

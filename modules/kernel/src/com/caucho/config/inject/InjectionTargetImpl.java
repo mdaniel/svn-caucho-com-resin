@@ -338,62 +338,72 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       if (_isBound)
         return;
       _isBound = true;
+      
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      
+      try {
+        thread.setContextClassLoader(getBeanManager().getClassLoader());
 
-      Class<?> cl = (Class<?>) _annotatedType.getBaseType();
+        Class<?> cl = (Class<?>) _annotatedType.getBaseType();
 
-      HashMap<Method,Annotation[]> methodMap
-        = new HashMap<Method,Annotation[]>();
+        HashMap<Method,Annotation[]> methodMap
+          = new HashMap<Method,Annotation[]>();
 
-      ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
-      introspectInit(initList, cl, methodMap);
-      _initProgram = new ConfigProgram[initList.size()];
-      initList.toArray(_initProgram);
+        ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
+        introspectInit(initList, cl, methodMap);
+        _initProgram = new ConfigProgram[initList.size()];
+        initList.toArray(_initProgram);
 
-      ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
-      introspectDestroy(destroyList, cl);
-      _destroyProgram = new ConfigProgram[destroyList.size()];
-      destroyList.toArray(_destroyProgram);
+        ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
+        introspectDestroy(destroyList, cl);
+        _destroyProgram = new ConfigProgram[destroyList.size()];
+        destroyList.toArray(_destroyProgram);
 
-      if (_beanCtor == null) {
-        // XXX:
-        AnnotatedType beanType = _annotatedType;
-        if (beanType != null)
-          beanType = ReflectionAnnotatedFactory.introspectType(cl);
+        if (_beanCtor == null) {
+          // XXX:
+          AnnotatedType beanType = _annotatedType;
+          
+          if (beanType != null)
+            beanType = ReflectionAnnotatedFactory.introspectType(cl);
 
-        introspectConstructor(beanType);
-      }
-
-      // introspectObservers(getTargetClass());
-
-      Class<X> instanceClass = null;
-
-      if (_isGenerateInterception) {
-        if (! _annotatedType.isAnnotationPresent(javax.interceptor.Interceptor.class)
-            && ! _annotatedType.isAnnotationPresent(javax.decorator.Decorator.class)) {
-          CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(_annotatedType);
-          bean.introspect();
-
-          instanceClass = (Class<X>) bean.generateClass();
+          introspectConstructor(beanType);
         }
 
-        if (instanceClass == cl && isSerializeHandle()) {
-          instanceClass = SerializationAdapter.gen(instanceClass);
-        }
-      }
+        // introspectObservers(getTargetClass());
 
-      if (instanceClass != null && instanceClass != _instanceClass) {
-        try {
-          if (_javaCtor != null) {
-            _javaCtor = (Constructor<X>) getConstructor(instanceClass, _javaCtor.getParameterTypes());
-            _javaCtor.setAccessible(true);
+        Class<X> instanceClass = null;
+
+        if (_isGenerateInterception) {
+          if (! _annotatedType.isAnnotationPresent(javax.interceptor.Interceptor.class)
+              && ! _annotatedType.isAnnotationPresent(javax.decorator.Decorator.class)) {
+            CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(getBeanManager(), _annotatedType);
+            bean.introspect();
+
+            instanceClass = (Class<X>) bean.generateClass();
           }
 
-          _instanceClass = instanceClass;
-        } catch (Exception e) {
-          // server/2423
-          log.log(Level.FINE, e.toString(), e);
-          // throw ConfigException.create(e);
+          if (instanceClass == cl && isSerializeHandle()) {
+            instanceClass = SerializationAdapter.gen(instanceClass);
+          }
         }
+
+        if (instanceClass != null && instanceClass != _instanceClass) {
+          try {
+            if (_javaCtor != null) {
+              _javaCtor = (Constructor<X>) getConstructor(instanceClass, _javaCtor.getParameterTypes());
+              _javaCtor.setAccessible(true);
+            }
+
+            _instanceClass = instanceClass;
+          } catch (Exception e) {
+            // server/2423
+            log.log(Level.FINE, e.toString(), e);
+            // throw ConfigException.create(e);
+          }
+        }
+      } finally {
+        thread.setContextClassLoader(oldLoader);
       }
     }
   }

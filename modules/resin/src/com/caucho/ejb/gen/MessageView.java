@@ -30,6 +30,7 @@
 package com.caucho.ejb.gen;
 
 import com.caucho.config.gen.*;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.*;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -56,13 +57,13 @@ public class MessageView<X> extends View<X> {
   private ArrayList<AspectGenerator<X>> _businessMethods
     = new ArrayList<AspectGenerator<X>>();
 
-  public MessageView(MessageGenerator<X> bean)
+  public MessageView(InjectManager manager, MessageGenerator<X> bean)
   {
     super(bean);
 
     _messageBean = bean;
     
-    _aspectBeanFactory = new MessageAspectBeanFactory<X>(bean.getBeanType());
+    _aspectBeanFactory = new MessageAspectBeanFactory<X>(manager, bean.getBeanType());
   }
 
   public MessageGenerator<X> getMessageBean()

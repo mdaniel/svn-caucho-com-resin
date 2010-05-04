@@ -48,9 +48,10 @@ import com.caucho.inject.Module;
 @Module
 public class SingletonAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
 {
-  public SingletonAspectBeanFactory(AnnotatedType<X> beanType)
+  public SingletonAspectBeanFactory(InjectManager manager,
+                                    AnnotatedType<X> beanType)
   {
-    super(beanType);
+    super(manager, beanType);
   }
   
   /**

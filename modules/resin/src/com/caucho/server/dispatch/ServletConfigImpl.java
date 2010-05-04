@@ -53,6 +53,7 @@ import com.caucho.util.*;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.faces.*;
@@ -1254,10 +1255,14 @@ public class ServletConfigImpl
       _comp = inject.createInjectionTarget(servletClass);
 
       CreationalContext env = CreationalContextImpl.create();
-      
-      // server/1b40
-      servlet = _comp.produce(env);
-      _comp.inject(servlet, env);
+
+      try {
+        // server/1b40
+        servlet = _comp.produce(env);
+        _comp.inject(servlet, env);
+      } catch (InjectionException e) {
+        throw ConfigException.createConfig(e);
+      }
     }
     else
       throw new ServletException(L.l("Null servlet class for '{0}'.",

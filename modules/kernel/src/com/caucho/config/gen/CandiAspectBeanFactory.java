@@ -39,11 +39,16 @@ import com.caucho.inject.Module;
  */
 @Module
 public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
+  private InjectManager _manager;
+  
   private AnnotatedType<X> _beanType;
   private AspectFactory<X> _factory;
   
-  public CandiAspectBeanFactory(AnnotatedType<X> beanType)
+  public CandiAspectBeanFactory(InjectManager manager,
+                                AnnotatedType<X> beanType)
   {
+    _manager = manager;
+    
     _beanType = beanType;
     _factory = createAspectFactory();
   }
@@ -131,7 +136,7 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   
   protected AspectFactory<X> createAspectFactory()
   {
-    InjectManager manager = InjectManager.getCurrent();
+    InjectManager manager = _manager;
     
     AspectFactory<X> next = new MethodTailFactory<X>(this);
     

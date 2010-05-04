@@ -79,12 +79,11 @@ public class InterceptorGenerator<X>
 
   private InterceptionType _interceptionType = InterceptionType.AROUND_INVOKE;
 
-  private ArrayList<Annotation> _interceptorBinding;
+  private ArrayList<Annotation> _interceptorBinding
+    = new ArrayList<Annotation>();
 
   private ArrayList<Class<?>> _interceptors
     = new ArrayList<Class<?>>();
-
-  private ArrayList<Class<?>> _methodInterceptors;
 
   private InterceptionBinding _bindingEntry;
 
@@ -117,15 +116,17 @@ public class InterceptorGenerator<X>
     _factory = factory;
     
     if (factory.getClassInterceptors() != null)
-      _interceptors = factory.getClassInterceptors();
+      _interceptors.addAll(factory.getClassInterceptors());
 
     if (methodInterceptors != null)
-      _methodInterceptors = new ArrayList<Class<?>>(methodInterceptors);
+      _interceptors.addAll(methodInterceptors);
 
+    
     if (methodInterceptorMap != null)
-      _interceptorBinding = new ArrayList<Annotation>(methodInterceptorMap.values());
-    else if (factory.getClassInterceptorBinding() != null)
-      _interceptorBinding = factory.getClassInterceptorBinding();
+      _interceptorBinding.addAll(methodInterceptorMap.values());
+    
+    if (factory.getClassInterceptorBinding() != null)
+      _interceptorBinding.addAll(factory.getClassInterceptorBinding());
 
     _decoratorSet = decoratorSet;
 
@@ -144,7 +145,7 @@ public class InterceptorGenerator<X>
 
   private boolean isProxy()
   {
-    return false;
+    return _factory.getAspectBeanFactory().isProxy();
   }
 
   //
@@ -754,6 +755,9 @@ public class InterceptorGenerator<X>
     out.printClass(getBeanType().getJavaClass());
     out.println(".class);");
 
+    out.println();
+    out.print("__caucho_init_decorators(" + _decoratorBeansVar + ");");
+    
     out.popDepth();
     out.println("}");
 
@@ -813,6 +817,52 @@ public class InterceptorGenerator<X>
 
     String className = _decoratorClass;
 
+    ArrayList<Method> methodList = new ArrayList<Method>();
+    HashMap<ArrayList<Class<?>>, String> apiMap
+    = new HashMap<ArrayList<Class<?>>, String>();
+
+    for (Class<?> decoratorClass : _factory.getDecoratorClasses()) {
+      for (Method method : decoratorClass.getMethods()) {
+        if (Modifier.isFinal(method.getModifiers())
+            || Modifier.isStatic(method.getModifiers())
+            || Modifier.isPrivate(method.getModifiers())
+            || (method.getDeclaringClass() == Object.class
+                && ! method.getName().equals("toString"))) {
+          continue;
+        }
+
+        if (! containsMethod(methodList, method)) {
+          methodList.add(method);
+        }
+      }
+    }
+    
+    for (Method method : methodList) {
+      generateDecoratorMethodDecl(out, method);
+    }
+    
+    out.println();
+    out.println("private static void __caucho_init_decorators(java.util.List<javax.enterprise.inject.spi.Decorator<?>> decoratorList)");
+    out.println("{");
+    out.pushDepth();
+    
+    for (Method method : methodList) {
+      out.print("_caucho_decorator_" + method.getName() + "_m");
+      out.print(" = com.caucho.config.gen.CandiUtil.createDecoratorMethods(decoratorList, ");
+      out.print("\"" + method.getName() + "\"");
+      
+      for (int i = 0; i < method.getParameterTypes().length; i++) {
+        out.print(", ");
+        out.printClass(method.getParameterTypes()[i]);
+        out.print(".class");
+      }
+      
+      out.println(");");
+    }
+    
+    out.popDepth();
+    out.println("}");
+
     out.println();
     out.print("class ");
     out.print(className);
@@ -869,26 +919,8 @@ public class InterceptorGenerator<X>
     out.println("  return _bean;");
     out.println("}");
 
-    ArrayList<Method> methodList = new ArrayList<Method>();
-    HashMap<ArrayList<Class<?>>, String> apiMap
-    = new HashMap<ArrayList<Class<?>>, String>();
-
-    for (Class<?> decoratorClass : _factory.getDecoratorClasses()) {
-      for (Method method : decoratorClass.getMethods()) {
-        if (Modifier.isFinal(method.getModifiers())
-            || Modifier.isStatic(method.getModifiers())
-            || Modifier.isPrivate(method.getModifiers())
-            || (method.getDeclaringClass() == Object.class
-                && ! method.getName().equals("toString"))) {
-          continue;
-        }
-
-        if (! containsMethod(methodList, method)) {
-          methodList.add(method);
-
-          generateDecoratorMethod(out, method, apiMap);
-        }
-      }
+    for (Method method : methodList) {
+      generateDecoratorMethod(out, method, apiMap);
     }
 
     out.popDepth();
@@ -910,6 +942,12 @@ public class InterceptorGenerator<X>
       out.popDepth();
       out.println("};");
     }
+  }
+  
+  private void generateDecoratorMethodDecl(JavaWriter out, Method method)
+    throws IOException
+  {
+      out.println("static java.lang.reflect.Method []_caucho_decorator_" + method.getName() + "_m;");
   }
 
   private void generateDecoratorMethod(JavaWriter out,
@@ -967,8 +1005,10 @@ public class InterceptorGenerator<X>
     out.println("{");
     out.pushDepth();
 
-    if (annMethod != null && annMethod.isAnnotationPresent(Inject.class)) {
-      out.println("throw new UnsupportedOperationException();");
+    if (false && annMethod != null && annMethod.isAnnotationPresent(Inject.class)) {
+      out.println(_decoratorClass + " var = " + _decoratorLocalVar + ".get();");
+      
+      printDecoratorSuperCall(out, method);
     }
     else {
       out.println(_decoratorClass + " var = " + _decoratorLocalVar + ".get();");
@@ -979,6 +1019,7 @@ public class InterceptorGenerator<X>
       out.println();
       out.print("var._index = com.caucho.config.gen.CandiUtil.nextDelegate(");
       out.print("delegates, ");
+      /*
       if (apis.size() > 1) {
         out.print(apiName);
       }
@@ -986,6 +1027,8 @@ public class InterceptorGenerator<X>
         out.printClass(decoratorType);
         out.print(".class");
       }
+      */
+      out.println("_caucho_decorator_" + method.getName() + "_m");
       out.println(", var._index);");
 
       out.println();
@@ -1009,15 +1052,25 @@ public class InterceptorGenerator<X>
           out.print("  ");
         }
 
-        if (! void.class.equals(method.getReturnType()))
-          out.print("return ");
+        if (! void.class.equals(method.getReturnType())) {
+          out.print("return (");
+          out.printClass(method.getReturnType());
+          out.print(") ");
+        }
 
+        /*
         out.print("((");
         out.printClass(apis.get(j));
-        out.print(") delegate)." + method.getName() + "(");
+        out.print(") delegate)." + method.getName());
+        */
+        
+        out.print("com.caucho.config.gen.CandiUtil.invoke(");
+        out.print("_caucho_decorator_" + method.getName() + "_m[");
+        out.print("var._index");
+        out.print("], delegate");
+        
         for (int i = 0; i < paramTypes.length; i++) {
-          if (i != 0)
-            out.print(", ");
+          out.print(", ");
 
           out.print("a" + i);
         }
@@ -1029,33 +1082,42 @@ public class InterceptorGenerator<X>
 
       out.println("else");
       out.pushDepth();
-
-      if (! void.class.equals(method.getReturnType()))
-        out.print("return ");
-
-      if (isProxy()) {
-        out.print("var.__caucho_getBean().");
-        out.print(method.getName());
-      }
-      else {
-        out.print("var.__caucho_getBean().");
-        out.print("__caucho_" + method.getName());
-      }
-
-      out.print("(");
-      for (int i = 0; i < paramTypes.length; i++) {
-        if (i != 0)
-          out.print(", ");
-
-        out.print("a" + i);
-      }
-      out.println(");");
-
-      out.popDepth();
+      
+      printDecoratorSuperCall(out, method);
     }
 
     out.popDepth();
     out.println("}");
+  }
+  
+  private void printDecoratorSuperCall(JavaWriter out,
+                                       Method method)
+    throws IOException
+  {
+    Class<?>[] paramTypes = method.getParameterTypes();
+
+    if (! void.class.equals(method.getReturnType()))
+      out.print("return ");
+
+    if (isProxy()) {
+      out.print("var.__caucho_getBean().");
+      out.print(method.getName());
+    }
+    else {
+      out.print("var.__caucho_getBean().");
+      out.print("__caucho_" + method.getName());
+    }
+
+    out.print("(");
+    for (int i = 0; i < paramTypes.length; i++) {
+      if (i != 0)
+        out.print(", ");
+
+      out.print("a" + i);
+    }
+    out.println(");");
+
+    out.popDepth();
   }
 
   //

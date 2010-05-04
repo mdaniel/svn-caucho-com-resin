@@ -41,6 +41,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.View;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -65,7 +66,9 @@ public class StatefulView<X> extends SessionView<X> {
 
     _sessionBean = bean;
     
-    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(bean.getBeanType());
+    InjectManager manager = InjectManager.create();
+    
+    _aspectBeanFactory = new StatefulAspectBeanFactory<X>(manager, bean.getBeanType());
   }
 
   public StatefulGenerator<X> getSessionBean()

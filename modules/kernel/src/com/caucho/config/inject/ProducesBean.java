@@ -193,7 +193,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
       = getBeanManager().createCreationalContext(_producerBean, cxt);
 
     X factory = (X) getBeanManager().getReference(_producerBean, type, parentEnv);
-
+    
     if (factory == null) {
       throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
                                           this, _producerBean));
