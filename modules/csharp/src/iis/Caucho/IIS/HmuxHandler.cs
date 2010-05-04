@@ -281,12 +281,15 @@ namespace Caucho.IIS
           result = HandleRequest(request, response, channel, rs, ws,
                                  buf, len, isComplete, isComplete);
 
-          if ((result & STATUS_MASK) == OK)
+          if ((result & STATUS_MASK) == OK) {
+            client.ClearBusy();
+
             return;
-          else if ((result & STATUS_MASK) == BUSY)
+          } else if ((result & STATUS_MASK) == BUSY) {
             client.Busy();
-          else
+          } else {
             client.FailSocket();
+          }
         } catch (ClientDisconnectException) {
           _log.Info("Client disconnect detected for '{0}'", channel.GetTraceId());
 
@@ -333,12 +336,15 @@ namespace Caucho.IIS
             result = HandleRequest(request, response, channel, rs, ws,
                                    buf, len, isComplete, false);
 
-            if ((result & STATUS_MASK) == OK)
+            if ((result & STATUS_MASK) == OK) {
+              client2.ClearBusy();
+
               return;
-            else if ((result & STATUS_MASK) == BUSY)
+            } else if ((result & STATUS_MASK) == BUSY) {
               client2.Busy();
-            else
+            } else {
               client2.FailSocket();
+            }
           } catch (IOException e) {
             client2.FailSocket();
 
@@ -365,7 +371,6 @@ namespace Caucho.IIS
                             BufferedStream ws,
                             byte[] buf, int length, bool isComplete,
                             bool allowBusy)
-    //throws ServletException, IOException
     {
       Trace.TraceInformation("Handle request: length: {0}, complete: {1}, allowBusy {2}", length, isComplete, allowBusy);
       String traceId = hmuxChannel.GetTraceId();

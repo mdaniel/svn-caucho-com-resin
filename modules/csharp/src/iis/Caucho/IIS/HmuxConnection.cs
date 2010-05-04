@@ -101,7 +101,6 @@ namespace Caucho.IIS
       _stream = new BufferedStream(new NetworkStream(_socket));
       _pool = pool;
       _serverInternalId = serverInternalId;
-
       
       _traceId = traceId;
       _log = Logger.GetLogger();

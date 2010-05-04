@@ -83,7 +83,7 @@ namespace Caucho.IIS
         char c = (char)('a' + i);
         _log.Info("Adding Server '{0}:{1}:{2}'", c, host, port);
 
-        Server srun = new Server(c, address, port, _loadBalanceIdleTime, _socketTimeout);
+        Server srun = new Server(c, address, port, _loadBalanceIdleTime, _loadBalanceRecoverTime, _socketTimeout);
         srun.SetDebug(_isDebug);
         pool.Add(srun);
       }
@@ -117,7 +117,6 @@ namespace Caucho.IIS
             }
           }
         }
-
 
         if (result == null) {
           String message = String.Format("Can't resolve ip for host '{0}'.", host);
@@ -160,13 +159,7 @@ namespace Caucho.IIS
 
       HmuxConnection connection = null;
 
-      try {
-        if (server.IsActive())
-          connection = server.OpenServer();
-      } catch (Exception e) {
-        if (_log.IsLoggable(EventLogEntryType.Information))
-          _log.Info("Error openning session server '{0}'\t {1}", e.Message, e.StackTrace);
-      }
+      connection = server.OpenConnection();
 
       return connection;
     }
@@ -186,39 +179,26 @@ namespace Caucho.IIS
         _roundRobinIdx++;
       }
 
-      try {
-        server = _servers[id];
-        if (server.IsActive())
-          connection = server.OpenServer();
-      } catch (Exception e) {
-        String message = "Closing server '{0}' due to exception {1} \t {2}";
-        _log.Error(message, server, e.Message, e.StackTrace);
-
-        Trace.TraceInformation(message, server, e.Message, e.StackTrace);
-
-        server.Close();
-      }
+      server = _servers[id];
+      connection = server.OpenConnection();
 
       if (connection != null)
         return connection;
 
       lock (this) {
         _roundRobinIdx = _random.Next(serverCount);
+
         for (int i = 0; i < serverCount; i++) {
           id = (i + _roundRobinIdx) % serverCount;
+          
           server = _servers[id];
-          try {
-            if (xChannelFactory != server && server.IsActive()) {
-              connection = server.OpenServer();
-            }
-          } catch (Exception e) {
-            String message = "Closing server '{0}' due to exception {1} \t {2}";
-            _log.Error(message, server, e.Message, e.StackTrace);
+          if (xChannelFactory != server)
+            connection = server.OpenConnection();
 
-            Trace.TraceInformation(message, server, e.Message, e.StackTrace);
+          _roundRobinIdx = id;
 
-            server.Close();
-          }
+          if (connection != null)
+            break;
         }
       }
 

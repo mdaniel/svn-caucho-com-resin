@@ -51,31 +51,32 @@ namespace Caucho.IIS
     private int _maxConnections = int.MaxValue / 2;
 
     private int _loadBalanceIdleTime;
+    private int _loadBalanceRecoverTime;
     private int _socketTimeout;
-    private volatile int _keepaliveCountTotal;
 
     private volatile int _activeCount;
     private volatile int _startingCount;
-
-    private State _state;
 
     private IPAddress _address;
     private int _port;
     private bool _isDebug = false;
 
+    private long _successTime = 0;
+    private long _failTime = 0;
+    private long _busyTime = 0;
+
     private volatile int _traceId = 0;
 
-    public Server(char serverInternalId, IPAddress address, int port, int loadBalanceIdleTime, int socketTimeout)
+    public Server(char serverInternalId, IPAddress address, int port, int loadBalanceIdleTime, int loadBalanceRecoverTime, int socketTimeout)
     {
       _socketTimeout = socketTimeout;
       _loadBalanceIdleTime = loadBalanceIdleTime;
+      _loadBalanceRecoverTime = loadBalanceRecoverTime;
       _serverInternalId = serverInternalId;
       _address = address;
       _port = port;
 
       _log = Logger.GetLogger();
-
-      _state = State.ACTVIE;
     }
 
     public void SetDebug(bool isDebug)
@@ -83,13 +84,24 @@ namespace Caucho.IIS
       _isDebug = isDebug;
     }
 
-    public bool IsActive()
+    public HmuxConnection OpenConnection()
     {
-      return _state == State.ACTVIE;
-    }
+      long now = Utils.CurrentTimeMillis();
+      lock (this) {
+        if (_failTime > 0 && (_failTime + _loadBalanceRecoverTime) > now) {
+          return null;
+        }
 
-    public HmuxConnection OpenServer()
-    {
+        if (_busyTime > 0 && (_busyTime + _loadBalanceRecoverTime) > now) {
+          return null;
+        }
+
+        //only allow a single thread to open connection
+        if ((_failTime > 0 || _busyTime > 0) && _startingCount > 0) {
+          return null;
+        }
+      }
+
       HmuxConnection channel = OpenRecycle();
 
       if (channel != null)
@@ -113,7 +125,6 @@ namespace Caucho.IIS
 
           if (now < freeTime + _loadBalanceIdleTime) {
             _activeCount++;
-            _keepaliveCountTotal++;
 
             channel.ClearIdleStartTime();
             channel.ToActive();
@@ -128,9 +139,8 @@ namespace Caucho.IIS
       if (channel != null) {
         if (_log.IsLoggable(EventLogEntryType.Information))
           _log.Info(this + " close idle " + channel
-                    + " expire=" + new DateTime(channel.GetIdleStartTime()*10 + _loadBalanceIdleTime*10));
-
-        //Trace.TraceInformation("closing expired channel '{0}'", channel);
+                    + " expire=" + new DateTime(channel.GetIdleStartTime() * 10 + _loadBalanceIdleTime * 10));
+        Trace.TraceInformation("closing expired channel '{0}'", channel);
 
         channel.CloseImpl();
       }
@@ -173,33 +183,40 @@ namespace Caucho.IIS
 
         return channel;
       } catch (Exception e) {
-        _log.Info("Can't create HmuxChannel to '{0}:{1}' due to: {2} \t {3}", _address, _port, e.Message, e.StackTrace);
+        String message = String.Format("Can't create HmuxChannel to '{0}:{1}' due to: {2} \t {3}", _address, _port, e.Message, e.StackTrace);
+        _log.Info(message);
+        Trace.TraceError(message);
 
         FailConnect();
-
-        return null;
       } finally {
         lock (this) {
           _startingCount--;
         }
       }
+
+      return null;
     }
 
     public void FailConnect()
     {
       lock (this) {
-        _state = State.INACTIVE;
+        _failTime = Utils.CurrentTimeMillis();
       }
     }
 
     internal void Busy()
     {
-      Trace.TraceInformation("HmuxChannelFactory.Busy() NYI");
+      lock (this) {
+        _busyTime = Utils.CurrentTimeMillis();
+      }
     }
 
     internal void FailSocket()
     {
-      _state = State.INACTIVE;
+      lock (this) {
+        _failTime = Utils.CurrentTimeMillis();
+        Trace.TraceInformation("FailSocket {0} {1}", this, _failTime);
+      }
     }
 
     internal void SetCpuLoadAvg(double loadAvg)
@@ -208,7 +225,17 @@ namespace Caucho.IIS
 
     private void Success()
     {
-      _state = State.ACTVIE;
+      lock (this) {
+        _failTime = 0;
+        _successTime = Utils.CurrentTimeMillis();
+      }
+    }
+
+    internal void ClearBusy()
+    {
+      lock (this) {
+        _busyTime = 0;
+      }
     }
 
     internal void Free(HmuxConnection channel)
@@ -218,10 +245,14 @@ namespace Caucho.IIS
       lock (this) {
         _activeCount--;
 
+        bool failing = false;
+
+        failing = _failTime > 0 || _busyTime > 0;
+
         int size = (_idleHead - _idleTail + _idle.Length) % _idle.Length;
-        
-        if (_state != State.INACTIVE && size < _idleSize) {
-          Trace.TraceInformation("returning channel '{0}' to pool", channel);
+
+        if (!failing && size < _idleSize) {
+          Trace.TraceInformation("Returning channel '{0}' to pool", channel);
           _idleHead = (_idleHead + 1) % _idle.Length;
           _idle[_idleHead] = channel;
 
@@ -282,10 +313,6 @@ namespace Caucho.IIS
       Trace.TraceInformation("Close '{0}'", this);
 
       lock (this) {
-        if (_state == State.INACTIVE)
-          return;
-
-        _state = State.INACTIVE;
         _idleHead = _idleTail = 0;
       }
 
