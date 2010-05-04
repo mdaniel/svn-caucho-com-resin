@@ -215,7 +215,6 @@ namespace Caucho.IIS
     {
       lock (this) {
         _failTime = Utils.CurrentTimeMillis();
-        Trace.TraceInformation("FailSocket {0} {1}", this, _failTime);
       }
     }
 
