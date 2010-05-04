@@ -471,7 +471,7 @@ and reports errors as necessary.</p>
   <th>Default</th>
 </tr>
 <tr>
-  <td>cpu-load-exit-threshold</td>
+  <td>unix-load-avg-exit-threshold</td>
   <td>CPU load triggering a Resin exit (and restart)</td>
   <td>100.0</td>
 </tr>
@@ -504,7 +504,7 @@ and reports errors as necessary.</p>
 
 <def title="&lt;stat-service> schema">
 element stat-service {
-  cpu-load-exit-threshold?
+  unix-load-avg-exit-threshold?
   &amp; cpu-load-log-info-threshold?
   &amp; cpu-load-log-warning-threshold?
   &amp; cpu-load-thread-dump-threshold?

@@ -491,7 +491,7 @@ href="security-overview.xtp#Authentication">&lt;resin:AdminAuthenticator></a>.</
 &lt;resin xmlns="http://caucho.com/ns/resin">
   &lt;management>
     &lt;stat-service>
-      &lt;cpu-load-exit-threshold>10.0&lt;/cpu-load-exit-threshold>
+      &lt;unix-load-avg-exit-threshold>10.0&lt;/unix-load-avg-exit-threshold>
       &lt;cpu-load-log-info-threshold>1.0&lt;/cpu-load-log-info-threshold>
       &lt;cpu-load-log-warning-threshold>2.0&lt;/cpu-load-log-warning-threshold>
       &lt;cpu-load-thread-dump-threshold>2.0&lt;/cpu-load-thread-dump-threshold>
