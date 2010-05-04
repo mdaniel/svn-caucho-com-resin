@@ -355,6 +355,11 @@ public class JavaClassDef extends ClassDef {
   {
     _isPhpClass = isPhpClass;
   }
+  
+  public boolean isPhpClass()
+  {
+    return _isPhpClass;
+  }
 
   public JavaClassDef getComponentDef()
   {

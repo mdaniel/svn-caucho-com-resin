@@ -73,7 +73,7 @@ public class ObjectExtJavaValue extends ObjectExtValue
   protected Value getFieldExt(Env env, StringValue name)
   {
     if (_object == null) {
-      _object = createJavaObject(Env.getInstance());
+      _object = createJavaObject(env);
     }
     
     Value value = _javaClassDef.getField(env, this, name);
