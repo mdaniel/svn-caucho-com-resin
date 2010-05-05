@@ -1,4 +1,4 @@
-﻿/*
+/*
  * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
  *
  * This file is part of Resin(R) Open Source
@@ -34,6 +34,7 @@ using System.Text;
 using System.Diagnostics;
 using System.Net.Sockets;
 using System.Net;
+using System.Threading;
 
 namespace Caucho.IIS
 {
@@ -50,6 +51,7 @@ namespace Caucho.IIS
 
     private int _maxConnections = int.MaxValue / 2;
 
+    private int _loadBalanceConnectTimeout;
     private int _loadBalanceIdleTime;
     private int _loadBalanceRecoverTime;
     private int _socketTimeout;
@@ -67,9 +69,16 @@ namespace Caucho.IIS
 
     private volatile int _traceId = 0;
 
-    public Server(char serverInternalId, IPAddress address, int port, int loadBalanceIdleTime, int loadBalanceRecoverTime, int socketTimeout)
+    public Server(char serverInternalId,
+      IPAddress address,
+      int port,
+      int loadBalanceConnectTimeout,
+      int loadBalanceIdleTime,
+      int loadBalanceRecoverTime,
+      int socketTimeout)
     {
       _socketTimeout = socketTimeout;
+      _loadBalanceConnectTimeout = loadBalanceConnectTimeout;
       _loadBalanceIdleTime = loadBalanceIdleTime;
       _loadBalanceRecoverTime = loadBalanceRecoverTime;
       _serverInternalId = serverInternalId;
@@ -158,9 +167,33 @@ namespace Caucho.IIS
         _startingCount++;
       }
 
+      HmuxConnection connection = null;
+
+      Object connectLock = new Object();
+      Monitor.Enter(connectLock);
       try {
         Socket socket = new Socket(_address.AddressFamily, SocketType.Stream, ProtocolType.Tcp);
-        socket.Connect(_address, _port);
+
+        AsyncCallback connectListener = delegate(IAsyncResult result)
+        {
+          Monitor.Enter(connectLock);
+          try {
+            Monitor.Pulse(connectLock);
+          } catch (Exception) {
+          } finally {
+            Monitor.Exit(connectLock);
+          }
+        };
+
+        socket.BeginConnect(_address, _port, connectListener, socket);
+        Monitor.Wait(connectLock, _loadBalanceConnectTimeout);
+
+        if (!socket.Connected) {
+          throw new SocketException(10053);
+        }
+
+        socket.SendTimeout = _socketTimeout;
+        socket.ReceiveTimeout = _socketTimeout;
 
         String traceId;
         if (_isDebug) {
@@ -170,28 +203,39 @@ namespace Caucho.IIS
           traceId = socket.Handle.ToInt32().ToString();
         }
 
-        HmuxConnection channel = new HmuxConnection(socket, this, _serverInternalId, traceId);
+        connection = new HmuxConnection(socket, this, _serverInternalId, traceId);
 
         lock (this) {
           _activeCount++;
         }
 
         if (_log.IsLoggable(EventLogEntryType.Information))
-          _log.Info("Connect " + channel);
+          _log.Info("Connect " + connection);
 
-        Trace.TraceInformation("Connect '{0}'", channel);
+        Trace.TraceInformation("Connect '{0}'", connection);
 
-        return channel;
+        return connection;
+      } catch (SocketException e) {
+        String message = String.Format("Socket connection to {0}:{1} timed out on load-balance-connect-timeout {2}", _address, _port, _loadBalanceConnectTimeout);
+        if (_log.IsLoggable(EventLogEntryType.Information))
+          _log.Info(message);
+
+        Trace.TraceInformation(message);
       } catch (Exception e) {
         String message = String.Format("Can't create HmuxChannel to '{0}:{1}' due to: {2} \t {3}", _address, _port, e.Message, e.StackTrace);
-        _log.Info(message);
-        Trace.TraceError(message);
+        if (_log.IsLoggable(EventLogEntryType.Information))
+          _log.Info(message);
 
-        FailConnect();
+        Trace.TraceError(message);
       } finally {
         lock (this) {
           _startingCount--;
         }
+
+        if (connection == null)
+          FailConnect();
+
+        Monitor.Exit(connectLock);
       }
 
       return null;
@@ -338,11 +382,5 @@ namespace Caucho.IIS
       String format = this.GetType().Name + "'{0}:{1}:{2}'";
       return String.Format(format, _serverInternalId, _address, _port);
     }
-  }
-
-  enum State
-  {
-    ACTVIE,
-    INACTIVE
   }
 }

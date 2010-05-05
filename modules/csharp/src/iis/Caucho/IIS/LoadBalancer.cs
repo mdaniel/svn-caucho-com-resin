@@ -83,7 +83,7 @@ namespace Caucho.IIS
         char c = (char)('a' + i);
         _log.Info("Adding Server '{0}:{1}:{2}'", c, host, port);
 
-        Server srun = new Server(c, address, port, _loadBalanceIdleTime, _loadBalanceRecoverTime, _socketTimeout);
+        Server srun = new Server(c, address, port, _loadBalanceConnectTimeout, _loadBalanceIdleTime, _loadBalanceRecoverTime, _socketTimeout);
         srun.SetDebug(_isDebug);
         pool.Add(srun);
       }
