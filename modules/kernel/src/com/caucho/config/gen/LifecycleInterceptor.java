@@ -263,8 +263,9 @@ public class LifecycleInterceptor {
       Method method = findInterceptorMethod(iClass);
 
       if (method == null)
-	throw new IllegalStateException(L.l("{0}: Can't find {1}",
-					    iClass.getName(), _annType.getSimpleName()));
+        throw new IllegalStateException(L.l("{0}: Can't find {1}",
+                                            iClass.getName(), 
+                                            _annType.getSimpleName()));
       
       generateGetMethod(out, method);
       out.println(", ");

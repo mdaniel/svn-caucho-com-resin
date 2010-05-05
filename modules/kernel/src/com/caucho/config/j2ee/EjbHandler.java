@@ -124,7 +124,7 @@ public class EjbHandler extends JavaeeInjectionHandler {
     BeanValueGenerator gen
       = new BeanValueGenerator(location, bean);
 
-    if (name != null)
+    if (name != null && ! "".equals(name))
       bindJndi(name, gen, name);
     
     return new FieldGeneratorProgram(javaField, gen);
