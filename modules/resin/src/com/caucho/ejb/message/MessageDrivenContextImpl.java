@@ -49,11 +49,11 @@ public class MessageDrivenContextImpl extends AbstractContext
   protected static final Logger log
     = Logger.getLogger(MessageDrivenContextImpl.class.getName());
 
-  private MessageServer _server;
+  private MessageManager _server;
   private UserTransaction _ut;
   private boolean _isRollbackOnly;
 
-  MessageDrivenContextImpl(MessageServer server, UserTransaction ut)
+  MessageDrivenContextImpl(MessageManager server, UserTransaction ut)
   {
     _server = server;
     _ut = ut;

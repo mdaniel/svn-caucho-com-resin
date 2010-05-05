@@ -34,7 +34,7 @@ import com.caucho.config.*;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.*;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.server.EjbProducer;
+import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
 import com.caucho.util.*;
 
@@ -88,8 +88,9 @@ abstract public class StatelessContext<X> extends AbstractSessionContext<X> {
   {
     if (_statelessPool == null) {
       // XXX: per-view?
-      EjbProducer<X> producer = getServer().getProducer();
-      producer.setBeanProducer(provider);
+      /*
+      EjbInjectionTarget<X> producer = getServer().getProducer();
+      producer.setBeanProducer(provider);*/
 
       _statelessPool = new StatelessPool<X>(_server);
     }

@@ -50,7 +50,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.server.EjbProducer;
+import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -58,12 +58,12 @@ import com.caucho.util.L10N;
  * JCA activation-spec server container for a message bean.
  */
 @Module
-public class MessageServer<T> extends AbstractEjbBeanManager<T>
+public class MessageManager<T> extends AbstractEjbBeanManager<T>
   implements MessageEndpointFactory
 {
-  private static final L10N L = new L10N(MessageServer.class);
+  private static final L10N L = new L10N(MessageManager.class);
   protected static final Logger log
-    = Logger.getLogger(MessageServer.class.getName());
+    = Logger.getLogger(MessageManager.class.getName());
 
   private ResourceAdapter _ra;
   private ActivationSpec _activationSpec;
@@ -72,7 +72,7 @@ public class MessageServer<T> extends AbstractEjbBeanManager<T>
 
   private Method _ejbCreate;
 
-  public MessageServer(EjbManager ejbContainer, 
+  public MessageManager(EjbManager ejbContainer, 
                        AnnotatedType<T> annotatedType)
   {
     super(ejbContainer, annotatedType);
@@ -238,13 +238,11 @@ public class MessageServer<T> extends AbstractEjbBeanManager<T>
       
       Class<T> beanClass = getBeanSkelClass();
 
-      Constructor<T> ctor = beanClass.getConstructor(new Class[] { MessageServer.class });
+      Constructor<T> ctor = beanClass.getConstructor(new Class[] { MessageManager.class });
     
       T listener = ctor.newInstance(this);
 
-      EjbProducer<T> producer = getProducer();
-      
-      producer.initInstance(listener);
+      initInstance(listener);
 
       if (_ejbCreate != null)
         _ejbCreate.invoke(listener);

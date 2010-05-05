@@ -31,7 +31,6 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -62,9 +61,6 @@ public class StatelessView<X> extends SessionView<X> {
 
   private AspectBeanFactory<X> _aspectBeanFactory;
   
-  private ArrayList<AspectGenerator<X>> _businessMethods
-    = new ArrayList<AspectGenerator<X>>();
-
   private String _timeoutMethod;
 
   private LifecycleInterceptor _postConstructInterceptor;
@@ -114,15 +110,6 @@ public class StatelessView<X> extends SessionView<X> {
     return getBeanType().getJavaClass().getName();
     // return getViewClass().getJavaClass().getSimpleName() + "__Bean";
     // return getStatelessBean().getClassName();
-  }
-
-  /**
-   * Returns the introspected methods
-   */
-  @Override
-  public ArrayList<AspectGenerator<X>> getMethods()
-  {
-    return _businessMethods;
   }
 
   /**
@@ -315,8 +302,16 @@ public class StatelessView<X> extends SessionView<X> {
   {
     out.println();
     out.println("public static class " + getViewClassName());
-    generateExtends(out);
+
+    if (isNoInterfaceView())
+      out.println("  extends " + getBeanType().getJavaClass().getName());
+
     out.print("  implements StatelessProvider");
+    
+    for (AnnotatedType<? super X> api : getGenerator().getLocalApi()) {
+      out.print(", " + api.getJavaClass().getName());
+    }
+    out.println();
 
     /*
     if (isProxy())

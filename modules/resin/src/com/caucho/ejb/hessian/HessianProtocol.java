@@ -30,7 +30,7 @@ package com.caucho.ejb.hessian;
 
 import com.caucho.hessian.server.HessianSkeleton;
 import com.caucho.config.ConfigException;
-import com.caucho.ejb.message.MessageServer;
+import com.caucho.ejb.message.MessageManager;
 import com.caucho.ejb.protocol.ProtocolContainer;
 import com.caucho.ejb.protocol.Skeleton;
 import com.caucho.ejb.server.AbstractEjbBeanManager;

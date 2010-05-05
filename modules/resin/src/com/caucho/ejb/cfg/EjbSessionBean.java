@@ -56,7 +56,7 @@ import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.server.EjbProducer;
+import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.ejb.session.SingletonManager;
 import com.caucho.ejb.session.StatefulManager;
 import com.caucho.ejb.session.StatelessManager;
@@ -362,27 +362,27 @@ public class EjbSessionBean<X> extends EjbBean<X> {
    */
   @Override
   public AbstractEjbBeanManager<X> deployServer(EjbManager ejbContainer,
-                                        JavaClassGenerator javaGen)
+                                                JavaClassGenerator javaGen)
       throws ClassNotFoundException, ConfigException
   {
-    AbstractEjbBeanManager<X> server;
+    AbstractEjbBeanManager<X> manager;
 
     if (Stateless.class.equals(getSessionType()))
-      server = new StatelessManager<X>(ejbContainer, getAnnotatedType());
+      manager = new StatelessManager<X>(ejbContainer, getAnnotatedType());
     else if (Stateful.class.equals(getSessionType()))
-      server = new StatefulManager<X>(ejbContainer, getAnnotatedType());
+      manager = new StatefulManager<X>(ejbContainer, getAnnotatedType());
     else if (Singleton.class.equals(getSessionType()))
-      server = new SingletonManager<X>(ejbContainer, getAnnotatedType());
+      manager = new SingletonManager<X>(ejbContainer, getAnnotatedType());
     else
       throw new IllegalStateException(String.valueOf(getSessionType()));
 
-    server.setModuleName(getEJBModuleName());
-    server.setEJBName(getEJBName());
-    server.setMappedName(getMappedName());
-    server.setId(getEJBModuleName() + "#" + getEJBName());
-    server.setContainerTransaction(_isContainerTransaction);
+    manager.setModuleName(getEJBModuleName());
+    manager.setEJBName(getEJBName());
+    manager.setMappedName(getMappedName());
+    manager.setId(getEJBModuleName() + "#" + getEJBName());
+    manager.setContainerTransaction(_isContainerTransaction);
 
-    server.setEjbClass((Class<X>) loadClass(getEJBClass().getName()));
+    manager.setEjbClass((Class<X>) loadClass(getEJBClass().getName()));
 
     ArrayList<AnnotatedType<? super X>> remoteList = _sessionBean.getRemoteApi();
     if (remoteList.size() > 0) {
@@ -391,13 +391,15 @@ public class EjbSessionBean<X> extends EjbBean<X> {
         classList.add(loadClass(apiClass.getJavaClass().getName()));
       }
 
-      server.setRemoteApiList(classList);
+      manager.setRemoteApiList(classList);
     }
 
     /*
      * if (getRemote21() != null)
      * server.setRemote21(loadClass(getRemote21().getName()));
      */
+    
+    manager.setIsNoInterfaceView(_sessionBean.getView().isNoInterfaceView());
 
     ArrayList<AnnotatedType<? super X>> localList = _sessionBean.getLocalApi();
     if (localList.size() > 0) {
@@ -406,7 +408,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
         classList.add(loadClass(apiClass.getJavaClass().getName()));
       }
 
-      server.setLocalApiList(classList);
+      manager.setLocalApiList(classList);
     }
 
     /*
@@ -427,13 +429,13 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
     // contextImplClass.getDeclaredConstructors();
 
-    server.setContextImplClass(contextImplClass);
+    manager.setContextImplClass(contextImplClass);
 
     Class<?>[] classes = contextImplClass.getDeclaredClasses();
 
     for (Class<?> aClass : classes) {
       if (getEJBClass().isAssignableFrom(aClass)) {
-        server.setBeanImplClass((Class<X>) aClass);
+        manager.setBeanImplClass((Class<X>) aClass);
 
         break;
       }
@@ -443,17 +445,15 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(server.getClassLoader());
+      thread.setContextClassLoader(manager.getClassLoader());
 
-      EjbProducer<X> producer = server.getProducer();
+      manager.setInjectionTarget(getInjectionTarget());
 
-      producer.setInjectionTarget(getInjectionTarget());
-
-      producer.setInitProgram(getInitProgram());
+      manager.setInitProgram(getInitProgram());
 
       try {
         if (getServerProgram() != null)
-          getServerProgram().configure(server);
+          getServerProgram().configure(manager);
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
@@ -464,7 +464,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
       thread.setContextClassLoader(oldLoader);
     }
 
-    return server;
+    return manager;
   }
 
   /**

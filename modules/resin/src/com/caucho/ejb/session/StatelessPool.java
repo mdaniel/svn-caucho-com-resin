@@ -32,7 +32,7 @@ package com.caucho.ejb.session;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
-import com.caucho.ejb.server.EjbProducer;
+import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -50,13 +50,9 @@ public class StatelessPool<X> {
   private final Semaphore _concurrentSemaphore;
   private final long _concurrentTimeout;
 
-  private EjbProducer<X> _ejbProducer;
- 
   StatelessPool(StatelessManager<X> manager)
   {
     _manager = manager;
-    
-    _ejbProducer = manager.getProducer();
     
     int idleMax = manager.getSessionIdleMax();
     int concurrentMax = manager.getSessionConcurrentMax();
@@ -105,7 +101,8 @@ public class StatelessPool<X> {
       Item<X> beanItem = _freeList.allocate();
     
       if (beanItem == null) {
-        beanItem = _manager.newInstance(_ejbProducer);
+        beanItem = new Item<X>(_manager.createInstance(), 
+                               _manager.getInterceptorBindings());
         // _ejbProducer.newInstance();
       }
       
@@ -153,7 +150,7 @@ public class StatelessPool<X> {
   
   private void destroyImpl(Item<X> beanItem)
   {
-    _ejbProducer.destroyInstance(beanItem.getValue());
+    _manager.destroyInstance(beanItem.getValue());
   }
   
   public void destroy()

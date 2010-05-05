@@ -31,23 +31,30 @@ package com.caucho.ejb.gen;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+
+import javax.ejb.LocalBean;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
 /**
- * Represents any stateless view.
+ * Represents any session view.
  */
 @Module
 abstract public class SessionView<X> extends View<X> {
   private static final L10N L = new L10N(SessionView.class);
 
   private SessionGenerator<X> _sessionGenerator;
+  private boolean _isNoInterfaceView;
+
+  protected ArrayList<AspectGenerator<X>> _businessMethods 
+    = new ArrayList<AspectGenerator<X>>();
 
   public SessionView(SessionGenerator<X> bean)
   {
@@ -62,6 +69,15 @@ abstract public class SessionView<X> extends View<X> {
   }
 
   /**
+   * Returns the introspected methods
+   */
+  @Override
+  public ArrayList<AspectGenerator<X>> getMethods()
+  {
+    return _businessMethods;
+  }
+  
+  /**
    * Introspects the APIs methods, producing a business method for each.
    */
   @Override
@@ -70,8 +86,16 @@ abstract public class SessionView<X> extends View<X> {
     super.introspect();
     
     introspectImpl();
+    
+    // XXX register no interface view with injection manager
+    if (getBeanType().isAnnotationPresent(LocalBean.class) 
+        && ! getBeanType().getJavaClass().isInterface())
+      _isNoInterfaceView = true;
+    
+    if (getGenerator().getLocalApi().size() == 0)
+      _isNoInterfaceView = true;
   }
-
+  
   /**
    * Introspects the APIs methods, producing a business method for
    * each.
@@ -82,6 +106,11 @@ abstract public class SessionView<X> extends View<X> {
           : getGenerator().getAnnotatedMethods()) {
       introspectMethod(method);
     }
+  }
+  
+  public boolean isNoInterfaceView()
+  {
+    return _isNoInterfaceView;
   }
   
   private void introspectMethod(AnnotatedMethod<? super X> apiMethod)

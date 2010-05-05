@@ -35,8 +35,10 @@ import java.util.logging.Logger;
 import javax.ejb.FinderException;
 import javax.ejb.Timer;
 import javax.ejb.TimerService;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.naming.Context;
 import javax.naming.InitialContext;
 import javax.naming.NamingException;
@@ -88,6 +90,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
 
   protected ArrayList<Class<?>> _remoteApiList = new ArrayList<Class<?>>();
   protected ArrayList<Class<?>> _localApiList = new ArrayList<Class<?>>();
+  protected boolean _isNoInterfaceView = false;
 
   protected Class<?> _serviceEndpointClass;
 
@@ -99,7 +102,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   private ConfigProgram _serverProgram;
 
   // injection/postconstruct from Java Injection
-  private EjbProducer<T> _producer;
+  private EjbInjectionTarget<T> _producer;
 
   private boolean _isContainerTransaction = true;
   protected long _transactionTimeout;
@@ -127,7 +130,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
     _loader = EnvironmentClassLoader.create(container.getClassLoader());
     _loader.setAttribute("caucho.inject", false);
     
-    _producer = new EjbProducer<T>(this, annotatedType);
+    _producer = new EjbInjectionTarget<T>(this, annotatedType);
   }
 
   /**
@@ -173,7 +176,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
     return _bean;
   }
   
-  public EjbProducer<T> getProducer()
+  private EjbInjectionTarget<T> getProducer()
   {
     return _producer;
   }
@@ -301,7 +304,17 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   public void setBeanImplClass(Class<T> cl)
   {
   }
+  
+  public void setIsNoInterfaceView(boolean noInterfaceView)
+  {
+    _isNoInterfaceView = noInterfaceView;
+  }
 
+  public boolean isNoInterfaceView()
+  {
+    return _isNoInterfaceView;
+  }
+  
   /**
    * Sets the remote object list.
    */
@@ -509,7 +522,53 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
     _loader.init();
     // _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
   }
+  
+  public void initInstance(T instance)
+  {
+    _producer.initInstance(instance);
+  }
+  
+  public T newInstance()
+  {
+    return _producer.newInstance();
+  }
+  
+  public T createInstance()
+  {
+    T instance = newInstance();
+    
+    initInstance(instance);
+    
+    return instance;
+  }
+  
+  /**
+   * Initialize an instance
+   */
+  public <X> void initInstance(T instance, InjectionTarget<T> target, 
+                               X proxy, CreationalContext<X> cxt)
+  {
+    _producer.initInstance(instance, target, proxy, cxt);
+  }
 
+  public void setInitProgram(ConfigProgram program)
+  {
+    _producer.setInitProgram(program);
+  }
+  
+  public void setInjectionTarget(InjectionTarget<T> target)
+  {
+    _producer.setInjectionTarget(target);
+  }
+  
+  /**
+   * Initialize an instance
+   */
+  public void destroyInstance(T instance)
+  {
+    _producer.destroyInstance(instance);
+  }
+  
   public boolean start() throws Exception
   {
     if (! _lifecycle.toActive())

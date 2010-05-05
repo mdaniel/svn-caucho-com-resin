@@ -188,25 +188,6 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   }
 
   /**
-   * Initialize an instance
-   */
-  public <X> void initInstance(T instance,
-                               InjectionTarget<T> target,
-                               X proxy,
-                               CreationalContext<X> cxt)
-  {
-    getProducer().initInstance(instance, target, proxy, cxt);
-  }
-
-  /**
-   * Initialize an instance
-   */
-  public void destroyInstance(T instance)
-  {
-    getProducer().destroyInstance(instance);
-  }
-
-  /**
    * Returns the remote object.
    */
   @Override

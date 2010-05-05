@@ -190,33 +190,6 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
      * return cxt;
      */
   }
-
-
-  
-  public T newInstance()
-  {
-    T object = getProducer().newInstance();
-    
-    return object;
-  }
-
-  /**
-   * Initialize an instance
-   */
-  public <X> void initInstance(T instance, InjectionTarget<T> target, 
-                               X proxy, CreationalContext<X> cxt)
-  {
-    getProducer().initInstance(instance, target, proxy, cxt);
-  }
-
-  /**
-   * Initialize an instance
-   */
-  public void destroyInstance(T instance)
-  {
-    getProducer().destroyInstance(instance);
-  }
-
  
   /**
    * Cleans up the entity server nicely.

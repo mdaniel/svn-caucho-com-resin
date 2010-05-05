@@ -61,9 +61,9 @@ import com.caucho.ejb.gen.MessageGenerator;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.message.JmsActivationSpec;
 import com.caucho.ejb.message.JmsResourceAdapter;
-import com.caucho.ejb.message.MessageServer;
+import com.caucho.ejb.message.MessageManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.server.EjbProducer;
+import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
 import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.jca.cfg.MessageListenerConfig;
@@ -643,7 +643,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
                                                ActivationSpec spec)
     throws ClassNotFoundException
   {
-    MessageServer<X> server;
+    MessageManager<X> manager;
 
     try {
       if (spec == null)
@@ -653,25 +653,25 @@ public class EjbMessageBean<X> extends EjbBean<X> {
         throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
 
 
-      server = new MessageServer<X>(ejbManager, getAnnotatedType());
+      manager = new MessageManager<X>(ejbManager, getAnnotatedType());
 
-      server.setConfigLocation(getFilename(), getLine());
+      manager.setConfigLocation(getFilename(), getLine());
 
-      server.setModuleName(getEJBModuleName());
-      server.setEJBName(getEJBName());
-      server.setMappedName(getMappedName());
-      server.setId(getEJBModuleName() + "#" + getMappedName());
+      manager.setModuleName(getEJBModuleName());
+      manager.setEJBName(getEJBName());
+      manager.setMappedName(getMappedName());
+      manager.setId(getEJBModuleName() + "#" + getMappedName());
 
-      server.setContainerTransaction(isContainerTransaction());
+      manager.setContainerTransaction(isContainerTransaction());
 
-      server.setEjbClass(getEJBClass());
+      manager.setEjbClass(getEJBClass());
 
       Class<?> contextImplClass = javaGen.loadClass(getSkeletonName());
 
-      server.setContextImplClass(contextImplClass);
+      manager.setContextImplClass(contextImplClass);
 
-      server.setActivationSpec(spec);
-      server.setResourceAdapter(ra);
+      manager.setActivationSpec(spec);
+      manager.setResourceAdapter(ra);
 
       // server.setMessageListenerType(_messagingType);
 
@@ -681,16 +681,14 @@ public class EjbMessageBean<X> extends EjbBean<X> {
       ClassLoader oldLoader = thread.getContextClassLoader();
 
       try {
-        thread.setContextClassLoader(server.getClassLoader());
+        thread.setContextClassLoader(manager.getClassLoader());
 
         ContainerProgram initContainer = getInitProgram();
 
-        EjbProducer<?> producer = server.getProducer();
-        
-        producer.setInitProgram(initContainer);
+        manager.setInitProgram(initContainer);
 
         if (getServerProgram() != null)
-          getServerProgram().configure(server);
+          getServerProgram().configure(manager);
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -698,7 +696,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
       throw error(e);
     }
 
-    return server;
+    return manager;
   }
 
   public class ActivationConfig {

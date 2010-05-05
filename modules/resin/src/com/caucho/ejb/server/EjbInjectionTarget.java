@@ -57,7 +57,7 @@ import com.caucho.ejb.timer.EjbTimerService;
 /**
  * Creates an configures an ejb instance
  */
-public class EjbProducer<T> {
+public class EjbInjectionTarget<T> {
   private AbstractEjbBeanManager<T> _server;
   
   private Class<T> _ejbClass;
@@ -83,7 +83,7 @@ public class EjbProducer<T> {
   private Method _timeoutMethod;
   private TimerService _timerService;
   
-  EjbProducer(AbstractEjbBeanManager<T> server,
+  EjbInjectionTarget(AbstractEjbBeanManager<T> server,
               AnnotatedType<T> annotatedType)
   {
     _server = server;
@@ -289,6 +289,7 @@ public class EjbProducer<T> {
                                X proxy,
                                CreationalContext<X> env)
   {
+    System.out.println("initInstance");
     Bean<T> bean = _bean;
 
     if (env != null && bean != null) {

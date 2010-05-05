@@ -193,7 +193,10 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     ArrayList<Class<?>> localApiList = getLocalApiList();
     ArrayList<Class<?>> remoteApiList = getRemoteApiList();
 
-    if (beanClass != null && (localApiList != null || remoteApiList != null)) {
+    if (beanClass != null 
+        && (isNoInterfaceView() 
+            || localApiList != null 
+            || remoteApiList != null)) {
       InjectManager beanManager = InjectManager.create();
 
       Named named = (Named) beanClass.getAnnotation(Named.class);
@@ -207,6 +210,14 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       
       Set<Type> apiList = new LinkedHashSet<Type>();
 
+      if (isNoInterfaceView()) {
+        baseApi = _ejbClass;
+        
+        BaseType sourceApi = beanManager.createSourceBaseType(_ejbClass);
+        
+        apiList.addAll(sourceApi.getTypeClosure(beanManager));
+      }
+      
       if (localApiList != null) {
         for (Class<?> api : localApiList) {
           baseApi = api;

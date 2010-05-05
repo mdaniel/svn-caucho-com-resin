@@ -32,7 +32,6 @@ package com.caucho.ejb.gen;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -56,9 +55,6 @@ public class StatefulView<X> extends SessionView<X> {
   private StatefulGenerator<X> _sessionBean;
   
   private StatefulAspectBeanFactory<X> _aspectBeanFactory;
-
-  private final ArrayList<AspectGenerator<X>> _businessMethods
-    = new ArrayList<AspectGenerator<X>>();
 
   public StatefulView(StatefulGenerator<X> bean)
   {
@@ -105,15 +101,6 @@ public class StatefulView<X> extends SessionView<X> {
     return getBeanType().getJavaClass().getName();
   }
 
-  /**
-   * Returns the introspected methods
-   */
-  @Override
-  public ArrayList<AspectGenerator<X>> getMethods()
-  {
-    return _businessMethods;
-  }
-  
   @Override
   protected void addBusinessMethod(AnnotatedMethod<? super X> method)
   {
@@ -145,19 +132,15 @@ public class StatefulView<X> extends SessionView<X> {
     out.println();
     out.println("public static class " + getViewClassName());
 
-    if (isProxy()) {
-      generateExtends(out);
-      out.print("  implements StatefulProvider");
-      
-      for (AnnotatedType<? super X> api : getGenerator().getLocalApi()) {
-        out.print(", " + api.getJavaClass().getName());
-      }
-      out.println();
-    }
-    else {
+    if (isNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
-      out.println("  implements StatefulProvider");
+
+    out.print("  implements StatefulProvider");
+
+    for (AnnotatedType<? super X> api : getGenerator().getLocalApi()) {
+      out.print(", " + api.getJavaClass().getName());
     }
+    out.println();
 
     out.println("{");
     out.pushDepth();

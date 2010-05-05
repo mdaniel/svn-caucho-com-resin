@@ -31,7 +31,6 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -54,9 +53,6 @@ public class SingletonView<X> extends SessionView<X> {
   private SingletonGenerator<X> _sessionBean;
   
   private SingletonAspectBeanFactory<X> _aspectBeanFactory;
-
-  private ArrayList<AspectGenerator<X>> _businessMethods
-    = new ArrayList<AspectGenerator<X>>();
 
   public SingletonView(SingletonGenerator<X> bean)
   {
@@ -101,15 +97,6 @@ public class SingletonView<X> extends SessionView<X> {
   }
 
   /**
-   * Returns the introspected methods
-   */
-  @Override
-  public ArrayList<AspectGenerator<X>> getMethods()
-  {
-    return _businessMethods;
-  }
-
-  /**
    * Introspects the APIs methods, producing a business method for
    * each.
    */
@@ -145,19 +132,15 @@ public class SingletonView<X> extends SessionView<X> {
     out.println();
     out.println("public static class " + getViewClassName());
 
-    if (isProxy()) {
-      generateExtends(out);
-      out.print("  implements SingletonProxyFactory");
-      
-      for (AnnotatedType<? super X> apiType : getGenerator().getLocalApi()) {
-        out.print(", " + apiType.getJavaClass().getName());
-      }
-      out.println();
-    }
-    else {
+    if (isNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
-      out.println("  implements SingletonProxyFactory");
+    
+    out.print("  implements SingletonProxyFactory");
+
+    for (AnnotatedType<? super X> apiType : getGenerator().getLocalApi()) {
+      out.print(", " + apiType.getJavaClass().getName());
     }
+    out.println();
 
     out.println("{");
     out.pushDepth();

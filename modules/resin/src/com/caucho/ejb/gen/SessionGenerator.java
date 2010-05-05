@@ -51,11 +51,8 @@ import com.caucho.util.L10N;
 abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private static final L10N L = new L10N(SessionGenerator.class);
   
-  private ArrayList<AnnotatedType<? super X>> _localApi
-    = new ArrayList<AnnotatedType<? super X>>();
-
-  private ArrayList<AnnotatedType<? super X>> _remoteApi
-    = new ArrayList<AnnotatedType<? super X>>();
+  private ArrayList<AnnotatedType<? super X>> _localApi;
+  private ArrayList<AnnotatedType<? super X>> _remoteApi;
   
   private ArrayList<AnnotatedMethod<? super X>> _annotatedMethods
     = new ArrayList<AnnotatedMethod<? super X>>();
@@ -157,10 +154,12 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   {
     super.introspect();
 
+    // no interface view
     if (_localApi.size() == 0 && _remoteApi.size() == 0) {
       AnnotatedType<? super X> localDefault = introspectLocalDefault();
       
-      _localApi.add(localDefault); 
+      if (localDefault.getJavaClass().isInterface())
+        _localApi.add(localDefault); 
     }
     
     for (AnnotatedType<? super X> type : _localApi) {

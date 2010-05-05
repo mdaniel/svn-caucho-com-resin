@@ -51,7 +51,7 @@ import com.caucho.ejb.EJBExceptionWrapper;
 import com.caucho.ejb.inject.StatelessBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
-import com.caucho.ejb.server.EjbProducer;
+import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.util.L10N;
 
 /**
@@ -215,12 +215,11 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   {
     return getContext();
   }
-  
-  StatelessPool.Item<X> newInstance(EjbProducer<X> producer)
+
+  // XXX
+  public Object[] getInterceptorBindings()
   {
-    X value = producer.newInstance();
-    
-    return new StatelessPool.Item<X>(value, null);
+    return null;
   }
   
   public void destroy()
@@ -265,4 +264,5 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
       getContext().__caucho_timeout_callback(method);
     }
   }
+
 }

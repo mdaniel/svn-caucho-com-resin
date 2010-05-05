@@ -97,7 +97,7 @@ public class LifecycleInterceptor {
 
     if (iAnn != null) {
       for (Class<?> iClass : iAnn.value()) {
-	introspectClass(iClass);
+        introspectClass(iClass);
       }
     }
 
@@ -115,9 +115,9 @@ public class LifecycleInterceptor {
   {
     for (Method method : cl.getMethods()) {
       if (method.isAnnotationPresent(_annType)
-	  && method.getParameterTypes().length == 1
-	  && method.getParameterTypes()[0].equals(InvocationContext.class)) {
-	return method;
+          && method.getParameterTypes().length == 1
+          && method.getParameterTypes()[0].equals(InvocationContext.class)) {
+        return method;
       }
     }
 
