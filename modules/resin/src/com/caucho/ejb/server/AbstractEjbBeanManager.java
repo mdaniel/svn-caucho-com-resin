@@ -90,7 +90,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
 
   protected ArrayList<Class<?>> _remoteApiList = new ArrayList<Class<?>>();
   protected ArrayList<Class<?>> _localApiList = new ArrayList<Class<?>>();
-  protected boolean _isNoInterfaceView = false;
+  protected boolean _hasNoInterfaceView = false;
 
   protected Class<?> _serviceEndpointClass;
 
@@ -307,12 +307,12 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   
   public void setIsNoInterfaceView(boolean noInterfaceView)
   {
-    _isNoInterfaceView = noInterfaceView;
+    _hasNoInterfaceView = noInterfaceView;
   }
 
-  public boolean isNoInterfaceView()
+  public boolean hasNoInterfaceView()
   {
-    return _isNoInterfaceView;
+    return _hasNoInterfaceView;
   }
   
   /**
@@ -531,15 +531,6 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   public T newInstance()
   {
     return _producer.newInstance();
-  }
-  
-  public T createInstance()
-  {
-    T instance = newInstance();
-    
-    initInstance(instance);
-    
-    return instance;
   }
   
   /**

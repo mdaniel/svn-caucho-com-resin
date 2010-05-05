@@ -33,6 +33,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import javax.ejb.LocalBean;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
@@ -51,6 +52,8 @@ import com.caucho.util.L10N;
 abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private static final L10N L = new L10N(SessionGenerator.class);
   
+  private boolean _hasNoInterfaceView;
+
   private ArrayList<AnnotatedType<? super X>> _localApi;
   private ArrayList<AnnotatedType<? super X>> _remoteApi;
   
@@ -122,6 +125,11 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     return (SessionView<X>) super.getView();
   }
 
+  public boolean hasNoInterfaceView()
+  {
+    return _hasNoInterfaceView;
+  }
+  
   /**
    * Returns the local API list.
    */
@@ -153,28 +161,38 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   public void introspect()
   {
     super.introspect();
+    
+    if (getBeanType().isAnnotationPresent(LocalBean.class) 
+        && ! getBeanType().getJavaClass().isInterface())
+      _hasNoInterfaceView = true;
+        
+    if (_localApi.size() == 0 && _remoteApi.size() == 0)
+      _hasNoInterfaceView = true;
 
-    // no interface view
-    if (_localApi.size() == 0 && _remoteApi.size() == 0) {
+    if (_hasNoInterfaceView) {
       AnnotatedType<? super X> localDefault = introspectLocalDefault();
       
       if (localDefault.getJavaClass().isInterface())
         _localApi.add(localDefault); 
+      else
+        // we still want to introspect the methods, but don't add it as
+        // a local api because it will be treated as an interface later
+        introspectType(localDefault);
     }
     
-    for (AnnotatedType<? super X> type : _localApi) {
-      for (AnnotatedMethod<? super X> method : type.getMethods()) {
-        introspectMethod(method);
-      }
-    }
+    for (AnnotatedType<? super X> type : _localApi)
+      introspectType(type);
     
-    for (AnnotatedType<? super X> type : _remoteApi) {
-      for (AnnotatedMethod<? super X> method : type.getMethods()) {
-        introspectMethod(method);
-      }
-    }
+    for (AnnotatedType<? super X> type : _remoteApi)
+      introspectType(type);
     
     getView().introspect();
+  }
+  
+  private void introspectType(AnnotatedType<? super X> type)
+  {
+    for (AnnotatedMethod<? super X> method : type.getMethods())
+      introspectMethod(method);
   }
   
   private void introspectMethod(AnnotatedMethod<? super X> method)

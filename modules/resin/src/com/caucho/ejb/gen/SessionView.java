@@ -38,6 +38,7 @@ import javax.ejb.LocalBean;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.View;
 import com.caucho.inject.Module;
@@ -51,9 +52,13 @@ abstract public class SessionView<X> extends View<X> {
   private static final L10N L = new L10N(SessionView.class);
 
   private SessionGenerator<X> _sessionGenerator;
-  private boolean _isNoInterfaceView;
 
-  protected ArrayList<AspectGenerator<X>> _businessMethods 
+  protected AspectBeanFactory<X> _aspectBeanFactory;
+
+  private final ArrayList<AspectGenerator<X>> _businessMethods 
+    = new ArrayList<AspectGenerator<X>>();
+
+  private final ArrayList<AspectGenerator<X>> _nonBusinessMethods 
     = new ArrayList<AspectGenerator<X>>();
 
   public SessionView(SessionGenerator<X> bean)
@@ -66,6 +71,11 @@ abstract public class SessionView<X> extends View<X> {
   public SessionGenerator<X> getGenerator()
   {
     return _sessionGenerator;
+  }
+
+  public boolean hasNoInterfaceView()
+  {
+    return getGenerator().hasNoInterfaceView();
   }
 
   /**
@@ -86,14 +96,6 @@ abstract public class SessionView<X> extends View<X> {
     super.introspect();
     
     introspectImpl();
-    
-    // XXX register no interface view with injection manager
-    if (getBeanType().isAnnotationPresent(LocalBean.class) 
-        && ! getBeanType().getJavaClass().isInterface())
-      _isNoInterfaceView = true;
-    
-    if (getGenerator().getLocalApi().size() == 0)
-      _isNoInterfaceView = true;
   }
   
   /**
@@ -107,12 +109,7 @@ abstract public class SessionView<X> extends View<X> {
       introspectMethod(method);
     }
   }
-  
-  public boolean isNoInterfaceView()
-  {
-    return _isNoInterfaceView;
-  }
-  
+
   private void introspectMethod(AnnotatedMethod<? super X> apiMethod)
   {
     Method javaMethod = apiMethod.getJavaMember();
@@ -134,7 +131,17 @@ abstract public class SessionView<X> extends View<X> {
     }
 
     addBusinessMethod(apiMethod);
+
+    // TODO: Need an addNonBusinessMethod method for methods that are visible
+    // in Java (i.e. protected/package-protected), but not actual business
+    // methods. The TCK checks that these throw exceptions when called.
   }
   
-  abstract protected void addBusinessMethod(AnnotatedMethod<? super X> method);
+  protected void addBusinessMethod(AnnotatedMethod<? super X> method)
+  {
+    AspectGenerator<X> bizMethod = _aspectBeanFactory.create(method);
+      
+    if (bizMethod != null)
+      _businessMethods.add(bizMethod);
+  }
 }

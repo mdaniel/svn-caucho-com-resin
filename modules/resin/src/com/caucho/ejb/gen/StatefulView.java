@@ -54,8 +54,6 @@ public class StatefulView<X> extends SessionView<X> {
 
   private StatefulGenerator<X> _sessionBean;
   
-  private StatefulAspectBeanFactory<X> _aspectBeanFactory;
-
   public StatefulView(StatefulGenerator<X> bean)
   {
     super(bean);
@@ -101,16 +99,6 @@ public class StatefulView<X> extends SessionView<X> {
     return getBeanType().getJavaClass().getName();
   }
 
-  @Override
-  protected void addBusinessMethod(AnnotatedMethod<? super X> method)
-  {
-    AspectGenerator<X> bizMethod = _aspectBeanFactory.create(method);
-      
-    if (bizMethod != null) {
-      _businessMethods.add(bizMethod);
-    }
-  }
-
   /**
    * Generates code to create the provider
    */
@@ -132,7 +120,7 @@ public class StatefulView<X> extends SessionView<X> {
     out.println();
     out.println("public static class " + getViewClassName());
 
-    if (isNoInterfaceView())
+    if (hasNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
 
     out.print("  implements StatefulProvider");
@@ -230,7 +218,7 @@ public class StatefulView<X> extends SessionView<X> {
     // ejb/1143
     if (isProxy()) {
       // XXX: 4.0.7
-      out.println("_bean = (" + getBeanClassName() + ") _server.getProducer().newInstance();");
+      out.println("_bean = (" + getBeanClassName() + ") _server.newInstance();");
       /*
       out.println("try {");
       out.println("_bean = (" + getBeanClassName() + ") _ctor.newInstance();");

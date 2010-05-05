@@ -59,8 +59,6 @@ public class StatelessView<X> extends SessionView<X> {
 
   private StatelessGenerator<X> _statelessBean;
 
-  private AspectBeanFactory<X> _aspectBeanFactory;
-  
   private String _timeoutMethod;
 
   private LifecycleInterceptor _postConstructInterceptor;
@@ -182,22 +180,6 @@ public class StatelessView<X> extends SessionView<X> {
     }
   }
 
-  @Override
-  protected void addBusinessMethod(AnnotatedMethod<? super X> method)
-  {
-    Method javaMethod = method.getJavaMember();
-    
-    if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb.")) {
-      return;
-    }
-    
-    AspectGenerator<X> bizMethod = _aspectBeanFactory.create(method);
-      
-    if (bizMethod != null) {
-      _businessMethods.add(bizMethod);
-    }
-  }
-
   //
   // code generation
   //
@@ -303,7 +285,7 @@ public class StatelessView<X> extends SessionView<X> {
     out.println();
     out.println("public static class " + getViewClassName());
 
-    if (isNoInterfaceView())
+    if (hasNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
 
     out.print("  implements StatelessProvider");

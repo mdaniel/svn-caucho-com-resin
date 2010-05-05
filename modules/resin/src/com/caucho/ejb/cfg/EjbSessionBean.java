@@ -37,6 +37,7 @@ import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Local;
+import javax.ejb.LocalBean;
 import javax.ejb.Remote;
 import javax.ejb.SessionSynchronization;
 import javax.ejb.Singleton;
@@ -279,7 +280,9 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
     // ejb/0j20
     if (!type.isAnnotationPresent(Stateful.class)
-        && !type.isAnnotationPresent(Stateless.class) && !isAllowPOJO())
+        && !type.isAnnotationPresent(Stateless.class) 
+        && !type.isAnnotationPresent(Singleton.class) 
+        && !isAllowPOJO())
       return;
 
     /*
@@ -399,7 +402,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
      * server.setRemote21(loadClass(getRemote21().getName()));
      */
     
-    manager.setIsNoInterfaceView(_sessionBean.getView().isNoInterfaceView());
+    manager.setIsNoInterfaceView(_sessionBean.hasNoInterfaceView());
 
     ArrayList<AnnotatedType<? super X>> localList = _sessionBean.getLocalApi();
     if (localList.size() > 0) {

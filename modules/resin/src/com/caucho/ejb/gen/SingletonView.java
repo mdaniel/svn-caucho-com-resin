@@ -52,8 +52,6 @@ public class SingletonView<X> extends SessionView<X> {
 
   private SingletonGenerator<X> _sessionBean;
   
-  private SingletonAspectBeanFactory<X> _aspectBeanFactory;
-
   public SingletonView(SingletonGenerator<X> bean)
   {
     super(bean);
@@ -97,21 +95,6 @@ public class SingletonView<X> extends SessionView<X> {
   }
 
   /**
-   * Introspects the APIs methods, producing a business method for
-   * each.
-   */
-  @Override
-  public void addBusinessMethod(AnnotatedMethod<? super X> method)
-  {
-    AspectGenerator<X> bizMethod
-    = _aspectBeanFactory.create(method);
-
-    if (bizMethod != null) {
-      _businessMethods.add(bizMethod);
-    }
-  }
-
-  /**
    * Generates code to create the provider
    */
   public void generateCreateProvider(JavaWriter out)
@@ -132,7 +115,7 @@ public class SingletonView<X> extends SessionView<X> {
     out.println();
     out.println("public static class " + getViewClassName());
 
-    if (isNoInterfaceView())
+    if (hasNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
     
     out.print("  implements SingletonProxyFactory");

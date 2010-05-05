@@ -359,23 +359,31 @@ public class EjbProtocolManager {
     String moduleName = manager.getModuleName();
 
     if (moduleName != null) {
-      ArrayList<Class> apiList = manager.getLocalApiList();
-
-      if (apiList == null) {
+      ServerLocalProxy proxy = null;
+      
+      if (manager.hasNoInterfaceView()) {
         String suffix = manager.getEJBName();
         Class api = manager.getEjbClass();
 
-        ServerLocalProxy proxy = new ServerLocalProxy(manager, api); 
+        proxy = new ServerLocalProxy(manager, api); 
 
         bindPortableJndi(appName, moduleName, suffix, proxy);
+
+        suffix = suffix + '!' + manager.getEjbClass().getName();
+        bindPortableJndi(appName, moduleName, suffix, proxy);
       }
-      else if (apiList.size() == 1) {
+
+      ArrayList<Class> apiList = manager.getLocalApiList();
+
+      if (apiList.size() == 1) {
         String suffix = manager.getEJBName();
         Class api = apiList.get(0);
 
-        ServerLocalProxy proxy = new ServerLocalProxy(manager, api); 
+        if (proxy == null)
+          proxy = new ServerLocalProxy(manager, api); 
 
-        bindPortableJndi(appName, moduleName, suffix, proxy);
+        if (! manager.hasNoInterfaceView())
+          bindPortableJndi(appName, moduleName, suffix, proxy);
 
         suffix = suffix + '!' + api.getName();
         bindPortableJndi(appName, moduleName, suffix, proxy);
@@ -384,7 +392,9 @@ public class EjbProtocolManager {
         for (Class api : apiList) {
           String suffix = manager.getEJBName() + '!' + api.getName();
 
-          ServerLocalProxy proxy = new ServerLocalProxy(manager, api); 
+          if (proxy == null)
+            proxy = new ServerLocalProxy(manager, api); 
+
           bindPortableJndi(appName, moduleName, suffix, proxy);
         }
       }
