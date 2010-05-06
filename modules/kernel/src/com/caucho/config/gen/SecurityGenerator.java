@@ -54,9 +54,14 @@ public class SecurityGenerator<X> extends AbstractAspectGenerator<X> {
  
   public SecurityGenerator(SecurityFactory<X> factory,
                            AnnotatedMethod<? super X> method,
-			   AspectGenerator<X> next)
+			   AspectGenerator<X> next,
+			   String []roleNames,
+			   String runAs)
   {
     super(factory, method, next);
+    
+    _roles = roleNames;
+    _runAs = runAs;
   }
 
   /**

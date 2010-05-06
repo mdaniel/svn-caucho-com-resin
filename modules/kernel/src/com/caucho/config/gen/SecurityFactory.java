@@ -29,6 +29,10 @@
 
 package com.caucho.config.gen;
 
+import javax.annotation.security.DenyAll;
+import javax.annotation.security.PermitAll;
+import javax.annotation.security.RolesAllowed;
+import javax.annotation.security.RunAs;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
@@ -40,10 +44,16 @@ import com.caucho.inject.Module;
 public class SecurityFactory<X>
   extends AbstractAspectFactory<X>
 {
+  private RunAs _classRunAs;
+  private RolesAllowed _classRolesAllowed;
+  
   public SecurityFactory(AspectBeanFactory<X> beanFactory,
-                  AspectFactory<X> next)
+                         AspectFactory<X> next)
   {
     super(beanFactory, next);
+    
+    _classRunAs = beanFactory.getBeanType().getAnnotation(RunAs.class);
+    _classRolesAllowed = beanFactory.getBeanType().getAnnotation(RolesAllowed.class);
   }
   
   /**
@@ -53,6 +63,42 @@ public class SecurityFactory<X>
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
                                    boolean isEnhanced)
   {
-    return super.create(method, isEnhanced);
+    RunAs runAs = method.getAnnotation(RunAs.class);
+      
+    if (runAs == null)
+      runAs = _classRunAs;
+    
+    String runAsName = null;
+      
+    if (runAs != null)
+      runAsName = runAs.value();
+      
+    RolesAllowed rolesAllowed = method.getAnnotation(RolesAllowed.class);
+    
+    if (rolesAllowed == null)
+      rolesAllowed = _classRolesAllowed;
+
+    String []roleNames = null;
+
+    if (rolesAllowed != null)
+      roleNames = rolesAllowed.value();
+
+    PermitAll permitAll = method.getAnnotation(PermitAll.class);
+
+    if (permitAll != null)
+      roleNames = null;
+      
+    DenyAll denyAll = method.getAnnotation(DenyAll.class);
+
+    if (denyAll != null)
+      roleNames = new String[0];
+    
+    if (roleNames != null || runAs != null) {
+      AspectGenerator<X> next = super.create(method, true);
+
+      return new SecurityGenerator<X>(this, method, next, roleNames, runAsName);
+    }
+    else
+      return super.create(method, isEnhanced);
   }
 }

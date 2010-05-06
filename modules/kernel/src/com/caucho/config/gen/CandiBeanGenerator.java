@@ -38,15 +38,10 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Set;
 
-import javax.decorator.Decorator;
-import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.inject.Qualifier;
-import javax.interceptor.Interceptor;
-import javax.interceptor.InterceptorBinding;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
@@ -80,7 +75,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
                             AnnotatedType<X> beanClass)
   {
     super(beanClass.getJavaClass().getName() + "__ResinWebBean", beanClass);
-
+    
     setSuperClassName(beanClass.getJavaClass().getName());
 
     if (beanClass.isAnnotationPresent(SerializeHandle.class)) {
@@ -143,7 +138,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
       boolean isEnhance = false;
       AspectGenerator<X> bizMethod = aspectHeadFactory.create(method, isEnhance);
-      
+
       if (bizMethod == null)
         continue;
       

@@ -60,7 +60,7 @@ public class MethodTailGenerator<X> extends NullGenerator<X> {
   public void generateCall(JavaWriter out)
     throws IOException
   {
-    String superVar = _factory.getAspectBeanFactory().getBeanInstance();
+    String superVar = _factory.getAspectBeanFactory().getBeanSuper();
     
     out.println();
 

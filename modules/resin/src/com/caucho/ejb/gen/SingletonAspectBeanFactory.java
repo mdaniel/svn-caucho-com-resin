@@ -63,6 +63,12 @@ public class SingletonAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
     return "_bean";
   }
   
+  @Override
+  public String getBeanSuper()
+  {
+    return "_bean";
+  }
+  
   /**
    * Generates the proxy object.
    */

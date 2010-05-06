@@ -77,6 +77,12 @@ public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
     return "bean";
   }
   
+  @Override
+  public String getBeanSuper()
+  {
+    return "bean";
+  }
+  
   /**
    * Generates data associated with the bean
    */
