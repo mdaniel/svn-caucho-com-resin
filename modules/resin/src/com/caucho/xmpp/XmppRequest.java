@@ -42,10 +42,9 @@ import javax.xml.stream.XMLStreamReader;
 import com.caucho.bam.Broker;
 import com.caucho.hemp.broker.HempBrokerManager;
 import com.caucho.network.listen.AbstractProtocolConnection;
-import com.caucho.network.listen.ProtocolConnection;
+import com.caucho.network.listen.SocketLinkDuplexController;
+import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.network.listen.TcpDuplexController;
-import com.caucho.network.listen.TcpDuplexHandler;
 import com.caucho.util.Base64;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -181,10 +180,10 @@ public class XmppRequest extends AbstractProtocolConnection {
 	return handleInit();
       }
 
-      TcpDuplexHandler handler
+      SocketLinkDuplexListener handler
 	= new XmppBrokerStream(this, _broker, _is, _in, _os);
       
-      TcpDuplexController controller = _conn.startDuplex(handler);
+      SocketLinkDuplexController controller = _conn.startDuplex(handler);
 
       return true;
     } catch (XMLStreamException e) {

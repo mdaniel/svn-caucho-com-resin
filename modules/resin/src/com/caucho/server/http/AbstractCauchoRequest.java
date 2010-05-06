@@ -36,8 +36,6 @@ import com.caucho.server.dispatch.ServletInvocation;
 import com.caucho.server.session.SessionImpl;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.DuplexContext;
-import com.caucho.servlet.DuplexListener;
 import com.caucho.security.AbstractLogin;
 import com.caucho.security.Authenticator;
 import com.caucho.security.RoleMapManager;

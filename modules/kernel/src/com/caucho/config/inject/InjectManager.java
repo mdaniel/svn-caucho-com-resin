@@ -1063,9 +1063,12 @@ public class InjectManager
 
     BaseType baseType = createTargetBaseType(type);
     
+    // ioc/024n
+    /*
     if (baseType.isGeneric())
       throw new IllegalArgumentException(L.l("'{0}' is an invalid getBeans type because it's generic.",
                                     baseType));
+                                    */
 
     return resolve(baseType, bindings);
   }

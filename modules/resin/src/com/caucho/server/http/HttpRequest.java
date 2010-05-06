@@ -42,10 +42,10 @@ import com.caucho.env.sample.AverageProbe;
 import com.caucho.env.sample.ProbeManager;
 import com.caucho.env.sample.SampleCountProbe;
 import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.network.listen.TcpDuplexController;
-import com.caucho.network.listen.TcpDuplexHandler;
 import com.caucho.network.listen.SocketLink;
+import com.caucho.network.listen.SocketLinkDuplexController;
+import com.caucho.network.listen.SocketLinkDuplexListener;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.BadRequestException;
 import com.caucho.server.dispatch.Invocation;
@@ -135,7 +135,7 @@ public class HttpRequest extends AbstractHttpRequest
   }
 
   @Override
-  protected HttpResponse createResponse()
+  public HttpResponse createResponse()
   {
     return new HttpResponse(this, getConnection().getWriteStream());
   }
@@ -1228,11 +1228,11 @@ public class HttpRequest extends AbstractHttpRequest
    * Upgrade to duplex
    */
   @Override
-  public TcpDuplexController startDuplex(TcpDuplexHandler handler)
+  public SocketLinkDuplexController startDuplex(SocketLinkDuplexListener handler)
   {
     TcpSocketLink conn = (TcpSocketLink) getConnection();
 
-    TcpDuplexController context = conn.startDuplex(handler);
+    SocketLinkDuplexController context = conn.startDuplex(handler);
 
     _rawInputStream.init(conn.getReadStream());
     getReadStream().setSource(_rawInputStream);

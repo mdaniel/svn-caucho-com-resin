@@ -320,11 +320,12 @@ public class HmuxRequest extends AbstractHttpRequest
   }
 
   @Override
-  protected HmuxResponse createResponse()
+  public HmuxResponse createResponse()
   {
     return new HmuxResponse(this, getConnection().getWriteStream());
   }
 
+  @Override
   public boolean isWaitForRead()
   {
     return true;
@@ -512,8 +513,8 @@ public class HmuxRequest extends AbstractHttpRequest
   /**
    * Initialize the read stream from the raw stream.
    */
-  protected boolean initStream(ReadStream readStream,
-                               ReadStream rawStream)
+  public boolean initStream(ReadStream readStream,
+                            ReadStream rawStream)
     throws IOException
   {
     readStream.init(_filter, null);

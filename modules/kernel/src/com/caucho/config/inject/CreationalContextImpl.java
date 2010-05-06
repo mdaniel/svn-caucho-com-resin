@@ -194,6 +194,9 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   
   void postConstruct()
   {
+    if (_next != null)
+      _next.postConstruct();
+    
     T value = _value;
     // _value = null;
     
@@ -201,9 +204,6 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
       _injectionTarget.postConstruct(value);
       _injectionTarget = null;
     }
-
-    if (_next != null)
-      _next.postConstruct();
   }
 
   @Override

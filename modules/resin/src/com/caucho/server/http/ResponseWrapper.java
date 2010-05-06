@@ -29,16 +29,19 @@
 
 package com.caucho.server.http;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Locale;
-import com.caucho.util.L10N;
-import com.caucho.network.listen.TcpDuplexController;
-import com.caucho.network.listen.TcpDuplexHandler;
+
+import javax.servlet.ServletOutputStream;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.server.cache.AbstractCacheEntry;
 import com.caucho.server.cache.AbstractCacheFilterChain;
+import com.caucho.util.L10N;
 
 /**
  * Wraps a servlet response in another response.  Filters may
@@ -463,15 +466,5 @@ public class ResponseWrapper implements ServletResponse {
 
   public void setMatchCacheEntry(AbstractCacheEntry cacheEntry)
   {
-  }
-
-  //
-  // caucho methods
-  //
-
-  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
-  {
-    throw new IllegalStateException(L.l("'{0}' does not support upgrading",
-					this));
   }
 }

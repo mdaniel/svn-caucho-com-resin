@@ -29,17 +29,31 @@
 
 package com.caucho.server.http;
 
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.*;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.DuplexContext;
-import com.caucho.servlet.DuplexListener;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.util.Collection;
+import java.util.Enumeration;
+import java.util.Locale;
+import java.util.Map;
 
-import java.io.*;
-import java.util.*;
-import java.security.*;
-import javax.servlet.*;
-import javax.servlet.http.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+
+import com.caucho.server.webapp.WebApp;
+import com.caucho.util.CharBuffer;
+import com.caucho.vfs.ReadStream;
 
 public class CauchoRequestWrapper extends AbstractCauchoRequest {
   // the wrapped request
@@ -760,11 +774,6 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
     CauchoRequest cRequest = (CauchoRequest) _request;
 
     return cRequest.getAbstractHttpRequest();
-  }
-
-  public DuplexContext startDuplex(DuplexListener listener)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
   }
 
   private CauchoRequest getCauchoRequest()

@@ -37,7 +37,6 @@ import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.logging.Level;
@@ -74,7 +73,6 @@ import com.caucho.config.program.Arg;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ValueArg;
-import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -723,7 +721,9 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       return;
     
     Class<?> parentClass = rawType.getSuperclass();
-    
+
+    // 4.0.7 - currently the recursion is handled by ReflectionAnnotatedType
+    /*
     if (parentClass != null && ! Object.class.equals(parentClass)) {
       // XXX:
       AnnotatedType<?> parentType
@@ -731,6 +731,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       
       introspectInject(parentType);
     }
+    */
     
     // configureClassResources(injectList, type);
 

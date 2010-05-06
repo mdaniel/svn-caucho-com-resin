@@ -43,7 +43,7 @@ public class ObjectType extends ClassType
 {
   public static final ObjectType OBJECT_TYPE = new ObjectType();
 
-  private ObjectType()
+  protected ObjectType()
   {
     super(Object.class);
   }
@@ -53,12 +53,21 @@ public class ObjectType extends ClassType
   {
     return Object.class;
   }
+  
+  @Override
+  public boolean isObject()
+  {
+    return true;
+  }
 
+  // ioc/024f
+  /*
   @Override
   public boolean isParamAssignableFrom(BaseType type)
   {
     return true;
   }
+  */
     
   @Override
   public boolean isAssignableFrom(BaseType type)

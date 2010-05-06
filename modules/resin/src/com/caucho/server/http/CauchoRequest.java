@@ -30,8 +30,6 @@
 package com.caucho.server.http;
 
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.DuplexContext;
-import com.caucho.servlet.DuplexListener;
 import com.caucho.vfs.ReadStream;
 
 import javax.servlet.ServletResponse;
@@ -84,6 +82,4 @@ public interface CauchoRequest extends HttpServletRequest {
 
   public ServletResponse getServletResponse();
   public AbstractHttpRequest getAbstractHttpRequest();
-  
-  public DuplexContext startDuplex(DuplexListener listener);
 }

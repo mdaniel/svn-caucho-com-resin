@@ -189,8 +189,8 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     Class<?> type = _producerBean.getBeanClass();
     
-    CreationalContext<X> parentEnv
-      = getBeanManager().createCreationalContext(_producerBean, cxt);
+    CreationalContextImpl<X> parentEnv
+      = new CreationalContextImpl<X>(_producerBean, cxt);
 
     X factory = (X) getBeanManager().getReference(_producerBean, type, parentEnv);
     
@@ -236,6 +236,13 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
       // ioc/0084
       _producesMethod.getJavaMember().setAccessible(true);
+      
+      if (cxt instanceof CreationalContextImpl<?>) {
+        CreationalContextImpl<X> env = (CreationalContextImpl<X>) cxt;
+        // ioc/07b0
+        env.postConstruct();
+      }
+      
       
       T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
       
@@ -379,6 +386,10 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
           else {
             args[i] = _disposesArgs[i].eval(env);
           }
+        }
+        
+        if (env instanceof CreationalContextImpl<?>) {
+          ((CreationalContextImpl<?>) env).postConstruct();
         }
         
         _disposesMethod.getJavaMember().invoke(producer, args);

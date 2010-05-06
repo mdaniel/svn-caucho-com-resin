@@ -30,8 +30,6 @@ package com.caucho.server.http;
 
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.DuplexListener;
-import com.caucho.servlet.DuplexContext;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -662,12 +660,7 @@ public class RequestAdapter extends RequestWrapper
   {
     getRequest().logout();
   }
-
-  public DuplexContext startDuplex(DuplexListener listener)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  
+ 
   public CauchoRequest getCauchoRequest()
   {
     return (CauchoRequest) getRequest();

@@ -146,7 +146,18 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
       context.push(instance);
 
     _injectionTarget.inject(instance, context);
-    _injectionTarget.postConstruct(instance);
+    
+    if (context instanceof CreationalContextImpl<?>) {
+      CreationalContextImpl<X> env = (CreationalContextImpl<X>) context;
+
+      // ioc/0555
+      if (env.isTop()) {
+        env.postConstruct();
+        _injectionTarget.postConstruct(instance);
+      }
+    }
+    else
+      _injectionTarget.postConstruct(instance);
 
     return instance;
   }
@@ -350,7 +361,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
                                  AnnotatedMethod disposesMethod)
   {
     if (producesMethod.getJavaMember().getDeclaringClass() != getBeanClass()
-        && ! getBeanClass().isAnnotationPresent(Specializes.class))
+        && ! getAnnotatedType().isAnnotationPresent(Specializes.class))
       return;
     
     Arg []producesArgs = introspectArguments(producesMethod.getParameters());
@@ -510,7 +521,8 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     Type eventType = method.getGenericParameterTypes()[param];
     
     // ioc/0b22
-    if (! method.getDeclaringClass().equals(getBeanClass()))
+    if (! method.getDeclaringClass().equals(getBeanClass())
+        && ! getBeanClass().isAnnotationPresent(Specializes.class))
       return;
 
     HashSet<Annotation> bindingSet = new HashSet<Annotation>();

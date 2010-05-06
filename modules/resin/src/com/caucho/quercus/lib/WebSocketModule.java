@@ -30,6 +30,8 @@
 
 package com.caucho.quercus.lib;
 
+import com.caucho.network.listen.SocketLinkDuplexListener;
+import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.quercus.module.AbstractQuercusModule;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.StringValue;
@@ -37,8 +39,6 @@ import com.caucho.quercus.env.StringBuilderValue;
 import com.caucho.quercus.env.BooleanValue;
 import com.caucho.quercus.env.Value;
 import com.caucho.server.http.CauchoRequest;
-import com.caucho.servlet.DuplexListener;
-import com.caucho.servlet.DuplexContext;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -170,7 +170,7 @@ public class WebSocketModule
   /**
    * Reads a string from the websocket.
    */
-  public static DuplexContext websocket_start(Env env, StringValue path)
+  public static SocketLinkDuplexController websocket_start(Env env, StringValue path)
   {
     if (! (env.getRequest() instanceof CauchoRequest)) {
       env.warning("websocket_start requires a Resin request at "
@@ -236,16 +236,16 @@ public class WebSocketModule
 
     WebSocketListener listener = new WebSocketListener(env, path);
 
-    DuplexContext context = request.startDuplex(listener);
+    SocketLinkDuplexController context = null;//request.startDuplex(listener);
 
-    context.setTimeout(30 * 60000L);
+    // context.setTimeout(30 * 60000L);
 
     env.startDuplex(context);
 
     return context;
   }
 
-  public static class WebSocketListener implements DuplexListener {
+  public static class WebSocketListener implements SocketLinkDuplexListener {
     private Env _env;
     private StringValue _path;
 
@@ -255,7 +255,8 @@ public class WebSocketModule
       _path = path;
     }
     
-    public void onRead(DuplexContext context)
+    @Override
+    public void onRead(SocketLinkDuplexController context)
     {
       boolean isValid = false;
       
@@ -276,7 +277,7 @@ public class WebSocketModule
       }
     }
     
-    public void onComplete(DuplexContext context)
+    public void onComplete(SocketLinkDuplexController context)
     {
       try {
         _env.closeDuplex();
@@ -285,7 +286,7 @@ public class WebSocketModule
       }
     }
     
-    public void onTimeout(DuplexContext context)
+    public void onTimeout(SocketLinkDuplexController context)
     {
       try {
         _env.closeDuplex();
@@ -297,6 +298,11 @@ public class WebSocketModule
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _path + "]";
+    }
+
+    @Override
+    public void onStart(SocketLinkDuplexController context) throws IOException
+    {
     }
   }
 }

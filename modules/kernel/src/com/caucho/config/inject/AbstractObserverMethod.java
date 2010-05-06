@@ -37,36 +37,45 @@ import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
 import javax.enterprise.inject.spi.ObserverMethod;
 
+import com.caucho.inject.Module;
+
 /**
  * Common bean introspection for Produces and ManagedBean.
  */
+@Module
 abstract public class AbstractObserverMethod<T>
   implements ObserverMethod<T>
 {
+  @Override
   public Class<?> getBeanClass()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public Type getObservedType()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public Set<Annotation> getObservedQualifiers()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public Reception getReception()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   public TransactionPhase getTransactionPhase()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
+  @Override
   abstract public void notify(T event);
 }

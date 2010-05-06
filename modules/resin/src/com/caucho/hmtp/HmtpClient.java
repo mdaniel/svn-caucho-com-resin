@@ -42,8 +42,8 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.remote.websocket.WebSocketClient;
-import com.caucho.servlet.WebSocketContext;
-import com.caucho.servlet.WebSocketListener;
+import com.caucho.servlet.JanusMessageContext;
+import com.caucho.servlet.JanusMessageListener;
 
 /**
  * HMTP client protocol
@@ -58,7 +58,7 @@ public class HmtpClient extends SimpleActorClient {
   private String _jid;
 
   private WebSocketClient _webSocketClient;
-  private WebSocketListener _webSocketHandler;
+  private JanusMessageListener _webSocketHandler;
 
   private ActorException _connException;
 
@@ -219,35 +219,35 @@ public class HmtpClient extends SimpleActorClient {
     close();
   }
   
-  class WebSocketHandler implements WebSocketListener {
+  class WebSocketHandler implements JanusMessageListener {
     private HmtpReader _in;
     private HmtpWriter _out;
     
     @Override
-    public void onStart(WebSocketContext context) throws IOException
+    public void onStart(JanusMessageContext context) throws IOException
     {
-      _out = new HmtpWriter(context.getOutputStream());
+      _out = new HmtpWriter(context.openMessageOutputStream());
       setLinkStream(new HempMemoryQueue(_out, getActorStream(), 1));
       
-      _in = new HmtpReader(context.getInputStream());
+      _in = new HmtpReader(context.openMessageInputStream());
     }
 
     @Override
-    public void onRead(WebSocketContext context) throws IOException
+    public void onMessage(JanusMessageContext context) throws IOException
     {
-      InputStream is = context.getInputStream();
+      InputStream is = context.openMessageInputStream();
       
       while (_in.readPacket(getActorStream()) && is.available() > 0) {
       }
     }
 
     @Override
-    public void onComplete(WebSocketContext context) throws IOException
+    public void onComplete(JanusMessageContext context) throws IOException
     {
     }
 
     @Override
-    public void onTimeout(WebSocketContext context) throws IOException
+    public void onTimeout(JanusMessageContext context) throws IOException
     {
     }    
   }

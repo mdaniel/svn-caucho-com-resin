@@ -41,16 +41,18 @@ import com.caucho.bam.ActorClient;
 import com.caucho.bam.ActorError;
 import com.caucho.bam.ActorStream;
 import com.caucho.bam.Broker;
-import com.caucho.network.listen.TcpDuplexController;
-import com.caucho.network.listen.TcpDuplexHandler;
+import com.caucho.inject.Module;
+import com.caucho.network.listen.SocketLinkDuplexController;
+import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.WriteStream;
 
 /**
  * Protocol handler from the TCP/XMPP stream forwarding to the broker
  */
+@Module
 public class XmppBrokerStream
-  implements TcpDuplexHandler, ActorStream
+  implements SocketLinkDuplexListener, ActorStream
 {
   private static final Logger log
     = Logger.getLogger(XmppBrokerStream.class.getName());
@@ -133,24 +135,24 @@ public class XmppBrokerStream
     return _xmppContext;
   }
   
-  public void onRead(TcpDuplexController context)
+  public void onRead(SocketLinkDuplexController context)
     throws IOException
   {
     _reader.readNext();
   }
   
-  public void onComplete(TcpDuplexController context)
+  public void onComplete(SocketLinkDuplexController context)
     throws IOException
   {
   }
   
-  public void onTimeout(TcpDuplexController context)
+  public void onTimeout(SocketLinkDuplexController context)
     throws IOException
   {
   }
   
   public boolean serviceWrite(WriteStream os,
-			      TcpDuplexController controller)
+			      SocketLinkDuplexController controller)
     throws IOException
   {
     return false;
@@ -294,5 +296,15 @@ public class XmppBrokerStream
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _conn + "]";
+  }
+
+  /* (non-Javadoc)
+   * @see com.caucho.network.listen.SocketLinkDuplexListener#onStart(com.caucho.network.listen.SocketLinkDuplexController)
+   */
+  @Override
+  public void onStart(SocketLinkDuplexController context) throws IOException
+  {
+    // TODO Auto-generated method stub
+    
   }
 }

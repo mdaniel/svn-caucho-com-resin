@@ -29,19 +29,37 @@
 
 package com.caucho.server.http;
 
-import com.caucho.util.NullEnumeration;
-import com.caucho.network.listen.TcpDuplexController;
-import com.caucho.network.listen.TcpDuplexHandler;
-import com.caucho.servlet.DuplexContext;
-import com.caucho.servlet.DuplexListener;
-import com.caucho.server.webapp.WebApp;
-import com.caucho.vfs.ReadStream;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.logging.Logger;
 
-import javax.servlet.*;
-import javax.servlet.http.*;
-import java.io.*;
-import java.util.*;
-import java.util.logging.*;
+import javax.servlet.AsyncContext;
+import javax.servlet.AsyncListener;
+import javax.servlet.DispatcherType;
+import javax.servlet.RequestDispatcher;
+import javax.servlet.ServletContext;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
+import javax.servlet.http.Part;
+
+import com.caucho.network.listen.SocketLinkDuplexController;
+import com.caucho.network.listen.SocketLinkDuplexListener;
+import com.caucho.server.webapp.WebApp;
+import com.caucho.servlet.JanusMessageContext;
+import com.caucho.servlet.JanusMessageListener;
+import com.caucho.util.NullEnumeration;
+import com.caucho.vfs.ReadStream;
 
 /**
  * Used when there isn't any actual request object, e.g. for calling
@@ -184,7 +202,7 @@ public class StubServletRequest implements CauchoRequest {
 
   public boolean isUserInRole(String str) { return false; }
   
-  public TcpDuplexController upgradeProtocol(TcpDuplexHandler handler)
+  public SocketLinkDuplexController upgradeProtocol(SocketLinkDuplexListener handler)
   {
     return null;
   }
@@ -445,7 +463,7 @@ public class StubServletRequest implements CauchoRequest {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public DuplexContext startDuplex(DuplexListener listener)
+  public JanusMessageContext startWebSocket(JanusMessageListener listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }

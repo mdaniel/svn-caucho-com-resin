@@ -31,7 +31,9 @@ package com.caucho.config.event;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.lang.reflect.TypeVariable;
 
 import javax.enterprise.event.Event;
 import javax.enterprise.inject.spi.BeanManager;
@@ -100,14 +102,24 @@ public class EventImpl<T> implements Event<T>, Serializable
   
   private void validateType(Type type)
   {
-    if (! (type instanceof Class<?>))
-      return;
-    
-    Class<?> cl = (Class<?>) type; 
+    if (type instanceof Class<?>) {
+      Class<?> cl = (Class<?>) type; 
 
-    if (cl.getTypeParameters().length > 0)
-      throw new IllegalArgumentException(L.l("Generic class '{0}' is not allowed in select.",
-                                             type));
+      if (cl.getTypeParameters().length > 0)
+        throw new IllegalArgumentException(L.l("Generic class '{0}' is not allowed in select.",
+                                               type));
+    }
+    else if (type instanceof ParameterizedType) {
+      ParameterizedType pType = (ParameterizedType) type;
+      
+      for (Type param : pType.getActualTypeArguments()) {
+        if (param instanceof TypeVariable<?>) {
+          throw new IllegalArgumentException(L.l("Generic class '{0}' is not allowed in select.",
+                                                 type));
+          
+        }
+      }
+    }
   }
   
   private void validateBindings(Annotation ...bindings)

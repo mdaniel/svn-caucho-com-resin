@@ -32,10 +32,12 @@ package com.caucho.config.inject;
 import java.io.Closeable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 /**
  * SingletonBean represents a singleton instance exported as a web beans.
@@ -49,6 +51,9 @@ import javax.enterprise.inject.spi.Annotated;
 public class SingletonBean<T> extends AbstractSingletonBean<T>
   implements Closeable
 {
+  private static final Set<InjectionPoint> EMPTY_INJECTION_POINTS
+    = new HashSet<InjectionPoint>();
+  
   private T _value;
 
   SingletonBean(ManagedBeanImpl<T> managedBean,
@@ -80,6 +85,11 @@ public class SingletonBean<T> extends AbstractSingletonBean<T>
     return _value;
   }
 
+  @Override
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return EMPTY_INJECTION_POINTS;
+  }
   /**
    * Frees the singleton on environment shutdown
    */

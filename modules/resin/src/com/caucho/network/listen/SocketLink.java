@@ -172,4 +172,10 @@ public interface SocketLink {
    * Returns true for a duplex connection
    */
   public boolean isDuplex();
+  
+
+  /**
+   * Starts a full duplex (tcp style) request for hmtp/xmpp
+   */
+  public SocketLinkDuplexController startDuplex(SocketLinkDuplexListener handler);
 }

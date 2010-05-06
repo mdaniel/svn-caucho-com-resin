@@ -86,7 +86,7 @@ abstract public class BaseType
 
       for (int i = 0; i < args.length; i++) {
         // ioc/0246
-        args[i] = ClassType.OBJECT_TYPE;
+        args[i] = TargetObjectType.OBJECT_TYPE;
 	
 	if (args[i] == null) {
 	  throw new NullPointerException("unsupported BaseType: " + type);
@@ -238,6 +238,11 @@ abstract public class BaseType
   }
   
   public boolean isPrimitive()
+  {
+    return false;
+  }
+  
+  public boolean isObject()
   {
     return false;
   }

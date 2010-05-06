@@ -49,10 +49,10 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.caucho.network.listen.ProtocolConnection;
-import com.caucho.network.listen.TcpSocketLink;
-import com.caucho.network.listen.TcpDuplexController;
-import com.caucho.network.listen.TcpDuplexHandler;
 import com.caucho.network.listen.SocketLink;
+import com.caucho.network.listen.SocketLinkDuplexController;
+import com.caucho.network.listen.SocketLinkDuplexListener;
+import com.caucho.network.listen.TcpSocketLink;
 import com.caucho.security.SecurityContextProvider;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.DispatchServer;
@@ -1369,20 +1369,6 @@ public abstract class AbstractHttpRequest
   }
 
   //
-  // duplex/websocket
-  //
-
-  /**
-   * Starts a duplex connection, e.g. for WebSocket.
-   */
-  public TcpDuplexController startDuplex(TcpDuplexHandler listener)
-  {
-    throw new UnsupportedOperationException(L.l("{0} does not support duplex connections.  Only HTTP protocols support duplex.",
-                                                getClass().getName()));
-  }
-
-
-  //
   // internal goodies
   //
 
@@ -1562,6 +1548,13 @@ public abstract class AbstractHttpRequest
     throw new UnsupportedOperationException();
   }
 
+  /**
+   * Starts duplex mode.
+   */
+  public SocketLinkDuplexController startDuplex(SocketLinkDuplexListener handler)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   protected void sendRequestError(Throwable e)
     throws IOException

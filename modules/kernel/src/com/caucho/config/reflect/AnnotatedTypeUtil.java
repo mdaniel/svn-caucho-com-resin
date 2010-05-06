@@ -30,6 +30,7 @@
 package com.caucho.config.reflect;
 
 import java.lang.reflect.Method;
+import java.util.Set;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -62,6 +63,34 @@ public class AnnotatedTypeUtil {
   findMethod(AnnotatedType<X> type, String methodName, Class<?> []param)
   {
     for (AnnotatedMethod<? super X> annMethod : type.getMethods()) {
+      Method method = annMethod.getJavaMember();
+      
+      if (! method.getName().equals(methodName))
+        continue;
+      
+      if (isMatch(param, method.getParameterTypes()))
+        return annMethod;
+    }
+    
+    return null;
+  }
+
+  /**
+   * Finds any method matching the method name and parameter types.
+   */
+  public static <X> AnnotatedMethod<? super X>
+  findMethod(Set<AnnotatedMethod<? super X>> methods, Method method)
+  {
+    return findMethod(methods, method.getName(), method.getParameterTypes());
+  }
+  
+  /**
+   * Finds any method matching the method name and parameter types.
+   */
+  public static <X> AnnotatedMethod<? super X>
+  findMethod(Set<AnnotatedMethod<? super X>> methods, String methodName, Class<?> []param)
+  {
+    for (AnnotatedMethod<? super X> annMethod : methods) {
       Method method = annMethod.getJavaMember();
       
       if (! method.getName().equals(methodName))

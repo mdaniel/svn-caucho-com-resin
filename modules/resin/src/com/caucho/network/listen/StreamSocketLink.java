@@ -174,4 +174,13 @@ public class StreamSocketLink extends AbstractSocketLink {
       return getClass().getSimpleName() + "[]";
     }
   }
+
+  /* (non-Javadoc)
+   * @see com.caucho.network.listen.SocketLink#startDuplex(com.caucho.network.listen.DuplexHandler)
+   */
+  @Override
+  public SocketLinkDuplexController startDuplex(SocketLinkDuplexListener handler)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 }

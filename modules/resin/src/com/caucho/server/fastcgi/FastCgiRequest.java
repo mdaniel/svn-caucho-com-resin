@@ -178,7 +178,7 @@ public class FastCgiRequest extends AbstractHttpRequest
   }
 
   @Override
-  protected FastCgiResponse createResponse()
+  public FastCgiResponse createResponse()
   {
     return new FastCgiResponse(this, getWriteStream());
   }

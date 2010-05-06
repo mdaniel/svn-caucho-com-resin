@@ -153,6 +153,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the connection id.  Primarily for debugging.
    */
+  @Override
   public int getId()
   {
     return _connectionId;
@@ -227,6 +228,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Returns the state.
    */
+  @Override
   public SocketLinkState getState()
   {
     return _state;
@@ -854,6 +856,7 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Wakes the connection (comet-style).
    */
+  @Override
   public boolean wake()
   {
     if (! _state.isComet())
@@ -904,11 +907,12 @@ public class TcpSocketLink extends AbstractSocketLink
   /**
    * Starts a full duplex (tcp style) request for hmtp/xmpp
    */
-  public TcpDuplexController startDuplex(TcpDuplexHandler handler)
+  @Override
+  public SocketLinkDuplexController startDuplex(SocketLinkDuplexListener handler)
   {
     _state = _state.toDuplex(this);
 
-    TcpDuplexController duplex = new TcpDuplexController(this, handler);
+    SocketLinkDuplexController duplex = new SocketLinkDuplexController(this, handler);
 
     _controller = duplex;
 
@@ -1115,6 +1119,7 @@ public class TcpSocketLink extends AbstractSocketLink
   }
 
   class AcceptTask extends ConnectionReadTask {
+    @Override
     public void run()
     {
       SocketLinkListener port = _port;
@@ -1221,9 +1226,9 @@ public class TcpSocketLink extends AbstractSocketLink
   }
 
   class DuplexReadTask extends ConnectionReadTask {
-    private final TcpDuplexController _duplex;
+    private final SocketLinkDuplexController _duplex;
 
-    DuplexReadTask(TcpDuplexController duplex)
+    DuplexReadTask(SocketLinkDuplexController duplex)
     {
       _duplex = duplex;
     }

@@ -35,7 +35,6 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
-import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
 import java.util.logging.Level;
@@ -197,6 +196,11 @@ public class ReflectionAnnotatedType<T>
 
   private void introspectMethods(Class<?> cl)
   {
+    introspectMethods(cl, true);
+  }
+
+  private void introspectMethods(Class<?> cl, boolean isParent)
+  {
     if (cl == null)
       return;
     
@@ -206,16 +210,19 @@ public class ReflectionAnnotatedType<T>
       
       if (hasBeanAnnotation(method)
           || Modifier.isPublic(method.getModifiers())) {
-        _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
+        if (isParent
+            || AnnotatedTypeUtil.findMethod(_methodSet, method) == null) {
+          _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
+        }
       }
     }
     
     if (cl.isInterface()) {
       for (Class<?> superInterface : cl.getInterfaces()) 
-        introspectMethods(superInterface);
+        introspectMethods(superInterface, false);
     }
     else
-      introspectMethods(cl.getSuperclass());
+      introspectMethods(cl.getSuperclass(), false);
   }
   
   private void introspectInheritedAnnotations(Class<?> cl)

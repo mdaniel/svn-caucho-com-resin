@@ -183,13 +183,15 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
     } catch (RuntimeException e) {
       throw e;
     } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException)
-        throw (RuntimeException) e.getCause();
+      Throwable exn = e.getCause();
+      
+      if (exn instanceof RuntimeException)
+        throw (RuntimeException) exn;
       
       String loc = (method.getDeclaringClass().getSimpleName() + "."
                     + method.getName() + ": ");
 
-      throw new ObserverException(loc + e.toString(), e.getCause());
+      throw new ObserverException(loc + exn.toString(), exn.getCause());
     } catch (Exception e) {
       String loc = (method.getDeclaringClass().getSimpleName() + "."
                     + method.getName() + ": ");
@@ -244,7 +246,10 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   @Override
   public Reception getReception()
   {
-    return Reception.ALWAYS;
+    if (_isIfExists)
+      return Reception.IF_EXISTS;
+    else
+      return Reception.ALWAYS;
   }
 
   @Override
@@ -253,6 +258,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
     return _transactionPhase;
   }
 
+  /*
   public Set<InjectionPoint> getInjectionPoints()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -262,6 +268,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  */
 
   @Override
   public String toString()

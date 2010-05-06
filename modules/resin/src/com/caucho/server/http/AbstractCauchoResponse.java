@@ -32,8 +32,6 @@ package com.caucho.server.http;
 import com.caucho.util.CharBuffer;
 import com.caucho.vfs.*;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.DuplexContext;
-import com.caucho.servlet.DuplexListener;
 
 import java.io.*;
 import java.util.*;

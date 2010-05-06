@@ -119,6 +119,10 @@ public class ClassType extends BaseType
   {
     if (type.isWildcard()) {
       for (BaseType bound : type.getWildcardBounds()) {
+        // ioc/024d
+        if (bound.isObject())
+          continue;
+        
         if (! isAssignableFrom(bound))
           return false;
       }
