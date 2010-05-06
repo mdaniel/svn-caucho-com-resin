@@ -8,8 +8,8 @@
     <ProjectGuid>{681D2FA8-740C-4397-9821-8A05C5B42B95}</ProjectGuid>
     <OutputType>Library</OutputType>
     <AppDesignerFolder>Properties</AppDesignerFolder>
-    <RootNamespace>resin_plugin</RootNamespace>
-    <AssemblyName>plugin</AssemblyName>
+    <RootNamespace>Caucho.IIS</RootNamespace>
+    <AssemblyName>Resin.IIS.Plugin</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
     <FileAlignment>512</FileAlignment>
   </PropertyGroup>
@@ -70,7 +70,7 @@
   -->
   <PropertyGroup>
     <PostBuildEvent>mkdir C:\inetpub\wwwroot\bin
-copy $(TargetDir)plugin.* C:\inetpub\wwwroot\bin
+copy $(TargetDir)Resin.IIS.Plugin.* C:\inetpub\wwwroot\bin
 c:\projects\caucho\trunk\qa\iis\iis-setup.bat</PostBuildEvent>
   </PropertyGroup>
 </Project>
