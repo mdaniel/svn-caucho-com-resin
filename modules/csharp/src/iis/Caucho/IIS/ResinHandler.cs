@@ -42,6 +42,8 @@ namespace Caucho.IIS
   public class ResinHandler : IHttpHandler
   {
     private const int HTTP_STATUS_SERVICE_UNAVAIL = 503;
+    private const String STATUS_OK_CLR = "#66ff66";
+    private const String STATUS_BAD_CLR = "#ff6666";
 
     private const int EXIT_MASK = 0x1;
     private const int QUIT = 0x0;
@@ -64,6 +66,7 @@ namespace Caucho.IIS
     private bool _isUrlRewriteEnabled = true;
     private String _sessionUrlPrefix = ";jsessionid=";
     private bool _isDebug = false;
+    private bool _isCauchoStatusEnabled = true;
 
     public ResinHandler()
     {
@@ -135,6 +138,8 @@ namespace Caucho.IIS
         if (_isDebug)
           Trace.TraceInformation("Setting debug to true");
 
+        _isCauchoStatusEnabled = !"false".Equals(appSettings["resin.caucho-status"], StringComparison.OrdinalIgnoreCase);
+
         _loadBalancer = new LoadBalancer(servers,
           loadBalanceConnectTimeout,
           loadBalanceIdleTime,
@@ -196,12 +201,18 @@ namespace Caucho.IIS
       String path = context.Request.Path;
       if (_e != null) {
         DoConfigurationError(context);
-      } else if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__basic")) {
-        DoTestBasic(context);
-      } else if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__chunked")) {
-        DoTestChunked(context);
-      } else if (path.StartsWith("/_") && path.StartsWith("/__caucho__test__ssl")) {
-        DoTestSSL(context);
+      } else if (path.StartsWith("/caucho")) {
+        if (path.StartsWith("/caucho__test__basic")) {
+          DoTestBasic(context);
+        } else if (path.StartsWith("/caucho__test__chunked")) {
+          DoTestChunked(context);
+        } else if (path.StartsWith("/caucho__test__ssl")) {
+          DoTestSSL(context);
+        } else if (path.StartsWith("/caucho-status")) {
+          DoCauchoStatus(context);
+        } else {
+          DoHmux(context);
+        }
       } else {
         DoHmux(context);
       }
@@ -828,6 +839,66 @@ Resin
 </small>
 </body></html>
 ");
+    }
+
+    private void DoCauchoStatus(HttpContext context)
+    {
+      TextWriter writer = context.Response.Output;
+      writer.WriteLine("<html><title>Status : Caucho Servlet Engine</title>");
+      if (!_isCauchoStatusEnabled) {
+        writer.WriteLine("<body><h2>Caucho Status is disabled in configuration<h2>");
+      } else {
+
+        writer.WriteLine("<body bgcolor='white'> <h1>Status : Caucho Servlet Engine</h1>");
+
+        writer.WriteLine("<h2>Backend Servers</h2>");
+        writer.WriteLine("<center><table border='2' width='80%'>");
+        writer.WriteLine("<tr><th width='30%'>Host</th><th>Active</th><th>Pooled</th></tr>");
+        Server[] servers = _loadBalancer.GetServers();
+        foreach (Server server in servers) {
+          String bgcolor = STATUS_OK_CLR;
+          String status = "(Ok)";
+          if (!server.IsActive()) {
+            bgcolor = STATUS_BAD_CLR;
+            status = "(Down)";
+          }
+          writer.WriteLine("<tr><td bgcolor='{0}' width='30%'>{1} {2}</td><td>{3}</td><td>{4}</td></tr>",
+            bgcolor,
+            server.GetName(),
+            status,
+            server.IsActive(),
+            server.GetPooledCount());
+        }
+        writer.WriteLine("</table></center>");
+
+        writer.WriteLine("<h2>Configuration</h2>");
+        writer.WriteLine("<center><table border='2' width='80%'>");
+        writer.WriteLine("<tr><th width='30%'>Parameter</th><th>Value</th></tr>");
+
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "session-cookie", _sessionCookieName);
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "ssl-session-cookie", _sslSessionCookieName);
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "sticky-sessions", _isStickySessions);
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "session-url-prefix", _sessionUrlPrefix);
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "load-balance-connect-timeout", FormatTime(_loadBalancer.GetLoadBalanceConnectTimeout()));
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "load-balance-idle-time", FormatTime(_loadBalancer.GetLoadBalanceIdleTime()));
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "load-balance-recover-time", FormatTime(_loadBalancer.GetLoadBalanceRecoverTime()));
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "load-balance-socket-timeout", FormatTime(_loadBalancer.GetLoadBalanceSocketTimeout()));
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "keepalive-timeout", FormatTime(_loadBalancer.GetLoadBalanceKeepAliveTimeout()));
+        writer.WriteLine("<tr><td width='30%'>{0}</td><td>{1}</td></tr>", "socket-timeout", FormatTime(_loadBalancer.GetSocketTimeout()));
+
+        writer.WriteLine("</table></center>");
+      }
+      writer.WriteLine("</body></html>");
+    }
+
+    private String FormatTime(int time)
+    {
+      int milliseconds = time % 1000;
+      if (milliseconds == 0) {
+        return time / 1000 + " sec.";
+      } else {
+        return time + " ms.";
+      }
     }
 
     private void DoTestBasic(HttpContext context)

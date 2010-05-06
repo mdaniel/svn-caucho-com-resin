@@ -18,7 +18,7 @@
     <DebugType>full</DebugType>
     <Optimize>false</Optimize>
     <OutputPath>bin\Debug\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>DEBUG</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
@@ -26,12 +26,14 @@
     <DebugType>pdbonly</DebugType>
     <Optimize>true</Optimize>
     <OutputPath>bin\Release\</OutputPath>
-    <DefineConstants>TRACE;DEBUG</DefineConstants>
+    <DefineConstants>
+    </DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.configuration" />
     <Reference Include="System.Core">
       <RequiredTargetFramework>3.5</RequiredTargetFramework>
     </Reference>
@@ -46,8 +48,16 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Caucho\IIS\HmuxChannel.cs" />
-    <Compile Include="Caucho\IIS\HmuxHandler.cs" />
+    <Compile Include="Caucho\IIS\ResinHandlerFactory.cs" />
+    <Compile Include="Caucho\IIS\Utils.cs" />
+    <Compile Include="Caucho\IIS\ConfigurationException.cs" />
+    <Compile Include="Caucho\IIS\Logger.cs" />
+    <Compile Include="Caucho\IIS\ClientDisconnectException.cs" />
+    <Compile Include="Caucho\IIS\HmuxConnection.cs" />
+    <Compile Include="Caucho\IIS\Server.cs" />
+    <Compile Include="Caucho\IIS\ResinHandler.cs" />
+    <Compile Include="Caucho\IIS\LoadBalancer.cs" />
+    <Compile Include="Caucho\IIS\TempBuffer.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
@@ -61,6 +71,6 @@
   <PropertyGroup>
     <PostBuildEvent>mkdir C:\inetpub\wwwroot\bin
 copy $(TargetDir)plugin.* C:\inetpub\wwwroot\bin
-c:\projects\caucho\trunk\qa\iis\reset-handler.bat</PostBuildEvent>
+c:\projects\caucho\trunk\qa\iis\iis-setup.bat</PostBuildEvent>
   </PropertyGroup>
 </Project>

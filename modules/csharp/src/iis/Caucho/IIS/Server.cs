@@ -93,6 +93,16 @@ namespace Caucho.IIS
       _isDebug = isDebug;
     }
 
+    public bool IsActive()
+    {
+      return _failTime == 0 && _busyTime == 0;
+    }
+
+    public int GetPooledCount()
+    {
+      return _idleHead;
+    }
+
     public HmuxConnection OpenConnection()
     {
       long now = Utils.CurrentTimeMillis();
@@ -375,6 +385,11 @@ namespace Caucho.IIS
     internal string GetDebugId()
     {
       return _address + _port.ToString();
+    }
+
+    public String GetName()
+    {
+      return String.Format("{0}:{1}:{2}", _serverInternalId, _address, _port);
     }
 
     public override string ToString()

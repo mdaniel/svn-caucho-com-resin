@@ -137,6 +137,41 @@ namespace Caucho.IIS
     {
     }
 
+    public Server[] GetServers()
+    {
+      return _servers;
+    }
+
+    public int GetLoadBalanceConnectTimeout()
+    {
+      return _loadBalanceConnectTimeout;
+    }
+
+    public int GetLoadBalanceIdleTime()
+    {
+      return _loadBalanceIdleTime;
+    }
+
+    public int GetLoadBalanceRecoverTime()
+    {
+      return _loadBalanceRecoverTime;
+    }
+
+    public int GetLoadBalanceSocketTimeout()
+    {
+      return _loadBalanceSocketTimeout;
+    }
+
+    public int GetLoadBalanceKeepAliveTimeout()
+    {
+      return _keepaliveTimeout;
+    }
+
+    public int GetSocketTimeout()
+    {
+      return _socketTimeout;
+    }
+
     public HmuxConnection OpenServer(String sessionId, Server xServer)
     {
       Trace.TraceInformation("{0}:{1}", _servers.Length, _servers[0]);
