@@ -1148,7 +1148,7 @@ public class InterceptorGenerator<X>
     }
 
     out.println(")");
-    MethodHeadGenerator.generateThrows(out, javaMethod.getExceptionTypes());
+    AspectGeneratorUtil.generateThrows(out, javaMethod.getExceptionTypes());
 
     out.println("{");
     out.pushDepth();
@@ -1403,7 +1403,7 @@ public class InterceptorGenerator<X>
     }
 
     out.println(")");
-    MethodHeadGenerator.generateThrows(out, javaMethod.getExceptionTypes());
+    AspectGeneratorUtil.generateThrows(out, javaMethod.getExceptionTypes());
     out.println();
     out.println("{");
     out.pushDepth();

@@ -53,6 +53,8 @@ abstract public class SessionView<X> extends View<X> {
 
   private SessionGenerator<X> _sessionGenerator;
 
+  private final NonBusinessAspectBeanFactory _nonBusinessAspectBeanFactory;
+
   protected AspectBeanFactory<X> _aspectBeanFactory;
 
   private final ArrayList<AspectGenerator<X>> _businessMethods 
@@ -66,6 +68,9 @@ abstract public class SessionView<X> extends View<X> {
     super(bean);
 
     _sessionGenerator = bean;
+
+    _nonBusinessAspectBeanFactory 
+      = new NonBusinessAspectBeanFactory(bean.getBeanType());
   }
 
   public SessionGenerator<X> getGenerator()
@@ -118,23 +123,25 @@ abstract public class SessionView<X> extends View<X> {
       return;
     if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
       return;
-    if (! Modifier.isPublic(javaMethod.getModifiers()))
-      return;
-    if (Modifier.isFinal(javaMethod.getModifiers())
-        || Modifier.isStatic(javaMethod.getModifiers()))
-      return;
-
     if (javaMethod.getName().startsWith("ejb")) {
       throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
                                     javaMethod.getDeclaringClass(),
                                     javaMethod.getName()));
     }
+    
+    int modifiers = javaMethod.getModifiers();
+
+    if (! Modifier.isPublic(modifiers)) {
+      if (! Modifier.isPrivate(modifiers))
+        addNonBusinessMethod(apiMethod);
+
+      return;
+    }
+
+    if (Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))
+      return;
 
     addBusinessMethod(apiMethod);
-
-    // TODO: Need an addNonBusinessMethod method for methods that are visible
-    // in Java (i.e. protected/package-protected), but not actual business
-    // methods. The TCK checks that these throw exceptions when called.
   }
   
   protected void addBusinessMethod(AnnotatedMethod<? super X> method)
@@ -143,5 +150,16 @@ abstract public class SessionView<X> extends View<X> {
       
     if (bizMethod != null)
       _businessMethods.add(bizMethod);
+  }
+
+  protected void addNonBusinessMethod(AnnotatedMethod<? super X> method)
+  {
+    AspectGenerator<X> nonBizMethod 
+      = _nonBusinessAspectBeanFactory.create(method);
+      
+    // XXX seems weird to add this to the _businessMethods, but the generation
+    // is correct.
+    if (nonBizMethod != null)
+      _businessMethods.add(nonBizMethod);
   }
 }

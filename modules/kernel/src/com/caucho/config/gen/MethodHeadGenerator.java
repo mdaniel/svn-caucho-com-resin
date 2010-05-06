@@ -92,7 +92,22 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
     }
     */
 
-    generateHeader(out, suffix, getJavaMethod(), getThrowsExceptions());
+    int modifiers = getJavaMethod().getModifiers();
+    String accessModifier = null;
+    
+    if (Modifier.isPublic(modifiers))
+      accessModifier = "public";
+    else if (Modifier.isProtected(modifiers))
+      accessModifier = "protected";
+    else
+      throw new IllegalStateException(getJavaMethod().toString()
+                                      + " must be public or protected");
+
+    AspectGeneratorUtil.generateHeader(out, 
+                                       accessModifier, 
+                                       suffix, 
+                                       getJavaMethod(), 
+                                       getThrowsExceptions());
 
     out.println("{");
     out.pushDepth();
@@ -103,83 +118,6 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
     out.println("}");
   }
 
-  /**
-   * Generates the method's signature before the call:
-   *
-   * <code><pre>
-   * MyValue myCall(int a0, String, a1, ...)
-   *   throws MyException, ...
-   * </pre><?code>
-  */
-  public static void generateHeader(JavaWriter out,
-                                    String suffix,
-                                    Method method,
-                                    Class<?> []exnList)
-    throws IOException
-  {
-    out.println();
-    
-    int modifiers = method.getModifiers();
-    
-    if (Modifier.isPublic(modifiers))
-      out.print("public ");
-    else if (Modifier.isProtected(modifiers))
-      out.print("protected ");
-    else
-      throw new IllegalStateException(method.toString()
-                                      + " must be public or protected");
-
-    out.printClass(method.getReturnType());
-    out.print(" ");
-    out.print(method.getName() + suffix);
-    out.print("(");
-
-    Class<?>[] types = method.getParameterTypes();
-    for (int i = 0; i < types.length; i++) {
-      Class<?> type = types[i];
-
-      if (i != 0)
-        out.print(", ");
-
-      if (i == types.length - 1 && type.isArray() && method.isVarArgs()) {
-        out.printClass(type.getComponentType());
-        out.print("...");
-      } else
-        out.printClass(type);
-
-      out.print(" a" + i);
-    }
-
-    out.println(")");
-    
-    generateThrows(out, exnList);
-  }
-
-  /**
-   * Generates the method's "throws" declaration in the
-   * method signature.
-   *
-   * @param out generated Java output
-   * @param exnCls the exception classes
-   */
-  protected static void generateThrows(JavaWriter out,
-                                       Class<?>[] exnCls)
-    throws IOException
-  {
-    if (exnCls.length == 0)
-      return;
-
-    out.print(" throws ");
-
-    for (int i = 0; i < exnCls.length; i++) {
-      if (i != 0)
-        out.print(", ");
-
-      out.printClass(exnCls[i]);
-    }
-    out.println();
-  }
-  
   /**
    * Generates the body of the method.
    *
