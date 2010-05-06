@@ -208,7 +208,8 @@ public class ReflectionAnnotatedType<T>
       if (method.getDeclaringClass().equals(Object.class))
         continue;
       
-      if (hasBeanAnnotation(method)
+      if (true 
+          || hasBeanAnnotation(method)
           || Modifier.isPublic(method.getModifiers())) {
         if (isParent
             || AnnotatedTypeUtil.findMethod(_methodSet, method) == null) {

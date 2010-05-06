@@ -47,6 +47,7 @@ import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.caucho.config.bytecode.ScopeProxy;
 import com.caucho.config.program.BeanArg;
 
 /**
@@ -170,6 +171,10 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
 
     if (instance == null)
       return;
+    
+    if (instance instanceof ScopeProxy) {
+      instance = ((ScopeProxy) instance).__caucho_getDelegate();
+    }
 
     Method method = _method.getJavaMember();
 

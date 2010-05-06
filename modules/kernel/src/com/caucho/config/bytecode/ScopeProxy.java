@@ -35,4 +35,5 @@ import java.io.Serializable;
  * Scope adapting
  */
 public interface ScopeProxy extends Serializable {
+  public Object __caucho_getDelegate();
 }

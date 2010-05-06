@@ -99,11 +99,11 @@ public class ScopeAdapter {
     
   }
   
-  public Object wrap(InjectManager manager, Bean<?> comp)
+  public <X> X wrap(InjectManager manager, Bean<X> comp)
   {
     try {
       Object v = _proxyCtor.newInstance(manager, comp);
-      return v;
+      return (X) v;
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -210,6 +210,8 @@ public class ScopeAdapter {
             .getDescriptor());
         code.addReturn();
         code.close();
+        
+        createGetDelegateMethod(jClass);
 
         for (Method method : _cl.getMethods()) {
           if (Modifier.isStatic(method.getModifiers()))
@@ -354,6 +356,36 @@ public class ScopeAdapter {
     else {
       code.addObjectReturn();
     }
+
+    code.close();
+  }
+
+  private void createGetDelegateMethod(JavaClass jClass)
+  {
+    String descriptor = "()Ljava/lang/Object;";
+
+    JavaMethod jMethod = jClass.createMethod("__caucho_getDelegate",
+                                             descriptor);
+    jMethod.setAccessFlags(Modifier.PUBLIC);
+
+    CodeWriterAttribute code = jMethod.createCodeWriter();
+    code.setMaxLocals(1);
+    code.setMaxStack(3);
+
+    code.pushObjectVar(0);
+    code.getField(jClass.getThisClass(), "_manager",
+                  "Lcom/caucho/config/inject/InjectManager;");
+
+    code.pushObjectVar(0);
+    code.getField(jClass.getThisClass(), "_bean",
+                  "Ljavax/enterprise/inject/spi/Bean;");
+
+    code.invoke("com/caucho/config/inject/InjectManager",
+                "getInstance",
+                "(Ljavax/enterprise/inject/spi/Bean;)Ljava/lang/Object;",
+                1, 1);
+
+    code.addObjectReturn();
 
     code.close();
   }

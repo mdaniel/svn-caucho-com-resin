@@ -50,6 +50,7 @@ import javax.enterprise.inject.spi.ProcessBean;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.ServiceStartup;
+import com.caucho.config.bytecode.ScopeProxy;
 import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
@@ -213,6 +214,9 @@ public class XmlStandardPlugin implements Extension
       CreationalContext<?> env = _manager.createCreationalContext(bean);
 
       Object value = _manager.getReference(bean, bean.getBeanClass(), env);
+      
+      if (value instanceof ScopeProxy)
+        ((ScopeProxy) value).__caucho_getDelegate();
       
       if (bean instanceof ManagedBeanImpl<?>) {
         ((ManagedBeanImpl<?>) bean).scheduleTimers(value);

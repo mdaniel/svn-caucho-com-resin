@@ -285,8 +285,10 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       if (! _isBound)
         bind();
 
-      for (ConfigProgram program : _injectProgram) {
-        program.inject(instance, env);
+      if (_injectProgram != null) {
+        for (ConfigProgram program : _injectProgram) {
+          program.inject(instance, env);
+        }
       }
     } catch (RuntimeException e) {
       throw e;

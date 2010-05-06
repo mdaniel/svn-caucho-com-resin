@@ -87,8 +87,9 @@ public class QualifierBinding {
   boolean isMatch(Annotation []annList)
   {
     for (Annotation ann : annList) {
-      if (isMatch(ann))
+      if (isMatch(ann)) {
         return true;
+      }
     }
 
     return false;
@@ -135,7 +136,7 @@ public class QualifierBinding {
           else
             b = method.getDefaultValue();
         }
-
+        
         if (a == b)
           continue;
         else if (a == null)
