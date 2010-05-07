@@ -70,6 +70,13 @@ public class LogHandlerConfig extends BeanConfig {
   {
     setBeanConfigClass(Handler.class);
   }
+  
+  @Override
+  protected String getDefaultScope()
+  {
+    // env/02s7
+    return null;
+  }
 
   /**
    * Sets the name of the logger to configure.
