@@ -81,6 +81,7 @@
         Note: the directory won't be added to %PATH% automatically.
       </p>
     </s1>
+    
     <s1 name="introduction" title="How Resin Integrates with IIS">
       <p>In the deployment scenarios made available by the IIS Handler, Resin can
         serve application completely or partially. Capability
@@ -349,6 +350,63 @@
       </example>
     </s1>
 
+    <s1 name="mixed-technologies-app" title="Servicing a mixed technologies application">
+      <p>
+
+      Using Resin IIS Handler it's possible to deploy an application that employes
+      both ASP.NET and JSP technologies. In such a configuration requests for Java EE
+      based resources needs to be forwarded to Resin while the rest can be served by IIS.
+      </p>
+
+      <p>
+        E.g. Assuming an applicaiton consists of index.jsp and an index.aspx page
+        in application residing at path c:\temp\a. To be able to serve such an application
+        from both Resin and IIS it needs to be deployed at both.
+      </p>
+
+      <example title="Deploying application /a to Resin">
+        ...
+        &lt;cluster id="app-tier">
+          ...
+          &lt;server id="" port="6800"/>
+          ...
+          &lt;web-app id="/a" root-directory="c:/temp/a"/>
+        &lt;/cluster>
+      </example>
+
+      <p>
+        Deploying application '/a' to IIS can be done with IIS Manager, by executing
+        'Add Applicaton' action from the 'Site's' context menu. Once the 'Add Application'
+        dialog opens field Alias needs to be supplied value of 'a',
+        field Physical path – value of 'c:\temp\a'
+      </p>
+      <p>
+        Once this configuration is complete copy the Resin.IIS.Handler.dll into
+        the 'c:\temp\a\bin' directory and create web.conf file with settings
+        configured to match '*.jsp' requests and forward them to an instance of
+        Resin.
+      </p>
+      <example title="web.config">
+&lt;?xml version="1.0" encoding="UTF-8"?>
+&lt;configuration>
+&lt;system.webServer>
+  &lt;handlers>
+    <b>&lt;add name="ResinHandlerFactory"</b>
+         <b>path="*.jsp"</b>
+         <b>verb="*"</b>
+         <b>type="Caucho.IIS.ResinHandlerFactory"</b>
+         <b>preCondition="integratedMode"/></b>
+  &lt;/handlers>
+&lt;/system.webServer>
+&lt;appSettings>
+  <b>&lt;add key="resin.servers" value="127.0.0.1:6800"/></b>
+  &lt;add key="resin.log-level" value="Information"/>
+&lt;/appSettings>
+&lt;/configuration>
+      </example>
+
+    </s1>
+
     <s1 title="Tracing &amp; Logging with Resin IIS Handler">
       <s2 title="Tracing">
         <p>
@@ -444,14 +502,23 @@ Windows Registry Editor Version 5.00
     </s1>
 
     <s1 name="caucho-status" title="Resin IIS Handler Status">
-        <p>
-          <code>caucho-status</code>
-          is optional and probably should be avoided in
-          a production site. It lets you ask the Caucho IIS module about it's
-          configuration, and the status of the backend server(s), valuable for
-          debugging. To see caucho-status point your browser url to
-         http://youriisserver/caucho-status.
-        </p>
+      <p>
+        <code>caucho-status</code>
+        is optional and probably should be avoided in
+        a production site. It lets you ask the Caucho IIS module about it's
+        configuration, and the status of the backend server(s), valuable for
+        debugging. To see caucho-status point your browser url to
+        http://iisserver/caucho-status.
+
+      </p>
+      <p>
+        Note, that in a configuration where handler mapping prevents handler from
+        being invoked on /caucho-status request a 404 will be returned. In such
+        configuration /caucho-status may still be available if there is an extension
+        mapping present for the handler e.g. '*.jsp' or '*.xtp' – simply add the
+        extension to status request http://iisserver/caucho-status.jsp or
+        http://iisserver/cauchos-status.xtp
+      </p>
     </s1>
   </body>
 </document>
