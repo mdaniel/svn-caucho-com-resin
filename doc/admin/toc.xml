@@ -21,6 +21,11 @@
       <item link="starting-resin-apache.xtp" title="Apache HTTPd"
             description="Using Apache HTTPd with Resin"
             reference="starting-resin-apache-ref.xtp"/>
+
+      <item link="starting-resin-iis-7.xtp" title="IIS 7 Plugin"
+            description="Using Microsoft IIS 7 with Resin"
+            reference="starting-resin-iis-7-ref.xtp"/>
+
     </item>
 
     <item link="migration.xtp" title="Migrating"
