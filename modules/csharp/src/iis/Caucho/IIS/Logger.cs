@@ -39,7 +39,7 @@ namespace Caucho.IIS
 {
   public class Logger
   {
-    private const String LOG_SOURCE = "Resin IIS Plugin";
+    private const String LOG_SOURCE = "Resin IIS Handler";
 
     private EventLog _log;
     private EventLogEntryType _logLevel;
