@@ -27,47 +27,37 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.inject;
 
-import java.io.IOException;
-import java.util.ArrayList;
-
-import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
+import javax.inject.Named;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * Represents a public interface to a bean, e.g. a local stateful view
+ * Utility class for creating @Name annotations, used for generic
+ * resources like DataSources.
  */
-@Module
-public class CandiView<X> extends View<X> {
-  public CandiView(BeanGenerator<X> bean)
+public class NamedLiteral extends AnnotationLiteral<Named> implements Named {
+  private final String _name;
+  
+  public NamedLiteral()
   {
-    super(bean);
+    _name = "";
+  }
+  
+  public NamedLiteral(String name)
+  {
+    _name = name;
   }
 
   @Override
-  public String getViewClassName()
-  {
-    return getBean().getFullClassName();
+  public String value()
+  { 
+    return _name;
   }
 
-  /**
-   * Returns the introspected methods
-   */
   @Override
-  public ArrayList<AspectGenerator<X>> getMethods()
+  public String toString()
   {
-    CandiBeanGenerator<X> bean = (CandiBeanGenerator<X>) getBean();
-    
-    return bean.getBusinessMethods();
-  }
-
-  /**
-   * Generates the view code.
-   */
-  @Override
-  public void generate(JavaWriter out)
-    throws IOException
-  {
+    return "@" + Named.class.getSimpleName() + "('" + _name + "')";
   }
 }

@@ -540,7 +540,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
   {
     _messageBean = new MessageGenerator<X>(getEJBName(), getAnnotatedType());
 
-    _messageBean.setApi(new AnnotatedTypeImpl(_messagingType));
+    // _messageBean.setApi(new AnnotatedTypeImpl(_messagingType));
 
     return _messageBean;
   }

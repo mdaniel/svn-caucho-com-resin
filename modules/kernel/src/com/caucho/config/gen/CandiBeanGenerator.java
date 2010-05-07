@@ -93,18 +93,6 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     
     _aspectFactory = new CandiAspectBeanFactory<X>(manager, beanClass);
   }
-
-  @Override
-  public CandiView<X> getView()
-  {
-    return (CandiView<X>) super.getView();
-  }
-  
-  @Override
-  protected CandiView<X> createView()
-  {
-    return new CandiView<X>(this);
-  }
   
   public void setSingleton(boolean isSingleton)
   {
@@ -246,6 +234,21 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     return hasTransientInject(cl.getSuperclass());
   }
 
+  @Override
+  public String getViewClassName()
+  {
+    return getFullClassName();
+  }
+
+  /**
+   * Returns the introspected methods
+   */
+  @Override
+  public ArrayList<AspectGenerator<X>> getMethods()
+  {
+    return getBusinessMethods();
+  }
+
   public Class<?> generateClass()
   {
     if (! isEnhanced())
@@ -320,7 +323,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       }
     }
     
-    getView().generateBeanPrologue(out);
+    generateBeanPrologue(out);
 
     generatePostConstruct(out);
 
@@ -453,8 +456,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     }
     out.println(");");
 
-    getView().generateBeanConstructor(out);
-    getView().generateProxyConstructor(out);
+    generateBeanConstructor(out);
+    generateProxyConstructor(out);
 
     out.popDepth();
     out.println("}");

@@ -30,6 +30,8 @@
 package com.caucho.ejb.gen;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Collection;
 
@@ -37,8 +39,10 @@ import javax.ejb.LocalBean;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.gen.AspectBeanFactory;
+import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.View;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.types.InjectionTarget;
 import com.caucho.inject.Module;
@@ -62,6 +66,16 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
 
   protected String _contextClassName = "dummy";
 
+  private final NonBusinessAspectBeanFactory _nonBusinessAspectBeanFactory;
+
+  protected AspectBeanFactory<X> _aspectBeanFactory;
+
+  private final ArrayList<AspectGenerator<X>> _businessMethods 
+    = new ArrayList<AspectGenerator<X>>();
+
+  private final ArrayList<AspectGenerator<X>> _nonBusinessMethods 
+    = new ArrayList<AspectGenerator<X>>();
+
   public SessionGenerator(String ejbName, 
                           AnnotatedType<X> beanType,
                           ArrayList<AnnotatedType<? super X>> localApi,
@@ -76,7 +90,10 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     _localApi = new ArrayList<AnnotatedType<? super X>>(localApi);
 
     _remoteApi = new ArrayList<AnnotatedType<? super X>>(remoteApi);
-  }
+
+    _nonBusinessAspectBeanFactory 
+      = new NonBusinessAspectBeanFactory(getBeanType());
+   }
 
   public static String toFullClassName(String ejbName, String className,
                                        String beanType)
@@ -118,12 +135,6 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   {
     return false;
   }
-  
-  @Override
-  public SessionView<X> getView()
-  {
-    return (SessionView<X>) super.getView();
-  }
 
   public boolean hasNoInterfaceView()
   {
@@ -152,6 +163,15 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   protected ArrayList<AnnotatedMethod<? super X>> getAnnotatedMethods()
   {
     return _annotatedMethods;
+  }
+
+  /**
+   * Returns the introspected methods
+   */
+  @Override
+  public ArrayList<AspectGenerator<X>> getMethods()
+  {
+    return _businessMethods;
   }
 
   /**
@@ -186,7 +206,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     for (AnnotatedType<? super X> type : _remoteApi)
       introspectType(type);
     
-    getView().introspect();
+    introspectImpl();
   }
   
   private void introspectType(AnnotatedType<? super X> type)
@@ -216,7 +236,66 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     
     _annotatedMethods.add(baseMethod);
   }
+
   
+  /**
+   * Introspects the APIs methods, producing a business method for
+   * each.
+   */
+  private void introspectImpl()
+  {
+    for (AnnotatedMethod<? super X> method : getAnnotatedMethods()) {
+      introspectMethodImpl(method);
+    }
+  }
+
+  private void introspectMethodImpl(AnnotatedMethod<? super X> apiMethod)
+  {
+    Method javaMethod = apiMethod.getJavaMember();
+      
+    if (javaMethod.getDeclaringClass().equals(Object.class))
+      return;
+    if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
+      return;
+    if (javaMethod.getName().startsWith("ejb")) {
+      throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
+                                    javaMethod.getDeclaringClass(),
+                                    javaMethod.getName()));
+    }
+    
+    int modifiers = javaMethod.getModifiers();
+
+    if (! Modifier.isPublic(modifiers)) {
+      if (! Modifier.isPrivate(modifiers))
+        addNonBusinessMethod(apiMethod);
+
+      return;
+    }
+
+    if (Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))
+      return;
+
+    addBusinessMethod(apiMethod);
+  }
+  
+  protected void addBusinessMethod(AnnotatedMethod<? super X> method)
+  {
+    AspectGenerator<X> bizMethod = _aspectBeanFactory.create(method);
+      
+    if (bizMethod != null)
+      _businessMethods.add(bizMethod);
+  }
+
+  protected void addNonBusinessMethod(AnnotatedMethod<? super X> method)
+  {
+    AspectGenerator<X> nonBizMethod 
+      = _nonBusinessAspectBeanFactory.create(method);
+      
+    // XXX seems weird to add this to the _businessMethods, but the generation
+    // is correct.
+    if (nonBizMethod != null)
+      _businessMethods.add(nonBizMethod);
+  } 
   private AnnotatedMethod<? super X> 
   findMethod(Collection<AnnotatedMethod<? super X>> methodList,
              AnnotatedMethod<? super X> method)
@@ -234,10 +313,6 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   {
     return getBeanType();
   }
-  /**
-   * Generates the local view for the given class
-   */
-  abstract protected View<X> createView();
 
   abstract protected void generateContext(JavaWriter out) throws IOException;
 }

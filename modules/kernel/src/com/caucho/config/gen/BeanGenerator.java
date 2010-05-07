@@ -31,6 +31,8 @@ package com.caucho.config.gen;
 
 import java.io.IOException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -50,8 +52,6 @@ abstract public class BeanGenerator<X> extends GenClass
 {
   private final AnnotatedType<X> _beanType;
   
-  private final View<X> _view;
-
   private DependencyComponent _dependency = new DependencyComponent();
 
   protected BeanGenerator(String fullClassName,
@@ -62,8 +62,6 @@ abstract public class BeanGenerator<X> extends GenClass
     _beanType = beanType;
 
     addDependency(beanType.getJavaClass());
-    
-    _view = createView();
   }
 
   public AnnotatedType<X> getBeanType()
@@ -81,36 +79,51 @@ abstract public class BeanGenerator<X> extends GenClass
     _dependency.addDependency(new ClassDependency(cl));
   }
 
-  /**
-   * Returns the views.
-   */
-  public View<X> getView()
+  public String getBeanClassName()
   {
-    return _view;
+    return getBeanType().getJavaClass().getName();
+  }
+
+  public String getViewClassName()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public boolean isRemote()
+  {
+    return false;
+  }
+  
+  public boolean isProxy()
+  {
+    return false;
   }
 
   /**
-   * Generates the views for the bean
+   * Returns the introspected methods
    */
-  abstract protected View<X> createView();
+  public ArrayList<AspectGenerator<X>> getMethods()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
 
   public void introspect()
   {
     
   }
   
+  //
+  // Java generation
+  //
+  
   /**
    * Generates the view contents
    */
-  public void generateViews(JavaWriter out)
-    throws IOException
-  {
-    View<X> view = getView();
-    
-    out.println();
-
-    view.generate(out);
-  }
+  /*
+  @Override
+  abstract public void generate(JavaWriter out)
+    throws IOException;
+    */
 
   /**
    * Generates the view contents
@@ -118,11 +131,161 @@ abstract public class BeanGenerator<X> extends GenClass
   public void generateDestroyViews(JavaWriter out)
     throws IOException
   {
-    View<X> view = getView();
-    
-    out.println();
+    // view.generateDestroy(out);
+  }
 
-    view.generateDestroy(out);
+ /**
+   * Generates prologue for the context.
+   */
+  public void generateContextPrologue(JavaWriter out)
+    throws IOException
+  {
+
+  }
+
+  /**
+   * Generates context home's constructor
+   */
+  public void generateContextHomeConstructor(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates context object's constructor
+   */
+  public void generateContextObjectConstructor(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates timer code
+   */
+  public void generateTimer(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates a new bean instance.
+   */
+  public void generateNewInstance(JavaWriter out)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Frees a bean instance.
+   */
+  public void generateFreeInstance(JavaWriter out, String name)
+    throws IOException
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  /**
+   * Generates any global destroy
+   */
+  public void generateDestroy(JavaWriter out)
+    throws IOException
+  {
+  }
+
+  /**
+   * Generates constructor additions
+   */
+  public void generateProxyConstructor(JavaWriter out)
+    throws IOException
+  {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    generateProxyConstructor(out, map);
+  }
+
+  /**
+   * Generates constructor additions
+   */
+  public void generateProxyConstructor(JavaWriter out, 
+                                       HashMap<String,Object> map)
+    throws IOException
+  {
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generateProxyConstructor(out, map);
+    }
+  }
+
+  /**
+   * Generates constructor additions
+   */
+  public void generateBeanConstructor(JavaWriter out)
+    throws IOException
+  {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    generateBeanConstructor(out, map);
+  }
+
+  /**
+   * Generates constructor additions
+   */
+  public void generateBeanConstructor(JavaWriter out, 
+                                      HashMap<String,Object> map)
+    throws IOException
+  {
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generateBeanConstructor(out, map);
+    }
+  }
+
+  /**
+   * Generates prologue additions
+   */
+  public void generateBeanPrologue(JavaWriter out)
+    throws IOException
+  {
+    generateBeanPrologue(out, new HashMap<String,Object>());
+  }
+
+  /**
+   * Generates prologue additions
+   */
+  public void generateBeanPrologue(JavaWriter out, 
+                                   HashMap<String,Object> map)
+    throws IOException
+  {
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generateBeanPrologue(out, map);
+    }
+  }
+
+  protected void generatePostConstruct(JavaWriter out)
+     throws IOException
+   {
+     out.println();
+     out.println("private void __caucho_postConstruct()");
+     out.println("{");
+     out.pushDepth();
+
+     HashMap<String,Object> map = new HashMap<String,Object>();
+     for (AspectGenerator<X> method : getMethods()) {
+       method.generatePostConstruct(out, map);
+     }
+
+     out.popDepth();
+     out.println("}");
+   }
+
+
+  /**
+   * Generates view's business methods
+   */
+  public void generateBusinessMethods(JavaWriter out)
+    throws IOException
+  {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generate(out, map);
+    }
   }
 
   protected void generateDependency(JavaWriter out)
@@ -134,7 +297,7 @@ abstract public class BeanGenerator<X> extends GenClass
   /**
    * Returns true if the method is implemented.
    */
-  public boolean hasMethod(String methodName, Class<?> []paramTypes)
+  private boolean hasMethod(String methodName, Class<?> []paramTypes)
   {
     for (AnnotatedMethod<? super X> method : _beanType.getMethods()) {
       Method javaMethod = method.getJavaMember();

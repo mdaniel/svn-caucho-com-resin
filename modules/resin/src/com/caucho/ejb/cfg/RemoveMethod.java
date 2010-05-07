@@ -34,7 +34,6 @@ import java.lang.reflect.Method;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.View;
 
 /**
  * Configuration for remove-method.
@@ -77,7 +76,7 @@ public class RemoveMethod {
    */
   public <X> void configure(BeanGenerator<X> bean)
   {
-    View<X> view = bean.getView();
+    // View<X> view = bean.getView();
       // XXX: check for type
       
       /*

@@ -29,19 +29,19 @@
 
 package com.caucho.ejb.gen;
 
-import static javax.ejb.TransactionAttributeType.REQUIRED;
-
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.ejb.MessageDrivenBean;
+import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.gen.AspectBeanFactory;
+import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.View;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -50,11 +50,18 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class MessageGenerator<X> extends BeanGenerator<X> {
-  private MessageView<X> _view;
+  private AspectBeanFactory<X> _aspectBeanFactory;
+  
+  private ArrayList<AspectGenerator<X>> _businessMethods
+    = new ArrayList<AspectGenerator<X>>();
   
   public MessageGenerator(String ejbName, AnnotatedType<X> ejbClass)
   {
     super(toFullClassName(ejbName, ejbClass.getJavaClass().getName()), ejbClass);
+    
+    InjectManager manager = InjectManager.create();
+    
+    _aspectBeanFactory = new MessageAspectBeanFactory<X>(manager, getBeanType());
   }
 
   private static String toFullClassName(String ejbName, String className)
@@ -86,36 +93,37 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
 
     return sb.toString();
   }
-  
-  @Override
-  public MessageView<X> getView()
+
+  public String getContextClassName()
   {
-    return (MessageView<X>) super.getView();
-  }
-  
-  @Override
-  protected MessageView<X> createView()
-  {
-    return new MessageView<X>(InjectManager.create(), this);
+    return getClassName();
   }
 
-  public <T> void setApi(AnnotatedType<T> api)
+  @Override
+  public String getViewClassName()
   {
-    _view = new MessageView<X>(InjectManager.create(), this);
+    return getClassName();
   }
 
   /**
-   * Introspects the bean.
+   * Returns the introspected methods
    */
   @Override
-  public void introspect()
+  public ArrayList<AspectGenerator<X>> getMethods()
   {
-    super.introspect();
-    
-    // XXX: 4.0.7
-    // getView().introspect();
+    return _businessMethods;
   }
   
+  public void addBusinessMethod(AnnotatedMethod<? super X> method)
+  {
+    AspectGenerator<X> bizMethod
+      = _aspectBeanFactory.create(method);
+      
+    if (bizMethod != null) {
+      _businessMethods.add(bizMethod);
+    }
+  }
+
   /**
    * Generates the message session bean
    */
@@ -164,7 +172,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     map.put("caucho.ejb.xa", "true");
     
     // view.generateContextPrologue(out);
-    getView().generateBeanPrologue(out, map);
+    generateBeanPrologue(out, map);
 
     out.println();
     out.println("public " + getClassName() + "(MessageServer server)");
@@ -177,7 +185,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
       out.println("setMessageDrivenContext(server.getMessageContext());");
     }
 
-    _view.generateBeanConstructor(out);
+    generateBeanConstructor(out);
 
     out.popDepth();
     out.println("}");
@@ -245,7 +253,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     out.println("{");
     out.pushDepth();
 
-    if (_view.getImplMethod("ejbRemove", new Class[0]) != null) {
+    if (getImplMethod("ejbRemove", new Class[0]) != null) {
       out.println("ejbRemove();");
     }
     
@@ -258,11 +266,41 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     }
     */
 
-    generateViews(out);
+    generateView(out);
 
     generateDependency(out);
     
     out.popDepth();
     out.println("}");
+  }
+
+  /**
+   * Generates the view code.
+   */
+  private void generateView(JavaWriter out)
+    throws IOException
+  {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+
+    map.put("caucho.ejb.xa", "done");
+
+    out.println();
+    out.println("private static final com.caucho.ejb.util.XAManager _xa");
+    out.println("  = new com.caucho.ejb.util.XAManager();");
+
+    /* ejb/0fbm
+    for (BusinessMethodGenerator bizMethod : _businessMethods) {
+      bizMethod.generatePrologueTop(out, map);
+    }
+    */
+    
+    for (AspectGenerator<X> bizMethod : _businessMethods) {
+      bizMethod.generate(out, map);
+    }
+  }
+  
+  protected AnnotatedMethod<? super X> getImplMethod(String name, Class<?> []param)
+  {
+    return AnnotatedTypeUtil.findMethod(getBeanType(), name, param);
   }
 }
