@@ -71,7 +71,6 @@ namespace Caucho.IIS
     public ResinHandler()
     {
       init();
-      Trace.TraceInformation("ResinHandler(): current process:thread:thread-hash {0}:{1}:{2} ", System.Diagnostics.Process.GetCurrentProcess().Id, (Thread.CurrentThread.Name), (Thread.CurrentThread.GetHashCode()));
     }
 
     private void init()
@@ -198,21 +197,28 @@ namespace Caucho.IIS
 
     public void ProcessRequest(HttpContext context)
     {
+      String contextPath = context.Request.ApplicationPath;
+      String cauchoStatus = "/caucho-status";
+      if (!"/".Equals(contextPath)) {
+        cauchoStatus = contextPath + "/caucho-status";
+      }
       String path = context.Request.Path;
       if (_e != null) {
         DoConfigurationError(context);
-      } else if (path.StartsWith("/caucho")) {
-        if (path.StartsWith("/caucho__test__basic")) {
+      } else if (_isDebug) {
+        if (path.Contains("/caucho__test__basic")) {
           DoTestBasic(context);
-        } else if (path.StartsWith("/caucho__test__chunked")) {
+        } else if (path.Contains("/caucho__test__chunked")) {
           DoTestChunked(context);
-        } else if (path.StartsWith("/caucho__test__ssl")) {
+        } else if (path.Contains("/caucho__test__ssl")) {
           DoTestSSL(context);
-        } else if (path.StartsWith("/caucho-status")) {
+        } else if (path.Contains("/caucho-status")) {
           DoCauchoStatus(context);
         } else {
           DoHmux(context);
         }
+      } else if (path.StartsWith(cauchoStatus)) {
+        DoCauchoStatus(context);
       } else {
         DoHmux(context);
       }
