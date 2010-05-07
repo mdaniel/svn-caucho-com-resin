@@ -242,7 +242,7 @@ public class MessageManager<T> extends AbstractEjbBeanManager<T>
     
       T listener = ctor.newInstance(this);
 
-      initInstance(listener);
+      //initInstance(listener);
 
       if (_ejbCreate != null)
         _ejbCreate.invoke(listener);

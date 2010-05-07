@@ -103,8 +103,7 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
     out.println("{");
     out.pushDepth();
 
-    out.println("Thread.dumpStack();");
-    out.println("throw new IllegalStateException(\"Illegal non-business method call\");");
+    out.println("throw new EJBException(\"Illegal non-business method call\");");
 
     out.popDepth();
     out.println("}");

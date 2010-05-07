@@ -113,7 +113,7 @@ abstract public class AbstractEjbBeanManager<T> implements EnvironmentBean {
   // generated Java Injection bean
   protected Bean<T> _component;
 
-  private final Lifecycle _lifecycle = new Lifecycle();;
+  private final Lifecycle _lifecycle = new Lifecycle();
 
   /**
    * Creates a new server container

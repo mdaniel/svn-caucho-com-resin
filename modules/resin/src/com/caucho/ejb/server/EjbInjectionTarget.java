@@ -260,16 +260,26 @@ public class EjbInjectionTarget<T> {
 
   public T newInstance()
   {
+    return newInstance(null);
+  }
+  
+  public T newInstance(CreationalContext<?> parentEnv)
+  {
     InjectManager inject = InjectManager.create();
     
     // XXX: circular for stateful
-    CreationalContext<T> env = inject.createCreationalContext(_bean);
+    CreationalContext<T> env = new CreationalContextImpl<T>(_bean, parentEnv);
     
-    // XXX: both ManagedBeanImpl.create() and initInstance call the
-    // post construct for this instance.  Which one should do it?
     T instance = _bean.create(env);
     // Producer.__caucho_new();
-    initInstance(instance);
+
+    /* XXX for stateful proxy
+    if (env != null && bean != null) {
+      // server/4762
+      // env.put((AbstractBean) bean, proxy);
+      env.push(proxy);
+    }*/
+    
     // _beanProducer.__caucho_postConstruct(instance);
     
     return instance;
