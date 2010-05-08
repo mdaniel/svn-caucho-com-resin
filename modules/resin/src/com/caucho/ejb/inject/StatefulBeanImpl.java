@@ -36,6 +36,7 @@ import java.util.Set;
 import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.session.StatefulContext;
 import com.caucho.ejb.session.StatefulManager;
 import com.caucho.ejb.session.StatefulProvider;
 import com.caucho.inject.Module;
@@ -44,32 +45,32 @@ import com.caucho.inject.Module;
  * Internal implementation for a Bean
  */
 @Module
-public class StatefulBeanImpl<X> extends SessionBeanImpl<X>
+public class StatefulBeanImpl<X,T> extends SessionBeanImpl<X,T>
 {
-  private StatefulProvider _producer;
-  
+  private StatefulContext<X,T> _context;
   private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
   
   public StatefulBeanImpl(StatefulManager<X> server,
 			  ManagedBeanImpl<X> bean,
-			  Class<?> api,
+			  Class<T> api,
 			  Set<Type> apiList,
-			  StatefulProvider producer)
+			  StatefulContext<X,T> context)
   {
     super(bean);
 
-    _producer = producer;
+    _context = context;
 
-    if (producer == null)
+    if (context == null)
       throw new NullPointerException();
 
     _types.addAll(apiList);
   }
 
   @Override
-  public X create(CreationalContext<X> context)
+  public T create(CreationalContext<T> context)
   {
-    return (X) _producer.__caucho_createNew(getInjectionTarget(), context);
+    // return _producer.__caucho_createNew(getInjectionTarget(), context);
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   @Override

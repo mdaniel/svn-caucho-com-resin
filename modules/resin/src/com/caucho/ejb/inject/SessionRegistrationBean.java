@@ -33,27 +33,32 @@ import java.lang.annotation.Annotation;
 import java.util.HashSet;
 import java.util.Set;
 
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
 
-import com.caucho.config.inject.BeanWrapper;
+import com.caucho.config.inject.BeanAdapter;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.BeanName;
+import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.inject.Module;
 
 /**
  * Internal registration for the EJB.
  */
 @Module
-public class SessionRegistrationBean<X> extends BeanWrapper<X>
+public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
 {
+  private AbstractSessionContext<X,T> _context;
   private Set<Annotation> _qualifierSet;
   
   public SessionRegistrationBean(InjectManager beanManager,
+                                 AbstractSessionContext<X,T> context,
                                  Bean<X> bean,
                                  BeanName beanName)
   {
     super(beanManager, bean);
+    
+    _context = context;
     
     _qualifierSet = new HashSet<Annotation>();
     _qualifierSet.add(beanName);
@@ -74,11 +79,15 @@ public class SessionRegistrationBean<X> extends BeanWrapper<X>
     return _qualifierSet;
   }
 
-  /**
-   * Returns the injection points.
-   */
-  public Set<InjectionPoint> getInjectionPoints()
+  @Override
+  public T create(CreationalContext<T> env)
   {
-    return getBean().getInjectionPoints();
+    return _context.createProxy(env);
+  }
+
+  @Override
+  public void destroy(T instance, CreationalContext<T> env)
+  {
+    _context.destroyProxy(instance, env);
   }
 }

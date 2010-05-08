@@ -135,321 +135,100 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println();
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
+    out.println("import javax.enterprise.context.spi.CreationalContext;");
 
-    out.println();
-    out.println("public class " + getClassName());
-    out.println("  extends StatefulContext");
-    out.println("{");
-    out.pushDepth();
+    generateClassHeader(out);
     
-    // XXX: 4.0.7 temp for JSR-299 TCK
-    /*
-    out.println("static java.lang.reflect.Constructor _ctor;");
-    out.println("static {");
-    out.println("try {");
-    out.print("Class cl = Class.forName(\"");
-    out.print(getBeanClass().getJavaClass().getName());
-    out.println("\");");
-    // out.println("cl.setAccessible(true);");
-    out.println("java.lang.reflect.Constructor ctor = null;");
-    out.println("for (java.lang.reflect.Constructor tCtor : cl.getDeclaredConstructors()) {");
-    out.println("  if (tCtor.getParameterTypes().length == 0)");
-    out.println("    ctor = tCtor;");
-    out.println("}");
-    out.println("_ctor = ctor;");
-    out.println("_ctor.setAccessible(true);");
-    out.println("} catch (Exception e) {");
-    out.println("  e.printStackTrace();");
-    out.println("}");
-    out.println("}");
-    */
-
-    out.println();
-    out.println("public " + getClassName() + "(StatefulManager server)");
     out.println("{");
     out.pushDepth();
-
-    out.println("super(server);");
-
-    generateContextHomeConstructor(out);
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println("public " + getClassName() + "(" + getClassName()
-                + " context)");
-    out.println("{");
-    out.pushDepth();
-
-    out.println("super(context.getStatefulManager());");
-
-    generateContextObjectConstructor(out);
-
-    out.popDepth();
-    out.println("}");
 
     generateContextPrologue(out);
 
-    generateCreateProvider(out);
-    generateView(out);
+    generateClassContent(out);
 
     generateDependency(out);
 
     out.popDepth();
     out.println("}");
   }
-
-  protected void generateCreateProvider(JavaWriter out) throws IOException
-  {
-    out.println();
-    out.println("@Override");
-    out.println("public StatefulProvider getProvider()");
-    out.println("{");
-    out.pushDepth();
-
-    generateCreateProviderView(out);
-
-    out.popDepth();
-    out.println("}");
-  }
-
-  @Override
-  protected void generateContext(JavaWriter out)
-  {
-  }
-
-  /**
-   * Generates code to create the provider
-   */
-  public void generateCreateProviderView(JavaWriter out)
+  
+  private void generateClassHeader(JavaWriter out) 
     throws IOException
   {
-    out.println("  return new " + getViewClassName() + "(getStatefulManager(), true);");
-  }
-
-  /**
-   * Generates the view code.
-   */
-  public void generateView(JavaWriter out)
-    throws IOException
-  {
-    // generateBean(out);
-
     out.println();
-    out.println("public static class " + getViewClassName());
+    out.println("public class " + getClassName() + "<T>");
 
     if (hasNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
 
-    out.print("  implements StatefulProvider");
+    out.print("  implements SessionProxyFactory<T>");
 
     for (AnnotatedType<? super X> api : getLocalApi()) {
       out.print(", " + api.getJavaClass().getName());
     }
     out.println();
-
-    out.println("{");
-    out.pushDepth();
-
-    generateClassContent(out);
-
-    out.popDepth();
-    out.println("}");
   }
 
-  /**
-   * Generates the view code.
-   */
-  public void generateBean(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("public static class " + getBeanClassName());
-    out.println("  extends " + getBeanType().getJavaClass().getName());
-    out.println("{");
-    out.pushDepth();
-    
-    out.println("private transient " + getViewClassName() + " _context;");
-
-    HashMap<String,Object> map = new HashMap<String,Object>();
-    
-    generateBeanPrologue(out, map);
-
-    generatePostConstruct(out);
-    //_postConstructInterceptor.generatePrologue(out, map);
-    //_preDestroyInterceptor.generatePrologue(out, map);
-
-    out.println();
-    out.println(getBeanClassName() + "(" + getViewClassName() + " context)");
-    out.println("{");
-    out.pushDepth();
-    out.println("_context = context;");
-
-    map = new HashMap<String,Object>();
-    generateBeanConstructor(out, map);    
-    //_postConstructInterceptor.generateConstructor(out, map);
-    //_preDestroyInterceptor.generateConstructor(out, map);
-
-    //_postConstructInterceptor.generateCall(out);
-
-    out.popDepth();
-    out.println("}");
-
-    // generateBusinessMethods(out);
-    
-    out.popDepth();
-    out.println("}");
-  }
-
+  @Override
   protected void generateClassContent(JavaWriter out)
     throws IOException
   {
+    out.println("private transient StatefulManager _manager;");
     out.println("private transient StatefulContext _context;");
-    out.println("private transient StatefulManager _server;");
 
-    if (isProxy()) {
-      out.println("private " + getBeanClassName() + " _bean;");
-    }
+    out.println("private " + getBeanClassName() + " _bean;");
 
     out.println("private transient boolean _isValid;");
     out.println("private transient boolean _isActive;");
-
-    /*
-    out.println();
-    out.println("private static final com.caucho.ejb.gen.XAManager _xa");
-    out.println("  = new com.caucho.ejb.gen.XAManager();");
-*/
-    //generateBusinessPrologue(out);
-
-    out.println();
-    out.println(getViewClassName() + "(StatefulManager server)");
-    out.println("{");
-    out.pushDepth();
-
-    generateSuper(out, "server");
-
-    out.println("_server = server;");
-    out.println("_isValid = true;");
     
-    generateProxyConstructor(out);
-
-    // ejb/1143
-    if (isProxy()) {
-      // XXX: 4.0.7
-      out.println("_bean = (" + getBeanClassName() + ") _server.newInstance();");
-      /*
-      out.println("try {");
-      out.println("_bean = (" + getBeanClassName() + ") _ctor.newInstance();");
-      out.println("} catch (Exception e) {");
-      out.println("  throw new RuntimeException(e);");
-      out.println("}");
-      */
-    }
-
-    out.popDepth();
-    out.println("}");
-
-    out.println();
-    out.println(getViewClassName() + "(StatefulManager server, boolean isProvider)");
-    out.println("{");
-    out.pushDepth();
-
-    generateSuper(out, "server");
-
-    out.println("_server = server;");
-    out.println("_isValid = true;");
-
-    out.popDepth();
-    out.println("}");
-
-    /*
-    out.println();
-    out.println("public " + getViewClassName() + "(StatefulManager server, javax.enterprise.context.spi.CreationalContext env)");
-    out.println("{");
-    out.pushDepth();
-
-    generateSuper(out, "server");
-    out.println("_server = server;");
-    out.println("_bean = new " + getBeanClassName() + "(this);");
-
-    out.popDepth();
-    out.println("}");
-    */
-
-    generateSessionProvider(out);
-
-    /*
-    out.println();
-    out.println("public " + getViewClassName()
-                + "(StatefulManager server, "
-                + getBeanClassName() + " bean)");
-    out.println("{");
-    generateSuper(out, "server");
-    out.println("  _server = server;");
-    out.println("  _bean = bean;");
-
-    // generateBusinessConstructor(out);
-
-    out.println("}");
-    */
-
-    out.println();
-    out.println("public StatefulManager getStatefulManager()");
-    out.println("{");
-    out.println("  return _server;");
-    out.println("}");
-    out.println();
-
-    out.println();
-    out.println("void __caucho_setContext(StatefulContext context)");
-    out.println("{");
-    out.println("  _context = context;");
-    out.println("}");
+    generateConstructor(out);
+    
+    generateProxyFactory(out);
 
     generateBusinessMethods(out);
   }
 
-  protected void generateSessionProvider(JavaWriter out)
+  private void generateConstructor(JavaWriter out)
     throws IOException
   {
+    // generateProxyConstructor(out);
+    
     out.println();
-    out.println("public Object __caucho_createNew(javax.enterprise.inject.spi.InjectionTarget injectBean, javax.enterprise.context.spi.CreationalContext env)");
+    out.println("public " + getClassName() + "(StatefulManager manager)");
     out.println("{");
-    out.println("  " + getViewClassName() + " bean"
-                + " = new " + getViewClassName() + "(_server);");
+    out.pushDepth();
 
-    if (isProxy())
-      out.println("  _server.initInstance(bean._bean, injectBean, bean, env);");
-    else
-      out.println("  _server.initInstance(bean, injectBean, bean, env);");
-    out.println("  return bean;");
+    out.println("_manager = manager;");
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("private " + getClassName() + "(StatefulManager manager"
+                + ", StatefulContext context"
+                + ", CreationalContext<T> env)");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("_manager = manager;");
+    out.println("_context = context;");
+
+    out.println("_bean = (" + getBeanClassName() + ") _manager.newInstance(env);");
+    
+    generateContextObjectConstructor(out);
+
+    out.popDepth();
     out.println("}");
   }
 
-  protected void generateSuper(JavaWriter out, String serverVar)
+  private void generateProxyFactory(JavaWriter out)
     throws IOException
   {
-  }
-
-  protected void generateExtends(JavaWriter out)
-    throws IOException
-  {
-  }
-
-  protected AnnotatedMethod<? super X> findImplMethod(AnnotatedMethod<? super X> apiMethod)
-  {
-    AnnotatedMethod<? super X> implMethod 
-      = AnnotatedTypeUtil.findMethod(getBeanType(), apiMethod);
-
-    if (implMethod != null)
-      return implMethod;
-
-    Method javaMethod = apiMethod.getJavaMember();
-    
-    throw new ConfigException(L.l("'{0}' method '{1}' has no corresponding implementation in '{2}'",
-                                  javaMethod.getDeclaringClass().getSimpleName(),
-                                  javaMethod.getName(),
-                                  getBeanType().getJavaClass().getName()));
+    out.println();
+    out.println("@Override");
+    out.println("public T __caucho_createProxy(CreationalContext<T> env)");
+    out.println("{");
+    out.println("  return (T) new " + getClassName() + "(_manager, _context, env);");
+    out.println("}");
   }
 }

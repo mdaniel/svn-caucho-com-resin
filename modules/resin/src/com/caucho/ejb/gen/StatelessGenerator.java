@@ -192,7 +192,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
         addBusinessMethod(apiMethod);
       }
     }
-  }  
+  }
   
   //
   // Java generation
@@ -216,17 +216,13 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
 
-    out.println();
-    out.println("public class " + getClassName());
-    out.println("  extends StatelessContext");
+    generateHeader(out);
     out.println("{");
     out.pushDepth();
 
-    generateContext(out);
+    generateBody(out);
 
-    generateCreateProvider(out);
-
-    generateView(out);
+    // generateView(out);
 
     generateDependency(out);
 
@@ -234,39 +230,42 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println("}");
   }
 
-  protected void generateCreateProvider(JavaWriter out) throws IOException
+  /**
+   * Generates the local/remote proxy.
+   */
+  public void generateHeader(JavaWriter out)
+    throws IOException
   {
     out.println();
-    out.println("@Override");
-    out.println("public StatelessProvider getProvider()");
-    out.println("{");
-    out.pushDepth();
+    out.println("public class " + getClassName() + "<T>");
 
-    generateCreateProviderView(out);
+    if (hasNoInterfaceView())
+      out.println("  extends " + getBeanType().getJavaClass().getName());
 
-    out.popDepth();
-    out.println("}");
+    out.print("  implements SessionProxyFactory<T>");
+    
+    for (AnnotatedType<? super X> api : getLocalApi()) {
+      out.print(", " + api.getJavaClass().getName());
+    }
+    out.println();
   }
 
-  @Override
-  protected void generateContext(JavaWriter out) throws IOException
+  private void generateBody(JavaWriter out) throws IOException
   {
-    out.println("protected static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\""
+    out.println("private static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\""
                 + getFullClassName() + "\");");
-    out.println("protected static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
-
+    out.println("private static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
+    
     out.println();
-    out.println("public " + getClassName() + "(StatelessManager server)");
-    out.println("{");
-    out.pushDepth();
+    out.println("private final StatelessManager _manager;");
+    out.println();
+    out.println("private final StatelessPool<" + getBeanClassName() + "> _statelessPool;");
 
-    out.println("super(server);");
-    // out.println("_xaManager = server.getTransactionManager();");
+    generateConstructor(out);
 
-    generateContextHomeConstructor(out);
+    generateProxyPool(out);
 
-    out.popDepth();
-    out.println("}");
+    generateBusinessMethods(out);
 
     generateContextPrologue(out);
 
@@ -288,6 +287,68 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.pushDepth();
 
     generateDestroyViews(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+  
+  private void generateConstructor(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("public " + getClassName() + "(StatelessManager manager)");
+    out.println("{");
+    out.pushDepth();
+
+    out.println("_manager = manager;");
+    out.println("_statelessPool = manager.createStatelessPool();");
+  
+    generateProxyConstructor(out);
+
+    out.popDepth();
+    out.println("}");
+
+    out.println();
+    out.println("@Override");
+    out.println("public T __caucho_createProxy(javax.enterprise.context.spi.CreationalContext<T> env)");
+    out.println("{");
+    out.println("  return (T) this;");
+    out.println("}");
+  }
+    
+  /**
+   * Generates the local/remote proxy.
+   */
+  public void generateProxy(JavaWriter out)
+    throws IOException
+  {
+    out.println();
+    out.println("{");
+    out.pushDepth();
+
+    out.println();
+    out.println(getClassName() + "()");
+    out.println("{");
+    out.pushDepth();
+    
+    out.println("_context = context;");
+    
+    out.popDepth();
+    out.println("}");
+
+    out.println("public void __caucho_preDestroy(Object instance)");
+    out.println("{");
+    out.println("}");
+
+    out.println("public void __caucho_postConstruct(Object instance)");
+    out.println("{");
+    out.println("}");
+
+    out.println();
+    out.println("public " + getViewClassName() + " __caucho_get()");
+    out.println("{");
+    out.println("  return this;");
+    out.println("}");
 
     out.popDepth();
     out.println("}");
@@ -353,7 +414,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   /**
    * Generates the view code.
    */
-  public void generateView(JavaWriter out) throws IOException
+  private void generateView(JavaWriter out) throws IOException
   {
     // generateBean(out);
 
@@ -369,170 +430,12 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     }
   }
 
-  /**
-   * Generates prologue for the context.
-   */
-  @Override
-  public void generateContextPrologue(JavaWriter out) throws IOException
-  {
-    String localVar = "_local";
-
-    out.println();
-    out.println("private " + getViewClassName() + " " + localVar + ";");
-  }
-
-  /**
-   * Generates context home's constructor
-   */
-  @Override
-  public void generateContextHomeConstructor(JavaWriter out) throws IOException
-  {
-    String localVar = "_local";
-
-    out.println(localVar + " = new " + getViewClassName() + "(this);");
-  }
-
-  /**
-   * Generates code to create the provider
-   */
-  public void generateCreateProviderView(JavaWriter out)
-      throws IOException
-  {
-    String localVar = "_local";
-    
-    out.println("if (" + localVar + " == null)");
-    out.println("  " + localVar + " = new " + getViewClassName() + "(this);");
-
-    out.println();
-    out.println("return " + localVar + ";");
-  }
-
-  /**
-   * Generates code to create the provider
-   */
-  @Override
-  public void generateDestroy(JavaWriter out) throws IOException
-  {
-    String localVar = "_local";
-
-    out.println();
-    out.println(localVar + ".destroy();");
-  }
-
-  /**
-   * Generates code to create an instance
-   */
-  @Override
-  public void generateNewInstance(JavaWriter out) throws IOException
-  {
-    String localVar = "_local";
-
-    out.print(localVar + "._ejb_begin()");
-  }
-
-  /**
-   * Generates code to free an instance
-   */
-  @Override
-  public void generateFreeInstance(JavaWriter out, String bean)
-      throws IOException
-  {
-    String localVar = "_local";
-
-    out.println(localVar + "._ejb_free(" + bean + ");");
-  }
-
-  /**
-   * Generates the local/remote proxy.
-   */
-  public void generateProxy(JavaWriter out) throws IOException
-  {
-    out.println();
-    out.println("public static class " + getViewClassName());
-
-    if (hasNoInterfaceView())
-      out.println("  extends " + getBeanType().getJavaClass().getName());
-
-    out.print("  implements StatelessProvider");
-    
-    for (AnnotatedType<? super X> api : getLocalApi()) {
-      out.print(", " + api.getJavaClass().getName());
-    }
-    out.println();
-
-    /*
-    if (isProxy())
-      out.print(", " + getViewClass().getJavaClass().getName());
-      */
-    
-    out.println();
-    out.println("{");
-    out.pushDepth();
-
-    out.println();
-    out.println("private " + getClassName() + " _context;");
-    out.println("private final StatelessPool<" + getBeanClassName() + "> _statelessPool;");
-
-    out.println();
-    out.println(getViewClassName() + "(" + getClassName() + " context)");
-    out.println("{");
-    out.pushDepth();
-    
-    /*
-    generateSuper(out, "context.getStatelessManager(), "
-                  + getViewClass().getJavaClass().getName() + ".class");
-                  */
-    
-    out.println("_context = context;");
-
-    out.println("_statelessPool = context.getStatelessPool(this);");
-    
-    generateProxyConstructor(out);
-    
-    out.popDepth();
-    out.println("}");
-
-    out.println("public " + getBeanClassName()
-                + " __caucho_new()");
-    out.println("{");
-    // XXX: 4.0.7 temp for CDI TCK package-private issues
-    // out.println("  return new " + getBeanClassName() + "(this);");
-    out.println("  throw new IllegalStateException();");
-    // out.println("  return new " + getBeanClass().getJavaClass().getName() + "();");
-    out.println("}");
-
-    out.println("public void __caucho_preDestroy(Object instance)");
-    out.println("{");
-    out.println("}");
-
-    out.println("public void __caucho_postConstruct(Object instance)");
-    out.println("{");
-    out.println("}");
-
-    out.println();
-    out.println("public " + getViewClassName() + " __caucho_get()");
-    out.println("{");
-    out.println("  return this;");
-    out.println("}");
-
-    generateProxyPool(out);
-
-    generateBusinessMethods(out);
-
-    out.popDepth();
-    out.println("}");
-  }
-
   public void generateProxyPool(JavaWriter out) throws IOException
   {
     out.println();
-    out.println("public void destroy()");
+    out.println("public void __caucho_destroy()");
     out.println("{");
-    out.pushDepth();
-
-    out.println("_statelessPool.destroy();");
-
-    out.popDepth();
+    out.println("  _statelessPool.destroy();");
     out.println("}");
   }
 

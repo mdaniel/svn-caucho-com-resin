@@ -58,6 +58,7 @@ import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.ejb.server.EjbInjectionTarget;
+import com.caucho.ejb.session.AbstractSessionManager;
 import com.caucho.ejb.session.SingletonManager;
 import com.caucho.ejb.session.StatefulManager;
 import com.caucho.ejb.session.StatelessManager;
@@ -364,18 +365,29 @@ public class EjbSessionBean<X> extends EjbBean<X> {
    * Deploys the bean.
    */
   @Override
-  public AbstractEjbBeanManager<X> deployServer(EjbManager ejbContainer,
+  public AbstractSessionManager<X> deployServer(EjbManager ejbContainer,
                                                 JavaClassGenerator javaGen)
       throws ClassNotFoundException, ConfigException
   {
-    AbstractEjbBeanManager<X> manager;
+    Class<?> proxyImplClass = generateProxyClass(javaGen);
+    
+    AbstractSessionManager<X> manager;
 
-    if (Stateless.class.equals(getSessionType()))
-      manager = new StatelessManager<X>(ejbContainer, getAnnotatedType());
-    else if (Stateful.class.equals(getSessionType()))
-      manager = new StatefulManager<X>(ejbContainer, getAnnotatedType());
-    else if (Singleton.class.equals(getSessionType()))
-      manager = new SingletonManager<X>(ejbContainer, getAnnotatedType());
+    if (Stateless.class.equals(getSessionType())) {
+      manager = new StatelessManager<X>(ejbContainer, 
+                                        getAnnotatedType(),
+                                        proxyImplClass);
+    }
+    else if (Stateful.class.equals(getSessionType())) {
+      manager = new StatefulManager<X>(ejbContainer,
+                                       getAnnotatedType(),
+                                       proxyImplClass);
+    }
+    else if (Singleton.class.equals(getSessionType())) {
+      manager = new SingletonManager<X>(ejbContainer, 
+                                        getAnnotatedType(),
+                                        proxyImplClass);
+    }
     else
       throw new IllegalStateException(String.valueOf(getSessionType()));
 
@@ -384,8 +396,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     manager.setMappedName(getMappedName());
     manager.setId(getEJBModuleName() + "#" + getEJBName());
     manager.setContainerTransaction(_isContainerTransaction);
-
-    manager.setEjbClass((Class<X>) loadClass(getEJBClass().getName()));
 
     ArrayList<AnnotatedType<? super X>> remoteList = _sessionBean.getRemoteApi();
     if (remoteList.size() > 0) {
@@ -413,6 +423,9 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
       manager.setLocalApiList(classList);
     }
+    
+    if (_sessionBean.hasNoInterfaceView())
+      manager.setLocalBean(getEJBClass());
 
     /*
      * if (getLocal21() != null)
@@ -420,20 +433,8 @@ public class EjbSessionBean<X> extends EjbBean<X> {
      */
 
     // Class<?> contextImplClass = javaGen.loadClassParentLoader(getSkeletonName());
-    
-    Class<?> contextImplClass;
-    
-    if (Modifier.isPublic(getEJBClass().getModifiers())) {
-      contextImplClass = javaGen.loadClass(getSkeletonName());
-    }
-    else {
-      // ejb/1103
-      contextImplClass = javaGen.loadClassParentLoader(getSkeletonName(), getEJBClass());
-    }
-    // contextImplClass.getDeclaredConstructors();
 
-    manager.setContextImplClass(contextImplClass);
-
+    /*
     Class<?>[] classes = contextImplClass.getDeclaredClasses();
 
     for (Class<?> aClass : classes) {
@@ -443,6 +444,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
         break;
       }
     }
+    */
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -468,6 +470,23 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
 
     return manager;
+  }
+
+  private Class<?> generateProxyClass(JavaClassGenerator javaGen)
+    throws ClassNotFoundException
+  {
+    Class<?> proxyImplClass;
+  
+    if (Modifier.isPublic(getEJBClass().getModifiers())) {
+      proxyImplClass = javaGen.loadClass(getSkeletonName());
+    }
+    else {
+      // ejb/1103
+      proxyImplClass = javaGen.loadClassParentLoader(getSkeletonName(), getEJBClass());
+    }
+    // contextImplClass.getDeclaredConstructors();
+    
+    return proxyImplClass;
   }
 
   /**

@@ -1183,7 +1183,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     StringBuilder sb = new StringBuilder();
     sb.append(getEJBClass().getName());
     sb.append("__");
-    sb.append(getBeanType()).append("Context");
+    sb.append(getBeanType()).append("Proxy");
 
     return JavaClassGenerator.cleanClassName(sb.toString());
   }

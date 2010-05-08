@@ -27,78 +27,63 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.inject;
+package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.PassivationCapable;
 
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.inject.Module;
 
 /**
- * Internal implementation for a Bean
+ * Adapter from an internal bean to an external exposed bean as used by
+ * session beans.
  */
 @Module
-abstract public class SessionBeanImpl<X,T>
-  implements ScopeAdapterBean<T>, Bean<T>, PassivationCapable, EjbGeneratedBean
+abstract public class BeanAdapter<X,T> extends AbstractBean<T>
 {
-  private ManagedBeanImpl<X> _bean;
-  
-  public SessionBeanImpl(ManagedBeanImpl<X> bean)
+  private final Bean<X> _bean;
+
+  public BeanAdapter(InjectManager manager, Bean<X> bean)
   {
+    super(manager);
+
     _bean = bean;
   }
-  
-  protected ManagedBeanImpl<X> getBean()
+
+  protected Bean<X> getBean()
   {
     return _bean;
   }
-  
-  @Override
-  abstract public Set<Type> getTypes();
+
+  //
+  // from javax.enterprise.inject.InjectionTarget
+  //
 
   @Override
-  public T getScopeAdapter(Bean<?> topBean, CreationalContext<T> context)
-  {
-    return null;
-  }
+  abstract public T create(CreationalContext<T> env);
 
   @Override
-  public T create(CreationalContext<T> context)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  
-  @Override
-  public void destroy(T instance, CreationalContext<T> context)
-  {
-  }
+  abstract public void destroy(T instance, CreationalContext<T> env);
 
-  /**
-   * Returns the injection points.
-   */
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    return getBean().getInjectionPoints();
-  }
+  //
+  // metadata for the bean
+  //
 
   @Override
-  public Class<?> getBeanClass()
+  public Annotated getAnnotated()
   {
-    return getBean().getBeanClass();
-  }
+    Bean<X> bean = getBean();
 
-  @Override
-  public String getName()
-  {
-    return getBean().getName();
+    if (bean instanceof AnnotatedBean)
+      return ((AnnotatedBean) bean).getAnnotated();
+    else
+      return null;
   }
 
   @Override
@@ -108,15 +93,21 @@ abstract public class SessionBeanImpl<X,T>
   }
 
   @Override
-  public Class<? extends Annotation> getScope()
-  {
-    return getBean().getScope();
-  }
-
-  @Override
   public Set<Class<? extends Annotation>> getStereotypes()
   {
     return getBean().getStereotypes();
+  }
+  
+  @Override
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return getBean().getInjectionPoints();
+  }
+
+  @Override
+  public String getName()
+  {
+    return getBean().getName();
   }
 
   @Override
@@ -125,15 +116,36 @@ abstract public class SessionBeanImpl<X,T>
     return getBean().isAlternative();
   }
 
+  /**
+   * Returns true if the bean can be null
+   */
   @Override
   public boolean isNullable()
   {
-    return false;
+    return getBean().isNullable();
+  }
+
+  /**
+   * Returns the bean's scope type.
+   */
+  @Override
+  public Class<? extends Annotation> getScope()
+  {
+    return getBean().getScope();
+  }
+
+  /**
+   * Returns the types that the bean exports for bindings.
+   */
+  @Override
+  public Set<Type> getTypes()
+  {
+    return getBean().getTypes();
   }
 
   @Override
-  public String getId()
+  public Class<?> getBeanClass()
   {
-    return getBean().getId();
+    return getBean().getBeanClass();
   }
 }

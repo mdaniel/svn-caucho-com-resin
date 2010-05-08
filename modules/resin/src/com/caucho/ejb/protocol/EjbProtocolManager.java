@@ -498,7 +498,7 @@ public class EjbProtocolManager {
 
       AbstractEjbBeanManager server = _serverMap.get(name);
 
-      if (server.getLocalObject(null) == null)
+      if (server.getLocalProxy(null) == null)
         continue;
 
       if (name.startsWith(ejbName)) {

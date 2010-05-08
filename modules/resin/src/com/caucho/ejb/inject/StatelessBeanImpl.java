@@ -40,6 +40,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.BeanNameLiteral;
+import com.caucho.ejb.session.StatelessContext;
 import com.caucho.ejb.session.StatelessManager;
 import com.caucho.ejb.session.StatelessProvider;
 import com.caucho.inject.Module;
@@ -49,26 +50,26 @@ import com.caucho.util.L10N;
  * Internal implementation for a Bean
  */
 @Module
-public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
+public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
 {
   private static final L10N L = new L10N(StatelessBeanImpl.class);
   
-  private StatelessProvider<X> _producer;
+  private StatelessContext<X,T> _context;
   private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
   private LinkedHashSet<Annotation> _qualifiers
     = new LinkedHashSet<Annotation>();
 
   public StatelessBeanImpl(StatelessManager<X> server,
 			   ManagedBeanImpl<X> bean,
-			   Class<?> api,
+			   Class<T> api,
 			   Set<Type> types,
-                           StatelessProvider<X> producer)
+                           StatelessContext<X,T> context)
   {
     super(bean);
     
-    _producer = producer;
+    _context = context;
 
-    if (producer == null)
+    if (context == null)
       throw new NullPointerException();
 
     _types.addAll(types);
@@ -85,9 +86,9 @@ public class StatelessBeanImpl<X> extends SessionBeanImpl<X>
   }
 
   @Override
-  public X create(CreationalContext<X> context)
+  public T create(CreationalContext<T> context)
   {
-    return (X) _producer.__caucho_get();
+    return _context.createProxy(context);
   }
   
   @Override

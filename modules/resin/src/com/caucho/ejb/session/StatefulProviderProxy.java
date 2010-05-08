@@ -38,13 +38,13 @@ import com.caucho.naming.*;
 /**
  * Component for stateful beans
  */
-public class StatefulProviderProxy implements ObjectProxy
+public class StatefulProviderProxy<X,T> implements ObjectProxy
 {
-  private final StatefulProvider _provider;
+  private final StatefulContext<X,T> _context;
 
-  public StatefulProviderProxy(StatefulProvider provider)
+  public StatefulProviderProxy(StatefulContext<X,T> context)
   {
-    _provider = provider;
+    _context = context;
   }
 
   /**
@@ -54,9 +54,11 @@ public class StatefulProviderProxy implements ObjectProxy
    *
    * @return the object named by the proxy.
    */
-  public Object createObject(Hashtable env)
+  @Override
+  public Object createObject(Hashtable<?,?> env)
   {
     // XXX: should be the bean
-    return _provider.__caucho_createNew(null, null);
+    // return _context.newProxy();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 }

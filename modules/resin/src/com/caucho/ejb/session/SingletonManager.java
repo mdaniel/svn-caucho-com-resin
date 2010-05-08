@@ -57,18 +57,18 @@ import com.caucho.util.LruCache;
 /**
  * Server container for a session bean.
  */
-public class SingletonManager<T> extends AbstractSessionManager<T> {
+public class SingletonManager<X> extends AbstractSessionManager<X> {
   private static final L10N L = new L10N(SingletonManager.class);
   private static final Logger log =
     Logger.getLogger(SingletonManager.class.getName());
 
-  private SingletonContext<T> _sessionContext;
-  private T _proxy;
+  private X _instance;
 
   public SingletonManager(EjbManager ejbContainer,
-                          AnnotatedType<T> annotatedType)
+                          AnnotatedType<X> annotatedType,
+                          Class<?> proxyImplClass)
   {
-    super(ejbContainer, annotatedType);
+    super(ejbContainer, annotatedType, proxyImplClass);
   }
 
   @Override
@@ -76,33 +76,20 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
   {
     return "singleton:";
   }
-
+  
   @Override
-  public SingletonContext<T> getContext()
+  protected <T> SingletonContext<X,T> getSessionContext(Class<T> api)
   {
-    synchronized (this) {
-      if (_sessionContext == null) {
-        try {
-          Class<?>[] param = new Class[] { SingletonManager.class };
-          Constructor<?> cons = _contextImplClass.getConstructor(param);
-
-          _sessionContext = (SingletonContext) cons.newInstance(this);
-        } catch (Exception e) {
-          throw new EJBExceptionWrapper(e);
-        }
-      }
-    }
-
-    return _sessionContext;
+    return (SingletonContext<X,T>) super.getSessionContext(api);
   }
 
   /**
    * Returns the JNDI proxy object to create instances of the local interface.
    */
   @Override
-  public Object getLocalProxy(Class api)
+  public <T> Object getLocalJndiProxy(Class<T> api)
   {
-    SingletonProxyFactory factory = getContext().getProxyFactory(api);
+    // SingletonContext<X,T> context = getSessionContext(api);
     /*
      * if (factory != null) return new SingletonFactoryJndiProxy(factory); else
      * return null;
@@ -111,57 +98,38 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
     throw new UnsupportedOperationException();
   }
 
-  /**
-   * Returns the object implementation
-   */
   @Override
-  public T getLocalObject(Class<?> api)
+  protected <T> Bean<T> createBean(ManagedBeanImpl<X> mBean, 
+                                   Class<T> api,
+                                   Set<Type> apiList)
   {
-    return createProxy();
-  }
+    SingletonContext<X,T> context = getSessionContext(api);
 
-  /**
-   * @return
-   */
-  public T createProxy()
-  {
-    if (_proxy == null) {
-      SingletonProxyFactory factory = getContext().getProxyFactory(null);
-      CreationalContextImpl env = new CreationalContextImpl();
-      
-      _proxy = (T) factory.__caucho_createNew(null, env);
-      
-      factory.__caucho_postConstruct();
-    }
-    
-    return _proxy;
-  }
-
-  @Override
-  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, 
-                               Class<?> api,
-                               Set<Type> apiList)
-  {
-    /*
-    SingletonProxyFactory factory = getSessionContext().getProxyFactory(api);
-
-    if (factory == null)
+    if (context == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
-                                         api, getSessionContext()));
-
-      */
+                                         api, getContext()));
     
-    SingletonBeanImpl<T> singletonBean
-      = new SingletonBeanImpl<T>(this, mBean, apiList);
+    SingletonBeanImpl<X,T> statefulBean
+      = new SingletonBeanImpl<X,T>(this, mBean, api, apiList, context);
 
-    return singletonBean;
+    return statefulBean;
   }
 
-  protected InjectionTarget<T> createSessionComponent(Class api, Class beanClass)
+  @Override
+  protected <T> SingletonContext<X,T>
+  createSessionContext(Class<T> api, SessionProxyFactory<T> factory)
   {
+    return new SingletonContext<X,T>(this, api, factory);
+  }
+
+  private InjectionTarget<X> createSessionComponent(Class api, Class beanClass)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+    /*
     SingletonProxyFactory factory = getContext().getProxyFactory(api);
 
     return new SingletonComponent(factory);
+    */
   }
 
   /**
@@ -202,11 +170,8 @@ public class SingletonManager<T> extends AbstractSessionManager<T> {
     log.fine(this + " closed");
   }
 
-  /* (non-Javadoc)
-   * @see com.caucho.ejb.server.AbstractServer#getRemoteObject(java.lang.Class, java.lang.String)
-   */
   @Override
-  public Object getRemoteObject(Class<?> api, String protocol)
+  public <T> T getRemoteObject(Class<T> api, String protocol)
   {
     // TODO Auto-generated method stub
     return null;

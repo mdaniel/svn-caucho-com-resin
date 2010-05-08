@@ -144,14 +144,6 @@ abstract public class BeanGenerator<X> extends GenClass
   }
 
   /**
-   * Generates context home's constructor
-   */
-  public void generateContextHomeConstructor(JavaWriter out)
-    throws IOException
-  {
-  }
-
-  /**
    * Generates context object's constructor
    */
   public void generateContextObjectConstructor(JavaWriter out)

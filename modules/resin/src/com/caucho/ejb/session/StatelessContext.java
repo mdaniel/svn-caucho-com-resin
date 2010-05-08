@@ -28,122 +28,38 @@
 
 package com.caucho.ejb.session;
 
-import javax.ejb.*;
+import javax.ejb.TimerService;
 
-import com.caucho.config.*;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.ejb.*;
-import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
-import com.caucho.util.*;
 
 /**
  * Abstract base class for an stateless session context
  */
 @Module
-abstract public class StatelessContext<X> extends AbstractSessionContext<X> {
-  private transient StatelessManager<X> _server;
-  private StatelessPool<X> _statelessPool;
-
-  public StatelessContext(StatelessManager<X> server)
+public class StatelessContext<X,T> extends AbstractSessionContext<X,T> {
+  public StatelessContext(StatelessManager<X> manager,
+                          Class<T> api,
+                          SessionProxyFactory<T> proxyFactory)
   {
-    assert(server != null);
-
-    _server = server;
+    super(manager, api, proxyFactory);
   }
 
   /**
    * Returns the server which owns this bean.
    */
-  public StatelessManager<X> getStatelessManager()
+  @Override
+  public StatelessManager<X> getServer()
   {
-    return _server;
-  }
-
-  /**
-   * Returns the server which owns this bean.
-   */
-  public AbstractEjbBeanManager<X> getServer()
-  {
-    return _server;
+    return (StatelessManager<X>) super.getServer();
   }
   
   /**
    * Returns the timer service.
    */
+  @Override
   public TimerService getTimerService()
     throws IllegalStateException
   {
-    return _server.getTimerService();
-  }
-  
-
-  public StatelessProvider<X> getProvider()
-  {
-    return null;
-  }
-  
-  public StatelessPool<X> getStatelessPool(StatelessProvider<X> provider)
-  {
-    if (_statelessPool == null) {
-      // XXX: per-view?
-      /*
-      EjbInjectionTarget<X> producer = getServer().getProducer();
-      producer.setBeanProducer(provider);*/
-
-      _statelessPool = new StatelessPool<X>(_server);
-    }
-    
-    return _statelessPool;
-  }
-  
-  /**
-   * Returns the EJBObject stub for the container.
-   */
-  @Override
-  public EJBObject getEJBObject()
-  {
-    return (EJBObject) getStatelessManager().getRemoteObject();
-  }
-
-  /**
-   * Returns the new instance for EJB 3.0
-   */
-  protected X _caucho_newInstance()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the new instance for EJB 3.0
-   */
-  protected X _caucho_newInstance(XmlConfigContext env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the new instance for EJB 2.1
-   */
-  protected Object _caucho_newInstance21()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the new remote instance for EJB 3.0
-   */
-  protected Object _caucho_newRemoteInstance()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the new remote instance for EJB 2.1
-   */
-  protected Object _caucho_newRemoteInstance21()
-  {
-    return null;
+    return getServer().getTimerService();
   }
 }

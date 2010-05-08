@@ -30,23 +30,15 @@ package com.caucho.ejb.session;
 
 import javax.ejb.TimerService;
 
-import com.caucho.config.*;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.ejb.*;
-import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.util.*;
-
 /**
  * Abstract base class for an session context
  */
-abstract public class SingletonContext<X> extends AbstractSessionContext {
-  private transient SingletonManager<X> _manager;
-
-  public SingletonContext(SingletonManager<X> server)
+public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
+  public SingletonContext(SingletonManager<X> manager,
+                          Class<T> api,
+                          SessionProxyFactory<T> proxyFactory)
   {
-    assert(server != null);
-
-    _manager = server;
+    super(manager, api, proxyFactory);
   }
 
   /**
@@ -55,14 +47,9 @@ abstract public class SingletonContext<X> extends AbstractSessionContext {
   @Override
   public SingletonManager<X> getServer()
   {
-    return _manager;
+    return (SingletonManager<X>) super.getServer();
   }
-  
-  public SingletonProxyFactory getProxyFactory(Class<?> api)
-  {
-    return null;
-  }
-  
+
   /**
    * Returns the timer service.
    */
@@ -71,29 +58,5 @@ abstract public class SingletonContext<X> extends AbstractSessionContext {
     throws IllegalStateException
   {
     throw new IllegalStateException("Singleton session beans cannot call SessionContext.getTimerService()");
-  }
-
-  /**
-   * Returns the new instance for EJB 3.0
-   */
-  protected Object _caucho_newInstance()
-  {
-    return null;
-  }
-
-  /**
-   * Returns the new instance for EJB 3.0
-   */
-  protected Object _caucho_newInstance(XmlConfigContext env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the new remote instance for EJB 3.0
-   */
-  protected Object _caucho_newRemoteInstance()
-  {
-    return null;
   }
 }

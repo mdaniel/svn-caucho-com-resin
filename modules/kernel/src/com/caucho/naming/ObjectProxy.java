@@ -40,6 +40,6 @@ public interface ObjectProxy {
    *
    * @return the object named by the proxy.
    */
-  public Object createObject(Hashtable env)
+  public Object createObject(Hashtable<?,?> env)
     throws NamingException;
 }

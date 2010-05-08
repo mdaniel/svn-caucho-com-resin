@@ -666,9 +666,11 @@ public class EjbMessageBean<X> extends EjbBean<X> {
 
       manager.setEjbClass(getEJBClass());
 
-      Class<?> contextImplClass = javaGen.loadClass(getSkeletonName());
+      Class<?> proxyImplClass = javaGen.loadClass(getSkeletonName());
 
-      manager.setContextImplClass(contextImplClass);
+      if (true)
+        throw new UnsupportedOperationException(getClass().getName());
+      manager.setProxyImplClass(proxyImplClass);
 
       manager.setActivationSpec(spec);
       manager.setResourceAdapter(ra);

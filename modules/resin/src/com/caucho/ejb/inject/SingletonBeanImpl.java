@@ -30,56 +30,55 @@
 package com.caucho.ejb.inject;
 
 import java.lang.reflect.Type;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.session.SessionProxyFactory;
+import com.caucho.ejb.session.SingletonContext;
 import com.caucho.ejb.session.SingletonManager;
 import com.caucho.ejb.session.SingletonProxyFactory;
+import com.caucho.ejb.session.StatefulContext;
+import com.caucho.ejb.session.StatefulManager;
 import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean
  */
 @Module
-public class SingletonBeanImpl<X> extends SessionBeanImpl<X>
+public class SingletonBeanImpl<X,T> extends SessionBeanImpl<X,T>
 {
-  // private SingletonProxyFactory _factory;
-  private SingletonManager<X> _manager;
-  private Set<Type> _apiList;
-  private X _proxy;
-
+  private SingletonContext<X,T> _context;
+  private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
+  
   public SingletonBeanImpl(SingletonManager<X> manager,
                            ManagedBeanImpl<X> bean,
-                           Set<Type> apiList)
+                           Class<T> api,
+                           Set<Type> apiList,
+                           SingletonContext<X,T> context)
   {
     super(bean);
 
-    /*
-    _factory = factory;
+    _context = context;
 
-    if (factory == null)
+    if (context == null)
       throw new NullPointerException();
-      */
 
-    _manager = manager;
-    _apiList = apiList;
-
-    bean.getInjectionTarget();
+    _types.addAll(apiList);
   }
-  
+
   @Override
   public Set<Type> getTypes()
   {
-    return _apiList;
+    return _types;
   }
 
   @Override
-  public X create(CreationalContext<X> context)
+  public T create(CreationalContext<T> env)
   {
-    // return _factory.__caucho_createNew(getInjectionTarget(), context);
-    return _manager.createProxy();
+    return _context.createProxy(env);
   }
 }
 

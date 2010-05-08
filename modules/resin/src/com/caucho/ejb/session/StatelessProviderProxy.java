@@ -35,13 +35,13 @@ import com.caucho.naming.*;
 /**
  * Component for session beans
  */
-public class StatelessProviderProxy implements ObjectProxy
+public class StatelessProviderProxy<X,T> implements ObjectProxy
 {
-  private final StatelessProvider _provider;
+  private final T _proxy;
 
-  public StatelessProviderProxy(StatelessProvider provider)
+  public StatelessProviderProxy(T proxy)
   {
-    _provider = provider;
+    _proxy = proxy;
   }
 
   /**
@@ -53,6 +53,6 @@ public class StatelessProviderProxy implements ObjectProxy
    */
   public Object createObject(Hashtable env)
   {
-    return _provider.__caucho_get();
+    return _proxy;
   }
 }

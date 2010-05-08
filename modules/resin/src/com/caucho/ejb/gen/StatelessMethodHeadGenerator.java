@@ -98,7 +98,7 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   public void generatePreCall(JavaWriter out)
     throws IOException
   {
-    out.println("thread.setContextClassLoader(_context.getStatelessManager().getClassLoader());");
+    out.println("thread.setContextClassLoader(_manager.getClassLoader());");
     
     super.generatePreCall(out);
   }

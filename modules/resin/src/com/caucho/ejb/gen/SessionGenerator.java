@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.gen;
 
-import java.io.IOException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -44,9 +43,7 @@ import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
-import com.caucho.config.types.InjectionTarget;
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
 
 /**
@@ -126,7 +123,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     */
     
     sb.append(beanType);
-    sb.append("Context");
+    sb.append("Proxy");
 
     return sb.toString();
   }
@@ -314,5 +311,5 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     return getBeanType();
   }
 
-  abstract protected void generateContext(JavaWriter out) throws IOException;
+  // abstract protected void generateBody(JavaWriter out) throws IOException;
 }

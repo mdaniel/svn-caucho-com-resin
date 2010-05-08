@@ -27,21 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.program;
+package com.caucho.ejb.session;
+
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * Returns a constant
+ * Creates a new instance of a stateful bean
  */
-public class SingletonGenerator extends ValueGenerator {
-  private final Object _value;
-
-  public SingletonGenerator(Object value)
-  {
-    _value = value;
-  }
-  
-  public Object create()
-  {
-    return _value;
-  }
+public interface SessionProxyFactory<T> {
+  public T __caucho_createProxy(CreationalContext<T> env);
 }

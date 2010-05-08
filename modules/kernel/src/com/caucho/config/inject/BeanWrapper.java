@@ -44,26 +44,18 @@ import com.caucho.inject.Module;
  * Internal implementation for a Bean
  */
 @Module
-public class BeanWrapper<T> extends AbstractBean<T>
+public class BeanWrapper<T> extends BeanAdapter<T,T>
 {
-  private final Bean<T> _bean;
-
   public BeanWrapper(InjectManager manager, Bean<T> bean)
   {
-    super(manager);
-
-    _bean = bean;
-  }
-
-  protected Bean<T> getBean()
-  {
-    return _bean;
+    super(manager, bean);
   }
 
   //
   // from javax.enterprise.inject.InjectionTarget
   //
 
+  @Override
   public T create(CreationalContext<T> env)
   {
     return getBean().create(env);
@@ -74,89 +66,4 @@ public class BeanWrapper<T> extends AbstractBean<T>
   {
     getBean().destroy(instance, env);
   }
-
-  //
-  // metadata for the bean
-  //
-
-  @Override
-  public Annotated getAnnotated()
-  {
-    Bean<T> bean = getBean();
-
-    if (bean instanceof AnnotatedBean)
-      return ((AnnotatedBean) bean).getAnnotated();
-    else
-      return null;
-  }
-
-  @Override
-  public Set<Annotation> getQualifiers()
-  {
-    return getBean().getQualifiers();
-  }
-
-  public Set<Class<? extends Annotation>> getStereotypes()
-  {
-    return getBean().getStereotypes();
-  }
-  
-  @Override
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    return getBean().getInjectionPoints();
-  }
-
-  @Override
-  public String getName()
-  {
-    return getBean().getName();
-  }
-
-  @Override
-  public boolean isAlternative()
-  {
-    return getBean().isAlternative();
-  }
-
-  /**
-   * Returns true if the bean can be null
-   */
-  @Override
-  public boolean isNullable()
-  {
-    return getBean().isNullable();
-  }
-
-  /**
-   * Returns the bean's scope type.
-   */
-  @Override
-  public Class<? extends Annotation> getScope()
-  {
-    return getBean().getScope();
-  }
-
-  /**
-   * Returns the types that the bean exports for bindings.
-   */
-  @Override
-  public Set<Type> getTypes()
-  {
-    return getBean().getTypes();
-  }
-
-  @Override
-  public Class<?> getBeanClass()
-  {
-    return getBean().getBeanClass();
-  }
-
-  /*
-  @Override
-  public String toString()
-  {
-    return getClass().getSimpleName() + "[" + _bean + "]";
-  }
-  */
 }

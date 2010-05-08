@@ -101,7 +101,7 @@ public class StatelessPool<X> {
       Item<X> beanItem = _freeList.allocate();
     
       if (beanItem == null) {
-        beanItem = new Item<X>(_manager.newInstance(), 
+        beanItem = new Item<X>(_manager.newInstance(null), 
                                _manager.getInterceptorBindings());
         // _ejbProducer.newInstance();
       }

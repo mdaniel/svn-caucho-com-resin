@@ -96,7 +96,7 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   public void generatePreCall(JavaWriter out)
     throws IOException
   {
-    out.println("thread.setContextClassLoader(_server.getClassLoader());");
+    out.println("thread.setContextClassLoader(_manager.getClassLoader());");
     out.println("_isActive = true;");
     
     super.generatePreCall(out);
@@ -139,7 +139,7 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X>
       out.println("_isValid = false;");
       out.println();
       out.println("if (isOldValid)");
-      out.print("  _server.destroyInstance(");
+      out.print("  _manager.destroyInstance(");
       out.print(getBeanFactory().getBeanInstance());
       out.println(");");
     

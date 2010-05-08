@@ -34,6 +34,6 @@ import com.caucho.config.gen.BeanProducer;
 /**
  * Creates a new instance of a stateless bean
  */
-public interface StatelessProvider<T> extends BeanProducer<T> {
-  public T __caucho_get();
+public interface StatelessProvider<T> {
+  // public T __caucho_get();
 }

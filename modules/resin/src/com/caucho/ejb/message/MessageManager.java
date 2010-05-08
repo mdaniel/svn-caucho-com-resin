@@ -58,7 +58,7 @@ import com.caucho.util.L10N;
  * JCA activation-spec server container for a message bean.
  */
 @Module
-public class MessageManager<T> extends AbstractEjbBeanManager<T>
+public class MessageManager<X> extends AbstractEjbBeanManager<X>
   implements MessageEndpointFactory
 {
   private static final L10N L = new L10N(MessageManager.class);
@@ -73,7 +73,7 @@ public class MessageManager<T> extends AbstractEjbBeanManager<T>
   private Method _ejbCreate;
 
   public MessageManager(EjbManager ejbContainer, 
-                       AnnotatedType<T> annotatedType)
+                        AnnotatedType<X> annotatedType)
   {
     super(ejbContainer, annotatedType);
 
@@ -117,7 +117,7 @@ public class MessageManager<T> extends AbstractEjbBeanManager<T>
     ClassLoader oldLoader = thread.getContextClassLoader();
 
     try {
-      thread.setContextClassLoader(_loader);
+      thread.setContextClassLoader(getClassLoader());
 
       super.init();
 
@@ -227,7 +227,7 @@ public class MessageManager<T> extends AbstractEjbBeanManager<T>
     return false;
   }
 
-  private T createMessageListener()
+  private X createMessageListener()
     throws Exception
   {
     Thread thread = Thread.currentThread();
@@ -236,11 +236,11 @@ public class MessageManager<T> extends AbstractEjbBeanManager<T>
     try {
       thread.setContextClassLoader(getClassLoader());
       
-      Class<T> beanClass = getBeanSkelClass();
+      Class<X> beanClass = getBeanSkelClass();
 
-      Constructor<T> ctor = beanClass.getConstructor(new Class[] { MessageManager.class });
+      Constructor<X> ctor = beanClass.getConstructor(new Class[] { MessageManager.class });
     
-      T listener = ctor.newInstance(this);
+      X listener = ctor.newInstance(this);
 
       //initInstance(listener);
 
@@ -262,21 +262,43 @@ public class MessageManager<T> extends AbstractEjbBeanManager<T>
     _ra.endpointDeactivation(this, _activationSpec);
   }
 
+  /* (non-Javadoc)
+   * @see com.caucho.ejb.server.AbstractEjbBeanManager#getLocalJndiProxy(java.lang.Class)
+   */
   @Override
-  public Object getRemoteObject(Class api, String protocol)
+  public <T> Object getLocalJndiProxy(Class<T> api)
   {
+    // TODO Auto-generated method stub
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see com.caucho.ejb.server.AbstractEjbBeanManager#getLocalProxy(java.lang.Class)
+   */
   @Override
-  public Object getLocalObject(Class api)
+  public <T> T getLocalProxy(Class<T> api)
   {
+    // TODO Auto-generated method stub
     return null;
   }
 
+  /* (non-Javadoc)
+   * @see com.caucho.ejb.server.AbstractEjbBeanManager#getRemoteObject(java.lang.Class, java.lang.String)
+   */
   @Override
-  public Object getLocalProxy(Class api)
+  public <T> T getRemoteObject(Class<T> api, String protocol)
   {
+    // TODO Auto-generated method stub
     return null;
   }
+
+  /**
+   * @param proxyImplClass
+   */
+  public void setProxyImplClass(Class<?> proxyImplClass)
+  {
+    // TODO Auto-generated method stub
+    
+  }
+
 }

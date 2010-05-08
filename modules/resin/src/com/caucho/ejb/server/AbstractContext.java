@@ -27,30 +27,25 @@
  */
 package com.caucho.ejb.server;
 
-import java.rmi.RemoteException;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.security.Identity;
 import java.security.Principal;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.lang.reflect.Method;
-import java.lang.reflect.InvocationTargetException;
 
 import javax.ejb.EJBContext;
 import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
-import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBMetaData;
-import javax.ejb.EJBObject;
-import javax.ejb.Handle;
-import javax.ejb.HomeHandle;
-import javax.ejb.RemoveException;
 import javax.ejb.TimerService;
 import javax.transaction.UserTransaction;
 
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
-import com.caucho.transaction.*;
+import com.caucho.transaction.TransactionImpl;
+import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 
 /**
@@ -64,8 +59,7 @@ abstract public class AbstractContext<X> implements EJBContext {
   private boolean _isDead;
   private String []_declaredRoles;
 
-  @SuppressWarnings("unchecked")
-  private Class _invokedBusinessInterface;
+  private Class<?> _invokedBusinessInterface;
 
   public void setDeclaredRoles(String[] roles)
   {
@@ -104,124 +98,25 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Returns the EJBLocalHome stub for the container.
    */
+  @Override
   public EJBLocalHome getEJBLocalHome()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
-   * Returns the object's handle.
-   */
-  public Handle getHandle()
-  {
-    throw new UnsupportedOperationException();
-  }
-
-  /**
-   * Returns the object's home handle.
-   */
-  public HomeHandle getHomeHandle()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Returns the local object in the context.
-   */
-  public EJBLocalObject getEJBLocalObject() throws IllegalStateException
-  {
-    throw new IllegalStateException(
-        L.l("`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context.",
-            getServer()));
-  }
-
-  /**
    * Looks up an object in the current JNDI context.
    */
+  @Override
   public Object lookup(String name)
   {
     return getServer().lookup(name);
   }
 
   /**
-   * Returns the EJBObject stub for the container.
-   */
-  public EJBObject getEJBObject()
-  {
-    EJBObject obj = getRemoteView();
-
-    if (obj == null)
-      throw new IllegalStateException(
-          "getEJBObject() is only allowed through EJB 2.1 interfaces");
-
-    return obj;
-
-    /*
-     * throw newIllegalStateException(L.l(
-     * "`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context."
-     * , getServer().getEJBName()));
-     */
-  }
-
-  /**
-   * Returns the underlying bean
-   */
-  public EJBObject getRemoteView()
-  {
-    return null;
-
-    /*
-     * throw newIllegalStateException(L.l(
-     * "`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context."
-     * , getServer()));
-     */
-  }
-
-  /**
-   * Create the home view.
-   */
-  public EJBHome createRemoteHomeView()
-  {
-    return null;
-    /*
-     * throw newIllegalStateException(L.l(
-     * "`{0}' has no remote interface.  Remote beans need a home and a remote interface.  Local beans must be called with a local context."
-     * , getServer().getEJBName()));
-     */
-  }
-
-  /**
-   * Create the local home view.
-   */
-  public EJBLocalHome createLocalHome()
-  {
-    return null;
-    /*
-     * throw newIllegalStateException(L.l(
-     * "`{0}' has no local interface.  Local beans need a local-home and a local interface.  Remote beans must be called with a remote context."
-     * , getServer().getEJBName()));
-     */
-  }
-
-  /**
-   * Create the 2.1 remote view.
-   */
-  public Object createRemoteView21()
-  {
-    return null;
-  }
-
-  /**
-   * Create the 3.0 remote view.
-   */
-  public Object createRemoteView()
-  {
-    return null;
-  }
-
-  /**
    * Obsolete method which returns the EJB 1.0 environment.
    */
+  @Override
   public Properties getEnvironment()
   {
     return new Properties();
@@ -230,6 +125,8 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Obsolete method returns null.
    */
+  @Override
+  @SuppressWarnings("deprecation")
   public Identity getCallerIdentity()
   {
     throw new UnsupportedOperationException();
@@ -238,6 +135,7 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Returns the principal
    */
+  @Override
   public Principal getCallerPrincipal()
   {
     try {
@@ -252,6 +150,8 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Obsolete method returns false.
    */
+  @Override
+  @SuppressWarnings("deprecation")
   public boolean isCallerInRole(Identity role)
   {
     throw new UnsupportedOperationException();
@@ -260,6 +160,7 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Returns true if the caller is in the named role.
    */
+  @Override
   public boolean isCallerInRole(String roleName)
   {
     for (String role : _declaredRoles) {
@@ -270,38 +171,11 @@ abstract public class AbstractContext<X> implements EJBContext {
     return false;
   }
 
-  public void remove() throws RemoveException
-  {
-    EJBObject obj = null;
-    try {
-      obj = getEJBObject();
-    } catch (Exception e) {
-    }
-
-    try {
-      if (obj != null) {
-        obj.remove();
-        return;
-      }
-    } catch (RemoteException e) {
-    }
-
-    EJBLocalObject local = null;
-    try {
-      local = getEJBLocalObject();
-    } catch (Exception e) {
-    }
-
-    if (local != null) {
-      local.remove();
-      return;
-    }
-  }
-
   /**
    * Returns the current UserTransaction. Only Session beans with bean-managed
    * transactions may use this.
    */
+  @Override
   public UserTransaction getUserTransaction() throws IllegalStateException
   {
     if (getServer().isContainerTransaction())
@@ -314,6 +188,7 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Looks the timer service.
    */
+  @Override
   public TimerService getTimerService() throws IllegalStateException
   {
     return getServer().getTimerService();
@@ -322,6 +197,7 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Forces a rollback of the current transaction.
    */
+  @Override
   public void setRollbackOnly() throws IllegalStateException
   {
     if (! getServer().isContainerTransaction()) {
@@ -338,6 +214,7 @@ abstract public class AbstractContext<X> implements EJBContext {
   /**
    * Returns true if the current transaction will rollback.
    */
+  @Override
   public boolean getRollbackOnly() throws IllegalStateException
   {
     if (! getServer().isContainerTransaction())
@@ -368,8 +245,7 @@ abstract public class AbstractContext<X> implements EJBContext {
     return _invokedBusinessInterface;
   }
 
-  public void __caucho_setInvokedBusinessInterface(
-      Class invokedBusinessInterface)
+  public void __caucho_setInvokedBusinessInterface(Class invokedBusinessInterface)
   {
     _invokedBusinessInterface = invokedBusinessInterface;
   }

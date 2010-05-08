@@ -55,21 +55,20 @@ import com.caucho.util.LruCache;
 /**
  * Server container for a session bean.
  */
-public class StatefulManager<T> extends AbstractSessionManager<T>
+public class StatefulManager<X> extends AbstractSessionManager<X>
 {
   private static final L10N L = new L10N(StatefulManager.class);
   private static final Logger log
     = Logger.getLogger(StatefulManager.class.getName());
   
-  private StatefulContext _homeContext;
-  
   // XXX: need real lifecycle
   private LruCache<String,StatefulObject> _remoteSessions;
 
   public StatefulManager(EjbManager ejbContainer,
-			AnnotatedType<T> annotatedType)
+			AnnotatedType<X> annotatedType,
+			Class<?> proxyImplClass)
   {
-    super(ejbContainer, annotatedType);
+    super(ejbContainer, annotatedType, proxyImplClass);
   }
 
   @Override
@@ -79,22 +78,9 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   }
 
   @Override
-  public StatefulContext getContext()
+  public <T> StatefulContext<X,T> getSessionContext(Class<T> api)
   {
-    synchronized (this) {
-      if (_homeContext == null) {
-        try {
-          Class<?> []param = new Class[] { StatefulManager.class };
-          Constructor<?> cons = _contextImplClass.getConstructor(param);
-
-          _homeContext = (StatefulContext) cons.newInstance(this);
-        } catch (Exception e) {
-          throw new EJBExceptionWrapper(e);
-        }
-      }
-    }
-
-    return _homeContext;
+    return (StatefulContext<X,T>) super.getSessionContext(api);
   }
 
   /**
@@ -102,56 +88,54 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
    * local interface.
    */
   @Override
-  public Object getLocalProxy(Class api)
+  public <T> Object getLocalJndiProxy(Class<T> api)
   {
-    StatefulProvider provider = getContext().getProvider();
+    StatefulContext<X,T> context = getSessionContext(api);
 
-    if (provider != null)
-      return new StatefulProviderProxy(provider);
-    else
-      return null;
+    return new StatefulProviderProxy<X,T>(context);
   }
 
   /**
    * Returns the object implementation
    */
   @Override
-  public Object getLocalObject(Class api)
+  public <T> T getLocalProxy(Class<T> api)
   {
-    StatefulProvider provider = getContext().getProvider();
+    StatefulContext<X,T> context = getSessionContext(api);
 
-    if (provider != null) {
+    if (context != null) {
       CreationalContextImpl<?> env = CreationalContextImpl.create();
       
       // XXX: should be bean
-      return provider.__caucho_createNew(null, env);
+      // return context.__caucho_createNew(null, env);
+      throw new UnsupportedOperationException(getClass().getName());
     }
     else
       return null;
   }
 
   @Override
-  protected Bean<T> createBean(ManagedBeanImpl<T> mBean, 
-                               Class<?> api,
-                               Set<Type> apiList)
+  protected <T> StatefulContext<X,T>
+  createSessionContext(Class<T> api, SessionProxyFactory<T> factory)
   {
-    StatefulProvider provider = getContext().getProvider();
+    return new StatefulContext<X,T>(this, api, factory);
+  }
 
-    if (provider == null)
+  @Override
+  protected <T> Bean<T> createBean(ManagedBeanImpl<X> mBean, 
+                                   Class<T> api,
+                                   Set<Type> apiList)
+  {
+    StatefulContext<X,T> context = getSessionContext(api);
+
+    if (context == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
                                          api, getContext()));
     
-    StatefulBeanImpl statefulBean
-      = new StatefulBeanImpl(this, mBean, api, apiList, provider);
+    StatefulBeanImpl<X,T> statefulBean
+      = new StatefulBeanImpl<X,T>(this, mBean, api, apiList, context);
 
     return statefulBean;
-  }
-
-  protected InjectionTarget createSessionComponent(Class api, Class beanClass)
-  {
-    StatefulProvider provider = getContext().getProvider();
-    
-    return new StatefulComponent(provider, beanClass);
   }
 
   public void addSession(StatefulObject remoteObject)
@@ -190,6 +174,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
   /**
    * Returns the remote object.
    */
+  /*
   @Override
   public Object getRemoteObject(Object key)
   {
@@ -200,6 +185,7 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
 
     return remote;
   }
+  */
 
   /**
    * Creates a handle for a new session.
@@ -223,15 +209,17 @@ public class StatefulManager<T> extends AbstractSessionManager<T>
    * Returns the remote stub for the container
    */
   @Override
-  public Object getRemoteObject(Class api, String protocol)
+  public <T> T getRemoteObject(Class<T> api, String protocol)
   {
-    StatefulProvider provider = getContext().getProvider();
+    StatefulContext<X,T> context = getSessionContext(api);
 
-    if (provider != null) {
+    if (context != null) {
       // XXX: bean?
-      Object value = provider.__caucho_createNew(null, null);
+      // T value = context.__caucho_createNew(null, null);
       
-      return value;
+      // return value;
+      
+      throw new UnsupportedOperationException(getClass().getName());
     }
     else
       return null;
