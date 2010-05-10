@@ -42,8 +42,8 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.remote.websocket.WebSocketClient;
-import com.caucho.servlet.JanusMessageContext;
-import com.caucho.servlet.JanusMessageListener;
+import com.caucho.servlet.JanusContext;
+import com.caucho.servlet.JanusListener;
 
 /**
  * HMTP client protocol
@@ -58,7 +58,7 @@ public class HmtpClient extends SimpleActorClient {
   private String _jid;
 
   private WebSocketClient _webSocketClient;
-  private JanusMessageListener _webSocketHandler;
+  private JanusListener _webSocketHandler;
 
   private ActorException _connException;
 
@@ -219,12 +219,12 @@ public class HmtpClient extends SimpleActorClient {
     close();
   }
   
-  class WebSocketHandler implements JanusMessageListener {
+  class WebSocketHandler implements JanusListener {
     private HmtpReader _in;
     private HmtpWriter _out;
     
     @Override
-    public void onStart(JanusMessageContext context) throws IOException
+    public void onStart(JanusContext context) throws IOException
     {
       _out = new HmtpWriter(context.openMessageOutputStream());
       setLinkStream(new HempMemoryQueue(_out, getActorStream(), 1));
@@ -233,7 +233,7 @@ public class HmtpClient extends SimpleActorClient {
     }
 
     @Override
-    public void onMessage(JanusMessageContext context) throws IOException
+    public void onMessage(JanusContext context) throws IOException
     {
       InputStream is = context.openMessageInputStream();
       
@@ -242,12 +242,12 @@ public class HmtpClient extends SimpleActorClient {
     }
 
     @Override
-    public void onComplete(JanusMessageContext context) throws IOException
+    public void onComplete(JanusContext context) throws IOException
     {
     }
 
     @Override
-    public void onTimeout(JanusMessageContext context) throws IOException
+    public void onTimeout(JanusContext context) throws IOException
     {
     }    
   }

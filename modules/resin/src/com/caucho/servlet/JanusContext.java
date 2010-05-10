@@ -30,43 +30,44 @@
 package com.caucho.servlet;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 
 /**
- * The WebSocket bidirectional message listener receives events on each
- * new message in the WebSocket stream.
+ * Bidirectional TCP connection based on a HTTP upgrade, e.g. WebSocket.
  *
- * To read a message, read the input stream until the end of the message,
- * when it returns an end of file.
- * 
- * To write a message, write the output stream and close it. Remember, the
- * output will be locked until the output stream completes.
+ * The context and its values are not thread safe.  The DuplexListener
+ * thread normally is the only thread reading from the input stream.
  */
-public interface JanusMessageListener
-{
+public interface JanusContext {
   /**
-   * Called when the connection is established, allowing for any initial
-   * messages.
+   * Returns an input stream to the current message. The input stream will
+   * return bytes until the message is complete.
    * 
-   * @param context the bidirectional message context for reading new messages. 
+   * To read the next message, call openMessageInputStream() again.
    */
-  public void onStart(JanusMessageContext context)
+  public InputStream openMessageInputStream()
     throws IOException;
 
   /**
-   * Called when a new message is available is available.
+   * Opens an output stream to the next message. Because the stream is 
+   * locked until the message complete, it's important to write without blocking.
    */
-  public void onMessage(JanusMessageContext context)
+  public OutputStream openMessageOutputStream()
     throws IOException;
 
   /**
-   * Called when the connection closes
+   * Sets the read timeout.
    */
-  public void onComplete(JanusMessageContext context)
-    throws IOException;
+  public void setTimeout(long timeout);
 
   /**
-   * Called when the connection times out
+   * Gets the read timeout.
    */
-  public void onTimeout(JanusMessageContext context)
-    throws IOException;
+  public long getTimeout();
+
+  /**
+   * Complete and close the connection.
+   */
+  public void complete();
 }

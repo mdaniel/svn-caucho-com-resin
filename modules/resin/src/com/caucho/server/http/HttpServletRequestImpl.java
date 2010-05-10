@@ -71,9 +71,12 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.dispatch.Invocation;
 import com.caucho.server.session.SessionManager;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.JanusMessageContext;
-import com.caucho.servlet.JanusMessageListener;
-import com.caucho.servlet.JanusMessageServletRequest;
+import com.caucho.servlet.JanusContext;
+import com.caucho.servlet.JanusListener;
+import com.caucho.servlet.JanusServletRequest;
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
+import com.caucho.servlet.WebSocketServletRequest;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
 import com.caucho.util.HashMapImpl;
@@ -90,7 +93,7 @@ import com.caucho.vfs.WriteStream;
  * User facade for http requests.
  */
 public final class HttpServletRequestImpl extends AbstractCauchoRequest
-  implements CauchoRequest, JanusMessageServletRequest
+  implements CauchoRequest, WebSocketServletRequest
 {
   private static final Logger log
     = Logger.getLogger(HttpServletRequestImpl.class.getName());
@@ -1849,7 +1852,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   // WebSocket
   //
 
-  public JanusMessageContext startWebSocket(JanusMessageListener listener)
+  public WebSocketContext startWebSocket(WebSocketListener listener)
   {
     if (log.isLoggable(Level.FINE))
       log.fine(this + " upgrade HTTP to WebSocket " + listener);
@@ -2298,18 +2301,18 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   */
 
   static class WebSocketContextImpl
-    implements JanusMessageContext, SocketLinkDuplexListener
+    implements WebSocketContext, SocketLinkDuplexListener
   {
     private final HttpServletRequestImpl _request;
     private final HttpServletResponseImpl _response;
 
-    private final JanusMessageListener _listener;
+    private final WebSocketListener _listener;
 
     private SocketLinkDuplexController _controller;
 
     WebSocketContextImpl(HttpServletRequestImpl request,
                          HttpServletResponseImpl response,
-                         JanusMessageListener listener)
+                         WebSocketListener listener)
     {
       _request = request;
       _response = response;
@@ -2331,16 +2334,16 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       return _controller.getIdleTimeMax();
     }
 
-    public InputStream openMessageInputStream()
+    public InputStream getInputStream()
       throws IOException
     {
-      return _request.getInputStream();
+      return _controller.getReadStream();
     }
 
-    public OutputStream openMessageOutputStream()
+    public OutputStream getOutputStream()
       throws IOException
     {
-      return _response.getOutputStream();
+      return _controller.getWriteStream();
     }
 
     public void complete()
@@ -2358,7 +2361,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
       throws IOException
     {
       do {
-        _listener.onMessage(this);
+        _listener.onRead(this);
       } while (_request.getAvailable() > 0);
     }
 

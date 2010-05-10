@@ -641,28 +641,6 @@ public class SocketLinkListener extends TaskWorker
   //
 
   /**
-   * Sets the minimum spare listen.
-   */
-  /*
-  public void setMinSpareListen(int minSpare)
-    throws ConfigException
-  {
-    setAcceptThreadMin(minSpare);
-  }
-  */
-
-  /**
-   * Sets the maximum spare listen.
-   */
-  /*
-  public void setMaxSpareListen(int maxSpare)
-    throws ConfigException
-  {
-    setAcceptThreadMax(maxSpare);
-  }
-  */
-
-  /**
    * Sets the keepalive max.
    */
   public void setKeepaliveMax(int max)
@@ -886,34 +864,6 @@ public class SocketLinkListener extends TaskWorker
   }
 
   /**
-   * Returns the accept pool.
-   */
-  /*
-  public int getFreeKeepalive()
-  {
-    int freeKeepalive = _keepaliveMax - _keepaliveAllocateCount.get();
-    int freeConnections = (_connectionMax - _activeConnectionCount.get()
-                           - _minSpareConnection);
-    int freeSelect = _server.getFreeSelectKeepalive();
-
-    if (freeKeepalive < freeConnections)
-      return freeSelect < freeKeepalive ? freeSelect : freeKeepalive;
-    else
-      return freeSelect < freeConnections ? freeSelect : freeConnections;
-  }
-  */
-
-  /**
-   * Returns true if the port matches the server id.
-   */
-  /*
-  public boolean matchesServerId(String serverId)
-  {
-    return getServerId().equals("*") || getServerId().equals(serverId);
-  }
-  */
-
-  /**
    * Initializes the port.
    */
   @PostConstruct
@@ -922,7 +872,7 @@ public class SocketLinkListener extends TaskWorker
   {
     if (! _lifecycle.toInit())
       return;
-
+    
     StringBuilder url = new StringBuilder();
 
     if (_protocol != null)
@@ -1365,14 +1315,16 @@ public class SocketLinkListener extends TaskWorker
   /**
    * Reads data from a keepalive connection
    */
-  boolean keepaliveThreadRead(ReadStream is)
+  int keepaliveThreadRead(ReadStream is)
     throws IOException
   {
     if (isClosed())
-      return false;
+      return -1;
 
-    if (is.getBufferAvailable() > 0) {
-      return true;
+    int available = is.getBufferAvailable();
+    
+    if (available > 0) {
+      return available;
     }
 
     long timeout = getKeepaliveTimeout();
@@ -1394,14 +1346,14 @@ public class SocketLinkListener extends TaskWorker
     _keepaliveThreadCount.incrementAndGet();
 
     try {
-      boolean result = is.fillWithTimeout(timeout);
+      int result = is.fillWithTimeout(timeout);
 
       return result;
     } catch (IOException e) {
       if (isClosed()) {
         log.log(Level.FINEST, e.toString(), e);
 
-        return false;
+        return -1;
       }
 
       throw e;
@@ -1586,7 +1538,7 @@ public class SocketLinkListener extends TaskWorker
 
       if (isStartThreadRequired()
           && _lifecycle.isActive()
-          && _activeConnectionCount.get() <= _connectionMax) {
+          && _activeConnectionCount.get() < _connectionMax) {
         startConn = _idleConn.allocate();
 
         if (startConn != null) {

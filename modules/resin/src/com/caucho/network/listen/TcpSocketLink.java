@@ -680,8 +680,16 @@ public class TcpSocketLink extends AbstractSocketLink
     SocketLinkListener port = _port;
 
     // quick timed read to see if data is already available
-    if (port.keepaliveThreadRead(getReadStream())) {
+    int available = port.keepaliveThreadRead(getReadStream());
+    
+    if (available > 0) {
       return RequestState.REQUEST;
+    }
+    else if (available < 0) {
+      setStatState(null);
+      close();
+      
+      return RequestState.EXIT;
     }
 
     _idleStartTime = Alarm.getCurrentTime();
@@ -916,10 +924,18 @@ public class TcpSocketLink extends AbstractSocketLink
 
     _controller = duplex;
 
-    if (log.isLoggable(Level.FINER))
-      log.finer(this + " starting duplex");
-
     _duplexReadTask = new DuplexReadTask(duplex);
+    
+    if (log.isLoggable(Level.FINER))
+      log.finer(this + " starting duplex " + handler);
+
+    try {
+      handler.onStart(duplex);
+    } catch (RuntimeException e) {
+      throw e;
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
 
     return duplex;
   }
@@ -956,8 +972,9 @@ public class TcpSocketLink extends AbstractSocketLink
     SocketLinkState state = _state;
     _state = _state.toClosed(this);
 
-    if (state.isClosed())
+    if (state.isClosed() || state.isIdle()) {
       return;
+    }
 
     QSocket socket = _socket;
 
@@ -973,13 +990,15 @@ public class TcpSocketLink extends AbstractSocketLink
     if (controller != null)
       controller.closeImpl();
 
+    _duplexReadTask = null;
+
     SocketLinkListener port = getPort();
 
     if (log.isLoggable(Level.FINER)) {
       if (port != null)
-        log.finer(dbgId() + " closing connection " + this + ", total=" + port.getConnectionCount());
+        log.finer(dbgId() + "closing connection " + this + ", total=" + port.getConnectionCount());
       else
-        log.finer(dbgId() + " closing connection " + this);
+        log.finer(dbgId() + "closing connection " + this);
     }
 
     try {
@@ -1056,7 +1075,7 @@ public class TcpSocketLink extends AbstractSocketLink
   @Override
   public String toString()
   {
-    return "TcpConnection[id=" + _id + "," + _port.toURL() + "," + _state + "]";
+    return getClass().getSimpleName() + "[id=" + _id + "," + _port.toURL() + "," + _state + "]";
   }
 
   enum RequestState {
@@ -1256,7 +1275,9 @@ public class TcpSocketLink extends AbstractSocketLink
 
         if (position == readStream.getPosition()) {
           log.warning(_duplex + " was not processing any data. Shutting down.");
+          setStatState(null);
           close();
+          
           return RequestState.EXIT;
         }
       }

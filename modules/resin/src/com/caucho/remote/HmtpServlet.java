@@ -55,8 +55,10 @@ import com.caucho.security.Authenticator;
 import com.caucho.server.cluster.Server;
 import com.caucho.server.http.HttpServletRequestImpl;
 import com.caucho.server.http.HttpServletResponseImpl;
-import com.caucho.servlet.JanusMessageContext;
-import com.caucho.servlet.JanusMessageListener;
+import com.caucho.servlet.JanusContext;
+import com.caucho.servlet.JanusListener;
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.L10N;
 
 /**
@@ -152,12 +154,12 @@ public class HmtpServlet extends GenericServlet {
     WebSocketHandler handler
       = new WebSocketHandler(ipAddress);
     
-    JanusMessageContext webSocket = req.startWebSocket(handler);
+    WebSocketContext webSocket = req.startWebSocket(handler);
 
     webSocket.setTimeout(30 * 60 * 1000L);
   }
   
-  class WebSocketHandler implements JanusMessageListener {
+  class WebSocketHandler implements WebSocketListener {
     private String _ipAddress;
     
     private HmtpReader _in;
@@ -174,10 +176,10 @@ public class HmtpServlet extends GenericServlet {
     }
     
     @Override
-    public void onStart(JanusMessageContext context) throws IOException
+    public void onStart(WebSocketContext context) throws IOException
     {
-      _in = new HmtpReader(context.openMessageInputStream());
-      _out = new HmtpWriter(context.openMessageOutputStream());
+      _in = new HmtpReader(context.getInputStream());
+      _out = new HmtpWriter(context.getOutputStream());
       _linkStream = new HempMemoryQueue(_out, _broker.getBrokerStream(), 1);
       
       _linkService = new ServerLinkService(_linkStream, _broker, _authManager,
@@ -186,16 +188,16 @@ public class HmtpServlet extends GenericServlet {
     }
 
     @Override
-    public void onComplete(JanusMessageContext context) throws IOException
+    public void onComplete(WebSocketContext context) throws IOException
     {
       _brokerStream.close();
       _linkService.close();
     }
 
     @Override
-    public void onMessage(JanusMessageContext context) throws IOException
+    public void onRead(WebSocketContext context) throws IOException
     {
-      InputStream is = context.openMessageInputStream();
+      InputStream is = context.getInputStream();
       
       while (_in.readPacket(_brokerStream)
             && is.available() > 0) {
@@ -203,7 +205,7 @@ public class HmtpServlet extends GenericServlet {
     }
 
     @Override
-    public void onTimeout(JanusMessageContext context) throws IOException
+    public void onTimeout(WebSocketContext context) throws IOException
     {
     }
   }

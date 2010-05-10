@@ -1108,16 +1108,16 @@ public final class ReadStream extends InputStream
 
    * @return true on data or end of file, false on timeout
    */
-  public boolean fillWithTimeout(long timeout)
+  public int fillWithTimeout(long timeout)
     throws IOException
   {
     if (_readOffset < _readLength)
-      return true;
+      return _readLength - _readOffset;
 
     if (_readBuffer == null) {
       _readOffset = 0;
       _readLength = 0;
-      return false;
+      return -1;
     }
 
     if (_sibling != null)
@@ -1128,7 +1128,7 @@ public final class ReadStream extends InputStream
 
     if (source == null) {
       // return true on end of file
-      return true;
+      return -1;
     }
 
     int readLength
@@ -1141,17 +1141,18 @@ public final class ReadStream extends InputStream
       
       if (_isEnableReadTime)
         _readTime = Alarm.getCurrentTime();
-      return true;
+      
+      return readLength;
     }
     else if (readLength == READ_TIMEOUT) {
       // timeout
       _readLength = 0;
-      return false;
+      return 0;
     }
     else {
       // return false on end of file
       _readLength = 0;
-      return false;
+      return -1;
     }
   }
 
@@ -1345,7 +1346,7 @@ public final class ReadStream extends InputStream
   /**
    * Lists all named attributes.
    */
-  public Iterator getAttributeNames()
+  public Iterator<String> getAttributeNames()
     throws IOException
   {
     if (_sibling != null)

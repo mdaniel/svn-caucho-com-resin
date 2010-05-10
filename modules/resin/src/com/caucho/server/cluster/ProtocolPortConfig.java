@@ -56,7 +56,7 @@ public class ProtocolPortConfig extends SocketLinkListener
     = Logger.getLogger(ProtocolPortConfig.class.getName());
 
   // The protocol
-  private Class _protocolClass;
+  private Class<?> _protocolClass;
   private ContainerProgram _init;
   private Protocol _protocol;
 
@@ -67,7 +67,7 @@ public class ProtocolPortConfig extends SocketLinkListener
   /**
    * Sets protocol class.
    */
-  public void setType(Class cl)
+  public void setType(Class<?> cl)
   {
     setClass(cl);
   }
@@ -75,7 +75,7 @@ public class ProtocolPortConfig extends SocketLinkListener
   /**
    * Sets protocol class.
    */
-  public void setClass(Class cl)
+  public void setClass(Class<?> cl)
   {
     Config.validate(cl, AbstractProtocol.class);
 
@@ -127,5 +127,7 @@ public class ProtocolPortConfig extends SocketLinkListener
     }
     else
       throw new ConfigException(L.l("protocol requires either a class"));
+    
+    super.init();
   }
 }

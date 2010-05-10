@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *
+ * 
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -29,45 +29,24 @@
 
 package com.caucho.servlet;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-
 /**
- * Bidirectional TCP connection based on a HTTP upgrade, e.g. WebSocket.
- *
- * The context and its values are not thread safe.  The DuplexListener
- * thread normally is the only thread reading from the input stream.
+ * A ServletRequest extension for servlet containers capable of upgrading
+ * to a bidirectional WebSocket message stream.
+ * 
+ * When a new message is available, the servlet engine will call the 
+ * message listener's <code>onMessage</code> callback. The application will
+ * call the context's <code>openMessageInputStream</code> to read the new
+ * message.
+ * 
+ * To send a message, the application calls <code>openMessageOutputStream</code>.
+ * 
+ * This API is not thread-safe. It's important for writers to coordinate message
+ * sending, for example using a message queue to serialize the requests.
  */
-public interface JanusMessageContext {
-  /**
-   * Returns an input stream to the current message. The input stream will
-   * return bytes until the message is complete.
-   * 
-   * To read the next message, call openMessageInputStream() again.
-   */
-  public InputStream openMessageInputStream()
-    throws IOException;
 
+public interface JanusServletRequest {
   /**
-   * Opens an output stream to the next message. Because the stream is 
-   * locked until the message complete, it's important to write without blocking.
+   * Upgrade the current HTTP connection to a WebSocket connection
    */
-  public OutputStream openMessageOutputStream()
-    throws IOException;
-
-  /**
-   * Sets the read timeout.
-   */
-  public void setTimeout(long timeout);
-
-  /**
-   * Gets the read timeout.
-   */
-  public long getTimeout();
-
-  /**
-   * Complete and close the connection.
-   */
-  public void complete();
+  public JanusContext startWebSocket(JanusListener listener);
 }

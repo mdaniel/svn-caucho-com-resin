@@ -19,7 +19,7 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- * 
+ *
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
@@ -29,24 +29,44 @@
 
 package com.caucho.servlet;
 
-/**
- * A ServletRequest extension for servlet containers capable of upgrading
- * to a bidirectional WebSocket message stream.
- * 
- * When a new message is available, the servlet engine will call the 
- * message listener's <code>onMessage</code> callback. The application will
- * call the context's <code>openMessageInputStream</code> to read the new
- * message.
- * 
- * To send a message, the application calls <code>openMessageOutputStream</code>.
- * 
- * This API is not thread-safe. It's important for writers to coordinate message
- * sending, for example using a message queue to serialize the requests.
- */
+import java.io.IOException;
 
-public interface JanusMessageServletRequest {
+/**
+ * The WebSocket bidirectional message listener receives events on each
+ * new message in the WebSocket stream.
+ *
+ * To read a message, read the input stream until the end of the message,
+ * when it returns an end of file.
+ * 
+ * To write a message, write the output stream and close it. Remember, the
+ * output will be locked until the output stream completes.
+ */
+public interface JanusListener
+{
   /**
-   * Upgrade the current HTTP connection to a WebSocket connection
+   * Called when the connection is established, allowing for any initial
+   * messages.
+   * 
+   * @param context the bidirectional message context for reading new messages. 
    */
-  public JanusMessageContext startWebSocket(JanusMessageListener listener);
+  public void onStart(JanusContext context)
+    throws IOException;
+
+  /**
+   * Called when a new message is available is available.
+   */
+  public void onMessage(JanusContext context)
+    throws IOException;
+
+  /**
+   * Called when the connection closes
+   */
+  public void onComplete(JanusContext context)
+    throws IOException;
+
+  /**
+   * Called when the connection times out
+   */
+  public void onTimeout(JanusContext context)
+    throws IOException;
 }

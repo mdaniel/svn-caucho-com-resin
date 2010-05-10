@@ -55,7 +55,7 @@ public class SocketLinkDuplexController extends AsyncController {
   private ReadStream _is;
   private WriteStream _os;
 
-  private SocketLinkDuplexListener _handler;
+  private SocketLinkDuplexListener _listener;
   private String _readThreadName;
 
   public SocketLinkDuplexController(TcpSocketLink conn,
@@ -65,14 +65,14 @@ public class SocketLinkDuplexController extends AsyncController {
       throw new NullPointerException(L.l("handler is a required argument"));
 
     _conn = conn;
-    _handler = handler;
+    _listener = handler;
 
     _loader = Thread.currentThread().getContextClassLoader();
 
     _is = _conn.getReadStream();
     _os = _conn.getWriteStream();
 
-    _readThreadName = ("resin-" + _handler.getClass().getSimpleName()
+    _readThreadName = ("resin-" + _listener.getClass().getSimpleName()
                        + "-read-" + conn.getId());
   }
 
@@ -109,6 +109,14 @@ public class SocketLinkDuplexController extends AsyncController {
     else
       return -1;
   }
+  
+  /**
+   * Returns the socket link
+   */
+  public TcpSocketLink getSocketLink()
+  {
+    return _conn;
+  }
 
   /**
    * Returns the read stream. The read stream should only be used by the read
@@ -133,7 +141,7 @@ public class SocketLinkDuplexController extends AsyncController {
    */
   public SocketLinkDuplexListener getHandler()
   {
-    return _handler;
+    return _listener;
   }
 
   public boolean serviceRead()
@@ -150,7 +158,7 @@ public class SocketLinkDuplexController extends AsyncController {
 
       TcpSocketLink conn = _conn;
       ReadStream is = _is;
-      SocketLinkDuplexListener handler = _handler;
+      SocketLinkDuplexListener handler = _listener;
 
       if (conn == null || is == null || handler == null) {
         return false;
@@ -177,11 +185,13 @@ public class SocketLinkDuplexController extends AsyncController {
     return true;
   }
 
+  @Override
   public void complete()
   {
     close();
   }
   
+  @Override
   public void close()
   {
     closeImpl();
@@ -198,9 +208,14 @@ public class SocketLinkDuplexController extends AsyncController {
     
     TcpSocketLink conn = _conn;
     _conn = null;
-    _os = null;
-    _handler = null;
+    
+    SocketLinkDuplexListener listener = _listener;
+    _listener = null;
+    
+    ClassLoader loader = _loader;
     _loader = null;
+    
+    _os = null;
 
     IoUtil.close(is);
     
@@ -211,6 +226,21 @@ public class SocketLinkDuplexController extends AsyncController {
     }
 
     super.closeImpl();
+    
+    if (listener != null) {
+      Thread thread = Thread.currentThread();
+      ClassLoader oldLoader = thread.getContextClassLoader();
+      
+      try {
+        thread.setContextClassLoader(loader);
+        
+        listener.onComplete(this);
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      } finally {
+        thread.setContextClassLoader(oldLoader);
+      }
+    }
   }
 
   @Override
@@ -219,10 +249,10 @@ public class SocketLinkDuplexController extends AsyncController {
     TcpSocketLink conn = _conn;
 
     if (conn == null)
-      return getClass().getSimpleName() + "[" + _handler + ",closed]";
+      return getClass().getSimpleName() + "[" + _listener + ",closed]";
     else if (Alarm.isTest())
-      return getClass().getSimpleName() + "[" + _handler + "]";
+      return getClass().getSimpleName() + "[" + _listener + "]";
     else
-      return (getClass().getSimpleName() + "[" + conn.getId() + "," + _handler + "]");
+      return (getClass().getSimpleName() + "[" + conn.getId() + "," + _listener + "]");
   }
 }

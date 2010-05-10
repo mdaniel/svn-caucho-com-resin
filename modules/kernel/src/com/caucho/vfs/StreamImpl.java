@@ -322,7 +322,8 @@ public class StreamImpl {
   /**
    * Returns an iterator of the attribute names.
    */
-  public Iterator getAttributeNames()
+  @SuppressWarnings("unchecked")
+  public Iterator<String> getAttributeNames()
     throws IOException
   {
     return NullIterator.create();

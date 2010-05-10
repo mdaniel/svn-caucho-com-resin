@@ -56,8 +56,8 @@ import javax.servlet.http.Part;
 import com.caucho.network.listen.SocketLinkDuplexController;
 import com.caucho.network.listen.SocketLinkDuplexListener;
 import com.caucho.server.webapp.WebApp;
-import com.caucho.servlet.JanusMessageContext;
-import com.caucho.servlet.JanusMessageListener;
+import com.caucho.servlet.JanusContext;
+import com.caucho.servlet.JanusListener;
 import com.caucho.util.NullEnumeration;
 import com.caucho.vfs.ReadStream;
 
@@ -463,7 +463,7 @@ public class StubServletRequest implements CauchoRequest {
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public JanusMessageContext startWebSocket(JanusMessageListener listener)
+  public JanusContext startWebSocket(JanusListener listener)
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
