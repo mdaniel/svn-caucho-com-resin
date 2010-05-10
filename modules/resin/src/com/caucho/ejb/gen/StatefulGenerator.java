@@ -178,7 +178,6 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.println("private " + getBeanClassName() + " _bean;");
 
-    out.println("private transient boolean _isValid;");
     out.println("private transient boolean _isActive;");
     
     generateConstructor(out);
@@ -194,11 +193,13 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     // generateProxyConstructor(out);
     
     out.println();
-    out.println("public " + getClassName() + "(StatefulManager manager)");
+    out.print("public " + getClassName() + "(StatefulManager manager, ");
+    out.println("StatefulContext context)");
     out.println("{");
     out.pushDepth();
 
     out.println("_manager = manager;");
+    out.println("_context = context;");
 
     out.popDepth();
     out.println("}");
@@ -218,6 +219,12 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     generateContextObjectConstructor(out);
 
     out.popDepth();
+    out.println("}");
+    
+    out.println();
+    out.println("@Override");
+    out.println("public void __caucho_destroy()");
+    out.println("{");
     out.println("}");
   }
 

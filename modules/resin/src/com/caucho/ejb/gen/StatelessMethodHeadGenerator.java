@@ -77,7 +77,7 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     // bean allocation must be last because it needs to be
     // freed or discarded in the finally block
     out.println("StatelessPool.Item<" + getJavaClass().getName() + "> poolItem");
-    out.println(" = _statelessPool.allocate();");
+    out.println("  = _statelessPool.allocate();");
     out.println(getJavaClass().getName() + " bean = poolItem.getValue();");
   }
 

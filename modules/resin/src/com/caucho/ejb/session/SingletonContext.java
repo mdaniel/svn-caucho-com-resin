@@ -35,10 +35,9 @@ import javax.ejb.TimerService;
  */
 public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
   public SingletonContext(SingletonManager<X> manager,
-                          Class<T> api,
-                          SessionProxyFactory<T> proxyFactory)
+                          Class<T> api)
   {
-    super(manager, api, proxyFactory);
+    super(manager, api);
   }
 
   /**

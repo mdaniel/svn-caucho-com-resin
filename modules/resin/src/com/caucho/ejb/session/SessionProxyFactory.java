@@ -32,8 +32,10 @@ package com.caucho.ejb.session;
 import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * Creates a new instance of a stateful bean
+ * Factory for a session bean.
  */
 public interface SessionProxyFactory<T> {
   public T __caucho_createProxy(CreationalContext<T> env);
+
+  public void __caucho_destroy();
 }

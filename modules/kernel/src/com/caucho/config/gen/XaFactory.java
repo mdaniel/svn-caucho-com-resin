@@ -29,6 +29,7 @@
 
 package com.caucho.config.gen;
 
+import javax.ejb.Remove;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -64,6 +65,10 @@ public class XaFactory<X>
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
                                    boolean isEnhanced)
   {
+    // ejb/2101 - XXX: should be part of EjbXaFactory?
+    if (method.isAnnotationPresent(Remove.class))
+      return super.create(method, isEnhanced);
+    
     TransactionAttribute xa = method.getAnnotation(TransactionAttribute.class);
     TransactionAttributeType xaType = _classXa;
     

@@ -38,10 +38,9 @@ import com.caucho.inject.Module;
 @Module
 public class StatelessContext<X,T> extends AbstractSessionContext<X,T> {
   public StatelessContext(StatelessManager<X> manager,
-                          Class<T> api,
-                          SessionProxyFactory<T> proxyFactory)
+                          Class<T> api)
   {
-    super(manager, api, proxyFactory);
+    super(manager, api);
   }
 
   /**

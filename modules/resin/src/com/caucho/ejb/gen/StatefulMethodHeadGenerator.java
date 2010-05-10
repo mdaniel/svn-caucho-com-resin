@@ -73,20 +73,21 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   {
     super.generatePreTry(out);
     
-    out.println("if (! _isValid)");
+    String beanClassName = getJavaClass().getName();
+    
+    out.println(beanClassName + " bean = _bean;");
+    
+    out.println();
+    out.println("if (bean == null)");
     out.println("  throw new javax.ejb.NoSuchEJBException(\"stateful instance "
                 + getJavaClass().getSimpleName() + " is no longer valid\");");
-    
-    String beanClassName = getJavaClass().getName();
 
-    out.println("boolean isValid = false;");
-    // bean allocation must be last because it needs to be
-    // freed or discarded in the finally block
-    out.print(beanClassName + " bean = _bean;");
-    
+    out.println();
     out.println("if (_isActive)");
     out.println("  throw new EJBException(\"session bean is not reentrant\");");
     out.println();
+
+    out.println("boolean isValid = false;");
     
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
@@ -135,10 +136,9 @@ public class StatefulMethodHeadGenerator<X> extends MethodHeadGenerator<X>
       out.println("if (! isValid) {");
       out.pushDepth();
     
-      out.println("boolean isOldValid = _isValid;");
-      out.println("_isValid = false;");
+      out.println("_bean = null;");
       out.println();
-      out.println("if (isOldValid)");
+      out.println("if (bean != null)");
       out.print("  _manager.destroyInstance(");
       out.print(getBeanFactory().getBeanInstance());
       out.println(");");

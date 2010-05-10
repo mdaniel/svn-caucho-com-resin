@@ -193,8 +193,8 @@ public class ResourceHandler extends JavaeeInjectionHandler {
                                                mappedName));
     }
     else {
-      throw new ConfigException(location + L.l("@Resource cannot find any matching resources with type='{0}'",
-                                               bindType));
+      throw new ConfigException(location + L.l("@Resource cannot find any matching resources with type='{0}' in {1}",
+                                               bindType, getManager()));
     }
 
     // bindJndi(location, jndiName, bean);

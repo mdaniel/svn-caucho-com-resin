@@ -41,18 +41,22 @@ import com.caucho.util.L10N;
  * Pool of stateless session beans.
  */
 @Module
-public class StatelessPool<X> {
+public class StatelessPool<X,T> {
   private static final L10N L = new L10N(StatelessPool.class);
 
   private final StatelessManager<X> _manager;
+  private final StatelessContext<X,T> _context;
   
   private final FreeList<Item<X>> _freeList;
+  
   private final Semaphore _concurrentSemaphore;
   private final long _concurrentTimeout;
 
-  StatelessPool(StatelessManager<X> manager)
+  StatelessPool(StatelessManager<X> manager,
+                StatelessContext<X,T> context)
   {
     _manager = manager;
+    _context = context;
     
     int idleMax = manager.getSessionIdleMax();
     int concurrentMax = manager.getSessionConcurrentMax();
@@ -101,7 +105,7 @@ public class StatelessPool<X> {
       Item<X> beanItem = _freeList.allocate();
     
       if (beanItem == null) {
-        beanItem = new Item<X>(_manager.newInstance(null), 
+        beanItem = new Item<X>(_context.newInstance(null), 
                                _manager.getInterceptorBindings());
         // _ejbProducer.newInstance();
       }

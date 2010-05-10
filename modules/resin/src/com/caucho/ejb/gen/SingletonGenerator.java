@@ -175,7 +175,8 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     String beanClassName = getBeanType().getJavaClass().getName();
     
     out.println();
-    out.println("public " + getClassName() + "(SingletonManager manager)");
+    out.print("public " + getClassName() + "(SingletonManager manager");
+    out.println(", SingletonContext context)");
     out.println("{");
     out.pushDepth();
 
@@ -204,11 +205,17 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
   private void generateProxyFactory(JavaWriter out)
     throws IOException
   {
-    out.println();
-    out.println("@Override");
-    out.println("public T __caucho_createProxy(CreationalContext<T> env)");
-    out.println("{");
-    out.println("  return (T) new " + getClassName() + "(_manager, env);");
-    out.println("}");
+      out.println();
+      out.println("@Override");
+      out.println("public T __caucho_createProxy(CreationalContext<T> env)");
+      out.println("{");
+      out.println("  return (T) new " + getClassName() + "(_manager, env);");
+      out.println("}");
+      out.println();
+      
+      out.println("@Override");
+      out.println("public void __caucho_destroy()");
+      out.println("{");
+      out.println("}");
   }
 }

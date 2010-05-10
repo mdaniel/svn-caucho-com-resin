@@ -177,8 +177,8 @@ public class EjbConfig {
     else if (oldBean != null) {
       throw new IllegalStateException(L.l("{0}: duplicate bean '{1}' old ejb-class={2} new ejb-class={3}",
 					  this, name,
-					  oldBean.getEJBClass().getName(),
-					  bean.getEJBClass().getName()));
+					  oldBean, // .getEJBClass().getName()));
+					  bean)); // .getEJBClass().getName()));
     }
 
     _pendingBeans.add(bean);

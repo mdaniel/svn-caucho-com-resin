@@ -259,7 +259,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println();
     out.println("private final StatelessManager _manager;");
     out.println();
-    out.println("private final StatelessPool<" + getBeanClassName() + "> _statelessPool;");
+    out.println("private final StatelessPool<" + getBeanClassName() + ",T> _statelessPool;");
 
     generateConstructor(out);
 
@@ -296,12 +296,13 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     throws IOException
   {
     out.println();
-    out.println("public " + getClassName() + "(StatelessManager manager)");
+    out.println("public " + getClassName() + "(StatelessManager manager"
+                + ", StatelessContext context)");
     out.println("{");
     out.pushDepth();
 
     out.println("_manager = manager;");
-    out.println("_statelessPool = manager.createStatelessPool();");
+    out.println("_statelessPool = manager.createStatelessPool(context);");
   
     generateProxyConstructor(out);
 

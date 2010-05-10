@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.session;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -38,15 +37,12 @@ import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.ejb.EJBExceptionWrapper;
-import com.caucho.ejb.inject.StatefulBeanImpl;
+import com.caucho.ejb.inject.SessionBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
@@ -75,6 +71,12 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   protected String getType()
   {
     return "stateful:";
+  }
+  
+  @Override
+  protected Class<?> getContextClass()
+  {
+    return StatefulContext.class;
   }
 
   @Override
@@ -115,10 +117,9 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   }
 
   @Override
-  protected <T> StatefulContext<X,T>
-  createSessionContext(Class<T> api, SessionProxyFactory<T> factory)
+  protected <T> StatefulContext<X,T> createSessionContext(Class<T> api)
   {
-    return new StatefulContext<X,T>(this, api, factory);
+    return new StatefulContext<X,T>(this, api);
   }
 
   @Override
@@ -132,8 +133,8 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
                                          api, getContext()));
     
-    StatefulBeanImpl<X,T> statefulBean
-      = new StatefulBeanImpl<X,T>(this, mBean, api, apiList, context);
+    SessionBeanImpl<X,T> statefulBean
+      = new SessionBeanImpl<X,T>(context, mBean, apiList);
 
     return statefulBean;
   }

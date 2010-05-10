@@ -54,8 +54,6 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
 {
   private static final L10N L = new L10N(StatelessBeanImpl.class);
   
-  private StatelessContext<X,T> _context;
-  private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
   private LinkedHashSet<Annotation> _qualifiers
     = new LinkedHashSet<Annotation>();
 
@@ -65,15 +63,8 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
 			   Set<Type> types,
                            StatelessContext<X,T> context)
   {
-    super(bean);
-    
-    _context = context;
+    super(context, bean, types);
 
-    if (context == null)
-      throw new NullPointerException();
-
-    _types.addAll(types);
-    
     _qualifiers.addAll(bean.getQualifiers());
     
     Class<?> scopeType = bean.getScope();
@@ -84,19 +75,7 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
                                     scopeType.getName(), getBeanClass().getName()));
     }
   }
-
-  @Override
-  public T create(CreationalContext<T> context)
-  {
-    return _context.createProxy(context);
-  }
-  
-  @Override
-  public Set<Type> getTypes()
-  {
-    return _types;
-  }
-  
+ 
   @Override
   public Set<Annotation> getQualifiers()
   {

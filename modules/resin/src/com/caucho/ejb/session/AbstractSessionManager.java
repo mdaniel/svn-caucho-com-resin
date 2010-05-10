@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.annotation.security.DeclareRoles;
@@ -120,16 +121,12 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     return _bean;
   }
   
+  @SuppressWarnings("unchecked")
   protected <T> AbstractSessionContext<X,T> getSessionContext(Class<T> api)
   {
     return (AbstractSessionContext<X,T>) _contextMap.get(api);
   }
 
-  @Override
-  public AbstractSessionContext getContext()
-  {
-    return null;
-  }
   /**
    * Initialize the server
    */
@@ -166,33 +163,21 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   
   private <T> void createContext(Class<T> api)
   {
-    SessionProxyFactory<T> proxyFactory;
+    AbstractSessionContext<X,T> context = createSessionContext(api);
     
-    try {
-      Class<?> []param = new Class[] { getClass() };
-      
-      Constructor<?> ctor = _proxyImplClass.getConstructor(param);
-      
-      proxyFactory = (SessionProxyFactory<T>) ctor.newInstance(this);
-    } catch (Exception e) {
-      throw new IllegalStateException(e);
-    }
+    InjectManager injectManager = context.getInjectManager();
     
-    AbstractSessionContext<X,T> context = createSessionContext(api, proxyFactory);
+    BeanBuilder<SessionContext> factory
+      = injectManager.createBeanFactory(SessionContext.class);
+  
+    context.setDeclaredRoles(_declaredRoles);
+
+    injectManager.addBean(factory.singleton(context));
    
     _contextMap.put(context.getApi(), context);
     
     /*
     if (_sessionContext == null) {
-      AbstractContext context = getContext();
-      _sessionContext = (SessionContext) context;
-      
-      BeanBuilder<SessionContext> factory
-      = beanManager.createBeanFactory(SessionContext.class);
-    
-      context.setDeclaredRoles(_declaredRoles);
-
-      beanManager.addBean(factory.singleton(context));
     }
     */
   }
@@ -204,7 +189,26 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   }
   
   protected <T> AbstractSessionContext<X,T>
-  createSessionContext(Class<T> api, SessionProxyFactory<T> factory)
+  createSessionContext(Class<T> api)
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+  
+  protected <T> SessionProxyFactory<T>
+  createProxyFactory(AbstractSessionContext<X,T> context)
+  {
+    try {
+      Class<?> []param = new Class[] { getClass(), getContextClass() };
+    
+      Constructor<?> ctor = _proxyImplClass.getConstructor(param);
+    
+      return (SessionProxyFactory<T>) ctor.newInstance(this, context);
+    } catch (Exception e) {
+      throw new IllegalStateException(e);
+    }
+  }
+  
+  protected Class<?> getContextClass()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
@@ -301,10 +305,16 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   {
     return SessionBeanType.STATELESS;
   }
-  
-  protected <T> InjectionTarget<T> getComponent(Class<T> api)
-  {
-    return (InjectionTarget<T>) _contextMap.get(api);
-  }
 
+  @Override
+  public void destroy()
+  {
+    for (AbstractSessionContext<X,?> context : _contextMap.values()) {
+      try {
+        context.destroy();
+      } catch (Exception e) {
+        log.log(Level.WARNING, e.toString(), e);
+      }
+    }
+  }
 }

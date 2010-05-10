@@ -33,6 +33,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.Timer;
@@ -44,6 +45,7 @@ import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.timer.ScheduleIntrospector;
 import com.caucho.config.timer.TimeoutCaller;
 import com.caucho.config.timer.TimerTask;
+import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.inject.StatelessBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
@@ -77,6 +79,8 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
                           Class<?> proxyImplClass)
   {
     super(ejbContainer, annotatedType, proxyImplClass);
+    
+    introspect();
   }
 
   @Override
@@ -154,12 +158,18 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   }
   */
   
+  @Override
+  protected Class<?> getContextClass()
+  {
+    return StatelessContext.class;
+  }
+  
   /**
    * Called by the StatelessProxy on initialization.
    */
-  public StatelessPool<X> createStatelessPool()
+  public <T> StatelessPool<X,T> createStatelessPool(StatelessContext<X,T> context)
   {
-    return new StatelessPool<X>(this);
+    return new StatelessPool<X,T>(this, context);
   }
 
   /**
@@ -209,11 +219,13 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
       _remoteProvider = getContext().getProvider();
     }
     */
+  }
 
-    /*
+  private void introspect()
+  {
     AnnotatedType<?> annType = getAnnotatedType();
     SessionPool sessionPool = annType.getAnnotation(SessionPool.class);
-    
+
     if (sessionPool != null) {
       if (sessionPool.maxIdle() >= 0)
         _sessionIdleMax = sessionPool.maxIdle();
@@ -223,16 +235,13 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
       
       if (sessionPool.maxConcurrentTimeout() >= 0)
         _sessionConcurrentTimeout = sessionPool.maxConcurrentTimeout();
-      
     }
-    */
   }
 
   @Override
-  protected <T> StatelessContext<X,T>
-  createSessionContext(Class<T> api, SessionProxyFactory<T> factory)
+  protected <T> StatelessContext<X,T> createSessionContext(Class<T> api)
   {
-    return new StatelessContext<X,T>(this, api, factory);
+    return new StatelessContext<X,T>(this, api);
   }
 
   @Override

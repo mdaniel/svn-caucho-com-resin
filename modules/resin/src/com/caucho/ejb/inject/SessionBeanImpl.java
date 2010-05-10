@@ -31,6 +31,7 @@ package com.caucho.ejb.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
@@ -40,20 +41,28 @@ import javax.enterprise.inject.spi.PassivationCapable;
 
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
+import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean
  */
 @Module
-abstract public class SessionBeanImpl<X,T>
+public class SessionBeanImpl<X,T>
   implements ScopeAdapterBean<T>, Bean<T>, PassivationCapable, EjbGeneratedBean
 {
+  private AbstractSessionContext<X,T> _context;
   private ManagedBeanImpl<X> _bean;
+  private LinkedHashSet<Type> _types = new LinkedHashSet<Type>();
   
-  public SessionBeanImpl(ManagedBeanImpl<X> bean)
+  public SessionBeanImpl(AbstractSessionContext<X,T> context,
+                         ManagedBeanImpl<X> bean,
+                         Set<Type> apiList)
   {
+    _context = context;
     _bean = bean;
+    
+    _types.addAll(apiList);
   }
   
   protected ManagedBeanImpl<X> getBean()
@@ -62,7 +71,10 @@ abstract public class SessionBeanImpl<X,T>
   }
   
   @Override
-  abstract public Set<Type> getTypes();
+  public Set<Type> getTypes()
+  {
+    return _types;
+  }
 
   @Override
   public T getScopeAdapter(Bean<?> topBean, CreationalContext<T> context)
@@ -71,14 +83,15 @@ abstract public class SessionBeanImpl<X,T>
   }
 
   @Override
-  public T create(CreationalContext<T> context)
+  public T create(CreationalContext<T> env)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _context.createProxy(env);
   }
   
   @Override
-  public void destroy(T instance, CreationalContext<T> context)
+  public void destroy(T instance, CreationalContext<T> env)
   {
+    _context.destroyProxy(instance, env);
   }
 
   /**

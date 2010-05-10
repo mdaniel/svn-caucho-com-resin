@@ -29,30 +29,21 @@
 
 package com.caucho.ejb.session;
 
-import java.lang.reflect.Constructor;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.Set;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.ejb.EJBExceptionWrapper;
-import com.caucho.ejb.inject.SingletonBeanImpl;
-import com.caucho.ejb.inject.StatefulBeanImpl;
+import com.caucho.ejb.inject.SessionBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
-import com.caucho.util.LruCache;
 
 /**
  * Server container for a session bean.
@@ -109,27 +100,21 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
                                          api, getContext()));
     
-    SingletonBeanImpl<X,T> statefulBean
-      = new SingletonBeanImpl<X,T>(this, mBean, api, apiList, context);
+    SessionBeanImpl<X,T> statefulBean
+      = new SessionBeanImpl<X,T>(context, mBean, apiList);
 
     return statefulBean;
   }
 
   @Override
-  protected <T> SingletonContext<X,T>
-  createSessionContext(Class<T> api, SessionProxyFactory<T> factory)
+  protected <T> SingletonContext<X,T> createSessionContext(Class<T> api)
   {
-    return new SingletonContext<X,T>(this, api, factory);
+    return new SingletonContext<X,T>(this, api);
   }
-
-  private InjectionTarget<X> createSessionComponent(Class api, Class beanClass)
+  
+  protected Class<?> getContextClass()
   {
-    throw new UnsupportedOperationException(getClass().getName());
-    /*
-    SingletonProxyFactory factory = getContext().getProxyFactory(api);
-
-    return new SingletonComponent(factory);
-    */
+    return SingletonContext.class;
   }
 
   /**
