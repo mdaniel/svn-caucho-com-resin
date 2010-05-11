@@ -803,7 +803,15 @@ public class Env
 
   public TimeZone getDefaultTimeZone()
   {
-    return _defaultTimeZone;
+    if (_defaultTimeZone != null)
+      return _defaultTimeZone;
+    
+    String timeZone = getIniString("date.timezone");
+    
+    if (timeZone != null)
+      return TimeZone.getTimeZone(timeZone);
+    else
+      return TimeZone.getDefault();
   }
 
   public QDate getGmtDate()
@@ -828,6 +836,18 @@ public class Env
     }
 
     return _localDate;
+  }
+  
+  public QDate getDate()
+  {
+    TimeZone zone = getDefaultTimeZone();
+    
+    if (zone.getID().equals("GMT"))
+      return getGmtDate();
+    else if (zone.equals(TimeZone.getDefault()))
+      return getLocalDate();
+    else
+      return new QDate(zone);
   }
 
   public void setDefaultTimeZone(String id)
@@ -1432,8 +1452,15 @@ public class Env
   public Path getUploadDirectory()
   {
     if (_uploadPath == null) {
-      String realPath = getUploadPath();
-
+      String realPath = getIniString("upload_tmp_dir");
+      
+      if (realPath != null) {
+      }
+      else if (getRequest() != null)
+        realPath = "WEB-INF/upload";
+      else
+        realPath = "/tmp/caucho/upload";
+      
       _uploadPath = _quercus.getPwd().lookup(realPath);
 
       try {
@@ -1448,20 +1475,6 @@ public class Env
     }
 
     return _uploadPath;
-  }
-
-  protected String getUploadPath()
-  {
-    String realPath = getIniString("upload_tmp_dir");
-
-    if (realPath == null) {
-      if (getRequest() != null)
-        realPath = getRequest().getRealPath("/WEB-INF/upload");
-      else
-        realPath = "/tmp/caucho/upload";
-    }
-
-    return realPath;
   }
 
   /**

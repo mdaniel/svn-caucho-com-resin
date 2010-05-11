@@ -1387,8 +1387,8 @@ public class FileModule extends AbstractQuercusModule {
       }
 
       if (mode.startsWith("r")) {
-        if (useIncludePath)
-          path = env.lookupInclude(filename.toStringValue());
+        if (useIncludePath && path == null)
+          path = env.lookupInclude(filename);
 
         if (path == null) {
           env.warning(L.l("{0} cannot be read", filename));
@@ -2231,7 +2231,9 @@ public class FileModule extends AbstractQuercusModule {
    * @param path the temp name of the uploaded file
    * @param dst the destination path
    */
-  public static boolean move_uploaded_file(Env env, @NotNull Path src, @NotNull Path dst)
+  public static boolean move_uploaded_file(Env env,
+                                           @NotNull Path src,
+                                           @NotNull Path dst)
   {
     // php/1665, php/1666
 
@@ -2244,11 +2246,10 @@ public class FileModule extends AbstractQuercusModule {
     String tail = src.getTail();
 
     src = env.getUploadDirectory().lookup(tail);
-
+    
     try {
       if (src.canRead()) {
-        src.renameTo(dst);
-        return true;
+        return src.renameTo(dst);
       }
       else
         return false;

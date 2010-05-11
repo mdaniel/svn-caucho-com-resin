@@ -31,12 +31,10 @@ package com.caucho.quercus.lib.date;
 
 import java.util.TimeZone;
 
-import com.caucho.quercus.UnimplementedException;
-import com.caucho.quercus.annotation.ClassImplementation;
-import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.env.ArrayValue;
 import com.caucho.quercus.env.ArrayValueImpl;
 import com.caucho.quercus.env.BooleanValue;
+import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.LongValue;
 import com.caucho.quercus.env.StringValue;
 import com.caucho.quercus.env.Value;
@@ -48,9 +46,14 @@ public class DateTimeZone
 {
   private TimeZone _timeZone;
   
-  protected DateTimeZone()
+  protected DateTimeZone(Env env)
   {
-    _timeZone = TimeZone.getDefault();
+    TimeZone timeZone = env.getDefaultTimeZone();
+    
+    if (timeZone == null)
+      timeZone = TimeZone.getDefault();
+    
+    _timeZone = timeZone;
   }
   
   protected DateTimeZone(String id)

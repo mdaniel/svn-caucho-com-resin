@@ -169,14 +169,6 @@ public class QDate {
   {
     this(isLocal ? _localTimeZone : _gmtTimeZone);
   }
-  
-  /**
-   * Creates the date form local or GMT.
-   */
-  public QDate(boolean isLocal, long now)
-  {
-    this(isLocal ? _localTimeZone : _gmtTimeZone, now);
-  }
 
   /**
    * Creates the date from local or GMT.

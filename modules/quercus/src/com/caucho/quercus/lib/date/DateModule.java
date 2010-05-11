@@ -82,8 +82,9 @@ public class DateModule extends AbstractQuercusModule {
   public static int cal_days_in_month(Env env,
                                       int cal, int month, int year)
   {
-    QDate date = new QDate(false, env.getCurrentTime());
-
+    QDate date = env.getDate();
+    date.setGMTTime(env.getCurrentTime());
+    
     date.setYear(year);
     date.setMonth(month - 1);
 
@@ -182,7 +183,8 @@ public class DateModule extends AbstractQuercusModule {
   {
     long now = env.getCurrentTime();
     
-    QDate date = new QDate(false, now);
+    QDate date = env.getDate();
+    date.setGMTTime(now);
     
     if (year < 0) {
       date.setGMTTime(now);
@@ -227,9 +229,18 @@ public class DateModule extends AbstractQuercusModule {
   /**
    * Returns an array of the current date.
    */
-  public Value getdate(@Optional("time()") long time)
+  public Value getdate(Env env, @Optional Value timeV)
   {
-    QDate date = new QDate(false, 1000 * time);
+    QDate date = env.getDate();
+    
+    long time;
+    
+    if (timeV.isDefault())
+      time = env.getCurrentTime();
+    else
+      time = timeV.toLong() * 1000L;
+    
+    date.setGMTTime(time);
 
     ArrayValue array = new ArrayValueImpl();
 
@@ -243,7 +254,7 @@ public class DateModule extends AbstractQuercusModule {
     array.put("yday", date.getDayOfYear());
     array.put("weekday", _fullDayOfWeek[date.getDayOfWeek() - 1]);
     array.put("month", _fullMonth[date.getMonth()]);
-    array.put(LongValue.ZERO, LongValue.create(time));
+    array.put(LongValue.ZERO, LongValue.create(time / 1000L));
 
     return array;
   }
@@ -351,12 +362,7 @@ public class DateModule extends AbstractQuercusModule {
       return dateImpl(format, time, env.getGmtDate());
     }
     else {
-      QDate calendar;
-      
-      if (env.getDefaultTimeZone() != null)
-        calendar = new QDate(env.getDefaultTimeZone(), env.getCurrentTime());
-      else
-        calendar = env.getLocalDate();
+      QDate calendar = env.getDate();
 
       return dateImpl(format, time, calendar);
     }
@@ -370,7 +376,7 @@ public class DateModule extends AbstractQuercusModule {
                                    QDate calendar)
   {
     long now = 1000 * time;
-
+    
     calendar.setGMTTime(now);
 
     CharBuffer sb = new CharBuffer();
@@ -868,7 +874,8 @@ public class DateModule extends AbstractQuercusModule {
 
     long now = env.getCurrentTime();
     
-    QDate date = new QDate(true, now);
+    QDate date = env.getDate();
+    date.setGMTTime(now);
     
     setMktime(date, hourV, minuteV, secondV, monthV, dayV, yearV);
 
@@ -961,7 +968,8 @@ public class DateModule extends AbstractQuercusModule {
       else
         now = env.getCurrentTime();
 
-      QDate date = new QDate(true, now);
+      QDate date = env.getDate();
+      date.setGMTTime(now);
 
       if (timeString.equals("")) {
         date.setHour(0);
@@ -1043,17 +1051,8 @@ public class DateModule extends AbstractQuercusModule {
   public static String date_default_timezone_get(Env env)
   {
     TimeZone timeZone = env.getDefaultTimeZone();
-    String id;
-  
-    if (timeZone != null)
-      return timeZone.getID();
     
-    id = env.getIniString("date.timezone");
-    
-    if (id != null)
-      return id;
-    
-    return TimeZone.getDefault().getID();
+    return timeZone.getID();
   }
   
   public static boolean date_default_timezone_set(Env env, String id)

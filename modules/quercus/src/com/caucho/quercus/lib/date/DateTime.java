@@ -62,7 +62,7 @@ public class DateTime
   
   protected DateTime(Env env, String timeString)
   {
-    this(env, timeString, new DateTimeZone());
+    this(env, timeString, new DateTimeZone(env));
   }
   
   protected DateTime(Env env, String timeString, DateTimeZone dateTimeZone)
@@ -103,7 +103,7 @@ public class DateTime
   
   public String format(String format)
   {
-    long time = _qDate.getLocalTime() / 1000;
+    long time = _qDate.getGMTTime() / 1000;
     
     QDate calendar = new QDate(_qDate.getLocalTimeZone());
 
@@ -150,7 +150,7 @@ public class DateTime
                       int month,
                       int day)
   {
-    _qDate.setDate(year, month, day);
+    _qDate.setDate(year, month - 1, day);
   }
   
   public void setISODate(int year,
