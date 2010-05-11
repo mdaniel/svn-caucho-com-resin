@@ -167,7 +167,7 @@ public class QuercusContext
 
   private String _scriptEncoding;
 
-  private String _phpVersion = "5.2.0";
+  private String _phpVersion = "5.3.2";
   private String _mySqlVersion;
   private StringValue _phpVersionValue;
 

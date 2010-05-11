@@ -57,7 +57,7 @@ public class XmlReader
 
   private boolean _hasAttribute;
 
-  private XMLStreamReader  _streamReader;
+  private XMLStreamReader _streamReader;
 
   private static final HashMap<Integer, Integer> _constConvertMap
     = new HashMap<Integer, Integer>();
@@ -292,7 +292,7 @@ public class XmlReader
       else if (_currentNodeType == XMLStreamConstants.COMMENT)
         name = "#comment";
       else {
-        if (prefix == null)
+        if (prefix == null || prefix.length() == 0)
           name = _streamReader.getName().toString();
         else
           name = prefix + ":" + _streamReader.getLocalName().toString();

@@ -2393,7 +2393,7 @@ public class FileModule extends AbstractQuercusModule {
       }
 
       skipToEndOfLine(ch, is);
-
+      
       return sb;
     }
     else {
@@ -2430,26 +2430,45 @@ public class FileModule extends AbstractQuercusModule {
           }
 
         }
+        else if (ch == '"') {
+          StringValue result = env.createUnicodeBuilder();
+          
+          String value = sb.toString().trim();
+
+          result.append(getIniConstant(env, value));
+
+          for (ch = is.read(); ch >= 0 && ch != '"'; ch = is.read()) {
+            result.append((char) ch);
+          }
+
+          skipToEndOfLine(ch, is);
+          
+          return result;
+        }
         else
           sb.append((char) ch);
       }
 
       String value = sb.toString().trim();
 
-      if (value.equalsIgnoreCase("null"))
-        return env.getEmptyString();
-      else if (value.equalsIgnoreCase("true")
-               || value.equalsIgnoreCase("yes"))
-        return env.createString("1");
-      else if (value.equalsIgnoreCase("false")
-               || value.equalsIgnoreCase("no"))
-        return env.getEmptyString();
-
-      if (env.isDefined(value))
-        return env.createString(env.getConstant(value).toString());
-      else
-        return env.createString(value);
+      return env.createString(getIniConstant(env, value));
     }
+  }
+  
+  private static String getIniConstant(Env env, String value)
+  {
+    if (value.equalsIgnoreCase("null"))
+      return "";
+    else if (value.equalsIgnoreCase("true")
+             || value.equalsIgnoreCase("yes"))
+      return "1";
+    else if (value.equalsIgnoreCase("false")
+             || value.equalsIgnoreCase("no"))
+      return "";
+    else if (env.isDefined(value))
+      return env.getConstant(value).toString();
+    else
+      return value;
   }
 
   private static boolean isValidIniKeyChar(char ch)
