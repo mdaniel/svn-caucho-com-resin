@@ -312,12 +312,12 @@ public class QuercusContext
 
   public String getVersion()
   {
-    return "Open Source 4.0.7";
+    return "Open Source " + QuercusVersion.getVersionNumber();
   }
 
   public String getVersionDate()
   {
-    return "20100420";
+    return QuercusVersion.getVersionDate();
   }
 
   /**

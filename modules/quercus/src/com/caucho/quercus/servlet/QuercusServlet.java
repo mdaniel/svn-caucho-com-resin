@@ -172,34 +172,6 @@ public class QuercusServlet
 
     if (version.startsWith("1.3.") || version.startsWith("1.4."))
       throw new QuercusRuntimeException(L.l("Quercus requires JDK 1.5 or higher."));
-
-    /*
-    int major = 0;
-    int minor = 0;
-
-    int i = 0;
-    int length = version.length();
-    while(i < length) {
-      char ch = version.charAt(i++);
-
-      if (ch == '.')
-        break;
-
-      major = major * 10 + ch - '0';
-    }
-
-    while(i < length) {
-      char ch = version.charAt(i++);
-
-      if (ch == '.')
-        break;
-
-      minor = minor * 10 + ch - '0';
-    }
-
-    if (major == 1 && minor < 5)
-      throw new QuercusRuntimeException(L.l("Quercus requires JDK 1.5 or higher."));
-    */
   }
 
   /**
@@ -447,10 +419,10 @@ public class QuercusServlet
   {
     super.init(config);
 
-    Enumeration paramNames = config.getInitParameterNames();
+    Enumeration<String> paramNames = config.getInitParameterNames();
 
     while (paramNames.hasMoreElements()) {
-      String paramName = String.valueOf(paramNames.nextElement());
+      String paramName = paramNames.nextElement();
       String paramValue = config.getInitParameter(paramName);
 
       setInitParam(paramName, paramValue);
@@ -545,7 +517,7 @@ public class QuercusServlet
       _impl.getQuercus().setUnicodeSemantics(true);
 
     _impl.init(config);
-
+    
     QuercusContext quercus = getQuercus();
 
     quercus.setCompile(_isCompile);
@@ -564,7 +536,7 @@ public class QuercusServlet
       String realPath = getServletContext().getRealPath(_iniPath);
       quercus.setIniFile(getQuercus().getPwd().lookup(realPath));
     }
-
+    
     if (_scriptEncoding != null)
       quercus.setScriptEncoding(_scriptEncoding);
 

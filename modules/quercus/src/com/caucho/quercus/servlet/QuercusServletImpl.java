@@ -40,21 +40,17 @@ import com.caucho.quercus.QuercusRuntimeException;
 import com.caucho.quercus.env.Env;
 import com.caucho.quercus.env.QuercusValueException;
 import com.caucho.quercus.env.StringValue;
-import com.caucho.quercus.env.Value;
 import com.caucho.quercus.page.QuercusPage;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.vfs.FilePath;
 import com.caucho.vfs.Path;
-import com.caucho.vfs.StreamImpl;
 import com.caucho.vfs.Vfs;
-import com.caucho.vfs.VfsStream;
 import com.caucho.vfs.WriteStream;
-import com.caucho.vfs.WriterStreamImpl;
 
 import javax.servlet.ServletConfig;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
-import javax.servlet.GenericServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpServlet;
@@ -93,7 +89,7 @@ public class QuercusServletImpl extends HttpServlet
     getQuercus().setPwd(pwd);
 
     // need to set these for non-Resin containers
-    if (! getQuercus().isResin()) {
+    if (! Alarm.isTest() && ! getQuercus().isResin()) {
       Vfs.setPwd(pwd);
       WorkDir.setLocalWorkDir(pwd.lookup("WEB-INF/work"));
     }
