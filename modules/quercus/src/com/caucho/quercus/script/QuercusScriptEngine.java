@@ -56,14 +56,24 @@ public class QuercusScriptEngine
 
   QuercusScriptEngine(QuercusScriptEngineFactory factory)
   {
-    this(factory, new QuercusContext());
+    this(factory, createQuercus());
   }
 
   public QuercusScriptEngine(QuercusScriptEngineFactory factory,
-			     QuercusContext quercus)
+                             QuercusContext quercus)
   {
     _factory = factory;
     _quercus = quercus;
+  }
+  
+  private static QuercusContext createQuercus()
+  {
+    QuercusContext quercus = new QuercusContext();
+    
+    quercus.init();
+    quercus.start();
+    
+    return quercus;
   }
 
   /**

@@ -127,6 +127,7 @@ public class BamPhpServiceManager implements BrokerListener {
       throw new ConfigException(L.l("script path not specified"));
 
     _quercus.init();
+    _quercus.start();
 
     _broker.addBrokerListener(this);
   }

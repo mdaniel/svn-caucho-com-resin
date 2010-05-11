@@ -125,6 +125,7 @@ public class BamPhpActor extends SimpleActor {
       throw new ConfigException(L.l("script path not specified"));
 
     _quercus.init();
+    _quercus.start();
     
     try {
       _page = _quercus.parse(_script);

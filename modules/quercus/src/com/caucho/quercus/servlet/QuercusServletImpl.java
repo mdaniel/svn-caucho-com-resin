@@ -95,7 +95,6 @@ public class QuercusServletImpl extends HttpServlet
     }
 
     getQuercus().init();
-    
     getQuercus().start();
   }
   
