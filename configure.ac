@@ -162,6 +162,12 @@ AC_SUBST(JAVA_HOME)
 
 JAVA_EXE="$JAVA_HOME/bin/java"
 
+$JAVA_EXE -d64 -version 1>/dev/null 2>/dev/null
+
+if test $? = "0"; then
+  JAVA_EXE="$JAVA_EXE -d64"
+fi
+
 AC_SUBST(JAVA_EXE)
 
 #
@@ -600,7 +606,7 @@ fi
 # Java 1.6 check
 #
 
-echo -n "checking if ${JAVA_EXE} is Java 1.6... "
+echo $ECHO_N "checking if ${JAVA_EXE} is Java 1.6... "
 
 tmpname="/tmp/java$$.out"
 	       	
@@ -618,7 +624,7 @@ echo "yes"
 #
 # 64bit heuristics
 #
-echo -n "checking if Java is 64-bit... "
+echo $ECHO_N "checking if Java is 64-bit... "
 
 tmpname="/tmp/java$$.out"
 	       	
@@ -738,81 +744,83 @@ if test -z "${LD_SHLIB}"; then
 
   case "$target_os" in
     linux*)
-	LD_SHLIB=${CC}
-	
-	if test -n "$b64"; then
-  	  CFLAGS="$CFLAGS -m64 -fPIC"
-	  LDFLAGS_SHLIB="-shared -fPIC"
-	fi
-	if test -n "$b64_jni"; then
-  	  CFLAGS_JNI="$CFLAGS_JNI -m64 -fPIC"
-	  LDFLAGS_SHLIB="-shared -fPIC"
-   	fi
-	;;
-	
-    *solaris*)
-	if test -n "$is_gcc"; then
-	    CFLAGS_SHLIB="-fPIC"
-	    
-	   if test -n "$b64"; then
-  	     CFLAGS="$CFLAGS -m64"
-	   fi
-           if test -n "$b64_jni"; then
-  	     CFLAGS_JNI="$CFLAGS_JNI -m64"
-   	   fi
-	else
-	    CFLAGS_SHLIB="-KPIC"
-	    
-	   if test -n "$b64"; then
-  	     CFLAGS="$CFLAGS -xarch=v9"
-	   fi
-	   if test -n "$b64_jni"; then
-  	     CFLAGS_JNI="$CFLAGS_JNI -xarch=v9"
-   	   fi
-	fi
+      LD_SHLIB=${CC}
 
-	if test -n "$is_gnu_ld"; then
-	    LDFLAGS_SHLIB="-shared"
-        else
-	    LDFLAGS_SHLIB="-G -fPIC"
-	fi
-	;;
+      if test -n "$b64"; then
+        CFLAGS="$CFLAGS -m64 -fPIC"
+        LDFLAGS_SHLIB="-shared -fPIC"
+      fi
+      if test -n "$b64_jni"; then
+        CFLAGS_JNI="$CFLAGS_JNI -m64 -fPIC"
+        LDFLAGS_SHLIB="-shared -fPIC"
+      fi
+      ;;
+
+    *solaris*)
+      if test -n "$is_gcc"; then
+        CFLAGS_SHLIB="-fPIC"
+
+        if test -n "$b64"; then
+          CFLAGS="$CFLAGS -m64 -G -fPIC"
+          LDFLAGS_SHLIB="-m64"
+        fi
+        if test -n "$b64_jni"; then
+          CFLAGS_JNI="$CFLAGS_JNI -m64 -G -fPIC"
+          LDFLAGS_SHLIB="-m64"
+        fi
+      else
+        CFLAGS_SHLIB="-KPIC"
+
+        if test -n "$b64"; then
+          CFLAGS="$CFLAGS -xarch=v9"
+        fi
+        if test -n "$b64_jni"; then
+          CFLAGS_JNI="$CFLAGS_JNI -xarch=v9"
+        fi
+      fi
+
+      if test -n "$is_gnu_ld"; then
+        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -shared"
+      else
+        LDFLAGS_SHLIB="$LDFLAGS_SHLIB -shared -fPIC"
+      fi
+      ;;
 
     darwin*)
-        CFLAGS_SHLIB="-DSHARED_MODULE"
-	LD_SHLIB=${CC}
- 	LDFLAGS_SHLIB="-dynamiclib -undefined suppress -flat_namespace"
-	if test -n "$b64"; then
-  	  CFLAGS="$CFLAGS -arch x86_64"
-  	  LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
-	fi
-	if test -n "$b64_jni"; then
-  	  CFLAGS_JNI="$CFLAGS_JNI -m64"
-  	  LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
-   	fi
-        ;;
+      CFLAGS_SHLIB="-DSHARED_MODULE"
+      LD_SHLIB=${CC}
+      LDFLAGS_SHLIB="-dynamiclib -undefined suppress -flat_namespace"
+      if test -n "$b64"; then
+        CFLAGS="$CFLAGS -arch x86_64"
+        LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
+      fi
+      if test -n "$b64_jni"; then
+        CFLAGS_JNI="$CFLAGS_JNI -m64"
+        LDFLAGS_SHLIB="-arch x86_64 $LDFLAGS_SHLIB"
+      fi
+      ;;
 
     *freebsd*)
-        CFLAGS="$CFLAGS -fPIC"
-        ;;
+      CFLAGS="$CFLAGS -fPIC"
+      ;;
 
     *aix*)
-	if test -z "$is_gcc"; then
-	   CFLAGS_SHLIB="-bexpall"
-	else
-	    CFLAGS_SHLIB="-fpic"
-	fi
-	LDFLAGS_SHLIB=""
-	;;
+      if test -z "$is_gcc"; then
+        CFLAGS_SHLIB="-bexpall"
+      else
+        CFLAGS_SHLIB="-fpic"
+      fi
+      LDFLAGS_SHLIB=""
+      ;;
 
     *hpux*)
-	if test -z "$is_gcc"; then
-	    CFLAGS_SHLIB="+z"
-	else
-	    CFLAGS_SHLIB="-fpic"
-	fi
-	LDFLAGS_SHLIB="-b"
-	;;
+      if test -z "$is_gcc"; then
+        CFLAGS_SHLIB="+z"
+      else
+        CFLAGS_SHLIB="-fpic"
+      fi
+      LDFLAGS_SHLIB="-b"
+      ;;
   esac
 
   case "$target_cpu" in
@@ -871,7 +879,7 @@ fi
 # Check if cp accepts -u
 #
 CP=`which cp`
-echo -n "checking if $CP accepts -u... "
+echo $ECHO_N "checking if $CP accepts -u... "
 
 touch /tmp/cp.test.$$.src
 $CP -u /tmp/cp.test.$$.src /tmp/cp.test.$$.dest

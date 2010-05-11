@@ -30,7 +30,7 @@ fi
 
 export JAVA_HOME RESIN_HOME
 
-JAVA="$JAVA_HOME/bin/java"
+JAVA="@JAVA_EXE@"
 #
 # Set to the server id to start
 #
