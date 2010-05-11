@@ -69,6 +69,8 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
   private ActivationSpec _activationSpec;
 
   private MessageDrivenContext _context;
+  
+  private Class _proxyClass;
 
   private Method _ejbCreate;
 
@@ -131,7 +133,7 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
 			getEJBName()));
 
       try {
-        Class<?> beanClass = getBeanSkelClass();
+        Class<?> beanClass = _proxyClass;//getBeanSkelClass();
 
         _ejbCreate = beanClass.getMethod("ejbCreate", new Class[0]);
 
@@ -236,7 +238,7 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
     try {
       thread.setContextClassLoader(getClassLoader());
       
-      Class<X> beanClass = getBeanSkelClass();
+      Class<X> beanClass = _proxyClass; // getBeanSkelClass();
 
       Constructor<X> ctor = beanClass.getConstructor(new Class[] { MessageManager.class });
     
@@ -297,8 +299,7 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
    */
   public void setProxyImplClass(Class<?> proxyImplClass)
   {
-    // TODO Auto-generated method stub
-    
+    _proxyClass = proxyImplClass;
   }
 
 }

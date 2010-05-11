@@ -29,6 +29,9 @@
 
 package com.caucho.ejb.cfg;
 
+import static javax.ejb.TransactionAttributeType.REQUIRED;
+
+
 import java.lang.reflect.Modifier;
 
 import javax.annotation.PostConstruct;
@@ -538,7 +541,11 @@ public class EjbMessageBean<X> extends EjbBean<X> {
   @Override
   protected BeanGenerator<X> createBeanGenerator()
   {
-    _messageBean = new MessageGenerator<X>(getEJBName(), getAnnotatedType());
+    AnnotatedType<X> ejbClass = getAnnotatedType();
+
+    ejbClass = fillClassDefaults(ejbClass);
+    
+    _messageBean = new MessageGenerator<X>(getEJBName(), ejbClass);
 
     // _messageBean.setApi(new AnnotatedTypeImpl(_messagingType));
 
@@ -634,6 +641,25 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     return deployMessageServer(ejbManager, javaGen, ra, _activationSpec);
   }
 
+  private AnnotatedType<X> fillClassDefaults(AnnotatedType<X> ejbClass)
+  {
+    AnnotatedTypeImpl<X> ejbClassImpl = AnnotatedTypeImpl.create(ejbClass);
+    
+    if (!_isContainerTransaction) {
+      ejbClassImpl.addAnnotation(XaAnnotation.createBeanManaged());
+    }
+
+    TransactionAttribute ann
+      = ejbClass.getAnnotation(TransactionAttribute.class);
+
+    if (ann == null) {
+      // ejb/1100
+      ejbClassImpl.addAnnotation(XaAnnotation.create(REQUIRED));
+    }
+    
+    return ejbClassImpl;
+  }
+
   /**
    * Deploys the bean.
    */
@@ -668,8 +694,6 @@ public class EjbMessageBean<X> extends EjbBean<X> {
 
       Class<?> proxyImplClass = javaGen.loadClass(getSkeletonName());
 
-      if (true)
-        throw new UnsupportedOperationException(getClass().getName());
       manager.setProxyImplClass(proxyImplClass);
 
       manager.setActivationSpec(spec);

@@ -30,13 +30,17 @@
 package com.caucho.ejb.gen;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
 
+import javax.ejb.LocalBean;
 import javax.ejb.MessageDrivenBean;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.BeanGenerator;
@@ -54,6 +58,9 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   
   private ArrayList<AspectGenerator<X>> _businessMethods
     = new ArrayList<AspectGenerator<X>>();
+  
+  private ArrayList<AnnotatedMethod<? super X>> _annotatedMethods
+    = new ArrayList<AnnotatedMethod<? super X>>();
   
   public MessageGenerator(String ejbName, AnnotatedType<X> ejbClass)
   {
@@ -89,7 +96,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     sb.append(className);
     */
     sb.append(className);
-    sb.append("__BeanContext");
+    sb.append("__BeanProxy");
 
     return sb.toString();
   }
@@ -112,6 +119,90 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   public ArrayList<AspectGenerator<X>> getMethods()
   {
     return _businessMethods;
+  }
+
+  /**
+   * Introspects the bean.
+   */
+  @Override
+  public void introspect()
+  {
+    super.introspect();
+    
+    introspectType(getBeanType());
+    
+    introspectImpl();
+  }
+  
+  private void introspectType(AnnotatedType<? super X> type)
+  {
+    for (AnnotatedMethod<? super X> method : type.getMethods())
+      introspectMethod(method);
+  }
+  
+  private void introspectMethod(AnnotatedMethod<? super X> method)
+  {
+    /*
+    AnnotatedMethod<? super X> oldMethod 
+      = AnnotatedTypeUtil.findMethod(_annotatedMethods, method);
+    
+    if (oldMethod != null) {
+      // XXX: merge annotations
+      return;
+    }
+    
+    AnnotatedMethod<? super X> baseMethod
+      = AnnotatedTypeUtil.findMethod(getBeanType(), method);
+    
+    if (baseMethod == null)
+      throw new IllegalStateException(L.l("{0} does not have a matching base method in {1}",
+                                          method, getBeanType()));
+    
+    // XXX: merge annotations
+    
+    _annotatedMethods.add(baseMethod);
+     */
+    _annotatedMethods.add(method);
+  }
+
+  
+  /**
+   * Introspects the APIs methods, producing a business method for
+   * each.
+   */
+  private void introspectImpl()
+  {
+    for (AnnotatedMethod<? super X> method : _annotatedMethods) {
+      introspectMethodImpl(method);
+    }
+  }
+
+  private void introspectMethodImpl(AnnotatedMethod<? super X> apiMethod)
+  {
+    Method javaMethod = apiMethod.getJavaMember();
+      
+    if (javaMethod.getDeclaringClass().equals(Object.class))
+      return;
+    if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
+      return;
+    /*
+    if (javaMethod.getName().startsWith("ejb")) {
+      throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
+                                    javaMethod.getDeclaringClass(),
+                                    javaMethod.getName()));
+    }
+    */
+    
+    int modifiers = javaMethod.getModifiers();
+
+    if (! Modifier.isPublic(modifiers)) {
+      return;
+    }
+
+    if (Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))
+      return;
+
+    addBusinessMethod(apiMethod);
   }
   
   public void addBusinessMethod(AnnotatedMethod<? super X> method)
@@ -164,7 +255,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
 
     out.println("private static HashSet<Method> _xaMethods = new HashSet<Method>();");
     out.println();
-    out.println("private MessageServer _server;");
+    out.println("private MessageManager _server;");
     out.println("private XAResource _xaResource;");
     out.println("private boolean _isXa;");
 
@@ -175,7 +266,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     generateBeanPrologue(out, map);
 
     out.println();
-    out.println("public " + getClassName() + "(MessageServer server)");
+    out.println("public " + getClassName() + "(MessageManager server)");
     out.println("{");
     out.pushDepth();
 
@@ -299,7 +390,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     }
   }
   
-  protected AnnotatedMethod<? super X> getImplMethod(String name, Class<?> []param)
+  private AnnotatedMethod<? super X> getImplMethod(String name, Class<?> []param)
   {
     return AnnotatedTypeUtil.findMethod(getBeanType(), name, param);
   }
