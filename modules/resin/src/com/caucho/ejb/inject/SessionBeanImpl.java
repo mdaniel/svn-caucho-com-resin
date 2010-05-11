@@ -149,4 +149,12 @@ public class SessionBeanImpl<X,T>
   {
     return getBean().getId();
   }
+  
+  @Override
+  public String toString()
+  {
+    return (getClass().getSimpleName()
+            + "[" + getBeanClass().getSimpleName()
+            + ", " + getQualifiers() + "]");
+  }
 }

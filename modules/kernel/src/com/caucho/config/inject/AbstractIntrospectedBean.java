@@ -91,8 +91,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
 
   private BaseType _baseType;
 
-  private Set<BaseType> _types;
-
   private Set<Type> _typeClasses;
 
   private ArrayList<Annotation> _qualifiers
@@ -218,18 +216,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _annotated;
   }
 
-  /*
-  protected AnnotatedType getAnnotatedType()
-  {
-    return  new BeanTypeImpl(getTargetType(), getIntrospectionClass());
-  }
-  */
-
-  protected Class<?> getIntrospectionClass()
-  {
-    return getTargetClass();
-  }
-
   /**
    * Gets the bean's EL qualifier name.
    */
@@ -242,6 +228,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Returns the bean's qualifier types
    */
+  @Override
   public Set<Annotation> getQualifiers()
   {
     Set<Annotation> set = new LinkedHashSet<Annotation>();
@@ -253,6 +240,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return set;
   }
 
+  @Override
   public String getId()
   {
     if (_passivationId == null)
@@ -261,6 +249,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _passivationId;
   }
 
+  @Override
   public void setPassivationId(String passivationId)
   {
     _passivationId = passivationId;
@@ -281,18 +270,9 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return set;
   }
 
-  /**
-   * Returns an array of the qualifier annotations
-   */
-  public Annotation []getQualifierArray()
+  private Annotated getIntrospectedAnnotated()
   {
-    if (_qualifiers == null || _qualifiers.size() == 0)
-      return new Annotation[] { DefaultLiteral.DEFAULT };
-
-    Annotation []qualifiers = new Annotation[_qualifiers.size()];
-    _qualifiers.toArray(qualifiers);
-
-    return qualifiers;
+    return _annotated;
   }
 
   /**
@@ -307,17 +287,10 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Returns the types that the bean implements
    */
+  @Override
   public Set<Type> getTypes()
   {
     return _typeClasses;
-  }
-
-  /**
-   * Returns the types that the bean implements
-   */
-  public Set<BaseType> getGenericTypes()
-  {
-    return _types;
   }
   
   @Override
@@ -326,16 +299,12 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _isAlternative;
   }
 
+  @Override
   public void introspect()
   {
     super.introspect();
 
     introspect(getIntrospectedAnnotated());
-  }
-
-  protected Annotated getIntrospectedAnnotated()
-  {
-    return _annotated;
   }
 
   protected void introspect(Annotated annotated)
@@ -571,14 +540,16 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Returns true if the bean can be null
    */
+  @Override
   public boolean isNullable()
   {
-    return false;
+    return ! getBeanClass().isPrimitive();
   }
 
   /**
    * Returns true if the bean is serializable
    */
+  @Override
   public boolean isPassivationCapable()
   {
     return Serializable.class.isAssignableFrom(getTargetClass());
@@ -587,6 +558,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   /**
    * Instantiate the bean.
    */
+  @Override
   public T create(CreationalContext<T> env)
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -599,42 +571,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   public void destroy(T instance, CreationalContext<T> env)
   {
   }
-
-  /**
-   * Call destroy
-   */
-  /*
-  public void destroy(T instance)
-  {
-  }
-  */
-
-  /**
-   * Inject the bean.
-   */
-/*
-  public void inject(T instance)
-  {
-  }
-*/
-
-  /**
-   * Call post-construct
-   */
-/*
-  public void postConstruct(T instance)
-  {
-  }
-*/
-
-  /**
-   * Call pre-destroy
-   */
-/*
-  public void preDestroy(T instance)
-  {
-  }
-*/
 
   public void dispose(T instance)
   {
@@ -698,6 +634,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   }
 
   static class MethodNameComparator implements Comparator<AnnotatedMethod<?>> {
+    @Override
     public int compare(AnnotatedMethod<?> a, AnnotatedMethod<?> b)
     {
       return a.getJavaMember().getName().compareTo(b.getJavaMember().getName());
@@ -705,6 +642,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
   }
 
   static class AnnotationComparator implements Comparator<Annotation> {
+    @Override
     public int compare(Annotation a, Annotation b)
     {
       Class<?> annTypeA = a.annotationType();

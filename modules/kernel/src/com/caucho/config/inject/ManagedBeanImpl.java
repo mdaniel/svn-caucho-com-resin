@@ -146,6 +146,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
       context.push(instance);
 
     _injectionTarget.inject(instance, context);
+    _injectionTarget.postConstruct(instance);
     
     /*
     if (context instanceof CreationalContextImpl<?>) {
@@ -160,7 +161,6 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     else
       _injectionTarget.postConstruct(instance);
       */
-    _injectionTarget.postConstruct(instance);
 
     return instance;
   }
@@ -174,13 +174,17 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
     if (env != null) {
       env.push(instance);
-      env.setInjectionTarget(_injectionTarget);
+      // env.setInjectionTarget(_injectionTarget);
     }
 
     _injectionTarget.inject(instance, env);
-    
+    _injectionTarget.postConstruct(instance);
+
+    // ioc/0555
+    /*
     if (env == null)
       _injectionTarget.postConstruct(instance);
+      */
     
     return instance;
   }
