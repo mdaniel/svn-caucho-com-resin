@@ -1913,9 +1913,11 @@ public class WebApp extends ServletContextImpl
     if (! hasListener(listener.getListenerClass())) {
       _listeners.add(listener);
 
+/*
       if (_lifecycle.isStarting() || _lifecycle.isActive()) {
         addListenerObject(listener.createListenerObject(), true);
       }
+*/
     }
   }
 
