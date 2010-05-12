@@ -137,7 +137,7 @@ public class ByteCodeClassScanner {
 
       int fieldCount = readShort(is);
       for (int i = 0; i < fieldCount; i++) {
-        skipField(is);
+        scanField(is);
       }
 
       int methodCount = readShort(is);
@@ -368,6 +368,25 @@ public class ByteCodeClassScanner {
   }
 
   /**
+   * Parses a field entry.
+   */
+  private void scanField(InputStream is)
+    throws IOException
+  {
+    // int accessFlags = readShort();
+    // int nameIndex = readShort();
+    // int descriptorIndex = readShort();
+    
+    is.skip(6);
+
+    int attributesCount = readShort(is);
+
+    for (int i = 0; i < attributesCount; i++) {
+      scanAttributeForAnnotation(is);
+    }
+  }
+
+  /**
    * Parses a method entry.
    */
   private void skipMethod(InputStream is)
@@ -397,19 +416,49 @@ public class ByteCodeClassScanner {
     int nameIndex = readShort(is);
 
     // String name = _cp.getUtf8(nameIndex).getValue();
-    
+      
     int length = readInt(is);
 
     if (! isNameAnnotation(nameIndex)) {
       is.skip(length);
       return;
     }
-    
+      
     int count = readShort(is);
-    
+      
     for (int i = 0; i < count; i++) {
       int annTypeIndex = scanAnnotation(is);
-    
+      
+      if (annTypeIndex > 0) {
+        _matcher.addClassAnnotation(_charBuffer, 
+                                    _cpData[annTypeIndex] + 1, 
+                                    _cpLengths[annTypeIndex] - 2);
+      }
+    }
+  }
+
+  /**
+   * Parses an attribute for an annotation.
+   */
+  private void scanAttributeForAnnotation(InputStream is)
+    throws IOException
+  {
+    int nameIndex = readShort(is);
+
+    // String name = _cp.getUtf8(nameIndex).getValue();
+      
+    int length = readInt(is);
+
+    if (! isNameAnnotation(nameIndex)) {
+      is.skip(length);
+      return;
+    }
+      
+    int count = readShort(is);
+      
+    for (int i = 0; i < count; i++) {
+      int annTypeIndex = scanAnnotation(is);
+      
       if (annTypeIndex > 0) {
         _matcher.addClassAnnotation(_charBuffer, 
                                     _cpData[annTypeIndex] + 1, 

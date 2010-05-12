@@ -33,12 +33,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.IllegalProductException;
+import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -49,6 +49,7 @@ import javax.enterprise.inject.spi.Producer;
 
 import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.program.Arg;
+import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -118,6 +119,15 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
                                                    disposesMethod, disposesArgs);
     bean.introspect();
     bean.introspect(producesMethod);
+    
+    BaseType type = manager.createSourceBaseType(producesMethod.getBaseType());
+    
+    if (type.isGeneric()) {
+      // ioc/07f0
+      throw new InjectionException(L.l("'{0}' is an invalid @Produces method because it returns a generic type {1}",
+                                       producesMethod.getJavaMember(),
+                                       type));
+    }
 
     return bean;
   }

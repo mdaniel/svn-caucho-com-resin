@@ -49,7 +49,6 @@ public class ParamType extends BaseType implements ParameterizedType
   private BaseType []_param;
   private Type []_actualArguments;
   private HashMap<String,BaseType> _paramMap;
-  private boolean _isGeneric;
 
   public ParamType(Class<?> type,
 		   BaseType []param,
@@ -93,6 +92,18 @@ public class ParamType extends BaseType implements ParameterizedType
   public BaseType []getParameters()
   {
     return _param;
+  }
+  
+  @Override
+  public boolean isGeneric()
+  {
+    // ioc/07f0
+    for (BaseType type : _param) {
+      if (type.isGeneric())
+        return true;
+    }
+    
+    return false;
   }
 
   @Override

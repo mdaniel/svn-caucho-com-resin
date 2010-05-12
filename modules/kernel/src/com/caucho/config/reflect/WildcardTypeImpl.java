@@ -79,6 +79,14 @@ public class WildcardTypeImpl extends BaseType implements WildcardType
   }
   
   @Override
+  public boolean isGeneric()
+  {
+    // ioc/07f0
+    
+    return true;
+  }
+  
+  @Override
   protected BaseType []getWildcardBounds()
   {
     return _upperBounds;

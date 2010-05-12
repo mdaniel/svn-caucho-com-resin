@@ -112,8 +112,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   private ConfigProgram []_initProgram;
   private ConfigProgram []_destroyProgram;
 
-  private Set<InjectionPoint> _injectionPointSet
-    = new HashSet<InjectionPoint>();
+  private Set<InjectionPoint> _injectionPointSet;
 
   private ArrayList<ConfigProgram> _injectProgramList
     = new ArrayList<ConfigProgram>();
@@ -542,22 +541,16 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   }
 
   /**
-   * Call pre-destroy
-   */
-  /*
-  @Override
-  public void destroy(T instance)
-  {
-
-  }
-  */
-
-  /**
    * Returns the injection points.
    */
   @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
+    if (_injectionPointSet == null) {
+      _injectionPointSet = new HashSet<InjectionPoint>();
+      introspect();
+    }
+    
     return _injectionPointSet;
   }
 
@@ -565,7 +558,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   // introspection
   //
 
-  protected void introspect()
+  private void introspect()
   {
     introspect(_annotatedType);
   }
@@ -573,7 +566,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   /**
    * Called for implicit introspection.
    */
-  public void introspect(AnnotatedType<X> beanType)
+  private void introspect(AnnotatedType<X> beanType)
   {
     Class<X> cl = (Class<X>) beanType.getBaseType();
     
@@ -588,7 +581,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   /**
    * Introspects the constructor
    */
-  protected void introspectConstructor(AnnotatedType<X> beanType)
+  private void introspectConstructor(AnnotatedType<X> beanType)
   {
     if (_beanCtor != null)
       return;
@@ -661,7 +654,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       _javaCtor = _beanCtor.getJavaMember();
       _javaCtor.setAccessible(true);
 
-      _args = introspectArguments(_beanCtor.getParameters());
+      _args = introspectArguments(_beanCtor, _beanCtor.getParameters());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -669,7 +662,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     }
   }
 
-  protected Arg<?> []introspectArguments(List<AnnotatedParameter<X>> params)
+  private Arg<?> []introspectArguments(Annotated ann, List<AnnotatedParameter<X>> params)
   {
     Arg<?> []args = new Arg[params.size()];
 
@@ -677,12 +670,15 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       AnnotatedParameter<?> param = params.get(i);
 
       Annotation []qualifiers = getQualifiers(param);
-      
+   
       InjectionPoint ip = new InjectionPointImpl(getBeanManager(),
                                                  this,
                                                  param);
       
-      _injectionPointSet.add(ip);
+      if (ann.isAnnotationPresent(Inject.class)) {
+        // ioc/022k
+        _injectionPointSet.add(ip);
+      }
 
       if (qualifiers.length > 0 || true)
         args[i] = new BeanArg<X>(getBeanManager(),

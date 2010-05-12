@@ -47,8 +47,16 @@ public class GenericParamType extends ParamType
   }
   
   @Override
-  public boolean isGeneric()
+  public boolean isGenericRaw()
   {
     return true;
+  }
+  
+  @Override
+  public boolean isGeneric()
+  {
+    // ioc/07f2
+    
+    return false;
   }
 }

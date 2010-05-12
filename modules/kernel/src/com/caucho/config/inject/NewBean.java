@@ -59,7 +59,9 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
     super(inject, beanType.getBaseType(), beanType);
 
     _target = new InjectionTargetImpl<X>(inject, beanType, this);
-    _target.introspect(beanType);
+    
+    // validation
+    _target.getInjectionPoints();
 
     _qualifiers = new LinkedHashSet<Annotation>();
     _qualifiers.add(new NewLiteral(beanType.getJavaClass()));

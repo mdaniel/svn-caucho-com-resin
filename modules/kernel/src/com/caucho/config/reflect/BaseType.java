@@ -196,8 +196,10 @@ abstract public class BaseType
 	
       newParamMap.put(typeParam[i].getName(), args[i]);
     }
+    
+    // ioc/07f2
 
-    return new ParamType(type, args, newParamMap);
+    return new GenericParamType(type, args, newParamMap);
   }
 
   private static BaseType []toBaseType(Type []types,
@@ -232,7 +234,27 @@ abstract public class BaseType
     return false;
   }
   
+  /**
+   * Returns true for a generic type like MyBean<X> or MyBean<?>
+   */
   public boolean isGeneric()
+  {
+    return false;
+  }
+  
+  /**
+   * Returns true for a variable type like X
+   */
+  public boolean isVariable()
+  {
+    return false;
+  }
+  
+  /**
+   * Returns true for a raw type like MyBean where the class definition 
+   * is MyBean<X>.
+   */
+  public boolean isGenericRaw()
   {
     return false;
   }

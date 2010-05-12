@@ -76,6 +76,12 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   {
     return true;
   }
+  
+  @Override
+  public boolean isVariable()
+  {
+    return true;
+  }
 
   @Override
   public Type []getBounds()

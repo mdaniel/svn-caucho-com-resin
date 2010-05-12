@@ -319,7 +319,6 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     introspectStereotypes(annotated);
     introspectSpecializes(annotated);
     
-
     introspectDefault();
     
     if (getScope().isAnnotationPresent(NormalScope.class)) {

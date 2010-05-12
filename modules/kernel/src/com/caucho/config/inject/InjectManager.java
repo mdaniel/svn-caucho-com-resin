@@ -118,6 +118,7 @@ import com.caucho.config.j2ee.PersistenceUnitHandler;
 import com.caucho.config.j2ee.ResourceHandler;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.BaseTypeFactory;
+import com.caucho.config.reflect.ParamType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.scope.ApplicationScope;
 import com.caucho.config.scope.DependentContext;
@@ -857,7 +858,8 @@ public class InjectManager
   {
     InjectionTargetImpl<T> bean = new InjectionTargetImpl<T>(this, type);
 
-    bean.introspect();
+    // validation
+    bean.getInjectionPoints();
 
     return bean;
   }
@@ -1124,7 +1126,7 @@ public class InjectManager
       return set;
     }
     else if (Event.class.equals(rawType)) {
-      if (baseType.isGeneric())
+      if (baseType.isGenericRaw())
         throw new ConfigException(L.l("Event must have parameters because a non-parameterized Event would observe no events."));
                                       
       BaseType []param = baseType.getParameters();
@@ -1296,9 +1298,30 @@ public class InjectManager
       throw ambiguousException(beans, bestPriority);
   }
 
+  @Override
   public void validate(InjectionPoint ij)
   {
-    //     throw new UnsupportedOperationException(getClass().getName());
+    try {
+      resolveByInjectionPoint(ij);
+    } catch (AmbiguousResolutionException e) {
+      throw new AmbiguousResolutionException(L.l("{0}.{1}: {2}",
+                                       ij.getMember().getDeclaringClass().getName(),
+                                       ij.getMember().getName(),
+                                       e.getMessage()),
+                                   e);
+    } catch (UnsatisfiedResolutionException e) {
+      throw new UnsatisfiedResolutionException(L.l("{0}.{1}: {2}",
+                                                   ij.getMember().getDeclaringClass().getName(),
+                                                   ij.getMember().getName(),
+                                                   e.getMessage()),
+                                   e);
+    } catch (Exception e) {
+      throw new InjectionException(L.l("{0}.{1}: {2}",
+                                       ij.getMember().getDeclaringClass().getName(),
+                                       ij.getMember().getName(),
+                                       e.getMessage()),
+                                   e);
+    }
   }
 
   public int getDeploymentPriority(Bean<?> bean)
@@ -1708,8 +1731,19 @@ public class InjectManager
     }
     else
       bindings = new Annotation[] { DefaultLiteral.DEFAULT };
+    
+    BaseType baseType = createTargetBaseType(type);
+    
+    /*
+    if (baseType.isGeneric())
+      throw new InjectionException(L.l("'{0}' is an invalid type for injection because it's generic. {1}",
+                                       baseType, ij));
+                                       */
+    if (baseType.isVariable())
+      throw new InjectionException(L.l("'{0}' is an invalid type for injection because it's a variable . {1}",
+                                       baseType, ij));
 
-    Set<Bean<?>> set = getBeans(type, bindings);
+    Set<Bean<?>> set = resolve(baseType, bindings);
 
     if (set == null || set.size() == 0) {
       if (InjectionPoint.class.equals(type))
@@ -1718,7 +1752,17 @@ public class InjectManager
       throw unsatisfiedException(type, bindings);
     }
 
-    return resolve(set);
+    Bean<?> bean = resolve(set);
+
+    if (bean != null 
+        && type instanceof Class<?>
+        && ((Class<?>) type).isPrimitive()
+        && bean.isNullable()) {
+      throw new InjectionException(L.l("'{0}' cannot be injected because it's a primitive with {1}",
+                                       type, bean));                               
+    }
+    
+    return bean;
 
     /*
     else if (set.size() == 1) {
@@ -2057,9 +2101,10 @@ public class InjectManager
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " fireEvent " + event);
 
-    BaseType eventType = createTargetBaseType(event.getClass());
+    BaseType eventType = createSourceBaseType(event.getClass());
     
-    if (eventType.isGeneric())
+    // ioc/0b71
+    if (eventType.isGeneric() || eventType instanceof ParamType)
       throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
                                              eventType));
     
@@ -2903,15 +2948,18 @@ public class InjectManager
       
       processPendingAnnotatedTypes();
       
-      if (_pendingBindList == null)
-        return;
+      if (_pendingBindList != null) {
+        ArrayList<AbstractBean<?>> bindList
+          = new ArrayList<AbstractBean<?>>(_pendingBindList);
 
-      ArrayList<AbstractBean<?>> bindList
-        = new ArrayList<AbstractBean<?>>(_pendingBindList);
+        _pendingBindList.clear();
 
-      _pendingBindList.clear();
-
-      isBind = bindList.size() > 0 || ! _isAfterBeanDiscoveryComplete;
+        if (bindList.size() > 0)
+          isBind = true;
+      }
+      
+      if (! _isAfterBeanDiscoveryComplete)
+        isBind = true;
 
       if (isBind) {
         _isAfterBeanDiscoveryComplete = true;
@@ -2929,6 +2977,8 @@ public class InjectManager
       }
       */
 
+      validate();
+      
       if (isBind) {
         AfterDeploymentValidationImpl event
           = new AfterDeploymentValidationImpl();
@@ -2945,6 +2995,22 @@ public class InjectManager
       throw e;
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
+  private void validate()
+  {
+    // XXX: these allocations seem wasteful
+    
+    ArrayList<Set<TypedBean>> beanMapValues
+      = new ArrayList<Set<TypedBean>>(_selfBeanMap.values());
+    
+    for (Set<TypedBean> beans : beanMapValues) {
+      HashSet<TypedBean> beanSet = new HashSet<TypedBean>(beans);
+      
+      for (TypedBean typedBean : beanSet) {
+        typedBean.validate();
+      }
     }
   }
 
@@ -2989,14 +3055,6 @@ public class InjectManager
     initialize();
 
     bind();
-
-    //     _wbWebBeans.init();
-
-    /*
-    if (_lifecycle.toActive()) {
-      fireEvent(this, new AnnotationLiteral<Deployed>() {});
-    }
-    */
 
     startServices();
   }
@@ -3131,10 +3189,11 @@ public class InjectManager
       return String.valueOf(type);
   }
 
-  static class TypedBean {
+  class TypedBean {
     private final BaseType _type;
     private final Bean<?> _bean;
     private final boolean _isModulePrivate;
+    private boolean _isValidated;
 
     TypedBean(BaseType type, Bean<?> bean)
     {
@@ -3142,6 +3201,20 @@ public class InjectManager
       _bean = bean;
       
       _isModulePrivate = isModulePrivate(bean) || bean.isAlternative();
+    }
+
+    /**
+     * 
+     */
+    public void validate()
+    {
+      if (! _isValidated) {
+        _isValidated = true;
+    
+        for (InjectionPoint ip : _bean.getInjectionPoints()) {
+          InjectManager.this.validate(ip);
+        }
+      }
     }
 
     boolean isModulePrivate()
@@ -3159,7 +3232,7 @@ public class InjectManager
       return _bean;
     }
 
-    static boolean isModulePrivate(Bean<?> bean)
+    boolean isModulePrivate(Bean<?> bean)
     {
       if (! (bean instanceof AnnotatedBean))
         return false;

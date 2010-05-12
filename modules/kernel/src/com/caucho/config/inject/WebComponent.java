@@ -40,6 +40,7 @@ import java.util.Set;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
@@ -154,6 +155,25 @@ public class WebComponent {
     }
 
     return list;
+  }
+
+  /**
+   * 
+   */
+  public void validate()
+  {
+    for (BeanEntry beanEntry : _beanList) {
+      Bean<?> bean = beanEntry.getBean();
+
+      int beanPriority = _beanManager.getDeploymentPriority(bean);
+
+      if (beanPriority >= 0) {
+        // validation
+        for (InjectionPoint ip : bean.getInjectionPoints()) {
+          _beanManager.validate(ip);
+        }
+      }
+    }
   }
 
   static String getName(Type type)

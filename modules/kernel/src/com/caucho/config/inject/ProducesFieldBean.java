@@ -35,6 +35,7 @@ import java.lang.reflect.Field;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.IllegalProductException;
+import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -44,6 +45,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.Producer;
 
+import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -84,6 +86,15 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
       = new ProducesFieldBean(manager, producer, beanField);
     bean.introspect();
     bean.introspect(beanField);
+    
+    BaseType type = manager.createSourceBaseType(beanField.getBaseType());
+    
+    if (type.isGeneric()) {
+      // ioc/07f1
+      throw new InjectionException(L.l("'{0}' is an invalid @Produces field because it returns a generic type {1}",
+                                       beanField.getJavaMember(),
+                                       type));
+    }
 
     return bean;
   }
