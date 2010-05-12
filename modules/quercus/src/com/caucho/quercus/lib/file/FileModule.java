@@ -42,6 +42,7 @@ import com.caucho.quercus.module.IniDefinition;
 import com.caucho.quercus.resources.StreamContextResource;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
+import com.caucho.vfs.FilePath;
 import com.caucho.vfs.NotFoundPath;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.ReadStream;
@@ -2064,6 +2065,20 @@ public class FileModule extends AbstractQuercusModule {
   {
     if (path == null)
       return false;
+    
+    if (path instanceof FilePath) {
+      if (Path.isWindows()) {
+        String tail = path.getTail();
+        
+        return tail.endsWith(".exe")
+          || tail.endsWith(".com")
+          || tail.endsWith(".bat")
+          || tail.endsWith(".cmd");
+      }
+    }
+    else {
+    }
+
 
     return path.isExecutable();
   }

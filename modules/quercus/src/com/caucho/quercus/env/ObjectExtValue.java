@@ -1009,14 +1009,7 @@ public class ObjectExtValue extends ObjectValue
       Entry copy = newObject.createEntry(entry.getKey(),
                                          entry.getVisibility());
 
-      copy.setValue(entry.getRawValue());
-
-    }
-
-    for (Map.Entry<Value,Value> entry : entrySet()) {
-      newObject.putThisField(env,
-                                         (StringValue) entry.getKey(),
-                                         entry.getValue());
+      copy.setValue(entry.getValue().copy());
     }
 
     return newObject;
