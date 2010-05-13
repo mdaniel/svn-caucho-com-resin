@@ -954,6 +954,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public Collection<Part> getParts()
     throws IOException, ServletException
   {
+    if ( ! getWebApp().doMultipartForm())
+      throw new ServletException("multipart-form is disabled; check <multipart-form> configuration tag.");
+
     if (! getContentType().startsWith("multipart/form-data"))
       throw new ServletException("Content-Type must be of 'multipart/form-data'.");
 
@@ -975,13 +978,7 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   public Part getPart(String name)
     throws IOException, ServletException
   {
-    if (! getContentType().startsWith("multipart/form-data"))
-      throw new ServletException("Content-Type must be of 'multipart/form-data'.");
-
-    if (_filledForm == null)
-      _filledForm = parseQuery();
-
-    for (Part part : _parts) {
+    for (Part part : getParts()) {
       if (name.equals(part.getName()))
         return part;
     }
