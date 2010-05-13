@@ -71,7 +71,6 @@ public abstract class JdbcConnectionResource
 
   private String _errorMessage = null;
   private int _errorCode;
-  private boolean _fieldCount = false;
   private SQLWarning _warnings;
 
   private Env _env;
@@ -86,7 +85,6 @@ public abstract class JdbcConnectionResource
 
   private String _catalog;
   private boolean _isCatalogOptimEnabled = false;
-  private boolean _isCloseOnClose = true;
 
   private boolean _isUsed;
 
@@ -203,10 +201,10 @@ public abstract class JdbcConnectionResource
 
     if (_conn != null) {
       try {
-	if ("".equals(_catalog)) 
-	  _catalog = _conn.getConnection().getCatalog();
+        if ("".equals(_catalog)) 
+          _catalog = _conn.getConnection().getCatalog();
       } catch (SQLException e) {
-	log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINE, e.toString(), e);
       }
     }
 
@@ -217,16 +215,16 @@ public abstract class JdbcConnectionResource
    * Connects to the underlying database.
    */
   protected abstract ConnectionEntry connectImpl(Env env,
-						 String host,
-						 String userName,
-						 String password,
-						 String dbname,
-						 int port,
-						 String socket,
-						 int flags,
-						 String driver,
-						 String url,
-						 boolean isNewLink);
+                                                 String host,
+                                                 String userName,
+                                                 String password,
+                                                 String dbname,
+                                                 int port,
+                                                 String socket,
+                                                 int flags,
+                                                 String driver,
+                                                 String url,
+                                                 boolean isNewLink);
 
   /**
    * Escape the given string for SQL statements.
@@ -404,6 +402,8 @@ public abstract class JdbcConnectionResource
     }
     else {
       env.warning(L.l("Connection is not available: {0}", _conn));
+      
+      _errorMessage = L.l("Connection is not available: {0}", _conn);
       
       return null;
     }

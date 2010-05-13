@@ -153,6 +153,14 @@ public class VarExpr
   {
     return env.getValue(_name, false, false);
   }
+  
+  /**
+   * Evaluates the expression as an isset() statement.
+   */
+  public boolean evalIsset(Env env)
+  {
+    return env.getValue(_name, false, false).isset();
+  }
 
   /**
    * Evaluates the expression.

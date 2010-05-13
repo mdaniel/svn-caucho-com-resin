@@ -34,6 +34,7 @@ import com.caucho.quercus.annotation.NotNull;
 import com.caucho.quercus.annotation.Optional;
 import com.caucho.quercus.annotation.ReturnNullAsFalse;
 import com.caucho.quercus.env.*;
+import com.caucho.quercus.lib.MiscModule;
 import com.caucho.quercus.lib.UrlModule;
 import com.caucho.quercus.lib.string.StringModule;
 import com.caucho.quercus.module.AbstractQuercusModule;
@@ -2061,26 +2062,32 @@ public class FileModule extends AbstractQuercusModule {
    *
    * @param path the path to check
    */
-  public static boolean is_executable(@NotNull Path path)
+  public static boolean is_executable(Env env,
+                                      @NotNull Path path)
   {
-    if (path == null)
+    if (path == null || ! path.exists())
       return false;
     
-    if (path instanceof FilePath) {
-      if (Path.isWindows()) {
-        String tail = path.getTail();
-        
-        return tail.endsWith(".exe")
-          || tail.endsWith(".com")
-          || tail.endsWith(".bat")
-          || tail.endsWith(".cmd");
-      }
+    if (Path.isWindows()) {
+      // XXX: PHP appears to be looking for the "MZ" magic number in the header
+      String tail = path.getTail();
+
+      return tail.endsWith(".exe")
+             || tail.endsWith(".com")
+             || tail.endsWith(".bat")
+             || tail.endsWith(".cmd");
     }
     else {
+      String cmd = "if [ -x "
+                   + path.getNativePath()
+                   + " ]; then echo 1; else echo 0; fi";
+
+      String result = MiscModule.shell_exec(env, cmd).toString();
+
+      result = result.trim();
+
+      return result.length() == 1 && result.charAt(0) == '1';
     }
-
-
-    return path.isExecutable();
   }
 
   /**

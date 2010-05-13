@@ -77,8 +77,6 @@ public class ErrorModule extends AbstractQuercusModule {
   public static final StringValue LINE = new ConstStringValue("line");
   public static final StringValue TYPE = new ConstStringValue("type");
 
-  private long _errorReporting = Env.E_DEFAULT;
-
   /**
    * Returns the default php.ini values.
    */
@@ -515,10 +513,12 @@ public class ErrorModule extends AbstractQuercusModule {
   public static long error_reporting(Env env,
                                      @Optional Value levelV)
   {
-    if (levelV instanceof DefaultValue)
-      return env.getErrorMask();
-    else
-      return env.setErrorMask(levelV.toInt());
+    long oldMask = env.getIni("error_reporting").toLong();
+
+    if (! levelV.isDefault())
+      env.setIni("error_reporting", levelV);
+    
+    return oldMask;
   }
 
   /**
@@ -619,9 +619,8 @@ public class ErrorModule extends AbstractQuercusModule {
     return trigger_error(env, msg, code);
   }
 
-
   static final IniDefinition INI_ERROR_REPORING
-    = _iniDefinitions.add("error_reporing", null, PHP_INI_ALL);
+    = _iniDefinitions.add("error_reporting", Env.E_DEFAULT, PHP_INI_ALL);
   static final IniDefinition INI_DISPLAY_ERRORS
     = _iniDefinitions.add("display_errors", "1", PHP_INI_ALL);
   static final IniDefinition INI_DISPLAY_STARTUP_ERRORS

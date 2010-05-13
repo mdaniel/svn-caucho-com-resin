@@ -321,9 +321,6 @@ public class Env
 
   private StreamContextResource _defaultStreamContext;
 
-  // XXX: need to look this up from the module itself
-  private int _errorMask = E_DEFAULT;
-
   private int _objectId = 0;
 
   private Logger _logger;
@@ -447,11 +444,6 @@ public class Env
 
     _internalAutoload
       = new InternalAutoloadCallback("com/caucho/quercus/php/");
-
-    fillPost(_postArray,
-             _files,
-             _request,
-             getIniBoolean("magic_quotes_gpc"));
 
     // Define the constant string PHP_VERSION
 
@@ -938,6 +930,11 @@ public class Env
       _endTime = Long.MAX_VALUE / 2;
 
     _threadEnv.set(this);
+    
+    fillPost(_postArray,
+             _files,
+             _request,
+             getIniBoolean("magic_quotes_gpc"));
 
     // quercus/1b06
     String encoding = getOutputEncoding();
@@ -6043,7 +6040,7 @@ public class Env
   {
     int mask = 1 << B_WARNING;
 
-    if ((_errorMask & mask) != 0) {
+    if ((getErrorMask() & mask) != 0) {
       if (log.isLoggable(Level.FINER)) {
         QuercusException e = new QuercusException(msg);
 
@@ -6061,7 +6058,7 @@ public class Env
   {
     int mask = 1 << B_WARNING;
 
-    if ((_errorMask & mask) != 0) {
+    if ((getErrorMask() & mask) != 0) {
       if (log.isLoggable(Level.FINER)) {
         QuercusException e = new QuercusException(msg);
 
@@ -6202,7 +6199,7 @@ public class Env
    */
   public int getErrorMask()
   {
-    return _errorMask;
+    return getIni("error_reporting").toInt();
   }
 
   /**
@@ -6210,10 +6207,10 @@ public class Env
    */
   public int setErrorMask(int mask)
   {
-    int oldMask = _errorMask;
-
-    _errorMask = mask;
-
+    int oldMask = getErrorMask();
+    
+    setIni("error_reporting", LongValue.create(mask));
+    
     return oldMask;
   }
 
@@ -6318,13 +6315,15 @@ public class Env
   {
     int mask = 1 << code;
 
+    int errorMask = getErrorMask();
+    
     if (log.isLoggable(Level.FINEST)) {
       QuercusException e = new QuercusException(loc + msg);
 
       log.log(Level.FINEST, e.toString(), e);
     }
 
-    if ((_errorMask & mask) != 0) {
+    if ((errorMask & mask) != 0) {
       if (log.isLoggable(Level.FINE))
         log.fine(this + " " + loc + msg);
     }
@@ -6369,7 +6368,7 @@ public class Env
       }
     }
 
-    if ((_errorMask & mask) != 0) {
+    if ((errorMask & mask) != 0) {
       try {
         String fullMsg = (getLocationPrefix(location, loc)
                           + getCodeName(mask) + msg);

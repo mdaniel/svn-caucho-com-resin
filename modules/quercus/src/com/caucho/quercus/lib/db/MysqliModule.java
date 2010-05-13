@@ -530,7 +530,7 @@ public class MysqliModule extends AbstractQuercusModule {
    * Returns the most recent error.
    */
   public static Value mysqli_error(Env env,
-                                    @NotNull Mysqli conn)
+                                   @NotNull Mysqli conn)
   {
     if (conn == null)
       return NullValue.NULL;

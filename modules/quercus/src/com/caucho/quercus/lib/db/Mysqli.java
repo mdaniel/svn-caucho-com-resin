@@ -219,8 +219,6 @@ public class Mysqli extends JdbcConnectionResource {
       ConnectionEntry jConn
         = env.getConnection(driver, url, userName, password, ! isNewLink);
 
-      checkDriverVersion(env, jConn);
-
       Connection conn = jConn.getConnection();
 
       if (! (conn instanceof QuercusConnection)) {
@@ -1521,40 +1519,6 @@ public class Mysqli extends JdbcConnectionResource {
     }
 
     return _metaDataMethod.getColumnCharacterSetMethod();
-  }
-
-  /**
-   * Verify that the ConnectorJ driver version is 3.1.14 or newer.
-   * Older versions of this driver return incorrect type information
-   * and suffer from encoding related bugs.
-   */
-  protected static void checkDriverVersion(Env env,
-                                           ConnectionEntry connEntry)
-    throws SQLException
-  {
-    if (_checkedDriverVersion != null)
-      return;
-
-    Connection conn = connEntry.getConnection();
-
-    synchronized(_checkDriverLock) {
-      // to prevent multiple checks
-      if (_checkedDriverVersion == null) {
-        _checkedDriverVersion = checkDriverVersionImpl(env, conn);
-
-        if (_checkedDriverVersion.length() != 0)
-          return;
-
-        /*
-        String message = "Unable to detect MySQL Connector/J JDBC driver " +
-                         "version.  The recommended JDBC version is " +
-                         "3.1.14+/5+.";
-
-        log.log(Level.WARNING, message);
-        env.warning(message);
-        */
-      }
-    }
   }
 
   private static String checkDriverVersionImpl(Env env, Connection conn)

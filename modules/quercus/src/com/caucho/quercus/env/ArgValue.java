@@ -61,12 +61,33 @@ abstract public class ArgValue extends Value
     return toLocalValue().toStringValue();
   }
   
-  /*
-   * Converts to a StringValue.
-   */
   public StringValue toStringValue(Env env)
   {
     return toLocalValue().toStringValue(env);
+  }
+  
+  @Override
+  public boolean toBoolean()
+  {
+    return toLocalValue().toBoolean();
+  }
+  
+  @Override
+  public double toDouble()
+  {
+    return toLocalValue().toDouble();
+  }
+  
+  @Override
+  public Value toArray()
+  {
+    return toLocalValue().toArray();
+  }
+  
+  @Override
+  public Value toAutoObject(Env env)
+  {
+    return toLocalValue().toObject(env);
   }
   
   @Override
