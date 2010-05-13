@@ -75,7 +75,10 @@ public class HttpsConnection
 
     HttpsURLConnection conn;
 
-    conn = (HttpsURLConnection) getURL().openConnection(proxy);
+    if (proxy != null)
+      conn = (HttpsURLConnection) getURL().openConnection(proxy);
+    else
+      conn = (HttpsURLConnection) getURL().openConnection();
 
     HostnameVerifier hostnameVerifier
       = CurlHostnameVerifier.create(curl.getIsVerifySSLPeer(),
