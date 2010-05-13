@@ -51,6 +51,11 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super(factory, method, next);
   }
+
+  protected boolean isOverride()
+  {
+    return true;
+  }
  
   protected Class<?> []getThrowsExceptions()
   {
@@ -104,6 +109,7 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
                                       + " must be public or protected");
 
     AspectGeneratorUtil.generateHeader(out, 
+                                       isOverride(),
                                        accessModifier, 
                                        suffix, 
                                        getJavaMethod(), 

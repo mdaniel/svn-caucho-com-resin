@@ -316,6 +316,9 @@ public class InterceptorGenerator<X>
     }
   }
 
+  // XXX This map is really a Map<String, Object>, so putting in an
+  // InterceptionBinding seems wrong.  Also, it doesn't discriminate the 
+  // chainName -- see the generated code for test1() in ejb/10a5
   private void generateBeanInterceptorChain(JavaWriter out,
                                             HashMap map)
     throws IOException

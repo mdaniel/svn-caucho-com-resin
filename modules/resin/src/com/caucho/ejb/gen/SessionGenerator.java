@@ -70,9 +70,6 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private final ArrayList<AspectGenerator<X>> _businessMethods 
     = new ArrayList<AspectGenerator<X>>();
 
-  private final ArrayList<AspectGenerator<X>> _nonBusinessMethods 
-    = new ArrayList<AspectGenerator<X>>();
-
   public SessionGenerator(String ejbName, 
                           AnnotatedType<X> beanType,
                           ArrayList<AnnotatedType<? super X>> localApi,
@@ -293,6 +290,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     if (nonBizMethod != null)
       _businessMethods.add(nonBizMethod);
   } 
+
   private AnnotatedMethod<? super X> 
   findMethod(Collection<AnnotatedMethod<? super X>> methodList,
              AnnotatedMethod<? super X> method)

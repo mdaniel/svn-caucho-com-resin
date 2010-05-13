@@ -51,6 +51,12 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     super(factory, method, next);
   }
 
+  @Override
+  protected boolean isOverride()
+  {
+    return false;
+  }
+
   /**
    * Generates code before the "try" block
    * <code><pre>

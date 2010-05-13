@@ -54,6 +54,7 @@ public class AspectGeneratorUtil {
    * </pre><?code>
   */
   public static void generateHeader(JavaWriter out,
+                                    boolean isOverride,
                                     String accessModifier,
                                     String suffix,
                                     Method method,
@@ -62,7 +63,8 @@ public class AspectGeneratorUtil {
   {
     out.println();
     
-    out.println("@Override");
+    if (isOverride)
+      out.println("@Override");
 
     if (accessModifier != null) {
       out.print(accessModifier);

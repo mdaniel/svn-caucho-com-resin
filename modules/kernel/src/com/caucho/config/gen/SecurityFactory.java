@@ -44,8 +44,10 @@ import com.caucho.inject.Module;
 public class SecurityFactory<X>
   extends AbstractAspectFactory<X>
 {
-  private RunAs _classRunAs;
-  private RolesAllowed _classRolesAllowed;
+  private final RunAs _classRunAs;
+  private final RolesAllowed _classRolesAllowed;
+  private final PermitAll _classPermitAll;
+  private final DenyAll _classDenyAll;
   
   public SecurityFactory(AspectBeanFactory<X> beanFactory,
                          AspectFactory<X> next)
@@ -54,6 +56,8 @@ public class SecurityFactory<X>
     
     _classRunAs = beanFactory.getBeanType().getAnnotation(RunAs.class);
     _classRolesAllowed = beanFactory.getBeanType().getAnnotation(RolesAllowed.class);
+    _classPermitAll = beanFactory.getBeanType().getAnnotation(PermitAll.class);
+    _classDenyAll = beanFactory.getBeanType().getAnnotation(DenyAll.class);
   }
   
   /**
@@ -85,12 +89,12 @@ public class SecurityFactory<X>
 
     PermitAll permitAll = method.getAnnotation(PermitAll.class);
 
-    if (permitAll != null)
+    if (permitAll != null || _classPermitAll != null)
       roleNames = null;
       
     DenyAll denyAll = method.getAnnotation(DenyAll.class);
 
-    if (denyAll != null)
+    if (denyAll != null || _classDenyAll != null)
       roleNames = new String[0];
     
     if (roleNames != null || runAs != null) {

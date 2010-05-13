@@ -184,6 +184,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     
     generateProxyFactory(out);
 
+    generateBeanPrologue(out);
+    
     generateBusinessMethods(out);
   }
 

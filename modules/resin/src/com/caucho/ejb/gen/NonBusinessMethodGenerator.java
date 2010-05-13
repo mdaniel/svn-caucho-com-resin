@@ -56,6 +56,13 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
     _method = method;
   }
 
+  // will always be @Override because we're only generating this method
+  // to hide the implementation method of a no-interface view.
+  protected boolean isOverride()
+  {
+    return true;
+  }
+
   public AnnotatedMethod<? super X> getMethod()
   {
     return _method;
@@ -94,6 +101,7 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
     String suffix = "";
 
     AspectGeneratorUtil.generateHeader(out, 
+                                       isOverride(),
                                        accessModifier, 
                                        suffix, 
                                        getJavaMethod(),
