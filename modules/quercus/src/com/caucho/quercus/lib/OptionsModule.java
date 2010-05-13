@@ -793,6 +793,22 @@ public class OptionsModule extends AbstractQuercusModule {
   {
     return "2.0.4";
   }
+  
+  /**
+   * JVM takes care of circular reference collection.
+   */
+  public static boolean gc_enabled()
+  {
+    return true;
+  }
+  
+  public static void gc_enable()
+  {
+  }
+  
+  public static void gc_disable()
+  {
+  }
 
   private static ArrayList<Value> expandVersion(Env env, StringValue version)
   {
