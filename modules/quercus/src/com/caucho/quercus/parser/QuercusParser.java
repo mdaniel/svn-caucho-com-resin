@@ -232,7 +232,7 @@ public class QuercusParser {
   public QuercusParser(QuercusContext quercus)
   {
     _quercus = quercus;
-
+    
     if (quercus == null)
       _factory = ExprFactory.create();
     else
@@ -387,6 +387,11 @@ public class QuercusParser {
     parser.close();
 
     return fun;
+  }
+  
+  public boolean isUnicodeSemantics()
+  {
+    return _quercus != null && _quercus.isUnicodeSemantics();
   }
 
   public static Expr parse(QuercusContext quercus, String str)
@@ -4763,7 +4768,7 @@ public class QuercusParser {
   private void parseStringToken(int end)
     throws IOException
   {
-    parseStringToken(end, _quercus.isUnicodeSemantics());
+    parseStringToken(end, isUnicodeSemantics());
   }
 
   /**
