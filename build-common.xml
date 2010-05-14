@@ -527,6 +527,10 @@
       <fileset dir="${resin.modules}/eclipselink/classes">
         <exclude name="**/.*"/>
       </fileset>    	
+    	
+      <fileset dir="${resin.artifacts}/ant/classes">
+        <exclude name="**/.*"/>
+      </fileset>    	
     </jar>
   </target>
 

@@ -882,7 +882,7 @@ CP=`which cp`
 echo $ECHO_N "checking if $CP accepts -u... "
 
 touch /tmp/cp.test.$$.src
-$CP -u /tmp/cp.test.$$.src /tmp/cp.test.$$.dest
+$CP -u /tmp/cp.test.$$.src /tmp/cp.test.$$.dest 1>/dev/null 2>/dev/null
 if test $? = "0"; then
   CP_U_FLAG=-u
   AC_SUBST(CP_U_FLAG)
@@ -1020,75 +1020,80 @@ AC_ARG_ENABLE(jni,
 [  --enable-jni    Turn on jni],
 [case "${enableval}" in
  yes) JNI=true ;;
- no)  JNI="" ;;
+ no)  JNI=false ;; 
  *) AC_MSG_ERROR(bad value ${enableval} for --enable-jni) ;;
  esac],[JNI=""])
 
 JNI_INCLUDE_DIR=""
 
-if test -n "$JNI_INCLUDE"; then
-  JNI=yes
-  for x in $JNI_INCLUDE; do
-    y=${x:2}
-    if test -n "$JNI_INCLUDE_DIR"; then
-      JNI_INCLUDE_DIR="$JNI_INCLUDE_DIR $y"
-    else
-      JNI_INCLUDE_DIR="$y"
+if test "$JNI" != "false" ; then
+  if test -n "$JNI_INCLUDE"; then
+    JNI=yes
+    for x in $JNI_INCLUDE; do
+      y=${x:2}
+      if test -n "$JNI_INCLUDE_DIR"; then
+        JNI_INCLUDE_DIR="$JNI_INCLUDE_DIR $y"
+      else
+        JNI_INCLUDE_DIR="$y"
+      fi
+    done;
+  elif test -r "$JAVA_HOME/include/jni_md.h"; then
+    JNI_INCLUDE_DIR="${JAVA_HOME}/include"
+    JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
+    JNI=yes
+    echo "checking for JNI in $JAVA_HOME/include ... found"
+  elif test -r "$JAVA_HOME/include/$jni_os/jni_md.h"; then
+    JNI_INCLUDE_DIR="${JAVA_HOME}/include"
+    JNI_INCLUDE="-I$JAVA_HOME/include -I$JAVA_HOME/include/$jni_os"
+    JNI=yes
+    echo "checking for JNI in $JAVA_HOME/include/$jni_os ... found"
+  elif test -r "/System/Library/Frameworks/JavaVM.framework/Headers/jni_md.h"; then
+    # Darwin
+    echo "checking for JNI in /System/Library/Frameworks/JavaVM.framework/Headers ... found"
+    JNI_INCLUDE_DIR="/System/Library/Frameworks/JavaVM.framework/Headers"
+    JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
+    JNI=yes
+  elif test -r "$JAVA_HOME/../Headers/jni_md.h"; then
+    # Darwin
+    echo "checking for JNI in $JAVA_HOME/../Headers ... found"
+    JNI_INCLUDE_DIR="$JAVA_HOME/../Headers"
+    JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
+    JNI=yes
+  elif test -r "$JAVA_HOME/include/jni.h"; then
+    JNI_INCLUDE_DIR="$JAVA_HOME/include"
+    JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
+    JNI=yes
+    echo "checking for JNI in $JAVA_HOME/include ... found"
+  else
+    JNI=""
+    AC_MSG_ERROR([
+
+    *** Can't find JNI directory in JAVA_HOME=${JAVA_HOME}
+    *** JNI is expected in ${JAVA_HOME}/include/$jni_os
+  ])
+  fi
+
+  HAS_JVMTI=""
+
+  for x in $JNI_INCLUDE_DIR; do
+    if test -r "$x/jvmti.h"; then
+      HAS_JVMTI="yes"
     fi
   done;
-elif test -r "$JAVA_HOME/include/jni_md.h"; then
-  JNI_INCLUDE_DIR="${JAVA_HOME}/include"
-  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
-  JNI=yes
-  echo "checking for JNI in $JAVA_HOME/include ... found"
-elif test -r "$JAVA_HOME/include/$jni_os/jni_md.h"; then
-  JNI_INCLUDE_DIR="${JAVA_HOME}/include"
-  JNI_INCLUDE="-I$JAVA_HOME/include -I$JAVA_HOME/include/$jni_os"
-  JNI=yes
-  echo "checking for JNI in $JAVA_HOME/include/$jni_os ... found"
-elif test -r "/System/Library/Frameworks/JavaVM.framework/Headers/jni_md.h"; then
-  # Darwin
-  echo "checking for JNI in /System/Library/Frameworks/JavaVM.framework/Headers ... found"
-  JNI_INCLUDE_DIR="/System/Library/Frameworks/JavaVM.framework/Headers"
-  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
-  JNI=yes
-elif test -r "$JAVA_HOME/../Headers/jni_md.h"; then
-  # Darwin
-  echo "checking for JNI in $JAVA_HOME/../Headers ... found"
-  JNI_INCLUDE_DIR="$JAVA_HOME/../Headers"
-  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
-  JNI=yes
-elif test -r "$JAVA_HOME/include/jni.h"; then
-  JNI_INCLUDE_DIR="$JAVA_HOME/include"
-  JNI_INCLUDE="-I${JNI_INCLUDE_DIR}"
-  JNI=yes
-  echo "checking for JNI in $JAVA_HOME/include ... found"
-else
-  JNI=""
-  AC_MSG_ERROR([
 
-  *** Can't find JNI directory in JAVA_HOME=${JAVA_HOME}
-  *** JNI is expected in ${JAVA_HOME}/include/$jni_os
-])
-fi
-
-HAS_JVMTI=""
-
-for x in $JNI_INCLUDE_DIR; do
-  if test -r "$x/jvmti.h"; then
-    HAS_JVMTI="yes"
+  if test -n "$HAS_JVMTI"; then
+    echo "Using JVMTI for class reloading"
+    
+    CFLAGS="$CFLAGS -DHAS_JVMTI"
+  else
+    AC_MSG_ERROR([Can't find JVMTI directory ${JNI_INCLUDE_DIR}/jvmti.h])
   fi
-done;
-
-if test -n "$HAS_JVMTI"; then
-  echo "Using JVMTI for class reloading"
-  
-  CFLAGS="$CFLAGS -DHAS_JVMTI"
-else
-  AC_MSG_ERROR([Can't find JVMTI directory ${JNI_INCLUDE_DIR}/jvmti.h])
 fi
 
-if test -n "$JNI"; then
+if test "$JNI" = "false" ; then
+  resin_pro_plugins=""
+  echo "JNI disabled by --disable-jni"
+elif test -n "$JNI"; then
   plugins="$plugins resin_os"
 else
   resin_pro_plugins=""
@@ -1401,13 +1406,13 @@ if test -n "resin_init_d"; then
   echo "      init: ${resin_init_d}"
 fi
 
-echo ""
-
-if test -z "JNI"; then
+if test "$JNI" = "false" ; then
+  echo 
+  echo "  *** JNI disabled by --disable-jni"
+elif test -z "$JNI"; then
   echo "  *** No JNI has been found in JAVA_HOME=${JAVA_HOME}"
   echo "  *** JNI libraries cannot be compiled"
 else  
-
   echo "  JAVA_HOME: ${JAVA_HOME}"
   echo ""
 
