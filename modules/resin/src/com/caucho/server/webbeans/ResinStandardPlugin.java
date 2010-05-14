@@ -85,15 +85,20 @@ public class ResinStandardPlugin implements Extension {
    * EJB and disabled for normal processing.
    */
   @LazyExtension
-  public <T> void processAnnotatedType(@Observes ProcessAnnotatedType<T> event) 
+  public void processAnnotatedType(@Observes ProcessAnnotatedType<?> event) 
   {
+    processAnnotatedTypeImpl(event);
+  }
+    
+  private <T> void processAnnotatedTypeImpl(ProcessAnnotatedType<T> event) 
+    {
     AnnotatedType<T> annotatedType = event.getAnnotatedType();
 
     if (annotatedType == null)
       return;
 
     // ioc/0j08
-    boolean isXmlConfig = false;
+    boolean isXmlConfig = true;
 
     if (isXmlConfig
         && (annotatedType.isAnnotationPresent(Stateful.class)
@@ -130,6 +135,10 @@ public class ResinStandardPlugin implements Extension {
       EjbManager ejbContainer = EjbManager.create();
 
       if (bean instanceof ManagedBeanImpl<?>) {
+        // XXX: shouldn't reach processBeanImpl
+        if (true)
+          throw new IllegalStateException(String.valueOf(annotated));
+        
         ManagedBeanImpl<T> mBean = (ManagedBeanImpl<T>) bean;
         AnnotatedType<T> annType = mBean.getAnnotatedType();
         
