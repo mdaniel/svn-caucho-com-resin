@@ -298,7 +298,10 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       ConfigProgram []destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(destroyProgram);
       
-      Arg []args = introspectArguments(_beanCtor, _beanCtor.getParameters());
+      Arg []args = null;
+      
+      if (_beanCtor != null)
+        args = introspectArguments(_beanCtor, _beanCtor.getParameters());
 
       CandiProducer<X> producer
         = new CandiProducer<X>(_bean,
