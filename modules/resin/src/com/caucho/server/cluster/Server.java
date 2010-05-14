@@ -436,8 +436,11 @@ public class Server extends ProtocolDispatchServer
         Path root = _resin.getResinDataDirectory();
 
         // QA
-        if (root instanceof MemoryPath)
-          root = Vfs.lookup("file:/tmp/caucho/qa");
+        if (root instanceof MemoryPath) {
+          String userName = System.getProperty("user.name");
+
+          root = Vfs.lookup("file:/tmp/" + userName + "/qa");
+        }
 
         _git = new GitRepository(root.lookup(".git"));
 

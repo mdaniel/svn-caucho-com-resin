@@ -135,7 +135,9 @@ public class SerializationAdapter<X> {
       byte []buffer = bos.toByteArray();
 
       if (false) {
-	out = Vfs.lookup("file:/tmp/caucho/qa/temp.class").openWrite();
+        String userName = System.getProperty("user.name");
+        
+	out = Vfs.lookup("file:/tmp/" + userName + "/qa/temp.class").openWrite();
 	out.write(buffer, 0, buffer.length);
 	out.close();
       }

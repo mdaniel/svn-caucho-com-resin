@@ -97,6 +97,16 @@ public class NullGenerator<X> implements AspectGenerator<X> {
   }
 
   /**
+   * Generates bean injection
+   */
+  @Override
+  public void generateInject(JavaWriter out,
+                             HashMap<String,Object> map)
+    throws IOException
+  {
+  }
+
+  /**
    * Generates bean post construct interception
    */
   @Override

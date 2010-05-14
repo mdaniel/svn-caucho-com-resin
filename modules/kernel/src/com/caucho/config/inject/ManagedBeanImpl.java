@@ -105,7 +105,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
       validateType((Class) beanType.getType());
     */
 
-    _injectionTarget = new InjectionTargetImpl<X>(injectManager, beanType, this);
+    _injectionTarget = new InjectionTargetBuilder<X>(injectManager, beanType, this);
   }
 
   public ManagedBeanImpl(InjectManager webBeans,

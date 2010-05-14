@@ -250,11 +250,29 @@ abstract public class BeanGenerator<X> extends GenClass
     }
   }
 
+  protected void generateInject(JavaWriter out)
+     throws IOException
+   {
+     out.println();
+     out.println("public void __caucho_inject(Object []delegates"
+                 + ", javax.enterprise.context.spi.CreationalContext<?> parentEnv)");
+     out.println("{");
+     out.pushDepth();
+
+     HashMap<String,Object> map = new HashMap<String,Object>();
+     for (AspectGenerator<X> method : getMethods()) {
+       method.generateInject(out, map);
+     }
+
+     out.popDepth();
+     out.println("}");
+   }
+
   protected void generatePostConstruct(JavaWriter out)
      throws IOException
    {
      out.println();
-     out.println("private void __caucho_postConstruct()");
+     out.println("public void __caucho_postConstruct()");
      out.println("{");
      out.pushDepth();
 

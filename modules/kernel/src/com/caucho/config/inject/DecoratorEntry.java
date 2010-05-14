@@ -52,6 +52,8 @@ public class DecoratorEntry<X> {
 
   private BaseType _delegateType;
   
+  private boolean _isEnabled;
+  
   private Set<BaseType> _decoratedTypes = new LinkedHashSet<BaseType>();
 
   public DecoratorEntry(InjectManager manager, Decorator<X> decorator,
@@ -87,8 +89,21 @@ public class DecoratorEntry<X> {
     return _decoratedTypes;
   }
 
+  public boolean isEnabled()
+  {
+    return _isEnabled;
+  }
+  
+  public void setEnabled(boolean isEnabled)
+  {
+    _isEnabled = isEnabled;
+  }
+  
   public boolean isMatch(Annotation []bindingAnn)
   {
+    if (! _isEnabled)
+      return false;
+    
     for (QualifierBinding binding : _bindings) {
       if (! isMatch(binding, bindingAnn)) {
         return false;

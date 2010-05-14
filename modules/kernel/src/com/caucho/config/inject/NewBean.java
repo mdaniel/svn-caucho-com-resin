@@ -51,14 +51,14 @@ import com.caucho.inject.Module;
 @Module
 public class NewBean<X> extends AbstractIntrospectedBean<X>
 {
-  private InjectionTargetImpl<X> _target;
+  private InjectionTargetBuilder<X> _target;
   private LinkedHashSet<Annotation> _qualifiers;
 
   NewBean(InjectManager inject, AnnotatedType<X> beanType)
   {
     super(inject, beanType.getBaseType(), beanType);
 
-    _target = new InjectionTargetImpl<X>(inject, beanType, this);
+    _target = new InjectionTargetBuilder<X>(inject, beanType, this);
     
     // validation
     _target.getInjectionPoints();

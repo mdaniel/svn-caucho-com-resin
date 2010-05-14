@@ -259,6 +259,9 @@ public class InjectManager
   private ArrayList<InterceptorEntry<?>> _interceptorList
     = new ArrayList<InterceptorEntry<?>>();
 
+  private ArrayList<Class<?>> _decoratorClassList
+    = new ArrayList<Class<?>>();
+
   private ArrayList<DecoratorEntry<?>> _decoratorList
     = new ArrayList<DecoratorEntry<?>>();
 
@@ -672,6 +675,8 @@ public class InjectManager
   {
     ManagedBeanImpl<T> bean = createManagedBean(type);
 
+    validate(bean);
+    
     // server/10gn
     //return factory.create(new ConfigContext());
     InjectionTarget<T> injectionTarget = bean.getInjectionTarget();
@@ -856,7 +861,7 @@ public class InjectManager
   @Override
   public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type)
   {
-    InjectionTargetImpl<T> bean = new InjectionTargetImpl<T>(this, type);
+    InjectionTargetBuilder<T> bean = new InjectionTargetBuilder<T>(this, type);
 
     // validation
     bean.getInjectionPoints();
@@ -879,8 +884,8 @@ public class InjectManager
   {
     AnnotatedType<T> annotatedType = null;
     
-    if (target instanceof InjectionTargetImpl<?>)
-      annotatedType = ((InjectionTargetImpl<T>) target).getAnnotatedType();
+    if (target instanceof InjectionTargetBuilder<?>)
+      annotatedType = ((InjectionTargetBuilder<T>) target).getAnnotatedType();
     
     ProcessInjectionTargetImpl<T> processTarget
       = new ProcessInjectionTargetImpl<T>(target, annotatedType);
@@ -898,9 +903,7 @@ public class InjectManager
    */
   public <T> ManagedBeanImpl<T> createManagedBean(AnnotatedType<T> type)
   {
-    InjectionTarget<T> target = createInjectionTarget(type);
-
-    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type, target);
+    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type);
     bean.introspect();
 
     return bean;
@@ -967,6 +970,10 @@ public class InjectManager
     
     if (bean instanceof Interceptor<?>) {
       addInterceptor((Interceptor<?>) bean);
+      return;
+    }
+    else if (bean instanceof Decorator<?>) {
+      addDecorator((Decorator<?>) bean);
       return;
     }
 
@@ -1214,6 +1221,8 @@ public class InjectManager
         if (getDeploymentPriority(typedBean.getBean()) < 0)
           continue;
         
+        validate(typedBean.getBean());
+        
         beanSet.addComponent(typedBean.getType(), typedBean.getBean());
       }
     }
@@ -1297,7 +1306,21 @@ public class InjectManager
     else
       throw ambiguousException(beans, bestPriority);
   }
+  
+  private void validate(Type type)
+  {
+    BaseType baseType = createTargetBaseType(type);
+    
+    WebComponent comp = getWebComponent(baseType);
+  }
 
+  private void validate(Bean<?> bean)
+  {
+    for (InjectionPoint ip : bean.getInjectionPoints()) {
+      validate(ip);
+    }
+  }
+  
   @Override
   public void validate(InjectionPoint ij)
   {
@@ -1671,8 +1694,9 @@ public class InjectManager
       parentEnv = (CreationalContextImpl<?>) parentCxt;
     
     if (InjectionPoint.class.equals(ij.getType())) {
-      if (parentEnv != null)
+      if (parentEnv != null) {
         return parentEnv.getInjectionPoint();
+      }
     }
     
     Bean<?> bean = resolveByInjectionPoint(ij);
@@ -1691,9 +1715,9 @@ public class InjectManager
     if (value != null)
       return value;
 
-    CreationalContext<?> cxt
-      = new CreationalContextImpl(bean, parentEnv, ij);
-
+    CreationalContext<?> env
+      = new CreationalContextImpl(bean, parentCxt, ij);
+    
     /*
     if (cxt instanceof ConfigContext) {
       ConfigContext env = (ConfigContext) cxt;
@@ -1703,7 +1727,7 @@ public class InjectManager
     }
     */
 
-    return getReference(bean, ij.getType(), cxt);
+    return getReference(bean, ij.getType(), env);
   }
 
   public Bean<?> resolveByInjectionPoint(InjectionPoint ij)
@@ -2343,11 +2367,23 @@ public class InjectManager
   /**
    * Adds a new decorator
    */
-  public <X> BeanManager addDecorator(Decorator<X> decorator)
+  private <X> DecoratorEntry<X> addDecorator(Decorator<X> decorator)
   {
     BaseType baseType = createSourceBaseType(decorator.getDelegateType());
 
-    _decoratorList.add(new DecoratorEntry<X>(this, decorator, baseType));
+    DecoratorEntry<X> entry = new DecoratorEntry<X>(this, decorator, baseType);
+    
+    _decoratorList.add(entry);
+
+    return entry;
+  }
+
+  /**
+   * Adds a new decorator class
+   */
+  public <X> BeanManager addDecoratorClass(Class<?> decoratorClass)
+  {
+    _decoratorClassList.add(decoratorClass);
 
     return this;
   }
@@ -2747,10 +2783,12 @@ public class InjectManager
     if (! isValidSimpleBean(type.getJavaClass()))
       return;
     
-    InjectionTarget<T> target = createInjectionTarget(type);
+    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type);
+    
+    InjectionTarget<T> target = bean.getInjectionTarget(); //createInjectionTarget(type);
 
-    if (target instanceof InjectionTargetImpl<?>) {
-      InjectionTargetImpl<?> targetImpl = (InjectionTargetImpl<?>) target;
+    if (target instanceof InjectionTargetBuilder<?>) {
+      InjectionTargetBuilder<?> targetImpl = (InjectionTargetBuilder<?>) target;
 
       targetImpl.setGenerateInterception(true);
     }
@@ -2760,10 +2798,8 @@ public class InjectManager
     if (target == null)
       return;
 
-    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type, target);
-
-    if (target instanceof InjectionTargetImpl<?>) {
-      InjectionTargetImpl<T> targetImpl = (InjectionTargetImpl<T>) target;
+    if (target instanceof InjectionTargetBuilder<?>) {
+      InjectionTargetBuilder<T> targetImpl = (InjectionTargetBuilder<T>) target;
 
       targetImpl.setBean(bean);
     }
@@ -2976,6 +3012,9 @@ public class InjectManager
           comp.bind();
       }
       */
+      
+      addDecorators();
+      addInterceptors();
 
       validate();
       
@@ -2995,6 +3034,46 @@ public class InjectManager
       throw e;
     } finally {
       thread.setContextClassLoader(oldLoader);
+    }
+  }
+  
+  private void addInterceptors()
+  {
+    for (InterceptorEntry<?> entry : _interceptorList) {
+      validate(entry.getInterceptor());
+    }
+  }
+  
+  private void addDecorators()
+  {
+    if (_decoratorClassList.size() == 0)
+      return;
+    
+    ArrayList<Class<?>> decoratorClassList
+      = new ArrayList<Class<?>>(_decoratorClassList);
+    _decoratorClassList.clear();
+    
+    for (Class<?> decoratorClass : decoratorClassList) {
+      for (DecoratorEntry<?> entry : _decoratorList) {
+        if (entry.getDecorator().getBeanClass().equals(decoratorClass)) {
+          entry.setEnabled(true);
+          return;
+        }
+      }
+      
+      DecoratorBean<?> bean = new DecoratorBean(this, decoratorClass);
+      
+      DecoratorEntry<?> entry = addDecorator(bean);
+      entry.setEnabled(true);
+    }
+    
+    // ioc/0i57 - validation must be early
+    for (DecoratorEntry<?> entry : _decoratorList) {
+      if (entry.isEnabled()) {
+        for (Type type : entry.getDelegateType().getTypeClosure(this)) {
+          validate(type);
+        }
+      }
     }
   }
   

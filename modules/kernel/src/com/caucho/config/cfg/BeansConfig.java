@@ -190,9 +190,9 @@ public class BeansConfig {
   public void init()
   {
     for (Class<?> cl : _decoratorList) {
-      DecoratorBean<?> decorator = new DecoratorBean(_injectManager, cl);
+      // DecoratorBean<?> decorator = new DecoratorBean(_injectManager, cl);
 
-      _injectManager.addDecorator(decorator);
+      _injectManager.addDecoratorClass(cl);
     }
     
     _decoratorList.clear();

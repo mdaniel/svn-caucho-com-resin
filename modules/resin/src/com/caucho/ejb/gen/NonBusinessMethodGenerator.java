@@ -138,6 +138,16 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
   }
 
   /**
+   * Generates initialization in the constructor
+   */
+  @Override
+  public void generateInject(JavaWriter out, 
+                             HashMap<String,Object> map)
+    throws IOException
+  {
+  }
+
+  /**
    * Generates initialization in the proxy constructor
    */
   @Override

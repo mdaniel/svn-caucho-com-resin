@@ -86,10 +86,13 @@ public class BeanArg<T> extends Arg<T> {
     if (_bean == null)
       bind();
 
+    // ioc/0i3o
     CreationalContextImpl<?> beanEnv
-      = new CreationalContextImpl(_bean, parentEnv, _ip);
+      = new CreationalContextImpl(_bean, parentEnv);//, _ip);
 
     // XXX: getInstance for injection?
-    return _beanManager.getReference(_bean, _type, beanEnv);
+    Object value = _beanManager.getReference(_bean, _type, beanEnv);
+    
+    return value;
   }
 }

@@ -144,6 +144,17 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
   }
 
   /**
+   * Generates extra inject code
+   */
+  @Override
+  public void generateInject(JavaWriter out, 
+                             HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateInject(out, map);
+  }
+
+  /**
    * Generates @PostConstruct code
    */
   @Override

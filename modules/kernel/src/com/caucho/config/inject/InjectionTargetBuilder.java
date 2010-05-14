@@ -32,7 +32,6 @@ package com.caucho.config.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
-import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,7 +46,6 @@ import javax.annotation.PreDestroy;
 import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AmbiguousResolutionException;
-import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
@@ -65,7 +63,6 @@ import javax.interceptor.InvocationContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
 import com.caucho.config.bytecode.SerializationAdapter;
-import com.caucho.config.gen.BeanInjectionTarget;
 import com.caucho.config.gen.CandiBeanGenerator;
 import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.j2ee.PreDestroyInject;
@@ -81,16 +78,12 @@ import com.caucho.util.L10N;
  * SimpleBean represents a POJO Java bean registered as a WebBean.
  */
 @Module
-public class InjectionTargetImpl<X> implements InjectionTarget<X>
+public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 {
-  private static final L10N L = new L10N(InjectionTargetImpl.class);
+  private static final L10N L = new L10N(InjectionTargetBuilder.class);
   private static final Logger log
-    = Logger.getLogger(InjectionTargetImpl.class.getName());
+    = Logger.getLogger(InjectionTargetBuilder.class.getName());
 
-  private static final Object []NULL_ARGS = new Object[0];
-
-  private boolean _isBound;
-  
   private InjectManager _beanManager;
 
   private Class<X> _instanceClass;
@@ -102,38 +95,29 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   private Set<Annotation> _interceptorBindings;
 
   private AnnotatedConstructor<X> _beanCtor;
+  
+  private CandiProducer<X> _producer;
+  
   private Constructor<X> _javaCtor;
-  private Arg []_args;
   
   private boolean _isGenerateInterception = true;
 
   private ConfigProgram []_newArgs;
-  private ConfigProgram []_injectProgram;
-  private ConfigProgram []_initProgram;
-  private ConfigProgram []_destroyProgram;
 
   private Set<InjectionPoint> _injectionPointSet;
-
-  private ArrayList<ConfigProgram> _injectProgramList
-    = new ArrayList<ConfigProgram>();
   
-  public InjectionTargetImpl(InjectManager beanManager,
-                             AnnotatedType<X> beanType,
-                             Bean<X> bean)
+  public InjectionTargetBuilder(InjectManager beanManager,
+                                AnnotatedType<X> beanType,
+                                Bean<X> bean)
   {
     _beanManager = beanManager;
 
     _annotatedType = beanType;
     _bean = bean;
-
-    /*
-    if (beanType.getType() instanceof Class)
-      validateType((Class) beanType.getType());
-    */
   }
   
-  public InjectionTargetImpl(InjectManager beanManager,
-                             AnnotatedType<X> beanType)
+  public InjectionTargetBuilder(InjectManager beanManager,
+                                AnnotatedType<X> beanType)
   {
     this(beanManager, beanType, null);
   }
@@ -159,57 +143,23 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   }
 
   /**
-   * Checks for validity for classpath scanning.
+   * Returns the injection points.
    */
-  public static boolean isValid(Class<?> type)
+  @Override
+  public Set<InjectionPoint> getInjectionPoints()
   {
-    if (type.isInterface())
-      return false;
-
-    if (type.getTypeParameters() != null
-        && type.getTypeParameters().length > 0) {
-      return false;
+    synchronized (this) {
+      if (_producer == null) {
+        _producer = build();
+      }
     }
-
-    if (! isValidConstructor(type))
-      return false;
-
-    return true;
-  }
-
-  public static boolean isValidConstructor(Class<?> type)
-  {
-    for (Constructor<?> ctor : type.getDeclaredConstructors()) {
-      if (ctor.getParameterTypes().length == 0)
-        return true;
-
-      if (ctor.isAnnotationPresent(Inject.class))
-        return true;
-    }
-
-    return false;
+    
+    return _producer.getInjectionPoints();
   }
 
   public void setGenerateInterception(boolean isEnable)
   {
     _isGenerateInterception = isEnable;
-  }
-
-  /**
-   * Sets the init program.
-   */
-  public void setNewArgs(ArrayList<ConfigProgram> args)
-  {
-    // XXX: handled differently
-    if (args != null) {
-      _newArgs = new ConfigProgram[args.size()];
-      args.toArray(_newArgs);
-    }
-  }
-
-  public Set<Annotation> getInterceptorBindings()
-  {
-    return _interceptorBindings;
   }
 
   private static boolean isAnnotationPresent(Annotation []annotations, Class<?> type)
@@ -221,51 +171,60 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
 
     return false;
   }
+  
+  //
+  // Producer/InjectionTarget methods
+  //
 
   @Override
-  public X produce(CreationalContext<X> contextEnv)
+  public X produce(CreationalContext<X> env)
   {
-    try {
-      if (! _isBound)
-        bind();
+    if (_producer == null)
+      getInjectionPoints();
+    
+    return _producer.produce(env);
+  }
 
-      CreationalContextImpl<X> env = null;
-      
-      if (contextEnv instanceof CreationalContextImpl<?>)
-        env = (CreationalContextImpl<X>) contextEnv;
+  @Override
+  public void inject(X instance, CreationalContext<X> env)
+  {
 
-      if (_args == null)
-        throw new IllegalStateException(L.l("Can't instantiate bean because it is not a valid ManagedBean: '{0}'", toString()));
+    if (_producer == null)
+      getInjectionPoints();
+    
+    _producer.inject(instance, env);
+  }
 
-      Object []args;
-      int size = _args.length;
-      if (size > 0) {
-        args = new Object[size];
+  @Override
+  public void postConstruct(X instance)
+  {
 
-        for (int i = 0; i < size; i++) {
-          args[i] = _args[i].eval(env);
-        }
-      }
-      else
-        args = NULL_ARGS;
+    if (_producer == null)
+      getInjectionPoints();
+    
+    _producer.postConstruct(instance);
+  }
 
-      Object value = _javaCtor.newInstance(args);
+  /**
+   * Call pre-destroy
+   */
+  @Override
+  public void preDestroy(X instance)
+  {
+    if (_producer == null)
+      getInjectionPoints();
+    
+    _producer.preDestroy(instance);
+  }
 
-      if (value instanceof HandleAware) {
-        SerializationAdapter.setHandle(value, getHandle());
-      }
+  @Override
+  public void dispose(X instance)
+  {
 
-      return (X) value;
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException)
-        throw (RuntimeException) e.getCause();
-      else
-        throw new CreationException(e.getCause());
-    } catch (Exception e) {
-      throw new CreationException(e);
-    }
+    if (_producer == null)
+      getInjectionPoints();
+    
+    _producer.dispose(instance);
   }
 
   protected Object getHandle()
@@ -277,133 +236,83 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
   {
     return null;
   }
-
-  public void inject(X instance, CreationalContext<X> env)
-  {
-    try {
-      if (! _isBound)
-        bind();
-
-      if (_injectProgram != null) {
-        for (ConfigProgram program : _injectProgram) {
-          program.inject(instance, env);
-        }
-      }
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (Exception e) {
-      throw new CreationException(e);
-    }
-  }
-
-  public void postConstruct(X instance)
-  {
-    try {
-      if (! _isBound)
-        bind();
-
-      CreationalContext<X> env = null;
-
-      for (ConfigProgram program : _initProgram) {
-        program.inject(instance, env);
-      }
-
-      // server/4750
-      if (instance instanceof BeanInjectionTarget) {
-        BeanInjectionTarget bean = (BeanInjectionTarget) instance;
-        bean.__caucho_postConstruct();
-      }
-    } catch (RuntimeException e) {
-      throw e;
-      /*
-    } catch (InvocationTargetException e) {
-      throw ConfigException.create(e.getCause());
-      */
-    } catch (Exception e) {
-      throw new CreationException(e);
-    }
-  }
-
-  public void dispose(X instance)
-  {
-  }
-
   /**
    * Binds parameters
    */
-  public void bind()
+  private CandiProducer<X> build()
   {
-    synchronized (this) {
-      if (_isBound)
-        return;
-      _isBound = true;
+    Thread thread = Thread.currentThread();
+    ClassLoader oldLoader = thread.getContextClassLoader();
       
-      Thread thread = Thread.currentThread();
-      ClassLoader oldLoader = thread.getContextClassLoader();
+    try {
+      thread.setContextClassLoader(getBeanManager().getClassLoader());
+
+      introspect();
       
-      try {
-        thread.setContextClassLoader(getBeanManager().getClassLoader());
+      Class<?> cl = (Class<?>) _annotatedType.getBaseType();
 
-        Class<?> cl = (Class<?>) _annotatedType.getBaseType();
-
-        HashMap<Method,Annotation[]> methodMap
-          = new HashMap<Method,Annotation[]>();
-
-        ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
-        introspectInit(initList, cl, methodMap);
-        _initProgram = new ConfigProgram[initList.size()];
-        initList.toArray(_initProgram);
-
-        ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
-        introspectDestroy(destroyList, cl);
-        _destroyProgram = new ConfigProgram[destroyList.size()];
-        destroyList.toArray(_destroyProgram);
-
-        if (_beanCtor == null) {
-          // XXX:
-          AnnotatedType beanType = _annotatedType;
+      if (_beanCtor == null) {
+        // XXX:
+        AnnotatedType beanType = _annotatedType;
           
-          if (beanType != null)
-            beanType = ReflectionAnnotatedFactory.introspectType(cl);
+        if (beanType == null)
+          beanType = ReflectionAnnotatedFactory.introspectType(cl);
 
-          introspectConstructor(beanType);
-        }
-
-        // introspectObservers(getTargetClass());
-
-        Class<X> instanceClass = null;
-
-        if (_isGenerateInterception) {
-          if (! _annotatedType.isAnnotationPresent(javax.interceptor.Interceptor.class)
-              && ! _annotatedType.isAnnotationPresent(javax.decorator.Decorator.class)) {
-            CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(getBeanManager(), _annotatedType);
-            bean.introspect();
-
-            instanceClass = (Class<X>) bean.generateClass();
-          }
-
-          if (instanceClass == cl && isSerializeHandle()) {
-            instanceClass = SerializationAdapter.gen(instanceClass);
-          }
-        }
-
-        if (instanceClass != null && instanceClass != _instanceClass) {
-          try {
-            if (_javaCtor != null) {
-              _javaCtor = (Constructor<X>) getConstructor(instanceClass, _javaCtor.getParameterTypes());
-              _javaCtor.setAccessible(true);
-            }
-
-            _instanceClass = instanceClass;
-          } catch (Exception e) {
-            // server/2423
-            log.log(Level.FINE, e.toString(), e);
-            // throw ConfigException.create(e);
-          }
-        }
-      } finally {
-        thread.setContextClassLoader(oldLoader);
+        introspectConstructor(beanType);
       }
+
+      Class<X> instanceClass = null;
+
+      if (_isGenerateInterception) {
+        if (! _annotatedType.isAnnotationPresent(javax.interceptor.Interceptor.class)
+            && ! _annotatedType.isAnnotationPresent(javax.decorator.Decorator.class)) {
+          CandiBeanGenerator<X> bean = new CandiBeanGenerator<X>(getBeanManager(), _annotatedType);
+          bean.introspect();
+
+          instanceClass = (Class<X>) bean.generateClass();
+        }
+
+        if (instanceClass == cl && isSerializeHandle()) {
+            instanceClass = SerializationAdapter.gen(instanceClass);
+        }
+      }
+
+      if (instanceClass != null && instanceClass != _instanceClass) {
+        try {
+          if (_javaCtor != null) {
+            _javaCtor = (Constructor<X>) getConstructor(instanceClass, _javaCtor.getParameterTypes());
+            _javaCtor.setAccessible(true);
+          }
+        } catch (Exception e) {
+          // server/2423
+          log.log(Level.FINE, e.toString(), e);
+          // throw ConfigException.create(e);
+        }
+      }
+
+      ConfigProgram []injectProgram = introspectInject(_annotatedType);
+      ConfigProgram []initProgram = introspectPostConstruct(_annotatedType);
+
+      ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
+      introspectDestroy(destroyList, cl);
+      ConfigProgram []destroyProgram = new ConfigProgram[destroyList.size()];
+      destroyList.toArray(destroyProgram);
+      
+      Arg []args = introspectArguments(_beanCtor, _beanCtor.getParameters());
+
+      CandiProducer<X> producer
+        = new CandiProducer<X>(_bean,
+                               instanceClass,
+                               _javaCtor,
+                               args,
+                               injectProgram,
+                               initProgram,
+                               destroyProgram,
+                               _injectionPointSet);
+      
+      return producer;
+    } finally {
+      thread.setContextClassLoader(oldLoader);
     }
   }
   
@@ -429,28 +338,29 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     
     return true;
   }
+  
+  private ConfigProgram []introspectPostConstruct(AnnotatedType<X> annType)
+  {
+    ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
+    introspectInit(initList, annType.getJavaClass());
+    ConfigProgram []initProgram = new ConfigProgram[initList.size()];
+    initList.toArray(initProgram);
+    
+    return initProgram;
+  }
 
   public static void
     introspectInit(ArrayList<ConfigProgram> initList,
-                   Class<?> type,
-                   HashMap<Method,Annotation[]> methodAnnotationMap)
+                   Class<?> type)
     throws ConfigException
   {
     if (type == null || type.equals(Object.class))
       return;
 
-    introspectInit(initList, type.getSuperclass(), methodAnnotationMap);
+    introspectInit(initList, type.getSuperclass());
 
     for (Method method : type.getDeclaredMethods()) {
-      Annotation []annList = null;
-
-      if (methodAnnotationMap != null)
-        annList = methodAnnotationMap.get(method);
-
-      if (annList == null)
-        annList = method.getAnnotations();
-
-      if (! isAnnotationPresent(annList, PostConstruct.class)) {
+      if (! method.isAnnotationPresent(PostConstruct.class)) {
         // && ! isAnnotationPresent(annList, Inject.class)) {
         continue;
       }
@@ -459,7 +369,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
           && InvocationContext.class.equals(method.getParameterTypes()[0]))
         continue;
 
-      if (isAnnotationPresent(annList, PostConstruct.class)
+      if (method.isAnnotationPresent(PostConstruct.class)
           && method.getParameterTypes().length != 0) {
           throw new ConfigException(location(method)
                                     + L.l("{0}: @PostConstruct is requires zero arguments"));
@@ -505,55 +415,6 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     }
   }
 
-  private static String location(Method method)
-  {
-    String className = method.getDeclaringClass().getName();
-
-    return className + "." + method.getName() + ": ";
-  }
-
-  private boolean isSerializeHandle()
-  {
-    return getAnnotatedType().isAnnotationPresent(SerializeHandle.class);
-  }
-
-  /**
-   * Call pre-destroy
-   */
-  public void preDestroy(X instance)
-  {
-    try {
-      if (!_isBound)
-        bind();
-
-      CreationalContext<X> env = null;
-
-      for (ConfigProgram program : _destroyProgram) {
-        program.inject(instance, env);
-      }
-    }
-    catch (RuntimeException e) {
-      throw e;
-    }
-    catch (Exception e) {
-      throw new CreationException(e);
-    }
-  }
-
-  /**
-   * Returns the injection points.
-   */
-  @Override
-  public Set<InjectionPoint> getInjectionPoints()
-  {
-    if (_injectionPointSet == null) {
-      _injectionPointSet = new HashSet<InjectionPoint>();
-      introspect();
-    }
-    
-    return _injectionPointSet;
-  }
-
   //
   // introspection
   //
@@ -571,11 +432,6 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     Class<X> cl = (Class<X>) beanType.getBaseType();
     
     introspectConstructor(beanType);
-
-    introspectInject(beanType);
-
-    _injectProgram = new ConfigProgram[_injectProgramList.size()];
-    _injectProgramList.toArray(_injectProgram);
   }
 
   /**
@@ -654,7 +510,6 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       _javaCtor = _beanCtor.getJavaMember();
       _javaCtor.setAccessible(true);
 
-      _args = introspectArguments(_beanCtor, _beanCtor.getParameters());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -662,34 +517,37 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     }
   }
 
-  private Arg<?> []introspectArguments(Annotated ann, List<AnnotatedParameter<X>> params)
+  @SuppressWarnings("unchecked")
+  private Arg<X> []introspectArguments(Annotated ann, List<AnnotatedParameter<X>> params)
   {
-    Arg<?> []args = new Arg[params.size()];
+    Arg<X> []args = new Arg[params.size()];
 
     for (int i = 0; i < args.length; i++) {
-      AnnotatedParameter<?> param = params.get(i);
-
-      Annotation []qualifiers = getQualifiers(param);
-   
-      InjectionPoint ip = new InjectionPointImpl(getBeanManager(),
-                                                 this,
-                                                 param);
+      AnnotatedParameter<X> param = params.get(i);
       
-      if (ann.isAnnotationPresent(Inject.class)) {
-        // ioc/022k
-        _injectionPointSet.add(ip);
-      }
-
-      if (qualifiers.length > 0 || true)
-        args[i] = new BeanArg<X>(getBeanManager(),
-                                 param.getBaseType(), 
-                                 qualifiers,
-                                 ip);
-      else
-        args[i] = new ValueArg<X>(param.getBaseType());
+      args[i] = introspectArg(ann, param);
     }
 
     return args;
+  }
+  
+  private Arg<X> introspectArg(Annotated ann, AnnotatedParameter<X> param)
+  {
+    Annotation []qualifiers = getQualifiers(param);
+ 
+    InjectionPoint ip = new InjectionPointImpl<X>(getBeanManager(),
+                                                 this,
+                                                 param);
+    
+    if (ann.isAnnotationPresent(Inject.class)) {
+      // ioc/022k
+      _injectionPointSet.add(ip);
+    }
+
+    return new BeanArg<X>(getBeanManager(),
+                          param.getBaseType(), 
+                          qualifiers,
+                          ip);
   }
 
   private Annotation []getQualifiers(Annotated annotated)
@@ -711,7 +569,22 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
     return qualifiers;
   }
 
-  private void introspectInject(AnnotatedType<?> type)
+  private ConfigProgram []introspectInject(AnnotatedType<X> type)
+  {
+    ArrayList<ConfigProgram> injectProgramList = new ArrayList<ConfigProgram>();
+    
+    _injectionPointSet = new HashSet<InjectionPoint>();
+    
+    introspectInject(type, injectProgramList);
+    
+    ConfigProgram []injectProgram = new ConfigProgram[injectProgramList.size()];
+    injectProgramList.toArray(injectProgram);
+    
+    return injectProgram;
+  }
+  
+  private void introspectInject(AnnotatedType<X> type,
+                                ArrayList<ConfigProgram> injectProgramList)
   {
     Class<?> rawType = (Class<?>) type.getBaseType();
 
@@ -719,17 +592,6 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       return;
     
     Class<?> parentClass = rawType.getSuperclass();
-
-    // 4.0.7 - currently the recursion is handled by ReflectionAnnotatedType
-    /*
-    if (parentClass != null && ! Object.class.equals(parentClass)) {
-      // XXX:
-      AnnotatedType<?> parentType
-        = ReflectionAnnotatedFactory.introspectType(parentClass);
-      
-      introspectInject(parentType);
-    }
-    */
     
     // configureClassResources(injectList, type);
 
@@ -745,13 +607,16 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
         _injectionPointSet.add(ij);
 
         if (field.isAnnotationPresent(Delegate.class)) {
+          // ioc/0i60
+          /*
           if (! type.isAnnotationPresent(javax.decorator.Decorator.class)) {
             throw new IllegalStateException(L.l("'{0}' may not inject with @Delegate because it is not a @Decorator",
                                                 type.getJavaClass()));
           }
+          */
         }
         else {
-          _injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
+          injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
         }
       }
       else {
@@ -761,7 +626,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
         if (handler != null) {
           ConfigProgram program = new FieldHandlerProgram(field, handler);
           
-          _injectProgramList.add(program);
+          injectProgramList.add(program);
         }
       }
     }
@@ -773,7 +638,7 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
       if (method.isAnnotationPresent(Inject.class)) {
         // boolean isOptional = isQualifierOptional(field);
 
-        List<AnnotatedParameter> params = method.getParameters();
+        List<AnnotatedParameter<?>> params = method.getParameters();
 
         InjectionPoint []args = new InjectionPoint[params.size()];
 
@@ -786,8 +651,8 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
           args[i] = ij;
         }
 
-        _injectProgramList.add(new MethodInjectProgram(method.getJavaMember(),
-                                                       args));
+        injectProgramList.add(new MethodInjectProgram(method.getJavaMember(),
+                                                      args));
       }
       else {
         InjectionPointHandler handler
@@ -796,27 +661,54 @@ public class InjectionTargetImpl<X> implements InjectionTarget<X>
         if (handler != null) {
           ConfigProgram program = new MethodHandlerProgram(method, handler);
           
-          _injectProgramList.add(program);
+          injectProgramList.add(program);
         }
       }
     }
   }
 
-  private static boolean hasQualifierAnnotation(AnnotatedField<?> field)
+  /**
+   * Checks for validity for classpath scanning.
+   */
+  public static boolean isValid(Class<?> type)
   {
-    for (Annotation ann : field.getAnnotations()) {
-      Class<?> annType = ann.annotationType();
+    if (type.isInterface())
+      return false;
 
-      if (annType.equals(Inject.class))
+    if (type.getTypeParameters() != null
+        && type.getTypeParameters().length > 0) {
+      return false;
+    }
+
+    if (! isValidConstructor(type))
+      return false;
+
+    return true;
+  }
+
+  public static boolean isValidConstructor(Class<?> type)
+  {
+    for (Constructor<?> ctor : type.getDeclaredConstructors()) {
+      if (ctor.getParameterTypes().length == 0)
         return true;
-      // XXX: no longer true
-      /*
-      if (annType.isAnnotationPresent(Qualifier.class))
+
+      if (ctor.isAnnotationPresent(Inject.class))
         return true;
-      */
     }
 
     return false;
+  }
+
+  private static String location(Method method)
+  {
+    String className = method.getDeclaringClass().getName();
+
+    return className + "." + method.getName() + ": ";
+  }
+
+  private boolean isSerializeHandle()
+  {
+    return getAnnotatedType().isAnnotationPresent(SerializeHandle.class);
   }
 
   private static boolean hasQualifierAnnotation(AnnotatedConstructor<?> ctor)

@@ -45,7 +45,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   private CreationalContextImpl<?> _parent; // parent in the creation chain
   
   private final Contextual<T> _bean;
-  private final InjectionPoint _injectionPoint;
+  private InjectionPoint _injectionPoint;
   private T _value;
   private InjectionTarget<T> _injectionTarget;
   
@@ -156,9 +156,29 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     return null;
   }
   
+  public void setInjectionPoint(InjectionPoint ip)
+  {
+    _injectionPoint = ip;
+  }
+  
   public InjectionPoint getInjectionPoint()
   {
-    return _injectionPoint;
+    CreationalContext<?> ptr = this; 
+    
+    while (ptr != null) {
+      if (ptr instanceof CreationalContextImpl<?>) {
+        CreationalContextImpl<?> env = (CreationalContextImpl<?>) ptr;
+        
+        if (env._injectionPoint != null)
+          return env._injectionPoint;
+        
+        ptr = env._parent;
+      }
+      else
+        ptr = null;
+    }
+    
+    return null;
   }
 
   @Override
@@ -209,6 +229,6 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _bean + "," + _value + ",next=" + _next + "]";
+    return getClass().getSimpleName() + "[" + _bean + "," + _value + ",parent=" + _parent + "]";
   }
 }

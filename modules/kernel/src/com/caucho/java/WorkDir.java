@@ -64,12 +64,8 @@ public class WorkDir {
 
     if (path != null)
       return path;
-
-    // Windows uses /temp as a work dir
-    if (com.caucho.server.util.CauchoSystem.isWindows())
-      path = Vfs.lookup("file:/c:/tmp/caucho");
-    else
-      path = Vfs.lookup("file:/tmp/caucho");
+    
+    path = getTmpWorkDir();
 
     _localWorkDir.setGlobal(path);
     
@@ -79,6 +75,20 @@ public class WorkDir {
     }
 
     return path;
+  }
+  
+  /**
+   * Returns the user directory from /tmp/
+   */
+  public static Path getTmpWorkDir()
+  {
+    String userName = System.getProperty("user.name");
+    
+    // Windows uses /temp as a work dir
+    if (com.caucho.server.util.CauchoSystem.isWindows())
+      return Vfs.lookup("file:/c:/tmp/" + userName);
+    else
+      return Vfs.lookup("file:/tmp/" + userName);
   }
 
   /**
@@ -101,7 +111,7 @@ public class WorkDir {
       if (path instanceof MemoryPath) {
 	String pathName = path.getPath();
 
-	path = Vfs.lookup("file:/tmp/caucho/qa/" + pathName);
+	path = WorkDir.getTmpWorkDir().lookup("qa/" + pathName);
       }
     
       // path.mkdirs();

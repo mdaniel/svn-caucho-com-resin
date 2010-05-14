@@ -29,6 +29,7 @@
 
 package com.caucho.config.gen;
 
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.InjectManager;
@@ -42,8 +43,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.InterceptionType;
 
@@ -152,6 +155,7 @@ public class CandiUtil {
       
       try {
         methods[decorators.size() - i - 1] = beanClass.getMethod(methodName, paramTypes);
+        methods[decorators.size() - i - 1].setAccessible(true);
       } catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
       }
@@ -209,27 +213,70 @@ public class CandiUtil {
     return tail;
   }
 
-  public static Object []generateProxyDelegate(InjectManager webBeans,
+  public static Object []generateProxyDelegate(InjectManager manager,
                                                List<Decorator<?>> beans,
-                                               Object proxy)
+                                               Object proxy,
+                                               CreationalContext<?> parentEnv)
   {
     Object []instances = new Object[beans.size()];
 
-    Bean parentBean = null;
-    CreationalContext env = webBeans.createCreationalContext(parentBean);
-
     for (int i = 0; i < beans.size(); i++) {
       Decorator<?> bean = beans.get(i);
+      CreationalContext<?> env = new CreationalContextImpl(bean, parentEnv);
 
-      Object instance = webBeans.getReference(bean, bean.getBeanClass(), env);
+      Object instance = manager.getReference(bean, bean.getBeanClass(), env);
 
       // XXX:
-      ((DecoratorBean<?>) bean).setDelegate(instance, proxy);
+      InjectionPoint ip = getDelegate(bean);
+
+      if (ip.getMember() instanceof Field) {
+        Field field = (Field) ip.getMember();
+        field.setAccessible(true);
+      
+        try {
+          field.set(instance, proxy);
+        } catch (Exception e) {
+          throw new InjectionException(e);
+        }
+      } else {
+        Method method = (Method) ip.getMember();
+        method.setAccessible(true);
+      
+        try {
+          method.invoke(instance, proxy);
+        } catch (Exception e) {
+          throw new InjectionException(e);
+        }
+      }
+      
+      /*
+      DecoratorBean<?> decoratorBean = (DecoratorBean<?>) bean;
+      decoratorBean.setDelegate(instance, proxy);
+      */
 
       instances[beans.size() - i - 1] = instance;
+      
+      if (parentEnv instanceof CreationalContextImpl<?>) {
+        // InjectionPoint ip = decoratorBean.getDelegateInjectionPoint();
+      
+        ((CreationalContextImpl<?>) parentEnv).setInjectionPoint(ip);
+      }
     }
 
     return instances;
+  }
+  
+  private static InjectionPoint getDelegate(Decorator<?> bean)
+  {
+    if (bean instanceof DecoratorBean)
+      return ((DecoratorBean) bean).getDelegateInjectionPoint();
+
+    for (InjectionPoint ip : bean.getInjectionPoints()) {
+      if (ip.isDelegate())
+        return ip;
+    }
+    
+    throw new IllegalStateException(String.valueOf(bean));
   }
 
   public static int nextDelegate(Object []beans,

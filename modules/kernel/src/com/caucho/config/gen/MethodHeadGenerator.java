@@ -104,9 +104,11 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
       accessModifier = "public";
     else if (Modifier.isProtected(modifiers))
       accessModifier = "protected";
+    /*
     else
       throw new IllegalStateException(getJavaMethod().toString()
                                       + " must be public or protected");
+     */
 
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),

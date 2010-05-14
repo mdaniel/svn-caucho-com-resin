@@ -85,7 +85,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       addInterfaceName(HandleAware.class.getName());
     }
     
-    addInterfaceName(BeanInjectionTarget.class.getName());
+    addInterfaceName(CandiEnhancedBean.class.getName());
 
     addImport("javax.transaction.*");
 
@@ -123,6 +123,11 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
           && javaMethod.getParameterTypes().length == 0) {
         _hasReadResolve = true;
       }
+      
+      int modifiers = method.getJavaMember().getModifiers();
+      
+      if (method.isStatic() || Modifier.isPrivate(modifiers))
+        continue;
 
       boolean isEnhance = false;
       AspectGenerator<X> bizMethod = aspectHeadFactory.create(method, isEnhance);
@@ -134,9 +139,10 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       if (_businessMethods.contains(bizMethod))
         continue;
 
-      int modifiers = method.getJavaMember().getModifiers();
+      /*
       if (! Modifier.isPublic(modifiers) && ! Modifier.isProtected(modifiers))
-        throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on private methods.", bizMethod));
+        throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on private or package-private methods.", bizMethod));
+        */
       if (method.isStatic())
         throw new ConfigException(L.l("{0}: Java Injection annotations are not allowed on static methods.", bizMethod));
       if (Modifier.isFinal(modifiers))
@@ -152,11 +158,6 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
         && hasTransientInject(_beanClass.getJavaClass())) {
       _isEnhanced = true;
     }
-
-    /*
-    if (getDecoratorTypes().size() > 0)
-      _isEnhanced = true;
-      */
   }
 
   protected void introspectClass(AnnotatedType<X> cl)
@@ -325,6 +326,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     
     generateBeanPrologue(out);
 
+    generateInject(out);
+
     generatePostConstruct(out);
 
     HashMap<String,Object> map = new HashMap<String,Object>();
@@ -388,23 +391,6 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     out.println("private Object readResolve()");
     out.println("{");
     out.println("  return this;");
-    out.println("}");
-  }
-
-  protected void generatePostConstruct(JavaWriter out)
-    throws IOException
-  {
-    out.println();
-    out.println("public void __caucho_postConstruct()");
-    out.println("{");
-    out.pushDepth();
-
-    HashMap<String,Object> map = new HashMap<String,Object>();
-    for (AspectGenerator<X> method : _businessMethods) {
-      method.generatePostConstruct(out, map);
-    }
-
-    out.popDepth();
     out.println("}");
   }
 

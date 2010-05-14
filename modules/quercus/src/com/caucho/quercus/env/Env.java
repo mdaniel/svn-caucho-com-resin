@@ -29,6 +29,7 @@
 
 package com.caucho.quercus.env;
 
+import com.caucho.java.WorkDir;
 import com.caucho.quercus.*;
 import com.caucho.quercus.expr.Expr;
 import com.caucho.quercus.lib.ErrorModule;
@@ -1456,7 +1457,7 @@ public class Env
       else if (getRequest() != null)
         realPath = "WEB-INF/upload";
       else
-        realPath = "/tmp/caucho/upload";
+        realPath = WorkDir.getTmpWorkDir().lookup("upload").getNativePath();
       
       _uploadPath = _quercus.getPwd().lookup(realPath);
 

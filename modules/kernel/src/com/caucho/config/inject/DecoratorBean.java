@@ -31,7 +31,9 @@ package com.caucho.config.inject;
 
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.HashSet;
@@ -46,6 +48,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.reflect.AnnotatedFieldImpl;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -61,8 +64,12 @@ public class DecoratorBean<T> implements Decorator<T>
   private Class<T> _type;
 
   private Bean<T> _bean;
+  
+  private InjectionPoint _delegateInjectionPoint;
 
   private Field _delegateField;
+  private Method _delegateMethod;
+  private Constructor<?> _delegateConstructor;
   
   private Set<Type> _typeSet;
 
@@ -89,7 +96,11 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Set<Annotation> getQualifiers()
   {
-    return _qualifiers;
+    if (_delegateInjectionPoint != null)
+      return _delegateInjectionPoint.getQualifiers();
+    else
+      return _qualifiers;
+    //          return _bean.getQualifiers();
   }
 
   /**
@@ -117,7 +128,7 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public boolean isNullable()
   {
-    return false;
+    return true;
   }
   /**
    * Returns true if the bean can be null
@@ -162,7 +173,7 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public T create(CreationalContext<T> creationalContext)
   {
-    return (T) _bean.create(creationalContext);
+    return _bean.create(creationalContext);
   }
 
   /**
@@ -190,10 +201,7 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Type getDelegateType()
   {
-    if (_delegateField != null)
-      return _delegateField.getGenericType();
-    else
-      return null;
+    return _delegateInjectionPoint.getType();
   }
 
   /**
@@ -213,13 +221,21 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Set<Annotation> getDelegateQualifiers()
   {
-    return _qualifiers;
+    if (_delegateInjectionPoint != null)
+      return _delegateInjectionPoint.getQualifiers();
+    else
+      return _qualifiers;
+  }
+  
+  public InjectionPoint getDelegateInjectionPoint()
+  {
+    return _delegateInjectionPoint;
   }
 
   /**
    * Sets the delegate for an object
    */
-  public void setDelegate(Object instance,
+  private void setDelegate(Object instance,
                           Object delegate)
   {
     if (! _type.isAssignableFrom(instance.getClass())) {
@@ -235,7 +251,10 @@ public class DecoratorBean<T> implements Decorator<T>
     }
 
     try {
-      _delegateField.set(instance, delegate);
+      if (_delegateField != null)
+        _delegateField.set(instance, delegate);
+      else if (_delegateMethod != null)
+        _delegateMethod.invoke(instance, delegate);
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
@@ -251,21 +270,47 @@ public class DecoratorBean<T> implements Decorator<T>
 
     introspect();
 
-    if (_delegateField == null)
+    if (_delegateField == null && _delegateMethod == null)
       throw new ConfigException(L.l("{0} is missing a @Delegate field.  All @Decorators need a @Delegate field for a delegate injection",
                                     _type.getName()));
   }
 
   protected void introspect()
   {
-    introspectDelegateField();
+    // introspectDelegateField();
 
-    if (_delegateField != null) {
+    for (InjectionPoint ip : _bean.getInjectionPoints()) {
+      if (ip.isDelegate()) {
+        if (_delegateInjectionPoint != null)
+          throw new ConfigException(L.l("{0}: @Decorator field '{1}' conflicts with earlier field '{2}'."
+                                        + " A decorator must have exactly on delegate field.",
+                                        ip.getBean().getBeanClass().getName(),
+                                        ip.getMember().getName(),
+                                        _delegateInjectionPoint.getMember().getName()));
+        
+        _delegateInjectionPoint = ip;
+      }
+    }
+
+    if (_delegateInjectionPoint != null) {
+      if (_delegateInjectionPoint.getMember() instanceof Field) {
+        _delegateField = (Field) _delegateInjectionPoint.getMember();
+        _delegateField.setAccessible(true);
+      }
+      else if (_delegateInjectionPoint.getMember() instanceof Method) {
+        _delegateMethod = (Method) _delegateInjectionPoint.getMember();
+        _delegateMethod.setAccessible(true);
+      }
+      else if (_delegateInjectionPoint.getMember() instanceof Constructor) {
+        _delegateConstructor = (Constructor) _delegateInjectionPoint.getMember();
+        _delegateConstructor.setAccessible(true);
+      }
+      
       InjectManager manager = InjectManager.getCurrent();
       
       BaseType selfType = manager.createTargetBaseType(_type);
       BaseType delegateType 
-        = manager.createSourceBaseType(_delegateField.getGenericType());
+        = manager.createSourceBaseType(_delegateInjectionPoint.getType());
             
       _typeSet = new LinkedHashSet<Type>();
       
@@ -281,7 +326,7 @@ public class DecoratorBean<T> implements Decorator<T>
     }
   }
 
-  protected void introspectDelegateField()
+  private void introspectDelegateField()
   {
     if (_delegateField == null) {
       for (Field field : _type.getDeclaredFields()) {

@@ -46,7 +46,7 @@ import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.InjectionTargetImpl;
+import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.xml.XmlConfigContext;
@@ -115,8 +115,8 @@ public class EjbInjectionTarget<T> {
   {
     _injectionTarget = injectionTarget;
     
-    if (injectionTarget instanceof InjectionTargetImpl<?>) {
-      InjectionTargetImpl<T> targetImpl = (InjectionTargetImpl<T>) injectionTarget;
+    if (injectionTarget instanceof InjectionTargetBuilder<?>) {
+      InjectionTargetBuilder<T> targetImpl = (InjectionTargetBuilder<T>) injectionTarget;
       
       targetImpl.setGenerateInterception(false);
     }

@@ -221,19 +221,8 @@ public class CauchoSystem {
     if (workPath != null)
       return workPath;
 
-    String workDir;
+    Path path = WorkDir.getTmpWorkDir();
 
-    // Windows uses /temp as a work dir
-    if (isWindows())
-      workDir = "file:/c:/tmp/caucho";
-    else
-      workDir = "file:/tmp/caucho";
-
-    Path path;
-    if (workDir.charAt(0) == '/')
-      path = Vfs.lookupNative(workDir);
-    else
-      path = CauchoSystem.getResinHome().lookupNative(workDir);
     try {
       path.mkdirs();
     } catch (IOException e) {

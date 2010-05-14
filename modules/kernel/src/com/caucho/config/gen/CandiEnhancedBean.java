@@ -24,26 +24,18 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson;
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.gen;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.program.Arg;
-
 /**
- * A saved program for creating a constructor argument
+ * Interface for a Candi enhanced bean.
  */
-public class InjectionPointArg<T> extends Arg<T> {
-  public InjectionPointArg()
-  {
-  }
+public interface CandiEnhancedBean {
+  public void __caucho_inject(Object []delegates, CreationalContext<?> parentEnv);
   
-  @Override
-  public T eval(CreationalContext<T> env)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
+  public void __caucho_postConstruct();
 }

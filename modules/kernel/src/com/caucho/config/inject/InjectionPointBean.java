@@ -39,9 +39,12 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.caucho.inject.Module;
+
 /**
  * Configuration for the xml web bean component.
  */
+@Module
 public class InjectionPointBean implements Bean<InjectionPoint>
 {
   private InjectionPoint _ij;
@@ -55,6 +58,7 @@ public class InjectionPointBean implements Bean<InjectionPoint>
   // metadata for the bean
   //
 
+  @Override
   public Class<InjectionPoint> getBeanClass()
   {
     throw new UnsupportedOperationException(getClass().getName());
@@ -142,9 +146,13 @@ public class InjectionPointBean implements Bean<InjectionPoint>
   }
 
   @Override
-  public InjectionPoint create(CreationalContext<InjectionPoint> creationalContext)
+  public InjectionPoint create(CreationalContext<InjectionPoint> env)
   {
-    return _ij;
+    // ioc/0i3o
+    if (env instanceof CreationalContextImpl<?>)
+      return ((CreationalContextImpl<InjectionPoint>) env).getInjectionPoint();
+    else
+      return _ij;
   }
   /**
    * Instantiate the bean.

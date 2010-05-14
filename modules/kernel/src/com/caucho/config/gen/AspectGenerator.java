@@ -97,6 +97,13 @@ public interface AspectGenerator<X> {
     throws IOException;
 
   /**
+   * Generates inject code after the constructor
+   */
+  public void generateInject(JavaWriter out, 
+                             HashMap<String,Object> map)
+    throws IOException;
+
+  /**
    * Generates @PostConstruct code
    */
   public void generatePostConstruct(JavaWriter out, 

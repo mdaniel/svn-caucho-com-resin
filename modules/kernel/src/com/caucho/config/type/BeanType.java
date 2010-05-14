@@ -58,7 +58,7 @@ import com.caucho.config.attribute.PropertyAttribute;
 import com.caucho.config.attribute.SetterAttribute;
 import com.caucho.config.attribute.TextAttribute;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.InjectionTargetImpl;
+import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
@@ -168,6 +168,8 @@ public class BeanType<T> extends ConfigType<T>
 					_beanClass.getName()));
 
 	_bean = webBeans.createManagedBean(_beanClass);
+	
+	_bean.getInjectionPoints();
       }
 
       InjectionTarget<T> injection = _bean.getInjectionTarget();
@@ -881,9 +883,7 @@ public class BeanType<T> extends ConfigType<T>
       _injectList = new ArrayList<ConfigProgram>();
       _initList = new ArrayList<ConfigProgram>();
     
-      // InjectionTargetImpl.introspectInject(_injectList, _beanClass);
-
-      InjectionTargetImpl.introspectInit(_initList, _beanClass, null);
+      InjectionTargetBuilder.introspectInit(_initList, _beanClass);
     }
   }
 
