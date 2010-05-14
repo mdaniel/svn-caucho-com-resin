@@ -74,8 +74,8 @@ public class InterceptorFactory<X>
   private HashSet<Class<?>> _decoratorClasses;
   
   public InterceptorFactory(AspectBeanFactory<X> beanFactory,
-                     AspectFactory<X> next,
-                     InjectManager manager)
+                            AspectFactory<X> next,
+                            InjectManager manager)
   {
     super(beanFactory, next);
     

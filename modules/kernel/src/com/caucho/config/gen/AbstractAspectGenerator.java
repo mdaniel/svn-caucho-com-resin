@@ -32,7 +32,9 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.HashMap;
+import java.util.HashSet;
 
+import javax.ejb.ApplicationException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
@@ -107,6 +109,132 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
+  /**
+   * Generates the body of the method.
+   *
+   * <code><pre>
+   * MyType myMethod(...)
+   * {
+   *   [pre-try]
+   *   try {
+   *     [pre-call]
+   *     [call]   // retValue = super.myMethod(...)
+   *     [post-call]
+   *     return retValue;
+   *   } catch (RuntimeException e) {
+   *     [system-exception]
+   *     throw e;
+   *   } catch (Exception e) {
+   *     [application-exception]
+   *     throw e;
+   *   } finally {
+   *     [finally]
+   *   }
+   * </pre></code>
+   */
+  protected void generateContent(JavaWriter out)
+    throws IOException
+  {
+    generatePreTry(out);
+
+    out.println();
+    out.println("try {");
+    out.pushDepth();
+
+    Method method = getJavaMethod();
+    
+    if (! void.class.equals(method.getReturnType())) {
+      out.printClass(method.getReturnType());
+      out.println(" result;");
+    }
+
+    generatePreCall(out);
+
+    generateCall(out);
+
+    generatePostCall(out);
+
+    if (! void.class.equals(method.getReturnType()))
+      out.println("return result;");
+
+    out.popDepth();
+
+    generateExceptions(out);
+
+    out.println("} finally {");
+    out.pushDepth();
+
+    generateFinally(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+  
+
+  private void generateExceptions(JavaWriter out)
+    throws IOException
+  {
+    HashSet<Class<?>> exceptionSet
+      = new HashSet<Class<?>>();
+
+    for (Class<?> exn : getThrowsExceptions()) {
+      exceptionSet.add(exn);
+    }
+
+    exceptionSet.add(RuntimeException.class);
+
+    Class<?> exn;
+    while ((exn = selectException(exceptionSet)) != null) {
+      boolean isSystemException
+        = (RuntimeException.class.isAssignableFrom(exn)
+            && ! exn.isAnnotationPresent(ApplicationException.class));
+
+      out.println("} catch (" + exn.getName() + " e) {");
+      out.pushDepth();
+
+      if (isSystemException)
+        generateSystemException(out, exn);
+      else
+        generateApplicationException(out, exn);
+
+      out.println();
+      out.println("throw e;");
+
+      out.popDepth();
+    }
+  }
+  
+  private Class<?> selectException(HashSet<Class<?>> exnSet)
+  {
+    for (Class<?> exn : exnSet) {
+      if (isMostSpecific(exn, exnSet)) {
+        exnSet.remove(exn);
+
+        return exn;
+      }
+    }
+
+    return null;
+  }
+  
+  private boolean isMostSpecific(Class<?> exn, HashSet<Class<?>> exnSet)
+  {
+    for (Class<?> testExn : exnSet) {
+      if (exn == testExn)
+        continue;
+
+      if (exn.isAssignableFrom(testExn))
+        return false;
+    }
+
+    return true;
+  }
+
+  protected Class<?> []getThrowsExceptions()
+  {
+    return getJavaMethod().getExceptionTypes();
+  }
+
   //
   // bean instance generation
   //

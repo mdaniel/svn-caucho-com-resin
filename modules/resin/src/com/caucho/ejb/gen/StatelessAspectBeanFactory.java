@@ -106,7 +106,7 @@ public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   {
     InjectManager manager = InjectManager.getCurrent();
     
-    AspectFactory<X> next = new MethodTailFactory<X>(this);
+    AspectFactory<X> next = new StatelessMethodTailFactory<X>(this);
     
     next = new InterceptorFactory<X>(this, next, manager);
     next = new XaFactory<X>(this, next);

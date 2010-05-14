@@ -32,9 +32,14 @@ package com.caucho.ejb.gen;
 import java.io.IOException;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.gen.AspectBeanFactory;
+import com.caucho.config.gen.AspectFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.MethodHeadGenerator;
+import com.caucho.config.gen.MethodTailFactory;
+import com.caucho.config.gen.MethodTailGenerator;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 
@@ -42,19 +47,12 @@ import com.caucho.java.JavaWriter;
  * Represents a stateless local business method
  */
 @Module
-public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
+public class StatelessMethodTailGenerator<X> extends MethodTailGenerator<X>
 {
-  public StatelessMethodHeadGenerator(StatelessMethodHeadFactory<X> factory,
-                                      AnnotatedMethod<? super X> method,
-                                      AspectGenerator<X> next)
+  public StatelessMethodTailGenerator(StatelessMethodTailFactory<X> factory,
+                                      AnnotatedMethod<? super X> method)
   {
-    super(factory, method, next);
-  }
-
-  @Override
-  protected boolean isOverride()
-  {
-    return false;
+    super(factory, method);
   }
 
   /**
@@ -72,20 +70,44 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   public void generatePreTry(JavaWriter out)
     throws IOException
   {
-//    out.println("Thread thread = Thread.currentThread();");
-//    out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
-//
+    out.println("Thread thread = Thread.currentThread();");
+    out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
+
     super.generatePreTry(out);
-//
-//    out.println();
-//    out.println("boolean isValid = false;");
-//    
-//    // bean allocation must be last because it needs to be
-//    // freed or discarded in the finally block
-//    out.println("StatelessPool.Item<" + getJavaClass().getName() + "> poolItem");
-//    out.println("  = _statelessPool.allocate();");
-//    out.println(getJavaClass().getName() + " bean = poolItem.getValue();");
+
+    out.println();
+    out.println("boolean isValid = false;");
+    
+    // bean allocation must be last because it needs to be
+    // freed or discarded in the finally block
+    out.println("StatelessPool.Item<" + getJavaClass().getName() + "> poolItem");
+    out.println("  = _statelessPool.allocate();");
+    out.println(getJavaClass().getName() + " bean = poolItem.getValue();");
   }
+
+  protected AspectFactory<X> getFactory()
+  {
+    return _factory;
+  }
+
+  protected AspectBeanFactory<X> getBeanFactory()
+  {
+    return _factory.getAspectBeanFactory();
+  }
+  
+  /**
+   * Returns the owning bean type.
+   */
+  protected AnnotatedType<X> getBeanType()
+  {
+    return _factory.getBeanType();
+  }
+
+  protected Class<X> getJavaClass()
+  {
+    return getBeanType().getJavaClass();
+  }
+   
 
   /**
    * Generates code in the "try" block before the call
@@ -104,7 +126,7 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   public void generatePreCall(JavaWriter out)
     throws IOException
   {
-    //out.println("thread.setContextClassLoader(_manager.getClassLoader());");
+    out.println("thread.setContextClassLoader(_manager.getClassLoader());");
     
     super.generatePreCall(out);
   }
@@ -141,9 +163,9 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     throws IOException
   {
     super.generatePostCall(out);
-//    
-//    out.println();
-//    out.println("isValid = true;");
+    
+    out.println();
+    out.println("isValid = true;");
   }
   
   /**
@@ -179,14 +201,14 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     // in the other finally methods
     // XXX: (possibly free semaphore first and allow bean at
     // end, since it's the semaphore that's critical
-//    out.println("if (isValid)");
-//    out.println("  _statelessPool.free(poolItem);");
-//    out.println("else");
-//    out.println("  _statelessPool.discard(poolItem);");
-//     
+    out.println("if (isValid)");
+    out.println("  _statelessPool.free(poolItem);");
+    out.println("else");
+    out.println("  _statelessPool.discard(poolItem);");
+     
     super.generateFinally(out);
-//    
-//    out.println();
-//    out.println("thread.setContextClassLoader(oldLoader);");
+    
+    out.println();
+    out.println("thread.setContextClassLoader(oldLoader);");
   }
 }

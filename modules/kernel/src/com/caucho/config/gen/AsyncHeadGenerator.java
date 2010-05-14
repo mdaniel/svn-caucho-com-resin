@@ -44,8 +44,8 @@ import com.caucho.java.JavaWriter;
  * Generates the method aspect code for the head or proxy of the method.
  */
 @Module
-public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
-  public MethodHeadGenerator(MethodHeadFactory<X> factory,
+public class AsyncHeadGenerator<X> extends AbstractAspectGenerator<X> {
+  public AsyncHeadGenerator(AsynchronousFactory<X> factory,
                              AnnotatedMethod<? super X> method,
                              AspectGenerator<X> next)
   {
@@ -54,7 +54,7 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
 
   protected boolean isOverride()
   {
-    return true;
+    return false;
   }
 
   //
@@ -74,7 +74,7 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   {
     generateMethodPrologue(out, prologueMap);
     
-    String suffix = "";
+    String suffix = "_async";
     
     /*
     if (isAsync()) {
@@ -89,32 +89,18 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
 
       out.popDepth();
       out.println("}");
-    }
-    */
-
-    int modifiers = getJavaMethod().getModifiers();
-    String accessModifier = null;
-    
-    if (Modifier.isPublic(modifiers))
-      accessModifier = "public";
-    else if (Modifier.isProtected(modifiers))
-      accessModifier = "protected";
-    /*
-    else
-      throw new IllegalStateException(getJavaMethod().toString()
-                                      + " must be public or protected");
-     */
+    }*/
 
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
-                                       accessModifier, 
+                                       "public", 
                                        suffix, 
                                        getJavaMethod(), 
                                        getThrowsExceptions());
 
     out.println("{");
     out.pushDepth();
-
+    
     generateContent(out);
 
     out.popDepth();
@@ -126,10 +112,10 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   {
     if (this == o)
       return true;
-    else if (!(o instanceof MethodHeadGenerator<?>))
+    else if (!(o instanceof AsyncHeadGenerator<?>))
       return false;
 
-    MethodHeadGenerator<?> bizMethod = (MethodHeadGenerator<?>) o;
+    AsyncHeadGenerator<?> bizMethod = (AsyncHeadGenerator<?>) o;
 
     return getJavaMethod().getName().equals(bizMethod.getJavaMethod().getName());
   }

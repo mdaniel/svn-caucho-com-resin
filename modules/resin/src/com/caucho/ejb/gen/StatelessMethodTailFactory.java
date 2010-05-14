@@ -27,41 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.ejb.gen;
 
-import javax.ejb.Asynchronous;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
+import com.caucho.config.gen.AspectFactory;
+import com.caucho.config.gen.AspectGenerator;
+import com.caucho.config.gen.MethodHeadFactory;
+import com.caucho.config.gen.MethodTailFactory;
 import com.caucho.inject.Module;
 
 /**
- * Aspect factory for generating @Asynchronous aspects.
+ * Represents a stateless local business method
  */
 @Module
-public class AsynchronousFactory<X>
-  extends AbstractAspectFactory<X>
+public class StatelessMethodTailFactory<X> extends MethodTailFactory<X>
 {
-  public AsynchronousFactory(AspectBeanFactory<X> beanFactory,
-                      AspectFactory<X> next)
+  public StatelessMethodTailFactory(StatelessAspectBeanFactory<X> beanFactory)
   {
-    super(beanFactory, next);
+    super(beanFactory);
   }
   
-  /**
-   * Creates an aspect for interception if the method should be intercepted.
-   */
   @Override
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
                                    boolean isEnhanced)
   {
-    if (method.isAnnotationPresent(Asynchronous.class)) {
-      AspectGenerator<X> next = super.create(method, true);
-
-      AspectGenerator<X> head = new AsyncHeadGenerator<X>(this, method, next);
-      
-      return new AsynchronousGenerator<X>(this, method, head);
-    }
+    if (isEnhanced)
+      return new StatelessMethodTailGenerator<X>(this, method);
     else
-      return super.create(method, isEnhanced);
+      return null;
   }
 }

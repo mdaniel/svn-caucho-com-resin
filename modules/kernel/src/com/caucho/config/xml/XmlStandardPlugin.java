@@ -35,8 +35,10 @@ import java.util.ArrayList;
 import java.util.HashSet;
 
 import javax.ejb.Startup;
+import javax.ejb.Stateless;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Annotated;
@@ -232,17 +234,23 @@ public class XmlStandardPlugin implements Extension
     for (Annotation ann : annotated.getAnnotations()) {
       Class<?> annType = ann.annotationType();
 
-      if (annType.equals(Startup.class))
+      // @Stateless must be on the bean itself
+      if (annType.equals(Stateless.class))
         return true;
 
-      if (annType.isAnnotationPresent(Startup.class))
+      if (annType.equals(Startup.class))
         return true;
 
       if (annType.equals(ServiceStartup.class))
         return true;
 
-      if (annType.isAnnotationPresent(ServiceStartup.class)) {
-        return true;
+      // @Startup & @ServiceStartup can be stereotyped
+      if (annType.isAnnotationPresent(Stereotype.class)) {
+        if (annType.isAnnotationPresent(ServiceStartup.class))
+          return true;
+
+        if (annType.isAnnotationPresent(Startup.class))
+          return true;
       }
     }
 

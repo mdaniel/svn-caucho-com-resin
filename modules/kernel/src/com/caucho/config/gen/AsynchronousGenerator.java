@@ -42,16 +42,21 @@ import com.caucho.java.JavaWriter;
  * Represents the @Asynchronous interception
  */
 @Module
-public class AsynchronousGenerator<X> extends AbstractAspectGenerator<X> {
+public class AsynchronousGenerator<X> extends NullGenerator<X> {
   private boolean _isAsynchronous;
 
   private String _varName;
+  private AspectGenerator<X> _head;
+  private AsynchronousFactory<X> _factory;
+  private AnnotatedMethod<? super X> _method;
  
   public AsynchronousGenerator(AsynchronousFactory<X> factory,
                                AnnotatedMethod<? super X> method,
-                               AspectGenerator<X> next)
+                               AspectGenerator<X> head)
   {
-    super(factory, method, next);
+    _factory = factory;
+    _method = method;
+    _head = head;
   }
   
   /**
@@ -111,7 +116,7 @@ public class AsynchronousGenerator<X> extends AbstractAspectGenerator<X> {
   public void generateMethodPrologue(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
-    super.generateMethodPrologue(out, map);
+    _head.generate(out, map);
     
     _varName = "_caucho_async_" + out.generateId();
       
@@ -120,7 +125,14 @@ public class AsynchronousGenerator<X> extends AbstractAspectGenerator<X> {
   }
   
   @Override
-  public void generateAsync(JavaWriter out)
+  public void generate(JavaWriter out, HashMap<String, Object> prologueMap)
+    throws IOException
+  {
+    _head.generate(out, prologueMap);
+  }
+
+  @Override
+  public void generateCall(JavaWriter out)
     throws IOException
   {
     Method javaApiMethod = getJavaMethod();
@@ -141,7 +153,7 @@ public class AsynchronousGenerator<X> extends AbstractAspectGenerator<X> {
     out.println("{");
     out.pushDepth();
     
-    out.print(javaApiMethod.getName() + "__caucho_async(");
+    out.print(javaApiMethod.getName() + "_async(");
     
     for (int i = 0; i < paramType.length; i++) {
       if (i != 0)
@@ -160,4 +172,10 @@ public class AsynchronousGenerator<X> extends AbstractAspectGenerator<X> {
     
     out.println(_varName + ".offer(task);");
   }
+
+  protected Method getJavaMethod()
+  {
+    return _method.getJavaMember();
+  }
+
 }
