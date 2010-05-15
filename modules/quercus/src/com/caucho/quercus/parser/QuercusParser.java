@@ -5035,7 +5035,7 @@ public class QuercusParser {
   private Expr createString(String lexeme)
   {
     // XXX: see QuercusParser.parseDefault for _quercus == null
-    if (_quercus != null && _quercus.isUnicodeSemantics())
+    if (isUnicodeSemantics())
       return _factory.createUnicode(lexeme);
     else
       return _factory.createString(lexeme);
@@ -5044,7 +5044,7 @@ public class QuercusParser {
   private StringValue createStringValue(String lexeme)
   {
     // XXX: see QuercusParser.parseDefault for _quercus == null
-    if (_quercus != null && _quercus.isUnicodeSemantics())
+    if (isUnicodeSemantics())
       return new UnicodeBuilderValue(lexeme);
     else
       return new ConstStringValue(lexeme);
@@ -5057,7 +5057,7 @@ public class QuercusParser {
     // php/0ch1, php/0350
     // return _factory.createBinary(bytes);
 
-    if (_quercus != null && _quercus.isUnicodeSemantics())
+    if (isUnicodeSemantics())
       return _factory.createBinary(bytes);
     else {
       try {
@@ -5074,7 +5074,7 @@ public class QuercusParser {
   private int parseEscapedString(char end)
     throws IOException
   {
-    return parseEscapedString(end, _quercus.isUnicodeSemantics());
+    return parseEscapedString(end, isUnicodeSemantics());
   }
 
   /**
