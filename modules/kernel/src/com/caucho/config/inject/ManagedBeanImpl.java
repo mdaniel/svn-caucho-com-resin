@@ -77,7 +77,7 @@ import com.caucho.util.L10N;
  */
 @Module
 public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
-  implements ScopeAdapterBean<X>
+  implements ScopeAdapterBean<X>, ScheduleBean
 {
   private static final L10N L = new L10N(ManagedBeanImpl.class);
   
@@ -584,6 +584,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   /**
    * 
    */
+  @Override
   public void scheduleTimers(Object value)
   {
     ScheduleIntrospector introspector = new ScheduleIntrospector();
@@ -614,7 +615,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     throws InvocationTargetException,
            IllegalAccessException
     {
-      method.invoke(_bean);
+    	method.invoke(_bean);
     }
 
     @Override

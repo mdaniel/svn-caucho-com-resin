@@ -99,6 +99,12 @@ public class ScheduleIntrospector {
     Trigger trigger = new CronTrigger(cronExpression, -1, -1, timezone);
     EjbTimer ejbTimer = new EjbTimer();
 
+    // TODO this may be the wrong method - in the case where we have a 
+    // stateless session bean with an @Schedule on a business method,
+    // it should get the benefits of the other aspects (?), so it should
+    // call through the proxy, but this is the method of the implementation
+    // class at the moment and the proxy isn't currently written to extend
+    // the implementation class. It only implements the local interface.
     TimeoutInvoker timeoutInvoker
       = new MethodTimeoutInvoker(caller, method.getJavaMember());
 

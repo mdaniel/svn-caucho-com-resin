@@ -57,6 +57,7 @@ import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ProcessBeanImpl;
+import com.caucho.config.inject.ScheduleBean;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.Module;
 import com.caucho.vfs.Path;
@@ -220,8 +221,8 @@ public class XmlStandardPlugin implements Extension
       if (value instanceof ScopeProxy)
         ((ScopeProxy) value).__caucho_getDelegate();
       
-      if (bean instanceof ManagedBeanImpl<?>) {
-        ((ManagedBeanImpl<?>) bean).scheduleTimers(value);
+      if (bean instanceof ScheduleBean) {
+        ((ScheduleBean) bean).scheduleTimers(value);
       }
     }
   }

@@ -39,6 +39,7 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.ScheduleBean;
 import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.ejb.session.StatelessContext;
 import com.caucho.ejb.session.StatelessManager;
@@ -51,6 +52,7 @@ import com.caucho.util.L10N;
  */
 @Module
 public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
+                                    implements ScheduleBean
 {
   private static final L10N L = new L10N(StatelessBeanImpl.class);
   
@@ -58,9 +60,9 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
     = new LinkedHashSet<Annotation>();
 
   public StatelessBeanImpl(StatelessManager<X> server,
-			   ManagedBeanImpl<X> bean,
-			   Class<T> api,
-			   Set<Type> types,
+                           ManagedBeanImpl<X> bean,
+                           Class<T> api,
+                           Set<Type> types,
                            StatelessContext<X,T> context)
   {
     super(context, bean, types);
@@ -80,5 +82,11 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
   public Set<Annotation> getQualifiers()
   {
     return _qualifiers;
+  }
+
+  @Override
+  public void scheduleTimers(Object value)
+  {
+    getBean().scheduleTimers(value);
   }
 }
