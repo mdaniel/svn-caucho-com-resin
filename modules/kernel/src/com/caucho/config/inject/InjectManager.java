@@ -143,7 +143,7 @@ import com.caucho.vfs.Vfs;
  */
 @ModulePrivate
 @SuppressWarnings("serial")
-public class InjectManager
+public final class InjectManager
   implements BeanManager, EnvironmentListener,
              java.io.Serializable, HandleAware
 {
@@ -280,6 +280,12 @@ public class InjectManager
 
   private ArrayList<Bean<?>> _pendingServiceList
     = new ArrayList<Bean<?>>();
+  
+  private ConcurrentHashMap<Bean<?>,ReferenceFactory<?>> _refFactoryMap
+    = new ConcurrentHashMap<Bean<?>,ReferenceFactory<?>>();
+
+  private ThreadLocal<CreationalContextImpl<?>> _proxyThreadLocal
+    = new ThreadLocal<CreationalContextImpl<?>>();
 
   private boolean _isBeforeBeanDiscoveryComplete;
   private boolean _isAfterBeanDiscoveryComplete;
@@ -1325,7 +1331,7 @@ public class InjectManager
   public void validate(InjectionPoint ij)
   {
     try {
-      resolveByInjectionPoint(ij);
+      getReferenceFactory(ij);
     } catch (AmbiguousResolutionException e) {
       throw new AmbiguousResolutionException(L.l("{0}.{1}: {2}",
                                        ij.getMember().getDeclaringClass().getName(),
@@ -1408,14 +1414,22 @@ public class InjectManager
   public <T> T getReference(Class<T> type, Annotation... bindings)
   {
     Set<Bean<?>> beans = getBeans(type);
-    Bean<?> bean = resolve(beans);
+    Bean<T> bean = (Bean<T>) resolve(beans);
 
     if (bean == null)
       return null;
 
-    CreationalContext<?> env = createCreationalContext(bean);
+    return getReference(bean);
+  }
 
-    return (T) getReference(bean, type, env);
+  /**
+   * Convenience for Resin.
+   */
+  public <T> T getReference(Bean<T> bean)
+  {
+    ReferenceFactory<T> factory = getReferenceFactory(bean);
+    
+    return factory.create(null, null);
   }
 
   /**
@@ -1424,14 +1438,14 @@ public class InjectManager
   public <T> T getReference(String name)
   {
     Set<Bean<?>> beans = getBeans(name);
-    Bean<?> bean = resolve(beans);
+    Bean<T> bean = (Bean<T>) resolve(beans);
 
     if (bean == null)
       return null;
 
-    CreationalContext<?> env = createCreationalContext(bean);
-
-    return (T) getReference(bean, bean.getBeanClass(), env);
+    ReferenceFactory<T> factory = getReferenceFactory(bean);
+    
+    return factory.create(null, null);
   }
 
   /**
@@ -1447,51 +1461,22 @@ public class InjectManager
                              Type type,
                              CreationalContext<?> createContext)
   {
-    if (bean instanceof ScopeAdapterBean<?>) {
-      ScopeAdapterBean<?> simpleBean = (ScopeAdapterBean<?>) bean;
-
-      Object adapter = simpleBean.getScopeAdapter(bean, null);
-
-      if (adapter != null)
-        return adapter;
-    }
-    
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     
     try {
       thread.setContextClassLoader(getClassLoader());
-    
-      CreationalContextImpl<?> env
-        = (CreationalContextImpl<?>) createContext;
-
-      if (env != null) {
-        Object object = env.get(bean);
-
-        if (object != null)
-          return object;
-      }
-
-      Object object = getInstanceRec(bean, type, env, this);
-
-      return object;
+      
+      ReferenceFactory factory = getReferenceFactory(bean);
+      
+      if (createContext instanceof CreationalContextImpl)
+        return factory.create((CreationalContextImpl) createContext, null);
+      else
+        return factory.create(null, null);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
-
-  /**
-   * Used by ScopeProxy
-   */
-  public Object getReference(Bean<?> bean)
-  {
-    CreationalContext<?> env = createCreationalContext(bean);
-
-    return getReference(bean, bean.getBeanClass(), env);
-  }
-
-  private ThreadLocal<CreationalContextImpl<?>> _proxyThreadLocal
-    = new ThreadLocal<CreationalContextImpl<?>>();
   
   /**
    * Used by ScopeProxy
@@ -1514,9 +1499,7 @@ public class InjectManager
       
       _proxyThreadLocal.set(env);
 
-      value = getInstanceRec(bean, bean.getBeanClass(), env, this);
-
-      env.postConstruct();
+      value = bean.create(env);
       
       return value;
     } finally {
@@ -1524,35 +1507,36 @@ public class InjectManager
     }
   }
 
-  private <T> T getInstanceRec(Bean<T> bean,
-                               Type type,
-                               CreationalContextImpl env,
-                               InjectManager topManager)
+  private <T> T getInstanceImpl(Bean<T> bean,
+                                CreationalContextImpl<T> env,
+                                InjectionPoint ip)
+  {
+    ReferenceFactory<T> factory = getReferenceFactory(bean);
+    
+    return factory.create(env, ip);
+  }
+
+  public <T> ReferenceFactory<T> getReferenceFactory(Bean<T> bean)
+  {
+    ReferenceFactory<T> factory = (ReferenceFactory<T>) _refFactoryMap.get(bean);
+    
+    if (factory == null) {
+      factory = createReferenceFactory(bean);
+      _refFactoryMap.put(bean, factory);
+    }
+    
+    return factory;
+  }
+  
+  private <T> ReferenceFactory<T> createReferenceFactory(Bean<T> bean)
   {
     Class<? extends Annotation> scopeType = bean.getScope();
 
-    if (Dependent.class.equals(scopeType)) {
-      // server/4764
-
-      T instance = (T) env.get(bean);
-
-      if (instance != null)
-        return instance;
-      else {
-        if (bean instanceof ManagedBeanImpl<?>)
-          instance = ((ManagedBeanImpl<T>) bean).createDependent(env);
-        else
-          instance = bean.create(env);
-        
-        if (env.isTop()) {
-          env.postConstruct();
-          
-          // ioc/07b0
-          bean.destroy(instance, env);
-        }
-        
-        return instance;
-      }
+    if (Dependent.class == scopeType) {
+      if (bean instanceof ManagedBeanImpl<?>)
+        return new DependentReferenceFactoryImpl<T>((ManagedBeanImpl<T>) bean);
+      else
+        return new DependentReferenceFactory<T>(bean);
     }
 
     if (scopeType == null) {
@@ -1568,23 +1552,15 @@ public class InjectManager
 
     Context context = ownerManager.getContextImpl(scopeType);
 
+    /*
     if (context == null)
       return null;
-
-    //CreationalContextImpl<T> createContext
-    //  = new CreationalContextImpl<T>(bean, parentEnv);
-
-    /*
-    // ioc/0b10
-    if (bean instanceof InjectBean<?>)
-      bean = ((InjectBean<T>) bean).getBean();
       */
-
-    T value = (T) context.get(bean, env);
+    if (context == null)
+      throw new InjectionException(L.l("Bean has an unknown scope '{0}' for bean {1}",
+                                       scopeType, bean));
     
-    env.postConstruct();
-    
-    return value;
+    return new ContextReferenceFactory<T>(bean, context);
   }
 
   private RuntimeException unsatisfiedException(Type type,
@@ -1699,48 +1675,31 @@ public class InjectManager
       }
     }
     
-    Bean<?> bean = resolveByInjectionPoint(ij);
-
-    if (bean instanceof ScopeAdapterBean<?>) {
-      ScopeAdapterBean simpleBean = (ScopeAdapterBean<?>) bean;
-
-      Object adapter = simpleBean.getScopeAdapter(bean, parentCxt);
-
-      if (adapter != null)
-        return adapter;
-    }
-
-    Object value = CreationalContextImpl.find(parentEnv, bean);
-
-    if (value != null)
-      return value;
-
-    CreationalContext<?> env
-      = new CreationalContextImpl(bean, parentCxt, ij);
+    ReferenceFactory<?> factory = getReferenceFactory(ij);
     
-    /*
-    if (cxt instanceof ConfigContext) {
-      ConfigContext env = (ConfigContext) cxt;
-
-      // ioc/0770
-      env.setInjectionPoint(ij);
-    }
-    */
-
-    return getReference(bean, ij.getType(), env);
+    return factory.create(parentEnv, ij);
   }
 
-  public Bean<?> resolveByInjectionPoint(InjectionPoint ij)
+  public ReferenceFactory<?> getReferenceFactory(InjectionPoint ij)
   {
     Type type = ij.getType();
     Set<Annotation> qualifiers = ij.getQualifiers();
 
-    return resolveByInjectionPoint(type, qualifiers, ij);
+    return getReferenceFactory(type, qualifiers, ij);
   }
 
-  public Bean<?> resolveByInjectionPoint(Type type,
-                                         Set<Annotation> bindingSet,
-                                         InjectionPoint ij)
+  public ReferenceFactory<?> getReferenceFactory(Type type,
+                                                 Set<Annotation> qualifiers,
+                                                 InjectionPoint ij)
+  {
+    Bean<?> bean = resolveByInjectionPoint(type, qualifiers, ij);
+    
+    return getReferenceFactory(bean);
+  }
+
+  private Bean<?> resolveByInjectionPoint(Type type,
+                                          Set<Annotation> bindingSet,
+                                          InjectionPoint ij)
   {
     Annotation []bindings;
 
@@ -2507,29 +2466,6 @@ public class InjectManager
 
     return false;
   }
-
-  private boolean isTypeContained(Set<Type> types,
-                                  BaseType delegateType)
-  {
-    if (delegateType.getRawClass().equals(Object.class))
-      return false;
-    
-    for (Type type : types) {
-      if (type.equals(Object.class))
-        continue;
-      
-      BaseType baseType = createTargetBaseType(type);
-
-      if (delegateType.isAssignableFrom(baseType))
-        return true;
-    }
-
-    return false;
-  }
-
-  //
-  // class loader updates
-  //
 
   public void addConfiguredClass(String className)
   {
@@ -3725,6 +3661,104 @@ public class InjectManager
     public String toString()
     {
       return getClass().getSimpleName() + "[" + getBean() + "]";
+    }
+  }
+  
+  abstract public class ReferenceFactory<T> {
+    abstract public T create(CreationalContextImpl<?> parentEnv,
+                             InjectionPoint ip);
+  }
+  
+  public class DependentReferenceFactory<T> extends ReferenceFactory<T> {
+    private Bean<T> _bean;
+    
+    DependentReferenceFactory(Bean<T> bean)
+    {
+      _bean = bean;
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      Bean<T> bean = _bean;
+      
+      T instance = CreationalContextImpl.find(parentEnv, bean);
+      
+      if (instance != null)
+        return instance;
+      
+      CreationalContextImpl<T> env
+        = new CreationalContextImpl<T>(bean, parentEnv, ip);
+      
+      instance = bean.create(env);
+      
+      if (parentEnv == null)
+        env.release();
+      
+      return instance;
+    }
+  }
+  
+  public class DependentReferenceFactoryImpl<T> extends ReferenceFactory<T> {
+    private ManagedBeanImpl<T> _bean;
+    
+    DependentReferenceFactoryImpl(ManagedBeanImpl<T> bean)
+    {
+      _bean = bean;
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      ManagedBeanImpl<T> bean = _bean;
+      
+      T instance = CreationalContextImpl.find(parentEnv, bean);
+      
+      if (instance != null)
+        return instance;
+      
+      CreationalContextImpl<T> env
+        = new CreationalContextImpl<T>(bean, parentEnv, ip);
+      
+      instance = bean.createDependent(env);
+      
+      if (parentEnv == null)
+        env.release();
+      
+      return instance;
+    }
+  }
+  
+  public class ContextReferenceFactory<T> extends ReferenceFactory<T> {
+    private Bean<T> _bean;
+    private Context _context;
+    
+    ContextReferenceFactory(Bean<T> bean,
+                            Context context)
+    {
+      _bean = bean;
+      _context = context;
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      Bean<T> bean = _bean;
+      
+      T instance = CreationalContextImpl.find(parentEnv, bean);
+      
+      if (instance != null)
+        return instance;
+      
+      CreationalContextImpl<T> env
+        = new CreationalContextImpl<T>(bean, parentEnv, ip);
+      
+      instance = _context.get(bean, env);
+      
+      return instance;
     }
   }
 

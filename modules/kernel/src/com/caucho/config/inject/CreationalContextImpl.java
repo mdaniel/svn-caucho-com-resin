@@ -39,15 +39,14 @@ import com.caucho.inject.Module;
  * Stack of partially constructed beans.
  */
 @Module
-public class CreationalContextImpl<T> implements CreationalContext<T> {
-  private CreationalContextImpl<?> _top;
+public final class CreationalContextImpl<T> implements CreationalContext<T> {
+  private final CreationalContextImpl<?> _top;
+  private final CreationalContextImpl<?> _parent; // parent in the creation chain
   private CreationalContextImpl<?> _next; // next in the dependent chain
-  private CreationalContextImpl<?> _parent; // parent in the creation chain
   
   private final Contextual<T> _bean;
   private InjectionPoint _injectionPoint;
   private T _value;
-  private InjectionTarget<T> _injectionTarget;
   
   public CreationalContextImpl(Contextual<T> bean,
                                CreationalContext<?> parent,
@@ -66,17 +65,43 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     }
     else {
       _top = this;
+      _parent = null;
       // _next = next;
     }
   }
   
+  public CreationalContextImpl(Contextual<T> bean,
+                               CreationalContextImpl<?> parentEnv,
+                               InjectionPoint ij)
+  {
+    _bean = bean;
+    _injectionPoint = ij;
+    
+    _parent = parentEnv;
+    
+    if (parentEnv != null) {
+      _top = parentEnv._top;
+      _next = _top._next;
+    }
+    else
+      _top = this;
+    
+    _top._next = this;
+  }
+  
   public CreationalContextImpl()
   {
-    this(null, null, null);
+    this(null, (CreationalContextImpl<?>) null, null);
   }
   
   public CreationalContextImpl(Contextual<T> bean,
                                CreationalContext<?> next)
+  {
+    this(bean, next, null);
+  }
+  
+  public CreationalContextImpl(Contextual<T> bean,
+                               CreationalContextImpl<?> next)
   {
     this(bean, next, null);
   }
@@ -189,31 +214,30 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   
   public void setInjectionTarget(InjectionTarget<T> injectionTarget)
   {
-    _injectionTarget = injectionTarget;
   }
 
   @Override
   public void release()
   {
-    //_value = null;
+    CreationalContextImpl<?> next = _next;
+    _next = null;
     
-    if (_next != null)
-      _next.releaseImpl();
+    if (next != null)
+      next.releaseImpl();
   }
   
   void releaseImpl()
   {
     T value = _value;
-    // _value = null;
+    _value = null;
     
     if (value != null)
       _bean.destroy(value, this);
-    else
-      release();
   }
   
   void postConstruct()
   {
+    /*
     if (_next != null)
       _next.postConstruct();
     
@@ -224,6 +248,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
       _injectionTarget.postConstruct(value);
       _injectionTarget = null;
     }
+    */
   }
 
   @Override

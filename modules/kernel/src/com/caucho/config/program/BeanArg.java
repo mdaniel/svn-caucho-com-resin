@@ -40,6 +40,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionPointImpl;
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.inject.Module;
 
 /**
@@ -50,7 +51,7 @@ public class BeanArg<T> extends Arg<T> {
   private InjectManager _beanManager;
   private Type _type;
   private Annotation []_bindings;
-  private Bean<?> _bean;
+  private ReferenceFactory<?> _factory;
   private InjectionPoint _ip;
 
   public BeanArg(InjectManager injectManager,
@@ -69,30 +70,23 @@ public class BeanArg<T> extends Arg<T> {
   @Override
   public void bind()
   {
-    if (_bean == null) {
+    if (_factory == null) {
       HashSet<Annotation> qualifiers = new HashSet<Annotation>();
       
       for (Annotation ann : _bindings) {
 	qualifiers.add(ann);
       }
       
-      _bean = (Bean<T>) _beanManager.resolveByInjectionPoint(_type, qualifiers, _ip);
+      _factory = (ReferenceFactory<T>) _beanManager.getReferenceFactory(_type, qualifiers, _ip);
     }
   }
 
   @Override
   public Object eval(CreationalContext<T> parentEnv)
   {
-    if (_bean == null)
+    if (_factory == null)
       bind();
 
-    // ioc/0i3o
-    CreationalContextImpl<?> beanEnv
-      = new CreationalContextImpl(_bean, parentEnv);//, _ip);
-
-    // XXX: getInstance for injection?
-    Object value = _beanManager.getReference(_bean, _type, beanEnv);
-    
-    return value;
+    return _factory.create((CreationalContextImpl) parentEnv, _ip);
   }
 }

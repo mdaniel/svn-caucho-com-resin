@@ -91,6 +91,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   private HashSet<ObserverMethodImpl<X,?>> _observerMethods
     = new LinkedHashSet<ObserverMethodImpl<X,?>>();
 
+  private boolean _isNormalScope;
   private Object _scopeAdapter;
 
   public ManagedBeanImpl(InjectManager injectManager,
@@ -132,6 +133,11 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   public void setInjectionTarget(InjectionTarget<X> target)
   {
     _injectionTarget = target;
+  }
+  
+  private boolean isNormalScope()
+  {
+    return _isNormalScope;
   }
 
   /**
@@ -192,14 +198,8 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   @Override
   public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
   {
-    NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
-
     // ioc/0520
-    if (scopeType != null) {
-      //  && ! getScope().equals(ApplicationScoped.class)) {
-      // && scopeType.normal()
-      //  && ! env.canInject(getScope())) {
-
+    if (isNormalScope()) {
       Object value = _scopeAdapter;
 
       if (value == null) {
@@ -275,7 +275,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   @Override
   public void destroy(X instance, CreationalContext<X> env)
   {
-    getInjectionTarget().preDestroy(instance);
+    _injectionTarget.preDestroy(instance);
     
     env.release();
   }
@@ -297,6 +297,8 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     
     validateBean();
     validatePassivation();
+    
+    _isNormalScope = getScope().isAnnotationPresent(NormalScope.class);
   }
   
   private void validateBean()

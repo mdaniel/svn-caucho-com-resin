@@ -32,6 +32,8 @@ package com.caucho.config.inject;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.*;
 
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
+
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.lang.reflect.Member;
@@ -41,14 +43,11 @@ import java.util.Set;
  */
 public class AbstractInjectionPoint implements InjectionPoint
 {
-  private InjectManager _inject;
   private Type _type;
   private Member _member;
   private Bean _bean;
   private Set<Annotation> _bindings;
   private Annotation []_annotations;
-
-  private Bean _injectionBean;
 
   public AbstractInjectionPoint(InjectManager inject,
                                 Bean bean,
@@ -57,7 +56,6 @@ public class AbstractInjectionPoint implements InjectionPoint
                                 Set<Annotation> bindings,
                                 Annotation []annotations)
   {
-    _inject = inject;
     _bean = bean;
     _member = member;
     _type = type;
@@ -113,15 +111,6 @@ public class AbstractInjectionPoint implements InjectionPoint
     }
 
     return false;
-  }
-
-  public Object getInstance(CreationalContext cxt)
-  {
-    if (_injectionBean == null)
-      _injectionBean = _inject.resolveByInjectionPoint(this);
-
-    return _inject.getReference(_injectionBean,
-                                _injectionBean.getBeanClass(), cxt);
   }
 
   public boolean isDelegate()

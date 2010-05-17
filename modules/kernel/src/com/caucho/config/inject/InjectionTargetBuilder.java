@@ -188,7 +188,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   @Override
   public void inject(X instance, CreationalContext<X> env)
   {
-
     if (_producer == null)
       getInjectionPoints();
     
@@ -726,24 +725,33 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
   class FieldInjectProgram extends ConfigProgram {
     private final Field _field;
-    private final InjectionPoint _ij;
+    private final InjectionPoint _ip;
+    private final InjectManager.ReferenceFactory<?> _fieldFactory;
 
-    FieldInjectProgram(Field field, InjectionPoint ij)
+    FieldInjectProgram(Field field, InjectionPoint ip)
     {
       _field = field;
       _field.setAccessible(true);
-      _ij = ij;
+      _ip = ip;
+      
+      InjectManager beanManager = getBeanManager();
+      
+      _fieldFactory = beanManager.getReferenceFactory(_ip);
     }
 
     @Override
-    public <T> void inject(T instance, CreationalContext<T> env)
+    public <T> void inject(T instance, CreationalContext<T> cxt)
     {
       try {
-        // server/30i1 vs ioc/0155
-        InjectManager beanManager = getBeanManager();
-        // InjectManager.getCurrent();
+        CreationalContextImpl<T> env;
         
-        Object value = beanManager.getInjectableReference(_ij, env);
+        if (cxt instanceof CreationalContextImpl<?>)
+          env = (CreationalContextImpl<T>) cxt;
+        else
+          env = null;
+        
+        // server/30i1 vs ioc/0155
+        Object value = _fieldFactory.create(env, _ip);
 
         _field.set(instance, value);
       } catch (AmbiguousResolutionException e) {

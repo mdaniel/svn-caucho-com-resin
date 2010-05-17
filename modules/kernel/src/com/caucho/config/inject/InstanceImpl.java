@@ -39,13 +39,14 @@ import javax.enterprise.inject.*;
 import javax.enterprise.inject.spi.*;
 import javax.enterprise.util.TypeLiteral;
 
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.inject.Module;
 
 /**
  * Factory to create instances of a bean.
  */
 @Module
-public class InstanceImpl<T> implements Instance<T>
+public final class InstanceImpl<T> implements Instance<T>
 {
   private InjectManager _beanManager;
   private Type _type;
@@ -53,7 +54,7 @@ public class InstanceImpl<T> implements Instance<T>
 
   private long _version;
   private Set<Bean<?>> _beanSet;
-  private Bean<T> _bean;
+  private ReferenceFactory<T> _factory;
 
   InstanceImpl(InjectManager beanManager,
                Type type,
@@ -72,16 +73,16 @@ public class InstanceImpl<T> implements Instance<T>
    */
   public T get()
   {
-    if (_bean == null) {
-      _bean = (Bean<T>) _beanManager.resolve(getBeanSet());
+    if (_factory == null) {
+      Bean<?> bean = _beanManager.resolve(_beanSet);
+      
+      _factory = (ReferenceFactory<T>) _beanManager.getReferenceFactory(bean);
     }
 
-    if (_bean == null)
+    if (_factory != null)
+      return (T) _factory.create(null, null);
+    else
       return null;
-
-    CreationalContext<T> env = _beanManager.createCreationalContext(_bean);
-
-    return (T) _beanManager.getReference(_bean, _bean.getBeanClass(), env);
   }
 
   /**
@@ -118,11 +119,13 @@ public class InstanceImpl<T> implements Instance<T>
     return new InstanceIterator(_beanManager, getBeanSet().iterator());
   }
 
+  @Override
   public boolean isAmbiguous()
   {
     return getBeanSet().size() > 1;
   }
 
+  @Override
   public boolean isUnsatisfied()
   {
     return getBeanSet().size() == 0;

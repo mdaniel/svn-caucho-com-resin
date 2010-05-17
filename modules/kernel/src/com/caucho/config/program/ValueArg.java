@@ -31,7 +31,9 @@ package com.caucho.config.program;
 
 import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.config.program.*;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.type.*;
@@ -63,7 +65,7 @@ public class ValueArg<T> extends Arg<T> {
   private Type _type;
   private ConfigType<T> _configType;
 
-  private Bean<T> _bean;
+  private ReferenceFactory<T> _factory;
   private RuntimeException _bindException;
 
   public ValueArg(Type type)
@@ -77,11 +79,11 @@ public class ValueArg<T> extends Arg<T> {
   @Override
   public void bind()
   {
-    if (_bean == null) {
+    if (_factory == null) {
       HashSet<Annotation> bindings = new HashSet<Annotation>();
       
       try {
-	_bean = (Bean<T>) _beanManager.resolveByInjectionPoint(_type, bindings, null);
+	_factory = (ReferenceFactory<T>) _beanManager.getReferenceFactory(_type, bindings, null);
       } catch (RuntimeException e) {
 	_bindException = e;
       }
@@ -91,11 +93,11 @@ public class ValueArg<T> extends Arg<T> {
   @Override
   public Object eval(CreationalContext<T> env)
   {
-    if (_bean == null && _bindException == null)
+    if (_factory == null && _bindException == null)
       bind();
 
-    if (_bean != null)
-      return _beanManager.getReference(_bean, _type, env);
+    if (_factory != null)
+      return _factory.create((CreationalContextImpl) env, null);
     else
       throw _bindException;
   }

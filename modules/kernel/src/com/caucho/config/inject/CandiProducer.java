@@ -91,6 +91,7 @@ public class CandiProducer<X> implements InjectionTarget<X>
     
     _bean = bean;
     _instanceClass = instanceClass;
+    
     _javaCtor = javaCtor;
     _args = args;
     _injectProgram = injectProgram;
@@ -145,10 +146,10 @@ public class CandiProducer<X> implements InjectionTarget<X>
       
       InjectionPoint oldPoint = null;
       
-      if (env != null)
-        oldPoint = env.getInjectionPoint();
-      
       if (_decoratorBeans != null && _decoratorBeans.size() > 0) {
+        if (env != null)
+          oldPoint = env.getInjectionPoint();
+        
         Decorator dec = (Decorator) _decoratorBeans.get(_decoratorBeans.size() - 1);
         
         if (dec instanceof DecoratorBean && env != null)
@@ -157,17 +158,22 @@ public class CandiProducer<X> implements InjectionTarget<X>
       
       Object []args = evalArgs(env);
       
-      if (env != null)
-        env.setInjectionPoint(oldPoint);
-      
       if (_decoratorBeans != null) {
+        if (env != null)
+          env.setInjectionPoint(oldPoint);
+        
         delegates = CandiUtil.generateProxyDelegate(_injectManager,
                                                     _decoratorBeans,
                                                     _decoratorClass,
                                                     env);
       }
 
-      X value = _javaCtor.newInstance(args);
+      X value;
+      
+      if (_javaCtor != null)
+        value = _javaCtor.newInstance(args);
+      else
+        value = _instanceClass.newInstance();
       
       // server/4750
       if (value instanceof CandiEnhancedBean) {
@@ -192,16 +198,18 @@ public class CandiProducer<X> implements InjectionTarget<X>
   
   private Object []evalArgs(CreationalContextImpl<?> env)
   {
-    int size = _args.length;
+    Arg []args = _args;
+    
+    int size = args.length;
     
     if (size > 0) {
-      Object []args = new Object[size];
+      Object []argValues = new Object[size];
 
       for (int i = 0; i < size; i++) {
-        args[i] = _args[i].eval(env);
+        argValues[i] = args[i].eval(env);
       }
       
-      return args;
+      return argValues;
     }
     else
       return NULL_ARGS;
