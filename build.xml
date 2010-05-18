@@ -849,7 +849,7 @@
     <delete dir="${dist}/${dist.name}"/>
   </target>
 
-  <target name="dist" depends="dist.clean, configure, compile, update, junit, eclipselink, artifacts, ant, resin.dist.build, dist.package"/>
+  <target name="dist" depends="dist.clean, configure, compile, update, junit, eclipselink, artifacts, ant, resin.dist.build, dist.package, quercus.war"/>
 
   <target name="configure">
      <copy tofile="modules/c/src/resin/Makefile.in"
@@ -1067,6 +1067,90 @@
         <include name="**/*.rpm"/>
       </fileset>
     </copy>
+  </target>
+
+  <target name="quercus.war" depends="init, resin.dist.jar">
+    <property name="quercus.dist.name" value="quercus-war-${version}"/>
+  
+    <delete dir="${dist}/${quercus.dist.name}"/>
+    <delete file="${dist}/quercus-${version}.war"/>
+  
+    <mkdir dir="${dist}/${quercus.dist.name}"/>
+    <mkdir dir="${dist}/${quercus.dist.name}/WEB-INF/licenses"/>
+
+    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/resin.jar"
+          file="${resin.dist}/${dist.name}/lib/resin.jar"/>
+
+    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/javaee-16.jar"
+          file="${resin.dist}/${dist.name}/lib/javaee-16.jar"/>
+
+    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/inject-16.jar"
+          file="${resin.lib}/inject-16.jar"/>
+
+    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/lib/javamail-141.jar"
+          file="${resin.lib}/javamail-141.jar"/>
+          
+    <copy tofile="${dist}/${quercus.dist.name}/WEB-INF/web.xml"
+          file="${resin.install}/php/quercus-war/WEB-INF/web.xml"/>
+    
+    <copy tofile="${dist}/${quercus.dist.name}/images/caucho-white.jpg"
+          file="${resin.install}/php/quercus-war/images/caucho-white.jpg"/>
+
+    <copy tofile="${dist}/${quercus.dist.name}/images/dragonfly-tiny.png"
+          file="${resin.install}/php/quercus-war/images/dragonfly-tiny.png"/>
+
+    <copy tofile="${dist}/${quercus.dist.name}/index.php"
+          file="${resin.install}/php/quercus-war/index.php"/>
+
+    <copy tofile="${dist}/${quercus.dist.name}/README"
+          file="${resin.install}/php/quercus-war/README"/>
+
+    <jar destfile="${dist}/quercus-${version}.war">
+      <fileset dir="${dist}/${quercus.dist.name}">
+        <include name="WEB-INF/lib/resin.jar"/>
+        <include name="WEB-INF/lib/inject-16.jar"/>
+        <include name="WEB-INF/lib/javamail-141.jar"/>
+        <include name="WEB-INF/licenses"/>
+        <include name="WEB-INF/web.xml"/>
+        <include name="images/caucho-white.jpg"/>
+        <include name="images/dragonfly-tiny.png"/>
+        <include name="index.php"/>
+        <include name="README"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="LICENSE"/>
+      </fileset>
+    </jar>
+    
+    <delete file="${dist}/quercus-${version}-src.jar"/>
+
+    <jar destfile="${dist}/quercus-${version}-src.jar">
+      <fileset dir="${resin.modules}/kernel/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/**"/>
+      </fileset>
+      <fileset dir="${resin.modules}/quercus/src">
+        <exclude name=".cvsignore"/>
+        <exclude name=".svnignore"/>
+        <exclude name="*~"/>
+        <exclude name="**/CVS/**"/>
+        <exclude name="**/.svn/**"/>
+        <include name="com/caucho/**"/>
+      </fileset>
+      <fileset dir="${basedir}">
+        <include name="LICENSE"/>
+      </fileset>
+    </jar>
+    
+    <copy tofile="${dist}/quercus-4_0-snap.war"
+          file="${dist}/quercus-${version}.war"/>
+
+    <copy tofile="${dist}/quercus-4_0-snap-src.jar"
+          file="${dist}/quercus-${version}-src.jar"/>
   </target>
 
   <!--
