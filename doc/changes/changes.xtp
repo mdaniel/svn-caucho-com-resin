@@ -14,6 +14,17 @@
 <s2 title="4.0.7 - snapshot">
 <ul>
 <li>network: keepalive-timeout was incorrectly applied to initial read</li>
+<li>quercus: WWW-Authenticate does not work (#4000, rep by hm2k)</li>
+<li>quercus: NullPointerException in Alarm (after Glassfish redeploy) (#3711, rep by ashamash)</li>
+<li>quercus: quercus-4.0.6.war incorrect version reporting (#4033)</li>
+<li>quercus: date_format() does not use user-set default time zone (#4034, rep by sblommers)</li>
+<li>quercus: report as php 5.2.1 (#3916, rep by derickso)</li>
+<li>quercus: parse_ini_file does not replace PHP Constants (#3878, rep by ice-breaker)</li>
+<li>quercus: PHP clone object is ignored? (#3607, rep by sblommers)</li>
+<li>quercus: error_display in php.ini (#4037, rep by wml)</li>
+<li>quercus: java.lang.NullPointerException on drupal admin/user/permissions (#4020, #4035, rep by alberto, sblommers)</li>
+<li>quercus: is_executable is broken (#3979, rep by domdorn)</li>
+<li>quercus: Wordpress MU Settings link causes exception (#3918, rep by chiefgeek)</li>
 </ul>
 </s2>
 
