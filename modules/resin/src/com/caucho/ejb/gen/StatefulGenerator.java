@@ -39,6 +39,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.inject.Module;
@@ -53,6 +54,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 {
   private static final L10N L = new L10N(StatefulGenerator.class);
   
+  private final AspectBeanFactory<X> _aspectBeanFactory;
+  
   public StatefulGenerator(String ejbName, AnnotatedType<X> beanType,
                            ArrayList<AnnotatedType<? super X>> localApi,
                            ArrayList<AnnotatedType<? super X>> remoteApi)
@@ -66,7 +69,19 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   }
 
   @Override
+  protected AspectBeanFactory<X> getAspectBeanFactory()
+  {
+    return _aspectBeanFactory;
+  }
+  
+  @Override
   public boolean isStateless()
+  {
+    return false;
+  }
+  
+  @Override
+  protected boolean isTimerSupported()
   {
     return false;
   }

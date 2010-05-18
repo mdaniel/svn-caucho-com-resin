@@ -33,7 +33,6 @@ import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectFactory;
 import com.caucho.config.gen.AsynchronousFactory;
-import com.caucho.config.gen.CandiAspectBeanFactory;
 import com.caucho.config.gen.InterceptorFactory;
 import com.caucho.config.gen.LockFactory;
 import com.caucho.config.gen.SecurityFactory;
@@ -45,67 +44,21 @@ import com.caucho.inject.Module;
  * Represents a stateless local business method
  */
 @Module
-public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
+public class StatelessScheduledAspectBeanFactory<X> 
+  extends StatelessAspectBeanFactory<X>
 {
-  public StatelessAspectBeanFactory(InjectManager manager,
-                                    AnnotatedType<X> beanType)
+  public StatelessScheduledAspectBeanFactory(InjectManager manager,
+                                             AnnotatedType<X> beanType)
   {
     super(manager, beanType);
   }
-  
-  @Override
-  public boolean isProxy()
-  {
-    return true;
-  }
-  /**
-   * Generates the underlying bean object
-   */
-  @Override
-  public String getBeanInstance()
-  {
-    return "bean";
-  }
-  
-  /**
-   * Generates the proxy object.
-   */
-  @Override
-  public String getBeanProxy()
-  {
-    return "bean";
-  }
-  
-  @Override
-  public String getBeanSuper()
-  {
-    return "bean";
-  }
-  
-  /**
-   * Generates data associated with the bean
-   */
-  @Override
-  public String getBeanInfo()
-  {
-    return "poolItem";
-  }
-  
-  /**
-   * Returns the generated bean name
-   */
-  @Override
-  public String getGeneratedClassName()
-  {
-    return getBeanType().getJavaClass().getName();
-  }
-  
+ 
   @Override
   protected AspectFactory<X> createAspectFactory()
   {
     InjectManager manager = InjectManager.getCurrent();
     
-    AspectFactory<X> next = new StatelessMethodTailFactory<X>(this);
+    AspectFactory<X> next = new StatelessScheduledMethodTailFactory<X>(this);
     
     next = new InterceptorFactory<X>(this, next, manager);
     next = new XaFactory<X>(this, next);
@@ -113,6 +66,6 @@ public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
     next = new AsynchronousFactory<X>(this, next);
     next = new SecurityFactory<X>(this, next);
     
-    return new StatelessMethodHeadFactory<X>(this, next);
+    return new StatelessScheduledMethodHeadFactory<X>(this, next);
   }
 }

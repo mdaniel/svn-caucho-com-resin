@@ -50,9 +50,9 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
   private AnnotatedMethod<? super X> _method;
   private AspectGenerator<X> _next;
 
-  AbstractAspectGenerator(AspectFactory<X> factory,
-                          AnnotatedMethod<? super X> method,
-                          AspectGenerator<X> next)
+  protected AbstractAspectGenerator(AspectFactory<X> factory,
+                                    AnnotatedMethod<? super X> method,
+                                    AspectGenerator<X> next)
   {
     _factory = factory;
     _method = method;

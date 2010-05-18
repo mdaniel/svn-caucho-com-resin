@@ -74,6 +74,7 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
   {
     generateMethodPrologue(out, prologueMap);
     
+    String prefix = "";
     String suffix = "";
     
     /*
@@ -108,8 +109,9 @@ public class MethodHeadGenerator<X> extends AbstractAspectGenerator<X> {
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
                                        accessModifier, 
-                                       suffix, 
+                                       prefix, 
                                        getJavaMethod(), 
+                                       suffix, 
                                        getThrowsExceptions());
 
     out.println("{");

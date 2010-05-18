@@ -106,11 +106,10 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
     StatefulContext<X,T> context = getSessionContext(api);
 
     if (context != null) {
-      CreationalContextImpl<?> env = CreationalContextImpl.create();
-      
-      // XXX: should be bean
-      // return context.__caucho_createNew(null, env);
-      throw new UnsupportedOperationException(getClass().getName());
+      CreationalContextImpl<T> env = 
+        (CreationalContextImpl<T>) CreationalContextImpl.create();
+
+      return context.createProxy(env);
     }
     else
       return null;

@@ -247,7 +247,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   @Override
   protected void postStart()
   {
-    ScheduleIntrospector introspector = new ScheduleIntrospector();
+    //ScheduleIntrospector introspector = new ScheduleIntrospector();
 
     /*
     InjectManager manager = InjectManager.create();
@@ -288,18 +288,4 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     }
   }
   */
-
-  class StatelessTimeoutCaller implements TimeoutCaller {
-    public void timeout(Method method, Timer timer)
-      throws InvocationTargetException, IllegalAccessException
-    {
-      getContext().__caucho_timeout_callback(method, timer);
-    }
-
-    public void timeout(Method method) throws InvocationTargetException,
-        IllegalAccessException
-    {
-      getContext().__caucho_timeout_callback(method);
-    }
-  }
 }

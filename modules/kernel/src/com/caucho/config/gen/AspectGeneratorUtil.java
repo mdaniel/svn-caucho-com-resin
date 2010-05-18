@@ -52,12 +52,14 @@ public class AspectGeneratorUtil {
    * MyValue myCall(int a0, String, a1, ...)
    *   throws MyException, ...
    * </pre><?code>
+   * @param prefix TODO
   */
   public static void generateHeader(JavaWriter out,
                                     boolean isOverride,
                                     String accessModifier,
-                                    String suffix,
+                                    String prefix,
                                     Method method,
+                                    String suffix, 
                                     Class<?> []exnList)
     throws IOException
   {
@@ -73,7 +75,7 @@ public class AspectGeneratorUtil {
 
     out.printClass(method.getReturnType());
     out.print(" ");
-    out.print(method.getName() + suffix);
+    out.print(prefix + method.getName() + suffix);
     out.print("(");
 
     Class<?>[] types = method.getParameterTypes();

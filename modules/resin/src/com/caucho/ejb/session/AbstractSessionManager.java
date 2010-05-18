@@ -121,6 +121,11 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     return _bean;
   }
   
+  public Class<?> getProxyImplClass()
+  {
+    return _proxyImplClass;
+  }
+
   @SuppressWarnings("unchecked")
   protected <T> AbstractSessionContext<X,T> getSessionContext(Class<T> api)
   {

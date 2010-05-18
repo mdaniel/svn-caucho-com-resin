@@ -23,78 +23,62 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
- *
- * @author Scott Ferguson
  */
-package com.caucho.config.gen;
+
+package com.caucho.ejb.gen;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
-import java.lang.reflect.Modifier;
 import java.util.HashMap;
-import java.util.HashSet;
 
-import javax.ejb.ApplicationException;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
-import com.caucho.inject.Module;
+import com.caucho.config.gen.AbstractAspectGenerator;
+import com.caucho.config.gen.AspectGenerator;
+import com.caucho.config.gen.AspectGeneratorUtil;
 import com.caucho.java.JavaWriter;
 
-/**
- * Generates the method aspect code for the head or proxy of the method.
- */
-@Module
-public class AsyncHeadGenerator<X> extends AbstractAspectGenerator<X> {
-  public AsyncHeadGenerator(AsynchronousFactory<X> factory,
-                             AnnotatedMethod<? super X> method,
-                             AspectGenerator<X> next)
+public class StatelessScheduledMethodHeadGenerator<X> 
+  extends AbstractAspectGenerator<X> 
+{
+  public StatelessScheduledMethodHeadGenerator(StatelessScheduledMethodHeadFactory<X> factory,
+                                               AnnotatedMethod<? super X> method,
+                                               AspectGenerator<X> next)
   {
     super(factory, method, next);
   }
 
-  protected boolean isOverride()
+  public boolean isOverride()
   {
     return false;
   }
-
-  //
-  // business method interception
-  //
-
-  //
-  // generation for the actual method
-  //
-
+  
+  @Override
+  public void generateApplicationException(JavaWriter out,
+                                           Class<?> exn)
+    throws IOException
+  {
+    out.println("isValid = true;");
+    
+    super.generateApplicationException(out, exn);
+  }
+  
   /**
    * Generates the overridden method.
    */
-  public final void generate(JavaWriter out,
+  @Override
+  public void generate(JavaWriter out,
                              HashMap<String,Object> prologueMap)
     throws IOException
   {
     generateMethodPrologue(out, prologueMap);
     
-    String prefix = "";
-    String suffix = "_async";
-    
-    /*
-    if (isAsync()) {
-      suffix = "__caucho_async";
-      
-      generateHeader(out, "");
-
-      out.println("{");
-      out.pushDepth();
-
-      generateAsync(out);
-
-      out.popDepth();
-      out.println("}");
-    }*/
+    String prefix = "__caucho_schedule_";
+    String suffix = "";
+    String accessModifier = "public";
 
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
-                                       "public", 
+                                       accessModifier, 
                                        prefix, 
                                        getJavaMethod(), 
                                        suffix, 
@@ -102,23 +86,10 @@ public class AsyncHeadGenerator<X> extends AbstractAspectGenerator<X> {
 
     out.println("{");
     out.pushDepth();
-    
+
     generateContent(out);
 
     out.popDepth();
     out.println("}");
-  }
-
-  @Override
-  public boolean equals(Object o)
-  {
-    if (this == o)
-      return true;
-    else if (!(o instanceof AsyncHeadGenerator<?>))
-      return false;
-
-    AsyncHeadGenerator<?> bizMethod = (AsyncHeadGenerator<?>) o;
-
-    return getJavaMethod().getName().equals(bizMethod.getJavaMethod().getName());
   }
 }

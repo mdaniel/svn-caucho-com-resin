@@ -35,6 +35,7 @@ import java.util.ArrayList;
 import javax.ejb.Singleton;
 import javax.enterprise.inject.spi.AnnotatedType;
 
+import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -44,6 +45,9 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class SingletonGenerator<X> extends SessionGenerator<X> {
+  
+  private final AspectBeanFactory<X> _aspectBeanFactory;
+
   public SingletonGenerator(String ejbName, AnnotatedType<X> ejbClass,
                             ArrayList<AnnotatedType<? super X>> localApi,
                             ArrayList<AnnotatedType<? super X>> remoteApi)
@@ -55,11 +59,23 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     
     _aspectBeanFactory = new SingletonAspectBeanFactory<X>(manager, getBeanType());
   }
+  
+  @Override
+  protected AspectBeanFactory<X> getAspectBeanFactory()
+  {
+    return _aspectBeanFactory;
+  }
 
   @Override
   public boolean isStateless()
   {
     return false;
+  }
+    
+  @Override
+  protected boolean isTimerSupported()
+  {
+    return true;
   }
 
   public String getContextClassName()

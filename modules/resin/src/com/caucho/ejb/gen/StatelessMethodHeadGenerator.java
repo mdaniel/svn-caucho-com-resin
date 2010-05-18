@@ -110,16 +110,6 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   }
   
   /**
-   * Generates code for the invocation itself.
-   */
-  @Override
-  public void generateCall(JavaWriter out)
-    throws IOException
-  {
-    super.generateCall(out);
-  }
-
-  /**
    * Generates aspect code after the invocation.
    * <code><pre>
    * retType myMethod(...)

@@ -42,7 +42,7 @@ import com.caucho.java.JavaWriter;
 @Module
 public class MethodTailGenerator<X> extends NullGenerator<X> {
   protected final MethodTailFactory<X> _factory;
-  private final AnnotatedMethod<? super X> _method;
+  protected final AnnotatedMethod<? super X> _method;
 
   public MethodTailGenerator(MethodTailFactory<X> factory,
                              AnnotatedMethod<? super X> method)

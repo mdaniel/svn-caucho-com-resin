@@ -63,9 +63,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
 
   protected String _contextClassName = "dummy";
 
-  private final NonBusinessAspectBeanFactory _nonBusinessAspectBeanFactory;
-
-  protected AspectBeanFactory<X> _aspectBeanFactory;
+  private final NonBusinessAspectBeanFactory<X> _nonBusinessAspectBeanFactory;
 
   private final ArrayList<AspectGenerator<X>> _businessMethods 
     = new ArrayList<AspectGenerator<X>>();
@@ -86,7 +84,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     _remoteApi = new ArrayList<AnnotatedType<? super X>>(remoteApi);
 
     _nonBusinessAspectBeanFactory 
-      = new NonBusinessAspectBeanFactory(getBeanType());
+      = new NonBusinessAspectBeanFactory<X>(getBeanType());
    }
 
   public static String toFullClassName(String ejbName, String className,
@@ -201,6 +199,13 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
       introspectType(type);
     
     introspectImpl();
+    
+    // this comes after the other introspection classes because all it
+    // does is catch private timer methods and generate aspect wrappers
+    // that wouldn't normally be generated if the method didn't have
+    // timer behavior associated.
+    if (isTimerSupported())
+      introspectTimerMethods();
   }
   
   private void introspectType(AnnotatedType<? super X> type)
@@ -246,35 +251,44 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private void introspectMethodImpl(AnnotatedMethod<? super X> apiMethod)
   {
     Method javaMethod = apiMethod.getJavaMember();
-      
-    if (javaMethod.getDeclaringClass().equals(Object.class))
-      return;
-    if (javaMethod.getDeclaringClass().getName().startsWith("javax.ejb."))
-      return;
-    if (javaMethod.getName().startsWith("ejb")) {
-      throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
-                                    javaMethod.getDeclaringClass(),
-                                    javaMethod.getName()));
+
+    if (isBusinessMethod(javaMethod)) {
+      addBusinessMethod(apiMethod);
     }
+    else {
+      if (javaMethod.getName().startsWith("ejb")) {
+        throw new ConfigException(L.l("{0}: '{1}' must not start with 'ejb'.  The EJB spec reserves all methods starting with ejb.",
+                                      javaMethod.getDeclaringClass(),
+                                      javaMethod.getName()));
+      }
     
+      int modifiers = javaMethod.getModifiers();
+
+      if (! Modifier.isPublic(modifiers) && ! Modifier.isPrivate(modifiers))
+        addNonBusinessMethod(apiMethod);
+    }
+  }
+  
+  private void introspectTimerMethods()
+  {
+    for (AnnotatedMethod<? super X> method : getAnnotatedMethods()) {
+      introspectTimerMethod(method);
+    }    
+  }
+  
+  private void introspectTimerMethod(AnnotatedMethod<? super X> apiMethod)
+  {
+    Method javaMethod = apiMethod.getJavaMember();
+      
     int modifiers = javaMethod.getModifiers();
 
-    if (! Modifier.isPublic(modifiers)) {
-      if (! Modifier.isPrivate(modifiers))
-        addNonBusinessMethod(apiMethod);
-
-      return;
-    }
-
-    if (Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))
-      return;
-
-    addBusinessMethod(apiMethod);
+    if (! isBusinessMethod(javaMethod) && ! Modifier.isPublic(modifiers))
+      addScheduledMethod(apiMethod);
   }
   
   protected void addBusinessMethod(AnnotatedMethod<? super X> method)
   {
-    AspectGenerator<X> bizMethod = _aspectBeanFactory.create(method);
+    AspectGenerator<X> bizMethod = getAspectBeanFactory().create(method);
       
     if (bizMethod != null)
       _businessMethods.add(bizMethod);
@@ -291,6 +305,15 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
       _businessMethods.add(nonBizMethod);
   } 
 
+  protected void addScheduledMethod(AnnotatedMethod<? super X> method)
+  {
+    AspectGenerator<X> bizMethod = 
+      getScheduledAspectBeanFactory().create(method);
+      
+    if (bizMethod != null)
+      _businessMethods.add(bizMethod);
+  }
+  
   private AnnotatedMethod<? super X> 
   findMethod(Collection<AnnotatedMethod<? super X>> methodList,
              AnnotatedMethod<? super X> method)
@@ -309,5 +332,33 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     return getBeanType();
   }
 
+  protected AspectBeanFactory<X> getScheduledAspectBeanFactory()
+  {
+    throw new UnsupportedOperationException();
+  }
+  
+  abstract protected boolean isTimerSupported();
+  abstract protected AspectBeanFactory<X> getAspectBeanFactory();
+  
   // abstract protected void generateBody(JavaWriter out) throws IOException;
+  
+  public static boolean isBusinessMethod(Method method)
+  {
+    if (method.getDeclaringClass().equals(Object.class))
+      return false;
+    if (method.getDeclaringClass().getName().startsWith("javax.ejb."))
+      return false;
+    if (method.getName().startsWith("ejb")) {
+    }
+    
+    int modifiers = method.getModifiers();
+
+    if (! Modifier.isPublic(modifiers))
+      return false;
+    
+    if (Modifier.isFinal(modifiers) || Modifier.isStatic(modifiers))
+      return false;
+    
+    return true;
+  }
 }

@@ -35,6 +35,7 @@ import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.ejb.Schedule;
 import javax.ejb.Stateless;
 import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
@@ -43,6 +44,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.LifecycleInterceptor;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
@@ -61,6 +63,9 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   private LifecycleInterceptor _postConstructInterceptor;
   private LifecycleInterceptor _preDestroyInterceptor;
   
+  private final AspectBeanFactory<X> _aspectBeanFactory;
+  private final StatelessScheduledAspectBeanFactory<X> _scheduledBeanFactory;
+  
   public StatelessGenerator(String ejbName, 
                             AnnotatedType<X> beanType,
                             ArrayList<AnnotatedType<? super X>> localApi,
@@ -71,11 +76,32 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     
     InjectManager manager = InjectManager.create();
     
-    _aspectBeanFactory = new StatelessAspectBeanFactory<X>(manager, getBeanType());
+    _aspectBeanFactory 
+      = new StatelessAspectBeanFactory<X>(manager, getBeanType());
+    _scheduledBeanFactory
+      = new StatelessScheduledAspectBeanFactory<X>(manager, getBeanType());
   }
 
   @Override
+  protected AspectBeanFactory<X> getAspectBeanFactory()
+  {
+    return _aspectBeanFactory;
+  }
+
+  @Override
+  protected AspectBeanFactory<X> getScheduledAspectBeanFactory()
+  {
+    return _scheduledBeanFactory;
+  }
+  
+  @Override
   public boolean isStateless()
+  {
+    return true;
+  }
+  
+  @Override
+  protected boolean isTimerSupported()
   {
     return true;
   }
@@ -269,6 +295,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
 
     generateContextPrologue(out);
 
+    /*
     out.println();
     out.println("public void __caucho_timeout_callback(javax.ejb.Timer timer)");
     out.println("{");
@@ -279,7 +306,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.popDepth();
     out.println("}");
 
-    generateTimeoutCallback(out);
+    generateTimeoutCallback(out);*/
 
     out.println();
     out.println("public void destroy()");

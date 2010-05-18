@@ -30,20 +30,29 @@
 package com.caucho.ejb.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.ejb.Timer;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScheduleBean;
-import com.caucho.config.j2ee.BeanNameLiteral;
+import com.caucho.config.timer.ScheduleIntrospector;
+import com.caucho.config.timer.TimeoutCaller;
+import com.caucho.config.timer.TimerTask;
+import com.caucho.ejb.gen.SessionGenerator;
 import com.caucho.ejb.session.StatelessContext;
 import com.caucho.ejb.session.StatelessManager;
-import com.caucho.ejb.session.StatelessProvider;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 
@@ -58,8 +67,10 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
   
   private LinkedHashSet<Annotation> _qualifiers
     = new LinkedHashSet<Annotation>();
+  
+  private final StatelessManager<X> _manager;
 
-  public StatelessBeanImpl(StatelessManager<X> server,
+  public StatelessBeanImpl(StatelessManager<X> manager,
                            ManagedBeanImpl<X> bean,
                            Class<T> api,
                            Set<Type> types,
@@ -67,6 +78,7 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
   {
     super(context, bean, types);
 
+    _manager = manager;
     _qualifiers.addAll(bean.getQualifiers());
     
     Class<?> scopeType = bean.getScope();
@@ -87,6 +99,67 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
   @Override
   public void scheduleTimers(Object value)
   {
-    getBean().scheduleTimers(value);
+    ScheduleIntrospector introspector = new StatelessScheduleIntrospector();
+
+    TimeoutCaller timeoutCaller = new StatelessTimeoutCaller(value);
+
+    ArrayList<TimerTask> taskList
+      = introspector.introspect(timeoutCaller, getBean().getAnnotatedType());
+
+    if (taskList != null) {
+      for (TimerTask task : taskList) {
+        task.start();
+      }
+    }
+  }
+  
+  private class StatelessScheduleIntrospector extends ScheduleIntrospector
+  {
+    @Override
+    protected Method getScheduledMethod(AnnotatedMethod<?> method)
+    {
+      Method javaMethod = method.getJavaMember();
+      String methodName = javaMethod.getName();
+
+      if (! SessionGenerator.isBusinessMethod(javaMethod))
+        methodName = "__caucho_schedule_" + javaMethod.getName();
+
+      Class<?> proxyClass = _manager.getProxyImplClass();
+      
+      try {
+        Method scheduleMethod 
+          = proxyClass.getMethod(methodName, javaMethod.getParameterTypes());
+
+        return scheduleMethod;
+      } catch (Exception e) {
+        throw new ConfigException(L.l("Cannot find method {0} on generated class {1}.",
+                                      methodName, proxyClass.getName()),
+                                  e);
+      }
+    }
+  }
+  
+  private class StatelessTimeoutCaller implements TimeoutCaller {
+    private final Object _bean;
+    
+    /**
+     * @param bean
+     */
+    public StatelessTimeoutCaller(Object bean)
+    {
+      _bean = bean;
+    }
+
+    public void timeout(Method method, Timer timer)
+      throws InvocationTargetException, IllegalAccessException
+    {
+      method.invoke(_bean, timer);
+    }
+
+    public void timeout(Method method)
+      throws InvocationTargetException, IllegalAccessException
+    {
+      method.invoke(_bean);
+    }
   }
 }

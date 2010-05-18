@@ -130,16 +130,6 @@ public class StatelessMethodTailGenerator<X> extends MethodTailGenerator<X>
     
     super.generatePreCall(out);
   }
-  
-  /**
-   * Generates code for the invocation itself.
-   */
-  @Override
-  public void generateCall(JavaWriter out)
-    throws IOException
-  {
-    super.generateCall(out);
-  }
 
   /**
    * Generates aspect code after the invocation.

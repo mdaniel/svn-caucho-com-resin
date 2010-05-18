@@ -98,13 +98,15 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
       throw new IllegalStateException(getJavaMethod().toString()
                                       + " must be protected or package protected");
 
+    String prefix = "";
     String suffix = "";
 
     AspectGeneratorUtil.generateHeader(out, 
                                        isOverride(),
                                        accessModifier, 
-                                       suffix, 
+                                       prefix, 
                                        getJavaMethod(),
+                                       suffix, 
                                        getThrowsExceptions());
 
 

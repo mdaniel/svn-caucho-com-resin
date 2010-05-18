@@ -28,6 +28,7 @@
  */
 package com.caucho.config.timer;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.TimeZone;
 
@@ -61,7 +62,7 @@ public class ScheduleIntrospector {
           timers = new ArrayList<TimerTask>();
 
         for (Schedule schedule : schedules.value()) {
-          addSchedule(timers, schedule, caller, method);
+          addSchedule(timers, schedule, caller, getScheduledMethod(method));
         }
       }
 
@@ -71,15 +72,23 @@ public class ScheduleIntrospector {
         if (timers == null)
           timers = new ArrayList<TimerTask>();
 
-        addSchedule(timers, schedule, caller, method);
+        addSchedule(timers, schedule, caller, getScheduledMethod(method));
       }
     }
 
     return timers;
   }
+  
+  /**
+   * Returns the method to call when the schedule event occurs.
+   */
+  protected Method getScheduledMethod(AnnotatedMethod<?> method)
+  {
+    return method.getJavaMember();
+  }
 
   private void addSchedule(ArrayList<TimerTask> timers, Schedule schedule,
-                           TimeoutCaller caller, AnnotatedMethod<?> method)
+                           TimeoutCaller caller, Method method)
   {
     CronExpression cronExpression
       = new CronExpression(schedule.second(),
@@ -99,14 +108,8 @@ public class ScheduleIntrospector {
     Trigger trigger = new CronTrigger(cronExpression, -1, -1, timezone);
     EjbTimer ejbTimer = new EjbTimer();
 
-    // TODO this may be the wrong method - in the case where we have a 
-    // stateless session bean with an @Schedule on a business method,
-    // it should get the benefits of the other aspects (?), so it should
-    // call through the proxy, but this is the method of the implementation
-    // class at the moment and the proxy isn't currently written to extend
-    // the implementation class. It only implements the local interface.
     TimeoutInvoker timeoutInvoker
-      = new MethodTimeoutInvoker(caller, method.getJavaMember());
+      = new MethodTimeoutInvoker(caller, method);
 
     TimerTask timerTask 
       = new TimerTask(timeoutInvoker, ejbTimer,
