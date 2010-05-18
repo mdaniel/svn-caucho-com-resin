@@ -253,6 +253,9 @@ public class PageManager
         program = preloadProgram(path, fileName);
 
         if (program == null) {
+          if (log.isLoggable(Level.FINE))
+            log.fine(L.l("Quercus[{0}] parsing page", path));
+          
           program = QuercusParser.parse(_quercus,
                                         path,
                                         _quercus.getScriptEncoding(),
