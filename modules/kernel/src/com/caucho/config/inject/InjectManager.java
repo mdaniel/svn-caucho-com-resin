@@ -277,6 +277,9 @@ public final class InjectManager
 
   private ArrayList<AbstractBean<?>> _pendingBindList
     = new ArrayList<AbstractBean<?>>();
+  
+  private ArrayList<Bean<?>> _pendingValidationBeans
+    = new ArrayList<Bean<?>>();
 
   private ArrayList<Bean<?>> _pendingServiceList
     = new ArrayList<Bean<?>>();
@@ -1085,14 +1088,14 @@ public final class InjectManager
                                     baseType));
                                     */
 
-    return resolve(baseType, bindings);
+    return resolveRec(baseType, bindings);
   }
 
   /**
    * Returns the web beans component with a given binding list.
    */
-  private Set<Bean<?>> resolve(BaseType baseType,
-                               Annotation []qualifiers)
+  private Set<Bean<?>> resolveRec(BaseType baseType,
+                                  Annotation []qualifiers)
   {
     WebComponent component = getWebComponent(baseType);
     
@@ -1156,7 +1159,7 @@ public final class InjectManager
     }
 
     if (_parent != null) {
-      return _parent.resolve(baseType, qualifiers);
+      return _parent.resolveRec(baseType, qualifiers);
     }
 
     for (Annotation ann : qualifiers) {
@@ -1227,7 +1230,7 @@ public final class InjectManager
         if (getDeploymentPriority(typedBean.getBean()) < 0)
           continue;
         
-        validate(typedBean.getBean());
+        _pendingValidationBeans.add(typedBean.getBean());
         
         beanSet.addComponent(typedBean.getType(), typedBean.getBean());
       }
@@ -1726,7 +1729,7 @@ public final class InjectManager
       throw new InjectionException(L.l("'{0}' is an invalid type for injection because it's a variable . {1}",
                                        baseType, ij));
 
-    Set<Bean<?>> set = resolve(baseType, bindings);
+    Set<Bean<?>> set = resolveRec(baseType, bindings);
 
     if (set == null || set.size() == 0) {
       if (InjectionPoint.class.equals(type))
