@@ -41,6 +41,7 @@ import javax.transaction.Transaction;
 import javax.transaction.xa.XAResource;
 
 import com.caucho.jca.pool.UserTransactionProxy;
+import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
 import com.caucho.util.L10N;
 
@@ -190,23 +191,25 @@ public class XAManager {
    * 
    * @return the current transaction if it exists
    */
-  public void endRequiresNew(Transaction xa, boolean isCommit)
+  public void endRequiresNew(Transaction parent)
   {
     try {
-      if (isCommit)
-        _ut.commit();
-      else
+      TransactionImpl xa = getTransaction();
+      
+      if (xa != null && xa.isRollbackOnly())
         _ut.rollback();
+      else
+        _ut.commit();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
       throw new EJBException(e);
     } finally {
       try {
-        if (xa != null) {
+        if (parent != null) {
           TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
 
-          tm.resume(xa);
+          tm.resume(parent);
         }
       } catch (RuntimeException e) {
         throw e;
@@ -239,7 +242,7 @@ public class XAManager {
    * 
    * @return The current transaction if it exists.
    */
-  public Transaction getTransaction()
+  public TransactionImpl getTransaction()
   {
     try {
       TransactionManagerImpl tm = TransactionManagerImpl.getLocal();
@@ -266,7 +269,12 @@ public class XAManager {
   public void commit()
   {
     try {
-      _ut.commit();
+      TransactionImpl xa = getTransaction();
+      
+      if (xa != null && xa.isRollbackOnly())
+        _ut.rollback();
+      else
+        _ut.commit();
     } catch (RuntimeException e) {
       throw e;
     } catch (RollbackException e) {
@@ -282,7 +290,6 @@ public class XAManager {
 
   /**
    * Commits transaction.
-   */
   public void commit(boolean isCommit)
   {
     try {
@@ -301,7 +308,7 @@ public class XAManager {
     } catch (Exception e) {
       throw new EJBException(e);
     }
-  }
+  }*/
 
   /**
    * Resumes transaction.

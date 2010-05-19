@@ -167,10 +167,12 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   @Override
   public void generatePreTry(JavaWriter out) throws IOException
   {
+/*
     if (_isContainerManaged) {
       out.println();
       out.println("boolean isXAValid = false;");
     }
+    */
 
     if (!_isContainerManaged) {
       out.println();
@@ -271,10 +273,11 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super.generatePostCall(out);
 
+    /*
     if (_isContainerManaged
         && (_transactionType == REQUIRED || _transactionType == REQUIRES_NEW)) {
       out.println("isXAValid = true;");
-    }
+    }*/
   }
 
   /**
@@ -295,10 +298,10 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
         out.println("if (_xa.getTransaction() != null)");
         out.println("  _xa.markRollback(e);");
       }
-    } else if (_isContainerManaged
+    }/* else if (_isContainerManaged
         && (_transactionType == REQUIRED || _transactionType == REQUIRES_NEW)) {
       out.println("isXAValid = true;");
-    }
+    }*/
   }
 
   @Override
@@ -308,7 +311,7 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     if (_isContainerManaged) {
       out.println("if (_xa.getTransaction() != null) {");
       out.println("  _xa.markRollback(e);");
-      out.println("  isXAValid = true;");
+      //out.println("  isXAValid = true;");
       out.println("}");
     }
   }
@@ -335,23 +338,27 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     if (!_isContainerManaged) {
       out.println("if (xa != null)");
       out.println("  _xa.resume(xa);");
-    } else if (_transactionType != null) {
+    } 
+    else if (_transactionType != null) {
       switch (_transactionType) {
       case NOT_SUPPORTED: {
         out.println("if (xa != null)");
+        out.pushDepth();
         out.println("  _xa.resume(xa);");
+        out.popDepth();
         break;
       }
 
       case REQUIRED: {
-        out.println();
         out.println("if (xa == null)");
-        out.println("  _xa.commit(isXAValid);");
+        out.pushDepth();
+        out.println("_xa.commit();");
+        out.popDepth();
         break;
       }
 
       case REQUIRES_NEW: {
-        out.println("_xa.endRequiresNew(xa, isXAValid);");
+        out.println("_xa.endRequiresNew(xa);");
         break;
       }
       }
