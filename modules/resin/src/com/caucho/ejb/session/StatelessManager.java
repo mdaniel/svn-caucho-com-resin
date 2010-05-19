@@ -28,23 +28,19 @@
  */
 package com.caucho.ejb.session;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Set;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.ejb.Timer;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.Interceptor;
 
-import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.timer.ScheduleIntrospector;
-import com.caucho.config.timer.TimeoutCaller;
-import com.caucho.config.timer.TimerTask;
 import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.inject.StatelessBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
@@ -57,7 +53,7 @@ import com.caucho.util.L10N;
 public class StatelessManager<X> extends AbstractSessionManager<X> {
   private static final L10N L = new L10N(StatelessManager.class);
 
-  protected static Logger log
+  private static Logger log
     = Logger.getLogger(StatelessManager.class.getName());
   
   private int _sessionIdleMax = 16;
@@ -167,9 +163,10 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   /**
    * Called by the StatelessProxy on initialization.
    */
-  public <T> StatelessPool<X,T> createStatelessPool(StatelessContext<X,T> context)
+  public <T> StatelessPool<X,T> createStatelessPool(StatelessContext<X,T> context,
+                                                    List<Interceptor<?>> interceptorBeans)
   {
-    return new StatelessPool<X,T>(this, context);
+    return new StatelessPool<X,T>(this, context, interceptorBeans);
   }
 
   /**
@@ -271,9 +268,23 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   }
 
   // XXX
-  public Object[] getInterceptorBindings()
+  public Object[] getInterceptorBindings(List<Interceptor<?>> interceptorBeans,
+                                         CreationalContextImpl parentEnv)
   {
-    return null;
+    int size = interceptorBeans.size();
+    
+    if (size == 0)
+      return null;
+    
+    Object []interceptors = new Object[size];
+    
+    for (int i = 0; i < size; i++) {
+      Interceptor bean = interceptorBeans.get(i);
+      
+      interceptors[i] = getInjectManager().getReference(bean, parentEnv); 
+    }
+    
+    return interceptors;
   }
 
   /*

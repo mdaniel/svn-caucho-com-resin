@@ -235,26 +235,7 @@ abstract public class AbstractBeanConfig {
   {
     InjectManager beanManager = InjectManager.create();
 
-    AnnotatedType<X> annType = (AnnotatedType<X>) ReflectionAnnotatedFactory.introspectType(_cl);
-    AnnotatedTypeImpl<X> beanType;
-    
-    beanType = new AnnotatedTypeImpl<X>(annType);
-
-    if (_name != null) {
-      beanType.addAnnotation(Names.create(_name));
-    }
-
-    for (Annotation binding : _bindings) {
-      beanType.addAnnotation(binding);
-    }
-
-    for (Annotation stereotype : _stereotypes) {
-      beanType.addAnnotation(stereotype);
-    }
-
-    for (Annotation ann : _annotations) {
-      beanType.addAnnotation(ann);
-    }
+    AnnotatedTypeImpl<X> beanType = buildAnnotatedType();
 
     BeanBuilder<X> factory = beanManager.createBeanFactory(beanType);
 
@@ -285,6 +266,34 @@ abstract public class AbstractBeanConfig {
         throw ConfigException.create(e);
       }
     }
+  }
+  
+  protected <X> AnnotatedTypeImpl<X> buildAnnotatedType()
+  {
+    InjectManager beanManager = InjectManager.create();
+
+    AnnotatedType<X> annType = (AnnotatedType<X>) ReflectionAnnotatedFactory.introspectType(_cl);
+    AnnotatedTypeImpl<X> beanType;
+    
+    beanType = new AnnotatedTypeImpl<X>(annType);
+
+    if (_name != null) {
+      beanType.addAnnotation(Names.create(_name));
+    }
+
+    for (Annotation binding : _bindings) {
+      beanType.addAnnotation(binding);
+    }
+
+    for (Annotation stereotype : _stereotypes) {
+      beanType.addAnnotation(stereotype);
+    }
+
+    for (Annotation ann : _annotations) {
+      beanType.addAnnotation(ann);
+    }
+    
+    return beanType;
   }
 
   protected Object replaceObject()

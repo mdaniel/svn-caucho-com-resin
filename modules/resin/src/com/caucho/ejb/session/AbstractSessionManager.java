@@ -71,6 +71,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   private HashMap<Class<?>, AbstractSessionContext<X,?>> _contextMap
     = new HashMap<Class<?>, AbstractSessionContext<X,?>>();
 
+  private InjectManager _injectManager;
   private Bean<X> _bean;
   
   private String[] _declaredRoles;
@@ -125,6 +126,11 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   {
     return _proxyImplClass;
   }
+  
+  public InjectManager getInjectManager()
+  {
+    return _injectManager;
+  }
 
   @SuppressWarnings("unchecked")
   protected <T> AbstractSessionContext<X,T> getSessionContext(Class<T> api)
@@ -145,6 +151,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       thread.setContextClassLoader(getClassLoader());
 
       super.init();
+      
+      _injectManager = InjectManager.create();
 
       for (Class<?> localApi : getLocalApiList()) {
         createContext(localApi);

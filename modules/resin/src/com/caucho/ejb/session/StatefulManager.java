@@ -37,9 +37,11 @@ import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 
+import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.inject.SessionBeanImpl;
@@ -113,6 +115,19 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
     }
     else
       return null;
+  }
+  
+  public <T> T initProxy(T instance, CreationalContext<T> env)
+  {
+    if (instance instanceof CandiEnhancedBean) {
+      CandiEnhancedBean bean = (CandiEnhancedBean) instance;
+      
+      Object []delegates = null;
+      
+      bean.__caucho_inject(delegates, env);
+    }
+    
+    return instance;
   }
 
   @Override

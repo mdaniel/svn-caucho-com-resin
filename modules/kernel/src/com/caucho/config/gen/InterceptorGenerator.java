@@ -102,24 +102,28 @@ public class InterceptorGenerator<X>
                               AspectGenerator<X> next,
                               HashSet<Class<?>> methodInterceptors,
                               HashMap<Class<?>, Annotation> methodInterceptorMap,
-                              HashSet<Class<?>> decoratorSet)
+                              HashSet<Class<?>> decoratorSet,
+                              boolean isExcludeClassInterceptors)
   {
     super(factory, method, next);
 
     _factory = factory;
     
-    if (factory.getClassInterceptors() != null)
+    if (factory.getClassInterceptors() != null
+        && ! isExcludeClassInterceptors) {
       _interceptors.addAll(factory.getClassInterceptors());
+    }
 
     if (methodInterceptors != null)
       _interceptors.addAll(methodInterceptors);
 
-    
     if (methodInterceptorMap != null)
       _interceptorBinding.addAll(methodInterceptorMap.values());
     
-    if (factory.getClassInterceptorBinding() != null)
+    if (factory.getClassInterceptorBinding() != null
+        && ! _isExcludeClassInterceptors) {
       _interceptorBinding.addAll(factory.getClassInterceptorBinding());
+    }
 
     _decoratorSet = decoratorSet;
 
@@ -374,6 +378,9 @@ public class InterceptorGenerator<X>
   public void generatePreTry(JavaWriter out)
     throws IOException
   {
+    // ejb/12a0
+    super.generatePreTry(out);
+    
     if (hasDecorator()) {
       generateDecoratorPreTry(out);
     }
@@ -407,6 +414,9 @@ public class InterceptorGenerator<X>
   public void generateFinally(JavaWriter out)
     throws IOException
   {
+    // server/12a0
+    super.generateFinally(out);
+    
     if (hasDecorator()) {
       generateDecoratorFinally(out);
     }
@@ -643,7 +653,8 @@ public class InterceptorGenerator<X>
     }
 
     out.print("new com.caucho.config.gen.InvocationContextImpl(");
-    _factory.generateThis(out);
+    out.print(_factory.getAspectBeanFactory().getBeanInstance());
+
     out.print(", ");
     // generateThis(out);
     out.print(uniqueName + "_method, ");
@@ -1404,7 +1415,7 @@ public class InterceptorGenerator<X>
       out.println(" result;");
     }
 
-    generateTailCall(out, "super");
+    generateTailCall(out, getFactory().getAspectBeanFactory().getBeanSuper());
 
     if (! void.class.equals(javaMethod.getReturnType()))
       out.println("return result;");

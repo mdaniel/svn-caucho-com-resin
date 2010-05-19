@@ -59,6 +59,7 @@ public class StatelessBeanConfig extends AbstractBeanConfig
   {
   }
 
+  @Override
   protected void initImpl()
   {
     if (getInstanceClass() == null)
@@ -74,6 +75,9 @@ public class StatelessBeanConfig extends AbstractBeanConfig
     };
 
     add(ann);
+    
+    EjbManager ejbContainer = EjbManager.create();
+    ejbContainer.createBean(buildAnnotatedType(), null);
   }
   
   @Override

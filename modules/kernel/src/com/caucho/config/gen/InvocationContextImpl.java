@@ -105,6 +105,7 @@ public class InvocationContextImpl implements InvocationContext {
     return _map;
   }
 
+  @Override
   public Object proceed()
     throws Exception
   {
@@ -115,8 +116,9 @@ public class InvocationContextImpl implements InvocationContext {
 
         return _chainMethods[i].invoke(_chainObjects[_chainIndex[i]], this);
       }
-      else
+      else {
         return _implMethod.invoke(_target, _param);
+      }
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
 

@@ -29,9 +29,13 @@
 
 package com.caucho.ejb.session;
 
+import java.util.List;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
+import javax.enterprise.inject.spi.Interceptor;
+
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
@@ -46,6 +50,7 @@ public class StatelessPool<X,T> {
 
   private final StatelessManager<X> _manager;
   private final StatelessContext<X,T> _context;
+  private final List<Interceptor<?>> _interceptorBeans;
   
   private final FreeList<Item<X>> _freeList;
   
@@ -53,10 +58,12 @@ public class StatelessPool<X,T> {
   private final long _concurrentTimeout;
 
   StatelessPool(StatelessManager<X> manager,
-                StatelessContext<X,T> context)
+                StatelessContext<X,T> context,
+                List<Interceptor<?>> interceptorBeans)
   {
     _manager = manager;
     _context = context;
+    _interceptorBeans = interceptorBeans;
     
     int idleMax = manager.getSessionIdleMax();
     int concurrentMax = manager.getSessionConcurrentMax();
@@ -105,8 +112,10 @@ public class StatelessPool<X,T> {
       Item<X> beanItem = _freeList.allocate();
     
       if (beanItem == null) {
-        beanItem = new Item<X>(_context.newInstance(null), 
-                               _manager.getInterceptorBindings());
+        CreationalContextImpl<X> env = new CreationalContextImpl<X>(_manager.getBean());
+        
+        beanItem = new Item<X>(_context.newInstance(env), 
+                               _manager.getInterceptorBindings(_interceptorBeans, env));
         // _ejbProducer.newInstance();
       }
       

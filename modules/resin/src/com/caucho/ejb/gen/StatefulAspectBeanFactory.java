@@ -94,7 +94,8 @@ public class StatefulAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   @Override
   public String getBeanSuper()
   {
-    return "bean";
+    // ejb/11a0
+    return "_bean";
   }
   
   /**

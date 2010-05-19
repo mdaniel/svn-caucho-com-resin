@@ -82,11 +82,10 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
     if (parentEnv != null) {
       _top = parentEnv._top;
       _next = _top._next;
+      _top._next = this;
     }
     else
       _top = this;
-    
-    _top._next = this;
   }
   
   public CreationalContextImpl()
@@ -106,7 +105,7 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
     this(bean, next, null);
   }
   
-  CreationalContextImpl(Contextual<T> bean)
+  public CreationalContextImpl(Contextual<T> bean)
   {
     this(bean, null, null);
   }

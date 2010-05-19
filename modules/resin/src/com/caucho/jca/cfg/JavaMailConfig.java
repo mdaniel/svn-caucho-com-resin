@@ -29,27 +29,21 @@
 
 package com.caucho.jca.cfg;
 
+import java.util.Properties;
+
+import javax.mail.Authenticator;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.AbstractBeanConfig;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.util.L10N;
-
-import java.lang.reflect.Method;
-import java.util.Properties;
-import java.util.logging.Logger;
-
-import javax.annotation.*;
-import javax.mail.*;
 
 /**
  * Configuration for a javamail.
  */
 public class JavaMailConfig extends AbstractBeanConfig {
-  private static final L10N L = new L10N(JavaMailConfig.class);
-  private static final Logger log
-    = Logger.getLogger(JavaMailConfig.class.getName());
-
   private Properties _props = new Properties();
   private Authenticator _auth;
 
@@ -214,6 +208,7 @@ public class JavaMailConfig extends AbstractBeanConfig {
     _props.putAll(props);
   }
 
+  @Override
   public void initImpl()
     throws ConfigException
   {
@@ -233,13 +228,11 @@ public class JavaMailConfig extends AbstractBeanConfig {
       else
 	_session = Session.getInstance(_props);
 
-      /*
       InjectManager manager = InjectManager.create();
-      BeanFactory factory = manager.createBeanFactory(Session.class);
+      BeanBuilder factory = manager.createBeanFactory(Session.class);
       factory.type(Session.class);
 
       manager.addBean(factory.singleton(_session));
-      */
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

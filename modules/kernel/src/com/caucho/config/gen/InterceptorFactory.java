@@ -36,6 +36,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -47,6 +48,7 @@ import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.interceptor.AroundInvoke;
+import javax.interceptor.ExcludeClassInterceptors;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
 
@@ -128,7 +130,7 @@ public class InterceptorFactory<X>
         }
         
         if (methodInterceptors == null)
-          methodInterceptors = new HashSet<Class<?>>();
+          methodInterceptors = new LinkedHashSet<Class<?>>();
         
         methodInterceptors.add(iClass);
       }
@@ -146,19 +148,23 @@ public class InterceptorFactory<X>
     }
     */
     
+    boolean isExcludeClassInterceptors
+      = method.isAnnotationPresent(ExcludeClassInterceptors.class);
+    
     HashSet<Class<?>> decoratorSet = introspectDecorators(method);
     
     if (methodInterceptors != null
         || interceptorMap != null
         || decoratorSet != null
-        || _classInterceptors != null
-        || _classInterceptorBinding != null) {
+        || _classInterceptors != null && ! isExcludeClassInterceptors
+        || _classInterceptorBinding != null && ! isExcludeClassInterceptors) {
       AspectGenerator<X> next = super.create(method, true);
       
       return new InterceptorGenerator<X>(this, method, next,
                                          methodInterceptors, 
                                          interceptorMap,
-                                         decoratorSet);
+                                         decoratorSet,
+                                         isExcludeClassInterceptors);
     }
     else
       return super.create(method, isEnhanced);
@@ -203,8 +209,9 @@ public class InterceptorFactory<X>
       _classInterceptors = new ArrayList<Class<?>>();
     
       for (Class<?> iClass : interceptors.value()) {
-        if (! _classInterceptors.contains(iClass))
+        if (! _classInterceptors.contains(iClass)) {
           _classInterceptors.add(iClass);
+        }
       }
     }
   }

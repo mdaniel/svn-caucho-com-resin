@@ -30,18 +30,13 @@
 package com.caucho.ejb.gen;
 
 import java.io.IOException;
-import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.HashMap;
 
 import javax.ejb.Stateful;
-import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
-import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -176,7 +171,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     if (hasNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
 
-    out.print("  implements SessionProxyFactory<T>");
+    out.print("  implements SessionProxyFactory<T>, com.caucho.config.gen.CandiEnhancedBean");
 
     for (AnnotatedType<? super X> api : getLocalApi()) {
       out.print(", " + api.getJavaClass().getName());
@@ -237,6 +232,9 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.popDepth();
     out.println("}");
+    
+    generateInject(out);
+    generatePostConstruct(out);
     
     out.println();
     out.println("@Override");

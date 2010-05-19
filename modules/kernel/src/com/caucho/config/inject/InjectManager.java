@@ -1440,6 +1440,16 @@ public final class InjectManager
   }
 
   /**
+   * Convenience for Resin.
+   */
+  public <T> T getReference(Bean<T> bean, CreationalContextImpl<?> parentEnv)
+  {
+    ReferenceFactory<T> factory = getReferenceFactory(bean);
+    
+    return factory.create(parentEnv, null);
+  }
+
+  /**
    * Convenience-class for Resin.
    */
   public <T> T getReference(String name)

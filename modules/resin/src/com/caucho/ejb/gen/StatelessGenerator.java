@@ -329,7 +329,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.pushDepth();
 
     out.println("_manager = manager;");
-    out.println("_statelessPool = manager.createStatelessPool(context);");
+    out.println("_statelessPool = manager.createStatelessPool(context, __caucho_interceptor_beans);");
   
     generateProxyConstructor(out);
 

@@ -73,6 +73,14 @@ public class StatefulBeanConfig extends AbstractBeanConfig
     };
 
     add(statefulAnn);
+    
+    EjbManager ejbContainer = EjbManager.create();
+    ejbContainer.createBean(buildAnnotatedType(), null);
+  }
+  
+  @Override
+  public void deploy()
+  {
   }
 }
 

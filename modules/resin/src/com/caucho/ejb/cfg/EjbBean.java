@@ -999,9 +999,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
         else {
           interceptor = _ejbConfig.getInterceptor(className);
 
-          interceptor.init();
+          if (interceptor != null) {
+            interceptor.init();
 
-          addInterceptor(interceptor);
+            addInterceptor(interceptor);
+          }
         }
       }
     }

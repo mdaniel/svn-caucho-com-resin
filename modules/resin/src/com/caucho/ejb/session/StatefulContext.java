@@ -29,6 +29,7 @@
 package com.caucho.ejb.session;
 
 import javax.ejb.TimerService;
+import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -52,6 +53,16 @@ public class StatefulContext<X,T> extends AbstractSessionContext<X,T> {
   public StatefulManager<X> getServer()
   {
     return (StatefulManager<X>) super.getServer();
+  }
+  
+  @Override
+  public T createProxy(CreationalContext<T> env)
+  {
+    T proxy = super.createProxy(env);
+    
+    getServer().initProxy(proxy, env);
+    
+    return proxy;
   }
  
   /**
