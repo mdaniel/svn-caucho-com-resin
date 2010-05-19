@@ -195,11 +195,12 @@ public class ScopeAdapter {
         code.setMaxStack(4);
 
         code.pushObjectVar(0);
-        code.invokespecial(superClassName, "<init>", "()V", 1, 0);
-        code.pushObjectVar(0);
         code.pushObjectVar(1);
         code.putField(thisClassName, factoryField.getName(),
                       factoryField.getDescriptor());
+        
+        code.pushObjectVar(0);
+        code.invokespecial(superClassName, "<init>", "()V", 1, 0);
         code.addReturn();
         code.close();
         

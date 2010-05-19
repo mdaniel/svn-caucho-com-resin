@@ -75,8 +75,9 @@ public final class InstanceImpl<T> implements Instance<T>
   {
     if (_factory == null) {
       Bean<?> bean = _beanManager.resolve(_beanSet);
-      
-      _factory = (ReferenceFactory<T>) _beanManager.getReferenceFactory(bean);
+
+      if (bean != null)
+        _factory = (ReferenceFactory<T>) _beanManager.getReferenceFactory(bean);
     }
 
     if (_factory != null)

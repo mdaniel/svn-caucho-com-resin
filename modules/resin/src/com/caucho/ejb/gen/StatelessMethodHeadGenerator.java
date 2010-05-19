@@ -30,6 +30,7 @@
 package com.caucho.ejb.gen;
 
 import java.io.IOException;
+import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
@@ -57,6 +58,18 @@ public class StatelessMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     return false;
   }
 
+  /**
+   * Generates the static class prologue
+   */
+  @Override
+  public void generateMethodPrologue(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+    map.put("__caucho_interceptor_beans", true);
+    
+    super.generateMethodPrologue(out, map);
+  }
+ 
   /**
    * Generates code before the "try" block
    * <code><pre>

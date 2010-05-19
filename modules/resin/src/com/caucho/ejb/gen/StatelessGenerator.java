@@ -42,6 +42,7 @@ import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Interceptor;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectBeanFactory;
@@ -323,6 +324,15 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     throws IOException
   {
     out.println();
+    out.print("private static final ");
+    out.print("java.util.ArrayList<");
+    out.printClass(Interceptor.class);
+    out.println("<?>> __caucho_interceptor_beans");
+    out.print("  = new java.util.ArrayList<");
+    out.printClass(Interceptor.class);
+    out.println("<?>>();");
+    
+    out.println();
     out.println("public " + getClassName() + "(StatelessManager manager"
                 + ", StatelessContext context)");
     out.println("{");
@@ -438,16 +448,6 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   //
   // code generation
   //
-
-  /**
-   * Generates the view code.
-   */
-  private void generateView(JavaWriter out) throws IOException
-  {
-    // generateBean(out);
-
-    generateProxy(out);
-  }
 
   protected void generateExtends(JavaWriter out)
     throws IOException
