@@ -20,10 +20,10 @@ $digest_attempt = $_REQUEST["digest_attempt"];
 if (! empty($_REQUEST["digest_username"]))
 
 if (! empty($digest_attempt)) {
-  $digest_username = $_REQUEST["digest_username"];
+  $digest_username = htmlspecialchars($_REQUEST["digest_username"]);
   $digest_password1 = $_REQUEST["digest_password1"];
   $digest_password2 = $_REQUEST["digest_password2"];
-  $digest_realm = $_REQUEST["digest_realm"];
+  $digest_realm = htmlspecialchars($_REQUEST["digest_realm"]);
 
   if (! empty($digest_password1) || ! empty($digest_password2)) {
     if ($digest_password1 !== $digest_password2)
