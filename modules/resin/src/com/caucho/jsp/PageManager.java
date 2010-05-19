@@ -350,13 +350,12 @@ abstract public class PageManager {
       try {
 	InjectManager beanManager = InjectManager.create();
 	
-	AnnotatedType annType
-	  = beanManager.createAnnotatedType(page.getClass());
-	InjectionTarget inject = beanManager.createInjectionTarget(annType);
+	InjectionTarget inject = beanManager.createInjectionTarget(page.getClass());
 
 	CreationalContext<?> env = CreationalContextImpl.create();
 
 	inject.inject(page, env);
+	
 	inject.postConstruct(page);
       } catch (RuntimeException e) {
 	throw e;

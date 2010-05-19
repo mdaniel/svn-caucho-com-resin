@@ -32,11 +32,9 @@ package com.caucho.config.scope;
 import java.lang.annotation.Annotation;
 
 import javax.enterprise.context.ApplicationScoped;
-import javax.enterprise.context.spi.Contextual;
 
 import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
 
 /**
  * The application scope value
@@ -50,6 +48,7 @@ public class ApplicationScope extends AbstractScopeContext {
    */
   public ApplicationScope()
   {
+    Environment.addCloseListener(_context);
   }
 
   /**

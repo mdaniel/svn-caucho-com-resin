@@ -99,10 +99,10 @@ public class ScopeAdapter {
     
   }
   
-  public <X> X wrap(InjectManager manager, Bean<X> comp)
+  public <X> X wrap(InjectManager.ReferenceFactory<X> factory)
   {
     try {
-      Object v = _proxyCtor.newInstance(manager, comp);
+      Object v = _proxyCtor.newInstance(factory);
       return (X) v;
     } catch (Exception e) {
       throw ConfigException.create(e);
@@ -125,8 +125,9 @@ public class ScopeAdapter {
         throw new ConfigException(L.l("'{0}' does not have a zero-arg public or protected constructor.  Scope adapter components need a zero-arg constructor, e.g. @RequestScoped stored in @ApplicationScoped.",
                                       cl.getName()));
       }
-      
-      zeroCtor.setAccessible(true);
+
+      if (zeroCtor != null)
+        zeroCtor.setAccessible(true);
       
       String typeClassName = cl.getName().replace('.', '/');
       
@@ -179,19 +180,14 @@ public class ScopeAdapter {
         
         jClass.addInterface(ScopeProxy.class.getName().replace('.', '/'));
 
-        JavaField managerField =
-          jClass.createField("_manager",
-                             "Lcom/caucho/config/inject/InjectManager;");
-        managerField.setAccessFlags(Modifier.PRIVATE);
-
-        JavaField beanField =
-          jClass.createField("_bean", "Ljavax/enterprise/inject/spi/Bean;");
-        beanField.setAccessFlags(Modifier.PRIVATE);
+        JavaField factoryField =
+          jClass.createField("_factory",
+                             "Lcom/caucho/config/inject/InjectManager$ReferenceFactory;");
+        factoryField.setAccessFlags(Modifier.PRIVATE);
 
         JavaMethod ctor =
           jClass.createMethod("<init>",
-                              "(Lcom/caucho/config/inject/InjectManager;"
-                                  + "Ljavax/enterprise/inject/spi/Bean;)V");
+                              "(Lcom/caucho/config/inject/InjectManager$ReferenceFactory;)V");
         ctor.setAccessFlags(Modifier.PUBLIC);
 
         CodeWriterAttribute code = ctor.createCodeWriter();
@@ -202,12 +198,8 @@ public class ScopeAdapter {
         code.invokespecial(superClassName, "<init>", "()V", 1, 0);
         code.pushObjectVar(0);
         code.pushObjectVar(1);
-        code.putField(thisClassName, managerField.getName(), managerField
-            .getDescriptor());
-        code.pushObjectVar(0);
-        code.pushObjectVar(2);
-        code.putField(thisClassName, beanField.getName(), beanField
-            .getDescriptor());
+        code.putField(thisClassName, factoryField.getName(),
+                      factoryField.getDescriptor());
         code.addReturn();
         code.close();
         
@@ -273,17 +265,16 @@ public class ScopeAdapter {
     code.setMaxStack(3 + 2 * parameterTypes.length);
 
     code.pushObjectVar(0);
-    code.getField(jClass.getThisClass(), "_manager",
-                  "Lcom/caucho/config/inject/InjectManager;");
+    code.getField(jClass.getThisClass(), "_factory",
+                  "Lcom/caucho/config/inject/InjectManager$ReferenceFactory;");
+    
+    code.pushNull();
+    code.pushNull();
 
-    code.pushObjectVar(0);
-    code.getField(jClass.getThisClass(), "_bean",
-                  "Ljavax/enterprise/inject/spi/Bean;");
-
-    code.invoke("com/caucho/config/inject/InjectManager",
-                "getInstance",
-                "(Ljavax/enterprise/inject/spi/Bean;)Ljava/lang/Object;",
-                1, 1);
+    code.invoke("com/caucho/config/inject/InjectManager$ReferenceFactory",
+                "create",
+                "(Lcom/caucho/config/inject/CreationalContextImpl;Ljavax/enterprise/inject/spi/InjectionPoint;)Ljava/lang/Object;",
+                3, 1);
 
     code.cast(method.getDeclaringClass().getName().replace('.', '/'));
 
@@ -373,17 +364,16 @@ public class ScopeAdapter {
     code.setMaxStack(3);
 
     code.pushObjectVar(0);
-    code.getField(jClass.getThisClass(), "_manager",
-                  "Lcom/caucho/config/inject/InjectManager;");
+    code.getField(jClass.getThisClass(), "_factory",
+                  "Lcom/caucho/config/inject/InjectManager$ReferenceFactory;");
 
-    code.pushObjectVar(0);
-    code.getField(jClass.getThisClass(), "_bean",
-                  "Ljavax/enterprise/inject/spi/Bean;");
+    code.pushNull();
+    code.pushNull();
 
-    code.invoke("com/caucho/config/inject/InjectManager",
-                "getInstance",
-                "(Ljavax/enterprise/inject/spi/Bean;)Ljava/lang/Object;",
-                1, 1);
+    code.invoke("com/caucho/config/inject/InjectManager$ReferenceFactory",
+                "create",
+                "(Lcom/caucho/config/inject/CreationalContextImpl;Ljavax/enterprise/inject/spi/InjectionPoint;)Ljava/lang/Object;",
+                3, 1);
 
     code.addObjectReturn();
 

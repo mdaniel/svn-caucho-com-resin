@@ -96,45 +96,24 @@ public class CandiContextResolver extends ELResolver {
 
     String name = (String) property;
 
-    InjectManager webBeans = _injectManager;
+    InjectManager manager = _injectManager;
 
-    if (webBeans == null) {
-      webBeans = InjectManager.getCurrent();
+    if (manager == null) {
+      manager = InjectManager.getCurrent();
       
-      if (webBeans == null)
+      if (manager == null)
         return null;
     }
 
-    Set<Bean<?>> beans = webBeans.getBeans(name);
-
-    if (beans.size() == 0)
-      return null;
-
-    Bean<?> bean = webBeans.resolve(beans);
-    
     XmlConfigContext env = XmlConfigContext.getCurrent();
     
-    CreationalContext<?> cxt = null;
+    CreationalContextImpl<?> cxt = null;
     
     if (env != null) {
-      cxt = env.getCreationalContext();
-      
-      if (cxt instanceof CreationalContextImpl<?>) {
-        CreationalContextImpl<?> cxtImpl = (CreationalContextImpl<?>) cxt;
-        
-        Object value = cxtImpl.get(bean);
-        
-        if (value != null)
-          return value;
-      }
-      
-      cxt = new CreationalContextImpl(bean, cxt);
-    }
-    else {
-      cxt = new CreationalContextImpl(bean, null);
+      cxt = (CreationalContextImpl<?>) env.getCreationalContext();
     }
     
-    Object result = webBeans.getReference(bean, bean.getBeanClass(), cxt);
+    Object result = manager.getReference(name, cxt);
 
     if (result != null) {
       context.setPropertyResolved(true);

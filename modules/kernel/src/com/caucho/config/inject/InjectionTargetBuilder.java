@@ -47,6 +47,7 @@ import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AmbiguousResolutionException;
 import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.UnsatisfiedResolutionException;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedField;
@@ -219,10 +220,9 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   @Override
   public void dispose(X instance)
   {
-
     if (_producer == null)
       getInjectionPoints();
-    
+System.out.println("DISPOSE: " + instance);    
     _producer.dispose(instance);
   }
 
@@ -581,7 +581,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     
     ConfigProgram []injectProgram = new ConfigProgram[injectProgramList.size()];
     injectProgramList.toArray(injectProgram);
-    
+
     return injectProgram;
   }
   
@@ -735,8 +735,22 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       _ip = ip;
       
       InjectManager beanManager = getBeanManager();
+
+      try {
+        _fieldFactory = beanManager.getReferenceFactory(_ip);
+      } catch (AmbiguousResolutionException e) {
+        String loc = _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
+        
+        throw new AmbiguousResolutionException(loc + e.getMessage(), e);
+      } catch (UnsatisfiedResolutionException e) {
+        String loc = _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
+        
+        throw new UnsatisfiedResolutionException(loc + e.getMessage(), e);
+      } catch (InjectionException e) {
+        String loc = _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
       
-      _fieldFactory = beanManager.getReferenceFactory(_ip);
+        throw new InjectionException(loc + e.getMessage(), e);
+      }
     }
 
     @Override
@@ -752,7 +766,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         
         // server/30i1 vs ioc/0155
         Object value = _fieldFactory.create(env, _ip);
-
+        
         _field.set(instance, value);
       } catch (AmbiguousResolutionException e) {
         throw new AmbiguousResolutionException(getFieldName(_field) + e.getMessage(), e);
@@ -766,6 +780,11 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     private String getFieldName(Field field)
     {
       return field.getDeclaringClass().getSimpleName() + "." + field.getName() + ": ";
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _field + "]";
     }
   }
 

@@ -50,6 +50,7 @@ public class SingletonScope extends AbstractScopeContext {
    */
   public SingletonScope()
   {
+    Environment.addCloseListener(_context);
   }
 
   /**

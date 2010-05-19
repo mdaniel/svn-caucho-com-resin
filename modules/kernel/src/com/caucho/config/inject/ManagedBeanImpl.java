@@ -204,7 +204,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
       if (value == null) {
         ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
-        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), topBean);
+        _scopeAdapter = scopeAdapter.wrap(getBeanManager().createNormalInstanceFactory(topBean));
         value = _scopeAdapter;
       }
 
@@ -232,7 +232,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
     if (value == null) {
       ScopeAdapter scopeAdapter = ScopeAdapter.create(getTargetClass());
-      _scopeAdapter = scopeAdapter.wrap(getBeanManager(), this);
+      _scopeAdapter = scopeAdapter.wrap(getBeanManager().createNormalInstanceFactory(this));
       value = _scopeAdapter;
     }
 

@@ -39,6 +39,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.Decorator;
@@ -111,11 +112,10 @@ public class InterceptorFactory<X>
     
     if (method.isAnnotationPresent(Inject.class))
       return super.create(method, isEnhanced);
-    
-    /*
+
+    // ioc/0c57
     if (method.isAnnotationPresent(PostConstruct.class))
       return super.create(method, isEnhanced);
-      */
     
     HashSet<Class<?>> methodInterceptors = null;
 

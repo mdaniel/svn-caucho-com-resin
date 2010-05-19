@@ -59,7 +59,6 @@ import com.caucho.loader.EnvironmentEnhancerListener;
 import com.caucho.loader.EnvironmentLocal;
 import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanListener;
-import com.caucho.loader.enhancer.ScanMatch;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.IoUtil;
 import com.caucho.vfs.Path;
@@ -247,12 +246,12 @@ public class ManagerPersistence
   public void configurePersistenceRoots()
   {
     ArrayList<Path> rootList = new ArrayList<Path>();
-    
+
     synchronized (_pendingRootList) {
       rootList.addAll(_pendingRootList);
       _pendingRootList.clear();
     }
-    
+
     for (Path root : rootList) {
       parsePersistenceConfig(root);
     }
@@ -264,6 +263,11 @@ public class ManagerPersistence
   private void parsePersistenceConfig(Path root)
   {
     Path persistenceXml = root.lookup("META-INF/persistence.xml");
+    
+    if (root.getFullPath().endsWith("WEB-INF/classes/")
+        && ! persistenceXml.canRead()) {
+      persistenceXml = root.lookup("../persistence.xml");
+    }
 
     if (! persistenceXml.canRead())
       return;
@@ -533,7 +537,9 @@ public class ManagerPersistence
   @Override
   public boolean isRootScannable(Path root, String packageRoot)
   {
-    if (root.lookup("META-INF/persistence.xml").canRead()) {
+    if (root.lookup("META-INF/persistence.xml").canRead()
+        || (root.getFullPath().endsWith("WEB-INF/classes/")
+            && root.lookup("../persistence.xml").canRead())) {
       _pendingRootList.add(root);
     }
 

@@ -231,7 +231,7 @@ public final class InjectManager
 
   private HashMap<String,ArrayList<Bean<?>>> _namedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
-
+  
   private ConcurrentHashMap<Class<?>,ObserverMap> _observerMap
     = new ConcurrentHashMap<Class<?>,ObserverMap>();
 
@@ -883,7 +883,11 @@ public final class InjectManager
    */
   public <T> InjectionTarget<T> createInjectionTarget(Class<T> type)
   {
-    return createInjectionTarget(createAnnotatedType(type));
+    try {
+      return createInjectionTarget(createAnnotatedType(type));
+    } catch (Exception e) {
+      throw ConfigException.createConfig(e);
+    }
   }
 
   /**
@@ -1143,7 +1147,7 @@ public final class InjectManager
     }
     else if (Event.class.equals(rawType)) {
       if (baseType.isGenericRaw())
-        throw new ConfigException(L.l("Event must have parameters because a non-parameterized Event would observe no events."));
+        throw new InjectionException(L.l("Event must have parameters because a non-parameterized Event would observe no events."));
                                       
       BaseType []param = baseType.getParameters();
 
@@ -1452,6 +1456,22 @@ public final class InjectManager
   }
 
   /**
+   * Convenience-class for Resin.
+   */
+  public <T> T getReference(String name, CreationalContextImpl parentEnv)
+  {
+    Set<Bean<?>> beans = getBeans(name);
+    Bean<T> bean = (Bean<T>) resolve(beans);
+
+    if (bean == null)
+      return null;
+
+    ReferenceFactory<T> factory = getReferenceFactory(bean);
+
+    return factory.create(parentEnv, null);
+  }
+
+  /**
    * Returns an instance for the given bean.  This method will obey
    * the scope of the bean, so a singleton will return the single bean.
    *
@@ -1563,11 +1583,42 @@ public final class InjectManager
       throw new InjectionException(L.l("Bean has an unknown scope '{0}' for bean {1}",
                                        scopeType, bean));
     
+    if (isNormalScope(scopeType) && bean instanceof ScopeAdapterBean<?>) {
+      ScopeAdapterBean<T> scopeAdapterBean = (ScopeAdapterBean<T>) bean;
+      
+      return new NormalContextReferenceFactory<T>(bean, scopeAdapterBean, context);
+    }
+    else
+      return new ContextReferenceFactory<T>(bean, context);
+  }
+  
+  public <T> ReferenceFactory<T> createNormalInstanceFactory(Bean<T> bean)
+  {
+    Class<? extends Annotation> scopeType = bean.getScope();
+
+    if (! isNormalScope(scopeType)) {
+      throw new IllegalStateException(L.l("{0} is an invalid normal scopr for {1}",
+                                          scopeType, bean));
+    }
+
+    InjectManager ownerManager;
+
+    if (bean instanceof AbstractBean<?>)
+      ownerManager = ((AbstractBean<?>) bean).getBeanManager();
+    else
+      ownerManager = this;
+
+    Context context = ownerManager.getContextImpl(scopeType);
+
+    if (context == null)
+      throw new InjectionException(L.l("Bean has an unknown scope '{0}' for bean {1}",
+                                       scopeType, bean));
+
     return new ContextReferenceFactory<T>(bean, context);
   }
 
   private RuntimeException unsatisfiedException(Type type,
-                                                Annotation []bindings)
+                                                Annotation []qualifiers)
   {
     WebComponent component = getWebComponent(createTargetBaseType(type));
 
@@ -1583,9 +1634,9 @@ public final class InjectManager
                                                      type, this));
       }
       else {
-        return new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans match the type and bindings {1}.\nBeans:{2}",
+        return new UnsatisfiedResolutionException(L.l("Can't find a bean for '{0}' because no beans match the type and qualifiers {1}.\nBeans:{2}",
                                                       type,
-                                                      toList(bindings),
+                                                      toList(qualifiers),
                                                       listToLines(enabledList)));
       }
     }
@@ -3697,7 +3748,7 @@ public final class InjectManager
       instance = bean.create(env);
       
       if (parentEnv == null)
-        env.release();
+        bean.destroy(instance, env);
       
       return instance;
     }
@@ -3727,8 +3778,9 @@ public final class InjectManager
       
       instance = bean.createDependent(env);
       
-      if (parentEnv == null)
-        env.release();
+      if (parentEnv == null) {
+        bean.destroy(instance, env);
+      }
       
       return instance;
     }
@@ -3762,6 +3814,28 @@ public final class InjectManager
       instance = _context.get(bean, env);
       
       return instance;
+    }
+  }
+  
+  public class NormalContextReferenceFactory<T> extends ReferenceFactory<T> {
+    private Bean<T> _bean;
+    private ScopeAdapterBean<T> _scopeAdapterBean;
+    private Context _context;
+    
+    NormalContextReferenceFactory(Bean<T> bean,
+                                  ScopeAdapterBean<T> scopeAdapterBean,
+                                  Context context)
+    {
+      _bean = bean;
+      _scopeAdapterBean = scopeAdapterBean;
+      _context = context;
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      return _scopeAdapterBean.getScopeAdapter(_bean, null); // parentEnv);
     }
   }
 

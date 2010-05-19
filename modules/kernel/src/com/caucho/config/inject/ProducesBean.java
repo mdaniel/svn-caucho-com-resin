@@ -91,7 +91,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     _disposesMethod = disposesMethod;
     _producesArgs = producesArgs;
     _disposesArgs = disposesArgs;
-
     
     if (producesMethod != null)
       producesMethod.getJavaMember().setAccessible(true);
@@ -182,7 +181,11 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   @Override
   public T create(CreationalContext<T> createEnv)
   {
-    return produce(createEnv);
+    T value = produce(createEnv);
+    
+    createEnv.push(value);
+    
+    return value;
   }
 
   @Override
@@ -301,7 +304,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
       if (value == null) {
         ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
-        _scopeAdapter = scopeAdapter.wrap(getBeanManager(), topBean);
+        _scopeAdapter = scopeAdapter.wrap(getBeanManager().createNormalInstanceFactory(topBean));
         value = _scopeAdapter;
       }
 

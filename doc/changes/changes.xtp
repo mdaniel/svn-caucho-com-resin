@@ -13,7 +13,7 @@
 
 <s2 title="4.0.7 - snapshot">
 <ul>
-<li>network: keepalive-timeout was incorrectly applied to initial read</li>
+<li>network: keepalive-timeout was incorrectly applied to initial read (#4001, rep by Jamie Novak)</li>
 <li>quercus: WWW-Authenticate does not work (#4000, rep by hm2k)</li>
 <li>quercus: NullPointerException in Alarm (after Glassfish redeploy) (#3711, rep by ashamash)</li>
 <li>quercus: quercus-4.0.6.war incorrect version reporting (#4033)</li>

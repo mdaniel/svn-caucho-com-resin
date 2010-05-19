@@ -221,6 +221,7 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
   {
     CreationalContextImpl<?> next = _next;
     _next = null;
+    _value = null;
     
     if (next != null)
       next.releaseImpl();
