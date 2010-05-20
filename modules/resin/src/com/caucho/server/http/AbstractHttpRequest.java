@@ -1191,14 +1191,18 @@ public abstract class AbstractHttpRequest
   protected void skip()
     throws IOException
   {
-    if (! _hasReadStream) {
-      if (! initStream(_readStream, _rawRead))
-        return;
+    try {
+      if (! _hasReadStream) {
+        if (! initStream(_readStream, _rawRead))
+          return;
 
-      _hasReadStream = true;
-    }
+        _hasReadStream = true;
+      }
 
-    while ((_readStream.skip(8192) > 0)) {
+      while ((_readStream.skip(8192) > 0)) {
+      }
+    } catch (ClientDisconnectException e) {
+      log.log(Level.FINER, e.toString(), e);
     }
   }
 

@@ -29,7 +29,10 @@
 
 package javax.persistence;
 
+import javax.persistence.spi.LoadState;
 import javax.persistence.spi.PersistenceProvider;
+import javax.persistence.spi.ProviderUtil;
+
 import java.io.InputStream;
 import java.net.URL;
 import java.util.ArrayList;
@@ -109,9 +112,7 @@ public class Persistence {
   
   public static PersistenceUtil getPersistenceUtil()
   {
-    // XXX:
-    
-    throw new UnsupportedOperationException();
+    return new PersistenceUtilImpl(getProviderList());
   }
 
   private static PersistenceProvider []getProviderList()
@@ -183,7 +184,7 @@ public class Persistence {
 
           String className = sb.toString();
 
-          Class cl = Class.forName(className, false, loader);
+          Class<?> cl = Class.forName(className, false, loader);
 
           return (PersistenceProvider) cl.newInstance();
         }
@@ -199,5 +200,69 @@ public class Persistence {
     }
 
     return null;
+  }
+  
+  private static class PersistenceUtilImpl implements PersistenceUtil {
+    private PersistenceProvider []_providerList;
+    
+    PersistenceUtilImpl(PersistenceProvider []providerList)
+    {
+      _providerList = providerList;
+    }
+
+    @Override
+    public boolean isLoaded(Object entity, String attributeName)
+    {
+      for (PersistenceProvider provider : _providerList) {
+        try {
+          ProviderUtil util = provider.getProviderUtil();
+      
+          if (util != null) {
+            LoadState state = util.isLoadedWithoutReference(entity, attributeName);
+          
+            if (state == LoadState.LOADED)
+              return true;
+            else if (state == LoadState.NOT_LOADED)
+              return false;
+          }
+        } catch (Exception e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        } catch (AbstractMethodError e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        }
+      }
+      
+      return false;
+    }
+
+    @Override
+    public boolean isLoaded(Object entity)
+    {
+      for (PersistenceProvider provider : _providerList) {
+        try {
+          ProviderUtil util = provider.getProviderUtil();
+      
+          if (util != null) {
+            LoadState state = util.isLoaded(entity);
+          
+            if (state == LoadState.LOADED)
+              return true;
+            else if (state == LoadState.NOT_LOADED)
+              return false;
+          }
+        } catch (AbstractMethodError e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        } catch (Exception e) {
+          log.log(Level.FINER, provider + ": " + e.toString(), e);
+        }
+      }
+      
+      return false;
+    }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[]";
+    }
   }
 }

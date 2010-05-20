@@ -1004,13 +1004,13 @@ public class TcpSocketLink extends AbstractSocketLink
     try {
       getWriteStream().close();
     } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     }
 
     try {
       getReadStream().close();
     } catch (Throwable e) {
-      log.log(Level.FINE, e.toString(), e);
+      log.log(Level.FINER, e.toString(), e);
     }
 
     if (socket != null) {
@@ -1019,7 +1019,7 @@ public class TcpSocketLink extends AbstractSocketLink
       try {
         socket.close();
       } catch (Throwable e) {
-        log.log(Level.FINE, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
       }
     }
   }

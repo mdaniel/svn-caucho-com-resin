@@ -1646,9 +1646,6 @@ public class HmuxRequest extends AbstractHttpRequest
 
     if (writer != null)
       writer.close();
-
-    if (_bufferStartOffset > 0 || _rawWrite.getBufferOffset() > 0)
-      Thread.dumpStack();
   }
 
   protected String getRequestId()

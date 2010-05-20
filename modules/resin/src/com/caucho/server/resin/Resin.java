@@ -581,6 +581,11 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     else
       return "";
   }
+  
+  protected NetworkServer getNetworkServer()
+  {
+    return _networkServer;
+  }
 
   /**
    * Sets the server id.
@@ -1660,7 +1665,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
     */
   }
 
-  protected void dumpHeapOnExit()
+  public void dumpHeapOnExit()
   {
 
   }
