@@ -42,8 +42,8 @@ import com.caucho.bam.RemoteConnectionFailedException;
 import com.caucho.bam.SimpleActorClient;
 import com.caucho.hemp.broker.HempMemoryQueue;
 import com.caucho.remote.websocket.WebSocketClient;
-import com.caucho.servlet.JanusContext;
-import com.caucho.servlet.JanusListener;
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
 
 /**
  * HMTP client protocol
@@ -58,7 +58,7 @@ public class HmtpClient extends SimpleActorClient {
   private String _jid;
 
   private WebSocketClient _webSocketClient;
-  private JanusListener _webSocketHandler;
+  private WebSocketListener _webSocketHandler;
 
   private ActorException _connException;
 
@@ -69,7 +69,7 @@ public class HmtpClient extends SimpleActorClient {
     _url = url;
     
     _webSocketClient = new WebSocketClient(url);
-    _webSocketHandler = new WebSocketHandler();
+    _webSocketHandler = new HmtpWebSocketHandler();
   }
 
   public HmtpClient(String url, ActorStream actorStream)
@@ -219,35 +219,35 @@ public class HmtpClient extends SimpleActorClient {
     close();
   }
   
-  class WebSocketHandler implements JanusListener {
+  class HmtpWebSocketHandler implements WebSocketListener {
     private HmtpReader _in;
     private HmtpWriter _out;
     
     @Override
-    public void onStart(JanusContext context) throws IOException
+    public void onStart(WebSocketContext context) throws IOException
     {
-      _out = new HmtpWriter(context.openMessageOutputStream());
+      _out = new HmtpWriter(context.getOutputStream());
       setLinkStream(new HempMemoryQueue(_out, getActorStream(), 1));
       
-      _in = new HmtpReader(context.openMessageInputStream());
+      _in = new HmtpReader(context.getInputStream());
     }
 
     @Override
-    public void onMessage(JanusContext context) throws IOException
+    public void onRead(WebSocketContext context) throws IOException
     {
-      InputStream is = context.openMessageInputStream();
+      InputStream is = context.getInputStream();
       
       while (_in.readPacket(getActorStream()) && is.available() > 0) {
       }
     }
 
     @Override
-    public void onComplete(JanusContext context) throws IOException
+    public void onComplete(WebSocketContext context) throws IOException
     {
     }
 
     @Override
-    public void onTimeout(JanusContext context) throws IOException
+    public void onTimeout(WebSocketContext context) throws IOException
     {
     }    
   }
