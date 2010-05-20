@@ -13,6 +13,10 @@
 
 <s2 title="4.0.7 - snapshot">
 <ul>
+<li>init.d: added "status" to init.d/resin (#3841, rep by Matt Pangaro)</li>
+<li>init.d: test for log_daemon_msg directly (#3932, #4012)</li>
+<li>proxy-cache: no longer disable cache on exception (#3957, rep by Dave Hintemeyer)</li>
+<li>rewrite: add &lt;resin:IfMBeanEnabled> (#4042, rep by stbu)</li>
 <li>rewrite: add &lt;resin:MovedPermanently> (#4023)</li>
 <li>ssl: jsse doesn't understand Socket.shutdownOutput (#4030, rep by Martin Morawetz)</li>
 <li>jpa: Persistence.getPersistenceUtil() (#4038, rep by Kaj Hejer)</li>

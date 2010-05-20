@@ -147,4 +147,9 @@ public class MessageDrivenContextImpl extends AbstractContext
       throw new EJBException(e);
     }
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _server.getAnnotatedType().getJavaClass() + "]"; 
+  }
 }

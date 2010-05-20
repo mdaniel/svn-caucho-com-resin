@@ -176,6 +176,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   
   private <T> void createContext(Class<T> api)
   {
+    if (_contextMap.get(api) != null)
+      throw new IllegalStateException(String.valueOf(api));
+    
     AbstractSessionContext<X,T> context = createSessionContext(api);
     
     InjectManager injectManager = context.getInjectManager();
@@ -185,7 +188,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   
     context.setDeclaredRoles(_declaredRoles);
 
-    injectManager.addBean(factory.singleton(context));
+    // XXX: separate additions?
+    if (injectManager.getBeans(SessionContext.class).size() == 0)
+      injectManager.addBean(factory.singleton(context));
    
     _contextMap.put(context.getApi(), context);
     

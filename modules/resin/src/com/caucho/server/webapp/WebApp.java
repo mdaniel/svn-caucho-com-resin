@@ -2974,7 +2974,7 @@ public class WebApp extends ServletContextImpl
       _invocationDependency.clearModified();
       _classLoader.clearModified();
 
-      String serverId = (String) new EnvironmentLocal("caucho.server-id").get();
+      String serverId = Server.getCurrent().getServerId();
       if (serverId != null)
         setAttribute("caucho.server-id", serverId);
 
@@ -2996,9 +2996,6 @@ public class WebApp extends ServletContextImpl
 
       callInitializers();
 
-      //Servlet 3.0
-      initAnnotated();
-
       ServletContextEvent event = new ServletContextEvent(this);
 
       for (ListenerConfig listener : _listeners) {
@@ -3018,6 +3015,9 @@ public class WebApp extends ServletContextImpl
           log.log(Level.WARNING, e.toString(), e);
         }
       }
+      
+      //Servlet 3.0
+      initAnnotated();
 
       try {
         _filterManager.init();

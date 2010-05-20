@@ -36,7 +36,6 @@ import java.util.concurrent.TimeUnit;
 import javax.enterprise.inject.spi.Interceptor;
 
 import com.caucho.config.inject.CreationalContextImpl;
-import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;

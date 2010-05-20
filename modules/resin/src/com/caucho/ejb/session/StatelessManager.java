@@ -143,17 +143,6 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     return statelessBean;
   }
 
-  /*
-  @Override
-  protected <T> InjectionTarget<T> createSessionComponent(Class<T> api, 
-                                                          Class<X> beanClass)
-  {
-    StatelessProvider<?> provider = getContext().getProvider();
-
-    return new StatelessComponent(provider, beanClass);
-  }
-  */
-  
   @Override
   protected Class<?> getContextClass()
   {
@@ -207,15 +196,6 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
     super.init();
 
     ArrayList<Class<?>> remoteApiList = getRemoteApiList();
-
-    /*
-    if (remoteApiList.size() > 0) {
-      Class<?> api = remoteApiList.get(0);
-
-      // XXX: concept of unique remote api not correct.
-      _remoteProvider = getContext().getProvider();
-    }
-    */
   }
 
   private void introspect()

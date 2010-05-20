@@ -29,8 +29,8 @@
 
 package com.caucho.remote.websocket;
 
-import com.caucho.servlet.JanusContext;
-import com.caucho.servlet.JanusListener;
+import com.caucho.servlet.WebSocketContext;
+import com.caucho.servlet.WebSocketListener;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -55,7 +55,7 @@ public class WebSocketClient {
   
   private String _virtualHost;
 
-  private JanusListener _listener;
+  private WebSocketListener _listener;
 
   private Socket _s;
   private ReadStream _is;
@@ -75,7 +75,7 @@ public class WebSocketClient {
     _virtualHost = virtualHost;
   }
 
-  public void connect(JanusListener listener)
+  public void connect(WebSocketListener listener)
     throws IOException
   {
     if (listener == null)
@@ -238,14 +238,14 @@ public class WebSocketClient {
     return getClass().getSimpleName() + "[" + _url + "]";
   }
 
-  class ClientContext implements Runnable, JanusContext
+  class ClientContext implements Runnable, WebSocketContext
   {
-    public InputStream openMessageInputStream()
+    public InputStream getInputStream()
     {
       return _is;
     }
 
-    public OutputStream openMessageOutputStream()
+    public OutputStream getOutputStream()
     {
       return _os;
     }
@@ -293,7 +293,7 @@ public class WebSocketClient {
       // _listener.onStart(this);
 
       while (! isClosed() && _is.waitForRead()) {
-        _listener.onMessage(this);
+        _listener.onRead(this);
       }
     }
   }

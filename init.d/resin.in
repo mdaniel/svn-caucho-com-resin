@@ -52,8 +52,10 @@ ARGS="$RESIN_CONF $RESIN_LOG $RESIN_ROOT $SERVER"
 
 if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions
-else
+fi
 
+type log_daemon_msg 1> /dev/null
+if test "$?" != 0; then
   log_daemon_msg () {
       if [ -z "$1" ]; then
           return 1
@@ -107,6 +109,9 @@ case "$1" in
 	fi
 	
 	log_end_msg $?
+	;;
+  status)
+        $JAVA -jar $RESIN_HOME/lib/resin.jar $ARGS status
 	;;
   restart)
 	$0 stop

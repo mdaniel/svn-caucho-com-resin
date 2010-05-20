@@ -146,6 +146,7 @@ public class ByteCodeClassScanner {
       }
 
       int attrCount = readShort(is);
+
       for (int i = 0; i < attrCount; i++) {
         scanClassAttribute(is);
       }
@@ -401,7 +402,7 @@ public class ByteCodeClassScanner {
     is.skip(6);
 
     int attributesCount = readShort(is);
-
+    
     for (int i = 0; i < attributesCount; i++) {
       skipAttribute(is);
     }
@@ -472,17 +473,11 @@ public class ByteCodeClassScanner {
   {
     int typeIndex = readShort(is);
     
-    int n = readShort(is);
-    
-    for (int i = 0; i < n; i++) {
-      is.skip(2);   // int type = readShort(is);
-      int valueCount = readShort(is);
-      
-      for (int j = 0; j < valueCount; j++) {
-        is.skip(2); // int eltIndex = readShort(is);
+    int valueCount = readShort(is);
+    for (int j = 0; j < valueCount; j++) {
+      is.skip(2); // int eltIndex = readShort(is);
         
-        skipElementValue(is);
-      }
+      skipElementValue(is);
     }
     
     return typeIndex;
@@ -491,7 +486,9 @@ public class ByteCodeClassScanner {
   private void skipElementValue(InputStream is)
     throws IOException
   {
-    switch (is.read()) {
+    int code = is.read();
+
+    switch (code) {
     case 'B': case 'C': case 'D': case 'F': case 'I': case 'J':
     case 'S': case 'Z': case 's':
       is.skip(2);
@@ -512,7 +509,7 @@ public class ByteCodeClassScanner {
       }
       return;
     default:
-      return;
+      throw new IllegalStateException("unknown code: " + (char) code);
     }
   }
   

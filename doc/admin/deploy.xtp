@@ -235,7 +235,7 @@ administration:</p>
   &lt;cluster id="">
   
     &lt;resin:RemoteAdminService/>
-    &lt;resin:RemoteDeploy/>
+    &lt;resin:DeployService/>
 
     ...
   &lt;/cluster>

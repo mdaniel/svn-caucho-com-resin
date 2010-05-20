@@ -1316,8 +1316,9 @@ public final class InjectManager
 
     if (secondBean == null)
       return bestBean;
-    else
+    else {
       throw ambiguousException(beans, bestPriority);
+    }
   }
   
   private void validate(Type type)

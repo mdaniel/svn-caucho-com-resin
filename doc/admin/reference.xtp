@@ -6845,6 +6845,53 @@ Matches if the current time is in an active range configured by cron-style times
 </example>
 </defun>
 
+<defun title="&lt;resin:IfMBeanEnabled>" name="resin:IfMBeanEnabled">
+<javadoc class="com.caucho.rewrite.IfMBeanEnabled"/>
+<description>
+<p>
+  Matches if a MBean is enabled().
+</p>
+</description>
+
+<attributes>
+<tr>
+  <th>Attribute</th>
+  <th>Description</th>
+  <th>Default</th>
+</tr>  
+<tr>
+  <td>name</td>
+  <td>The MBean name.</td>
+  <td>required</td>
+</tr>
+<tr>
+  <td>enabled</td>
+  <td>Sets the default enable/disable value.</td>
+  <td>true</td>
+</tr>
+</attributes>
+
+<p>The mbean name will be something like:</p>
+
+<example title="MBean name for maintenance">
+  resin:type=IfMBeanEnabled,name=my-name,Host=www.example.com,WebApp=/
+</example>  
+
+<p>The following example redirects URLs to a maintenance page if an
+mbean is enabled.</t>
+
+<example title="Redirecting based on an MBean">
+&lt;web-app xmlns="http://caucho.com/ns/resin"
+         xmlns:resin="urn:java:com.caucho.resin">
+
+    &lt;resin:Redirect regexp='^/foo' target='/scheduled-maintenance.jsp'>
+      &lt;resin:IfMBeanEnabled name="maintenance" enabled="false"/>
+    &lt;/resin:Redirect>
+
+&lt;/web-app>
+</example>
+</defun>
+
 <defun title="&lt;resin:IfMethod>" name="resin:IfMethod">
 <javadoc class="com.caucho.rewrite.IfMethod"/>
 <description>

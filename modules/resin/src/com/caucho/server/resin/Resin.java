@@ -412,7 +412,13 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       if (serverName == null || "".equals(serverName))
         serverName = "default";
       
-      Path resinData = getRootDirectory().lookup("resin-data");
+      Path resinData;
+      
+      if (isWatchdog())
+        resinData = getRootDirectory().lookup("watchdog-data");
+      else
+        resinData = getRootDirectory().lookup("resin-data");
+      
       _networkServer = new NetworkServer(serverName,
                                          getRootDirectory(),
                                          resinData.lookup(serverName));
