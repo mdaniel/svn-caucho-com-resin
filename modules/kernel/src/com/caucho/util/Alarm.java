@@ -29,14 +29,13 @@
 
 package com.caucho.util;
 
-import com.caucho.loader.DynamicClassLoader;
-import com.caucho.loader.ClassLoaderListener;
-import com.caucho.quercus.lib.file.Stream;
-
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import com.caucho.loader.ClassLoaderListener;
+import com.caucho.loader.DynamicClassLoader;
 
 /**
  * The alarm class provides a lightweight event scheduler.  This allows
