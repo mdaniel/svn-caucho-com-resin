@@ -75,13 +75,11 @@ public class TestCometServlet extends GenericServlet
     out.println("comet_update(" + count + ");");
     out.println("</script>");
 
-    if (count instanceof Number) {
-      int value = ((Number) count).intValue();
+    Integer iCount = (Integer) count;
 
-      if (value >= 10)
-        return;
-    }
-
-    req.startAsync();
+    if (iCount != null && iCount < 10)
+      req.startAsync();
+    else
+      req.setAttribute("comet.complete", true);
   }
 }

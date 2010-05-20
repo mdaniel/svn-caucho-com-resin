@@ -1773,7 +1773,9 @@ public final class HttpServletRequestImpl extends AbstractCauchoRequest
   @Override
   public boolean isAsyncStarted()
   {
-    return _request.isCometActive();
+    AbstractHttpRequest request = _request;
+    
+    return request != null && request.isCometActive();
   }
 
   /**

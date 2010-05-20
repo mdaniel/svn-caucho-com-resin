@@ -14,23 +14,28 @@ public class CometState {
 
   public boolean isClosed()
   {
-    return _request == null || ! _request.isAsyncStarted();
+    return _request == null;
   }
 
   public boolean wake()
   {
+    if (_request == null || _request.getAttribute("comet.complete") != null)
+      return false;
+
     _request.setAttribute("comet.count", ++_count);
 
     AsyncContext async = _request.getAsyncContext();
 
-    if (_count <= 10 && async != null) {
+    if (async == null)
+      return false;
+    else if (async.getRequest() != null) {
       async.dispatch();
 
-      return ! isClosed();
+      return true;
     }
-    else if (async != null) {
-      async.complete();
-    }
+
+    _request = null;
+    async.complete();
 
     return false;
   }

@@ -31,6 +31,7 @@ package com.caucho.util;
 
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.ClassLoaderListener;
+import com.caucho.quercus.lib.file.Stream;
 
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.locks.LockSupport;
@@ -557,7 +558,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     if (_heapTop < i)
       throw new IllegalStateException();
-
+    
     return (i == 1 && _coordinatorThread != null);
   }
 
@@ -755,6 +756,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
     /**
      * Runs the coordinator task.
      */
+    @Override
     public void run()
     {
       while (true) {
@@ -802,7 +804,6 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
           long now = getCurrentTime();
 
           if (now < next) {
-            Thread.interrupted();
             LockSupport.parkNanos((next - now) * 1000000L);
           }
         } catch (Throwable e) {
@@ -826,8 +827,10 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
 
     try {
       ClassLoader loader = Alarm.class.getClassLoader();
-      
-      if (loader == null || loader == systemLoader) {
+
+      if (loader == null
+          || loader == systemLoader
+          || systemLoader != null && loader == systemLoader.getParent()) {
         alarmThread = new AlarmThread();
         alarmThread.start();
 
@@ -836,6 +839,7 @@ public class Alarm implements ThreadTask, ClassLoaderListener {
       }
     } catch (Throwable e) {
       // should display for security manager issues
+      log.fine("Alarm not started: " + e);
     }
 
     _systemLoader = systemLoader;

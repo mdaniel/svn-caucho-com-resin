@@ -772,6 +772,7 @@ public class ScheduledThreadPool implements ScheduledExecutorService,
         throw new TimeoutException();
     }
 
+    @Override
     public void handleAlarm(Alarm alarm)
     {
       if (_isCancelled || _isDone || _isShutdown)

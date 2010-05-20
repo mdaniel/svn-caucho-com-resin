@@ -66,7 +66,12 @@ public class TimerService implements Runnable {
       for (int i = _stateList.size() - 1; i >= 0; i--) {
         CometState state = _stateList.get(i);
 
-        if (! state.wake()) {
+        try {
+          if (! state.wake()) {
+            _stateList.remove(i);
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
           _stateList.remove(i);
         }
       }
