@@ -13,10 +13,10 @@
 
 <s2 title="4.0.7 - snapshot">
 <ul>
-<li>iis: fixed (2694) - aberrant behaviour of servlets within IIS7</li>
-<li>iis: fixed (3178) - the bug was cutting the data stream off after 20kb</li>
-<li>iis: fixed (3889) - the bug was preventing static content from being served</li>
-<li>iis: fixed (3951) - the bug was preventing use of virtual hosts with ports</li>
+<li>iis: fixed aberrant behaviour of servlets with IIS7 (#2694, rep by mitch)</li>
+<li>iis: fixed bug preventing iis plugin from sending data larger 20kb(#3178, rep gert)</li>
+<li>iis: fixed bug preventing static content from being served by the plugin(#3889)</li>
+<li>iis: fixed bug was preventing use of virtual hosts with ports in IIS + Resin setup(#3951)</li>
 <li>init.d: added "status" to init.d/resin (#3841, rep by Matt Pangaro)</li>
 <li>init.d: test for log_daemon_msg directly (#3932, #4012)</li>
 <li>proxy-cache: no longer disable cache on exception (#3957, rep by Dave Hintemeyer)</li>
