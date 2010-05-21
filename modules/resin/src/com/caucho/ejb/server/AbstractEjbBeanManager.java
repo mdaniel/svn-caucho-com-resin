@@ -46,6 +46,7 @@ import javax.transaction.UserTransaction;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.AroundInvokeConfig;
 import com.caucho.ejb.manager.EjbManager;
@@ -117,6 +118,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   private Bean<X> _component;
 
   private final Lifecycle _lifecycle = new Lifecycle();
+  private InjectManager _ejbInjectManager;
 
   /**
    * Creates a new server container
@@ -135,6 +137,8 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     _loader.setAttribute("caucho.inject", false);
     
     _producer = new EjbInjectionTarget<X>(this, annotatedType);
+    
+    _ejbInjectManager = InjectManager.create(_loader);
   }
 
   /**
@@ -143,6 +147,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   public String getId()
   {
     return _id;
+  }
+
+  public InjectManager getInjectManager()
+  {
+    return _ejbInjectManager;
   }
 
   /**

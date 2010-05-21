@@ -238,7 +238,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     
     AnnotatedType<X> beanType = getAnnotatedType();
 
-    InjectManager beanManager = InjectManager.create();
+    InjectManager moduleBeanManager = InjectManager.create();
 
     Named named = (Named) beanType.getAnnotation(Named.class);
 
@@ -246,7 +246,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     }
 
     ManagedBeanImpl<X> mBean 
-      = beanManager.createManagedBean(getAnnotatedType());
+      = getInjectManager().createManagedBean(getAnnotatedType());
+    
+    moduleBeanManager.addBean(mBean);
 
     Class<?> baseApi = beanType.getJavaClass();
       
@@ -255,18 +257,18 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     if (hasNoInterfaceView()) {
       baseApi = baseApi;
       
-      BaseType sourceApi = beanManager.createSourceBaseType(baseApi);
+      BaseType sourceApi = moduleBeanManager.createSourceBaseType(baseApi);
         
-      apiList.addAll(sourceApi.getTypeClosure(beanManager));
+      apiList.addAll(sourceApi.getTypeClosure(moduleBeanManager));
     }
       
     if (localApiList != null) {
       for (Class<?> api : localApiList) {
         baseApi = api;
           
-        BaseType sourceApi = beanManager.createSourceBaseType(api);
+        BaseType sourceApi = moduleBeanManager.createSourceBaseType(api);
           
-        apiList.addAll(sourceApi.getTypeClosure(beanManager));
+        apiList.addAll(sourceApi.getTypeClosure(moduleBeanManager));
       }
     }
       
@@ -281,16 +283,16 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     _bean = (Bean<X>) createBean(mBean, baseApi, apiList);
       
     ProcessSessionBeanImpl process
-      = new ProcessSessionBeanImpl(beanManager,
+      = new ProcessSessionBeanImpl(moduleBeanManager,
                                    _bean,
                                    mBean.getAnnotatedType(),
                                    getEJBName(),
                                    getSessionBeanType());
 
-    beanManager.addBean(_bean, process);
+    moduleBeanManager.addBean(_bean, process);
 
     for (Class<?> localApi : getLocalApiList()) {
-      registerLocalSession(beanManager, localApi);
+      registerLocalSession(moduleBeanManager, localApi);
     }
   }
   
