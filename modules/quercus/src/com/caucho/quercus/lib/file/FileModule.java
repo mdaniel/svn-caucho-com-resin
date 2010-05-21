@@ -2950,7 +2950,8 @@ public class FileModule extends AbstractQuercusModule {
   /**
    * Creates a temporary file.
    */
-  public static Value tempnam(Env env, Path dir, String prefix)
+  @ReturnNullAsFalse
+  public static String tempnam(Env env, Path dir, String prefix)
   {
     // php/160u
 
@@ -2963,7 +2964,7 @@ public class FileModule extends AbstractQuercusModule {
     catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
-      return BooleanValue.FALSE;
+      return null;
     }
 
     try {
@@ -2973,11 +2974,11 @@ public class FileModule extends AbstractQuercusModule {
 
       env.addCleanup(new RemoveFile(path));
 
-      return env.createString(path.getTail());
+      return path.getNativePath();
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
 
-      return BooleanValue.FALSE;
+      return null;
     }
   }
 
