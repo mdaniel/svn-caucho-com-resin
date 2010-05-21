@@ -11,7 +11,8 @@
 <s1 title="Resin 4.0.7 Overview">
 
 <p>Resin 4.0.7 is an interim CDI/EJB and bug fix release; the following
-release 4.0.8 is planned to be the full CDI TCK completion.</p>
+release 4.0.8 is planned to be the full CDI TCK completion.  People using
+CDI/EJB heavily may want to wait for the 4.0.8 release.</p>
 
 <p>Resin 4.0.7 adds resin:IfMBeanEnabled and resin:MovedPermanently to
 the rewrite rules.</p>

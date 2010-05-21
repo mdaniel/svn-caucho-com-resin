@@ -32,6 +32,8 @@ package com.caucho.config.gen;
 import javax.ejb.Remove;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
@@ -45,6 +47,7 @@ public class XaFactory<X>
   extends AbstractAspectFactory<X>
 {
   private TransactionAttributeType _classXa;
+  private TransactionManagementType _classXaManagement;
   
   public XaFactory(AspectBeanFactory<X> beanFactory,
                    AspectFactory<X> next)
@@ -54,8 +57,14 @@ public class XaFactory<X>
     AnnotatedType<X> beanType = beanFactory.getBeanType();
     TransactionAttribute xa = beanType.getAnnotation(TransactionAttribute.class);
     
+    TransactionManagement xaManagement
+      = beanType.getAnnotation(TransactionManagement.class);
+    
     if (xa != null)
       _classXa = xa.value();
+    
+    if (xaManagement != null)
+      _classXaManagement = xaManagement.value();
   }
   
   /**
@@ -69,6 +78,17 @@ public class XaFactory<X>
     if (method.isAnnotationPresent(Remove.class))
       return super.create(method, isEnhanced);
     
+    TransactionManagement xaManagement
+      = method.getAnnotation(TransactionManagement.class);
+    
+    TransactionManagementType xaManagementType = _classXaManagement;
+    
+    if (xaManagement != null)
+      xaManagementType = xaManagement.value();
+    
+    if (xaManagementType == TransactionManagementType.BEAN)
+      return super.create(method, isEnhanced);
+  
     TransactionAttribute xa = method.getAnnotation(TransactionAttribute.class);
     TransactionAttributeType xaType = _classXa;
     

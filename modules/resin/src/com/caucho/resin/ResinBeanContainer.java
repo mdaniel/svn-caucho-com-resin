@@ -31,6 +31,7 @@ package com.caucho.resin;
 
 import java.lang.annotation.Annotation;
 import java.net.URL;
+import java.util.Enumeration;
 import java.util.Set;
 
 import javax.enterprise.context.RequestScoped;
@@ -43,9 +44,8 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.ejb.EJBServer;
-import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
+import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
@@ -180,6 +180,68 @@ public class ResinBeanContainer
       URL url = new URL(root.getURL());
     
       _classLoader.addScanPackage(url, packageName);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
+  /**
+   * Adds a package in the classpath as module root.
+   * 
+   * @param packageName the name of the package to be treated as a virtual
+   * module root.
+   */
+  public void addPackageModule(String packageName)
+  {
+    try {
+      ClassLoader loader = Thread.currentThread().getContextClassLoader();
+
+      Enumeration<URL> e = loader.getResources(packageName.replace('.', '/'));
+
+      URL bestUrl = null;
+
+      while (e.hasMoreElements()) {
+        URL url = e.nextElement();
+
+        if (bestUrl == null) {
+          bestUrl = url;
+          continue;
+        }
+
+        URL urlA = bestUrl;
+
+        Path pathA = Vfs.lookup(urlA);
+        Path pathB = Vfs.lookup(url);
+
+        for (String name : pathA.list()) {
+          if (name.endsWith(".class")) {
+            bestUrl = urlA;
+            break;
+          }
+        }
+
+        for (String name : pathB.list()) {
+          if (name.endsWith(".class")) {
+            bestUrl = url;
+            break;
+          }
+        }
+      }
+
+      if (bestUrl == null)
+        throw new NullPointerException(packageName);
+
+      Path path = Vfs.lookup(bestUrl);
+
+      String moduleName = path.getNativePath();
+
+      if (moduleName.endsWith(packageName.replace('.', '/'))) {
+        int prefixLength = moduleName.length() - packageName.length();
+        moduleName = moduleName.substring(0, prefixLength);
+      }
+
+      addResourceRoot(path);
+      addPackageModule(moduleName, packageName);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

@@ -2974,7 +2974,13 @@ public class WebApp extends ServletContextImpl
       _invocationDependency.clearModified();
       _classLoader.clearModified();
 
-      String serverId = Server.getCurrent().getServerId();
+      String serverId = null;
+      
+      Server server = Server.getCurrent();
+      
+      if (server != null)
+        serverId = server.getServerId();
+      
       if (serverId != null)
         setAttribute("caucho.server-id", serverId);
 
