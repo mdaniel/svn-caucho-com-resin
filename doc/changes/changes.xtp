@@ -13,6 +13,9 @@
 
 <s2 title="4.0.7 - snapshot">
 <ul>
+<li>iis: fixed bug preventing iis from serving web-apps defined with web-app tag (#3890)</li>
+<li>iis: allow IIS to choose when to use chunked encoding (#3871)</li>
+<li>iis: 64 bit IIS Handler build provided (#3846)</li>
 <li>iis: fixed aberrant behaviour of servlets with IIS7 (#2694, rep by mitch)</li>
 <li>iis: fixed bug preventing iis plugin from sending data larger 20kb(#3178, rep gert)</li>
 <li>iis: fixed bug preventing static content from being served by the plugin(#3889)</li>
