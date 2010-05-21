@@ -6878,7 +6878,7 @@ Matches if the current time is in an active range configured by cron-style times
 </example>  
 
 <p>The following example redirects URLs to a maintenance page if an
-mbean is enabled.</t>
+mbean is enabled.</p>
 
 <example title="Redirecting based on an MBean">
 &lt;web-app xmlns="http://caucho.com/ns/resin"
