@@ -405,9 +405,19 @@ namespace Caucho.IIS
 
       bool isDebugFiner = true;
 
-      String uri = Uri.EscapeUriString(request.RawUrl);
+      String uri = request.Path;
+      uri = Uri.EscapeUriString(uri);
+
       Trace.TraceInformation("Hmux[{0}] >>U:uri {1}->{2}", traceId, request.RawUrl, uri);
       WriteRequestString(ws, HmuxConnection.HMUX_URI, uri, traceId);
+
+      String rawUri = request.RawUrl;
+      int queryIdx = rawUri.IndexOf('?');
+      if (queryIdx > -1 && queryIdx + 1 < rawUri.Length) {
+        String query = rawUri.Substring(queryIdx + 1);
+        Trace.TraceInformation("Hmux[{0}] >>U:query {1}", traceId, query);
+        WriteRequestString(ws, HmuxConnection.CSE_QUERY_STRING, query, traceId);
+      }
 
       Trace.TraceInformation("Hmux[{0}] >>m:method {1}", traceId, request.HttpMethod);
       WriteRequestString(ws, HmuxConnection.HMUX_METHOD, request.HttpMethod, traceId);
