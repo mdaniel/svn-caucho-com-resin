@@ -31,6 +31,7 @@ package com.caucho.ejb.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -99,7 +100,12 @@ public class SessionBeanImpl<X,T>
    */
   public Set<InjectionPoint> getInjectionPoints()
   {
-    return getBean().getInjectionPoints();
+    // ejb/1210
+    // return getBean().getInjectionPoints();
+    
+    HashSet<InjectionPoint> injectionPoints = new HashSet<InjectionPoint>();
+    
+    return injectionPoints;
   }
 
   @Override

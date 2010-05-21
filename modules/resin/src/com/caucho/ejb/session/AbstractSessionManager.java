@@ -248,8 +248,6 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     ManagedBeanImpl<X> mBean 
       = getInjectManager().createManagedBean(getAnnotatedType());
     
-    moduleBeanManager.addBean(mBean);
-
     Class<?> baseApi = beanType.getJavaClass();
       
     Set<Type> apiList = new LinkedHashSet<Type>();

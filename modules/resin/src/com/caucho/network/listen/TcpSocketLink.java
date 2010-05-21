@@ -611,6 +611,8 @@ public class TcpSocketLink extends AbstractSocketLink
     RequestState result = null;
 
     do {
+      result = RequestState.REQUEST;
+      
       if (_port.isClosed()) {
         return RequestState.EXIT;
       }
@@ -1066,7 +1068,7 @@ public class TcpSocketLink extends AbstractSocketLink
         _dbgId = (getClass().getSimpleName() + "[id=" + getId()
                   + "," + serverId + "] ");
       else
-        _dbgId = (getClass().getSimpleName() + "[id=" + getId() + "]");
+        _dbgId = (getClass().getSimpleName() + "[id=" + getId() + "] ");
     }
 
     return _dbgId;
