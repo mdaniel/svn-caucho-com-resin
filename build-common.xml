@@ -1195,6 +1195,7 @@
           overwrite="true">
       <filterset>
         <filter token="JAVA_HOME" value="/usr/lib/jvm/java-6-sun"/>
+        <filter token="JAVA_EXE" value="$JAVA_HOME/bin/java"/>
         <filter token="resin_home" value="/usr/share/resin"/>
         <filter token="resin_root" value="/var/www"/>
         <filter token="resin_log" value="/var/log/resin"/>
