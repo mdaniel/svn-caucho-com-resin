@@ -30,6 +30,7 @@
 package com.caucho.ejb.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -50,6 +51,7 @@ public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
 {
   private AbstractSessionContext<X,T> _context;
   private Set<Annotation> _qualifierSet;
+  private Set<Type> _types;
   
   public SessionRegistrationBean(InjectManager beanManager,
                                  AbstractSessionContext<X,T> context,
@@ -89,5 +91,18 @@ public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
   public void destroy(T instance, CreationalContext<T> env)
   {
     _context.destroyProxy(instance, env);
+  }
+
+  @Override
+  public Set<Type> getTypes()
+  {
+    if (_types == null) {
+      _types = new HashSet<Type>();
+      
+      // ejb/2018
+      _types.add(_context.getApi());
+    }
+    
+    return _types;
   }
 }

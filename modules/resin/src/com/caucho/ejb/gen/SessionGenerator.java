@@ -35,6 +35,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import javax.ejb.LocalBean;
+import javax.ejb.Schedule;
+import javax.ejb.Schedules;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
@@ -282,7 +284,10 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
       
     int modifiers = javaMethod.getModifiers();
 
-    if (! isBusinessMethod(javaMethod) && ! Modifier.isPublic(modifiers))
+    if (! isBusinessMethod(javaMethod) 
+        && ! Modifier.isPublic(modifiers)
+        && (javaMethod.isAnnotationPresent(Schedule.class)
+            || javaMethod.isAnnotationPresent(Schedules.class)))
       addScheduledMethod(apiMethod);
   }
   
