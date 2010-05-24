@@ -949,7 +949,7 @@ r_session-config = element session-config {
      | element cookie-use-context-path { r_boolean-Type })?
 
   & (attribute cookie-path { string }
-     | element cookie-pathdport { string })?
+     | element cookie-path { string })?
 
   & (attribute cookie-port { string }
      | element cookie-port { string })?
