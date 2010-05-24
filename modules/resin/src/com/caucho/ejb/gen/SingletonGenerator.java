@@ -50,9 +50,10 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
 
   public SingletonGenerator(String ejbName, AnnotatedType<X> ejbClass,
                             ArrayList<AnnotatedType<? super X>> localApi,
+                            AnnotatedType<X> localBean,
                             ArrayList<AnnotatedType<? super X>> remoteApi)
   {
-    super(ejbName, ejbClass, localApi, remoteApi, 
+    super(ejbName, ejbClass, localApi, localBean, remoteApi, 
           Singleton.class.getSimpleName());
     
     InjectManager manager = InjectManager.create();

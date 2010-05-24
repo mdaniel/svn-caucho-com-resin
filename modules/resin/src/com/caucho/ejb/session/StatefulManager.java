@@ -29,10 +29,14 @@
 
 package com.caucho.ejb.session;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
@@ -40,10 +44,16 @@ import javax.ejb.NoSuchEJBException;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.Decorator;
 
+import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.CandiEnhancedBean;
+import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.cfg.EjbLazyGenerator;
+import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.inject.SessionBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
@@ -61,12 +71,15 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   
   // XXX: need real lifecycle
   private LruCache<String,StatefulObject> _remoteSessions;
+  
+  private Object _decoratorClass;
+  private List<Decorator<?>> _decoratorBeans;
 
   public StatefulManager(EjbManager ejbContainer,
-			AnnotatedType<X> annotatedType,
-			Class<?> proxyImplClass)
+                         AnnotatedType<X> annotatedType,
+                         EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, annotatedType, proxyImplClass);
+    super(ejbContainer, annotatedType, lazyGenerator);
   }
 
   @Override
@@ -80,7 +93,39 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   {
     return StatefulContext.class;
   }
+  
+  public void bind()
+  {
+    super.bind();
+    
+    Class<?> instanceClass = getProxyImplClass();
 
+    if (instanceClass != null
+        && CandiEnhancedBean.class.isAssignableFrom(instanceClass)) {
+      try {
+        Method method = instanceClass.getMethod("__caucho_decorator_init");
+
+        _decoratorClass = method.invoke(null);
+      
+        Annotation []qualifiers = new Annotation[getBean().getQualifiers().size()];
+        getBean().getQualifiers().toArray(qualifiers);
+        
+        InjectManager moduleBeanManager = InjectManager.create();
+
+        _decoratorBeans = moduleBeanManager.resolveDecorators(getBean().getTypes(), qualifiers);
+      
+        method = instanceClass.getMethod("__caucho_init_decorators",
+                                         List.class);
+        
+      
+        method.invoke(null, _decoratorBeans);
+      } catch (Exception e) {
+        e.printStackTrace();
+        log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+  }
+  
   @Override
   public <T> StatefulContext<X,T> getSessionContext(Class<T> api)
   {
@@ -122,12 +167,27 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
     if (instance instanceof CandiEnhancedBean) {
       CandiEnhancedBean bean = (CandiEnhancedBean) instance;
       
-      Object []delegates = null;
+      Object []delegates = createDelegates((CreationalContextImpl) env);
       
       bean.__caucho_inject(delegates, env);
     }
     
     return instance;
+  }
+  
+  private Object []createDelegates(CreationalContextImpl<?> env)
+  {
+    if (_decoratorBeans != null) {
+      // if (env != null)
+      //   env.setInjectionPoint(oldPoint);
+      
+      return CandiUtil.generateProxyDelegate(getInjectManager(),
+                                             _decoratorBeans,
+                                             _decoratorClass,
+                                             env);
+    }
+    else
+      return null;
   }
 
   @Override
@@ -156,6 +216,20 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   public void addSession(StatefulObject remoteObject)
   {
     createSessionKey(remoteObject);
+  }
+
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  @Override
+  protected BeanGenerator<X> createBeanGenerator()
+  {
+    EjbLazyGenerator<X> lazyGen = getLazyGenerator();
+    
+    return new StatefulGenerator<X>(getEJBName(), getAnnotatedType(),
+                                    lazyGen.getLocalApi(),
+                                    lazyGen.getLocalBean(),
+                                    lazyGen.getRemoteApi());
   }
 
   /**

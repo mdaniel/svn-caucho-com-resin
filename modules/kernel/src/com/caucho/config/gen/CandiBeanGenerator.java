@@ -162,48 +162,6 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
   protected void introspectClass(AnnotatedType<X> cl)
   {
-    /*
-    if (cl.isAnnotationPresent(Interceptor.class)
-        || cl.isAnnotationPresent(Decorator.class)) {
-      return;
-    }
-
-    ArrayList<Annotation> interceptorBindingList
-      = new ArrayList<Annotation>();
-
-    Set<Annotation> xmlInterceptorBindings = getInterceptorBindings();
-
-    if (xmlInterceptorBindings != null) {
-      for (Annotation ann : xmlInterceptorBindings) {
-        interceptorBindingList.add(ann);
-      }
-    }
-    else {
-      for (Annotation ann : cl.getAnnotations()) {
-        Class<?> annType = ann.annotationType();
-
-        if (annType.isAnnotationPresent(Stereotype.class)) {
-          for (Annotation sAnn : ann.annotationType().getAnnotations()) {
-            Class<?> sAnnType = sAnn.annotationType();
-
-            if (sAnnType.isAnnotationPresent(InterceptorBinding.class)) {
-              interceptorBindingList.add(sAnn);
-            }
-          }
-        }
-
-        if (annType.isAnnotationPresent(InterceptorBinding.class)) {
-          interceptorBindingList.add(ann);
-        }
-      }
-    }
-    */
-
-    /*
-    if (interceptorBindingList.size() > 0) {
-      _view.setInterceptorBindings(interceptorBindingList);
-    }
-    */
   }
 
   private boolean hasTransientInject(Class<?> cl)

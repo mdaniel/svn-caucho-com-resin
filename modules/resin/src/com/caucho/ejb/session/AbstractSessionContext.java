@@ -63,7 +63,6 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     _api = api;
     
     _injectManager = InjectManager.create();
-    _proxyFactory = manager.createProxyFactory(this);
   }
 
   @Override
@@ -85,8 +84,16 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     return _api;
   }
   
+  void bind()
+  {
+    _proxyFactory = _manager.createProxyFactory(this);
+  }
+  
   public T createProxy(CreationalContext<T> env)
   {
+    if (_proxyFactory == null)
+      bind();
+    
     return _proxyFactory.__caucho_createProxy(env);
   }
   

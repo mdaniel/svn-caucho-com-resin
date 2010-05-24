@@ -36,6 +36,7 @@ import com.caucho.server.e_app.EnterpriseApplication;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.naming.NamingException;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -273,11 +274,13 @@ public class EjbProtocolManager {
 
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
 
-      ArrayList<Class> apiList = server.getLocalApiList();
+      ArrayList<AnnotatedType<?>> apiList = server.getLocalApi();
       if (apiList != null && apiList.size() > 0) {
         String jndiName = prefix + "/local";
 
-        Jndi.bindDeep(jndiName, new ServerLocalProxy(server, apiList.get(0)));
+        Class<?> localApi = apiList.get(0).getJavaClass();
+        
+        Jndi.bindDeep(jndiName, new ServerLocalProxy(server, localApi));
 
         log.finer(server + " local binding to '" + jndiName + "' " + loader);
       }
@@ -373,11 +376,11 @@ public class EjbProtocolManager {
         bindPortableJndi(appName, moduleName, suffix, proxy);
       }
 
-      ArrayList<Class> apiList = manager.getLocalApiList();
+      ArrayList<AnnotatedType<?>> apiList = manager.getLocalApi();
 
       if (apiList.size() == 1) {
         String suffix = manager.getEJBName();
-        Class api = apiList.get(0);
+        Class<?> api = apiList.get(0).getJavaClass();
 
         if (proxy == null)
           proxy = new ServerLocalProxy(manager, api); 
@@ -389,11 +392,11 @@ public class EjbProtocolManager {
         bindPortableJndi(appName, moduleName, suffix, proxy);
       }
       else {
-        for (Class api : apiList) {
-          String suffix = manager.getEJBName() + '!' + api.getName();
+        for (AnnotatedType<?> api : apiList) {
+          String suffix = manager.getEJBName() + '!' + api.getJavaClass().getName();
 
           if (proxy == null)
-            proxy = new ServerLocalProxy(manager, api); 
+            proxy = new ServerLocalProxy(manager, api.getJavaClass()); 
 
           bindPortableJndi(appName, moduleName, suffix, proxy);
         }

@@ -58,6 +58,8 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   private boolean _hasNoInterfaceView;
 
   private ArrayList<AnnotatedType<? super X>> _localApi;
+  private AnnotatedType<X> _localBean;
+  
   private ArrayList<AnnotatedType<? super X>> _remoteApi;
   
   private ArrayList<AnnotatedMethod<? super X>> _annotatedMethods
@@ -73,6 +75,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   public SessionGenerator(String ejbName, 
                           AnnotatedType<X> beanType,
                           ArrayList<AnnotatedType<? super X>> localApi,
+                          AnnotatedType<X> localBean,
                           ArrayList<AnnotatedType<? super X>> remoteApi, 
                           String beanTypeName)
   {
@@ -82,6 +85,7 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
     _contextClassName = "dummy";
 
     _localApi = new ArrayList<AnnotatedType<? super X>>(localApi);
+    _localBean = localBean;
 
     _remoteApi = new ArrayList<AnnotatedType<? super X>>(remoteApi);
 
@@ -132,7 +136,8 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
 
   public boolean hasNoInterfaceView()
   {
-    return _hasNoInterfaceView;
+    // return _hasNoInterfaceView;
+    return getLocalBean() != null;
   }
   
   /**
@@ -141,6 +146,11 @@ abstract public class SessionGenerator<X> extends BeanGenerator<X> {
   public ArrayList<AnnotatedType<? super X>> getLocalApi()
   {
     return _localApi;
+  }
+  
+  public AnnotatedType<X> getLocalBean()
+  {
+    return _localBean;
   }
 
   /**

@@ -30,6 +30,7 @@
 package com.caucho.ejb.session;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -41,12 +42,17 @@ import java.util.logging.Logger;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.SessionContext;
+import javax.ejb.Singleton;
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.SessionBeanType;
 import javax.inject.Named;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
@@ -54,11 +60,16 @@ import com.caucho.config.j2ee.BeanName;
 import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.ejb.SessionPool;
+import com.caucho.ejb.cfg.EjbLazyGenerator;
+import com.caucho.ejb.gen.SingletonGenerator;
+import com.caucho.ejb.gen.StatefulGenerator;
+import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.inject.ProcessSessionBeanImpl;
 import com.caucho.ejb.inject.SessionRegistrationBean;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
+import com.caucho.java.gen.JavaClassGenerator;
 
 /**
  * Server container for a session bean.
@@ -67,6 +78,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   private final static Logger log
      = Logger.getLogger(AbstractSessionManager.class.getName());
 
+  private EjbLazyGenerator<X> _lazyGenerator;
+  
   private Class<?> _proxyImplClass;
   private HashMap<Class<?>, AbstractSessionContext<X,?>> _contextMap
     = new HashMap<Class<?>, AbstractSessionContext<X,?>>();
@@ -78,11 +91,11 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
   public AbstractSessionManager(EjbManager manager, 
                                 AnnotatedType<X> annotatedType,
-                                Class<?> proxyImplClass)
+                                EjbLazyGenerator<X> lazyGenerator)
   {
     super(manager, annotatedType);
     
-    _proxyImplClass = proxyImplClass;
+    _lazyGenerator = lazyGenerator;
     
     DeclareRoles declareRoles 
       = annotatedType.getJavaClass().getAnnotation(DeclareRoles.class);
@@ -127,9 +140,21 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     return _proxyImplClass;
   }
   
+  @Override
   public InjectManager getInjectManager()
   {
     return _injectManager;
+  }
+  
+  protected EjbLazyGenerator<X> getLazyGenerator()
+  {
+    return _lazyGenerator;
+  }
+  
+  @Override
+  public ArrayList<AnnotatedType<? super X>> getLocalApi()
+  {
+    return _lazyGenerator.getLocalApi();
   }
 
   @SuppressWarnings("unchecked")
@@ -139,7 +164,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   }
 
   /**
-   * Initialize the server
+   * Initialize the server during the config phase.
    */
   @Override
   public void init() throws Exception
@@ -154,25 +179,90 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       
       _injectManager = InjectManager.create();
 
-      for (Class<?> localApi : getLocalApiList()) {
-        createContext(localApi);
+      for (AnnotatedType<? super X> localApi : _lazyGenerator.getLocalApi()) {
+        createContext(localApi.getJavaClass());
       }
       
-      Class<?> localBean = getLocalBean();
+      AnnotatedType<X> localBean = _lazyGenerator.getLocalBean();
       if (localBean != null)
-        createContext(localBean);
-
-      for (Class<?> remoteApi : getRemoteApiList()) {
-        createContext(remoteApi);
+        createContext(localBean.getJavaClass());
+      
+      for (AnnotatedType<? super X> remoteApi : _lazyGenerator.getRemoteApi()) {
+        createContext(remoteApi.getJavaClass());
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
 
-    registerWebBeans();
+    registerCdiBeans();
 
     log.fine(this + " initialized");
   }
+  
+  public void bind()
+  {
+    try {
+      boolean isAutoCompile = true;
+    
+      BeanGenerator<X> beanGen = createBeanGenerator();
+
+      beanGen.introspect();
+    
+      JavaClassGenerator javaGen = getLazyGenerator().getJavaClassGenerator();
+    
+      String fullClassName = beanGen.getFullClassName();
+
+      if (javaGen.preload(fullClassName) != null) {
+      }
+      else if (isAutoCompile) {
+        javaGen.generate(beanGen);
+
+        /*
+        GenClass genClass = assembleGenerator(fullClassName);
+
+        if (genClass != null)
+          javaGen.generate(genClass);
+        */
+      }
+      
+      javaGen.compilePendingJava();
+      
+      _proxyImplClass = generateProxyClass(fullClassName, javaGen);
+     
+      for (AbstractSessionContext<X,?> cxt : _contextMap.values()) {
+        cxt.bind();
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  protected BeanGenerator<X> createBeanGenerator()
+  {
+    throw new UnsupportedOperationException();
+  }
+  /*
+    AnnotatedType<X> ejbClass = getAnnotatedType();
+
+    // fillClassDefaults(ejbClass);
+
+    if (Stateless.class.equals(getSessionType())) {
+      _sessionBean = new StatelessGenerator<X>(getEJBName(), ejbClass,
+                                               getLocalList(), getRemoteList());
+    } else if (Stateful.class.equals(getSessionType())) {
+      _sessionBean = new StatefulGenerator<X>(getEJBName(), ejbClass,
+                                              getLocalList(), getRemoteList());
+    } else if (Singleton.class.equals(getSessionType())){
+      _sessionBean = new SingletonGenerator<X>(getEJBName(), ejbClass,
+                                               getLocalList(), getRemoteList());
+    }
+
+    return _sessionBean;
+  }
+  */
   
   private <T> void createContext(Class<T> api)
   {
@@ -199,6 +289,26 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     }
     */
   }
+
+  private Class<?> generateProxyClass(String skeletonName,
+                                      JavaClassGenerator javaGen)
+    throws ClassNotFoundException
+  {
+    Class<?> proxyImplClass;
+    
+    Class<?> ejbClass = getAnnotatedType().getJavaClass();
+  
+    if (Modifier.isPublic(ejbClass.getModifiers())) {
+      proxyImplClass = javaGen.loadClass(skeletonName);
+    }
+    else {
+      // ejb/1103
+      proxyImplClass = javaGen.loadClassParentLoader(skeletonName, ejbClass);
+    }
+    // contextImplClass.getDeclaredConstructors();
+    
+    return proxyImplClass;
+  }
   
   @Override
   public <T> T getLocalProxy(Class<T> api)
@@ -216,6 +326,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   createProxyFactory(AbstractSessionContext<X,T> context)
   {
     try {
+      if (_proxyImplClass == null)
+        bind();
+      
       Class<?> []param = new Class[] { getClass(), getContextClass() };
     
       Constructor<?> ctor = _proxyImplClass.getConstructor(param);
@@ -231,9 +344,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     throw new UnsupportedOperationException(getClass().getName());
   }
 
-  private void registerWebBeans()
+  private void registerCdiBeans()
   {
-    ArrayList<Class<?>> localApiList = getLocalApiList();
+    ArrayList<AnnotatedType<? super X>> localApiList = getLocalApi();
     ArrayList<Class<?>> remoteApiList = getRemoteApiList();
     
     AnnotatedType<X> beanType = getAnnotatedType();
@@ -261,10 +374,10 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     }
       
     if (localApiList != null) {
-      for (Class<?> api : localApiList) {
-        baseApi = api;
+      for (AnnotatedType<? super X> api : localApiList) {
+        baseApi = api.getJavaClass();
           
-        BaseType sourceApi = moduleBeanManager.createSourceBaseType(api);
+        BaseType sourceApi = moduleBeanManager.createSourceBaseType(api.getJavaClass());
           
         apiList.addAll(sourceApi.getTypeClosure(moduleBeanManager));
       }
@@ -277,6 +390,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
         baseApi = api;
       }
     }
+    
+    if (baseApi == null)
+      throw new NullPointerException();
 
     _bean = (Bean<X>) createBean(mBean, baseApi, apiList);
       
@@ -289,8 +405,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     moduleBeanManager.addBean(_bean, process);
 
-    for (Class<?> localApi : getLocalApiList()) {
-      registerLocalSession(moduleBeanManager, localApi);
+    for (AnnotatedType<?> localApi : getLocalApi()) {
+      registerLocalSession(moduleBeanManager, localApi.getJavaClass());
     }
   }
   

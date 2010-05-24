@@ -472,11 +472,13 @@ public class EjbConfig {
 
       // Collections.sort(beanConfig, new BeanComparator());
 
+      /*
       for (EjbBean<?> bean : beanConfig) {
         bean.generate(javaGen, _ejbContainer.isAutoCompile());
       }
+      */
 
-      javaGen.compilePendingJava();
+      // javaGen.compilePendingJava();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -544,38 +546,63 @@ public class EjbConfig {
       for (EjbBean<?> bean : beanConfig) {
         if (beanList.contains(bean))
           continue;
-
-        AbstractEjbBeanManager<?> server = initBean(bean, javaGen);
-        ArrayList<String> dependList = bean.getBeanDependList();
-
-        for (String depend : dependList) {
-          for (EjbBean<?> b : beanConfig) {
-            if (bean == b)
-              continue;
-
-            if (depend.equals(b.getEJBName())) {
-              beanList.add(b);
-
-              AbstractEjbBeanManager<?> dependServer = initBean(b, javaGen);
-
-              initResources(b, dependServer);
-
-              thread.setContextClassLoader(server.getClassLoader());
-            }
-          }
-        }
-
-        initResources(bean, server);
+        
+        deployBean(beanConfig, javaGen, beanList, bean);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
   }
-
-  private AbstractEjbBeanManager<?> initBean(EjbBean<?> bean, JavaClassGenerator javaGen)
+  
+  private <X> void deployBean(ArrayList<EjbBean<?>> beanConfig,
+                              JavaClassGenerator javaGen,
+                              ArrayList<EjbBean<?>> beanList,
+                              EjbBean<X> bean)
     throws Exception
   {
-    AbstractEjbBeanManager<?> server = bean.deployServer(_ejbContainer, javaGen);
+    Thread thread = Thread.currentThread();
+    
+    EjbLazyGenerator<X> lazyGenerator
+      = new EjbLazyGenerator<X>(bean.getAnnotatedType(), javaGen,
+                                bean.getLocalList(), bean.getLocalBean(), 
+                                bean.getRemoteList());
+
+    AbstractEjbBeanManager<X> server = initBean(bean, lazyGenerator);
+    
+    _ejbContainer.addServer(server);
+    
+    ArrayList<String> dependList = bean.getBeanDependList();
+
+    for (String depend : dependList) {
+      for (EjbBean<?> b : beanConfig) {
+        if (bean == b)
+          continue;
+
+        // XXX: what test case is this for?
+        if (depend.equals(b.getEJBName())) {
+          beanList.add(b);
+
+          /*
+          AbstractEjbBeanManager<?> dependServer = initBean(b, lazyGenerator);
+
+          initResources(b, dependServer);
+          */
+
+          thread.setContextClassLoader(server.getClassLoader());
+        }
+      }
+    }
+
+    // XXX: 4.0.8 timing issues
+    // initResources(bean, server);
+  }
+
+  private <X> AbstractEjbBeanManager<X>
+  initBean(EjbBean<X> bean,
+           EjbLazyGenerator<X> lazyGenerator)
+    throws Exception
+  {
+    AbstractEjbBeanManager<X> server = bean.deployServer(_ejbContainer, lazyGenerator);
 
     server.init();
 

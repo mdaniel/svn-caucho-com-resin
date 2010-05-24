@@ -54,6 +54,7 @@ import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.Typed;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
@@ -313,8 +314,11 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     introspectQualifiers(annotated);
     introspectName(annotated);
     
-    if (annotated.isAnnotationPresent(Alternative.class))
+    if (annotated.isAnnotationPresent(Alternative.class)
+        && (annotated instanceof AnnotatedType<?>)) {
+      // ioc/0618
       _isAlternative = true;
+    }
     
     introspectStereotypes(annotated);
     introspectSpecializes(annotated);

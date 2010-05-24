@@ -38,6 +38,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.ejb.Local;
+import javax.ejb.LocalBean;
 import javax.ejb.Remote;
 import javax.ejb.Timeout;
 import javax.ejb.TransactionAttribute;
@@ -112,8 +113,10 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   protected ArrayList<AnnotatedType<? super X>> _localList
     = new ArrayList<AnnotatedType<? super X>>();
+  
+  protected AnnotatedType<X> _localBean;
 
-  protected BeanGenerator<X> _bean;
+  // protected BeanGenerator<X> _bean;
 
   private boolean _isAllowPOJO = true;
 
@@ -656,6 +659,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
   {
     return _localList;
   }
+  
+  public AnnotatedType<X> getLocalBean()
+  {
+    return _localBean;
+  }
 
   /**
    * Returns true if the transaction type is container.
@@ -913,15 +921,19 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
       initIntrospect();
       
+      /*
       _bean = createBeanGenerator();
       
       if (_bean == null)
         throw new NullPointerException(getClass().getName() + ": createBeanGenerator returns null");
 
       _bean.introspect();
+      */
 
       // _bean.createViews();
 
+      // XXX: lifecycle refactor
+      /*
       InterceptorBinding interceptor
         = getConfig().getInterceptorBinding(getEJBName(), false);
 
@@ -940,6 +952,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
       for (RemoveMethod method : _removeMethods) {
         method.configure(_bean);
       }
+      */
     } catch (ConfigException e) {
       throw ConfigException.createLine(_location, e);
     }
@@ -1013,6 +1026,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   /**
    * Generates the class.
    */
+  /*
   public void generate(JavaClassGenerator javaGen, boolean isAutoCompile)
     throws Exception
   {
@@ -1022,21 +1036,15 @@ public class EjbBean<X> extends DescriptionGroupConfig
     }
     else if (isAutoCompile) {
       javaGen.generate(_bean);
-
-      /*
-      GenClass genClass = assembleGenerator(fullClassName);
-
-      if (genClass != null)
-        javaGen.generate(genClass);
-      */
     }
   }
+  */
 
   /**
    * Deploys the bean.
    */
   public AbstractEjbBeanManager<X> deployServer(EjbManager ejbContainer,
-                                        JavaClassGenerator javaGen)
+                                                EjbLazyGenerator<X> lazyGenerator)
     throws ClassNotFoundException, ConfigException
   {
     throw new UnsupportedOperationException();
@@ -1460,7 +1468,14 @@ public class EjbBean<X> extends DescriptionGroupConfig
           addLocal(localClass);
         }
       }
-
+      
+      if (type.isAnnotationPresent(LocalBean.class)) {
+        _localBean = type;
+      }
+      
+      if (_localList.size() == 0)
+        _localBean = type;
+      
       Remote remote = type.getAnnotation(Remote.class);
       if (remote != null) {
         for (Class<?> localClass : local.value()) {

@@ -118,7 +118,8 @@ public class ClassType extends BaseType
   public boolean isParamAssignableFrom(BaseType type)
   {
     if (type.isWildcard()) {
-      boolean isMatchBound = false;
+      // ioc/0i3q
+      boolean isMatchBound = true; // false;
 
       for (BaseType bound : type.getWildcardBounds()) {
         // ioc/024d

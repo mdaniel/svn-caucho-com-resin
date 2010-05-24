@@ -41,8 +41,11 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.decorator.Delegate;
 import javax.enterprise.inject.Stereotype;
+import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Decorator;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -191,6 +194,22 @@ public class InterceptorFactory<X>
         || getBeanType().isAnnotationPresent(javax.decorator.Decorator.class)) {
       _isInterceptorOrDecorator = true;
       return;
+    }
+    
+    for (AnnotatedField<? super X> field : getBeanType().getFields()) {
+      if (field.isAnnotationPresent(Delegate.class)) {
+        _isInterceptorOrDecorator = true;
+        return;
+      }
+    }
+    
+    for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
+      for (AnnotatedParameter<? super X> param : method.getParameters()) {
+        if (param.isAnnotationPresent(Delegate.class)) {
+          _isInterceptorOrDecorator = true;
+          return;
+        }
+      }
     }
     
     introspectClassInterceptors();

@@ -11,7 +11,12 @@
 <li><a href="http://caucho.com/resin-3.1/changes/changes.xtp">Resin 3.1 changes</a></li>
 </ul>
 
-<s2 title="4.0.7 - snapshot">
+<s2 title="4.0.8 - snapshot">
+<ul>
+</ul>
+</s2>
+
+<s2 title="4.0.7 - May 21, 2010">
 <ul>
 <li>iis: fixed bug preventing iis from serving web-apps defined with web-app tag (#3890)</li>
 <li>iis: allow IIS to choose when to use chunked encoding (#3871)</li>

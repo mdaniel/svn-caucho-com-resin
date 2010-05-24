@@ -118,6 +118,7 @@ public class PostConstructProgram extends ConfigProgram
       else
 	_init.invoke(bean);
     } catch (Exception e) {
+      e.printStackTrace();
       throw ConfigException.create(_init, e);
     }
   }

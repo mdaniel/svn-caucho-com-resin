@@ -1332,6 +1332,11 @@ public final class InjectManager
   {
     for (InjectionPoint ip : bean.getInjectionPoints()) {
       validate(ip);
+      
+      if (ip.isDelegate() && ! (bean instanceof Decorator))
+        throw new ConfigException(L.l("'{0}' is an invalid delegate because {1} is not a Decorator.",
+                                      ip.getMember().getName(),
+                                      bean));
     }
   }
   
@@ -1339,7 +1344,14 @@ public final class InjectManager
   public void validate(InjectionPoint ij)
   {
     try {
-      getReferenceFactory(ij);
+      if (ij.isDelegate()) {
+        if (! (ij.getBean() instanceof Decorator<?>))
+          throw new ConfigException(L.l("'{0}' is an invalid @Delegate because {1} is not a decorator",
+                                        ij.getMember().getName(), ij.getBean()));
+      }
+      else {
+        getReferenceFactory(ij);
+      }
     } catch (AmbiguousResolutionException e) {
       throw new AmbiguousResolutionException(L.l("{0}.{1}: {2}",
                                        ij.getMember().getDeclaringClass().getName(),
@@ -1747,6 +1759,9 @@ public final class InjectManager
 
   public ReferenceFactory<?> getReferenceFactory(InjectionPoint ij)
   {
+    if (ij.isDelegate())
+      return new DelegateReferenceFactory();
+    
     Type type = ij.getType();
     Set<Annotation> qualifiers = ij.getQualifiers();
 
@@ -1757,6 +1772,9 @@ public final class InjectManager
                                                  Set<Annotation> qualifiers,
                                                  InjectionPoint ij)
   {
+    if (ij != null && ij.isDelegate())
+      return new DelegateReferenceFactory();
+    
     Bean<?> bean = resolveByInjectionPoint(type, qualifiers, ij);
     
     return getReferenceFactory(bean);
@@ -2393,7 +2411,7 @@ public final class InjectManager
    */
   private <X> DecoratorEntry<X> addDecorator(Decorator<X> decorator)
   {
-    BaseType baseType = createSourceBaseType(decorator.getDelegateType());
+    BaseType baseType = createTargetBaseType(decorator.getDelegateType());
 
     DecoratorEntry<X> entry = new DecoratorEntry<X>(this, decorator, baseType);
     
@@ -2491,7 +2509,7 @@ public final class InjectManager
     ArrayList<BaseType> targetTypes = new ArrayList<BaseType>();
     
     for (Type type : types) {
-      targetTypes.add(createTargetBaseType(type));
+      targetTypes.add(createSourceBaseType(type));
     }
 
     for (DecoratorEntry<?> entry : _decoratorList) {
@@ -2641,8 +2659,11 @@ public final class InjectManager
           return;
       }
 
+      // ioc/0619
+      /*
       if (isDisabled(cl))
         return;
+        */
 
       AnnotatedType<?> type = createAnnotatedType(cl);
       
@@ -2781,8 +2802,9 @@ public final class InjectManager
     if (Throwable.class.isAssignableFrom(type.getJavaClass()))
       return;
     
-    if (! isValidSimpleBean(type.getJavaClass()))
+    if (! isValidSimpleBean(type.getJavaClass())) {
       return;
+    }
     
     ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type);
     
@@ -2795,7 +2817,7 @@ public final class InjectManager
     }
 
     target = processInjectionTarget(target);
-
+    
     if (target == null)
       return;
 
@@ -2829,34 +2851,36 @@ public final class InjectManager
 
   private <X> void addDiscoveredBean(ManagedBeanImpl<X> managedBean)
   {
-    if (managedBean.isAlternative() && ! isEnabled(managedBean))
-      return;
-    
     if (! isValidSimpleBean(managedBean.getBeanClass()))
       return;
     
-    addBean(managedBean);
+    if (! managedBean.isAlternative() || isEnabled(managedBean)) {
+      addBean(managedBean);
+
+      for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
+        // observer = processObserver(observer);
+
+        if (observer != null) {
+          Set<Annotation> annSet = observer.getObservedQualifiers();
+
+          Annotation []bindings = new Annotation[annSet.size()];
+          annSet.toArray(bindings);
+
+          BaseType baseType = createSourceBaseType(observer.getObservedType());
+
+          addObserver(observer, baseType, bindings);
+        }
+      }
+    }
     
     for (Bean<?> producerBean : managedBean.getProducerBeans()) {
+      // ioc/0619
+      /*
       if (producerBean.isAlternative() && ! isEnabled(producerBean))
         continue;
+        */
 
       addBean(producerBean);
-    }
-
-    for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
-      // observer = processObserver(observer);
-
-      if (observer != null) {
-        Set<Annotation> annSet = observer.getObservedQualifiers();
-
-        Annotation []bindings = new Annotation[annSet.size()];
-        annSet.toArray(bindings);
-
-        BaseType baseType = createSourceBaseType(observer.getObservedType());
-
-        addObserver(observer, baseType, bindings);
-      }
     }
   }
 
@@ -3798,6 +3822,9 @@ public final class InjectManager
   }
   
   public class ContextReferenceFactory<T> extends ReferenceFactory<T> {
+    private ThreadLocal<CreationalContextImpl<T>> _threadLocal
+      = new ThreadLocal<CreationalContextImpl<T>>();
+    
     private Bean<T> _bean;
     private Context _context;
     
@@ -3819,12 +3846,30 @@ public final class InjectManager
       if (instance != null)
         return instance;
       
-      CreationalContextImpl<T> env
-        = new CreationalContextImpl<T>(bean, parentEnv, ip);
+      // ioc/0155
+      // XXX: possibly restrict to NormalScope adapter
+      CreationalContextImpl<T> oldEnv = _threadLocal.get();
       
-      instance = _context.get(bean, env);
+      try {
+        CreationalContextImpl<T> env = oldEnv;
       
-      return instance;
+        if (env == null) {
+          env = new CreationalContextImpl<T>(bean, parentEnv, ip);
+          _threadLocal.set(env);
+        }
+        else {
+          instance = CreationalContextImpl.find(oldEnv, bean);
+          
+          if (instance != null)
+            return instance;
+        }
+      
+        instance = _context.get(bean, env);
+      
+        return instance;
+      } finally {
+        _threadLocal.set(oldEnv);
+      }
     }
   }
   
@@ -3847,6 +3892,19 @@ public final class InjectManager
                     InjectionPoint ip)
     {
       return _scopeAdapterBean.getScopeAdapter(_bean, null); // parentEnv);
+    }
+  }
+  
+  public class DelegateReferenceFactory<T> extends ReferenceFactory<T> {
+    DelegateReferenceFactory()
+    {
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      return (T) parentEnv.getDelegate();
     }
   }
 

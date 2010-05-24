@@ -157,6 +157,15 @@ public class CandiProducer<X> implements InjectionTarget<X>
       }
       
       Object []args = evalArgs(env);
+
+      X value;
+      
+      if (_javaCtor != null)
+        value = _javaCtor.newInstance(args);
+      else
+        value = _instanceClass.newInstance();
+      
+      env.push(value);
       
       if (_decoratorBeans != null) {
         if (env != null)
@@ -167,13 +176,6 @@ public class CandiProducer<X> implements InjectionTarget<X>
                                                     _decoratorClass,
                                                     env);
       }
-
-      X value;
-      
-      if (_javaCtor != null)
-        value = _javaCtor.newInstance(args);
-      else
-        value = _instanceClass.newInstance();
       
       // server/4750
       if (value instanceof CandiEnhancedBean) {

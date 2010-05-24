@@ -29,7 +29,6 @@
 
 package com.caucho.ejb.session;
 
-import com.caucho.config.gen.BeanProducer;
 
 /**
  * Creates a new instance of a stateless bean

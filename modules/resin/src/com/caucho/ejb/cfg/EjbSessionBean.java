@@ -48,16 +48,9 @@ import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.XaAnnotation;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
-import com.caucho.ejb.gen.SessionGenerator;
-import com.caucho.ejb.gen.SingletonGenerator;
-import com.caucho.ejb.gen.StatefulGenerator;
-import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.manager.EjbManager;
-import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.ejb.session.AbstractSessionManager;
 import com.caucho.ejb.session.SingletonManager;
 import com.caucho.ejb.session.StatefulManager;
@@ -74,7 +67,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
   // Default is container managed transaction.
   private boolean _isContainerTransaction = true;
 
-  private SessionGenerator<X> _sessionBean;
+  // private SessionGenerator<X> _sessionBean;
 
   private Class<? extends Annotation> _sessionType;
 
@@ -227,6 +220,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
   /**
    * Creates the bean generator for the session bean.
    */
+  /*
   @Override
   protected BeanGenerator<X> createBeanGenerator()
   {
@@ -247,6 +241,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
     return _sessionBean;
   }
+  */
 
   private void fillClassDefaults(AnnotatedType<X> ejbClass)
   {
@@ -323,7 +318,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
       if (localApi.getName().equals("java.rmi.Remote"))
         continue;
 
-      if (!interfaceList.contains(localApi))
+      if (! interfaceList.contains(localApi))
         interfaceList.add(localApi);
     }
 
@@ -335,6 +330,13 @@ public class EjbSessionBean<X> extends EjbBean<X> {
         // XXX: grab from type?
         addLocal((Class) api);
       }
+    }
+    
+    if (type.isAnnotationPresent(LocalBean.class)) {
+      _localBean = type;
+    }
+    else if (_localList.size() == 0) {
+      _localBean = type;
     }
 
     Remote remote = type.getAnnotation(Remote.class);
@@ -366,27 +368,26 @@ public class EjbSessionBean<X> extends EjbBean<X> {
    */
   @Override
   public AbstractSessionManager<X> deployServer(EjbManager ejbContainer,
-                                                JavaClassGenerator javaGen)
+                                                EjbLazyGenerator<X> lazyGenerator)
       throws ClassNotFoundException, ConfigException
   {
-    Class<?> proxyImplClass = generateProxyClass(javaGen);
-    
+
     AbstractSessionManager<X> manager;
 
     if (Stateless.class.equals(getSessionType())) {
       manager = new StatelessManager<X>(ejbContainer, 
                                         getAnnotatedType(),
-                                        proxyImplClass);
+                                        lazyGenerator);
     }
     else if (Stateful.class.equals(getSessionType())) {
       manager = new StatefulManager<X>(ejbContainer,
                                        getAnnotatedType(),
-                                       proxyImplClass);
+                                       lazyGenerator);
     }
     else if (Singleton.class.equals(getSessionType())) {
       manager = new SingletonManager<X>(ejbContainer, 
                                         getAnnotatedType(),
-                                        proxyImplClass);
+                                        lazyGenerator);
     }
     else
       throw new IllegalStateException(String.valueOf(getSessionType()));
@@ -397,6 +398,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     manager.setId(getEJBModuleName() + "#" + getEJBName());
     manager.setContainerTransaction(_isContainerTransaction);
 
+    /*
     ArrayList<AnnotatedType<? super X>> remoteList = _sessionBean.getRemoteApi();
     if (remoteList.size() > 0) {
       ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
@@ -406,14 +408,16 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
       manager.setRemoteApiList(classList);
     }
+    */
 
     /*
      * if (getRemote21() != null)
      * server.setRemote21(loadClass(getRemote21().getName()));
      */
     
-    manager.setIsNoInterfaceView(_sessionBean.hasNoInterfaceView());
+    // manager.setIsNoInterfaceView(_sessionBean.hasNoInterfaceView());
 
+    /*
     ArrayList<AnnotatedType<? super X>> localList = _sessionBean.getLocalApi();
     if (localList.size() > 0) {
       ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
@@ -426,6 +430,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     
     if (_sessionBean.hasNoInterfaceView())
       manager.setLocalBean(getEJBClass());
+      */
 
     /*
      * if (getLocal21() != null)

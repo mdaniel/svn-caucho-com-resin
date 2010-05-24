@@ -31,6 +31,7 @@ package com.caucho.config.gen;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.DecoratorBean;
+import com.caucho.config.inject.DelegateProxyBean;
 import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
@@ -215,15 +216,34 @@ public class CandiUtil {
 
   public static Object []generateProxyDelegate(InjectManager manager,
                                                List<Decorator<?>> beans,
-                                               Object proxy,
-                                               CreationalContext<?> parentEnv)
+                                               Object delegateProxy,
+                                               CreationalContextImpl<?> parentEnv)
   {
     Object []instances = new Object[beans.size()];
 
+    CreationalContext<Object> proxyEnv
+      = new CreationalContextImpl<Object>(DelegateProxyBean.BEAN, parentEnv);
+    
+    proxyEnv.push(delegateProxy);
+    
     for (int i = 0; i < beans.size(); i++) {
       Decorator<?> bean = beans.get(i);
-      CreationalContext<?> env = new CreationalContextImpl(bean, parentEnv);
+      
+      /*
+      Object instance = CreationalContextImpl.findWithNull(parentEnv, bean);
+      
+      if (instance == null) {
+        CreationalContext<?> env = new CreationalContextImpl(bean, parentEnv);
 
+        instance = manager.getReference(bean, bean.getBeanClass(), env);
+      }
+      else if (instance == CreationalContextImpl.NULL) {
+        instance = null; // XXX: error?
+      }
+      */
+      
+      CreationalContext<?> env = new CreationalContextImpl(bean, proxyEnv);
+      
       Object instance = manager.getReference(bean, bean.getBeanClass(), env);
 
       // XXX:
@@ -234,16 +254,16 @@ public class CandiUtil {
         field.setAccessible(true);
       
         try {
-          field.set(instance, proxy);
+          field.set(instance, delegateProxy);
         } catch (Exception e) {
           throw new InjectionException(e);
         }
-      } else {
+      } else if (ip.getMember() instanceof Method) {
         Method method = (Method) ip.getMember();
         method.setAccessible(true);
       
         try {
-          method.invoke(instance, proxy);
+          method.invoke(instance, delegateProxy);
         } catch (Exception e) {
           throw new InjectionException(e);
         }

@@ -60,12 +60,13 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
 
   public LockGenerator(LockFactory<X> factory,
                        AnnotatedMethod<? super X> method,
-                       AspectGenerator<X> next)
+                       AspectGenerator<X> next,
+                       LockType lockType)
   {
     super(factory, method, next);
 
     _isContainerManaged = true;
-    _lockType = null;
+    _lockType = lockType;
     _lockTimeout = DEFAULT_TIMEOUT;
     _lockTimeoutUnit = TimeUnit.MILLISECONDS;
   }

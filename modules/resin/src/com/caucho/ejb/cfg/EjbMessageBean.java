@@ -573,17 +573,18 @@ public class EjbMessageBean<X> extends EjbBean<X> {
    */
   @Override
   public AbstractEjbBeanManager<X> deployServer(EjbManager ejbManager,
-                                        JavaClassGenerator javaGen)
+                                                EjbLazyGenerator<X> lazyGenerator)
     throws ClassNotFoundException
   {
     if (_activationSpec != null)
-      return deployActivationSpecServer(ejbManager, javaGen);
+      return deployActivationSpecServer(ejbManager, lazyGenerator);
     else
-      return deployJmsServer(ejbManager, javaGen);
+      return deployJmsServer(ejbManager, lazyGenerator);
   }
 
-  private AbstractEjbBeanManager<X> deployJmsServer(EjbManager ejbManager,
-                                            JavaClassGenerator javaGen)
+  private AbstractEjbBeanManager<X> 
+  deployJmsServer(EjbManager ejbManager,
+                  EjbLazyGenerator<X> lazyGenerator)
     throws ClassNotFoundException
   {
     JmsResourceAdapter ra
@@ -601,14 +602,15 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     else
       ra.setConsumerMax(getEjbContainer().getMessageConsumerMax());
 
-    return deployMessageServer(ejbManager, javaGen, ra, spec);
+    return deployMessageServer(ejbManager, lazyGenerator, ra, spec);
   }
 
   /**
    * Deploys the bean.
    */
-  public AbstractEjbBeanManager<X> deployActivationSpecServer(EjbManager ejbManager,
-                                                      JavaClassGenerator javaGen)
+  public AbstractEjbBeanManager<X>
+  deployActivationSpecServer(EjbManager ejbManager,
+                             EjbLazyGenerator<X> lazyGenerator)
     throws ClassNotFoundException
   {
     if (_activationSpec == null)
@@ -638,7 +640,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
                       raClass.getName()));
     }
 
-    return deployMessageServer(ejbManager, javaGen, ra, _activationSpec);
+    return deployMessageServer(ejbManager, lazyGenerator, ra, _activationSpec);
   }
 
   private AnnotatedType<X> fillClassDefaults(AnnotatedType<X> ejbClass)
@@ -663,10 +665,11 @@ public class EjbMessageBean<X> extends EjbBean<X> {
   /**
    * Deploys the bean.
    */
-  public AbstractEjbBeanManager<X> deployMessageServer(EjbManager ejbManager,
-                                               JavaClassGenerator javaGen,
-                                               ResourceAdapter ra,
-                                               ActivationSpec spec)
+  public AbstractEjbBeanManager<X> 
+  deployMessageServer(EjbManager ejbManager,
+                      EjbLazyGenerator<X> lazyGenerator,
+                      ResourceAdapter ra,
+                      ActivationSpec spec)
     throws ClassNotFoundException
   {
     MessageManager<X> manager;
@@ -692,17 +695,23 @@ public class EjbMessageBean<X> extends EjbBean<X> {
 
       manager.setEjbClass(getEJBClass());
 
+      // XXX:
+      /*
       Class<?> proxyImplClass = javaGen.loadClass(getSkeletonName());
 
       manager.setProxyImplClass(proxyImplClass);
+      */
 
       manager.setActivationSpec(spec);
       manager.setResourceAdapter(ra);
 
       // server.setMessageListenerType(_messagingType);
 
-      javaGen.loadClass(getEJBClass().getName());
+      // javaGen.loadClass(getEJBClass().getName());
 
+      // XXX: can't be right because of timing, i.e. must be in bind() phase
+      
+      /*
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -718,6 +727,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
+      */
     } catch (Exception e) {
       throw error(e);
     }

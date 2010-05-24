@@ -795,7 +795,7 @@ public class InterceptorGenerator<X>
     out.pushDepth();
     
     out.println("if (__caucho_delegate == null)");
-    out.println("  __caucho_delegate = new __caucho_decorator_class(0, null);");
+    out.println("  __caucho_delegate = new __caucho_decorator_class(0, null, null);");
     
     out.println();
     out.println("return __caucho_delegate;");
@@ -898,12 +898,14 @@ public class InterceptorGenerator<X>
 
     out.println("private int _index;");
     out.println("private " + beanClassName + " _bean;");
+    out.println("private Object [] _delegates;");
 
     out.println();
-    out.print(className + "(int index, " + beanClassName + " bean)");
+    out.print(className + "(int index, " + beanClassName + " bean, Object []delegates)");
     out.println("{");
     out.println("  _index = index;");
     out.println("  _bean = bean;");
+    out.println("  _delegates = delegates;");
     out.println("}");
 
     String generatedClassName = _factory.getAspectBeanFactory().getGeneratedClassName();
@@ -1014,7 +1016,9 @@ public class InterceptorGenerator<X>
 
       // out.println("Object []delegates = var.__caucho_getBean()." + _decoratorIndexVar + ";");
       // out.println("Object []delegates = _bean != null ? _bean." + _decoratorIndexVar + " : null;");
-      out.println("Object []delegates = var._bean.__caucho_getDelegates();");
+      // out.println("Object []delegates = var._bean.__caucho_getDelegates();");
+      
+      out.println("Object []delegates = var._delegates;");
 
       out.println();
       out.print("var._index = com.caucho.config.gen.CandiUtil.nextDelegate(");
@@ -1188,7 +1192,10 @@ public class InterceptorGenerator<X>
     out.print(_decoratorClass + " delegate = ");
     out.print("new " + _decoratorClass + "(");
     out.print(_decoratorIndexVar + ".length, ");
-    out.print(_factory.getAspectBeanFactory().getBeanInstance());
+    out.print(_factory.getAspectBeanFactory().getBeanInstance() + ", ");
+    
+    out.print(getBeanFactory().getBeanInfo() + ".__caucho_getDelegates()");
+    
     out.println(");");
 
     out.print(_decoratorLocalVar);

@@ -41,15 +41,12 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
 
-import com.caucho.config.gen.BeanProducer;
-import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
 import com.caucho.ejb.timer.EjbTimerService;
@@ -66,8 +63,6 @@ public class EjbInjectionTarget<T> {
   private Bean<T> _bean;
   
   private ClassLoader _envLoader;
-  
-  private BeanProducer<T> _beanProducer;
   
   private InjectionTarget<T> _injectionTarget;
 
@@ -165,17 +160,6 @@ public class EjbInjectionTarget<T> {
   {
     _preDestroyConfig = preDestroy;
   }
-  
-  public void setBeanProducer(BeanProducer<T> producer)
-  {
-    _beanProducer = producer;
-  }
-  
-  public BeanProducer<T> getBeanProducer()
-  {
-    return _beanProducer;
-  }
-
 
   public void bindInjection()
   {
@@ -351,8 +335,8 @@ public class EjbInjectionTarget<T> {
       }
       */
       
-      if (_beanProducer != null)
-        _beanProducer.__caucho_postConstruct(instance);
+      //if (_beanProducer != null)
+      //  _beanProducer.__caucho_postConstruct(instance);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

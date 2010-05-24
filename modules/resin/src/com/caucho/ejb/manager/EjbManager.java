@@ -44,6 +44,7 @@ import javax.jms.ConnectionFactory;
 import com.caucho.amber.manager.AmberContainer;
 import com.caucho.amber.manager.AmberPersistenceUnit;
 import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.cfg.EjbConfigManager;
 import com.caucho.ejb.cfg.EjbRootConfig;
 import com.caucho.ejb.protocol.EjbProtocolManager;
@@ -440,7 +441,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     }
     
     if (log.isLoggable(Level.FINE))
-      log.fine("EJB scanning '" + root + "'");
+        log.fine("EJB scanning '" + root + "'");
 
     EjbRootConfig context = _configManager.createRootConfig(root);
 
@@ -510,12 +511,23 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     _configManager.start();
   }
 
+  private void bind()
+  {
+    config();
+    
+    InjectManager.create().bind();
+    
+    for (AbstractEjbBeanManager server : _serverList) {
+      server.bind();
+    }
+  }
+
   public void start() throws ConfigException
   {
     try {
-      AmberContainer.create().start();
+      // AmberContainer.create().start();
 
-      config();  // ejb/4200
+      bind();  // ejb/4200
 
       Thread thread = Thread.currentThread();
       ClassLoader oldLoader = thread.getContextClassLoader();
@@ -589,6 +601,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
    */
   public void environmentBind(EnvironmentClassLoader loader)
   {
+    bind();
   }
 
   /**

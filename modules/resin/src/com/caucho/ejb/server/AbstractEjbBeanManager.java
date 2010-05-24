@@ -351,9 +351,16 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   /**
    * Sets the remote object class.
    */
-  public ArrayList<Class<?>> getLocalApiList()
+  /*
+  private ArrayList<Class<?>> getLocalApiList()
   {
     return _localApiList;
+  }
+  */
+  
+  public ArrayList<AnnotatedType<? super X>> getLocalApi()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
   public void setLocalBean(Class<?> localBean)
@@ -468,6 +475,10 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     return _contextImplClass;
   }
 
+  public void bind()
+  {
+  }
+  
   /**
    * Returns the remote skeleton for the given API
    *

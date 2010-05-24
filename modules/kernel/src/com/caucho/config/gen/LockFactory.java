@@ -29,6 +29,8 @@
 
 package com.caucho.config.gen;
 
+import javax.ejb.Lock;
+import javax.ejb.LockType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 
 import com.caucho.inject.Module;
@@ -40,10 +42,17 @@ import com.caucho.inject.Module;
 public class LockFactory<X>
   extends AbstractAspectFactory<X>
 {
+  private LockType _classLockType;
+  
   public LockFactory(AspectBeanFactory<X> beanFactory,
-              AspectFactory<X> next)
+                     AspectFactory<X> next)
   {
     super(beanFactory, next);
+    
+    Lock lock = beanFactory.getBeanType().getAnnotation(Lock.class);
+    
+    if (lock != null)
+      _classLockType = lock.value();
   }
   
   /**
@@ -53,6 +62,19 @@ public class LockFactory<X>
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
                                    boolean isEnhanced)
   {
-    return super.create(method, isEnhanced);
+    Lock lock = method.getAnnotation(Lock.class);
+    
+    LockType lockType = _classLockType;
+    
+    if (lock != null)
+      lockType = lock.value();
+    
+    if (lockType == null)
+      return super.create(method, isEnhanced);
+    else {
+      AspectGenerator<X> next = super.create(method, true);
+    
+      return new LockGenerator(this, method, next, lockType);
+    }
   }
 }

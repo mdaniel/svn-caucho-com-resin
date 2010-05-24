@@ -37,9 +37,12 @@ import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
 
+import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.cfg.EjbLazyGenerator;
+import com.caucho.ejb.gen.SingletonGenerator;
+import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.inject.SessionBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
@@ -57,9 +60,9 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
 
   public SingletonManager(EjbManager ejbContainer,
                           AnnotatedType<X> annotatedType,
-                          Class<?> proxyImplClass)
+                          EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, annotatedType, proxyImplClass);
+    super(ejbContainer, annotatedType, lazyGenerator);
   }
 
   @Override
@@ -98,7 +101,7 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
 
     if (context == null)
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
-                                         api, getContext()));
+                                         api, this));
     
     SessionBeanImpl<X,T> statefulBean
       = new SessionBeanImpl<X,T>(context, mBean, apiList);
@@ -117,6 +120,20 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
     return SingletonContext.class;
   }
 
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  @Override
+  protected BeanGenerator<X> createBeanGenerator()
+  {
+    EjbLazyGenerator<X> lazyGen = getLazyGenerator();
+    
+    return new SingletonGenerator<X>(getEJBName(), getAnnotatedType(),
+                                     lazyGen.getLocalApi(),
+                                     lazyGen.getLocalBean(),
+                                     lazyGen.getRemoteApi());
+  }
+ 
   /**
    * Finds the remote bean by its key.
    * 

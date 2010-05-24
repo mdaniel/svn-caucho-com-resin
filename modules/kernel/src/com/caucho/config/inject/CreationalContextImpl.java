@@ -40,6 +40,8 @@ import com.caucho.inject.Module;
  */
 @Module
 public final class CreationalContextImpl<T> implements CreationalContext<T> {
+  public static final Object NULL = new Object();
+  
   private final CreationalContextImpl<?> _top;
   private final CreationalContextImpl<?> _parent; // parent in the creation chain
   private CreationalContextImpl<?> _next; // next in the dependent chain
@@ -140,6 +142,26 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
     return null;
   }
   
+  @SuppressWarnings("unchecked")
+  public
+  static <X> X findWithNull(CreationalContextImpl<?> ptr, Contextual<X> bean)
+  {
+    for (; ptr != null; ptr = ptr._parent) {
+      Contextual<?> testBean = ptr._bean;
+      
+      if (testBean != bean) {
+        
+      }
+      else if (ptr._value != null) {
+        return (X) ptr._value;
+      }
+      else
+        return (X) NULL;
+    }
+    
+    return null;
+  }
+
   /**
    * Find any bean, for disposers.
    */
@@ -195,6 +217,26 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
         
         if (env._injectionPoint != null)
           return env._injectionPoint;
+        
+        ptr = env._parent;
+      }
+      else
+        ptr = null;
+    }
+    
+    return null;
+  }
+  
+  public Object getDelegate()
+  {
+    CreationalContext<?> ptr = this; 
+    
+    while (ptr != null) {
+      if (ptr instanceof CreationalContextImpl<?>) {
+        CreationalContextImpl<?> env = (CreationalContextImpl<?>) ptr;
+        
+        if (env._bean == DelegateProxyBean.BEAN)
+          return env._value;
         
         ptr = env._parent;
       }

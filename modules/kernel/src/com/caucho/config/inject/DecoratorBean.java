@@ -270,7 +270,9 @@ public class DecoratorBean<T> implements Decorator<T>
 
     introspect();
 
-    if (_delegateField == null && _delegateMethod == null)
+    if (_delegateField == null
+        && _delegateMethod == null
+        && _delegateConstructor == null)
       throw new ConfigException(L.l("{0} is missing a @Delegate field.  All @Decorators need a @Delegate field for a delegate injection",
                                     _type.getName()));
   }

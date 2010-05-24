@@ -70,9 +70,10 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
   public StatelessGenerator(String ejbName, 
                             AnnotatedType<X> beanType,
                             ArrayList<AnnotatedType<? super X>> localApi,
+                            AnnotatedType<X> localBean,
                             ArrayList<AnnotatedType<? super X>> remoteApi)
   {
-    super(ejbName, beanType, localApi, remoteApi, 
+    super(ejbName, beanType, localApi, localBean, remoteApi, 
           Stateless.class.getSimpleName());
     
     InjectManager manager = InjectManager.create();
