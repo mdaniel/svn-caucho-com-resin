@@ -1761,6 +1761,8 @@ public final class InjectManager
   {
     if (ij.isDelegate())
       return new DelegateReferenceFactory();
+    else if (ij.getType().equals(InjectionPoint.class))
+      return new InjectionPointReferenceFactory();
     
     Type type = ij.getType();
     Set<Annotation> qualifiers = ij.getQualifiers();
@@ -3905,6 +3907,19 @@ public final class InjectManager
                     InjectionPoint ip)
     {
       return (T) parentEnv.getDelegate();
+    }
+  }
+  
+  public class InjectionPointReferenceFactory extends ReferenceFactory<InjectionPoint> {
+    InjectionPointReferenceFactory()
+    {
+    }
+   
+    @Override
+    public InjectionPoint create(CreationalContextImpl<?> parentEnv,
+                                 InjectionPoint ip)
+    {
+      return parentEnv.getInjectionPoint();
     }
   }
 

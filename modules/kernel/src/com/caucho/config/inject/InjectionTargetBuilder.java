@@ -467,8 +467,8 @@ System.out.println("DISPOSE: " + instance);
         else if (best == null) {
           best = ctor;
         }
-        else if (hasQualifierAnnotation(ctor)) {
-          if (best != null && hasQualifierAnnotation(best))
+        else if (ctor.isAnnotationPresent(Inject.class)) {
+          if (best != null && best.isAnnotationPresent(Inject.class))
             throw new ConfigException(L.l("'{0}' can't have two constructors marked by @Inject or by a @Qualifier, because the Java Injection BeanManager can't tell which one to use.",
                                           beanType.getJavaClass().getName()));
           best = ctor;
@@ -538,8 +538,8 @@ System.out.println("DISPOSE: " + instance);
     Annotation []qualifiers = getQualifiers(param);
  
     InjectionPoint ip = new InjectionPointImpl<X>(getBeanManager(),
-                                                 this,
-                                                 param);
+                                                  this,
+                                                  param);
     
     if (ann.isAnnotationPresent(Inject.class)) {
       // ioc/022k
@@ -766,6 +766,7 @@ System.out.println("DISPOSE: " + instance);
         
         // server/30i1 vs ioc/0155
         Object value = _fieldFactory.create(env, _ip);
+        System.out.println("FF: " + value + " " + _fieldFactory + " " + _ip + " " + _field);
         
         _field.set(instance, value);
       } catch (AmbiguousResolutionException e) {
