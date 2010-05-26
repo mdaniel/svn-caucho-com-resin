@@ -32,6 +32,8 @@ package com.caucho.config.inject;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
@@ -39,6 +41,8 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.IllegalProductException;
 import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.Specializes;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -65,10 +69,13 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   private static final Object []NULL_ARGS = new Object[0];
 
   private final Bean<X> _producerBean;
-  private final AnnotatedMethod<X> _producesMethod;
-  private final AnnotatedMethod<X> _disposesMethod;
+  private final AnnotatedMethod<? super X> _producesMethod;
+  private final AnnotatedMethod<? super X> _disposesMethod;
+  
+  private LinkedHashSet<InjectionPoint> _injectionPointSet
+    = new LinkedHashSet<InjectionPoint>();
 
-  private Producer<T> _producer;
+  private Producer<T> _producer = this;
 
   private Arg<T> []_producesArgs;
   private Arg<T> []_disposesArgs;
@@ -79,9 +86,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
   protected ProducesBean(InjectManager manager,
                          Bean<X> producerBean,
-                         AnnotatedMethod<X> producesMethod,
+                         AnnotatedMethod<? super X> producesMethod,
                          Arg<T> []producesArgs,
-                         AnnotatedMethod<X> disposesMethod,
+                         AnnotatedMethod<? super X> disposesMethod,
                          Arg<T> []disposesArgs)
   {
     super(manager, producesMethod.getBaseType(), producesMethod);
@@ -103,14 +110,16 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
     if (producesArgs == null)
       throw new NullPointerException();
+    
+    introspectInjectionPoints();
   }
 
   public static <X,T> ProducesBean<X,T> 
   create(InjectManager manager,
          Bean<X> producer,
-         AnnotatedMethod<X> producesMethod,
+         AnnotatedMethod<? super X> producesMethod,
          Arg<T> []producesArgs,
-         AnnotatedMethod<X> disposesMethod,
+         AnnotatedMethod<? super X> disposesMethod,
          Arg<T> []disposesArgs)
   {
     ProducesBean<X,T> bean = new ProducesBean<X,T>(manager, producer, 
@@ -177,15 +186,65 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   {
     return _producerBean;
   }
+  
+  @Override
+  public Class<?> getBeanClass()
+  {
+    return _producerBean.getBeanClass();
+  }
+  
+  public AnnotatedMethod<? super X> getProducesMethod()
+  {
+    return _producesMethod;
+  }
+  
+  @Override
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return _injectionPointSet;
+  }
+  
+  //
+  // introspection
+  //
+
+  /**
+   * Adds the stereotypes from the bean's annotations
+   */
+  @Override
+  protected void introspectSpecializes(Annotated annotated)
+  {
+    if (! annotated.isAnnotationPresent(Specializes.class))
+      return;
+  }
+  
+  private void introspectInjectionPoints()
+  {
+    for (AnnotatedParameter<?> param : _producesMethod.getParameters()) {
+      InjectionPointImpl ip = new InjectionPointImpl(getBeanManager(), this, param);
+
+      _injectionPointSet.add(ip);
+    }
+  }
+  
+  //
+  // Producer
+  //
+
 
   @Override
   public T create(CreationalContext<T> createEnv)
   {
-    T value = produce(createEnv);
+    T value = _producer.produce(createEnv);
     
     createEnv.push(value);
     
     return value;
+  }
+  
+  @Override
+  public void dispose(T value)
+  {
   }
 
   @Override
@@ -281,14 +340,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     }
   }
 
-  /*
-  @Override
-  public X instantiate()
-  {
-    return createNew(null, null);
-  }
-  */
-
   @Override
   public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
   {
@@ -332,32 +383,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
         return;
 
       _isBound = true;
-
-      /*
-      Method method = _producesMethod.getJavaMember();
-
-      String loc = InjectManager.location(method);
-
-      // Annotation [][]paramAnn = _method.getParameterAnnotations();
-      // List<AnnotatedParameter<T>> beanParams = _producesMethod.getParameters();
-
-      _args = new Arg[param.length];
-
-      for (int i = 0; i < param.length; i++) {
-        _args[i] = bindParameter(loc, param[i], beanParams.get(i).getAnnotations());
-
-        if (_args[i] != null) {
-        }
-        else if (InjectionPoint.class.equals(param[i])) {
-          _args[i] = createInjectionPointBean(getManager());
-        }
-        else {
-          throw error(_beanMethod.getJavaMember(),
-                      L.l("Type '{0}' for method parameter #{1} has no matching component.",
-                          getSimpleName(param[i]), i));
-        }
-      }
-      */
     }
   }
 
@@ -425,10 +450,11 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   /**
    * Returns the owning producer
    */
+  /*
   public AnnotatedMember<X> getProducerMember()
   {
     throw new UnsupportedOperationException(getClass().getName());
-  }
+  }*/
 
   /**
    * Returns the owning disposer

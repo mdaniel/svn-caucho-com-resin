@@ -67,8 +67,7 @@ public class VarType<D extends GenericDeclaration> extends BaseType
   public boolean isWildcard()
   {
     // ioc/024j vs ioc/024k
-    return true;
-    // return false;
+    return false;
   }
   
   @Override

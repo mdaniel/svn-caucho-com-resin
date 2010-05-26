@@ -473,9 +473,12 @@ public class CustomBeanConfig<T> {
 
     beanManager.addBean(_bean);
 
+    managedBean.introspectProduces();
+    /*
     for (Bean producesBean : managedBean.getProducerBeans()) {
       beanManager.addBean(producesBean);
     }
+    */
   }
 
   protected Bean bindParameter(String loc,

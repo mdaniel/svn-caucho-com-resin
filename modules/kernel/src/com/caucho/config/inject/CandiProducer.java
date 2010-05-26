@@ -164,8 +164,9 @@ public class CandiProducer<X> implements InjectionTarget<X>
         value = _javaCtor.newInstance(args);
       else
         value = _instanceClass.newInstance();
-      
-      env.push(value);
+
+      if (env != null)
+        env.push(value);
       
       if (_decoratorBeans != null) {
         if (env != null)

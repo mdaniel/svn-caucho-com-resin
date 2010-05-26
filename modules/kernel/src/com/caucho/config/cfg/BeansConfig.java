@@ -238,9 +238,12 @@ public class BeansConfig {
 
           injectManager.addBean(bean);
 
+          bean.introspectProduces();
+          /*
           for (Bean<?> producerBean : bean.getProducerBeans()) {
             injectManager.addBean(producerBean);
           }
+          */
 
           //_pendingComponentList.add(component);
         }

@@ -404,6 +404,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
                                    getSessionBeanType());
 
     moduleBeanManager.addBean(_bean, process);
+    
+    moduleBeanManager.addProduces(_bean, mBean.getAnnotatedType());
 
     for (AnnotatedType<?> localApi : getLocalApi()) {
       registerLocalSession(moduleBeanManager, localApi.getJavaClass());

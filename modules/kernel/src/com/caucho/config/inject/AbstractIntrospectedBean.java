@@ -136,8 +136,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     Typed typed = annotated.getAnnotation(Typed.class);
     
     if (typed != null) {
-      _typeClasses = fillTyped(baseTypes,
-                               typed.value());
+      _typeClasses = fillTyped(baseTypes, typed.value());
     }
     else {
       _typeClasses = baseTypes;

@@ -46,6 +46,7 @@ import javax.annotation.PreDestroy;
 import javax.decorator.Delegate;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.AmbiguousResolutionException;
+import javax.enterprise.inject.IllegalProductException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.UnsatisfiedResolutionException;
 import javax.enterprise.inject.spi.Annotated;
@@ -739,18 +740,28 @@ System.out.println("DISPOSE: " + instance);
       try {
         _fieldFactory = beanManager.getReferenceFactory(_ip);
       } catch (AmbiguousResolutionException e) {
-        String loc = _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
+        String loc = getLocation(field);
         
         throw new AmbiguousResolutionException(loc + e.getMessage(), e);
       } catch (UnsatisfiedResolutionException e) {
-        String loc = _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
+        String loc = getLocation(field);
         
         throw new UnsatisfiedResolutionException(loc + e.getMessage(), e);
+      } catch (IllegalProductException e) {
+        String loc = getLocation(field);
+        
+        throw new IllegalProductException(loc + e.getMessage(), e);
       } catch (InjectionException e) {
-        String loc = _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
+        String loc = getLocation(field);
       
         throw new InjectionException(loc + e.getMessage(), e);
       }
+    }
+    
+    private String getLocation(Field field)
+    {
+      return _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
+      
     }
 
     @Override
@@ -766,11 +777,12 @@ System.out.println("DISPOSE: " + instance);
         
         // server/30i1 vs ioc/0155
         Object value = _fieldFactory.create(env, _ip);
-        System.out.println("FF: " + value + " " + _fieldFactory + " " + _ip + " " + _field);
         
         _field.set(instance, value);
       } catch (AmbiguousResolutionException e) {
         throw new AmbiguousResolutionException(getFieldName(_field) + e.getMessage(), e);
+      } catch (IllegalProductException e) {
+        throw new IllegalProductException(getFieldName(_field) + e.getMessage(), e);
       } catch (InjectionException e) {
         throw new InjectionException(getFieldName(_field) + e.getMessage(), e);
       } catch (Exception e) {

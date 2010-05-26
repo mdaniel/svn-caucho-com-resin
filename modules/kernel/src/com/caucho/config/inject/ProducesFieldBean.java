@@ -61,7 +61,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
   private final Bean<X> _producerBean;
   private final AnnotatedField<X> _beanField;
 
-  private Producer<T> _producer;
+  private Producer<T> _producer = this;
 
   private boolean _isBound;
 
@@ -70,7 +70,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
                               AnnotatedField<X> beanField)
   {
     super(manager, beanField.getBaseType(), beanField);
-
+    
     _producerBean = producerBean;
     _beanField = beanField;
 
@@ -88,7 +88,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
     bean.introspect(beanField);
     
     BaseType type = manager.createSourceBaseType(beanField.getBaseType());
-    
+
     if (type.isGeneric()) {
       // ioc/07f1
       throw new InjectionException(L.l("'{0}' is an invalid @Produces field because it returns a generic type {1}",
@@ -136,7 +136,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
   @Override
   public T create(CreationalContext<T> createEnv)
   {
-    return produce(createEnv);
+    return _producer.produce(createEnv);
   }
 
   @Override

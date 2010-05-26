@@ -51,6 +51,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
+import javax.enterprise.inject.spi.ProcessProducer;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.BeanArg;
@@ -194,7 +195,6 @@ class ExtensionManager
                                           method.getBaseType(),
                                           method.getQualifiers());
       
-      
       if ((ProcessAnnotatedType.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
         _injectManager.getScanManager().setIsCustomExtension(true);
@@ -206,6 +206,11 @@ class ExtensionManager
       }
 
       if ((ProcessInjectionTarget.class.isAssignableFrom(rawType))
+          && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
+        _injectManager.getScanManager().setIsCustomExtension(true);
+      }
+
+      if ((ProcessProducer.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
         _injectManager.getScanManager().setIsCustomExtension(true);
       }

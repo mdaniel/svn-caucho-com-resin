@@ -74,8 +74,21 @@ public class ObserverMap {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry observer = _observerList.get(i);
 
-      if (observer.isMatch(eventType, bindings)) {
+      if (observer.isAssignableFrom(eventType, bindings)) {
         set.add(observer.getObserver());
+      }
+    }
+  }
+
+  public void resolveEntries(ArrayList<ObserverEntry<?>> list,
+                             BaseType eventType)
+  {
+    for (int i = 0; i < _observerList.size(); i++) {
+      ObserverEntry<?> observer = _observerList.get(i);
+      
+      if (observer.getType().isAssignableFrom(eventType)
+          && ! list.contains(observer)) {
+        list.add(observer);
       }
     }
   }
@@ -87,11 +100,11 @@ public class ObserverMap {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry observer = _observerList.get(i);
 
-      if (observer.isMatch(eventType, qualifiers)) {
+      if (observer.isAssignableFrom(eventType, qualifiers)) {
         if (log.isLoggable(Level.FINEST))
           log.finest(observer.getObserver() + " notify " + event);
 
-        observer.getObserver().notify(event);
+        observer.notify(event);
       }
     }
   }
@@ -100,56 +113,5 @@ public class ObserverMap {
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _type + "]";
-  }
-
-  static class ObserverEntry {
-    private final ObserverMethod<?> _observer;
-    private final BaseType _type;
-    private final QualifierBinding []_qualifiers;
-
-    ObserverEntry(ObserverMethod<?> observer,
-                  BaseType type,
-                  Annotation []qualifiers)
-    {
-      _observer = observer;
-      _type = type;
-
-      _qualifiers = new QualifierBinding[qualifiers.length];
-      for (int i = 0; i < qualifiers.length; i++) {
-        _qualifiers[i] = new QualifierBinding(qualifiers[i]);
-      }
-    }
-
-    ObserverMethod getObserver()
-    {
-      return _observer;
-    }
-
-    boolean isMatch(BaseType type, Annotation []qualifiers)
-    {
-      if (! _type.isAssignableFrom(type)) {
-        return false;
-      }
-
-      /*
-      if (qualifiers.length < _qualifiers.length)
-        return false;
-        */
-
-      for (QualifierBinding qualifier : _qualifiers) {
-        if (qualifier.isAny()) {
-        }
-        else if (! qualifier.isMatch(qualifiers)) {
-          return false;
-        }
-      }
-
-      return true;
-    }
-
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _observer + "," + _type + "]";
-    }
   }
 }

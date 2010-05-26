@@ -111,11 +111,19 @@ public class WebComponent {
       beans.add(_injectionPointEntry.getBean());
       return beans;
     }
+    
+    boolean isVariable = ! type.isGenericRaw();
 
     for (BeanEntry beanEntry : _beanList) {
       if (beanEntry.isMatch(type, qualifiers)) {
         if (beans == null)
           beans = new LinkedHashSet<Bean<?>>();
+        
+        if (isVariable && ! beanEntry.getType().isGenericVariable()) {
+          // ioc/024k
+          isVariable = false;
+          beans.clear();
+        }
 
         beans.add(beanEntry.getBean());
       }

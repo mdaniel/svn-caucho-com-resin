@@ -60,6 +60,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
 import javax.management.Attribute;
 import javax.management.MBeanAttributeInfo;
 import javax.management.MBeanInfo;
@@ -456,7 +457,8 @@ public class Resource {
 
     // server/12dt
     // for backward compatibility <resource> is always ApplicationScoped
-    factory.scope(ApplicationScoped.class);
+    // factory.scope(ApplicationScoped.class);
+    factory.scope(Singleton.class);
 
     if (_object != null)
       beanManager.addBean(factory.singleton(_object));

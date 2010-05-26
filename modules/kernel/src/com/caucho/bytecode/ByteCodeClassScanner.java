@@ -142,7 +142,7 @@ public class ByteCodeClassScanner {
 
       int methodCount = readShort(is);
       for (int i = 0; i < methodCount; i++) {
-        skipMethod(is);
+        scanMethod(is);
       }
 
       int attrCount = readShort(is);
@@ -405,6 +405,27 @@ public class ByteCodeClassScanner {
     
     for (int i = 0; i < attributesCount; i++) {
       skipAttribute(is);
+    }
+  }
+
+  /**
+   * Parses a method entry.
+   */
+  private void scanMethod(InputStream is)
+    throws IOException
+  {
+    /*
+    int accessFlags = readShort();
+    int nameIndex = readShort();
+    int descriptorIndex = readShort();
+    */
+    
+    is.skip(6);
+
+    int attributesCount = readShort(is);
+    
+    for (int i = 0; i < attributesCount; i++) {
+      scanAttributeForAnnotation(is);
     }
   }
 

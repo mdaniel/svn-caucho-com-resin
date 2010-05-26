@@ -29,6 +29,7 @@
 
 package com.caucho.config.inject;
 
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.ProcessManagedBean;
@@ -43,11 +44,11 @@ public class ProcessManagedBeanImpl<X> extends ProcessBeanImpl<X>
 
   protected ProcessManagedBeanImpl(InjectManager manager, 
                                    Bean<X> bean,
-                                   AnnotatedType<X> annotatedType)
+                                   Annotated annotatedType)
   {
     super(manager, bean, annotatedType);
     
-    _annotatedType = annotatedType;
+    _annotatedType = (AnnotatedType<X>) annotatedType;
   }
 
   @Override

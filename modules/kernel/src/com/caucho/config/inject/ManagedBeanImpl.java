@@ -248,10 +248,12 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     return _injectionTarget.getInjectionPoints();
   }
 
+  /*
   public Set<Bean<?>> getProducerBeans()
   {
     return _producerBeans;
   }
+  */
 
   /**
    * Returns the observer methods
@@ -341,11 +343,15 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   {
     // super.introspect(beanType);
 
-    introspectProduces(beanType);
+    // introspectProduces(beanType);
 
     introspectObservers(beanType);
   }
 
+  public void introspectProduces()
+  {
+    getBeanManager().addProduces(this, getAnnotatedType());
+  }
   /**
    * Introspects the methods for any @Produces
    */

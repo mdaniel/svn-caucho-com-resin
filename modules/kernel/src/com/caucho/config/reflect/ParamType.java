@@ -105,6 +105,18 @@ public class ParamType extends BaseType implements ParameterizedType
     
     return false;
   }
+  
+  @Override
+  public boolean isGenericVariable()
+  {
+    // ioc/0190, ioc/0192
+    for (BaseType type : _param) {
+      if (type.isVariable())
+        return true;
+    }
+    
+    return false;
+  }
 
   @Override
   public HashMap<String,BaseType> getParamMap()

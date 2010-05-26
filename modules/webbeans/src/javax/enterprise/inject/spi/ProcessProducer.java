@@ -50,7 +50,7 @@ public interface ProcessProducer<X,T>
 
   public Producer<T> getProducer();
   
-  public void setProducer(Producer<X> producer);
+  public void setProducer(Producer<T> producer);
 
   public void addDefinitionError(Throwable t);
 }

@@ -275,6 +275,8 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
     
     if (value != null)
       _bean.destroy(value, this);
+    else
+      release();
   }
   
   void postConstruct()

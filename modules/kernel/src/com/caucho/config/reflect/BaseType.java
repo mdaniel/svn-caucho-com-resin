@@ -243,6 +243,14 @@ abstract public class BaseType
   }
   
   /**
+   * Returns true for a generic variable type like MyBean<X>, but not MyBean<?>
+   */
+  public boolean isGenericVariable()
+  {
+    return isVariable();
+  }
+  
+  /**
    * Returns true for a variable type like X
    */
   public boolean isVariable()
@@ -315,7 +323,21 @@ abstract public class BaseType
     
     return _typeSet;
   }
-  
+
+  /**
+   * Returns the type closure of the base type.
+   */
+  public final Set<BaseType> getBaseTypeClosure(InjectManager manager)
+  {
+    LinkedHashSet<BaseType> baseTypeSet = new LinkedHashSet<BaseType>();
+    
+    for (Type type : getTypeClosure(manager)) {
+      baseTypeSet.add(manager.createSourceBaseType(type));
+    }
+    
+    return baseTypeSet;
+  }
+    
   protected void fillTypeClosure(InjectManager manager, Set<Type> typeSet)
   {
     typeSet.add(toType());

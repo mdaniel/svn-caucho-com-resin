@@ -120,7 +120,6 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       
         method.invoke(null, _decoratorBeans);
       } catch (Exception e) {
-        e.printStackTrace();
         log.log(Level.FINEST, e.toString(), e);
       }
     }

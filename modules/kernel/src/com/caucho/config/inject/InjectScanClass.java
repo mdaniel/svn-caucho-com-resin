@@ -39,6 +39,7 @@ import javax.ejb.MessageDriven;
 import javax.ejb.Startup;
 import javax.ejb.Stateless;
 import javax.ejb.Stateful;
+import javax.enterprise.context.NormalScope;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
@@ -46,6 +47,7 @@ import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Scope;
 
 import com.caucho.inject.Jndi;
 import com.caucho.inject.MBean;
@@ -142,6 +144,13 @@ class InjectScanClass implements ScanClass
         _isRegisterRequired = true;
       }
       else if (annType.isAnnotationPresent(Stereotype.class)) {
+        _isRegisterRequired = true;
+      }
+      else if (annType.isAnnotationPresent(Scope.class)) {
+        _isRegisterRequired = true;
+      }
+      else if (annType.isAnnotationPresent(NormalScope.class)) {
+        // ioc/02a3
         _isRegisterRequired = true;
       }
     } catch (ClassNotFoundException e) {
