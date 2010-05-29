@@ -36,6 +36,7 @@ import java.lang.reflect.Type;
 import java.util.List;
 import java.util.Set;
 
+import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.ObserverException;
@@ -167,19 +168,38 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   @Override
   public void notify(T event)
   {
-    Object instance = getInstance();
-
-    if (instance == null)
-      return;
+    X instance;
     
-    if (instance instanceof ScopeProxy) {
-      instance = ((ScopeProxy) instance).__caucho_getDelegate();
-    }
+    CreationalContextImpl<X> env = null;
+    OwnerCreationalContext<X> argEnv = null;
 
+    if (_isIfExists) {
+      instance = getExistsInstance();
+      
+      if (instance == null)
+        return;
+    }
+    else {
+      env = new OwnerCreationalContext<X>(getParentBean());
+      
+      instance = getParentBean().create(env);
+    }
+    
+    if (_args != null && _args.length > 1)
+      argEnv = new OwnerCreationalContext<X>(null);
+    
     Method method = _method.getJavaMember();
 
     try {
-      method.invoke(instance, getEventArguments(event));
+      Object object;
+      
+      if (instance instanceof ScopeProxy) {
+        object = ((ScopeProxy) instance).__caucho_getDelegate();
+      }
+      else
+        object = instance;
+
+      method.invoke(object, getEventArguments(event, argEnv));
     } catch (IllegalArgumentException e) {
       String loc = (method.getDeclaringClass().getSimpleName() + "."
                     + method.getName() + ": ");
@@ -202,45 +222,41 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
                     + method.getName() + ": ");
 
       throw new ObserverException(loc + e.toString(), e.getCause());
+    } finally {
+      if (argEnv != null)
+        argEnv.release();
+      
+      if (env != null && getParentBean().getScope() == Dependent.class)
+        getParentBean().destroy(instance, env);
     }
   }
 
-  protected Object getInstance()
+  protected X getExistsInstance()
   {
     Bean<X> bean = getParentBean();
-    Class<?> type = bean.getBeanClass();
+    
+    Class<? extends Annotation>scopeType = bean.getScope();
+    Context context = _beanManager.getContext(scopeType);
 
-    if (_isIfExists) {
-      Class<? extends Annotation>scopeType = bean.getScope();
-      Context context = _beanManager.getContext(scopeType);
-
-      if (context != null)
-        return context.get(bean);
-      else
-        return null;
-    }
-
-    CreationalContext<X> env
-      = _beanManager.createCreationalContext(getParentBean());
-
-    return _beanManager.getReference(getParentBean(), type, env);
+    if (context != null)
+      return (X) context.get(bean);
+    else
+      return null;
   }
 
-  protected Object[] getEventArguments(Object event)
+  protected Object[] getEventArguments(Object event, 
+                                       CreationalContextImpl<?> parentEnv)
   {
     if (_args == null)
       return new Object[] { event };
 
     Object []args = new Object[_args.length];
 
-    CreationalContext<X> env
-      = _beanManager.createCreationalContext(getParentBean());
-    
     for (int i = 0; i < _args.length; i++) {
       BeanArg<X> arg = _args[i];
 
       if (arg != null)
-        args[i] = arg.eval(env);
+        args[i] = arg.eval((CreationalContextImpl) parentEnv);
       else
         args[i] = event;
     }

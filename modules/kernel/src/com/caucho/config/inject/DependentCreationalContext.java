@@ -23,65 +23,64 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
- *
- * @author Scott Ferguson
  */
 
-package com.caucho.config.scope;
+package com.caucho.config.inject;
 
-import java.lang.annotation.Annotation;
-
-import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
-import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.InjectionPoint;
 
 import com.caucho.inject.Module;
 
 /**
- * Context to wrap errors.
+ * Stack of partially constructed beans.
  */
 @Module
-public class ErrorContext implements Context {
-  private RuntimeException _exn;
-  private Context _context;
+public class DependentCreationalContext<T> extends CreationalContextImpl<T> {
+  private OwnerCreationalContext<?> _owner;
+  private InjectionPoint _injectionPoint;
+  private DependentCreationalContext<?> _next;
   
-  public ErrorContext(RuntimeException exn, Context context)
+  public DependentCreationalContext(Contextual<T> bean,
+                                    CreationalContextImpl<?> parent,
+                                    InjectionPoint injectionPoint)
   {
-    _exn = exn;
-    _context = context;
-  }
-  
-  public RuntimeException getException()
-  {
-    return _exn;
-  }
-  
-  public Context getContext()
-  {
-    return _context;
+    super(bean, parent);
+    
+    _owner = parent.getOwner();
+    _injectionPoint = injectionPoint;
+    
+    _next = _owner.getNext();
+    _owner.setNext(this);
   }
 
   @Override
-  public <T> T get(Contextual<T> bean)
-  {
-    throw _exn;    
-  }
-
-  @Override
-  public <T> T get(Contextual<T> bean, CreationalContext<T> creationalContext)
-  {
-    throw _exn;
-  }
-
-  @Override
-  public Class<? extends Annotation> getScope()
-  {
-    return null;
-  }
-
-  @Override
-  public boolean isActive()
+  public boolean isTop()
   {
     return false;
+  }
+  
+  @Override
+  public OwnerCreationalContext<?> getOwner()
+  {
+    return _owner;
+  }
+  
+  @Override
+  public DependentCreationalContext<?> getNext()
+  {
+    return _next;
+  }
+  
+  @Override
+  public InjectionPoint getInjectionPoint()
+  {
+    return _injectionPoint;
+  }
+  
+  @Override
+  public void setInjectionPoint(InjectionPoint injectionPoint)
+  {
+    _injectionPoint = injectionPoint;
   }
 }

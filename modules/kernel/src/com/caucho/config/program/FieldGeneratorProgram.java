@@ -29,22 +29,16 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.program.ValueGenerator;
-import com.caucho.config.ConfigException;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.util.L10N;
-
-import javax.rmi.PortableRemoteObject;
-import javax.enterprise.context.spi.CreationalContext;
 import java.lang.reflect.Field;
-import java.util.logging.Logger;
+
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
 
 
 public class FieldGeneratorProgram extends ConfigProgram
 {
-  private static final Logger log
-    = Logger.getLogger(FieldGeneratorProgram.class.getName());
   private static final L10N L = new L10N(FieldGeneratorProgram.class);
 
   private Field _field;
@@ -58,7 +52,8 @@ public class FieldGeneratorProgram extends ConfigProgram
     _gen = gen;
   }
 
-  String getName()
+  @Override
+  public String getName()
   {
     return _field.getName();
   }
@@ -68,7 +63,8 @@ public class FieldGeneratorProgram extends ConfigProgram
     return _field.getType();
   }
 
-  Class<?> getDeclaringClass()
+  @Override
+  public Class<?> getDeclaringClass()
   {
     return _field.getDeclaringClass();
   }

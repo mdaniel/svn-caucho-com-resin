@@ -29,11 +29,15 @@
 
 package com.caucho.config.inject;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -153,6 +157,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     synchronized (this) {
       if (_producer == null) {
         _producer = build();
+        validate(getBean());
       }
     }
     
@@ -223,7 +228,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   {
     if (_producer == null)
       getInjectionPoints();
-System.out.println("DISPOSE: " + instance);    
+
     _producer.dispose(instance);
   }
 
@@ -348,6 +353,8 @@ System.out.println("DISPOSE: " + instance);
     introspectInit(initList, annType.getJavaClass());
     ConfigProgram []initProgram = new ConfigProgram[initList.size()];
     initList.toArray(initProgram);
+    
+    Arrays.sort(initProgram);
     
     return initProgram;
   }
@@ -582,6 +589,8 @@ System.out.println("DISPOSE: " + instance);
     
     ConfigProgram []injectProgram = new ConfigProgram[injectProgramList.size()];
     injectProgramList.toArray(injectProgram);
+    
+    Arrays.sort(injectProgram);
 
     return injectProgram;
   }
@@ -665,6 +674,115 @@ System.out.println("DISPOSE: " + instance);
           ConfigProgram program = new MethodHandlerProgram(method, handler);
           
           injectProgramList.add(program);
+        }
+      }
+    }
+  }
+  
+  private void validate(Bean<?> bean)
+  {
+    if (bean == null)
+      return;
+    
+    Class<? extends Annotation> scopeType = bean.getScope();
+    
+    if (getBeanManager().isPassivatingScope(scopeType)) {
+      //validateNormal(bean);
+      validatePassivating(bean);
+    }
+    else if (getBeanManager().isNormalScope(scopeType)) {
+      //validateNormal(bean);
+    }
+  }
+  
+  private void validateNormal(Bean<?> bean)
+  {
+    Type baseType = _annotatedType.getBaseType();
+    
+    Class<?> cl = getBeanManager().createTargetBaseType(baseType).getRawClass();
+    
+    int modifiers = cl.getModifiers();
+    
+    if (Modifier.isFinal(modifiers)) {
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it's a final class, for {2}.",
+                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                    bean));
+    }
+    
+    Constructor<?> ctor = null;
+    
+    for (Constructor<?> ctorPtr : cl.getDeclaredConstructors()) {
+      if (ctorPtr.getParameterTypes().length > 0)
+        continue;
+      
+      if (Modifier.isPrivate(ctorPtr.getModifiers())) {
+        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because its constructor is private for {2}.",
+                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                      bean));
+
+      }
+      
+      ctor = ctorPtr;
+    }
+    
+    if (ctor == null) {
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it doesn't have a zero-arg constructorfor {2}.",
+                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                    bean));
+
+    }
+    
+    
+    for (Method method : cl.getMethods()) {
+      if (method.getDeclaringClass() == Object.class)
+        continue;
+      
+      if (Modifier.isFinal(method.getModifiers())) {
+        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because {2} is a final method for {3}.",
+                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                      method.getName(),
+                                      bean));
+      
+      }
+    }
+    
+    for (InjectionPoint ip : bean.getInjectionPoints()) {
+      if (ip.getType().equals(InjectionPoint.class))
+        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' injects an InjectionPoint for {3}.",
+                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                      ip.getMember().getName(),
+                                      bean));
+      
+    }
+  }
+  
+  private void validatePassivating(Bean<?> bean)
+  {
+    Type baseType = _annotatedType.getBaseType();
+    
+    Class<?> cl = getBeanManager().createTargetBaseType(baseType).getRawClass();
+    
+    if (! Serializable.class.isAssignableFrom(cl)) {
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it's not serializable for {2}.",
+                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                    bean));
+    }
+    
+    for (InjectionPoint ip : bean.getInjectionPoints()) {
+      if (ip.isTransient())
+        continue;
+      
+      Type type = ip.getType();
+      
+      if (type instanceof Class<?>) {
+        Class<?> ipClass = (Class<?>) type;
+
+        if (! ipClass.isInterface()
+            && ! Serializable.class.isAssignableFrom(ipClass)) {
+          throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' is not serializable for {3}.",
+                                        cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                        ip.getMember().getName(),
+                                        bean));
         }
       }
     }
@@ -758,6 +876,18 @@ System.out.println("DISPOSE: " + instance);
       }
     }
     
+    @Override
+    public Class<?> getDeclaringClass()
+    {
+      return _field.getDeclaringClass();
+    }
+    
+    @Override
+    public String getName()
+    {
+      return _field.getName();
+    }
+    
     private String getLocation(Field field)
     {
       return _field.getDeclaringClass().getName() + "." + _field.getName() + ": ";
@@ -768,15 +898,15 @@ System.out.println("DISPOSE: " + instance);
     public <T> void inject(T instance, CreationalContext<T> cxt)
     {
       try {
-        CreationalContextImpl<T> env;
+        CreationalContextImpl<?> env;
         
         if (cxt instanceof CreationalContextImpl<?>)
-          env = (CreationalContextImpl<T>) cxt;
+          env = (CreationalContextImpl<?>) cxt;
         else
           env = null;
         
         // server/30i1 vs ioc/0155
-        Object value = _fieldFactory.create(env, _ip);
+        Object value = _fieldFactory.create(null, env, _ip);
         
         _field.set(instance, value);
       } catch (AmbiguousResolutionException e) {
@@ -812,6 +942,24 @@ System.out.println("DISPOSE: " + instance);
       _args = args;
     }
 
+    @Override
+    public int getPriority()
+    {
+      return 1;
+    }
+    
+    @Override
+    public Class<?> getDeclaringClass()
+    {
+      return _method.getDeclaringClass();
+    }
+    
+    @Override
+    public String getName()
+    {
+      return _method.getName();
+    }
+    
     @Override
     public <T> void inject(T instance, CreationalContext<T> env)
     {

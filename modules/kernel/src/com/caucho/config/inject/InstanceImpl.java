@@ -81,7 +81,7 @@ public final class InstanceImpl<T> implements Instance<T>
     }
 
     if (_factory != null)
-      return (T) _factory.create(null, null);
+      return (T) _factory.create(null, null, null);
     else
       return null;
   }

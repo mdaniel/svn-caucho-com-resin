@@ -36,6 +36,7 @@ import java.util.concurrent.TimeUnit;
 import javax.enterprise.inject.spi.Interceptor;
 
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.inject.Module;
 import com.caucho.util.FreeList;
 import com.caucho.util.L10N;
@@ -111,7 +112,7 @@ public class StatelessPool<X,T> {
       Item<X> beanItem = _freeList.allocate();
     
       if (beanItem == null) {
-        CreationalContextImpl<X> env = new CreationalContextImpl<X>(_manager.getBean());
+        CreationalContextImpl<X> env = new OwnerCreationalContext<X>(_manager.getBean());
         
         beanItem = new Item<X>(_context.newInstance(env), 
                                _manager.getInterceptorBindings(_interceptorBeans, env));

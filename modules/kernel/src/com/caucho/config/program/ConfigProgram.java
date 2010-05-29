@@ -33,6 +33,7 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.*;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.type.*;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.xml.QName;
@@ -40,13 +41,34 @@ import com.caucho.xml.QName;
 /**
  * A saved program for configuring an object.
  */
-public abstract class ConfigProgram {
+public abstract class ConfigProgram implements Comparable<ConfigProgram> {
   /**
    * Returns the program's QName
    */
   public QName getQName()
   {
     return null;
+  }
+  
+  public int getPriority()
+  {
+    return 0;
+  }
+  
+  /**
+   * Returns the declaring class.
+   */
+  public Class<?> getDeclaringClass()
+  {
+    return getClass();
+  }
+  
+  /**
+   * Returns the name.
+   */
+  public String getName()
+  {
+    return getClass().getName();
   }
   
   /**
@@ -71,7 +93,7 @@ public abstract class ConfigProgram {
     throws ConfigException
   {
     // ioc/23e7
-    inject(bean, CreationalContextImpl.create());
+    inject(bean, new OwnerCreationalContext(null));
   }
 
   final
@@ -92,7 +114,7 @@ public abstract class ConfigProgram {
     try {
       T value = type.newInstance();
 
-      inject(value, new CreationalContextImpl<T>());
+      inject(value, new OwnerCreationalContext<T>(null));
 
       return value;
     } catch (RuntimeException e) {
@@ -126,7 +148,7 @@ public abstract class ConfigProgram {
   public <T> T create(ConfigType<T> type)
     throws ConfigException
   {
-    return create(type, new CreationalContextImpl<T>());
+    return create(type, new OwnerCreationalContext<T>(null));
   }
 
   public <T> T create(ConfigType<T> type, CreationalContext<T> env)
@@ -139,5 +161,27 @@ public abstract class ConfigProgram {
     throws ConfigException
   {
     Config.init(bean);
+  }
+  
+  public int compareTo(ConfigProgram peer)
+  {
+    /*
+    int cmp = getPriority() - peer.getPriority();
+    
+    if (cmp != 0)
+      return cmp;
+    */
+    Class<?> selfClass = getDeclaringClass();
+    Class<?> peerClass = peer.getDeclaringClass();
+    
+    if (selfClass == peerClass) {
+      return getName().compareTo(peer.getName());
+    }
+    else if (selfClass.isAssignableFrom(peerClass))
+      return -1;
+    else if (peerClass.isAssignableFrom(selfClass))
+      return 1;
+    else
+      return selfClass.getName().compareTo(peerClass.getName());
   }
 }

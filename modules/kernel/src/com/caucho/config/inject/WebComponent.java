@@ -73,8 +73,8 @@ public class WebComponent {
         return;
     }
 
-    if (bean instanceof ProducesBean<?,?>
-        && ((ProducesBean<?,?>) bean).isInjectionPoint()) {
+    if (bean instanceof ProducesMethodBean<?,?>
+        && ((ProducesMethodBean<?,?>) bean).isInjectionPoint()) {
       _injectionPointEntry = new BeanEntry(type, bean);
     }
     

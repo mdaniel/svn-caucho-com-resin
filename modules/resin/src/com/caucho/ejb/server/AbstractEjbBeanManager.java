@@ -46,6 +46,7 @@ import javax.transaction.UserTransaction;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.AroundInvokeConfig;
@@ -89,12 +90,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   // name for IIOP, Hessian, JNDI
   protected String _mappedName;
 
-  private ArrayList<Class<?>> _localApiList = new ArrayList<Class<?>>();
-  private Class<?> _localBean;
-  
   private ArrayList<Class<?>> _remoteApiList = new ArrayList<Class<?>>();
-  
-  protected boolean _hasNoInterfaceView = false;
 
   private Class<?> _serviceEndpointClass;
 
@@ -306,16 +302,6 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     return _annotatedType.getJavaClass();
   }
   
-  public void setIsNoInterfaceView(boolean noInterfaceView)
-  {
-    _hasNoInterfaceView = noInterfaceView;
-  }
-
-  public boolean hasNoInterfaceView()
-  {
-    return _hasNoInterfaceView;
-  }
-  
   /**
    * Sets the remote object list.
    */
@@ -339,38 +325,15 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   {
     return _remoteApiList.size() > 0;
   }
-
-  /**
-   * Sets the local api class list
-   */
-  public void setLocalApiList(ArrayList<Class<?>> list)
-  {
-    _localApiList = new ArrayList<Class<?>>(list);
-  }
-
-  /**
-   * Sets the remote object class.
-   */
-  /*
-  private ArrayList<Class<?>> getLocalApiList()
-  {
-    return _localApiList;
-  }
-  */
   
   public ArrayList<AnnotatedType<? super X>> getLocalApi()
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
   
-  public void setLocalBean(Class<?> localBean)
+  public AnnotatedType<X> getLocalBean()
   {
-    _localBean = localBean;
-  }
-  
-  public Class<?> getLocalBean()
-  {
-    return _localBean;
+    return null;
   }
 
   /**
@@ -536,12 +499,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     // _loader.setId("EnvironmentLoader[ejb:" + getId() + "]");
   }
   
-  public void initInstance(X instance)
-  {
-    _producer.initInstance(instance);
-  }
-  
-  public X newInstance(CreationalContext<X> env)
+  public X newInstance(CreationalContextImpl<X> env)
   {
     return _producer.newInstance(env);
   }
@@ -549,21 +507,18 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   /**
    * Initialize an instance
    */
+  /*
   public <T> void initInstance(X instance, InjectionTarget<X> target, 
                                T proxy, CreationalContext<T> cxt)
   {
     _producer.initInstance(instance, target, proxy, cxt);
-  }
-
-  public void setInitProgram(ConfigProgram program)
-  {
-    _producer.setInitProgram(program);
   }
   
   public void setInjectionTarget(InjectionTarget<X> target)
   {
     _producer.setInjectionTarget(target);
   }
+  */
   
   /**
    * Initialize an instance

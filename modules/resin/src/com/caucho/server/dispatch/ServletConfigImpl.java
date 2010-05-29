@@ -32,6 +32,7 @@ package com.caucho.server.dispatch;
 import com.caucho.config.*;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.annotation.DisableConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
@@ -1233,7 +1234,7 @@ public class ServletConfigImpl
   {
     if (_bean != null) {
       // XXX: need to ask manager?
-      CreationalContext env = CreationalContextImpl.create();
+      CreationalContextImpl<?> env = new OwnerCreationalContext(_bean);
       
       return _bean.create(env);
     }
@@ -1254,7 +1255,7 @@ public class ServletConfigImpl
 
       _comp = inject.createInjectionTarget(servletClass);
 
-      CreationalContext env = CreationalContextImpl.create();
+      CreationalContextImpl env = new OwnerCreationalContext(null);
 
       try {
         // server/1b40

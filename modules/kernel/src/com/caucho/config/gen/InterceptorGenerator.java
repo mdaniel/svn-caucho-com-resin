@@ -50,6 +50,7 @@ import javax.interceptor.InterceptorBinding;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.DependentCreationalContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.inject.Module;
@@ -284,7 +285,7 @@ public class InterceptorGenerator<X>
     out.println("  = __caucho_interceptor_beans.get(i);");
     
     out.println("javax.enterprise.context.spi.CreationalContext env");
-    out.println("  = new " + CreationalContextImpl.class.getName() + "(bean, parentEnv);");
+    out.println("  = new " + DependentCreationalContext.class.getName() + "(bean, parentEnv, null);");
     
     out.print("__caucho_interceptor_objects[i] = ");
     out.println("__caucho_manager.getReference(bean, bean.getBeanClass(), env);");

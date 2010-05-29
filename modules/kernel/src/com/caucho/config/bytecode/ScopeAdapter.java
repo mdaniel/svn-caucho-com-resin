@@ -269,12 +269,9 @@ public class ScopeAdapter {
     code.getField(jClass.getThisClass(), "_factory",
                   "Lcom/caucho/config/inject/InjectManager$ReferenceFactory;");
     
-    code.pushNull();
-    code.pushNull();
-
     code.invoke("com/caucho/config/inject/InjectManager$ReferenceFactory",
                 "create",
-                "(Lcom/caucho/config/inject/CreationalContextImpl;Ljavax/enterprise/inject/spi/InjectionPoint;)Ljava/lang/Object;",
+                "()Ljava/lang/Object;",
                 3, 1);
 
     code.cast(method.getDeclaringClass().getName().replace('.', '/'));
@@ -368,12 +365,9 @@ public class ScopeAdapter {
     code.getField(jClass.getThisClass(), "_factory",
                   "Lcom/caucho/config/inject/InjectManager$ReferenceFactory;");
 
-    code.pushNull();
-    code.pushNull();
-
     code.invoke("com/caucho/config/inject/InjectManager$ReferenceFactory",
                 "create",
-                "(Lcom/caucho/config/inject/CreationalContextImpl;Ljavax/enterprise/inject/spi/InjectionPoint;)Ljava/lang/Object;",
+                "()Ljava/lang/Object;",
                 3, 1);
 
     code.addObjectReturn();

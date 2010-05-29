@@ -94,7 +94,7 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.el.WebBeansELResolver;
+import com.caucho.config.el.CandiContextResolver;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBindingHandle;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
@@ -524,8 +524,6 @@ public class WebApp extends ServletContextImpl
         _invocationDependency.add(new RepositoryDependency(baseTag, baseValue));
       }
 
-      _jspApplicationContext = new JspApplicationContextImpl(this);
-
       // validation
       if (CauchoSystem.isTesting()) {
       }
@@ -541,6 +539,7 @@ public class WebApp extends ServletContextImpl
       _beanManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
       _beanManager.addExtension(new WebAppInjectExtension(_beanManager, this));
 
+      _jspApplicationContext = new JspApplicationContextImpl(this);
       _jspApplicationContext.addELResolver(_beanManager.getELResolver());
     } catch (Throwable e) {
       setConfigException(e);
@@ -650,6 +649,11 @@ public class WebApp extends ServletContextImpl
       _invocationDecoder = Server.getCurrent().getInvocationDecoder();
 
     return _invocationDecoder;
+  }
+  
+  public InjectManager getBeanManager()
+  {
+    return _beanManager;
   }
 
   /**
@@ -3070,7 +3074,7 @@ public class WebApp extends ServletContextImpl
         log.log(Level.WARNING, e.toString(), e);
       }
 
-      _jspApplicationContext.addELResolver(new WebBeansELResolver());
+      _jspApplicationContext.addELResolver(new CandiContextResolver());
 
       callInitializers();
 

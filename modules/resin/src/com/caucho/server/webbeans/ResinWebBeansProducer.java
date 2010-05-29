@@ -37,6 +37,7 @@ import java.util.logging.Logger;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Conversation;
 import javax.enterprise.inject.Produces;
+import javax.inject.Singleton;
 import javax.management.MBeanServer;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
@@ -57,7 +58,7 @@ import com.caucho.transaction.TransactionManagerImpl;
  */
 
 @CauchoDeployment
-@ApplicationScoped
+@Singleton
 public class ResinWebBeansProducer
 {
   private static final Logger log
@@ -118,7 +119,7 @@ public class ResinWebBeansProducer
   }
 
   /**
-   * Returns the TransactoinSynchronizationRegistry
+   * Returns the TransactionSynchronizationRegistry
    */
   @Produces
   @CauchoDeployment

@@ -38,13 +38,16 @@ import java.util.logging.Logger;
 import javax.enterprise.inject.Any;
 import javax.enterprise.util.Nonbinding;
 
+import com.caucho.config.ConfigException;
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Introspected annotation binding
  */
 @Module
 public class QualifierBinding {
+  private static final L10N L = new L10N(QualifierBinding.class);
   private static final Logger log = Logger.getLogger(QualifierBinding.class.getName());
   private static final Class<?> []NULL_ARG = new Class[0];
 
@@ -72,6 +75,15 @@ public class QualifierBinding {
         continue;
       else if (Annotation.class.equals(method.getDeclaringClass()))
         continue;
+      
+      Class<?> type = method.getReturnType();
+      
+      if (type.isArray())
+        throw new ConfigException(L.l("@{0} is an invalid qualifier because its member '{1}' has an array value and is missing @Nonbinding",
+                                      _annType.getSimpleName(), method.getName()));
+      if (Annotation.class.isAssignableFrom(type))
+        throw new ConfigException(L.l("@{0} is an invalid qualifier because its member '{1}' has an annotation value and is missing @Nonbinding",
+                                      _annType.getSimpleName(), method.getName()));
       
       method.setAccessible(true);
 

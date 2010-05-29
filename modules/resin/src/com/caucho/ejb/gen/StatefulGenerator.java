@@ -141,12 +141,12 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.println();
     out.println("import com.caucho.config.*;");
+    out.println("import com.caucho.config.inject.CreationalContextImpl;");
     out.println("import com.caucho.ejb.*;");
     out.println("import com.caucho.ejb.session.*;");
     out.println();
     out.println("import javax.ejb.*;");
     out.println("import javax.transaction.*;");
-    out.println("import javax.enterprise.context.spi.CreationalContext;");
 
     generateClassHeader(out);
     
@@ -220,7 +220,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println();
     out.println("private " + getClassName() + "(StatefulManager manager"
                 + ", StatefulContext context"
-                + ", CreationalContext<T> env)");
+                + ", CreationalContextImpl<T> env)");
     out.println("{");
     out.pushDepth();
     
@@ -249,7 +249,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   {
     out.println();
     out.println("@Override");
-    out.println("public T __caucho_createProxy(CreationalContext<T> env)");
+    out.println("public T __caucho_createProxy(CreationalContextImpl<T> env)");
     out.println("{");
     out.println("  return (T) new " + getClassName() + "(_manager, _context, env);");
     out.println("}");

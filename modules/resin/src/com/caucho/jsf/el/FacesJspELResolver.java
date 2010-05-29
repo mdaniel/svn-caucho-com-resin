@@ -53,7 +53,7 @@ public class FacesJspELResolver extends ELResolver {
 
   private ApplicationImpl _app;
   private ELResolver _managedBeanResolver;
-  private ELResolver _webBeansResolver;
+  private ELResolver _cdiResolver;
   private ELResolver _resourceBundleResolver;
 
   public FacesJspELResolver(ApplicationImpl app)
@@ -64,7 +64,7 @@ public class FacesJspELResolver extends ELResolver {
       = (FacesContextELResolver) _app.getELResolver();
 
     _managedBeanResolver = facesResolver.getManagedBeanResolver();
-    _webBeansResolver = new WebBeansELResolver();
+    _cdiResolver = new CandiContextResolver();
     _resourceBundleResolver = facesResolver.getResourceBundleResolver();
   }
 
@@ -102,7 +102,7 @@ public class FacesJspELResolver extends ELResolver {
 		   _managedBeanResolver.getFeatureDescriptors(env, base));
 
     addDescriptors(descriptors,
-		   _webBeansResolver.getFeatureDescriptors(env, base));
+		   _cdiResolver.getFeatureDescriptors(env, base));
 
     addDescriptors(descriptors,
 		   _resourceBundleResolver.getFeatureDescriptors(env, base));
@@ -162,7 +162,7 @@ public class FacesJspELResolver extends ELResolver {
 	}
       }
 
-      Object value = _webBeansResolver.getValue(env, base, property);
+      Object value = _cdiResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
 	return value;

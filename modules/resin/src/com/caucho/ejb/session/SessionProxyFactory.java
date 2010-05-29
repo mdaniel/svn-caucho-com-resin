@@ -29,13 +29,13 @@
 
 package com.caucho.ejb.session;
 
-import javax.enterprise.context.spi.CreationalContext;
+import com.caucho.config.inject.CreationalContextImpl;
 
 /**
  * Factory for a session bean.
  */
 public interface SessionProxyFactory<T> {
-  public T __caucho_createProxy(CreationalContext<T> env);
+  public T __caucho_createProxy(CreationalContextImpl<T> env);
 
   public void __caucho_destroy();
 }

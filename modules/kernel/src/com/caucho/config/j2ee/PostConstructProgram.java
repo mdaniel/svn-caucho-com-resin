@@ -60,6 +60,18 @@ public class PostConstructProgram extends ConfigProgram
 
     introspect();
   }
+  
+  @Override
+  public Class<?> getDeclaringClass()
+  {
+    return _init.getDeclaringClass();
+  }
+  
+  @Override
+  public String getName()
+  {
+    return _init.getName();
+  }
 
   protected void introspect()
   {

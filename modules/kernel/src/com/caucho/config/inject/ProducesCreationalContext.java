@@ -23,19 +23,29 @@
  *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
- *
- * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.config.inject;
 
-import com.caucho.config.inject.CreationalContextImpl;
+import javax.enterprise.context.spi.Contextual;
+
+import com.caucho.inject.Module;
 
 /**
- * Interface for a Candi enhanced bean.
+ * Stack of partially constructed beans.
  */
-public interface CandiEnhancedBean {
-  public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
-  
-  public void __caucho_postConstruct();
+@Module
+public class ProducesCreationalContext<T> extends OwnerCreationalContext<T> {
+  public ProducesCreationalContext(Contextual<T> bean,
+                                   CreationalContextImpl<?> parent)
+  {
+    super(bean, parent);
+  }
+
+  @Override
+  public boolean isTop()
+  {
+    // ioc/0784
+    return false;
+  }
 }

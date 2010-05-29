@@ -37,5 +37,5 @@ import javax.enterprise.inject.spi.Bean;
  */
 public interface ScopeAdapterBean<X>
 {
-  public X getScopeAdapter(Bean<?> bean, CreationalContext<X> cxt);
+  public X getScopeAdapter(Bean<?> bean, CreationalContextImpl<X> cxt);
 }

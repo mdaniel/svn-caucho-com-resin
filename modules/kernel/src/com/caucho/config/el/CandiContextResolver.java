@@ -29,21 +29,30 @@
 
 package com.caucho.config.el;
 
-import java.beans.*;
-import java.util.*;
-import javax.el.*;
+import java.beans.FeatureDescriptor;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Set;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+import javax.el.ELResolver;
+import javax.el.PropertyNotFoundException;
+import javax.el.PropertyNotWritableException;
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.xml.XmlConfigContext;
-
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.inject.spi.Bean;
 
 /**
  * Variable resolution for webbeans variables
  */
 public class CandiContextResolver extends ELResolver {
+  private static final ThreadLocal<ContextHolder> _envLocal
+    = new ThreadLocal<ContextHolder>();
+  
   private InjectManager _injectManager;
   
   public CandiContextResolver(InjectManager injectManager)
@@ -76,12 +85,21 @@ public class CandiContextResolver extends ELResolver {
                           Object base,
                           Object property)
   {
-    Object value = getValue(context, base, property);
-
-    if (value == null)
+    if (! (property instanceof String) || base != null)
       return null;
-    else
-      return value.getClass();
+
+    String name = (String) property;
+    
+    InjectManager manager = getInjectManager();
+    
+    Set<Bean<?>> beanSet = manager.getBeans(name);
+    
+    if (beanSet.size() == 0)
+      return null;
+    
+    Bean<?> bean = beanSet.iterator().next();
+    
+    return bean.getBeanClass();
   }
 
   @Override
@@ -95,25 +113,46 @@ public class CandiContextResolver extends ELResolver {
       return null;
 
     String name = (String) property;
-
-    InjectManager manager = _injectManager;
-
-    if (manager == null) {
-      manager = InjectManager.getCurrent();
-      
-      if (manager == null)
-        return null;
-    }
+    
+    InjectManager manager = getInjectManager();
+    
+    if (manager == null)
+      return manager;
+    
+    Set<Bean<?>> beanSet = manager.getBeans(name);
+    
+    if (beanSet.size() == 0)
+      return null;
+    
+    Bean<?> bean = manager.resolve(beanSet);
 
     XmlConfigContext env = XmlConfigContext.getCurrent();
+
+    ContextHolder holder = _envLocal.get();
     
     CreationalContextImpl<?> cxt = null;
     
-    if (env != null) {
+    if (holder != null && holder.isActive()) {
+      cxt = holder.getEnv();
+      
+      if (cxt == null) {
+        cxt = new OwnerCreationalContext<Object>(null);
+        holder.setEnv(cxt);
+      }
+    }
+    
+    if (cxt == null && env != null) {
       cxt = (CreationalContextImpl<?>) env.getCreationalContext();
     }
     
-    Object result = manager.getReference(name, cxt);
+    if (cxt == null) {
+      cxt = new OwnerCreationalContext(bean);
+    }
+    
+    Object result = CreationalContextImpl.findAny(cxt, bean);
+    
+    if (result == null)
+      result = manager.getReference(bean, cxt);
 
     if (result != null) {
       context.setPropertyResolved(true);
@@ -122,6 +161,20 @@ public class CandiContextResolver extends ELResolver {
     }
     else
       return null;
+  }
+  
+  private InjectManager getInjectManager()
+  {
+    InjectManager manager = _injectManager;
+
+    if (manager == null) {
+      manager = InjectManager.getCurrent();
+      
+      if (manager == null)
+        return null;
+    }
+    
+    return manager;
   }
 
   @Override
@@ -143,5 +196,59 @@ public class CandiContextResolver extends ELResolver {
            PropertyNotWritableException,
            ELException
   {
+  }
+  
+  public static final void startContext()
+  {
+    ContextHolder holder = _envLocal.get();
+    
+    if (holder == null) {
+      holder = new ContextHolder();
+      _envLocal.set(holder);
+    }
+    
+    holder.setActive();
+  }
+  
+  public static final void finishContext()
+  {
+    ContextHolder holder = _envLocal.get();
+    
+    holder.free();
+  }
+  
+  static class ContextHolder {
+    private boolean _isActive;
+    private CreationalContextImpl<?> _env;
+
+    void setActive()
+    {
+      _isActive = true;
+    }
+    
+    boolean isActive()
+    {
+      return _isActive;
+      
+    }
+    
+    CreationalContextImpl<?> getEnv()
+    {
+      return _env;
+    }
+
+    void setEnv(CreationalContextImpl<?> env)
+    {
+      _env = env;
+    }
+    
+    void free()
+    {
+      CreationalContextImpl<?> env = _env;
+      _env = null;
+      _isActive = false;
+      
+      env.release();
+    }
   }
 }

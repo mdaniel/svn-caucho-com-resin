@@ -31,6 +31,7 @@ package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -76,9 +77,9 @@ public class ProducesBuilder {
     for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
       if (beanMethod.isAnnotationPresent(Produces.class)) {
         AnnotatedMethod<? super X> disposesMethod 
-          = findDisposesMethod(beanType, beanMethod);
+          = findDisposesMethod(beanType, beanMethod.getBaseType());
         
-        addProduces(bean, beanType, beanMethod, disposesMethod);
+        addProducesMethod(bean, beanType, beanMethod, disposesMethod);
       }
     }
     
@@ -88,7 +89,7 @@ public class ProducesBuilder {
     }
   }
 
-  protected <X,T> void addProduces(Bean<X> bean,
+  protected <X,T> void addProducesMethod(Bean<X> bean,
                                    AnnotatedType<X> beanType,
                                    AnnotatedMethod<? super X> producesMethod,
                                    AnnotatedMethod<? super X> disposesMethod)
@@ -97,48 +98,21 @@ public class ProducesBuilder {
         && ! beanType.isAnnotationPresent(Specializes.class))
       return;
     
-    Arg []producesArgs = introspectArguments(bean, producesMethod);
-    Arg []disposesArgs = null;
+    Arg<? super X> []producesArgs = introspectArguments(bean, producesMethod);
+    Arg<? super X> []disposesArgs = null;
     
     if (disposesMethod != null)
       disposesArgs = introspectDisposesArgs(disposesMethod.getParameters());
 
-    ProducesBean<X,T> producesBean
-      = ProducesBean.create(_manager, bean, 
-                            producesMethod, producesArgs,
-                            disposesMethod, disposesArgs);
+    ProducesMethodBean<X,T> producesBean
+      = ProducesMethodBean.create(_manager, bean, 
+                                  producesMethod, producesArgs,
+                                  disposesMethod, disposesArgs);
 
     // bean.init();
 
     // _manager.addBean(producesBean);
     _manager.addProducesBean(producesBean);
-  }
-  
-  private <X> AnnotatedMethod<? super X>
-  findDisposesMethod(AnnotatedType<X> beanType,
-                     AnnotatedMethod<? super X> producesMethod)
-  {
-    for (AnnotatedMethod beanMethod : beanType.getMethods()) {
-      List<AnnotatedParameter<?>> params = beanMethod.getParameters();
-      
-      if (params.size() == 0)
-        continue;
-      
-      AnnotatedParameter<?> param = params.get(0);
-      
-      if (! param.isAnnotationPresent(Disposes.class))
-        continue;
-      
-      if (! producesMethod.getBaseType().equals(param.getBaseType()))
-        continue;
-
-
-      // XXX: check @Qualifiers
-      
-      return beanMethod;
-    }
-    
-    return null;
   }
 
   protected <X> void addProduces(Bean<X> bean,
@@ -151,12 +125,47 @@ public class ProducesBuilder {
         && ! beanClass.isAnnotationPresent(Specializes.class))
       return;
     
-    ProducesFieldBean producesBean
-      = ProducesFieldBean.create(_manager, bean, beanField);
+    AnnotatedMethod<? super X> disposesMethod 
+      = findDisposesMethod(beanType, beanField.getBaseType());
+    
+    Arg<? super X> []disposesArgs = null;
+    
+    if (disposesMethod != null)
+      disposesArgs = introspectDisposesArgs(disposesMethod.getParameters());
+    
+    ProducesFieldBean producesFieldBean
+      = ProducesFieldBean.create(_manager, bean, beanField,
+                                 disposesMethod, disposesArgs);
 
     // bean.init();
 
-    _manager.addProducesFieldBean(producesBean);
+    _manager.addProducesFieldBean(producesFieldBean);
+  }
+  
+  private <X> AnnotatedMethod<? super X>
+  findDisposesMethod(AnnotatedType<X> beanType,
+                     Type producesBaseType)
+  {
+    for (AnnotatedMethod beanMethod : beanType.getMethods()) {
+      List<AnnotatedParameter<?>> params = beanMethod.getParameters();
+      
+      if (params.size() == 0)
+        continue;
+      
+      AnnotatedParameter<?> param = params.get(0);
+      
+      if (! param.isAnnotationPresent(Disposes.class))
+        continue;
+      
+      if (! producesBaseType.equals(param.getBaseType()))
+        continue;
+
+      // XXX: check @Qualifiers
+      
+      return beanMethod;
+    }
+    
+    return null;
   }
 
   protected <X,T> Arg<T> []introspectArguments(Bean<X> bean,

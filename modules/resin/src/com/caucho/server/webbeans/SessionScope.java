@@ -110,4 +110,9 @@ public class SessionScope extends AbstractScopeContext {
     
     return context;
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[]";
+  }
 }

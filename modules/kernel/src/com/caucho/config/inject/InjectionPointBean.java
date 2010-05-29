@@ -150,7 +150,7 @@ public class InjectionPointBean implements Bean<InjectionPoint>
   {
     // ioc/0i3o
     if (env instanceof CreationalContextImpl<?>)
-      return ((CreationalContextImpl<InjectionPoint>) env).getInjectionPoint();
+      return ((CreationalContextImpl<InjectionPoint>) env).findInjectionPoint();
     else
       return _ij;
   }

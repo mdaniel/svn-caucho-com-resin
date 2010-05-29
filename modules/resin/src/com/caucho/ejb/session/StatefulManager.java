@@ -52,6 +52,7 @@ import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.inject.SessionBeanImpl;
@@ -153,7 +154,7 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
 
     if (context != null) {
       CreationalContextImpl<T> env = 
-        (CreationalContextImpl<T>) CreationalContextImpl.create();
+        new OwnerCreationalContext<T>(null);
 
       return context.createProxy(env);
     }
@@ -161,7 +162,7 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       return null;
   }
   
-  public <T> T initProxy(T instance, CreationalContext<T> env)
+  public <T> T initProxy(T instance, CreationalContextImpl<T> env)
   {
     if (instance instanceof CandiEnhancedBean) {
       CandiEnhancedBean bean = (CandiEnhancedBean) instance;

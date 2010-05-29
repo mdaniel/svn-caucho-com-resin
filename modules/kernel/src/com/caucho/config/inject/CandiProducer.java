@@ -148,7 +148,7 @@ public class CandiProducer<X> implements InjectionTarget<X>
       
       if (_decoratorBeans != null && _decoratorBeans.size() > 0) {
         if (env != null)
-          oldPoint = env.getInjectionPoint();
+          oldPoint = env.findInjectionPoint();
         
         Decorator dec = (Decorator) _decoratorBeans.get(_decoratorBeans.size() - 1);
         
@@ -199,7 +199,7 @@ public class CandiProducer<X> implements InjectionTarget<X>
     }
   }
   
-  private Object []evalArgs(CreationalContextImpl<?> env)
+  private Object []evalArgs(CreationalContext<?> env)
   {
     Arg []args = _args;
     

@@ -40,6 +40,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.ejb.session.AbstractSessionContext;
@@ -78,7 +79,7 @@ public class SessionBeanImpl<X,T>
   }
 
   @Override
-  public T getScopeAdapter(Bean<?> topBean, CreationalContext<T> context)
+  public T getScopeAdapter(Bean<?> topBean, CreationalContextImpl<T> context)
   {
     return null;
   }
@@ -86,7 +87,10 @@ public class SessionBeanImpl<X,T>
   @Override
   public T create(CreationalContext<T> env)
   {
-    return _context.createProxy(env);
+    if (env instanceof CreationalContextImpl<?>)
+      return _context.createProxy((CreationalContextImpl<T>) env);
+    else
+      return _context.createProxy(null);
   }
   
   @Override

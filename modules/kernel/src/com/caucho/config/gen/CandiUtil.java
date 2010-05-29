@@ -32,8 +32,10 @@ package com.caucho.config.gen;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.DelegateProxyBean;
+import com.caucho.config.inject.DependentCreationalContext;
 import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.util.L10N;
 
 import java.lang.annotation.Annotation;
@@ -192,13 +194,13 @@ public class CandiUtil {
     return method;
   }
 
-  public static Object generateDelegate(List<Decorator<?>> beans,
+  private static Object generateDelegate(List<Decorator<?>> beans,
                                         Object tail)
   {
     InjectManager webBeans = InjectManager.create();
 
     Bean<?> parentBean = null;
-    CreationalContext env = webBeans.createCreationalContext(parentBean);
+    CreationalContextImpl env = new OwnerCreationalContext(parentBean);
 
     for (int i = beans.size() - 1; i >= 0; i--) {
       Decorator<?> bean = beans.get(i);
@@ -221,28 +223,15 @@ public class CandiUtil {
   {
     Object []instances = new Object[beans.size()];
 
-    CreationalContext<Object> proxyEnv
-      = new CreationalContextImpl<Object>(DelegateProxyBean.BEAN, parentEnv);
+    DependentCreationalContext<Object> proxyEnv
+      = new DependentCreationalContext<Object>(DelegateProxyBean.BEAN, parentEnv, null);
     
     proxyEnv.push(delegateProxy);
     
     for (int i = 0; i < beans.size(); i++) {
       Decorator<?> bean = beans.get(i);
       
-      /*
-      Object instance = CreationalContextImpl.findWithNull(parentEnv, bean);
-      
-      if (instance == null) {
-        CreationalContext<?> env = new CreationalContextImpl(bean, parentEnv);
-
-        instance = manager.getReference(bean, bean.getBeanClass(), env);
-      }
-      else if (instance == CreationalContextImpl.NULL) {
-        instance = null; // XXX: error?
-      }
-      */
-      
-      CreationalContext<?> env = new CreationalContextImpl(bean, proxyEnv);
+      CreationalContextImpl<?> env = new DependentCreationalContext(bean, proxyEnv, null);
       
       Object instance = manager.getReference(bean, bean.getBeanClass(), env);
 

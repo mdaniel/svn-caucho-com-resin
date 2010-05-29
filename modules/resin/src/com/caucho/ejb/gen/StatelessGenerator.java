@@ -349,7 +349,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
 
     out.println();
     out.println("@Override");
-    out.println("public T __caucho_createProxy(javax.enterprise.context.spi.CreationalContext<T> env)");
+    out.println("public T __caucho_createProxy(com.caucho.config.inject.CreationalContextImpl<T> env)");
     out.println("{");
     out.println("  return (T) this;");
     out.println("}");

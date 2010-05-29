@@ -50,6 +50,7 @@ import javax.servlet.jsp.PageContext;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.java.JavaCompiler;
 import com.caucho.jsp.cfg.JspPropertyGroup;
@@ -352,7 +353,7 @@ abstract public class PageManager {
 	
 	InjectionTarget inject = beanManager.createInjectionTarget(page.getClass());
 
-	CreationalContext<?> env = CreationalContextImpl.create();
+	CreationalContext<?> env = new OwnerCreationalContext(null);
 
 	inject.inject(page, env);
 	

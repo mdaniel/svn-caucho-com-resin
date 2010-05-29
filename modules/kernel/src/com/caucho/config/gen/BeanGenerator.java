@@ -255,7 +255,7 @@ abstract public class BeanGenerator<X> extends GenClass
    {
      out.println();
      out.println("public void __caucho_inject(Object []delegates"
-                 + ", javax.enterprise.context.spi.CreationalContext<?> parentEnv)");
+                 + ", com.caucho.config.inject.CreationalContextImpl<?> parentEnv)");
      out.println("{");
      out.pushDepth();
 

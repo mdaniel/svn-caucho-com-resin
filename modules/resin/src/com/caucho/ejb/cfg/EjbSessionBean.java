@@ -457,9 +457,9 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     try {
       thread.setContextClassLoader(manager.getClassLoader());
 
-      manager.setInjectionTarget(getInjectionTarget());
+      // manager.setInjectionTarget(getInjectionTarget());
 
-      manager.setInitProgram(getInitProgram());
+      // manager.setInitProgram(getInitProgram());
 
       try {
         if (getServerProgram() != null)

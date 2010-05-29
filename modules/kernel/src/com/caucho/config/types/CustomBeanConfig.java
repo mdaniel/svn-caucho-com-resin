@@ -33,7 +33,7 @@ import com.caucho.config.*;
 import com.caucho.config.annotation.StartupType;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ProducesBean;
+import com.caucho.config.inject.ProducesMethodBean;
 import com.caucho.config.program.*;
 import com.caucho.config.reflect.AnnotatedElementImpl;
 import com.caucho.config.reflect.AnnotatedMethodImpl;

@@ -97,7 +97,7 @@ public class ValueArg<T> extends Arg<T> {
       bind();
 
     if (_factory != null)
-      return _factory.create((CreationalContextImpl) env, null);
+      return _factory.create(null, (CreationalContextImpl) env, null);
     else
       throw _bindException;
   }

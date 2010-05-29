@@ -54,7 +54,8 @@ public class MethodGeneratorProgram extends ConfigProgram
     _gen = gen;
   }
 
-  String getName()
+  @Override
+  public String getName()
   {
     return _method.getName();
   }
@@ -64,7 +65,8 @@ public class MethodGeneratorProgram extends ConfigProgram
     return _method.getParameterTypes()[0];
   }
 
-  Class<?> getDeclaringClass()
+  @Override
+  public Class<?> getDeclaringClass()
   {
     return _method.getDeclaringClass();
   }

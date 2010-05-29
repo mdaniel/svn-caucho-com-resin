@@ -31,7 +31,6 @@ import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.inject.Module;
 
@@ -39,87 +38,47 @@ import com.caucho.inject.Module;
  * Stack of partially constructed beans.
  */
 @Module
-public final class CreationalContextImpl<T> implements CreationalContext<T> {
+public class CreationalContextImpl<T> implements CreationalContext<T> {
   public static final Object NULL = new Object();
   
-  private final CreationalContextImpl<?> _top;
-  private final CreationalContextImpl<?> _parent; // parent in the creation chain
-  private CreationalContextImpl<?> _next; // next in the dependent chain
-  
   private final Contextual<T> _bean;
-  private InjectionPoint _injectionPoint;
+  private final CreationalContextImpl<?> _parent; // parent in the creation chain
+  
   private T _value;
   
-  public CreationalContextImpl(Contextual<T> bean,
-                               CreationalContext<?> parent,
-                               InjectionPoint ij)
+  protected CreationalContextImpl(Contextual<T> bean,
+                                  CreationalContextImpl<?> parent)
   {
     _bean = bean;
-    _injectionPoint = ij;
     
-    if (parent instanceof CreationalContextImpl<?>) {
-      CreationalContextImpl<?> parentEnv = (CreationalContextImpl<?>) parent;
-      
-      _parent = parentEnv;
-      _top = parentEnv._top;
-      _next = _top._next;
-      _top._next = this;
-    }
-    else {
-      _top = this;
-      _parent = null;
-      // _next = next;
-    }
-  }
-  
-  public CreationalContextImpl(Contextual<T> bean,
-                               CreationalContextImpl<?> parentEnv,
-                               InjectionPoint ij)
-  {
-    _bean = bean;
-    _injectionPoint = ij;
-    
-    _parent = parentEnv;
-    
-    if (parentEnv != null) {
-      _top = parentEnv._top;
-      _next = _top._next;
-      _top._next = this;
-    }
+    if (parent instanceof CreationalContextImpl<?>)
+      _parent = (CreationalContextImpl<?>) parent;
     else
-      _top = this;
+      _parent = null;
   }
   
-  public CreationalContextImpl()
+  protected boolean isTop()
   {
-    this(null, (CreationalContextImpl<?>) null, null);
+    return false;
   }
   
-  public CreationalContextImpl(Contextual<T> bean,
-                               CreationalContext<?> next)
+  protected OwnerCreationalContext<?> getOwner()
   {
-    this(bean, next, null);
+    throw new UnsupportedOperationException(getClass().getName());
   }
   
-  public CreationalContextImpl(Contextual<T> bean,
-                               CreationalContextImpl<?> next)
+  protected DependentCreationalContext<?> getNext()
   {
-    this(bean, next, null);
+    return null;
   }
   
-  public CreationalContextImpl(Contextual<T> bean)
+  protected InjectionPoint getInjectionPoint()
   {
-    this(bean, null, null);
+    return null;
   }
   
-  public static CreationalContextImpl<Object> create()
+  public void setInjectionPoint(InjectionPoint ip)
   {
-    return new CreationalContextImpl<Object>();
-  }
-  
-  public boolean isTop()
-  {
-    return this == _top;
   }
   
   public <X> X get(Contextual<X> bean)
@@ -167,13 +126,17 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
    */
   public <X> X getAny(Contextual<X> bean)
   {
-    return findAny(_top, bean);    
+    return findAny(getOwner(), bean);    
   }
   
   @SuppressWarnings("unchecked")
+  public
   static <X> X findAny(CreationalContextImpl<?> ptr, Contextual<X> bean)
   {
-    for (; ptr != null; ptr = ptr._next) {
+    if (ptr == null)
+      return null;
+    
+    for (ptr = ptr.getOwner(); ptr != null; ptr = ptr.getNext()) {
       Contextual<?> testBean = ptr._bean;
       
       if (testBean == bean) {
@@ -202,21 +165,18 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
     return null;
   }
   
-  public void setInjectionPoint(InjectionPoint ip)
+  public InjectionPoint findInjectionPoint()
   {
-    _injectionPoint = ip;
-  }
-  
-  public InjectionPoint getInjectionPoint()
-  {
-    CreationalContext<?> ptr = this; 
+    CreationalContextImpl<?> ptr = this; 
     
     while (ptr != null) {
       if (ptr instanceof CreationalContextImpl<?>) {
         CreationalContextImpl<?> env = (CreationalContextImpl<?>) ptr;
+
+        InjectionPoint ip = env.getInjectionPoint();
         
-        if (env._injectionPoint != null)
-          return env._injectionPoint;
+        if (ip != null)
+          return ip;
         
         ptr = env._parent;
       }
@@ -229,7 +189,7 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
   
   public Object getDelegate()
   {
-    CreationalContext<?> ptr = this; 
+    CreationalContextImpl<?> ptr = this; 
     
     while (ptr != null) {
       if (ptr instanceof CreationalContextImpl<?>) {
@@ -253,16 +213,12 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
     _value = value;
   }
   
-  public void setInjectionTarget(InjectionTarget<T> injectionTarget)
-  {
-  }
-
   @Override
   public void release()
   {
-    CreationalContextImpl<?> next = _next;
-    _next = null;
     _value = null;
+    
+    CreationalContextImpl<?> next = getNext();
     
     if (next != null)
       next.releaseImpl();
@@ -275,26 +231,14 @@ public final class CreationalContextImpl<T> implements CreationalContext<T> {
     
     if (value != null)
       _bean.destroy(value, this);
-    else
-      release();
+    else {
+      CreationalContextImpl<?> next = getNext();
+      
+      if (next != null)
+        next.releaseImpl();
+    }
   }
   
-  void postConstruct()
-  {
-    /*
-    if (_next != null)
-      _next.postConstruct();
-    
-    T value = _value;
-    // _value = null;
-    
-    if (value != null && _injectionTarget != null) {
-      _injectionTarget.postConstruct(value);
-      _injectionTarget = null;
-    }
-    */
-  }
-
   @Override
   public String toString()
   {

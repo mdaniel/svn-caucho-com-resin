@@ -46,6 +46,7 @@ import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
+import com.caucho.inject.ThreadContext;
 import com.caucho.java.WorkDir;
 import com.caucho.loader.CompilingLoader;
 import com.caucho.loader.Environment;
@@ -128,7 +129,9 @@ public class ResinBeanContainer
   {
     _classLoader = EnvironmentClassLoader.create("resin-context");
     _injectManager = InjectManager.create(_classLoader);
-    _injectManager.replaceContext(new RequestScope());
+    
+    // _injectManager.replaceContext(new RequestScope());
+    _injectManager.replaceContext(ThreadContext.getContext());
 
     _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
 
@@ -463,7 +466,7 @@ public class ResinBeanContainer
     return getClass().getName() + "[]";
   }
 
-  class ContextConfig extends BeansConfig implements EnvironmentBean {
+  private class ContextConfig extends BeansConfig implements EnvironmentBean {
     ContextConfig(InjectManager manager, Path root)
     {
       super(manager, root);
@@ -480,14 +483,14 @@ public class ResinBeanContainer
     }
   }
 
-  public class SystemContext implements EnvironmentBean {
+  private class SystemContext implements EnvironmentBean {
     public ClassLoader getClassLoader()
     {
       return ClassLoader.getSystemClassLoader();
     }
   }
 
-  class RequestScope implements Context {
+  private class RequestScope implements Context {
     @Override
     public <T> T get(Contextual<T> bean)
     {

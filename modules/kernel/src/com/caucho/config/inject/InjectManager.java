@@ -31,6 +31,7 @@ package com.caucho.config.inject;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -118,6 +119,7 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.ModulePrivate;
 import com.caucho.config.ModulePrivateLiteral;
 import com.caucho.config.el.CandiContextResolver;
+import com.caucho.config.el.CandiExpressionFactory;
 import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
@@ -584,6 +586,16 @@ public final class InjectManager
       beanList = new ArrayList<Bean<?>>();
       _selfNamedBeanMap.put(name, beanList);
     }
+    else if (bean.isAlternative()) {
+    }
+    else {
+      for (Bean<?> testBean : beanList) {
+        if (! testBean.isAlternative()) {
+          throw new ConfigException(L.l("@Named('{0}') is a duplicate name for\n  {1}\n  {2}",
+                                        name, bean, testBean));
+        }
+      }
+    }
 
     beanList.add(bean);
 
@@ -646,11 +658,14 @@ public final class InjectManager
       if (_classLoader != null)
         _classLoader.applyVisibleModules(new FillByName(name, beanList));
 
+      // ioc/0680 
+      /*
       for (int i = beanList.size() - 1; i >= 0; i--) {
         if (getDeploymentPriority(beanList.get(i)) < 0) {
           beanList.remove(i);
         }
       }
+      */
 
       _namedBeanMap.put(name, beanList);
     }
@@ -664,8 +679,10 @@ public final class InjectManager
 
     if (localBeans != null) {
       for (Bean<?> bean : localBeans) {
+        /*
         if (getDeploymentPriority(bean) < 0)
           continue;
+          */
 
         if (! beanList.contains(bean))
           beanList.add(bean);
@@ -696,7 +713,7 @@ public final class InjectManager
     //return factory.create(new ConfigContext());
     InjectionTarget<T> injectionTarget = bean.getInjectionTarget();
 
-    CreationalContext<T> env = new CreationalContextImpl<T>(bean);
+    CreationalContext<T> env = new OwnerCreationalContext<T>(bean);
 
     T instance = injectionTarget.produce(env);
     injectionTarget.inject(instance, env);
@@ -879,7 +896,7 @@ public final class InjectManager
     InjectionTargetBuilder<T> bean = new InjectionTargetBuilder<T>(this, type);
 
     // validation
-    bean.getInjectionPoints();
+    // bean.getInjectionPoints();
 
     return bean;
   }
@@ -959,31 +976,22 @@ public final class InjectManager
     baseType = baseType.fill(createTargetBaseType(bean.getBeanClass()));
 
     fireExtensionEvent(processBean, baseType);
-    
-    if (isNormalScope(bean.getScope()))
+
+    /*
+    if (isPassivatingScope(bean.getScope())) {
       validateNormal(bean, processBean.getAnnotated());
+      validatePassivating(bean, processBean.getAnnotated());
+    }
+    else if (isNormalScope(bean.getScope())) {
+      validateNormal(bean, processBean.getAnnotated());
+    }
+    */
 
     if (processBean instanceof ProcessBeanImpl<?>
         && ((ProcessBeanImpl<?>) processBean).isVeto())
       return null;
     else
       return processBean.getBean();
-  }
-  
-  private void validateNormal(Bean<?> bean, Annotated annotated)
-  {
-    if (annotated == null)
-      return;
-    
-    Class<?> cl = createTargetBaseType(annotated.getBaseType()).getRawClass();
-    
-    int modifiers = cl.getModifiers();
-    
-    if (Modifier.isFinal(modifiers)) {
-      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it's a final class, for {2}.",
-                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
-                                    bean));
-    }
   }
 
   /**
@@ -1356,6 +1364,9 @@ public final class InjectManager
     int bestPriority = -1;
 
     for (Bean<? extends X> bean : beans) {
+      if (_specializedMap.get(bean.getBeanClass()) != null)
+        continue;
+      
       int priority = getDeploymentPriority(bean);
 
       if (bestPriority < priority) {
@@ -1400,6 +1411,9 @@ public final class InjectManager
 
   private void validate(Bean<?> bean)
   {
+    if (bean.isAlternative() && ! isEnabled(bean))
+      return;
+    
     for (InjectionPoint ip : bean.getInjectionPoints()) {
       validate(ip);
       
@@ -1409,21 +1423,84 @@ public final class InjectManager
                                       bean));
     }
     
-    /*
-    Class<? extends Annotation> scopeType = bean.getScope();
-    
-    if (isPassivatingScope(scopeType)) {
-      validateNormal(bean);
-      validatePassivating(bean);
-    }
-    else if (isNormalScope(scopeType)) {
+    if (isNormalScope(bean.getScope())) {
       validateNormal(bean);
     }
-    */
   }
   
-  private void validatePassivating(Bean<?> bean)
+  private void validateNormal(Bean<?> bean)
   {
+    Annotated ann = null;
+    
+    if (bean instanceof AbstractBean) {
+      AbstractBean absBean = (AbstractBean) bean;
+      
+      ann = absBean.getAnnotated();
+    }
+    
+    if (ann == null)
+      return;
+    
+    Type baseType = ann.getBaseType();
+    
+    Class<?> cl = createTargetBaseType(baseType).getRawClass();
+    
+    if (cl.isInterface())
+      return;
+    
+    int modifiers = cl.getModifiers();
+    
+    if (Modifier.isFinal(modifiers)) {
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it's a final class, for {2}.",
+                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                    bean));
+    }
+    
+    Constructor<?> ctor = null;
+    
+    for (Constructor<?> ctorPtr : cl.getDeclaredConstructors()) {
+      if (ctorPtr.getParameterTypes().length > 0)
+        continue;
+      
+      if (Modifier.isPrivate(ctorPtr.getModifiers())) {
+        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because its constructor is private for {2}.",
+                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                      bean));
+
+      }
+      
+      ctor = ctorPtr;
+    }
+    
+    if (ctor == null) {
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it doesn't have a zero-arg constructorfor {2}.",
+                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                    bean));
+
+    }
+    
+    
+    for (Method method : cl.getMethods()) {
+      if (method.getDeclaringClass() == Object.class)
+        continue;
+      
+      if (Modifier.isFinal(method.getModifiers())) {
+        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because {2} is a final method for {3}.",
+                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                      method.getName(),
+                                      bean));
+      
+      }
+    }
+    
+    for (InjectionPoint ip : bean.getInjectionPoints()) {
+      if (ip.getType().equals(InjectionPoint.class))
+        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' injects an InjectionPoint for {3}.",
+                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                      ip.getMember().getName(),
+                                      bean));
+      
+    }
   }
   
   @Override
@@ -1470,17 +1547,33 @@ public final class InjectManager
     int priority = DEFAULT_PRIORITY;
 
     Set<Class<? extends Annotation>> stereotypes = bean.getStereotypes();
+    
+    if (bean.isAlternative()) {
+      priority = -1;
+      
+      Integer value = _deploymentMap.get(bean.getBeanClass());
+      
+      if (value != null)
+        priority = value;
+    }
 
     if (stereotypes != null) {
       for (Class<? extends Annotation> annType : stereotypes) {
         Integer value = _deploymentMap.get(annType);
-
-        if (value != null && priority < value)
-          priority = value;
+                                           
+        if (value != null) {
+          if (priority < value)
+            priority = value;
+        }
+        else if (annType.isAnnotationPresent(Alternative.class)
+                 && priority == DEFAULT_PRIORITY)
+          priority = -1;
       }
     }
 
-    if (bean instanceof AbstractBean<?>) {
+    if (priority < 0)
+      return priority;
+    else if (bean instanceof AbstractBean<?>) {
       // ioc/0213
       AbstractBean<?> absBean = (AbstractBean<?>) bean;
 
@@ -1509,15 +1602,9 @@ public final class InjectManager
   }
 
   @Override
-  public <T> CreationalContextImpl<T> createCreationalContext(Contextual<T> bean)
+  public <T> CreationalContext<T> createCreationalContext(Contextual<T> bean)
   {
-    return new CreationalContextImpl<T>(bean);
-  }
-
-  public <T> CreationalContextImpl<T> createCreationalContext(Contextual<T> bean,
-                                                              CreationalContext<?> env)
-  {
-    return new CreationalContextImpl<T>(bean, env);
+    return new OwnerCreationalContext<T>(bean);
   }
 
   /**
@@ -1541,7 +1628,7 @@ public final class InjectManager
   {
     ReferenceFactory<T> factory = getReferenceFactory(bean);
     
-    return factory.create(null, null);
+    return factory.create(null, null, null);
   }
 
   /**
@@ -1551,7 +1638,7 @@ public final class InjectManager
   {
     ReferenceFactory<T> factory = getReferenceFactory(bean);
     
-    return factory.create(parentEnv, null);
+    return factory.create(null, parentEnv, null);
   }
 
   /**
@@ -1567,7 +1654,7 @@ public final class InjectManager
 
     ReferenceFactory<T> factory = getReferenceFactory(bean);
     
-    return factory.create(null, null);
+    return factory.create(null, null, null);
   }
 
   /**
@@ -1583,7 +1670,7 @@ public final class InjectManager
 
     ReferenceFactory<T> factory = getReferenceFactory(bean);
 
-    return factory.create(parentEnv, null);
+    return factory.create(null, parentEnv, null);
   }
 
   /**
@@ -1607,10 +1694,10 @@ public final class InjectManager
       
       ReferenceFactory factory = getReferenceFactory(bean);
       
-      if (createContext instanceof CreationalContextImpl)
-        return factory.create((CreationalContextImpl) createContext, null);
+      if (createContext instanceof CreationalContextImpl<?>)
+        return factory.create((CreationalContextImpl) createContext, null, null);
       else
-        return factory.create(null, null);
+        return factory.create(null, null, null);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
@@ -1619,7 +1706,7 @@ public final class InjectManager
   /**
    * Used by ScopeProxy
    */
-  public <T> T getInstance(Bean<T> bean)
+  private <T> T getInstanceForProxy(Bean<T> bean)
   {
     CreationalContextImpl<?> oldEnv = _proxyThreadLocal.get();
   
@@ -1633,7 +1720,7 @@ public final class InjectManager
     }
     
     try {
-      CreationalContextImpl<T> env = createCreationalContext(bean, oldEnv);
+      CreationalContextImpl<T> env = new OwnerCreationalContext(bean, oldEnv);
       
       _proxyThreadLocal.set(env);
 
@@ -1643,15 +1730,6 @@ public final class InjectManager
     } finally {
       _proxyThreadLocal.set(oldEnv);
     }
-  }
-
-  private <T> T getInstanceImpl(Bean<T> bean,
-                                CreationalContextImpl<T> env,
-                                InjectionPoint ip)
-  {
-    ReferenceFactory<T> factory = getReferenceFactory(bean);
-    
-    return factory.create(env, ip);
   }
 
   public <T> ReferenceFactory<T> getReferenceFactory(Bean<T> bean)
@@ -1840,13 +1918,13 @@ public final class InjectManager
     
     if (InjectionPoint.class.equals(ij.getType())) {
       if (parentEnv != null) {
-        return parentEnv.getInjectionPoint();
+        return parentEnv.findInjectionPoint();
       }
     }
     
     ReferenceFactory<?> factory = getReferenceFactory(ij);
     
-    return factory.create(parentEnv, ij);
+    return factory.create(null, parentEnv, ij);
   }
 
   public ReferenceFactory<?> getReferenceFactory(InjectionPoint ij)
@@ -1990,7 +2068,7 @@ public final class InjectManager
   public ExpressionFactory
     wrapExpressionFactory(ExpressionFactory expressionFactory)
   {
-    return expressionFactory;
+    return new CandiExpressionFactory(expressionFactory);
   }
 
   //
@@ -2013,8 +2091,12 @@ public final class InjectManager
       RuntimeException exn
         = new IllegalStateException(L.l("{0} is an invalid new context because @{1} is already registered as a scope",
                                         context, scopeType.getName()));
-      
+                                        
+      /*
       _contextMap.put(context.getScope(), new ErrorContext(exn, context));
+      
+      throw exn;
+      */
     }
   }
   
@@ -2805,6 +2887,7 @@ public final class InjectManager
     _specializedMap.put(parentType, specializedType);
   }
 
+  /*
   private boolean isDisabled(Class<?> type)
   {
     boolean isDisabled = false;
@@ -2824,6 +2907,7 @@ public final class InjectManager
 
     return isDisabled && ! _deploymentMap.containsKey(type);
   }
+  */
 
   private boolean isEnabled(Bean<?> bean)
   {
@@ -2941,7 +3025,9 @@ public final class InjectManager
     if (! isValidSimpleBean(managedBean.getBeanClass()))
       return;
     
+    // ioc/0680
     if (! managedBean.isAlternative() || isEnabled(managedBean)) {
+      // ioc/0680
       addBean(managedBean);
 
       for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
@@ -2970,7 +3056,7 @@ public final class InjectManager
     builder.introspectProduces(bean, beanType);
   }
   
-  public <X,T> void addProducesBean(ProducesBean<X,T> bean)
+  public <X,T> void addProducesBean(ProducesMethodBean<X,T> bean)
   {
     ProcessProducerImpl<X,T> event
       = new ProcessProducerImpl<X,T>((AnnotatedMethod<X>) bean.getProducesMethod(),
@@ -3900,7 +3986,7 @@ public final class InjectManager
         return null;
     }
 
-    public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
+    public X getScopeAdapter(Bean<?> topBean, CreationalContextImpl<X> cxt)
     {
       Bean<?> bean = getBean();
 
@@ -3951,7 +4037,13 @@ public final class InjectManager
   }
   
   abstract public class ReferenceFactory<T> {
-    abstract public T create(CreationalContextImpl<?> parentEnv,
+    public final T create()
+    {
+      return create(null, null, null);
+    }
+    
+    abstract public T create(CreationalContextImpl<T> env,
+                             CreationalContextImpl<?> parentEnv,
                              InjectionPoint ip);
   }
   
@@ -3964,7 +4056,8 @@ public final class InjectManager
     }
    
     @Override
-    public T create(CreationalContextImpl<?> parentEnv,
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
                     InjectionPoint ip)
     {
       Bean<T> bean = _bean;
@@ -3974,12 +4067,16 @@ public final class InjectManager
       if (instance != null)
         return instance;
       
-      CreationalContextImpl<T> env
-        = new CreationalContextImpl<T>(bean, parentEnv, ip);
+      if (env == null) {
+        if (parentEnv != null)
+          env = new DependentCreationalContext<T>(bean, parentEnv, ip);
+        else
+          env = new OwnerCreationalContext<T>(bean);
+      }
       
       instance = bean.create(env);
       
-      if (parentEnv == null)
+      if (env.isTop())
         bean.destroy(instance, env);
       
       return instance;
@@ -3995,7 +4092,8 @@ public final class InjectManager
     }
    
     @Override
-    public T create(CreationalContextImpl<?> parentEnv,
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
                     InjectionPoint ip)
     {
       ManagedBeanImpl<T> bean = _bean;
@@ -4005,12 +4103,16 @@ public final class InjectManager
       if (instance != null)
         return instance;
       
-      CreationalContextImpl<T> env
-        = new CreationalContextImpl<T>(bean, parentEnv, ip);
+      if (env == null) {
+        if (parentEnv != null)
+          env = new DependentCreationalContext<T>(bean, parentEnv, ip);
+        else
+          env = new OwnerCreationalContext<T>(bean);
+      }
       
       instance = bean.createDependent(env);
-      
-      if (parentEnv == null) {
+
+      if (env.isTop()) {
         bean.destroy(instance, env);
       }
       
@@ -4033,7 +4135,8 @@ public final class InjectManager
     }
    
     @Override
-    public T create(CreationalContextImpl<?> parentEnv,
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
                     InjectionPoint ip)
     {
       Bean<T> bean = _bean;
@@ -4048,10 +4151,12 @@ public final class InjectManager
       CreationalContextImpl<T> oldEnv = _threadLocal.get();
       
       try {
-        CreationalContextImpl<T> env = oldEnv;
-      
         if (env == null) {
-          env = new CreationalContextImpl<T>(bean, parentEnv, ip);
+          if (parentEnv != null)
+            env = new DependentCreationalContext<T>(bean, parentEnv, ip);
+          else
+            env = new OwnerCreationalContext<T>(bean);
+          
           _threadLocal.set(env);
         }
         else {
@@ -4062,7 +4167,11 @@ public final class InjectManager
         }
       
         instance = _context.get(bean, env);
-      
+        
+        if (instance == null)
+          throw new NullPointerException(L.l("null instance returned by '{0}' for bean '{1}'",
+                                             _context, bean));
+        
         return instance;
       } finally {
         _threadLocal.set(oldEnv);
@@ -4085,7 +4194,8 @@ public final class InjectManager
     }
    
     @Override
-    public T create(CreationalContextImpl<?> parentEnv,
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
                     InjectionPoint ip)
     {
       return _scopeAdapterBean.getScopeAdapter(_bean, null); // parentEnv);
@@ -4098,7 +4208,8 @@ public final class InjectManager
     }
    
     @Override
-    public T create(CreationalContextImpl<?> parentEnv,
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
                     InjectionPoint ip)
     {
       return (T) parentEnv.getDelegate();
@@ -4111,10 +4222,11 @@ public final class InjectManager
     }
    
     @Override
-    public InjectionPoint create(CreationalContextImpl<?> parentEnv,
+    public InjectionPoint create(CreationalContextImpl<InjectionPoint> env,
+                                 CreationalContextImpl<?> parentEnv,
                                  InjectionPoint ip)
     {
-      InjectionPoint ip2 =  parentEnv.getInjectionPoint();
+      InjectionPoint ip2 =  parentEnv.findInjectionPoint();
       
       if (ip2 != null)
         return ip2;

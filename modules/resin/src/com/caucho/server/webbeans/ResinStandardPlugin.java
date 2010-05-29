@@ -37,16 +37,16 @@ import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.enterprise.event.Observes;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.inject.spi.ProcessManagedBean;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ProcessBeanImpl;
@@ -57,6 +57,7 @@ import com.caucho.inject.Jndi;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.MBean;
 import com.caucho.inject.Module;
+import com.caucho.inject.ThreadContext;
 import com.caucho.jms.JmsMessageListener;
 import com.caucho.jmx.Jmx;
 import com.caucho.remote.BamService;
@@ -78,6 +79,14 @@ public class ResinStandardPlugin implements Extension {
   public ResinStandardPlugin(InjectManager manager) 
   {
     _injectManager = manager;
+  }
+  
+  /**
+   * Callback on initialization, allowing for registration of contexts.
+   */
+  public void processAfterBeanDiscovery(@Observes AfterBeanDiscovery event)
+  {
+    event.addContext(ThreadContext.getContext());
   }
 
   /**

@@ -30,6 +30,7 @@
 package com.caucho.jsp.el;
 
 import com.caucho.el.*;
+import com.caucho.inject.Module;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -43,9 +44,10 @@ import java.util.HashMap;
 /**
  * Represents an EL expression factory
  */
+@Module
 public class JspExpressionFactoryImpl extends ExpressionFactory {
-  private static final HashMap<Class,CoerceType> _coerceMap
-    = new HashMap<Class,CoerceType>();
+  private static final HashMap<Class<?>,CoerceType> _coerceMap
+    = new HashMap<Class<?>,CoerceType>();
   
   private final JspApplicationContextImpl _jspApplicationContext;
 
@@ -122,9 +124,9 @@ public class JspExpressionFactoryImpl extends ExpressionFactory {
     return createValueExpression(expr, expression, expectedType);
   }
 
-  public static ValueExpression createValueExpression(Expr expr,
-						      String expression,
-						      Class<?> expectedType)
+  public ValueExpression createValueExpression(Expr expr,
+                                               String expression,
+                                               Class<?> expectedType)
   {
     CoerceType type = _coerceMap.get(expectedType);
 

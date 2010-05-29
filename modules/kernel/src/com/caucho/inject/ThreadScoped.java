@@ -27,15 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.inject;
 
-import com.caucho.config.inject.CreationalContextImpl;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
+
+import javax.enterprise.context.NormalScope;
+import javax.inject.Scope;
 
 /**
- * Interface for a Candi enhanced bean.
+ * @ThreadScoped marks a bean as scoped to the current thread, under control
+ * of the application using the ThreadContext class.
+ * 
+ * <pre><code>
+ * ThreadContext.begin();
+ * ...
+ * ThreadContext.complete();
+ * </clode></pre>
  */
-public interface CandiEnhancedBean {
-  public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
-  
-  public void __caucho_postConstruct();
+
+@Scope
+@NormalScope
+@Target({TYPE, METHOD})
+@Retention(RUNTIME)
+public @interface ThreadScoped {
 }

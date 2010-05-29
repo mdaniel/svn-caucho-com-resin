@@ -38,6 +38,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.inject.BeanAdapter;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.BeanName;
 import com.caucho.ejb.session.AbstractSessionContext;
@@ -84,7 +85,10 @@ public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
   @Override
   public T create(CreationalContext<T> env)
   {
-    return _context.createProxy(env);
+    if (env instanceof CreationalContextImpl<?>)
+      return _context.createProxy((CreationalContextImpl<T>) env);
+    else
+      return _context.createProxy(null);
   }
 
   @Override

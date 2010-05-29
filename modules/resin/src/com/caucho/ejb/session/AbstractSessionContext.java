@@ -37,6 +37,7 @@ import javax.ejb.SessionContext;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.xml.rpc.handler.MessageContext;
 
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
@@ -89,7 +90,7 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     _proxyFactory = _manager.createProxyFactory(this);
   }
   
-  public T createProxy(CreationalContext<T> env)
+  public T createProxy(CreationalContextImpl<T> env)
   {
     if (_proxyFactory == null)
       bind();
@@ -101,7 +102,7 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   {
   }
   
-  public X newInstance(CreationalContext<X> env)
+  public X newInstance(CreationalContextImpl<X> env)
   {
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();

@@ -66,8 +66,8 @@ public class FacesContextELResolver extends CompositeELResolver {
   private final ResourceBundleELResolver _bundleResolver
     = new ResourceBundleELResolver();  
 
-  private final WebBeansELResolver _webBeansResolver
-    = new WebBeansELResolver();
+  private final CandiContextResolver _webBeansResolver
+    = new CandiContextResolver();
 
   private final ManagedBeanELResolver _managedBeanResolver
     = new ManagedBeanELResolver();

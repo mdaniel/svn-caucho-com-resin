@@ -41,6 +41,7 @@ import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.PassivationCapable;
 
 import com.caucho.config.inject.BeanWrapper;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
 import com.caucho.config.program.Arg;
@@ -99,7 +100,7 @@ public class XmlBean<X> extends BeanWrapper<X>
   }
 
   @Override
-  public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> context)
+  public X getScopeAdapter(Bean<?> topBean, CreationalContextImpl<X> context)
   {
     Bean<X> bean = getBean();
 

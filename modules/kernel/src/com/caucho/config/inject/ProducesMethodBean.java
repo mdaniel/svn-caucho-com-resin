@@ -43,12 +43,10 @@ import javax.enterprise.inject.IllegalProductException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.Producer;
 
 import com.caucho.config.bytecode.ScopeAdapter;
@@ -61,68 +59,72 @@ import com.caucho.util.L10N;
  * Configuration for a @Produces method
  */
 @Module
-public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
-  implements InjectionTarget<T>, ScopeAdapterBean<X>
+public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
+  implements ScopeAdapterBean<X>
 {
-  private static final L10N L = new L10N(ProducesBean.class);
+  private static final L10N L = new L10N(ProducesMethodBean.class);
 
   private static final Object []NULL_ARGS = new Object[0];
 
   private final Bean<X> _producerBean;
   private final AnnotatedMethod<? super X> _producesMethod;
-  private final AnnotatedMethod<? super X> _disposesMethod;
   
   private LinkedHashSet<InjectionPoint> _injectionPointSet
     = new LinkedHashSet<InjectionPoint>();
 
-  private Producer<T> _producer = this;
+  private MethodProducer _methodProducer;
+  private DisposesProducer<T,X> _disposesProducer;
+  private Producer<T> _producer;
 
-  private Arg<T> []_producesArgs;
-  private Arg<T> []_disposesArgs;
+  private Arg<?> []_producesArgs;
 
   private boolean _isBound;
 
   private Object _scopeAdapter;
 
-  protected ProducesBean(InjectManager manager,
+  private ProducesMethodBean(InjectManager manager,
                          Bean<X> producerBean,
                          AnnotatedMethod<? super X> producesMethod,
-                         Arg<T> []producesArgs,
+                         Arg<?> []producesArgs,
                          AnnotatedMethod<? super X> disposesMethod,
-                         Arg<T> []disposesArgs)
+                         Arg<?> []disposesArgs)
   {
     super(manager, producesMethod.getBaseType(), producesMethod);
 
     _producerBean = producerBean;
     _producesMethod = producesMethod;
-    _disposesMethod = disposesMethod;
     _producesArgs = producesArgs;
-    _disposesArgs = disposesArgs;
     
-    if (producesMethod != null)
-      producesMethod.getJavaMember().setAccessible(true);
-    
-    if (disposesMethod != null)
-      disposesMethod.getJavaMember().setAccessible(true);
 
     if (producesMethod == null)
       throw new NullPointerException();
 
     if (producesArgs == null)
       throw new NullPointerException();
+
+    producesMethod.getJavaMember().setAccessible(true);
+    
+    if (disposesMethod != null) {
+      _disposesProducer
+        = new DisposesProducer<T,X>(manager, producerBean,
+                                    disposesMethod, disposesArgs);
+    }
     
     introspectInjectionPoints();
+    
+    _methodProducer = new MethodProducer();
+    _producer = _methodProducer;
   }
 
-  public static <X,T> ProducesBean<X,T> 
+  public static <X,T> ProducesMethodBean<X,T> 
   create(InjectManager manager,
          Bean<X> producer,
          AnnotatedMethod<? super X> producesMethod,
-         Arg<T> []producesArgs,
+         Arg<? super X> []producesArgs,
          AnnotatedMethod<? super X> disposesMethod,
-         Arg<T> []disposesArgs)
+         Arg<? super X> []disposesArgs)
   {
-    ProducesBean<X,T> bean = new ProducesBean<X,T>(manager, producer, 
+    ProducesMethodBean<X,T> bean = new ProducesMethodBean<X,T>(manager, producer, 
                                                    producesMethod, producesArgs,
                                                    disposesMethod, disposesArgs);
     bean.introspect();
@@ -179,14 +181,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     return ! getBaseType().isPrimitive();
   }
 
-  /**
-   * Returns the declaring bean
-   */
-  public Bean<X> getParentBean()
-  {
-    return _producerBean;
-  }
-  
   @Override
   public Class<?> getBeanClass()
   {
@@ -228,7 +222,7 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
   }
   
   //
-  // Producer
+  // Bean creation methods
   //
 
 
@@ -241,107 +235,9 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     
     return value;
   }
-  
-  @Override
-  public void dispose(T value)
-  {
-  }
 
   @Override
-  public InjectionTarget<T> getInjectionTarget()
-  {
-    return this;
-  }
-
-  /**
-   * Produces a new bean instance
-   */
-  @Override
-  public T produce(CreationalContext<T> cxt)
-  {
-    Class<?> type = _producerBean.getBeanClass();
-    
-    CreationalContextImpl<X> parentEnv
-      = new CreationalContextImpl<X>(_producerBean, cxt);
-
-    X factory = (X) getBeanManager().getReference(_producerBean, type, parentEnv);
-    
-    if (factory == null) {
-      throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
-                                          this, _producerBean));
-    }
-    
-    return produce(factory, cxt);
-  }
-
-  /**
-   * Produces a new bean instance
-   */
-  private T produce(X bean, CreationalContext<T> cxt)
-  
-  {
-    InjectionPoint ij = null;
-    
-    if (cxt instanceof CreationalContextImpl<?>) {
-      CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
-
-      ij = env.getInjectionPoint();
-    }
-    
-    try {
-      // InjectManager inject = getBeanManager();
-
-      Object []args;
-
-      if (_producesArgs.length > 0) {
-        args = new Object[_producesArgs.length];
-
-        for (int i = 0; i < args.length; i++) {
-          if (_producesArgs[i] instanceof InjectionPointArg<?>)
-            args[i] = ij;
-          else
-            args[i] = _producesArgs[i].eval(cxt);
-        }
-      }
-      else
-        args = NULL_ARGS;
-
-      // ioc/0084
-      _producesMethod.getJavaMember().setAccessible(true);
-      
-      if (cxt instanceof CreationalContextImpl<?>) {
-        CreationalContextImpl<X> env = (CreationalContextImpl<X>) cxt;
-        // ioc/07b0
-        env.postConstruct();
-      }
-      
-      
-      T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
-      
-      cxt.push(value);
-      
-      if (value != null)
-        return value;
-      
-      if (Dependent.class.equals(getScope()))
-        return null;
-      
-      throw new IllegalProductException(L.l("producer {0} returned null, which is not allowed by the CDI spec.",
-                                            this));
-    } catch (RuntimeException e) {
-      throw e;
-    } catch (InvocationTargetException e) {
-      if (e.getCause() instanceof RuntimeException)
-        throw (RuntimeException) e.getCause();
-      else
-        throw new CreationException(e.getCause());
-    } catch (Exception e) {
-      throw new CreationException(e);
-    }
-  }
-
-  @Override
-  public X getScopeAdapter(Bean<?> topBean, CreationalContext<X> cxt)
+  public X getScopeAdapter(Bean<?> topBean, CreationalContextImpl<X> cxt)
   {
     NormalScope scopeType = getScope().getAnnotation(NormalScope.class);
 
@@ -364,16 +260,6 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
 
     return null;
   } 
-  
-  @Override
-  public void inject(T instance, CreationalContext<T> cxt)
-  {
-  }
-
-  @Override
-  public void postConstruct(T instance)
-  {
-  }
 
   @Override
   public void bind()
@@ -386,89 +272,21 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     }
   }
 
-  public Bean<T> bindInjectionPoint(InjectionPoint ij)
-  {
-    return new ProducesInjectionPointBean<T>(this, ij);
-  }
-
   /**
    * Call destroy
    */
   @Override
   public void destroy(T instance, CreationalContext<T> cxt)
   {
-    if (_disposesMethod != null) {
-      try {
-        CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
-        
-        Object producer = null;
-        
-        if (env != null)
-          producer = env.getAny(_producerBean);
-        else
-          Thread.dumpStack();
-        
-        if (producer == null) {
-          CreationalContext<X> parentEnv
-            = getBeanManager().createCreationalContext(_producerBean, env);
-
-          producer = getBeanManager().getReference(_producerBean, 
-                                                   _producerBean.getBeanClass(), 
-                                                   parentEnv);
-        }
-        
-        Object []args = new Object[_disposesArgs.length];
-        for (int i = 0; i < args.length; i++) {
-          if (_disposesArgs[i] == null)
-            args[i] = instance;
-          else {
-            args[i] = _disposesArgs[i].eval(env);
-          }
-        }
-        
-        if (env instanceof CreationalContextImpl<?>) {
-          ((CreationalContextImpl<?>) env).postConstruct();
-        }
-        
-        _disposesMethod.getJavaMember().invoke(producer, args);
-      } catch (Exception e) {
-        throw new RuntimeException(_disposesMethod.getJavaMember() + ":" + e, e);
-      }
-    }
+    if (_producer == _methodProducer)
+      _methodProducer.destroy(instance, (CreationalContextImpl<T>) cxt);
+    else
+      _producer.dispose(instance);
     
     cxt.release();
   }
 
-  /**
-   * Disposes a bean instance
-   */
   @Override
-  public void preDestroy(T instance)
-  {
-  }
-
-  /**
-   * Returns the owning producer
-   */
-  /*
-  public AnnotatedMember<X> getProducerMember()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }*/
-
-  /**
-   * Returns the owning disposer
-   */
-  public AnnotatedMethod<X> getAnnotatedDisposer()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public AnnotatedParameter<X> getDisposedParameter()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
   public String toString()
   {
     StringBuilder sb = new StringBuilder();
@@ -507,6 +325,124 @@ public class ProducesBean<X,T> extends AbstractIntrospectedBean<T>
     sb.append("]");
 
     return sb.toString();
+  }
+  
+  class MethodProducer implements Producer<T> {
+    /**
+     * Produces a new bean instance
+     */
+    @Override
+    public T produce(CreationalContext<T> cxt)
+    {
+      Class<?> type = _producerBean.getBeanClass();
+      
+      // factory instance owns its own dependency chain; it's not one of the
+      // context bean's dependencies.
+      CreationalContextImpl<X> parentEnv;
+      
+      if (cxt instanceof CreationalContextImpl<?>) {
+        CreationalContextImpl<?> parentCxt = (CreationalContextImpl<?>) cxt;
+
+        parentEnv = new ProducesCreationalContext<X>(_producerBean, parentCxt);
+      }
+      else
+        parentEnv = new ProducesCreationalContext<X>(_producerBean, null);
+
+      X factory = (X) getBeanManager().getReference(_producerBean, type, parentEnv);
+      
+      if (factory == null) {
+        throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
+                                            this, _producerBean));
+      }
+      
+      T instance = produce(factory, cxt);
+      
+      if (_producerBean.getScope() == Dependent.class)
+        _producerBean.destroy(factory, parentEnv);
+      
+      return instance;
+    }
+
+    /**
+     * Produces a new bean instance
+     */
+    private T produce(X bean, CreationalContext<T> cxt)
+    
+    {
+      InjectionPoint ij = null;
+      
+      if (cxt instanceof CreationalContextImpl<?>) {
+        CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
+
+        ij = env.findInjectionPoint();
+      }
+      
+      try {
+        // InjectManager inject = getBeanManager();
+
+        Object []args;
+
+        if (_producesArgs.length > 0) {
+          args = new Object[_producesArgs.length];
+
+          for (int i = 0; i < args.length; i++) {
+            if (_producesArgs[i] instanceof InjectionPointArg<?>)
+              args[i] = ij;
+            else
+              args[i] = _producesArgs[i].eval((CreationalContext) cxt);
+          }
+        }
+        else
+          args = NULL_ARGS;
+
+        // ioc/0084
+        _producesMethod.getJavaMember().setAccessible(true);
+        
+        T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
+        
+        cxt.push(value);
+        
+        if (value != null)
+          return value;
+        
+        if (Dependent.class.equals(getScope()))
+          return null;
+        
+        throw new IllegalProductException(L.l("producer {0} returned null, which is not allowed by the CDI spec.",
+                                              this));
+      } catch (RuntimeException e) {
+        throw e;
+      } catch (InvocationTargetException e) {
+        if (e.getCause() instanceof RuntimeException)
+          throw (RuntimeException) e.getCause();
+        else
+          throw new CreationException(e.getCause());
+      } catch (Exception e) {
+        throw new CreationException(e);
+      }
+    }
+    
+    @Override
+    public void dispose(T instance)
+    {
+      destroy(instance, null);
+    }
+
+    /**
+     * Call destroy
+     */
+    public void destroy(T instance, CreationalContextImpl<T> cxt)
+    {
+      if (_disposesProducer != null)
+        _disposesProducer.destroy(instance, cxt);
+    }
+   
+    @Override
+    public Set<InjectionPoint> getInjectionPoints()
+    {
+      return ProducesMethodBean.this.getInjectionPoints();
+    }
+    
   }
 
 }

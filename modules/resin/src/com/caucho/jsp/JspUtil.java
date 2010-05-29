@@ -29,26 +29,33 @@
 
 package com.caucho.jsp;
 
-import com.caucho.el.*;
-import com.caucho.jsp.el.*;
+import javax.el.ELContext;
+import javax.el.ExpressionFactory;
+import javax.el.MethodExpression;
+import javax.el.ValueExpression;
 
-import javax.el.*;
-import java.io.IOException;
-import java.util.ArrayList;
+import com.caucho.config.el.CandiExpr;
+import com.caucho.el.Expr;
+import com.caucho.el.MethodExpressionImpl;
+import com.caucho.inject.Module;
+import com.caucho.jsp.el.JspApplicationContextImpl;
+import com.caucho.jsp.el.JspELParser;
 
+@Module
 public class JspUtil
 {
   public static ValueExpression createValueExpression(ELContext elContext,
-                                                      Class type,
+                                                      Class<?> type,
                                                       String exprString)
   {
-    JspELParser parser = new JspELParser(elContext, exprString);
+    JspApplicationContextImpl jspContext
+      = JspApplicationContextImpl.getCurrent();
+    
+    ExpressionFactory factory = jspContext.getExpressionFactory();
 
-    Expr expr = parser.parse();
-
-    return JspExpressionFactoryImpl.createValueExpression(expr,
-                                                          exprString,
-                                                          type);
+    return factory.createValueExpression(elContext,
+                                         exprString,
+                                         type);
   }
 
   public static Expr createExpr(ELContext elContext,
@@ -56,13 +63,13 @@ public class JspUtil
   {
     JspELParser parser = new JspELParser(elContext, exprString);
 
-    return parser.parse();
+    return new CandiExpr(parser.parse());
   }
 
   public static MethodExpression createMethodExpression(ELContext elContext,
                                                         String exprString,
-                                                        Class type,
-                                                        Class []args)
+                                                        Class<?> type,
+                                                        Class<?> []args)
   {
     JspELParser parser = new JspELParser(elContext, exprString);
 

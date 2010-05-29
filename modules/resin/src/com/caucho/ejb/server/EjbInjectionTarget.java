@@ -43,9 +43,11 @@ import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.DependentCreationalContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
@@ -66,11 +68,6 @@ public class EjbInjectionTarget<T> {
   
   private InjectionTarget<T> _injectionTarget;
 
-  private ConfigProgram _initProgram;
-  private ConfigProgram[] _initInject;
-  
-  private ConfigProgram[] _destroyInject;
-  
   private PreDestroyConfig _preDestroyConfig;
   private PostConstructConfig _postConstructConfig;
   private Method _cauchoPostConstruct;
@@ -125,22 +122,6 @@ public class EjbInjectionTarget<T> {
     return _injectionTarget;
   }
 
-  /**
-   * Sets the init program.
-   */
-  public void setInitProgram(ConfigProgram init)
-  {
-    _initProgram = init;
-  }
-
-  /**
-   * Gets the init program.
-   */
-  public ConfigProgram getInitProgram()
-  {
-    return _initProgram;
-  }
-
   public PostConstructConfig getPostConstruct()
   {
     return _postConstructConfig;
@@ -180,47 +161,15 @@ public class EjbInjectionTarget<T> {
     InjectManager inject = InjectManager.create();
 
     // server/4751
-    if (_injectionTarget == null)
+    if (_injectionTarget == null) {
       _injectionTarget = inject.createInjectionTarget(_ejbClass);
+      _injectionTarget.getInjectionPoints();
+    }
 
     if (_timerService != null) {
       BeanBuilder<TimerService> factory = inject.createBeanFactory(TimerService.class);
       inject.addBean(factory.singleton(_timerService));
     }
-    /*
-    ArrayList<ConfigProgram> injectList = new ArrayList<ConfigProgram>();
-    InjectIntrospector.introspectInject(injectList, getEjbClass());
-    // XXX: add inject from xml here
-    */
-
-    ArrayList<ConfigProgram> injectList = null;
-    if (_initProgram != null) {
-      injectList = new ArrayList<ConfigProgram>();
-      injectList.add(_initProgram);
-    }
-
-    // InjectIntrospector.introspectInit(injectList, getEjbClass(), null);
-    // XXX: add init from xml here
-
-    if (injectList != null && injectList.size() > 0) {
-      ConfigProgram[] injectArray = new ConfigProgram[injectList.size()];
-      injectList.toArray(injectArray);
-
-      if (injectArray.length > 0)
-        _initInject = injectArray;
-    }
-
-    injectList = new ArrayList<ConfigProgram>();
-
-    // XXX:
-    // InjectIntrospector.introspectDestroy(injectList, _ejbClass);
-
-    ConfigProgram[] injectArray;
-    injectArray = new ConfigProgram[injectList.size()];
-    injectList.toArray(injectArray);
-
-    if (injectArray.length > 0)
-      _destroyInject = injectArray;
   }
 
   private Method getTimeoutMethod(Class<?> targetBean)
@@ -247,12 +196,13 @@ public class EjbInjectionTarget<T> {
     return newInstance(null);
   }
   
-  public T newInstance(CreationalContext<?> parentEnv)
+  public T newInstance(CreationalContextImpl<?> parentEnv)
   {
     InjectManager inject = InjectManager.create();
     
     // XXX: circular for stateful
-    CreationalContext<T> env = new CreationalContextImpl<T>(_bean, parentEnv);
+    CreationalContextImpl<T> env 
+      = new DependentCreationalContext<T>(_bean, parentEnv, null);
     
     T instance = _bean.create(env);
     // Producer.__caucho_new();
@@ -272,31 +222,24 @@ public class EjbInjectionTarget<T> {
   /**
    * Initialize an instance
    */
-  public void initInstance(T instance)
-  {
-    initInstance(instance, null, null, CreationalContextImpl.create());
-  }
-
-  /**
-   * Initialize an instance
-   */
   public <X> void initInstance(T instance,
                                InjectionTarget<T> target,
                                X proxy,
-                               CreationalContext<X> env)
+                               CreationalContextImpl<X> proxyEnv)
   {
     Bean<T> bean = _bean;
 
-    if (env != null && bean != null) {
+    if (proxyEnv != null && bean != null) {
       // server/4762
       // env.put((AbstractBean) bean, proxy);
-      env.push(proxy);
+      proxyEnv.push(proxy);
     }
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
     
-    CreationalContextImpl<T> cxt = new CreationalContextImpl<T>(bean, env);
+    CreationalContextImpl<T> cxt
+      = new DependentCreationalContext<T>(bean, proxyEnv, null);
 
     try {
       thread.setContextClassLoader(_envLoader);
@@ -308,35 +251,10 @@ public class EjbInjectionTarget<T> {
       if (getInjectionTarget() != null && target != getInjectionTarget()) {
         getInjectionTarget().inject(instance, cxt);
       }
-
-      if (_initInject != null) {
-        for (ConfigProgram inject : _initInject)
-          inject.inject(instance, cxt);
-      }
-
-      if (_initProgram != null) {
-        _initProgram.inject(instance, cxt);
-      }
       
       if (getInjectionTarget() != null) {
         getInjectionTarget().postConstruct(instance);
       }
-
-      /*
-      try {
-        if (_cauchoPostConstruct != null)
-          _cauchoPostConstruct.invoke(instance);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (InvocationTargetException e) {
-        throw new RuntimeException(e.getCause());
-      } catch (Exception e) {
-        throw new RuntimeException(e);
-      }
-      */
-      
-      //if (_beanProducer != null)
-      //  _beanProducer.__caucho_postConstruct(instance);
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

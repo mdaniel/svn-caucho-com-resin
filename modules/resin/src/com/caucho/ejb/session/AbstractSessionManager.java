@@ -42,12 +42,8 @@ import java.util.logging.Logger;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.SessionContext;
-import javax.ejb.Singleton;
-import javax.ejb.Stateful;
-import javax.ejb.Stateless;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.SessionBeanType;
 import javax.inject.Named;
 
@@ -59,15 +55,10 @@ import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.BeanName;
 import com.caucho.config.j2ee.BeanNameLiteral;
 import com.caucho.config.reflect.BaseType;
-import com.caucho.ejb.SessionPool;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
-import com.caucho.ejb.gen.SingletonGenerator;
-import com.caucho.ejb.gen.StatefulGenerator;
-import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.inject.ProcessSessionBeanImpl;
 import com.caucho.ejb.inject.SessionRegistrationBean;
 import com.caucho.ejb.manager.EjbManager;
-import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.JavaClassGenerator;
 
@@ -157,6 +148,12 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     return _lazyGenerator.getLocalApi();
   }
 
+  @Override
+  public AnnotatedType<X> getLocalBean()
+  {
+    return _lazyGenerator.getLocalBean();
+  }
+  
   @SuppressWarnings("unchecked")
   protected <T> AbstractSessionContext<X,T> getSessionContext(Class<T> api)
   {
@@ -365,10 +362,10 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       
     Set<Type> apiList = new LinkedHashSet<Type>();
 
-    if (hasNoInterfaceView()) {
-      baseApi = baseApi;
-      
-      BaseType sourceApi = moduleBeanManager.createSourceBaseType(baseApi);
+    AnnotatedType<X> baseType = getLocalBean();
+    
+    if (baseType != null) {
+      BaseType sourceApi = moduleBeanManager.createSourceBaseType(baseType.getBaseType());
         
       apiList.addAll(sourceApi.getTypeClosure(moduleBeanManager));
     }
@@ -384,7 +381,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     }
       
     apiList.add(Object.class);
-
+    
     if (remoteApiList != null) {
       for (Class<?> api : remoteApiList) {
         baseApi = api;

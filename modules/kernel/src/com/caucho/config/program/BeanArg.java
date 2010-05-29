@@ -87,6 +87,6 @@ public class BeanArg<T> extends Arg<T> {
     if (_factory == null)
       bind();
 
-    return _factory.create((CreationalContextImpl) parentEnv, _ip);
+    return _factory.create(null, (CreationalContextImpl) parentEnv, _ip);
   }
 }
