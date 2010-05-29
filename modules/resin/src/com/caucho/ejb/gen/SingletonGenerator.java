@@ -206,7 +206,7 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     out.print("private ");
     out.println(getClassName() 
                 + "(SingletonManager manager"
-                + ", CreationalContext<T> env)");
+                + ", com.caucho.config.inject.CreationalContextImpl<T> env)");
     out.println("{");
     out.pushDepth();
 
@@ -224,7 +224,7 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
   {
       out.println();
       out.println("@Override");
-      out.println("public T __caucho_createProxy(CreationalContext<T> env)");
+      out.println("public T __caucho_createProxy(com.caucho.config.inject.CreationalContextImpl<T> env)");
       out.println("{");
       out.println("  return (T) new " + getClassName() + "(_manager, env);");
       out.println("}");

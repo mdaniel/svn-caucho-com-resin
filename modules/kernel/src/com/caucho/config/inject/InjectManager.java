@@ -4152,10 +4152,7 @@ public final class InjectManager
       
       try {
         if (env == null) {
-          if (parentEnv != null)
-            env = new DependentCreationalContext<T>(bean, parentEnv, ip);
-          else
-            env = new OwnerCreationalContext<T>(bean);
+          env = new OwnerCreationalContext<T>(bean, parentEnv);
           
           _threadLocal.set(env);
         }
