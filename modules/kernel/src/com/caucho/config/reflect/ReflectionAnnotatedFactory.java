@@ -70,7 +70,8 @@ public class ReflectionAnnotatedFactory
    * Introspects a simple reflection type, i.e. a type without
    * fields and methods.
    */
-  public static ReflectionSimpleAnnotatedType introspectSimpleType(Class<?> cl)
+  public static <T> ReflectionSimpleAnnotatedType<T> 
+  introspectSimpleType(Class<T> cl)
   {
     return create(cl.getClassLoader()).introspectSimpleTypeImpl(cl);
   }
@@ -79,7 +80,8 @@ public class ReflectionAnnotatedFactory
    * Introspects the reflection type
    */
   synchronized
-  private ReflectionSimpleAnnotatedType introspectSimpleTypeImpl(Class cl)
+  private <T> ReflectionSimpleAnnotatedType<T>
+  introspectSimpleTypeImpl(Class<T> cl)
   {
     SoftReference<ReflectionSimpleAnnotatedType> typeRef
       = _simpleTypeMap.get(cl);

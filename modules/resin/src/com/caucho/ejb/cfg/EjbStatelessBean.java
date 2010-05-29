@@ -29,20 +29,15 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.util.L10N;
-
-import javax.ejb.*;
-import javax.enterprise.inject.spi.AnnotatedType;
-
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+
+import javax.ejb.Stateless;
+import javax.enterprise.inject.spi.AnnotatedType;
 
 /**
  * Configuration for an ejb stateless session bean.
  */
 public class EjbStatelessBean<X> extends EjbSessionBean<X> {
-  private static final L10N L = new L10N(EjbStatelessBean.class);
-
   /**
    * Creates a new session bean configuration.
    */
@@ -55,8 +50,8 @@ public class EjbStatelessBean<X> extends EjbSessionBean<X> {
    * Creates a new session bean configuration.
    */
   public EjbStatelessBean(EjbConfig ejbConfig,
-			 AnnotatedType annType,
-			 Stateless stateless)
+                          AnnotatedType<X> annType,
+                          Stateless stateless)
   {
     super(ejbConfig, annType, stateless.name());
   }

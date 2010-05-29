@@ -64,21 +64,17 @@ import com.caucho.util.L10N;
 public class EjbSessionBean<X> extends EjbBean<X> {
   private static final L10N L = new L10N(EjbSessionBean.class);
 
-  // Default is container managed transaction.
-  private boolean _isContainerTransaction = true;
-
-  // private SessionGenerator<X> _sessionBean;
-
   private Class<? extends Annotation> _sessionType;
 
   /**
    * Creates a new session bean configuration.
    */
+  /*
   public EjbSessionBean(EjbConfig ejbConfig, String ejbModuleName)
   {
     super(ejbConfig, ejbModuleName);
   }
-
+*/
   /**
    * Creates a new session bean configuration.
    */
@@ -210,6 +206,8 @@ public class EjbSessionBean<X> extends EjbBean<X> {
                "'{0}' must not implement SessionSynchronization.  Session beans with Bean-managed transactions may not use SessionSynchronization.",
                getEJBClass().getName()));
       }
+      
+      fillClassDefaults(getAnnotatedType());
     } catch (LineConfigException e) {
       throw e;
     } catch (ConfigException e) {
@@ -217,37 +215,11 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
   }
 
-  /**
-   * Creates the bean generator for the session bean.
-   */
-  /*
-  @Override
-  protected BeanGenerator<X> createBeanGenerator()
-  {
-    AnnotatedType<X> ejbClass = getAnnotatedType();
-
-    fillClassDefaults(ejbClass);
-
-    if (Stateless.class.equals(getSessionType())) {
-      _sessionBean = new StatelessGenerator<X>(getEJBName(), ejbClass,
-                                               getLocalList(), getRemoteList());
-    } else if (Stateful.class.equals(getSessionType())) {
-      _sessionBean = new StatefulGenerator<X>(getEJBName(), ejbClass,
-                                              getLocalList(), getRemoteList());
-    } else if (Singleton.class.equals(getSessionType())){
-      _sessionBean = new SingletonGenerator<X>(getEJBName(), ejbClass,
-                                               getLocalList(), getRemoteList());
-    }
-
-    return _sessionBean;
-  }
-  */
-
   private void fillClassDefaults(AnnotatedType<X> ejbClass)
   {
     AnnotatedTypeImpl<X> ejbClassImpl = AnnotatedTypeImpl.create(ejbClass);
     
-    if (!_isContainerTransaction) {
+    if (! _isContainerTransaction) {
       ejbClassImpl.addAnnotation(XaAnnotation.createBeanManaged());
     }
 

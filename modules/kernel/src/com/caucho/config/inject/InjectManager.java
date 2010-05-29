@@ -128,7 +128,7 @@ import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.BaseTypeFactory;
 import com.caucho.config.reflect.ParamType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
-import com.caucho.config.scope.ApplicationScope;
+import com.caucho.config.scope.ApplicationContext;
 import com.caucho.config.scope.DependentContext;
 import com.caucho.config.scope.ErrorContext;
 import com.caucho.config.scope.SingletonScope;
@@ -306,7 +306,7 @@ public final class InjectManager
 
   private DependentContext _dependentContext = new DependentContext();
   private SingletonScope _singletonScope;
-  private ApplicationScope _applicationScope;
+  private ApplicationContext _applicationScope;
   private XmlStandardPlugin _xmlExtension;
 
   private RuntimeException _configException;
@@ -365,7 +365,7 @@ public final class InjectManager
       }
 
       _singletonScope = new SingletonScope();
-      _applicationScope = new ApplicationScope();
+      _applicationScope = new ApplicationContext();
       
       addContext("com.caucho.server.webbeans.RequestScope");
       addContext("com.caucho.server.webbeans.SessionScope");
@@ -542,7 +542,7 @@ public final class InjectManager
     return _parent;
   }
 
-  public ApplicationScope getApplicationScope()
+  public ApplicationContext getApplicationScope()
   {
     return _applicationScope;
   }
@@ -1807,7 +1807,7 @@ public final class InjectManager
       throw new InjectionException(L.l("Bean has an unknown scope '{0}' for bean {1}",
                                        scopeType, bean));
 
-    return new ContextReferenceFactory<T>(bean, context);
+    return new NormalInstanceReferenceFactory<T>(bean, context);
   }
 
   private RuntimeException unsatisfiedException(Type type,
@@ -4121,9 +4121,6 @@ public final class InjectManager
   }
   
   public class ContextReferenceFactory<T> extends ReferenceFactory<T> {
-    private ThreadLocal<CreationalContextImpl<T>> _threadLocal
-      = new ThreadLocal<CreationalContextImpl<T>>();
-    
     private Bean<T> _bean;
     private Context _context;
     
@@ -4146,22 +4143,54 @@ public final class InjectManager
       if (instance != null)
         return instance;
       
+      if (env == null)
+        env = new OwnerCreationalContext<T>(bean, parentEnv);
+      
+      instance = _context.get(bean, env);
+        
+      if (instance == null)
+        throw new NullPointerException(L.l("null instance returned by '{0}' for bean '{1}'",
+                                           _context, bean));
+        
+      return instance;
+    }
+  }
+  
+  public class NormalInstanceReferenceFactory<T> extends ReferenceFactory<T> {
+    private ThreadLocal<CreationalContextImpl<T>> _threadLocal
+      = new ThreadLocal<CreationalContextImpl<T>>();
+    
+    private Bean<T> _bean;
+    private Context _context;
+    
+    NormalInstanceReferenceFactory(Bean<T> bean,
+                                   Context context)
+    {
+      _bean = bean;
+      _context = context;
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      Bean<T> bean = _bean;
+      
       // ioc/0155
       // XXX: possibly restrict to NormalScope adapter
       CreationalContextImpl<T> oldEnv = _threadLocal.get();
       
       try {
-        if (env == null) {
-          env = new OwnerCreationalContext<T>(bean, parentEnv);
-          
-          _threadLocal.set(env);
+        T instance = CreationalContextImpl.find(oldEnv, bean);
+        
+        if (instance != null) {
+          return instance;
         }
-        else {
-          instance = CreationalContextImpl.find(oldEnv, bean);
+
+        env = new OwnerCreationalContext<T>(bean, oldEnv);
           
-          if (instance != null)
-            return instance;
-        }
+        _threadLocal.set(env);
       
         instance = _context.get(bean, env);
         
@@ -4175,7 +4204,7 @@ public final class InjectManager
       }
     }
   }
-  
+
   public class NormalContextReferenceFactory<T> extends ReferenceFactory<T> {
     private Bean<T> _bean;
     private ScopeAdapterBean<T> _scopeAdapterBean;

@@ -19,7 +19,8 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
@@ -28,31 +29,42 @@
 
 package com.caucho.ejb.cfg;
 
+import javax.ejb.Singleton;
+import javax.enterprise.util.AnnotationLiteral;
+
 /**
- * Configuration for an ejb bean.
+ * Configuration for an ejb stateless session bean.
  */
-public class EjbEnterpriseBeans {
-  private final EjbConfig _config;
-  private final String _ejbModuleName;
-
-  public EjbEnterpriseBeans(EjbConfig config, String ejbModuleName)
+public class SingletonLiteral extends AnnotationLiteral<Singleton> 
+  implements Singleton {
+  private String _description;
+  private String _mappedName;
+  private String _name;
+  
+  public SingletonLiteral(String name,
+                          String mappedName,
+                          String description)
   {
-    _config = config;
-    _ejbModuleName = ejbModuleName;
+    _name = name;
+    _mappedName = mappedName;
+    _description = description;
   }
 
-  public EjbSessionConfigProxy createSession()
+  @Override
+  public String description()
   {
-    return new EjbSessionConfigProxy(_config, _ejbModuleName);
+    return _description;
   }
 
-  public EjbBeanConfigProxy createEjbBean()
+  @Override
+  public String mappedName()
   {
-    return new EjbBeanConfigProxy(_config, _ejbModuleName);
+    return _mappedName;
   }
 
-  public EjbMessageConfigProxy createMessageDriven()
+  @Override
+  public String name()
   {
-    return new EjbMessageConfigProxy(_config, _ejbModuleName);
+    return _name;
   }
 }

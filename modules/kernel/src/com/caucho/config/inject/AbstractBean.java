@@ -135,6 +135,11 @@ abstract public class AbstractBean<T>
   {
     return null;
   }
+  
+  public Class<?> getJavaClass()
+  {
+    return null;
+  }
 
   public Set<Annotation> getQualifiers()
   {
@@ -183,7 +188,7 @@ abstract public class AbstractBean<T>
     PrintWriter out = new PrintWriter(new OutputStreamWriter(os));
 
     // XXX: getTypes?
-    out.print(getBeanClass());
+    out.print(getJavaClass());
 
     if (getName() != null) {
       out.print(";name=");

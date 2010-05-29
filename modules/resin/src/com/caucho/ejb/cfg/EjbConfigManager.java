@@ -94,11 +94,13 @@ public class EjbConfigManager extends EjbConfig {
       = new ArrayList<EjbRootConfig>(_rootPendingList);
     _rootPendingList.clear();
 
+    /*
     for (EjbRootConfig rootConfig : pendingList) {
       for (String className : rootConfig.getClassNameList()) {
         addIntrospectableClass(className, rootConfig.getModuleName());
       }
     }
+    */
 
     configurePaths();
 

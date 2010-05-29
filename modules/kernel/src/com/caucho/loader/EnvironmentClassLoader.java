@@ -38,6 +38,7 @@ import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import com.caucho.config.ConfigException;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.loader.enhancer.ScanManager;
@@ -733,10 +734,10 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
       // configureEnhancerEvent();
     } catch (Exception e) {
-      log().log(Level.WARNING, e.toString(), e);
-
       if (_configException == null)
         _configException = e;
+      
+      throw ConfigException.create(e);
     }
   }
 

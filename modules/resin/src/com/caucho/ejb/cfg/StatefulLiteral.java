@@ -27,57 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.scope;
+package com.caucho.ejb.cfg;
 
-import java.lang.annotation.Annotation;
-
-import javax.enterprise.context.ApplicationScoped;
-
-import com.caucho.inject.Module;
-import com.caucho.loader.Environment;
+import javax.ejb.Stateful;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
- * The application scope value
+ * Configuration for an ejb singleton session bean.
  */
-@Module
-public class ApplicationScope extends AbstractScopeContext {
-  private ContextContainer _context = new ContextContainer();
-
-  /**
-   * Returns the current application scope
-   */
-  public ApplicationScope()
+public class StatefulLiteral extends AnnotationLiteral<Stateful> 
+  implements Stateful {
+  private String _description;
+  private String _mappedName;
+  private String _name;
+  
+  public StatefulLiteral(String name,
+                          String mappedName,
+                          String description)
   {
-    Environment.addCloseListener(_context);
-  }
-
-  /**
-   * Returns true if the scope is currently active.
-   */
-  @Override
-  public boolean isActive()
-  {
-    return true;
-   }
-
-  /**
-   * Returns the scope annotation type.
-   */
-  @Override
-  public Class<? extends Annotation> getScope()
-  {
-    return ApplicationScoped.class;
+    _name = name;
+    _mappedName = mappedName;
+    _description = description;
   }
 
   @Override
-  protected ContextContainer getContextContainer()
+  public String description()
   {
-    return _context;
+    return _description;
   }
 
   @Override
-  protected ContextContainer createContextContainer()
+  public String mappedName()
   {
-    return _context;
+    return _mappedName;
+  }
+
+  @Override
+  public String name()
+  {
+    return _name;
   }
 }

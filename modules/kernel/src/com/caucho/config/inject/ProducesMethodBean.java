@@ -250,7 +250,7 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
       Object value = _scopeAdapter;
 
       if (value == null) {
-        ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
+        ScopeAdapter scopeAdapter = ScopeAdapter.create(getJavaClass());
         _scopeAdapter = scopeAdapter.wrap(getBeanManager().createNormalInstanceFactory(topBean));
         value = _scopeAdapter;
       }
@@ -338,27 +338,31 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
       
       // factory instance owns its own dependency chain; it's not one of the
       // context bean's dependencies.
-      CreationalContextImpl<X> parentEnv;
+      CreationalContextImpl<T> env = null;
       
       if (cxt instanceof CreationalContextImpl<?>) {
-        CreationalContextImpl<?> parentCxt = (CreationalContextImpl<?>) cxt;
-
-        parentEnv = new ProducesCreationalContext<X>(_producerBean, parentCxt);
+        env = (CreationalContextImpl<T>) cxt;
       }
-      else
-        parentEnv = new ProducesCreationalContext<X>(_producerBean, null);
-
-      X factory = (X) getBeanManager().getReference(_producerBean, type, parentEnv);
+      
+      ProducesCreationalContext<X> factoryEnv = null;
+      
+      X factory = CreationalContextImpl.find(env, _producerBean);
+      
+      if (factory == null) {
+        factoryEnv = new ProducesCreationalContext<X>(_producerBean, env);
+        
+        factory = getBeanManager().getReference(_producerBean, factoryEnv);
+      }
       
       if (factory == null) {
         throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
                                             this, _producerBean));
       }
       
-      T instance = produce(factory, cxt);
+      T instance = produce(factory, env);
       
-      if (_producerBean.getScope() == Dependent.class)
-        _producerBean.destroy(factory, parentEnv);
+      if (env != null && _producerBean.getScope() == Dependent.class)
+        _producerBean.destroy(factory, factoryEnv);
       
       return instance;
     }
@@ -366,17 +370,9 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
     /**
      * Produces a new bean instance
      */
-    private T produce(X bean, CreationalContext<T> cxt)
+    private T produce(X bean, CreationalContextImpl<T> env)
     
     {
-      InjectionPoint ij = null;
-      
-      if (cxt instanceof CreationalContextImpl<?>) {
-        CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;
-
-        ij = env.findInjectionPoint();
-      }
-      
       try {
         // InjectManager inject = getBeanManager();
 
@@ -387,20 +383,17 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
 
           for (int i = 0; i < args.length; i++) {
             if (_producesArgs[i] instanceof InjectionPointArg<?>)
-              args[i] = ij;
+              args[i] = env.findInjectionPoint();
             else
-              args[i] = _producesArgs[i].eval((CreationalContext) cxt);
+              args[i] = _producesArgs[i].eval((CreationalContext) env);
           }
         }
         else
           args = NULL_ARGS;
 
-        // ioc/0084
-        _producesMethod.getJavaMember().setAccessible(true);
-        
         T value = (T) _producesMethod.getJavaMember().invoke(bean, args);
         
-        cxt.push(value);
+        env.push(value);
         
         if (value != null)
           return value;

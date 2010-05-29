@@ -190,6 +190,11 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     return _baseType.getRawClass();
   }
 
+  public final Class<?> getJavaClass()
+  {
+    return _baseType.getRawClass();
+  }
+
   public Type getTargetType()
   {
     return _baseType.toType();

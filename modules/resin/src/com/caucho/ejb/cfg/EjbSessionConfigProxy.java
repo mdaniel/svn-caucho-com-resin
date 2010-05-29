@@ -28,19 +28,24 @@
 
 package com.caucho.ejb.cfg;
 
-import com.caucho.config.ConfigException;
-import com.caucho.util.L10N;
+import javax.ejb.Singleton;
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
+import javax.enterprise.inject.spi.AnnotatedType;
 
-import javax.annotation.PostConstruct;
+import com.caucho.config.ConfigException;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
+import com.caucho.util.L10N;
 
 /**
  * Proxy for an ejb bean configuration.  This proxy is needed to handle
  * the merging of ejb definitions.
  */
 public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
-  private static final L10N L = new L10N(EjbBeanConfigProxy.class);
-
-  private EjbSessionBean _session;
+  private static final L10N L = new L10N(EjbSessionConfigProxy.class);
+  
+  private String _sessionType;
   
   /**
    * Creates a new session bean configuration.
@@ -49,40 +54,63 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   {
     super(config, ejbModuleName);
   }
-
-  /**
-   * Initializes and configures the session bean.
-   */
-  @PostConstruct
-  @Override
-  public void init()
+  
+  public void setSessionType(String sessionType)
   {
-    EjbBean oldBean = getConfig().getBeanConfig(getEJBName());
-
-    if (oldBean == null) {
-      _session = new EjbSessionBean(getConfig(), getEJBModuleName());
-      _session.setEJBName(getEJBName());
-      _session.setLocation(getLocation());
-      _session.setAllowPOJO(getConfig().isAllowPOJO());
-    }
-    else if (! (oldBean instanceof EjbSessionBean)) {
-      throw new ConfigException(L.l("session bean '{0}' conflicts with prior {1} bean at {2}.",
-				    getEJBName(), oldBean.getEJBKind(),
-				    oldBean.getLocation()));
-    }
+    if ("stateless".equals(sessionType))
+      _sessionType = sessionType;
+    else if ("stateful".equals(sessionType))
+      _sessionType = sessionType;
+    else if ("singleton".equals(sessionType))
+      _sessionType = sessionType;
     else
-      _session = (EjbSessionBean) oldBean;
-
-    _session.addDependencyList(getDependencyList());
-
-    getBuilderProgram().configure(_session);
+      throw new ConfigException(L.l("'{0}' is an unknown sessionType",
+                                    sessionType));
   }
-
-  /**
-   * Returns the session config.
-   */
-  public EjbSessionBean getSession()
+  
+  @Override
+  public void configure()
   {
-    return _session;
+    EjbBean<?> ejbBean = getConfig().getBeanConfig(getEJBName());
+    
+    if (ejbBean == null) {
+      ejbBean = createEjbBean(getEjbClass());
+      
+      getConfig().setBeanConfig(getEJBName(), ejbBean);
+    }
+    
+  }
+  
+  private <T> EjbBean<T> createEjbBean(Class<T> ejbClass)
+  {
+    AnnotatedType<T> reflAnnType
+      = ReflectionAnnotatedFactory.introspectSimpleType(ejbClass);
+    
+    AnnotatedTypeImpl<T> annType = AnnotatedTypeImpl.create(reflAnnType);
+    
+    String name = getEJBName();
+    String description = null;
+    String mappedName = null;
+    
+    if ("stateless".equals(_sessionType)) {
+      Stateless stateless = new StatelessLiteral(name, mappedName, description);
+      annType.addAnnotation(stateless);
+      
+      return new EjbStatelessBean<T>(getConfig(), annType, stateless);
+    }
+    else if ("stateful".equals(_sessionType)) {
+      Stateful stateful = new StatefulLiteral(name, mappedName, description);
+      annType.addAnnotation(stateful);
+      
+      return new EjbStatefulBean<T>(getConfig(), annType, stateful);
+    }
+    if ("singleton".equals(_sessionType)) {
+      Singleton singleton = new SingletonLiteral(name, mappedName, description);
+      annType.addAnnotation(singleton);
+      
+      return new EjbSingletonBean<T>(getConfig(), annType, singleton);
+    }
+    
+    throw new UnsupportedOperationException(_sessionType);
   }
 }

@@ -221,35 +221,6 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   }
 
   /**
-   * Returns the amber persistence unit for ejb.
-   */
-  public AmberPersistenceUnit createEjbPersistenceUnit()
-  {
-    if (_ejbPersistenceUnit == null) {
-      try {
-        AmberContainer amber = AmberContainer.create(_classLoader);
-
-        _ejbPersistenceUnit = amber.createPersistenceUnit("resin-ejb");
-        _ejbPersistenceUnit.setBytecodeGenerator(false);
-        ClassLoader loader = SimpleLoader.create(getWorkDir());
-        _ejbPersistenceUnit.setEnhancedLoader(loader);
-        _ejbPersistenceUnit.initLoaders();
-        // _ejbPersistenceUnit.setTableCacheTimeout(_entityCacheTimeout);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        throw ConfigException.create(e);
-      }
-    }
-
-    return _ejbPersistenceUnit;
-  }
-
-  //
-  // configuration
-  //
-
-  /**
    * true if beans should be auto-compiled
    */
   public void setAutoCompile(boolean isAutoCompile)
@@ -290,14 +261,6 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   public void setJmsConnectionFactory(ConnectionFactory factory)
   {
     _jmsConnectionFactory = factory;
-  }
-
-  /**
-   * Sets the JMS connection factory for the container.
-   */
-  public ConnectionFactory getJmsConnectionFactory()
-  {
-    return _jmsConnectionFactory;
   }
 
   /**
@@ -348,40 +311,6 @@ public class EjbManager implements ScanListener, EnvironmentListener {
 
     getProtocolManager().addServer(server);
   }
-
-  /**
-   * Returns the server specified by the ejbName, or null if not found.
-   */
-  public AbstractEjbBeanManager getServer(String ejbName)
-  {
-    for (AbstractEjbBeanManager server : _serverList) {
-      if (server.getEJBName().equals(ejbName)) {
-        return server;
-      }
-    }
-
-    return null;
-  }
-
-  /**
-   * Returns the server specified by the path and ejbName, or null if not found.
-   */
-  public AbstractEjbBeanManager getServer(Path path, String ejbName)
-  {
-    String mappedName = path.getFullPath() + "#" + ejbName;
-
-    for (AbstractEjbBeanManager server : _serverList) {
-      if (mappedName.equals(server.getId())) {
-        return server;
-      }
-    }
-
-    return null;
-  }
-
-  //
-  // ScanListener
-  //
 
   /**
    * Since EJB doesn't bytecode enhance, it's priority 1

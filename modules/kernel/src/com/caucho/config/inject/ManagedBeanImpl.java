@@ -194,7 +194,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
       Object value = _scopeAdapter;
 
       if (value == null) {
-        ScopeAdapter scopeAdapter = ScopeAdapter.create(getBaseType().getRawClass());
+        ScopeAdapter scopeAdapter = ScopeAdapter.create(getJavaClass());
         _scopeAdapter = scopeAdapter.wrap(getBeanManager().createNormalInstanceFactory(topBean));
         value = _scopeAdapter;
       }

@@ -19,40 +19,65 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
- *   Free SoftwareFoundation, Inc.
+ *
+ *   Free Software Foundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.cfg;
+package com.caucho.config.scope;
+
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.context.ApplicationScoped;
+
+import com.caucho.inject.Module;
+import com.caucho.loader.Environment;
 
 /**
- * Configuration for an ejb bean.
+ * The application scope value
  */
-public class EjbEnterpriseBeans {
-  private final EjbConfig _config;
-  private final String _ejbModuleName;
+@Module
+public class ApplicationContext extends AbstractScopeContext {
+  private ContextContainer _context = new ContextContainer();
 
-  public EjbEnterpriseBeans(EjbConfig config, String ejbModuleName)
+  /**
+   * Returns the current application scope
+   */
+  public ApplicationContext()
   {
-    _config = config;
-    _ejbModuleName = ejbModuleName;
+    Environment.addCloseListener(_context);
   }
 
-  public EjbSessionConfigProxy createSession()
+  /**
+   * Returns true if the scope is currently active.
+   */
+  @Override
+  public boolean isActive()
   {
-    return new EjbSessionConfigProxy(_config, _ejbModuleName);
+    return true;
+   }
+
+  /**
+   * Returns the scope annotation type.
+   */
+  @Override
+  public Class<? extends Annotation> getScope()
+  {
+    return ApplicationScoped.class;
   }
 
-  public EjbBeanConfigProxy createEjbBean()
+  @Override
+  protected ContextContainer getContextContainer()
   {
-    return new EjbBeanConfigProxy(_config, _ejbModuleName);
+    return _context;
   }
 
-  public EjbMessageConfigProxy createMessageDriven()
+  @Override
+  protected ContextContainer createContextContainer()
   {
-    return new EjbMessageConfigProxy(_config, _ejbModuleName);
+    return _context;
   }
 }

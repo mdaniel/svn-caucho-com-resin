@@ -58,8 +58,9 @@ public class EjbConfig {
 
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
 
-  private HashMap<String,EjbBean<?>> _cfgBeans = new HashMap<String,EjbBean<?>>();
-
+  private HashMap<String,EjbBean<?>> _cfgBeans
+    = new HashMap<String,EjbBean<?>>();
+  
   private ArrayList<EjbBean<?>> _pendingBeans = new ArrayList<EjbBean<?>>();
   private ArrayList<EjbBean<?>> _deployingBeans = new ArrayList<EjbBean<?>>();
 
@@ -69,10 +70,6 @@ public class EjbConfig {
   private ArrayList<FunctionSignature> _functions
     = new ArrayList<FunctionSignature>();
 
-  private String _booleanTrue = "1";
-  private String _booleanFalse = "0";
-
-  private boolean _isAllowPOJO;
   private HashMap<String, MessageDestination> _messageDestinations;
 
   private ArrayList<Interceptor> _cfgInterceptors
@@ -98,7 +95,7 @@ public class EjbConfig {
     throw new UnsupportedOperationException();
   }
 
-  public void addProxy(EjbBeanConfigProxy proxy)
+  public void addConfigProxy(EjbBeanConfigProxy proxy)
   {
     _proxyList.add(proxy);
   }
@@ -118,38 +115,6 @@ public class EjbConfig {
   public EjbManager getEjbContainer()
   {
     return _ejbContainer;
-  }
-
-  /**
-   * Sets the boolean true literal.
-   */
-  public void setBooleanTrue(String trueLiteral)
-  {
-    _booleanTrue = trueLiteral;
-  }
-
-  /**
-   * Gets the boolean true literal.
-   */
-  public String getBooleanTrue()
-  {
-    return _booleanTrue;
-  }
-
-  /**
-   * Sets the boolean false literal.
-   */
-  public void setBooleanFalse(String falseLiteral)
-  {
-    _booleanFalse = falseLiteral;
-  }
-
-  /**
-   * Gets the boolean false literal.
-   */
-  public String getBooleanFalse()
-  {
-    return _booleanFalse;
   }
 
   /**
@@ -176,9 +141,9 @@ public class EjbConfig {
       return;
     else if (oldBean != null) {
       throw new IllegalStateException(L.l("{0}: duplicate bean '{1}' old ejb-class={2} new ejb-class={3}",
-					  this, name,
-					  oldBean, // .getEJBClass().getName()));
-					  bean)); // .getEJBClass().getName()));
+                                          this, name,
+                                          oldBean, // .getEJBClass().getName()));
+                                          bean)); // .getEJBClass().getName()));
     }
 
     _pendingBeans.add(bean);
@@ -282,22 +247,6 @@ public class EjbConfig {
     return _messageDestinations.get(name);
   }
 
-  /**
-   * Sets true if POJO are allowed.
-   */
-  public void setAllowPOJO(boolean allowPOJO)
-  {
-    _isAllowPOJO = allowPOJO;
-  }
-
-  /**
-   * Return true if POJO are allowed.
-   */
-  public boolean isAllowPOJO()
-  {
-    return _isAllowPOJO;
-  }
-
   public <X> void addIntrospectableClass(String className, String moduleName)
   {
     try {
@@ -312,27 +261,23 @@ public class EjbConfig {
       if (type.isAnnotationPresent(javax.ejb.Stateless.class)) {
         EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, moduleName);
         bean.setEJBClass(type);
-        bean.setAllowPOJO(true);
 
         setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.Stateful.class)) {
         EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, moduleName);
-        bean.setAllowPOJO(true);
         bean.setEJBClass(type);
 
         setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
         EjbMessageBean<X> bean = new EjbMessageBean<X>(this, moduleName);
-        bean.setAllowPOJO(true);
         bean.setEJBClass(type);
 
         setBeanConfig(bean.getEJBName(), bean);
       }
       else if (type.isAnnotationPresent(javax.ejb.Singleton.class)) {
         EjbSingletonBean<X> bean = new EjbSingletonBean<X>(this, moduleName);
-        bean.setAllowPOJO(true);
         bean.setEJBClass(type);
 
         setBeanConfig(bean.getEJBName(), bean);
@@ -443,42 +388,18 @@ public class EjbConfig {
     findConfigurationFiles();
 
     try {
+      for (EjbBeanConfigProxy configProxy : _proxyList) {
+        configProxy.configure();
+      }
+      
       ArrayList<EjbBean<?>> beanConfig = new ArrayList<EjbBean<?>>(_pendingBeans);
       _pendingBeans.clear();
 
       _deployingBeans.addAll(beanConfig);
 
-      EnvironmentClassLoader parentLoader = _ejbContainer.getClassLoader();
-
-      Path workDir = _ejbContainer.getWorkDir();
-
-      JavaClassGenerator javaGen = new JavaClassGenerator();
-      // need to be compatible with enhancement
-      javaGen.setWorkDir(workDir);
-      javaGen.setParentLoader(parentLoader);
-
-      configureRelations();
-
-      for (EjbBeanConfigProxy proxy : _proxyList) {
-        EjbBean<?> bean = _cfgBeans.get(proxy.getEJBName());
-
-        if (bean != null)
-          proxy.getBuilderProgram().configure(bean);
-      }
-
       for (EjbBean<?> bean : beanConfig) {
         bean.init();
       }
-
-      // Collections.sort(beanConfig, new BeanComparator());
-
-      /*
-      for (EjbBean<?> bean : beanConfig) {
-        bean.generate(javaGen, _ejbContainer.isAutoCompile());
-      }
-      */
-
-      // javaGen.compilePendingJava();
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {

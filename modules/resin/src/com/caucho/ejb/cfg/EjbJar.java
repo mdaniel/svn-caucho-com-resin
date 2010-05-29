@@ -75,6 +75,11 @@ public class EjbJar extends DescriptionGroupConfig {
   {
     _isMetadataComplete = isMetadataComplete;
   }
+  
+  public boolean isMetadataComplete()
+  {
+    return _isMetadataComplete;
+  }
 
   public EjbEnterpriseBeans createEnterpriseBeans()
     throws ConfigException
@@ -102,13 +107,10 @@ public class EjbJar extends DescriptionGroupConfig {
 
   public void addQueryFunction(QueryFunction fun)
   {
-    _config.addFunction(fun.getSignature(), null);
   }
 
   public void setBooleanLiteral(BooleanLiteral literal)
   {
-    _config.setBooleanTrue(literal.getTrue());
-    _config.setBooleanFalse(literal.getFalse());
   }
 
   public static class MethodPermission {
