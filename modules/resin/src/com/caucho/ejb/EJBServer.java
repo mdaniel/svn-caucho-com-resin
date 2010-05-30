@@ -39,7 +39,6 @@ import com.caucho.config.types.PathPatternType;
 import com.caucho.config.types.Period;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.manager.EjbEnvironmentListener;
-import com.caucho.ejb.metadata.Bean;
 import com.caucho.env.jpa.ListenerPersistenceEnvironment;
 import com.caucho.env.jpa.ManagerPersistence;
 import com.caucho.loader.Environment;
@@ -84,8 +83,6 @@ public class EJBServer
 
   private String _entityManagerJndiName = "java:comp/EntityManager";
   private ArrayList<Path> _ejbJars = new ArrayList<Path>();
-
-  private ArrayList<Bean> _beanList = new ArrayList<Bean>();
 
   private MergePath _mergePath;
 
@@ -264,22 +261,6 @@ public class EJBServer
     }
 
     _ejbJars.add(ejbJar);
-  }
-
-  /**
-   * Adds a bean.
-   */
-  public Bean createBean()
-  {
-    return new Bean(_ejbContainer);
-  }
-
-  /**
-   * Adds a bean.
-   */
-  public void addBean(Bean bean)
-  {
-    _beanList.add(bean);
   }
 
   /**
