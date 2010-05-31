@@ -18,7 +18,8 @@
 
 <s2 title="4.0.7 - May 21, 2010">
 <ul>
-<li>servlet: fixed NullPointer with MultipartConfig caching bug (#4051, rep by subwiz)</li>
+<li>resin-admin: fixed IllegalStateExceptionwith with readonly conf/admin-users.xml.generated (#4055)</li>
+<li>servlet: fixed NPE with MultipartConfig caching bug (#4051, rep by subwiz)</li>
 <li>iis: fixed bug preventing iis from serving web-apps defined with web-app tag (#3890)</li>
 <li>iis: allow IIS to choose when to use chunked encoding (#3871)</li>
 <li>iis: 64 bit IIS Handler build provided (#3846)</li>
