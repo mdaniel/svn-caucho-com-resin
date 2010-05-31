@@ -55,26 +55,7 @@ import javax.annotation.PostConstruct;
 import javax.enterprise.inject.InjectionException;
 import javax.management.ObjectName;
 import javax.naming.NamingException;
-import javax.servlet.DispatcherType;
-import javax.servlet.Filter;
-import javax.servlet.FilterChain;
-import javax.servlet.FilterRegistration;
-import javax.servlet.HttpMethodConstraintElement;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.Servlet;
-import javax.servlet.ServletContainerInitializer;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletContextAttributeListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRegistration;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletRequestAttributeListener;
-import javax.servlet.ServletRequestListener;
-import javax.servlet.ServletSecurityElement;
-import javax.servlet.SessionCookieConfig;
-import javax.servlet.UnavailableException;
+import javax.servlet.*;
 import javax.servlet.annotation.ServletSecurity;
 import javax.servlet.annotation.WebFilter;
 import javax.servlet.annotation.WebInitParam;
@@ -3297,6 +3278,8 @@ public class WebApp extends ServletContextImpl
 
           if (! entry.isAsyncSupported())
             invocation.clearAsyncSupported();
+
+          invocation.setMultipartConfig(entry.getMultipartConfig());
         } else {
           chain = _servletMapper.mapServlet(invocation);
 
@@ -4246,6 +4229,7 @@ public class WebApp extends ServletContextImpl
     HashMap<String,String> _securityRoleMap;
     final Dependency _dependency;
     boolean _isAsyncSupported;
+    MultipartConfigElement _multipartConfig;
 
     FilterChainEntry(FilterChain filterChain, Invocation invocation)
     {
@@ -4255,6 +4239,7 @@ public class WebApp extends ServletContextImpl
       _servletName = invocation.getServletName();
       _dependency = invocation.getDependency();
       _isAsyncSupported = invocation.isAsyncSupported();
+      _multipartConfig = invocation.getMultipartConfig();
     }
 
     boolean isModified()
@@ -4294,6 +4279,11 @@ public class WebApp extends ServletContextImpl
 
     boolean isAsyncSupported() {
       return _isAsyncSupported;
+    }
+
+    public MultipartConfigElement getMultipartConfig()
+    {
+      return _multipartConfig;
     }
   }
   
