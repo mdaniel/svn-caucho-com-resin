@@ -44,14 +44,6 @@ public class EjbSingletonBean<X> extends EjbSessionBean<X> {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbSingletonBean(EjbConfig ejbConfig, String ejbModuleName)
-  {
-    super(ejbConfig, ejbModuleName);
-  }
-
-  /**
-   * Creates a new session bean configuration.
-   */
   public EjbSingletonBean(EjbConfig ejbConfig, 
                           AnnotatedType<X> annType,
                           Singleton singleton)

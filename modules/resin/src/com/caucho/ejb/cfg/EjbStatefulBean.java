@@ -44,14 +44,6 @@ public class EjbStatefulBean<X> extends EjbSessionBean<X> {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbStatefulBean(EjbConfig ejbConfig, String ejbModuleName)
-  {
-    super(ejbConfig, ejbModuleName);
-  }
-
-  /**
-   * Creates a new session bean configuration.
-   */
   public EjbStatefulBean(EjbConfig ejbConfig,
 			 AnnotatedType<X> annType,
 			 Stateful stateful)

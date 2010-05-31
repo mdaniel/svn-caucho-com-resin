@@ -247,48 +247,6 @@ public class EjbConfig {
     return _messageDestinations.get(name);
   }
 
-  public <X> void addIntrospectableClass(String className, String moduleName)
-  {
-    try {
-      ClassLoader loader = _ejbContainer.getClassLoader();
-
-      // ejb/0f20
-      Class<X> type = (Class<X>) Class.forName(className, false, loader);
-
-      if (findBeanByType(type) != null)
-        return;
-
-      if (type.isAnnotationPresent(javax.ejb.Stateless.class)) {
-        EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, moduleName);
-        bean.setEJBClass(type);
-
-        setBeanConfig(bean.getEJBName(), bean);
-      }
-      else if (type.isAnnotationPresent(javax.ejb.Stateful.class)) {
-        EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, moduleName);
-        bean.setEJBClass(type);
-
-        setBeanConfig(bean.getEJBName(), bean);
-      }
-      else if (type.isAnnotationPresent(javax.ejb.MessageDriven.class)) {
-        EjbMessageBean<X> bean = new EjbMessageBean<X>(this, moduleName);
-        bean.setEJBClass(type);
-
-        setBeanConfig(bean.getEJBName(), bean);
-      }
-      else if (type.isAnnotationPresent(javax.ejb.Singleton.class)) {
-        EjbSingletonBean<X> bean = new EjbSingletonBean<X>(this, moduleName);
-        bean.setEJBClass(type);
-
-        setBeanConfig(bean.getEJBName(), bean);
-      }
-    } catch (ConfigException e) {
-      throw e;
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-
   public <X> void addAnnotatedType(AnnotatedType<X> annType,
                                    InjectionTarget<X> injectTarget)
   {

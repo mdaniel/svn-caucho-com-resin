@@ -41,14 +41,6 @@ public class EjbStatelessBean<X> extends EjbSessionBean<X> {
   /**
    * Creates a new session bean configuration.
    */
-  public EjbStatelessBean(EjbConfig ejbConfig, String ejbModuleName)
-  {
-    super(ejbConfig, ejbModuleName);
-  }
-
-  /**
-   * Creates a new session bean configuration.
-   */
   public EjbStatelessBean(EjbConfig ejbConfig,
                           AnnotatedType<X> annType,
                           Stateless stateless)

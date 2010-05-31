@@ -55,7 +55,6 @@ public class EjbMessageConfigProxy extends EjbBeanConfigProxy {
    */
   @PostConstruct
   public void init()
-    throws Throwable
   {
     EjbBean oldBean = getConfig().getBeanConfig(getEJBName());
 
