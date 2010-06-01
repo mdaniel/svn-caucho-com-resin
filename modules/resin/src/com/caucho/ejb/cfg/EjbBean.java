@@ -94,6 +94,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
 
   private String _ejbName;
 
+  private AnnotatedType<X> _rawAnnType;
   private AnnotatedType<X> _ejbClass;
 
   // The published name as used by IIOP, Hessian, and
@@ -164,13 +165,18 @@ public class EjbBean<X> extends DescriptionGroupConfig
    * Creates a new entity bean configuration.
    */
   public EjbBean(EjbConfig ejbConfig,
+                 AnnotatedType<X> rawAnnType,
 		 AnnotatedType<X> annType,
 		 String ejbModuleName)
   {
     _ejbConfig = ejbConfig;
 
+    _rawAnnType = rawAnnType;
     _ejbClass = annType;
     _ejbModuleName = ejbModuleName;
+    
+    if (! "".equals(ejbModuleName))
+      _ejbName = ejbModuleName;
 
     setEJBClass(annType.getJavaClass());
 
@@ -535,6 +541,11 @@ public class EjbBean<X> extends DescriptionGroupConfig
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+
+  public AnnotatedType<X> getRawAnnotatedType()
+  {
+    return _rawAnnType;
   }
 
   public AnnotatedType<X> getAnnotatedType()

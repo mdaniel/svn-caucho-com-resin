@@ -44,6 +44,7 @@ import javax.annotation.security.RolesAllowed;
 import javax.ejb.SessionContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.SessionBeanType;
 import javax.inject.Named;
 
@@ -81,10 +82,11 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   private String[] _declaredRoles;
 
   public AbstractSessionManager(EjbManager manager, 
+                                AnnotatedType<X> rawAnnType,
                                 AnnotatedType<X> annotatedType,
                                 EjbLazyGenerator<X> lazyGenerator)
   {
-    super(manager, annotatedType);
+    super(manager, rawAnnType, annotatedType);
     
     _lazyGenerator = lazyGenerator;
     
@@ -196,6 +198,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     log.fine(this + " initialized");
   }
   
+  @Override
   public void bind()
   {
     try {
@@ -346,6 +349,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     ArrayList<AnnotatedType<? super X>> localApiList = getLocalApi();
     ArrayList<Class<?>> remoteApiList = getRemoteApiList();
     
+    AnnotatedType<X> rawAnnType = getRawAnnotatedType();
     AnnotatedType<X> beanType = getAnnotatedType();
 
     InjectManager moduleBeanManager = InjectManager.create();
@@ -357,6 +361,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     ManagedBeanImpl<X> mBean 
       = getInjectManager().createManagedBean(getAnnotatedType());
+    
+    InjectionTarget<X> target = mBean.getInjectionTarget();
+    target = moduleBeanManager.processInjectionTarget(target, getRawAnnotatedType());
     
     Class<?> baseApi = beanType.getJavaClass();
       
@@ -393,10 +400,11 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     _bean = (Bean<X>) createBean(mBean, baseApi, apiList);
       
+    // CDI TCK requires the rawAnnType, not the processed one
     ProcessSessionBeanImpl process
       = new ProcessSessionBeanImpl(moduleBeanManager,
                                    _bean,
-                                   mBean.getAnnotatedType(),
+                                   rawAnnType,
                                    getEJBName(),
                                    getSessionBeanType());
 

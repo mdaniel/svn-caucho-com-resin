@@ -110,7 +110,7 @@ public class EjbBeanConfigProxy implements DependencyBean {
   /**
    * Sets the ejbName
    */
-  public void setEJBName(String ejbName)
+  public void setEjbName(String ejbName)
   {
     _ejbName = ejbName;
   }
@@ -118,7 +118,7 @@ public class EjbBeanConfigProxy implements DependencyBean {
   /**
    * Gets the ejbName
    */
-  public String getEJBName()
+  public String getEjbName()
   {
     return _ejbName;
   }

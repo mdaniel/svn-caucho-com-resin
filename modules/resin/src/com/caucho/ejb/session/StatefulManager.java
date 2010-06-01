@@ -45,6 +45,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.SessionBeanType;
 
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.CandiEnhancedBean;
@@ -77,10 +78,11 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   private List<Decorator<?>> _decoratorBeans;
 
   public StatefulManager(EjbManager ejbContainer,
+                         AnnotatedType<X> rawAnnType,
                          AnnotatedType<X> annotatedType,
                          EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, annotatedType, lazyGenerator);
+    super(ejbContainer, rawAnnType, annotatedType, lazyGenerator);
   }
 
   @Override
@@ -93,6 +95,12 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   protected Class<?> getContextClass()
   {
     return StatefulContext.class;
+  }
+
+  @Override
+  protected SessionBeanType getSessionBeanType()
+  {
+    return SessionBeanType.STATEFUL;
   }
   
   public void bind()

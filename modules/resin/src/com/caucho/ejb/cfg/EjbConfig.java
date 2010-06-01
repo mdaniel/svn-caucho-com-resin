@@ -42,6 +42,8 @@ import com.caucho.vfs.Path;
 
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
+
 import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
@@ -60,6 +62,8 @@ public class EjbConfig {
 
   private HashMap<String,EjbBean<?>> _cfgBeans
     = new HashMap<String,EjbBean<?>>();
+  
+  private HashSet<Class<?>> _beanSet = new HashSet<Class<?>>();
   
   private ArrayList<EjbBean<?>> _pendingBeans = new ArrayList<EjbBean<?>>();
   private ArrayList<EjbBean<?>> _deployingBeans = new ArrayList<EjbBean<?>>();
@@ -98,6 +102,7 @@ public class EjbConfig {
   public void addConfigProxy(EjbBeanConfigProxy proxy)
   {
     _proxyList.add(proxy);
+    _beanSet.add(proxy.getEjbClass());
   }
 
   /**
@@ -148,6 +153,8 @@ public class EjbConfig {
 
     _pendingBeans.add(bean);
     _cfgBeans.put(name, bean);
+    
+    _beanSet.add(bean.getEJBClass());
   }
 
   /**
@@ -246,8 +253,14 @@ public class EjbConfig {
 
     return _messageDestinations.get(name);
   }
+  
+  public boolean isConfiguredBean(Class<?> beanType)
+  {
+    return _beanSet.contains(beanType);
+  }
 
-  public <X> void addAnnotatedType(AnnotatedType<X> annType,
+  public <X> void addAnnotatedType(AnnotatedType<X> rawAnnType,
+                                   AnnotatedType<X> annType,
                                    InjectionTarget<X> injectTarget)
   {
     try {
@@ -259,7 +272,8 @@ public class EjbConfig {
       if (annType.isAnnotationPresent(Stateless.class)) {
         Stateless stateless = annType.getAnnotation(Stateless.class);
 
-        EjbStatelessBean<X> bean = new EjbStatelessBean<X>(this, annType, stateless);
+        EjbStatelessBean<X> bean
+          = new EjbStatelessBean<X>(this, rawAnnType, annType, stateless);
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);
@@ -267,7 +281,8 @@ public class EjbConfig {
       else if (annType.isAnnotationPresent(Stateful.class)) {
         Stateful stateful = annType.getAnnotation(Stateful.class);
 
-        EjbStatefulBean<X> bean = new EjbStatefulBean<X>(this, annType, stateful);
+        EjbStatefulBean<X> bean
+          = new EjbStatefulBean<X>(this, rawAnnType, annType, stateful);
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);
@@ -275,14 +290,15 @@ public class EjbConfig {
       else if (annType.isAnnotationPresent(Singleton.class)) {
         Singleton singleton = annType.getAnnotation(Singleton.class);
 
-        EjbSingletonBean<X> bean = new EjbSingletonBean<X>(this, annType, singleton);
+        EjbSingletonBean<X> bean
+          = new EjbSingletonBean<X>(this, rawAnnType, annType, singleton);
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);
       }      
       else if (annType.isAnnotationPresent(MessageDriven.class)) {
         MessageDriven message = annType.getAnnotation(MessageDriven.class);
-        EjbMessageBean<X> bean = new EjbMessageBean<X>(this, annType, message);
+        EjbMessageBean<X> bean = new EjbMessageBean<X>(this, rawAnnType, annType, message);
         bean.setInjectionTarget(injectTarget);
 
         setBeanConfig(bean.getEJBName(), bean);
@@ -292,7 +308,7 @@ public class EjbConfig {
         = annType.getAnnotation(JmsMessageListener.class);
 
         EjbMessageBean<X> bean
-        = new EjbMessageBean<X>(this, annType, listener.destination());
+        = new EjbMessageBean<X>(this, rawAnnType, annType, listener.destination());
 
         bean.setInjectionTarget(injectTarget);
 

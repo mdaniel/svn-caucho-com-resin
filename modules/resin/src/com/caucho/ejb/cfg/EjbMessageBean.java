@@ -112,10 +112,11 @@ public class EjbMessageBean<X> extends EjbBean<X> {
    * Creates a new session bean configuration.
    */
   public EjbMessageBean(EjbConfig ejbConfig,
+                        AnnotatedType<X> rawAnnType,
                         AnnotatedType<X> annType,
                         MessageDriven messageDriven)
   {
-    super(ejbConfig, annType, messageDriven.name());
+    super(ejbConfig, rawAnnType, annType, messageDriven.name());
   }
 
 
@@ -123,10 +124,11 @@ public class EjbMessageBean<X> extends EjbBean<X> {
    * Creates a new session bean configuration.
    */
   public EjbMessageBean(EjbConfig ejbConfig,
+                        AnnotatedType<X> rawAnnType,
                         AnnotatedType<X> annType,
                         String ejbName)
   {
-    super(ejbConfig, annType, ejbName);
+    super(ejbConfig, rawAnnType, annType, ejbName);
   }
 
   /**
@@ -682,7 +684,9 @@ public class EjbMessageBean<X> extends EjbBean<X> {
         throw new ConfigException(L.l("ResourceAdapter is required for ActivationSpecServer"));
 
 
-      manager = new MessageManager<X>(ejbManager, getAnnotatedType());
+      manager = new MessageManager<X>(ejbManager, 
+                                      getRawAnnotatedType(), 
+                                      getAnnotatedType());
 
       manager.setConfigLocation(getFilename(), getLine());
 

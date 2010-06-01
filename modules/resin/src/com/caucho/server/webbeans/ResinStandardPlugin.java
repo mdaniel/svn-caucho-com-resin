@@ -109,13 +109,15 @@ public class ResinStandardPlugin implements Extension {
     // ioc/0j08
     boolean isXmlConfig = true;
 
+    EjbManager ejbContainer = EjbManager.create();
+    
     if (isXmlConfig
         && (annotatedType.isAnnotationPresent(Stateful.class)
             || annotatedType.isAnnotationPresent(Stateless.class)
             || annotatedType.isAnnotationPresent(Singleton.class)
             || annotatedType.isAnnotationPresent(MessageDriven.class)
-            || annotatedType.isAnnotationPresent(JmsMessageListener.class))) {
-      EjbManager ejbContainer = EjbManager.create();
+            || annotatedType.isAnnotationPresent(JmsMessageListener.class)
+            || ejbContainer.isConfiguredBean(annotatedType.getJavaClass()))) {
       ejbContainer.createBean(annotatedType, null);
       event.veto();
     }

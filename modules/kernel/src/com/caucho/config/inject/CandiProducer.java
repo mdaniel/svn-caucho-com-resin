@@ -203,6 +203,9 @@ public class CandiProducer<X> implements InjectionTarget<X>
   {
     Arg []args = _args;
     
+    if (args == null)
+      return NULL_ARGS;
+    
     int size = args.length;
     
     if (size > 0) {

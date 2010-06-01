@@ -79,10 +79,11 @@ public class EjbSessionBean<X> extends EjbBean<X> {
    * Creates a new session bean configuration.
    */
   public EjbSessionBean(EjbConfig ejbConfig, 
+                        AnnotatedType<X> rawAnnType,
                         AnnotatedType<X> annType,
                         String ejbModuleName)
   {
-    super(ejbConfig, annType, ejbModuleName);
+    super(ejbConfig, rawAnnType, annType, ejbModuleName);
   }
 
   /**
@@ -348,16 +349,19 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
     if (Stateless.class.equals(getSessionType())) {
       manager = new StatelessManager<X>(ejbContainer, 
+                                        getRawAnnotatedType(),
                                         getAnnotatedType(),
                                         lazyGenerator);
     }
     else if (Stateful.class.equals(getSessionType())) {
       manager = new StatefulManager<X>(ejbContainer,
+                                       getRawAnnotatedType(),
                                        getAnnotatedType(),
                                        lazyGenerator);
     }
     else if (Singleton.class.equals(getSessionType())) {
       manager = new SingletonManager<X>(ejbContainer, 
+                                        getRawAnnotatedType(),
                                         getAnnotatedType(),
                                         lazyGenerator);
     }

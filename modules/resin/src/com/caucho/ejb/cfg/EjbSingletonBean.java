@@ -45,10 +45,11 @@ public class EjbSingletonBean<X> extends EjbSessionBean<X> {
    * Creates a new session bean configuration.
    */
   public EjbSingletonBean(EjbConfig ejbConfig, 
+                          AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annType,
                           Singleton singleton)
   {
-    super(ejbConfig, annType, singleton.name());
+    super(ejbConfig, rawAnnType, annType, singleton.name());
   }
 
   /**

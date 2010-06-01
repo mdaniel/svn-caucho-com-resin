@@ -42,10 +42,11 @@ public class EjbStatelessBean<X> extends EjbSessionBean<X> {
    * Creates a new session bean configuration.
    */
   public EjbStatelessBean(EjbConfig ejbConfig,
+                          AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annType,
                           Stateless stateless)
   {
-    super(ejbConfig, annType, stateless.name());
+    super(ejbConfig, rawAnnType, annType, stateless.name());
   }
 
   /**

@@ -37,6 +37,7 @@ import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.SessionBeanType;
 
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.ManagedBeanImpl;
@@ -59,10 +60,11 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   private X _instance;
 
   public SingletonManager(EjbManager ejbContainer,
+                          AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annotatedType,
                           EjbLazyGenerator<X> lazyGenerator)
   {
-    super(ejbContainer, annotatedType, lazyGenerator);
+    super(ejbContainer, rawAnnType, annotatedType, lazyGenerator);
   }
 
   @Override
@@ -70,7 +72,13 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   {
     return "singleton:";
   }
-  
+
+  @Override
+  protected SessionBeanType getSessionBeanType()
+  {
+    return SessionBeanType.SINGLETON;
+  }
+
   @Override
   protected <T> SingletonContext<X,T> getSessionContext(Class<T> api)
   {

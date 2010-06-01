@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.event;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
@@ -43,19 +43,29 @@ import javax.enterprise.event.ObserverException;
 import javax.enterprise.event.Observes;
 import javax.enterprise.event.Reception;
 import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.bytecode.ScopeProxy;
+import com.caucho.config.inject.AbstractObserverMethod;
+import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InjectionPointImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.program.BeanArg;
+import com.caucho.util.L10N;
 
 /**
  * Internal implementation for a producer Bean
  */
 public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
-  private InjectManager _beanManager;
+  private static final L10N L = new L10N(ObserverMethodImpl.class);
+  
+  private InjectManager _cdiManager;
 
   private Bean<X> _bean;
   private AnnotatedMethod<X> _method;
@@ -68,13 +78,13 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   
   private TransactionPhase _transactionPhase = TransactionPhase.IN_PROGRESS;
 
-  ObserverMethodImpl(InjectManager beanManager,
+  public ObserverMethodImpl(InjectManager beanManager,
                      Bean<X> bean,
                      AnnotatedMethod<X> method,
                      Type type,
                      Set<Annotation> qualifiers)
   {
-    _beanManager = beanManager;
+    _cdiManager = beanManager;
     _bean = bean;
     _method = method;
     _method.getJavaMember().setAccessible(true);
@@ -137,6 +147,8 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
       return;
     }
     */
+    
+    Method javaMethod = _method.getJavaMember();
 
     _args = new BeanArg[parameters.size()];
 
@@ -150,15 +162,27 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
         _transactionPhase = observes.during();
       }
       else {
-        InjectionPoint ip = new InjectionPointImpl(_beanManager,
+        InjectionPoint ip = new InjectionPointImpl(_cdiManager,
                                                    _bean,
                                                    param);
 
-        _args[i] = new BeanArg<X>(_beanManager,
+        _args[i] = new BeanArg<X>(_cdiManager,
                                   param.getBaseType(),
-                                  _beanManager.getQualifiers(param.getAnnotations()),
+                                  _cdiManager.getQualifiers(param.getAnnotations()),
                                   ip);
       }
+      
+      if (param.isAnnotationPresent(Disposes.class)) {
+        throw new ConfigException(L.l("{0}.{1} may not have @Observes and @Disposes on the same method",
+                                      javaMethod.getDeclaringClass().getName(),
+                                      javaMethod.getName()));
+      }
+    }
+    
+    if (_isIfExists && _bean.getScope() == Dependent.class) {
+      throw new ConfigException(L.l("{0}.{1} @Observer cannot use IF_EXISTS because the bean has Dependent scope",
+                                    javaMethod.getDeclaringClass().getName(),
+                                    javaMethod.getName()));
     }
   }
 
@@ -180,9 +204,14 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
         return;
     }
     else {
-      env = new OwnerCreationalContext<X>(getParentBean());
+      if (_bean.getScope() == Dependent.class) {
+        env = new OwnerCreationalContext<X>(getParentBean());
       
-      instance = getParentBean().create(env);
+        instance = getParentBean().create(env);
+      }
+      else {
+        instance = _cdiManager.getReference(getParentBean());
+      }
     }
     
     if (_args != null && _args.length > 1)
@@ -226,7 +255,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
       if (argEnv != null)
         argEnv.release();
       
-      if (env != null && getParentBean().getScope() == Dependent.class)
+      if (env != null)
         getParentBean().destroy(instance, env);
     }
   }
@@ -236,7 +265,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
     Bean<X> bean = getParentBean();
     
     Class<? extends Annotation>scopeType = bean.getScope();
-    Context context = _beanManager.getContext(scopeType);
+    Context context = _cdiManager.getContext(scopeType);
 
     if (context != null)
       return (X) context.get(bean);

@@ -423,11 +423,11 @@ public class EnterpriseApplication
       fillDefaultModules();
     }
 
-    if (_ejbPaths.size() != 0) {
-      EjbManager ejbContainer = EjbManager.create();
+    EjbManager ejbManager = EjbManager.create();
 
+    if (_ejbPaths.size() != 0) {
       for (Path path : _ejbPaths) {
-        ejbContainer.addRoot(path);
+        // ejbManager.addRoot(path);
         _loader.addJar(path);
       }
 
@@ -435,15 +435,20 @@ public class EnterpriseApplication
 
       // XXX:??
       /*
-      Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
-      if (ejbJar.canRead()) {
-        ejbContainer.addRoot(path);
-      }
       */
 
       // starts with the environment
       // ejbServer.start();
     }
+    
+    // ioc/0p63
+    Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
+
+    if (ejbJar.canRead()) {
+      ejbManager.configureRootPath(_rootDir);
+    }
+
+    _loader.start();
 
     // updates the invocation caches
     if (_container != null)
@@ -810,6 +815,6 @@ public class EnterpriseApplication
     _ejbPaths.add(ejbPath);
     EjbManager ejbContainer = EjbManager.create();
 
-    ejbContainer.addRoot(ejbPath);
+    //ejbContainer.addRoot(ejbPath);
   }
 }

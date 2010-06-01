@@ -54,7 +54,6 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
-import com.caucho.loader.SimpleLoader;
 import com.caucho.loader.enhancer.ScanClass;
 import com.caucho.loader.enhancer.ScanListener;
 import com.caucho.util.CharBuffer;
@@ -292,10 +291,15 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   //
   // Bean configuration and management
   //
+  
+  public boolean isConfiguredBean(Class<?> beanType)
+  {
+    return _configManager.isConfiguredBean(beanType);
+  }
 
   public <T> void createBean(AnnotatedType<T> type, InjectionTarget<T> injectionTarget)
   {
-    _configManager.addAnnotatedType(type, injectionTarget);
+    _configManager.addAnnotatedType(type, type, injectionTarget);
   }
 
   //
@@ -323,7 +327,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   /**
    * Adds a root URL
    */
-  public void addRoot(Path root)
+  public void configureRootPath(Path root)
   {
     if (root.getURL().endsWith(".jar"))
       root = JarPath.create(root);
@@ -331,7 +335,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     // XXX: ejb/0fbn
     Path ejbJar = root.lookup("META-INF/ejb-jar.xml");
     if (ejbJar.canRead()) {
-      getConfigManager().addEjbPath(root);
+      getConfigManager().configureRootPath(root);
     }
 
     _ejbUrls.add(root.getURL());
@@ -348,9 +352,14 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   @Override
   public boolean isRootScannable(Path root, String packageRoot)
   {
+    Path scanRoot = root;
+    
+    if (packageRoot != null)
+      scanRoot = scanRoot.lookup(packageRoot.replace('.', '/'));
+      
     if (_scannableRoots == null) {
       if (! Boolean.TRUE.equals(_localScanAll.get())) {
-        if (! root.lookup("META-INF/ejb-jar.xml").canRead()) {
+        if (! scanRoot.lookup("META-INF/ejb-jar.xml").canRead()) {
           return false;
         }
       }     
@@ -360,7 +369,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
       }
     }
     else {
-      Path path = root;
+      Path path = scanRoot;
 
       if (root instanceof JarPath)
         path = ((JarPath) root).getContainer();
@@ -372,7 +381,7 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     if (log.isLoggable(Level.FINE))
         log.fine("EJB scanning '" + root + "'");
 
-    EjbRootConfig context = _configManager.createRootConfig(root);
+    EjbRootConfig context = _configManager.createRootConfig(scanRoot);
 
     if (context.isScanComplete())
       return false;

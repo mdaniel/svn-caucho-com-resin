@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.event;
 
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
@@ -50,8 +50,8 @@ public class ObserverMap {
   
   private Class<?> _type;
 
-  private ArrayList<ObserverEntry> _observerList
-    = new ArrayList<ObserverEntry>();
+  private ArrayList<ObserverEntry<?>> _observerList
+    = new ArrayList<ObserverEntry<?>>();
 
   public ObserverMap(Class<?> type)
   {
@@ -62,7 +62,7 @@ public class ObserverMap {
                           BaseType type,
                           Annotation []bindings)
   {
-    ObserverEntry entry = new ObserverEntry(observer, type, bindings);
+    ObserverEntry<?> entry = new ObserverEntry(observer, type, bindings);
 
     _observerList.add(entry);
   }
@@ -81,12 +81,14 @@ public class ObserverMap {
   }
 
   public void resolveEntries(ArrayList<ObserverEntry<?>> list,
-                             BaseType eventType)
+                             BaseType eventType,
+                             BaseType subType)
   {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry<?> observer = _observerList.get(i);
       
-      if (observer.getType().isAssignableFrom(eventType)
+      if ((observer.getType().isAssignableFrom(eventType)
+           || observer.getType().isAssignableFrom(subType))
           && ! list.contains(observer)) {
         list.add(observer);
       }

@@ -27,54 +27,65 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
-
-import javax.enterprise.inject.spi.*;
+package com.caucho.config.event;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
-import javax.enterprise.event.Event;
 import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.event.Event;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.InjectionPoint;
 
-import com.caucho.config.event.*;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.inject.Module;
 
 /**
  * Internal implementation for a Bean
  */
+@Module
 public class EventBeanImpl<T> implements Bean<T>
 {
   private InjectManager _beanManager;
   private Type _type;
-  private Annotation []_bindings;
+  private HashSet<Annotation> _qualifiers;
 
-  private EventImpl _event;
+  private EventImpl<T> _event;
 
-  EventBeanImpl(InjectManager beanManager,
-                   Type type,
-                   Annotation []bindings)
+  public EventBeanImpl(InjectManager beanManager,
+                Type type,
+                HashSet<Annotation> qualifierSet)
   {
     _beanManager = beanManager;
     _type = type;
-    _bindings = bindings;
+    _qualifiers = qualifierSet;
+    
+    Annotation []qualifiers = new Annotation[qualifierSet.size()];
+    
+    int i = 0;
+    for (Annotation ann : qualifierSet)
+      qualifiers[i++] = ann;
 
-    _event = new EventImpl(_beanManager, _type, _bindings);
+    _event = new EventImpl(_beanManager, _type, qualifiers);
   }
 
-  public Class getBeanClass()
+  @Override
+  public Class<?> getBeanClass()
   {
     return Event.class;
   }
 
+  @Override
   public T create(CreationalContext<T> env)
   {
     return (T) _event;
   }
 
+  @Override
   public void destroy(T instance, CreationalContext<T> env)
   {
   }
@@ -86,9 +97,15 @@ public class EventBeanImpl<T> implements Bean<T>
   /**
    * Returns the bean's binding annotations.
    */
+  @Override
   public Set<Annotation> getQualifiers()
   {
-    return null;
+    LinkedHashSet<Annotation> qualifiers = new LinkedHashSet<Annotation>();
+    
+    for (Annotation ann : _qualifiers)
+      qualifiers.add(ann);
+    
+    return qualifiers;
   }
 
   /**
@@ -153,6 +170,16 @@ public class EventBeanImpl<T> implements Bean<T>
    */
   public Set<Type> getTypes()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    LinkedHashSet<Type> typeSet = new LinkedHashSet<Type>();
+    
+    typeSet.add(_type);
+    typeSet.add(Object.class);
+    
+    return typeSet;
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _type + "]"; 
   }
 }

@@ -74,7 +74,7 @@ public class InjectionPointImpl<T> implements InjectionPoint
     _target = target;
   }
 
-  InjectionPointImpl(InjectManager manager,
+  public InjectionPointImpl(InjectManager manager,
                      Bean<T> bean,
                      AnnotatedParameter<?> param)
   {

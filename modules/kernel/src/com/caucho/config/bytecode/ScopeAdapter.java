@@ -68,6 +68,8 @@ public class ScopeAdapter {
 
   private Class<?> _proxyClass;
   private Constructor<?> _proxyCtor;
+  
+  private boolean _isWriteReplace;
 
   private ScopeAdapter(Class<?> cl)
   {
@@ -203,8 +205,9 @@ public class ScopeAdapter {
         code.invokespecial(superClassName, "<init>", "()V", 1, 0);
         code.addReturn();
         code.close();
-        
+
         createGetDelegateMethod(jClass);
+        createSerialize(jClass);
 
         for (Method method : _cl.getMethods()) {
           if (Modifier.isStatic(method.getModifiers()))
@@ -253,6 +256,9 @@ public class ScopeAdapter {
                                  Method method,
                                  boolean isInterface)
   {
+    if (method.getName().equals("writeReplace") && method.getParameterTypes().length == 0)
+      return;
+    
     String descriptor = createDescriptor(method);
 
     JavaMethod jMethod = jClass.createMethod(method.getName(),
@@ -369,6 +375,36 @@ public class ScopeAdapter {
                 "create",
                 "()Ljava/lang/Object;",
                 3, 1);
+
+    code.addObjectReturn();
+
+    code.close();
+  }
+
+  private void createSerialize(JavaClass jClass)
+  {
+    String descriptor = "()Ljava/lang/Object;";
+
+    JavaMethod jMethod = jClass.createMethod("writeReplace",
+                                             descriptor);
+    
+    jMethod.setAccessFlags(Modifier.PRIVATE);
+
+    CodeWriterAttribute code = jMethod.createCodeWriter();
+    code.setMaxLocals(1);
+    code.setMaxStack(3);
+
+    code.newInstance("com/caucho/config/bytecode/ScopeProxyHandle");
+    code.dup();
+    
+    code.pushObjectVar(0);
+    code.getField(jClass.getThisClass(), "_factory",
+                  "Lcom/caucho/config/inject/InjectManager$ReferenceFactory;");
+    
+    code.invokespecial("com/caucho/config/bytecode/ScopeProxyHandle",
+                       "<init>",
+                       "(Lcom/caucho/config/inject/InjectManager$ReferenceFactory;)V",
+                       3, 1);
 
     code.addObjectReturn();
 

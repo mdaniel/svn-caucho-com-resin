@@ -57,11 +57,11 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   
   public void setSessionType(String sessionType)
   {
-    if ("stateless".equals(sessionType))
+    if ("Stateless".equals(sessionType))
       _sessionType = sessionType;
-    else if ("stateful".equals(sessionType))
+    else if ("Stateful".equals(sessionType))
       _sessionType = sessionType;
-    else if ("singleton".equals(sessionType))
+    else if ("Singleton".equals(sessionType))
       _sessionType = sessionType;
     else
       throw new ConfigException(L.l("'{0}' is an unknown sessionType",
@@ -71,44 +71,44 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
   @Override
   public void configure()
   {
-    EjbBean<?> ejbBean = getConfig().getBeanConfig(getEJBName());
+    EjbBean<?> ejbBean = getConfig().getBeanConfig(getEjbName());
     
     if (ejbBean == null) {
       ejbBean = createEjbBean(getEjbClass());
       
-      getConfig().setBeanConfig(getEJBName(), ejbBean);
+      getConfig().setBeanConfig(getEjbName(), ejbBean);
     }
     
   }
   
   private <T> EjbBean<T> createEjbBean(Class<T> ejbClass)
   {
-    AnnotatedType<T> reflAnnType
+    AnnotatedType<T> rawAnnType
       = ReflectionAnnotatedFactory.introspectSimpleType(ejbClass);
     
-    AnnotatedTypeImpl<T> annType = AnnotatedTypeImpl.create(reflAnnType);
+    AnnotatedTypeImpl<T> annType = AnnotatedTypeImpl.create(rawAnnType);
     
-    String name = getEJBName();
+    String name = getEjbName();
     String description = null;
     String mappedName = null;
-    
-    if ("stateless".equals(_sessionType)) {
+
+    if ("Stateless".equals(_sessionType)) {
       Stateless stateless = new StatelessLiteral(name, mappedName, description);
       annType.addAnnotation(stateless);
       
-      return new EjbStatelessBean<T>(getConfig(), annType, stateless);
+      return new EjbStatelessBean<T>(getConfig(), rawAnnType, annType, stateless);
     }
-    else if ("stateful".equals(_sessionType)) {
+    else if ("Stateful".equals(_sessionType)) {
       Stateful stateful = new StatefulLiteral(name, mappedName, description);
       annType.addAnnotation(stateful);
       
-      return new EjbStatefulBean<T>(getConfig(), annType, stateful);
+      return new EjbStatefulBean<T>(getConfig(), rawAnnType, annType, stateful);
     }
-    if ("singleton".equals(_sessionType)) {
+    else if ("Singleton".equals(_sessionType)) {
       Singleton singleton = new SingletonLiteral(name, mappedName, description);
       annType.addAnnotation(singleton);
       
-      return new EjbSingletonBean<T>(getConfig(), annType, singleton);
+      return new EjbSingletonBean<T>(getConfig(), rawAnnType, annType, singleton);
     }
     
     throw new UnsupportedOperationException(_sessionType);

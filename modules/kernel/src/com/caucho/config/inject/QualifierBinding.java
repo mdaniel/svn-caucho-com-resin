@@ -57,7 +57,7 @@ public class QualifierBinding {
   private ArrayList<Method> _methodList
     = new ArrayList<Method>();
 
-  QualifierBinding(Annotation ann)
+  public QualifierBinding(Annotation ann)
   {
     _ann = ann;
     _annType = ann.annotationType();
@@ -96,7 +96,7 @@ public class QualifierBinding {
     return _annType == Any.class;
   }
 
-  boolean isMatch(Annotation []annList)
+  public boolean isMatch(Annotation []annList)
   {
     for (Annotation ann : annList) {
       if (isMatch(ann)) {

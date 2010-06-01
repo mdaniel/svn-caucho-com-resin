@@ -31,7 +31,6 @@ package com.caucho.config.inject;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AccessibleObject;
 import java.lang.reflect.Constructor;
@@ -120,6 +119,10 @@ import com.caucho.config.ModulePrivate;
 import com.caucho.config.ModulePrivateLiteral;
 import com.caucho.config.el.CandiContextResolver;
 import com.caucho.config.el.CandiExpressionFactory;
+import com.caucho.config.event.EventBeanImpl;
+import com.caucho.config.event.EventManager;
+import com.caucho.config.event.ObserverEntry;
+import com.caucho.config.event.ObserverMethodImpl;
 import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
@@ -200,6 +203,7 @@ public final class InjectManager
   private final InjectScanManager _scanManager;
   private final ExtensionManager _extensionManager
     = new ExtensionManager(this);
+  private EventManager _eventManager = new EventManager(this);
   
   private AtomicLong _version = new AtomicLong();
 
@@ -224,9 +228,6 @@ public final class InjectManager
   private HashMap<String,ArrayList<Bean<?>>> _selfNamedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
 
-  private ConcurrentHashMap<Class<?>,ObserverMap> _extObserverMap
-    = new ConcurrentHashMap<Class<?>,ObserverMap>();
-
   private HashMap<String,Bean<?>> _selfPassivationBeanMap
     = new HashMap<String,Bean<?>>();
 
@@ -239,9 +240,6 @@ public final class InjectManager
 
   private HashMap<String,ArrayList<Bean<?>>> _namedBeanMap
     = new HashMap<String,ArrayList<Bean<?>>>();
-  
-  private ConcurrentHashMap<Class<?>,ObserverMap> _observerMap
-    = new ConcurrentHashMap<Class<?>,ObserverMap>();
 
   private HashMap<Type,Bean<?>> _newBeanMap
     = new HashMap<Type,Bean<?>>();
@@ -260,9 +258,6 @@ public final class InjectManager
 
   private HashMap<Class<?>,Context> _contextMap
     = new HashMap<Class<?>,Context>();
-
-  private ConcurrentHashMap<Class<?>,ArrayList<ObserverEntry<?>>> _observerListCache
-    = new ConcurrentHashMap<Class<?>,ArrayList<ObserverEntry<?>>>();
 
   private ArrayList<InterceptorEntry<?>> _interceptorList
     = new ArrayList<InterceptorEntry<?>>();
@@ -421,6 +416,12 @@ public final class InjectManager
   InjectScanManager getScanManager()
   {
     return _scanManager;
+  }
+  
+  @Module
+  public EventManager getEventManager()
+  {
+    return _eventManager;
   }
 
   private void addContext(String contextClassName)
@@ -916,20 +917,16 @@ public final class InjectManager
   /**
    * Processes the discovered InjectionTarget
    */
-  private <T> InjectionTarget<T> processInjectionTarget(InjectionTarget<T> target)
+  public <T> InjectionTarget<T> processInjectionTarget(InjectionTarget<T> target,
+                                                       AnnotatedType<T> annotatedType)
   {
-    AnnotatedType<T> annotatedType = null;
-    
-    if (target instanceof InjectionTargetBuilder<?>)
-      annotatedType = ((InjectionTargetBuilder<T>) target).getAnnotatedType();
-    
     ProcessInjectionTargetImpl<T> processTarget
       = new ProcessInjectionTargetImpl<T>(target, annotatedType);
     
     BaseType eventType = createTargetBaseType(ProcessInjectionTargetImpl.class);
     eventType = eventType.fill(createTargetBaseType(annotatedType.getBaseType()));
 
-    fireExtensionEvent(processTarget, eventType);
+    getEventManager().fireExtensionEvent(processTarget, eventType);
 
     return (InjectionTarget<T>) processTarget.getInjectionTarget();
   }
@@ -946,7 +943,7 @@ public final class InjectManager
     eventType = eventType.fill(createTargetBaseType(declaringType.getBaseType()),
                                createTargetBaseType(annotatedMember.getBaseType()));
 
-    fireExtensionEvent(event, eventType);
+    getEventManager().fireExtensionEvent(event, eventType);
   }
 
   /**
@@ -975,7 +972,7 @@ public final class InjectManager
     BaseType baseType = createTargetBaseType(processBean.getClass());
     baseType = baseType.fill(createTargetBaseType(bean.getBeanClass()));
 
-    fireExtensionEvent(processBean, baseType);
+    getEventManager().fireExtensionEvent(processBean, baseType);
 
     /*
     if (isPassivatingScope(bean.getScope())) {
@@ -1026,7 +1023,7 @@ public final class InjectManager
   public <T> void addBean(Bean<T> bean, ProcessBean<T> processBean)
   {
     bean = processBean(bean, processBean);
-
+    
     if (bean == null)
       return;
 
@@ -1218,9 +1215,17 @@ public final class InjectManager
         beanType = param[0].getRawClass();
       else
         beanType = Object.class;
+      
+      HashSet<Annotation> qualifierSet = new LinkedHashSet<Annotation>();
+      
+      for (Annotation ann : qualifiers) {
+        qualifierSet.add(ann);
+      }
+      
+      qualifierSet.add(AnyLiteral.ANY);
 
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
-      set.add(new EventBeanImpl(this, beanType, qualifiers));
+      set.add(new EventBeanImpl(this, beanType, qualifierSet));
       return set;
     }
 
@@ -2150,161 +2155,7 @@ public final class InjectManager
     return _selfPassivationBeanMap.get(id);
   }
 
-  //
-  // event management
-  //
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param bindings the binding set for the event
-   */
-  public void addObserver(ObserverMethod<?> observer)
-  {
-    BaseType observedType = createTargetBaseType(observer.getObservedType());
-    Set<Annotation> qualifierSet = observer.getObservedQualifiers();
-
-    Annotation[] qualifiers = new Annotation[qualifierSet.size()];
-    int i = 0;
-    for (Annotation qualifier : qualifierSet) {
-      qualifiers[i++] = qualifier;
-    }
-
-    addObserver(observer, observedType, qualifiers);
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param bindings the binding set for the event
-   */
-  public void addObserver(ObserverMethod<?> observer,
-                          Type type,
-                          Annotation... bindings)
-  {
-    BaseType eventType = createTargetBaseType(type);
-
-    addObserver(observer, eventType, bindings);
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param bindings the binding set for the event
-   */
-  public void addObserver(ObserverMethod<?> observer,
-                          BaseType eventBaseType,
-                          Annotation... bindings)
-  {
-    Class<?> eventType = eventBaseType.getRawClass();
-
-    checkActive();
-
-    /*
-    if (eventType.getTypeParameters() != null
-        && eventType.getTypeParameters().length > 0) {
-      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's a parameterized type.",
-                                             eventType));
-    }
-    */
-
-    ObserverMap map = _observerMap.get(eventType);
-
-    if (map == null) {
-      map = new ObserverMap(eventType);
-      ObserverMap oldMap = _observerMap.putIfAbsent(eventType, map);
-        
-      if (oldMap != null)
-        map = oldMap;
-    }
-
-    map.addObserver(observer, eventBaseType, bindings);
-
-    _observerListCache.clear();
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param bindings the binding set for the event
-   */
-  void addExtensionObserver(ObserverMethod<?> observer,
-                            BaseType eventBaseType,
-                            Annotation... bindings)
-  {
-    addObserver(_extObserverMap, observer, eventBaseType, bindings);
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observer the observer object
-   * @param bindings the binding set for the event
-   */
-  private void addObserver(ConcurrentHashMap<Class<?>,ObserverMap> observerMap,
-                           ObserverMethod<?> observer,
-                           BaseType eventBaseType,
-                           Annotation... bindings)
-  {
-    Class<?> eventType = eventBaseType.getRawClass();
-
-    checkActive();
-
-    /*
-    if (eventType.getTypeParameters() != null
-        && eventType.getTypeParameters().length > 0) {
-      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's a parameterized type.",
-                                             eventType));
-    }
-    */
-
-    ObserverMap map = observerMap.get(eventType);
-
-    if (map == null) {
-      map = new ObserverMap(eventType);
-      
-      ObserverMap oldMap;
-      
-      oldMap = observerMap.putIfAbsent(eventType, map);
-      
-      if (oldMap != null)
-        map = oldMap;
-    }
-
-    map.addObserver(observer, eventBaseType, bindings);
-
-    _observerListCache.clear();
-  }
-
-  /**
-   * Removes an event observer
-   *
-   * @param observer the observer object
-   * @param eventType the type of event to listen for
-   * @param bindings the binding set for the event
-   */
-  public void removeObserver(ObserverMethod<?> observer)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
-   * Registers an event observer
-   *
-   * @param observerMethod the observer method
-   */
-  /*
-  public void addObserver(ObserverMethod<?,?> observerMethod)
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-  */
-
-  Annotation []getQualifiers(Set<Annotation> annotations)
+  public Annotation []getQualifiers(Set<Annotation> annotations)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
@@ -2343,57 +2194,7 @@ public final class InjectManager
     if (log.isLoggable(Level.FINEST))
       log.finest(this + " fireEvent " + event);
 
-    BaseType eventType = createSourceBaseType(event.getClass());
-    
-    // ioc/0b71
-    if (eventType.isGeneric() || eventType instanceof ParamType)
-      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
-                                             eventType));
-    
-    int length = qualifiers.length;
-    for (int i = 0; i < length; i++) {
-      Annotation qualifierA = qualifiers[i];
-      
-      if (! isQualifier(qualifierA.annotationType()))
-        throw new IllegalArgumentException(L.l("'{0}' is an invalid event annotation because it's not a @Qualifier.",
-                                               qualifierA));
-      
-      for (int j = i + 1; j < length; j++) {
-        if (qualifierA.annotationType() == qualifiers[j].annotationType()) {
-          throw new IllegalArgumentException(L.l("fireEvent is invalid because the bindings are duplicate types: {0} and {1}",
-                                                 qualifiers[i], qualifiers[j]));
-          
-        }
-      }
-    }
-
-    fireEventImpl(event, eventType, qualifiers);
-  }
-
-  protected void fireEventImpl(Object event,
-                               BaseType eventType,
-                               Annotation... bindings)
-  {
-    if (_parent != null)
-      _parent.fireEventImpl(event, eventType, bindings);
-
-    ArrayList<ObserverEntry<?>> observerList;
-
-    observerList = _observerListCache.get(event.getClass());
-    
-    if (observerList == null) {
-      observerList = new ArrayList<ObserverEntry<?>>();
-
-      fillLocalObserverList(_observerMap, observerList, eventType);
-
-      _observerListCache.put(event.getClass(), observerList);
-    }
-    
-    int size = observerList.size();
-    
-    for (int i = 0; i < size; i++) {
-      ((ObserverEntry) observerList.get(i)).fireEvent(event, bindings);
-    }
+    getEventManager().fireEvent(event, qualifiers);
   }
 
   /**
@@ -2402,110 +2203,12 @@ public final class InjectManager
    * @param eventType event to resolve
    * @param bindings the binding set for the event
    */
+  @Override
   public <T> Set<ObserverMethod<? super T>>
-    resolveObserverMethods(T event, Annotation... qualifiers)
+  resolveObserverMethods(T event, Annotation... qualifiers)
   {
-    HashSet<ObserverMethod<? super T>> set
-      = new HashSet<ObserverMethod<? super T>>();
-
-    BaseType eventType = createSourceBaseType(event.getClass());
-    
-    if (eventType.isGeneric())
-      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
-                                             eventType));
-    
-    for (int i = 0; i < qualifiers.length; i++) {
-      Class<? extends Annotation> annType = qualifiers[i].annotationType();
-      
-      if (! isQualifier(annType))
-        throw new IllegalArgumentException(L.l("{0} is not a valid qualifier because it is missing a @Qualifier annotation",
-                                               qualifiers[i]));
-      
-      for (int j = i + 1; j < qualifiers.length; j++) {
-        if (annType.equals(qualifiers[j].annotationType())) {
-          throw new IllegalArgumentException(L.l("duplicate qualifier {0} is not allowed.",
-                                                 qualifiers[i]));
-        }
-      }
-        
-    }
-
-    for (ObserverEntry entry : getLocalObserverList(event.getClass(), eventType)) {
-      entry.resolveObservers(set, qualifiers);
-    }
-
-    return set;
+    return getEventManager().resolveObserverMethods(event, qualifiers);
   }
-
-  private ArrayList<ObserverEntry<?>> 
-  getLocalObserverList(Class<?> cl, BaseType eventType)
-  {
-    ArrayList<ObserverEntry<?>> observerList;
-
-    observerList = _observerListCache.get(cl);
-
-    if (observerList == null) {
-      observerList = new ArrayList<ObserverEntry<?>>();
-
-      fillLocalObserverList(_observerMap, observerList, eventType);
-
-      _observerListCache.put(cl, observerList);
-    }
-
-    return observerList;
-  }
-
-  private void fireExtensionEvent(Object event, Annotation... bindings)
-  {
-    fireLocalEvent(_extObserverMap, event, bindings);
-  }
-
-  private void fireExtensionEvent(Object event, BaseType eventType, Annotation... bindings)
-  {
-    fireLocalEvent(_extObserverMap, event, eventType, bindings);
-  }
-
-  private void fireLocalEvent(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
-                              Object event, Annotation... bindings)
-  {
-    // ioc/0062 - class with type-param handled specially
-    BaseType eventType = createTargetBaseType(event.getClass());
-
-    fireLocalEvent(localMap, event, eventType, bindings);
-  }
-  
-  private void fireLocalEvent(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
-                              Object event, BaseType eventType,
-                              Annotation... bindings)
-  {
-    ArrayList<ObserverEntry<?>> observerList = new ArrayList<ObserverEntry<?>>();
-
-    fillLocalObserverList(localMap, observerList, eventType);
-
-    int size = observerList.size();
-    for (int i = 0; i < size; i++) {
-      ((ObserverEntry) observerList.get(i)).fireEvent(event, bindings);
-    }
-  }
-
-  private void fillLocalObserverList(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
-                                     ArrayList<ObserverEntry<?>> list,
-                                     BaseType eventType)
-  {
-    for (BaseType type : eventType.getBaseTypeClosure(this)) {
-      Class<?> rawClass = type.getRawClass();
-
-      ObserverMap map = localMap.get(rawClass);
-
-      if (map != null) {
-        map.resolveEntries(list, type);
-      }
-    }
-  }
-
-  //
-  // events
-  //
 
   //
   // interceptor support
@@ -2529,27 +2232,27 @@ public final class InjectManager
    * Resolves the interceptors for a given interceptor type
    *
    * @param type the main interception type
-   * @param bindings qualifying bindings
+   * @param qualifiers qualifying bindings
    *
    * @return the matching interceptors
    */
   public List<Interceptor<?>> resolveInterceptors(InterceptionType type,
-                                                  Annotation... bindings)
+                                                  Annotation... qualifiers)
   {
-    if (bindings == null || bindings.length == 0)
+    if (qualifiers == null || qualifiers.length == 0)
       throw new IllegalArgumentException(L.l("resolveInterceptors requires at least one @InterceptorBinding"));
     
-    for (int i = 0; i < bindings.length; i++) {
-      Class<? extends Annotation> annType = bindings[i].annotationType();
+    for (int i = 0; i < qualifiers.length; i++) {
+      Class<? extends Annotation> annType = qualifiers[i].annotationType();
       
       if (! annType.isAnnotationPresent(InterceptorBinding.class))
         throw new IllegalArgumentException(L.l("Annotation must be an @InterceptorBinding at '{0}' in resolveInterceptors",
-                                               bindings[i]));
+                                               qualifiers[i]));
         
-      for (int j = i + 1; j < bindings.length; j++) {
-        if (annType.equals(bindings[j].annotationType()))
+      for (int j = i + 1; j < qualifiers.length; j++) {
+        if (annType.equals(qualifiers[j].annotationType()))
           throw new IllegalArgumentException(L.l("Duplicate binding '{0}' is not allowed in resolveInterceptors",
-                                                 bindings[i]));
+                                                 qualifiers[i]));
       }
     }
 
@@ -2563,7 +2266,7 @@ public final class InjectManager
         continue;
       }
 
-      if (entry.isMatch(bindings)) {
+      if (entry.isMatch(qualifiers)) {
         interceptorList.add(interceptor);
       }
     }
@@ -2756,7 +2459,7 @@ public final class InjectManager
       }
 
       _isBeforeBeanDiscoveryComplete = true;
-      fireExtensionEvent(new BeforeBeanDiscoveryImpl());
+      _eventManager.fireExtensionEvent(new BeforeBeanDiscoveryImpl());
       
       /*
       // ioc/0061
@@ -2853,7 +2556,7 @@ public final class InjectManager
     BaseType baseType = createTargetBaseType(ProcessAnnotatedTypeImpl.class);
     baseType = baseType.fill(createTargetBaseType(type.getBaseType()));
     
-    fireExtensionEvent(processType, baseType);
+    _eventManager.fireExtensionEvent(processType, baseType);
 
     if (processType.isVeto()) {
       return;
@@ -2987,7 +2690,7 @@ public final class InjectManager
       targetImpl.setGenerateInterception(true);
     }
 
-    target = processInjectionTarget(target);
+    target = processInjectionTarget(target, type);
     
     if (target == null)
       return;
@@ -3041,7 +2744,7 @@ public final class InjectManager
 
           BaseType baseType = createSourceBaseType(observer.getObservedType());
 
-          addObserver(observer, baseType, bindings);
+          _eventManager.addObserver(observer, baseType, bindings);
         }
       }
     }
@@ -3097,7 +2800,7 @@ public final class InjectManager
 
         BaseType baseType = createSourceBaseType(observer.getObservedType());
 
-        addObserver(observer, baseType, bindings);
+        getEventManager().addObserver(observer, baseType, bindings);
       }
     }
 
@@ -3226,7 +2929,7 @@ public final class InjectManager
       if (isBind) {
         _isAfterBeanDiscoveryComplete = true;
 
-        fireExtensionEvent(new AfterBeanDiscoveryImpl());
+        getEventManager().fireExtensionEvent(new AfterBeanDiscoveryImpl());
       }
 
       if (_configException != null)
@@ -3248,7 +2951,7 @@ public final class InjectManager
         AfterDeploymentValidationImpl event
           = new AfterDeploymentValidationImpl();
         
-        fireExtensionEvent(event);
+        getEventManager().fireExtensionEvent(event);
         
         if (event.getDeploymentProblem() != null)
           throw ConfigException.create(event.getDeploymentProblem());
@@ -3418,15 +3121,14 @@ public final class InjectManager
     _selfNamedBeanMap = null;
     _beanMap = null;
     _namedBeanMap = null;
-    _observerMap = null;
-
     _contextMap = null;
-    _observerListCache = null;
 
     _interceptorList = null;
     _decoratorList = null;
     _pendingBindList = null;
     _pendingServiceList = null;
+    
+    _eventManager = null;
   }
 
   public static ConfigException injectError(AccessibleObject prop, String msg)
@@ -3477,7 +3179,7 @@ public final class InjectManager
     return _serializationHandle;
   }
 
-  private void checkActive()
+  public void checkActive()
   {
   }
 
@@ -3773,7 +3475,7 @@ public final class InjectManager
     @Override
     public void addObserverMethod(ObserverMethod<?> observerMethod)
     {
-      InjectManager.this.addObserver(observerMethod);
+      getEventManager().addObserver(observerMethod);
     }
 
     @Override
@@ -4037,6 +3739,11 @@ public final class InjectManager
   }
   
   abstract public class ReferenceFactory<T> {
+    public Bean<T> getBean()
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+    
     public final T create()
     {
       return create(null, null, null);
@@ -4168,6 +3875,12 @@ public final class InjectManager
     {
       _bean = bean;
       _context = context;
+    }
+    
+    @Override
+    public Bean<T> getBean()
+    {
+      return _bean;
     }
    
     @Override

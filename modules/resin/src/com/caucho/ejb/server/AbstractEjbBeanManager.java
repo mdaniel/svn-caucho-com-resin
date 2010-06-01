@@ -79,6 +79,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   protected Class<X> _ejbClass;
 
   // introspected bean information
+  private AnnotatedType<X> _rawAnnotatedType;
   private AnnotatedType<X> _annotatedType;
   private Bean<X> _bean;
 
@@ -122,9 +123,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
    * @param manager
    *          the owning server container
    */
-  public AbstractEjbBeanManager(EjbManager container, 
+  public AbstractEjbBeanManager(EjbManager container,
+                                AnnotatedType<X> rawAnnotatedType,
                                 AnnotatedType<X> annotatedType)
   {
+    _rawAnnotatedType = rawAnnotatedType;
     _annotatedType = annotatedType;
     _ejbContainer = container;
 
@@ -279,6 +282,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     String url = getProtocolId() + "#" + cl.getName().replace(".", "_");
 
     return url;
+  }
+
+  public AnnotatedType<X> getRawAnnotatedType()
+  {
+    return _rawAnnotatedType;
   }
 
   public AnnotatedType<X> getAnnotatedType()

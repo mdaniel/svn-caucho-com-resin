@@ -33,6 +33,7 @@ import java.util.*;
 import java.util.logging.*;
 
 import com.caucho.config.*;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.loader.*;
 import com.caucho.util.*;
@@ -87,9 +88,22 @@ public class EjbConfigManager extends EjbConfig {
 
     return rootConfig;
   }
+  
+  public void configureRootPath(Path root)
+  {
+    String ejbModuleName = getEjbModuleName(root);
 
+    Path ejbJarXml = root.lookup("META-INF/ejb-jar.xml");
+
+    if (ejbJarXml.canRead()) {
+      EjbJar ejbJar = configurePath(root, ejbModuleName);
+    }
+  }
+  
   public void start()
   {
+    InjectManager.create().update();
+    
     ArrayList<EjbRootConfig> pendingList
       = new ArrayList<EjbRootConfig>(_rootPendingList);
     _rootPendingList.clear();

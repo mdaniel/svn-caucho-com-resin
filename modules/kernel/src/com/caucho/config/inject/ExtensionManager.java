@@ -191,9 +191,9 @@ class ExtensionManager
                                        method.getMethod(),
                                        method.getArgs());
 
-      _injectManager.addExtensionObserver(observer,
-                                          method.getBaseType(),
-                                          method.getQualifiers());
+      _injectManager.getEventManager().addExtensionObserver(observer,
+                                                            method.getBaseType(),
+                                                            method.getQualifiers());
       
       if ((ProcessAnnotatedType.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {

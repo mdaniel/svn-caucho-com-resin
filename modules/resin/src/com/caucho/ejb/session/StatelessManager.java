@@ -38,6 +38,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Interceptor;
+import javax.enterprise.inject.spi.SessionBeanType;
 
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.CreationalContextImpl;
@@ -75,10 +76,11 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
    *          the session configuration from the ejb.xml
    */
   public StatelessManager(EjbManager ejbContainer, 
+                          AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annotatedType,
                           EjbLazyGenerator<X> ejbGenerator)
   {
-    super(ejbContainer, annotatedType, ejbGenerator);
+    super(ejbContainer, rawAnnType, annotatedType, ejbGenerator);
     
     introspect();
   }
@@ -88,7 +90,13 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   {
     return "stateless:";
   }
-  
+
+  @Override
+  protected SessionBeanType getSessionBeanType()
+  {
+    return SessionBeanType.STATELESS;
+  }
+
   public int getSessionIdleMax()
   {
     return _sessionIdleMax;

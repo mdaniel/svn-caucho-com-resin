@@ -60,6 +60,7 @@ import javax.inject.Qualifier;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.bytecode.ScopeAdapter;
+import com.caucho.config.event.ObserverMethodImpl;
 import com.caucho.config.timer.ScheduleIntrospector;
 import com.caucho.config.timer.TimeoutCaller;
 import com.caucho.config.timer.TimerTask;

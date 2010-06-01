@@ -25,13 +25,14 @@
  *   Boston, MA 02111-1307  USA
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.event;
 
 import java.lang.annotation.Annotation;
 import java.util.Set;
 
 import javax.enterprise.inject.spi.ObserverMethod;
 
+import com.caucho.config.inject.QualifierBinding;
 import com.caucho.config.reflect.BaseType;
 
 public class ObserverEntry<T> {
@@ -45,7 +46,7 @@ public class ObserverEntry<T> {
   {
     _observer = observer;
     _type = type;
-
+    
     _qualifiers = new QualifierBinding[qualifiers.length];
     for (int i = 0; i < qualifiers.length; i++) {
       _qualifiers[i] = new QualifierBinding(qualifiers[i]);
