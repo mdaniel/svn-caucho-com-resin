@@ -13,6 +13,7 @@
 
 <s2 title="4.0.8 - snapshot">
 <ul>
+<li>resin: fixed startup routine for directory with spaces issue: (#4021)</li>
 <li>resin-admin: fixed IllegalStateExceptionwith with readonly conf/admin-users.xml.generated (#4055)</li>
 <li>servlet: fixed NPE with MultipartConfig caching bug (#4051, rep by subwiz)</li>
 </ul>

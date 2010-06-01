@@ -411,8 +411,20 @@ class WatchdogArgs
           if (arg.startsWith("-Djava.class.path=")) {
             // IBM JDK
           }
-          else if (arg.startsWith("-D"))
-            args.add("-J" + arg);
+          else if (arg.startsWith("-D")) {
+            int eqlSignIdx = arg.indexOf('=');
+            if (eqlSignIdx == -1) {
+              args.add("-J" + arg);
+            } else {
+              String key = arg.substring(2, eqlSignIdx);
+              String value = System.getProperty(key);
+
+              if (value == null)
+                value = "";
+
+              args.add("-J-D" + key + "=" + value);
+            }
+          }
         }
       }
     } catch (Exception e) {
