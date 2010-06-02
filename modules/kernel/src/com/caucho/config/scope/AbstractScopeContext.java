@@ -31,6 +31,7 @@ package com.caucho.config.scope;
 
 import java.lang.annotation.Annotation;
 
+import javax.enterprise.context.ContextNotActiveException;
 import javax.enterprise.context.spi.Context;
 import javax.enterprise.context.spi.Contextual;
 import javax.enterprise.context.spi.CreationalContext;
@@ -38,12 +39,15 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.PassivationCapable;
 
 import com.caucho.inject.Module;
+import com.caucho.util.L10N;
 
 /**
  * Context for a named EL bean scope
  */
 @Module
 abstract public class AbstractScopeContext implements Context {
+  public static final L10N L = new L10N(AbstractScopeContext.class);
+  
   /**
    * Returns true if the scope is currently active.
    */
@@ -62,6 +66,10 @@ abstract public class AbstractScopeContext implements Context {
   @Override
   public <T> T get(Contextual<T> bean)
   {
+    if (! isActive())
+      throw new ContextNotActiveException(L.l("{0} cannot be used because it's not currently active",
+                                              getClass().getName()));
+    
     ContextContainer context = getContextContainer();
     
     if (context == null)
@@ -79,6 +87,10 @@ abstract public class AbstractScopeContext implements Context {
   public <T> T get(Contextual<T> bean,
                    CreationalContext<T> creationalContext)
   {
+    if (! isActive())
+      throw new ContextNotActiveException(L.l("{0} cannot be used because it's not currently active",
+                                              getClass().getName()));
+    
     ContextContainer context = createContextContainer();
 
     if (context == null)

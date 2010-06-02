@@ -102,6 +102,19 @@ public class AnnotatedTypeUtil {
     
     return null;
   }
+  
+  /**
+   * Finds any method matching the method name and parameter types.
+   */
+  public static Method findMethod(Method []methods, Method testMethod)
+  {
+    for (Method method : methods) {
+      if (isMatch(method, testMethod))
+        return method;
+    }
+    
+    return null;
+  }
 
   /**
    * Tests if two annotated methods are equivalent.

@@ -86,7 +86,8 @@ public class ResinStandardPlugin implements Extension {
    */
   public void processAfterBeanDiscovery(@Observes AfterBeanDiscovery event)
   {
-    event.addContext(ThreadContext.getContext());
+    // ioc/0p41
+    // event.addContext(ThreadContext.getContext());
   }
 
   /**

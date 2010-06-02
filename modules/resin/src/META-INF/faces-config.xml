@@ -6,7 +6,7 @@
    version="2.0">
 
   <application>
-    <el-resolver>com.caucho.config.el.WebBeansELResolver</el-resolver>
+    <el-resolver>com.caucho.config.el.CandiContextResolver</el-resolver>
   </application>
 
 </faces-config>

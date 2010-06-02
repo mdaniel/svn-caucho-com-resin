@@ -137,11 +137,11 @@ public class ParamType extends BaseType implements ParameterizedType
     
     for (Type type : _type.getGenericInterfaces()) {
       BaseType ifaceType = createForSource(type, _paramMap);
-
+      
       ifaceType.fillTypeClosure(manager, typeSet);
     }
 
-    Class<?> superclass = _type.getSuperclass();
+    Type superclass = _type.getGenericSuperclass();
     
     if (superclass == null)
       return;

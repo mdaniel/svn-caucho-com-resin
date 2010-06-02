@@ -29,8 +29,10 @@
 
 package com.caucho.config.inject;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
@@ -69,6 +71,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
   private Producer<T> _producer = _fieldProducer;
 
   private boolean _isBound;
+  private boolean _isPassivating;
 
   protected ProducesFieldBean(InjectManager manager,
                               Bean<X> producerBean,
@@ -132,6 +135,14 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
   protected String getDefaultName()
   {
     return _beanField.getJavaMember().getName();
+  }
+  
+  @Override
+  public void introspect()
+  {
+    super.introspect();
+   
+    _isPassivating = getBeanManager().isPassivatingScope(getScope());
   }
 
   @Override
@@ -228,6 +239,11 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
       if (_producerBean.getScope() == Dependent.class)
         _producerBean.destroy(factory, producerCxt);
       
+      if (_isPassivating && ! (instance instanceof Serializable))
+        throw new IllegalProductException(L.l("'{0}' is an invalid @{1} instance because it's not serializable for bean {2}",
+                                              instance, getScope().getSimpleName(), this));
+      
+      
       return instance;
     }
 
@@ -274,6 +290,16 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
     public Set<InjectionPoint> getInjectionPoints()
     {
       return ProducesFieldBean.this.getInjectionPoints();
+    }
+
+    @Override
+    public String toString()
+    {
+      Field javaField = _beanField.getJavaMember();
+      
+      return (getClass().getSimpleName()
+          + "[" + javaField.getDeclaringClass().getSimpleName()
+          + "." + javaField.getName() + "]");
     }
   }
 }

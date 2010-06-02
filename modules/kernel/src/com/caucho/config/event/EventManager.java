@@ -32,19 +32,29 @@ package com.caucho.config.event;
 import java.lang.annotation.Annotation;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.event.Event;
+import javax.enterprise.event.Observes;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.Specializes;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ObserverMethod;
+import javax.inject.Inject;
+import javax.inject.Qualifier;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.reflect.BaseType;
@@ -74,6 +84,71 @@ public class EventManager
   public EventManager(InjectManager cdiManager)
   {
     _cdiManager = cdiManager;
+  }
+
+  public <X,Z> void addObserver(Bean<X> bean, AnnotatedMethod<Z> beanMethod)
+  {
+    int param = findObserverAnnotation(beanMethod);
+
+    if (param < 0)
+      return;
+
+    Method method = beanMethod.getJavaMember();
+    Type eventType = method.getGenericParameterTypes()[param];
+    
+    // ioc/0b22
+    if (! method.getDeclaringClass().equals(bean.getBeanClass())
+        && ! bean.getBeanClass().isAnnotationPresent(Specializes.class)) {
+      return;
+    }
+
+    HashSet<Annotation> bindingSet = new HashSet<Annotation>();
+
+    List<AnnotatedParameter<Z>> paramList = beanMethod.getParameters();
+    for (Annotation ann : paramList.get(param).getAnnotations()) {
+      if (ann.annotationType().isAnnotationPresent(Qualifier.class))
+        bindingSet.add(ann);
+    }
+
+    if (method.isAnnotationPresent(Inject.class)) {
+      throw InjectManager.error(method, L.l("A method may not have both an @Observer and an @Inject annotation."));
+    }
+
+    if (method.isAnnotationPresent(Produces.class)) {
+      throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Produces annotation."));
+    }
+
+    if (method.isAnnotationPresent(Disposes.class)) {
+      throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Disposes annotation."));
+    }
+
+    ObserverMethodImpl observerMethod
+      = new ObserverMethodImpl(_cdiManager, bean, beanMethod,
+                               eventType, bindingSet);
+
+    _cdiManager.addObserver(observerMethod, beanMethod);
+  }
+
+  public static <Z> int findObserverAnnotation(AnnotatedMethod<Z> method)
+  {
+    List<AnnotatedParameter<Z>> params = method.getParameters();
+    int size = params.size();
+    int observer = -1;
+
+    for (int i = 0; i < size; i++) {
+      AnnotatedParameter<?> param = params.get(i);
+
+      for (Annotation ann : param.getAnnotations()) {
+        if (ann.annotationType() == Observes.class) {
+          if (observer >= 0 && observer != i)
+            throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
+
+          observer = i;
+        }
+      }
+    }
+
+    return observer;
   }
   
   public void fireEvent(Object event, Annotation... qualifiers)

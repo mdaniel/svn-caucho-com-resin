@@ -187,8 +187,19 @@ abstract public class AbstractBean<T>
     Sha256OutputStream os = new Sha256OutputStream(new NullOutputStream());
     PrintWriter out = new PrintWriter(new OutputStreamWriter(os));
 
-    // XXX: getTypes?
     out.print(getJavaClass());
+    
+    ArrayList<String> typeList = new ArrayList<String>();
+    
+    for (Type type : getTypes()) {
+      typeList.add(type.toString());
+    }
+    Collections.sort(typeList);
+
+    for (String typeString : typeList) {
+      out.print(";");
+      out.print(typeString);
+    }
 
     if (getName() != null) {
       out.print(";name=");

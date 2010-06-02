@@ -76,6 +76,11 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   {
     return _injectManager;
   }
+  
+  public InjectManager getModuleInjectManager()
+  {
+    return _manager.getModuleInjectManager();
+  }
 
   /*
    * Returns the API for the context

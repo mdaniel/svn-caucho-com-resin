@@ -36,10 +36,13 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.PassivationCapable;
 
+import com.caucho.config.event.EventManager;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScopeAdapterBean;
@@ -65,6 +68,8 @@ public class SessionBeanImpl<X,T>
     _bean = bean;
     
     _types.addAll(apiList);
+    
+    introspectObservers(bean.getAnnotatedType());
   }
   
   protected ManagedBeanImpl<X> getBean()
@@ -158,6 +163,21 @@ public class SessionBeanImpl<X,T>
   public String getId()
   {
     return getBean().getId();
+  }
+  
+  /**
+   * Introspects the methods for any @Produces
+   */
+  private void introspectObservers(AnnotatedType<X> beanType)
+  {
+    EventManager eventManager = _context.getModuleInjectManager().getEventManager();
+
+    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+      int param = EventManager.findObserverAnnotation(beanMethod);
+      
+      if (param >= 0)
+        eventManager.addObserver(this, beanMethod);
+    }
   }
   
   @Override

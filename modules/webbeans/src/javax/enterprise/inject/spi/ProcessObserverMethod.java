@@ -46,7 +46,7 @@ package javax.enterprise.inject.spi;
  */
 public interface ProcessObserverMethod<T,X>
 {
-  public AnnotatedParameter<T> getAnnotatedEventParameter();
+  public AnnotatedMethod<X> getAnnotatedMethod();
   public ObserverMethod<T> getObserverMethod();
   public void addDefinitionError(Throwable t);
 }

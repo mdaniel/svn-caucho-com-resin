@@ -409,50 +409,58 @@ public class EnterpriseApplication
     if (! _lifecycle.toInit())
       return;
 
-    Vfs.setPwd(_rootDir, _loader);
+    try {
+      Vfs.setPwd(_rootDir, _loader);
 
-    _loader.addJarManifestClassPath(_rootDir);
+      _loader.addJarManifestClassPath(_rootDir);
 
-    // server/13bb vs TCK
-    if ("1.4".equals(_version)) {
-      // XXX: tck ejb30/persistence/basic needs to add the lib/*.jar
-      // to find the META-INF/persistence.xml
-      fillDefaultLib();
-    }
-    else {
-      fillDefaultModules();
-    }
-
-    EjbManager ejbManager = EjbManager.create();
-
-    if (_ejbPaths.size() != 0) {
-      for (Path path : _ejbPaths) {
-        // ejbManager.addRoot(path);
-        _loader.addJar(path);
+      // server/13bb vs TCK
+      if ("1.4".equals(_version)) {
+        // XXX: tck ejb30/persistence/basic needs to add the lib/*.jar
+        // to find the META-INF/persistence.xml
+        fillDefaultLib();
+      }
+      else {
+        fillDefaultModules();
       }
 
-      _loader.validate();
+      EjbManager ejbManager = EjbManager.create();
+
+      if (_ejbPaths.size() != 0) {
+        for (Path path : _ejbPaths) {
+          // ejbManager.addRoot(path);
+          _loader.addJar(path);
+        }
+
+        _loader.validate();
 
       // XXX:??
       /*
       */
 
-      // starts with the environment
-      // ejbServer.start();
-    }
+        // starts with the environment
+        // ejbServer.start();
+      }
     
-    // ioc/0p63
-    Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
+      // ioc/0p63
+      Path ejbJar = _rootDir.lookup("META-INF/ejb-jar.xml");
 
-    if (ejbJar.canRead()) {
-      ejbManager.configureRootPath(_rootDir);
+      if (ejbJar.canRead()) {
+        ejbManager.configureRootPath(_rootDir);
+      }
+
+      _loader.start();
+
+      // updates the invocation caches
+      if (_container != null)
+        _container.clearCache();
+    } catch (Exception e) {
+      _configException = ConfigException.create(e);
+      
+      log.log(Level.WARNING, e.toString(), e);
+      
+      _loader.setConfigException(_configException);
     }
-
-    _loader.start();
-
-    // updates the invocation caches
-    if (_container != null)
-      _container.clearCache();
   }
 
   private void fillDefaultModules()
@@ -526,6 +534,7 @@ public class EnterpriseApplication
   /**
    * Configures the application.
    */
+  @Override
   public void start()
   {
     if (! _lifecycle.toStarting())
@@ -551,9 +560,15 @@ public class EnterpriseApplication
         }
       }
     } finally {
-      _lifecycle.toActive();
+      if (_configException != null)
+        _lifecycle.toActive();
+      else
+        _lifecycle.toError();
 
       thread.setContextClassLoader(oldLoader);
+      
+      if (_configException != null)
+        throw ConfigException.create(_configException);
     }
   }
 

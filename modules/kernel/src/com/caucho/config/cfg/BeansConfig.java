@@ -34,6 +34,7 @@ import java.util.ArrayList;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.Alternative;
+import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Interceptor;
 
@@ -346,9 +347,11 @@ public class BeansConfig {
   public class AlternativesConfig {
     public void addClass(Class<?> cl)
     {
-      if (cl.isAnnotation())
+      if (cl.isAnnotation() && ! cl.isAnnotationPresent(Stereotype.class)) {
+        // CDI TCK allows the stereotype in <class>
         throw new ConfigException(L.l("'{0}' is an invalid alternative because it is an annotation.",
                                       cl.getName()));
+      }
       
       if (! cl.isAnnotationPresent(Alternative.class))
         throw new ConfigException(L.l("'{0}' is an invalid alternative because it does not have an @Alternative annotation.",

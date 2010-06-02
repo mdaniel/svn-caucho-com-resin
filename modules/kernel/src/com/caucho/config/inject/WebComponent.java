@@ -39,6 +39,8 @@ import java.util.LinkedHashSet;
 import java.util.Set;
 
 import javax.enterprise.inject.Any;
+import javax.enterprise.inject.Specializes;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 
@@ -66,7 +68,7 @@ public class WebComponent {
     _rawType = rawType;
   }
 
-  public void addComponent(BaseType type, Bean<?> bean)
+  public void addComponent(BaseType type, Annotated annotated, Bean<?> bean)
   {
     for (BeanEntry beanEntry : _beanList) {
       if (beanEntry.getType().equals(type) && beanEntry.isMatch(bean))
@@ -75,12 +77,27 @@ public class WebComponent {
 
     if (bean instanceof ProducesMethodBean<?,?>
         && ((ProducesMethodBean<?,?>) bean).isInjectionPoint()) {
-      _injectionPointEntry = new BeanEntry(type, bean);
+      _injectionPointEntry = new BeanEntry(type, annotated, bean);
     }
     
-    _beanList.add(new BeanEntry(type, bean));
+    _beanList.add(new BeanEntry(type, annotated, bean));
     
     Collections.sort(_beanList);
+  }
+  
+  public void resolveSpecializes()
+  {
+    System.out.println("SPECIAL:" + this);
+    for (int i = _beanList.size() - 1; i >= 0; i--) {
+      BeanEntry entry = _beanList.get(i);
+      
+      Annotated ann = entry.getAnnotated();
+      
+      if (ann == null || ! ann.isAnnotationPresent(Specializes.class))
+        continue;
+      
+      System.out.println("SPECIAL:" + ann);
+    }
   }
 
   public void createProgram(ArrayList<ConfigProgram> initList,
@@ -200,12 +217,15 @@ public class WebComponent {
   class BeanEntry implements Comparable<BeanEntry> {
     private Bean<?> _bean;
     private BaseType _type;
+    private Annotated _annotated;
     private QualifierBinding []_qualifiers;
 
-    BeanEntry(BaseType type, Bean<?> bean)
+    BeanEntry(BaseType type,
+              Annotated annotated,
+              Bean<?> bean)
     {
       _type = type;
-
+      _annotated = annotated;
       _bean = bean;
 
       Set<Annotation> qualifiers = bean.getQualifiers();
@@ -223,6 +243,11 @@ public class WebComponent {
       return _bean;
     }
 
+    Annotated getAnnotated()
+    {
+      return _annotated;
+    }
+    
     BaseType getType()
     {
       return _type;

@@ -35,11 +35,14 @@ import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
 import javax.ejb.NoSuchEJBException;
+import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.SessionBeanType;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.SingletonGenerator;
@@ -113,6 +116,16 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
     
     SessionBeanImpl<X,T> statefulBean
       = new SessionBeanImpl<X,T>(context, mBean, apiList);
+    
+    InjectManager manager = getModuleInjectManager();
+
+    if (manager.isNormalScope(statefulBean.getScope())
+        && ApplicationScoped.class != statefulBean.getScope()) {
+      throw new ConfigException(L.l("{0} is an invalid @Singleton EJB because it has @{1} scope.",
+                                    api.getName(),
+                                    statefulBean.getScope()));
+    }
+        
 
     return statefulBean;
   }

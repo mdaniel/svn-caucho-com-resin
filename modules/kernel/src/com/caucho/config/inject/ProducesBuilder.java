@@ -45,6 +45,7 @@ import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
 
@@ -102,7 +103,8 @@ public class ProducesBuilder {
     Arg<? super X> []disposesArgs = null;
     
     if (disposesMethod != null)
-      disposesArgs = introspectDisposesArgs(disposesMethod.getParameters());
+      disposesArgs = introspectDisposesArgs(disposesMethod,
+                                            disposesMethod.getParameters());
 
     ProducesMethodBean<X,T> producesBean
       = ProducesMethodBean.create(_manager, bean, 
@@ -131,7 +133,7 @@ public class ProducesBuilder {
     Arg<? super X> []disposesArgs = null;
     
     if (disposesMethod != null)
-      disposesArgs = introspectDisposesArgs(disposesMethod.getParameters());
+      disposesArgs = introspectDisposesArgs(disposesMethod, disposesMethod.getParameters());
     
     ProducesFieldBean producesFieldBean
       = ProducesFieldBean.create(_manager, bean, beanField,
@@ -146,8 +148,8 @@ public class ProducesBuilder {
   findDisposesMethod(AnnotatedType<X> beanType,
                      Type producesBaseType)
   {
-    for (AnnotatedMethod beanMethod : beanType.getMethods()) {
-      List<AnnotatedParameter<?>> params = beanMethod.getParameters();
+    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+      List<AnnotatedParameter<?>> params = (List) beanMethod.getParameters();
       
       if (params.size() == 0)
         continue;
@@ -161,6 +163,13 @@ public class ProducesBuilder {
         continue;
 
       // XXX: check @Qualifiers
+      
+      Method javaMethod = beanMethod.getJavaMember();
+      
+      if (beanMethod.isAnnotationPresent(Inject.class))
+        throw new ConfigException(L.l("{0}.{1} is an invalid @Disposes method because it has an @Inject annotation",
+                                      javaMethod.getDeclaringClass().getName(),
+                                      javaMethod.getName()));
       
       return beanMethod;
     }
@@ -200,17 +209,27 @@ public class ProducesBuilder {
     return args;
   }
 
-  protected <X> Arg<X> []introspectDisposesArgs(List<AnnotatedParameter<X>> params)
+  protected <X> Arg<X> []introspectDisposesArgs(AnnotatedMethod<?> method,
+                                                List<AnnotatedParameter<X>> params)
   {
     Arg<X> []args = new Arg[params.size()];
+    
+    boolean hasDisposes = false;
 
     for (int i = 0; i < args.length; i++) {
       AnnotatedParameter<X> param = params.get(i);
       
       InjectionPoint ip = null;
 
-      if (param.isAnnotationPresent(Disposes.class))
+      if (param.isAnnotationPresent(Disposes.class)) {
+        if (hasDisposes)
+          throw new ConfigException(L.l("{0}.{1} is an invalid @Disposes method because two parameters are marked @Disposes",
+                                        method.getJavaMember().getDeclaringClass().getName(),
+                                        method.getJavaMember().getName()));
+        hasDisposes = true;
+
         args[i] = null;
+      }
       else
         args[i] = new BeanArg(_manager,
                               param.getBaseType(), 

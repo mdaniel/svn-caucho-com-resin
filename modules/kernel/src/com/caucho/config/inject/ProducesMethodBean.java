@@ -29,9 +29,11 @@
 
 package com.caucho.config.inject;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -48,9 +50,12 @@ import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.Producer;
+import javax.inject.Named;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.program.Arg;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -75,6 +80,8 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
   private MethodProducer _methodProducer;
   private DisposesProducer<T,X> _disposesProducer;
   private Producer<T> _producer;
+  
+  private boolean _isPassivating;
 
   private Arg<?> []_producesArgs;
 
@@ -83,11 +90,11 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
   private Object _scopeAdapter;
 
   private ProducesMethodBean(InjectManager manager,
-                         Bean<X> producerBean,
-                         AnnotatedMethod<? super X> producesMethod,
-                         Arg<?> []producesArgs,
-                         AnnotatedMethod<? super X> disposesMethod,
-                         Arg<?> []disposesArgs)
+                             Bean<X> producerBean,
+                             AnnotatedMethod<? super X> producesMethod,
+                             Arg<?> []producesArgs,
+                             AnnotatedMethod<? super X> disposesMethod,
+                             Arg<?> []disposesArgs)
   {
     super(manager, producesMethod.getBaseType(), producesMethod);
 
@@ -114,6 +121,44 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
     
     _methodProducer = new MethodProducer();
     _producer = _methodProducer;
+    
+    Method javaMethod = producesMethod.getJavaMember();
+    int modifiers = javaMethod.getModifiers();
+    
+    if (producesMethod.isAnnotationPresent(Specializes.class)) {
+      if (Modifier.isStatic(modifiers)) {
+        throw new ConfigException(L.l("{0}.{1} is an invalid @Specializes @Producer because the method is static.",
+                                      javaMethod.getDeclaringClass().getName(),
+                                      javaMethod.getName()));
+      }
+      
+      Method parentMethod = getSpecializedMethod(javaMethod);
+      
+      if (parentMethod == null) {
+        throw new ConfigException(L.l("{0}.{1} is an invalid @Specializes @Producer because it does not directly specialize a parent method",
+                                      javaMethod.getDeclaringClass().getName(),
+                                      javaMethod.getName()));
+
+      }
+      
+      if (producesMethod.isAnnotationPresent(Named.class)
+          && parentMethod.isAnnotationPresent(Named.class)) {
+        throw new ConfigException(L.l("{0}.{1} is an invalid @Specializes @Producer because both it and its parent defines @Named",
+                                      javaMethod.getDeclaringClass().getName(),
+                                      javaMethod.getName()));
+
+
+      }
+    }
+  }
+  
+  private Method getSpecializedMethod(Method javaMethod)
+  {
+    Class<?> childClass = javaMethod.getDeclaringClass();
+    Class<?> parentClass = childClass.getSuperclass();
+    
+    return AnnotatedTypeUtil.findMethod(parentClass.getDeclaredMethods(),
+                                        javaMethod);
   }
 
   public static <X,T> ProducesMethodBean<X,T> 
@@ -219,6 +264,14 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
 
       _injectionPointSet.add(ip);
     }
+  }
+  
+  @Override
+  public void introspect()
+  {
+    super.introspect();
+    
+    _isPassivating = getBeanManager().isPassivatingScope(getScope());
   }
   
   //
@@ -364,6 +417,10 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
       if (env != null && _producerBean.getScope() == Dependent.class)
         _producerBean.destroy(factory, factoryEnv);
       
+      if (_isPassivating && ! (instance instanceof Serializable))
+        throw new IllegalProductException(L.l("'{0}' is an invalid @{1} instance because it's not serializable for bean {2}",
+                                              instance, getScope().getSimpleName(), this));
+      
       return instance;
     }
 
@@ -435,7 +492,16 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
     {
       return ProducesMethodBean.this.getInjectionPoints();
     }
-    
+
+    @Override
+    public String toString()
+    {
+      Method javaMethod = _producesMethod.getJavaMember();
+      
+      return (getClass().getSimpleName()
+          + "[" + javaMethod.getDeclaringClass().getSimpleName()
+          + "." + javaMethod.getName() + "]");
+    }
   }
 
 }

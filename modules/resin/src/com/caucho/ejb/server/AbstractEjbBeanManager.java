@@ -115,6 +115,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   private Bean<X> _component;
 
   private final Lifecycle _lifecycle = new Lifecycle();
+  private InjectManager _moduleInjectManager;
   private InjectManager _ejbInjectManager;
 
   /**
@@ -137,6 +138,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     
     _producer = new EjbInjectionTarget<X>(this, annotatedType);
     
+    _moduleInjectManager = InjectManager.create();
     _ejbInjectManager = InjectManager.create(_loader);
   }
 
@@ -146,6 +148,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   public String getId()
   {
     return _id;
+  }
+
+  public InjectManager getModuleInjectManager()
+  {
+    return _moduleInjectManager;
   }
 
   public InjectManager getInjectManager()

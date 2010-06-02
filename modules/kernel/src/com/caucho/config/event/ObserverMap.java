@@ -87,8 +87,10 @@ public class ObserverMap {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry<?> observer = _observerList.get(i);
       
-      if ((observer.getType().isAssignableFrom(eventType)
-           || observer.getType().isAssignableFrom(subType))
+      BaseType observerType = observer.getType();
+      
+      if ((observerType.isAssignableFrom(eventType)
+           || observerType.isAssignableFrom(subType))
           && ! list.contains(observer)) {
         list.add(observer);
       }

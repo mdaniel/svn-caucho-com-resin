@@ -47,7 +47,7 @@ import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.xml.XmlConfigContext;
 
 /**
- * Variable resolution for webbeans variables
+ * Variable resolution for CDI variables
  */
 public class CandiContextResolver extends ELResolver {
   private static final ThreadLocal<ContextHolder> _envLocal
