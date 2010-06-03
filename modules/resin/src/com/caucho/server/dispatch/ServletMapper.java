@@ -43,6 +43,7 @@ import java.io.InputStream;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.net.URL;
 
 /**
  * Manages dispatching: servlets and filters.
@@ -397,6 +398,20 @@ public class ServletMapper {
                                                ArrayList<String> vars)
   {
     String contextURI = invocation.getContextURI();
+
+    try {
+      URL url = _servletContext.getResource(contextURI);
+
+      if (url == null)
+        return null;
+    } catch (Exception e) {
+      if (log.isLoggable(Level.FINER))
+        log.log(Level.FINER, L.l(
+          "can't match a welcome file path {0}",
+          contextURI), e);
+
+      return null;
+    }
 
     // String servletName = null;
 
