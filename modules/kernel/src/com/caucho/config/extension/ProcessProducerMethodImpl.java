@@ -27,25 +27,39 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.spi;
+package com.caucho.config.extension;
 
-/**
- * {@link javax.enterprise.inject.spi.Extension} callback while processing
- * a producer method.
- *
- * <code><pre>
- * public class MyExtension implements Extension
- * {
- *  &lt;X,T> public void
- *  processProducerBean(@Observes ProcessProducerMethod&lt;X,T> event)
- *  {
- *    ...
- *  }
- * }
- * </pre></code>
- */
-public interface ProcessProducerMethod<T,X> extends ProcessBean<X>
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
+import javax.enterprise.inject.spi.ProcessProducerMethod;
+
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ProducesMethodBean;
+import com.caucho.inject.Module;
+
+@Module
+public class ProcessProducerMethodImpl<X,T> extends ProcessBeanImpl<T>
+  implements ProcessProducerMethod<X,T>
 {
-  public AnnotatedMethod<T> getAnnotatedProducerMethod();
-  public AnnotatedParameter<T> getAnnotatedDisposedParameter();
+  private ProducesMethodBean<X,T> _bean;
+  
+  protected ProcessProducerMethodImpl(InjectManager manager, 
+                                      ProducesMethodBean<X,T> bean)
+  {
+    super(manager, bean, bean.getAnnotatedType());
+    
+    _bean = bean;
+  }
+
+  @Override
+  public AnnotatedParameter<X> getAnnotatedDisposedParameter()
+  {
+    return (AnnotatedParameter<X>) _bean.getDisposedParameter();
+  }
+
+  @Override
+  public AnnotatedMethod<X> getAnnotatedProducerMethod()
+  {
+    return (AnnotatedMethod<X>) _bean.getProducesMethod();
+  }
 }

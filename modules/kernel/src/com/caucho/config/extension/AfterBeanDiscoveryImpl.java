@@ -27,72 +27,65 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.extension;
 
+import java.lang.annotation.Annotation;
+import java.util.logging.Level;
+
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
 import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.ObserverMethod;
 import javax.enterprise.inject.spi.ProcessBean;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 @Module
-public class ProcessBeanImpl<X> implements ProcessBean<X>
+public class AfterBeanDiscoveryImpl implements AfterBeanDiscovery
 {
-  private InjectManager _manager;
-  private Bean<X> _bean;
-  private Annotated _annotated;
-  private boolean _isVeto;
-
-  public ProcessBeanImpl(InjectManager manager, 
-                         Bean<X> bean,
-                         Annotated annotated)
+  private InjectManager _cdiManager;
+ 
+  AfterBeanDiscoveryImpl(InjectManager cdiManager)
   {
-    _manager = manager;
-    _bean = bean;
-    
-    _annotated = annotated;
+    _cdiManager = cdiManager;
   }
-
-  public InjectManager getManager()
+  
+  public void addBean(Bean<?> bean)
   {
-    return _manager;
+    _cdiManager.addBean(bean);
   }
 
   @Override
-  public Annotated getAnnotated()
+  public void addContext(Context context)
   {
-    return _annotated;
+    _cdiManager.addContext(context);
   }
 
   @Override
-  public Bean<X> getBean()
+  public void addObserverMethod(ObserverMethod<?> observerMethod)
   {
-    return _bean;
-  }
-    
-  public void setBean(Bean<X> bean)
-  {
-    _bean = bean;
+    _cdiManager.getEventManager().addObserver(observerMethod);
   }
 
   @Override
   public void addDefinitionError(Throwable t)
   {
+    _cdiManager.addDefinitionError(t);
   }
 
-  public void veto()
+  public boolean hasDefinitionError()
   {
-    _isVeto = true;
-  }
-
-  public boolean isVeto()
-  {
-    return _isVeto;
+    return false;
   }
 
   @Override
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _bean + "]";
+    return getClass().getSimpleName() + "[" + _cdiManager + "]";
   }
 }

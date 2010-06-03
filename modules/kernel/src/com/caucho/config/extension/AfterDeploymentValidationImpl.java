@@ -27,55 +27,44 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.extension;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Type;
-import java.util.Set;
+import java.util.logging.Level;
 
-import javax.enterprise.event.Reception;
-import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.context.spi.Context;
+import javax.enterprise.inject.spi.AfterBeanDiscovery;
+import javax.enterprise.inject.spi.AfterDeploymentValidation;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.ObserverMethod;
+import javax.enterprise.inject.spi.ProcessBean;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
-/**
- * Common bean introspection for Produces and ManagedBean.
- */
 @Module
-abstract public class AbstractObserverMethod<T>
-  implements ObserverMethod<T>
+public class AfterDeploymentValidationImpl implements AfterDeploymentValidation
 {
-  @Override
-  public Class<?> getBeanClass()
+  private InjectManager _cdiManager;
+  
+  public AfterDeploymentValidationImpl(InjectManager cdiManager)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _cdiManager = cdiManager;
   }
 
   @Override
-  public Type getObservedType()
+  public void addDeploymentProblem(Throwable exn)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _cdiManager.addDefinitionError(exn);
   }
 
   @Override
-  public Set<Annotation> getObservedQualifiers()
+  public String toString()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return getClass().getSimpleName() + "[" + _cdiManager + "]";
   }
-
-  @Override
-  public Reception getReception()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  public TransactionPhase getTransactionPhase()
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  @Override
-  abstract public void notify(T event);
 }

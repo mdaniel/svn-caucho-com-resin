@@ -44,6 +44,7 @@ import javax.enterprise.inject.CreationException;
 import javax.enterprise.inject.IllegalProductException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.Specializes;
+import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
@@ -73,6 +74,7 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
 
   private final Bean<X> _producerBean;
   private final AnnotatedMethod<? super X> _producesMethod;
+  private AnnotatedParameter<? super X> _disposedParam;
   
   private LinkedHashSet<InjectionPoint> _injectionPointSet
     = new LinkedHashSet<InjectionPoint>();
@@ -102,7 +104,6 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
     _producesMethod = producesMethod;
     _producesArgs = producesArgs;
     
-
     if (producesMethod == null)
       throw new NullPointerException();
 
@@ -115,6 +116,11 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
       _disposesProducer
         = new DisposesProducer<T,X>(manager, producerBean,
                                     disposesMethod, disposesArgs);
+      
+      for (AnnotatedParameter<? super X> param : disposesMethod.getParameters()) {
+        if (param.isAnnotationPresent(Disposes.class))
+          _disposedParam = param;
+      }
     }
     
     introspectInjectionPoints();
@@ -196,7 +202,12 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
   {
     _producer = producer;
   }
-
+  
+  public Bean<?> getProducerBean()
+  {
+    return _producerBean;
+  }
+  
   @Override
   protected String getDefaultName()
   {
@@ -235,6 +246,11 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
   public AnnotatedMethod<? super X> getProducesMethod()
   {
     return _producesMethod;
+  }
+  
+  public AnnotatedParameter<? super X> getDisposedParameter()
+  {
+    return _disposedParam;
   }
   
   @Override

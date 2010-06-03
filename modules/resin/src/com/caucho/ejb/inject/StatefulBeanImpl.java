@@ -27,33 +27,27 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.ejb.inject;
 
-import javax.enterprise.inject.spi.Annotated;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ProcessManagedBean;
+import java.lang.reflect.Type;
+import java.util.Set;
 
+import com.caucho.config.inject.CdiStatefulBean;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.inject.Module;
 
+/**
+ * Internal implementation for a Bean
+ */
 @Module
-public class ProcessManagedBeanImpl<X> extends ProcessBeanImpl<X>
-  implements ProcessManagedBean<X>
+public class StatefulBeanImpl<X,T> extends SessionBeanImpl<X,T>
+  implements CdiStatefulBean
 {
-  private AnnotatedType<X> _annotatedType;
-
-  protected ProcessManagedBeanImpl(InjectManager manager, 
-                                   Bean<X> bean,
-                                   Annotated annotatedType)
+  public StatefulBeanImpl(AbstractSessionContext<X,T> context,
+                          ManagedBeanImpl<X> bean,
+                          Set<Type> apiList)
   {
-    super(manager, bean, annotatedType);
-    
-    _annotatedType = (AnnotatedType<X>) annotatedType;
-  }
-
-  @Override
-  public AnnotatedType<X> getAnnotatedBeanClass()
-  {
-    return _annotatedType;
+    super(context, bean, apiList);
   }
 }

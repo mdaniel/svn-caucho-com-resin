@@ -44,7 +44,6 @@ import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-import com.caucho.config.inject.AbstractObserverMethod;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.util.L10N;
 

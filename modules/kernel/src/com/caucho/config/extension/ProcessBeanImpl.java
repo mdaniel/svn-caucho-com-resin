@@ -27,48 +27,74 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.inject;
+package com.caucho.config.extension;
 
-import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ProcessSessionBean;
-import javax.enterprise.inject.spi.SessionBeanType;
+import javax.enterprise.inject.spi.ProcessBean;
 
-import com.caucho.config.extension.ProcessManagedBeanImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
-/**
- * Internal implementation for a Bean
- */
 @Module
-public class ProcessSessionBeanImpl<X> extends ProcessManagedBeanImpl<Object>
-  implements ProcessSessionBean<X>
+public class ProcessBeanImpl<X> implements ProcessBean<X>
 {
-  private String _ejbName;
-  private SessionBeanType _sessionBeanType;
-  
-  public ProcessSessionBeanImpl(InjectManager manager,
-                                Bean<Object> bean,
-                                AnnotatedType<Object> beanAnnType,
-                                String ejbName,
-                                SessionBeanType type)
+  private InjectManager _cdiManager;
+  private Bean<X> _bean;
+  private Annotated _annotated;
+  private boolean _isVeto;
+
+  public ProcessBeanImpl(InjectManager manager, 
+                         Bean<X> bean,
+                         Annotated annotated)
   {
-    super(manager, bean, beanAnnType);
+    _cdiManager = manager;
+    _bean = bean;
     
-    _ejbName = ejbName;
-    _sessionBeanType = type;
+    _annotated = annotated;
+  }
+
+  public InjectManager getManager()
+  {
+    return _cdiManager;
   }
 
   @Override
-  public String getEjbName()
+  public Annotated getAnnotated()
   {
-    return _ejbName;
+    return _annotated;
   }
 
   @Override
-  public SessionBeanType getSessionBeanType()
+  public Bean<X> getBean()
   {
-    return _sessionBeanType;
+    return _bean;
+  }
+    
+  public void setBean(Bean<X> bean)
+  {
+    _bean = bean;
+  }
+
+  @Override
+  public void addDefinitionError(Throwable t)
+  {
+    _cdiManager.addDefinitionError(t);
+  }
+
+  public void veto()
+  {
+    _isVeto = true;
+  }
+
+  public boolean isVeto()
+  {
+    return _isVeto;
+  }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _bean + "]";
   }
 }

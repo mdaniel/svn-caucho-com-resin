@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.inject;
+package com.caucho.config.extension;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -46,17 +46,33 @@ import java.util.logging.Logger;
 
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.InjectionTarget;
+import javax.enterprise.inject.spi.ObserverMethod;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 import javax.enterprise.inject.spi.ProcessInjectionTarget;
 import javax.enterprise.inject.spi.ProcessProducer;
+import javax.enterprise.inject.spi.Producer;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.event.AbstractObserverMethod;
+import com.caucho.config.event.EventManager;
+import com.caucho.config.inject.DefaultLiteral;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.ProducesFieldBean;
+import com.caucho.config.inject.ProducesMethodBean;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.LazyExtension;
+import com.caucho.inject.Module;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
@@ -65,13 +81,14 @@ import com.caucho.vfs.Vfs;
 /**
  * Manages custom extensions for the inject manager.
  */
-class ExtensionManager
+@Module
+public class ExtensionManager
 {
   private static final L10N L = new L10N(ExtensionManager.class);
   private static final Logger log
     = Logger.getLogger(ExtensionManager.class.getName());
   
-  private final InjectManager _injectManager;
+  private final InjectManager _cdiManager;
 
   private HashSet<URL> _extensionSet = new HashSet<URL>();
   
@@ -80,9 +97,9 @@ class ExtensionManager
   
   private boolean _isCustomExtension;
 
-  ExtensionManager(InjectManager injectManager)
+  public ExtensionManager(InjectManager cdiManager)
   {
-    _injectManager = injectManager;
+    _cdiManager = cdiManager;
   }
   
   boolean isCustomExtension()
@@ -90,10 +107,10 @@ class ExtensionManager
     return _isCustomExtension;
   }
 
-  void updateExtensions()
+  public void updateExtensions()
   {
     try {
-      ClassLoader loader = _injectManager.getClassLoader();
+      ClassLoader loader = _cdiManager.getClassLoader();
 
       if (loader == null)
         return;
@@ -138,7 +155,7 @@ class ExtensionManager
     }
   }
 
-  void createExtension(String className)
+  public void createExtension(String className)
   {
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -146,7 +163,7 @@ class ExtensionManager
       Class<?> cl = Class.forName(className, false, loader);
       Constructor<?> ctor = cl.getConstructor(new Class[] { InjectManager.class });
 
-      Extension extension = (Extension) ctor.newInstance(_injectManager);
+      Extension extension = (Extension) ctor.newInstance(_cdiManager);
 
       addExtension(extension);
     } catch (Exception e) {
@@ -175,7 +192,7 @@ class ExtensionManager
     }
   }
 
-  void addExtension(Extension ext)
+  public void addExtension(Extension ext)
   {
     if (log.isLoggable(Level.FINER))
       log.finer(this + " add extension " + ext);
@@ -191,28 +208,28 @@ class ExtensionManager
                                        method.getMethod(),
                                        method.getArgs());
 
-      _injectManager.getEventManager().addExtensionObserver(observer,
+      _cdiManager.getEventManager().addExtensionObserver(observer,
                                                             method.getBaseType(),
                                                             method.getQualifiers());
       
       if ((ProcessAnnotatedType.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
-        _injectManager.getScanManager().setIsCustomExtension(true);
+        _cdiManager.setIsCustomExtension(true);
       }
 
       if ((ProcessBean.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
-        _injectManager.getScanManager().setIsCustomExtension(true);
+        _cdiManager.setIsCustomExtension(true);
       }
 
       if ((ProcessInjectionTarget.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
-        _injectManager.getScanManager().setIsCustomExtension(true);
+        _cdiManager.setIsCustomExtension(true);
       }
 
       if ((ProcessProducer.class.isAssignableFrom(rawType))
           && ! javaMethod.isAnnotationPresent(LazyExtension.class)) {
-        _injectManager.getScanManager().setIsCustomExtension(true);
+        _cdiManager.setIsCustomExtension(true);
       }
     }
   }
@@ -228,10 +245,251 @@ class ExtensionManager
 
     return item;
   }
+
+  public <T> Bean<T> processBean(Bean<T> bean, ProcessBean<T> processBean)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    BaseType baseType = cdi.createTargetBaseType(processBean.getClass());
+    baseType = baseType.fill(cdi.createTargetBaseType(bean.getBeanClass()));
+    
+    getEventManager().fireExtensionEvent(processBean, baseType);
+
+    if (processBean instanceof ProcessBeanImpl<?>
+        && ((ProcessBeanImpl<?>) processBean).isVeto())
+      return null;
+    else
+      return processBean.getBean();
+  }
+
+  @Module
+  public <T> Bean<T> processBean(Bean<T> bean, Annotated ann)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessBeanImpl<T> event = new ProcessBeanImpl<T>(_cdiManager, bean, ann);
+    
+    BaseType baseType = cdi.createTargetBaseType(event.getClass());
+    baseType = baseType.fill(cdi.createTargetBaseType(bean.getBeanClass()));
+    
+    getEventManager().fireExtensionEvent(event, baseType);
+
+    if (event.isVeto())
+      return null;
+    else
+      return event.getBean();
+  }
+
+  @Module
+  public <T> Bean<T> processManagedBean(ManagedBeanImpl<T> bean, Annotated ann)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessManagedBeanImpl<T> event
+      = new ProcessManagedBeanImpl<T>(_cdiManager, bean, ann);
+    
+    BaseType baseType = cdi.createTargetBaseType(event.getClass());
+    baseType = baseType.fill(cdi.createTargetBaseType(bean.getBeanClass()));
+    
+    getEventManager().fireExtensionEvent(event, baseType);
+
+    if (event.isVeto())
+      return null;
+    else
+      return event.getBean();
+  }
+
+  @Module
+  public <T,X> Bean<T> processProducerMethod(ProducesMethodBean<X,T> bean)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessProducerMethodImpl<X,T> event
+      = new ProcessProducerMethodImpl<X,T>(_cdiManager, bean);
+    
+    AnnotatedMethod<? super X> method = bean.getProducesMethod();
+    Bean<?> producerBean = bean.getProducerBean();
+    
+    BaseType baseType = cdi.createTargetBaseType(event.getClass());
+    baseType = baseType.fill(cdi.createTargetBaseType(producerBean.getBeanClass()),
+                             cdi.createTargetBaseType(method.getBaseType()));
+                             
+    
+    getEventManager().fireExtensionEvent(event, baseType);
+
+    if (event.isVeto())
+      return null;
+    else
+      return event.getBean();
+  }
+
+  @Module
+  public <T,X> Bean<X> processProducerField(ProducesFieldBean<T,X> bean)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessProducerFieldImpl<T,X> event
+      = new ProcessProducerFieldImpl<T,X>(_cdiManager, bean);
+    
+    AnnotatedField<? super T> field = bean.getField();
+    
+    BaseType baseType = cdi.createTargetBaseType(event.getClass());
+    baseType = baseType.fill(cdi.createTargetBaseType(bean.getProducerBean().getBeanClass()),
+                             cdi.createTargetBaseType(field.getBaseType()));
+                             
+    
+    getEventManager().fireExtensionEvent(event, baseType);
+
+    if (event.isVeto())
+      return null;
+    else
+      return event.getBean();
+  }
+
+  /**
+   * Processes the discovered InjectionTarget
+   */
+  public <T> InjectionTarget<T> 
+  processInjectionTarget(InjectionTarget<T> target,
+                         AnnotatedType<T> annotatedType)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessInjectionTargetImpl<T> processTarget
+      = new ProcessInjectionTargetImpl<T>(_cdiManager, target, annotatedType);
+    
+    BaseType eventType = cdi.createTargetBaseType(ProcessInjectionTargetImpl.class);
+    eventType = eventType.fill(cdi.createTargetBaseType(annotatedType.getBaseType()));
+
+    getEventManager().fireExtensionEvent(processTarget, eventType);
+
+    return (InjectionTarget<T>) processTarget.getInjectionTarget();
+  }
+
+  /**
+   * Processes the discovered method producer
+   */
+  public <X,T> Producer<T>
+  processProducer(AnnotatedMethod<X> producesMethod,
+                  Producer<T> producer)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessProducerImpl<X,T> event
+      = new ProcessProducerImpl<X,T>(producesMethod, producer);
+    
+    AnnotatedType<X> declaringType = producesMethod.getDeclaringType();
+    
+    BaseType eventType = cdi.createTargetBaseType(ProcessProducerImpl.class);
+    eventType = eventType.fill(cdi.createTargetBaseType(declaringType.getBaseType()),
+                               cdi.createTargetBaseType(producesMethod.getBaseType()));
+
+    getEventManager().fireExtensionEvent(event, eventType);
+    
+    return event.getProducer();
+  }
+
+  /**
+   * Processes the discovered method producer
+   */
+  public <X,T> Producer<T>
+  processProducer(AnnotatedField<X> producesField,
+                  Producer<T> producer)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessProducerImpl<X,T> event
+      = new ProcessProducerImpl<X,T>(producesField, producer);
+    
+    AnnotatedType<X> declaringType = producesField.getDeclaringType();
+    
+    BaseType eventType = cdi.createTargetBaseType(ProcessProducerImpl.class);
+    eventType = eventType.fill(cdi.createTargetBaseType(declaringType.getBaseType()),
+                               cdi.createTargetBaseType(producesField.getBaseType()));
+
+    getEventManager().fireExtensionEvent(event, eventType);
+    
+    return event.getProducer();
+  }
+  
+  /**
+   * Processes the observer.
+   */
+  public <T,X> void processObserver(ObserverMethod<T> observer,
+                                    AnnotatedMethod<X> method)
+  {
+    ProcessObserverImpl<T,X> event
+      = new ProcessObserverImpl<T,X>(_cdiManager, observer, method);
+  
+    AnnotatedMethod<X> annotatedMethod = event.getAnnotatedMethod();
+    AnnotatedType<X> declaringType = annotatedMethod.getDeclaringType();
+    ObserverMethod<T> observerMethod = event.getObserverMethod();
+    Type observedType = observerMethod.getObservedType();
+    
+    BaseType eventType = _cdiManager.createTargetBaseType(ProcessObserverImpl.class);
+    eventType = eventType.fill(_cdiManager.createTargetBaseType(observedType),
+                               _cdiManager.createTargetBaseType(declaringType.getBaseType()));
+    
+    getEventManager().fireExtensionEvent(event, eventType);
+  }
+
+  public void fireBeforeBeanDiscovery()
+  {
+    getEventManager().fireExtensionEvent(new BeforeBeanDiscoveryImpl(_cdiManager));
+  }
+
+  public void fireAfterBeanDiscovery()
+  {
+    getEventManager().fireExtensionEvent(new AfterBeanDiscoveryImpl(_cdiManager));
+  }
+
+  public void fireAfterDeploymentValidation()
+  {
+    AfterDeploymentValidationImpl event
+      = new AfterDeploymentValidationImpl(_cdiManager);
+  
+    getEventManager().fireExtensionEvent(event);
+  
+    /*
+    if (event.getDeploymentProblem() != null)
+      throw ConfigException.create(event.getDeploymentProblem());
+      */
+  }
+  
+  /**
+   * Creates a discovered annotated type.
+   */
+  public <T> AnnotatedType<T> processAnnotatedType(AnnotatedType<T> type)
+  {
+    InjectManager cdi = _cdiManager;
+    
+    ProcessAnnotatedTypeImpl<T> processType
+      = new ProcessAnnotatedTypeImpl<T>(type);
+
+    BaseType baseType = cdi.createTargetBaseType(ProcessAnnotatedTypeImpl.class);
+    baseType = baseType.fill(cdi.createTargetBaseType(type.getBaseType()));
+    
+    getEventManager().fireExtensionEvent(processType, baseType);
+
+    if (processType.isVeto()) {
+      return null;
+    }
+    
+    type = processType.getAnnotatedType();
+
+    return type;
+    /*
+    */
+  }
+  
+  private EventManager getEventManager()
+  {
+    return _cdiManager.getEventManager();
+  }
   
   public String toString()
   {
-    return getClass().getSimpleName() + "[" + _injectManager + "]";
+    return getClass().getSimpleName() + "[" + _cdiManager + "]";
   }
 
   class ExtensionItem {
@@ -265,7 +523,7 @@ class ExtensionManager
       if (! hasObserver(paramAnn))
         return null;
 
-      InjectManager inject = _injectManager;
+      InjectManager inject = _cdiManager;
 
       BeanArg<?> []args = new BeanArg[param.length];
 

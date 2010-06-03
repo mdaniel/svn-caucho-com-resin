@@ -30,6 +30,7 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -55,6 +56,7 @@ import javax.interceptor.ExcludeClassInterceptors;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
@@ -62,6 +64,7 @@ import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
+import com.caucho.util.L10N;
 
 /**
  * Represents the interception
@@ -70,6 +73,8 @@ import com.caucho.java.JavaWriter;
 public class InterceptorFactory<X>
   extends AbstractAspectFactory<X>
 {
+  private static final L10N L = new L10N(InterceptorFactory.class);
+  
   private InjectManager _manager;
   
   private boolean _isInterceptorOrDecorator;
@@ -78,6 +83,8 @@ public class InterceptorFactory<X>
   private ArrayList<Annotation> _classInterceptorBinding;
   
   private HashSet<Class<?>> _decoratorClasses;
+  
+  private boolean _isPassivating;
   
   public InterceptorFactory(AspectBeanFactory<X> beanFactory,
                             AspectFactory<X> next,
@@ -103,6 +110,11 @@ public class InterceptorFactory<X>
   public HashSet<Class<?>> getDecoratorClasses()
   {
     return _decoratorClasses;
+  }
+  
+  public boolean isPassivating()
+  {
+    return _isPassivating;
   }
   
   /**
@@ -212,9 +224,29 @@ public class InterceptorFactory<X>
       }
     }
     
+    for (Annotation ann : getBeanType().getAnnotations()) {
+      if (_manager.isPassivatingScope(ann.annotationType()))
+        _isPassivating = true;
+    }
+    
     introspectClassInterceptors();
     introspectClassInterceptorBindings();
     introspectClassDecorators();
+    
+    if (_isPassivating)
+      validatePassivating();
+  }
+  
+  private void validatePassivating()
+  {
+    if (_classInterceptors != null) {
+      for (Class<?> cl : _classInterceptors) {
+        if (! Serializable.class.isAssignableFrom(cl))
+          throw new ConfigException(L.l("{0} has an invalid interceptor {1} because it's not serializable.",
+                                        getBeanType().getJavaClass().getName(),
+                                        cl.getName()));        
+      }
+    }
   }
   
   /**

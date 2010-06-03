@@ -27,48 +27,59 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.inject;
+package com.caucho.config.extension;
 
+import java.lang.annotation.Annotation;
+
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ProcessSessionBean;
-import javax.enterprise.inject.spi.SessionBeanType;
+import javax.enterprise.inject.spi.BeforeBeanDiscovery;
+import javax.enterprise.inject.spi.ProcessAnnotatedType;
+import javax.enterprise.inject.spi.ProcessBean;
 
-import com.caucho.config.extension.ProcessManagedBeanImpl;
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
-/**
- * Internal implementation for a Bean
- */
 @Module
-public class ProcessSessionBeanImpl<X> extends ProcessManagedBeanImpl<Object>
-  implements ProcessSessionBean<X>
+public class ProcessAnnotatedTypeImpl<X> implements ProcessAnnotatedType<X>
 {
-  private String _ejbName;
-  private SessionBeanType _sessionBeanType;
-  
-  public ProcessSessionBeanImpl(InjectManager manager,
-                                Bean<Object> bean,
-                                AnnotatedType<Object> beanAnnType,
-                                String ejbName,
-                                SessionBeanType type)
+  private AnnotatedType<X> _annotatedType;
+  private boolean _isVeto;
+
+  ProcessAnnotatedTypeImpl(AnnotatedType<X> annotatedType)
   {
-    super(manager, bean, beanAnnType);
-    
-    _ejbName = ejbName;
-    _sessionBeanType = type;
+    if (annotatedType == null)
+      throw new NullPointerException();
+
+    _annotatedType = annotatedType;
+  }
+
+  public AnnotatedType<X> getAnnotatedType()
+  {
+    return _annotatedType;
+  }
+
+  public void setAnnotatedType(AnnotatedType<X> type)
+  {
+    _annotatedType = type;
+  }
+
+  boolean isVeto()
+  {
+    return _isVeto;
   }
 
   @Override
-  public String getEjbName()
+  public void veto()
   {
-    return _ejbName;
+    _isVeto = true;
   }
 
   @Override
-  public SessionBeanType getSessionBeanType()
+  public String toString()
   {
-    return _sessionBeanType;
+    return getClass().getSimpleName() + "[" + _annotatedType + "]";
   }
 }

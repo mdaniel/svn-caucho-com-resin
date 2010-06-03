@@ -48,8 +48,11 @@ import java.util.logging.Logger;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import javax.decorator.Delegate;
+import javax.ejb.Stateful;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.event.Observes;
 import javax.enterprise.inject.AmbiguousResolutionException;
+import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.IllegalProductException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.UnsatisfiedResolutionException;
@@ -553,6 +556,16 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       // ioc/022k
       _injectionPointSet.add(ip);
     }
+    
+    if (param.isAnnotationPresent(Disposes.class)) {
+      throw new ConfigException(L.l("{0} is an invalid managed bean because its constructor has a @Disposes parameter",
+                                    getAnnotatedType().getJavaClass().getName()));
+    }
+    
+    if (param.isAnnotationPresent(Observes.class)) {
+      throw new ConfigException(L.l("{0} is an invalid managed bean because its constructor has an @Observes parameter",
+                                    getAnnotatedType().getJavaClass().getName()));
+    }
 
     return new BeanArg<X>(getBeanManager(),
                           param.getBaseType(), 
@@ -761,8 +774,9 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     Type baseType = _annotatedType.getBaseType();
     
     Class<?> cl = getBeanManager().createTargetBaseType(baseType).getRawClass();
+    boolean isStateful = _annotatedType.isAnnotationPresent(Stateful.class);
     
-    if (! Serializable.class.isAssignableFrom(cl)) {
+    if (! Serializable.class.isAssignableFrom(cl) && ! isStateful) {
       throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it's not serializable for {2}.",
                                     cl.getSimpleName(), bean.getScope().getSimpleName(),
                                     bean));
@@ -773,6 +787,9 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         continue;
       
       Type type = ip.getType();
+      
+      if (ip.getBean() instanceof CdiStatefulBean)
+        continue;
       
       if (type instanceof Class<?>) {
         Class<?> ipClass = (Class<?>) type;

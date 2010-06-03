@@ -27,48 +27,66 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.inject;
+package com.caucho.config.extension;
 
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedMember;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ProcessSessionBean;
-import javax.enterprise.inject.spi.SessionBeanType;
+import javax.enterprise.inject.spi.ProcessManagedBean;
+import javax.enterprise.inject.spi.ProcessProducer;
+import javax.enterprise.inject.spi.ProcessProducerMethod;
+import javax.enterprise.inject.spi.Producer;
 
-import com.caucho.config.extension.ProcessManagedBeanImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
-/**
- * Internal implementation for a Bean
- */
 @Module
-public class ProcessSessionBeanImpl<X> extends ProcessManagedBeanImpl<Object>
-  implements ProcessSessionBean<X>
+public class ProcessProducerImpl<X,T> implements ProcessProducer<X,T>
 {
-  private String _ejbName;
-  private SessionBeanType _sessionBeanType;
+  private AnnotatedMember<X> _member;
+  private Producer<T> _producer;
+  private Throwable _definitionError;
   
-  public ProcessSessionBeanImpl(InjectManager manager,
-                                Bean<Object> bean,
-                                AnnotatedType<Object> beanAnnType,
-                                String ejbName,
-                                SessionBeanType type)
+  ProcessProducerImpl(AnnotatedMember<X> member, Producer<T> producer)
   {
-    super(manager, bean, beanAnnType);
-    
-    _ejbName = ejbName;
-    _sessionBeanType = type;
+    _member = member;
+    _producer = producer;
+  }
+  
+  @Override
+  public AnnotatedMember<X> getAnnotatedMember()
+  {
+    return _member;
+  }
+  
+  @Override
+  public void addDefinitionError(Throwable t)
+  {
+    _definitionError = t;
+  }
+  
+  Throwable getDefinitionError()
+  {
+    return _definitionError;
   }
 
   @Override
-  public String getEjbName()
+  public Producer<T> getProducer()
   {
-    return _ejbName;
+    return _producer;
   }
 
   @Override
-  public SessionBeanType getSessionBeanType()
+  public void setProducer(Producer<T> producer)
   {
-    return _sessionBeanType;
+    _producer = producer;
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _member + "]";
   }
 }

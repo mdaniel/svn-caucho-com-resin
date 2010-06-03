@@ -27,25 +27,34 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.spi;
+package com.caucho.config.extension;
 
-/**
- * {@link javax.enterprise.inject.spi.Extension} callback while processing
- * a producer method.
- *
- * <code><pre>
- * public class MyExtension implements Extension
- * {
- *  &lt;X,T> public void
- *  processProducerBean(@Observes ProcessProducerMethod&lt;X,T> event)
- *  {
- *    ...
- *  }
- * }
- * </pre></code>
- */
-public interface ProcessProducerMethod<T,X> extends ProcessBean<X>
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.ProcessManagedBean;
+
+import com.caucho.config.inject.InjectManager;
+import com.caucho.inject.Module;
+
+@Module
+public class ProcessManagedBeanImpl<X> extends ProcessBeanImpl<X>
+  implements ProcessManagedBean<X>
 {
-  public AnnotatedMethod<T> getAnnotatedProducerMethod();
-  public AnnotatedParameter<T> getAnnotatedDisposedParameter();
+  private AnnotatedType<X> _annotatedType;
+
+  protected ProcessManagedBeanImpl(InjectManager manager, 
+                                   Bean<X> bean,
+                                   Annotated annotatedType)
+  {
+    super(manager, bean, annotatedType);
+    
+    _annotatedType = (AnnotatedType<X>) annotatedType;
+  }
+
+  @Override
+  public AnnotatedType<X> getAnnotatedBeanClass()
+  {
+    return _annotatedType;
+  }
 }

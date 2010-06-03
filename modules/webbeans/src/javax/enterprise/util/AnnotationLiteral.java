@@ -32,6 +32,10 @@ package javax.enterprise.util;
 import java.io.Serializable;
 import java.lang.annotation.*;
 import java.lang.reflect.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Convenience API to create runtime Annotations.
@@ -49,8 +53,10 @@ import java.lang.reflect.*;
 public abstract class AnnotationLiteral<T extends Annotation>
   implements Annotation, Serializable
 {
+  private static final Logger log = Logger.getLogger(AnnotationLiteral.class.getName());
+  
   private transient Class<T> _annotationType;
-  private transient Method [] _methods;
+  private transient MethodMatch [] _methods;
   private transient int _hashCode;
   
   protected AnnotationLiteral()
@@ -98,20 +104,9 @@ public abstract class AnnotationLiteral<T extends Annotation>
     if (! annTypeA.equals(annTypeB))
       return false;
     
-    for (Method annMethod : getMethods()) {
-      if (annMethod.getParameterTypes().length > 0 
-          || annMethod.getDeclaringClass() == Annotation.class
-          || annMethod.getDeclaringClass() == Object.class) {
-        continue;
-      }
-      
+    for (MethodMatch annMethod : getMethods()) {
       try {
-        annMethod.setAccessible(true);
-        
-        Object a = annMethod.invoke(this);
-        Object b = annMethod.invoke(o);
-        
-        if (a != b && (a == null || ! a.equals(b)))
+        if (! annMethod.invokeMatch(this, o))
           return false;
       } catch (Exception e) {
         throw new RuntimeException(e);
@@ -129,13 +124,9 @@ public abstract class AnnotationLiteral<T extends Annotation>
     
     int hash = 0;
     
-    for (Method annMethod : getMethods()) {
+    for (MethodMatch annMethod : getMethods()) {
       try {
-        Method method = getClass().getMethod(annMethod.getName());
-        
-        method.setAccessible(true);
-
-        hash += (127 * method.getName().hashCode()) ^ valueHashCode(method);
+        hash += (127 * annMethod.getName().hashCode()) ^ annMethod.hashCode(this);
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {
@@ -148,40 +139,146 @@ public abstract class AnnotationLiteral<T extends Annotation>
     return hash;
   }
   
-  private Method []getMethods()
+  private MethodMatch []getMethods()
   {
     if (_methods == null) {
       Class<?> annType = annotationType();
       
-      _methods = annType.getDeclaredMethods();
+      ArrayList<MethodMatch> matchList = new ArrayList<MethodMatch>();
       
-      if (_methods.length > 0 && ! annType.isAssignableFrom(getClass())) {
+      for (Method method : annType.getDeclaredMethods()) {
+        if (method.getParameterTypes().length > 0 
+            || method.getDeclaringClass() == Annotation.class
+            || method.getDeclaringClass() == Object.class) {
+          continue;
+        }
+        
+        MethodMatch match;
+        
+        if (method.getReturnType().isArray())
+          match = new ArrayMethodMatch(method);
+        else
+          match = new MethodMatch(method);
+        
+        matchList.add(match);
+      }
+      
+      MethodMatch []methods = new MethodMatch[matchList.size()];
+      matchList.toArray(methods);
+      
+      if (methods.length > 0 && ! annType.isAssignableFrom(getClass())) {
         throw new IllegalStateException("Annotation literal '" + getClass()
                                         + "' must implement '" + annType.getName()
                                         + "' because it has member values.");
       }
+      
+      _methods = methods;
     }
     
     return _methods;
-  }
-  
-  private int valueHashCode(Method method)
-  {
-    try {
-      Object value = method.invoke(this);
-
-      if (value != null)
-        return value.hashCode();
-      else
-        return 0;
-    } catch (Exception e) {
-      return 0;
-    }
   }
 
   @Override
   public String toString()
   {
     return "@" + annotationType().getName() + "()";
+  }
+  
+  private static class MethodMatch {
+    private final Method _method;
+    
+    MethodMatch(Method method)
+    {
+      _method = method;
+      method.setAccessible(true);
+    }
+    
+    public String getName()
+    {
+      return _method.getName();
+    }
+
+    public final boolean invokeMatch(Object a, Object b) 
+      throws IllegalArgumentException,
+             IllegalAccessException,
+             InvocationTargetException
+    {
+      return isMatch(_method.invoke(a), _method.invoke(b));
+    }
+    
+    public boolean isMatch(Object a, Object b)
+    {
+      return (a == b || a != null && a.equals(b));
+    }
+    
+    public final int hashCode(Object o)
+    {
+      try {
+        Object value = _method.invoke(o);
+
+        if (value != null)
+          return valueHashCode(value);
+        else
+          return 0;
+      } catch (Exception e) {
+        log.log(Level.FINER, e.toString(), e);
+        
+        return 0;
+      }
+    }
+    
+    public int valueHashCode(Object value)
+    {
+      return value.hashCode();
+    }
+  }
+  
+  private static class ArrayMethodMatch extends MethodMatch {
+    ArrayMethodMatch(Method method)
+    {
+      super(method);
+    }
+    
+    @Override
+    public boolean isMatch(Object a, Object b)
+    {
+      Object []arrayA = (Object []) a;
+      Object []arrayB = (Object []) b;
+      
+      if (arrayA == arrayB)
+        return true;
+      else if (arrayA == null || arrayB == null)
+        return false;
+      
+      if (arrayA.length != arrayB.length)
+        return false;
+      
+      for (Object valueA : arrayA) {
+        if (! isMatch(valueA, arrayB))
+          return false;
+      }
+      
+      return true;
+    }
+    
+    private boolean isMatch(Object aValue, Object []bArray)
+    {
+      for (Object bValue : bArray) {
+        if (aValue == bValue)
+          return true;
+        else if (aValue != null && aValue.equals(bValue))
+          return true;
+      }
+      
+      return false;
+    }
+
+    @Override
+    public int valueHashCode(Object value)
+    {
+      Object []array = (Object []) value;
+      
+      return Arrays.hashCode(array);
+    }
   }
 }

@@ -627,6 +627,15 @@ public class InterceptorGenerator<X>
     }
 
     out.println(");");
+    
+    if (_factory.isPassivating()) {
+      String beanClassName = getFactory().getAspectBeanFactory().getGeneratedClassName();
+      
+      out.println();
+      out.print("com.caucho.config.gen.CandiUtil.validatePassivating(");
+      out.print(beanClassName + ".class, ");
+      out.println("__caucho_interceptor_beans);");
+    }
 
     out.println();
     out.println(_chainName + "_methodChain = ");

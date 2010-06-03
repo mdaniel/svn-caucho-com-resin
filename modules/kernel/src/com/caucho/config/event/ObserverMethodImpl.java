@@ -51,7 +51,6 @@ import javax.enterprise.inject.spi.InjectionPoint;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.bytecode.ScopeProxy;
-import com.caucho.config.inject.AbstractObserverMethod;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionPointImpl;

@@ -57,6 +57,7 @@ import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.StatefulGenerator;
 import com.caucho.ejb.inject.SessionBeanImpl;
+import com.caucho.ejb.inject.StatefulBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.util.L10N;
@@ -215,8 +216,8 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       throw new NullPointerException(L.l("'{0}' is an unknown api for {1}",
                                          api, getContext()));
     
-    SessionBeanImpl<X,T> statefulBean
-      = new SessionBeanImpl<X,T>(context, mBean, apiList);
+    StatefulBeanImpl<X,T> statefulBean
+      = new StatefulBeanImpl<X,T>(context, mBean, apiList);
 
     return statefulBean;
   }

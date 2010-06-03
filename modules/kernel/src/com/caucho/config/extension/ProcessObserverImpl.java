@@ -27,48 +27,60 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.inject;
+package com.caucho.config.extension;
 
+import javax.enterprise.inject.spi.Annotated;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ProcessSessionBean;
-import javax.enterprise.inject.spi.SessionBeanType;
+import javax.enterprise.inject.spi.ObserverMethod;
+import javax.enterprise.inject.spi.ProcessManagedBean;
+import javax.enterprise.inject.spi.ProcessObserverMethod;
+import javax.enterprise.inject.spi.ProcessProducerMethod;
 
-import com.caucho.config.extension.ProcessManagedBeanImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
-/**
- * Internal implementation for a Bean
- */
 @Module
-public class ProcessSessionBeanImpl<X> extends ProcessManagedBeanImpl<Object>
-  implements ProcessSessionBean<X>
+
+public class ProcessObserverImpl<T,X> implements ProcessObserverMethod<T,X>
 {
-  private String _ejbName;
-  private SessionBeanType _sessionBeanType;
+  private InjectManager _cdiManager;
+  private AnnotatedMethod<X> _method;
+  private ObserverMethod<T> _observer;
+  private Throwable _definitionError;
   
-  public ProcessSessionBeanImpl(InjectManager manager,
-                                Bean<Object> bean,
-                                AnnotatedType<Object> beanAnnType,
-                                String ejbName,
-                                SessionBeanType type)
+  ProcessObserverImpl(InjectManager cdiManager,
+                      ObserverMethod<T> observer,
+                      AnnotatedMethod<X> method)
+                      
   {
-    super(manager, bean, beanAnnType);
-    
-    _ejbName = ejbName;
-    _sessionBeanType = type;
+    _cdiManager = cdiManager;
+    _method = method;
+    _observer = observer;
+  }
+  
+  @Override
+  public AnnotatedMethod<X> getAnnotatedMethod()
+  {
+    return _method;
+  }
+  
+  @Override
+  public void addDefinitionError(Throwable t)
+  {
+    _cdiManager.addDefinitionError(t);
   }
 
   @Override
-  public String getEjbName()
+  public ObserverMethod<T> getObserverMethod()
   {
-    return _ejbName;
+    return _observer;
   }
-
-  @Override
-  public SessionBeanType getSessionBeanType()
+  
+  public String toString()
   {
-    return _sessionBeanType;
+    return getClass().getSimpleName() + "[" + _method + "]";
   }
 }

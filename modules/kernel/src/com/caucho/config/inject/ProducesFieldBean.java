@@ -32,7 +32,6 @@ package com.caucho.config.inject;
 import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
-import java.lang.reflect.Method;
 import java.util.Set;
 
 import javax.enterprise.context.Dependent;
@@ -40,13 +39,9 @@ import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.IllegalProductException;
 import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
 import javax.enterprise.inject.spi.InjectionPoint;
-import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.Producer;
 
 import com.caucho.config.program.Arg;
@@ -72,6 +67,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
 
   private boolean _isBound;
   private boolean _isPassivating;
+  private boolean _isStatic;
 
   protected ProducesFieldBean(InjectManager manager,
                               Bean<X> producerBean,
@@ -83,6 +79,7 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
     
     _producerBean = producerBean;
     _beanField = beanField;
+    _isStatic = beanField.isStatic(); 
     
     if (disposesMethod != null)
       _disposesProducer = new DisposesProducer(manager, producerBean, 
@@ -125,8 +122,19 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
   {
     _producer = producer;
   }
+  
+  public Bean<X> getProducerBean()
+  {
+    return _producerBean;
+  }
 
-  protected AnnotatedField<X> getField()
+  @Override
+  public Class<?> getBeanClass()
+  {
+    return _producerBean.getBeanClass();
+  }
+
+  public AnnotatedField<X> getField()
   {
     return _beanField;
   }
@@ -225,11 +233,18 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
       else
         producerCxt = new ProducesCreationalContext<X>(_producerBean, null);
 
-      X factory = (X) getBeanManager().getReference(_producerBean, type, producerCxt);
+      X factory;
       
-      if (factory == null) {
-        throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
-                                            this, _producerBean));
+      if (_isStatic) {
+        factory = null;
+      }
+      else {
+        factory = (X) getBeanManager().getReference(_producerBean, type, producerCxt);
+      
+        if (factory == null) {
+          throw new IllegalStateException(L.l("{0}: unexpected null factory for {1}",
+                                              this, _producerBean));
+        }
       }
       
       CreationalContextImpl<T> env = (CreationalContextImpl<T>) cxt;

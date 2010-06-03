@@ -119,12 +119,17 @@ import com.caucho.config.ContextDependent;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.ModulePrivate;
 import com.caucho.config.ModulePrivateLiteral;
+import com.caucho.config.bytecode.ScopeAdapter;
 import com.caucho.config.el.CandiContextResolver;
 import com.caucho.config.el.CandiExpressionFactory;
 import com.caucho.config.event.EventBeanImpl;
 import com.caucho.config.event.EventManager;
 import com.caucho.config.event.ObserverEntry;
 import com.caucho.config.event.ObserverMethodImpl;
+import com.caucho.config.extension.ExtensionManager;
+import com.caucho.config.extension.ProcessBeanImpl;
+import com.caucho.config.extension.ProcessManagedBeanImpl;
+import com.caucho.config.extension.ProcessProducerMethodImpl;
 import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
@@ -258,6 +263,9 @@ public final class InjectManager
   
   private HashSet<Class<? extends Annotation>> _passivatingScopeSet
     = new HashSet<Class<? extends Annotation>>();
+  
+  private HashMap<Class<? extends Annotation>, Set<Annotation>> _stereotypeMap
+    = new HashMap<Class<? extends Annotation>, Set<Annotation>>();
 
   private HashMap<Class<?>,Context> _contextMap
     = new HashMap<Class<?>,Context>();
@@ -416,15 +424,26 @@ public final class InjectManager
     return _version.get();
   }
   
-  InjectScanManager getScanManager()
+  public InjectScanManager getScanManager()
   {
     return _scanManager;
+  }
+  
+  public void setIsCustomExtension(boolean isCustom)
+  {
+    getScanManager().setIsCustomExtension(isCustom);
   }
   
   @Module
   public EventManager getEventManager()
   {
     return _eventManager;
+  }
+  
+  @Module
+  public ExtensionManager getExtensionManager()
+  {
+    return _extensionManager;
   }
 
   private void addContext(String contextClassName)
@@ -765,20 +784,36 @@ public final class InjectManager
   }
 
   //
-  // enabled deployment types, scopes, and binding types
+  // enabled deployment types, scopes, and qualifiers
   //
 
-  /**
-   * Returns the enabled deployment types
-   */
-  public List<Class<? extends Annotation>> getEnabledDeploymentTypes()
+  @Module
+  public void addScope(Class<? extends Annotation> scopeType,
+                       boolean isNormal,
+                       boolean isPassivating)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    if (isPassivating && ! isNormal)
+      throw new ConfigException(L.l("@{0} must be 'normal' because it's using 'passivating'",
+                                    scopeType.getName()));
+
+    _scopeTypeSet.add(scopeType);
+    
+    if (isNormal)
+      _normalScopeSet.add(scopeType);
+    
+    if (isPassivating)
+      _passivatingScopeSet.add(scopeType);
+    
+    if (isNormal) {
+      // TCK - force validation of all methods
+      _scanManager.setIsCustomExtension(true);
+    }
   }
 
   /**
    * Tests if an annotation is an enabled scope type
    */
+  @Override
   public boolean isScope(Class<? extends Annotation> annotationType)
   {
     return (annotationType.isAnnotationPresent(Scope.class)
@@ -808,6 +843,12 @@ public final class InjectManager
       return scope.passivating();
     
     return _passivatingScopeSet.contains(annotationType);
+  }
+  
+  @Module
+  public void addQualifier(Class<? extends Annotation> qualifier)
+  {
+    _qualifierSet.add(qualifier);
   }
 
   /**
@@ -844,13 +885,26 @@ public final class InjectManager
     return annSet;
   }
 
+  @Module
+  public void addStereotype(Class<? extends Annotation> annotationType,
+                            Annotation []annotations)
+  {
+    LinkedHashSet<Annotation> annSet = new LinkedHashSet<Annotation>();
+    
+    for (Annotation ann : annotations)
+      annSet.add(ann);
+    
+    _stereotypeMap.put(annotationType, annSet);
+  }
+  
   /**
    * Tests if an annotation is an enabled stereotype.
    */
   @Override
   public boolean isStereotype(Class<? extends Annotation> annotationType)
   {
-    return annotationType.isAnnotationPresent(Stereotype.class);
+    return (annotationType.isAnnotationPresent(Stereotype.class)
+            || _stereotypeMap.get(annotationType) != null);
   }
 
   /**
@@ -859,6 +913,11 @@ public final class InjectManager
   @Override
   public Set<Annotation> getStereotypeDefinition(Class<? extends Annotation> stereotype)
   {
+    Set<Annotation> mapAnnSet = _stereotypeMap.get(stereotype);
+    
+    if (mapAnnSet != null)
+      return mapAnnSet;
+    
     LinkedHashSet<Annotation> annSet = new LinkedHashSet<Annotation>();
     
     for (Annotation ann : stereotype.getAnnotations()) {
@@ -924,64 +983,12 @@ public final class InjectManager
     }
   }
 
-  /**
-   * Processes the discovered InjectionTarget
-   */
-  public <T> InjectionTarget<T> processInjectionTarget(InjectionTarget<T> target,
-                                                       AnnotatedType<T> annotatedType)
-  {
-    ProcessInjectionTargetImpl<T> processTarget
-      = new ProcessInjectionTargetImpl<T>(target, annotatedType);
-    
-    BaseType eventType = createTargetBaseType(ProcessInjectionTargetImpl.class);
-    eventType = eventType.fill(createTargetBaseType(annotatedType.getBaseType()));
-
-    getEventManager().fireExtensionEvent(processTarget, eventType);
-
-    return (InjectionTarget<T>) processTarget.getInjectionTarget();
-  }
-
-  /**
-   * Processes the discovered InjectionTarget
-   */
-  private <X,T> void processProducer(ProcessProducerImpl<X,T> event)
-  {
-    AnnotatedMember<X> annotatedMember = event.getAnnotatedMember();
-    AnnotatedType<X> declaringType = annotatedMember.getDeclaringType();
-    
-    BaseType eventType = createTargetBaseType(ProcessProducerImpl.class);
-    eventType = eventType.fill(createTargetBaseType(declaringType.getBaseType()),
-                               createTargetBaseType(annotatedMember.getBaseType()));
-
-    getEventManager().fireExtensionEvent(event, eventType);
-  }
-
   public <T,X> void addObserver(ObserverMethod<T> observer,
                                 AnnotatedMethod<X> method)
   {
-    ProcessObserverImpl<T,X> event
-      = new ProcessObserverImpl<T,X>(observer, method);
-    
-    processObserver(event);
+    _extensionManager.processObserver(observer, method);
     
     getEventManager().addObserver(observer);
-  }
-  
-  /**
-   * Processes the observer.
-   */
-  private <T,X> void processObserver(ProcessObserverImpl<T,X> event)
-  {
-    AnnotatedMethod<X> annotatedMethod = event.getAnnotatedMethod();
-    AnnotatedType<X> declaringType = annotatedMethod.getDeclaringType();
-    ObserverMethod<T> observerMethod = event.getObserverMethod();
-    Type observedType = observerMethod.getObservedType();
-    
-    BaseType eventType = createTargetBaseType(ProcessObserverImpl.class);
-    eventType = eventType.fill(createTargetBaseType(observedType),
-                               createTargetBaseType(declaringType.getBaseType()));
-
-    getEventManager().fireExtensionEvent(event, eventType);
   }
 
   /**
@@ -1005,30 +1012,6 @@ public final class InjectManager
     return createManagedBean(type);
   }
 
-  public <T> Bean<T> processBean(Bean<T> bean, ProcessBean<T> processBean)
-  {
-    BaseType baseType = createTargetBaseType(processBean.getClass());
-    baseType = baseType.fill(createTargetBaseType(bean.getBeanClass()));
-    
-    getEventManager().fireExtensionEvent(processBean, baseType);
-
-    /*
-    if (isPassivatingScope(bean.getScope())) {
-      validateNormal(bean, processBean.getAnnotated());
-      validatePassivating(bean, processBean.getAnnotated());
-    }
-    else if (isNormalScope(bean.getScope())) {
-      validateNormal(bean, processBean.getAnnotated());
-    }
-    */
-
-    if (processBean instanceof ProcessBeanImpl<?>
-        && ((ProcessBeanImpl<?>) processBean).isVeto())
-      return null;
-    else
-      return processBean.getBean();
-  }
-
   /**
    * Processes the discovered bean
    */
@@ -1040,28 +1023,48 @@ public final class InjectManager
   /**
    * Processes the discovered bean
    */
+  @Module
   public <T> void addBean(Bean<T> bean, Annotated ann)
   {
     if (ann == null && bean instanceof AbstractBean<?>)
       ann = ((AbstractBean<T>) bean).getAnnotatedType();
     
-    ProcessBeanImpl<T> processBean;
-    
-    if (bean instanceof ManagedBeanImpl<?>)
-      processBean = new ProcessManagedBeanImpl<T>(this, bean, ann);
+    if (bean instanceof ManagedBeanImpl<?>) {
+      ManagedBeanImpl<T> managedBean = (ManagedBeanImpl<T>) bean;
+      
+      bean = getExtensionManager().processManagedBean(managedBean, ann);
+    }
+    else if (bean instanceof ProducesMethodBean<?,?>) {
+      ProducesMethodBean<?,T> methodBean = (ProducesMethodBean<?,T>) bean;
+      
+      bean = getExtensionManager().processProducerMethod(methodBean);
+    }
+    else if (bean instanceof ProducesFieldBean<?,?>) {
+      ProducesFieldBean<?,T> fieldBean = (ProducesFieldBean<?,T>) bean;
+      
+      bean = getExtensionManager().processProducerField(fieldBean);
+    }
     else
-      processBean = new ProcessBeanImpl<T>(this, bean, ann);
+      bean = getExtensionManager().processBean(bean, ann);
     
-    addBean(bean, processBean);
+    addBeanImpl(bean, ann);
   }
   
   /**
    * Adds a new bean definition to the manager
    */
-  public <T> void addBean(Bean<T> bean, ProcessBean<T> processBean)
+  public <T> void addBean(Bean<T> bean, ProcessBean<T> process)
   {
-    bean = processBean(bean, processBean);
-    
+    bean = getExtensionManager().processBean(bean, process);
+
+    if (bean != null)
+      addBeanImpl(bean, process.getAnnotated());
+  }
+  /**
+   * Adds a new bean definition to the manager
+   */
+  public <T> void addBeanImpl(Bean<T> bean, Annotated ann)
+  {
     if (bean == null)
       return;
 
@@ -1084,7 +1087,7 @@ public final class InjectManager
     _beanSet.add(bean);
 
     for (Type type : bean.getTypes()) {
-      addBeanByType(type, processBean.getAnnotated(), bean);
+      addBeanByType(type, ann, bean);
     }
 
     if (bean.getName() != null) {
@@ -1462,7 +1465,10 @@ public final class InjectManager
     if (bean.isAlternative() && ! isEnabled(bean))
       return;
     
-    boolean isPassivating = isPassivatingScope(bean.getScope()); 
+    boolean isPassivating = isPassivatingScope(bean.getScope());
+    
+    if (bean instanceof CdiStatefulBean)
+      isPassivating = true;
     
     for (InjectionPoint ip : bean.getInjectionPoints()) {
       validate(ip);
@@ -1472,17 +1478,17 @@ public final class InjectManager
                                       ip.getMember().getName(),
                                       bean));
       
-      if (isPassivating) {
+      if (isPassivating
+          && ! ip.isTransient()) {
         Class<?> cl = getRawClass(ip.getType());
         
         // TCK conflict
-        /*
         if (! cl.isInterface() && ! Serializable.class.isAssignableFrom(cl)) {
-          throw new ConfigException(L.l("'{0}' is an invalid injection point because it's not serializable for {1}",
+          throw new ConfigException(L.l("'{0}' is an invalid injection point of type {1} because it's not serializable for {1}",
                                         ip.getMember().getName(),
+                                        ip.getType(),
                                         bean));
         }
-        */
       }
     }
     
@@ -1863,7 +1869,7 @@ public final class InjectManager
     Class<? extends Annotation> scopeType = bean.getScope();
 
     if (! isNormalScope(scopeType)) {
-      throw new IllegalStateException(L.l("{0} is an invalid normal scopr for {1}",
+      throw new IllegalStateException(L.l("{0} is an invalid normal scope for {1}",
                                           scopeType, bean));
     }
 
@@ -2236,7 +2242,7 @@ public final class InjectManager
     return bindings;
   }
 
-  Annotation []getQualifiers(Annotation []annotations)
+  public Annotation []getQualifiers(Annotation []annotations)
   {
     ArrayList<Annotation> bindingList = new ArrayList<Annotation>();
 
@@ -2525,7 +2531,7 @@ public final class InjectManager
       }
 
       _isBeforeBeanDiscoveryComplete = true;
-      _eventManager.fireExtensionEvent(new BeforeBeanDiscoveryImpl());
+      getExtensionManager().fireBeforeBeanDiscovery();
       
       /*
       // ioc/0061
@@ -2605,43 +2611,23 @@ public final class InjectManager
 
       AnnotatedType<?> type = createAnnotatedType(cl);
       
-      processAnnotatedType(type);
+      type = getExtensionManager().processAnnotatedType(type);
+      
+      if (type == null)
+        return;
+      
+      if (type.isAnnotationPresent(Specializes.class)) {
+        Class<?> parent = type.getJavaClass().getSuperclass();
+
+        if (parent != null) {
+          addSpecialize(type.getJavaClass(), parent);
+        }
+      }
+
+      _pendingAnnotatedTypes.add(type);
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
     }
-  }
- 
-  /**
-   * Creates a discovered annotated type.
-   */
-  private <T> void processAnnotatedType(AnnotatedType<T> type)
-  {
-    ProcessAnnotatedTypeImpl<T> processType
-      = new ProcessAnnotatedTypeImpl<T>(type);
-
-    BaseType baseType = createTargetBaseType(ProcessAnnotatedTypeImpl.class);
-    baseType = baseType.fill(createTargetBaseType(type.getBaseType()));
-    
-    _eventManager.fireExtensionEvent(processType, baseType);
-
-    if (processType.isVeto()) {
-      return;
-    }
-    
-    type = processType.getAnnotatedType();
-
-    if (type == null)
-      return;
-    
-    if (type.isAnnotationPresent(Specializes.class)) {
-      Class<?> parent = type.getJavaClass().getSuperclass();
-
-      if (parent != null) {
-        addSpecialize(type.getJavaClass(), parent);
-      }
-    }
-
-    _pendingAnnotatedTypes.add(type);
   }
   
   private void addSpecialize(Class<?> specializedType, Class<?> parentType)
@@ -2655,28 +2641,6 @@ public final class InjectManager
     
     _specializedMap.put(parentType, specializedType);
   }
-
-  /*
-  private boolean isDisabled(Class<?> type)
-  {
-    boolean isDisabled = false;
-
-    for (Annotation ann : type.getAnnotations()) {
-      Class<?> annType = ann.annotationType();
-
-      // check stereotypes
-      if (_deploymentMap.containsKey(annType))
-        return false;
-
-      if (annType.equals(Alternative.class)
-          || annType.isAnnotationPresent(Alternative.class)) {
-        isDisabled = true;
-      }
-    }
-
-    return isDisabled && ! _deploymentMap.containsKey(type);
-  }
-  */
 
   private boolean isEnabled(Bean<?> bean)
   {
@@ -2766,6 +2730,8 @@ public final class InjectManager
 
       targetImpl.setBean(bean);
     }
+    
+    bean.setInjectionTarget(target);
 
     bean.introspect();
 
@@ -2783,6 +2749,12 @@ public final class InjectManager
     fillProducerBeans(bean);
 
     // beans.addScannedClass(cl);
+  }
+  
+  public <T> InjectionTarget<T> processInjectionTarget(InjectionTarget<T> target,
+                                                       AnnotatedType<T> ann)
+  {
+    return getExtensionManager().processInjectionTarget(target, ann);
   }
   
   private void fillProducerBeans(ManagedBeanImpl<?> bean)
@@ -2827,28 +2799,30 @@ public final class InjectManager
   
   public <X,T> void addProducesBean(ProducesMethodBean<X,T> bean)
   {
-    ProcessProducerImpl<X,T> event
-      = new ProcessProducerImpl<X,T>((AnnotatedMethod<X>) bean.getProducesMethod(),
-                                     bean.getProducer());
+    AnnotatedMethod<X> producesMethod
+    = (AnnotatedMethod<X>) bean.getProducesMethod();
     
-    processProducer(event);
+    Producer<T> producer = bean.getProducer();
     
-    bean.setProducer(event.getProducer());
+    producer = getExtensionManager().processProducer(producesMethod, producer);
     
-    addBean(bean, event.getAnnotatedMember());
+    bean.setProducer(producer);
+    
+    addBean(bean, producesMethod);
   }
   
   public <X,T> void addProducesFieldBean(ProducesFieldBean<X,T> bean)
   {
-    ProcessProducerImpl<X,T> event
-      = new ProcessProducerImpl<X,T>((AnnotatedField<X>) bean.getField(),
-                                     bean.getProducer());
+    AnnotatedField<X> producesField
+      = (AnnotatedField<X>) bean.getField();
     
-    processProducer(event);
+    Producer<T> producer = bean.getProducer();
     
-    bean.setProducer(event.getProducer());
+    producer = getExtensionManager().processProducer(producesField, producer);
     
-    addBean(bean, event.getAnnotatedMember());
+    bean.setProducer(producer);
+    
+    addBean(bean, producesField);
   }
 
   public <X> void addManagedBean(ManagedBeanImpl<X> managedBean)
@@ -2995,7 +2969,7 @@ public final class InjectManager
       if (isBind) {
         _isAfterBeanDiscoveryComplete = true;
 
-        getEventManager().fireExtensionEvent(new AfterBeanDiscoveryImpl());
+        getExtensionManager().fireAfterBeanDiscovery();
       }
 
       if (_configException != null)
@@ -3014,13 +2988,7 @@ public final class InjectManager
       validate();
       
       if (isBind) {
-        AfterDeploymentValidationImpl event
-          = new AfterDeploymentValidationImpl();
-        
-        getEventManager().fireExtensionEvent(event);
-        
-        if (event.getDeploymentProblem() != null)
-          throw ConfigException.create(event.getDeploymentProblem());
+        getExtensionManager().fireAfterDeploymentValidation();
       }
     } catch (ConfigException e) {
       if (_configException == null)
@@ -3163,6 +3131,7 @@ public final class InjectManager
   /**
    * Handles the case the environment config phase
    */
+  @Override
   public void environmentBind(EnvironmentClassLoader loader)
   {
     initialize();
@@ -3172,6 +3141,7 @@ public final class InjectManager
   /**
    * Handles the case where the environment is starting (after init).
    */
+  @Override
   public void environmentStart(EnvironmentClassLoader loader)
   {
     start();
@@ -3195,14 +3165,14 @@ public final class InjectManager
     bind();
 
     startServices();
-    
+
     if (_configException != null) {
       // ioc/0p91
       throw _configException;
     }
   }
 
-  private void addDefinitionError(Throwable t)
+  public void addDefinitionError(Throwable t)
   {
     if (_configException != null) {
       log.log(Level.WARNING, t.toString(), t);
@@ -3483,334 +3453,6 @@ public final class InjectManager
       InjectManager beanManager = InjectManager.getCurrent(loader);
 
       beanManager.fillByType(_baseType, _beanSet, _manager);
-    }
-  }
-
-  class BeforeBeanDiscoveryImpl implements BeforeBeanDiscovery
-  {
-    public void addAnnotatedType(AnnotatedType<?> annType)
-    {
-    }
-    
-    @Override
-    public void addQualifier(Class<? extends Annotation> qualifier)
-    {
-      _qualifierSet.add(qualifier);
-    }
-
-    @Override
-    public void addScope(Class<? extends Annotation> scopeType,
-                         boolean isNormal,
-                         boolean isPassivating)
-    {
-      if (isPassivating && ! isNormal)
-        throw new ConfigException(L.l("@{0} must be 'normal' because it's using 'passivating'",
-                                      scopeType.getName()));
-
-      _scopeTypeSet.add(scopeType);
-      
-      if (isNormal)
-        _normalScopeSet.add(scopeType);
-      
-      if (isPassivating)
-        _passivatingScopeSet.add(scopeType);
-      
-      if (isNormal) {
-        // TCK - force validation of all methods
-        _scanManager.setIsCustomExtension(true);
-      }
-    }
-
-    @Override
-    public void addStereotype(Class<? extends Annotation> stereotype,
-                              Annotation... stereotypeDef)
-    {
-    }
-
-    @Override
-    public void addInterceptorBinding(Class<? extends Annotation> bindingType,
-                                      Annotation... bindings)
-    {
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + InjectManager.this + "]";
-    }
-  }
-
-  class ProcessAnnotatedTypeImpl<X> implements ProcessAnnotatedType<X>
-  {
-    private AnnotatedType<X> _annotatedType;
-    private boolean _isVeto;
-
-    ProcessAnnotatedTypeImpl(AnnotatedType<X> annotatedType)
-    {
-      if (annotatedType == null)
-        throw new NullPointerException();
-
-      _annotatedType = annotatedType;
-    }
-
-    public AnnotatedType<X> getAnnotatedType()
-    {
-      return _annotatedType;
-    }
-
-    public void setAnnotatedType(AnnotatedType<X> type)
-    {
-      _annotatedType = type;
-    }
-
-    boolean isVeto()
-    {
-      return _isVeto;
-    }
-
-    @Override
-    public void veto()
-    {
-      _isVeto = true;
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _annotatedType + "]";
-    }
-  }
-
-  class ProcessInjectionTargetImpl<X> implements ProcessInjectionTarget<X>
-  {
-    private InjectionTarget<X> _target;
-    private AnnotatedType<X> _type;
-
-    ProcessInjectionTargetImpl(InjectionTarget<X> target,
-                               AnnotatedType<X> type)
-    {
-      _target = target;
-      _type = type;
-    }
-
-    public AnnotatedType<X> getAnnotatedType()
-    {
-      return _type;
-    }
-
-    public InjectionTarget<X> getInjectionTarget()
-    {
-      return _target;
-    }
-
-    public void setInjectionTarget(InjectionTarget<X> target)
-    {
-      _target = target;
-    }
-
-    @Override
-    public void addDefinitionError(Throwable t)
-    {
-      InjectManager.this.addDefinitionError(t);
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _target + "]";
-    }
-  }
-
-  class AfterBeanDiscoveryImpl implements AfterBeanDiscovery
-  {
-    public void addBean(Bean<?> bean)
-    {
-      InjectManager.this.addBean(bean);
-    }
-
-    @Override
-    public void addContext(Context context)
-    {
-      InjectManager.this.addContext(context);
-    }
-
-    @Override
-    public void addObserverMethod(ObserverMethod<?> observerMethod)
-    {
-      getEventManager().addObserver(observerMethod);
-    }
-
-    @Override
-    public void addDefinitionError(Throwable t)
-    {
-      if (_configException != null) {
-        log.log(Level.WARNING, t.toString(), t);
-      }
-      else if (t instanceof RuntimeException) {
-        _configException = (RuntimeException) t;
-      }
-      else {
-        _configException = ConfigException.create(t);
-      }
-    }
-
-    public boolean hasDefinitionError()
-    {
-      return false;
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + InjectManager.this + "]";
-    }
-  }
-
-  class AfterDeploymentValidationImpl implements AfterDeploymentValidation
-  {
-    private Throwable _exn;
-    
-    @Override
-    public void addDeploymentProblem(Throwable exn)
-    {
-      _exn = exn;
-    }
-    
-    Throwable getDeploymentProblem()
-    {
-      return _exn;
-    }
-
-    @Override
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + InjectManager.this + "]";
-    }
-  }
-
-  class ProcessProducerImpl<X,T> implements ProcessProducer<X,T>
-  {
-    private AnnotatedMember<X> _member;
-    private Producer<T> _producer;
-    private Throwable _definitionError;
-    
-    ProcessProducerImpl(AnnotatedMember<X> member, Producer<T> producer)
-    {
-      _member = member;
-      _producer = producer;
-    }
-    
-    @Override
-    public AnnotatedMember<X> getAnnotatedMember()
-    {
-      return _member;
-    }
-    
-    @Override
-    public void addDefinitionError(Throwable t)
-    {
-      _definitionError = t;
-    }
-    
-    Throwable getDefinitionError()
-    {
-      return _definitionError;
-    }
-
-    @Override
-    public Producer<T> getProducer()
-    {
-      return _producer;
-    }
-
-    @Override
-    public void setProducer(Producer<T> producer)
-    {
-      _producer = producer;
-    }
-    
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _member + "]";
-    }
-  }
-
-  class ProcessObserverImpl<T,X> implements ProcessObserverMethod<T,X>
-  {
-    private AnnotatedMethod<X> _method;
-    private ObserverMethod<T> _observer;
-    private Throwable _definitionError;
-    
-    ProcessObserverImpl(ObserverMethod<T> observer,
-                        AnnotatedMethod<X> method)
-                        
-    {
-      _method = method;
-      _observer = observer;
-    }
-    
-    @Override
-    public AnnotatedMethod<X> getAnnotatedMethod()
-    {
-      return _method;
-    }
-    
-    @Override
-    public void addDefinitionError(Throwable t)
-    {
-      InjectManager.this.addDefinitionError(t);
-    }
-
-    @Override
-    public ObserverMethod<T> getObserverMethod()
-    {
-      return _observer;
-    }
-    
-    public String toString()
-    {
-      return getClass().getSimpleName() + "[" + _method + "]";
-    }
-  }
-
-  class ProcessProducerMethodImpl<X,T> implements ProcessProducerMethod<X,T>
-  {
-    @Override
-    public Bean<T> getBean()
-    {
-      return null;
-    }
-    
-    @Override
-    public Annotated getAnnotated()
-    {
-      return null;
-    }
-
-    @Override
-    public AnnotatedMethod<X> getAnnotatedProducerMethod()
-    {
-      return null;
-    }
-    
-    @Override
-    public AnnotatedParameter<X> getAnnotatedDisposedParameter()
-    {
-      return null;
-    }
-
-    @Override
-    public void addDefinitionError(Throwable t)
-    {
-      if (_configException != null) {
-        log.log(Level.WARNING, t.toString(), t);
-      }
-      else if (t instanceof RuntimeException) {
-        _configException = (RuntimeException) t;
-      }
-      else {
-        _configException = ConfigException.create(t);
-      }
     }
   }
 
@@ -4131,6 +3773,7 @@ public final class InjectManager
     private Bean<T> _bean;
     private ScopeAdapterBean<T> _scopeAdapterBean;
     private Context _context;
+    private T _scopeAdapter;
     
     NormalContextReferenceFactory(Bean<T> bean,
                                   ScopeAdapterBean<T> scopeAdapterBean,
@@ -4138,15 +3781,19 @@ public final class InjectManager
     {
       _bean = bean;
       _scopeAdapterBean = scopeAdapterBean;
+      
       _context = context;
-    }
+      
+      ScopeAdapter scopeAdapter = ScopeAdapter.create(bean.getBeanClass());
+      _scopeAdapter = scopeAdapter.wrap(createNormalInstanceFactory(bean));
+     }
    
     @Override
     public T create(CreationalContextImpl<T> env,
                     CreationalContextImpl<?> parentEnv,
                     InjectionPoint ip)
     {
-      return _scopeAdapterBean.getScopeAdapter(_bean, null); // parentEnv);
+      return _scopeAdapter;
     }
   }
   

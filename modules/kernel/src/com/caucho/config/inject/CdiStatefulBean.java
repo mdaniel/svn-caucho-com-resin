@@ -27,25 +27,11 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.spi;
+package com.caucho.config.inject;
+
 
 /**
- * {@link javax.enterprise.inject.spi.Extension} callback while processing
- * a producer method.
- *
- * <code><pre>
- * public class MyExtension implements Extension
- * {
- *  &lt;X,T> public void
- *  processProducerBean(@Observes ProcessProducerMethod&lt;X,T> event)
- *  {
- *    ...
- *  }
- * }
- * </pre></code>
+ * Marker for a stateful bean
  */
-public interface ProcessProducerMethod<T,X> extends ProcessBean<X>
-{
-  public AnnotatedMethod<T> getAnnotatedProducerMethod();
-  public AnnotatedParameter<T> getAnnotatedDisposedParameter();
+public interface CdiStatefulBean {
 }

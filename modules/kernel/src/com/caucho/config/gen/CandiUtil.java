@@ -29,6 +29,7 @@
 
 package com.caucho.config.gen;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.DelegateProxyBean;
@@ -38,6 +39,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.util.L10N;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 import java.util.ArrayList;
@@ -120,6 +122,24 @@ public class CandiUtil {
     }
 
     return indexList;
+  }
+
+  public static void validatePassivating(Class<?> cl, 
+                                         ArrayList<Interceptor<?>> beans)
+  {
+    for (Interceptor<?> interceptor : beans) {
+      Class<?> beanClass = interceptor.getBeanClass();
+      
+      if (! Serializable.class.isAssignableFrom(beanClass)) {
+        ConfigException exn
+          = new ConfigException(L.l("{0}: {1} is an invalid interceptor because it is not serializable.",
+                                    cl.getName(),
+                                    interceptor));
+        
+        throw exn;
+        // InjectManager.create().addDefinitionError(exn);
+      }
+    }
   }
 
   public static Method []createMethods(ArrayList<Interceptor<?>> beans,

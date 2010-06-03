@@ -33,6 +33,7 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 import javax.enterprise.inject.Disposes;
@@ -75,18 +76,42 @@ public class ProducesBuilder {
    */
   public <X> void introspectProduces(Bean<X> bean, AnnotatedType<X> beanType)
   {
+    HashSet<AnnotatedMethod<?>> disposesSet
+      = new HashSet<AnnotatedMethod<?>>();
+    
     for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
       if (beanMethod.isAnnotationPresent(Produces.class)) {
         AnnotatedMethod<? super X> disposesMethod 
-          = findDisposesMethod(beanType, beanMethod.getBaseType());
+          = findDisposesMethod(beanType, 
+                               beanMethod.getBaseType(),
+                               getQualifiers(beanMethod));
         
         addProducesMethod(bean, beanType, beanMethod, disposesMethod);
+        
+        if (disposesMethod != null)
+          disposesSet.add(disposesMethod);
       }
     }
     
-    for (AnnotatedField<?> beanField : beanType.getFields()) {
-      if (beanField.isAnnotationPresent(Produces.class))
+    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+      if (isDisposes(beanMethod)
+          && ! disposesSet.contains(beanMethod))
+        throw new ConfigException(L.l("{0}.{1} is an invalid disposes method because it doesn't match a @Produces method",
+                                      beanMethod.getJavaMember().getDeclaringClass().getName(),
+                                      beanMethod.getJavaMember().getName()));
+    }
+    
+    for (AnnotatedField<? super X> beanField : beanType.getFields()) {
+      if (beanField.isAnnotationPresent(Produces.class)) {
+        AnnotatedMethod<?> disposesMethod
+          = findDisposesMethod(beanType, beanField.getBaseType(),
+                               getQualifiers(beanField));
+        
         addProduces(bean, beanType, beanField);
+        
+        if (disposesMethod != null)
+          disposesSet.add(disposesMethod);
+      }
     }
   }
 
@@ -128,7 +153,8 @@ public class ProducesBuilder {
       return;
     
     AnnotatedMethod<? super X> disposesMethod 
-      = findDisposesMethod(beanType, beanField.getBaseType());
+      = findDisposesMethod(beanType, beanField.getBaseType(), 
+                           getQualifiers(beanField));
     
     Arg<? super X> []disposesArgs = null;
     
@@ -146,7 +172,8 @@ public class ProducesBuilder {
   
   private <X> AnnotatedMethod<? super X>
   findDisposesMethod(AnnotatedType<X> beanType,
-                     Type producesBaseType)
+                     Type producesBaseType,
+                     Annotation []qualifiers)
   {
     for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
       List<AnnotatedParameter<?>> params = (List) beanMethod.getParameters();
@@ -161,7 +188,12 @@ public class ProducesBuilder {
       
       if (! producesBaseType.equals(param.getBaseType()))
         continue;
+      
+      Annotation []testQualifiers = getQualifiers(param);
 
+      if (! isQualifierMatch(qualifiers, testQualifiers))
+        continue;
+      
       // XXX: check @Qualifiers
       
       Method javaMethod = beanMethod.getJavaMember();
@@ -238,6 +270,42 @@ public class ProducesBuilder {
     }
 
     return args;
+  }
+
+  protected boolean isDisposes(AnnotatedMethod<?> method)
+  {
+    List<AnnotatedParameter<?>> params = (List) method.getParameters();
+
+    for (int i = 0; i < params.size(); i++) {
+      AnnotatedParameter<?> param = params.get(i);
+      
+      if (param.isAnnotationPresent(Disposes.class))
+        return true;
+    }
+    
+    return false;
+  }
+  
+  private boolean isQualifierMatch(Annotation []aList, Annotation []bList)
+  {
+    for (Annotation a : aList) {
+      if (! isQualifierPresent(a, bList))
+        return false;
+    }
+    
+    return true;
+  }
+  
+  private boolean isQualifierPresent(Annotation a, Annotation []list)
+  {
+    for (Annotation ann : list) {
+      if (! ann.annotationType().equals(a.annotationType()))
+        continue;
+      
+      return true;
+    }
+    
+    return false;
   }
   
   private Annotation []getQualifiers(Annotated annotated)

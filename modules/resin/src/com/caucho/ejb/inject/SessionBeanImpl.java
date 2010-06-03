@@ -109,12 +109,14 @@ public class SessionBeanImpl<X,T>
    */
   public Set<InjectionPoint> getInjectionPoints()
   {
-    // ejb/1210
-    // return getBean().getInjectionPoints();
+    // ejb/1210, ioc/05al
+    return getBean().getInjectionPoints();
     
+    /*
     HashSet<InjectionPoint> injectionPoints = new HashSet<InjectionPoint>();
     
     return injectionPoints;
+    */
   }
 
   @Override

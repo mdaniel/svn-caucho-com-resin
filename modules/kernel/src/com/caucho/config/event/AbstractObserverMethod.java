@@ -27,48 +27,55 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.ejb.inject;
+package com.caucho.config.event;
 
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.ProcessSessionBean;
-import javax.enterprise.inject.spi.SessionBeanType;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
+import java.util.Set;
 
-import com.caucho.config.extension.ProcessManagedBeanImpl;
-import com.caucho.config.inject.InjectManager;
+import javax.enterprise.event.Reception;
+import javax.enterprise.event.TransactionPhase;
+import javax.enterprise.inject.spi.ObserverMethod;
+
 import com.caucho.inject.Module;
 
 /**
- * Internal implementation for a Bean
+ * Common bean introspection for Produces and ManagedBean.
  */
 @Module
-public class ProcessSessionBeanImpl<X> extends ProcessManagedBeanImpl<Object>
-  implements ProcessSessionBean<X>
+abstract public class AbstractObserverMethod<T>
+  implements ObserverMethod<T>
 {
-  private String _ejbName;
-  private SessionBeanType _sessionBeanType;
-  
-  public ProcessSessionBeanImpl(InjectManager manager,
-                                Bean<Object> bean,
-                                AnnotatedType<Object> beanAnnType,
-                                String ejbName,
-                                SessionBeanType type)
+  @Override
+  public Class<?> getBeanClass()
   {
-    super(manager, bean, beanAnnType);
-    
-    _ejbName = ejbName;
-    _sessionBeanType = type;
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override
-  public String getEjbName()
+  public Type getObservedType()
   {
-    return _ejbName;
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   @Override
-  public SessionBeanType getSessionBeanType()
+  public Set<Annotation> getObservedQualifiers()
   {
-    return _sessionBeanType;
+    throw new UnsupportedOperationException(getClass().getName());
   }
+
+  @Override
+  public Reception getReception()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  public TransactionPhase getTransactionPhase()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  @Override
+  abstract public void notify(T event);
 }

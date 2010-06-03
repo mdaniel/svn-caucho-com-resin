@@ -47,9 +47,9 @@ import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.extension.ProcessBeanImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ProcessBeanImpl;
 import com.caucho.ejb.inject.EjbGeneratedBean;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.hemp.broker.HempBroker;
