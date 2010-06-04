@@ -126,10 +126,10 @@ public class ListenerConfig<T> extends DescriptionGroupConfig {
     if (_object != null)
       return _object;
 
-    InjectManager webBeans = InjectManager.create();
-    _target = webBeans.createInjectionTarget(_listenerClass);
+    InjectManager cdiManager = InjectManager.create();
+    _target = cdiManager.createInjectionTarget(_listenerClass);
 
-    CreationalContext<T> env = webBeans.createCreationalContext(null);
+    CreationalContext<T> env = cdiManager.createCreationalContext(null);
 
     _object = _target.produce(env);
     _target.inject(_object, env);

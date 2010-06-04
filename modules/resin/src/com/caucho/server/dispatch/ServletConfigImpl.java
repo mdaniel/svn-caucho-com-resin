@@ -1259,8 +1259,12 @@ public class ServletConfigImpl
 
       try {
         // server/1b40
-        servlet = _comp.produce(env);
-        _comp.inject(servlet, env);
+        if (_comp != null) {
+          servlet = _comp.produce(env);
+          _comp.inject(servlet, env);
+        }
+        else
+          servlet = servletClass.newInstance();
       } catch (InjectionException e) {
         throw ConfigException.createConfig(e);
       }

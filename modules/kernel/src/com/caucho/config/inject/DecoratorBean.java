@@ -46,6 +46,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.inject.Qualifier;
+import javax.interceptor.Interceptor;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.reflect.AnnotatedFieldImpl;
@@ -232,38 +233,6 @@ public class DecoratorBean<T> implements Decorator<T>
     return _delegateInjectionPoint;
   }
 
-  /**
-   * Sets the delegate for an object
-   */
-  private void setDelegate(Object instance,
-                          Object delegate)
-  {
-    if (! _type.isAssignableFrom(instance.getClass())) {
-      throw new ConfigException(L.l("{0} is an invalid @Decorator instance because it does not extend the implementation class {1}",
-                                    instance.getClass().getName(),
-                                    _type.getName()));
-    }
-
-    if (! getDelegateClass().isAssignableFrom(delegate.getClass())) {
-      throw new ConfigException(L.l("{0} is an invalid @Decorator delegate because it does not implement the delegate {1}",
-                                    delegate.getClass().getName(),
-                                    getDelegateType()));
-    }
-
-    try {
-      if (_delegateField != null)
-        _delegateField.set(instance, delegate);
-      else if (_delegateMethod != null)
-        _delegateMethod.invoke(instance, delegate);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
-  }
-
-  //
-  // introspection
-  //
-
   public void init()
   {
     // _bean.init();
@@ -274,6 +243,10 @@ public class DecoratorBean<T> implements Decorator<T>
         && _delegateMethod == null
         && _delegateConstructor == null)
       throw new ConfigException(L.l("{0} is missing a @Delegate field.  All @Decorators need a @Delegate field for a delegate injection",
+                                    _type.getName()));
+    
+    if (_type.isAnnotationPresent(Interceptor.class))
+      throw new ConfigException(L.l("{0} is an invalid @Delegate because it has an @Interceptor annotation.",
                                     _type.getName()));
   }
 

@@ -55,6 +55,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.ejb.Stateful;
 import javax.el.ELContext;
 import javax.el.ELResolver;
 import javax.el.ExpressionFactory;
@@ -269,6 +270,9 @@ public final class InjectManager
 
   private HashMap<Class<?>,Context> _contextMap
     = new HashMap<Class<?>,Context>();
+
+  private ArrayList<Class<?>> _interceptorClassList
+    = new ArrayList<Class<?>>();
 
   private ArrayList<InterceptorEntry<?>> _interceptorList
     = new ArrayList<InterceptorEntry<?>>();
@@ -612,12 +616,15 @@ public final class InjectManager
     else if (bean.isAlternative()) {
     }
     else {
+      // ioc/0n18
+      /*
       for (Bean<?> testBean : beanList) {
         if (! testBean.isAlternative()) {
           throw new ConfigException(L.l("@Named('{0}') is a duplicate name for\n  {1}\n  {2}",
                                         name, bean, testBean));
         }
       }
+      */
     }
 
     beanList.add(bean);
@@ -954,7 +961,9 @@ public final class InjectManager
   @Override
   public <T> AnnotatedType<T> createAnnotatedType(Class<T> cl)
   {
-    return ReflectionAnnotatedFactory.introspectType(cl);
+    AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(cl);
+    
+    return getExtensionManager().processAnnotatedType(annType);
   }
 
   /**
@@ -963,12 +972,9 @@ public final class InjectManager
   @Override
   public <T> InjectionTarget<T> createInjectionTarget(AnnotatedType<T> type)
   {
-    InjectionTargetBuilder<T> bean = new InjectionTargetBuilder<T>(this, type);
+    InjectionTarget<T> target = new InjectionTargetBuilder<T>(this, type);
 
-    // validation
-    // bean.getInjectionPoints();
-
-    return bean;
+    return getExtensionManager().processInjectionTarget(target, type);
   }
 
   /**
@@ -977,7 +983,17 @@ public final class InjectManager
   public <T> InjectionTarget<T> createInjectionTarget(Class<T> type)
   {
     try {
-      return createInjectionTarget(createAnnotatedType(type));
+      AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(type);
+      
+      AnnotatedType<T> enhAnnType
+        = getExtensionManager().processAnnotatedType(annType);
+      
+      if (enhAnnType != null)
+        return createInjectionTarget(enhAnnType);
+      else {
+        // special call from servlet, etc.
+        return createInjectionTarget(annType);
+      }
     } catch (Exception e) {
       throw ConfigException.createConfig(e);
     }
@@ -1217,8 +1233,14 @@ public final class InjectManager
     
     if (New.class.equals(qualifiers[0].annotationType())) {
       // ioc/0721
+      New newQualifier = (New) qualifiers[0];
       HashSet<Bean<?>> set = new HashSet<Bean<?>>();
-      AnnotatedType<?> ann = ReflectionAnnotatedFactory.introspectType(baseType.getRawClass());
+      Class<?> newClass = newQualifier.value();
+      
+      if (newClass == null || newClass.equals(void.class))
+        newClass = baseType.getRawClass();
+      
+      AnnotatedType<?> ann = ReflectionAnnotatedFactory.introspectType(newClass);
       NewBean<?> newBean = new NewBean(this, ann);
       newBean.introspect();
       
@@ -1471,30 +1493,66 @@ public final class InjectManager
       isPassivating = true;
     
     for (InjectionPoint ip : bean.getInjectionPoints()) {
-      validate(ip);
+      ReferenceFactory<?> factory = validateInjectionPoint(ip);
       
       if (ip.isDelegate() && ! (bean instanceof Decorator))
         throw new ConfigException(L.l("'{0}' is an invalid delegate because {1} is not a Decorator.",
                                       ip.getMember().getName(),
                                       bean));
       
-      if (isPassivating
-          && ! ip.isTransient()) {
-        Class<?> cl = getRawClass(ip.getType());
-        
-        // TCK conflict
-        if (! cl.isInterface() && ! Serializable.class.isAssignableFrom(cl)) {
-          throw new ConfigException(L.l("'{0}' is an invalid injection point of type {1} because it's not serializable for {1}",
-                                        ip.getMember().getName(),
-                                        ip.getType(),
-                                        bean));
-        }
-      }
+      RuntimeException exn = validatePassivation(ip);
+      
+      if (! factory.isProducer() && exn != null)
+        throw exn;
     }
     
     if (isNormalScope(bean.getScope())) {
       validateNormal(bean);
     }
+  }
+  
+  private RuntimeException validatePassivation(InjectionPoint ip)
+  {
+    Bean<?> bean = ip.getBean();
+    
+    if (bean == null)
+      return null;
+    
+    boolean isPassivating = isPassivatingScope(bean.getScope());
+    
+    if (bean instanceof CdiStatefulBean
+        || bean.getBeanClass().isAnnotationPresent(Stateful.class))
+      isPassivating = true;
+    
+    if (isPassivating && ! ip.isTransient()) {
+      Class<?> cl = getRawClass(ip.getType());
+    
+      // TCK conflict
+      if (! cl.isInterface() && ! Serializable.class.isAssignableFrom(cl)) {
+        RuntimeException exn;
+        
+        if (isProduct(bean))
+          exn = new IllegalProductException(L.l("'{0}' is an invalid injection point of type {1} because it's not serializable for {2}",
+                                                ip.getMember().getName(),
+                                                ip.getType(),
+                                                bean));
+        else
+          exn = new ConfigException(L.l("'{0}' is an invalid injection point of type {1} because it's not serializable for {2}",
+                                        ip.getMember().getName(),
+                                        ip.getType(),
+                                        bean));
+        
+        return exn;
+      }
+    }
+    
+    return null;
+  }
+  
+  private boolean isProduct(Bean<?> bean)
+  {
+    return ((bean instanceof ProducesFieldBean<?,?>)
+            || (bean instanceof ProducesMethodBean<?,?>));
   }
   
   private Class<?> getRawClass(Type type)
@@ -1572,6 +1630,18 @@ public final class InjectManager
       }
     }
     
+    for (Field field : cl.getFields()) {
+      if (Modifier.isStatic(field.getModifiers()))
+        continue;
+      
+      if (Modifier.isPublic(field.getModifiers())) {
+        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because {2} is a public field for {3}.",
+                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                      field.getName(),
+                                      bean));
+      }
+    }
+    
     for (InjectionPoint ip : bean.getInjectionPoints()) {
       if (ip.getType().equals(InjectionPoint.class))
         throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' injects an InjectionPoint for {3}.",
@@ -1585,6 +1655,11 @@ public final class InjectManager
   @Override
   public void validate(InjectionPoint ij)
   {
+    validateInjectionPoint(ij);
+  }
+  
+  public ReferenceFactory<?> validateInjectionPoint(InjectionPoint ij)
+  {
     try {
       if (ij.isDelegate()) {
         if (! (ij.getBean() instanceof Decorator<?>))
@@ -1592,7 +1667,7 @@ public final class InjectManager
                                         ij.getMember().getName(), ij.getBean()));
       }
       else {
-        getReferenceFactory(ij);
+        return getReferenceFactory(ij);
       }
     } catch (AmbiguousResolutionException e) {
       throw new AmbiguousResolutionException(L.l("{0}.{1}: {2}",
@@ -1619,6 +1694,8 @@ public final class InjectManager
                                        e.getMessage()),
                                    e);
     }
+    
+    return null;
   }
 
   public int getDeploymentPriority(Bean<?> bean)
@@ -1889,7 +1966,7 @@ public final class InjectManager
     return new NormalInstanceReferenceFactory<T>(bean, context);
   }
 
-  private RuntimeException unsatisfiedException(Type type,
+  RuntimeException unsatisfiedException(Type type,
                                                 Annotation []qualifiers)
   {
     WebComponent component = getWebComponent(createTargetBaseType(type));
@@ -2015,6 +2092,11 @@ public final class InjectManager
     
     Type type = ij.getType();
     Set<Annotation> qualifiers = ij.getQualifiers();
+    
+    RuntimeException exn = validatePassivation(ij);
+    
+    if (exn != null)
+      return new ErrorReferenceFactory(exn);
 
     return getReferenceFactory(type, qualifiers, ij);
   }
@@ -2032,22 +2114,24 @@ public final class InjectManager
   }
 
   private Bean<?> resolveByInjectionPoint(Type type,
-                                          Set<Annotation> bindingSet,
+                                          Set<Annotation> qualifierSet,
                                           InjectionPoint ij)
   {
-    Annotation []bindings;
+    Annotation []qualifiers;
 
-    if (bindingSet != null && bindingSet.size() > 0) {
-      bindings = new Annotation[bindingSet.size()];
-      bindingSet.toArray(bindings);
+    if (qualifierSet != null && qualifierSet.size() > 0) {
+      qualifiers = new Annotation[qualifierSet.size()];
+      qualifierSet.toArray(qualifiers);
 
-      if (bindings.length == 1
-          && bindings[0].annotationType().equals(New.class)) {
-        return createNewBean(type);
+      if (qualifiers.length == 1
+          && qualifiers[0].annotationType().equals(New.class)) {
+        New newQualifier = (New) qualifiers[0];
+        
+        return createNewBean(type, newQualifier);
       }
     }
     else
-      bindings = new Annotation[] { DefaultLiteral.DEFAULT };
+      qualifiers = new Annotation[] { DefaultLiteral.DEFAULT };
     
     BaseType baseType = createTargetBaseType(type);
     
@@ -2060,13 +2144,13 @@ public final class InjectManager
       throw new InjectionException(L.l("'{0}' is an invalid type for injection because it's a variable . {1}",
                                        baseType, ij));
 
-    Set<Bean<?>> set = resolveRec(baseType, bindings);
+    Set<Bean<?>> set = resolveRec(baseType, qualifiers);
 
     if (set == null || set.size() == 0) {
       if (InjectionPoint.class.equals(type))
         return new InjectionPointBean(this, ij);
       
-      throw unsatisfiedException(type, bindings);
+      throw unsatisfiedException(type, qualifiers);
     }
 
     Bean<?> bean = resolve(set);
@@ -2102,14 +2186,21 @@ public final class InjectManager
 */
   }
 
-  private <T> Bean<?> createNewBean(Type type)
+  private <T> Bean<?> createNewBean(Type type, New newQualifier)
   {
-    Bean<?> bean = _newBeanMap.get(type);
+    Class<?> newClass = newQualifier.value();
+    
+    if (newClass == null 
+        || void.class.equals(newClass)
+        || New.class.equals(newClass)) {
+      BaseType baseType = createTargetBaseType(type);
+      newClass = (Class<T>) baseType.getRawClass();
+    }
+      
+    Bean<?> bean = _newBeanMap.get(newClass);
 
     if (bean == null) {
-      BaseType baseType = createTargetBaseType(type);
-      Class<T> rawClass = (Class<T>) baseType.getRawClass();
-      AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(rawClass);
+      AnnotatedType<T> annType = (AnnotatedType<T>) ReflectionAnnotatedFactory.introspectType(newClass);
 
       NewBean<T> newBean = new NewBean<T>(this, annType);
       newBean.introspect();
@@ -2287,17 +2378,25 @@ public final class InjectManager
   //
 
   /**
-   * Adds a new interceptor to the manager
+   * Adds a new decorator class
    */
-  public <X> void addInterceptor(Interceptor<X> interceptor)
+  public <X> BeanManager addInterceptorClass(Class<?> interceptorClass)
   {
-    _interceptorList.add(new InterceptorEntry<X>(interceptor));
+    _interceptorClassList.add(interceptorClass);
+
+    return this;
   }
 
-  public void setInterceptorList(List<Interceptor<?>> interceptorList)
+  /**
+   * Adds a new interceptor to the manager
+   */
+  public <X> InterceptorEntry<X> addInterceptor(Interceptor<X> interceptor)
   {
-    for (Interceptor<?> interceptor : interceptorList)
-      addInterceptor(interceptor);
+    InterceptorEntry<X> entry = new InterceptorEntry<X>(interceptor);
+    
+    _interceptorList.add(entry);
+    
+    return entry;
   }
 
   /**
@@ -2308,6 +2407,7 @@ public final class InjectManager
    *
    * @return the matching interceptors
    */
+  @Override
   public List<Interceptor<?>> resolveInterceptors(InterceptionType type,
                                                   Annotation... qualifiers)
   {
@@ -2469,19 +2569,6 @@ public final class InjectManager
     return decorators;
   }
 
-  /*
-  private boolean isBaseTypeContained(ArrayList<BaseType> targetTypes,
-                                      Set<BaseType> sourceTypes)
-  {
-    for (BaseType type : targetTypes) {
-      if (isBaseTypeContained(sourceTypes, type))
-        return true;
-    }
-
-    return false;
-  }
-  */
-
   private boolean isDelegateAssignableFrom(BaseType delegateType,
                                            ArrayList<BaseType> sourceTypes)
   {
@@ -2611,8 +2698,6 @@ public final class InjectManager
 
       AnnotatedType<?> type = createAnnotatedType(cl);
       
-      type = getExtensionManager().processAnnotatedType(type);
-      
       if (type == null)
         return;
       
@@ -2699,8 +2784,11 @@ public final class InjectManager
 
   private <T> void discoverBean(AnnotatedType<T> type)
   {
+    // ioc/0n18
+    /*
     if (_specializedMap.get(type.getJavaClass()) != null)
       return;
+      */
     
     // XXX: not sure this is correct.
     if (Throwable.class.isAssignableFrom(type.getJavaClass()))
@@ -2738,11 +2826,21 @@ public final class InjectManager
     AnnotatedType<T> annType = bean.getAnnotatedType();
 
     // ioc/0i04
-    if (annType.isAnnotationPresent(javax.decorator.Decorator.class))
+    if (annType.isAnnotationPresent(javax.decorator.Decorator.class)) {
+      // ioc/0c92
+      DecoratorBean decoratorBean = new DecoratorBean(this, annType.getJavaClass());
+      
+      // addBean(decoratorBean);
+    
       return;
+    }
     // ioc/0c1a
-    if (annType.isAnnotationPresent(javax.interceptor.Interceptor.class))
+    if (annType.isAnnotationPresent(javax.interceptor.Interceptor.class)) {
+      InterceptorBean interceptorBean = new InterceptorBean(this, annType.getJavaClass());
+      
+      addBean(interceptorBean);
       return;
+    }
     
     addDiscoveredBean(bean);
     
@@ -2990,9 +3088,12 @@ public final class InjectManager
       if (isBind) {
         getExtensionManager().fireAfterDeploymentValidation();
       }
-    } catch (ConfigException e) {
+    } catch (RuntimeException e) {
       if (_configException == null)
         _configException = e;
+      else {
+        log.log(Level.WARNING, e.toString(), e);
+      }
 
       throw e;
     } finally {
@@ -3002,8 +3103,25 @@ public final class InjectManager
   
   private void addInterceptors()
   {
-    for (InterceptorEntry<?> entry : _interceptorList) {
-      validate(entry.getInterceptor());
+    if (_interceptorClassList.size() == 0)
+      return;
+    
+    ArrayList<Class<?>> interceptorClassList
+      = new ArrayList<Class<?>>(_interceptorClassList);
+    _interceptorClassList.clear();
+    
+    for (Class<?> interceptorClass : interceptorClassList) {
+      for (InterceptorEntry<?> entry : _interceptorList) {
+        if (entry.getInterceptor().getBeanClass().equals(interceptorClass)) {
+          entry.setEnabled(true);
+          return;
+        }
+      }
+      
+      InterceptorBean<?> bean = new InterceptorBean(this, interceptorClass);
+      
+      InterceptorEntry<?> entry = addInterceptor(bean);
+      entry.setEnabled(true);
     }
   }
   
@@ -3592,12 +3710,20 @@ public final class InjectManager
   abstract public class ReferenceFactory<T> {
     public Bean<T> getBean()
     {
-      throw new UnsupportedOperationException(getClass().getName());
+      return null;
     }
     
     public final T create()
     {
       return create(null, null, null);
+    }
+    
+    public boolean isProducer()
+    {
+      Bean<T> bean = getBean();
+      
+      return ((bean instanceof ProducesMethodBean<?,?>)
+              || (bean instanceof ProducesFieldBean<?,?>));
     }
     
     abstract public T create(CreationalContextImpl<T> env,
@@ -3611,6 +3737,12 @@ public final class InjectManager
     DependentReferenceFactory(Bean<T> bean)
     {
       _bean = bean;
+    }
+    
+    @Override
+    public Bean<T> getBean()
+    {
+      return _bean;
     }
    
     @Override
@@ -3634,8 +3766,9 @@ public final class InjectManager
       
       instance = bean.create(env);
       
-      if (env.isTop())
+      if (env.isTop() && ! (bean instanceof CdiStatefulBean)) {
         bean.destroy(instance, env);
+      }
       
       return instance;
     }
@@ -3647,6 +3780,12 @@ public final class InjectManager
     DependentReferenceFactoryImpl(ManagedBeanImpl<T> bean)
     {
       _bean = bean;
+    }
+    
+    @Override
+    public Bean<T> getBean()
+    {
+      return _bean;
     }
    
     @Override
@@ -3670,7 +3809,7 @@ public final class InjectManager
       
       instance = bean.createDependent(env);
 
-      if (env.isTop()) {
+      if (env.isTop() && ! (bean instanceof CdiStatefulBean)) {
         bean.destroy(instance, env);
       }
       
@@ -3687,6 +3826,12 @@ public final class InjectManager
     {
       _bean = bean;
       _context = context;
+    }
+    
+    @Override
+    public Bean<T> getBean()
+    {
+      return _bean;
     }
    
     @Override
@@ -3784,9 +3929,15 @@ public final class InjectManager
       
       _context = context;
       
-      ScopeAdapter scopeAdapter = ScopeAdapter.create(bean.getBeanClass());
+      ScopeAdapter scopeAdapter = ScopeAdapter.create(bean);
       _scopeAdapter = scopeAdapter.wrap(createNormalInstanceFactory(bean));
-     }
+    }
+    
+    @Override
+    public Bean<T> getBean()
+    {
+      return _bean;
+    }
    
     @Override
     public T create(CreationalContextImpl<T> env,
@@ -3808,6 +3959,29 @@ public final class InjectManager
                     InjectionPoint ip)
     {
       return (T) parentEnv.getDelegate();
+    }
+  }
+  
+  public class ErrorReferenceFactory<T> extends ReferenceFactory<T> {
+    private RuntimeException _exn;
+    
+    ErrorReferenceFactory(RuntimeException e)
+    {
+      _exn = e;
+    }
+    
+    @Override
+    public boolean isProducer()
+    {
+      return true;
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      throw _exn;
     }
   }
   

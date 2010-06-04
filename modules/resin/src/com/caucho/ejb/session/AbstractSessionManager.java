@@ -244,25 +244,6 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   {
     throw new UnsupportedOperationException();
   }
-  /*
-    AnnotatedType<X> ejbClass = getAnnotatedType();
-
-    // fillClassDefaults(ejbClass);
-
-    if (Stateless.class.equals(getSessionType())) {
-      _sessionBean = new StatelessGenerator<X>(getEJBName(), ejbClass,
-                                               getLocalList(), getRemoteList());
-    } else if (Stateful.class.equals(getSessionType())) {
-      _sessionBean = new StatefulGenerator<X>(getEJBName(), ejbClass,
-                                              getLocalList(), getRemoteList());
-    } else if (Singleton.class.equals(getSessionType())){
-      _sessionBean = new SingletonGenerator<X>(getEJBName(), ejbClass,
-                                               getLocalList(), getRemoteList());
-    }
-
-    return _sessionBean;
-  }
-  */
   
   private <T> void createContext(Class<T> api)
   {

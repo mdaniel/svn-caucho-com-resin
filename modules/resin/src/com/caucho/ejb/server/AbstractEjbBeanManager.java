@@ -519,21 +519,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     return _producer.newInstance(env);
   }
   
-  /**
-   * Initialize an instance
-   */
-  /*
-  public <T> void initInstance(X instance, InjectionTarget<X> target, 
-                               T proxy, CreationalContext<T> cxt)
+  public void destroy(Object instance, CreationalContextImpl env)
   {
-    _producer.initInstance(instance, target, proxy, cxt);
+    if (instance != null)
+      _producer.destroyInstance((X) instance);
   }
-  
-  public void setInjectionTarget(InjectionTarget<X> target)
-  {
-    _producer.setInjectionTarget(target);
-  }
-  */
   
   /**
    * Initialize an instance

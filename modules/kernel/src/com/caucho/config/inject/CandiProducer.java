@@ -185,7 +185,6 @@ public class CandiProducer<X> implements InjectionTarget<X>
         enhancedBean.__caucho_inject(delegates, env);
       }
 
-
       return value;
     } catch (RuntimeException e) {
       throw e;
@@ -226,6 +225,7 @@ public class CandiProducer<X> implements InjectionTarget<X>
   {
     try {
       for (ConfigProgram program : _injectProgram) {
+        // log.info("INJECT: " + program);
         program.inject(instance, env);
       }
     } catch (RuntimeException e) {
@@ -242,6 +242,7 @@ public class CandiProducer<X> implements InjectionTarget<X>
       CreationalContext<X> env = null;
 
       for (ConfigProgram program : _initProgram) {
+        // log.info("POST: " + program);
         program.inject(instance, env);
       }
 

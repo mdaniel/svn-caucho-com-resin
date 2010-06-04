@@ -43,6 +43,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.decorator.Delegate;
+import javax.ejb.Stateful;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -80,7 +81,7 @@ public class InterceptorFactory<X>
   private boolean _isInterceptorOrDecorator;
   
   private ArrayList<Class<?>> _classInterceptors;
-  private ArrayList<Annotation> _classInterceptorBinding;
+  private HashMap<Class<?>, Annotation> _classInterceptorBindings;
   
   private HashSet<Class<?>> _decoratorClasses;
   
@@ -100,11 +101,6 @@ public class InterceptorFactory<X>
   public ArrayList<Class<?>> getClassInterceptors()
   {
     return _classInterceptors;
-  }
-  
-  public ArrayList<Annotation> getClassInterceptorBinding()
-  {
-    return _classInterceptorBinding;
   }
   
   public HashSet<Class<?>> getDecoratorClasses()
@@ -127,13 +123,6 @@ public class InterceptorFactory<X>
     if (_isInterceptorOrDecorator)
       return super.create(method, isEnhanced);
     
-    if (method.isAnnotationPresent(Inject.class))
-      return super.create(method, isEnhanced);
-
-    // ioc/0c57
-    if (method.isAnnotationPresent(PostConstruct.class))
-      return super.create(method, isEnhanced);
-    
     HashSet<Class<?>> methodInterceptors = null;
 
     Interceptors interceptors = method.getAnnotation(Interceptors.class);
@@ -152,27 +141,39 @@ public class InterceptorFactory<X>
     }
 
     HashMap<Class<?>, Annotation> interceptorMap = null;
-
+    
     interceptorMap = addInterceptorBindings(interceptorMap, 
                                             method.getAnnotations());
-
-    /*
-    if (interceptorTypes.size() > 0) {
-      _interceptionType = InterceptionType.AROUND_INVOKE;
-      _interceptorBinding.addAll(interceptorTypes.values());
+    
+    HashSet<Class<?>> decoratorSet = introspectDecorators(method);
+    
+    if (method.isAnnotationPresent(Inject.class)
+        || method.isAnnotationPresent(PostConstruct.class)) {
+      if (methodInterceptors != null || interceptorMap != null) {
+        throw new ConfigException(L.l("{0}.{1} is invalid because it's annotated with @Inject or @PostConstruct but also has interceptor bindings",
+                                      method.getJavaMember().getDeclaringClass().getName(),
+                                      method.getJavaMember().getName()));
+      }
+      // ioc/0c57
+      return super.create(method, isEnhanced);
     }
-    */
     
     boolean isExcludeClassInterceptors
       = method.isAnnotationPresent(ExcludeClassInterceptors.class);
-    
-    HashSet<Class<?>> decoratorSet = introspectDecorators(method);
+
+    if (isExcludeClassInterceptors || _classInterceptorBindings == null) {
+    }
+    else if (interceptorMap != null) {
+      interceptorMap.putAll(_classInterceptorBindings);
+    }
+    else {
+      interceptorMap = _classInterceptorBindings;
+    }
     
     if (methodInterceptors != null
         || interceptorMap != null
         || decoratorSet != null
-        || _classInterceptors != null && ! isExcludeClassInterceptors
-        || _classInterceptorBinding != null && ! isExcludeClassInterceptors) {
+        || _classInterceptors != null && ! isExcludeClassInterceptors) {
       AspectGenerator<X> next = super.create(method, true);
       
       return new InterceptorGenerator<X>(this, method, next,
@@ -225,8 +226,10 @@ public class InterceptorFactory<X>
     }
     
     for (Annotation ann : getBeanType().getAnnotations()) {
-      if (_manager.isPassivatingScope(ann.annotationType()))
+      if (_manager.isPassivatingScope(ann.annotationType())
+          || Stateful.class.equals(ann.annotationType())) {
         _isPassivating = true;
+      }
     }
     
     introspectClassInterceptors();
@@ -272,19 +275,16 @@ public class InterceptorFactory<X>
    */
   private void introspectClassInterceptorBindings()
   {
+    /*
     for (Annotation ann : getBeanType().getAnnotations()) {
       if (ann.annotationType().isAnnotationPresent(InterceptorBinding.class)) {
         
       }
     }
+    */
     
-    HashMap<Class<?>, Annotation> interceptorMap
+    _classInterceptorBindings
       = addInterceptorBindings(null, getBeanType().getAnnotations());
-
-    if (interceptorMap != null) {
-      _classInterceptorBinding 
-        = new ArrayList<Annotation>(interceptorMap.values());
-    }
   }
   
   /**
@@ -395,7 +395,11 @@ public class InterceptorFactory<X>
       if (interceptorMap == null)
         interceptorMap = new HashMap<Class<?>,Annotation>();
         
-      interceptorMap.put(ann.annotationType(), ann);
+      Annotation oldAnn = interceptorMap.put(ann.annotationType(), ann);
+
+      if (oldAnn != null && ! oldAnn.equals(ann))
+        throw new ConfigException(L.l("duplicate @InterceptorBindings {0} and {1} are not allowed, because Resin can't tell which one to use.",
+                                      ann, oldAnn));
     }
 
     if (annType.isAnnotationPresent(Stereotype.class)) {
@@ -405,25 +409,6 @@ public class InterceptorFactory<X>
     }
     
     return interceptorMap;
-  }
-
-  private boolean isMatch(Method methodA, Method methodB)
-  {
-    if (! methodA.getName().equals(methodB.getName()))
-      return false;
-
-    Class<?>[] paramA = methodA.getParameterTypes();
-    Class<?>[] paramB = methodB.getParameterTypes();
-
-    if (paramA.length != paramB.length)
-      return false;
-
-    for (int i = 0; i < paramA.length; i++) {
-      if (! paramA[i].equals(paramB[i]))
-        return false;
-    }
-
-    return true;
   }
 
   /**

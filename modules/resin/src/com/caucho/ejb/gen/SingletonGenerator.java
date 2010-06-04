@@ -145,6 +145,8 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     generateClassContent(out);
 
     generateDependency(out);
+    
+    generateDestroy(out);
 
     out.popDepth();
     out.println("}");

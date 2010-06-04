@@ -48,7 +48,7 @@ public class XidImpl implements Xid {
    * @param id
    *          the 64 bit number for the id.
    */
-  public XidImpl(long serverId, long randomId)
+  public XidImpl(long serverId, long randomId, long sequence)
   {
     _global = new byte[GLOBAL_LENGTH];
     _local = new byte[4];
@@ -72,27 +72,26 @@ public class XidImpl implements Xid {
     _global[10] = (byte) (serverId >> 8);
     _global[11] = (byte) (serverId);
 
-    // next 8 is the current timestamp
-    long timestamp = Alarm.getCurrentTime();
-
-    _global[12] = (byte) (timestamp >> 56);
-    _global[13] = (byte) (timestamp >> 48);
-    _global[14] = (byte) (timestamp >> 40);
-    _global[15] = (byte) (timestamp >> 32);
-    _global[16] = (byte) (timestamp >> 24);
-    _global[17] = (byte) (timestamp >> 16);
-    _global[18] = (byte) (timestamp >> 8);
-    _global[19] = (byte) (timestamp);
-
     // next 8 is a 64-bit random long
-    _global[20] = (byte) (randomId >> 56);
-    _global[21] = (byte) (randomId >> 48);
-    _global[22] = (byte) (randomId >> 40);
-    _global[23] = (byte) (randomId >> 32);
-    _global[24] = (byte) (randomId >> 24);
-    _global[25] = (byte) (randomId >> 16);
-    _global[26] = (byte) (randomId >> 8);
-    _global[27] = (byte) (randomId);
+    _global[12] = (byte) (randomId >> 56);
+    _global[13] = (byte) (randomId >> 48);
+    _global[14] = (byte) (randomId >> 40);
+    _global[15] = (byte) (randomId >> 32);
+    _global[16] = (byte) (randomId >> 24);
+    _global[17] = (byte) (randomId >> 16);
+    _global[18] = (byte) (randomId >> 8);
+    _global[19] = (byte) (randomId);
+
+    // next 8 is the current sequence
+
+    _global[20] = (byte) (sequence >> 56);
+    _global[21] = (byte) (sequence >> 48);
+    _global[22] = (byte) (sequence >> 40);
+    _global[23] = (byte) (sequence >> 32);
+    _global[24] = (byte) (sequence >> 24);
+    _global[25] = (byte) (sequence >> 16);
+    _global[26] = (byte) (sequence >> 8);
+    _global[27] = (byte) (sequence);
   }
 
   XidImpl(XidImpl base, int branch)

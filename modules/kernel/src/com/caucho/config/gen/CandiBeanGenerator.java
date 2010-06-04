@@ -287,6 +287,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     generateInject(out);
 
     generatePostConstruct(out);
+    
+    generateDestroy(out);
 
     HashMap<String,Object> map = new HashMap<String,Object>();
     for (AspectGenerator<X> method : _businessMethods) {

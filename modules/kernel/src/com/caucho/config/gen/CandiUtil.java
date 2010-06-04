@@ -132,14 +132,40 @@ public class CandiUtil {
       
       if (! Serializable.class.isAssignableFrom(beanClass)) {
         ConfigException exn
-          = new ConfigException(L.l("{0}: {1} is an invalid interceptor because it is not serializable.",
-                                    cl.getName(),
-                                    interceptor));
-        
+        = new ConfigException(L.l("{0}: {1} is an invalid interceptor because it is not serializable.",
+                                  cl.getName(),
+                                  interceptor));
+      
         throw exn;
         // InjectManager.create().addDefinitionError(exn);
       }
+      
+      for (InjectionPoint ip : interceptor.getInjectionPoints()) {
+        Class<?> type = getRawClass(ip.getType());
+        
+        if (! Serializable.class.isAssignableFrom(type)) {
+          ConfigException exn
+            = new ConfigException(L.l("{0}: {1} is an invalid interceptor because its injection point '{2}' of type {3} is not serializable.",
+                                      cl.getName(),
+                                      interceptor,
+                                      ip.getMember().getName(),
+                                      ip.getType()));
+        
+          throw exn;
+          
+        }
+      }
     }
+  }
+  
+  public static Class<?> getRawClass(Type type)
+  {
+    if (type instanceof Class<?>)
+      return (Class<?>) type;
+    else if (type instanceof ParameterizedType)
+      return (Class<?>) ((ParameterizedType) type).getRawType();
+    else
+      return Object.class;
   }
 
   public static Method []createMethods(ArrayList<Interceptor<?>> beans,

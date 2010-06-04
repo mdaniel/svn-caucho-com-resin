@@ -236,12 +236,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     
     generateInject(out);
     generatePostConstruct(out);
-    
-    out.println();
-    out.println("@Override");
-    out.println("public void __caucho_destroy()");
-    out.println("{");
-    out.println("}");
+    generateDestroy(out);
   }
 
   private void generateProxyFactory(JavaWriter out)
@@ -254,4 +249,25 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("  return (T) new " + getClassName() + "(_manager, _context, env);");
     out.println("}");
   }
+ 
+  @Override
+  public void generateDestroy(JavaWriter out)
+    throws IOException
+  {
+    super.generateDestroy(out);
+
+    out.println();
+    out.println("@Override");
+    out.println("public void __caucho_destroy() {}");
+  }
+  
+  @Override
+  protected void generateDestroyImpl(JavaWriter out)
+    throws IOException
+  {
+    super.generateDestroyImpl(out);
+  
+  out.println("_manager.destroy(_bean, env);");
+  out.println("_bean = null;");
+}
 }

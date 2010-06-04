@@ -165,12 +165,12 @@ public abstract class ConfigProgram implements Comparable<ConfigProgram> {
   
   public int compareTo(ConfigProgram peer)
   {
-    /*
+    // ioc/0119
     int cmp = getPriority() - peer.getPriority();
     
     if (cmp != 0)
       return cmp;
-    */
+
     Class<?> selfClass = getDeclaringClass();
     Class<?> peerClass = peer.getDeclaringClass();
     

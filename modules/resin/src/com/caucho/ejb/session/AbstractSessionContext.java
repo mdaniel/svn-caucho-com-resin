@@ -37,6 +37,7 @@ import javax.ejb.SessionContext;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.xml.rpc.handler.MessageContext;
 
+import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.server.AbstractContext;
@@ -103,8 +104,13 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     return _proxyFactory.__caucho_createProxy(env);
   }
   
-  public void destroyProxy(T instance, CreationalContext<T> env)
+  public void destroyProxy(T instance, CreationalContextImpl<T> env)
   {
+    if (instance instanceof CandiEnhancedBean) {
+      CandiEnhancedBean candiInstance = (CandiEnhancedBean) instance;
+      
+      candiInstance.__caucho_destroy(env);
+    }
   }
   
   public X newInstance(CreationalContextImpl<X> env)
@@ -123,7 +129,8 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   public void destroy()
     throws Exception
   {
-    _proxyFactory.__caucho_destroy();
+    if (_proxyFactory != null)
+      _proxyFactory.__caucho_destroy();
     
     super.destroy();
   }

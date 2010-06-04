@@ -296,6 +296,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     generateBusinessMethods(out);
 
     generateContextPrologue(out);
+    generateDestroy(out);
 
     /*
     out.println();

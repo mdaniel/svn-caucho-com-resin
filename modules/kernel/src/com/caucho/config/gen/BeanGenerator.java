@@ -160,15 +160,6 @@ abstract public class BeanGenerator<X> extends GenClass
   }
 
   /**
-   * Generates a new bean instance.
-   */
-  public void generateNewInstance(JavaWriter out)
-    throws IOException
-  {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  /**
    * Frees a bean instance.
    */
   public void generateFreeInstance(JavaWriter out, String name)
@@ -183,6 +174,24 @@ abstract public class BeanGenerator<X> extends GenClass
   public void generateDestroy(JavaWriter out)
     throws IOException
   {
+    out.println();
+    out.println("public void __caucho_destroy(com.caucho.config.inject.CreationalContextImpl env)");
+    out.println("{");
+    out.pushDepth();
+
+    generateDestroyImpl(out);
+
+    out.popDepth();
+    out.println("}");
+  }
+  
+  protected void generateDestroyImpl(JavaWriter out)
+    throws IOException
+  {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generateDestroy(out, map);
+    }
   }
 
   /**
@@ -284,7 +293,6 @@ abstract public class BeanGenerator<X> extends GenClass
      out.popDepth();
      out.println("}");
    }
-
 
   /**
    * Generates view's business methods

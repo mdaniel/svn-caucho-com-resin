@@ -135,8 +135,6 @@ public class ResinBeanContainer
     _injectManager.replaceContext(new RequestScope());
     _injectManager.replaceContext(ThreadContext.getContext());
 
-    _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
-
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
 
@@ -150,6 +148,8 @@ public class ResinBeanContainer
 
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
+
+      _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
 
       _classLoader.scanRoot();
     } finally {

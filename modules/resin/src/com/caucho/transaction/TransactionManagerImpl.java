@@ -32,6 +32,7 @@ package com.caucho.transaction;
 import java.io.Serializable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -57,6 +58,7 @@ import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.transaction.xalog.AbstractXALogManager;
 import com.caucho.transaction.xalog.AbstractXALogStream;
+import com.caucho.util.Alarm;
 import com.caucho.util.Crc64;
 import com.caucho.util.L10N;
 import com.caucho.util.RandomUtil;
@@ -77,6 +79,10 @@ public class TransactionManagerImpl
   private static TransactionManagerImpl _tm = new TransactionManagerImpl();
 
   private int _serverId;
+  
+  private long _randomId = RandomUtil.getRandomLong();
+  
+  private AtomicLong _sequence = new AtomicLong(Alarm.getCurrentTime());
 
   private AbstractXALogManager _xaLogManager;
   
@@ -156,7 +162,7 @@ public class TransactionManagerImpl
    */
   XidImpl createXID()
   {
-    return new XidImpl(getServerId(), RandomUtil.getRandomLong());
+    return new XidImpl(getServerId(), _randomId, _sequence.incrementAndGet());
   }
 
   /**

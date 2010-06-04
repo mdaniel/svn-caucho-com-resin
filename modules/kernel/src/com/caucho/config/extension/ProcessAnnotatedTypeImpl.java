@@ -29,17 +29,9 @@
 
 package com.caucho.config.extension;
 
-import java.lang.annotation.Annotation;
-
-import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
-import javax.enterprise.inject.spi.ProcessBean;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 
 @Module
@@ -56,11 +48,13 @@ public class ProcessAnnotatedTypeImpl<X> implements ProcessAnnotatedType<X>
     _annotatedType = annotatedType;
   }
 
+  @Override
   public AnnotatedType<X> getAnnotatedType()
   {
     return _annotatedType;
   }
 
+  @Override
   public void setAnnotatedType(AnnotatedType<X> type)
   {
     _annotatedType = type;

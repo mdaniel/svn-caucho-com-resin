@@ -34,7 +34,9 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -46,7 +48,9 @@ import com.caucho.bytecode.JavaClassLoader;
 import com.caucho.bytecode.JavaField;
 import com.caucho.bytecode.JavaMethod;
 import com.caucho.config.ConfigException;
+import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.inject.Module;
 import com.caucho.loader.DynamicClassLoader;
@@ -65,22 +69,57 @@ public class ScopeAdapter {
     = Logger.getLogger(ScopeAdapter.class.getName());
 
   private final Class<?> _cl;
+  private final Class<?> []_types;
 
   private Class<?> _proxyClass;
   private Constructor<?> _proxyCtor;
   
   private boolean _isWriteReplace;
 
-  private ScopeAdapter(Class<?> cl)
+  private ScopeAdapter(Class<?> beanClass, Class<?> []types)
   {
-    _cl = cl;
+    _types = types;
+    
+    _cl = beanClass;
 
-    generateProxy(cl);
+    generateProxy(_cl, types);
+  }
+  
+  public static ScopeAdapter create(Bean<?> bean)
+  {
+    Set<Type> types = bean.getTypes();
+    
+    ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
+    
+    Class<?> cl = null;
+    
+    for (Type type : types) {
+      Class<?> rawClass = CandiUtil.getRawClass(type);
+      
+      if (rawClass.equals(Object.class))
+        continue;
+      
+      classList.add(rawClass);
+      
+      if (cl == null
+          || cl.isAssignableFrom(rawClass)
+          || cl.isInterface() && ! rawClass.isInterface()
+          || (cl.getName().startsWith("java") 
+              && ! rawClass.getName().startsWith("java"))) {
+        cl = rawClass;
+      }
+    }
+    
+    Class<?> []classes = new Class<?>[classList.size()];
+    
+    classList.toArray(classes);
+    
+    return new ScopeAdapter(cl, classes);
   }
 
   public static ScopeAdapter create(Class<?> cl)
   {
-    ScopeAdapter adapter = new ScopeAdapter(cl);
+    ScopeAdapter adapter = new ScopeAdapter(cl, new Class<?>[] { cl });
 
     return adapter;
   }
@@ -111,7 +150,7 @@ public class ScopeAdapter {
     }
   }
 
-  private void generateProxy(Class<?> cl)
+  private void generateProxy(Class<?> cl, Class<?> []types)
   {
     try {
       Constructor<?> zeroCtor = null;
@@ -134,6 +173,10 @@ public class ScopeAdapter {
       String typeClassName = cl.getName().replace('.', '/');
       
       String thisClassName = typeClassName + "__ResinScopeProxy";
+      
+      if (thisClassName.startsWith("java"))
+        thisClassName = "cdi/" + thisClassName;
+      
       String cleanName = thisClassName.replace('/', '.');
       
       boolean isPackagePrivate = false;
@@ -177,8 +220,10 @@ public class ScopeAdapter {
         jClass.setSuperClass(superClassName);
         jClass.setThisClass(thisClassName);
 
-        if (cl.isInterface())
-          jClass.addInterface(typeClassName);
+        for (Class<?> iface : types) {
+          if (iface.isInterface())
+            jClass.addInterface(iface.getName().replace('.', '/'));
+        }
         
         jClass.addInterface(ScopeProxy.class.getName().replace('.', '/'));
 
@@ -209,13 +254,13 @@ public class ScopeAdapter {
         createGetDelegateMethod(jClass);
         createSerialize(jClass);
 
-        for (Method method : _cl.getMethods()) {
+        for (Method method : getMethods(_types)) {
           if (Modifier.isStatic(method.getModifiers()))
             continue;
           if (Modifier.isFinal(method.getModifiers()))
             continue;
 
-          createProxyMethod(jClass, method, cl.isInterface());
+          createProxyMethod(jClass, method, method.getDeclaringClass().isInterface());
         }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -250,6 +295,42 @@ public class ScopeAdapter {
     } catch (Exception e) {
       throw new RuntimeException(e);
     }
+  }
+  
+  private ArrayList<Method> getMethods(Class<?> []types)
+  {
+    ArrayList<Method> methodList = new ArrayList<Method>();
+    
+    for (Class<?> type : types) {
+      if (Object.class.equals(type))
+        continue;
+      
+      for (Method method : type.getMethods()) {
+        if (Modifier.isStatic(method.getModifiers()))
+          continue;
+        
+        if (Modifier.isPrivate(method.getModifiers()))
+          continue;
+        
+        Method oldMethod = AnnotatedTypeUtil.findMethod(methodList, method);
+        
+        if (oldMethod == null) {
+          methodList.add(method);
+          continue;
+        }
+        
+        if (method.getDeclaringClass().isAssignableFrom(oldMethod.getDeclaringClass())) {
+          continue;
+        }
+        else {
+          methodList.remove(oldMethod);
+          methodList.add(method);
+          continue;
+        }
+      }
+    }
+    
+    return methodList;
   }
 
   private void createProxyMethod(JavaClass jClass,

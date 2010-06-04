@@ -183,8 +183,19 @@ public class ExtensionManager
       if (! Extension.class.isAssignableFrom(cl))
         throw new InjectionException(L.l("'{0}' is not a valid extension because it does not implement {1}",
                                          cl, Extension.class.getName()));
+      
+      Extension extension = null;
+      
+      for (Constructor<?> ctor : cl.getDeclaredConstructors()) {
+        if (ctor.getParameterTypes().length == 0) {
+          ctor.setAccessible(true);
+          
+          extension = (Extension) ctor.newInstance();
+        }
+      }
 
-      Extension extension = (Extension) cl.newInstance();
+      if (extension == null)
+        extension = (Extension) cl.newInstance();
 
       addExtension(extension);
     } catch (Exception e) {
@@ -430,6 +441,8 @@ public class ExtensionManager
     eventType = eventType.fill(_cdiManager.createTargetBaseType(observedType),
                                _cdiManager.createTargetBaseType(declaringType.getBaseType()));
     
+    log.info("PROCESS-OBSERVER: " + eventType);
+    
     getEventManager().fireExtensionEvent(event, eventType);
   }
 
@@ -478,8 +491,6 @@ public class ExtensionManager
     type = processType.getAnnotatedType();
 
     return type;
-    /*
-    */
   }
   
   private EventManager getEventManager()
@@ -570,6 +581,8 @@ public class ExtensionManager
                     BeanArg<?> []args)
     {
       _method = method;
+      method.setAccessible(true);
+      
       _type = type;
       _qualifiers = qualifiers;
       _args = args;
@@ -630,11 +643,13 @@ public class ExtensionManager
         throw e;
       } catch (InvocationTargetException e) {
         String loc = (_extension + "." + _method.getName() + ": ");
-
-        if (e.getCause() instanceof ConfigException)
-          throw (ConfigException) e.getCause();
         
-        throw new InjectionException(loc + e.getCause().getMessage(), e.getCause());
+        Throwable cause = e.getCause();
+
+        if (cause instanceof ConfigException)
+          throw (ConfigException) cause;
+        
+        throw new InjectionException(loc + cause.getMessage(), cause);
       } catch (Exception e) {
         String loc = (_extension + "." + _method.getName() + ": ");
 

@@ -292,6 +292,17 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
   {
     _next.generatePostConstruct(out, map);
   }
+
+  /**
+   * Generates destroy code
+   */
+  @Override
+  public void generateDestroy(JavaWriter out, 
+                              HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generateDestroy(out, map);
+  }
   
   //
   // business method interception

@@ -64,7 +64,8 @@ public class BeansConfig {
   private ArrayList<Class<?>> _deployList
     = new ArrayList<Class<?>>();
 
-  private ArrayList<Interceptor<?>> _interceptorList;
+  private ArrayList<Class<?>> _interceptorList
+    = new ArrayList<Class<?>>();
 
   private ArrayList<Class<?>> _decoratorList
     = new ArrayList<Class<?>>();
@@ -198,12 +199,13 @@ public class BeansConfig {
     
     _decoratorList.clear();
 
-    update();
-
-    if (_interceptorList != null) {
-      _injectManager.setInterceptorList(_interceptorList);
-      _interceptorList = null;
+    for (Class<?> cl : _interceptorList) {
+      _injectManager.addInterceptorClass(cl);
     }
+    
+    _interceptorList.clear();
+
+    update();
   }
 
   public void update()
@@ -257,12 +259,17 @@ public class BeansConfig {
   public <T> void addInterceptor(Class<T> cl)
   {
     if (_interceptorList == null)
-      _interceptorList = new ArrayList<Interceptor<?>>();
+      _interceptorList = new ArrayList<Class<?>>();
+    
+    if (cl.isInterface())
+      throw new ConfigException(L.l("'{0}' is not valid because <interceptors> can only contain interceptor implementations",
+                                    cl.getName()));
 
-    InterceptorBean<T> bean = new InterceptorBean<T>(_injectManager, cl);
-    bean.init();
+    if (_interceptorList.contains(cl))
+      throw new ConfigException(L.l("'{0}' is a duplicate interceptor. Interceptors may not be listed twice in the beans.xml",
+                                    cl.getName()));
 
-    _interceptorList.add(bean);
+    _interceptorList.add(cl);
   }
 
   @Override
@@ -277,21 +284,6 @@ public class BeansConfig {
   public class Interceptors {
     public void addClass(Class<?> cl)
     {
-      addInterceptor(cl);
-    }
-
-    public void addCustomBean(CustomBeanConfig<?> config)
-    {
-      Class<?> cl = config.getClassType();
-
-      if (cl.isInterface())
-        throw new ConfigException(L.l("'{0}' is not valid because <Interceptors> can only contain interceptor implementations",
-                                      cl.getName()));
-
-      if (! cl.isAnnotationPresent(javax.interceptor.Interceptor.class))
-        throw new ConfigException(L.l("'{0}' must have an @Interceptor annotation because it is an interceptor implementation",
-                                      cl.getName()));
-
       addInterceptor(cl);
     }
   }

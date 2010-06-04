@@ -120,11 +120,6 @@ public class InterceptorGenerator<X>
 
     if (methodInterceptorMap != null)
       _interceptorBinding.addAll(methodInterceptorMap.values());
-    
-    if (factory.getClassInterceptorBinding() != null
-        && ! _isExcludeClassInterceptors) {
-      _interceptorBinding.addAll(factory.getClassInterceptorBinding());
-    }
 
     _decoratorSet = decoratorSet;
 
@@ -170,18 +165,6 @@ public class InterceptorGenerator<X>
 
   private void introspectInterceptors()
   {
-    // if (apiMethod.isAnnotationPresent(ExcludeClassInterceptors.class))
-    //   _isExcludeClassInterceptors = true;
-
-    //if (apiMethod.isAnnotationPresent(ExcludeDefaultInterceptors.class))
-    //  _isExcludeDefaultInterceptors = true;
-
-    /*
-    if (interceptorTypes.size() > 0) {
-      _interceptionType = InterceptionType.AROUND_INVOKE;
-      _interceptorBinding.addAll(interceptorTypes.values());
-    }
-    */
   }
 
   //

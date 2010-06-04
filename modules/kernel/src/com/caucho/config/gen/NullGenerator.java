@@ -115,6 +115,13 @@ public class NullGenerator<X> implements AspectGenerator<X> {
     throws IOException
   {
   }
+
+  @Override
+  public void generateDestroy(JavaWriter out,
+                              HashMap<String,Object> map)
+    throws IOException
+  {
+  }
   
   //
   // business method interception

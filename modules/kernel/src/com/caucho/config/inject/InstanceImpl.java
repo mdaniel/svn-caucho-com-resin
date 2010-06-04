@@ -29,6 +29,7 @@
 
 package com.caucho.config.inject;
 
+import java.io.Serializable;
 import java.lang.reflect.Type;
 import java.lang.annotation.Annotation;
 import java.util.Iterator;
@@ -46,23 +47,23 @@ import com.caucho.inject.Module;
  * Factory to create instances of a bean.
  */
 @Module
-public final class InstanceImpl<T> implements Instance<T>
+public final class InstanceImpl<T> implements Instance<T>, Serializable
 {
-  private InjectManager _beanManager;
+  private transient InjectManager _cdiManager;
   private Type _type;
-  private Annotation []_bindings;
+  private Annotation []_qualifiers;
 
-  private long _version;
-  private Set<Bean<?>> _beanSet;
-  private ReferenceFactory<T> _factory;
+  private transient long _version;
+  private transient Set<Bean<?>> _beanSet;
+  private transient ReferenceFactory<T> _factory;
 
   InstanceImpl(InjectManager beanManager,
                Type type,
                Annotation []bindings)
   {
-    _beanManager = beanManager;
+    _cdiManager = beanManager;
     _type = type;
-    _bindings = bindings;
+    _qualifiers = bindings;
 
     _beanSet = beanManager.getBeans(type, bindings);
     _version = beanManager.getVersion();
@@ -74,10 +75,12 @@ public final class InstanceImpl<T> implements Instance<T>
   public T get()
   {
     if (_factory == null) {
-      Bean<?> bean = _beanManager.resolve(_beanSet);
+      Bean<?> bean = _cdiManager.resolve(_beanSet);
 
       if (bean != null)
-        _factory = (ReferenceFactory<T>) _beanManager.getReferenceFactory(bean);
+        _factory = (ReferenceFactory<T>) _cdiManager.getReferenceFactory(bean);
+      else
+        throw _cdiManager.unsatisfiedException(_type, _qualifiers);
     }
 
     if (_factory != null)
@@ -92,7 +95,7 @@ public final class InstanceImpl<T> implements Instance<T>
   @Override
   public Instance<T> select(Annotation ... bindings)
   {
-    return new InstanceImpl<T>(_beanManager, _type, bindings);
+    return new InstanceImpl<T>(_cdiManager, _type, bindings);
   }
 
   /**
@@ -102,7 +105,10 @@ public final class InstanceImpl<T> implements Instance<T>
   public <U extends T> Instance<U> select(Class<U> subtype,
                                           Annotation... bindings)
   {
-    return new InstanceImpl<U>(_beanManager, subtype, bindings);
+    if (bindings == null || bindings.length == 0)
+      bindings = _qualifiers;
+    
+    return new InstanceImpl<U>(_cdiManager, subtype, bindings);
   }
 
   /**
@@ -112,12 +118,12 @@ public final class InstanceImpl<T> implements Instance<T>
   public <U extends T> Instance<U> select(TypeLiteral<U> subtype,
                                           Annotation... bindings)
   {
-    return new InstanceImpl<U>(_beanManager, subtype.getType(), bindings);
+    return new InstanceImpl<U>(_cdiManager, subtype.getType(), bindings);
   }
 
   public Iterator<T> iterator()
   {
-    return new InstanceIterator(_beanManager, getBeanSet().iterator());
+    return new InstanceIterator(_cdiManager, getBeanSet().iterator());
   }
 
   @Override
@@ -134,14 +140,19 @@ public final class InstanceImpl<T> implements Instance<T>
 
   private Set<Bean<?>> getBeanSet()
   {
-    if (_version != _beanManager.getVersion()) {
-      _beanSet = _beanManager.getBeans(_type, _bindings);
-      _version = _beanManager.getVersion();
+    if (_version != _cdiManager.getVersion()) {
+      _beanSet = _cdiManager.getBeans(_type, _qualifiers);
+      _version = _cdiManager.getVersion();
     }
 
     return _beanSet;
   }
 
+  private Object readResolve()
+  {
+    return new InstanceImpl(InjectManager.create(), _type, _qualifiers);
+  }
+  
   @Override
   public String toString()
   {

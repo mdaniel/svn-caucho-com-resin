@@ -30,6 +30,7 @@
 package com.caucho.config.reflect;
 
 import java.lang.reflect.Method;
+import java.util.Collection;
 import java.util.Set;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -107,6 +108,19 @@ public class AnnotatedTypeUtil {
    * Finds any method matching the method name and parameter types.
    */
   public static Method findMethod(Method []methods, Method testMethod)
+  {
+    for (Method method : methods) {
+      if (isMatch(method, testMethod))
+        return method;
+    }
+    
+    return null;
+  }
+  
+  /**
+   * Finds any method matching the method name and parameter types.
+   */
+  public static Method findMethod(Collection<Method> methods, Method testMethod)
   {
     for (Method method : methods) {
       if (isMatch(method, testMethod))

@@ -29,15 +29,11 @@
 
 package com.caucho.config.extension;
 
-import javax.enterprise.inject.spi.Annotated;
+import java.util.logging.Logger;
+
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
-import javax.enterprise.inject.spi.AnnotatedType;
-import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.ObserverMethod;
-import javax.enterprise.inject.spi.ProcessManagedBean;
 import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.enterprise.inject.spi.ProcessProducerMethod;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
@@ -46,6 +42,9 @@ import com.caucho.inject.Module;
 
 public class ProcessObserverImpl<T,X> implements ProcessObserverMethod<T,X>
 {
+  private static final Logger log
+    = Logger.getLogger(ProcessObserverImpl.class.getName());
+  
   private InjectManager _cdiManager;
   private AnnotatedMethod<X> _method;
   private ObserverMethod<T> _observer;
@@ -70,6 +69,7 @@ public class ProcessObserverImpl<T,X> implements ProcessObserverMethod<T,X>
   @Override
   public void addDefinitionError(Throwable t)
   {
+    log.info("DEFINITION: " + t);
     _cdiManager.addDefinitionError(t);
   }
 

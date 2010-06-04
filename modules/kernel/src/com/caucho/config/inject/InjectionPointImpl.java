@@ -186,6 +186,25 @@ public class InjectionPointImpl<T> implements InjectionPoint
     
     return Modifier.isTransient(modifiers);
   }
+  
+  @Override
+  public int hashCode()
+  {
+    return _member.hashCode();
+  }
+  
+  @Override
+  public boolean equals(Object o)
+  {
+    if (this == o)
+      return true;
+    else if (o.getClass() != InjectionPointImpl.class)
+      return false;
+    
+    InjectionPointImpl<?> ip = (InjectionPointImpl<?>) o;
+    
+    return _member.equals(ip._member);
+  }
 
   @Override
   public String toString()

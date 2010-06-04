@@ -101,8 +101,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
   private AnnotatedType<X> _annotatedType;
 
-  private Set<Annotation> _interceptorBindings;
-
   private AnnotatedConstructor<X> _beanCtor;
   
   private CandiProducer<X> _producer;
@@ -485,6 +483,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
           best = ctor;
           second = null;
         }
+        else if (best.isAnnotationPresent(Inject.class)) {
+        }
         else if (ctor.getParameters().size() == 0) {
           best = ctor;
         }
@@ -796,8 +796,9 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
         if (! ipClass.isInterface()
             && ! Serializable.class.isAssignableFrom(ipClass)) {
-          throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' is not serializable for {3}.",
+          throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' value {3} is not serializable for {4}.",
                                         cl.getSimpleName(), bean.getScope().getSimpleName(),
+                                        ip.getType(),
                                         ip.getMember().getName(),
                                         bean));
         }
@@ -991,6 +992,12 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         throw ConfigException.create(_method, e);
       }
     }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _method + "]";
+    }
   }
   
   class FieldHandlerProgram extends ConfigProgram {
@@ -1003,7 +1010,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       _field = field;
       _handler = handler;
     }
-  
+
     @Override
     public <T> void inject(T instance, CreationalContext<T> env)
     {
@@ -1016,6 +1023,12 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     private void bind()
     {
       _boundProgram = _handler.introspectField(_field);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _field + "]";
     }
   }
   
@@ -1030,7 +1043,13 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       _method = method;
       _handler = handler;
     }
-  
+
+    @Override
+    public int getPriority()
+    {
+      return 1;
+    }
+    
     @Override
     public <T> void inject(T instance, CreationalContext<T> env)
     {
@@ -1043,6 +1062,12 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     private void bind()
     {
       _boundProgram = _handler.introspectMethod(_method);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _method + "]";
     }
   }
 }

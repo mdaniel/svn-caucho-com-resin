@@ -38,6 +38,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.decorator.Decorator;
 import javax.ejb.PostActivate;
 import javax.ejb.PrePassivate;
 import javax.enterprise.context.spi.CreationalContext;
@@ -48,11 +49,16 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.InvocationContext;
 
+import com.caucho.config.ConfigException;
+import com.caucho.util.L10N;
+
 /**
  * InterceptorBean represents a Java interceptor
  */
 public class InterceptorBean<X> implements Interceptor<X>
 {
+  private static final L10N L = new L10N(InterceptorBean.class);
+  
   private Class<X> _type;
 
   private ManagedBeanImpl<X> _bean;
@@ -63,7 +69,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   private Method _prePassivate;
   private Method _postActivate;
 
-  private HashSet<Annotation> _bindings
+  private HashSet<Annotation> _qualifiers
     = new HashSet<Annotation>();
 
   public InterceptorBean(InjectManager beanManager,
@@ -188,7 +194,7 @@ public class InterceptorBean<X> implements Interceptor<X>
    */
   public Set<Annotation> getInterceptorBindings()
   {
-    return _bindings;
+    return _qualifiers;
   }
 
   /**
@@ -254,6 +260,10 @@ public class InterceptorBean<X> implements Interceptor<X>
     introspectQualifiers(_type.getAnnotations());
 
     introspectMethods();
+    
+    if (_type.isAnnotationPresent(Decorator.class))
+      throw new ConfigException(L.l("@Interceptor {0} cannot have a @Decorator annotation",
+                                    _type.getName()));
   }
 
   protected void introspectMethods()
@@ -283,7 +293,7 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     for (Annotation ann : annList) {
       if (ann.annotationType().isAnnotationPresent(InterceptorBinding.class)) {
-        _bindings.add(ann);
+        _qualifiers.add(ann);
       }
     }
   }

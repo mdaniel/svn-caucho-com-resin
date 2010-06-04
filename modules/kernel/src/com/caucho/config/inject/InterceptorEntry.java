@@ -57,6 +57,8 @@ public class InterceptorEntry<X> {
   
   private ArrayList<QualifierBinding> _bindings
     = new ArrayList<QualifierBinding>();
+  
+  private boolean _isEnabled;
 
   public InterceptorEntry(Interceptor<X> interceptor)
   {
@@ -86,6 +88,11 @@ public class InterceptorEntry<X> {
     }
 
     return true;
+  }
+
+  public void setEnabled(boolean isEnabled)
+  {
+    _isEnabled = isEnabled;
   }
 
   public boolean isMatch(QualifierBinding binding, Annotation []bindingAnn)

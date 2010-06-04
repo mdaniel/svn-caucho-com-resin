@@ -92,9 +92,16 @@ public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
   }
 
   @Override
-  public void destroy(T instance, CreationalContext<T> env)
+  public void destroy(T instance, CreationalContext<T> cxt)
   {
-    _context.destroyProxy(instance, env);
+    CreationalContextImpl<T> env;
+    
+    if (cxt instanceof CreationalContextImpl<?>)
+      env = (CreationalContextImpl<T>) cxt;
+    else
+      env = null;
+    
+   _context.destroyProxy(instance, env);
   }
 
   @Override

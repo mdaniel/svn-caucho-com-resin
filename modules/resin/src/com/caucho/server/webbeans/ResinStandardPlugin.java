@@ -118,9 +118,11 @@ public class ResinStandardPlugin implements Extension {
             || annotatedType.isAnnotationPresent(Singleton.class)
             || annotatedType.isAnnotationPresent(MessageDriven.class)
             || annotatedType.isAnnotationPresent(JmsMessageListener.class)
-            || ejbContainer.isConfiguredBean(annotatedType.getJavaClass()))) {
-      ejbContainer.createBean(annotatedType, null);
-      event.veto();
+            || ejbContainer != null && ejbContainer.isConfiguredBean(annotatedType.getJavaClass()))) {
+      if (ejbContainer != null) {
+        ejbContainer.createBean(annotatedType, null);
+        event.veto();
+      }
     }
   }
 

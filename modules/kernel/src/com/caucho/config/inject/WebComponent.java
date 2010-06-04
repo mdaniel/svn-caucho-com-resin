@@ -87,7 +87,6 @@ public class WebComponent {
   
   public void resolveSpecializes()
   {
-    System.out.println("SPECIAL:" + this);
     for (int i = _beanList.size() - 1; i >= 0; i--) {
       BeanEntry entry = _beanList.get(i);
       
@@ -95,8 +94,6 @@ public class WebComponent {
       
       if (ann == null || ! ann.isAnnotationPresent(Specializes.class))
         continue;
-      
-      System.out.println("SPECIAL:" + ann);
     }
   }
 

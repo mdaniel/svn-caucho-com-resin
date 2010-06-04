@@ -36,6 +36,7 @@ import java.util.Set;
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import com.caucho.inject.Module;
@@ -103,6 +104,14 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
   //
 
   /**
+   * Returns the injection points. 
+   */
+  @Override
+  public Set<InjectionPoint> getInjectionPoints()
+  {
+    return _target.getInjectionPoints();
+  }
+  /**
    * Creates a new instance of the component.
    */
   @Override
@@ -115,5 +124,11 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
     target.postConstruct(value);
 
     return value;
+  }
+  
+  @Override
+  public void destroy(X instance, CreationalContext<X> env)
+  {
+    env.release();
   }
 }
