@@ -39,8 +39,10 @@ import java.util.Map;
 import com.caucho.config.ConfigException;
 import com.caucho.inject.Module;
 import com.caucho.util.JniTroubleshoot;
+import com.caucho.util.L10N;
 import com.caucho.vfs.ReadStream;
 import com.caucho.vfs.StreamImpl;
+import com.caucho.server.util.CauchoSystem;
 
 /**
  * Resin's bootstrap class.
@@ -48,6 +50,9 @@ import com.caucho.vfs.StreamImpl;
 @Module
 public class JniProcess extends Process
 {
+  private static final L10N L
+    = new L10N(JniProcess.class);
+
   private static final JniTroubleshoot _jniTroubleshoot;
   
   private int _stdoutFd = -1;
@@ -77,7 +82,10 @@ public class JniProcess extends Process
       envp[i++] = entry.getKey() + '=' + entry.getValue();
     }
 
-    setFdMax();
+    int fdMax = setFdMax();
+    if (CauchoSystem.isUnix() && fdMax <= 0) {
+      System.out.println(L.l("process file descriptors: {0}", fdMax));
+    }
 
     if (! exec(argv, envp, chroot, pwd, user, group))
       throw new IllegalStateException("exec failed");

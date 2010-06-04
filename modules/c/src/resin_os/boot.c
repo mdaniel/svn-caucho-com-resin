@@ -103,6 +103,7 @@ Java_com_caucho_bootjni_JniProcess_setFdMax(JNIEnv *env, jobject obj)
 #else  
   struct rlimit rlimit;
   struct rlimit set_rlimit;
+  struct rlimit check_rlimit;
   int result = -1;
 
   if (getrlimit(RLIMIT_NOFILE, &rlimit) != 0)
@@ -135,6 +136,10 @@ Java_com_caucho_bootjni_JniProcess_setFdMax(JNIEnv *env, jobject obj)
 
   if (result < 0)
     result = setrlimit(RLIMIT_NOFILE, &set_rlimit);
+
+  if (getrlimit(RLIMIT_NOFILE, &check_rlimit) == 0
+      && check_rlimit.rlim_cur < rlimit.rlim_cur)
+    setrlimit(RLIMIT_NOFILE, &rlimit);
 
   if (getrlimit(RLIMIT_NOFILE, &rlimit) != 0)
     return -1;
