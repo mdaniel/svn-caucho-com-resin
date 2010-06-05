@@ -1354,8 +1354,9 @@ public class DynamicClassLoader extends java.net.URLClassLoader
 
     if (cl != null)
       return cl;
-    else
+    else {
       throw new ClassNotFoundException(name + " in " + this);
+    }
   }
 
   /**

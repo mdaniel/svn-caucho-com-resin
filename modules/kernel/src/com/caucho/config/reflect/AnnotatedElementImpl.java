@@ -31,6 +31,7 @@ package com.caucho.config.reflect;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -105,6 +106,12 @@ public class AnnotatedElementImpl implements Annotated
     return _typeSet;
   }
 
+  public void addAnnotations(Collection<Annotation> annSet)
+  {
+    for (Annotation ann : annSet)
+      addAnnotation(ann);
+  }
+  
   public void addAnnotation(Annotation newAnn)
   {
     if (_annSet == null)

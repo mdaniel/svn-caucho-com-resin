@@ -110,9 +110,9 @@ public class InterceptorGenerator<X>
 
     _factory = factory;
     
-    if (factory.getClassInterceptors() != null
+    if (factory.getClassAroundInvokeInterceptors() != null
         && ! isExcludeClassInterceptors) {
-      _interceptors.addAll(factory.getClassInterceptors());
+      _interceptors.addAll(factory.getClassAroundInvokeInterceptors());
     }
 
     if (methodInterceptors != null)
@@ -500,7 +500,8 @@ public class InterceptorGenerator<X>
 
     out.popDepth();
     out.println("} catch (Exception e) {");
-    out.println("  throw new RuntimeException(e);");
+    out.println("  __log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+    out.println("  __initException = com.caucho.config.ConfigException.create(e);");
     out.println("}");
     out.popDepth();
     out.println("}");
@@ -582,7 +583,8 @@ public class InterceptorGenerator<X>
 
     out.popDepth();
     out.println("} catch (Exception e) {");
-    out.println("  throw new RuntimeException(e);");
+    out.println("  __log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+    out.println("  __initException = com.caucho.config.ConfigException.create(e);");
     out.println("}");
     out.popDepth();
     out.println("}");

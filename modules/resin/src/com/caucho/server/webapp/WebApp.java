@@ -75,7 +75,8 @@ import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Configurable;
 import com.caucho.config.SchemaBean;
-import com.caucho.config.el.CandiContextResolver;
+import com.caucho.config.el.CandiConfigResolver;
+import com.caucho.config.el.CandiElResolver;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.SingletonBindingHandle;
 import com.caucho.config.j2ee.PersistenceContextRefConfig;
@@ -3055,7 +3056,7 @@ public class WebApp extends ServletContextImpl
         log.log(Level.WARNING, e.toString(), e);
       }
 
-      _jspApplicationContext.addELResolver(new CandiContextResolver());
+      _jspApplicationContext.addELResolver(new CandiElResolver());
 
       callInitializers();
 

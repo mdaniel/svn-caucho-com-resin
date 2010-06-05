@@ -45,6 +45,7 @@ import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.program.Arg;
@@ -160,8 +161,17 @@ public class CandiProducer<X> implements InjectionTarget<X>
 
       X value;
       
-      if (_javaCtor != null)
+      if (_javaCtor != null) {
+        try {
         value = _javaCtor.newInstance(args);
+        } catch (InvocationTargetException e) {
+          log.log(Level.WARNING, e.toString(), e);
+          throw e;
+        } catch (Exception e) {
+          log.log(Level.WARNING, e.toString(), e);
+          throw ConfigException.create(e);
+        }
+      }
       else
         value = _instanceClass.newInstance();
 
@@ -194,6 +204,8 @@ public class CandiProducer<X> implements InjectionTarget<X>
       else
         throw new CreationException(e.getCause());
     } catch (Exception e) {
+      throw new CreationException(e);
+    } catch (ExceptionInInitializerError e) {
       throw new CreationException(e);
     }
   }

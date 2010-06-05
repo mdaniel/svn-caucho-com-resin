@@ -87,18 +87,10 @@ public class ProducesBuilder {
                                getQualifiers(beanMethod));
         
         addProducesMethod(bean, beanType, beanMethod, disposesMethod);
-        
+
         if (disposesMethod != null)
           disposesSet.add(disposesMethod);
       }
-    }
-    
-    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
-      if (isDisposes(beanMethod)
-          && ! disposesSet.contains(beanMethod))
-        throw new ConfigException(L.l("{0}.{1} is an invalid disposes method because it doesn't match a @Produces method",
-                                      beanMethod.getJavaMember().getDeclaringClass().getName(),
-                                      beanMethod.getJavaMember().getName()));
     }
     
     for (AnnotatedField<? super X> beanField : beanType.getFields()) {
@@ -113,6 +105,14 @@ public class ProducesBuilder {
           disposesSet.add(disposesMethod);
       }
     }
+    
+    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+      if (isDisposes(beanMethod)
+          && ! disposesSet.contains(beanMethod))
+        throw new ConfigException(L.l("{0}.{1} is an invalid disposes method because it doesn't match a @Produces method",
+                                      beanMethod.getJavaMember().getDeclaringClass().getName(),
+                                      beanMethod.getJavaMember().getName()));
+    }
   }
 
   protected <X,T> void addProducesMethod(Bean<X> bean,
@@ -120,9 +120,11 @@ public class ProducesBuilder {
                                    AnnotatedMethod<? super X> producesMethod,
                                    AnnotatedMethod<? super X> disposesMethod)
   {
+    // ioc/07d0
     if (producesMethod.getJavaMember().getDeclaringClass() != beanType.getJavaClass()
-        && ! beanType.isAnnotationPresent(Specializes.class))
+        && ! beanType.isAnnotationPresent(Specializes.class)) {
       return;
+    }
     
     Arg<? super X> []producesArgs = introspectArguments(bean, producesMethod);
     Arg<? super X> []disposesArgs = null;

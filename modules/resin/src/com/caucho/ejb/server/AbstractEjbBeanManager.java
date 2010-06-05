@@ -521,8 +521,10 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   
   public void destroy(Object instance, CreationalContextImpl env)
   {
+    /*
     if (instance != null)
       _producer.destroyInstance((X) instance);
+      */
   }
   
   /**

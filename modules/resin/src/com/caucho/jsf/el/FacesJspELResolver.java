@@ -64,7 +64,7 @@ public class FacesJspELResolver extends ELResolver {
       = (FacesContextELResolver) _app.getELResolver();
 
     _managedBeanResolver = facesResolver.getManagedBeanResolver();
-    _cdiResolver = new CandiContextResolver();
+    _cdiResolver = new CandiElResolver();
     _resourceBundleResolver = facesResolver.getResourceBundleResolver();
   }
 

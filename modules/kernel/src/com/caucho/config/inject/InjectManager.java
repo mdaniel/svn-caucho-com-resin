@@ -121,7 +121,8 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.ModulePrivate;
 import com.caucho.config.ModulePrivateLiteral;
 import com.caucho.config.bytecode.ScopeAdapter;
-import com.caucho.config.el.CandiContextResolver;
+import com.caucho.config.el.CandiConfigResolver;
+import com.caucho.config.el.CandiElResolver;
 import com.caucho.config.el.CandiExpressionFactory;
 import com.caucho.config.event.EventBeanImpl;
 import com.caucho.config.event.EventManager;
@@ -312,7 +313,7 @@ public final class InjectManager
   private boolean _isAfterBeanDiscoveryComplete;
 
   // XXX: needs to be a local resolver
-  private ELResolver _elResolver = new CandiContextResolver(this);
+  private ELResolver _elResolver = new CandiElResolver(this);
 
   private DependentContext _dependentContext = new DependentContext();
   private SingletonScope _singletonScope;
@@ -477,9 +478,7 @@ public final class InjectManager
    */
   public static InjectManager getCurrent(ClassLoader loader)
   {
-    synchronized (_localContainer) {
-      return _localContainer.get(loader);
-    }
+    return _localContainer.get(loader);
   }
 
   /**
@@ -720,7 +719,14 @@ public final class InjectManager
         if (getDeploymentPriority(bean) < 0)
           continue;
           */
-
+        
+        // ioc/0g20
+        if (bean.isAlternative() && ! isEnabled(bean))
+          continue;
+        
+        if (_specializedMap.containsKey(bean.getBeanClass()))
+          continue;
+        
         if (! beanList.contains(bean))
           beanList.add(bean);
       }
@@ -963,7 +969,10 @@ public final class InjectManager
   {
     AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(cl);
     
-    return getExtensionManager().processAnnotatedType(annType);
+    // TCK:
+    // return getExtensionManager().processAnnotatedType(annType);
+    
+    return annType;
   }
 
   /**
@@ -1024,6 +1033,8 @@ public final class InjectManager
   public <T> ManagedBeanImpl<T> createManagedBean(Class<T> cl)
   {
     AnnotatedType<T> type = createAnnotatedType(cl);
+    
+    type = getExtensionManager().processAnnotatedType(type);
 
     return createManagedBean(type);
   }
@@ -1180,6 +1191,21 @@ public final class InjectManager
       return (Set<Bean<?>>) set;
     else
       return new HashSet<Bean<?>>();
+  }
+
+  /**
+   * Returns the beans matching a class and annotation set
+   *
+   * @param type the bean's class
+   * @param qualifiers required @Qualifier annotations
+   */
+  private Set<Bean<?>> getBeans(Type type,
+                                Set<Annotation> qualifierSet)
+  {
+    Annotation []qualifiers = new Annotation[qualifierSet.size()];
+    qualifierSet.toArray(qualifiers);
+    
+    return getBeans(type, qualifiers);
   }
 
   /**
@@ -1502,7 +1528,7 @@ public final class InjectManager
       
       RuntimeException exn = validatePassivation(ip);
       
-      if (! factory.isProducer() && exn != null)
+      if (exn != null && ! factory.isProducer())
         throw exn;
     }
     
@@ -1526,12 +1552,14 @@ public final class InjectManager
     
     if (isPassivating && ! ip.isTransient()) {
       Class<?> cl = getRawClass(ip.getType());
+      
+      Bean<?> prodBean = resolve(getBeans(ip.getType(), ip.getQualifiers()));
     
       // TCK conflict
       if (! cl.isInterface() && ! Serializable.class.isAssignableFrom(cl)) {
         RuntimeException exn;
         
-        if (isProduct(bean))
+        if (isProduct(prodBean))
           exn = new IllegalProductException(L.l("'{0}' is an invalid injection point of type {1} because it's not serializable for {2}",
                                                 ip.getMember().getName(),
                                                 ip.getType(),
@@ -2092,13 +2120,19 @@ public final class InjectManager
     
     Type type = ij.getType();
     Set<Annotation> qualifiers = ij.getQualifiers();
+
+    ReferenceFactory factory = getReferenceFactory(type, qualifiers, ij);
     
     RuntimeException exn = validatePassivation(ij);
     
-    if (exn != null)
-      return new ErrorReferenceFactory(exn);
-
-    return getReferenceFactory(type, qualifiers, ij);
+    if (exn != null) {
+      if (factory.isProducer())
+        return new ErrorReferenceFactory(exn);
+      else
+        throw exn;
+    }
+    
+    return factory;
   }
 
   public ReferenceFactory<?> getReferenceFactory(Type type,
@@ -2698,6 +2732,8 @@ public final class InjectManager
 
       AnnotatedType<?> type = createAnnotatedType(cl);
       
+      type = getExtensionManager().processAnnotatedType(type);
+      
       if (type == null)
         return;
       
@@ -2727,7 +2763,7 @@ public final class InjectManager
     _specializedMap.put(parentType, specializedType);
   }
 
-  private boolean isEnabled(Bean<?> bean)
+  boolean isEnabled(Bean<?> bean)
   {
     if (_deploymentMap.containsKey(bean.getBeanClass()))
       return true;
@@ -2868,7 +2904,10 @@ public final class InjectManager
     if (! managedBean.isAlternative() || isEnabled(managedBean)) {
       // ioc/0680
       addBean(managedBean);
-
+      
+      managedBean.introspectObservers();
+      
+      /*
       for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
         // observer = processObserver(observer);
 
@@ -2883,9 +2922,12 @@ public final class InjectManager
           _eventManager.addObserver(observer, baseType, bindings);
         }
       }
+      */
     }
-    
-    managedBean.introspectProduces();
+
+    // ioc/07d2
+    if (! _specializedMap.containsKey(managedBean.getBeanClass()))
+      managedBean.introspectProduces();
   }
   
   public <X> void addProduces(Bean<X> bean, AnnotatedType<X> beanType)
@@ -2926,27 +2968,7 @@ public final class InjectManager
   public <X> void addManagedBean(ManagedBeanImpl<X> managedBean)
   {
     addBean(managedBean);
-
-    for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
-      // observer = processObserver(observer);
-
-      if (observer != null) {
-        Set<Annotation> annSet = observer.getObservedQualifiers();
-
-        Annotation []bindings = new Annotation[annSet.size()];
-        annSet.toArray(bindings);
-
-        BaseType baseType = createSourceBaseType(observer.getObservedType());
-
-        getEventManager().addObserver(observer, baseType, bindings);
-      }
-    }
-
-    /*
-    for (Bean<?> producerBean : managedBean.getProducerBeans()) {
-      addBean(producerBean);
-    }
-    */
+    
     managedBean.introspectProduces();
   }
 

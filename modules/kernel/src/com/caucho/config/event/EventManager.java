@@ -367,7 +367,7 @@ public class EventManager
     Class<?> eventType = eventBaseType.getRawClass();
 
     _cdiManager.checkActive();
-
+    
     /*
     if (eventType.getTypeParameters() != null
         && eventType.getTypeParameters().length > 0) {

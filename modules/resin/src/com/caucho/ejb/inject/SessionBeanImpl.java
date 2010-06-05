@@ -92,10 +92,17 @@ public class SessionBeanImpl<X,T>
   @Override
   public T create(CreationalContext<T> env)
   {
+    T value;
+    
     if (env instanceof CreationalContextImpl<?>)
-      return _context.createProxy((CreationalContextImpl<T>) env);
+      value = _context.createProxy((CreationalContextImpl<T>) env);
     else
-      return _context.createProxy(null);
+      value = _context.createProxy(null);
+    
+    if (env != null)
+      env.push(value);
+    
+    return value;
   }
   
   @Override
@@ -109,6 +116,9 @@ public class SessionBeanImpl<X,T>
       env = null;
     
     _context.destroyProxy(instance, env);
+    
+    if (env != null)
+      env.release();
   }
 
   /**

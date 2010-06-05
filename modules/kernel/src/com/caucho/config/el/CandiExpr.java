@@ -95,12 +95,12 @@ public class CandiExpr extends Expr {
   public Object getValue(ELContext env)
     throws ELException
   {
-    CandiContextResolver.startContext();
+    CandiConfigResolver.startContext();
     
     try {
       return _expr.getValue(env);
     } finally {
-      CandiContextResolver.finishContext();
+      CandiConfigResolver.finishContext();
     }
   }
 
@@ -198,12 +198,12 @@ public class CandiExpr extends Expr {
                        boolean escapeXml)
     throws IOException, ELException
   {
-    CandiContextResolver.startContext();
+    CandiConfigResolver.startContext();
     
     try {
       return _expr.print(out, env, escapeXml);
     } finally {
-      CandiContextResolver.finishContext();
+      CandiConfigResolver.finishContext();
     }
   }
 
@@ -213,12 +213,12 @@ public class CandiExpr extends Expr {
                        boolean escapeXml)
     throws IOException, ELException
   {
-    CandiContextResolver.startContext();
+    CandiConfigResolver.startContext();
     
     try {
       return _expr.print(out, env, escapeXml);
     } finally {
-      CandiContextResolver.finishContext();
+      CandiConfigResolver.finishContext();
     }
   }
 

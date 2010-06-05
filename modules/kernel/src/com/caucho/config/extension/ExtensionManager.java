@@ -389,7 +389,7 @@ public class ExtensionManager
     ProcessProducerImpl<X,T> event
       = new ProcessProducerImpl<X,T>(producesMethod, producer);
     
-    AnnotatedType<X> declaringType = producesMethod.getDeclaringType();
+    AnnotatedType<?> declaringType = producesMethod.getDeclaringType();
     
     BaseType eventType = cdi.createTargetBaseType(ProcessProducerImpl.class);
     eventType = eventType.fill(cdi.createTargetBaseType(declaringType.getBaseType()),

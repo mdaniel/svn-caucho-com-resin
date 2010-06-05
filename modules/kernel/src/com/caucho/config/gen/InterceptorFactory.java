@@ -56,6 +56,7 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.ExcludeClassInterceptors;
 import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
+import javax.interceptor.InvocationContext;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.AnyLiteral;
@@ -80,7 +81,10 @@ public class InterceptorFactory<X>
   
   private boolean _isInterceptorOrDecorator;
   
-  private ArrayList<Class<?>> _classInterceptors;
+  private ArrayList<Class<?>> _classAroundInvokeInterceptors
+    = new ArrayList<Class<?>>();
+  private ArrayList<Class<?>> _classPostConstructInterceptors;
+  
   private HashMap<Class<?>, Annotation> _classInterceptorBindings;
   
   private HashSet<Class<?>> _decoratorClasses;
@@ -98,9 +102,9 @@ public class InterceptorFactory<X>
     introspectType();
   }
   
-  public ArrayList<Class<?>> getClassInterceptors()
+  public ArrayList<Class<?>> getClassAroundInvokeInterceptors()
   {
-    return _classInterceptors;
+    return _classAroundInvokeInterceptors;
   }
   
   public HashSet<Class<?>> getDecoratorClasses()
@@ -173,7 +177,7 @@ public class InterceptorFactory<X>
     if (methodInterceptors != null
         || interceptorMap != null
         || decoratorSet != null
-        || _classInterceptors != null && ! isExcludeClassInterceptors) {
+        || _classAroundInvokeInterceptors.size() > 0 && ! isExcludeClassInterceptors) {
       AspectGenerator<X> next = super.create(method, true);
       
       return new InterceptorGenerator<X>(this, method, next,
@@ -191,6 +195,20 @@ public class InterceptorFactory<X>
     for (Method m : cl.getMethods()) {
       if (m.isAnnotationPresent(AroundInvoke.class))
         return true;
+    }
+    
+    return false;
+  }
+  
+  private boolean hasPostConstructInterceptor(Class<?> cl)
+  {
+    for (Method m : cl.getMethods()) {
+      if (m.isAnnotationPresent(PostConstruct.class)) {
+        Class<?> []param = m.getParameterTypes();
+        
+        if (param.length == 0 && param[0].equals(InvocationContext.class))
+          return true;
+      }
     }
     
     return false;
@@ -242,13 +260,11 @@ public class InterceptorFactory<X>
   
   private void validatePassivating()
   {
-    if (_classInterceptors != null) {
-      for (Class<?> cl : _classInterceptors) {
-        if (! Serializable.class.isAssignableFrom(cl))
-          throw new ConfigException(L.l("{0} has an invalid interceptor {1} because it's not serializable.",
-                                        getBeanType().getJavaClass().getName(),
-                                        cl.getName()));        
-      }
+    for (Class<?> cl : _classAroundInvokeInterceptors) {
+      if (! Serializable.class.isAssignableFrom(cl))
+        throw new ConfigException(L.l("{0} has an invalid interceptor {1} because it's not serializable.",
+                                      getBeanType().getJavaClass().getName(),
+                                      cl.getName()));        
     }
   }
   
@@ -260,11 +276,13 @@ public class InterceptorFactory<X>
     Interceptors interceptors = getBeanType().getAnnotation(Interceptors.class);
 
     if (interceptors != null) {
-      _classInterceptors = new ArrayList<Class<?>>();
+      _classAroundInvokeInterceptors = new ArrayList<Class<?>>();
     
       for (Class<?> iClass : interceptors.value()) {
-        if (! _classInterceptors.contains(iClass)) {
-          _classInterceptors.add(iClass);
+        if (hasAroundInvoke(iClass)) {
+          if (! _classAroundInvokeInterceptors.contains(iClass)) {
+            _classAroundInvokeInterceptors.add(iClass);
+          }
         }
       }
     }

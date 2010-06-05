@@ -68,12 +68,12 @@ public class CandiValueExpression extends ValueExpression {
   public Object getValue(ELContext context) throws PropertyNotFoundException,
       ELException
   {
-    CandiContextResolver.startContext();
+    CandiConfigResolver.startContext();
     
     try {
       return _expr.getValue(context);
     } finally {
-      CandiContextResolver.finishContext();
+      CandiConfigResolver.finishContext();
     }
   }
 

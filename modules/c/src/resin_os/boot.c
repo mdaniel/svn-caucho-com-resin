@@ -95,58 +95,31 @@ Java_com_caucho_bootjni_JniProcess_getFdMax(JNIEnv *env, jobject obj)
 #endif  
 }
 
+#ifdef WIN32
 JNIEXPORT jint JNICALL
 Java_com_caucho_bootjni_JniProcess_setFdMax(JNIEnv *env, jobject obj)
 {
-#ifdef WIN32
   return -1;
+}
+
 #else  
+JNIEXPORT jint JNICALL
+Java_com_caucho_bootjni_JniProcess_setFdMax(JNIEnv *env, jobject obj)
+{
+
+  struct rlimit orig_rlimit;
   struct rlimit rlimit;
   struct rlimit set_rlimit;
-  struct rlimit check_rlimit;
-  int result = -1;
 
-  if (getrlimit(RLIMIT_NOFILE, &rlimit) != 0)
-    return -1;
+  set_rlimit.rlim_cur = set_rlimit.rlim_max = RLIM_INFINITY;
+  setrlimit(RLIMIT_NOFILE, &set_rlimit);
 
-#ifdef EPOLL
-  if (rlimit.rlim_max < 65536) {
-    set_rlimit.rlim_cur = set_rlimit.rlim_max = 65536;
-    
-    result = setrlimit(RLIMIT_NOFILE, &set_rlimit);
-    if (result < 0 && rlimit.rlim_max < 8 * 1024) {
-      set_rlimit.rlim_cur = set_rlimit.rlim_max = 8 * 1024;
-    
-      result = setrlimit(RLIMIT_NOFILE, &set_rlimit);
-    }
-    
-    if (result < 0 && rlimit.rlim_max < 4 * 1024) {
-      set_rlimit.rlim_cur = set_rlimit.rlim_max = 4 * 1024;
-    
-      result = setrlimit(RLIMIT_NOFILE, &set_rlimit);
-    }
-  }
+  if (getrlimit(RLIMIT_NOFILE, &rlimit) == 0)
+    return rlimit.rlim_cur;
   else
-    set_rlimit.rlim_cur = set_rlimit.rlim_max = rlimit.rlim_max;
-#else
-  if (rlimit.rlim_cur < FD_SETSIZE) {
-    set_rlimit.rlim_cur = set_rlimit.rlim_max = FD_SETSIZE;
-  }
-#endif
-
-  if (result < 0)
-    result = setrlimit(RLIMIT_NOFILE, &set_rlimit);
-
-  if (getrlimit(RLIMIT_NOFILE, &check_rlimit) == 0
-      && check_rlimit.rlim_cur < rlimit.rlim_cur)
-    setrlimit(RLIMIT_NOFILE, &rlimit);
-
-  if (getrlimit(RLIMIT_NOFILE, &rlimit) != 0)
     return -1;
-
-  return rlimit.rlim_cur;
-#endif
 }
+#endif
 
 jboolean
 Java_com_caucho_bootjni_JniProcess_exec(JNIEnv *env,

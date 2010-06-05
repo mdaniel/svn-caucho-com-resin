@@ -308,6 +308,7 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     out.println("  = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
     out.println("private static final boolean __isFiner");
     out.println("  = __log.isLoggable(java.util.logging.Level.FINER);");
+    out.println("private static RuntimeException __initException;");
 
     /*
     if (_hasXA) {
@@ -401,6 +402,10 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       out.print("a" + i);
     }
     out.println(");");
+    
+    out.println();
+    out.println("if (__initException != null)");
+    out.println("  throw __initException;");
 
     generateBeanConstructor(out);
     generateProxyConstructor(out);

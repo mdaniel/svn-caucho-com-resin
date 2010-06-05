@@ -66,8 +66,8 @@ public class FacesContextELResolver extends CompositeELResolver {
   private final ResourceBundleELResolver _bundleResolver
     = new ResourceBundleELResolver();  
 
-  private final CandiContextResolver _webBeansResolver
-    = new CandiContextResolver();
+  private final CandiElResolver _cdiResolver
+    = new CandiElResolver();
 
   private final ManagedBeanELResolver _managedBeanResolver
     = new ManagedBeanELResolver();
@@ -167,7 +167,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 
     if (base == null) {
       addDescriptors(descriptors,
-		     _webBeansResolver.getFeatureDescriptors(env, base));
+		     _cdiResolver.getFeatureDescriptors(env, base));
       
       addDescriptors(descriptors,
 		     _managedBeanResolver.getFeatureDescriptors(env, base));
@@ -317,7 +317,7 @@ public class FacesContextELResolver extends CompositeELResolver {
 	return value;
       }
 
-      value = _webBeansResolver.getValue(env, base, property);
+      value = _cdiResolver.getValue(env, base, property);
 
       if (env.isPropertyResolved())
 	return value;

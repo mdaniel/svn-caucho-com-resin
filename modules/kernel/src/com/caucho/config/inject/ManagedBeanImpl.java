@@ -339,7 +339,7 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
     // introspectProduces(beanType);
 
-    introspectObservers(beanType);
+    // introspectObservers(beanType);
   }
 
   public void introspectProduces()
@@ -350,11 +350,11 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   /**
    * Introspects the methods for any @Produces
    */
-  private void introspectObservers(AnnotatedType<X> beanType)
+  void introspectObservers()
   {
     EventManager eventManager = getBeanManager().getEventManager();
     
-    for (AnnotatedMethod<? super X> beanMethod : beanType.getMethods()) {
+    for (AnnotatedMethod<? super X> beanMethod : getAnnotatedType().getMethods()) {
       int param = EventManager.findObserverAnnotation(beanMethod);
       
       if (param >= 0)

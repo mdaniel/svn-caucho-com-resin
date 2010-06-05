@@ -72,6 +72,11 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
     //init();
   }
 
+  @Override
+  public void introspect()
+  {
+  }
+  
   /**
    * The @New name is null.
    */

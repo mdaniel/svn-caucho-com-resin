@@ -49,19 +49,25 @@ import com.caucho.config.xml.XmlConfigContext;
 /**
  * Variable resolution for CDI variables
  */
-public class CandiContextResolver extends ELResolver {
+public class CandiElResolver extends ELResolver {
   private static final ThreadLocal<ContextHolder> _envLocal
     = new ThreadLocal<ContextHolder>();
   
   private InjectManager _injectManager;
   
-  public CandiContextResolver(InjectManager injectManager)
+  public CandiElResolver(InjectManager injectManager)
   {
     _injectManager = injectManager;
   }
   
-  public CandiContextResolver()
+  public CandiElResolver()
   {
+    this(InjectManager.create());
+  }
+  
+  protected InjectManager getInjectManager()
+  {
+    return _injectManager;
   }
 
   @Override
@@ -161,20 +167,6 @@ public class CandiContextResolver extends ELResolver {
     }
     else
       return null;
-  }
-  
-  private InjectManager getInjectManager()
-  {
-    InjectManager manager = _injectManager;
-
-    if (manager == null) {
-      manager = InjectManager.getCurrent();
-      
-      if (manager == null)
-        return null;
-    }
-    
-    return manager;
   }
 
   @Override

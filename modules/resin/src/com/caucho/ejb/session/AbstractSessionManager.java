@@ -42,6 +42,11 @@ import java.util.logging.Logger;
 import javax.annotation.security.DeclareRoles;
 import javax.annotation.security.RolesAllowed;
 import javax.ejb.SessionContext;
+import javax.enterprise.inject.Disposes;
+import javax.enterprise.inject.Produces;
+import javax.enterprise.inject.spi.AnnotatedField;
+import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
@@ -55,6 +60,8 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.j2ee.BeanName;
 import com.caucho.config.j2ee.BeanNameLiteral;
+import com.caucho.config.reflect.AnnotatedMethodImpl;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.inject.ProcessSessionBeanImpl;
@@ -62,11 +69,13 @@ import com.caucho.ejb.inject.SessionRegistrationBean;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.util.L10N;
 
 /**
  * Server container for a session bean.
  */
 abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X> {
+  private static final L10N L = new L10N(AbstractSessionManager.class);
   private final static Logger log
      = Logger.getLogger(AbstractSessionManager.class.getName());
 
@@ -332,6 +341,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     
     AnnotatedType<X> rawAnnType = getRawAnnotatedType();
     AnnotatedType<X> beanType = getAnnotatedType();
+    
+    AnnotatedType<X> extAnnType = createExternalAnnotatedType(beanType, localApiList);
 
     InjectManager moduleBeanManager = InjectManager.create();
 
@@ -391,11 +402,72 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     moduleBeanManager.addBean(_bean, process);
     
-    moduleBeanManager.addProduces(_bean, mBean.getAnnotatedType());
+    moduleBeanManager.addProduces(_bean, extAnnType);
 
     for (AnnotatedType<?> localApi : getLocalApi()) {
       registerLocalSession(moduleBeanManager, localApi.getJavaClass());
     }
+  }
+  
+  private AnnotatedType<X> 
+  createExternalAnnotatedType(AnnotatedType<X> baseType,
+                              ArrayList<AnnotatedType<? super X>> apiList)
+  {
+    ExtAnnotatedType<X> extAnnType = new ExtAnnotatedType<X>(baseType);
+    
+    for (AnnotatedField<? super X> field : baseType.getFields()) {
+      if (field.isStatic())
+        extAnnType.addField(field);
+    }
+    
+    for (AnnotatedMethod<? super X> method : baseType.getMethods()) {
+      AnnotatedMethod<? super X> extMethod = mergeMethod(method, apiList);
+      
+      if (extMethod != null)
+        extAnnType.addMethod(extMethod);
+      else if (method.isAnnotationPresent(Produces.class))
+        throw new ConfigException(L.l("{0}.{1} is an invalid @Produces EJB method because the method is not in a @Local interface.",
+                                      method.getDeclaringType().getJavaClass().getName(),
+                                      method.getJavaMember().getName()));
+      else if (isDisposes(method)) {
+        throw new ConfigException(L.l("{0}.{1} is an invalid @Disposes EJB method because the method is not in a @Local interface.",
+                                      method.getDeclaringType().getJavaClass().getName(),
+                                      method.getJavaMember().getName()));
+      }
+    }
+    
+    return extAnnType;
+  }
+  
+  private boolean isDisposes(AnnotatedMethod<? super X> method)
+  {
+    for (AnnotatedParameter<? super X> param : method.getParameters()) {
+      if (param.isAnnotationPresent(Disposes.class))
+        return true;
+    }
+    
+    return false;
+  }
+  
+  private AnnotatedMethod<? super X>
+  mergeMethod(AnnotatedMethod<? super X> method,
+              ArrayList<AnnotatedType<? super X>> apiList)
+  {
+    for (AnnotatedType<? super X> api : apiList) {
+      AnnotatedMethod<? super X> apiMethod
+        = AnnotatedTypeUtil.findMethod(api, method);
+      
+      if (apiMethod != null) {
+        AnnotatedMethodImpl<? super X> extMethod
+          = new AnnotatedMethodImpl(apiMethod.getDeclaringType(),
+                                    method,
+                                    apiMethod.getJavaMember());
+        
+        return extMethod;
+      }
+    }
+    
+    return null;
   }
   
   private <T> void registerLocalSession(InjectManager beanManager, 
