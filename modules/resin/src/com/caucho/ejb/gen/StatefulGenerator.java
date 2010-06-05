@@ -153,6 +153,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("{");
     out.pushDepth();
 
+    generateClassStaticFields(out);
+    
     generateContextPrologue(out);
 
     generateClassContent(out);

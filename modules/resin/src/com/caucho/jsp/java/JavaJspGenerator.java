@@ -58,6 +58,7 @@ import javax.servlet.jsp.tagext.TagInfo;
 import javax.servlet.jsp.tagext.TagLibraryValidator;
 import javax.servlet.jsp.tagext.ValidationMessage;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Array;
 import java.lang.reflect.Method;
 import java.math.BigDecimal;
@@ -578,8 +579,14 @@ public class JavaJspGenerator extends JspGenerator {
               message.append("\n");
             message.append(messages[j].getMessage());
           }
+          
+          InputStream is = getPageData().getInputStream();
+          StringBuilder sb = new StringBuilder();
+          int ch;
+          while ((ch = is.read()) >= 0)
+            sb.append((char) ch);
 
-          throw _rootNode.error(message.toString());
+          throw _rootNode.error(message.toString() + "\n\n" + sb);
         }
       }
     }

@@ -50,6 +50,7 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.loader.DynamicClassLoader;
 import com.caucho.util.L10N;
 
 /**
@@ -215,6 +216,11 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     
     Class<?> baseClass = _beanClass.getJavaClass();
     int modifiers = baseClass.getModifiers();
+    
+    ClassLoader baseClassLoader = baseClass.getClassLoader();
+    
+    boolean isPackageLoader = (baseClassLoader != null
+                               && (baseClassLoader instanceof DynamicClassLoader));
 
     if (Modifier.isFinal(modifiers))
       throw new IllegalStateException(L.l("'{0}' is an invalid enhanced class because it is final.",
@@ -223,7 +229,12 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     try {
       JavaClassGenerator gen = new JavaClassGenerator();
 
-      Class<?> cl = gen.preload(getFullClassName());
+      Class<?> cl;
+      
+      if (isPackageLoader)
+        cl = gen.preloadClassParentLoader(getFullClassName(), baseClass);
+      else
+        cl = gen.preload(getFullClassName());
 
       if (cl != null)
         return cl;
@@ -231,11 +242,14 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       gen.generate(this);
 
       gen.compilePendingJava();
+      
+      // ioc/0c26
 
-      if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers))
-        return gen.loadClass(getFullClassName());
-      else
+      // if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers))
+      if (isPackageLoader)
         return gen.loadClassParentLoader(getFullClassName(), baseClass);
+      else
+        return gen.loadClass(getFullClassName());
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -304,11 +318,11 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   protected void generateHeader(JavaWriter out)
     throws IOException
   {
-    out.println("private static final java.util.logging.Logger __log");
+    out.println("private static final java.util.logging.Logger __caucho_log");
     out.println("  = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
-    out.println("private static final boolean __isFiner");
-    out.println("  = __log.isLoggable(java.util.logging.Level.FINER);");
-    out.println("private static RuntimeException __initException;");
+    out.println("private static final boolean __caucho_isFiner");
+    out.println("  = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
+    out.println("private static RuntimeException __caucho_exception;");
 
     /*
     if (_hasXA) {
@@ -404,8 +418,8 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     out.println(");");
     
     out.println();
-    out.println("if (__initException != null)");
-    out.println("  throw __initException;");
+    out.println("if (__caucho_exception != null)");
+    out.println("  throw __caucho_exception;");
 
     generateBeanConstructor(out);
     generateProxyConstructor(out);

@@ -116,6 +116,14 @@ abstract public class BeanGenerator<X> extends GenClass
   // Java generation
   //
   
+  public void generateClassStaticFields(JavaWriter out)
+    throws IOException
+  {
+    out.println("private static final java.util.logging.Logger __caucho_log");
+    out.println("  = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
+    out.println("private static RuntimeException __caucho_exception;");
+  }
+  
   /**
    * Generates the view contents
    */

@@ -475,9 +475,14 @@ abstract public class GenericTag extends JspContainerNode
   {
     TagInfo tag = getTagInfo();
 
-    String name = tag.getTagLibrary().getPrefixString() + ':' + tag.getTagName();
+    String prefix = tag.getTagLibrary().getPrefixString();
+    String uri = tag.getTagLibrary().getURI();
+    
+    String name = prefix + ':' + tag.getTagName();
 
     os.print("<" + name);
+    
+    os.print(" xmlns:" + prefix + "=\"" + uri + "\"");
     
     printJspId(os);
 

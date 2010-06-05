@@ -50,6 +50,8 @@ public class ConversationScope extends AbstractScopeContext
   implements Conversation, java.io.Serializable
 {
   private static final L10N L = new L10N(ConversationScope.class);
+  
+  private long _timeout;
 
   public ConversationScope()
   {
@@ -108,17 +110,18 @@ public class ConversationScope extends AbstractScopeContext
     if (facesContext == null)
       return null;
 
-    ExternalContext extContext = facesContext.getExternalContext();
-    Map<String,Object> sessionMap = extContext.getSessionMap();
+    Scope scope = getJsfScope(facesContext);
 
-    ContextContainer scope = (ContextContainer) sessionMap.get("caucho.conversation");
-    
-    if (scope == null) {
-      scope = new ContextContainer();
-      sessionMap.put("caucho.conversation", scope);
+    String id = getId(facesContext);
+
+    ContextContainer map = scope._conversationMap.get(id);
+
+    if (map == null) {
+      map = new ContextContainer();
+      scope._conversationMap.put(id, map);
     }
 
-    return scope;
+    return map;
   }
 
   //
@@ -140,26 +143,14 @@ public class ConversationScope extends AbstractScopeContext
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    if (facesContext == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
+    Scope scope = getJsfScope(facesContext);
 
-    ExternalContext extContext = facesContext.getExternalContext();
-    Map<String,Object> sessionMap = extContext.getSessionMap();
+    String id = getId(facesContext);
 
-    Scope scope = (Scope) sessionMap.get("caucho.conversation");
-
-    if (scope == null) {
-      scope = new Scope();
-      sessionMap.put("caucho.conversation", scope);
-    }
-
-    UIViewRoot root = facesContext.getViewRoot();
-    String id = root.getViewId();
-
-    HashMap map = scope._conversationMap.get(id);
+    ContextContainer map = scope._conversationMap.get(id);
 
     if (map == null) {
-      map = new HashMap(8);
+      map = new ContextContainer();
       scope._conversationMap.put(id, map);
     }
 
@@ -173,29 +164,16 @@ public class ConversationScope extends AbstractScopeContext
   {
     FacesContext facesContext = FacesContext.getCurrentInstance();
 
-    if (facesContext == null)
-      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
-
-    ExternalContext extContext = facesContext.getExternalContext();
-    Map<String,Object> sessionMap = extContext.getSessionMap();
-
-    Scope scope = (Scope) sessionMap.get("caucho.conversation");
+    Scope scope = getJsfScope(facesContext);
 
     if (scope == null)
       return;
 
     scope._extendedConversation = null;
   }
-
-  public boolean isLongRunning()
+  
+  private Scope getJsfScope(FacesContext facesContext)
   {
-    throw new UnsupportedOperationException(getClass().getName());
-  }
-
-  public String getId()
-  {
-    FacesContext facesContext = FacesContext.getCurrentInstance();
-
     if (facesContext == null)
       throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
 
@@ -209,6 +187,26 @@ public class ConversationScope extends AbstractScopeContext
       sessionMap.put("caucho.conversation", scope);
     }
 
+    return scope;
+  }
+
+  public boolean isLongRunning()
+  {
+    throw new UnsupportedOperationException(getClass().getName());
+  }
+
+  public String getId()
+  {
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    
+    return getId(facesContext);
+  }
+
+  private String getId(FacesContext facesContext)
+  {
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
+
     UIViewRoot root = facesContext.getViewRoot();
     String id = root.getViewId();
     
@@ -217,18 +215,18 @@ public class ConversationScope extends AbstractScopeContext
 
   public long getTimeout()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _timeout;
   }
 
   public void setTimeout(long timeout)
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    _timeout = timeout;
   }
 
   static class Scope implements java.io.Serializable {
-    final HashMap<String,HashMap> _conversationMap
-      = new HashMap<String,HashMap>();
+    final HashMap<String,ContextContainer> _conversationMap
+      = new HashMap<String,ContextContainer>();
 
-    HashMap _extendedConversation;
+    ContextContainer _extendedConversation;
   }
 }

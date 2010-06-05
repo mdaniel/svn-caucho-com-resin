@@ -441,8 +441,6 @@ public class ExtensionManager
     eventType = eventType.fill(_cdiManager.createTargetBaseType(observedType),
                                _cdiManager.createTargetBaseType(declaringType.getBaseType()));
     
-    log.info("PROCESS-OBSERVER: " + eventType);
-    
     getEventManager().fireExtensionEvent(event, eventType);
   }
 

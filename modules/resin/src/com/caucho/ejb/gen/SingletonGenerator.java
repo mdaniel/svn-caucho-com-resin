@@ -138,6 +138,8 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     out.println("{");
     out.pushDepth();
 
+    generateClassStaticFields(out);
+    
     generateConstructor(out);
 
     generateContextPrologue(out);

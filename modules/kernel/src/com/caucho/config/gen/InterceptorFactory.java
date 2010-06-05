@@ -192,7 +192,7 @@ public class InterceptorFactory<X>
   
   private boolean hasAroundInvoke(Class<?> cl)
   {
-    for (Method m : cl.getMethods()) {
+    for (Method m : cl.getDeclaredMethods()) {
       if (m.isAnnotationPresent(AroundInvoke.class))
         return true;
     }

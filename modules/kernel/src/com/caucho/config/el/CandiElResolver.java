@@ -239,8 +239,9 @@ public class CandiElResolver extends ELResolver {
       CreationalContextImpl<?> env = _env;
       _env = null;
       _isActive = false;
-      
-      env.release();
+
+      if (env != null)
+        env.release();
     }
   }
 }

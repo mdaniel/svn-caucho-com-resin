@@ -499,9 +499,29 @@ public class JavaClassGenerator {
   /**
    * Loads the generated class into the parent loader.
    */
+  public Class<?> preloadClassParentLoader(String fullClassName,
+                                           Class<?> parentClass)
+  {
+    try {
+      Class<?> cl =  loadClassParentLoader(fullClassName, parentClass);
+      
+      if (! isModified(cl))
+        return cl;
+      else
+        return null;
+    } catch (ClassNotFoundException e) {
+      log.log(Level.ALL, e.toString(), e);
+      
+      return null;
+    }
+  }
+
+  /**
+   * Loads the generated class into the parent loader.
+   */
   public Class<?> loadClassParentLoader(String fullClassName,
                                         Class<?> parentClass)
-    throws ClassNotFoundException
+      throws ClassNotFoundException
   {
     ClassLoader parentLoader = parentClass.getClassLoader();
     

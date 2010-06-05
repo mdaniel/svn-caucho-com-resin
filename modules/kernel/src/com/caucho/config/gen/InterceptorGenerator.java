@@ -63,10 +63,13 @@ import com.caucho.java.JavaWriter;
 public class InterceptorGenerator<X>
   extends AbstractAspectGenerator<X>
 {
+  private static final String INTERCEPTOR_MAP = "caucho.interceptor.map";
+  
   private InterceptorFactory<X> _factory;
 
   private String _uniqueName;
   private String _chainName;
+  private boolean _isChainNew;
 
   private boolean _isExcludeDefaultInterceptors;
   private boolean _isExcludeClassInterceptors;
@@ -293,20 +296,10 @@ public class InterceptorGenerator<X>
   // InterceptionBinding seems wrong.  Also, it doesn't discriminate the 
   // chainName -- see the generated code for test1() in ejb/10a5
   private void generateBeanInterceptorChain(JavaWriter out,
-                                            HashMap map)
+                                            HashMap<String,Object> map)
     throws IOException
   {
-    _bindingEntry
-      = new InterceptionBinding(_interceptionType, _interceptorBinding);
-
-    _chainName = (String) map.get(_bindingEntry);
-
-    if (_chainName != null) {
-      return;
-    }
-
-    _chainName = getUniqueName(out);
-    map.put(_bindingEntry, _chainName);
+    _chainName = getChainName(out, map);
 
     if (_interceptors.size() > 0) {
       List<Class<?>> interceptors = (List<Class<?>>) map.get("@Interceptors");
@@ -500,34 +493,57 @@ public class InterceptorGenerator<X>
 
     out.popDepth();
     out.println("} catch (Exception e) {");
-    out.println("  __log.log(java.util.logging.Level.WARNING, e.toString(), e);");
-    out.println("  __initException = com.caucho.config.ConfigException.create(e);");
+    out.println("  __caucho_log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+    out.println("  __caucho_exception = com.caucho.config.ConfigException.create(e);");
     out.println("}");
     out.popDepth();
     out.println("}");
   }
 
+  private String getChainName(JavaWriter out, HashMap<String,Object> map)
+  {
+    HashMap bindingMap = (HashMap) map.get(INTERCEPTOR_MAP);
+    
+    if (bindingMap == null) {
+      bindingMap = new HashMap();
+      map.put(INTERCEPTOR_MAP, bindingMap);
+    }
+    
+    _bindingEntry
+      = new InterceptionBinding(_interceptionType, 
+                                _interceptorBinding,
+                                _interceptors);
+
+    _chainName = (String) bindingMap.get(_bindingEntry);
+    
+    if (_chainName != null) {
+      return _chainName;
+    }
+
+    _chainName = getUniqueName(out);
+    _isChainNew = true;
+    
+    bindingMap.put(_bindingEntry, _chainName);
+    
+    return _chainName;
+  }
+  
   private void generateInterceptorChain(JavaWriter out,
                                         HashMap map)
     throws IOException
   {
-    _bindingEntry
-      = new InterceptionBinding(_interceptionType, _interceptorBinding);
-
-    _chainName = (String) map.get(_bindingEntry);
-
-    if (_chainName != null) {
+    String chainName = getChainName(out, map);
+    
+    if (! _isChainNew)
       return;
-    }
-
-    _chainName = getUniqueName(out);
-    map.put(_bindingEntry, _chainName);
-
+    
     if (_interceptors.size() > 0) {
       List<Class<?>> interceptors = (List<Class<?>>) map.get("@Interceptors");
 
-      if (interceptors == null)
+      if (interceptors == null) {
         interceptors = new ArrayList<Class<?>>();
+        map.put("@Interceptors", interceptors);
+      }
 
       int []indexChain = new int[_interceptors.size()];
 
@@ -554,7 +570,7 @@ public class InterceptorGenerator<X>
 
       out.println();
 
-      out.print("private static int []" + _chainName
+      out.print("private static int []" + chainName
                 + "_objectIndexChain = new int[] {");
 
       for (int i : indexChain) {
@@ -583,8 +599,8 @@ public class InterceptorGenerator<X>
 
     out.popDepth();
     out.println("} catch (Exception e) {");
-    out.println("  __log.log(java.util.logging.Level.WARNING, e.toString(), e);");
-    out.println("  __initException = com.caucho.config.ConfigException.create(e);");
+    out.println("  __caucho_log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+    out.println("  __caucho_exception = com.caucho.config.ConfigException.create(e);");
     out.println("}");
     out.popDepth();
     out.println("}");
@@ -1584,12 +1600,15 @@ public class InterceptorGenerator<X>
   static class InterceptionBinding {
     private final InterceptionType _type;
     private final ArrayList<Annotation> _binding;
+    private final ArrayList<Class<?>> _interceptors;
 
     public InterceptionBinding(InterceptionType type,
-                               ArrayList<Annotation> binding)
+                               ArrayList<Annotation> binding,
+                               ArrayList<Class<?>> interceptors)
     {
       _type = type;
       _binding = binding;
+      _interceptors = interceptors;
     }
 
     @Override
@@ -1598,9 +1617,12 @@ public class InterceptorGenerator<X>
       int hashCode = _type.hashCode() * 65521;
       
       if (_binding != null)
-        return hashCode + _binding.hashCode();
-      else
-        return hashCode;
+        hashCode += _binding.hashCode();
+      
+      if (_interceptors != null)
+        hashCode += _interceptors.hashCode();
+      
+      return hashCode;
     }
 
     @Override
@@ -1616,10 +1638,18 @@ public class InterceptorGenerator<X>
       if (! _type.equals(binding._type))
         return false;
       
-      if (_binding == binding._binding)
-        return true;
+      if (_binding == binding._binding) {
+      }
+      else if (_binding == null || ! _binding.equals(binding._binding))
+        return false;
       
-      return _binding != null && _binding.equals(binding._binding);
+      if (_interceptors == binding._interceptors) {
+      }
+      else if (_interceptors == null
+               || ! _interceptors.equals(binding._interceptors))
+        return false;
+        
+      return true;
     }
   }
 }

@@ -283,6 +283,7 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println("private static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\""
                 + getFullClassName() + "\");");
     out.println("private static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
+    out.println("private static RuntimeException __caucho_exception;");
     
     out.println();
     out.println("private final StatelessManager _manager;");

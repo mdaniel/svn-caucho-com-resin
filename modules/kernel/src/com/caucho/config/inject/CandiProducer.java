@@ -162,15 +162,7 @@ public class CandiProducer<X> implements InjectionTarget<X>
       X value;
       
       if (_javaCtor != null) {
-        try {
         value = _javaCtor.newInstance(args);
-        } catch (InvocationTargetException e) {
-          log.log(Level.WARNING, e.toString(), e);
-          throw e;
-        } catch (Exception e) {
-          log.log(Level.WARNING, e.toString(), e);
-          throw ConfigException.create(e);
-        }
       }
       else
         value = _instanceClass.newInstance();

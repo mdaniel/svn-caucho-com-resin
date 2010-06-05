@@ -288,8 +288,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
           if (_javaCtor != null) {
             _javaCtor = (Constructor<X>) getConstructor(instanceClass, _javaCtor.getParameterTypes());
             _javaCtor.setAccessible(true);
-            
-            log.info("CTOR: " + _javaCtor + " " + instanceClass + " " + instanceClass.getClassLoader());
           }
         } catch (Exception e) {
           // server/2423

@@ -119,7 +119,7 @@ public class TypeFactory implements AddLoaderListener
   private TypeFactory(ClassLoader loader)
   {
     _loader = Environment.getEnvironmentClassLoader(loader);
-
+    
     _localFactory.set(this, loader);
 
     if (_loader != null) {

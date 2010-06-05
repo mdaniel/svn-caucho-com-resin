@@ -259,16 +259,21 @@ public class InterceptorBean<X> implements Interceptor<X>
   {
     introspectQualifiers(_type.getAnnotations());
 
-    introspectMethods();
+    introspectMethods(_type);
     
     if (_type.isAnnotationPresent(Decorator.class))
       throw new ConfigException(L.l("@Interceptor {0} cannot have a @Decorator annotation",
                                     _type.getName()));
   }
 
-  protected void introspectMethods()
+  protected void introspectMethods(Class<?> cl)
   {
-    for (Method method : _type.getMethods()) {
+    if (cl == null)
+      return;
+    
+    introspectMethods(cl.getSuperclass());
+    
+    for (Method method : cl.getDeclaredMethods()) {
       if (Modifier.isStatic(method.getModifiers()))
         continue;
 
