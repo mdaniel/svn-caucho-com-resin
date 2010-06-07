@@ -6,7 +6,7 @@
    version="2.0">
 
   <application>
-    <el-resolver>com.caucho.config.el.CandiContextResolver</el-resolver>
+    <el-resolver>com.caucho.config.el.CandiElResolver</el-resolver>
   </application>
 
 </faces-config>

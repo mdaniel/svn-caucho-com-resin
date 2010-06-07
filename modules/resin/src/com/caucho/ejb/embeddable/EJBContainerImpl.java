@@ -97,7 +97,6 @@ public class EJBContainerImpl extends EJBContainer {
     
     _classLoader = _application.getClassLoader();
     _injectManager = InjectManager.create(_classLoader);
-    _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
 
     Thread thread = Thread.currentThread();
     ClassLoader oldLoader = thread.getContextClassLoader();
@@ -110,6 +109,8 @@ public class EJBContainerImpl extends EJBContainer {
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
 
+      _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
+      
       // XXX initialcontextfactory broken when set by non-resin container
       AbstractModel model = InitialContextFactoryImpl.createRoot();
       _context = new ContextImpl(model, null);
