@@ -28,15 +28,17 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.server.http.CauchoRequest;
 import com.caucho.server.http.CauchoResponse;
 import com.caucho.server.http.RequestAdapter;
+import com.caucho.util.L10N;
 
 import javax.servlet.FilterChain;
 import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
+import javax.servlet.ServletRequestWrapper;
+import javax.servlet.ServletResponseWrapper;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
@@ -44,6 +46,9 @@ import java.io.OutputStream;
 import java.io.PrintWriter;
 
 class NamedDispatcherImpl implements RequestDispatcher {
+
+  private static final L10N L = new L10N(RequestDispatcherImpl.class);
+
   private WebApp _webApp;
   
   private FilterChain _includeFilterChain;  
@@ -61,28 +66,78 @@ class NamedDispatcherImpl implements RequestDispatcher {
     _webApp = webApp;
   }
 
-  public void include(ServletRequest request, ServletResponse response)
+  public void include(ServletRequest topRequest, ServletResponse topResponse)
     throws IOException, ServletException
   {
-    HttpServletResponse res = (HttpServletResponse) response;
+    HttpServletRequest parentReq;
+    ServletRequestWrapper reqWrapper = null;
 
-    RequestAdapter reqAdapt = null;
-    
-    if (! (request instanceof CauchoRequest)) {
-      reqAdapt = RequestAdapter.create();
-      reqAdapt.init((HttpServletRequest) request, res, _webApp);
-      request = reqAdapt;
+    if (topRequest instanceof ServletRequestWrapper) {
+      ServletRequest request = topRequest;
+
+      while (request instanceof ServletRequestWrapper) {
+        reqWrapper = (ServletRequestWrapper) request;
+
+        request = ((ServletRequestWrapper) request).getRequest();
+      }
+
+      parentReq = (HttpServletRequest) request;
+    } else if (topRequest instanceof HttpServletRequest) {
+      parentReq = (HttpServletRequest) topRequest;
+    } else {
+      throw new IllegalStateException(L.l(
+        "expected instance of ServletRequestWrapper at `{0}'", topResponse));
     }
 
-    CauchoRequest req = (CauchoRequest) request;
+    HttpServletResponse parentRes;
+    ServletResponseWrapper resWrapper = null;
 
-    DispatchResponse dispatchResponse = new DispatchResponse(res);
-    dispatchResponse.init(res);
+    if (topResponse instanceof ServletResponseWrapper) {
+      ServletResponse response = topResponse;
+
+      while (response instanceof ServletResponseWrapper) {
+        resWrapper = (ServletResponseWrapper) response;
+
+        response = ((ServletResponseWrapper) response).getResponse();
+      }
+
+      parentRes = (HttpServletResponse) response;
+    } else if (topResponse instanceof HttpServletResponse) {
+      parentRes = (HttpServletResponse) topResponse;
+    } else {
+      throw new IllegalStateException(L.l(
+        "expected instance of ServletResponse at `{0}'", topResponse));
+    }
+
+    RequestAdapter subRequest = RequestAdapter.create();
+    subRequest.init(parentReq, parentRes, _webApp);
+
+    DispatchResponse subResponse = new DispatchResponse(parentRes);
+    subResponse.init(parentRes);
+
+    if (reqWrapper != null) {
+      reqWrapper.setRequest(subRequest);
+    } else {
+      topRequest = subRequest;
+    }
+
+    if (resWrapper != null) {
+      resWrapper.setResponse(subResponse);
+    } else {
+      topResponse = subResponse;
+    }
 
     try {
-      _includeFilterChain.doFilter(req, dispatchResponse);
+      _includeFilterChain.doFilter(topRequest, topResponse);
     } finally {
-      dispatchResponse.finish();
+      subResponse.finish();
+      RequestAdapter.free(subRequest);
+
+      if (reqWrapper != null)
+        reqWrapper.setRequest(parentReq);
+
+      if (resWrapper != null)
+        resWrapper.setResponse(parentRes);
     }
 
     //_includeFilterChain.doFilter(req, new DispatchResponse(res));

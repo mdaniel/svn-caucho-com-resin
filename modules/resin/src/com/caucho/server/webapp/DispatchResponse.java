@@ -63,4 +63,10 @@ public class DispatchResponse extends ResponseAdapter {
   @Override
   public void setIntHeader(String name, int value) {
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + '[' + getResponse() + ']';
+  }
 }

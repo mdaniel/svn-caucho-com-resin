@@ -686,4 +686,9 @@ public class RequestAdapter extends RequestWrapper
     _webApp = null;
     _response = null;
   }
+
+  @Override
+  public String toString() {
+    return getClass().getSimpleName() + '[' + _request + ']'; 
+  }
 }
