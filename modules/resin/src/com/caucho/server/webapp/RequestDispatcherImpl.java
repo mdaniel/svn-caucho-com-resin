@@ -145,8 +145,8 @@ public class RequestDispatcherImpl implements RequestDispatcher {
   /**
    * Forwards the request to the servlet named by the request dispatcher.
    *
-   * @param req the servlet request.
-   * @param res the servlet response.
+   * @param topRequest the servlet request.
+   * @param topResponse the servlet response.
    * @param method special to tell if from error.
    */
   public void forward(ServletRequest topRequest, ServletResponse topResponse,
@@ -233,7 +233,7 @@ public class RequestDispatcherImpl implements RequestDispatcher {
       ServletResponse response = topResponse;
 
       while (response instanceof ServletResponseWrapper) {
-        resWrapper = (ServletResponseWrapper) topResponse;
+        resWrapper = (ServletResponseWrapper) response;
 
         response = ((ServletResponseWrapper) response).getResponse();
       }

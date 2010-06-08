@@ -47,7 +47,7 @@ import java.io.PrintWriter;
 
 class NamedDispatcherImpl implements RequestDispatcher {
 
-  private static final L10N L = new L10N(RequestDispatcherImpl.class);
+  private static final L10N L = new L10N(NamedDispatcherImpl.class);
 
   private WebApp _webApp;
   
