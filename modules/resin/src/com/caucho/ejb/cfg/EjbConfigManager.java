@@ -32,6 +32,8 @@ package com.caucho.ejb.cfg;
 import java.util.*;
 import java.util.logging.*;
 
+import javax.enterprise.inject.spi.AnnotatedType;
+
 import com.caucho.config.*;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbManager;
@@ -108,13 +110,12 @@ public class EjbConfigManager extends EjbConfig {
       = new ArrayList<EjbRootConfig>(_rootPendingList);
     _rootPendingList.clear();
 
-    /*
     for (EjbRootConfig rootConfig : pendingList) {
       for (String className : rootConfig.getClassNameList()) {
-        addIntrospectableClass(className, rootConfig.getModuleName());
+        // XXX rootConfig.getModuleName());
+        addClassByName(className);
       }
     }
-    */
 
     configurePaths();
 
@@ -123,6 +124,27 @@ public class EjbConfigManager extends EjbConfig {
     deploy();
   }
 
+  private <X> void addClassByName(String className)
+  {
+    try {
+      ClassLoader loader = _ejbContainer.getClassLoader();
+      
+      Class<X> type = (Class<X>) Class.forName(className, false, loader);
+      
+      InjectManager manager = InjectManager.create(loader);
+      
+      AnnotatedType<X> annType = manager.createAnnotatedType(type);
+      
+      addAnnotatedType(annType, annType, null);
+    }
+    catch (ConfigException e) {
+      throw e;
+    }
+    catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
   /**
    * Adds a path for an EJB config file to the config list.
    */

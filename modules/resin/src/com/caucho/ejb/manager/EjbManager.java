@@ -403,9 +403,13 @@ public class EjbManager implements ScanListener, EnvironmentListener {
       return new EjbScanClass(root, className, this);
   }
 
+  @Override
   public boolean isScanMatchAnnotation(CharBuffer annotationName)
   {
     if (annotationName.matches("javax.ejb.Stateless")) {
+      return true;
+    }
+    if (annotationName.matches("javax.ejb.Singleton")) {
       return true;
     }
     else if (annotationName.matches("javax.ejb.Stateful")) {

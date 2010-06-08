@@ -56,7 +56,8 @@ import javax.enterprise.inject.spi.InjectionTarget;
  */
 public class EjbConfig {
   private static final L10N L = new L10N(EjbConfig.class);
-  private final EjbManager _ejbContainer;
+  
+  protected final EjbManager _ejbContainer;
 
   private ArrayList<FileSetType> _fileSetList = new ArrayList<FileSetType>();
 
