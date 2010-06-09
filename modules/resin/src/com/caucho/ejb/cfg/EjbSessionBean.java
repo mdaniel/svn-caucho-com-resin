@@ -69,15 +69,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
   /**
    * Creates a new session bean configuration.
    */
-  /*
-  public EjbSessionBean(EjbConfig ejbConfig, String ejbModuleName)
-  {
-    super(ejbConfig, ejbModuleName);
-  }
-*/
-  /**
-   * Creates a new session bean configuration.
-   */
   public EjbSessionBean(EjbConfig ejbConfig, 
                         AnnotatedType<X> rawAnnType,
                         AnnotatedType<X> annType,

@@ -266,12 +266,14 @@ public class EjbInjectionTarget<T> {
         target.inject(instance, cxt);
       }
 
-      if (getInjectionTarget() != null && target != getInjectionTarget()) {
-        getInjectionTarget().inject(instance, cxt);
-      }
+      InjectionTarget<T> selfInjectionTarget = getInjectionTarget();
       
-      if (getInjectionTarget() != null) {
-        getInjectionTarget().postConstruct(instance);
+      if (selfInjectionTarget != null) {
+        if (target != selfInjectionTarget) {
+          selfInjectionTarget.inject(instance, cxt);
+        }
+
+        selfInjectionTarget.postConstruct(instance);
       }
     } finally {
       thread.setContextClassLoader(oldLoader);

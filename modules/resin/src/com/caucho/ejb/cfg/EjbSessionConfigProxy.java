@@ -96,19 +96,19 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
       Stateless stateless = new StatelessLiteral(name, mappedName, description);
       annType.addAnnotation(stateless);
       
-      return new EjbStatelessBean<T>(getConfig(), rawAnnType, annType, stateless);
+      return new EjbStatelessBean<T>(getConfig(), rawAnnType, annType, stateless.name());
     }
     else if ("Stateful".equals(_sessionType)) {
       Stateful stateful = new StatefulLiteral(name, mappedName, description);
       annType.addAnnotation(stateful);
       
-      return new EjbStatefulBean<T>(getConfig(), rawAnnType, annType, stateful);
+      return new EjbStatefulBean<T>(getConfig(), rawAnnType, annType, stateful.name());
     }
     else if ("Singleton".equals(_sessionType)) {
       Singleton singleton = new SingletonLiteral(name, mappedName, description);
       annType.addAnnotation(singleton);
       
-      return new EjbSingletonBean<T>(getConfig(), rawAnnType, annType, singleton);
+      return new EjbSingletonBean<T>(getConfig(), rawAnnType, annType, singleton.name());
     }
     
     throw new UnsupportedOperationException(_sessionType);
