@@ -62,9 +62,6 @@ public class AnnotatedElementImpl implements Annotated
   {
     _type = type;
 
-    if (annList == null)
-      annList = new Annotation[0];
-
     if (annotated != null) {
       Set<Annotation> annSet = annotated.getAnnotations();
       

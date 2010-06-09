@@ -96,12 +96,14 @@ public class EventManager
     Method method = beanMethod.getJavaMember();
     Type eventType = method.getGenericParameterTypes()[param];
     
-    // ioc/0b22
+    // ioc/0b22 vs ioc/0b0h
+    /*
     if (! method.getDeclaringClass().equals(bean.getBeanClass())
         && ! bean.getBeanClass().isAnnotationPresent(Specializes.class)) {
       return;
     }
-
+    */
+    
     HashSet<Annotation> bindingSet = new HashSet<Annotation>();
 
     List<AnnotatedParameter<Z>> paramList = beanMethod.getParameters();

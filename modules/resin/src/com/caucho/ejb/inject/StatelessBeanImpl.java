@@ -74,9 +74,10 @@ public class StatelessBeanImpl<X,T> extends SessionBeanImpl<X,T>
                            ManagedBeanImpl<X> bean,
                            Class<T> api,
                            Set<Type> types,
-                           StatelessContext<X,T> context)
+                           StatelessContext<X,T> context,
+                           AnnotatedType<X> extAnnType)
   {
-    super(context, bean, types);
+    super(context, bean, types, extAnnType);
 
     _manager = manager;
     _qualifiers.addAll(bean.getQualifiers());

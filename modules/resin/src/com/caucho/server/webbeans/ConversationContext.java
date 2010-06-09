@@ -1,0 +1,269 @@
+/*
+ * Copyright (c) 1998-2010 Caucho Technology -- all rights reserved
+ *
+ * This file is part of Resin(R) Open Source
+ *
+ * Each copy or derived work must preserve the copyright notice and this
+ * notice unmodified.
+ *
+ * Resin Open Source is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation; either version 2 of the License, or
+ * (at your option) any later version.
+ *
+ * Resin Open Source is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE, or any warranty
+ * of NON-INFRINGEMENT.  See the GNU General Public License for more
+ * details.
+ *
+ * You should have received a copy of the GNU General Public License
+ * along with Resin Open Source; if not, write to the
+ *
+ *   Free Software Foundation, Inc.
+ *   59 Temple Place, Suite 330
+ *   Boston, MA 02111-1307  USA
+ *
+ * @author Scott Ferguson
+ */
+
+package com.caucho.server.webbeans;
+
+import java.lang.annotation.Annotation;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicLong;
+
+import javax.annotation.PreDestroy;
+import javax.enterprise.context.ContextNotActiveException;
+import javax.enterprise.context.Conversation;
+import javax.enterprise.context.ConversationScoped;
+import javax.faces.component.UIViewRoot;
+import javax.faces.context.ExternalContext;
+import javax.faces.context.FacesContext;
+
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.scope.AbstractScopeContext;
+import com.caucho.config.scope.ContextContainer;
+import com.caucho.inject.Module;
+import com.caucho.util.Alarm;
+import com.caucho.util.L10N;
+import com.caucho.util.RandomUtil;
+
+/**
+ * The conversation scope value
+ */
+public class ConversationContext extends AbstractScopeContext
+  implements Conversation, java.io.Serializable
+{
+  private static final L10N L = new L10N(ConversationContext.class);
+  
+  private Scope _scope;
+  
+  public ConversationContext()
+  {
+  }
+  
+  /**
+   * Returns true if the scope is currently active.
+   */
+  @Override
+  public boolean isActive()
+  {
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+
+    return facesContext != null;
+  }
+
+  @Override
+  public boolean isTransient()
+  {
+    Scope scope = _scope;
+    
+    return scope == null || scope._extendedId == null;
+  }
+
+  /**
+   * Returns the scope annotation type.
+   */
+  public Class<? extends Annotation> getScope()
+  {
+    return ConversationScoped.class;
+  }
+
+  /**
+   * Returns the current value of the component in the conversation scope.
+   */
+  @Override
+  protected ContextContainer getContextContainer()
+  {
+    Scope scope = getJsfScope();
+    
+    if (scope == null)
+      return null;
+    else
+      return scope._transientConversation;
+  }
+
+  /**
+   * Returns the current value of the component in the conversation scope.
+   */
+  @Override
+  protected ContextContainer createContextContainer()
+  {
+    Scope scope = createJsfScope();
+
+    if (scope._transientConversation == null) {
+      scope._transientConversation = scope._extendedConversation;
+      
+      if (_scope._transientConversation == null)
+        scope._transientConversation = new ContextContainer();
+    }
+    
+    return scope._transientConversation;
+  }
+
+  //
+  // Conversation API
+  //
+
+  /**
+   * Begins an extended conversation
+   */
+  @Override
+  public void begin()
+  {
+    StringBuilder sb = new StringBuilder();
+    
+    sb.append(RandomUtil.getRandomLong() & 0x7fffffffffffffffL);
+
+    begin(sb.toString());
+  }
+  
+  @Override
+  public void begin(String name)
+  {
+    Scope scope = createJsfScope();
+    
+    if (scope._extendedId != null)
+      throw new IllegalStateException(L.l("Conversation begin() must only be called when a long-running conversation does not exist."));
+
+    scope._extendedId = name;
+    scope._extendedConversation = scope._transientConversation;
+  }
+
+  /**
+   * Ends an extended conversation
+   */
+  @Override
+  public void end()
+  {
+    Scope scope = getJsfScope();
+
+    if (scope == null)
+      return;
+    
+    if (scope._extendedId == null)
+      throw new IllegalStateException(L.l("Conversation end() must only be called when a long-running conversation exists."));
+
+    scope._extendedId = null;
+    scope._extendedConversation = null;
+  }
+
+  @Override
+  public String getId()
+  {
+    Scope scope = getJsfScope();
+    
+    if (scope != null)
+      return scope._extendedId;
+    else
+      return null;
+  }
+
+  @Override
+  public long getTimeout()
+  {
+    Scope scope = createJsfScope();
+    
+    return scope._timeout;
+  }
+
+  @Override
+  public void setTimeout(long timeout)
+  {
+    Scope scope = createJsfScope();
+    
+    scope._timeout = timeout;
+  }
+  
+  private Scope getJsfScope()
+  {
+    if (_scope != null)
+      return _scope;
+    
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    
+    if (facesContext == null)
+      return null;
+    
+    return getJsfScope(facesContext, false);
+  }
+  
+  private Scope createJsfScope()
+  {
+    if (_scope != null)
+      return _scope;
+    
+    FacesContext facesContext = FacesContext.getCurrentInstance();
+    
+    if (facesContext == null)
+      throw new IllegalStateException(L.l("@ConversationScoped is not available because JSF is not active"));
+
+    return getJsfScope(facesContext, true);
+  }
+    
+  private Scope getJsfScope(FacesContext facesContext, boolean isCreate)
+  {
+    if (_scope != null)
+      return _scope;
+    
+    ExternalContext extContext = facesContext.getExternalContext();
+    Map<String,Object> sessionMap = extContext.getSessionMap();
+
+    _scope = (Scope) sessionMap.get("caucho.conversation");
+
+    if (_scope == null) {
+      if (! isCreate)
+        return null;
+      
+      _scope = new Scope();
+      sessionMap.put("caucho.conversation", _scope);
+    }
+    
+    if (_scope._transientConversation == null)
+      _scope._transientConversation = _scope._extendedConversation;
+
+    return _scope;
+  }
+  
+  public void destroy()
+  {
+    if (_scope == null)
+      return;
+    
+    ContextContainer context = _scope._transientConversation;
+    _scope._transientConversation = null;
+    
+    if (_scope._extendedConversation == null && context != null)
+      context.close();
+  }
+
+  static class Scope implements java.io.Serializable {
+    ContextContainer _transientConversation;
+    
+    String _extendedId;
+    ContextContainer _extendedConversation;
+    long _timeout;
+  }
+}

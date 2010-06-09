@@ -74,6 +74,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
 
   private BeanArg<X> []_args;
   private boolean _isIfExists;
+  private boolean _isStatic;
   
   private TransactionPhase _transactionPhase = TransactionPhase.IN_PROGRESS;
 
@@ -87,6 +88,7 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
     _bean = bean;
     _method = method;
     _method.getJavaMember().setAccessible(true);
+    _isStatic = _method.isStatic();
     _type = type;
     _qualifiers = qualifiers;
 
@@ -201,6 +203,9 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
       
       if (instance == null)
         return;
+    }
+    else if (_isStatic) {
+      instance = null;
     }
     else {
       if (_bean.getScope() == Dependent.class) {

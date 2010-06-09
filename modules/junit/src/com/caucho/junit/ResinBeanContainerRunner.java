@@ -61,7 +61,7 @@ public class ResinBeanContainerRunner extends BlockJUnit4ClassRunner {
   protected void runChild(FrameworkMethod method, RunNotifier notifier)
   {
     ResinBeanContainer beanContainer = getResinContext();
-    RequestContext request = beanContainer.beginRequest();
+    BeanContainerRequest request = beanContainer.beginRequest();
 
     try {
       super.runChild(method, notifier);

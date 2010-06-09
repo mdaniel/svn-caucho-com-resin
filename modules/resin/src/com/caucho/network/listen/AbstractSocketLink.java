@@ -204,27 +204,11 @@ public abstract class AbstractSocketLink
     return null;
   }
   
-  /**
-   * Sends a broadcast request.
-   */
-  /*
-  public void sendBroadcast(BroadcastTask task)
-  {
-  }
-  */
-
   @Override
   public boolean isKeepaliveAllocated()
   {
     return false;
   }
-
-  /*
-  public boolean toKeepalive()
-  {
-    return false;
-  }
-  */
 
   @Override
   public void killKeepalive()
@@ -283,49 +267,4 @@ public abstract class AbstractSocketLink
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
-
-  /**
-   * Close the controller
-   */
-  /*
-  public void closeController(ConnectionCometController controller)
-  {
-  }
-
-  public void toCometComplete()
-  {
-  }
-  */
-
-  /*
-  public void toSuspend()
-  {
-  }
-  */
-
-  /**
-   * Wakes the connection
-   */
-  /*
-  protected boolean wake()
-  {
-    return false;
-  }
-  */
-
-  /*
-  static {
-    try {
-      Class<?> asyncComet = Class.forName("com.caucho.server.connection.AsyncConnectionCometController");
-
-      _cometConstructor = asyncComet.getConstructor(new Class[] {
-          TransportConnection.class,
-          boolean.class,
-          ServletRequest.class,
-          ServletResponse.class
-        });
-    } catch (Throwable e) {
-    }
-  }
-  */
 }

@@ -32,6 +32,8 @@ package com.caucho.ejb.inject;
 import java.lang.reflect.Type;
 import java.util.Set;
 
+import javax.enterprise.inject.spi.AnnotatedType;
+
 import com.caucho.config.inject.CdiStatefulBean;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.ejb.session.AbstractSessionContext;
@@ -46,8 +48,9 @@ public class StatefulBeanImpl<X,T> extends SessionBeanImpl<X,T>
 {
   public StatefulBeanImpl(AbstractSessionContext<X,T> context,
                           ManagedBeanImpl<X> bean,
-                          Set<Type> apiList)
+                          Set<Type> apiList,
+                          AnnotatedType<X> extAnnType)
   {
-    super(context, bean, apiList);
+    super(context, bean, apiList, extAnnType);
   }
 }

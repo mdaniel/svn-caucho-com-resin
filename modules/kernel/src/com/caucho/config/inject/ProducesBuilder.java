@@ -116,15 +116,18 @@ public class ProducesBuilder {
   }
 
   protected <X,T> void addProducesMethod(Bean<X> bean,
-                                   AnnotatedType<X> beanType,
-                                   AnnotatedMethod<? super X> producesMethod,
-                                   AnnotatedMethod<? super X> disposesMethod)
+                                         AnnotatedType<X> beanType,
+                                         AnnotatedMethod<? super X> producesMethod,
+                                         AnnotatedMethod<? super X> disposesMethod)
   {
-    // ioc/07d0
+    // ioc/07g2 vs ioc/07d0 
+    /*
+    // 
     if (producesMethod.getJavaMember().getDeclaringClass() != beanType.getJavaClass()
         && ! beanType.isAnnotationPresent(Specializes.class)) {
       return;
     }
+    */
     
     Arg<? super X> []producesArgs = introspectArguments(bean, producesMethod);
     Arg<? super X> []disposesArgs = null;

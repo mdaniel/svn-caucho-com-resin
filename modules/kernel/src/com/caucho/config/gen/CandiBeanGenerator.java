@@ -159,6 +159,9 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
         && hasTransientInject(_beanClass.getJavaClass())) {
       _isEnhanced = true;
     }
+    
+    if (_aspectFactory.isEnhanced())
+      _isEnhanced = true;
   }
 
   protected void introspectClass(AnnotatedType<X> cl)
@@ -296,20 +299,23 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       }
     }
     
-    generateBeanPrologue(out);
-
-    generateInject(out);
-
-    generatePostConstruct(out);
-    
-    generateDestroy(out);
-
     HashMap<String,Object> map = new HashMap<String,Object>();
+    
+    generateBeanPrologue(out, map);
+
     for (AspectGenerator<X> method : _businessMethods) {
       method.generate(out, map);
     }
 
+    generateEpilogue(out, map);
+    
+    generateInject(out);
+    
+    generatePostConstruct(out, map);
+    
     generateWriteReplace(out);
+    
+    generateDestroy(out);
   }
 
   /**
@@ -442,5 +448,11 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
 
       out.printClass(exnCls[i]);
     }
+  }
+
+  @Override
+  protected AspectBeanFactory<X> getAspectBeanFactory()
+  {
+    return _aspectFactory;
   }
 }

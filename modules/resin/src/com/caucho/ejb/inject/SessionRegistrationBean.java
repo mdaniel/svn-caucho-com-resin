@@ -39,6 +39,7 @@ import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.inject.BeanAdapter;
 import com.caucho.config.inject.CreationalContextImpl;
+import com.caucho.config.inject.InjectEnvironmentBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.j2ee.BeanName;
 import com.caucho.ejb.session.AbstractSessionContext;
@@ -49,6 +50,7 @@ import com.caucho.inject.Module;
  */
 @Module
 public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
+  implements InjectEnvironmentBean
 {
   private AbstractSessionContext<X,T> _context;
   private Set<Annotation> _qualifierSet;
@@ -65,6 +67,11 @@ public class SessionRegistrationBean<X,T> extends BeanAdapter<X,T>
     
     _qualifierSet = new HashSet<Annotation>();
     _qualifierSet.add(beanName);
+  }
+ 
+  public InjectManager getCdiManager()
+  {
+    return _context.getInjectManager();
   }
   
   /**

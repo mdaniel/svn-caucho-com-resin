@@ -344,11 +344,13 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
 
   public void introspectProduces()
   {
-    getBeanManager().addProduces(this, getAnnotatedType());
+    ProducesBuilder builder = new ManagedProducesBuilder(getBeanManager());
+    
+    builder.introspectProduces(this, getAnnotatedType());
   }
   
   /**
-   * Introspects the methods for any @Produces
+   * Introspects the methods for any @Observes
    */
   void introspectObservers()
   {

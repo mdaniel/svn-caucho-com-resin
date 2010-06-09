@@ -27,17 +27,13 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.gen;
+package com.caucho.config.inject;
 
-import com.caucho.config.inject.CreationalContextImpl;
 
 /**
- * Interface for a Candi enhanced bean.
+ * Injection beans which are environment-dependent.
  */
-public interface CandiEnhancedBean {
-  public void __caucho_inject(Object []delegates, CreationalContextImpl<?> parentEnv);
-  
-  public void __caucho_postConstruct();
-  
-  public void __caucho_destroy(CreationalContextImpl<?> env);
+public interface InjectEnvironmentBean
+{
+  public InjectManager getCdiManager();
 }

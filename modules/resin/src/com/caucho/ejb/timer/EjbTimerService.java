@@ -529,8 +529,8 @@ public class EjbTimerService implements TimerService {
   private Timer createTimer(Trigger trigger, Serializable info)
   {
     EjbTimer timer = new EjbTimer();
-    TimerTask scheduledTask = new TimerTask(_timeout, timer, null, trigger,
-        info);
+    TimerTask scheduledTask
+      = new TimerTask(_timeout, timer, null, trigger, info);
     timer.setScheduledTask(scheduledTask);
 
     synchronized (_timers) {

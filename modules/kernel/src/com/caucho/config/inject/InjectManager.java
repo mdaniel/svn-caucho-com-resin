@@ -77,17 +77,12 @@ import javax.enterprise.inject.New;
 import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.UnsatisfiedResolutionException;
-import javax.enterprise.inject.spi.AfterBeanDiscovery;
-import javax.enterprise.inject.spi.AfterDeploymentValidation;
 import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedField;
-import javax.enterprise.inject.spi.AnnotatedMember;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.Extension;
 import javax.enterprise.inject.spi.InjectionPoint;
@@ -96,12 +91,7 @@ import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.enterprise.inject.spi.ObserverMethod;
 import javax.enterprise.inject.spi.PassivationCapable;
-import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
-import javax.enterprise.inject.spi.ProcessInjectionTarget;
-import javax.enterprise.inject.spi.ProcessObserverMethod;
-import javax.enterprise.inject.spi.ProcessProducer;
-import javax.enterprise.inject.spi.ProcessProducerMethod;
 import javax.enterprise.inject.spi.Producer;
 import javax.inject.Inject;
 import javax.inject.Named;
@@ -121,17 +111,11 @@ import com.caucho.config.LineConfigException;
 import com.caucho.config.ModulePrivate;
 import com.caucho.config.ModulePrivateLiteral;
 import com.caucho.config.bytecode.ScopeAdapter;
-import com.caucho.config.el.CandiConfigResolver;
 import com.caucho.config.el.CandiElResolver;
 import com.caucho.config.el.CandiExpressionFactory;
 import com.caucho.config.event.EventBeanImpl;
 import com.caucho.config.event.EventManager;
-import com.caucho.config.event.ObserverEntry;
-import com.caucho.config.event.ObserverMethodImpl;
 import com.caucho.config.extension.ExtensionManager;
-import com.caucho.config.extension.ProcessBeanImpl;
-import com.caucho.config.extension.ProcessManagedBeanImpl;
-import com.caucho.config.extension.ProcessProducerMethodImpl;
 import com.caucho.config.j2ee.EjbHandler;
 import com.caucho.config.j2ee.PersistenceContextHandler;
 import com.caucho.config.j2ee.PersistenceUnitHandler;
@@ -139,7 +123,6 @@ import com.caucho.config.j2ee.ResourceHandler;
 import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.config.reflect.BaseType;
 import com.caucho.config.reflect.BaseTypeFactory;
-import com.caucho.config.reflect.ParamType;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.scope.ApplicationContext;
 import com.caucho.config.scope.DependentContext;
@@ -147,6 +130,7 @@ import com.caucho.config.scope.ErrorContext;
 import com.caucho.config.scope.SingletonScope;
 import com.caucho.config.xml.XmlStandardPlugin;
 import com.caucho.inject.Module;
+import com.caucho.inject.RequestContext;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentApply;
@@ -378,9 +362,9 @@ public final class InjectManager
       _singletonScope = new SingletonScope();
       _applicationScope = new ApplicationContext();
       
-      addContext("com.caucho.server.webbeans.RequestScope");
+      addContext(new RequestContext());
       addContext("com.caucho.server.webbeans.SessionScope");
-      addContext("com.caucho.server.webbeans.ConversationScope");
+      addContext("com.caucho.server.webbeans.ConversationContext");
       addContext("com.caucho.server.webbeans.TransactionScope");
       addContext(_applicationScope);
       addContext(_singletonScope);
@@ -1172,6 +1156,7 @@ public final class InjectManager
    * @param type the bean's class
    * @param qualifiers required @Qualifier annotations
    */
+  @Override
   public Set<Bean<?>> getBeans(Type type,
                                Annotation... qualifiers)
   {
@@ -1515,9 +1500,18 @@ public final class InjectManager
     
     boolean isPassivating = isPassivatingScope(bean.getScope());
     
+    if (bean instanceof InjectEnvironmentBean) {
+      InjectEnvironmentBean envBean = (InjectEnvironmentBean) bean;
+      
+      if (envBean.getCdiManager() != this) {
+        envBean.getCdiManager().validate(bean);
+        return;
+      }
+    }
+    
     if (bean instanceof CdiStatefulBean)
       isPassivating = true;
-    
+
     for (InjectionPoint ip : bean.getInjectionPoints()) {
       ReferenceFactory<?> factory = validateInjectionPoint(ip);
       
@@ -1547,8 +1541,9 @@ public final class InjectManager
     boolean isPassivating = isPassivatingScope(bean.getScope());
     
     if (bean instanceof CdiStatefulBean
-        || bean.getBeanClass().isAnnotationPresent(Stateful.class))
+        || bean.getBeanClass().isAnnotationPresent(Stateful.class)) {
       isPassivating = true;
+    }
     
     if (isPassivating && ! ip.isTransient()) {
       Class<?> cl = getRawClass(ip.getType());
@@ -1556,7 +1551,9 @@ public final class InjectManager
       Bean<?> prodBean = resolve(getBeans(ip.getType(), ip.getQualifiers()));
     
       // TCK conflict
-      if (! cl.isInterface() && ! Serializable.class.isAssignableFrom(cl)) {
+      if (! cl.isInterface()
+          && ! Serializable.class.isAssignableFrom(cl)
+          && ! isNormalScope(prodBean.getScope())) {
         RuntimeException exn;
         
         if (isProduct(prodBean))
@@ -2337,7 +2334,7 @@ public final class InjectManager
   }
 
   /**
-   * Returns the scope context for the given type, required for the TCK
+   * Required for TCK. Returns the scope context for the given type.
    */
   public Context getContextImpl(Class<? extends Annotation> scopeType)
   {
@@ -2904,8 +2901,10 @@ public final class InjectManager
     if (! managedBean.isAlternative() || isEnabled(managedBean)) {
       // ioc/0680
       addBean(managedBean);
-      
-      managedBean.introspectObservers();
+
+      // ioc/0b0f
+      if (! _specializedMap.containsKey(managedBean.getBeanClass()))
+        managedBean.introspectObservers();
       
       /*
       for (ObserverMethodImpl<X,?> observer : managedBean.getObserverMethods()) {
@@ -2933,6 +2932,13 @@ public final class InjectManager
   public <X> void addProduces(Bean<X> bean, AnnotatedType<X> beanType)
   {
     ProducesBuilder builder = new ProducesBuilder(this);
+    
+    builder.introspectProduces(bean, beanType);
+  }
+  
+  public <X> void addManagedProduces(Bean<X> bean, AnnotatedType<X> beanType)
+  {
+    ProducesBuilder builder = new ManagedProducesBuilder(this);
     
     builder.introspectProduces(bean, beanType);
   }

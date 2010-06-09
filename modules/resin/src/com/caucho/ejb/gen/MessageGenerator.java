@@ -394,4 +394,14 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
   {
     return AnnotatedTypeUtil.findMethod(getBeanType(), name, param);
   }
+
+  /* (non-Javadoc)
+   * @see com.caucho.config.gen.BeanGenerator#getAspectBeanFactory()
+   */
+  @Override
+  protected AspectBeanFactory<X> getAspectBeanFactory()
+  {
+    // TODO Auto-generated method stub
+    return null;
+  }
 }

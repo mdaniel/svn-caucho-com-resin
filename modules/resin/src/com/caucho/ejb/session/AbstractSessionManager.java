@@ -390,7 +390,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     if (baseApi == null)
       throw new NullPointerException();
 
-    _bean = (Bean<X>) createBean(mBean, baseApi, apiList);
+    _bean = (Bean<X>) createBean(mBean, baseApi, apiList, extAnnType);
       
     // CDI TCK requires the rawAnnType, not the processed one
     ProcessSessionBeanImpl process
@@ -425,10 +425,14 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       
       if (extMethod != null)
         extAnnType.addMethod(extMethod);
-      else if (method.isAnnotationPresent(Produces.class))
+      else if (method.isAnnotationPresent(Produces.class)) {
+        // TCK:
+        /*
         throw new ConfigException(L.l("{0}.{1} is an invalid @Produces EJB method because the method is not in a @Local interface.",
                                       method.getDeclaringType().getJavaClass().getName(),
                                       method.getJavaMember().getName()));
+                                      */
+      }
       else if (isDisposes(method)) {
         throw new ConfigException(L.l("{0}.{1} is an invalid @Disposes EJB method because the method is not in a @Local interface.",
                                       method.getDeclaringType().getJavaClass().getName(),
@@ -462,7 +466,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
           = new AnnotatedMethodImpl(apiMethod.getDeclaringType(),
                                     method,
                                     apiMethod.getJavaMember());
-        
+
         return extMethod;
       }
     }
@@ -493,7 +497,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   abstract protected <T> Bean<T>
   createBean(ManagedBeanImpl<X> mBean,
              Class<T> api,
-             Set<Type> apiList);
+             Set<Type> apiList,
+             AnnotatedType<X> extAnnType);
   
   protected SessionBeanType getSessionBeanType()
   {

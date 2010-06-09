@@ -141,7 +141,8 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
   @Override
   protected <T> Bean<T> createBean(ManagedBeanImpl<X> mBean,
                                    Class<T> api,
-                                   Set<Type> apiList)
+                                   Set<Type> apiList,
+                                   AnnotatedType<X> extAnnType)
   {
     StatelessContext<X,T> context = getSessionContext(api);
 
@@ -150,7 +151,7 @@ public class StatelessManager<X> extends AbstractSessionManager<X> {
           api, this));
 
     StatelessBeanImpl<X,T> statelessBean
-      = new StatelessBeanImpl<X,T>(this, mBean, api, apiList, context);
+      = new StatelessBeanImpl<X,T>(this, mBean, api, apiList, context, extAnnType);
 
     return statelessBean;
   }

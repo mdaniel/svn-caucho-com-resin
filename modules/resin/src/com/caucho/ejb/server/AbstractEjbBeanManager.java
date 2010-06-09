@@ -29,7 +29,9 @@
 
 package com.caucho.ejb.server;
 
+import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
@@ -48,10 +50,12 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.AroundInvokeConfig;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.session.AbstractSessionContext;
+import com.caucho.inject.RequestContext;
 import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
@@ -425,6 +429,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
    */
   public TimerService getTimerService()
   {
+    TimerService service = _producer.getTimerService();
+    
+    if (service != null)
+      return service;
+    
     // ejb/0fj0
     throw new UnsupportedOperationException(L.l("'{0}' does not support a timer service because it does not have a @Timeout method",
                                                 this));
@@ -505,7 +514,26 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     throw new UnsupportedOperationException(L.l("EJB '{0}' does not support a timeout, because it does not have a @Timeout method",
                                                 this));
     */
-    getContext().__caucho_timeout_callback(timer);
+    
+    try {
+      RequestContext.begin();
+      // XXX: needs reintegration
+      OwnerCreationalContext env = new OwnerCreationalContext(_producer.getBean());
+      Object instance = newInstance(env);
+      
+      Method method = _producer.getTimeoutMethod();
+      
+      if (method.getParameterTypes().length == 0)
+        method.invoke(instance);
+      else
+        method.invoke(instance, timer);
+      
+      destroy(instance, env);
+    } catch (Exception e) {
+      log.log(Level.WARNING, e.toString(), e);
+    } finally {
+      RequestContext.end();
+    }
   }
 
   public void init() throws Exception

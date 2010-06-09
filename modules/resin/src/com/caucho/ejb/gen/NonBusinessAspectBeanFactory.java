@@ -40,6 +40,7 @@ import com.caucho.config.gen.AspectFactory;
 import com.caucho.config.gen.AspectGenerator;
 import com.caucho.config.gen.SecurityFactory;
 import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
 
 /**
  * Factory for creating non-business methods that are package accessible.
@@ -124,5 +125,26 @@ public class NonBusinessAspectBeanFactory<X> implements AspectBeanFactory<X>
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method)
   {
     return new NonBusinessMethodGenerator<X>(method);
+  }
+
+  @Override
+  public void generateInject(JavaWriter out, HashMap<String, Object> hashMap)
+  {
+  }
+
+  @Override
+  public void generatePostConstruct(JavaWriter out, HashMap<String, Object> hashMap)
+  {
+  }
+  
+  @Override
+  public void generateEpilogue(JavaWriter out, HashMap<String, Object> hashMap)
+  {
+  }
+
+  @Override
+  public boolean isEnhanced()
+  {
+    return false;
   }
 }

@@ -54,7 +54,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.ResourceLoader;
-import com.caucho.server.webbeans.ResinWebBeansProducer;
+import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
 import com.caucho.vfs.Vfs;
@@ -120,8 +120,8 @@ public class ResinBeanContainer
   private EnvironmentClassLoader _classLoader;
   private InjectManager _injectManager;
 
-  private ThreadLocal<RequestContext> _localContext
-    = new ThreadLocal<RequestContext>();
+  private ThreadLocal<BeanContainerRequest> _localContext
+    = new ThreadLocal<BeanContainerRequest>();
 
   /**
    * Creates a new ResinContext.
@@ -149,7 +149,7 @@ public class ResinBeanContainer
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
 
-      _injectManager.addManagedBean(_injectManager.createManagedBean(ResinWebBeansProducer.class));
+      _injectManager.addManagedBean(_injectManager.createManagedBean(ResinCdiProducer.class));
 
       _classLoader.scanRoot();
     } finally {
@@ -420,15 +420,15 @@ public class ResinBeanContainer
    * @return the RequestContext which must be passed to
    *    <code>completeContext</code>
    */
-  public RequestContext beginRequest()
+  public BeanContainerRequest beginRequest()
   {
     Thread thread = Thread.currentThread();
 
     ClassLoader oldLoader = thread.getContextClassLoader();
 
-    RequestContext oldContext = _localContext.get();
+    BeanContainerRequest oldContext = _localContext.get();
 
-    RequestContext context = new RequestContext(this, oldLoader, oldContext);
+    BeanContainerRequest context = new BeanContainerRequest(this, oldLoader, oldContext);
 
     thread.setContextClassLoader(_classLoader);
 
@@ -440,7 +440,7 @@ public class ResinBeanContainer
   /**
    * Completes the thread's request and exits the Resin context.
    */
-  void completeRequest(RequestContext context)
+  void completeRequest(BeanContainerRequest context)
   {
     Thread thread = Thread.currentThread();
 
@@ -499,7 +499,7 @@ public class ResinBeanContainer
     @Override
     public <T> T get(Contextual<T> bean)
     {
-      RequestContext cxt = _localContext.get();
+      BeanContainerRequest cxt = _localContext.get();
 
       if (cxt == null)
         throw new IllegalStateException(L.l("No RequestScope is active"));
@@ -510,7 +510,7 @@ public class ResinBeanContainer
     @Override
     public <T> T get(Contextual<T> bean, CreationalContext<T> creationalContext)
     {
-      RequestContext cxt = _localContext.get();
+      BeanContainerRequest cxt = _localContext.get();
 
       if (cxt == null)
         throw new IllegalStateException(L.l("No RequestScope is active"));

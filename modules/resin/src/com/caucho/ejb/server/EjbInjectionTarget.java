@@ -141,6 +141,16 @@ public class EjbInjectionTarget<T> {
   {
     _preDestroyConfig = preDestroy;
   }
+  
+  public TimerService getTimerService()
+  {
+    return _timerService;
+  }
+  
+  public Method getTimeoutMethod()
+  {
+    return _timeoutMethod;
+  }
 
   public void bindInjection()
   {
@@ -152,7 +162,7 @@ public class EjbInjectionTarget<T> {
     setInjectionTarget(managedBean.getInjectionTarget());
 
     _timeoutMethod = getTimeoutMethod(_bean.getBeanClass());
-
+    
     if (_timeoutMethod != null)
       _timerService = new EjbTimerService(_server);
 
@@ -172,6 +182,11 @@ public class EjbInjectionTarget<T> {
     }
   }
 
+  Bean<?> getBean()
+  {
+    return _bean;
+  }
+  
   private Method getTimeoutMethod(Class<?> targetBean)
   {
     if (TimedObject.class.isAssignableFrom(targetBean)) {

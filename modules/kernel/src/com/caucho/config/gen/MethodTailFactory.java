@@ -28,10 +28,13 @@
  */
 package com.caucho.config.gen;
 
+import java.util.HashMap;
+
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.inject.Module;
+import com.caucho.java.JavaWriter;
 
 /**
  * Represents a filter for invoking a method
@@ -63,6 +66,12 @@ public class MethodTailFactory<X> implements AspectFactory<X> {
     return getAspectBeanFactory().getBeanType();
   }
   
+  @Override
+  public boolean isEnhanced()
+  {
+    return false;
+  }
+  
   /**
    * Returns an aspect for the method if one exists.
    */
@@ -74,6 +83,21 @@ public class MethodTailFactory<X> implements AspectFactory<X> {
       return new MethodTailGenerator<X>(this, method);
     else
       return null;
+  }
+  
+  @Override
+  public void generateInject(JavaWriter out, HashMap<String, Object> map)
+  {
+  }
+  
+  @Override
+  public void generatePostConstruct(JavaWriter out, HashMap<String, Object> map)
+  {
+  }
+  
+  @Override
+  public void generateEpilogue(JavaWriter out, HashMap<String, Object> map)
+  {
   }
   
   @Override

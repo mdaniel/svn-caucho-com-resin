@@ -98,7 +98,7 @@ import com.caucho.server.cluster.Server;
 import com.caucho.server.cluster.SingleCluster;
 import com.caucho.server.repository.ModuleRepositoryImpl;
 import com.caucho.server.util.JniCauchoSystem;
-import com.caucho.server.webbeans.ResinWebBeansProducer;
+import com.caucho.server.webbeans.ResinCdiProducer;
 import com.caucho.util.Alarm;
 import com.caucho.util.CompileException;
 import com.caucho.util.L10N;
@@ -443,7 +443,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
 
       _management = createResinManagement();
 
-      if (webBeans.getBeans(ResinWebBeansProducer.class).size() == 0) {
+      if (webBeans.getBeans(ResinCdiProducer.class).size() == 0) {
         Config.setProperty("fmt", new FmtFunctions());
 
         ResinConfigLibrary.configure(webBeans);
@@ -456,7 +456,7 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
           throw ConfigException.create(e);
         }
 
-        webBeans.addManagedBean(webBeans.createManagedBean(ResinWebBeansProducer.class));
+        webBeans.addManagedBean(webBeans.createManagedBean(ResinCdiProducer.class));
         webBeans.update();
       }
 

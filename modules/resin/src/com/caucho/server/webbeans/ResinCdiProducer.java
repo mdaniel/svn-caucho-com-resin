@@ -34,14 +34,19 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.context.Conversation;
+import javax.enterprise.context.RequestScoped;
+import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
+import javax.inject.Named;
 import javax.inject.Singleton;
 import javax.management.MBeanServer;
 import javax.transaction.TransactionManager;
 import javax.transaction.TransactionSynchronizationRegistry;
 import javax.transaction.UserTransaction;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import javax.validation.ValidatorFactory;
 
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
@@ -54,38 +59,36 @@ import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.TransactionManagerImpl;
 
 /**
- * Resin WebBeans producer for the main singletons.
+ * Resin CDI producer for the main singletons.
  */
 
 @CauchoDeployment
 @Singleton
-public class ResinWebBeansProducer
+public class ResinCdiProducer
 {
   private static final Logger log
-    = Logger.getLogger(ResinWebBeansProducer.class.getName());
+    = Logger.getLogger(ResinCdiProducer.class.getName());
   
-  public ResinWebBeansProducer()
+  private Validator _validator;
+  
+  public ResinCdiProducer()
   {
   }
-
-  /**
-   * Returns the web beans container.
-   */
-  /*
-  @Produces
-  public BeanManager getManager()
-  {
-    return InjectManager.create();
-  }
-  */
 
   /**
    * Returns the web beans conversation controller
    */
   @Produces
-  public Conversation getConversation()
+  @Named("javax.enterprise.context.conversation")
+  @RequestScoped
+  public ConversationContext getConversation()
   {
-    return InjectManager.create().createConversation();
+    return new ConversationContext();
+  }
+  
+  public void destroy(@Disposes @Named("javax.enterprise.context.conversation") ConversationContext conversation)
+  {
+    conversation.destroy();
   }
 
   /**
@@ -155,5 +158,26 @@ public class ResinWebBeansProducer
 
       return null;
     }
+  }
+  
+  /**
+   * Returns the validator factory.
+   */
+  @Produces
+  public ValidatorFactory createValidatorFactory()
+  {
+    return Validation.buildDefaultValidatorFactory();
+  }
+  
+  /**
+   * Returns the validator factory.
+   */
+  @Produces
+  public Validator createValidator()
+  {
+    if (_validator == null)
+      _validator = Validation.buildDefaultValidatorFactory().getValidator();
+    
+    return _validator;
   }
 }

@@ -106,7 +106,8 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   @Override
   protected <T> Bean<T> createBean(ManagedBeanImpl<X> mBean, 
                                    Class<T> api,
-                                   Set<Type> apiList)
+                                   Set<Type> apiList,
+                                   AnnotatedType<X> extAnnType)
   {
     SingletonContext<X,T> context = getSessionContext(api);
 
@@ -115,7 +116,7 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
                                          api, this));
     
     SessionBeanImpl<X,T> statefulBean
-      = new SessionBeanImpl<X,T>(context, mBean, apiList);
+      = new SessionBeanImpl<X,T>(context, mBean, apiList, extAnnType);
     
     InjectManager manager = getModuleInjectManager();
 

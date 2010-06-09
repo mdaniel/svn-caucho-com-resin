@@ -106,6 +106,8 @@ abstract public class BeanGenerator<X> extends GenClass
   {
     throw new UnsupportedOperationException(getClass().getName());
   }
+  
+  protected abstract AspectBeanFactory<X> getAspectBeanFactory();
 
   public void introspect()
   {
@@ -281,26 +283,36 @@ abstract public class BeanGenerator<X> extends GenClass
        method.generateInject(out, map);
      }
 
+     getAspectBeanFactory().generateInject(out, map);
+
      out.popDepth();
      out.println("}");
    }
 
-  protected void generatePostConstruct(JavaWriter out)
+  protected void generatePostConstruct(JavaWriter out, 
+                                       HashMap<String,Object> map)
      throws IOException
-   {
-     out.println();
-     out.println("public void __caucho_postConstruct()");
-     out.println("{");
-     out.pushDepth();
+  {
+    out.println();
+    out.println("public void __caucho_postConstruct()");
+    out.println("{");
+    out.pushDepth();
 
-     HashMap<String,Object> map = new HashMap<String,Object>();
-     for (AspectGenerator<X> method : getMethods()) {
-       method.generatePostConstruct(out, map);
-     }
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generatePostConstruct(out, map);
+    }
+     
+    getAspectBeanFactory().generatePostConstruct(out, map);
 
-     out.popDepth();
-     out.println("}");
-   }
+    out.popDepth();
+    out.println("}");
+  }
+
+  protected void generateEpilogue(JavaWriter out, HashMap<String,Object> map)
+     throws IOException
+  {
+    getAspectBeanFactory().generateEpilogue(out, map);
+  }
 
   /**
    * Generates view's business methods

@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.ejb.Stateful;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -174,7 +175,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     if (hasNoInterfaceView())
       out.println("  extends " + getBeanType().getJavaClass().getName());
 
-    out.print("  implements SessionProxyFactory<T>, com.caucho.config.gen.CandiEnhancedBean");
+    out.print("  implements SessionProxyFactory<T>, com.caucho.config.gen.CandiEnhancedBean, java.io.Serializable");
 
     for (AnnotatedType<? super X> api : getLocalApi()) {
       out.print(", " + api.getJavaClass().getName());
@@ -205,6 +206,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   private void generateConstructor(JavaWriter out)
     throws IOException
   {
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    
     // generateProxyConstructor(out);
     
     out.println();
@@ -237,7 +240,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     out.println("}");
     
     generateInject(out);
-    generatePostConstruct(out);
+    generatePostConstruct(out, map);
     generateDestroy(out);
   }
 

@@ -38,17 +38,17 @@ import com.caucho.config.scope.ContextContainer;
 /**
  * Request context for an embedded Resin request.
  */
-public class RequestContext
+public class BeanContainerRequest
 {
   private ClassLoader _oldClassLoader;
-  private RequestContext _oldContext;
+  private BeanContainerRequest _oldContext;
   private ResinBeanContainer _cdiContainer;
   
   private ContextContainer _context = new ContextContainer();
 
-  RequestContext(ResinBeanContainer cdiContainer,
-                 ClassLoader oldClassLoader,
-                 RequestContext oldContext)
+  BeanContainerRequest(ResinBeanContainer cdiContainer,
+                       ClassLoader oldClassLoader,
+                       BeanContainerRequest oldContext)
   {
     _cdiContainer = cdiContainer;
     _oldClassLoader = oldClassLoader;
@@ -60,7 +60,7 @@ public class RequestContext
     return _oldClassLoader;
   }
   
-  RequestContext getOldContext()
+  BeanContainerRequest getOldContext()
   {
     return _oldContext;
   }

@@ -26,46 +26,36 @@
  *
  * @author Scott Ferguson
  */
-package com.caucho.config.gen;
 
-import java.io.IOException;
-import java.util.HashMap;
+package com.caucho.config.inject;
 
+import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.inject.Module;
-import com.caucho.java.JavaWriter;
 
 /**
- * Creates an aspect generator for a method.
+ * Builder for produces beans.
  */
 @Module
-public interface AspectFactory<X> {
-  /**
-   * Returns the owning AspectBeanFactory
-   */
-  public AspectBeanFactory<X> getAspectBeanFactory();
-  
-  /**
-   * Returns the bean type.
-   */
-  public AnnotatedType<X> getBeanType();
+public class ManagedProducesBuilder extends ProducesBuilder {
+  public ManagedProducesBuilder(InjectManager manager)
+  {
+    super(manager);
+  }
+  protected <X,T> void addProducesMethod(Bean<X> bean,
+                                         AnnotatedType<X> beanType,
+                                         AnnotatedMethod<? super X> producesMethod,
+                                         AnnotatedMethod<? super X> disposesMethod)
+  {
+    // ioc/07g2 vs ioc/07d0 
+    if (producesMethod.getJavaMember().getDeclaringClass() != beanType.getJavaClass()
+        && ! beanType.isAnnotationPresent(Specializes.class)) {
+      return;
+    }
 
-  public boolean isEnhanced();
-  
-  /**
-   * Returns an aspect for the method if one exists.
-   */
-  public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
-                                   boolean isEnhanced);
-
-  public void generateInject(JavaWriter out, HashMap<String, Object> map) 
-    throws IOException;
-
-  public void generatePostConstruct(JavaWriter out, HashMap<String, Object> map) 
-    throws IOException;
-
-  public void generateEpilogue(JavaWriter out, HashMap<String, Object> map) 
-    throws IOException;
+    super.addProducesMethod(bean, beanType, producesMethod, disposesMethod);
+  }
 }

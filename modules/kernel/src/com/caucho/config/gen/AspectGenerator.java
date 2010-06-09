@@ -111,6 +111,13 @@ public interface AspectGenerator<X> {
     throws IOException;
 
   /**
+   * Generates epilogue
+   */
+  public void generateEpilogue(JavaWriter out, 
+                               HashMap<String,Object> map)
+    throws IOException;
+
+  /**
    * Generates any destroy lifecycle code.
    */
   public void generateDestroy(JavaWriter out, HashMap<String, Object> map)

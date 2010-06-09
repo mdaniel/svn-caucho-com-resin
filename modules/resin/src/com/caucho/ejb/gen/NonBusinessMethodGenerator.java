@@ -168,6 +168,13 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
     throws IOException
   {
   }
+  
+  @Override
+  public void generateEpilogue(JavaWriter out, 
+                               HashMap<String,Object> map)
+    throws IOException
+  {
+  }
 
   /**
    * Generates destroy code

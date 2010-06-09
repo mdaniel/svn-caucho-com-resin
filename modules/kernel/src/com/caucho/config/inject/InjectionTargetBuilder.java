@@ -795,7 +795,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         Class<?> ipClass = (Class<?>) type;
 
         if (! ipClass.isInterface()
-            && ! Serializable.class.isAssignableFrom(ipClass)) {
+            && ! Serializable.class.isAssignableFrom(ipClass)
+            && ! getBeanManager().isNormalScope(ip.getBean().getScope())) {
           throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' value {3} is not serializable for {4}.",
                                         cl.getSimpleName(), bean.getScope().getSimpleName(),
                                         ip.getType(),

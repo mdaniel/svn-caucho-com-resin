@@ -103,7 +103,7 @@ public class AsyncHeadGenerator<X> extends AbstractAspectGenerator<X> {
     out.println("{");
     out.pushDepth();
     
-    generateContent(out);
+    generateContent(out, prologueMap);
 
     out.popDepth();
     out.println("}");

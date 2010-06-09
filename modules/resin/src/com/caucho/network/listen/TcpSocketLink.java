@@ -39,6 +39,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 
 import com.caucho.inject.Module;
+import com.caucho.inject.RequestContext;
 import com.caucho.loader.Environment;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.TcpConnectionMXBean;
@@ -649,6 +650,7 @@ public class TcpSocketLink extends AbstractSocketLink
       thread.setContextClassLoader(_loader);
 
       _currentRequest.set(_request);
+      RequestContext.begin();
 
       _isWakeRequested = false;
       
@@ -665,6 +667,7 @@ public class TcpSocketLink extends AbstractSocketLink
       thread.setContextClassLoader(_loader);
 
       _currentRequest.set(null);
+      RequestContext.end();
     }
   }
 

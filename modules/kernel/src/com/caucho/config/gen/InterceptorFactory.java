@@ -49,6 +49,7 @@ import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Decorator;
+import javax.enterprise.inject.spi.InterceptionType;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
@@ -83,7 +84,8 @@ public class InterceptorFactory<X>
   
   private ArrayList<Class<?>> _classAroundInvokeInterceptors
     = new ArrayList<Class<?>>();
-  private ArrayList<Class<?>> _classPostConstructInterceptors;
+  private ArrayList<Class<?>> _classPostConstructInterceptors
+    = new ArrayList<Class<?>>();
   
   private HashMap<Class<?>, Annotation> _classInterceptorBindings;
   
@@ -200,18 +202,72 @@ public class InterceptorFactory<X>
     return false;
   }
   
-  private boolean hasPostConstructInterceptor(Class<?> cl)
+  private boolean hasPostConstruct(Class<?> cl)
   {
-    for (Method m : cl.getMethods()) {
+    for (Method m : cl.getDeclaredMethods()) {
       if (m.isAnnotationPresent(PostConstruct.class)) {
         Class<?> []param = m.getParameterTypes();
         
-        if (param.length == 0 && param[0].equals(InvocationContext.class))
+        if (param.length == 1 && param[0].equals(InvocationContext.class))
           return true;
       }
     }
     
     return false;
+  }
+  
+  @Override
+  public void generateInject(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+    super.generateInject(out, map);
+    
+    if (_classPostConstructInterceptors.size() > 0) {
+      InterceptorGenerator<X> gen 
+        = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
+            InterceptionType.POST_CONSTRUCT);
+ 
+      gen.generateInject(out, map);
+    }
+  }
+  
+  @Override
+  public void generatePostConstruct(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+    super.generatePostConstruct(out, map);
+    
+    if (_classPostConstructInterceptors.size() > 0) {
+      InterceptorGenerator<X> gen 
+        = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
+            InterceptionType.POST_CONSTRUCT);
+ 
+      gen.generateClassPostConstruct(out, map);
+    }
+  }
+  
+  @Override
+  public void generateEpilogue(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+    super.generateEpilogue(out, map);
+    
+    if (_classPostConstructInterceptors.size() > 0) {
+      InterceptorGenerator<X> gen 
+        = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
+                                      InterceptionType.POST_CONSTRUCT);
+ 
+      gen.generateEpilogue(out, map);
+    }
+  }
+  
+  @Override
+  public boolean isEnhanced()
+  {
+    if (_classPostConstructInterceptors.size() > 0)
+      return true;
+    else
+      return super.isEnhanced();
   }
   
   //
@@ -275,14 +331,19 @@ public class InterceptorFactory<X>
   {
     Interceptors interceptors = getBeanType().getAnnotation(Interceptors.class);
 
-    if (interceptors != null) {
-      _classAroundInvokeInterceptors = new ArrayList<Class<?>>();
+    if (interceptors == null)
+      return;
     
-      for (Class<?> iClass : interceptors.value()) {
-        if (hasAroundInvoke(iClass)) {
-          if (! _classAroundInvokeInterceptors.contains(iClass)) {
-            _classAroundInvokeInterceptors.add(iClass);
-          }
+    for (Class<?> iClass : interceptors.value()) {
+      if (hasAroundInvoke(iClass)) {
+        if (! _classAroundInvokeInterceptors.contains(iClass)) {
+          _classAroundInvokeInterceptors.add(iClass);
+        }
+      }
+        
+      if (hasPostConstruct(iClass)) {
+        if (! _classPostConstructInterceptors.contains(iClass)) {
+          _classPostConstructInterceptors.add(iClass);
         }
       }
     }
@@ -429,12 +490,8 @@ public class InterceptorFactory<X>
     return interceptorMap;
   }
 
-  /**
-   * @return
-   */
   public AnnotatedMethod<? super X> getAroundInvokeMethod()
   {
-    // TODO Auto-generated method stub
     return null;
   }
 

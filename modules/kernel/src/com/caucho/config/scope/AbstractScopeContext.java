@@ -119,7 +119,6 @@ abstract public class AbstractScopeContext implements Context {
   
   public void closeContext()
   {
-    System.out.println("CLOSE: " + this);
     ContextContainer context = getContextContainer();
     
     if (context != null)

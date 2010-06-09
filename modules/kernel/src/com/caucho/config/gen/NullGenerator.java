@@ -117,6 +117,13 @@ public class NullGenerator<X> implements AspectGenerator<X> {
   }
 
   @Override
+  public void generateEpilogue(JavaWriter out,
+                               HashMap<String,Object> map)
+    throws IOException
+  {
+  }
+
+  @Override
   public void generateDestroy(JavaWriter out,
                               HashMap<String,Object> map)
     throws IOException

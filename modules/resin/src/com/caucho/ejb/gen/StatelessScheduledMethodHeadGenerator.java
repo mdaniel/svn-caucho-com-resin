@@ -87,7 +87,7 @@ public class StatelessScheduledMethodHeadGenerator<X>
     out.println("{");
     out.pushDepth();
 
-    generateContent(out);
+    generateContent(out, prologueMap);
 
     out.popDepth();
     out.println("}");
