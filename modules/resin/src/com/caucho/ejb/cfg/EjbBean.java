@@ -166,8 +166,8 @@ public class EjbBean<X> extends DescriptionGroupConfig
    */
   public EjbBean(EjbConfig ejbConfig,
                  AnnotatedType<X> rawAnnType,
-		 AnnotatedType<X> annType,
-		 String ejbModuleName)
+                 AnnotatedType<X> annType,
+                 String ejbModuleName)
   {
     _ejbConfig = ejbConfig;
 
@@ -175,9 +175,6 @@ public class EjbBean<X> extends DescriptionGroupConfig
     _ejbClass = annType;
     _ejbModuleName = ejbModuleName;
     
-    if (! "".equals(ejbModuleName))
-      _ejbName = ejbModuleName;
-
     setEJBClass(annType.getJavaClass());
 
     _loader = ejbConfig.getEjbContainer().getClassLoader();

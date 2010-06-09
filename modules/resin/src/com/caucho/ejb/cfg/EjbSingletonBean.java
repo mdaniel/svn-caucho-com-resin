@@ -47,9 +47,9 @@ public class EjbSingletonBean<X> extends EjbSessionBean<X> {
   public EjbSingletonBean(EjbConfig ejbConfig, 
                           AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annType,
-                          Singleton singleton)
+                          String moduleName)
   {
-    super(ejbConfig, rawAnnType, annType, singleton.name());
+    super(ejbConfig, rawAnnType, annType, moduleName);
   }
 
   /**

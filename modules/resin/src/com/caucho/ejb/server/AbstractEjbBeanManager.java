@@ -366,7 +366,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   {
     try {
       if (_jndiEnv == null)
-        _jndiEnv = (Context) new InitialContext().lookup("java:comp/env");
+        _jndiEnv = (Context) new InitialContext();//.lookup("java:comp/env");
 
       // XXX: not tested
       return _jndiEnv.lookup(jndiName);

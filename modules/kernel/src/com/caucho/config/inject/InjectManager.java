@@ -2258,8 +2258,8 @@ public final class InjectManager
         matchBeans.add(bean);
     }
 
-    return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Stereotype and <enable> tags to choose a precedence.  Beans:{0}",
-                                                listToLines(matchBeans)));
+    return new AmbiguousResolutionException(L.l("Too many beans match, because they all have equal precedence.  See the @Stereotype and <enable> tags to choose a precedence.  Beans:{0}\nfor {1}",
+                                                listToLines(matchBeans), this));
   }
 
   @Override

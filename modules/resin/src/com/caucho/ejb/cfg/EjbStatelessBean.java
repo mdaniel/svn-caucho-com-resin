@@ -44,9 +44,9 @@ public class EjbStatelessBean<X> extends EjbSessionBean<X> {
   public EjbStatelessBean(EjbConfig ejbConfig,
                           AnnotatedType<X> rawAnnType,
                           AnnotatedType<X> annType,
-                          Stateless stateless)
+                          String moduleName)
   {
-    super(ejbConfig, rawAnnType, annType, stateless.name());
+    super(ejbConfig, rawAnnType, annType, moduleName);
   }
 
   /**

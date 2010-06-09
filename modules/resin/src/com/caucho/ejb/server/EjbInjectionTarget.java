@@ -199,6 +199,9 @@ public class EjbInjectionTarget<T> {
   public T newInstance(CreationalContextImpl<?> parentEnv)
   {
     InjectManager inject = InjectManager.create();
+   
+    if (parentEnv == null)
+      parentEnv = new OwnerCreationalContext<T>(_bean);
     
     // XXX: circular for stateful
     CreationalContextImpl<T> env 

@@ -262,7 +262,8 @@ public class EjbConfig {
 
   public <X> void addAnnotatedType(AnnotatedType<X> rawAnnType,
                                    AnnotatedType<X> annType,
-                                   InjectionTarget<X> injectTarget)
+                                   InjectionTarget<X> injectTarget, 
+                                   String moduleName)
   {
     try {
       Class<?> type = annType.getJavaClass();
@@ -271,29 +272,38 @@ public class EjbConfig {
         return;
 
       if (annType.isAnnotationPresent(Stateless.class)) {
+        EjbStatelessBean<X> bean
+          = new EjbStatelessBean<X>(this, rawAnnType, annType, moduleName);
+        bean.setInjectionTarget(injectTarget);
+
         Stateless stateless = annType.getAnnotation(Stateless.class);
 
-        EjbStatelessBean<X> bean
-          = new EjbStatelessBean<X>(this, rawAnnType, annType, stateless);
-        bean.setInjectionTarget(injectTarget);
+        if (! "".equals(stateless.name()))
+          bean.setEJBName(stateless.name());
 
         setBeanConfig(bean.getEJBName(), bean);
       }
       else if (annType.isAnnotationPresent(Stateful.class)) {
+        EjbStatefulBean<X> bean
+          = new EjbStatefulBean<X>(this, rawAnnType, annType, moduleName);
+        bean.setInjectionTarget(injectTarget);
+        
         Stateful stateful = annType.getAnnotation(Stateful.class);
 
-        EjbStatefulBean<X> bean
-          = new EjbStatefulBean<X>(this, rawAnnType, annType, stateful);
-        bean.setInjectionTarget(injectTarget);
+        if (! "".equals(stateful.name()))
+          bean.setEJBName(stateful.name());
 
         setBeanConfig(bean.getEJBName(), bean);
       }
       else if (annType.isAnnotationPresent(Singleton.class)) {
+        EjbSingletonBean<X> bean
+          = new EjbSingletonBean<X>(this, rawAnnType, annType, moduleName);
+        bean.setInjectionTarget(injectTarget);
+
         Singleton singleton = annType.getAnnotation(Singleton.class);
 
-        EjbSingletonBean<X> bean
-          = new EjbSingletonBean<X>(this, rawAnnType, annType, singleton);
-        bean.setInjectionTarget(injectTarget);
+        if (! "".equals(singleton.name()))
+          bean.setEJBName(singleton.name());
 
         setBeanConfig(bean.getEJBName(), bean);
       }      

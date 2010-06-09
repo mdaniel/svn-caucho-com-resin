@@ -46,10 +46,10 @@ public class EjbStatefulBean<X> extends EjbSessionBean<X> {
    */
   public EjbStatefulBean(EjbConfig ejbConfig,
                          AnnotatedType<X> rawAnnType,
-			 AnnotatedType<X> annType,
-			 Stateful stateful)
+                         AnnotatedType<X> annType,
+                         String moduleName)
   {
-    super(ejbConfig, rawAnnType, annType, stateful.name());
+    super(ejbConfig, rawAnnType, annType, moduleName);
   }
   
   @Override

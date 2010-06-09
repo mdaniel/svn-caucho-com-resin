@@ -785,6 +785,11 @@ public class WebApp extends ServletContextImpl
   {
     return _controller.getObjectName();
   }
+  
+  public String getWarName()
+  {
+    return _controller.getWarName();
+  }
 
   /**
    * Gets the context path

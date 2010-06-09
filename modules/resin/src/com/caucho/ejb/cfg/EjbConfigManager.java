@@ -38,6 +38,7 @@ import com.caucho.config.*;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.loader.*;
+import com.caucho.server.webapp.WebApp;
 import com.caucho.util.*;
 import com.caucho.vfs.*;
 
@@ -74,7 +75,14 @@ public class EjbConfigManager extends EjbConfig {
       _rootConfigMap.put(root, rootConfig);
       _rootPendingList.add(rootConfig);
 
-      String ejbModuleName = getEjbModuleName(root);
+      String ejbModuleName = null;
+      
+      WebApp webApp = WebApp.getCurrent();
+      
+      if (webApp != null)
+        ejbModuleName = webApp.getWarName();
+      else
+        ejbModuleName = getEjbModuleName(root);
 
       Path ejbJarXml = root.lookup("META-INF/ejb-jar.xml");
 
@@ -93,7 +101,14 @@ public class EjbConfigManager extends EjbConfig {
   
   public void configureRootPath(Path root)
   {
-    String ejbModuleName = getEjbModuleName(root);
+    String ejbModuleName = null;
+    
+    WebApp webApp = WebApp.getCurrent();
+    
+    if (webApp != null)
+      ejbModuleName = webApp.getWarName();
+    else
+      ejbModuleName = getEjbModuleName(root);
 
     Path ejbJarXml = root.lookup("META-INF/ejb-jar.xml");
 
@@ -112,8 +127,7 @@ public class EjbConfigManager extends EjbConfig {
 
     for (EjbRootConfig rootConfig : pendingList) {
       for (String className : rootConfig.getClassNameList()) {
-        // XXX rootConfig.getModuleName());
-        addClassByName(className);
+        addClassByName(className, rootConfig.getModuleName());
       }
     }
 
@@ -124,7 +138,7 @@ public class EjbConfigManager extends EjbConfig {
     deploy();
   }
 
-  private <X> void addClassByName(String className)
+  private <X> void addClassByName(String className, String moduleName)
   {
     try {
       ClassLoader loader = _ejbContainer.getClassLoader();
@@ -135,7 +149,7 @@ public class EjbConfigManager extends EjbConfig {
       
       AnnotatedType<X> annType = manager.createAnnotatedType(type);
       
-      addAnnotatedType(annType, annType, null);
+      addAnnotatedType(annType, annType, null, moduleName);
     }
     catch (ConfigException e) {
       throw e;
