@@ -63,8 +63,8 @@ public class AnnotatedMethodImpl<T>
   }
   
   public AnnotatedMethodImpl(AnnotatedType<T> declaringType,
-			     Annotated annotated,
-			     Method method)
+                             Annotated annotated,
+                             Method method)
   {
     super(method.getGenericReturnType(), annotated, method.getAnnotations());
 
@@ -115,7 +115,7 @@ public class AnnotatedMethodImpl<T>
     
     for (int i = 0; i < paramTypes.length; i++) {
       AnnotatedParameterImpl<T> param
-	= new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i], i);
+        = new AnnotatedParameterImpl<T>(this, paramTypes[i], annTypes[i], i);
     
       parameterList.add(param);
     }

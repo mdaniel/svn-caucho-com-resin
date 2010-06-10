@@ -322,7 +322,7 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       Class<?> []param = new Class[] { getClass(), getContextClass() };
     
       Constructor<?> ctor = _proxyImplClass.getConstructor(param);
-    
+      
       return (SessionProxyFactory<T>) ctor.newInstance(this, context);
     } catch (Exception e) {
       throw new IllegalStateException(e);

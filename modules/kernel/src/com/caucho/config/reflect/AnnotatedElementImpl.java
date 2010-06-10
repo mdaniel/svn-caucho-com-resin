@@ -108,6 +108,12 @@ public class AnnotatedElementImpl implements Annotated
     for (Annotation ann : annSet)
       addAnnotation(ann);
   }
+
+  public void addAnnotations(Annotation []annSet)
+  {
+    for (Annotation ann : annSet)
+      addAnnotation(ann);
+  }
   
   public void addAnnotation(Annotation newAnn)
   {

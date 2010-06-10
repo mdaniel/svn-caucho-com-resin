@@ -278,7 +278,7 @@ public class EjbConfig {
 
         Stateless stateless = annType.getAnnotation(Stateless.class);
 
-        if (! "".equals(stateless.name()))
+        if (! "".equals(stateless.name()) && stateless.name() != null)
           bean.setEJBName(stateless.name());
 
         setBeanConfig(bean.getEJBName(), bean);
@@ -290,7 +290,7 @@ public class EjbConfig {
         
         Stateful stateful = annType.getAnnotation(Stateful.class);
 
-        if (! "".equals(stateful.name()))
+        if (! "".equals(stateful.name()) && stateful.name() != null)
           bean.setEJBName(stateful.name());
 
         setBeanConfig(bean.getEJBName(), bean);
@@ -302,7 +302,7 @@ public class EjbConfig {
 
         Singleton singleton = annType.getAnnotation(Singleton.class);
 
-        if (! "".equals(singleton.name()))
+        if (! "".equals(singleton.name()) && singleton.name() != null)
           bean.setEJBName(singleton.name());
 
         setBeanConfig(bean.getEJBName(), bean);

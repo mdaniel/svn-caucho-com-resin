@@ -289,6 +289,9 @@ public final class InjectManager
   
   private ConcurrentHashMap<Bean<?>,ReferenceFactory<?>> _refFactoryMap
     = new ConcurrentHashMap<Bean<?>,ReferenceFactory<?>>();
+  
+  private ConcurrentHashMap<String,ReferenceFactory<?>> _namedRefFactoryMap
+    = new ConcurrentHashMap<String,ReferenceFactory<?>>();
 
   private ThreadLocal<CreationalContextImpl<?>> _proxyThreadLocal
     = new ThreadLocal<CreationalContextImpl<?>>();
@@ -748,11 +751,6 @@ public final class InjectManager
     return instance;
   }
 
-  public ELContext getELContext()
-  {
-    return new ConfigELContext();
-  }
-
   /**
    * Returns a new instance for a class, but does not register the
    * component with webbeans.
@@ -1148,6 +1146,28 @@ public final class InjectManager
       return new LinkedHashSet<Bean<?>>(beanList);
     else
       return new LinkedHashSet<Bean<?>>();
+  }
+  
+  @Module
+  public ReferenceFactory<?> getReferenceFactory(String name)
+  {
+    ReferenceFactory<?> refFactory = _namedRefFactoryMap.get(name);
+    
+    if (refFactory == null) {
+      Set<Bean<?>> beanSet = getBeans(name);
+      
+      if (beanSet != null && beanSet.size() > 0) {
+        Bean<?> bean = resolve(beanSet);
+        refFactory = getReferenceFactory(bean);
+      }
+      else {
+        refFactory = new UnresolvedReferenceFactory();
+      }
+      
+      _namedRefFactoryMap.put(name, refFactory);
+    }
+    
+    return refFactory;
   }
 
   /**
@@ -1635,8 +1655,8 @@ public final class InjectManager
     }
     
     if (ctor == null) {
-      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it doesn't have a zero-arg constructorfor {2}.",
-                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it doesn't have a zero-arg constructor for {2}.",
+                                    cl.getName(), bean.getScope().getSimpleName(),
                                     bean));
 
     }
@@ -3746,6 +3766,11 @@ public final class InjectManager
       return create(null, null, null);
     }
     
+    public boolean isResolved()
+    {
+      return true;
+    }
+    
     public boolean isProducer()
     {
       Bean<T> bean = getBean();
@@ -4030,6 +4055,29 @@ public final class InjectManager
       
       throw new InjectionException(L.l("no injection point available in this context {0}",
                                        ip));
+    }
+  }
+  
+  public class UnresolvedReferenceFactory extends ReferenceFactory<Object> {
+    private InjectionException _exn;
+    
+    UnresolvedReferenceFactory()
+    {
+      _exn = new InjectionException("unresolved injection");
+    }
+    
+    @Override
+    public boolean isResolved()
+    {
+      return false;
+    }
+   
+    @Override
+    public Object create(CreationalContextImpl<Object> env,
+                         CreationalContextImpl<?> parentEnv,
+                         InjectionPoint ip)
+    {
+      throw _exn;
     }
   }
 

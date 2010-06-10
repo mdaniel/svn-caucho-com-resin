@@ -604,7 +604,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     injectProgramList.toArray(injectProgram);
     
     Arrays.sort(injectProgram);
-
+    
     return injectProgram;
   }
   
@@ -739,8 +739,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     }
     
     if (ctor == null) {
-      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it doesn't have a zero-arg constructorfor {2}.",
-                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
+      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it doesn't have a zero-arg constructor for {2}.",
+                                    cl.getName(), bean.getScope().getSimpleName(),
                                     bean));
 
     }
@@ -961,6 +961,9 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       _args = args;
     }
 
+    /**
+     * Sorting priority: fields are second
+     */
     @Override
     public int getPriority()
     {

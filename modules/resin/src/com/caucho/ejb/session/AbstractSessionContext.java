@@ -93,7 +93,8 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   
   void bind()
   {
-    _proxyFactory = _manager.createProxyFactory(this);
+    if (_proxyFactory == null)
+      _proxyFactory = _manager.createProxyFactory(this);
   }
   
   public T createProxy(CreationalContextImpl<T> env)

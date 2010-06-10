@@ -44,6 +44,7 @@ import javax.enterprise.inject.spi.Bean;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.OwnerCreationalContext;
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.config.xml.XmlConfigContext;
 
 /**
@@ -98,14 +99,12 @@ public class CandiElResolver extends ELResolver {
     
     InjectManager manager = getInjectManager();
     
-    Set<Bean<?>> beanSet = manager.getBeans(name);
+    ReferenceFactory<?> factory = manager.getReferenceFactory(name);
     
-    if (beanSet.size() == 0)
+    if (factory == null || ! factory.isResolved())
       return null;
     
-    Bean<?> bean = beanSet.iterator().next();
-    
-    return bean.getBeanClass();
+    return factory.getBean().getBeanClass();
   }
 
   @Override
@@ -125,13 +124,11 @@ public class CandiElResolver extends ELResolver {
     if (manager == null)
       return manager;
     
-    Set<Bean<?>> beanSet = manager.getBeans(name);
+    ReferenceFactory<?> factory = manager.getReferenceFactory(name);
     
-    if (beanSet.size() == 0)
+    if (factory == null || ! factory.isResolved())
       return null;
     
-    Bean<?> bean = manager.resolve(beanSet);
-
     XmlConfigContext env = XmlConfigContext.getCurrent();
 
     ContextHolder holder = _envLocal.get();
@@ -151,22 +148,9 @@ public class CandiElResolver extends ELResolver {
       cxt = (CreationalContextImpl<?>) env.getCreationalContext();
     }
     
-    if (cxt == null) {
-      cxt = new OwnerCreationalContext(bean);
-    }
+    context.setPropertyResolved(true);
     
-    Object result = CreationalContextImpl.findAny(cxt, bean);
-    
-    if (result == null)
-      result = manager.getReference(bean, cxt);
-
-    if (result != null) {
-      context.setPropertyResolved(true);
-
-      return result;
-    }
-    else
-      return null;
+    return factory.create(null, cxt, null);
   }
 
   @Override

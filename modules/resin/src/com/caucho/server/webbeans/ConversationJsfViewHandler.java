@@ -55,7 +55,7 @@ public class ConversationJsfViewHandler extends ViewHandlerWrapper
     _next = next;
     
     _cdiManager = InjectManager.create();
-    //_conversation = (ConversationContext) _cdiManager.getContext(ConversationScoped.class);
+    _conversation = (ConversationContext) _cdiManager.getContext(ConversationScoped.class);
   }
 
   /*
@@ -67,6 +67,7 @@ public class ConversationJsfViewHandler extends ViewHandlerWrapper
     
     super.initView(context);
   }
+  */
 
   @Override
   public void renderView(FacesContext context,
@@ -76,10 +77,9 @@ public class ConversationJsfViewHandler extends ViewHandlerWrapper
     try {
       super.renderView(context, viewToRender);
     } finally {
-      _conversation.endView(context);
+      _conversation.destroy();
     }
   }
-  */
   
   @Override
   public ViewHandler getWrapped()

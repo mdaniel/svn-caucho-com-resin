@@ -58,8 +58,6 @@ public class ConversationContext extends AbstractScopeContext
 {
   private static final L10N L = new L10N(ConversationContext.class);
   
-  private Scope _scope;
-  
   public ConversationContext()
   {
   }
@@ -78,7 +76,7 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   public boolean isTransient()
   {
-    Scope scope = _scope;
+    Scope scope = getJsfScope();
     
     return scope == null || scope._extendedId == null;
   }
@@ -99,10 +97,10 @@ public class ConversationContext extends AbstractScopeContext
   {
     Scope scope = getJsfScope();
     
-    if (scope == null)
-      return null;
-    else
+    if (scope != null)
       return scope._transientConversation;
+    else
+      return null;
   }
 
   /**
@@ -116,7 +114,7 @@ public class ConversationContext extends AbstractScopeContext
     if (scope._transientConversation == null) {
       scope._transientConversation = scope._extendedConversation;
       
-      if (_scope._transientConversation == null)
+      if (scope._transientConversation == null)
         scope._transientConversation = new ContextContainer();
     }
     
@@ -199,9 +197,6 @@ public class ConversationContext extends AbstractScopeContext
   
   private Scope getJsfScope()
   {
-    if (_scope != null)
-      return _scope;
-    
     FacesContext facesContext = FacesContext.getCurrentInstance();
     
     if (facesContext == null)
@@ -212,9 +207,6 @@ public class ConversationContext extends AbstractScopeContext
   
   private Scope createJsfScope()
   {
-    if (_scope != null)
-      return _scope;
-    
     FacesContext facesContext = FacesContext.getCurrentInstance();
     
     if (facesContext == null)
@@ -225,37 +217,36 @@ public class ConversationContext extends AbstractScopeContext
     
   private Scope getJsfScope(FacesContext facesContext, boolean isCreate)
   {
-    if (_scope != null)
-      return _scope;
-    
     ExternalContext extContext = facesContext.getExternalContext();
     Map<String,Object> sessionMap = extContext.getSessionMap();
 
-    _scope = (Scope) sessionMap.get("caucho.conversation");
+    Scope scope = (Scope) sessionMap.get("caucho.conversation");
 
-    if (_scope == null) {
+    if (scope == null) {
       if (! isCreate)
         return null;
       
-      _scope = new Scope();
-      sessionMap.put("caucho.conversation", _scope);
+      scope = new Scope();
+      sessionMap.put("caucho.conversation", scope);
     }
     
-    if (_scope._transientConversation == null)
-      _scope._transientConversation = _scope._extendedConversation;
+    if (scope._transientConversation == null)
+      scope._transientConversation = scope._extendedConversation;
 
-    return _scope;
+    return scope;
   }
   
   public void destroy()
   {
-    if (_scope == null)
+    Scope scope = getJsfScope();
+    
+    if (scope == null)
       return;
     
-    ContextContainer context = _scope._transientConversation;
-    _scope._transientConversation = null;
+    ContextContainer context = scope._transientConversation;
+    scope._transientConversation = null;
     
-    if (_scope._extendedConversation == null && context != null)
+    if (scope._extendedConversation == null && context != null)
       context.close();
   }
 

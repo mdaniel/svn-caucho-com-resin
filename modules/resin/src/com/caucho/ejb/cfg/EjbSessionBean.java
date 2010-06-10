@@ -295,13 +295,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
         addLocal((Class) api);
       }
     }
-    
-    if (type.isAnnotationPresent(LocalBean.class)) {
-      _localBean = type;
-    }
-    else if (_localList.size() == 0) {
-      _localBean = type;
-    }
 
     Remote remote = type.getAnnotation(Remote.class);
     if (remote != null && remote.value() != null) {
@@ -324,6 +317,14 @@ public class EjbSessionBean<X> extends EjbBean<X> {
                  type.getJavaClass().getName(), interfaceList.toString()));
     else {
       addLocal((Class) interfaceList.get(0));
+    }
+
+    // ioc/0312
+    if (type.isAnnotationPresent(LocalBean.class)) {
+      _localBean = type;
+    }
+    else if (_localList.size() == 0) {
+      _localBean = type;
     }
   }
 

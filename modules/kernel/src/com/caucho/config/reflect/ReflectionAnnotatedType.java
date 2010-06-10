@@ -210,9 +210,21 @@ public class ReflectionAnnotatedType<T>
       
       if (hasBeanAnnotation(method)
           || ! Modifier.isPrivate(method.getModifiers())) {
-        if (isParent
-            || AnnotatedTypeUtil.findMethod(_methodSet, method) == null) {
+        AnnotatedMethod<?> oldMethod
+          = AnnotatedTypeUtil.findMethod(_methodSet, method);
+            
+        if (oldMethod == null) {
           _methodSet.add(new AnnotatedMethodImpl<T>(this, null, method));
+        }
+        /*
+        else if (! isParent)
+          continue;
+          */
+        else if (oldMethod instanceof AnnotatedMethodImpl<?>){
+          AnnotatedMethodImpl<?> oldMethodImpl
+            = (AnnotatedMethodImpl<?>) oldMethod;
+          
+          oldMethodImpl.addAnnotations(method.getAnnotations());
         }
       }
     }

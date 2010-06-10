@@ -30,6 +30,7 @@
 package com.caucho.inject;
 
 import java.lang.annotation.Annotation;
+import javax.enterprise.context.RequestScoped;
 
 import com.caucho.config.scope.AbstractScopeContext;
 import com.caucho.config.scope.ContextContainer;
@@ -87,7 +88,9 @@ public class RequestContext extends AbstractScopeContext
   @Override
   public boolean isActive()
   {
-    return _depth > 0;
+    RequestContext request = _threadLocal.get();
+
+    return request != null && request._depth > 0;
   }
 
   /**
@@ -96,7 +99,7 @@ public class RequestContext extends AbstractScopeContext
   @Override
   public Class<? extends Annotation> getScope()
   {
-    return TransactionScoped.class;
+    return RequestScoped.class;
   }
 
   @Override
