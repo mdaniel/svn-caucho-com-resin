@@ -30,13 +30,11 @@
 package com.caucho.ejb.server;
 
 import java.lang.reflect.Method;
-import java.util.ArrayList;
 
 import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
 import javax.ejb.Timer;
 import javax.ejb.TimerService;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
@@ -48,7 +46,6 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
-import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
 import com.caucho.ejb.timer.EjbTimerService;

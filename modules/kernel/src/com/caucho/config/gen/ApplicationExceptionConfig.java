@@ -32,6 +32,7 @@ public class ApplicationExceptionConfig {
   private String _id;
   private String _exceptionClass;
   private String _rollback;
+  private boolean _inherited;
 
   public ApplicationExceptionConfig()
   {
@@ -76,5 +77,15 @@ public class ApplicationExceptionConfig {
   public void setRollback(String rollback)
   {
     _rollback = rollback;
+  }
+
+  public void setInherited(boolean inherited)
+  {
+    _inherited = inherited;
+  }
+
+  public boolean isInherited()
+  {
+    return _inherited;
   }
 }

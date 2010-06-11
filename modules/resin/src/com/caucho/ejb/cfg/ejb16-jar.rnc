@@ -29,7 +29,8 @@ ejb16_activation-config = element activation-config {
 ejb16_application-exception = element application-exception {
   attribute id { string }?,
   ejb16_exception-class,
-  ejb16_rollback?
+  ejb16_rollback?,
+  ejb16_inherited?
 }
 
 ejb16_around-invoke = element around-invoke {
@@ -500,6 +501,10 @@ ejb16_remove-method = element remove-method {
 }
 
 ejb16_rollback = element rollback {
+  string
+}
+
+ejb16_inherited = element inherited {
   string
 }
 

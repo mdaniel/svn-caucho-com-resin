@@ -87,7 +87,7 @@ javaee_env-entry = element env-entry {
 
   javaee_env-entry-name,
 
-  javaee_env-entry-type,
+  javaee_env-entry-type?,
 
   javaee_env-entry-value?,
 
@@ -320,7 +320,7 @@ javaee_resource-env-ref = element resource-env-ref {
 
   javaee_resource-env-ref-name,
 
-  javaee_resource-env-ref-type,
+  javaee_resource-env-ref-type?,
 
   javaee_resource-Group
 }

@@ -101,7 +101,6 @@ public class TimerTask implements AlarmListener {
 
     _alarm = new Alarm(this); // TODO Try a weak alarm instead.
     _alarm.queueAt(nextTime);
-    System.out.println("SQUEU: " + _alarm);
   }
 
   /**

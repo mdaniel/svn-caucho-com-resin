@@ -86,6 +86,11 @@ public class EjbHandler extends JavaeeInjectionHandler {
 
     Class<?> bindType = javaField.getType();
     
+    // ejb/2004
+    if (! Object.class.equals(ejb.beanInterface())) {
+      bindType = ejb.beanInterface();
+    }
+    
     /*
     if (! "".equals(pContext.name()))
       jndiName = pContext.name();
@@ -144,6 +149,11 @@ public class EjbHandler extends JavaeeInjectionHandler {
     String location = getLocation(javaMethod);
 
     Class<?> bindType = javaMethod.getParameterTypes()[0];
+    
+    // ejb/2005
+    if (! Object.class.equals(ejb.beanInterface())) {
+      bindType = ejb.beanInterface();
+    }
     
     /*
     if (! "".equals(pContext.name()))

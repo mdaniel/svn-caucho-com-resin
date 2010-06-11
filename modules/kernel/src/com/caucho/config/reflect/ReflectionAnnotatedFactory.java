@@ -58,8 +58,8 @@ public class ReflectionAnnotatedFactory
       ReflectionAnnotatedFactory factory = _current.get(loader);
 
       if (factory == null) {
-	factory = new ReflectionAnnotatedFactory();
-	_current.set(factory, loader);
+        factory = new ReflectionAnnotatedFactory();
+        _current.set(factory, loader);
       }
 
       return factory;

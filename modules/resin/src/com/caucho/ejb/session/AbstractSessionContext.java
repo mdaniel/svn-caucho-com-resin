@@ -168,9 +168,17 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
 
   @Override
   public <Z> Z getBusinessObject(Class<Z> businessInterface)
-      throws IllegalStateException
+    throws IllegalStateException
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    AbstractSessionContext<?,Z> context = 
+      getServer().getSessionContext(businessInterface);
+    
+    if (context == null)
+      throw new IllegalStateException(L.l("{0} is not a valid local interface or no-interface view for {1}",
+                                          businessInterface.getName(),
+                                          getServer().getEjbClass().getName()));
+    
+    return context.createProxy(null);
   }
 
   @Override
