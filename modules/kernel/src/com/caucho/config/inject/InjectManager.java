@@ -3160,16 +3160,17 @@ public final class InjectManager
     _interceptorClassList.clear();
     
     for (Class<?> interceptorClass : interceptorClassList) {
-      if (! interceptorClass.isAnnotationPresent(javax.interceptor.Interceptor.class))
-        throw new ConfigException(L.l("'{0}' is an invalid interceptor because it does not have an @Interceptor.",
-                                      interceptorClass.getName()));
-        
       for (InterceptorEntry<?> entry : _interceptorList) {
         if (entry.getInterceptor().getBeanClass().equals(interceptorClass)) {
           entry.setEnabled(true);
           return;
         }
       }
+      
+      if (! interceptorClass.isAnnotationPresent(javax.interceptor.Interceptor.class))
+        throw new ConfigException(L.l("'{0}' is an invalid interceptor because it does not have an @Interceptor.",
+                                      interceptorClass.getName()));
+        
       
       InterceptorBean<?> bean = new InterceptorBean(this, interceptorClass);
       
