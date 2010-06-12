@@ -179,6 +179,14 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   }
 
   @Override
+  public void generatePreDestroy(JavaWriter out, HashMap<String, Object> map) 
+    throws IOException
+  {
+    if (_factory != null)
+      _factory.generatePreDestroy(out, map);
+  }
+
+  @Override
   public void generateEpilogue(JavaWriter out, HashMap<String, Object> map) 
     throws IOException
   {

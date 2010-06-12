@@ -294,6 +294,17 @@ abstract public class AbstractAspectGenerator<X> implements AspectGenerator<X> {
   }
 
   /**
+   * Generates @PreDestroy code
+   */
+  @Override
+  public void generatePreDestroy(JavaWriter out, 
+                                 HashMap<String,Object> map)
+    throws IOException
+  {
+    _next.generatePreDestroy(out, map);
+  }
+
+  /**
    * Generates epilogue
    */
   @Override

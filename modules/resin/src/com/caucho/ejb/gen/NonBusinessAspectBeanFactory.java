@@ -136,6 +136,11 @@ public class NonBusinessAspectBeanFactory<X> implements AspectBeanFactory<X>
   public void generatePostConstruct(JavaWriter out, HashMap<String, Object> hashMap)
   {
   }
+
+  @Override
+  public void generatePreDestroy(JavaWriter out, HashMap<String, Object> hashMap)
+  {
+  }
   
   @Override
   public void generateEpilogue(JavaWriter out, HashMap<String, Object> hashMap)

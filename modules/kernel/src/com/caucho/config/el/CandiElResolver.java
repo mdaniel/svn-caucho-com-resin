@@ -32,14 +32,12 @@ package com.caucho.config.el;
 import java.beans.FeatureDescriptor;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Set;
 
 import javax.el.ELContext;
 import javax.el.ELException;
 import javax.el.ELResolver;
 import javax.el.PropertyNotFoundException;
 import javax.el.PropertyNotWritableException;
-import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;

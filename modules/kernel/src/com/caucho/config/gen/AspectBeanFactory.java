@@ -95,10 +95,17 @@ public interface AspectBeanFactory<X> {
     throws IOException;
 
   /**
-   * Generates final closing information.
+   * Generates final initialization information.
    */
   public void generatePostConstruct(JavaWriter out, 
                                     HashMap<String, Object> hashMap)
+    throws IOException;
+
+  /**
+   * Generates final closing information.
+   */
+  public void generatePreDestroy(JavaWriter out, 
+                                 HashMap<String, Object> hashMap)
     throws IOException;
 
   /**

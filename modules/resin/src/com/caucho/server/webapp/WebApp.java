@@ -3095,6 +3095,9 @@ public class WebApp extends ServletContextImpl
         initSecurityConstraints();
       } catch (Exception e) {
         setConfigException(e);
+
+        // XXX: CDI TCK
+        throw e;
       }
 
       if (_parent instanceof Host) {

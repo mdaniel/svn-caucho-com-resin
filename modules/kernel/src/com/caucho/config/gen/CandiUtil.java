@@ -113,6 +113,7 @@ public class CandiUtil {
       Interceptor<?> interceptor = interceptors.get(i);
 
       int index = beans.indexOf(interceptor);
+
       if (index >= 0)
         indexList[offset + i] = index;
       else {
@@ -122,6 +123,35 @@ public class CandiUtil {
     }
 
     return indexList;
+  }
+
+  public static void createInterceptors(InjectManager manager,
+                                        ArrayList<Interceptor<?>> beans,
+                                        Annotation ...bindings)
+  {
+    if (bindings == null || bindings.length == 0)
+      return;
+    
+    createInterceptors(manager, beans, InterceptionType.AROUND_INVOKE, bindings);
+    createInterceptors(manager, beans, InterceptionType.POST_CONSTRUCT, bindings);
+    createInterceptors(manager, beans, InterceptionType.PRE_DESTROY, bindings);
+  }
+  
+  public static void createInterceptors(InjectManager manager,
+                                        ArrayList<Interceptor<?>> beans,
+                                        InterceptionType type,
+                                        Annotation ...bindings)
+  {
+    List<Interceptor<?>> interceptors;
+
+    interceptors = manager.resolveInterceptors(type, bindings);
+
+    for (Interceptor<?> bean : interceptors) {
+       int index = beans.indexOf(bean);
+
+      if (index < 0)
+        beans.add(bean);
+    }
   }
 
   public static void validatePassivating(Class<?> cl, 
@@ -150,6 +180,8 @@ public class CandiUtil {
                                       interceptor,
                                       ip.getMember().getName(),
                                       ip.getType()));
+          
+          log.log(Level.INFO, exn.toString(), exn);
         
           throw exn;
           

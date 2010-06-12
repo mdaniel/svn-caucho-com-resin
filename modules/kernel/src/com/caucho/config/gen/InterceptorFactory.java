@@ -42,6 +42,7 @@ import java.util.List;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.decorator.Delegate;
 import javax.ejb.Stateful;
 import javax.enterprise.inject.Stereotype;
@@ -85,6 +86,8 @@ public class InterceptorFactory<X>
   private ArrayList<Class<?>> _classAroundInvokeInterceptors
     = new ArrayList<Class<?>>();
   private ArrayList<Class<?>> _classPostConstructInterceptors
+    = new ArrayList<Class<?>>();
+  private ArrayList<Class<?>> _classPreDestroyInterceptors
     = new ArrayList<Class<?>>();
   
   private HashMap<Class<?>, Annotation> _classInterceptorBindings;
@@ -202,10 +205,21 @@ public class InterceptorFactory<X>
     return false;
   }
   
-  private boolean hasPostConstruct(Class<?> cl)
+  private boolean isPostConstruct(Class<?> cl)
+  {
+    return isLifecycle(cl, PostConstruct.class);
+  }
+  
+  private boolean isPreDestroy(Class<?> cl)
+  {
+    return isLifecycle(cl, PreDestroy.class);
+  }
+  
+  private boolean isLifecycle(Class<?> cl, 
+                              Class<? extends Annotation> annType)
   {
     for (Method m : cl.getDeclaredMethods()) {
-      if (m.isAnnotationPresent(PostConstruct.class)) {
+      if (m.isAnnotationPresent(annType)) {
         Class<?> []param = m.getParameterTypes();
         
         if (param.length == 1 && param[0].equals(InvocationContext.class))
@@ -224,8 +238,18 @@ public class InterceptorFactory<X>
     
     if (_classPostConstructInterceptors.size() > 0) {
       InterceptorGenerator<X> gen 
-        = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
-            InterceptionType.POST_CONSTRUCT);
+        = new InterceptorGenerator<X>(this,
+                                      _classPostConstructInterceptors,
+                                      InterceptionType.POST_CONSTRUCT);
+ 
+      gen.generateInject(out, map);
+    }
+    
+    if (_classPreDestroyInterceptors.size() > 0) {
+      InterceptorGenerator<X> gen 
+        = new InterceptorGenerator<X>(this,
+                                      _classPreDestroyInterceptors,
+                                      InterceptionType.PRE_DESTROY);
  
       gen.generateInject(out, map);
     }
@@ -237,12 +261,27 @@ public class InterceptorFactory<X>
   {
     super.generatePostConstruct(out, map);
     
-    if (_classPostConstructInterceptors.size() > 0) {
-      InterceptorGenerator<X> gen 
-        = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
-            InterceptionType.POST_CONSTRUCT);
+    if (isEnhanced()) {
+      InterceptorGenerator<X> gen =
+        new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
+                                    InterceptionType.POST_CONSTRUCT);
  
       gen.generateClassPostConstruct(out, map);
+    }
+  }
+  
+  @Override
+  public void generatePreDestroy(JavaWriter out, HashMap<String,Object> map)
+    throws IOException
+  {
+    super.generatePreDestroy(out, map);
+    
+    if (isEnhanced()) {
+      InterceptorGenerator<X> gen =
+        new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
+                                    InterceptionType.PRE_DESTROY);
+ 
+      gen.generateClassPreDestroy(out, map);
     }
   }
   
@@ -252,19 +291,43 @@ public class InterceptorFactory<X>
   {
     super.generateEpilogue(out, map);
     
-    if (_classPostConstructInterceptors.size() > 0) {
+    if (isEnhanced()) {
       InterceptorGenerator<X> gen 
         = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
                                       InterceptionType.POST_CONSTRUCT);
  
       gen.generateEpilogue(out, map);
+      
+      gen = new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
+                                      InterceptionType.PRE_DESTROY);
+ 
+      gen.generateEpilogue(out, map);
+      
+      gen = new InterceptorGenerator<X>(this, _classAroundInvokeInterceptors,
+                                      InterceptionType.AROUND_INVOKE);
+ 
+      gen.generateEpilogue(out, map);
     }
+    /*
+    if (isEnhanced()) {
+      InterceptorGenerator<X> gen 
+        = new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
+                                      InterceptionType.PRE_DESTROY);
+ 
+      gen.generateEpilogue(out, map);
+    }*/
   }
   
   @Override
   public boolean isEnhanced()
   {
     if (_classPostConstructInterceptors.size() > 0)
+      return true;
+    else if (_classPreDestroyInterceptors.size() > 0)
+      return true;
+    else if (_classAroundInvokeInterceptors.size() > 0)
+      return true;
+    else if (_classInterceptorBindings != null)
       return true;
     else
       return super.isEnhanced();
@@ -341,9 +404,15 @@ public class InterceptorFactory<X>
         }
       }
         
-      if (hasPostConstruct(iClass)) {
+      if (isPostConstruct(iClass)) {
         if (! _classPostConstructInterceptors.contains(iClass)) {
           _classPostConstructInterceptors.add(iClass);
+        }
+      }
+      
+      if (isPreDestroy(iClass)) {
+        if (! _classPreDestroyInterceptors.contains(iClass)) {
+          _classPreDestroyInterceptors.add(iClass);
         }
       }
     }

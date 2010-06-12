@@ -88,7 +88,8 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
   private Object _scopeAdapter;
 
   public ManagedBeanImpl(InjectManager injectManager,
-                         AnnotatedType<X> beanType)
+                         AnnotatedType<X> beanType,
+                         boolean isSessionBean)
   {
     super(injectManager, beanType.getBaseType(), beanType);
 
@@ -98,15 +99,21 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
     if (beanType.getType() instanceof Class)
       validateType((Class) beanType.getType());
     */
-
-    _injectionTarget = new InjectionTargetBuilder<X>(injectManager, beanType, this);
+    
+    InjectionTargetBuilder target;
+    target = new InjectionTargetBuilder<X>(injectManager, beanType, this);
+    
+    if (isSessionBean)
+      target.setGenerateInterception(false);
+    
+    _injectionTarget = target; 
   }
 
   public ManagedBeanImpl(InjectManager webBeans,
                          AnnotatedType<X> beanType,
                          InjectionTarget<X> injectionTarget)
   {
-    this(webBeans, beanType);
+    this(webBeans, beanType, false);
 
     _injectionTarget = injectionTarget;
   }

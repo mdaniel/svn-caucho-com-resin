@@ -275,10 +275,16 @@ public class CandiProducer<X> implements InjectionTarget<X>
   public void preDestroy(X instance)
   {
     try {
-      CreationalContext<X> env = null;
+      CreationalContextImpl<X> env = null;
 
       for (ConfigProgram program : _destroyProgram) {
         program.inject(instance, env);
+      }
+
+      // server/4750
+      if (instance instanceof CandiEnhancedBean) {
+        CandiEnhancedBean bean = (CandiEnhancedBean) instance;
+        bean.__caucho_destroy(env);
       }
     }
     catch (RuntimeException e) {

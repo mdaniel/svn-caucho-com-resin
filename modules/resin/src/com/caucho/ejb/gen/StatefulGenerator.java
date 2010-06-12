@@ -156,8 +156,6 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     generateClassStaticFields(out);
     
-    generateContextPrologue(out);
-
     generateClassContent(out);
 
     generateDependency(out);
@@ -194,20 +192,26 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.println("private transient boolean _isActive;");
     
-    generateConstructor(out);
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    
+    generateConstructor(out, map);
     
     generateProxyFactory(out);
 
-    generateBeanPrologue(out);
+    generateBeanPrologue(out, map);
+
+    generateBusinessMethods(out, map);
     
-    generateBusinessMethods(out);
+    generateEpilogue(out, map);
+    generateInject(out, map);
+    generatePostConstruct(out, map);
+    generateDestroy(out, map);
   }
 
-  private void generateConstructor(JavaWriter out)
+  private void generateConstructor(JavaWriter out,
+                                   HashMap<String,Object> map)
     throws IOException
   {
-    HashMap<String,Object> map = new HashMap<String,Object>();
-    
     // generateProxyConstructor(out);
     
     out.println();
@@ -218,6 +222,9 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.println("_manager = manager;");
     out.println("_context = context;");
+    
+    out.println("if (__caucho_exception != null)");
+    out.println("  throw __caucho_exception;");
 
     out.popDepth();
     out.println("}");
@@ -238,10 +245,6 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
 
     out.popDepth();
     out.println("}");
-    
-    generateInject(out);
-    generatePostConstruct(out, map);
-    generateDestroy(out);
   }
 
   private void generateProxyFactory(JavaWriter out)
@@ -256,10 +259,10 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   }
  
   @Override
-  public void generateDestroy(JavaWriter out)
+  public void generateDestroy(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
-    super.generateDestroy(out);
+    super.generateDestroy(out, map);
 
     out.println();
     out.println("@Override");

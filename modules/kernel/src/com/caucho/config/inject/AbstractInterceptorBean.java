@@ -27,32 +27,17 @@
  * @author Scott Ferguson
  */
 
-package javax.enterprise.inject.spi;
+package com.caucho.config.inject;
 
-import java.lang.annotation.Annotation;
-import java.util.Set;
-
-import javax.interceptor.InvocationContext;
+import javax.enterprise.inject.spi.Interceptor;
 
 /**
- * Metadata for for an interceptor
+ * InterceptorBean represents a Java interceptor
  */
-public interface Interceptor<T> extends Bean<T>
+abstract public class AbstractInterceptorBean<X> implements Interceptor<X>
 {
-  /**
-   * Returns the bindings for the interceptor
+  /*
+   * XXX:CDI TCK requires this construction because it checks inheritance
+   * for the Interceptor. 
    */
-  public Set<Annotation> getInterceptorBindings();
-
-  /**
-   * Returns true if the interceptor intercepts the given type.
-   */
-  public boolean intercepts(InterceptionType type);
-
-  /**
-   * Invokes the callback
-   */
-  public Object intercept(InterceptionType type,
-                          T instance,
-                          InvocationContext ctx);
 }

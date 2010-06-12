@@ -268,7 +268,7 @@ public class BeansConfig {
     if (_interceptorList.contains(cl))
       throw new ConfigException(L.l("'{0}' is a duplicate interceptor. Interceptors may not be listed twice in the beans.xml",
                                     cl.getName()));
-
+      
     _interceptorList.add(cl);
   }
 

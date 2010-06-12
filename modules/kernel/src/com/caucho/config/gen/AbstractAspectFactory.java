@@ -112,6 +112,13 @@ abstract public class AbstractAspectFactory<X> implements AspectFactory<X> {
   }
   
   @Override
+  public void generatePreDestroy(JavaWriter out, HashMap<String, Object> map)
+  throws IOException
+  {
+    _next.generatePreDestroy(out, map);
+  }
+  
+  @Override
   public void generateEpilogue(JavaWriter out, HashMap<String, Object> map)
     throws IOException
   {

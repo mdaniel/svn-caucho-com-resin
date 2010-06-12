@@ -111,6 +111,13 @@ public interface AspectGenerator<X> {
     throws IOException;
 
   /**
+   * Generates @PreDestroy code
+   */
+  public void generatePreDestroy(JavaWriter out, 
+                                 HashMap<String,Object> map)
+    throws IOException;
+
+  /**
    * Generates epilogue
    */
   public void generateEpilogue(JavaWriter out, 

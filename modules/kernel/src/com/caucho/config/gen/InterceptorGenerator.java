@@ -71,7 +71,7 @@ public class InterceptorGenerator<X>
   private static final String INTERCEPTOR_MAP = "caucho.interceptor.map";
   
   private static final Method _nullMethod;
-  
+    
   private InterceptorFactory<X> _factory;
 
   private String _uniqueName;
@@ -88,6 +88,8 @@ public class InterceptorGenerator<X>
 
   private ArrayList<Class<?>> _interceptors
     = new ArrayList<Class<?>>();
+  
+  private boolean _isEpilogue;
 
   private InterceptionBinding _bindingEntry;
 
@@ -137,16 +139,18 @@ public class InterceptorGenerator<X>
   }
 
   public InterceptorGenerator(InterceptorFactory<X> factory,
-                              ArrayList<Class<?>> postConstructInterceptors,
+                              ArrayList<Class<?>> lifecycleInterceptors,
                               InterceptionType type)
   {
-    super(factory, null, new NullGenerator());
+    super(factory, null, (NullGenerator) NullGenerator.NULL);
     
     _factory = factory;
     
-    _interceptors.addAll(postConstructInterceptors);
+    _interceptors.addAll(lifecycleInterceptors);
     
     _interceptionType = type;
+    
+    _isEpilogue = true;
   }
 
   public ArrayList<Class<?>> getInterceptors()
@@ -207,6 +211,19 @@ public class InterceptorGenerator<X>
     map.put("caucho.interceptor.postConstructName", _uniqueName);
   }  
 
+  public void generateClassPreDestroy(JavaWriter out,
+                                      HashMap<String, Object> map)
+    throws IOException
+  {
+    super.generatePreDestroy(out, map);
+    
+    _uniqueName = (String) map.get("caucho.interceptor.preDestroyName");
+
+    generateInterceptorCall(out, map);
+    
+    map.put("caucho.interceptor.preDestroyName", _uniqueName);
+  }  
+
   @Override
   public void generateEpilogue(JavaWriter out,
                                HashMap<String, Object> map)
@@ -214,12 +231,54 @@ public class InterceptorGenerator<X>
   {
     super.generateEpilogue(out, map);
     
-    _uniqueName = (String) map.get("caucho.interceptor.postConstructName");
+    String key = null;
+    
+    if (_interceptionType == InterceptionType.POST_CONSTRUCT)
+      key = "caucho.interceptor.postConstructName";
+    else if (_interceptionType == InterceptionType.PRE_DESTROY)
+      key = "caucho.interceptor.preDestroyName";
+    
+    _uniqueName = (String) map.get(key);
    
     generateBeanPrologue(out, map);
     generateMethodPrologue(out, map);
     
-    map.put("caucho.interceptor.postConstructName", _uniqueName);
+    out.println("static {");
+    out.pushDepth();
+    out.println("try {");
+    out.pushDepth();
+    
+    out.print(CandiUtil.class.getName());
+    out.print(".createInterceptors(__caucho_manager, __caucho_interceptor_beans");
+
+    for (int i = 0; i < _interceptorBinding.size(); i++) {
+      out.pushDepth();
+      out.pushDepth();
+      generateAnnotation(out, _interceptorBinding.get(i));
+      out.popDepth();
+      out.popDepth();
+    }
+    
+    out.println(");");
+    
+    if (_factory.isPassivating()) {
+      String beanClassName = getFactory().getAspectBeanFactory().getGeneratedClassName();
+      
+      out.println();
+      out.print("com.caucho.config.gen.CandiUtil.validatePassivating(");
+      out.print(beanClassName + ".class, ");
+      out.println("__caucho_interceptor_beans);");
+    }
+
+    out.popDepth();
+    out.println("} catch (Exception e) {");
+    out.println("  __caucho_log.log(java.util.logging.Level.WARNING, e.toString(), e);");
+    out.println("  __caucho_exception = com.caucho.config.ConfigException.create(e);");
+    out.println("}");
+    out.popDepth();
+    out.println("}");
+
+    map.put(key, _uniqueName);
   }
 
   /**
@@ -525,24 +584,32 @@ public class InterceptorGenerator<X>
     out.println(";");
     out.println(getUniqueName(out) + "_method.setAccessible(true);");
 
-    String superMethodName;
-
-    if (hasDecorator())
-      superMethodName = "__caucho_" + javaMethod.getName() + "_decorator";
-    else if (isProxy())
-      superMethodName = javaMethod.getName();
-    else {
-      superMethodName = "__caucho_" + javaMethod.getName();
-    }
+    String superMethodName = getSuperMethodName();
 
     out.print(getUniqueName(out) + "_implMethod = ");
+    
+    String className;
+    
+    if (javaMethod.getDeclaringClass().equals(getClass())) {
+      className = InterceptorGenerator.class.getName();
+      superMethodName = javaMethod.getName();
+    }
+    else
+      className = getBeanFactory().getGeneratedClassName();
+      
+    
     generateGetMethod(out,
-                      getBeanFactory().getGeneratedClassName(),
+                      className,
                       superMethodName,
                       javaMethod.getParameterTypes());
     out.println(";");
-    out.println(getUniqueName(out) + "_implMethod.setAccessible(true);");
 
+    /*
+    out.print(getUniqueName(out) + "_implMethod = ");
+    out.println(getUniqueName(out) + "_method;");
+    
+    out.println(getUniqueName(out) + "_implMethod.setAccessible(true);");
+    */
     if (isAroundInvokePrologue) {
       AnnotatedMethod<? super X> aroundInvoke = getAroundInvokeMethod();
 
@@ -562,6 +629,20 @@ public class InterceptorGenerator<X>
     out.println("}");
     out.popDepth();
     out.println("}");
+  }
+
+  private String getSuperMethodName()
+  {
+    Method javaMethod = getJavaMethod();
+
+    if (hasDecorator())
+      return "__caucho_" + javaMethod.getName() + "_decorator";
+    else if (isProxy())
+      return javaMethod.getName();
+    else {
+      return ("__caucho_" + javaMethod.getName()
+          + "_" + _interceptionType);
+    }
   }
 
   private String getChainName(JavaWriter out, HashMap<String,Object> map)
@@ -1200,7 +1281,7 @@ public class InterceptorGenerator<X>
     }
     else {
       out.print("var.__caucho_getBean().");
-      out.print("__caucho_" + method.getName());
+      out.print("__caucho_" + method.getName() + "_" + _interceptionType);
     }
 
     out.print("(");
@@ -1337,7 +1418,8 @@ public class InterceptorGenerator<X>
     if (_uniqueName == null) {
       String name = getJavaMethod().getName();
       
-      _uniqueName = "_" + name + "_v" + out.generateId();
+      _uniqueName = ("_" + name + "_" + _interceptionType
+                     + "_" + out.generateId());
     }
 
     return _uniqueName;
@@ -1470,7 +1552,8 @@ public class InterceptorGenerator<X>
   {
     return (_interceptors != null && _interceptors.size() > 0
             || _interceptorBinding != null && _interceptorBinding.size() > 0
-            || getAroundInvokeMethod() != null);
+            || getAroundInvokeMethod() != null
+            || _isEpilogue);
   }
 
   private boolean hasDecorator()
@@ -1487,7 +1570,7 @@ public class InterceptorGenerator<X>
     out.print("private ");
     out.printClass(javaMethod.getReturnType());
     out.print(" __caucho_");
-    out.print(javaMethod.getName());
+    out.print(javaMethod.getName() + "_" + _interceptionType);
     out.print("(");
 
     Class<?>[] types = javaMethod.getParameterTypes();
@@ -1525,7 +1608,13 @@ public class InterceptorGenerator<X>
     throws IOException
   {
     out.println();
-    out.println("private void __caucho_null()");
+    out.println("private void __caucho_nullPostConstruct()");
+    out.println("{");
+    out.pushDepth();
+    out.popDepth();
+    out.println("}");
+    out.println();
+    out.println("private void __caucho_nullPreDestroy()");
     out.println("{");
     out.pushDepth();
     out.popDepth();

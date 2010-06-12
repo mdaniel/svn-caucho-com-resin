@@ -170,6 +170,13 @@ public class NonBusinessMethodGenerator<X> implements AspectGenerator<X>
   }
   
   @Override
+  public void generatePreDestroy(JavaWriter out, 
+                                 HashMap<String,Object> map)
+    throws IOException
+  {
+  }
+  
+  @Override
   public void generateEpilogue(JavaWriter out, 
                                HashMap<String,Object> map)
     throws IOException

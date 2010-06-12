@@ -55,7 +55,7 @@ import com.caucho.util.L10N;
 /**
  * InterceptorBean represents a Java interceptor
  */
-public class InterceptorBean<X> implements Interceptor<X>
+public class InterceptorBean<X> extends AbstractInterceptorBean<X>
 {
   private static final L10N L = new L10N(InterceptorBean.class);
   

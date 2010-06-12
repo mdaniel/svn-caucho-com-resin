@@ -31,6 +31,7 @@ package com.caucho.ejb.gen;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.ejb.Singleton;
 import javax.enterprise.inject.spi.AnnotatedType;
@@ -142,13 +143,9 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     
     generateConstructor(out);
 
-    generateContextPrologue(out);
-
     generateClassContent(out);
 
     generateDependency(out);
-    
-    generateDestroy(out);
 
     out.popDepth();
     out.println("}");
@@ -185,9 +182,12 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     out.println("private transient boolean _isValid;");
     out.println("private transient boolean _isActive;");
     
+    HashMap<String,Object> map = new HashMap<String,Object>();
+    
     generateProxyFactory(out);
 
-    generateBusinessMethods(out);
+    generateBusinessMethods(out, map);
+    generateDestroy(out, map);
   }
   
   private void generateConstructor(JavaWriter out)

@@ -239,20 +239,27 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
       else
         cl = gen.preload(getFullClassName());
 
-      if (cl != null)
-        return cl;
+      if (cl == null) {
+        gen.generate(this);
 
-      gen.generate(this);
-
-      gen.compilePendingJava();
+        gen.compilePendingJava();
       
-      // ioc/0c26
+        // ioc/0c26
 
-      // if (Modifier.isPublic(modifiers) || Modifier.isProtected(modifiers))
-      if (isPackageLoader)
-        return gen.loadClassParentLoader(getFullClassName(), baseClass);
-      else
-        return gen.loadClass(getFullClassName());
+        if (isPackageLoader)
+          cl = gen.loadClassParentLoader(getFullClassName(), baseClass);
+        else
+          cl = gen.loadClass(getFullClassName());
+      }
+      
+      Method getException = cl.getMethod("__caucho_getException");
+      
+      RuntimeException exn = (RuntimeException) getException.invoke(null);
+      
+      if (exn != null)
+        throw exn;
+      
+      return cl;
     } catch (RuntimeException e) {
       throw e;
     } catch (Exception e) {
@@ -303,19 +310,17 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
     
     generateBeanPrologue(out, map);
 
-    for (AspectGenerator<X> method : _businessMethods) {
-      method.generate(out, map);
-    }
+    generateBusinessMethods(out, map);
 
     generateEpilogue(out, map);
     
-    generateInject(out);
+    generateInject(out, map);
     
     generatePostConstruct(out, map);
     
     generateWriteReplace(out);
     
-    generateDestroy(out);
+    generateDestroy(out, map);
   }
 
   /**
@@ -324,19 +329,10 @@ public class CandiBeanGenerator<X> extends BeanGenerator<X> {
   protected void generateHeader(JavaWriter out)
     throws IOException
   {
-    out.println("private static final java.util.logging.Logger __caucho_log");
-    out.println("  = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
+    generateClassStaticFields(out);
+    
     out.println("private static final boolean __caucho_isFiner");
     out.println("  = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
-    out.println("private static RuntimeException __caucho_exception;");
-
-    /*
-    if (_hasXA) {
-      out.println();
-      out.println("private static final com.caucho.ejb.gen.XAManager _xa");
-      out.println("  = new com.caucho.ejb.gen.XAManager();");
-    }
-    */
 
     if (_isSerializeHandle) {
       generateSerializeHandle(out);

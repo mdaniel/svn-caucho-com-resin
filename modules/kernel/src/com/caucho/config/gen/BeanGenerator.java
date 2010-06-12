@@ -124,6 +124,12 @@ abstract public class BeanGenerator<X> extends GenClass
     out.println("private static final java.util.logging.Logger __caucho_log");
     out.println("  = java.util.logging.Logger.getLogger(\"" + getFullClassName() + "\");");
     out.println("private static RuntimeException __caucho_exception;");
+    
+    out.println();
+    out.println("public static RuntimeException __caucho_getException()");
+    out.println("{");
+    out.println("  return __caucho_exception;");
+    out.println("}");
   }
   
   /**
@@ -142,15 +148,6 @@ abstract public class BeanGenerator<X> extends GenClass
     throws IOException
   {
     // view.generateDestroy(out);
-  }
-
- /**
-   * Generates prologue for the context.
-   */
-  public void generateContextPrologue(JavaWriter out)
-    throws IOException
-  {
-
   }
 
   /**
@@ -181,15 +178,19 @@ abstract public class BeanGenerator<X> extends GenClass
   /**
    * Generates any global destroy
    */
-  public void generateDestroy(JavaWriter out)
+  public void generateDestroy(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
+    generatePreDestroy(out, map);
+    
     out.println();
     out.println("public void __caucho_destroy(com.caucho.config.inject.CreationalContextImpl env)");
     out.println("{");
     out.pushDepth();
 
     generateDestroyImpl(out);
+    
+    out.println("__caucho_preDestroy();");
 
     out.popDepth();
     out.println("}");
@@ -251,15 +252,6 @@ abstract public class BeanGenerator<X> extends GenClass
   /**
    * Generates prologue additions
    */
-  public void generateBeanPrologue(JavaWriter out)
-    throws IOException
-  {
-    generateBeanPrologue(out, new HashMap<String,Object>());
-  }
-
-  /**
-   * Generates prologue additions
-   */
   public void generateBeanPrologue(JavaWriter out, 
                                    HashMap<String,Object> map)
     throws IOException
@@ -269,7 +261,8 @@ abstract public class BeanGenerator<X> extends GenClass
     }
   }
 
-  protected void generateInject(JavaWriter out)
+  protected void generateInject(JavaWriter out,
+                                HashMap<String,Object> map)
      throws IOException
    {
      out.println();
@@ -278,7 +271,6 @@ abstract public class BeanGenerator<X> extends GenClass
      out.println("{");
      out.pushDepth();
 
-     HashMap<String,Object> map = new HashMap<String,Object>();
      for (AspectGenerator<X> method : getMethods()) {
        method.generateInject(out, map);
      }
@@ -308,6 +300,25 @@ abstract public class BeanGenerator<X> extends GenClass
     out.println("}");
   }
 
+  private void generatePreDestroy(JavaWriter out, 
+                                  HashMap<String,Object> map)
+     throws IOException
+  {
+    out.println();
+    out.println("public void __caucho_preDestroy()");
+    out.println("{");
+    out.pushDepth();
+
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generatePreDestroy(out, map);
+    }
+     
+    getAspectBeanFactory().generatePreDestroy(out, map);
+
+    out.popDepth();
+    out.println("}");
+  }
+
   protected void generateEpilogue(JavaWriter out, HashMap<String,Object> map)
      throws IOException
   {
@@ -317,10 +328,10 @@ abstract public class BeanGenerator<X> extends GenClass
   /**
    * Generates view's business methods
    */
-  public void generateBusinessMethods(JavaWriter out)
+  public void generateBusinessMethods(JavaWriter out,
+                                      HashMap<String,Object> map)
     throws IOException
   {
-    HashMap<String,Object> map = new HashMap<String,Object>();
     for (AspectGenerator<X> method : getMethods()) {
       method.generate(out, map);
     }

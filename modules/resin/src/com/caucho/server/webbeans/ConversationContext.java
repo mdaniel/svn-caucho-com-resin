@@ -45,6 +45,7 @@ import javax.faces.context.FacesContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.scope.AbstractScopeContext;
 import com.caucho.config.scope.ContextContainer;
+import com.caucho.config.scope.ScopeRemoveListener;
 import com.caucho.inject.Module;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
@@ -250,11 +251,22 @@ public class ConversationContext extends AbstractScopeContext
       context.close();
   }
 
-  static class Scope implements java.io.Serializable {
+  static class Scope implements java.io.Serializable, ScopeRemoveListener {
     ContextContainer _transientConversation;
     
     String _extendedId;
     ContextContainer _extendedConversation;
     long _timeout;
+
+    @Override
+    public void removeEvent(Object scope, String name)
+    {
+      ContextContainer conversation = _extendedConversation;
+      
+      if (conversation != null)
+        conversation.close();
+      
+      _extendedConversation = null;
+    }
   }
 }

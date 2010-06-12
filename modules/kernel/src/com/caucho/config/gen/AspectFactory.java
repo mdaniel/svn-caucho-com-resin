@@ -66,6 +66,9 @@ public interface AspectFactory<X> {
   public void generatePostConstruct(JavaWriter out, HashMap<String, Object> map) 
     throws IOException;
 
+  public void generatePreDestroy(JavaWriter out, HashMap<String, Object> map) 
+    throws IOException;
+
   public void generateEpilogue(JavaWriter out, HashMap<String, Object> map) 
     throws IOException;
 }

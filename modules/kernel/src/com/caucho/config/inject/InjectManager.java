@@ -1003,7 +1003,8 @@ public final class InjectManager
    */
   public <T> ManagedBeanImpl<T> createManagedBean(AnnotatedType<T> type)
   {
-    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type);
+    ManagedBeanImpl<T> bean
+      = new ManagedBeanImpl<T>(this, type, false);
     bean.introspect();
 
     return bean;
@@ -2851,7 +2852,7 @@ public final class InjectManager
       return;
     }
     
-    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type);
+    ManagedBeanImpl<T> bean = new ManagedBeanImpl<T>(this, type, false);
     
     InjectionTarget<T> target = bean.getInjectionTarget(); //createInjectionTarget(type);
 
@@ -3159,6 +3160,10 @@ public final class InjectManager
     _interceptorClassList.clear();
     
     for (Class<?> interceptorClass : interceptorClassList) {
+      if (! interceptorClass.isAnnotationPresent(javax.interceptor.Interceptor.class))
+        throw new ConfigException(L.l("'{0}' is an invalid interceptor because it does not have an @Interceptor.",
+                                      interceptorClass.getName()));
+        
       for (InterceptorEntry<?> entry : _interceptorList) {
         if (entry.getInterceptor().getBeanClass().equals(interceptorClass)) {
           entry.setEnabled(true);

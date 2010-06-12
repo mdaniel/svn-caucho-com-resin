@@ -96,6 +96,11 @@ public class MethodTailFactory<X> implements AspectFactory<X> {
   }
   
   @Override
+  public void generatePreDestroy(JavaWriter out, HashMap<String, Object> map)
+  {
+  }
+  
+  @Override
   public void generateEpilogue(JavaWriter out, HashMap<String, Object> map)
   {
   }

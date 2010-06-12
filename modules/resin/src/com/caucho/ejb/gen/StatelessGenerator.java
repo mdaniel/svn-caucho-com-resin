@@ -32,6 +32,7 @@ package com.caucho.ejb.gen;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -280,10 +281,9 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
 
   private void generateBody(JavaWriter out) throws IOException
   {
-    out.println("private static final java.util.logging.Logger __caucho_log = java.util.logging.Logger.getLogger(\""
-                + getFullClassName() + "\");");
+    generateClassStaticFields(out);
+    
     out.println("private static final boolean __caucho_isFiner = __caucho_log.isLoggable(java.util.logging.Level.FINER);");
-    out.println("private static RuntimeException __caucho_exception;");
     
     out.println();
     out.println("private final StatelessManager _manager;");
@@ -293,11 +293,11 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     generateConstructor(out);
 
     generateProxyPool(out);
+    
+    HashMap<String,Object> map = new HashMap<String,Object>();
 
-    generateBusinessMethods(out);
-
-    generateContextPrologue(out);
-    generateDestroy(out);
+    generateBusinessMethods(out, map);
+    // generateDestroy(out, map);
 
     /*
     out.println();

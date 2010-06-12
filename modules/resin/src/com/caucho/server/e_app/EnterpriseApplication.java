@@ -372,6 +372,7 @@ public class EnterpriseApplication
   /**
    * Sets the config exception.
    */
+  @Override
   public void setConfigException(Throwable e)
   {
     if (e != null)
@@ -557,6 +558,12 @@ public class EnterpriseApplication
       if (_container != null) {
         for (WebAppController webApp : _webApps) {
           _container.getWebAppGenerator().update(webApp.getContextPath());
+        }
+      }
+      
+      if (_configException != null) {
+        for (WebAppController controller : _webApps) {
+          controller.setConfigException(_configException);
         }
       }
     } finally {

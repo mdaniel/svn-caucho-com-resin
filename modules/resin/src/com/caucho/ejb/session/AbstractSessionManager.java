@@ -30,6 +30,8 @@
 package com.caucho.ejb.session;
 
 import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -295,6 +297,19 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       // ejb/1103
       proxyImplClass = javaGen.loadClassParentLoader(skeletonName, ejbClass);
     }
+    
+    try {
+      Method method = proxyImplClass.getMethod("__caucho_getException");
+      
+      RuntimeException exn = (RuntimeException) method.invoke(null);
+
+      if (exn != null)
+        throw exn;
+    } catch (RuntimeException exn) {
+      throw exn;
+    } catch (Exception exn) {
+      throw new RuntimeException(exn);
+    }
     // contextImplClass.getDeclaredConstructors();
     
     return proxyImplClass;
@@ -324,6 +339,15 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       Constructor<?> ctor = _proxyImplClass.getConstructor(param);
       
       return (SessionProxyFactory<T>) ctor.newInstance(this, context);
+    } catch (InvocationTargetException e) {
+      Throwable cause = e.getCause();
+      
+      if (cause instanceof RuntimeException)
+        throw (RuntimeException) cause;
+      else
+        throw new IllegalStateException(cause);
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
@@ -352,7 +376,8 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     }
 
     ManagedBeanImpl<X> mBean 
-      = getInjectManager().createManagedBean(getAnnotatedType());
+      = new ManagedBeanImpl<X>(getInjectManager(), getAnnotatedType(), true);
+    mBean.introspect();
     
     InjectionTarget<X> target = mBean.getInjectionTarget();
     target = moduleBeanManager.processInjectionTarget(target, getRawAnnotatedType());

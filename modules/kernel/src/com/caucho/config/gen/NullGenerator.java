@@ -41,6 +41,8 @@ import com.caucho.java.JavaWriter;
  */
 @Module
 public class NullGenerator<X> implements AspectGenerator<X> {
+  public static NullGenerator<?> NULL = new NullGenerator<Object>();
+  
   NullGenerator()
   {
   }
@@ -112,6 +114,13 @@ public class NullGenerator<X> implements AspectGenerator<X> {
   @Override
   public void generatePostConstruct(JavaWriter out,
                                     HashMap<String,Object> map)
+    throws IOException
+  {
+  }
+  
+  @Override
+  public void generatePreDestroy(JavaWriter out,
+                                 HashMap<String,Object> map)
     throws IOException
   {
   }

@@ -76,7 +76,9 @@ public class StatefulAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   @Override
   public String getBeanInstance()
   {
-    return "bean";
+      // ioc/05as
+  //  return "bean";
+    return "_bean";
   }
   
   /**
