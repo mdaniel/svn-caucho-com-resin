@@ -74,11 +74,11 @@ public class ResinStandardPlugin implements Extension {
   private static final Logger log
     = Logger.getLogger(ResinStandardPlugin.class.getName());
 
-  private InjectManager _injectManager;
+  private InjectManager _cdiManager;
   
   public ResinStandardPlugin(InjectManager manager) 
   {
-    _injectManager = manager;
+    _cdiManager = manager;
   }
   
   /**
@@ -110,7 +110,7 @@ public class ResinStandardPlugin implements Extension {
     // ioc/0j08
     boolean isXmlConfig = true;
 
-    EjbManager ejbContainer = EjbManager.create();
+    EjbManager ejbContainer = EjbManager.create(_cdiManager.getClassLoader());
     
     if (isXmlConfig
         && (annotatedType.isAnnotationPresent(Stateful.class)
@@ -171,7 +171,7 @@ public class ResinStandardPlugin implements Extension {
         jndiName = bean.getBeanClass().getSimpleName();
       }
       
-      JndiBeanProxy<T> proxy = new JndiBeanProxy<T>(_injectManager, bean);
+      JndiBeanProxy<T> proxy = new JndiBeanProxy<T>(_cdiManager, bean);
       
       if (log.isLoggable(Level.FINE))
         log.fine("bind to JNDI '" + jndiName + "' for " + bean);
@@ -193,7 +193,7 @@ public class ResinStandardPlugin implements Extension {
       AnnotatedType<?> annType = (AnnotatedType<?>) annotated;
       
       try {
-        Jmx.register(new BeanMBean(_injectManager, bean, annType), mbeanName);
+        Jmx.register(new BeanMBean(_cdiManager, bean, annType), mbeanName);
       } catch (Exception e) {
         log.log(Level.FINE, e.toString(), e);
       }

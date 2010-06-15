@@ -83,8 +83,6 @@ public class EjbManager implements ScanListener, EnvironmentListener {
   private final EjbConfigManager _configManager;
   private final EjbProtocolManager _protocolManager;
 
-  private AmberPersistenceUnit _ejbPersistenceUnit;
-
   private final HashSet<String> _ejbUrls = new HashSet<String>();
 
   // the exact list of root to scan - used by EJBContainer
@@ -316,10 +314,24 @@ public class EjbManager implements ScanListener, EnvironmentListener {
 
     getProtocolManager().addServer(server);
   }
+  
+  public AbstractEjbBeanManager<?> getServerByEjbName(String name)
+  {
+    for (AbstractEjbBeanManager<?> server : _serverList) {
+      if (server.getEJBName().equals(name))
+        return server;
+    }
+    
+    if (_parentContainer != null)
+      return _parentContainer.getServerByEjbName(name);
+    else
+      return null;
+  }
 
   /**
    * Since EJB doesn't bytecode enhance, it's priority 1
    */
+  @Override
   public int getScanPriority()
   {
     return 1;

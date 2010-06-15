@@ -327,9 +327,9 @@ public abstract class JspNode {
       JspNode parent = getParent();
 
       if (parent != null)
-	return parent.getParentTagNode();
+        return parent.getParentTagNode();
       else
-	return null;
+        return null;
     }
   }
 
@@ -344,9 +344,9 @@ public abstract class JspNode {
       JspNode parent = getParent();
 
       if (parent != null)
-	return parent.getParentTagName();
+        return parent.getParentTagName();
       else
-	return null;
+        return null;
     }
   }
 
@@ -387,7 +387,7 @@ public abstract class JspNode {
     for (Namespace ptr = _ns; ptr != null; ptr = ptr.getNext()) {
       // jsp/1g58
       if (! "".equals(ptr.getPrefix()))
-	ns = new NamespaceContext(ns, ptr.getPrefix(), ptr.getURI());
+        ns = new NamespaceContext(ns, ptr.getPrefix(), ptr.getURI());
     }
 
     return ns;
@@ -445,7 +445,7 @@ public abstract class JspNode {
     }
     else
       throw error(L.l("attribute '{0}' is not allowed in <{1}>.",
-		      name.getName(), getTagName()));
+                      name.getName(), getTagName()));
   }
 
   /**
@@ -484,11 +484,11 @@ public abstract class JspNode {
     if (node instanceof JspAttribute) {
     }
     else if (node instanceof StaticText
-	     && ((StaticText) node).isWhitespace()) {
+        && ((StaticText) node).isWhitespace()) {
     }
     else
       throw node.error(L.l("<{0}> does not allow any child elements at {1}",
-			   getTagName(), node.getTagName()));
+                           getTagName(), node.getTagName()));
   }
 
 
@@ -610,20 +610,20 @@ public abstract class JspNode {
 
       switch (ch) {
       case '<':
-	cb.append("&lt;");
-	break;
+        cb.append("&lt;");
+        break;
       case '>':
-	cb.append("&gt;");
-	break;
+        cb.append("&gt;");
+        break;
       case '&':
-	cb.append("&amp;");
-	break;
+        cb.append("&amp;");
+        break;
       case '"':
-	cb.append("&quot;");
-	break;
+        cb.append("&quot;");
+        break;
       default:
-	cb.append(ch);
-	break;
+        cb.append(ch);
+        break;
       }
     }
 
@@ -645,23 +645,23 @@ public abstract class JspNode {
 
       switch (ch) {
       case '&':
-	cb.append("&amp;");
-	break;
+        cb.append("&amp;");
+        break;
       case '<':
-	cb.append("&lt;");
-	break;
+        cb.append("&lt;");
+        break;
       case '>':
-	cb.append("&gt;");
-	break;
+        cb.append("&gt;");
+        break;
       case '"':
-	cb.append("&quot;");
-	break;
+        cb.append("&quot;");
+        break;
       case '\'':
-	cb.append("&apos;");
-	break;
+        cb.append("&apos;");
+        break;
       default:
-	cb.append(ch);
-	break;
+        cb.append(ch);
+        break;
       }
     }
 
@@ -778,6 +778,27 @@ public abstract class JspNode {
    */
   public void generateChildren(JspJavaWriter out)
     throws Exception
+  {
+  }
+
+  /**
+   * Generates the code for the tag
+   *
+   * @param out the output writer for the generated java.
+   */
+  public void generateClassEpilogue(JspJavaWriter out)
+    throws IOException
+  {
+    generateClassEpilogueChildren(out);
+  }
+
+  /**
+   * Generates the code for the tag
+   *
+   * @param out the output writer for the generated java.
+   */
+  public void generateClassEpilogueChildren(JspJavaWriter out)
+    throws IOException
   {
   }
 

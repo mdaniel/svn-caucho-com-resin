@@ -33,8 +33,11 @@ import javax.el.ELContext;
 import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
+import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.el.CandiExpr;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.el.Expr;
 import com.caucho.el.MethodExpressionImpl;
 import com.caucho.inject.Module;
@@ -64,6 +67,15 @@ public class JspUtil
     JspELParser parser = new JspELParser(elContext, exprString);
 
     return new CandiExpr(parser.parse());
+  }
+  
+  public static <T> ReferenceFactory<T> getInjectFactory(Class<T> cl)
+  {
+    InjectManager cdiManager = InjectManager.create();
+    
+    Bean<T> bean = cdiManager.createManagedBean(cl);
+    
+    return cdiManager.getReferenceFactory(bean);
   }
 
   public static MethodExpression createMethodExpression(ELContext elContext,

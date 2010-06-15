@@ -595,6 +595,7 @@ public class JavaJspGenerator extends JspGenerator {
   /**
    * Generates the JSP page.
    */
+  @Override
   protected void generate(Path path, String className)
     throws Exception
   {
@@ -757,7 +758,7 @@ public class JavaJspGenerator extends JspGenerator {
     _rootNode.generate(out);
 
     generatePageFooter(out);
-
+    
     // _rootNode.generateDeclaration(out);
 
     generateClassFooter(out);
@@ -1263,6 +1264,8 @@ public class JavaJspGenerator extends JspGenerator {
     generateDepends(out);
 
     generateTags(out);
+    
+    _rootNode.generateClassEpilogue(out);
 
     //generateTags may still add to _value(Expr|Method)List
     generateInit(out);

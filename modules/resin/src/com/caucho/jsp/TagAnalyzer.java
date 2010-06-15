@@ -34,6 +34,9 @@ import com.caucho.util.L10N;
 
 import javax.annotation.Resource;
 import javax.ejb.EJB;
+import javax.inject.Inject;
+import javax.persistence.PersistenceContext;
+import javax.persistence.PersistenceUnit;
 import javax.servlet.jsp.tagext.*;
 //import javax.xml.ws.WebServiceRef;
 import java.io.InputStream;
@@ -65,13 +68,13 @@ public class TagAnalyzer
   
   static final L10N L = new L10N(TagAnalyzer.class);
 
-  private HashMap<Class,AnalyzedTag> _analyzedTags =
-    new HashMap<Class,AnalyzedTag>();
+  private HashMap<Class<?>,AnalyzedTag> _analyzedTags =
+    new HashMap<Class<?>,AnalyzedTag>();
 
   /**
    * Analyzes a tag.
    */
-  public AnalyzedTag analyze(Class tagClass)
+  public AnalyzedTag analyze(Class<?> tagClass)
   {
     if (tagClass == null)
       return null;
@@ -102,30 +105,30 @@ public class TagAnalyzer
       InputStream is = loader.getResourceAsStream(name);
 
       if (is == null)
-	return tag;
+        return tag;
 
       try {
-	JavaClass javaClass = new ByteCodeParser().parse(is);
+        JavaClass javaClass = new ByteCodeParser().parse(is);
         tag.setJavaClass(javaClass);
 
-	analyze(tag, "doStartTag", "()I", new StartAnalyzer(tag));
-	analyze(tag, "doEndTag", "()I", new EndAnalyzer(tag));
+        analyze(tag, "doStartTag", "()I", new StartAnalyzer(tag));
+        analyze(tag, "doEndTag", "()I", new EndAnalyzer(tag));
 
-	if (IterationTag.class.isAssignableFrom(tagClass)) {
-	  analyze(tag, "doAfterBody", "()I", new AfterAnalyzer(tag));
-	}
-	
-	if (BodyTag.class.isAssignableFrom(tagClass)) {
-	  analyze(tag, "doInitBody", "()V", new InitAnalyzer());
-	}
-	
-	if (TryCatchFinally.class.isAssignableFrom(tagClass)) {
-	  analyze(tag, "doCatch", "(Ljava/lang/Throwable;)V",
+        if (IterationTag.class.isAssignableFrom(tagClass)) {
+          analyze(tag, "doAfterBody", "()I", new AfterAnalyzer(tag));
+        }
+        
+        if (BodyTag.class.isAssignableFrom(tagClass)) {
+          analyze(tag, "doInitBody", "()V", new InitAnalyzer());
+        }
+        
+        if (TryCatchFinally.class.isAssignableFrom(tagClass)) {
+          analyze(tag, "doCatch", "(Ljava/lang/Throwable;)V",
                   new CatchAnalyzer());
-	  analyze(tag, "doFinally", "()V", new FinallyAnalyzer());
-	}
+          analyze(tag, "doFinally", "()V", new FinallyAnalyzer());
+        }
       } finally {
-	is.close();
+        is.close();
       }
     } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
@@ -137,38 +140,38 @@ public class TagAnalyzer
   /**
    * Analyzes the tag by reflection.
    */
-  public void analyzeByReflection(Class tagClass,
-				  AnalyzedTag tag, AnalyzedTag parent)
+  public void analyzeByReflection(Class<?> tagClass,
+                                  AnalyzedTag tag, AnalyzedTag parent)
   {
     tag.setBodyTag(BodyTag.class.isAssignableFrom(tagClass));
-		   
+    
     Method doStartMethod = getMethod(tagClass, "doStartTag", new Class[0]);
 
     if (doStartMethod != null &&
-	doStartMethod.getDeclaringClass().equals(tagClass)) {
+        doStartMethod.getDeclaringClass().equals(tagClass)) {
       if (TagSupport.class.equals(tagClass)) {
-	tag.setDoStart(false);
-	tag.setStartReturnsSkip(false);
-	tag.setStartReturnsInclude(true);
-	tag.setStartReturnsBuffered(false);
+        tag.setDoStart(false);
+        tag.setStartReturnsSkip(false);
+        tag.setStartReturnsInclude(true);
+        tag.setStartReturnsBuffered(false);
       }
       else if (BodyTagSupport.class.equals(tagClass)) {
-	tag.setDoStart(false);
-	tag.setStartReturnsSkip(false);
-	tag.setStartReturnsInclude(false);
-	tag.setStartReturnsBuffered(true);
+        tag.setDoStart(false);
+        tag.setStartReturnsSkip(false);
+        tag.setStartReturnsInclude(false);
+        tag.setStartReturnsBuffered(true);
       }
       else if (BodyTag.class.isAssignableFrom(tagClass)) {
-	tag.setDoStart(true);
-	tag.setStartReturnsSkip(true);
-	tag.setStartReturnsInclude(true);
-	tag.setStartReturnsBuffered(true);
+        tag.setDoStart(true);
+        tag.setStartReturnsSkip(true);
+        tag.setStartReturnsInclude(true);
+        tag.setStartReturnsBuffered(true);
       }
       else {
-	tag.setDoStart(true);
-	tag.setStartReturnsSkip(true);
-	tag.setStartReturnsInclude(true);
-	tag.setStartReturnsBuffered(false);
+        tag.setDoStart(true);
+        tag.setStartReturnsSkip(true);
+        tag.setStartReturnsInclude(true);
+        tag.setStartReturnsBuffered(false);
       }
     }
     else if (parent != null) {
@@ -181,17 +184,17 @@ public class TagAnalyzer
     Method doEndMethod = getMethod(tagClass, "doEndTag", new Class[0]);
 
     if (doEndMethod != null &&
-	doEndMethod.getDeclaringClass().equals(tagClass)) {
+        doEndMethod.getDeclaringClass().equals(tagClass)) {
       if (TagSupport.class.equals(tagClass) ||
-	  BodyTagSupport.class.equals(tagClass)) {
-	tag.setDoEnd(false);
-	tag.setEndReturnsSkip(false);
-	tag.setEndReturnsEval(true);
+          BodyTagSupport.class.equals(tagClass)) {
+        tag.setDoEnd(false);
+        tag.setEndReturnsSkip(false);
+        tag.setEndReturnsEval(true);
       }
       else {
-	tag.setDoEnd(true);
-	tag.setEndReturnsSkip(true);
-	tag.setEndReturnsEval(true);
+        tag.setDoEnd(true);
+        tag.setEndReturnsSkip(true);
+        tag.setEndReturnsEval(true);
       }
     }
     else if (parent != null) {
@@ -203,19 +206,19 @@ public class TagAnalyzer
     Method doAfterBody = getMethod(tagClass, "doAfterBody", new Class[0]);
 
     if (doAfterBody != null &&
-	doAfterBody.getDeclaringClass().equals(tagClass)) {
+        doAfterBody.getDeclaringClass().equals(tagClass)) {
       if (TagSupport.class.equals(tagClass) ||
-	  BodyTagSupport.class.equals(tagClass)) {
-	tag.setDoAfter(false);
-	tag.setAfterReturnsAgain(false);
+          BodyTagSupport.class.equals(tagClass)) {
+        tag.setDoAfter(false);
+        tag.setAfterReturnsAgain(false);
       }
       else if (! IterationTag.class.isAssignableFrom(tagClass)) {
-	tag.setDoAfter(false);
-	tag.setAfterReturnsAgain(false);
+        tag.setDoAfter(false);
+        tag.setAfterReturnsAgain(false);
       }
       else {
-	tag.setDoAfter(true);
-	tag.setAfterReturnsAgain(true);
+        tag.setDoAfter(true);
+        tag.setAfterReturnsAgain(true);
       }
     }
     else if (parent != null) {
@@ -226,15 +229,15 @@ public class TagAnalyzer
     Method doInitBody = getMethod(tagClass, "doInitBody", new Class[0]);
 
     if (doInitBody != null &&
-	doInitBody.getDeclaringClass().equals(tagClass)) {
+        doInitBody.getDeclaringClass().equals(tagClass)) {
       if (BodyTagSupport.class.equals(tagClass)) {
-	tag.setDoInit(false);
+        tag.setDoInit(false);
       }
       else if (! BodyTag.class.isAssignableFrom(tagClass)) {
-	tag.setDoInit(false);
+        tag.setDoInit(false);
       }
       else {
-	tag.setDoInit(true);
+        tag.setDoInit(true);
       }
     }
     else if (parent != null) {
@@ -242,15 +245,15 @@ public class TagAnalyzer
     }
     
     Method doCatch = getMethod(tagClass, "doCatch",
-			       new Class[] { Throwable.class });
+                               new Class[] { Throwable.class });
 
     if (doCatch != null &&
-	doCatch.getDeclaringClass().equals(tagClass)) {
+        doCatch.getDeclaringClass().equals(tagClass)) {
       if (! TryCatchFinally.class.isAssignableFrom(tagClass)) {
-	tag.setDoCatch(false);
+        tag.setDoCatch(false);
       }
       else {
-	tag.setDoCatch(true);
+        tag.setDoCatch(true);
       }
     }
     else if (parent != null) {
@@ -260,12 +263,12 @@ public class TagAnalyzer
     Method doFinally = getMethod(tagClass, "doFinally", new Class[0]);
 
     if (doFinally != null &&
-	doFinally.getDeclaringClass().equals(tagClass)) {
+        doFinally.getDeclaringClass().equals(tagClass)) {
       if (! TryCatchFinally.class.isAssignableFrom(tagClass)) {
-	tag.setDoFinally(false);
+        tag.setDoFinally(false);
       }
       else {
-	tag.setDoFinally(true);
+        tag.setDoFinally(true);
       }
     }
     else if (parent != null) {
@@ -273,25 +276,39 @@ public class TagAnalyzer
     }
 
     // check for @Resource injection
-    for (Method method : tagClass.getDeclaredMethods()) {
+    analyzeInject(tag, tagClass);
+  }
+  
+  private void analyzeInject(AnalyzedTag tag, Class<?> cl)
+  {
+    if (cl == null)
+      return;
+    
+    for (Method method : cl.getDeclaredMethods()) {
       if (method.getName().startsWith("set")
-	  && (method.isAnnotationPresent(Resource.class)
-	      || method.isAnnotationPresent(EJB.class))) {
-	//	      || method.isAnnotationPresent(WebServiceRef.class))) {
-	tag.setHasInjection(true);
+          && (method.isAnnotationPresent(Resource.class)
+              || method.isAnnotationPresent(EJB.class)
+              || method.isAnnotationPresent(Inject.class)
+              || method.isAnnotationPresent(PersistenceContext.class)
+              || method.isAnnotationPresent(PersistenceUnit.class))) {
+        tag.setHasInjection(true);
+      }
+    }
+
+    for (Field field : cl.getDeclaredFields()) {
+      if (field.isAnnotationPresent(Resource.class)
+          || field.isAnnotationPresent(EJB.class)
+          || field.isAnnotationPresent(Inject.class)
+          || field.isAnnotationPresent(PersistenceContext.class)
+          || field.isAnnotationPresent(PersistenceUnit.class)) {
+        tag.setHasInjection(true);
       }
     }
     
-    for (Field field : tagClass.getDeclaredFields()) {
-      if (field.isAnnotationPresent(Resource.class)
-	  || field.isAnnotationPresent(EJB.class)) {
-	//	  || field.isAnnotationPresent(WebServiceRef.class)) {
-	tag.setHasInjection(true);
-      }
-    }
+    analyzeInject(tag, cl.getSuperclass());
   }
 
-  private Method getMethod(Class tagClass, String name, Class []args)
+  private Method getMethod(Class<?> tagClass, String name, Class<?> []args)
   {
     try {
       return tagClass.getMethod(name, args);
@@ -304,9 +321,9 @@ public class TagAnalyzer
    * Analyzes the code for a method
    */
   private void analyze(AnalyzedTag tag,
-		       String name,
-		       String signature,
-		       Analyzer analyzer)
+                       String name,
+                       String signature,
+                       Analyzer analyzer)
   {
     JavaClass javaClass = null;
     JavaMethod method = null;
@@ -341,8 +358,8 @@ public class TagAnalyzer
   }
 
   static IntMethodAnalyzer analyzeIntMethod(AnalyzedTag tag,
-					    String name,
-					    String signature)
+                                            String name,
+                                            String signature)
   {
     if (! "()I".equals(signature))
       return null;
@@ -354,12 +371,12 @@ public class TagAnalyzer
       method = javaClass.findMethod(name, signature);
 
       if (method == null) {
-	JClass parent = javaClass.getSuperClass();
+        JClass parent = javaClass.getSuperClass();
 
-	if (parent == null || ! (parent instanceof JavaClass))
-	  return null;
-	
-	javaClass = (JavaClass) parent;
+        if (parent == null || ! (parent instanceof JavaClass))
+          return null;
+        
+        javaClass = (JavaClass) parent;
       }
     }
 
@@ -442,75 +459,73 @@ public class TagAnalyzer
       case CodeVisitor.ICONST_3:
       case CodeVisitor.ICONST_4:
       case CodeVisitor.ICONST_5:
-	if (count != 0)
-	  _hasCode = true;
-	    
-	_value = visitor.getOpcode() - CodeVisitor.ICONST_0;
-	break;
+        if (count != 0)
+          _hasCode = true;
+        
+        _value = visitor.getOpcode() - CodeVisitor.ICONST_0;
+        break;
 
       case CodeVisitor.BIPUSH:
-	if (count != 0)
-	  _hasCode = true;
-	
-	_value = visitor.getByteArg();
-	break;
+        if (count != 0)
+          _hasCode = true;
+        
+        _value = visitor.getByteArg();
+        break;
 
       case CodeVisitor.SIPUSH:
-	if (count != 0)
-	  _hasCode = true;
-	
-	_value = visitor.getShortArg();
-	break;
+        if (count != 0)
+          _hasCode = true;
+        
+        _value = visitor.getShortArg();
+        break;
 
       case CodeVisitor.ALOAD_0:
-	if (count != 0)
-	  _hasCode = true;
-	break;
+        if (count != 0)
+          _hasCode = true;
+        break;
 
       case CodeVisitor.INVOKEVIRTUAL:
       case CodeVisitor.INVOKESPECIAL:
-	{
-	  // matching int methods have an extra opcode for 'this'
-	  if (count != 1)
-	    _hasCode = true;
-	  
-	  _value = -1;
-	
-	  int index = visitor.getShortArg();
-	  JavaClass jClass = visitor.getJavaClass();
+        {
+          // matching int methods have an extra opcode for 'this'
+          if (count != 1)
+            _hasCode = true;
 
-	  MethodRefConstant methodRef
-	    = jClass.getConstantPool().getMethodRef(index);
+          _value = -1;
 
-	  IntMethodAnalyzer value = analyzeIntMethod(_tag,
-						     methodRef.getName(),
-						     methodRef.getType());
+          int index = visitor.getShortArg();
+          JavaClass jClass = visitor.getJavaClass();
 
-	  if (value != null) {
-	    _value = value.getValue();
+          MethodRefConstant methodRef =
+            jClass.getConstantPool().getMethodRef(index);
 
-	    // reset count since the subcall checks for side-effect code
-	    if (count == 1)
-	      _count = 1;
+          IntMethodAnalyzer value =
+            analyzeIntMethod(_tag, methodRef.getName(), methodRef.getType());
 
-	    if (value.hasCode()) {
-	      _hasCode = true;
-	    }
-	  }
-	  else {
-	    _hasCode = true;
-	  }
-	}
-	break;
-	  
+          if (value != null) {
+            _value = value.getValue();
+
+            // reset count since the subcall checks for side-effect code
+            if (count == 1)
+              _count = 1;
+
+            if (value.hasCode()) {
+              _hasCode = true;
+            }
+          } else {
+            _hasCode = true;
+          }
+        }
+        break;
+
       default:
-	_hasCode = true;
-	_value = -1;
-	break;
+        _hasCode = true;
+        _value = -1;
+        break;
       }
     }
 
-    protected void addReturnValue(int value)
+   protected void addReturnValue(int value)
     {
     }
   }
@@ -532,16 +547,16 @@ public class TagAnalyzer
     protected void addReturnValue(int value)
     {
       if (value == Tag.SKIP_BODY)
-	_hasSkip = true;
+        _hasSkip = true;
       else if (value == Tag.EVAL_BODY_INCLUDE)
-	_hasInclude = true;
+        _hasInclude = true;
       else if (value == BodyTag.EVAL_BODY_BUFFERED)
-	_hasBuffered = true;
+        _hasBuffered = true;
       else {
-	_hasSkip = true;
-	_hasInclude = true;
-	_hasBuffered = true;
-	setHasCode();
+        _hasSkip = true;
+        _hasInclude = true;
+        _hasBuffered = true;
+        setHasCode();
       }
     }
 
@@ -570,13 +585,13 @@ public class TagAnalyzer
     protected void addReturnValue(int value)
     {
       if (value == Tag.SKIP_PAGE)
-	_hasSkip = true;
+        _hasSkip = true;
       else if (value == Tag.EVAL_PAGE)
-	_hasEval = true;
+        _hasEval = true;
       else {
-	_hasSkip = true;
-	_hasEval = true;
-	setHasCode();
+        _hasSkip = true;
+        _hasEval = true;
+        setHasCode();
       }
     }
 
@@ -610,13 +625,11 @@ public class TagAnalyzer
     protected void addReturnValue(int value)
     {
       if (value == IterationTag.EVAL_BODY_AGAIN)
-	_hasAgain = true;
-      else if (value == IterationTag.SKIP_BODY
-	       || value == BodyTag.SKIP_PAGE) {
-      }
-      else {
-	_hasAgain = true;
-	setHasCode();
+        _hasAgain = true;
+      else if (value == IterationTag.SKIP_BODY || value == BodyTag.SKIP_PAGE) {
+      } else {
+        _hasAgain = true;
+        setHasCode();
       }
     }
 
@@ -641,13 +654,13 @@ public class TagAnalyzer
       
       switch (visitor.getOpcode()) {
       case CodeVisitor.RETURN:
-	if (count != 0)
-	  _hasCode = true;
-	break;
+        if (count != 0)
+          _hasCode = true;
+        break;
 
       default:
-	_hasCode = true;
-	break;
+        _hasCode = true;
+        break;
       }
     }
 
@@ -668,16 +681,16 @@ public class TagAnalyzer
     public void analyze(CodeVisitor visitor)
     {
       int count = _count++;
-      
+
       switch (visitor.getOpcode()) {
       case CodeVisitor.RETURN:
-	if (count != 0)
-	  _hasCode = true;
-	break;
+        if (count != 0)
+          _hasCode = true;
+        break;
 
       default:
-	_hasCode = true;
-	break;
+        _hasCode = true;
+        break;
       }
     }
 
@@ -698,16 +711,16 @@ public class TagAnalyzer
     public void analyze(CodeVisitor visitor)
     {
       int count = _count++;
-      
+
       switch (visitor.getOpcode()) {
       case CodeVisitor.RETURN:
-	if (count != 0)
-	  _hasCode = true;
-	break;
+        if (count != 0)
+          _hasCode = true;
+        break;
 
       default:
-	_hasCode = true;
-	break;
+        _hasCode = true;
+        break;
       }
     }
 

@@ -38,6 +38,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.ejb.session.StatefulHandle;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -48,8 +49,6 @@ import com.caucho.util.L10N;
 @Module
 public class StatefulGenerator<X> extends SessionGenerator<X> 
 {
-  private static final L10N L = new L10N(StatefulGenerator.class);
-  
   private final AspectBeanFactory<X> _aspectBeanFactory;
   
   public StatefulGenerator(String ejbName, AnnotatedType<X> beanType,
@@ -159,7 +158,7 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     generateClassContent(out);
 
     generateDependency(out);
-
+    
     out.popDepth();
     out.println("}");
   }
@@ -206,6 +205,8 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     generateInject(out, map);
     generatePostConstruct(out, map);
     generateDestroy(out, map);
+    
+    generateSerialization(out);
   }
 
   private void generateConstructor(JavaWriter out,
@@ -275,7 +276,22 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
   {
     super.generateDestroyImpl(out);
   
-  out.println("_manager.destroy(_bean, env);");
-  out.println("_bean = null;");
-}
+    out.println("_manager.destroy(_bean, env);");
+    out.println("_bean = null;");
+  }
+  
+  private void generateSerialization(JavaWriter out)
+    throws IOException
+  {
+    out.println("private Object writeReplace()");
+    out.println("{");
+    out.pushDepth();
+    
+    out.print("return new ");
+    out.printClass(StatefulHandle.class);
+    out.println("(_manager.getEJBName(), null);");
+    
+    out.popDepth();
+    out.println("}");
+  }
 }

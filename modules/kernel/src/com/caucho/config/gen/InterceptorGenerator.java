@@ -150,6 +150,9 @@ public class InterceptorGenerator<X>
     
     _interceptionType = type;
     
+    if (factory.getClassInterceptorBindings() != null)
+      _interceptorBinding.addAll(factory.getClassInterceptorBindings().values());
+    
     _isEpilogue = true;
   }
 
@@ -252,11 +255,8 @@ public class InterceptorGenerator<X>
     out.print(".createInterceptors(__caucho_manager, __caucho_interceptor_beans");
 
     for (int i = 0; i < _interceptorBinding.size(); i++) {
-      out.pushDepth();
-      out.pushDepth();
+      out.print(", ");
       generateAnnotation(out, _interceptorBinding.get(i));
-      out.popDepth();
-      out.popDepth();
     }
     
     out.println(");");

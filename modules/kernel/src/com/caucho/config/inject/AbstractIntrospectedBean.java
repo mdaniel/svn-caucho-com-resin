@@ -318,8 +318,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     introspectQualifiers(annotated);
     introspectName(annotated);
     
-    if (annotated.isAnnotationPresent(Alternative.class)
-        && (annotated instanceof AnnotatedType<?>)) {
+    if (annotated.isAnnotationPresent(Alternative.class)) {
       // ioc/0618
       _isAlternative = true;
     }

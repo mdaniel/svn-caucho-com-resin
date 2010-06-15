@@ -43,8 +43,6 @@ import java.util.ArrayList;
  * the merging of ejb definitions.
  */
 public class EjbBeanConfigProxy implements DependencyBean {
-  private static final L10N L = new L10N(EjbBeanConfigProxy.class);
-
   private final EjbConfig _config;
   private final String _ejbModuleName;
 

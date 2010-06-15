@@ -56,7 +56,7 @@ public class AnnotatedElementImpl implements Annotated
 
   private LinkedHashSet<Annotation> _annSet;
 
-  protected AnnotatedElementImpl(Type type,
+  public AnnotatedElementImpl(Type type,
                                  Annotated annotated,
                                  Annotation []annList)
   {

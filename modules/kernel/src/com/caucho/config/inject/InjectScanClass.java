@@ -82,6 +82,8 @@ class InjectScanClass implements ScanClass
   private boolean _isRegisterRequired;
   private boolean _isRegistered;
   
+  private boolean _isVeto;
+  
   InjectScanClass(String className, InjectScanManager manager)
   {
     _className = className;
@@ -112,6 +114,11 @@ class InjectScanClass implements ScanClass
   public boolean isRegisterRequired()
   {
     return _isRegisterRequired;
+  }
+  
+  public boolean isRegistered()
+  {
+    return _isRegistered;
   }
   
   @Override

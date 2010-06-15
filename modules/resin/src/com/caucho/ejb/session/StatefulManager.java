@@ -171,6 +171,22 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
       return null;
   }
   
+  public Object getStatefulProxy(String key)
+  {
+    AnnotatedType<?> annType = getLocalBean();
+    
+    if (annType != null)
+      return getLocalProxy(annType.getJavaClass());
+    
+    ArrayList<AnnotatedType<? super X>> localApi = getLocalApi();
+    
+    if (localApi.size() > 0)
+      return localApi.get(0).getJavaClass();
+    
+    return null;
+    
+  }
+  
   public <T> T initProxy(T instance, CreationalContextImpl<T> env)
   {
     if (instance instanceof CandiEnhancedBean) {
@@ -271,37 +287,11 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
   }
 
   /**
-   * Returns the remote object.
-   */
-  /*
-  @Override
-  public Object getRemoteObject(Object key)
-  {
-    StatefulObject remote = null;
-    if (_remoteSessions != null) {
-      remote = _remoteSessions.get(String.valueOf(key));
-    }
-
-    return remote;
-  }
-  */
-
-  /**
    * Creates a handle for a new session.
    */
   public String createSessionKey(StatefulObject remote)
   {
     throw new UnsupportedOperationException(getClass().getName());
-    /*
-    String key = getHandleEncoder().createRandomStringKey();
-
-    if (_remoteSessions == null)
-      _remoteSessions = new LruCache<String,StatefulObject>(8192);
-    
-    _remoteSessions.put(key, remote);
-
-    return key;
-    */
   }
 
   /**

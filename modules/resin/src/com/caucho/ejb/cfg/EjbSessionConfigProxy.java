@@ -76,6 +76,11 @@ public class EjbSessionConfigProxy extends EjbBeanConfigProxy {
     if (ejbBean == null) {
       ejbBean = createEjbBean(getEjbClass());
       
+      if (getEjbName() != null) {
+        // ioc/0p65
+        ejbBean.setEJBName(getEjbName());
+      }
+      
       getConfig().setBeanConfig(getEjbName(), ejbBean);
     }
     

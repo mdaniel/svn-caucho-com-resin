@@ -112,6 +112,12 @@ public class InterceptorFactory<X>
     return _classAroundInvokeInterceptors;
   }
   
+  public HashMap<Class<?>, Annotation>
+  getClassInterceptorBindings()
+  {
+    return _classInterceptorBindings;
+  }
+  
   public HashSet<Class<?>> getDecoratorClasses()
   {
     return _decoratorClasses;
@@ -291,31 +297,21 @@ public class InterceptorFactory<X>
   {
     super.generateEpilogue(out, map);
     
-    if (isEnhanced()) {
-      InterceptorGenerator<X> gen 
-        = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
-                                      InterceptionType.POST_CONSTRUCT);
+    InterceptorGenerator<X> gen 
+      = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
+          InterceptionType.POST_CONSTRUCT);
  
-      gen.generateEpilogue(out, map);
+    gen.generateEpilogue(out, map);
       
-      gen = new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
+    gen = new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
                                       InterceptionType.PRE_DESTROY);
  
-      gen.generateEpilogue(out, map);
+    gen.generateEpilogue(out, map);
       
-      gen = new InterceptorGenerator<X>(this, _classAroundInvokeInterceptors,
+    gen = new InterceptorGenerator<X>(this, _classAroundInvokeInterceptors,
                                       InterceptionType.AROUND_INVOKE);
  
-      gen.generateEpilogue(out, map);
-    }
-    /*
-    if (isEnhanced()) {
-      InterceptorGenerator<X> gen 
-        = new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
-                                      InterceptionType.PRE_DESTROY);
- 
-      gen.generateEpilogue(out, map);
-    }*/
+    gen.generateEpilogue(out, map);
   }
   
   @Override

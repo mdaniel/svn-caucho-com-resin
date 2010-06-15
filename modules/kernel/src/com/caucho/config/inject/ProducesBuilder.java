@@ -36,6 +36,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 
+import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.Specializes;
@@ -140,6 +141,13 @@ public class ProducesBuilder {
       = ProducesMethodBean.create(_manager, bean, 
                                   producesMethod, producesArgs,
                                   disposesMethod, disposesArgs);
+    
+    if (producesBean.isAlternative()
+        && ! _manager.isEnabled(producesBean)) {
+      return;
+    }
+        
+    
 
     // bean.init();
 

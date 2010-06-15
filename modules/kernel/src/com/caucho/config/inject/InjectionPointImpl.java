@@ -29,6 +29,7 @@
 
 package com.caucho.config.inject;
 
+import java.io.Serializable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Member;
 import java.lang.reflect.Modifier;
@@ -42,13 +43,14 @@ import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
+import javax.enterprise.inject.spi.PassivationCapable;
 
 import com.caucho.inject.Module;
 
 /**
  */
 @Module
-public class InjectionPointImpl<T> implements InjectionPoint
+public class InjectionPointImpl<T> implements InjectionPoint, Serializable
 {
   private final InjectManager _manager;
   
@@ -57,19 +59,22 @@ public class InjectionPointImpl<T> implements InjectionPoint
   private final Annotated _annotated;
   private final Member _member;
   private final HashSet<Annotation> _qualifiers = new HashSet<Annotation>();
+  private Type _type;
 
   InjectionPointImpl(InjectManager manager,
                      Bean<T> bean,
                      AnnotatedField<T> field)
   {
-    this(manager, bean, field, field.getJavaMember());
+    this(manager, bean, field, field.getJavaMember(),
+         field.getBaseType());
   }
 
   InjectionPointImpl(InjectManager manager,
                      InjectionTargetBuilder<T> target,
                      AnnotatedField<T> field)
   {
-    this(manager, target.getBean(), field, field.getJavaMember());
+    this(manager, target.getBean(), field, field.getJavaMember(),
+         field.getBaseType());
     
     _target = target;
   }
@@ -78,14 +83,19 @@ public class InjectionPointImpl<T> implements InjectionPoint
                      Bean<T> bean,
                      AnnotatedParameter<?> param)
   {
-    this(manager, bean, param, param.getDeclaringCallable().getJavaMember());
+    this(manager, bean, param, 
+         param.getDeclaringCallable().getJavaMember(),
+         param.getBaseType());
   }
 
   InjectionPointImpl(InjectManager manager,
                      InjectionTargetBuilder<T> target,
                      AnnotatedParameter<?> param)
   {
-    this(manager, target.getBean(), param, param.getDeclaringCallable().getJavaMember());
+    this(manager, target.getBean(), 
+         param, 
+         param.getDeclaringCallable().getJavaMember(),
+         param.getBaseType());
     
     _target = target;
   }
@@ -93,12 +103,14 @@ public class InjectionPointImpl<T> implements InjectionPoint
   public InjectionPointImpl(InjectManager manager,
                             Bean<T> bean,
                             Annotated annotated,
-                            Member member)
+                            Member member,
+                            Type type)
   {
     _manager = manager;
     _bean = bean;
     _annotated = annotated;
     _member = member;
+    _type = type;
     
     boolean isQualifier = false;
 
@@ -127,7 +139,10 @@ public class InjectionPointImpl<T> implements InjectionPoint
   @Override
   public Type getType()
   {
-    return _annotated.getBaseType();
+    if (_type != null)
+      return _type;
+    else
+      return _annotated.getBaseType();
   }
 
   /**
@@ -185,6 +200,15 @@ public class InjectionPointImpl<T> implements InjectionPoint
     int modifiers = _member.getModifiers();
     
     return Modifier.isTransient(modifiers);
+  }
+  
+  private Object writeReplace()
+  {
+    return new InjectionPointImplHandle(_bean.getBeanClass().getName(),
+                                        _bean.getQualifiers(),
+                                        getMember(), 
+                                        _qualifiers,
+                                         ((Class<?>) getType()).getName());
   }
   
   @Override

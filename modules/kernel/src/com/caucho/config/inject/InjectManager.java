@@ -392,6 +392,9 @@ public final class InjectManager
       factory.type(BeanManager.class);
       factory.annotation(ModulePrivateLiteral.create());
       addBean(factory.singleton(this));
+      
+      // ioc/0162
+      addBean(new InjectionPointStandardBean());
 
       _xmlExtension = new XmlStandardPlugin(this);
       addExtension(_xmlExtension);
@@ -601,21 +604,32 @@ public final class InjectManager
     }
     else if (bean.isAlternative()) {
     }
+    else if (_specializedMap.get(bean.getBeanClass()) != null) {
+    }
     else {
-      // ioc/0n18
-      /*
+      // ioc/0n18 vs ioc/0g30
       for (Bean<?> testBean : beanList) {
-        if (! testBean.isAlternative()) {
+        if (testBean.isAlternative()) {
+        }
+        else if (bean.getBeanClass().isAnnotationPresent(Specializes.class)
+                 && testBean.getBeanClass().isAssignableFrom(bean.getBeanClass())) {
+        }
+        else {
           throw new ConfigException(L.l("@Named('{0}') is a duplicate name for\n  {1}\n  {2}",
                                         name, bean, testBean));
         }
       }
-      */
     }
 
     beanList.add(bean);
 
     _namedBeanMap.remove(name);
+    
+    // ioc/0g31
+    int p = name.indexOf('.');
+    if (p > 0) {
+      addBeanByName(name.substring(0, p), bean);
+    }
   }
 
   /**
@@ -1160,6 +1174,10 @@ public final class InjectManager
       if (beanSet != null && beanSet.size() > 0) {
         Bean<?> bean = resolve(beanSet);
         refFactory = getReferenceFactory(bean);
+        
+        // ioc/0301
+        if (refFactory instanceof DependentReferenceFactoryImpl<?>)
+          refFactory = new DependentElReferenceFactoryImpl((ManagedBeanImpl<?>) bean);
       }
       else {
         refFactory = new UnresolvedReferenceFactory();
@@ -1414,9 +1432,10 @@ public final class InjectManager
   {
     Class<?> rawClass = baseType.getRawClass();
     
-    InjectScanClass scanClass = _scanManager.getScanClass(rawClass.getName());
+    InjectScanClass scanClass
+      = _scanManager.getScanClass(rawClass.getName());
     
-    if (scanClass != null) {
+    if (scanClass != null && ! scanClass.isRegistered()) {
       discoverScanClass(scanClass);
       processPendingAnnotatedTypes();
     }
@@ -2749,7 +2768,7 @@ public final class InjectManager
         */
 
       AnnotatedType<?> type = createAnnotatedType(cl);
-      
+
       type = getExtensionManager().processAnnotatedType(type);
       
       if (type == null)
@@ -2778,11 +2797,19 @@ public final class InjectManager
                                     specializedType.getName(),
                                     oldSpecialized.getName()));
     
+    if (! isValidSimpleBean(parentType))
+      throw new ConfigException(L.l("@Specialized on '{0}' is invalid because its parent '{1}' is not a managed bean.",
+                                    specializedType.getName(),
+                                    parentType.getName()));
+    
     _specializedMap.put(parentType, specializedType);
   }
 
   boolean isEnabled(Bean<?> bean)
   {
+    if (! bean.isAlternative())
+      return true;
+    
     if (_deploymentMap.containsKey(bean.getBeanClass()))
       return true;
     
@@ -2946,8 +2973,10 @@ public final class InjectManager
     }
 
     // ioc/07d2
-    if (! _specializedMap.containsKey(managedBean.getBeanClass()))
+    if (! _specializedMap.containsKey(managedBean.getBeanClass())
+        && isEnabled(managedBean)) {
       managedBean.introspectProduces();
+    }
   }
   
   public <X> void addProduces(Bean<X> bean, AnnotatedType<X> beanType)
@@ -3620,6 +3649,7 @@ public final class InjectManager
       _manager = manager;
     }
 
+    @Override
     public void apply(EnvironmentClassLoader loader)
     {
       InjectManager beanManager = InjectManager.getCurrent(loader);
@@ -3855,6 +3885,49 @@ public final class InjectManager
       ManagedBeanImpl<T> bean = _bean;
       
       T instance = CreationalContextImpl.find(parentEnv, bean);
+      
+      if (instance != null)
+        return instance;
+      
+      if (env == null) {
+        if (parentEnv != null)
+          env = new DependentCreationalContext<T>(bean, parentEnv, ip);
+        else
+          env = new OwnerCreationalContext<T>(bean);
+      }
+      
+      instance = bean.createDependent(env);
+
+      if (env.isTop() && ! (bean instanceof CdiStatefulBean)) {
+        bean.destroy(instance, env);
+      }
+      
+      return instance;
+    }
+  }
+  
+  public class DependentElReferenceFactoryImpl<T> extends ReferenceFactory<T> {
+    private ManagedBeanImpl<T> _bean;
+    
+    DependentElReferenceFactoryImpl(ManagedBeanImpl<T> bean)
+    {
+      _bean = bean;
+    }
+    
+    @Override
+    public Bean<T> getBean()
+    {
+      return _bean;
+    }
+   
+    @Override
+    public T create(CreationalContextImpl<T> env,
+                    CreationalContextImpl<?> parentEnv,
+                    InjectionPoint ip)
+    {
+      ManagedBeanImpl<T> bean = _bean;
+      
+      T instance = CreationalContextImpl.findAny(parentEnv, bean);
       
       if (instance != null)
         return instance;
