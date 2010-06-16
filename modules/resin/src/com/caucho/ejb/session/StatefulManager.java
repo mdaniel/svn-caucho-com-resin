@@ -181,9 +181,10 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
     ArrayList<AnnotatedType<? super X>> localApi = getLocalApi();
     
     if (localApi.size() > 0)
-      return localApi.get(0).getJavaClass();
+      return getLocalProxy(localApi.get(0).getJavaClass());
     
-    return null;
+    throw new UnsupportedOperationException(L.l("{0} cannot return proxy for {1} because no @Local interface exists",
+                                                this, key));
     
   }
   

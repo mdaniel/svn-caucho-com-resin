@@ -214,31 +214,33 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   {
     try {
       boolean isAutoCompile = true;
-    
-      BeanGenerator<X> beanGen = createBeanGenerator();
 
-      beanGen.introspect();
-    
-      JavaClassGenerator javaGen = getLazyGenerator().getJavaClassGenerator();
-    
-      String fullClassName = beanGen.getFullClassName();
+      if (_proxyImplClass == null) {
+        BeanGenerator<X> beanGen = createBeanGenerator();
 
-      if (javaGen.preload(fullClassName) != null) {
-      }
-      else if (isAutoCompile) {
-        javaGen.generate(beanGen);
+        String fullClassName = beanGen.getFullClassName();
+        
+        JavaClassGenerator javaGen = getLazyGenerator().getJavaClassGenerator();
+      
+        if (javaGen.preload(fullClassName) != null) {
+        }
+        else if (isAutoCompile) {
+          beanGen.introspect();
+          
+          javaGen.generate(beanGen);
 
-        /*
+          /*
         GenClass genClass = assembleGenerator(fullClassName);
 
         if (genClass != null)
           javaGen.generate(genClass);
         */
+        }
+      
+        javaGen.compilePendingJava();
+      
+        _proxyImplClass = generateProxyClass(fullClassName, javaGen);
       }
-      
-      javaGen.compilePendingJava();
-      
-      _proxyImplClass = generateProxyClass(fullClassName, javaGen);
      
       for (AbstractSessionContext<X,?> cxt : _contextMap.values()) {
         cxt.bind();
@@ -427,7 +429,9 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
 
     moduleBeanManager.addBean(_bean, process);
     
-    moduleBeanManager.addProduces(_bean, extAnnType);
+    if (! moduleBeanManager.isSpecialized(beanType.getJavaClass())) {
+      moduleBeanManager.addProduces(_bean, extAnnType);
+    }
 
     for (AnnotatedType<?> localApi : getLocalApi()) {
       registerLocalSession(moduleBeanManager, localApi.getJavaClass());
@@ -451,12 +455,11 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       if (extMethod != null)
         extAnnType.addMethod(extMethod);
       else if (method.isAnnotationPresent(Produces.class)) {
-        // TCK:
-        /*
+        // TCK: conflict
+        // ioc/07fa
         throw new ConfigException(L.l("{0}.{1} is an invalid @Produces EJB method because the method is not in a @Local interface.",
                                       method.getDeclaringType().getJavaClass().getName(),
                                       method.getJavaMember().getName()));
-                                      */
       }
       else if (isDisposes(method)) {
         throw new ConfigException(L.l("{0}.{1} is an invalid @Disposes EJB method because the method is not in a @Local interface.",

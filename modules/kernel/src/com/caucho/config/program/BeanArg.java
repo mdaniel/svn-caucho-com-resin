@@ -87,6 +87,12 @@ public class BeanArg<T> extends Arg<T> {
     if (_factory == null)
       bind();
 
-    return _factory.create(null, (CreationalContextImpl) parentEnv, _ip);
+    return _factory.create(null, (CreationalContextImpl<T>) parentEnv, _ip);
+  }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _factory + "]";
   }
 }

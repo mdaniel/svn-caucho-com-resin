@@ -38,7 +38,6 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -73,12 +72,12 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.SerializeHandle;
 import com.caucho.config.bytecode.SerializationAdapter;
 import com.caucho.config.gen.CandiBeanGenerator;
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.config.j2ee.PostConstructProgram;
 import com.caucho.config.j2ee.PreDestroyInject;
 import com.caucho.config.program.Arg;
 import com.caucho.config.program.BeanArg;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.ValueArg;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
@@ -953,12 +952,16 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   class MethodInjectProgram extends ConfigProgram {
     private final Method _method;
     private final InjectionPoint []_args;
+    private ReferenceFactory<?> []_factoryArgs;
 
-    MethodInjectProgram(Method method, InjectionPoint []args)
+    MethodInjectProgram(Method method, 
+                        InjectionPoint []args)
     {
       _method = method;
       _method.setAccessible(true);
       _args = args;
+      
+      _factoryArgs = new ReferenceFactory[args.length];
     }
 
     /**
@@ -983,13 +986,24 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     }
     
     @Override
-    public <T> void inject(T instance, CreationalContext<T> env)
+    public <T> void inject(T instance, CreationalContext<T> cxt)
     {
       try {
+        CreationalContextImpl<T> env;
+        
+        if (cxt instanceof CreationalContextImpl<?>)
+          env = (CreationalContextImpl<T>) cxt;
+        else
+          env = null;
+        
         Object []args = new Object[_args.length];
 
-        for (int i = 0; i < _args.length; i++)
-          args[i] = getBeanManager().getInjectableReference(_args[i], env);
+        for (int i = 0; i < _args.length; i++) {
+          if (_factoryArgs[i] == null)
+            _factoryArgs[i] = getBeanManager().getReferenceFactory(_args[i]);
+
+          args[i] = _factoryArgs[i].create(null, env, _args[i]);
+        }
 
         _method.invoke(instance, args);
       } catch (Exception e) {

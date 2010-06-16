@@ -146,15 +146,21 @@ public class CandiProducer<X> implements InjectionTarget<X>
       Object []delegates = null;
       
       InjectionPoint oldPoint = null;
+      InjectionPoint ip = null;
+      
+      if (env != null) {
+        oldPoint = env.findInjectionPoint();
+        ip = oldPoint;
+      }
+      
       
       if (_decoratorBeans != null && _decoratorBeans.size() > 0) {
-        if (env != null)
-          oldPoint = env.findInjectionPoint();
-        
         Decorator dec = (Decorator) _decoratorBeans.get(_decoratorBeans.size() - 1);
         
-        if (dec instanceof DecoratorBean && env != null)
-          env.setInjectionPoint(((DecoratorBean) dec).getDelegateInjectionPoint());
+        if (dec instanceof DecoratorBean && env != null) {
+          ip = ((DecoratorBean) dec).getDelegateInjectionPoint();
+          env.setInjectionPoint(ip);
+        }
       }
       
       Object []args = evalArgs(env);
@@ -178,6 +184,9 @@ public class CandiProducer<X> implements InjectionTarget<X>
                                                     _decoratorBeans,
                                                     _decoratorClass,
                                                     env);
+        
+        if (env != null)
+          env.setInjectionPoint(ip);
       }
       
       // server/4750
@@ -202,7 +211,7 @@ public class CandiProducer<X> implements InjectionTarget<X>
     }
   }
   
-  private Object []evalArgs(CreationalContext<?> env)
+  private Object []evalArgs(CreationalContextImpl<?> env)
   {
     Arg []args = _args;
     

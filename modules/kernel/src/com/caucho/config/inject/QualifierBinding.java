@@ -62,9 +62,13 @@ public class QualifierBinding {
     _ann = ann;
     _annType = ann.annotationType();
 
-    Method []methods = _annType.getMethods();
-
-    for (Method method : methods) {
+    validateQualifier(_annType, _methodList);
+  }
+  
+  public static void validateQualifier(Class<?> cl,
+                                       ArrayList<Method> methodList)
+  {
+    for (Method method : cl.getMethods()) {
       if (method.getName().equals("annotationType"))
         continue;
       else if (method.isAnnotationPresent(Nonbinding.class))
@@ -80,14 +84,15 @@ public class QualifierBinding {
       
       if (type.isArray())
         throw new ConfigException(L.l("@{0} is an invalid qualifier because its member '{1}' has an array value and is missing @Nonbinding",
-                                      _annType.getSimpleName(), method.getName()));
+                                      cl.getSimpleName(), method.getName()));
       if (Annotation.class.isAssignableFrom(type))
         throw new ConfigException(L.l("@{0} is an invalid qualifier because its member '{1}' has an annotation value and is missing @Nonbinding",
-                                      _annType.getSimpleName(), method.getName()));
+                                      cl.getSimpleName(), method.getName()));
       
       method.setAccessible(true);
 
-      _methodList.add(method);
+      if (methodList != null)
+        methodList.add(method);
     }
   }
 

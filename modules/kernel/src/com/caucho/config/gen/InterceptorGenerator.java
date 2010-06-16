@@ -942,6 +942,8 @@ public class InterceptorGenerator<X>
       out.println("static final ThreadLocal<" + _decoratorClass + "> "
                   + _decoratorLocalVar);
       out.println("  = new ThreadLocal<" + _decoratorClass + ">();");
+      
+      out.println("static { __caucho_log.log(java.util.logging.Level.WARNING, \"thread local\", new IllegalStateException()); }");
 
       out.println();
       out.println("private transient Object [] " + _decoratorIndexVar + ";");
@@ -1188,6 +1190,8 @@ public class InterceptorGenerator<X>
       // out.println("Object []delegates = _bean != null ? _bean." + _decoratorIndexVar + " : null;");
       // out.println("Object []delegates = var._bean.__caucho_getDelegates();");
       
+      out.println("__caucho_log.info(\"GET: \" + var + \"\\n  \" + this + \"\\n  \" + getClass() + \"\\n  \" + getClass().getClassLoader());");
+      
       out.println("Object []delegates = var._delegates;");
 
       out.println();
@@ -1370,6 +1374,7 @@ public class InterceptorGenerator<X>
 
     out.print(_decoratorLocalVar);
     out.println(".set(delegate);");
+    out.println("__caucho_log.info(\"SET: \" + delegate);");
   }
 
   /**

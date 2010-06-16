@@ -62,6 +62,10 @@ public class StatefulHandle
       throw new IllegalStateException(L.l("'{0}' is an unknown @Stateful ejb-name for deserialization in {1}",
                                           _ejbName, manager));
     
-    return ejbManager.getStatefulProxy(_primaryKey);
+    Object proxy = ejbManager.getStatefulProxy(_primaryKey);
+    
+    System.out.println("READ: " + _ejbName + " " + ejbManager + " " + proxy);
+    
+    return proxy;
   }
 }

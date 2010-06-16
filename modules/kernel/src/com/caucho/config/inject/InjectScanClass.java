@@ -29,6 +29,7 @@
 
 package com.caucho.config.inject;
 
+import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.logging.Level;
@@ -47,6 +48,7 @@ import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.Stereotype;
 import javax.inject.Inject;
 import javax.inject.Named;
+import javax.inject.Qualifier;
 import javax.inject.Scope;
 
 import com.caucho.inject.Jndi;
@@ -249,5 +251,6 @@ class InjectScanClass implements ScanClass
     _registerAnnotationSet.add(Stateful.class);
     _registerAnnotationSet.add(javax.ejb.Singleton.class);
     _registerAnnotationSet.add(MessageDriven.class);
+    _registerAnnotationSet.add(Qualifier.class);
   }
 }

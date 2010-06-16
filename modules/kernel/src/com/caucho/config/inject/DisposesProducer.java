@@ -38,6 +38,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.Producer;
 
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
 import com.caucho.config.program.Arg;
 import com.caucho.inject.Module;
 
@@ -47,8 +48,9 @@ import com.caucho.inject.Module;
 @Module
 public class DisposesProducer<T,X> implements Producer<T>
 {
-  private final InjectManager _manager;
+  private final InjectManager _cdiManager;
   private final Bean<X> _producerBean;
+  private final ReferenceFactory<X> _referenceFactory;
   private final AnnotatedMethod<? super X> _disposesMethod;
 
   private Arg<?> []_disposesArgs;
@@ -58,8 +60,9 @@ public class DisposesProducer<T,X> implements Producer<T>
                    AnnotatedMethod<? super X> disposesMethod,
                    Arg<?> []disposesArgs)
   {
-    _manager = manager;
+    _cdiManager = manager;
     _producerBean = producerBean;
+    _referenceFactory = manager.getReferenceFactory(producerBean);
     _disposesMethod = disposesMethod;
     _disposesArgs = disposesArgs;
 
@@ -92,7 +95,7 @@ public class DisposesProducer<T,X> implements Producer<T>
         ProducesCreationalContext<X> env
           = new ProducesCreationalContext<X>(_producerBean, cxt);
           
-        X producer = _producerBean.create(env);
+        X producer = _referenceFactory.create(env, null, null);
           
         Object []args = new Object[_disposesArgs.length];
         for (int i = 0; i < args.length; i++) {

@@ -29,6 +29,8 @@
 
 package com.caucho.server.webbeans;
 
+import java.lang.annotation.Annotation;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -73,6 +75,9 @@ public class ResinStandardPlugin implements Extension {
   private static final L10N L = new L10N(ResinStandardPlugin.class);
   private static final Logger log
     = Logger.getLogger(ResinStandardPlugin.class.getName());
+  
+  private static final HashSet<Class<? extends Annotation>> _ejbAnnotations
+    = new HashSet<Class<? extends Annotation>>();
 
   private InjectManager _cdiManager;
   
@@ -124,7 +129,25 @@ public class ResinStandardPlugin implements Extension {
         event.veto();
       }
     }
+    
+    if (isEjbParent(annotatedType.getJavaClass().getSuperclass())) {
+      event.veto();
+    }
   }
+  
+  private boolean isEjbParent(Class<?> cl)
+  {
+    if (cl == null || cl == Object.class)
+      return false;
+    
+    for (Annotation ann : cl.getAnnotations()) {
+      if (_ejbAnnotations.contains(ann.annotationType()))
+        return true;
+    }
+    
+    return isEjbParent(cl.getSuperclass());
+  }
+  
 
   @LazyExtension
   public void processBean(@Observes ProcessBean<?> event) 
@@ -231,5 +254,13 @@ public class ResinStandardPlugin implements Extension {
   public String toString()
   {
     return getClass().getSimpleName() + "[]";
+  }
+  
+  static {
+    _ejbAnnotations.add(Stateful.class);
+    _ejbAnnotations.add(Stateless.class);
+    _ejbAnnotations.add(Singleton.class);
+    _ejbAnnotations.add(MessageDriven.class);
+    _ejbAnnotations.add(JmsMessageListener.class);
   }
 }

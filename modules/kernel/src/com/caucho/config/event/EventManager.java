@@ -78,8 +78,8 @@ public class EventManager
   private ConcurrentHashMap<Class<?>,ObserverMap> _observerMap
     = new ConcurrentHashMap<Class<?>,ObserverMap>();
 
-  private ConcurrentHashMap<Class<?>,ArrayList<ObserverEntry<?>>> _observerListCache
-    = new ConcurrentHashMap<Class<?>,ArrayList<ObserverEntry<?>>>();
+  private ConcurrentHashMap<EventKey,Set<ObserverMethod<?>>> _observerMethodCache
+    = new ConcurrentHashMap<EventKey,Set<ObserverMethod<?>>>();
   
   public EventManager(InjectManager cdiManager)
   {
@@ -170,9 +170,6 @@ public class EventManager
   public <T> Set<ObserverMethod<? super T>>
   resolveObserverMethods(T event, Annotation... qualifiers)
   {
-    HashSet<ObserverMethod<? super T>> set
-      = new HashSet<ObserverMethod<? super T>>();
-
     BaseType eventType = _cdiManager.createSourceBaseType(event.getClass());
     
     // ioc/0b71
@@ -181,12 +178,8 @@ public class EventManager
                                              eventType));
     
     validateEventQualifiers(qualifiers);
-
-    for (ObserverEntry entry : getLocalObserverList(event.getClass(), eventType)) {
-      entry.resolveObservers(set, qualifiers);
-    }
-
-    return set;
+    
+    return (Set) resolve(eventType, qualifiers);
   }
 
   private void validateEventQualifiers(Annotation []qualifiers)
@@ -227,52 +220,57 @@ public class EventManager
       _parent.fireEventImpl(event, eventType, bindings);
       */
 
-    ArrayList<ObserverEntry<?>> observerList;
-
-    observerList = _observerListCache.get(event.getClass());
-    
-    if (observerList == null) {
-      observerList = new ArrayList<ObserverEntry<?>>();
-
-      fillLocalObserverList(_observerMap, observerList, eventType);
-
-      _observerListCache.put(event.getClass(), observerList);
-    }
+    Set<ObserverMethod<?>> observerList = resolve(eventType, bindings);
     
     int size = observerList.size();
     
-    for (int i = 0; i < size; i++) {
-      ((ObserverEntry) observerList.get(i)).fireEvent(event, bindings);
+    for (ObserverMethod<?> method : resolve(eventType, bindings)) {
+      ((ObserverMethod) method).notify(event);
     }
   }
-
-  private ArrayList<ObserverEntry<?>> 
-  getLocalObserverList(Class<?> cl, BaseType eventType)
+  
+  private Set<ObserverMethod<?>>
+  resolve(BaseType eventType, Annotation... bindings)
   {
-    ArrayList<ObserverEntry<?>> observerList;
-
-    observerList = _observerListCache.get(cl);
-
+    EventKey key = new EventKey(eventType, bindings);
+    
+    Set<ObserverMethod<?>> observerList = _observerMethodCache.get(key);
+    
     if (observerList == null) {
-      observerList = new ArrayList<ObserverEntry<?>>();
-
-      fillLocalObserverList(_observerMap, observerList, eventType);
-
-      _observerListCache.put(cl, observerList);
+      observerList = new LinkedHashSet<ObserverMethod<?>>();
+      
+      fillObserverMethodList(observerList, eventType, bindings);
     }
-
+    
+    _observerMethodCache.put(key, observerList);
+    
     return observerList;
   }
 
-  public void fireExtensionEvent(Object event, Annotation... bindings)
+  public void
+  fillObserverMethodList(Set<ObserverMethod<?>> list,
+                         BaseType type, Annotation []qualifiers)
   {
-    fireLocalEvent(_extObserverMap, event, bindings);
+    if (_cdiManager.getParent() != null) {
+      EventManager parentManager = _cdiManager.getParent().getEventManager();
+      
+      parentManager.fillObserverMethodList(list, type, qualifiers);
+    }
+    
+    fillLocalObserverList(_observerMap, list, type, qualifiers);
+  }
+
+  public void fireExtensionEvent(Object event, 
+                                 Annotation... qualifiers)
+  {
+    fireLocalEvent(_extObserverMap, event, qualifiers);
   }
 
   @Module
-  public void fireExtensionEvent(Object event, BaseType eventType, Annotation... bindings)
+  public void fireExtensionEvent(Object event, BaseType eventType, 
+                                 Annotation... qualifiers)
   {
-    fireLocalEvent(_extObserverMap, event, eventType, bindings);
+    fireLocalEvent(_extObserverMap, event, eventType, qualifiers);
   }
 
   private void fireLocalEvent(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
@@ -286,21 +284,21 @@ public class EventManager
   
   private void fireLocalEvent(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
                               Object event, BaseType eventType,
-                              Annotation... bindings)
+                              Annotation... qualifiers)
   {
-    ArrayList<ObserverEntry<?>> observerList = new ArrayList<ObserverEntry<?>>();
+    Set<ObserverMethod<?>> observerList = new LinkedHashSet<ObserverMethod<?>>();
 
-    fillLocalObserverList(localMap, observerList, eventType);
+    fillLocalObserverList(localMap, observerList, eventType, qualifiers);
 
-    int size = observerList.size();
-    for (int i = 0; i < size; i++) {
-      ((ObserverEntry) observerList.get(i)).fireEvent(event, bindings);
+    for (ObserverMethod<?> method : observerList) {
+      ((ObserverMethod) method).notify(event);
     }
   }
 
   private void fillLocalObserverList(ConcurrentHashMap<Class<?>,ObserverMap> localMap,
-                                     ArrayList<ObserverEntry<?>> list,
-                                     BaseType eventType)
+                                     Set<ObserverMethod<?>> list,
+                                     BaseType eventType,
+                                     Annotation []qualifiers)
   {
     for (BaseType type : eventType.getBaseTypeClosure(_cdiManager)) {
       Class<?> rawClass = type.getRawClass();
@@ -308,7 +306,7 @@ public class EventManager
       ObserverMap map = localMap.get(rawClass);
 
       if (map != null) {
-        map.resolveEntries(list, eventType, type);
+        map.resolveObservers((Set) list, eventType, qualifiers);
       }
     }
   }
@@ -390,7 +388,7 @@ public class EventManager
 
     map.addObserver(observer, eventBaseType, bindings);
 
-    _observerListCache.clear();
+    _observerMethodCache.clear();
   }
 
   /**
@@ -444,7 +442,7 @@ public class EventManager
 
     map.addObserver(observer, eventBaseType, bindings);
 
-    _observerListCache.clear();
+    _observerMethodCache.clear();
   }
 
   /**
@@ -474,5 +472,53 @@ public class EventManager
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _cdiManager + "]"; 
+  }
+  
+  static class EventKey {
+    private BaseType _type;
+    private Annotation []_qualifiers;
+    
+    EventKey(BaseType type, Annotation []qualifiers)
+    {
+      _type = type;
+      _qualifiers = qualifiers;
+    }
+
+    @Override
+    public int hashCode()
+    {
+      int hash = _type.hashCode();
+      
+      if (_qualifiers == null)
+        return hash;
+      
+      for (Annotation ann : _qualifiers) {
+        hash += 65521 * ann.hashCode(); 
+      }
+      
+      return hash;
+    }
+
+    @Override
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof EventKey))
+        return false;
+      
+      EventKey key = (EventKey) o;
+      
+      if (! _type.equals(key._type))
+        return false;
+      
+      if (_qualifiers.length != key._qualifiers.length)
+        return false;
+      
+      for (int i = 0; i < _qualifiers.length; i++) {
+        if (_qualifiers[i] != key._qualifiers[i])
+          return false;
+      }
+      
+      return true;
+    }
   }
 }

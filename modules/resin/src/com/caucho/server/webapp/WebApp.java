@@ -220,7 +220,7 @@ public class WebApp extends ServletContextImpl
   private WebAppController _controller;
 
   // The webbeans container
-  private InjectManager _beanManager;
+  private InjectManager _cdiManager;
 
   // The webApp directory.
   private final Path _appDir;
@@ -517,12 +517,12 @@ public class WebApp extends ServletContextImpl
         throw new ConfigException(L.l("web-app root-directory '{0}' can not be the same as the host root-directory\n", _appDir.getURL()));
       }
 
-      _beanManager = InjectManager.create(_classLoader);
-      _beanManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
-      _beanManager.addExtension(new WebAppInjectExtension(_beanManager, this));
+      _cdiManager = InjectManager.create(_classLoader);
+      _cdiManager.addPath(_appDir.lookup("WEB-INF/beans.xml"));
+      _cdiManager.addExtension(new WebAppInjectExtension(_cdiManager, this));
 
       _jspApplicationContext = new JspApplicationContextImpl(this);
-      _jspApplicationContext.addELResolver(_beanManager.getELResolver());
+      _jspApplicationContext.addELResolver(_cdiManager.getELResolver());
     } catch (Throwable e) {
       setConfigException(e);
     }
@@ -635,7 +635,7 @@ public class WebApp extends ServletContextImpl
   
   public InjectManager getBeanManager()
   {
-    return _beanManager;
+    return _cdiManager;
   }
 
   /**
@@ -1030,7 +1030,7 @@ public class WebApp extends ServletContextImpl
     throws ServletException
   {
     try {
-      return _beanManager.createTransientObject(servletClass);
+      return _cdiManager.createTransientObject(servletClass);
     } catch (InjectionException e) {
       throw new ServletException(e);
     }
@@ -1261,7 +1261,7 @@ public class WebApp extends ServletContextImpl
     throws ServletException
   {
     try {
-      return _beanManager.createTransientObject(filterClass);
+      return _cdiManager.createTransientObject(filterClass);
     } catch (InjectionException e) {
       throw new ServletException(e);
     }
@@ -1937,7 +1937,7 @@ public class WebApp extends ServletContextImpl
     throws ServletException
   {
     try {
-      return _beanManager.createTransientObject(listenerClass);
+      return _cdiManager.createTransientObject(listenerClass);
     }
     catch (InjectionException e) {
       throw new ServletException(e);
@@ -1960,7 +1960,7 @@ public class WebApp extends ServletContextImpl
   @Override
   public void addListener(Class<? extends EventListener> listenerClass)
   {
-    addListener(_beanManager.createTransientObject(listenerClass));
+    addListener(_cdiManager.createTransientObject(listenerClass));
   }
 
   @Override
@@ -2154,7 +2154,8 @@ public class WebApp extends ServletContextImpl
    * Returns the JSF configuration
    */
   @Configurable
-  public JsfPropertyGroup getJsf() {
+  public JsfPropertyGroup getJsf()
+  {
     return _jsf;
   }
 
@@ -2605,7 +2606,7 @@ public class WebApp extends ServletContextImpl
 
       _classLoader.setId("web-app:" + getId());
 
-      _beanManager = InjectManager.getCurrent();
+      _cdiManager = InjectManager.getCurrent();
       
       SingleSignon singleSignon = AbstractSingleSignon.getCurrent();
       
@@ -2626,7 +2627,7 @@ public class WebApp extends ServletContextImpl
       try {
         // server/1a36
 
-        Authenticator auth = _beanManager.getReference(Authenticator.class);
+        Authenticator auth = _cdiManager.getReference(Authenticator.class);
 
         setAttribute("caucho.authenticator", auth);
       } catch (Exception e) {
@@ -2635,15 +2636,15 @@ public class WebApp extends ServletContextImpl
 
       try {
         if (_login == null) {
-          _login = _beanManager.getReference(Login.class);
+          _login = _cdiManager.getReference(Login.class);
         }
 
         if (_login == null) {
-          _beanManager.addBean(_beanManager.createManagedBean(BasicLogin.class));
+          _cdiManager.addBean(_cdiManager.createManagedBean(BasicLogin.class));
           // server/1aj0
-          _defaultLogin = _beanManager.getReference(Login.class);
+          _defaultLogin = _cdiManager.getReference(Login.class);
 
-          _authenticator = _beanManager.getReference(Authenticator.class);
+          _authenticator = _cdiManager.getReference(Authenticator.class);
         }
 
         setAttribute("caucho.login", _login);
@@ -2929,7 +2930,7 @@ public class WebApp extends ServletContextImpl
     throws Exception
   {
     for (ServletContainerInitializer init
-          : _beanManager.loadServices(ServletContainerInitializer.class)) {
+          : _cdiManager.loadLocalServices(ServletContainerInitializer.class)) {
       init.onStartup(null, this);
     }
   }

@@ -153,6 +153,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
   /**
    * Returns the current array of webApp entries.
    */
+  @Override
   public WebAppController generateController(String name)
   {
     for (EarDeployController earController : _earContainer.getControllers()) {
@@ -161,7 +162,7 @@ public class WebAppEarDeployGenerator extends DeployGenerator<WebAppController> 
       webAppController = earController.findWebAppController(name);
 
       if (webAppController != null)
-	return webAppController;
+        return webAppController;
     }
 
     return null;

@@ -147,7 +147,7 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
 
       }
       
-      if (producesMethod.isAnnotationPresent(Named.class)
+      if (producesMethod.getJavaMember().isAnnotationPresent(Named.class)
           && parentMethod.isAnnotationPresent(Named.class)) {
         throw new ConfigException(L.l("{0}.{1} is an invalid @Specializes @Producer because both it and its parent defines @Named",
                                       javaMethod.getDeclaringClass().getName(),

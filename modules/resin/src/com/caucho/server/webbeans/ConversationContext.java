@@ -33,6 +33,8 @@ import java.lang.annotation.Annotation;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.annotation.PreDestroy;
 import javax.enterprise.context.ContextNotActiveException;
@@ -57,6 +59,7 @@ import com.caucho.util.RandomUtil;
 public class ConversationContext extends AbstractScopeContext
   implements Conversation, java.io.Serializable
 {
+  private static final Logger log = Logger.getLogger(ConversationContext.class.getName());
   private static final L10N L = new L10N(ConversationContext.class);
   
   public ConversationContext()
@@ -191,9 +194,13 @@ public class ConversationContext extends AbstractScopeContext
   @Override
   public void setTimeout(long timeout)
   {
+    try {
     Scope scope = createJsfScope();
     
     scope._timeout = timeout;
+    } catch (RuntimeException e) {
+      log.log(Level.WARNING, e.toString(), e);
+    }
   }
   
   private Scope getJsfScope()

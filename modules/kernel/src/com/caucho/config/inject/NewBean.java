@@ -30,6 +30,7 @@
 package com.caucho.config.inject;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
@@ -54,8 +55,11 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
 {
   private InjectionTargetBuilder<X> _target;
   private LinkedHashSet<Annotation> _qualifiers;
+  private Set<Type> _types;
 
-  NewBean(InjectManager inject, AnnotatedType<X> beanType)
+  NewBean(InjectManager inject,
+          Class<?> newType,
+          AnnotatedType<X> beanType)
   {
     super(inject, beanType.getBaseType(), beanType);
 
@@ -63,6 +67,8 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
     
     // validation
     _target.getInjectionPoints();
+    
+    _types = inject.createSourceBaseType(newType).getTypeClosure(inject);
 
     _qualifiers = new LinkedHashSet<Annotation>();
     _qualifiers.add(new NewLiteral(beanType.getJavaClass()));
@@ -93,6 +99,15 @@ public class NewBean<X> extends AbstractIntrospectedBean<X>
   public Class<? extends Annotation> getScope()
   {
     return Dependent.class;
+  }
+  
+  /**
+   * Returns thetype closure.
+   */
+  @Override
+  public Set<Type> getTypes()
+  {
+    return _types;
   }
   
   /**

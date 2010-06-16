@@ -701,7 +701,7 @@ abstract public class DeployController<I extends DeployInstance>
       isStarting = _lifecycle.toStarting();
       
       if (! isStarting)
-	return deployInstance;
+        return deployInstance;
       
       expandArchive();
     
@@ -720,10 +720,10 @@ abstract public class DeployController<I extends DeployInstance>
         _deployItem.toError(e);
 
       if (deployInstance != null)
-	deployInstance.setConfigException(e);
+        deployInstance.setConfigException(e);
       else {
-	log.severe(e.toString());
-	log.log(Level.FINEST, e.toString(), e);
+        log.severe(e.toString());
+        log.log(Level.FINEST, e.toString(), e);
       }
     } catch (Throwable e) {
       _lifecycle.toError();
@@ -732,15 +732,15 @@ abstract public class DeployController<I extends DeployInstance>
         _deployItem.toError(e);
 
       if (deployInstance != null)
-	deployInstance.setConfigException(e);
+        deployInstance.setConfigException(e);
       else
-	log.log(Level.SEVERE, e.toString(), e);
+        log.log(Level.SEVERE, e.toString(), e);
     } finally {
       if (isActive) {
-	_lifecycle.toActive();
-	
-	if (_deployItem != null && ! "error".equals(_deployItem.getState()))
-	  _deployItem.toStart();
+        _lifecycle.toActive();
+        
+        if (_deployItem != null && ! "error".equals(_deployItem.getState()))
+          _deployItem.toStart();
       }
       else
         _lifecycle.toError();

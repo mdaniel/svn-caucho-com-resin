@@ -655,9 +655,20 @@ public class EjbBean<X> extends DescriptionGroupConfig
     if (! localClass.isInterface())
       throw error(L.l("'{0}' must be an interface. <local> interfaces must be interfaces.", localClass.getName()));
 
-    if (! _localList.contains(local)) {
-      _localList.add(local);
+    for (int i = _localList.size() - 1; i >= 0; i--) {
+      AnnotatedType<? super X> oldLocal = _localList.get(i);
+      
+      Class<?> oldClass = oldLocal.getJavaClass();
+      
+      if (oldClass.isAssignableFrom(localClass)) {
+        _localList.set(i, local);
+        return;
+      }
+      else if (localClass.isAssignableFrom(oldClass))
+        return;
     }
+
+    _localList.add(local);
   }
 
   /**

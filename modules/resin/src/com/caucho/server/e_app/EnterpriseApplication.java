@@ -79,7 +79,7 @@ public class EnterpriseApplication
 
   private Path _webappsPath;
 
-  private WebAppContainer _container;
+  private WebAppContainer _webAppContainer;
   private String _version;
 
   private String _libraryDirectory;
@@ -103,7 +103,7 @@ public class EnterpriseApplication
   EnterpriseApplication(WebAppContainer container,
                         EarDeployController controller, String name)
   {
-    _container = container;
+    _webAppContainer = container;
 
     _controller = controller;
     
@@ -453,8 +453,8 @@ public class EnterpriseApplication
       _loader.start();
 
       // updates the invocation caches
-      if (_container != null)
-        _container.clearCache();
+      if (_webAppContainer != null)
+        _webAppContainer.clearCache();
     } catch (Exception e) {
       _configException = ConfigException.create(e);
       
@@ -555,9 +555,9 @@ public class EnterpriseApplication
 
       getClassLoader().start();
 
-      if (_container != null) {
+      if (_webAppContainer != null) {
         for (WebAppController webApp : _webApps) {
-          _container.getWebAppGenerator().update(webApp.getContextPath());
+          _webAppContainer.getWebAppGenerator().updateNoStart(webApp.getContextPath());
         }
       }
       
@@ -639,7 +639,7 @@ public class EnterpriseApplication
       controller = new WebAppController(contextUrl,
                                         contextUrl,
                                         path,
-                                        _container);
+                                        _webAppContainer);
 
       _webApps.add(controller);
     }
@@ -727,9 +727,9 @@ public class EnterpriseApplication
       ArrayList<WebAppController> webApps = _webApps;
       _webApps = null;
 
-      if (webApps != null && _container != null) {
+      if (webApps != null && _webAppContainer != null) {
         for (WebAppController webApp : webApps) {
-          _container.getWebAppGenerator().update(webApp.getContextPath());
+          _webAppContainer.getWebAppGenerator().update(webApp.getContextPath());
         }
       }
     } finally {

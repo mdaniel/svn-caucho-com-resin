@@ -255,36 +255,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
     ArrayList<Class<?>> interfaceList = new ArrayList<Class<?>>();
 
-    for (Class<?> localApi : ejbClass.getInterfaces()) {
-      Local local = localApi.getAnnotation(Local.class);
-
-      if (local != null) {
-        addLocal((Class) localApi);
-        continue;
-      }
-
-      javax.ejb.Remote remote = localApi.getAnnotation(javax.ejb.Remote.class);
-
-      if (remote != null || java.rmi.Remote.class.isAssignableFrom(localApi)) {
-        addRemote(localApi);
-        continue;
-      }
-
-      if (localApi.getName().equals("java.io.Serializable"))
-        continue;
-
-      if (localApi.getName().equals("java.io.Externalizable"))
-        continue;
-
-      if (localApi.getName().startsWith("javax.ejb"))
-        continue;
-
-      if (localApi.getName().equals("java.rmi.Remote"))
-        continue;
-
-      if (! interfaceList.contains(localApi))
-        interfaceList.add(localApi);
-    }
+    addInterfaces(interfaceList, ejbClass, true);
 
     Local local = type.getAnnotation(Local.class);
     if (local != null && local.value() != null) {
@@ -312,9 +283,8 @@ public class EjbSessionBean<X> extends EjbBean<X> {
       // Session bean no-interface view.
     } else if (interfaceList.size() != 1)
       throw new ConfigException(
-          L.l(
-                 "'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
-                 type.getJavaClass().getName(), interfaceList.toString()));
+          L.l("'{0}' has multiple interfaces, but none are marked as @Local or @Remote.\n{1}",
+              type.getJavaClass().getName(), interfaceList.toString()));
     else {
       addLocal((Class) interfaceList.get(0));
     }
@@ -326,6 +296,64 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     else if (_localList.size() == 0) {
       _localBean = type;
     }
+  }
+  
+  private void addInterfaces(ArrayList<Class<?>> interfaceList,
+                             Class<?> ejbClass,
+                             boolean isTop)
+  {
+    if (ejbClass == null)
+      return;
+
+    for (Class<?> localApi : ejbClass.getInterfaces()) {
+      Local local = localApi.getAnnotation(Local.class);
+
+      if (local != null) {
+        addLocal((Class) localApi);
+        continue;
+      }
+
+      javax.ejb.Remote remote = localApi.getAnnotation(javax.ejb.Remote.class);
+
+      if (remote != null || java.rmi.Remote.class.isAssignableFrom(localApi)) {
+        addRemote(localApi);
+        continue;
+      }
+
+      if (localApi.getName().equals("java.io.Serializable"))
+        continue;
+
+      if (localApi.getName().equals("java.io.Externalizable"))
+        continue;
+
+      if (localApi.getName().startsWith("javax.ejb"))
+        continue;
+
+      if (localApi.getName().equals("java.rmi.Remote"))
+        continue;
+
+      if (isTop)
+        addInterface(interfaceList, localApi);
+    }
+    
+    addInterfaces(interfaceList, ejbClass.getSuperclass(), false);
+  }
+  
+  private void addInterface(ArrayList<Class<?>> interfaceList, Class<?> cl)
+  {
+    for (int i = interfaceList.size() - 1; i >= 0; i--) {
+      Class<?> oldClass = interfaceList.get(i);
+      
+      if (oldClass.isAssignableFrom(cl)) {
+        interfaceList.set(i, cl);
+        return;
+      }
+      else if (cl.isAssignableFrom(oldClass)) {
+        return;
+      }
+    }
+    
+    interfaceList.add(cl);
   }
 
   /**

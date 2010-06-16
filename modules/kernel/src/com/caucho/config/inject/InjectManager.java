@@ -45,8 +45,10 @@ import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.atomic.AtomicLong;
@@ -611,8 +613,13 @@ public final class InjectManager
       for (Bean<?> testBean : beanList) {
         if (testBean.isAlternative()) {
         }
+        else if (bean.isAlternative()) {
+        }
         else if (bean.getBeanClass().isAnnotationPresent(Specializes.class)
                  && testBean.getBeanClass().isAssignableFrom(bean.getBeanClass())) {
+        }
+        else if (testBean.getBeanClass().isAnnotationPresent(Specializes.class)
+                  && bean.getBeanClass().isAssignableFrom(testBean.getBeanClass())) {
         }
         else {
           throw new ConfigException(L.l("@Named('{0}') is a duplicate name for\n  {1}\n  {2}",
@@ -655,6 +662,9 @@ public final class InjectManager
                              Bean<?> bean)
   {
     if (type == null)
+      return;
+    
+    if (isSpecialized(bean.getBeanClass()))
       return;
 
     if (log.isLoggable(Level.FINEST))
@@ -927,13 +937,36 @@ public final class InjectManager
     if (mapAnnSet != null)
       return mapAnnSet;
     
-    LinkedHashSet<Annotation> annSet = new LinkedHashSet<Annotation>();
+    if (! stereotype.isAnnotationPresent(Stereotype.class))
+      return null;
     
+    LinkedHashMap<Class<?>, Annotation> annMap
+      = new LinkedHashMap<Class<?>, Annotation>();
+    
+    addStereotypeDefinitions(annMap, stereotype);
+    
+    mapAnnSet = new LinkedHashSet<Annotation>(annMap.values());
+    
+    _stereotypeMap.put(stereotype, mapAnnSet);
+    
+    return mapAnnSet;
+  }
+  
+  private void addStereotypeDefinitions(Map<Class<?>,Annotation> annMap, 
+                                        Class<? extends Annotation> stereotype)
+  {
     for (Annotation ann : stereotype.getAnnotations()) {
-      annSet.add(ann);
+      if (annMap.get(ann.annotationType()) == null)
+        annMap.put(ann.annotationType(), ann);
     }
     
-    return annSet;
+    for (Annotation ann : stereotype.getAnnotations()) {
+      Class<? extends Annotation> annType = ann.annotationType();
+      
+      if (annType.isAnnotationPresent(Stereotype.class)) {
+        addStereotypeDefinitions(annMap, annType);
+      }
+    }
   }
 
   //
@@ -1291,7 +1324,7 @@ public final class InjectManager
         newClass = baseType.getRawClass();
       
       AnnotatedType<?> ann = ReflectionAnnotatedFactory.introspectType(newClass);
-      NewBean<?> newBean = new NewBean(this, ann);
+      NewBean<?> newBean = new NewBean(this, baseType.getRawClass(), ann);
       newBean.introspect();
       
       if (component != null) {
@@ -1478,6 +1511,12 @@ public final class InjectManager
       return bean;
       */
   }
+  
+  @Module
+  public boolean isSpecialized(Class<?> beanClass)
+  {
+    return _specializedMap.get(beanClass) != null;
+  }
 
   public <X> Bean<? extends X> resolve(Set<Bean<? extends X>> beans)
   {
@@ -1485,7 +1524,6 @@ public final class InjectManager
     Bean<? extends X> secondBean = null;
     
     int bestPriority = -1;
-    boolean bestGeneric = false;
 
     for (Bean<? extends X> bean : beans) {
       if (_specializedMap.get(bean.getBeanClass()) != null)
@@ -1849,7 +1887,10 @@ public final class InjectManager
   {
     ReferenceFactory<T> factory = getReferenceFactory(bean);
     
-    return factory.create(null, null, null);
+    if (factory != null)
+      return factory.create(null, null, null);
+    else
+      return null;
   }
 
   /**
@@ -1955,6 +1996,9 @@ public final class InjectManager
 
   public <T> ReferenceFactory<T> getReferenceFactory(Bean<T> bean)
   {
+    if (bean == null)
+      return null;
+    
     ReferenceFactory<T> factory = (ReferenceFactory<T>) _refFactoryMap.get(bean);
     
     if (factory == null) {
@@ -1968,6 +2012,9 @@ public final class InjectManager
   private <T> ReferenceFactory<T> createReferenceFactory(Bean<T> bean)
   {
     Class<? extends Annotation> scopeType = bean.getScope();
+    
+    if (InjectionPoint.class.equals(bean.getBeanClass()))
+      return (ReferenceFactory) new InjectionPointReferenceFactory();
 
     if (Dependent.class == scopeType) {
       if (bean instanceof ManagedBeanImpl<?>)
@@ -2272,8 +2319,10 @@ public final class InjectManager
 
     if (bean == null) {
       AnnotatedType<T> annType = (AnnotatedType<T>) ReflectionAnnotatedFactory.introspectType(newClass);
+      
+      BaseType newType = createSourceBaseType(type);
 
-      NewBean<T> newBean = new NewBean<T>(this, annType);
+      NewBean<T> newBean = new NewBean<T>(this, newType.getRawClass(), annType);
       newBean.introspect();
 
       _newBeanMap.put(type, bean);
@@ -2766,21 +2815,33 @@ public final class InjectManager
       if (isDisabled(cl))
         return;
         */
+      
+      if (cl.isInterface()) {
+        if (Annotation.class.isAssignableFrom(cl)
+            && cl.isAnnotationPresent(Qualifier.class)) {
+          // validateQualifier(cl);
+          QualifierBinding.validateQualifier(cl, null);
+        }
+      }
 
       AnnotatedType<?> type = createAnnotatedType(cl);
 
       type = getExtensionManager().processAnnotatedType(type);
+
+      // ioc/07fb
+      if (type != null)
+        cl = type.getJavaClass();
+      
+      if (cl.isAnnotationPresent(Specializes.class)) {
+        Class<?> parent = cl.getSuperclass();
+
+        if (parent != null) {
+          addSpecialize(cl, parent);
+        }
+      }
       
       if (type == null)
         return;
-      
-      if (type.isAnnotationPresent(Specializes.class)) {
-        Class<?> parent = type.getJavaClass().getSuperclass();
-
-        if (parent != null) {
-          addSpecialize(type.getJavaClass(), parent);
-        }
-      }
 
       _pendingAnnotatedTypes.add(type);
     } catch (ClassNotFoundException e) {
@@ -3030,22 +3091,34 @@ public final class InjectManager
 
   public <T> ArrayList<T> loadServices(Class<T> serviceClass)
   {
-    return loadServices(serviceClass, new HashSet<URL>());
+    return loadServices(serviceClass, new HashSet<URL>(), false);
+  }
+
+  public <T> ArrayList<T> loadLocalServices(Class<T> serviceClass)
+  {
+    return loadServices(serviceClass, new HashSet<URL>(), true);
   }
 
   private <T> ArrayList<T> loadServices(Class<T> serviceApiClass,
-                                        HashSet<URL> serviceSet)
+                                        HashSet<URL> serviceSet,
+                                        boolean isLocal)
   {
     ArrayList<T> services = new ArrayList<T>();
 
     try {
-      ClassLoader loader = _classLoader;
+      DynamicClassLoader loader = _classLoader;
 
       if (loader == null)
         return services;
-
-      Enumeration<URL> e
-        = loader.getResources("META-INF/services/" + serviceApiClass.getName());
+      
+      String serviceName = "META-INF/services/" + serviceApiClass.getName();
+      
+      Enumeration<URL> e;
+      
+      if (isLocal)
+        e = loader.findResources(serviceName);
+      else
+        e = loader.getResources(serviceName);
 
       while (e.hasMoreElements()) {
         URL url = e.nextElement();
@@ -3083,7 +3156,7 @@ public final class InjectManager
           IoUtil.close(is);
         }
       }
-    } catch (IOException e) {
+    } catch (Exception e) {
       log.log(Level.WARNING, e.toString(), e);
     }
 
@@ -4117,7 +4190,8 @@ public final class InjectManager
     }
   }
   
-  public class InjectionPointReferenceFactory extends ReferenceFactory<InjectionPoint> {
+  public class InjectionPointReferenceFactory 
+    extends ReferenceFactory<InjectionPoint> {
     InjectionPointReferenceFactory()
     {
     }

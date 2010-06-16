@@ -237,6 +237,21 @@ public class DeployContainer<C extends DeployController>
    * The entry handles its own internal changes, e.g. a modification to
    * a web.xml file.
    */
+  public C updateNoStart(String name)
+  {
+    C newController = updateImpl(name);
+
+    return newController;
+  }
+
+  /**
+   * Callback from the DeployGenerator when the deployment changes.
+   * <code>update</code> is only called when a deployment is added
+   * or removed, e.g. with a new .war file.
+   *
+   * The entry handles its own internal changes, e.g. a modification to
+   * a web.xml file.
+   */
   C updateImpl(String name)
   {
     C oldController = null;

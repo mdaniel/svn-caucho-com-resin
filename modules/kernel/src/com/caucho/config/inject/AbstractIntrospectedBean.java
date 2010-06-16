@@ -409,12 +409,17 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     Class<? extends Annotation> scope = null;
 
     for (Annotation stereotype : annotated.getAnnotations()) {
-      Class<?> stereotypeType = stereotype.annotationType();
+      Class<? extends Annotation> stereotypeType = stereotype.annotationType();
 
-      if (stereotypeType.isAnnotationPresent(Stereotype.class))
-        _stereotypes.add(stereotype);
+      Set<Annotation> stereotypeSet =
+        getBeanManager().getStereotypeDefinition(stereotypeType);
+      
+      if (stereotypeSet == null)
+        continue;
 
-      for (Annotation ann : stereotypeType.getDeclaredAnnotations()) {
+      _stereotypes.add(stereotype);
+
+      for (Annotation ann : stereotypeSet) {
         Class<? extends Annotation> annType = ann.annotationType();
 
         if (annType.isAnnotationPresent(Scope.class)
