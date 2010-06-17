@@ -357,9 +357,9 @@ public class CauchoResponseWrapper extends AbstractCauchoResponse
 
   public void close() throws IOException
   {
-    CauchoResponse cResponse = (CauchoResponse) _response;
-
-    cResponse.close();
+    //support for spring.MockHttpServletResponse
+    if (_response instanceof CauchoResponse)
+      ((CauchoResponse) _response).close();
   }
 
   public boolean getForbidForward()

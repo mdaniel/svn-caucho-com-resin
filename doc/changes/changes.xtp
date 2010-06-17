@@ -13,6 +13,7 @@
 
 <s2 title="4.0.8 - snapshot">
 <ul>
+<li>servlet: added support for MockHttpServletRequest and MockHttpServletResponse: (#4073)</li>
 <li>configure: fix for bad libtool message: (#4048)</li>
 <li>resin: fixed startup routine for directory with spaces issue: (#4021)</li>
 <li>resin-admin: fixed IllegalStateExceptionwith with readonly conf/admin-users.xml.generated (#4055)</li>

@@ -467,7 +467,8 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   {
     CauchoRequest cRequest = getCauchoRequest();
 
-    cRequest.setSessionId(sessionId);
+    if (cRequest != null)
+      cRequest.setSessionId(sessionId);
   }
 
   @Override
@@ -475,7 +476,10 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
   {
     CauchoRequest cRequest = getCauchoRequest();
 
-    return cRequest.getSessionId();
+    if (cRequest != null)
+      return cRequest.getSessionId();
+    else
+      return null;
   }
 
   @Override
@@ -787,7 +791,10 @@ public class CauchoRequestWrapper extends AbstractCauchoRequest {
       request = ((ServletRequestWrapper) request).getRequest();
     }
 
-    return (CauchoRequest) request;
+    if (request instanceof CauchoRequest)
+      return (CauchoRequest) request;
+
+    return null;
   }
   
   @Override
