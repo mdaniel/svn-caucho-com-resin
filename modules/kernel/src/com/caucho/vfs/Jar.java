@@ -29,26 +29,31 @@
 
 package com.caucho.vfs;
 
-import com.caucho.loader.EnvironmentLocal;
-import com.caucho.make.CachedDependency;
-import com.caucho.util.Alarm;
-import com.caucho.util.CacheListener;
-import com.caucho.util.Log;
-import com.caucho.util.LruCache;
-import com.caucho.util.L10N;
-
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.ref.SoftReference;
 import java.security.cert.Certificate;
-import java.util.*;
-import java.util.jar.*;
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
+import java.util.jar.Attributes;
+import java.util.jar.JarEntry;
+import java.util.jar.JarFile;
+import java.util.jar.Manifest;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
+
+import com.caucho.loader.EnvironmentLocal;
+import com.caucho.make.CachedDependency;
+import com.caucho.util.Alarm;
+import com.caucho.util.CacheListener;
+import com.caucho.util.L10N;
+import com.caucho.util.Log;
+import com.caucho.util.LruCache;
 
 /**
  * Jar is a cache around a jar file to avoid scanning through the whole
@@ -66,6 +71,11 @@ public class Jar implements CacheListener {
   private static EnvironmentLocal<Integer> _jarSize
     = new EnvironmentLocal<Integer>("caucho.vfs.jar-size");
   
+  private static ZipEntry NULL_ZIP = new ZipEntry("null");
+  
+  private LruCache<String,ZipEntry> _zipEntryCache
+    = new LruCache<String,ZipEntry>(64);
+  
   private Path _backing;
   private boolean _backingIsFile;
 
@@ -81,12 +91,12 @@ public class Jar implements CacheListener {
   // cached zip file to read jar entries
   private SoftReference<JarFile> _jarFileRef;
   // last time the zip file was modified
-  private long _jarLastModified;
   private long _jarLength;
   private Boolean _isSigned;
 
   // file to be closed
-  private SoftReference<JarFile> _closeJarFileRef;
+  private final AtomicReference<SoftReference<JarFile>> _closeJarFileRef
+    = new AtomicReference<SoftReference<JarFile>>();
 
   /**
    * Creates a new Jar.
@@ -250,9 +260,9 @@ public class Jar implements CacheListener {
       JarFile jarFile = getJarFile();
 
       if (jarFile == null)
-	manifest = null;
+        manifest = null;
       else
-	manifest = jarFile.getManifest();
+        manifest = jarFile.getManifest();
     }
 
     closeJarFile();
@@ -273,27 +283,27 @@ public class Jar implements CacheListener {
 
     try {
       if (! _backing.canRead())
-	return null;
+        return null;
       
       JarFile jarFile = new JarFile(_backing.getNativePath());
       JarEntry entry;
       InputStream is = null;
 
       try {
-	entry = jarFile.getJarEntry(path);
+        entry = jarFile.getJarEntry(path);
 
-	if (entry != null) {
-	  is = jarFile.getInputStream(entry);
+        if (entry != null) {
+          is = jarFile.getInputStream(entry);
 
-	  while (is.skip(65536) > 0) {
-	  }
+          while (is.skip(65536) > 0) {
+          }
 
-	  is.close();
+          is.close();
 
-	  return entry.getCertificates();
-	}
+          return entry.getCertificates();
+        }
       } finally {
-	jarFile.close();
+        jarFile.close();
       }
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
@@ -314,21 +324,15 @@ public class Jar implements CacheListener {
     // server/249f, server/249g
     // XXX: facelets vs issue of meta-inf (i.e. lower case)
 
-    boolean result = false;
-    
-    synchronized (this) {
-      try {
-	ZipEntry entry = getJarEntry(path);
+    try {
+      ZipEntry entry = getJarEntry(path);
 
-	result = entry != null;
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
+      return entry != null;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
 
-    closeJarFile();
-
-    return result;
+    return false;
   }
 
   /**
@@ -340,19 +344,15 @@ public class Jar implements CacheListener {
   {
     boolean result = false;
     
-    synchronized (this) {
-      try {
-	ZipEntry entry = getJarEntry(path);
+    try {
+      ZipEntry entry = getJarEntry(path);
 
-	result = entry != null && entry.isDirectory();
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
+      return entry != null && entry.isDirectory();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
 
-    closeJarFile();
-
-    return result;
+    return false;
   }
 
   /**
@@ -362,21 +362,15 @@ public class Jar implements CacheListener {
    */
   public boolean isFile(String path)
   {
-    boolean result = false;
-    
-    synchronized (this) {
-      try {
-	ZipEntry entry = getJarEntry(path);
+    try {
+      ZipEntry entry = getJarEntry(path);
 
-	result = entry != null && ! entry.isDirectory();
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
+      return entry != null && ! entry.isDirectory();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
 
-    closeJarFile();
-
-    return result;
+    return false;
   }
 
   /**
@@ -387,20 +381,15 @@ public class Jar implements CacheListener {
    */
   public long getLastModified(String path)
   {
-    long result = -1;
-    synchronized (this) {
-      try {
-	ZipEntry entry = getJarEntry(path);
+    try {
+      ZipEntry entry = getJarEntry(path);
 
-	result = entry != null ? entry.getTime() : -1;
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
+      return entry != null ? entry.getTime() : -1;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
     }
 
-    closeJarFile();
-
-    return result;
+    return  -1;
   }
 
   /**
@@ -411,21 +400,15 @@ public class Jar implements CacheListener {
    */
   public long getLength(String path)
   {
-    long result = -1;
-    
-    synchronized (this) {
-      try {
-	ZipEntry entry = getJarEntry(path);
+    try {
+      ZipEntry entry = getJarEntry(path);
 
-	result = entry != null ? entry.getSize() : -1;
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-      }
+      return entry != null ? entry.getSize() : -1;
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      return -1;
     }
-
-    closeJarFile();
-
-    return result;
   }
 
   /**
@@ -433,23 +416,15 @@ public class Jar implements CacheListener {
    */
   public boolean canRead(String path)
   {
-    boolean result = false;
-    
-    synchronized (this) {
-      try {
-	ZipEntry entry = getJarEntry(path);
+    try {
+      ZipEntry entry = getJarEntry(path);
 
-	result = entry != null && ! entry.isDirectory();
-      } catch (IOException e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	return false;
-      }
+      return entry != null && ! entry.isDirectory();
+    } catch (IOException e) {
+      log.log(Level.FINE, e.toString(), e);
+
+      return false;
     }
-
-    closeJarFile();
-
-    return result;
   }
 
   /**
@@ -489,23 +464,18 @@ public class Jar implements CacheListener {
     try {
       entry = zipFile.getEntry(pathName);
       if (entry != null) {
-	is = zipFile.getInputStream(entry);
+        is = zipFile.getInputStream(entry);
 
-	return new ZipStreamImpl(zipFile, is, null, path);
+        return new ZipStreamImpl(zipFile, is, null, path);
       }
       else {
-	throw new FileNotFoundException(path.toString());
+        throw new FileNotFoundException(path.toString());
       }
     } finally {
       if (is == null) {
-	zipFile.close();
+        zipFile.close();
       }
     }
-  }
-
-  public String toString()
-  {
-    return _backing.toString();
   }
 
   /**
@@ -518,19 +488,47 @@ public class Jar implements CacheListener {
     synchronized (this) {
       SoftReference<JarFile> jarFileRef = _jarFileRef;
       _jarFileRef = null;
-      
+
       if (jarFileRef != null)
-	jarFile = jarFileRef.get();
+        jarFile = jarFileRef.get();
     }
-      
+
     try {
       if (jarFile != null)
-	jarFile.close();
+        jarFile.close();
     } catch (Exception e) {
     }
   }
 
   private ZipEntry getJarEntry(String path)
+    throws IOException
+  {
+    ZipEntry entry = _zipEntryCache.get(path);
+    
+    if (entry != null) {
+      if (entry == NULL_ZIP)
+        return null;
+      else
+        return entry;
+    }
+    
+    synchronized (this) {
+      entry = getJarEntryImpl(path);
+    }
+    
+    closeJarFile();
+    
+    if (entry != null) {
+      _zipEntryCache.put(path, entry);
+    }
+    else {
+      _zipEntryCache.put(path, NULL_ZIP);
+    }
+    
+    return entry;
+  }
+
+  private ZipEntry getJarEntryImpl(String path)
     throws IOException
   {
     if (path.startsWith("/"))
@@ -561,7 +559,7 @@ public class Jar implements CacheListener {
 
     if (jarFileRef != null) {
       jarFile = jarFileRef.get();
-	
+
       if (jarFile != null)
         return jarFile;
     }
@@ -572,16 +570,16 @@ public class Jar implements CacheListener {
     JarFile oldFile = null;
     if (oldJarRef == null) {
     }
-    else if (_closeJarFileRef == null)
-      _closeJarFileRef = oldJarRef;
+    else if (_closeJarFileRef.compareAndSet(null, oldJarRef)) {
+    }
     else
       oldFile = oldJarRef.get();
 
     if (oldFile != null) {
       try {
-	oldFile.close();
+        oldFile.close();
       } catch (Throwable e) {
-	e.printStackTrace();
+        e.printStackTrace();
       }
     }
 
@@ -597,7 +595,7 @@ public class Jar implements CacheListener {
       }
 
       _jarFileRef = new SoftReference<JarFile>(jarFile);
-      _jarLastModified = getLastModifiedImpl();
+      getLastModifiedImpl();
     }
 
     return jarFile;
@@ -643,23 +641,22 @@ public class Jar implements CacheListener {
     else {
       // If the file has changed, close the old file
       SoftReference<JarFile> oldFileRef = _jarFileRef;
-	
+      
       _jarFileRef = null;
-      _jarLastModified = 0;
       _depend = null;
       _isSigned = null;
 
-      JarFile oldCloseFile = null;
-      if (_closeJarFileRef != null)
-	oldCloseFile = _closeJarFileRef.get();
+      SoftReference<JarFile> oldCloseFileRef = null;
+      oldCloseFileRef = _closeJarFileRef.getAndSet(oldFileRef);
 
-      _closeJarFileRef = oldFileRef;
-
-      if (oldCloseFile != null) {
-	try {
-	  oldCloseFile.close();
-	} catch (Throwable e) {
-	}
+      if (oldCloseFileRef != null) {
+        JarFile oldCloseFile = oldCloseFileRef.get();
+        
+        try {
+          if (oldCloseFile != null)
+            oldCloseFile.close();
+        } catch (Throwable e) {
+        }
       }
 
       return false;
@@ -671,19 +668,17 @@ public class Jar implements CacheListener {
    */
   private void closeJarFile()
   {
-    JarFile jarFile = null;
+    SoftReference<JarFile> jarFileRef = _closeJarFileRef.getAndSet(null);
     
-    synchronized (this) {
-      if (_closeJarFileRef != null)
-	jarFile = _closeJarFileRef.get();
-      _closeJarFileRef = null;
-    }
-    
-    if (jarFile != null) {
-      try {
-	jarFile.close();
-      } catch (IOException e) {
-	log.log(Level.WARNING, e.toString(), e);
+    if (jarFileRef != null) {
+      JarFile jarFile = jarFileRef.get();
+
+      if (jarFile != null) {
+        try {
+          jarFile.close();
+        } catch (IOException e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
     }
   }
@@ -693,20 +688,21 @@ public class Jar implements CacheListener {
     removeEvent();
   }
   
+  @Override
   public void removeEvent()
   {
     JarFile jarFile = null;
     
     synchronized (this) {
       if (_jarFileRef != null)
-	jarFile = _jarFileRef.get();
+        jarFile = _jarFileRef.get();
 
       _jarFileRef = null;
     }
 
     try {
       if (jarFile != null)
-	jarFile.close();
+        jarFile.close();
     } catch (Throwable e) {
       log.log(Level.FINE, e.toString(), e);
     }
@@ -743,15 +739,21 @@ public class Jar implements CacheListener {
       Iterator<Jar> iter = jarCache.values();
       
       while (iter.hasNext())
-	jars.add(iter.next());
+        jars.add(iter.next());
     }
 
     for (int i = 0; i < jars.size(); i++) {
       Jar jar = jars.get(i);
         
       if (jar != null)
-	jar.clearCache();
+        jar.clearCache();
     }
+  }
+
+  @Override
+  public String toString()
+  {
+    return _backing.toString();
   }
 
   /**

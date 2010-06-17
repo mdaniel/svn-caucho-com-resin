@@ -49,6 +49,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.gen.AspectBeanFactory;
 import com.caucho.config.gen.LifecycleInterceptor;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InterceptorRuntimeBean;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
 import com.caucho.util.L10N;
@@ -333,6 +334,15 @@ public class StatelessGenerator<X> extends SessionGenerator<X> {
     out.println("<?>> __caucho_interceptor_beans");
     out.print("  = new java.util.ArrayList<");
     out.printClass(Interceptor.class);
+    out.println("<?>>();");
+    
+    out.println();
+    out.print("private static final ");
+    out.print("java.util.ArrayList<");
+    out.printClass(InterceptorRuntimeBean.class);
+    out.println("<?>> __caucho_interceptor_static_beans");
+    out.print("  = new java.util.ArrayList<");
+    out.printClass(InterceptorRuntimeBean.class);
     out.println("<?>>();");
     
     out.println();

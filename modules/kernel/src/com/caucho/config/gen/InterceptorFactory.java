@@ -51,6 +51,7 @@ import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.InterceptionType;
+import static javax.enterprise.inject.spi.InterceptionType.*;
 import javax.inject.Inject;
 import javax.inject.Named;
 import javax.inject.Qualifier;
@@ -83,11 +84,10 @@ public class InterceptorFactory<X>
   
   private boolean _isInterceptorOrDecorator;
   
-  private ArrayList<Class<?>> _classAroundInvokeInterceptors
+  private ArrayList<Class<?>> _classInterceptors
     = new ArrayList<Class<?>>();
-  private ArrayList<Class<?>> _classPostConstructInterceptors
-    = new ArrayList<Class<?>>();
-  private ArrayList<Class<?>> _classPreDestroyInterceptors
+  
+  private ArrayList<Class<?>> _selfInterceptors
     = new ArrayList<Class<?>>();
   
   private HashMap<Class<?>, Annotation> _classInterceptorBindings;
@@ -105,11 +105,6 @@ public class InterceptorFactory<X>
     _manager = manager;
     
     introspectType();
-  }
-  
-  public ArrayList<Class<?>> getClassAroundInvokeInterceptors()
-  {
-    return _classAroundInvokeInterceptors;
   }
   
   public HashMap<Class<?>, Annotation>
@@ -138,15 +133,41 @@ public class InterceptorFactory<X>
     if (_isInterceptorOrDecorator)
       return super.create(method, isEnhanced);
     
+    boolean isExcludeClassInterceptors
+      = method.isAnnotationPresent(ExcludeClassInterceptors.class);
+    
     HashSet<Class<?>> methodInterceptors = null;
+    
+    InterceptionType type = InterceptionType.AROUND_INVOKE;
+    Class<? extends Annotation> annType = AroundInvoke.class;
+    
+    if (method.isAnnotationPresent(PostConstruct.class)){
+      type = InterceptionType.POST_CONSTRUCT;
+      annType = PostConstruct.class;
+    }
+    else if (method.isAnnotationPresent(PreDestroy.class)){
+      type = InterceptionType.PRE_DESTROY;
+      annType = PreDestroy.class;
+    }
+    
+    if (! isExcludeClassInterceptors 
+        && _classInterceptors.size() > 0) {
+      methodInterceptors = addInterceptors(methodInterceptors,
+                                           _classInterceptors,
+                                           annType);
+    }
 
-    Interceptors interceptors = method.getAnnotation(Interceptors.class);
+    Interceptors interceptorsAnn = method.getAnnotation(Interceptors.class);
 
-    if (interceptors != null) {
-      for (Class<?> iClass : interceptors.value()) {
+    boolean isMethodInterceptor = false;
+    
+    if (interceptorsAnn != null) {
+      for (Class<?> iClass : interceptorsAnn.value()) {
         if (! hasAroundInvoke(iClass)) {
           continue;
         }
+        
+        isMethodInterceptor = true;
         
         if (methodInterceptors == null)
           methodInterceptors = new LinkedHashSet<Class<?>>();
@@ -154,6 +175,10 @@ public class InterceptorFactory<X>
         methodInterceptors.add(iClass);
       }
     }
+    
+    methodInterceptors = addInterceptors(methodInterceptors,
+                                         _selfInterceptors,
+                                         annType);
 
     HashMap<Class<?>, Annotation> interceptorMap = null;
     
@@ -164,7 +189,7 @@ public class InterceptorFactory<X>
     
     if (method.isAnnotationPresent(Inject.class)
         || method.isAnnotationPresent(PostConstruct.class)) {
-      if (methodInterceptors != null || interceptorMap != null) {
+      if (isMethodInterceptor || interceptorMap != null) {
         throw new ConfigException(L.l("{0}.{1} is invalid because it's annotated with @Inject or @PostConstruct but also has interceptor bindings",
                                       method.getJavaMember().getDeclaringClass().getName(),
                                       method.getJavaMember().getName()));
@@ -172,9 +197,6 @@ public class InterceptorFactory<X>
       // ioc/0c57
       return super.create(method, isEnhanced);
     }
-    
-    boolean isExcludeClassInterceptors
-      = method.isAnnotationPresent(ExcludeClassInterceptors.class);
 
     if (isExcludeClassInterceptors || _classInterceptorBindings == null) {
     }
@@ -187,11 +209,11 @@ public class InterceptorFactory<X>
     
     if (methodInterceptors != null
         || interceptorMap != null
-        || decoratorSet != null
-        || _classAroundInvokeInterceptors.size() > 0 && ! isExcludeClassInterceptors) {
+        || decoratorSet != null) {
       AspectGenerator<X> next = super.create(method, true);
       
       return new InterceptorGenerator<X>(this, method, next,
+                                         type,
                                          methodInterceptors, 
                                          interceptorMap,
                                          decoratorSet,
@@ -211,51 +233,36 @@ public class InterceptorFactory<X>
     return false;
   }
   
-  private boolean isPostConstruct(Class<?> cl)
-  {
-    return isLifecycle(cl, PostConstruct.class);
-  }
-  
-  private boolean isPreDestroy(Class<?> cl)
-  {
-    return isLifecycle(cl, PreDestroy.class);
-  }
-  
-  private boolean isLifecycle(Class<?> cl, 
-                              Class<? extends Annotation> annType)
-  {
-    for (Method m : cl.getDeclaredMethods()) {
-      if (m.isAnnotationPresent(annType)) {
-        Class<?> []param = m.getParameterTypes();
-        
-        if (param.length == 1 && param[0].equals(InvocationContext.class))
-          return true;
-      }
-    }
-    
-    return false;
-  }
-  
   @Override
   public void generateInject(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
     super.generateInject(out, map);
     
-    if (_classPostConstructInterceptors.size() > 0) {
-      InterceptorGenerator<X> gen 
-        = new InterceptorGenerator<X>(this,
-                                      _classPostConstructInterceptors,
-                                      InterceptionType.POST_CONSTRUCT);
- 
-      gen.generateInject(out, map);
-    }
+    if (_isInterceptorOrDecorator)
+      return;
     
-    if (_classPreDestroyInterceptors.size() > 0) {
+    if (isEnhanced()) {
+      generateInject(out, map, POST_CONSTRUCT, PostConstruct.class);
+      generateInject(out, map, AROUND_INVOKE, AroundInvoke.class);
+      generateInject(out, map, PRE_DESTROY, PreDestroy.class);
+    }
+  }
+  
+  private void generateInject(JavaWriter out, 
+                              HashMap<String,Object> map,
+                              InterceptionType type,
+                              Class<? extends Annotation> annType)
+    throws IOException
+  {
+    HashSet<Class<?>> interceptors = null;
+    
+    interceptors = addInterceptors(interceptors, _classInterceptors, annType);
+    interceptors = addInterceptors(interceptors, _selfInterceptors, annType);
+
+    if (interceptors != null) {
       InterceptorGenerator<X> gen 
-        = new InterceptorGenerator<X>(this,
-                                      _classPreDestroyInterceptors,
-                                      InterceptionType.PRE_DESTROY);
+        = new InterceptorGenerator<X>(this, interceptors, type);
  
       gen.generateInject(out, map);
     }
@@ -267,12 +274,22 @@ public class InterceptorFactory<X>
   {
     super.generatePostConstruct(out, map);
     
+    if (_isInterceptorOrDecorator)
+      return;
+    
     if (isEnhanced()) {
-      InterceptorGenerator<X> gen =
-        new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
-                                    InterceptionType.POST_CONSTRUCT);
- 
-      gen.generateClassPostConstruct(out, map);
+      HashSet<Class<?>> set = null;
+      
+      set = addInterceptors(set, _classInterceptors, PostConstruct.class);
+
+      if (set != null) {
+        InterceptorGenerator<X> gen
+          = new InterceptorGenerator<X>(this,
+                                        set,
+                                        InterceptionType.POST_CONSTRUCT);
+        
+        gen.generateClassPostConstruct(out, map);
+      }
     }
   }
   
@@ -282,12 +299,22 @@ public class InterceptorFactory<X>
   {
     super.generatePreDestroy(out, map);
     
+    if (_isInterceptorOrDecorator)
+      return;
+    
     if (isEnhanced()) {
-      InterceptorGenerator<X> gen =
-        new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
-                                    InterceptionType.PRE_DESTROY);
- 
-      gen.generateClassPreDestroy(out, map);
+      HashSet<Class<?>> set = null;
+      
+      set = addInterceptors(set, _classInterceptors, PreDestroy.class);
+
+      if (set != null) {
+        InterceptorGenerator<X> gen
+          = new InterceptorGenerator<X>(this,
+                                        set,
+                                        InterceptionType.PRE_DESTROY);
+        
+        gen.generateClassPreDestroy(out, map);
+      }
     }
   }
   
@@ -297,19 +324,29 @@ public class InterceptorFactory<X>
   {
     super.generateEpilogue(out, map);
     
+    if (_isInterceptorOrDecorator)
+      return;
+    
+    if (isEnhanced()) {
+      generateEpilogue(out, map, POST_CONSTRUCT, PostConstruct.class);
+      generateEpilogue(out, map, AROUND_INVOKE, AroundInvoke.class);
+      generateEpilogue(out, map, PRE_DESTROY, PreDestroy.class);
+    }
+  }
+  
+  private void generateEpilogue(JavaWriter out, 
+                                HashMap<String,Object> map,
+                                InterceptionType type,
+                                Class<? extends Annotation> annType)
+    throws IOException
+  {
+    HashSet<Class<?>> interceptors = new LinkedHashSet<Class<?>>();
+    
+    interceptors = addInterceptors(interceptors, _classInterceptors, annType);
+    interceptors = addInterceptors(interceptors, _selfInterceptors, annType);
+    
     InterceptorGenerator<X> gen 
-      = new InterceptorGenerator<X>(this, _classPostConstructInterceptors,
-          InterceptionType.POST_CONSTRUCT);
- 
-    gen.generateEpilogue(out, map);
-      
-    gen = new InterceptorGenerator<X>(this, _classPreDestroyInterceptors,
-                                      InterceptionType.PRE_DESTROY);
- 
-    gen.generateEpilogue(out, map);
-      
-    gen = new InterceptorGenerator<X>(this, _classAroundInvokeInterceptors,
-                                      InterceptionType.AROUND_INVOKE);
+      = new InterceptorGenerator<X>(this, interceptors, type);
  
     gen.generateEpilogue(out, map);
   }
@@ -317,16 +354,69 @@ public class InterceptorFactory<X>
   @Override
   public boolean isEnhanced()
   {
-    if (_classPostConstructInterceptors.size() > 0)
+    if (_isInterceptorOrDecorator)
+      return false;
+    else if (_classInterceptors.size() > 0)
       return true;
-    else if (_classPreDestroyInterceptors.size() > 0)
-      return true;
-    else if (_classAroundInvokeInterceptors.size() > 0)
+    else if (_selfInterceptors.size() > 0)
       return true;
     else if (_classInterceptorBindings != null)
       return true;
     else
       return super.isEnhanced();
+  }
+   
+  private boolean isInterceptorPresent(Class<?> cl)
+  {
+    for (Method m : cl.getDeclaredMethods()) {
+      Class<?> []param = m.getParameterTypes();
+      
+      if (param.length == 1 && param[0].equals(InvocationContext.class))
+        return true;
+      
+      // if (m.isAnnotationPresent(annType))
+    }
+    
+    return false;
+  }
+  
+  private HashSet<Class<?>> 
+  addInterceptors(HashSet<Class<?>> set,
+                  ArrayList<Class<?>> sourceList,
+                 Class<? extends Annotation> annType)
+  {
+    for (Class<?> cl : sourceList) {
+      set = addInterceptor(set, cl, annType);
+    }
+    
+    return set;
+  }
+  
+  private HashSet<Class<?>> 
+  addInterceptor(HashSet<Class<?>> set,
+                 Class<?> cl,
+                 Class<? extends Annotation> annType)
+  {
+    if (cl == null || cl == Object.class)
+      return set;
+    
+    for (Method m : cl.getDeclaredMethods()) {
+      if (! m.isAnnotationPresent(annType))
+        continue;
+      
+      Class<?> []param = m.getParameterTypes();
+      
+      if (param.length == 1 && param[0].equals(InvocationContext.class)) {
+        if (set == null)
+          set = new LinkedHashSet<Class<?>>();
+          
+        set.add(cl);
+        
+        return set;
+      }
+    }
+    
+    return addInterceptor(set, cl.getSuperclass(), annType);
   }
   
   //
@@ -375,7 +465,7 @@ public class InterceptorFactory<X>
   
   private void validatePassivating()
   {
-    for (Class<?> cl : _classAroundInvokeInterceptors) {
+    for (Class<?> cl : _classInterceptors) {
       if (! Serializable.class.isAssignableFrom(cl))
         throw new ConfigException(L.l("{0} has an invalid interceptor {1} because it's not serializable.",
                                       getBeanType().getJavaClass().getName(),
@@ -390,26 +480,21 @@ public class InterceptorFactory<X>
   {
     Interceptors interceptors = getBeanType().getAnnotation(Interceptors.class);
 
-    if (interceptors == null)
-      return;
+    if (interceptors != null) {
+      for (Class<?> iClass : interceptors.value()) {
+        introspectClassInterceptors(_classInterceptors, iClass);
+      }
+    }
     
-    for (Class<?> iClass : interceptors.value()) {
-      if (hasAroundInvoke(iClass)) {
-        if (! _classAroundInvokeInterceptors.contains(iClass)) {
-          _classAroundInvokeInterceptors.add(iClass);
-        }
-      }
-        
-      if (isPostConstruct(iClass)) {
-        if (! _classPostConstructInterceptors.contains(iClass)) {
-          _classPostConstructInterceptors.add(iClass);
-        }
-      }
-      
-      if (isPreDestroy(iClass)) {
-        if (! _classPreDestroyInterceptors.contains(iClass)) {
-          _classPreDestroyInterceptors.add(iClass);
-        }
+    introspectClassInterceptors(_selfInterceptors, getBeanType().getJavaClass());
+  }
+  
+  private void introspectClassInterceptors(ArrayList<Class<?>> list,
+                                           Class<?> iClass)
+  {
+    if (isInterceptorPresent(iClass)) {
+      if (! list.contains(iClass)) {
+        list.add(iClass);
       }
     }
   }

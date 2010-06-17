@@ -81,6 +81,16 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   {
   }
   
+  public T getValue()
+  {
+    return _value;
+  }
+  
+  public Object getParentValue()
+  {
+    return _parent.getValue();
+  }
+  
   public <X> X get(Contextual<X> bean)
   {
     return find(this, bean);    

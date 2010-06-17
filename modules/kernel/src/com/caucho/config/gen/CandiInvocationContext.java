@@ -20,72 +20,91 @@
  * You should have received a copy of the GNU General Public License
  * along with Resin Open Source; if not, write to the
  *
- *   Free Software Foundation, Inc.
+ *   Free SoftwareFoundation, Inc.
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Sam
+ * @author Scott Ferguson
  */
 
-package com.caucho.config.bytecode;
+package com.caucho.config.gen;
 
 import java.lang.reflect.*;
 import java.util.*;
-import javax.interceptor.*;
 
-public class InvocationContextImpl implements InvocationContext {
+import javax.enterprise.inject.spi.InterceptionType;
+import javax.enterprise.inject.spi.Interceptor;
+import javax.interceptor.InvocationContext;
+
+public class CandiInvocationContext implements InvocationContext {
   private final Object _target;
-  private final Method _method;
-  
-  private final Method []_chainMethods;
+  private final Method _apiMethod;
+  private final Method _implMethod;
+
+  private final Interceptor []_chainMethods;
   private final Object []_chainObjects;
+  private final int []_chainIndex;
   
+  private final InterceptionType _type;
+
   private Object []_param;
 
   private int _index;
   private HashMap<String,Object> _map;
 
-  public InvocationContextImpl(Object target,
-			       Method method,
-			       Method []chainMethods,
-			       Object []chainObjects,
-			       Object []param)
-    throws Exception
+  public CandiInvocationContext(InterceptionType type,
+                                Object target,
+                                Method apiMethod,
+                                Method implMethod,
+                                Interceptor []chainMethods,
+                                Object []chainObjects,
+                                int []chainIndex,
+                                Object []param)
   {
     _target = target;
-    _method = method;
+    _type = type;
+    
+    _apiMethod = apiMethod;
+    _implMethod = implMethod;
     _chainMethods = chainMethods;
     _chainObjects = chainObjects;
+    _chainIndex = chainIndex;
     _param = param;
   }
-  
+
+  @Override
   public Object getTarget()
   {
     return _target;
   }
 
-  public Object getTimer()
-  {
-    throw new UnsupportedOperationException();
-  }
-
+  @Override
   public Method getMethod()
   {
-    return _method;
+    return _apiMethod;
   }
 
+  @Override
+  public Object getTimer()
+  {
+    return null;
+  }
+
+  @Override
   public Object[] getParameters()
     throws IllegalStateException
   {
     return _param;
   }
 
+  @Override
   public void setParameters(Object[] parameters)
     throws IllegalStateException
   {
     _param = parameters;
   }
 
+  @Override
   public Map<String, Object> getContextData()
   {
     if (_map == null)
@@ -93,35 +112,42 @@ public class InvocationContextImpl implements InvocationContext {
 
     return _map;
   }
-      
+
   @Override
   public Object proceed()
     throws Exception
   {
     try {
-      if (_index < _chainMethods.length) {
-	int i = _index++;
+      // ioc/0c57
+      if (_chainObjects != null && _index < _chainIndex.length) {
+        int i = _index++;
 
-	return _chainMethods[i].invoke(_chainObjects[i], this);
+        return _chainMethods[i].intercept(_type,
+                                          _chainObjects[_chainIndex[i]], 
+                                          this);
       }
       else {
-	return _method.invoke(_target, _param);
+        return _implMethod.invoke(_target, _param);
       }
+    } catch (InterceptorException e) {
+      Throwable cause = e.getCause();
+
+      if (cause instanceof Exception)
+        throw (Exception) cause;
+      else
+        throw e;
     } catch (InvocationTargetException e) {
       Throwable cause = e.getCause();
 
       if (cause instanceof Exception)
-	throw (Exception) cause;
+        throw (Exception) cause;
       else
-	throw e;
+        throw e;
     }
   }
   
   public String toString()
   {
-    if (_target != null)
-      return getClass().getSimpleName() + "[" + _target.getClass() + "," + _method + "]";
-    else
-      return getClass().getSimpleName() + "[" + _method + "]"; 
+    return getClass().getSimpleName() + "[" + _implMethod.getName() + "]";
   }
 }

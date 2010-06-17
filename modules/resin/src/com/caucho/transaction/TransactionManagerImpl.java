@@ -152,6 +152,7 @@ public class TransactionManagerImpl
   /**
    * Create a new transaction and associate it with the thread.
    */
+  @Override
   public void begin() throws NotSupportedException, SystemException
   {
     getCurrent().begin();

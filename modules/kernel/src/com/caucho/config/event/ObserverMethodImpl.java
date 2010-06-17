@@ -79,10 +79,10 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
   private TransactionPhase _transactionPhase = TransactionPhase.IN_PROGRESS;
 
   public ObserverMethodImpl(InjectManager beanManager,
-                     Bean<X> bean,
-                     AnnotatedMethod<X> method,
-                     Type type,
-                     Set<Annotation> qualifiers)
+                            Bean<X> bean,
+                            AnnotatedMethod<X> method,
+                            Type type,
+                            Set<Annotation> qualifiers)
   {
     _cdiManager = beanManager;
     _bean = bean;
@@ -192,6 +192,11 @@ public class ObserverMethodImpl<X, T> extends AbstractObserverMethod<T> {
    */
   @Override
   public void notify(T event)
+  {
+    notifyImpl(event);
+  }
+  
+  protected void notifyImpl(T event)
   {
     X instance;
     

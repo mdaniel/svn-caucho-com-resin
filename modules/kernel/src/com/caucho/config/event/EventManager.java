@@ -40,6 +40,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.spi.CreationalContext;
@@ -69,6 +70,7 @@ import com.caucho.util.L10N;
 public class EventManager
 {
   private static final L10N L = new L10N(EventManager.class);
+  private static final Logger log = Logger.getLogger(EventManager.class.getName());
   
   private InjectManager _cdiManager;
 
@@ -111,6 +113,8 @@ public class EventManager
       if (ann.annotationType().isAnnotationPresent(Qualifier.class))
         bindingSet.add(ann);
     }
+    
+    Observes observes = paramList.get(param).getAnnotation(Observes.class);
 
     if (method.isAnnotationPresent(Inject.class)) {
       throw InjectManager.error(method, L.l("A method may not have both an @Observer and an @Inject annotation."));
@@ -124,9 +128,48 @@ public class EventManager
       throw InjectManager.error(method, L.l("A method may not have both an @Observer and a @Disposes annotation."));
     }
 
-    ObserverMethodImpl observerMethod
-      = new ObserverMethodImpl(_cdiManager, bean, beanMethod,
-                               eventType, bindingSet);
+    ObserverMethodImpl<X,Z> observerMethod;
+    switch(observes.during()) {
+    case BEFORE_COMPLETION:
+      observerMethod 
+        = new ObserverMethodBeforeCompletionImpl(_cdiManager, 
+                                                 bean, 
+                                                 beanMethod,
+                                                 eventType, 
+                                                 bindingSet);
+      break;
+      
+    case AFTER_COMPLETION:
+      observerMethod 
+        = new ObserverMethodAfterCompletionImpl(_cdiManager, 
+                                                bean, 
+                                                beanMethod,
+                                                eventType, 
+                                                bindingSet);
+      break;
+      
+    case AFTER_SUCCESS:
+      observerMethod 
+        = new ObserverMethodAfterSuccessImpl(_cdiManager, 
+                                             bean, 
+                                             beanMethod,
+                                             eventType, 
+                                             bindingSet);
+      break;
+      
+    case AFTER_FAILURE:
+      observerMethod 
+        = new ObserverMethodAfterFailureImpl(_cdiManager, 
+                                             bean, 
+                                             beanMethod,
+                                             eventType, 
+                                             bindingSet);
+      break;
+      
+    default:
+      observerMethod = new ObserverMethodImpl(_cdiManager, bean, beanMethod,
+                                              eventType, bindingSet);
+    }
 
     _cdiManager.addObserver(observerMethod, beanMethod);
   }
@@ -155,31 +198,38 @@ public class EventManager
   
   public void fireEvent(Object event, Annotation... qualifiers)
   {
-    BaseType eventType = _cdiManager.createSourceBaseType(event.getClass());
-    
-    // ioc/0b71
-    if (eventType.isGeneric() || eventType instanceof ParamType)
-      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
-                                             eventType));
-    
-    validateEventQualifiers(qualifiers);
-
-    fireEventImpl(event, eventType, qualifiers);
+    for (ObserverMethod<?>  method : resolveObserverMethods(event, qualifiers)) {
+      ((ObserverMethod) method).notify(event);
+    }
   }
   
   public <T> Set<ObserverMethod<? super T>>
   resolveObserverMethods(T event, Annotation... qualifiers)
   {
-    BaseType eventType = _cdiManager.createSourceBaseType(event.getClass());
+    Class<?> eventClass = event.getClass();
     
-    // ioc/0b71
-    if (eventType.isGeneric() || eventType instanceof ParamType)
-      throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
-                                             eventType));
+    EventKey key = new EventKey(eventClass, qualifiers);
     
-    validateEventQualifiers(qualifiers);
+    Set<ObserverMethod<?>> observerList = _observerMethodCache.get(key);
     
-    return (Set) resolve(eventType, qualifiers);
+    if (observerList == null) {
+      BaseType eventType = _cdiManager.createSourceBaseType(event.getClass());
+
+      // ioc/0b71
+      if (eventType.isGeneric() || eventType instanceof ParamType)
+        throw new IllegalArgumentException(L.l("'{0}' is an invalid event type because it's generic.",
+                                               eventType));
+      
+      validateEventQualifiers(qualifiers);
+            
+      observerList = new LinkedHashSet<ObserverMethod<?>>();
+    
+      fillObserverMethodList(observerList, eventType, qualifiers);
+    
+      _observerMethodCache.put(key, observerList);
+    }
+    
+    return (Set) observerList;
   }
 
   private void validateEventQualifiers(Annotation []qualifiers)
@@ -209,42 +259,6 @@ public class EventManager
         }
       }
     }
-  }
-
-  protected void fireEventImpl(Object event,
-                               BaseType eventType,
-                               Annotation... bindings)
-  {
-    /*
-    if (_parent != null)
-      _parent.fireEventImpl(event, eventType, bindings);
-      */
-
-    Set<ObserverMethod<?>> observerList = resolve(eventType, bindings);
-    
-    int size = observerList.size();
-    
-    for (ObserverMethod<?> method : resolve(eventType, bindings)) {
-      ((ObserverMethod) method).notify(event);
-    }
-  }
-  
-  private Set<ObserverMethod<?>>
-  resolve(BaseType eventType, Annotation... bindings)
-  {
-    EventKey key = new EventKey(eventType, bindings);
-    
-    Set<ObserverMethod<?>> observerList = _observerMethodCache.get(key);
-    
-    if (observerList == null) {
-      observerList = new LinkedHashSet<ObserverMethod<?>>();
-      
-      fillObserverMethodList(observerList, eventType, bindings);
-    }
-    
-    _observerMethodCache.put(key, observerList);
-    
-    return observerList;
   }
 
   public void
@@ -306,7 +320,7 @@ public class EventManager
       ObserverMap map = localMap.get(rawClass);
 
       if (map != null) {
-        map.resolveObservers((Set) list, eventType, qualifiers);
+        map.resolveObservers((Set) list, eventType, type, qualifiers);
       }
     }
   }
@@ -475,10 +489,10 @@ public class EventManager
   }
   
   static class EventKey {
-    private BaseType _type;
+    private Class<?> _type;
     private Annotation []_qualifiers;
     
-    EventKey(BaseType type, Annotation []qualifiers)
+    EventKey(Class<?> type, Annotation []qualifiers)
     {
       _type = type;
       _qualifiers = qualifiers;

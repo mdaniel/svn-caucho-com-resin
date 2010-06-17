@@ -254,15 +254,15 @@ public class CandiProducer<X> implements InjectionTarget<X>
     try {
       CreationalContext<X> env = null;
 
-      for (ConfigProgram program : _initProgram) {
-        // log.info("POST: " + program);
-        program.inject(instance, env);
-      }
-
-      // server/4750
+      // server/4750, ioc/0c29
       if (instance instanceof CandiEnhancedBean) {
         CandiEnhancedBean bean = (CandiEnhancedBean) instance;
         bean.__caucho_postConstruct();
+      }
+
+      for (ConfigProgram program : _initProgram) {
+        // log.info("POST: " + program);
+        program.inject(instance, env);
       }
 
       /*

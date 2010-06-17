@@ -69,12 +69,13 @@ public class ObserverMap {
 
   public <T> void resolveObservers(Set<ObserverMethod<? super T>> set,
                                    BaseType eventType,
+                                   BaseType matchType,
                                    Annotation []qualifiers)
   {
     for (int i = 0; i < _observerList.size(); i++) {
       ObserverEntry observer = _observerList.get(i);
-
-      if (observer.isAssignableFrom(eventType, qualifiers)) {
+      
+      if (observer.isAssignableFrom(matchType, qualifiers)) {
         set.add(observer.getObserver());
       }
     }

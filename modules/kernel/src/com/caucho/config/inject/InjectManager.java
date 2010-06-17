@@ -3928,6 +3928,8 @@ public final class InjectManager
       
       instance = bean.create(env);
       
+      env.push(instance);
+      
       if (env.isTop() && ! (bean instanceof CdiStatefulBean)) {
         bean.destroy(instance, env);
       }

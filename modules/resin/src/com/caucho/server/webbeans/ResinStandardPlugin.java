@@ -130,9 +130,11 @@ public class ResinStandardPlugin implements Extension {
       }
     }
     
+    /*
     if (isEjbParent(annotatedType.getJavaClass().getSuperclass())) {
       event.veto();
     }
+    */
   }
   
   private boolean isEjbParent(Class<?> cl)

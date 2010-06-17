@@ -36,6 +36,7 @@ import com.caucho.config.inject.DelegateProxyBean;
 import com.caucho.config.inject.DependentCreationalContext;
 import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InterceptorRuntimeBean;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.util.L10N;
 
@@ -83,11 +84,14 @@ public class CandiUtil {
   }
 
   public static int []createInterceptors(InjectManager manager,
+                                         ArrayList<InterceptorRuntimeBean<?>> staticBeans,
                                          ArrayList<Interceptor<?>> beans,
-                                         int []indexList,
+                                         int []staticIndexList,
                                          InterceptionType type,
                                          Annotation ...bindings)
   {
+    ArrayList<Integer> indexList = new ArrayList<Integer>();
+    
     List<Interceptor<?>> interceptors;
 
     if (bindings != null && bindings.length > 0) {
@@ -96,17 +100,13 @@ public class CandiUtil {
     else
       interceptors = new ArrayList<Interceptor<?>>();
 
-    int offset = 0;
-
-    if (indexList == null) {
-      indexList = new int[interceptors.size()];
-    }
-    else {
-      offset = indexList.length;
-
-      int[] newIndexList = new int[indexList.length + interceptors.size()];
-      System.arraycopy(indexList, 0, newIndexList, 0, indexList.length);
-      indexList = newIndexList;
+    if (staticIndexList != null) {
+      for (int i = 0; i < staticIndexList.length; i++) {
+        int staticIndex = staticIndexList[i];
+        InterceptorRuntimeBean<?> staticBean = staticBeans.get(staticIndex);
+      
+        addStaticBean(staticBean, indexList, beans, type);
+      }
     }
 
     for (int i = 0; i < interceptors.size(); i++) {
@@ -115,14 +115,39 @@ public class CandiUtil {
       int index = beans.indexOf(interceptor);
 
       if (index >= 0)
-        indexList[offset + i] = index;
+        indexList.add(index);
       else {
-        indexList[offset + i] = beans.size();
+        indexList.add(beans.size());
         beans.add(interceptor);
       }
     }
 
-    return indexList;
+    int []indexArray = new int[indexList.size()];
+    for (int i = 0; i < indexList.size(); i++) {
+      indexArray[i] = indexList.get(i);
+    }
+    
+    return indexArray;
+  }
+  
+  private static void 
+  addStaticBean(InterceptorRuntimeBean<?> staticBean,
+                ArrayList<Integer> indexList,
+                ArrayList<Interceptor<?>> beans,
+                InterceptionType type)
+  {
+    if (staticBean == null)
+      return;
+    
+    if (! beans.contains(staticBean))
+      beans.add(staticBean);
+    
+    addStaticBean(staticBean.getParent(), indexList, beans, type);
+
+    if (staticBean.intercepts(type)) {
+      int index = beans.indexOf(staticBean);
+      indexList.add(index);
+    }
   }
 
   public static void createInterceptors(InjectManager manager,
@@ -200,25 +225,16 @@ public class CandiUtil {
       return Object.class;
   }
 
-  public static Method []createMethods(ArrayList<Interceptor<?>> beans,
-                                       InterceptionType type,
-                                       int []indexChain)
+  public static Interceptor<?> []createMethods(ArrayList<Interceptor<?>> beans,
+                                               InterceptionType type,
+                                               int []indexChain)
   {
-    Method []methods = new Method[indexChain.length];
+    Interceptor<?> []methods = new Interceptor<?>[indexChain.length];
 
     for (int i = 0; i < indexChain.length; i++) {
       int index = indexChain[i];
 
-      // XXX:
-      Method method = ((InterceptorBean<?>) beans.get(index)).getMethod(type);
-
-      if (method == null)
-        throw new IllegalStateException(L.l("'{0}' is an unknown interception method in '{1}'",
-                                           type, beans.get(index)));
-
-      method.setAccessible(true);
-      
-      methods[i] = method;
+      methods[i] = beans.get(index);
     }
 
     return methods;
@@ -270,28 +286,6 @@ public class CandiUtil {
     method.setAccessible(true);
 
     return method;
-  }
-
-  private static Object generateDelegate(List<Decorator<?>> beans,
-                                        Object tail)
-  {
-    InjectManager webBeans = InjectManager.create();
-
-    Bean<?> parentBean = null;
-    CreationalContextImpl env = new OwnerCreationalContext(parentBean);
-
-    for (int i = beans.size() - 1; i >= 0; i--) {
-      Decorator<?> bean = beans.get(i);
-
-      Object instance = webBeans.getReference(bean, bean.getBeanClass(), env);
-
-      // XXX:
-      // bean.setDelegate(instance, tail);
-
-      tail = instance;
-    }
-
-    return tail;
   }
 
   public static Object []generateProxyDelegate(InjectManager manager,
