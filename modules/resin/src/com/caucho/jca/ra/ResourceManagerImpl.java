@@ -29,9 +29,9 @@
 package com.caucho.jca.ra;
 
 import com.caucho.config.ConfigException;
-import com.caucho.jca.pool.ConnectionPool;
-import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.loader.*;
+import com.caucho.transaction.ConnectionPool;
+import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.L10N;
 
 import javax.naming.Context;

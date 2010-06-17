@@ -29,9 +29,9 @@
 
 package com.caucho.sql;
 
-import com.caucho.jca.pool.IdlePoolSet;
 import com.caucho.server.cluster.*;
 import com.caucho.server.resin.Resin;
+import com.caucho.transaction.IdlePoolSet;
 import com.caucho.util.L10N;
 
 import javax.resource.ResourceException;

@@ -41,7 +41,6 @@ import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.types.*;
 import com.caucho.jca.*;
 import com.caucho.jca.cfg.JavaMailConfig;
-import com.caucho.jca.pool.ConnectionPool;
 import com.caucho.jca.ra.ResourceAdapterController;
 import com.caucho.jca.ra.ResourceArchive;
 import com.caucho.jca.ra.ResourceArchiveManager;
@@ -54,6 +53,7 @@ import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.StartListener;
 import com.caucho.naming.Jndi;
+import com.caucho.transaction.ConnectionPool;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
 

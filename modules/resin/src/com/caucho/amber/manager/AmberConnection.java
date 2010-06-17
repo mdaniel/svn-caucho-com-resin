@@ -47,10 +47,10 @@ import com.caucho.amber.table.AmberTable;
 import com.caucho.amber.type.EntityType;
 import com.caucho.config.ConfigException;
 import com.caucho.ejb.EJBExceptionWrapper;
-import com.caucho.jca.pool.UserTransactionProxy;
-import com.caucho.jca.ra.BeginResource;
-import com.caucho.jca.ra.CloseResource;
 import com.caucho.jdbc.JdbcMetaData;
+import com.caucho.transaction.BeginResource;
+import com.caucho.transaction.CloseResource;
+import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.L10N;
 import com.caucho.util.LruCache;
 

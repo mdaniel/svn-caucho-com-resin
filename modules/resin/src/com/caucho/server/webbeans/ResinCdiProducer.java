@@ -51,12 +51,12 @@ import javax.validation.ValidatorFactory;
 import com.caucho.config.CauchoDeployment;
 import com.caucho.config.ContextDependent;
 import com.caucho.config.inject.InjectManager;
-import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.jmx.Jmx;
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.server.util.ScheduledThreadPool;
 import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.transaction.UserTransactionProxy;
 
 /**
  * Resin CDI producer for the main singletons.

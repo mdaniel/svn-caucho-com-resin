@@ -36,12 +36,12 @@ import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.CurrentLiteral;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.type.TypeFactory;
-import com.caucho.jca.pool.ConnectionPool;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.naming.Jndi;
+import com.caucho.transaction.ConnectionPool;
 import com.caucho.util.L10N;
 
 import javax.annotation.PostConstruct;

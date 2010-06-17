@@ -56,11 +56,11 @@ import com.caucho.ejb.cfg.AroundInvokeConfig;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.inject.RequestContext;
-import com.caucho.jca.pool.UserTransactionProxy;
 import com.caucho.lifecycle.Lifecycle;
 import com.caucho.loader.DynamicClassLoader;
 import com.caucho.loader.EnvironmentBean;
 import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.transaction.UserTransactionProxy;
 import com.caucho.util.L10N;
 
 /**

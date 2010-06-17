@@ -42,10 +42,10 @@ import java.util.ArrayList;
 
 import javax.management.*;
 
-import com.caucho.jca.pool.ConnectionPool;
 import com.caucho.management.server.AbstractManagedObject;
 import com.caucho.management.server.DatabaseMXBean;
 import com.caucho.management.server.JdbcDriverMXBean;
+import com.caucho.transaction.ConnectionPool;
 
 public class DatabaseAdmin extends AbstractManagedObject
   implements DatabaseMXBean
