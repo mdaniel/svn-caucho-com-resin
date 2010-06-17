@@ -35,6 +35,7 @@ import java.lang.reflect.Method;
 import javax.ejb.EJB;
 import javax.enterprise.inject.spi.AnnotatedField;
 import javax.enterprise.inject.spi.AnnotatedMethod;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.config.ConfigException;
@@ -70,6 +71,17 @@ public class EjbHandler extends JavaeeInjectionHandler {
     EJB ejb = method.getAnnotation(EJB.class);
     
     return generateContext(method, ejb);
+  }
+
+  @Override
+  public ConfigProgram introspectType(AnnotatedType<?> type)
+  {
+    EJB ejb = type.getAnnotation(EJB.class);
+    
+    // return generateContext(type, ejb);
+    
+    // return null;
+    throw new UnsupportedOperationException(getClass().getName() + ":" + ejb);
   }
 
   private ConfigProgram generateContext(AnnotatedField<?> field,

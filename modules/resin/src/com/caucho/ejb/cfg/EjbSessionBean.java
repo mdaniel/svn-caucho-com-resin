@@ -44,6 +44,8 @@ import javax.ejb.Singleton;
 import javax.ejb.Stateful;
 import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
+import javax.ejb.TransactionManagement;
+import javax.ejb.TransactionManagementType;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
@@ -199,7 +201,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
                getEJBClass().getName()));
       }
       
-      fillClassDefaults(getAnnotatedType());
+      fillClassDefaults();
     } catch (LineConfigException e) {
       throw e;
     } catch (ConfigException e) {
@@ -207,20 +209,26 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     }
   }
 
-  private void fillClassDefaults(AnnotatedType<X> ejbClass)
+  private void fillClassDefaults()
   {
-    AnnotatedTypeImpl<X> ejbClassImpl = AnnotatedTypeImpl.create(ejbClass);
+    AnnotatedTypeImpl<X> ejbClass = getAnnotatedType();
     
-    if (! _isContainerTransaction) {
+    TransactionManagement tm = ejbClass.getAnnotation(TransactionManagement.class);
+    
+    /*
+    if (! ejbClassImpl.isAnnotationPresent(TransactionManagement.class)) {
       ejbClassImpl.addAnnotation(XaAnnotation.createBeanManaged());
     }
+    */
 
-    TransactionAttribute ann = ejbClass
-        .getAnnotation(TransactionAttribute.class);
+    if (tm == null || tm.value() == TransactionManagementType.CONTAINER) {
+      TransactionAttribute ann
+        = ejbClass.getAnnotation(TransactionAttribute.class);
 
-    if (ann == null) {
-      // ejb/1100
-      ejbClassImpl.addAnnotation(XaAnnotation.create(REQUIRED));
+      if (ann == null) {
+        // ejb/1100
+        ejbClass.addAnnotation(XaAnnotation.create(REQUIRED));
+      }
     }
   }
 
@@ -388,7 +396,6 @@ public class EjbSessionBean<X> extends EjbBean<X> {
     else
       throw new IllegalStateException(String.valueOf(getSessionType()));
 
-    manager.setModuleName(getEJBModuleName());
     manager.setEJBName(getEJBName());
     manager.setMappedName(getMappedName());
     manager.setId(getEJBModuleName() + "#" + getEJBName());

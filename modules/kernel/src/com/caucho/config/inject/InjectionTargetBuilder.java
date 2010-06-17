@@ -619,6 +619,31 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     
     // configureClassResources(injectList, type);
 
+    introspectInjectClass(type, injectProgramList);
+    introspectInjectField(type, injectProgramList);
+    introspectInjectMethod(type, injectProgramList);
+  }
+  
+  private void introspectInjectClass(AnnotatedType<X> type,
+                                     ArrayList<ConfigProgram> injectProgramList)
+  {
+    InjectManager cdiManager = getBeanManager();
+    
+    for (Annotation ann : type.getAnnotations()) {
+      Class<? extends Annotation> annType = ann.annotationType();
+      
+      InjectionPointHandler handler 
+        = cdiManager.getInjectionPointHandler(annType);
+      
+      if (handler != null) {
+        injectProgramList.add(new ClassHandlerProgram(ann, handler));
+      }
+    }
+  }
+  
+  private void introspectInjectField(AnnotatedType<X> type,
+                                     ArrayList<ConfigProgram> injectProgramList)
+  {
     for (AnnotatedField<?> field : type.getFields()) {
       if (field.getAnnotations().size() == 0)
         continue;
@@ -633,11 +658,11 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
         if (field.isAnnotationPresent(Delegate.class)) {
           // ioc/0i60
           /*
-          if (! type.isAnnotationPresent(javax.decorator.Decorator.class)) {
-            throw new IllegalStateException(L.l("'{0}' may not inject with @Delegate because it is not a @Decorator",
-                                                type.getJavaClass()));
-          }
-          */
+        if (! type.isAnnotationPresent(javax.decorator.Decorator.class)) {
+          throw new IllegalStateException(L.l("'{0}' may not inject with @Delegate because it is not a @Decorator",
+                                              type.getJavaClass()));
+        }
+           */
         }
         else {
           injectProgramList.add(new FieldInjectProgram(field.getJavaMember(), ij));
@@ -645,15 +670,20 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       }
       else {
         InjectionPointHandler handler
-          = getBeanManager().getInjectionPointHandler(field);
-        
+        = getBeanManager().getInjectionPointHandler(field);
+
         if (handler != null) {
           ConfigProgram program = new FieldHandlerProgram(field, handler);
-          
+
           injectProgramList.add(program);
         }
       }
     }
+  }
+  
+  private void introspectInjectMethod(AnnotatedType<X> type,
+                                      ArrayList<ConfigProgram> injectProgramList)
+  {
 
     for (AnnotatedMethod method : type.getMethods()) {
       if (method.getAnnotations().size() == 0)
@@ -1047,6 +1077,38 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     public String toString()
     {
       return getClass().getSimpleName() + "[" + _field + "]";
+    }
+  }
+  
+  class ClassHandlerProgram extends ConfigProgram {
+    private final Annotation _ann;
+    private final InjectionPointHandler _handler;
+    private ConfigProgram _boundProgram;
+    
+    ClassHandlerProgram(Annotation ann, InjectionPointHandler handler)
+    {
+      _ann = ann;
+      _handler = handler;
+    }
+
+    @Override
+    public <T> void inject(T instance, CreationalContext<T> env)
+    {
+      if (_boundProgram == null)
+        bind();
+      
+      _boundProgram.inject(instance, env);
+    }
+    
+    private void bind()
+    {
+      _boundProgram = _handler.introspectType(_annotatedType);
+    }
+    
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _annotatedType + "]";
     }
   }
   

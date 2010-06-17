@@ -86,16 +86,18 @@ public class XaFactory<X>
     if (xaManagement != null)
       xaManagementType = xaManagement.value();
     
-    if (xaManagementType == TransactionManagementType.BEAN)
-      return super.create(method, isEnhanced);
-  
+
     TransactionAttribute xa = method.getAnnotation(TransactionAttribute.class);
     TransactionAttributeType xaType = _classXa;
     
-    
+
     if (xa != null) {
       xaType = xa.value();
     }
+
+    if (xaManagementType == TransactionManagementType.BEAN)
+      xaType = TransactionAttributeType.NOT_SUPPORTED;
+      
     
     if (xaType != null) {
       isEnhanced = true;

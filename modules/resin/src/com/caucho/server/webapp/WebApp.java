@@ -88,6 +88,7 @@ import com.caucho.config.types.Period;
 import com.caucho.config.types.ResourceRef;
 import com.caucho.config.types.Validator;
 import com.caucho.ejb.manager.EjbManager;
+import com.caucho.ejb.manager.EjbModule;
 import com.caucho.i18n.CharacterEncoding;
 import com.caucho.java.WorkDir;
 import com.caucho.jsf.cfg.JsfPropertyGroup;
@@ -227,6 +228,8 @@ public class WebApp extends ServletContextImpl
 
   private InvocationDecoder _invocationDecoder;
 
+  private String _moduleName = "default";
+  
   // The context path
   private String _baseContextPath = "";
   private String _versionContextPath = "";
@@ -429,6 +432,11 @@ public class WebApp extends ServletContextImpl
 
     setVersionContextPath(controller.getContextPath());
     _baseContextPath = controller.getBaseContextPath();
+    
+    _moduleName = _baseContextPath;
+    
+    if ("".equals(_moduleName))
+      _moduleName = "ROOT";
 
     _controller = controller;
     _appDir = controller.getRootDirectory();
@@ -460,6 +468,8 @@ public class WebApp extends ServletContextImpl
       WorkDir.setLocalWorkDir(_appDir.lookup("WEB-INF/work"), _classLoader);
       
       EjbManager.setScanAll();
+      
+      EjbModule.replace(getModuleName(), _classLoader);
 
       // map.put("app", _appVar);
 
@@ -617,6 +627,11 @@ public class WebApp extends ServletContextImpl
       return (Server) _parent.getDispatchServer();
     else
       return null;
+  }
+  
+  public String getModuleName()
+  {
+    return _moduleName;
   }
 
   public InvocationDecoder getInvocationDecoder()

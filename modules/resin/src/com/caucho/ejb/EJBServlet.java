@@ -406,7 +406,7 @@ public class EJBServlet extends GenericServlet {
       EjbManager manager = _ejbManager;
 
       for (; manager != null; manager = manager.getParent()) {
-	manager.getProtocolManager().addProtocolContainer(_protocolContainer);
+        manager.getProtocolManager().addProtocolContainer(_protocolContainer);
       }
     }
   }

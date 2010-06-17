@@ -42,6 +42,7 @@ import javax.naming.NamingException;
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.inject.CurrentLiteral;
+import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionPointHandler;
 import com.caucho.config.program.BeanValueGenerator;
@@ -76,7 +77,7 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
     if (name != null)
       beans = injectManager.getBeans(type, Names.create(name));
     else
-      beans = injectManager.getBeans(type, CurrentLiteral.CURRENT);
+      beans = injectManager.getBeans(type, DefaultLiteral.DEFAULT);
 
     if (beans != null && beans.size() != 0)
       return injectManager.resolve(beans);

@@ -54,6 +54,7 @@ import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.ejb.cfg.AroundInvokeConfig;
 import com.caucho.ejb.manager.EjbManager;
+import com.caucho.ejb.manager.EjbModule;
 import com.caucho.ejb.session.AbstractSessionContext;
 import com.caucho.inject.RequestContext;
 import com.caucho.lifecycle.Lifecycle;
@@ -71,7 +72,8 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
     = Logger.getLogger(AbstractEjbBeanManager.class.getName());
   private static final L10N L = new L10N(AbstractEjbBeanManager.class);
 
-  protected final EjbManager _ejbContainer;
+  protected final EjbManager _ejbManager;
+  private final EjbModule _ejbModule;
 
   protected final UserTransaction _ut = UserTransactionProxy.getInstance();
 
@@ -89,7 +91,6 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
 
   private String _id;
   private String _ejbName;
-  private String _moduleName;
   private String _handleServerId;
 
   // name for IIOP, Hessian, JNDI
@@ -128,15 +129,20 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
    * @param manager
    *          the owning server container
    */
-  public AbstractEjbBeanManager(EjbManager container,
+  public AbstractEjbBeanManager(EjbManager ejbManager,
                                 AnnotatedType<X> rawAnnotatedType,
                                 AnnotatedType<X> annotatedType)
   {
     _rawAnnotatedType = rawAnnotatedType;
     _annotatedType = annotatedType;
-    _ejbContainer = container;
-
-    _loader = EnvironmentClassLoader.create(container.getClassLoader());
+    _ejbManager = ejbManager;
+    
+    _ejbModule = EjbModule.getCurrent();
+    
+    if (_ejbModule == null)
+      throw new IllegalStateException(L.l("EjbModule is not currently defined."));
+    
+    _loader = EnvironmentClassLoader.create(ejbManager.getClassLoader());
     // XXX: 4.0.7 this is complicated by decorator vs context injection
     _loader.setAttribute("caucho.inject", false);
     
@@ -225,19 +231,11 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
   }
 
   /**
-   * Set's the module that defined this ejb.
-   */
-  public void setModuleName(String moduleName)
-  {
-    _moduleName = moduleName;
-  }
-
-  /**
    * Returns's the module that defined this ejb.
    */
   public String getModuleName()
   {
-    return _moduleName;
+    return _ejbModule.getModuleName();
   }
 
   /**
@@ -389,7 +387,7 @@ abstract public class AbstractEjbBeanManager<X> implements EnvironmentBean {
    */
   public EjbManager getEjbContainer()
   {
-    return _ejbContainer;
+    return _ejbManager;
   }
 
   /**

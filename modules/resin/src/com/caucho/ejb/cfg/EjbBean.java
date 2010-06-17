@@ -95,7 +95,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
   private String _ejbName;
 
   private AnnotatedType<X> _rawAnnType;
-  private AnnotatedType<X> _ejbClass;
+  private AnnotatedTypeImpl<X> _ejbClass;
 
   // The published name as used by IIOP, Hessian, and
   // jndi-remote-prefix/jndi-local-prefix
@@ -172,7 +172,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     _ejbConfig = ejbConfig;
 
     _rawAnnType = rawAnnType;
-    _ejbClass = annType;
+    _ejbClass = AnnotatedTypeImpl.create(annType);
     _ejbModuleName = ejbModuleName;
     
     setEJBClass(annType.getJavaClass());
@@ -466,7 +466,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
                       ejbClass.getJavaClass().getName()));
 
 
-    _ejbClass = ejbClass;
+    _ejbClass = AnnotatedTypeImpl.create(ejbClass);
 
     int modifiers = _ejbClass.getJavaClass().getModifiers();
     
@@ -511,16 +511,18 @@ public class EjbBean<X> extends DescriptionGroupConfig
     AnnotatedMethod<? super X> method = getMethod("finalize", new Class[0]);
 
     if (method != null
-	&& ! method.getJavaMember().getDeclaringClass().equals(Object.class)) {
+        && ! method.getJavaMember().getDeclaringClass().equals(Object.class)) {
       throw error(L.l("'{0}' may not implement finalize().  Bean implementations may not implement finalize().", 
                       method.getJavaMember().getDeclaringClass().getName()));
     }
 
+    /*
     if (_ejbClass == null) {
       InjectManager manager = InjectManager.create();
 
       _ejbClass = manager.createAnnotatedType(_ejbClass.getJavaClass());
     }
+    */
   }
 
   /**
@@ -545,7 +547,7 @@ public class EjbBean<X> extends DescriptionGroupConfig
     return _rawAnnType;
   }
 
-  public AnnotatedType<X> getAnnotatedType()
+  public AnnotatedTypeImpl<X> getAnnotatedType()
   {
     return _ejbClass;
   }

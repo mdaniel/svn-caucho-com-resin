@@ -129,6 +129,8 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     _classLoader.addScanListener(this);
 
     Environment.addEnvironmentListener(this);
+    
+    EjbModule.create("default");
   }
 
   /**

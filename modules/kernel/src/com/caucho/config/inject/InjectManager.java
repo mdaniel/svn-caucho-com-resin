@@ -2171,6 +2171,12 @@ public final class InjectManager
 
     return null;
   }
+  
+  InjectionPointHandler 
+  getInjectionPointHandler(Class<? extends Annotation> annType)
+  {
+    return _injectionMap.get(annType);
+  }
 
   /**
    * Internal callback during creation to get a new injection instance.

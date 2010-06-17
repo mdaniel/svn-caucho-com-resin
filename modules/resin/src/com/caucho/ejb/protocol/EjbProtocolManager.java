@@ -238,14 +238,13 @@ public class EjbProtocolManager {
 
     try {
       Thread.currentThread().setContextClassLoader(_loader);
-      String ejbName = server.getEJBName();
-      String mappedName = server.getMappedName();
 
       // ejb/0g11
       // remote without a local interface should not get bound
       // with the local prefix
 
       bindDefaultJndi(_jndiPrefix, server);
+      
       bindPortableJndiApis(server);
     } catch (RuntimeException e) {
       throw e;
@@ -366,7 +365,7 @@ public class EjbProtocolManager {
       
       if (manager.getLocalBean() != null) {
         String suffix = manager.getEJBName();
-        Class api = manager.getEjbClass();
+        Class<?> api = manager.getEjbClass();
 
         proxy = new ServerLocalProxy(manager, api); 
 
