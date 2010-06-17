@@ -180,19 +180,9 @@ fi
 	
 LIBTOOL_SCRIPT="`pwd`/libtool"
 LIBTOOL="${LIBTOOL_SCRIPT} ${LTFLAGS}"    
-libtoolversion=`${SHELL} ${LIBTOOL_SCRIPT} --version`
-case $libtoolversion in
-     *1.4*)
-       SH_LIBTOOL="${LIBTOOL_SCRIPT}"
-       SHLTCFLAGS="-prefer-pic"
-       LTCFLAGS="-prefer-non-pic -static"
-       ;;
-     *)
-       SH_LIBTOOL="${SHELL} ${LIBTOOL_SCRIPT} ${LTFLAGS}"
-       SHLTCFLAGS=""
-       LTCFLAGS=""
-       ;;
-esac
+SH_LIBTOOL="${SHELL} ${LIBTOOL_SCRIPT} ${LTFLAGS}"
+SHLTCFLAGS=""
+LTCFLAGS=""
 
 AC_SUBST(LTFLAGS)	
 AC_SUBST(LIBTOOL_SCRIPT)	
