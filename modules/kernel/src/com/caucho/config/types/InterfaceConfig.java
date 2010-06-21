@@ -69,6 +69,7 @@ public class InterfaceConfig extends BeanConfig {
   
   public InterfaceConfig(Class<?> type, String tagName)
   {
+    Thread.dumpStack();
     setBeanConfigClass(type);
     setTagName(tagName);
   }

@@ -524,6 +524,8 @@ public class TypeFactory implements AddLoaderListener
     else if (type.isInterface()) {
       return new InterfaceType(type);
     }
+    else if (type == ConfigProgram.class)
+      return new ConfigProgramType(type);
     else if (Modifier.isAbstract(type.getModifiers())) {
       return new AbstractBeanType(type);
     }

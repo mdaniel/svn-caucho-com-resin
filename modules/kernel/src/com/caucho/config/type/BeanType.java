@@ -530,6 +530,7 @@ public class BeanType<T> extends ConfigType<T>
   @Override
   public void introspect()
   {
+    long startTime = System.currentTimeMillis();
     synchronized (_introspectLock) {
       if (_isIntrospecting)
         return;
@@ -558,6 +559,7 @@ public class BeanType<T> extends ConfigType<T>
     }
 
     introspectComplete();
+    long endTime = System.currentTimeMillis();
   }
 
   private void introspectComplete()
