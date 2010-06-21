@@ -146,6 +146,9 @@ class InjectScanClass implements ScanClass
     try {
       AnnType annType = _scanManager.loadAnnotation(buffer, offset, length);
       
+      if (annType == null)
+        return;
+      
       if (_registerAnnotationSet.contains(annType.getType())) {
         _isRegisterRequired = true;
         return;

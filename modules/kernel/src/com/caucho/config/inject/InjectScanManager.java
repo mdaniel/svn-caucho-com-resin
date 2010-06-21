@@ -248,7 +248,9 @@ class InjectScanManager
     
     Class<?> cl = Class.forName(className, false, loader);
     
-    _annotationMap.put(key.dup(), new AnnType(cl));
+    annType = new AnnType(cl);
+    
+    _annotationMap.put(key.dup(), annType);
     
     return annType;
   }
