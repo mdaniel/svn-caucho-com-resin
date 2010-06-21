@@ -29,22 +29,18 @@
 
 package com.caucho.loader;
 
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.FileSetType;
-import com.caucho.config.types.PathPatternType;
-import com.caucho.make.DependencyContainer;
-import com.caucho.server.util.CauchoSystem;
-import com.caucho.util.CharBuffer;
-import com.caucho.vfs.*;
-
-import javax.annotation.PostConstruct;
-import java.net.URL;
-import java.util.*;
+import java.io.IOException;
+import java.util.Enumeration;
+import java.util.Iterator;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.concurrent.atomic.AtomicReference;
-import java.io.*;
-import java.util.zip.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+
+import com.caucho.vfs.JarPath;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.ZipScanner;
 
 /**
  * Class loader which checks for changes in class files and automatically
@@ -67,7 +63,7 @@ public class JarMap {
    */
   public JarMap()
   {
-    _entries = new JarList[128];
+    _entries = new JarList[1024];
     _mask = _entries.length - 1;
   }
 
@@ -97,10 +93,11 @@ public class JarMap {
 
     for (JarList ptr = _entries[hash]; ptr != null; ptr = ptr._nextHash) {
       if (ptr.equals(key)) {
-	key._next = ptr._next;
-	ptr._next = key;
+        key.clearName();
+        key._next = ptr._next;
+        ptr._next = key;
 
-	return ptr;
+        return ptr;
       }
     }
 
@@ -126,9 +123,9 @@ public class JarMap {
     
     for (JarList ptr = _entries[hash]; ptr != null; ptr = ptr._nextHash) {
       if (ptr.equals(key)) {
-	_key.set(key);
-	
-	return ptr;
+        _key.set(key);
+        
+        return ptr;
       }
     }
 
@@ -162,59 +159,59 @@ public class JarMap {
       boolean isValidScan = false;
 
       try {
-	if (isScan && jar.canRead()) {
-	  scan = new ZipScanner(jar);
-	}
-	
-	if (scan != null && scan.open()) {
-	  while (scan.next()) {
-	    char []buffer = scan.getNameBuffer();
-	    int length = scan.getNameLength();
-	      
-	    add(buffer, length, jarEntry);
+        if (isScan && jar.canRead()) {
+          scan = new ZipScanner(jar);
+        }
 
-	    // server/249b
-	    /*
+        if (scan != null && scan.open()) {
+          while (scan.next()) {
+            char []buffer = scan.getNameBuffer();
+            int length = scan.getNameLength();
+
+            add(buffer, length, jarEntry);
+
+            // server/249b
+            /*
 	      if (name.endsWith("/"))
 	      name = name.substring(0, name.length() - 1);
-	    */
-	  }
+             */
+          }
 
-	  isValidScan = true;
-	}
+          isValidScan = true;
+        }
       } catch (Exception e) {
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
 
-	isScan = false;
+        isScan = false;
       }
-	
+
       if (! isValidScan && jar.canRead()) {
-	ZipFile file = new ZipFile(jar.getNativePath());
+        ZipFile file = new ZipFile(jar.getNativePath());
 
-	Enumeration<? extends ZipEntry> e = file.entries();
-	while (e.hasMoreElements()) {
-	  ZipEntry entry = e.nextElement();
-	  String name = entry.getName();
+        Enumeration<? extends ZipEntry> e = file.entries();
+        while (e.hasMoreElements()) {
+          ZipEntry entry = e.nextElement();
+          String name = entry.getName();
 
-	  add(name, jarEntry);
+          add(name, jarEntry);
 
-	  // server/249b
-	  /*
+          // server/249b
+          /*
 	    if (name.endsWith("/"))
 	    name = name.substring(0, name.length() - 1);
-	  */
-	}
+           */
+        }
 
-	file.close();
+        file.close();
       }
     } catch (IOException e) {
       if (jar.canRead())
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       else
-	log.log(Level.FINER, e.toString(), e);
+        log.log(Level.FINER, e.toString(), e);
     } finally {
       if (scan != null)
-	scan.close();
+        scan.close();
     }
   }
 
@@ -256,7 +253,7 @@ public class JarMap {
       int length = name.length();
       
       if (_name == null || _name.length <= length)
-	_name = new char[length];
+        _name = new char[length];
 
       name.getChars(0, length, _name, 0);
 
@@ -268,6 +265,12 @@ public class JarMap {
       return _length;
     }
 
+    void clearName()
+    {
+      _name = null;
+      _length = 0;
+    }
+    
     void copyName()
     {
       char []newName = new char[_length];
@@ -307,23 +310,23 @@ public class JarMap {
     public boolean equals(Object o)
     {
       if (this == o)
-	return true;
+        return true;
       else if (! (o instanceof JarList))
-	return false;
+        return false;
 
       JarList entry = (JarList) o;
 
       int length = _length;
 
       if (length != entry._length)
-	return false;
+        return false;
 
       char []nameA = _name;
       char []nameB = entry._name;
 
       for (int i = length - 1; i >= 0; i--) {
-	if (nameA[i] != nameB[i])
-	  return false;
+        if (nameA[i] != nameB[i])
+          return false;
       }
 
       return true;
@@ -332,7 +335,7 @@ public class JarMap {
     public String toString()
     {
       return (getClass().getSimpleName()
-	      + "[" + new String(_name, 0, _length) + "]");
+              + "[" + new String(_name, 0, _length) + "]");
     }
   }
 

@@ -318,9 +318,11 @@ public class EventManager
       Class<?> rawClass = type.getRawClass();
 
       ObserverMap map = localMap.get(rawClass);
-
+      
       if (map != null) {
-        map.resolveObservers((Set) list, eventType, type, qualifiers);
+        // ioc/0b5c, ioc/0b82
+        map.resolveObservers((Set) list, eventType, qualifiers);
+        map.resolveObservers((Set) list, type, qualifiers);
       }
     }
   }

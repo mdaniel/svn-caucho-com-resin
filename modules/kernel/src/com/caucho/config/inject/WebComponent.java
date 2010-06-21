@@ -37,6 +37,7 @@ import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.Any;
 import javax.enterprise.inject.Specializes;
@@ -54,6 +55,7 @@ import com.caucho.inject.Module;
  */
 @Module
 public class WebComponent {
+  private static final Logger log = Logger.getLogger(WebComponent.class.getName());
   private InjectManager _beanManager;
 
   private Class<?> _rawType;
@@ -71,8 +73,9 @@ public class WebComponent {
   public void addComponent(BaseType type, Annotated annotated, Bean<?> bean)
   {
     for (BeanEntry beanEntry : _beanList) {
-      if (beanEntry.getType().equals(type) && beanEntry.isMatch(bean))
+      if (beanEntry.getType().equals(type) && beanEntry.isMatch(bean)) {
         return;
+      }
     }
 
     if (bean instanceof ProducesMethodBean<?,?>

@@ -62,6 +62,8 @@ public class DecoratorBean<T> implements Decorator<T>
 {
   private static final L10N L = new L10N(DecoratorBean.class);
 
+  private InjectManager _cdiManager;
+  
   private Class<T> _type;
 
   private Bean<T> _bean;
@@ -80,6 +82,7 @@ public class DecoratorBean<T> implements Decorator<T>
   public DecoratorBean(InjectManager beanManager,
                        Class<T> type)
   {
+    _cdiManager = beanManager;
     _type = type;
 
     _bean = beanManager.createManagedBean(type);
@@ -206,17 +209,6 @@ public class DecoratorBean<T> implements Decorator<T>
   }
 
   /**
-   * Returns the type of the delegated object
-   */
-  private Class<?> getDelegateClass()
-  {
-    if (_delegateField != null)
-      return _delegateField.getType();
-    else
-      return null;
-  }
-
-  /**
    * Returns the bindings for the delegated object
    */
   @Override
@@ -292,13 +284,33 @@ public class DecoratorBean<T> implements Decorator<T>
       for (Type type : selfType.getTypeClosure(manager)) {
         BaseType baseType = manager.createSourceBaseType(type);
         
-        if (baseType.getRawClass().isInterface()
-            && ! baseType.getRawClass().equals(Serializable.class)
-            && baseType.isAssignableFrom(delegateType)) {
+        if (! baseType.getRawClass().isInterface())
+          continue;
+        if (baseType.getRawClass().equals(Serializable.class))
+          continue;
+        
+        if (baseType.isAssignableFrom(delegateType)) {
           _typeSet.add(type);
+        }
+        else if (isDeclaredInterface(selfType, baseType)){
+          // ioc/0i5a
+          // only types declared directly are errors
+          throw new ConfigException(L.l("{0}: '{1}' is an Decorator type not implemented by the delegate {2}",
+                                        _type, baseType, delegateType));
         }
       }
     }
+  }
+  
+  private boolean isDeclaredInterface(BaseType selfType, BaseType baseType)
+  {
+    for (Class<?> iface : selfType.getRawClass().getInterfaces()) {
+      if (iface.equals(baseType.getRawClass()))
+        return true;
+      
+    }
+    
+    return false;
   }
 
   private void introspectDelegateField()

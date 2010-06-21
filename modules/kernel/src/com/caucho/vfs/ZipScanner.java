@@ -33,7 +33,8 @@ import java.io.*;
 import java.util.logging.*;
 
 /**
- * Scans a zip file, returning the names
+ * Scans a zip file, returning the names. The ZipScanner only works with
+ * central directory style zip files.
  */
 public class ZipScanner
 {
@@ -45,12 +46,16 @@ public class ZipScanner
   private Path _path;
   private ReadStream _is;
   
+  private ReadStream _fileIs;
+  
   private boolean _isValid;
 
   private int _entries;
   private int _offset;
 
   private int _index;
+  
+  private int _localFileOffset;
   
   private String _name;
 
@@ -69,35 +74,33 @@ public class ZipScanner
       ReadStream is = path.openRead();
 
       try {
-	// PACK200 is a standard comment, so try skipping it first
-	is.skip(length - 22 - 7);
+        // PACK200 is a standard comment, so try skipping it first
+        is.skip(length - 22 - 7);
 
-	if (is.read() != 0x50) {
-	  is.skip(6);
+        if (is.read() != 0x50) {
+          is.skip(6);
 
-	  if (is.read() != 0x50)
-	    return;
-	
-	}
-      
-	if (is.read() == 0x4b
-	    && is.read() == 0x05
-	    && is.read() == 0x06) {
-	  _isValid = true;
-	}
+          if (is.read() != 0x50)
+            return;
 
-	if (_isValid) {
-	  is.skip(6);
+        }
 
-	  _entries = is.read() + (is.read() << 8);
-	  is.skip(4);
-	  _offset = (is.read()
-		     + (is.read() << 8)
-		     + (is.read() << 16)
-		     + (is.read() << 24));
-	}
+        if (is.read() == 0x4b
+            && is.read() == 0x05
+            && is.read() == 0x06) {
+          _isValid = true;
+        }
+
+        if (_isValid) {
+          is.skip(6);
+
+          _entries = is.read() + (is.read() << 8);
+          is.skip(4);
+          
+          _offset = readInt(is);
+        }
       } finally {
-	is.close();
+        is.close();
       }
     } catch (Exception e) {
       log().log(Level.FINER, e.toString(), e);
@@ -126,18 +129,23 @@ public class ZipScanner
     _index++;
 
     ReadStream is = _is;
-    
+
     if (is.readInt() != 0x504b0102) {
       throw new IOException("illegal zip format");
     }
 
-    is.skip(2 + 2 + 2 + 2 + 2 + 2 + 4 + 4 + 4);
+    is.skip(2 + 2 + 2 + 2 + 2 + 2 + 4);
+    
+    int compressedSize = readInt(is);
+    int uncompressedSize = readInt(is);
 
     int nameLen = is.read() + (is.read() << 8);
     int extraLen = is.read() + (is.read() << 8);
     int commentLen = is.read() + (is.read() << 8);
 
-    is.skip(2 + 2 + 4 + 4);
+    is.skip(2 + 2 + 4);
+    
+    _localFileOffset = readInt(is);
 
     _nameLen = nameLen;
     if (_cbuf.length < nameLen)
@@ -152,14 +160,14 @@ public class ZipScanner
 
       // win32 canonicalize 
       if (ch == '\\')
-	cbuf[i] = '/';
+        cbuf[i] = '/';
     }
 
     _name = null; // new String(cbuf, 0, k);
 
     if (extraLen + commentLen > 0)
       is.skip(extraLen + commentLen);
-    
+
     return true;
   }
 
@@ -167,7 +175,7 @@ public class ZipScanner
   {
     if (_name == null)
       _name = new String(_cbuf, 0, _nameLen);
-    
+
     return _name;
   }
 
@@ -180,17 +188,41 @@ public class ZipScanner
   {
     return _nameLen;
   }
+  
+  private static int readInt(InputStream is)
+    throws IOException
+  {
+    int value;
+    
+    value = ((is.read() & 0xff) 
+             + ((is.read() & 0xff) << 8) 
+             + ((is.read() & 0xff) << 16) 
+             + ((is.read() & 0xff) << 24));
+    
+    return value;
+  }
 
   public void close()
   {
     InputStream is = _is;
     _is = null;
+    
+    InputStream fileIs = _fileIs;
+    _fileIs = null;
 
     if (is != null) {
       try {
-	is.close();
+        is.close();
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new IllegalStateException(e);
+      }
+    }
+
+    if (fileIs != null) {
+      try {
+        fileIs.close();
+      } catch (Exception e) {
+        throw new IllegalStateException(e);
       }
     }
   }

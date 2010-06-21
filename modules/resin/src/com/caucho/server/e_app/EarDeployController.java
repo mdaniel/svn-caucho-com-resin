@@ -95,8 +95,6 @@ public class EarDeployController
       _deployTagName = "EntApp/" + container.getHostName() + "/" + name;
     else
       _deployTagName = "EntApp/default/" + name;
-    
-    log.info("DEPLOY: " + _deployTagName);
   }
 
   /**

@@ -36,6 +36,8 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.enterprise.context.Dependent;
 import javax.enterprise.context.NormalScope;
@@ -68,6 +70,8 @@ import com.caucho.util.L10N;
 public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
   implements ScopeAdapterBean<X>
 {
+  private static final Logger log = Logger.getLogger(ProducesMethodBean.class.getName());
+  
   private static final L10N L = new L10N(ProducesMethodBean.class);
 
   private static final Object []NULL_ARGS = new Object[0];

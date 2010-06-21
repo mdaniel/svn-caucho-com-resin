@@ -67,6 +67,7 @@ import com.caucho.util.CharBuffer;
 import com.caucho.util.CharSegment;
 import com.caucho.util.HashMapImpl;
 import com.caucho.util.L10N;
+import com.caucho.util.LruCache;
 import com.caucho.util.NullEnumeration;
 import com.caucho.util.QDate;
 import com.caucho.util.StringCharCursor;
@@ -120,6 +121,9 @@ public abstract class AbstractHttpRequest
   private static final boolean []VALUE;
 
   private static final Cookie []NULL_COOKIES = new Cookie[0];
+  
+  private static final LruCache<CharBuffer,String> _nameCache
+    = new LruCache<CharBuffer,String>(1024);
 
   private final Server _server;
 
@@ -1093,7 +1097,7 @@ public abstract class AbstractHttpRequest
         if (cbName.length() == 0)
           log.warning("bad cookie: " + rawCookie);
         else {
-          cookie = new Cookie(cbName.toString(), cbValue.toString());
+          cookie = new Cookie(toName(cbName), cbValue.toString());
           cookie.setVersion(version);
           _cookies.add(cookie);
         }
@@ -1109,6 +1113,21 @@ public abstract class AbstractHttpRequest
       else if (cbName.matchesIgnoreCase("Path"))
         cookie.setPath(cbValue.toString());
     }
+  }
+  
+  private String toName(CharBuffer cb)
+  {
+    String value = _nameCache.get(cb);
+    
+    if (value == null) {
+      value = cb.toString();
+      
+      cb = new CharBuffer(value);
+      
+      _nameCache.put(cb, value);
+    }
+    
+    return value;
   }
 
   /**

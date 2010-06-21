@@ -50,6 +50,7 @@ public class UTF8Writer extends EncodingWriter {
   /**
    * Returns the Java encoding for the writer.
    */
+  @Override
   public String getJavaEncoding()
   {
     return "UTF8";
@@ -60,6 +61,7 @@ public class UTF8Writer extends EncodingWriter {
    *
    * @return the UTF8_Writer
    */
+  @Override
   public EncodingWriter create(String javaEncoding)
   {
     return _writer;
@@ -80,6 +82,7 @@ public class UTF8Writer extends EncodingWriter {
    *
    * @param ch the character to write.
    */
+  @Override
   public void write(ByteAppendable os, char ch)
     throws IOException
   {
@@ -104,6 +107,7 @@ public class UTF8Writer extends EncodingWriter {
    * @param off starting offset into the character array.
    * @param len the number of characters to write.
    */
+  @Override
   public void write(OutputStreamWithBuffer os, char []cbuf, int off, int len)
     throws IOException
   {
@@ -111,37 +115,48 @@ public class UTF8Writer extends EncodingWriter {
     int length = os.getBufferOffset();
     int capacity = buffer.length;
 
-    for (int i = 0; i < len; i++) {
-      if (capacity <= length + 2) {
-	buffer = os.nextBuffer(length);
-	length = os.getBufferOffset();
+    while (len > 0) {
+      int sublen = capacity - length;
+      
+      if (sublen <= 2) {
+        buffer = os.nextBuffer(length);
+        length = os.getBufferOffset();
+        
+        sublen = capacity - length;
       }
       
-      char ch = cbuf[off + i];
+      if (len < sublen)
+        sublen = len;
+      
+      for (int i = 0; i < sublen; i++) {
+        char ch = cbuf[off + i];
 
-      if (ch < 0x80)
-	buffer[length++] = (byte) ch;
-      else if (ch < 0x800) {
-	buffer[length++] = (byte) (0xc0 + (ch >> 6));
-	buffer[length++] = (byte) (0x80 + (ch & 0x3f));
+        if (ch < 0x80)
+          buffer[length++] = (byte) ch;
+        else if (ch < 0x800) {
+          buffer[length++] = (byte) (0xc0 + (ch >> 6));
+          buffer[length++] = (byte) (0x80 + (ch & 0x3f));
+        }
+        else if (ch < 0xd800 || 0xdfff < ch || i + 1 == len) {
+          // server/0815
+          buffer[length++] = (byte) (0xe0 + (ch >> 12));
+          buffer[length++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
+          buffer[length++] = (byte) (0x80 + (ch & 0x3f));
+        }
+        else {
+          char ch2 = cbuf[off + i + 1];
+          int v = 0x10000 + (ch & 0x3ff) * 0x400 + (ch2 & 0x3ff);
+          
+          i += 1;
+        
+          buffer[length++] = (byte) (0xf0 + (v >> 18));
+          buffer[length++] = (byte) (0x80 + ((v >> 12) & 0x3f));
+          buffer[length++] = (byte) (0x80 + ((v >> 6) & 0x3f));
+          buffer[length++] = (byte) (0x80 + (v & 0x3f));
+        }
       }
-      else if (ch < 0xd800 || 0xdfff < ch || i + 1 == len) {
-	// server/0815
-	buffer[length++] = (byte) (0xe0 + (ch >> 12));
-	buffer[length++] = (byte) (0x80 + ((ch >> 6) & 0x3f));
-	buffer[length++] = (byte) (0x80 + (ch & 0x3f));
-      }
-      else {
-	char ch2 = cbuf[off + i + 1];
-	int v = 0x10000 + (ch & 0x3ff) * 0x400 + (ch2 & 0x3ff);
-	
-	i += 1;
-	
-	buffer[length++] = (byte) (0xf0 + (v >> 18));
-	buffer[length++] = (byte) (0x80 + ((v >> 12) & 0x3f));
-	buffer[length++] = (byte) (0x80 + ((v >> 6) & 0x3f));
-	buffer[length++] = (byte) (0x80 + (v & 0x3f));
-      }
+      
+      len -= sublen;
     }
 
     os.setBufferOffset(length);

@@ -29,20 +29,22 @@
 
 package com.caucho.el;
 
-import com.caucho.config.types.Signature;
-import com.caucho.vfs.WriteStream;
-
-import javax.el.ELContext;
-import javax.el.ELException;
 import java.io.IOException;
 import java.io.Serializable;
 import java.lang.reflect.Method;
-import java.util.logging.Level;
+
+import javax.el.ELContext;
+import javax.el.ELException;
+
+import com.caucho.config.types.Signature;
+import com.caucho.vfs.WriteStream;
 
 /**
  * Represents a method call.  The expr will evaluate to a method.
  */
 public class StaticMethodExpr extends Expr {
+  private static final Object []NULL_ARGS = new Object[0];
+  
   private Method _method;
   private Marshall []_marshall;
   private boolean _isVoid;
@@ -121,7 +123,7 @@ public class StaticMethodExpr extends Expr {
    * @param env the variable environment
    */
   public Object evalMethod(Expr []args,
-			   ELContext env)
+                           ELContext env)
     throws ELException
   {
     if (_marshall.length != args.length) {
@@ -130,17 +132,23 @@ public class StaticMethodExpr extends Expr {
     }
 
     try {
-      Object []objs = new Object[args.length];
+      Object []objs;
       
-      for (int i = 0; i < _marshall.length; i++)
-        objs[i] = _marshall[i].marshall(args[i], env);
+      if (args.length > 0) {
+        objs = new Object[args.length];
+      
+        for (int i = 0; i < _marshall.length; i++)
+          objs[i] = _marshall[i].marshall(args[i], env);
+      }
+      else
+        objs = NULL_ARGS;
 
       if (! _isVoid)
-	return _method.invoke(null, objs);
+        return _method.invoke(null, objs);
       else {
-	_method.invoke(null, objs);
+        _method.invoke(null, objs);
 
-	return null;
+        return null;
       }
     } catch (ELException e) {
       throw e;
@@ -162,7 +170,7 @@ public class StaticMethodExpr extends Expr {
     os.print(".");
     os.print(_method.getName());
     os.print("(");
-    Class []parameterTypes = _method.getParameterTypes();
+    Class<?> []parameterTypes = _method.getParameterTypes();
     
     for (int i = 0; i < parameterTypes.length; i++) {
       if (i != 0)
@@ -173,7 +181,7 @@ public class StaticMethodExpr extends Expr {
     os.print("\")");
   }
 
-  private void printType(WriteStream os, Class cl)
+  private void printType(WriteStream os, Class<?> cl)
     throws IOException
   {
     if (cl.isArray()) {
@@ -194,7 +202,7 @@ public class StaticMethodExpr extends Expr {
     sig.append(".");
     sig.append(_method.getName());
     sig.append("(");
-    Class []param = _method.getParameterTypes();
+    Class<?> []param = _method.getParameterTypes();
     
     for (int i = 0; i < param.length; i++) {
       if (i != 0)
@@ -207,7 +215,7 @@ public class StaticMethodExpr extends Expr {
     return new Handle(sig.toString());
   }
 
-  private void addType(StringBuilder sb, Class cl)
+  private void addType(StringBuilder sb, Class<?> cl)
   {
     if (cl.isArray()) {
       addType(sb, cl.getComponentType());

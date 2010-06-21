@@ -164,6 +164,20 @@ public class AnnotatedTypeUtil {
   /**
    * Tests if an annotated method matches a name and parameter types.
    */
+  public static boolean isMatch(Method javaMethod,
+                                String name, Class<?> []param)
+  {
+    if (! javaMethod.getName().equals(name))
+      return false;
+
+    Class<?> []mparam = javaMethod.getParameterTypes();
+
+    return isMatch(mparam, param);
+  }
+
+  /**
+   * Tests if an annotated method matches a name and parameter types.
+   */
   public static boolean isMatch(Method methodA, Method methodB)
   {
     if (! methodA.getName().equals(methodB.getName()))

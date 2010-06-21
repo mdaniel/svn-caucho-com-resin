@@ -56,6 +56,11 @@ public interface AspectBeanFactory<X> {
    * Returns the generated bean name.
    */
   public String getGeneratedClassName();
+
+  /**
+   * Returns the instance class name.
+   */
+  public String getInstanceClassName();
   
   /**
    * Returns true for a proxied instance

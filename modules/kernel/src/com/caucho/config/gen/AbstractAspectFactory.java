@@ -62,6 +62,22 @@ abstract public class AbstractAspectFactory<X> implements AspectFactory<X> {
   }
   
   /**
+   * Returns the generated class name
+   */
+  public String getGeneratedClassName()
+  {
+    return getAspectBeanFactory().getGeneratedClassName();
+  }
+  
+  /**
+   * Returns the generated class name
+   */
+  public String getInstanceClassName()
+  {
+    return getAspectBeanFactory().getInstanceClassName();
+  }
+  
+  /**
    * Returns the factory's bean type.
    */
   @Override
@@ -78,6 +94,7 @@ abstract public class AbstractAspectFactory<X> implements AspectFactory<X> {
     return getBeanType().getJavaClass();
   }
   
+
   /**
    * Returns true if the factory requires enhancement
    */

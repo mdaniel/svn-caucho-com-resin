@@ -74,7 +74,12 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
   {
     return getBeanType().getJavaClass().getSimpleName() + "__ResinWebBean";
   }
-  
+
+  @Override
+  public String getInstanceClassName()
+  {
+    return getGeneratedClassName();
+  }
   /**
    * Returns the head aspect factory
    */

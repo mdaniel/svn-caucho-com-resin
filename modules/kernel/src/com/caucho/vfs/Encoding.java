@@ -250,21 +250,28 @@ public class Encoding {
   {
     if (encoding == null)
       return null;
-
-    String upper = normalize(encoding);
-
-    String javaName = null;
-
-    javaName = _javaName.get(upper);
+    
+    String javaName = _javaName.get(encoding);
+    
     if (javaName != null)
       return javaName;
 
-    String lookup = _mimeName.get(upper);
+    String upper = normalize(encoding);
 
-    if (lookup != null)
-      javaName = _javaName.get(lookup);
+    javaName = _javaName.get(upper);
+    if (javaName == null) {
+      String lookup = _mimeName.get(upper);
 
-    return javaName == null ? upper : javaName;
+      if (lookup != null)
+        javaName = _javaName.get(lookup);
+    }
+    
+    if (javaName == null)
+      javaName = upper;
+    
+    _javaName.put(encoding, javaName);
+
+    return javaName;
   }
 
   /**

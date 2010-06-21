@@ -43,6 +43,8 @@ import javax.enterprise.context.ConversationScoped;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.ExternalContext;
 import javax.faces.context.FacesContext;
+import javax.servlet.http.HttpSessionBindingEvent;
+import javax.servlet.http.HttpSessionBindingListener;
 
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.scope.AbstractScopeContext;
@@ -61,6 +63,8 @@ public class ConversationContext extends AbstractScopeContext
 {
   private static final Logger log = Logger.getLogger(ConversationContext.class.getName());
   private static final L10N L = new L10N(ConversationContext.class);
+  
+  private static final long DEFAULT_TIMEOUT = 120000L;
   
   public ConversationContext()
   {
@@ -146,10 +150,10 @@ public class ConversationContext extends AbstractScopeContext
   public void begin(String name)
   {
     Scope scope = createJsfScope();
-    
+
     if (scope._extendedId != null)
       throw new IllegalStateException(L.l("Conversation begin() must only be called when a long-running conversation does not exist."));
-
+    
     scope._extendedId = name;
     scope._extendedConversation = scope._transientConversation;
   }
@@ -188,16 +192,16 @@ public class ConversationContext extends AbstractScopeContext
   {
     Scope scope = createJsfScope();
     
-    return scope._timeout;
+    return scope.getTimeout();
   }
 
   @Override
   public void setTimeout(long timeout)
   {
     try {
-    Scope scope = createJsfScope();
+      Scope scope = createJsfScope();
     
-    scope._timeout = timeout;
+      scope.setTimeout(timeout);
     } catch (RuntimeException e) {
       log.log(Level.WARNING, e.toString(), e);
     }
@@ -258,15 +262,30 @@ public class ConversationContext extends AbstractScopeContext
       context.close();
   }
 
-  static class Scope implements java.io.Serializable, ScopeRemoveListener {
+  static class Scope implements java.io.Serializable, HttpSessionBindingListener {
     ContextContainer _transientConversation;
     
     String _extendedId;
     ContextContainer _extendedConversation;
-    long _timeout;
+    private long _timeout = DEFAULT_TIMEOUT;
+    
+    public long getTimeout()
+    {
+      return _timeout;
+    }
+    
+    public void setTimeout(long timeout)
+    {
+      _timeout = timeout;
+    }
 
     @Override
-    public void removeEvent(Object scope, String name)
+    public void valueBound(HttpSessionBindingEvent event)
+    {
+    }
+
+    @Override
+    public void valueUnbound(HttpSessionBindingEvent event)
     {
       ContextContainer conversation = _extendedConversation;
       

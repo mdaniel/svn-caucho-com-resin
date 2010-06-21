@@ -226,16 +226,6 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
   @Override
   public void release()
   {
-    _value = null;
-    
-    CreationalContextImpl<?> next = getNext();
-    
-    if (next != null)
-      next.releaseImpl();
-  }
-  
-  void releaseImpl()
-  {
     T value = _value;
     _value = null;
     
@@ -245,7 +235,7 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
       CreationalContextImpl<?> next = getNext();
       
       if (next != null)
-        next.releaseImpl();
+        next.release();
     }
   }
   

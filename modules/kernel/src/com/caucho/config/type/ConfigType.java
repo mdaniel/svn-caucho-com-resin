@@ -193,7 +193,7 @@ abstract public class ConfigType<T>
    */
   public boolean isProgram()
   {
-    return ConfigProgram.class.equals(getType());
+    return false;
   }
 
   public ConfigType<?> getComponentType()
@@ -291,8 +291,8 @@ abstract public class ConfigType<T>
    * Called before the children are configured.
    */
   public void beforeConfigureBean(XmlConfigContext builder,
-				  Object bean,
-				  Node node)
+                                  Object bean,
+                                  Node node)
   {
   }
 

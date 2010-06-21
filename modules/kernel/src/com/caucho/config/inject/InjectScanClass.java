@@ -51,6 +51,7 @@ import javax.inject.Named;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 
+import com.caucho.config.inject.InjectScanManager.AnnType;
 import com.caucho.inject.Jndi;
 import com.caucho.inject.MBean;
 import com.caucho.loader.enhancer.ScanClass;
@@ -143,24 +144,26 @@ class InjectScanClass implements ScanClass
   public void addClassAnnotation(char[] buffer, int offset, int length)
   {
     try {
-      ClassLoader loader = _scanManager.getInjectManager().getClassLoader();
+      AnnType annType = _scanManager.loadAnnotation(buffer, offset, length);
       
-      String className = new String(buffer, offset, length);
+      if (_registerAnnotationSet.contains(annType.getType())) {
+        _isRegisterRequired = true;
+        return;
+      }
       
-      Class<?> annType = Class.forName(className, false, loader);
+      for (Annotation ann : annType.getAnnotations()) {
+        Class<? extends Annotation> metaAnnType = ann.annotationType();
       
-      if (_registerAnnotationSet.contains(annType)) {
-        _isRegisterRequired = true;
-      }
-      else if (annType.isAnnotationPresent(Stereotype.class)) {
-        _isRegisterRequired = true;
-      }
-      else if (annType.isAnnotationPresent(Scope.class)) {
-        _isRegisterRequired = true;
-      }
-      else if (annType.isAnnotationPresent(NormalScope.class)) {
-        // ioc/02a3
-        _isRegisterRequired = true;
+        if (metaAnnType == Stereotype.class) {
+          _isRegisterRequired = true;
+        }
+        else if (metaAnnType == Scope.class) {
+          _isRegisterRequired = true;
+        }
+        else if (metaAnnType == NormalScope.class) {
+          // ioc/02a3
+          _isRegisterRequired = true;
+        }
       }
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);

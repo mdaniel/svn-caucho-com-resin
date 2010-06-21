@@ -307,7 +307,8 @@ public class InterceptorFactory<X>
       
       set = addInterceptors(set, _classInterceptors, PreDestroy.class);
 
-      if (set != null) {
+      // ioc/055b
+      if (set != null || _classInterceptorBindings != null) {
         InterceptorGenerator<X> gen
           = new InterceptorGenerator<X>(this,
                                         set,
@@ -586,7 +587,7 @@ public class InterceptorFactory<X>
     
     if (_decoratorClasses == null)
       return null;
-    
+
     HashSet<Class<?>> decoratorSet = null;
 
     for (Class<?> decoratorClass : _decoratorClasses) {

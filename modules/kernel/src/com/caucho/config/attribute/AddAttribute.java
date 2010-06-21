@@ -80,41 +80,16 @@ public class AddAttribute extends Attribute {
   public Object create(Object parent, QName qName)
     throws ConfigException
   {
-    String uri = qName.getNamespaceURI();
-    String localName = qName.getLocalName();
-
-    if (uri.equals("urn:java:com.caucho.config.driver")) {
-      TypeFactory factory = TypeFactory.getFactory();
-      
-      Class api;
-
-      if (parent instanceof BeanConfig) {
-	api = ((BeanConfig) parent).getBeanConfigClass();
-      }
-      else if (_setMethod != null)
-	api = _setMethod.getParameterTypes()[0];
-      else
-	api = _configType.getType();
-
-      Class cl = factory.getDriverClassByScheme(api, localName);
-
-      return new CustomBeanConfig(qName, cl);
-    }
-
-    if (! uri.startsWith("urn:java:"))
-      throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));
-
-    String packageName = uri.substring("uri:java:".length());
-    Class cl = TypeFactory.loadClass(packageName, localName);
+    Class<?> cl = TypeFactory.loadClass(qName);
 
     if (cl == null) {
-      ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+      ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
 
       if (type != null)
-	return type.create(parent, qName);
+        return type.create(parent, qName);
 
       throw new ConfigException(L.l("'{0}.{1}' is an unknown class for element '{2}'",
-				    packageName, localName, qName));
+                                    qName.getNamespaceURI(), qName.getLocalName(), qName));
     }
 
     if (Annotation.class.isAssignableFrom(cl)) {

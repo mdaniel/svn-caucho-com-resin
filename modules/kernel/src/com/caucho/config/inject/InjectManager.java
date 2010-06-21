@@ -621,6 +621,13 @@ public final class InjectManager
         else if (testBean.getBeanClass().isAnnotationPresent(Specializes.class)
                   && bean.getBeanClass().isAssignableFrom(testBean.getBeanClass())) {
         }
+        else if ((bean instanceof AbstractIntrospectedBean<?>)
+                 && ((AbstractIntrospectedBean<?>) bean).getAnnotated().isAnnotationPresent(Specializes.class)) {
+          // ioc/07a2
+        }
+        else if ((testBean instanceof AbstractIntrospectedBean<?>)
+                 && ((AbstractIntrospectedBean<?>) testBean).getAnnotated().isAnnotationPresent(Specializes.class)) {
+        }
         else {
           throw new ConfigException(L.l("@Named('{0}') is a duplicate name for\n  {1}\n  {2}",
                                         name, bean, testBean));
@@ -664,8 +671,9 @@ public final class InjectManager
     if (type == null)
       return;
     
-    if (isSpecialized(bean.getBeanClass()))
+    if (isSpecialized(bean.getBeanClass())) {
       return;
+    }
 
     if (log.isLoggable(Level.FINEST))
       log.finest(bean + "(" + type + ") added to " + this);
@@ -682,8 +690,9 @@ public final class InjectManager
 
     TypedBean typedBean = new TypedBean(type, annotated, bean);
     
-    if (! beanSet.contains(typedBean))
+    if (! beanSet.contains(typedBean)) {
       beanSet.add(typedBean);
+    }
   }
 
   /**
@@ -1524,9 +1533,24 @@ public final class InjectManager
     Bean<? extends X> secondBean = null;
     
     int bestPriority = -1;
+    boolean isSpecializes = false;
 
     for (Bean<? extends X> bean : beans) {
       if (_specializedMap.get(bean.getBeanClass()) != null)
+        continue;
+      
+      if ((bean instanceof AbstractIntrospectedBean<?>)
+          && ((AbstractIntrospectedBean<?>) bean).getAnnotated().isAnnotationPresent(Specializes.class)) {
+        if (! isSpecializes) {
+          // ioc/07a3
+          
+          bestPriority = -1;
+          bestBean = null;
+          secondBean = null;
+          isSpecializes = true;
+        }
+      }
+      else if (isSpecializes)
         continue;
       
       int priority = getDeploymentPriority(bean);
@@ -2637,7 +2661,6 @@ public final class InjectManager
     return decorators;
   }
 
-
   /**
    * Resolves the decorators for a given set of types
    *
@@ -3364,19 +3387,28 @@ public final class InjectManager
         
         TypedBean bean2 = beans.get(j);
         
+        // XXX:
+        
         Annotated ann2 = bean.getAnnotated();
         
         if (ann2 == null)
           continue;
         
-        if (isSpecializes(ann, ann2)) {
+        if (isSpecializes(ann, ann2) && isMatchInject(bean, bean2)) {
           beans.remove(j);
+          i = 0;
         }
       }
-      
-      if (beans.size() < i)
-        i = beans.size();
     }
+  }
+  
+  private boolean isMatchInject(TypedBean typedBeanA, TypedBean typedBeanB)
+  {
+    Bean<?> beanA = typedBeanA.getBean();
+    Bean<?> beanB = typedBeanB.getBean();
+    
+    return (beanA.getTypes().equals(beanB.getTypes())
+            && beanA.getQualifiers().equals(beanB.getQualifiers()));
   }
   
   private boolean isSpecializes(Annotated childAnn, Annotated parentAnn)
@@ -3842,7 +3874,9 @@ public final class InjectManager
           thread.setContextClassLoader(_loader);
         }
 
-        return getBean().create(env);
+        X value = getBean().create(env);
+        
+        return value;
       } finally {
         thread.setContextClassLoader(oldLoader);
       }
@@ -3936,9 +3970,11 @@ public final class InjectManager
       
       env.push(instance);
       
+      /*
       if (env.isTop() && ! (bean instanceof CdiStatefulBean)) {
         bean.destroy(instance, env);
       }
+      */
       
       return instance;
     }
@@ -3979,9 +4015,12 @@ public final class InjectManager
       
       instance = bean.createDependent(env);
 
+      // ioc/0k13
+      /*
       if (env.isTop() && ! (bean instanceof CdiStatefulBean)) {
         bean.destroy(instance, env);
       }
+      */
       
       return instance;
     }

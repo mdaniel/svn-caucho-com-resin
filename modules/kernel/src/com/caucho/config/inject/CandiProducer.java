@@ -259,10 +259,11 @@ public class CandiProducer<X> implements InjectionTarget<X>
         CandiEnhancedBean bean = (CandiEnhancedBean) instance;
         bean.__caucho_postConstruct();
       }
-
-      for (ConfigProgram program : _initProgram) {
-        // log.info("POST: " + program);
-        program.inject(instance, env);
+      else {
+        for (ConfigProgram program : _initProgram) {
+          // log.info("POST: " + program);
+          program.inject(instance, env);
+        }
       }
 
       /*

@@ -730,7 +730,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
     _pendingScanRoots.clear();
     
     try {
-      if (_scanListeners != null && rootList.size() > 0) { 
+      int rootListSize = rootList.size();
+      
+      if (_scanListeners != null && rootListSize > 0) { 
         try {
           make();
         } catch (Exception e) {
@@ -742,7 +744,9 @@ public class EnvironmentClassLoader extends DynamicClassLoader
 
         ScanManager scanManager = new ScanManager(_scanListeners);
 
-        for (ScanRoot root : rootList) {
+        for (int i = 0; i < rootListSize; i++) {
+          ScanRoot root = rootList.get(i);
+
           scanManager.scan(this, root.getUrl(), root.getPackageName());
         }
       }

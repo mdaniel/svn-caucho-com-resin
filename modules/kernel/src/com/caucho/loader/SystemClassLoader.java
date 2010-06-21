@@ -223,7 +223,7 @@ public class SystemClassLoader
       String className = name.replace('.', '/') + ".class";
 
       if (findPath(className) == null)
-	return null;
+        return null;
     }
 
     return super.loadClassImpl(name, resolve);

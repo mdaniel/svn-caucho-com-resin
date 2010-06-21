@@ -915,6 +915,10 @@ public class ServletConfigImpl
       }
       else if (_protocolConfig != null || _protocolFactory != null) {
       }
+      else {
+        // XXX: should allow soap
+        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a <protocol>.  All servlets must implement the Servlet interface.", _servletClassName));
+      }
       /*
       else if (_servletClass.isAnnotationPresent(WebService.class)) {
         // update protocol for "soap"?
@@ -923,8 +927,6 @@ public class ServletConfigImpl
         // update protocol for "soap"?
       }
       */
-      else
-        throw error(L.l("'{0}' must implement javax.servlet.Servlet or have a <protocol>.  All servlets must implement the Servlet interface.", _servletClassName));
 
       /*
       if (Modifier.isAbstract(_servletClass.getModifiers()))

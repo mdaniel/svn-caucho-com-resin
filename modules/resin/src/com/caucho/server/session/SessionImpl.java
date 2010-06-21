@@ -291,12 +291,15 @@ public class SessionImpl implements HttpSession, CacheListener {
    * @param name the name of the attribute
    * @param value the value of the attribute
    */
+  @Override
   public void setAttribute(String name, Object value)
   {
     if (! _isValid)
       throw new IllegalStateException(L.l("{0}: can't call setAttribute(String, Object) when session is no longer valid.", this));
 
     Object oldValue;
+    
+    System.out.println("SET: " + name + " " + value);
 
     if (value != null
         && ! (value instanceof Serializable)

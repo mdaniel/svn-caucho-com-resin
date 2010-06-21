@@ -31,12 +31,16 @@ package com.caucho.config.gen;
 
 import java.lang.reflect.*;
 import java.util.*;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.spi.InterceptionType;
 import javax.enterprise.inject.spi.Interceptor;
 import javax.interceptor.InvocationContext;
 
 public class CandiInvocationContext implements InvocationContext {
+  private static final Logger log
+    = Logger.getLogger(CandiInvocationContext.class.getName());
+  
   private final Object _target;
   private final Method _apiMethod;
   private final Method _implMethod;
@@ -127,6 +131,7 @@ public class CandiInvocationContext implements InvocationContext {
                                           this);
       }
       else {
+        log.warning("INVOKE: " + _target.getClass() + " " + _implMethod);
         return _implMethod.invoke(_target, _param);
       }
     } catch (InterceptorException e) {

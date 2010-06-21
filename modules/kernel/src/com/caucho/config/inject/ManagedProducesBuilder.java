@@ -45,6 +45,8 @@ public class ManagedProducesBuilder extends ProducesBuilder {
   {
     super(manager);
   }
+  
+  @Override
   protected <X,T> void addProducesMethod(Bean<X> bean,
                                          AnnotatedType<X> beanType,
                                          AnnotatedMethod<? super X> producesMethod,

@@ -123,7 +123,7 @@ public class CompilingLoader extends Loader implements Make {
     this(loader);
     
     if (classDir.getScheme().equals("http")
-	|| classDir.getScheme().equals("https"))
+        || classDir.getScheme().equals("https"))
       throw new RuntimeException("compiling class loader can't be http.  Use compile=false.");
 
     _sourceDir = sourceDir;
@@ -197,7 +197,7 @@ public class CompilingLoader extends Loader implements Make {
   {
     if (! ext.startsWith("."))
       throw new ConfigException(L.l("source-extension '{0}' must begin with '.'",
-				    ext));
+                                    ext));
     
     _sourceExt = ext;
   }
@@ -378,11 +378,11 @@ public class CompilingLoader extends Loader implements Make {
     }
     else {
       while (files.size() > 0) {
-	String path = files.remove(0);
-	
-	String []paths = new String[] { path };
-	
-	compileBatch(paths, true);
+        String path = files.remove(0);
+
+        String []paths = new String[] { path };
+
+        compileBatch(paths, true);
       }
     }
   }
@@ -391,10 +391,10 @@ public class CompilingLoader extends Loader implements Make {
    * Returns the classes which need compilation.
    */
   private void findAllModifiedClasses(String name,
-				      Path sourceDir,
-				      Path classDir,
-				      String sourcePath,
-				      ArrayList<String> sources)
+                                      Path sourceDir,
+                                      Path classDir,
+                                      String sourcePath,
+                                      ArrayList<String> sources)
     throws IOException, ClassNotFoundException
   {
     String []list;
@@ -415,17 +415,17 @@ public class CompilingLoader extends Loader implements Make {
       Path subSource = sourceDir.lookup(list[i]);
 
       if (subSource.isDirectory()) {
-	findAllModifiedClasses(name + list[i] + "/", subSource,
-			       classDir.lookup(list[i]), sourcePath, sources);
+        findAllModifiedClasses(name + list[i] + "/", subSource,
+                               classDir.lookup(list[i]), sourcePath, sources);
       }
       else if (list[i].endsWith(_sourceExt)) {
-	int tail = list[i].length() - _sourceExt.length();
-	String prefix = list[i].substring(0, tail);
-	Path subClass = classDir.lookup(prefix + ".class");
+        int tail = list[i].length() - _sourceExt.length();
+        String prefix = list[i].substring(0, tail);
+        Path subClass = classDir.lookup(prefix + ".class");
 
-	if (subClass.getLastModified() < subSource.getLastModified()) {
-	  sources.add(name + list[i]);
-	}
+        if (subClass.getLastModified() < subSource.getLastModified()) {
+          sources.add(name + list[i]);
+        }
       }
     }
 
@@ -448,27 +448,27 @@ public class CompilingLoader extends Loader implements Make {
       Path subClass = classDir.lookup(list[i]);
 
       if (list[i].endsWith(".class")) {
-	String prefix = list[i].substring(0, list[i].length() - 6);
-	Path subSource = sourceDir.lookup(prefix + _sourceExt);
+        String prefix = list[i].substring(0, list[i].length() - 6);
+        Path subSource = sourceDir.lookup(prefix + _sourceExt);
 
-	if (! subSource.exists()) {
-	  String tail = subSource.getTail();
-	  boolean doRemove = true;
+        if (! subSource.exists()) {
+          String tail = subSource.getTail();
+          boolean doRemove = true;
 
-	  if (tail.indexOf('$') > 0) {
-	    String subTail = tail.substring(0, tail.indexOf('$')) + _sourceExt;
-	    Path subJava = subSource.getParent().lookup(subTail);
+          if (tail.indexOf('$') > 0) {
+            String subTail = tail.substring(0, tail.indexOf('$')) + _sourceExt;
+            Path subJava = subSource.getParent().lookup(subTail);
 
-	    if (subJava.exists())
-	      doRemove = false;
-	  }
+            if (subJava.exists())
+              doRemove = false;
+          }
 
-	  if (doRemove) {
-	    log.finer(L.l("removing obsolete class '{0}'.", subClass.getPath()));
+          if (doRemove) {
+            log.finer(L.l("removing obsolete class '{0}'.", subClass.getPath()));
 
-	    subClass.remove();
-	  }
-	}
+            subClass.remove();
+          }
+        }
       }
     }
   }
@@ -480,47 +480,53 @@ public class CompilingLoader extends Loader implements Make {
   protected ClassEntry getClassEntry(String name, String pathName)
     throws ClassNotFoundException
   {
-    synchronized (this) {
-      Path classFile = _classDir.lookup(pathName);
-      String javaName = name.replace('.', '/') + _sourceExt;
-      Path javaFile = _sourceDir.lookup(javaName);
+    Path classFile = _classDir.lookup(pathName);
+    /*
+    Path classDir = classFile.getParent();
+    
+    if (! classDir.isDirectory())
+      return null;
+    */
+    String javaName = name.replace('.', '/') + _sourceExt;
+    Path javaFile = _sourceDir.lookup(javaName);
 
-      for (int i = 0; i < INNER_CLASS_SEPARATORS.length; i++) {
-	char sep = INNER_CLASS_SEPARATORS[i];
-	if (name.indexOf(sep) > 0) {
-	  String subName = name.substring(0, name.indexOf(sep));
-	  String subJavaName = subName.replace('.', '/') + _sourceExt;
-	  Path subJava = _sourceDir.lookup(subJavaName);
+    for (int i = 0; i < INNER_CLASS_SEPARATORS.length; i++) {
+      char sep = INNER_CLASS_SEPARATORS[i];
+      if (name.indexOf(sep) > 0) {
+        String subName = name.substring(0, name.indexOf(sep));
+        String subJavaName = subName.replace('.', '/') + _sourceExt;
+        Path subJava = _sourceDir.lookup(subJavaName);
 
-	  if (subJava.exists()) {
-	    javaFile = subJava;
-	  }
-	}
+        if (subJava.exists()) {
+          javaFile = subJava;
+        }
       }
+    }
 
+    synchronized (this) {
       if (_requireSource && ! javaFile.exists()) {
-	boolean doRemove = true;
+        boolean doRemove = true;
 
-	if (doRemove) {
-	  log.finer(L.l("removing obsolete class `{0}'.", classFile.getPath()));
+        if (doRemove) {
+          log.finer(L.l("removing obsolete class `{0}'.", classFile.getPath()));
 
-	  try {
-	    classFile.remove();
-	  } catch (IOException e) {
-	    log.log(Level.WARNING, e.toString(), e);
-	  }
+          try {
+            classFile.remove();
+          } catch (IOException e) {
+            log.log(Level.WARNING, e.toString(), e);
+          }
 
-	  return null;
-	}
+          return null;
+        }
       }
 
       if (! classFile.canRead() && ! javaFile.canRead())
-	return null;
+        return null;
 
       return new CompilingClassEntry(this, getClassLoader(),
-				     name, javaFile,
-				     classFile,
-				     getCodeSource(classFile));
+                                     name, javaFile,
+                                     classFile,
+                                     getCodeSource(classFile));
     }
   }
 
@@ -579,7 +585,7 @@ public class CompilingLoader extends Loader implements Make {
    * @param javaSource path to the Java source
    */
   void compileClass(Path javaSource, Path javaClass,
-		    String sourcePath, boolean isMake)
+                    String sourcePath, boolean isMake)
     throws ClassNotFoundException
   {
     try {
@@ -592,7 +598,7 @@ public class CompilingLoader extends Loader implements Make {
       compiler.setCompileParent(! isMake);
       compiler.setSourceExtension(_sourceExt);
       if (_compiler != null)
-	compiler.setCompiler(_compiler);
+        compiler.setCompiler(_compiler);
 
       //LineMap lineMap = new LineMap(javaFile.getNativePath());
       // The context path is obvious from the browser url
@@ -703,17 +709,17 @@ public class CompilingLoader extends Loader implements Make {
       }
 
       if (_classDir.isDirectory()) {
-	String path = _classDir.getNativePath();
+        String path = _classDir.getNativePath();
 
-	if (! pathList.contains(path))
-	  pathList.add(path);
+        if (! pathList.contains(path))
+          pathList.add(path);
       }
     
       if (! _classDir.equals(_sourceDir)) {
-	String path = _sourceDir.getNativePath();
+        String path = _sourceDir.getNativePath();
 
-	if (! pathList.contains(path))
-	  pathList.add(path);
+        if (! pathList.contains(path))
+          pathList.add(path);
       }
     } catch (java.security.AccessControlException e) {
       log.log(Level.WARNING, e.toString(), e);

@@ -164,12 +164,12 @@ abstract public class PageManager {
   }
 
   public PageContextImpl allocatePageContext(Servlet servlet,
-					     ServletRequest request,
-					     ServletResponse response,
-					     String errorPageURL,
-					     boolean needsSession,
-					     int buffer,
-					     boolean autoFlush)
+                                             ServletRequest request,
+                                             ServletResponse response,
+                                             String errorPageURL,
+                                             boolean needsSession,
+                                             int buffer,
+                                             boolean autoFlush)
   {
     PageContextImpl pc = _freePages.allocate();
 
@@ -189,14 +189,14 @@ abstract public class PageManager {
    * The jsp page context initialization.
    */
   public PageContextImpl allocatePageContext(Servlet servlet,
-					     WebApp app,
-					     ServletRequest request,
-					     ServletResponse response,
-					     String errorPageURL,
-					     HttpSession session,
-					     int buffer,
-					     boolean autoFlush,
-					     boolean isPrintNullAsBlank)
+                                             WebApp app,
+                                             ServletRequest request,
+                                             ServletResponse response,
+                                             String errorPageURL,
+                                             HttpSession session,
+                                             int buffer,
+                                             boolean autoFlush,
+                                             boolean isPrintNullAsBlank)
   {
     PageContextImpl pc = _freePages.allocate();
 
@@ -204,7 +204,7 @@ abstract public class PageManager {
       pc = new PageContextImpl();
 
     pc.initialize(servlet, app, request, response, errorPageURL,
-		  session, buffer, autoFlush, isPrintNullAsBlank);
+                  session, buffer, autoFlush, isPrintNullAsBlank);
 
     return pc;
   }
@@ -215,7 +215,7 @@ abstract public class PageManager {
       pc.release();
 
       if (pc instanceof PageContextImpl)
-	_freePages.free((PageContextImpl) pc);
+        _freePages.free((PageContextImpl) pc);
     }
   }
 
@@ -278,8 +278,8 @@ abstract public class PageManager {
     * @return the compiled JSP (or XTP) page.
     */
   public Page getPage(String uri, String pageURI, Path path,
-		      ServletConfig config,
-		      ArrayList<PersistentDependency> dependList)
+                      ServletConfig config,
+                      ArrayList<PersistentDependency> dependList)
     throws Exception
   {
     LruCache<String,Entry> cache = _cache;
@@ -288,9 +288,9 @@ abstract public class PageManager {
       initPageManager();
       
       synchronized (this) {
-	if (_cache == null)
-	  _cache = new LruCache<String,Entry>(_pageCacheMax);
-	cache = _cache;
+        if (_cache == null)
+          _cache = new LruCache<String,Entry>(_pageCacheMax);
+        cache = _cache;
       }
     }
 
@@ -300,8 +300,8 @@ abstract public class PageManager {
       entry = cache.get(uri);
 
       if (entry == null) {
-	entry = new Entry(uri);
-	cache.put(uri, entry);
+        entry = new Entry(uri);
+        cache.put(uri, entry);
       }
     }
 
@@ -330,15 +330,15 @@ abstract public class PageManager {
       String rawClassName = pageURI;
 
       if (path.getPath().startsWith(appDir.getPath()))
-	rawClassName = path.getPath().substring(appDir.getPath().length());
+        rawClassName = path.getPath().substring(appDir.getPath().length());
 
       String className = JavaCompiler.mangleName("jsp/" + rawClassName);
 
       page = createPage(path, pageURI, className, config, dependList);
 
       if (page == null) {
-	log.fine("Jsp[] cannot create page " + path.getURL());
-	
+        log.fine("Jsp[] cannot create page " + path.getURL());
+        
         throw new FileNotFoundException(getWebApp().getContextPath() + pageURI);
       }
 
@@ -349,19 +349,19 @@ abstract public class PageManager {
       page._caucho_isModified();
 
       try {
-	InjectManager beanManager = InjectManager.create();
-	
-	InjectionTarget inject = beanManager.createInjectionTarget(page.getClass());
+        InjectManager beanManager = InjectManager.create();
+        
+        InjectionTarget inject = beanManager.createInjectionTarget(page.getClass());
 
-	CreationalContext<?> env = new OwnerCreationalContext(null);
+        CreationalContext<?> env = new OwnerCreationalContext(null);
 
-	inject.inject(page, env);
-	
-	inject.postConstruct(page);
+        inject.inject(page, env);
+        
+        inject.postConstruct(page);
       } catch (RuntimeException e) {
-	throw e;
+        throw e;
       } catch (Exception e) {
-	throw new RuntimeException(e);
+        throw new RuntimeException(e);
       }
 
       entry.setPage(page);
@@ -379,8 +379,8 @@ abstract public class PageManager {
    * and XtpManager define this for their specific needs.
    */
   abstract Page createPage(Path path, String uri, String className,
-			   ServletConfig config,
-			   ArrayList<PersistentDependency> dependList)
+                           ServletConfig config,
+                           ArrayList<PersistentDependency> dependList)
     throws Exception;
 
   void killPage(HttpServletRequest request,
@@ -448,12 +448,12 @@ abstract public class PageManager {
       long now = Alarm.getCurrentTime();
 
       if (now < _lastAccessTime + ACCESS_INTERVAL)
-	return;
+        return;
 
       _lastAccessTime = now;
 
       if (_cache != null)
-	_cache.get(_key);
+        _cache.get(_key);
     }
 
     public void removeEvent()
@@ -465,7 +465,7 @@ abstract public class PageManager {
         if (log.isLoggable(Level.FINE))
           log.fine("dropping page " + page);
         
-	page.setDead();
+        page.setDead();
         page.destroy();
       }
     }

@@ -52,7 +52,7 @@ abstract public class FilesystemPath extends Path {
    */
   protected FilesystemPath(FilesystemPath root,
                            String userPath,
-			   String pathname)
+                           String pathname)
   {
     super(root);
 
@@ -71,24 +71,25 @@ abstract public class FilesystemPath extends Path {
   /**
    * Return the parent Path
    */
+  @Override
   public Path getParent()
   {
     if (_pathname.length() <= 1)
-      return fsWalk("/", null, "/");
+      return lookup("/");
 
     int length = _pathname.length();
     int lastSlash = _pathname.lastIndexOf('/');
 
     if (lastSlash < 1)
-      return fsWalk("/", null, "/");
+      return lookup("/");
     
     if (lastSlash == length - 1) {
       lastSlash = _pathname.lastIndexOf('/', length - 2);
       if (lastSlash < 1)
-        return fsWalk("/", null, "/");
+        return lookup("/");
     }
   
-    return fsWalk("..", null, _pathname.substring(0, lastSlash));
+    return lookup(_pathname.substring(0, lastSlash));
   }
 
   /**
@@ -101,7 +102,7 @@ abstract public class FilesystemPath extends Path {
    */
   protected Path schemeWalk(String userPath,
                             Map<String,Object> attributes,
-			    String filePath,
+                            String filePath,
                             int offset)
   {
     String canonicalPath;
@@ -129,8 +130,8 @@ abstract public class FilesystemPath extends Path {
    * @return the matching path
    */
   abstract public Path fsWalk(String userPath,
-                                 Map<String,Object> newAttributes, 
-				 String newPath);
+                              Map<String,Object> newAttributes, 
+                              String newPath);
 
   /**
    * wrapper for the real normalize path routine to use CharBuffer.

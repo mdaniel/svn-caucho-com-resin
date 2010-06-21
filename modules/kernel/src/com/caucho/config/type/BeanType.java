@@ -530,36 +530,30 @@ public class BeanType<T> extends ConfigType<T>
   @Override
   public void introspect()
   {
-   synchronized (_introspectLock) {
+    synchronized (_introspectLock) {
       if (_isIntrospecting)
-	return;
-    
+        return;
+
       _isIntrospecting = true;
-    
+
       try {
-	// ioc/20h4 - after to deal with recursion
-	introspectParent();
+        // ioc/20h4 - after to deal with recursion
+        introspectParent();
 
-	//Method []methods = _beanClass.getMethods();
-	if (! _isIntrospected) {
-	  _isIntrospected = true;
+        //Method []methods = _beanClass.getMethods();
+        if (! _isIntrospected) {
+          _isIntrospected = true;
 
-	  try {
-	    Method []methods = _beanClass.getDeclaredMethods();
-    
-	    introspectMethods(methods);
-	  } catch (NoClassDefFoundError e) {
-	    log.fine(_beanClass + " " + e);
-	  }
+          try {
+            Method []methods = _beanClass.getDeclaredMethods();
 
-	  /*
-	  InjectIntrospector.introspectInject(_injectList, _beanClass);
-
-	  InjectIntrospector.introspectInit(_initList, _beanClass, null);
-	  */
-	}
+            introspectMethods(methods);
+          } catch (NoClassDefFoundError e) {
+            log.fine(_beanClass + " " + e);
+          }
+        }
       } finally {
-	_isIntrospecting = false;
+        _isIntrospecting = false;
       }
     }
 

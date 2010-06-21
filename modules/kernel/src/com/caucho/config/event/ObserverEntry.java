@@ -83,10 +83,8 @@ public class ObserverEntry<T> {
   boolean isAssignableFrom(BaseType type, Annotation []qualifiers)
   {
     if (! _type.isAssignableFrom(type)) {
-      System.out.println("BadType:\n  " + _type + "\n  " + type + "\n  " + this);
       return false;
     }
-
 
     /*
     if (qualifiers.length < _qualifiers.length)

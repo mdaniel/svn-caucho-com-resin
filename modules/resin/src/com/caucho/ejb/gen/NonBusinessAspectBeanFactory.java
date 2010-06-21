@@ -78,6 +78,15 @@ public class NonBusinessAspectBeanFactory<X> implements AspectBeanFactory<X>
   {
     return getBeanType().getJavaClass().getName();
   }
+
+  /**
+   * Returns the generated bean name
+   */
+  @Override
+  public String getInstanceClassName()
+  {
+    return getGeneratedClassName();
+  }
   
   @Override
   public boolean isProxy()

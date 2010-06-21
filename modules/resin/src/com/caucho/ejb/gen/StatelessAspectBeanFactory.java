@@ -97,6 +97,15 @@ public class StatelessAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   @Override
   public String getGeneratedClassName()
   {
+    return getBeanType().getJavaClass().getName() + "__StatelessProxy";
+  }
+  
+  /**
+   * Returns the generated bean name
+   */
+  @Override
+  public String getInstanceClassName()
+  {
     return getBeanType().getJavaClass().getName();
   }
   

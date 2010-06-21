@@ -87,6 +87,8 @@ public abstract class Path {
 
   private static SchemeMap _defaultSchemeMap;
 
+  static long _startTime;
+
   protected SchemeMap _schemeMap = _defaultSchemeMap;
 
   /**
@@ -153,51 +155,55 @@ public abstract class Path {
     else if (userPath == null)
       return this;
 
-    if (isPathCacheable()) {
-      PathKey key = _key.getAndSet(null);
+    Path path = getCache(userPath);
+      
+    if (path != null)
+      return path;
 
-      if (key == null)
-        key = new PathKey();
+    path = lookupImpl(userPath, null);
 
-      key.init(this, userPath);
-
-      Path path = _pathLookupCache.get(key);
-
-      _key.set(key);
-
-      if (path != null) {
-        return path.cacheCopy();
-      }
-    }
-
-    Path path = lookupImpl(userPath, null);
-
-    if (_startTime == 0)
+    if (_startTime == 0) {
       _startTime = System.currentTimeMillis();
 
-    /*
-    if (System.currentTimeMillis() > 15000) {
-      if (path.getPath().endsWith("UIRepeat.class")) {
-        Thread.dumpStack();
-        System.out.println("PATH: " + path);
-      }
-    }
-    */
-
-    if (isPathCacheable()) {
-      synchronized (_key) {
-        Path copy = path.cacheCopy();
-
-        if (copy != null) {
-          _pathLookupCache.putIfNew(new PathKey(this, userPath), copy);
-        }
-      }
+      putCache(userPath, path);
     }
 
     return path;
   }
+  
+  protected Path getCache(String subPath)
+  {
+    if (! isPathCacheable())
+      return null;
+    
+    PathKey key = _key.getAndSet(null);
 
-  static long _startTime;
+    if (key == null)
+      key = new PathKey();
+
+    key.init(this, subPath);
+
+    Path path = _pathLookupCache.get(key);
+
+    _key.set(key);
+
+    if (path != null)
+      return path.cacheCopy();
+    else
+      return null;
+  }
+  
+  protected void putCache(String subPath, Path path)
+  {
+    if (! isPathCacheable())
+      return;
+    
+    Path copy = path.cacheCopy();
+
+    if (copy != null) {
+      _pathLookupCache.putIfNew(new PathKey(this, subPath), copy);
+    }
+  }
 
   /**
    * Returns true if the path itself is cacheable

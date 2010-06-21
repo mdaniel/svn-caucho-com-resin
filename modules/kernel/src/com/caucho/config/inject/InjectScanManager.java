@@ -29,6 +29,7 @@
 
 package com.caucho.config.inject;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -61,6 +62,9 @@ class InjectScanManager
   
   private final ConcurrentHashMap<String,InjectScanClass> _scanClassMap
     = new ConcurrentHashMap<String,InjectScanClass>();
+  
+  private final ConcurrentHashMap<NameKey,AnnType> _annotationMap
+    = new ConcurrentHashMap<NameKey,AnnType>();
   
   private boolean _isCustomExtension;
   
@@ -214,8 +218,6 @@ class InjectScanManager
     InjectScanClass scanClass = _scanClassMap.get(className);
     
     if (scanClass == null) {
-      className = className.intern();
-      
       scanClass = new InjectScanClass(className, this);
       InjectScanClass oldScanClass;
       oldScanClass = _scanClassMap.putIfAbsent(className, scanClass);
@@ -225,6 +227,30 @@ class InjectScanManager
     }
     
     return scanClass;
+  }
+  
+  /**
+   * Loads an annotation for scanning.
+   */
+  public AnnType loadAnnotation(char[] buffer, int offset, int length)
+    throws ClassNotFoundException
+  {
+    NameKey key = new NameKey(buffer, offset, length);
+    
+    AnnType annType = _annotationMap.get(key);
+    
+    if (annType != null)
+      return annType;
+    
+    ClassLoader loader = getInjectManager().getClassLoader();
+    
+    String className = new String(buffer, offset, length);
+    
+    Class<?> cl = Class.forName(className, false, loader);
+    
+    _annotationMap.put(key.dup(), new AnnType(cl));
+    
+    return annType;
   }
 
   @Override
@@ -245,4 +271,93 @@ class InjectScanManager
   {
     return getClass().getSimpleName() + "[" + _injectManager + "]";
   }
+  
+  static class NameKey {
+    private char []_buffer;
+    private int _offset;
+    private int _length;
+    
+    NameKey(char []buffer, int offset, int length)
+    {
+      _buffer = buffer;
+      _offset = offset;
+      _length = length;
+    }
+    
+    public NameKey dup()
+    {
+      char []buffer = new char[_length];
+      
+      System.arraycopy(_buffer, _offset, buffer, 0, _length);
+      
+      _buffer = buffer;
+      _offset = 0;
+      
+      return this;
+    }
+    
+    public int hashCode()
+    {
+      char []buffer = _buffer;
+      int offset = _offset;
+      int length = _length;
+      int hash = length;
+      
+      for (length--; length >= 0; length--) {
+        char value = buffer[offset + length];
+        
+        hash = 65521 * hash + value;
+      }
+      
+      return hash;
+    }
+    
+    public boolean equals(Object o)
+    {
+      if (! (o instanceof NameKey))
+        return false;
+      
+      NameKey key = (NameKey) o;
+     
+      if (_length != key._length)
+        return false;
+      
+      char []bufferA = _buffer;
+      char []bufferB = key._buffer;
+      
+      int offsetA = _offset;
+      int offsetB = key._offset;
+      
+      for (int i = _length - 1; i >= 0; i--) {
+        if (bufferA[offsetA + i] != bufferB[offsetB + i])
+          return false;
+      }
+      
+      return true;
+    }
+  }
+  
+  static class AnnType {
+    private Class<?> _type;
+    private Annotation []_annotations;
+    
+    AnnType(Class<?> type)
+    {
+      _type = type;
+    }
+    
+    public Class<?> getType()
+    {
+      return _type;
+    }
+    
+    public Annotation []getAnnotations()
+    {
+      if (_annotations == null)
+        _annotations = _type.getAnnotations();
+      
+      return _annotations;
+    }
+  }
+
 }

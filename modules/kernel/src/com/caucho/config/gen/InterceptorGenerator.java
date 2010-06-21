@@ -147,7 +147,8 @@ public class InterceptorGenerator<X>
     
     _factory = factory;
     
-    _interceptors.addAll(lifecycleInterceptors);
+    if (lifecycleInterceptors != null)
+      _interceptors.addAll(lifecycleInterceptors);
     
     _interceptionType = type;
     
@@ -263,7 +264,7 @@ public class InterceptorGenerator<X>
     out.println(");");
     
     if (_factory.isPassivating()) {
-      String beanClassName = getFactory().getAspectBeanFactory().getGeneratedClassName();
+      String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
       
       out.println();
       out.print("com.caucho.config.gen.CandiUtil.validatePassivating(");
@@ -587,6 +588,7 @@ public class InterceptorGenerator<X>
     out.pushDepth();
 
     out.print(getUniqueName(out) + "_method = ");
+    
     generateGetMethod(out,
                       javaMethod.getDeclaringClass().getName(),
                       javaMethod.getName(),
@@ -605,7 +607,7 @@ public class InterceptorGenerator<X>
       superMethodName = javaMethod.getName();
     }
     else
-      className = getBeanFactory().getGeneratedClassName();
+      className = getBeanFactory().getInstanceClassName();
       
     
     generateGetMethod(out,
@@ -805,7 +807,7 @@ public class InterceptorGenerator<X>
     out.println(");");
     
     if (_factory.isPassivating()) {
-      String beanClassName = getFactory().getAspectBeanFactory().getGeneratedClassName();
+      String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
       
       out.println();
       out.print("com.caucho.config.gen.CandiUtil.validatePassivating(");
@@ -853,7 +855,10 @@ public class InterceptorGenerator<X>
 
     out.println(", ");
     // generateThis(out);
-    out.println(uniqueName + "_method, ");
+    if (_interceptionType == InterceptionType.AROUND_INVOKE)
+      out.println(uniqueName + "_method, ");
+    else
+      out.println("null, ");
     // generateThis(out);
     out.println(uniqueName + "_implMethod, ");
     // generateThis(out);
@@ -1102,7 +1107,7 @@ public class InterceptorGenerator<X>
     out.pushDepth();
 
     // String beanClassName = getBeanType().getJavaClass().getName();
-    String beanClassName = getFactory().getAspectBeanFactory().getGeneratedClassName();
+    String beanClassName = _factory.getInstanceClassName();
 
     out.println("private int _index;");
     out.println("private " + beanClassName + " _bean;");
@@ -1116,10 +1121,10 @@ public class InterceptorGenerator<X>
     out.println("  _delegates = delegates;");
     out.println("}");
 
-    String generatedClassName = _factory.getAspectBeanFactory().getGeneratedClassName();
+    String generatedClassName = _factory.getGeneratedClassName();
     
     out.println();
-    out.println("final " + generatedClassName + " __caucho_getBean()");
+    out.println("final " + beanClassName + " __caucho_getBean()");
     out.println("{");
     /*
     out.println("  return " + getBusinessMethod().getView().getViewClassName()
@@ -1784,15 +1789,23 @@ public class InterceptorGenerator<X>
                                  Class<?>[] paramTypes)
     throws IOException
   {
-    out.print("com.caucho.config.gen.CandiUtil.getMethod(");
-    out.print(className);
-    out.print(".class, \"" + methodName + "\", new Class[] { ");
-
-    for (Class<?> type : paramTypes) {
-      out.printClass(type);
-      out.print(".class, ");
+    if (_interceptionType == InterceptionType.POST_CONSTRUCT) {
+      out.print("com.caucho.config.gen.CandiUtil.getMethod(");
+      out.print(_factory.getGeneratedClassName());
+      out.print(".class, \"__caucho_postConstructImpl\");");
     }
-    out.print("})");
+    else {
+      out.print("com.caucho.config.gen.CandiUtil.getMethod(");
+      out.print(className);
+      out.print(".class, \"" + methodName + "\"");
+
+      for (Class<?> type : paramTypes) {
+        out.print(", ");
+        out.printClass(type);
+        out.print(".class");
+      }
+      out.print(")");
+    }
   }
 
   protected void printCastClass(JavaWriter out, Class<?> type)

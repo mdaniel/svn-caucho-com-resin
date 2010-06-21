@@ -38,6 +38,7 @@ import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InterceptorRuntimeBean;
 import com.caucho.config.inject.OwnerCreationalContext;
+import com.caucho.config.reflect.AnnotatedTypeUtil;
 import com.caucho.util.L10N;
 
 import java.io.Serializable;
@@ -263,7 +264,7 @@ public class CandiUtil {
 
   public static Method getMethod(Class<?> cl,
                                  String methodName,
-                                 Class<?> paramTypes[])
+                                 Class<?> ...paramTypes)
     throws Exception
   {
     Method method = null;
@@ -288,6 +289,24 @@ public class CandiUtil {
     return method;
   }
 
+  public static Method findMethod(Class<?> cl,
+                                  String methodName,
+                                  Class<?> ...paramTypes)
+  {
+    for (Class<?> ptr = cl; ptr != null; ptr = ptr.getSuperclass()) {
+      for (Method method : ptr.getDeclaredMethods()) {
+        if (AnnotatedTypeUtil.isMatch(method, methodName, paramTypes)) {
+          return method;
+        }
+      }
+    }
+
+    log.warning(L.l("'{0}' is an unknown method in {1}",
+                    methodName, cl.getName()));
+    
+    return null;
+  }
+
   public static Object []generateProxyDelegate(InjectManager manager,
                                                List<Decorator<?>> beans,
                                                Object delegateProxy,
@@ -306,7 +325,7 @@ public class CandiUtil {
       CreationalContextImpl<?> env = new DependentCreationalContext(bean, proxyEnv, null);
       
       Object instance = manager.getReference(bean, bean.getBeanClass(), env);
-
+      
       // XXX:
       InjectionPoint ip = getDelegate(bean);
 

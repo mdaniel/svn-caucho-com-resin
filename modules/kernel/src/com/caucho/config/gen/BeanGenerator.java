@@ -32,8 +32,11 @@ package com.caucho.config.gen;
 import java.io.IOException;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 
+import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
@@ -285,6 +288,8 @@ abstract public class BeanGenerator<X> extends GenClass
                                        HashMap<String,Object> map)
      throws IOException
   {
+    ArrayList<Method> postConstructMethods = getPostConstructMethods();
+    
     out.println();
     out.println("public void __caucho_postConstruct()");
     out.println("{");
@@ -298,6 +303,83 @@ abstract public class BeanGenerator<X> extends GenClass
 
     out.popDepth();
     out.println("}");
+    
+    generatePostConstructMethodReflection(out, postConstructMethods);
+    
+    out.println();
+    out.println("private void __caucho_postConstructImpl()");
+    out.println("  throws Exception");
+    out.println("{");
+    out.pushDepth();
+    
+    generatePostConstructMethods(out, postConstructMethods);
+    
+    out.popDepth();
+    out.println("}");
+  }
+  
+  protected void generatePostConstructMethodReflection(JavaWriter out,
+                                                       ArrayList<Method> methods)
+    throws IOException
+  {
+    for (int i = 0; i < methods.size(); i++) {
+      Method method = methods.get(i);
+      
+
+      out.println();
+      out.println("java.lang.reflect.Method __caucho_postConstruct_" + i + " = ");
+      
+      out.print("  ");
+      
+      out.printClass(CandiUtil.class);
+      out.print(".findMethod(");
+      out.printClass(method.getDeclaringClass());
+      out.print(".class, \"");
+      out.print(method.getName());
+      out.println("\");");
+    }
+  }
+  
+  protected void generatePostConstructMethods(JavaWriter out,
+                                              ArrayList<Method> methods)
+    throws IOException
+  {
+    for (int i = 0; i < methods.size(); i++) {
+      out.println("try {");
+      out.pushDepth();
+      
+      out.print("__caucho_postConstruct_" + i + ".invoke(");
+      out.print(getAspectBeanFactory().getBeanInstance());
+      out.println(");");
+      
+      out.popDepth();
+      out.println("} catch (java.lang.reflect.InvocationTargetException ex) {");
+      out.println("  if (ex.getCause() instanceof Exception)");
+      out.println("    throw (Exception) ex.getCause();");
+      out.println("  else");
+      out.println("    throw ex;");
+      out.println("}");
+    }
+  }
+
+  
+  protected ArrayList<Method> getPostConstructMethods()
+  {
+    ArrayList<Method> methods = new ArrayList<Method>();
+    
+    for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
+      if (! method.isAnnotationPresent(PostConstruct.class))
+        continue;
+      
+      if (method.getParameters().size() != 0)
+        continue;
+      
+      methods.add(method.getJavaMember());
+    }
+    
+    Collections.sort(methods, new PostConstructComparator());
+    
+    return methods;
   }
 
   private void generatePreDestroy(JavaWriter out, 
@@ -343,43 +425,28 @@ abstract public class BeanGenerator<X> extends GenClass
     _dependency.generate(out);
   }
 
-  /**
-   * Returns true if the method is implemented.
-   */
-  private boolean hasMethod(String methodName, Class<?> []paramTypes)
-  {
-    for (AnnotatedMethod<? super X> method : _beanType.getMethods()) {
-      Method javaMethod = method.getJavaMember();
-      
-      if (! javaMethod.getName().equals(methodName))
-        continue;
-      
-      if (! isMatch(javaMethod.getParameterTypes(), paramTypes))
-        continue;
-      
-      return true;
-    }
-    
-    return false;
-  }
-  
-  private static boolean isMatch(Class<?> []typesA, Class<?> []typesB)
-  {
-    if (typesA.length != typesB.length)
-      return false;
-    
-    for (int i = typesA.length - 1; i >= 0; i--) {
-      if (! typesA[i].equals(typesB[i]))
-        return false;
-    }
-    
-    return true;
-  }
-
   @Override
   public String toString()
   {
     return (getClass().getSimpleName()
             + "[" + _beanType.getJavaClass().getSimpleName() + "]");
+  }
+  
+  static class PostConstructComparator implements Comparator<Method> {
+    @Override
+    public int compare(Method a, Method b)
+    {
+      Class<?> classA = a.getDeclaringClass();
+      Class<?> classB = b.getDeclaringClass();
+      
+      if (classA == classB)
+        return a.getName().compareTo(b.getName());
+      else if (classA.isAssignableFrom(classB))
+        return -1;
+      else if (classB.isAssignableFrom(classA))
+        return 1;
+      else
+        return a.getName().compareTo(b.getName());
+    }
   }
 }

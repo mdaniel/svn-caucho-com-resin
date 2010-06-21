@@ -35,6 +35,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
+import java.util.logging.Logger;
 
 import javax.enterprise.inject.Alternative;
 import javax.enterprise.inject.Disposes;
@@ -63,6 +64,7 @@ import com.caucho.util.L10N;
  */
 @Module
 public class ProducesBuilder {
+  private static final Logger log = Logger.getLogger(ProducesBuilder.class.getName());
   private static final L10N L = new L10N(ProducesBuilder.class);
   
   private InjectManager _manager;

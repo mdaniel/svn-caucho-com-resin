@@ -55,6 +55,24 @@ public class SingletonAspectBeanFactory<X> extends CandiAspectBeanFactory<X>
   }
   
   /**
+   * Returns the generated bean name
+   */
+  @Override
+  public String getGeneratedClassName()
+  {
+    return getBeanType().getJavaClass().getName() + "__SingletonProxy";
+  }
+  
+  /**
+   * Returns the generated bean name
+   */
+  @Override
+  public String getInstanceClassName()
+  {
+    return getBeanType().getJavaClass().getName();
+  }
+  
+  /**
    * Generates the underlying bean object
    */
   @Override

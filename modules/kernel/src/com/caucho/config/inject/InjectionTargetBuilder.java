@@ -46,6 +46,7 @@ import java.util.logging.Logger;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+import javax.decorator.Decorator;
 import javax.decorator.Delegate;
 import javax.ejb.Stateful;
 import javax.enterprise.context.spi.CreationalContext;
@@ -66,6 +67,7 @@ import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
+import javax.interceptor.Interceptor;
 import javax.interceptor.InvocationContext;
 
 import com.caucho.config.ConfigException;
@@ -349,6 +351,10 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   
   private ConfigProgram []introspectPostConstruct(AnnotatedType<X> annType)
   {
+    if (annType.isAnnotationPresent(Interceptor.class)) {
+      return new ConfigProgram[0];
+    }
+    
     ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
     introspectInit(initList, annType.getJavaClass());
     ConfigProgram []initProgram = new ConfigProgram[initList.size()];
@@ -399,6 +405,10 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   {
     if (type == null || type.equals(Object.class))
       return;
+    
+    if (type.isAnnotationPresent(Interceptor.class)) {
+      return;
+    }
 
     introspectDestroy(destroyList, type.getSuperclass());
 

@@ -95,6 +95,9 @@ public class TypeFactory implements AddLoaderListener
 
   private final ConcurrentHashMap<QName,ConfigType> _attrMap
     = new ConcurrentHashMap<QName,ConfigType>();
+  
+  private final ConcurrentHashMap<QName,Class<?>> _customClassMap
+    = new ConcurrentHashMap<QName,Class<?>>();
 
   private final HashMap<QName,Attribute> _listAttrMap
     = new HashMap<QName,Attribute>();
@@ -162,6 +165,14 @@ public class TypeFactory implements AddLoaderListener
   public static ConfigType<?> getType(Type type)
   {
     return getType((Class) type);
+  }
+
+  /**
+   * Returns the appropriate strategy.
+   */
+  public static Class<?> loadClass(QName qName)
+  {
+    return getFactory().loadClassImpl(qName);
   }
 
   /**
@@ -272,10 +283,14 @@ public class TypeFactory implements AddLoaderListener
       String pkg = uri.substring("urn:java:".length());
       String className = name.getLocalName();
 
-      Class cl = loadClassImpl(pkg, className);
+      Class<?> cl = loadClassImpl(pkg, className);
 
       if (cl != null) {
-        return getType(cl);
+        type = getType(cl);
+        
+        _attrMap.put(name, type);
+        
+        return type;
       }
     }
 
@@ -295,7 +310,7 @@ public class TypeFactory implements AddLoaderListener
       if (attr != null)
         return attr;
 
-      ConfigType type = getEnvironmentType(name);
+      ConfigType<?> type = getEnvironmentType(name);
 
       if (type == null)
         return null;
@@ -319,7 +334,7 @@ public class TypeFactory implements AddLoaderListener
       if (attr != null)
         return attr;
 
-      ConfigType type = getEnvironmentType(name);
+      ConfigType<?> type = getEnvironmentType(name);
 
       if (type == null)
         return null;
@@ -357,10 +372,33 @@ public class TypeFactory implements AddLoaderListener
     return attr;
   }
 
-  private Class loadClassImpl(String pkg, String name)
+  private Class<?> loadClassImpl(QName qName)
   {
-    String className = pkg + "." + name;
+    Class<?> cl = _customClassMap.get(qName);
+    
+    if (cl != null)
+      return cl == void.class ? null : cl;
+    
+    String uri = qName.getNamespaceURI();
+    String localName = qName.getLocalName();
 
+    if (! uri.startsWith("urn:java:"))
+      throw new IllegalStateException(L.l("'{0}' is an unexpected namespace, expected 'urn:java:...'", uri));
+
+    String packageName = uri.substring("uri:java:".length());
+    
+    cl = loadClassImpl(packageName, localName);
+    
+    if (cl != null)
+      _customClassMap.put(qName, cl);
+    else
+      _customClassMap.put(qName, void.class);
+    
+    return cl;
+  }
+  
+  private Class<?> loadClassImpl(String pkg, String name)
+  {
     ClassLoader loader = _loader;
 
     if (_loader == null)
@@ -370,7 +408,7 @@ public class TypeFactory implements AddLoaderListener
 
     for (String pkgName : pkgList) {
       try {
-        Class cl = Class.forName(pkgName + '.' + name, false, loader);
+        Class<?> cl = Class.forName(pkgName + '.' + name, false, loader);
 
         return cl;
       } catch (ClassNotFoundException e) {
@@ -953,7 +991,7 @@ public class TypeFactory implements AddLoaderListener
     private String _name;
     private String _className;
 
-    private ConfigType _configType;
+    private ConfigType<?> _configType;
     private ClassLoader _loader;
 
     BeanConfig(String ns, boolean isDefault)
@@ -978,15 +1016,13 @@ public class TypeFactory implements AddLoaderListener
       _className = className;
     }
 
-    public ConfigType getConfigType()
+    public ConfigType<?> getConfigType()
     {
       try {
         if (_configType == null) {
-          QName qName = new QName(null, _name, _ns);
+          Class<?> cl = Class.forName(_className, false, _loader);
 
-          Class cl = Class.forName(_className, false, _loader);
-
-          ConfigType type = createType(cl);
+          ConfigType<?> type = createType(cl);
 
           type.introspect();
 
