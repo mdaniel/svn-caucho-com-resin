@@ -1480,7 +1480,7 @@ cron entry</a> contains this descriptive chart:
 <p>&lt;development-mode-error-page> enables browser error reporting
 with extra information.  Because it can expose internal data, it is not
 generally recommended in production systems.  (The information is generally
-coped to the log.</p>
+copied to the log.</p>
 </description>
 
 </defun>
