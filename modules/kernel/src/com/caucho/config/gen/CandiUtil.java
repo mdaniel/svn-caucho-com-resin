@@ -184,34 +184,54 @@ public class CandiUtil {
                                          ArrayList<Interceptor<?>> beans)
   {
     for (Interceptor<?> interceptor : beans) {
-      Class<?> beanClass = interceptor.getBeanClass();
+      validatePassivating(cl, interceptor, "interceptor");
+    }
+  }
+
+  public static void validatePassivatingDecorators(Class<?> cl, 
+                                                   List<Decorator<?>> beans)
+  {
+    for (Decorator<?> decorator : beans) {
+      validatePassivating(cl, decorator, "decorator");
+    }
+  }
+  
+  public static void validatePassivating(Class<?> cl,
+                                         Bean<?> bean,
+                                         String typeName)
+  {
+    Class<?> beanClass = bean.getBeanClass();
+
+    if (! Serializable.class.isAssignableFrom(beanClass)) {
+      ConfigException exn
+      = new ConfigException(L.l("{0}: {1} is an invalid {2} because it is not serializable.",
+                                cl.getName(),
+                                bean,
+                                typeName));
+
+      throw exn;
+      // InjectManager.create().addDefinitionError(exn);
+    }
+
+    for (InjectionPoint ip : bean.getInjectionPoints()) {
+      if (ip.isTransient() || ip.isDelegate())
+        continue;
       
-      if (! Serializable.class.isAssignableFrom(beanClass)) {
+      Class<?> type = getRawClass(ip.getType());
+      
+      if (type.isInterface())
+        continue;
+
+      if (! Serializable.class.isAssignableFrom(type)) {
         ConfigException exn
-        = new ConfigException(L.l("{0}: {1} is an invalid interceptor because it is not serializable.",
-                                  cl.getName(),
-                                  interceptor));
-      
+          = new ConfigException(L.l("{0}: {1} is an invalid {4} because its injection point '{2}' of type {3} is not serializable.",
+                                    cl.getName(),
+                                    bean,
+                                    ip.getMember().getName(),
+                                    ip.getType(),
+                                    typeName));
+
         throw exn;
-        // InjectManager.create().addDefinitionError(exn);
-      }
-      
-      for (InjectionPoint ip : interceptor.getInjectionPoints()) {
-        Class<?> type = getRawClass(ip.getType());
-        
-        if (! Serializable.class.isAssignableFrom(type)) {
-          ConfigException exn
-            = new ConfigException(L.l("{0}: {1} is an invalid interceptor because its injection point '{2}' of type {3} is not serializable.",
-                                      cl.getName(),
-                                      interceptor,
-                                      ip.getMember().getName(),
-                                      ip.getType()));
-          
-          log.log(Level.INFO, exn.toString(), exn);
-        
-          throw exn;
-          
-        }
       }
     }
   }

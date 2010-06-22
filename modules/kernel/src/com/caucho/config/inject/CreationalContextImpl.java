@@ -223,6 +223,12 @@ public class CreationalContextImpl<T> implements CreationalContext<T> {
     _value = value;
   }
   
+  @Module
+  public void clearTarget()
+  {
+    _value = null;
+  }
+  
   @Override
   public void release()
   {

@@ -51,7 +51,6 @@ import javax.interceptor.AroundInvoke;
 import javax.interceptor.InterceptorBinding;
 
 import com.caucho.config.ConfigException;
-import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.DependentCreationalContext;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InterceptorBean;
@@ -984,8 +983,6 @@ public class InterceptorGenerator<X>
                   + _decoratorLocalVar);
       out.println("  = new ThreadLocal<" + _decoratorClass + ">();");
       
-      out.println("static { __caucho_log.log(java.util.logging.Level.WARNING, \"thread local\", new IllegalStateException()); }");
-
       out.println();
       out.println("private transient Object [] " + _decoratorIndexVar + ";");
       
@@ -1070,6 +1067,15 @@ public class InterceptorGenerator<X>
       }
       
       out.println(");");
+    }
+    
+    if (_factory.isPassivating()) {
+      String beanClassName = getFactory().getAspectBeanFactory().getInstanceClassName();
+      
+      out.println();
+      out.print("com.caucho.config.gen.CandiUtil.validatePassivatingDecorators(");
+      out.print(beanClassName + ".class, ");
+      out.println("decoratorList);");
     }
     
     out.popDepth();
@@ -1230,8 +1236,6 @@ public class InterceptorGenerator<X>
       // out.println("Object []delegates = var.__caucho_getBean()." + _decoratorIndexVar + ";");
       // out.println("Object []delegates = _bean != null ? _bean." + _decoratorIndexVar + " : null;");
       // out.println("Object []delegates = var._bean.__caucho_getDelegates();");
-      
-      out.println("__caucho_log.info(\"GET: \" + var + \"\\n  \" + this + \"\\n  \" + getClass() + \"\\n  \" + getClass().getClassLoader());");
       
       out.println("Object []delegates = var._delegates;");
 
@@ -1415,7 +1419,6 @@ public class InterceptorGenerator<X>
 
     out.print(_decoratorLocalVar);
     out.println(".set(delegate);");
-    out.println("__caucho_log.info(\"SET: \" + delegate);");
   }
 
   /**

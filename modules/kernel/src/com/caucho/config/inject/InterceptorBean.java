@@ -186,9 +186,11 @@ public class InterceptorBean<X> extends InterceptorRuntimeBean<X>
   /**
    * Destroys a bean instance
    */
+  @Override
   public void destroy(X instance, CreationalContext<X> env)
   {
-    _bean.destroy(instance, env);
+    // ioc/0558
+    // _bean.destroy(instance, env);
   }
 
   //

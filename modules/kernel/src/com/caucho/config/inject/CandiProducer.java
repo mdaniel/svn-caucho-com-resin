@@ -119,6 +119,8 @@ public class CandiProducer<X> implements InjectionTarget<X>
                                          List.class);
         
         method.invoke(null, _decoratorBeans);
+      } catch (InvocationTargetException e) {
+        throw ConfigException.create(e.getCause());
       } catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
       }

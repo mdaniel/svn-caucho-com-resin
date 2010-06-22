@@ -166,6 +166,14 @@ public class ProducesFieldBean<X,T> extends AbstractIntrospectedBean<T>
       _fieldProducer.destroy(instance, (CreationalContextImpl<T>) cxt);
     else
       _producer.dispose(instance);
+    
+    if (cxt instanceof CreationalContextImpl<?>) {
+      CreationalContextImpl<?> env = (CreationalContextImpl<?>) cxt;
+      
+      env.clearTarget();
+    }
+    
+    cxt.release();
   }
 
   @Override

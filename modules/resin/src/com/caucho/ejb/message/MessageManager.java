@@ -32,6 +32,7 @@ package com.caucho.ejb.message;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -107,6 +108,11 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
   public void setResourceAdapter(ResourceAdapter ra)
   {
     _ra = ra;
+  }
+  
+  public ArrayList<AnnotatedType<? super X>> getLocalApi()
+  {
+    return new ArrayList<AnnotatedType<? super X>>();
   }
 
   /**

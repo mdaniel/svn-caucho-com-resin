@@ -87,7 +87,7 @@ public class DecoratorBean<T> implements Decorator<T>
 
     _bean = beanManager.createManagedBean(type);
 
-    init();
+    // init();
   }
 
   //
@@ -186,6 +186,9 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Set<InjectionPoint> getInjectionPoints()
   {
+    if (_delegateInjectionPoint != null)
+      bind();
+    
     return _bean.getInjectionPoints();
   }
 
@@ -205,6 +208,9 @@ public class DecoratorBean<T> implements Decorator<T>
   @Override
   public Type getDelegateType()
   {
+    if (_delegateInjectionPoint == null)
+      bind();
+    
     return _delegateInjectionPoint.getType();
   }
 
@@ -222,11 +228,16 @@ public class DecoratorBean<T> implements Decorator<T>
   
   public InjectionPoint getDelegateInjectionPoint()
   {
+    if (_delegateInjectionPoint != null)
+      bind();
+    
     return _delegateInjectionPoint;
   }
 
-  public void init()
+  public void bind()
   {
+    if (_delegateInjectionPoint != null)
+      return;
     // _bean.init();
 
     introspect();
@@ -250,7 +261,7 @@ public class DecoratorBean<T> implements Decorator<T>
       if (ip.isDelegate()) {
         if (_delegateInjectionPoint != null)
           throw new ConfigException(L.l("{0}: @Decorator field '{1}' conflicts with earlier field '{2}'."
-                                        + " A decorator must have exactly on delegate field.",
+                                        + " A decorator must have exactly one delegate field.",
                                         ip.getBean().getBeanClass().getName(),
                                         ip.getMember().getName(),
                                         _delegateInjectionPoint.getMember().getName()));

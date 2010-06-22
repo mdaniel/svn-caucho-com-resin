@@ -219,36 +219,13 @@ public class BeansConfig {
         _pendingClasses.clear();
 
         for (Class<?> cl : pendingClasses) {
-          /*
-          if (injectManager.getWebComponent(cl) != null)
-            continue;
-          */
-
           ManagedBeanImpl<?> bean;
-
-          /*
-          if (cl.isAnnotationPresent(Singleton.class))
-            component = new SingletonClassComponent(cl);
-          else
-          */
-          /*
-          component = new SimpleBean(cl);
-
-          component.setFromClass(true);
-          component.init();
-          */
+          
           bean = injectManager.createManagedBean(cl);
 
           injectManager.addBean(bean);
 
           bean.introspectProduces();
-          /*
-          for (Bean<?> producerBean : bean.getProducerBeans()) {
-            injectManager.addBean(producerBean);
-          }
-          */
-
-          //_pendingComponentList.add(component);
         }
       }
     } catch (Exception e) {
@@ -295,7 +272,16 @@ public class BeansConfig {
 
     public void addClass(Class<?> cl)
     {
+      if (_decoratorList.contains(cl))
+        throw new ConfigException(L.l("'{0}' is a duplicate decorator. Decorators may not be listed twice in the beans.xml",
+                                      cl.getName()));
+        
       _decoratorList.add(cl);
+    }
+
+    public void addDecorator(Class<?> cl)
+    {
+      addClass(cl);
     }
 
     public void addCustomBean(CustomBeanConfig<?> config)

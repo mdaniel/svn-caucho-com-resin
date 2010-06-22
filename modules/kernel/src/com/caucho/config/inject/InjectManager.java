@@ -1059,6 +1059,9 @@ public final class InjectManager
    */
   public <T> ManagedBeanImpl<T> createManagedBean(AnnotatedType<T> type)
   {
+    if (type == null)
+      throw new NullPointerException();
+    
     ManagedBeanImpl<T> bean
       = new ManagedBeanImpl<T>(this, type, false);
     bean.introspect();
@@ -1447,7 +1450,7 @@ public final class InjectManager
 
         _classLoader.applyVisibleModules(fillByType);
       }
-
+      
       Class<?> rawClass = baseType.getRawClass();
       
       beanSet = new WebComponent(this, rawClass);
@@ -2998,6 +3001,9 @@ public final class InjectManager
 
     // ioc/0i04
     if (annType.isAnnotationPresent(javax.decorator.Decorator.class)) {
+      if (annType.isAnnotationPresent(javax.interceptor.Interceptor.class))
+        throw new ConfigException(L.l("'{0}' bean may not have both a @Decorator and @Interceptor annotation.",
+                                      annType.getJavaClass()));
       // ioc/0c92
       DecoratorBean decoratorBean = new DecoratorBean(this, annType.getJavaClass());
       

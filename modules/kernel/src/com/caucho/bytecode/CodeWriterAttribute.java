@@ -32,7 +32,7 @@ package com.caucho.bytecode;
 import java.io.*;
 
 /**
- * Represents a generic attribute
+ * Code generator attribute.
  */
 public class CodeWriterAttribute extends CodeAttribute {
   private int _stack;
@@ -184,10 +184,10 @@ public class CodeWriterAttribute extends CodeAttribute {
   }
 
   public void invoke(String className,
-		     String methodName,
-		     String signature,
-		     int argStack,
-		     int returnStack)
+                     String methodName,
+                     String signature,
+                     int argStack,
+                     int returnStack)
   {
     _stack += returnStack - argStack;
 
@@ -245,10 +245,10 @@ public class CodeWriterAttribute extends CodeAttribute {
   }
 
   public void invokespecial(String className,
-			    String methodName,
-			    String signature,
-			    int argStack,
-			    int returnStack)
+                            String methodName,
+                            String signature,
+                            int argStack,
+                            int returnStack)
   {
     _stack += returnStack - argStack;
 
@@ -272,6 +272,11 @@ public class CodeWriterAttribute extends CodeAttribute {
     write(CodeVisitor.INVOKESTATIC);
     write(index >> 8);
     write(index);
+  }
+  
+  public void addThrow()
+  {
+    write(CodeVisitor.ATHROW);
   }
   
   public void addReturn()

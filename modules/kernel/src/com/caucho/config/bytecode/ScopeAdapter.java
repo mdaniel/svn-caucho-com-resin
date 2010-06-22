@@ -40,6 +40,7 @@ import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.ejb.Remove;
 import javax.enterprise.inject.spi.Bean;
 
 import com.caucho.bytecode.CodeWriterAttribute;
@@ -68,19 +69,19 @@ public class ScopeAdapter {
   private static final Logger log 
     = Logger.getLogger(ScopeAdapter.class.getName());
 
+  private final Class<?> _beanClass;
   private final Class<?> _cl;
   private final Class<?> []_types;
 
   private Class<?> _proxyClass;
   private Constructor<?> _proxyCtor;
   
-  private boolean _isWriteReplace;
-
-  private ScopeAdapter(Class<?> beanClass, Class<?> []types)
+  private ScopeAdapter(Class<?> beanClass, Class<?> cl, Class<?> []types)
   {
     _types = types;
     
-    _cl = beanClass;
+    _beanClass = beanClass;
+    _cl = cl;
 
     generateProxy(_cl, types);
   }
@@ -91,6 +92,7 @@ public class ScopeAdapter {
     
     ArrayList<Class<?>> classList = new ArrayList<Class<?>>();
     
+    Class<?> beanClass = bean.getBeanClass();
     Class<?> cl = null;
     
     for (Type type : types) {
@@ -114,12 +116,12 @@ public class ScopeAdapter {
     
     classList.toArray(classes);
     
-    return new ScopeAdapter(cl, classes);
+    return new ScopeAdapter(beanClass, cl, classes);
   }
 
   public static ScopeAdapter create(Class<?> cl)
   {
-    ScopeAdapter adapter = new ScopeAdapter(cl, new Class<?>[] { cl });
+    ScopeAdapter adapter = new ScopeAdapter(cl, cl, new Class<?>[] { cl });
 
     return adapter;
   }
@@ -260,7 +262,10 @@ public class ScopeAdapter {
           if (Modifier.isFinal(method.getModifiers()))
             continue;
 
-          createProxyMethod(jClass, method, method.getDeclaringClass().isInterface());
+          if (isRemoveMethod(_beanClass, method))
+            createRemoveProxyMethod(jClass, method, method.getDeclaringClass().isInterface());
+          else
+            createProxyMethod(jClass, method, method.getDeclaringClass().isInterface());
         }
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
@@ -331,6 +336,23 @@ public class ScopeAdapter {
     }
     
     return methodList;
+  }
+
+  private boolean isRemoveMethod(Class<?> beanClass, Method method)
+  {
+    if (method.isAnnotationPresent(Remove.class)) {
+      return true;
+    }
+    
+    try {
+      Method beanMethod = beanClass.getMethod(method.getName(), method.getParameterTypes());
+      
+      return beanMethod.isAnnotationPresent(Remove.class);
+    } catch (Exception e) {
+      log.log(Level.FINEST, e.toString(), e);
+      
+      return false;
+    }
   }
 
   private void createProxyMethod(JavaClass jClass,
@@ -436,6 +458,33 @@ public class ScopeAdapter {
     code.close();
   }
 
+  private void createRemoveProxyMethod(JavaClass jClass,
+                                       Method method,
+                                       boolean isInterface)
+  {
+    String descriptor = createDescriptor(method);
+
+    JavaMethod jMethod = jClass.createMethod(method.getName(),
+                                             descriptor);
+    jMethod.setAccessFlags(Modifier.PUBLIC);
+
+    Class<?> []parameterTypes = method.getParameterTypes();
+
+    CodeWriterAttribute code = jMethod.createCodeWriter();
+    code.setMaxLocals(1 + 2 * parameterTypes.length);
+    code.setMaxStack(3 + 2 * parameterTypes.length);
+
+    code.newInstance("java/lang/UnsupportedOperationException");
+    code.dup();
+    code.invokespecial("java/lang/UnsupportedOperationException",
+                       "<init>",
+                       "()V",
+                       3, 1);
+    code.addThrow();
+
+    code.close();
+  }
+
   private void createGetDelegateMethod(JavaClass jClass)
   {
     String descriptor = "()Ljava/lang/Object;";
@@ -498,7 +547,7 @@ public class ScopeAdapter {
 
     sb.append("(");
 
-    for (Class param : method.getParameterTypes()) {
+    for (Class<?> param : method.getParameterTypes()) {
       sb.append(createDescriptor(param));
     }
 
@@ -508,7 +557,7 @@ public class ScopeAdapter {
     return sb.toString();
   }
 
-  private String createDescriptor(Class cl)
+  private String createDescriptor(Class<?> cl)
   {
     if (cl.isArray())
       return "[" + createDescriptor(cl.getComponentType());
@@ -521,7 +570,8 @@ public class ScopeAdapter {
     return "L" + cl.getName().replace('.', '/') + ";";
   }
 
-  private static HashMap<Class,String> _prim = new HashMap<Class,String>();
+  private static HashMap<Class<?>,String> _prim
+    = new HashMap<Class<?>,String>();
 
   static {
     _prim.put(boolean.class, "Z");

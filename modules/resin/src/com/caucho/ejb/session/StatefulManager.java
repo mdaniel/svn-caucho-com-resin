@@ -30,6 +30,7 @@
 package com.caucho.ejb.session;
 
 import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -47,6 +48,7 @@ import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.SessionBeanType;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.gen.CandiUtil;
@@ -129,6 +131,8 @@ public class StatefulManager<X> extends AbstractSessionManager<X>
         
       
         method.invoke(null, _decoratorBeans);
+      } catch (InvocationTargetException e) {
+        throw ConfigException.create(e.getCause());
       } catch (Exception e) {
         log.log(Level.FINEST, e.toString(), e);
       }

@@ -356,6 +356,12 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
     else
       _producer.dispose(instance);
     
+    if (cxt instanceof CreationalContextImpl<?>) {
+      CreationalContextImpl<?> env = (CreationalContextImpl<?>) cxt;
+      
+      env.clearTarget();
+    }
+    
     cxt.release();
   }
 

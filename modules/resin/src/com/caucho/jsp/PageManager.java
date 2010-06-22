@@ -36,6 +36,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.InjectionException;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
 import javax.servlet.Servlet;
@@ -48,6 +49,7 @@ import javax.servlet.http.HttpSession;
 import javax.servlet.jsp.JspContext;
 import javax.servlet.jsp.PageContext;
 
+import com.caucho.config.ConfigException;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.OwnerCreationalContext;
@@ -358,6 +360,8 @@ abstract public class PageManager {
         inject.inject(page, env);
         
         inject.postConstruct(page);
+      } catch (InjectionException e) {
+        throw ConfigException.createConfig(e);
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {

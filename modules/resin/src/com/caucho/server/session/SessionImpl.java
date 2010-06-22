@@ -299,8 +299,6 @@ public class SessionImpl implements HttpSession, CacheListener {
 
     Object oldValue;
     
-    System.out.println("SET: " + name + " " + value);
-
     if (value != null
         && ! (value instanceof Serializable)
         && log.isLoggable(Level.FINE)) {

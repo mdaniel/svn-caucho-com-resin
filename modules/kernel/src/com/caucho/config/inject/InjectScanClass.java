@@ -215,7 +215,7 @@ class InjectScanClass implements ScanClass
   {
     if (_isScanClass && ! _isRegistered) {
       _isRegistered = true;
-      
+
       _scanManager.addDiscoveredClass(this);
     }
     

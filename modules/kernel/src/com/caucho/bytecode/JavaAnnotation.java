@@ -302,7 +302,7 @@ public class JavaAnnotation extends JAnnotation {
     try {
       Class cl = Class.forName("java.lang.Enum");
       _enumValueOf = cl.getMethod("valueOf",
-				  new Class[] { Class.class, String.class });
+                                  new Class[] { Class.class, String.class });
     } catch (Throwable e) {
       e.printStackTrace();
     }

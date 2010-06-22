@@ -275,12 +275,18 @@ public class ManagedBeanImpl<X> extends AbstractIntrospectedBean<X>
    * Call pre-destroy
    */
   @Override
-  public void destroy(X instance, CreationalContext<X> env)
+  public void destroy(X instance, CreationalContext<X> cxt)
   {
     _injectionTarget.preDestroy(instance);
 
-    if (env != null)
-      env.release();
+    if (cxt!= null) {
+      if (cxt instanceof CreationalContextImpl<?>) {
+        CreationalContextImpl<?> env = (CreationalContextImpl<?>) cxt;
+        env.clearTarget();
+      }
+      
+      cxt.release();
+    }
   }
 
   //

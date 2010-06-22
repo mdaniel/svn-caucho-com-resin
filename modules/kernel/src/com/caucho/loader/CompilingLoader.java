@@ -487,6 +487,7 @@ public class CompilingLoader extends Loader implements Make {
     if (! classDir.isDirectory())
       return null;
     */
+    
     String javaName = name.replace('.', '/') + _sourceExt;
     Path javaFile = _sourceDir.lookup(javaName);
 
