@@ -43,12 +43,12 @@ install	:
 	fi; \
 	(cd modules/c/src; $(MAKE) install)
 	if test -r $(resin_pro)/modules/c/src/Makefile; then \
-	  cd $(resin_pro)/modules/c/src; $(MAKE) install; \
+	  pushd $(resin_pro)/modules/c/src; $(MAKE) install; popd; \
 	fi; \
 	if test -n "${resin_init_d}"; then \
 		cd $(abs_builddir); \
 		if test -f "${resin_init_d}"; then\
-			if test -w "${resin_init_d}"; then \
+			if test \( -w "${resin_init_d}" \) -o \( -w `dirname ${resin_init_d}` \); then \
 				cp $(CP_U_FLAG) init.d/resin $(resin_init_d); \
 				chmod +x $(resin_init_d) && echo "${resin_init_d} updated."; \
 			else \

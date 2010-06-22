@@ -9,6 +9,13 @@
 # Short-Description: The Resin Java Application Server
 ### END INIT INFO
 #
+### BEGIN Fedora SysV
+#
+# chkconfig: 2345 90 10
+# description: The Resin Java Application Server
+#
+### END Fedora SysV
+#
 # To install, configure this file as needed and copy init.resin
 # to /etc/rc.d/init.d as resin.  Then use "# /sbin/chkconfig resin reset"
 #
@@ -54,7 +61,7 @@ if test -r /lib/lsb/init-functions; then
   . /lib/lsb/init-functions
 fi
 
-type log_daemon_msg 1> /dev/null
+type log_daemon_msg 1> /dev/null 2> /dev/null
 if test "$?" != 0; then
   log_daemon_msg () {
       if [ -z "$1" ]; then
