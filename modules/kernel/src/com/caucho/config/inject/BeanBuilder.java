@@ -217,4 +217,10 @@ public class BeanBuilder<T>
                                _name,
                                _injectionTarget);
   }
+  
+  public String toString()
+  {
+    return (getClass().getSimpleName() + "[" + _managedBean.getBeanClass()
+            + _bindings + ", " + _name + "]");
+  }
 }

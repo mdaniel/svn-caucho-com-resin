@@ -36,8 +36,8 @@ import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.config.types.CustomBeanMethodConfig;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
@@ -76,7 +76,7 @@ public class CustomBeanMethodAttribute extends Attribute {
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    CustomBeanConfig customBean = (CustomBeanConfig) bean;
+    XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
     customBean.addMethod((CustomBeanMethodConfig) value);
   }

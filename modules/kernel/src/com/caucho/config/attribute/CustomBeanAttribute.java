@@ -39,7 +39,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
@@ -55,7 +55,7 @@ public class CustomBeanAttribute extends Attribute {
 
   private CustomBeanAttribute()
   {
-    this(null, TypeFactory.getType(CustomBeanConfig.class));
+    this(null, TypeFactory.getType(XmlBeanConfig.class));
   }
 
   public CustomBeanAttribute(Method setMethod, ConfigType configType)
@@ -94,7 +94,7 @@ public class CustomBeanAttribute extends Attribute {
 
       Class cl = factory.getDriverClassByScheme(api, localName);
 
-      return new CustomBeanConfig(qName, cl);
+      return new XmlBeanConfig(qName, cl);
     }
 
     if (! uri.startsWith("urn:java:"))
@@ -118,7 +118,7 @@ public class CustomBeanAttribute extends Attribute {
       return new AnnotationConfig(cl);
     }
     else {
-      CustomBeanConfig config = new CustomBeanConfig(qName, cl);
+      XmlBeanConfig config = new XmlBeanConfig(qName, cl);
 
       // config.setScope("singleton");
 
@@ -134,8 +134,8 @@ public class CustomBeanAttribute extends Attribute {
   {
     Object beanChild = create(bean, name);
 
-    if (beanChild instanceof CustomBeanConfig) {
-      CustomBeanConfig config = (CustomBeanConfig) beanChild;
+    if (beanChild instanceof XmlBeanConfig) {
+      XmlBeanConfig config = (XmlBeanConfig) beanChild;
 
       if (! value.trim().equals("")) {
         config.addArg(new TextArgProgram(value));

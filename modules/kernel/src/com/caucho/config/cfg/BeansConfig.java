@@ -45,7 +45,7 @@ import com.caucho.config.inject.DecoratorBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InterceptorBean;
 import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.inject.Module;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -148,7 +148,7 @@ public class BeansConfig {
   /**
    * Adds a namespace bean
    */
-  public void addCustomBean(CustomBeanConfig<?> bean)
+  public void addCustomBean(XmlBeanConfig<?> bean)
   {
   }
 
@@ -284,7 +284,7 @@ public class BeansConfig {
       addClass(cl);
     }
 
-    public void addCustomBean(CustomBeanConfig<?> config)
+    public void addCustomBean(XmlBeanConfig<?> config)
     {
       Class<?> cl = config.getClassType();
 

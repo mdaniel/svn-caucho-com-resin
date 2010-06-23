@@ -778,6 +778,7 @@ public class DBPool
     // factory.stereotype(CauchoDeployment.class);
 
     manager.addBean(factory.singleton(this));
+    
 
     _queryAdmin.register();
     _databaseAdmin.register();

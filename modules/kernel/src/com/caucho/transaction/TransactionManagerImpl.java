@@ -434,6 +434,8 @@ public class TransactionManagerImpl
     _timeout = -1;
     AbstractXALogManager logManager = _xaLogManager;
     _xaLogManager = null;
+    _sequence.set(Alarm.getCurrentTime());
+    _randomId = RandomUtil.getRandomLong();
 
     if (logManager != null)
       logManager.close();

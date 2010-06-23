@@ -77,7 +77,7 @@ public class ObjectConfig {
   {
     if (_propertyMap.get(property.getName()) != null)
       throw new ConfigException(L.l("'{0}' is a duplicate property name.  Property names must be declared only once.",
-				    property.getName()));
+                                    property.getName()));
 
     _propertyMap.put(property.getName(), property);
   }
@@ -98,7 +98,7 @@ public class ObjectConfig {
       ConfigPropertyConfig prop = iter.next();
 
       if (prop.getValue() != null) {
-	Config.setAttribute(object, prop.getName(), prop.getValue());
+        Config.setAttribute(object, prop.getName(), prop.getValue());
       }
     }
 

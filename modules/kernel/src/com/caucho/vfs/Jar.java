@@ -374,7 +374,7 @@ public class Jar implements CacheListener {
   }
 
   /**
-   * Returns the length of the entry in the jar file.
+   * Returns the last-modified time of the entry in the jar file.
    *
    * @param path full path to the jar entry
    * @return the length of the entry
@@ -382,6 +382,7 @@ public class Jar implements CacheListener {
   public long getLastModified(String path)
   {
     try {
+      // this entry time can cause problems ...
       ZipEntry entry = getJarEntry(path);
 
       return entry != null ? entry.getTime() : -1;
@@ -403,7 +404,9 @@ public class Jar implements CacheListener {
     try {
       ZipEntry entry = getJarEntry(path);
 
-      return entry != null ? entry.getSize() : -1;
+      long length = entry != null ? entry.getSize() : -1;
+      
+      return length;
     } catch (IOException e) {
       log.log(Level.FINE, e.toString(), e);
       
@@ -505,7 +508,7 @@ public class Jar implements CacheListener {
   {
     ZipEntry entry = _zipEntryCache.get(path);
     
-    if (entry != null) {
+    if (entry != null && isCacheValid()) {
       if (entry == NULL_ZIP)
         return null;
       else
@@ -626,18 +629,21 @@ public class Jar implements CacheListener {
   {
     long now = Alarm.getCurrentTime();
 
-    if ((now - _lastTime < 1000) && ! Alarm.isTest())
+    if ((now - _lastTime < 100) && ! Alarm.isTest())
       return true;
 
     long oldLastModified = _lastModified;
     long oldLength = _length;
     
-    _lastModified = _backing.getLastModified();
-    _length = _backing.getLength();
+    long newLastModified = _backing.getLastModified();
+    long newLength = _backing.getLength();
+    
     _lastTime = now;
 
-    if (_lastModified == oldLastModified && _length == oldLength)
+    if (newLastModified == oldLastModified && newLength == oldLength) {
+      _lastTime = now;
       return true;
+    }
     else {
       // If the file has changed, close the old file
       SoftReference<JarFile> oldFileRef = _jarFileRef;
@@ -645,6 +651,13 @@ public class Jar implements CacheListener {
       _jarFileRef = null;
       _depend = null;
       _isSigned = null;
+      _zipEntryCache.clear();
+      
+      _lastModified = newLastModified;
+      _length = newLength;
+      
+      _lastTime = now;
+
 
       SoftReference<JarFile> oldCloseFileRef = null;
       oldCloseFileRef = _closeJarFileRef.getAndSet(oldFileRef);

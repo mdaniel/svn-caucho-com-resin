@@ -46,9 +46,11 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.InjectionTarget;
 import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
+import javax.enterprise.inject.spi.ProcessInjectionTarget;
 
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
@@ -73,7 +75,7 @@ public class XmlStandardPlugin implements Extension
 {
   private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
 
-  private InjectManager _manager;
+  private InjectManager _cdiManager;
   private HashSet<String> _configuredBeans = new HashSet<String>();
 
   private ArrayList<Path> _paths = new ArrayList<Path>();
@@ -87,7 +89,7 @@ public class XmlStandardPlugin implements Extension
 
   public XmlStandardPlugin(InjectManager manager)
   {
-    _manager = manager;
+    _cdiManager = manager;
 
     Thread.currentThread().getContextClassLoader();
   }
@@ -115,7 +117,7 @@ public class XmlStandardPlugin implements Extension
         ArrayList<Class<?>> deployList = config.getDeployList();
 
         if (deployList != null && deployList.size() > 0) {
-          _manager.setDeploymentTypes(deployList);
+          _cdiManager.setDeploymentTypes(deployList);
         }
       }
     } catch (Exception e) {
@@ -151,7 +153,7 @@ public class XmlStandardPlugin implements Extension
     if (beansPath.canRead() && beansPath.getLength() > 0) {
       // ioc/0041 - tck allows empty beans.xml
       
-      BeansConfig beans = new BeansConfig(_manager, beansPath);
+      BeansConfig beans = new BeansConfig(_cdiManager, beansPath);
 
       beansPath.setUserPath(beansPath.getURL());
 
@@ -173,6 +175,9 @@ public class XmlStandardPlugin implements Extension
 
     if (type == null)
       return;
+    
+    if (type.isAnnotationPresent(XmlCookie.class))
+      return;
 
     if (_configuredBeans.contains(type.getJavaClass().getName())) {
       event.veto();
@@ -188,6 +193,21 @@ public class XmlStandardPlugin implements Extension
     }
     */
   }
+  
+  @LazyExtension
+  public void processTarget(@Observes ProcessInjectionTarget<?> event)
+  {
+    AnnotatedType<?> type = event.getAnnotatedType();
+    
+    XmlCookie cookie = type.getAnnotation(XmlCookie.class);
+    
+    if (cookie != null) {
+      InjectionTarget target = _cdiManager.getXmlInjectionTarget(cookie.value());
+      
+      event.setInjectionTarget(target);
+      
+    }
+  }
 
   public void processType(@Observes AfterBeanDiscovery event)
   {
@@ -200,7 +220,7 @@ public class XmlStandardPlugin implements Extension
   {
     ProcessBeanImpl<?> eventImpl = (ProcessBeanImpl<?>) event;
 
-    if (eventImpl.getManager() != _manager)
+    if (eventImpl.getManager() != _cdiManager)
       return;
 
     Annotated annotated = event.getAnnotated();
@@ -217,9 +237,9 @@ public class XmlStandardPlugin implements Extension
     _pendingService.clear();
 
     for (Bean<?> bean : startupBeans) {
-      CreationalContext<?> env = _manager.createCreationalContext(bean);
+      CreationalContext<?> env = _cdiManager.createCreationalContext(bean);
 
-      Object value = _manager.getReference(bean, bean.getBeanClass(), env);
+      Object value = _cdiManager.getReference(bean, bean.getBeanClass(), env);
       
       if (value instanceof ScopeProxy)
         ((ScopeProxy) value).__caucho_getDelegate();

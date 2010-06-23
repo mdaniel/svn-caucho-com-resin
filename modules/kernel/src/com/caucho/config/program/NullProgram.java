@@ -24,24 +24,19 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.remote.annotation;
+package com.caucho.config.program;
 
-import static java.lang.annotation.ElementType.*;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.*;
-
-import javax.ejb.Startup;
+import javax.enterprise.context.spi.CreationalContext;
 
 /**
- * The @ServiceType
+ * A saved program for configuring an object.
  */
-
-@Documented
-@Target({TYPE})
-@Retention(RUNTIME)
-public @interface ServiceType {
-  public Class defaultFactory() default Object.class;
+public class NullProgram extends ConfigProgram {
+  @Override
+  public <T> void inject(T bean, CreationalContext<T> createContext)
+  {
+  }
 }

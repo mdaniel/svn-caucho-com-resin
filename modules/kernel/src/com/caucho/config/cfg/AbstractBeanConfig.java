@@ -76,7 +76,7 @@ abstract public class AbstractBeanConfig {
   private ArrayList<Annotation> _annotations
     = new ArrayList<Annotation>();
 
-  private ArrayList<Annotation> _bindings
+  private ArrayList<Annotation> _qualifiers
     = new ArrayList<Annotation>();
 
   private ArrayList<Annotation> _stereotypes
@@ -175,7 +175,7 @@ abstract public class AbstractBeanConfig {
     _annotations.add(binding);
 
     if (binding.annotationType().isAnnotationPresent(Qualifier.class))
-      _bindings.add(binding);
+      _qualifiers.add(binding);
   }
 
   /**
@@ -237,23 +237,26 @@ abstract public class AbstractBeanConfig {
 
     AnnotatedTypeImpl<X> beanType = buildAnnotatedType();
 
-    BeanBuilder<X> factory = beanManager.createBeanFactory(beanType);
+    BeanBuilder<X> builder = beanManager.createBeanFactory(beanType);
 
     if (_scope != null)
-      factory.scope(_scope);
+      builder.scope(_scope);
 
     if (_init != null)
-      factory.init(_init);
+      builder.init(_init);
+    
+    for (Annotation qualifier : _qualifiers)
+      builder.binding(qualifier);
 
     Object value = replaceObject();
     Bean<X> bean = null;
 
     if (value != null) {
-      bean = factory.singleton(value);
+      bean = builder.singleton(value);
       beanManager.addBean(bean);
     }
     else {
-      bean = factory.bean();
+      bean = builder.bean();
       beanManager.addBean(bean);
     }
 
@@ -281,7 +284,7 @@ abstract public class AbstractBeanConfig {
       beanType.addAnnotation(Names.create(_name));
     }
 
-    for (Annotation binding : _bindings) {
+    for (Annotation binding : _qualifiers) {
       beanType.addAnnotation(binding);
     }
 

@@ -384,15 +384,17 @@ public class ClassEntry implements Dependency {
 
       int retry = 3;
       for (int i = 0; i < retry; i++) {
-        long length = classPath.getLength();
-        long lastModified = classPath.getLastModified();
-
-        if (length < 0)
-          throw new IOException("class loading failed because class file '" + classPath + "' does not have a positive length.  Possibly the file has been overwritten");
-
+        long length = -1;
+        
         ReadStream is = classPath.openRead();
 
         try {
+          length = classPath.getLength();
+          long lastModified = classPath.getLastModified();
+
+          if (length < 0)
+            throw new IOException("class loading failed because class file '" + classPath + "' does not have a positive length.  Possibly the file has been overwritten");
+
           buffer.setLength((int) length);
 
           int results = is.readAll(buffer.getBuffer(), 0, (int) length);
@@ -405,6 +407,7 @@ public class ClassEntry implements Dependency {
 
           log.warning(L.l("{0}: class file length mismatch expected={1} received={2}.  The class file may have been modified concurrently.",
                 this, length, results));
+          
         } finally {
           is.close();
         }

@@ -27,21 +27,22 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.remote.annotation;
+package com.caucho.config.xml;
 
-import static java.lang.annotation.ElementType.*;
+import static java.lang.annotation.ElementType.TYPE;
 import static java.lang.annotation.RetentionPolicy.RUNTIME;
-import java.lang.annotation.*;
 
-import javax.ejb.Startup;
+import java.lang.annotation.Documented;
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
 /**
- * The @ServiceType
+ * An annotation cookie for matching AnnotatedTypes to InjectionTargets.
  */
 
 @Documented
-@Target({TYPE})
 @Retention(RUNTIME)
-public @interface ServiceType {
-  public Class defaultFactory() default Object.class;
+@Target({TYPE})
+public @interface XmlCookie {
+  public long value();
 }

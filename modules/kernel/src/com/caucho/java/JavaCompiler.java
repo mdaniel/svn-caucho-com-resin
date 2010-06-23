@@ -40,6 +40,7 @@ import com.caucho.make.Make;
 import com.caucho.server.util.CauchoSystem;
 import com.caucho.util.CharBuffer;
 import com.caucho.util.L10N;
+import com.caucho.util.ThreadPool;
 import com.caucho.vfs.*;
 
 import java.io.IOException;
@@ -677,15 +678,13 @@ public class JavaCompiler {
     compiler.setLineMap(lineMap);
 
     // the compiler may not be well-behaved enough to use the ThreadPool
-    Thread thread = new Thread(compiler);
-    thread.setDaemon(true);
-    thread.start();
+    ThreadPool.getCurrent().schedule(compiler);
 
     compiler.waitForComplete(_maxCompileTime);
 
     if (! compiler.isDone()) {
       log.warning("compilation timed out");
-      thread.interrupt();
+      // thread.interrupt();
       compiler.abort();
     }
 

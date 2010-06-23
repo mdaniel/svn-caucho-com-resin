@@ -146,7 +146,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
   {
     if (getConnectionDefinition(conn.getConnectionFactoryInterface().getName()) != null)
       throw new ConfigException(L.l("'{0}' is a duplicate connection-definition.  The <connectionfactory-interface> must be unique.",
-				    conn.getConnectionFactoryInterface().getName()));
+                                    conn.getConnectionFactoryInterface().getName()));
     
     _outboundConnections.add(conn);
   }
@@ -172,12 +172,12 @@ public class ResourceAdapterConfig extends ObjectConfig {
       cl = cfg.getConnectionFactoryInterface();
       
       if (cl != null && cl.getName().equals(type))
-	return cfg;
+        return cfg;
 
       cl = cfg.getConnectionFactoryImpl();
       
       if (cl != null && cl.getName().equals(type))
-	return cfg;
+        return cfg;
     }
 
     return null;
@@ -191,7 +191,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
   {
     if (getMessageListener(cfg.getMessageListenerType().getName()) != null)
       throw new ConfigException(L.l("'{0}' is a duplicate messagelistener-type.  The <messagelistener-type> must be unique.",
-				    cfg.getMessageListenerType().getName()));
+                                    cfg.getMessageListenerType().getName()));
     
     _inboundConnections.add(cfg);
   }
@@ -213,7 +213,7 @@ public class ResourceAdapterConfig extends ObjectConfig {
       Class<?> cl = cfg.getActivationSpecClass();
 
       if (cl != null && cl.getName().equals(type))
-	return cfg;
+        return cfg;
     }
 
     return null;
@@ -238,12 +238,12 @@ public class ResourceAdapterConfig extends ObjectConfig {
       Class<?> cl = cfg.getAdminObjectClass();
 
       if (cl != null && cl.getName().equals(type))
-	return cfg;
+        return cfg;
 
       cl = cfg.getAdminObjectInterface();
       
       if (cl != null && cl.getName().equals(type))
-	return cfg;
+        return cfg;
     }
 
     return null;

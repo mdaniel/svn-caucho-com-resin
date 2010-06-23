@@ -51,6 +51,7 @@ import com.caucho.config.inject.InjectionPointHandler;
 import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldGeneratorProgram;
+import com.caucho.config.program.NullProgram;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.util.L10N;
 
@@ -63,6 +64,29 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
   public PersistenceContextHandler(InjectManager manager)
   {
     super(manager);
+  }
+  
+  @Override
+  public ConfigProgram introspectType(AnnotatedType<?> type)
+  {
+    PersistenceContext pContext = type.getAnnotation(PersistenceContext.class);
+    
+    String location = type.getJavaClass().getName() + ": ";
+
+    String jndiName = null;
+    
+    if (! "".equals(pContext.name()))
+      jndiName = pContext.name();
+
+    Bean<?> bean = bindEntityManager(location, pContext);
+    
+    BeanValueGenerator gen
+      = new BeanValueGenerator(location, bean);
+    
+    if (jndiName != null)
+      bindJndi(jndiName, gen, null);
+    
+    return new NullProgram();
   }
   
   @Override
@@ -91,9 +115,6 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
                                                    PersistenceContext pContext)
     throws ConfigException
   {
-    String name = pContext.name();
-    String unitName = pContext.unitName();
-
     Field javaField = field.getJavaMember();
     
     String location = getLocation(javaField);
@@ -102,6 +123,36 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     if (! "".equals(pContext.name()))
       jndiName = pContext.name();
       */
+
+    Bean<?> bean = bindEntityManager(location, pContext);
+
+    // bindJndi(location, jndiName, bean);
+
+    // return new ComponentValueGenerator(location, (AbstractBean) bean);
+    
+    BeanValueGenerator gen
+    = new BeanValueGenerator(location, bean);
+    
+    return new FieldGeneratorProgram(javaField, gen);
+  }
+
+  private ConfigProgram generateExtendedContext(AnnotatedField<?> field,
+                                                PersistenceContext pContext)
+  {
+    Field javaField = field.getJavaMember();
+    
+    PersistenceContextGenerator gen;
+
+    gen = new PersistenceContextGenerator(getLocation(javaField), pContext);
+
+    return new FieldGeneratorProgram(javaField, gen);
+  }
+  
+  private Bean<?> bindEntityManager(String location, 
+                                    PersistenceContext pContext)
+  {
+    String name = pContext.name();
+    String unitName = pContext.unitName();
 
     Bean<?> bean;
     
@@ -125,26 +176,7 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     else {
       throw new ConfigException(location + L.l("@PersistenceContext cannot find any persistence contexts.  No JPA persistence-units have been deployed"));
     }
-
-    // bindJndi(location, jndiName, bean);
-
-    // return new ComponentValueGenerator(location, (AbstractBean) bean);
     
-    BeanValueGenerator gen
-      = new BeanValueGenerator(location, bean);
-    
-    return new FieldGeneratorProgram(javaField, gen);
-  }
-
-  private ConfigProgram generateExtendedContext(AnnotatedField<?> field,
-                                                PersistenceContext pContext)
-  {
-    Field javaField = field.getJavaMember();
-    
-    PersistenceContextGenerator gen;
-
-    gen = new PersistenceContextGenerator(getLocation(javaField), pContext);
-
-    return new FieldGeneratorProgram(javaField, gen);
+    return bean;
   }
 }

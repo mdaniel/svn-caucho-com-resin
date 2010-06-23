@@ -216,23 +216,19 @@ public class JavaMailConfig extends AbstractBeanConfig {
     
     try {
       if (getInit() != null)
-	getInit().configure(this);
+        getInit().configure(this);
 
       Authenticator auth = _auth;
 
       if (auth == null && _user != null && _password != null)
-	auth = new StandardAuthenticator(_user, _password);
+        auth = new StandardAuthenticator(_user, _password);
       
       if (auth != null)
-	_session = Session.getInstance(_props, auth);
+        _session = Session.getInstance(_props, auth);
       else
-	_session = Session.getInstance(_props);
+        _session = Session.getInstance(_props);
 
-      InjectManager manager = InjectManager.create();
-      BeanBuilder factory = manager.createBeanFactory(Session.class);
-      factory.type(Session.class);
-
-      manager.addBean(factory.singleton(_session));
+      deploy();
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

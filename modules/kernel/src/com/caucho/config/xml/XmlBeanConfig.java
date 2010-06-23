@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
+package com.caucho.config.xml;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Constructor;
@@ -38,6 +38,7 @@ import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.NormalScope;
@@ -68,23 +69,28 @@ import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
-import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.config.types.CustomBeanFieldConfig;
+import com.caucho.config.types.CustomBeanMethodConfig;
+import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
 /**
  * Custom bean configured by namespace
  */
-public class CustomBeanConfig<T> {
+public class XmlBeanConfig<T> {
   private static final Logger log
-    = Logger.getLogger(CustomBeanConfig.class.getName());
+    = Logger.getLogger(XmlBeanConfig.class.getName());
 
-  private static final L10N L = new L10N(CustomBeanConfig.class);
+  private static final L10N L = new L10N(XmlBeanConfig.class);
 
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
+  
+  private static final AtomicLong _xmlCookieSequence
+    = new AtomicLong(Alarm.getCurrentTime());
 
-  private InjectManager _beanManager;
+  private InjectManager _cdiManager;
 
   private Class<T> _class;
   private AnnotatedTypeImpl<T> _annotatedType;
@@ -103,13 +109,13 @@ public class CustomBeanConfig<T> {
   private boolean _hasInterceptorBindings;
   private boolean _hasDeployment;
 
-  public CustomBeanConfig(QName name, Class<T> cl)
+  public XmlBeanConfig(QName name, Class<T> cl)
   {
     _name = name;
 
     _class = cl;
 
-    _beanManager = InjectManager.create();
+    _cdiManager = InjectManager.create();
 
     if (! Annotation.class.isAssignableFrom(cl)) {
       // XXX:
@@ -319,31 +325,6 @@ public class CustomBeanConfig<T> {
     //_component.addField(new SimpleBeanField(field, annList));
   }
 
-  /*
-  private void addStereotype(Class type)
-  {
-    for (Annotation ann : type.getAnnotations()) {
-      Class annType = ann.annotationType();
-
-      if (annType.equals(Named.class)) {
-        if (_component.getName() == null)
-          _component.setName("");
-      }
-      else if (annType.isAnnotationPresent(DeploymentType.class)) {
-        if (_component.getDeploymentType() == null)
-          _component.setDeploymentType(annType);
-      }
-      else if (annType.isAnnotationPresent(Scope.class)) {
-        if (_component.getScope() == null)
-          _component.setScope(annType);
-      }
-      else if (annType.isAnnotationPresent(Qualifier.class)) {
-        _component.addBinding(ann);
-      }
-    }
-  }
-  */
-
   private void clearBindings(AnnotatedTypeImpl beanType)
   {
     HashSet<Annotation> annSet
@@ -421,8 +402,6 @@ public class CustomBeanConfig<T> {
 
     beanManager.addConfiguredClass(_annotatedType.getJavaClass().getName());
 
-    ManagedBeanImpl<T> managedBean = beanManager.createManagedBean(_annotatedType);
-
     Arg<?> []newProgram = null;
     Constructor<?> javaCtor = null;
 
@@ -430,14 +409,14 @@ public class CustomBeanConfig<T> {
       AnnotatedConstructor<T> ctor = null;
 
       for (AnnotatedConstructor<T> testCtor
-             : managedBean.getAnnotatedType().getConstructors()) {
+             : _annotatedType.getConstructors()) {
         if (testCtor.getParameters().size() == _args.size())
           ctor = testCtor;
       }
 
       if (ctor == null) {
         throw new ConfigException(L.l("No matching constructor found for '{0}' with {1} arguments.",
-                                      managedBean, _args.size()));
+                                      _annotatedType, _args.size()));
       }
 
       javaCtor = ctor.getJavaMember();
@@ -474,25 +453,26 @@ public class CustomBeanConfig<T> {
     else
       injectProgram = new ConfigProgram[0];
 
+    long xmlCookie = _xmlCookieSequence.incrementAndGet();
+
+    _annotatedType.addAnnotation(new XmlCookieLiteral(xmlCookie));
+    
+    ManagedBeanImpl<T> managedBean
+      = new ManagedBeanImpl(beanManager,_annotatedType, false);
+    
+    managedBean.introspect();
+    
     XmlInjectionTarget injectionTarget
       = new XmlInjectionTarget(managedBean, javaCtor, newProgram, injectProgram);
     
-    _bean = new XmlBean(managedBean, injectionTarget);
+    _cdiManager.addXmlInjectionTarget(xmlCookie, injectionTarget);
 
-    /*
-    if (_annotatedType.isAnnotationPresent(Stateful.class)
-        || _annotatedType.isAnnotationPresent(Stateless.class)
-        || _annotatedType.isAnnotationPresent(Singleton.class)) {
-      EjbManager ejbManager = EjbManager.create();
-      
-      ejbManager.createBean(_annotatedType, injectionTarget);
-      
-      return;
-    }
-    */
-    beanManager.addBean(_bean);
+    beanManager.discoverBean(_annotatedType);
+    
+    // _bean = new XmlBean(managedBean, injectionTarget);
+    //beanManager.addBean(_bean);
 
-    managedBean.introspectProduces();
+    //managedBean.introspectProduces();
     /*
     for (Bean producesBean : managedBean.getProducerBeans()) {
       beanManager.addBean(producesBean);
@@ -507,12 +487,12 @@ public class CustomBeanConfig<T> {
     Annotation []bindings = new Annotation[bindingSet.size()];
     bindingSet.toArray(bindings);
 
-    Set<Bean<?>> set = _beanManager.getBeans(type, bindings);
+    Set<Bean<?>> set = _cdiManager.getBeans(type, bindings);
 
     if (set == null || set.size() == 0)
       return null;
 
-    return _beanManager.resolve(set);
+    return _cdiManager.resolve(set);
   }
 
   public Object toObject()
@@ -563,7 +543,7 @@ public class CustomBeanConfig<T> {
 
       // XXX: getInstance for injection?
       Type type = null;
-      return _beanManager.getReference(_bean, type, env);
+      return _cdiManager.getReference(_bean, type, env);
     }
   }
 

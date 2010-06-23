@@ -66,7 +66,7 @@ public class WebAppInjectExtension implements Extension
   private WebApp _webApp;
 
   public WebAppInjectExtension(InjectManager manager,
-			       WebApp webApp)
+                               WebApp webApp)
   {
     _beanManager = manager;
     _webApp = webApp;
@@ -79,54 +79,54 @@ public class WebAppInjectExtension implements Extension
       AnnotatedType<?> annotated = event.getAnnotatedType();
 
       if (annotated == null
-	  || annotated.getAnnotations() == null
-	  || annotated.isAnnotationPresent(Enhanced.class)) {
-	return;
+          || annotated.getAnnotations() == null
+          || annotated.isAnnotationPresent(Enhanced.class)) {
+        return;
       }
 
       for (Annotation ann : annotated.getAnnotations()) {
-	Class<?> annType = ann.annotationType();
-	
-	if (annType.isAnnotationPresent(ProxyType.class)) {
-	  ProxyType proxyType
-	    = (ProxyType) annType.getAnnotation(ProxyType.class);
+        Class<?> annType = ann.annotationType();
 
-	  Class<?> factoryClass = proxyType.defaultFactory();
-	  ProtocolProxyFactory proxyFactory
-	    = (ProtocolProxyFactory) factoryClass.newInstance();
+        if (annType.isAnnotationPresent(ProxyType.class)) {
+          ProxyType proxyType
+          = (ProxyType) annType.getAnnotation(ProxyType.class);
 
-	  proxyFactory.setProxyType(ann);
-	  proxyFactory.setAnnotated(annotated);
+          Class<?> factoryClass = proxyType.defaultFactory();
+          ProtocolProxyFactory proxyFactory
+          = (ProtocolProxyFactory) factoryClass.newInstance();
 
-	  Object proxy = proxyFactory.createProxy((Class<?>) annotated.getBaseType());
+          proxyFactory.setProxyType(ann);
+          proxyFactory.setAnnotated(annotated);
 
-	  AnnotatedTypeImpl<?> annotatedType
-	    = new AnnotatedTypeImpl((AnnotatedType) annotated);
+          Object proxy = proxyFactory.createProxy((Class<?>) annotated.getBaseType());
 
-	  annotatedType.addAnnotation(EnhancedLiteral.ANNOTATION);
+          AnnotatedTypeImpl<?> annotatedType
+          = new AnnotatedTypeImpl((AnnotatedType) annotated);
 
-	  BeanBuilder<?> builder
-	    = _beanManager.createBeanFactory(annotatedType);
+          annotatedType.addAnnotation(EnhancedLiteral.ANNOTATION);
 
-	  /*
+          BeanBuilder<?> builder
+          = _beanManager.createBeanFactory(annotatedType);
+
+          /*
 	  factory.name(bean.getName());
 
 	  for (Type type : bean.getTypes()) {
 	    factory.type(type);
 	  }
 
-	  */
-	  for (Annotation binding : annotated.getAnnotations()) {
-	    Class<?> bindingType = binding.annotationType();
-	    
-	    if (bindingType.isAnnotationPresent(Qualifier.class))
-	      builder.binding(binding);
-	  }
+           */
+          for (Annotation binding : annotated.getAnnotations()) {
+            Class<?> bindingType = binding.annotationType();
 
-	  _beanManager.addBean(builder.singleton(proxy));
+            if (bindingType.isAnnotationPresent(Qualifier.class))
+              builder.binding(binding);
+          }
 
-	  event.veto();
-	}
+          _beanManager.addBean(builder.singleton(proxy));
+
+          event.veto();
+        }
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

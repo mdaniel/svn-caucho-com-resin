@@ -62,8 +62,8 @@ import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.config.types.RawString;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Dependency;
@@ -726,9 +726,9 @@ public class BeanType<T> extends ConfigType<T>
       }
       else if ((name.equals("addCustomBean")
 		&& paramTypes.length == 1
-		&& paramTypes[0].equals(CustomBeanConfig.class))) {
+		&& paramTypes[0].equals(XmlBeanConfig.class))) {
 	ConfigType customBeanType
-	  = TypeFactory.getType(CustomBeanConfig.class);
+	  = TypeFactory.getType(XmlBeanConfig.class);
 
 	_addCustomBean = new CustomBeanAttribute(method, customBeanType);
       }
@@ -736,7 +736,7 @@ public class BeanType<T> extends ConfigType<T>
 		&& paramTypes.length == 1
 		&& paramTypes[0].equals(Annotation.class))) {
 	ConfigType customBeanType
-	  = TypeFactory.getType(CustomBeanConfig.class);
+	  = TypeFactory.getType(XmlBeanConfig.class);
 
 	_addCustomBean = new CustomBeanAttribute(method, customBeanType);
       }

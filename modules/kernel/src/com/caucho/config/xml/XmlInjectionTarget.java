@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
+package com.caucho.config.xml;
 
 import java.lang.reflect.Constructor;
 import java.util.Set;

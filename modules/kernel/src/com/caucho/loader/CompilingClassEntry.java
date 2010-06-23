@@ -37,6 +37,7 @@ import com.caucho.vfs.Path;
 
 import java.io.IOException;
 import java.security.CodeSource;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
@@ -47,18 +48,20 @@ class CompilingClassEntry extends ClassEntry {
   
   private CompilingLoader _loader;
   private boolean _compileIsModified;
+  private AtomicBoolean _isCompiling = new AtomicBoolean();
     
   public CompilingClassEntry(CompilingLoader compilingLoader,
-			     DynamicClassLoader loader,
-			     String name, Path sourcePath,
-			     Path classPath,
-			     CodeSource codeSource)
+                             DynamicClassLoader loader,
+                             String name, Path sourcePath,
+                             Path classPath,
+                             CodeSource codeSource)
   {
     super(loader, name, sourcePath, classPath, codeSource);
 
     _loader = compilingLoader;
   }
 
+  @Override
   public void preLoad()
     throws ClassNotFoundException
   {
@@ -69,7 +72,7 @@ class CompilingClassEntry extends ClassEntry {
     
     if (javaFile.getLastModified() <= classFile.getLastModified()) {
       log.finest(L.l("loading pre-compiled class {0} from {1}",
-		     getName(), classFile));
+                     getName(), classFile));
       return;
     }
 
@@ -85,18 +88,18 @@ class CompilingClassEntry extends ClassEntry {
 
     // deal with windows case nuttiness
     if (CauchoSystem.isWindows()
-	&& ! _loader.checkSource(_loader.getSource(), javaName))
+        && ! _loader.checkSource(_loader.getSource(), javaName))
       return;
 
     _loader.compileClass(javaFile, classFile, sourcePath, false);
 
     if (classFile.canRead()) {
       log.fine(L.l("loading compiled class {0} from {1}",
-		   getName(), classFile));
+                   getName(), classFile));
     }
     else if (javaFile.exists())
       throw new CompileClassNotFound(L.l("{1} does not have a class file because compiling {0} didn't produce a {1} class",
-					 javaFile, getName()));
+                                         javaFile, getName()));
 
     setDependPath(classFile);
   }
@@ -114,19 +117,19 @@ class CompilingClassEntry extends ClassEntry {
 
     try {
       synchronized (compileThread) {
-	if (! compileThread.isDone())
-	  compileThread.wait(5000);
+        if (! compileThread.isDone())
+          compileThread.wait(5000);
       }
 
       if (_compileIsModified)
-	return true;
+        return true;
       else if (compileThread.isDone()) {
-	setDependPath(getClassPath());
-	
-	return reloadIsModified();
+        setDependPath(getClassPath());
+
+        return reloadIsModified();
       }
       else
-	return true;
+        return true;
     } catch (Throwable e) {
     }
 
@@ -149,21 +152,21 @@ class CompilingClassEntry extends ClassEntry {
       long lastModified = sourcePath.getLastModified();
 
       try {
-	_loader.compileClass(getSourcePath(), getClassPath(),
-			     getSourcePath().getPath(), false);
+        _loader.compileClass(getSourcePath(), getClassPath(),
+                             getSourcePath().getPath(), false);
 
-	setSourceLength(length);
-	setSourceLastModified(lastModified);
+        setSourceLength(length);
+        setSourceLastModified(lastModified);
       } catch (Throwable e) {
-	log.log(Level.FINE, e.toString(), e);
-	
-	_compileIsModified = true;
+        log.log(Level.FINE, e.toString(), e);
+
+        _compileIsModified = true;
       }
 
       _isDone = true;
 
       synchronized (this) {
-	notifyAll();
+        notifyAll();
       }
     }
   }

@@ -77,6 +77,13 @@ public class LogHandlerConfig extends BeanConfig {
     // env/02s7
     return null;
   }
+  
+  @Override
+  protected String getCdiNamed()
+  {
+    // env/02s7
+    return null;
+  }
 
   /**
    * Sets the name of the logger to configure.

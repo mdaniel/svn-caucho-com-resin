@@ -39,7 +39,7 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
@@ -54,7 +54,7 @@ public class AddAttribute extends Attribute {
 
   private AddAttribute()
   {
-    this(null, TypeFactory.getType(CustomBeanConfig.class));
+    this(null, TypeFactory.getType(XmlBeanConfig.class));
   }
   
   public AddAttribute(Method setMethod, ConfigType configType)
@@ -96,7 +96,7 @@ public class AddAttribute extends Attribute {
       return new AnnotationConfig(cl);
     }
     else {
-      CustomBeanConfig config = new CustomBeanConfig(qName, cl);
+      XmlBeanConfig config = new XmlBeanConfig(qName, cl);
 
       // config.setScope("singleton");
 
@@ -112,8 +112,8 @@ public class AddAttribute extends Attribute {
   {
     Object objValue = create(bean, name);
 
-    if (objValue instanceof CustomBeanConfig) {
-      CustomBeanConfig config = (CustomBeanConfig) objValue;
+    if (objValue instanceof XmlBeanConfig) {
+      XmlBeanConfig config = (XmlBeanConfig) objValue;
 
       if (! value.trim().equals("")) {
 	config.addArg(new TextArgProgram(value));
@@ -133,8 +133,8 @@ public class AddAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      if (value instanceof CustomBeanConfig) {
-	CustomBeanConfig config = (CustomBeanConfig) value;
+      if (value instanceof XmlBeanConfig) {
+	XmlBeanConfig config = (XmlBeanConfig) value;
 
 	value = config.toObject();
       }

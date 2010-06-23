@@ -62,7 +62,7 @@ import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.program.PropertyValueProgram;
 import com.caucho.config.type.TypeFactory;
-import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.inject.Module;
 import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
@@ -84,7 +84,7 @@ public class BeanConfig {
   private String _mbeanName;
   private Class<?> _beanConfigClass;
 
-  private CustomBeanConfig _customBean;
+  private XmlBeanConfig _customBean;
 
   private InjectManager _beanManager;
 
@@ -92,7 +92,7 @@ public class BeanConfig {
 
   private String _name;
 
-  private ArrayList<Annotation> _bindingList
+  private ArrayList<Annotation> _qualifierList
     = new ArrayList<Annotation>();
 
   private ArrayList<Annotation> _stereotypeList
@@ -141,7 +141,7 @@ public class BeanConfig {
   {
     _name = name;
 
-    _bindingList.add(Names.create(name));
+    _qualifierList.add(Names.create(name));
   }
 
   /**
@@ -195,12 +195,12 @@ public class BeanConfig {
    */
   public void addBinding(Annotation binding)
   {
-    _bindingList.add(binding);
+    _qualifierList.add(binding);
   }
 
   public ArrayList<Annotation> getBindingList()
   {
-    return _bindingList;
+    return _qualifierList;
   }
 
   public ArrayList<Annotation> getStereotypeList()
@@ -449,7 +449,7 @@ public class BeanConfig {
     return _uri;
   }
 
-  public void addCustomBean(CustomBeanConfig<?> customBean)
+  public void addCustomBean(XmlBeanConfig<?> customBean)
   {
     _customBean = customBean;
   }
@@ -494,19 +494,23 @@ public class BeanConfig {
     introspect();
 
     InjectManager beanManager = InjectManager.create();
-    BeanBuilder factory =  beanManager.createBeanFactory(_cl);
+    BeanBuilder builder =  beanManager.createBeanFactory(_cl);
 
-    if (factory == null)
+    if (builder == null)
       return;
-    _annotatedType = factory.getAnnotatedType();
+    _annotatedType = builder.getAnnotatedType();
 
     if (_name != null) {
-      factory.name(_name);
-
       // server/2n00
       if (! Map.class.isAssignableFrom(_cl))
         addOptionalStringProperty("name", _name);
     }
+    
+    if (getCdiNamed() != null) {
+      // env/02s7
+      builder.name(getCdiNamed());
+    }
+
 
     /*
     if (getMBeanName() != null)
@@ -518,26 +522,27 @@ public class BeanConfig {
         && ! _annotatedType.isAnnotationPresent(Stateful.class)
         && ! _annotatedType.isAnnotationPresent(Stateless.class)
         && ! _annotatedType.isAnnotationPresent(MessageDriven.class)) {
-      factory.annotation(new Startup() {
+      builder.annotation(new Startup() {
           public Class annotationType() { return Startup.class; }
         });
     }
 
-    for (Annotation binding : _bindingList) {
-      factory.binding(binding);
+    System.out.println("BUILD: " + _qualifierList + " " + this);
+    for (Annotation qualifier : _qualifierList) {
+      builder.binding(qualifier);
     }
 
     for (Annotation stereotype : _stereotypeList) {
-      factory.stereotype(stereotype.annotationType());
+      builder.stereotype(stereotype.annotationType());
     }
 
     if (_scope != null) {
-      factory.scope(_scope);
+      builder.scope(_scope);
       // comp.setScope(_beanManager.getScopeContext(_scope));
     }
     
     if (Singleton.class == _scope) {
-      factory.annotation(new StartupLiteral());
+      builder.annotation(new StartupLiteral());
     }
 
     /*
@@ -552,9 +557,9 @@ public class BeanConfig {
     */
 
     if (_init != null)
-      factory.init(_init);
+      builder.init(_init);
 
-    _bean = factory.bean();
+    _bean = builder.bean();
 
     introspectPostInit();
 
@@ -571,6 +576,11 @@ public class BeanConfig {
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+  
+  protected String getCdiNamed()
+  {
+    return _name;
   }
 
   /**

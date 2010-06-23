@@ -100,6 +100,7 @@ abstract public class AbstractJavaCompiler implements Runnable {
   /**
    * runs the compiler.
    */
+  @Override
   public void run()
   {
     _compileThread = Thread.currentThread();

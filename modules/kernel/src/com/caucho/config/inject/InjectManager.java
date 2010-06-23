@@ -297,6 +297,9 @@ public final class InjectManager
 
   private ThreadLocal<CreationalContextImpl<?>> _proxyThreadLocal
     = new ThreadLocal<CreationalContextImpl<?>>();
+  
+  private ConcurrentHashMap<Long,InjectionTarget<?>> _xmlTargetMap
+    = new ConcurrentHashMap<Long,InjectionTarget<?>>();
 
   private boolean _isBeforeBeanDiscoveryComplete;
   private boolean _isAfterBeanDiscoveryComplete;
@@ -2813,7 +2816,7 @@ public final class InjectManager
     _pendingAnnotatedTypes.clear();
     
     for (AnnotatedType<?> type : types) {
-      discoverBean(type);
+      discoverBeanImpl(type);
     }
   }
 
@@ -2866,27 +2869,33 @@ public final class InjectManager
 
       AnnotatedType<?> type = createAnnotatedType(cl);
 
-      type = getExtensionManager().processAnnotatedType(type);
-
-      // ioc/07fb
-      if (type != null)
-        cl = type.getJavaClass();
-      
-      if (cl.isAnnotationPresent(Specializes.class)) {
-        Class<?> parent = cl.getSuperclass();
-
-        if (parent != null) {
-          addSpecialize(cl, parent);
-        }
-      }
-      
-      if (type == null)
-        return;
-
-      _pendingAnnotatedTypes.add(type);
+      discoverBean(type);
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+  }
+  
+  public <X> void discoverBean(AnnotatedType<X> beanType)
+  {
+    Class<X> cl;
+    
+    AnnotatedType<X> type = getExtensionManager().processAnnotatedType(beanType);
+    
+    if (type == null)
+      return;
+    
+    // ioc/07fb
+    cl = type.getJavaClass();
+    
+    if (cl.isAnnotationPresent(Specializes.class)) {
+      Class<?> parent = cl.getSuperclass();
+
+      if (parent != null) {
+        addSpecialize(cl, parent);
+      }
+    }
+
+    _pendingAnnotatedTypes.add(type);
   }
   
   private void addSpecialize(Class<?> specializedType, Class<?> parentType)
@@ -2964,7 +2973,7 @@ public final class InjectManager
     return false;
   }
 
-  private <T> void discoverBean(AnnotatedType<T> type)
+  private <T> void discoverBeanImpl(AnnotatedType<T> type)
   {
     // ioc/0n18
     /*
@@ -3231,6 +3240,16 @@ public final class InjectManager
     _extensionManager.addExtension(extension);
   }
 
+  public void addXmlInjectionTarget(long cookie, InjectionTarget<?> target)
+  {
+    _xmlTargetMap.put(cookie, target);
+  }
+  
+  public InjectionTarget<?> getXmlInjectionTarget(long cookie)
+  {
+    return _xmlTargetMap.get(cookie);
+  }
+  
   /**
    * Starts the bind phase
    */

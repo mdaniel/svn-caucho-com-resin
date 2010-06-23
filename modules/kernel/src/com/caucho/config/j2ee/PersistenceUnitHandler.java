@@ -123,8 +123,11 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
     else if (! "".equals(unitName)) {
     }
     else if (! "".equals(name)) {
-      throw new ConfigException(location + L.l("name='{0}' is an unknown @PersistenceUnit.",
-                                               name));
+      Set<Bean<?>> beans = getManager().getBeans(EntityManagerFactory.class,
+                                                 new AnnotationLiteral<Any>() {});
+      
+      throw new ConfigException(location + L.l("name='{0}' is an unknown @PersistenceUnit.\n  {1}",
+                                               name, beans));
 
     }
     else {

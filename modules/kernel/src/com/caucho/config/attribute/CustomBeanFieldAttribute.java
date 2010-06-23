@@ -37,8 +37,8 @@ import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.types.CustomBeanConfig;
 import com.caucho.config.types.CustomBeanFieldConfig;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
@@ -77,7 +77,7 @@ public class CustomBeanFieldAttribute extends Attribute {
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    CustomBeanConfig customBean = (CustomBeanConfig) bean;
+    XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
     customBean.addField((CustomBeanFieldConfig) value);
   }
@@ -89,7 +89,7 @@ public class CustomBeanFieldAttribute extends Attribute {
   public void setText(Object parent, QName name, String text)
     throws ConfigException
   {
-    CustomBeanConfig customBean = (CustomBeanConfig) parent;
+    XmlBeanConfig customBean = (XmlBeanConfig) parent;
 
     customBean.addBuilderProgram(new PropertyStringProgram(name, text));
   }

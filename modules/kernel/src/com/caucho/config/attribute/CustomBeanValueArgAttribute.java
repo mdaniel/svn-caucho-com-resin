@@ -34,7 +34,7 @@ import javax.enterprise.context.spi.CreationalContext;
 import com.caucho.config.ConfigException;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.ConfigType;
-import com.caucho.config.types.CustomBeanConfig;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.xml.QName;
 
@@ -64,7 +64,7 @@ public class CustomBeanValueArgAttribute extends Attribute {
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    CustomBeanConfig customBean = (CustomBeanConfig) bean;
+    XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
     customBean.addArg((ConfigProgram) value);
   }
@@ -77,7 +77,7 @@ public class CustomBeanValueArgAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      CustomBeanConfig customBean = (CustomBeanConfig) bean;
+      XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
       customBean.addArg(new TextArgProgram(text));
     } catch (Exception e) {

@@ -42,6 +42,7 @@ import com.caucho.config.attribute.*;
 import com.caucho.config.j2ee.*;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.types.*;
+import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.util.*;
 import com.caucho.xml.*;
 import com.caucho.vfs.*;
@@ -119,7 +120,7 @@ public class CustomBeanType<T> extends ConfigType
   @Override
   public Object create(Object parent, QName name)
   {
-    return new CustomBeanConfig(name, _beanClass);
+    return new XmlBeanConfig(name, _beanClass);
   }
 
   /**
@@ -307,7 +308,7 @@ public class CustomBeanType<T> extends ConfigType
   @Override
   public void init(Object bean)
   {
-    CustomBeanConfig customBean = (CustomBeanConfig) bean;
+    XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
     customBean.init();
   }

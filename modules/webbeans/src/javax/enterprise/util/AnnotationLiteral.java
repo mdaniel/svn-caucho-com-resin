@@ -31,9 +31,11 @@ package javax.enterprise.util;
 
 import java.io.Serializable;
 import java.lang.annotation.*;
+import java.lang.ref.SoftReference;
 import java.lang.reflect.*;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.WeakHashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -54,6 +56,9 @@ public abstract class AnnotationLiteral<T extends Annotation>
   implements Annotation, Serializable
 {
   private static final Logger log = Logger.getLogger(AnnotationLiteral.class.getName());
+  
+  private static WeakHashMap<Class<?>,SoftReference<MethodMatch[]>> _annMap
+    = new WeakHashMap<Class<?>,SoftReference<MethodMatch[]>>();
   
   private transient Class<T> _annotationType;
   private transient MethodMatch [] _methods;
@@ -144,6 +149,15 @@ public abstract class AnnotationLiteral<T extends Annotation>
     if (_methods == null) {
       Class<?> annType = annotationType();
       
+      SoftReference<MethodMatch[]> matchListRef = _annMap.get(annType);
+      
+      if (matchListRef != null) {
+        MethodMatch []matchArray = matchListRef.get();
+        
+        if (matchArray != null)
+          return matchArray;
+      }
+      
       ArrayList<MethodMatch> matchList = new ArrayList<MethodMatch>();
       
       for (Method method : annType.getDeclaredMethods()) {
@@ -171,6 +185,8 @@ public abstract class AnnotationLiteral<T extends Annotation>
                                         + "' must implement '" + annType.getName()
                                         + "' because it has member values.");
       }
+      
+      _annMap.put(annType, new SoftReference<MethodMatch[]>(methods));
       
       _methods = methods;
     }
