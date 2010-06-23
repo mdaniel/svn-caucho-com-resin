@@ -478,6 +478,7 @@ public class CustomBeanConfig<T> {
     
     _bean = new XmlBean(managedBean, injectionTarget);
 
+    /*
     if (_annotatedType.isAnnotationPresent(Stateful.class)
         || _annotatedType.isAnnotationPresent(Stateless.class)
         || _annotatedType.isAnnotationPresent(Singleton.class)) {
@@ -487,6 +488,7 @@ public class CustomBeanConfig<T> {
       
       return;
     }
+    */
     beanManager.addBean(_bean);
 
     managedBean.introspectProduces();

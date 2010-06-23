@@ -191,6 +191,7 @@ public class CandiUtil {
   public static void validatePassivatingDecorators(Class<?> cl, 
                                                    List<Decorator<?>> beans)
   {
+    log.info("VALID: " + cl + " " + beans);
     for (Decorator<?> decorator : beans) {
       validatePassivating(cl, decorator, "decorator");
     }

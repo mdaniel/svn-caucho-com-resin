@@ -458,8 +458,6 @@ public class EnterpriseApplication
       log.log(Level.WARNING, e.toString(), e);
       
       _loader.setConfigException(_configException);
-      
-      _lifecycle.toError();
     }
     
     fillErrors();
@@ -539,9 +537,6 @@ public class EnterpriseApplication
   @Override
   public void start()
   {
-    if (_configException != null)
-      throw ConfigException.create(_configException);
-    
     if (! _lifecycle.toStarting())
       return;
 
