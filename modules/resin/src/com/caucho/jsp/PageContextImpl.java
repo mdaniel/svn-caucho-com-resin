@@ -1179,7 +1179,6 @@ public class PageContextImpl extends PageContext
     response.setResponseStream(_responseStream);
     response.killCache();
     response.setNoCache(true);
-    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
     _hasException = true;
 
@@ -1232,6 +1231,7 @@ public class PageContextImpl extends PageContext
       getCauchoRequest().setAttribute("javax.servlet.error.exception_type", e);
       getCauchoRequest().setAttribute("javax.servlet.error.request_uri",
                             getCauchoRequest().getRequestURI());
+      response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
       try {
         RequestDispatcher rd = getCauchoRequest().getRequestDispatcher(_errorPage);
