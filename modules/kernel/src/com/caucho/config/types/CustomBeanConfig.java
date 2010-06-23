@@ -42,7 +42,7 @@ import com.caucho.config.reflect.ReflectionAnnotated;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.type.*;
 import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.ejb.manager.EjbManager;
+//import com.caucho.ejb.manager.EjbManager;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
 
