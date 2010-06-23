@@ -29,47 +29,48 @@
 
 package com.caucho.config.types;
 
-import com.caucho.config.*;
-import com.caucho.config.annotation.StartupType;
-import com.caucho.config.inject.InjectManager;
-import com.caucho.config.inject.ManagedBeanImpl;
-import com.caucho.config.inject.ProducesMethodBean;
-import com.caucho.config.program.*;
-import com.caucho.config.reflect.AnnotatedElementImpl;
-import com.caucho.config.reflect.AnnotatedMethodImpl;
-import com.caucho.config.reflect.AnnotatedTypeImpl;
-import com.caucho.config.reflect.ReflectionAnnotated;
-import com.caucho.config.reflect.ReflectionAnnotatedFactory;
-import com.caucho.config.type.*;
-import com.caucho.config.xml.XmlConfigContext;
-//import com.caucho.ejb.manager.EjbManager;
-import com.caucho.util.*;
-import com.caucho.xml.QName;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
+import java.util.logging.Logger;
 
-import java.util.*;
-import java.util.logging.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
-
-import javax.annotation.*;
-import javax.ejb.Singleton;
-import javax.ejb.Stateful;
-import javax.ejb.Stateless;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.NormalScope;
+import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.Produces;
 import javax.enterprise.inject.spi.AnnotatedConstructor;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.BeanManager;
-import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 import javax.interceptor.InterceptorBinding;
 
 import org.w3c.dom.Node;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.ConfiguredLiteral;
+import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.program.Arg;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.program.ContainerProgram;
+import com.caucho.config.program.NodeBuilderChildProgram;
+import com.caucho.config.reflect.AnnotatedElementImpl;
+import com.caucho.config.reflect.AnnotatedMethodImpl;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
+import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
 
 /**
  * Custom bean configured by namespace
