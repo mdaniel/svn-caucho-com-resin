@@ -62,8 +62,6 @@ import javax.interceptor.InterceptorBinding;
 import javax.interceptor.Interceptors;
 import javax.interceptor.InvocationContext;
 
-import sun.util.logging.resources.logging;
-
 import com.caucho.config.ConfigException;
 import com.caucho.config.inject.AnyLiteral;
 import com.caucho.config.inject.DefaultLiteral;
@@ -81,7 +79,6 @@ import com.caucho.util.L10N;
 public class InterceptorFactory<X>
   extends AbstractAspectFactory<X>
 {
-  private static final Logger log = Logger.getLogger(InterceptorFactory.class.getName());
   private static final L10N L = new L10N(InterceptorFactory.class);
   
   private InjectManager _manager;
@@ -557,10 +554,13 @@ public class InterceptorFactory<X>
     List<Decorator<?>> decorators
       = _manager.resolveDecorators(types, decoratorBindings);
     
-    log.warning("RESOLVE: " + decorators + " " + types + " " + decoratorBindings);
-    
     if (decorators.size() == 0)
       return;
+    
+    if (isPassivating()) {
+      // ioc/0i5e
+      CandiUtil.validatePassivatingDecorators(getBeanType().getJavaClass(), decorators);
+    }
     
     HashSet<Type> closure = new HashSet<Type>();
     
