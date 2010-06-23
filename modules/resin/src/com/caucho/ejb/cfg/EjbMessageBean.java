@@ -686,7 +686,8 @@ public class EjbMessageBean<X> extends EjbBean<X> {
 
       manager = new MessageManager<X>(ejbManager, 
                                       getRawAnnotatedType(), 
-                                      getAnnotatedType());
+                                      getAnnotatedType(),
+                                      lazyGenerator);
 
       manager.setConfigLocation(getFilename(), getLine());
 

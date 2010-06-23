@@ -106,11 +106,16 @@ abstract public class AbstractScopeContext implements Context {
     if (result != null || creationalContext == null)
       return result;
 
-    result = bean.create(creationalContext);
+    result = create(bean, creationalContext);
 
     context.put(bean, key, result, creationalContext);
 
     return result;
+  }
+  
+  protected <T> T create(Contextual<T> bean, CreationalContext<T> env)
+  {
+    return bean.create(env);
   }
 
   abstract protected ContextContainer getContextContainer();

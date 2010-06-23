@@ -272,12 +272,7 @@ public class InterceptorFactory<X>
   public void generatePostConstruct(JavaWriter out, HashMap<String,Object> map)
     throws IOException
   {
-    super.generatePostConstruct(out, map);
-    
-    if (_isInterceptorOrDecorator)
-      return;
-    
-    if (isEnhanced()) {
+    if (! _isInterceptorOrDecorator && isEnhanced()) {
       HashSet<Class<?>> set = null;
       
       set = addInterceptors(set, _classInterceptors, PostConstruct.class);
@@ -289,8 +284,12 @@ public class InterceptorFactory<X>
                                         InterceptionType.POST_CONSTRUCT);
         
         gen.generateClassPostConstruct(out, map);
+        
+        return;
       }
     }
+    
+    super.generatePostConstruct(out, map);
   }
   
   @Override

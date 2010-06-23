@@ -96,7 +96,7 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     sb.append(className);
     */
     sb.append(className);
-    sb.append("__BeanProxy");
+    sb.append("__MessageProxy");
 
     return sb.toString();
   }
@@ -266,15 +266,17 @@ public class MessageGenerator<X> extends BeanGenerator<X> {
     generateBeanPrologue(out, map);
 
     out.println();
-    out.println("public " + getClassName() + "(MessageManager server)");
+    //out.println("public " + getClassName() + "(MessageManager server)");
+    out.println("public " + getClassName() + "()");
     out.println("{");
     out.pushDepth();
 
-    out.println("_server = server;");
-
+    // out.println("_server = server;");
+    /*
     if (MessageDrivenBean.class.isAssignableFrom(getBeanType().getJavaClass())) {
       out.println("setMessageDrivenContext(server.getMessageContext());");
     }
+    */
 
     generateBeanConstructor(out);
 

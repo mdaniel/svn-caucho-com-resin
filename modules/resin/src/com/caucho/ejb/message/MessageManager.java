@@ -46,13 +46,22 @@ import javax.resource.spi.endpoint.MessageEndpointFactory;
 import javax.transaction.UserTransaction;
 import javax.transaction.xa.XAResource;
 
+import com.caucho.config.ConfigException;
+import com.caucho.config.gen.BeanGenerator;
 import com.caucho.config.inject.BeanBuilder;
 import com.caucho.config.inject.InjectManager;
+import com.caucho.config.inject.InjectionTargetBuilder;
+import com.caucho.config.inject.OwnerCreationalContext;
+import com.caucho.config.inject.InjectManager.ReferenceFactory;
+import com.caucho.config.reflect.AnnotatedTypeImpl;
+import com.caucho.config.reflect.ReflectionAnnotatedFactory;
+import com.caucho.ejb.cfg.EjbLazyGenerator;
+import com.caucho.ejb.gen.MessageGenerator;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
-import com.caucho.ejb.server.EjbInjectionTarget;
 import com.caucho.inject.Module;
+import com.caucho.java.gen.JavaClassGenerator;
 import com.caucho.util.L10N;
 
 /**
@@ -71,19 +80,24 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
 
   private MessageDrivenContext _context;
   
-  private Class _proxyClass;
+  private EjbLazyGenerator<X> _lazyGenerator;
+  private Class<X> _proxyImplClass;
+  
+  private InjectionTargetBuilder<X> _builder;
 
   private Method _ejbCreate;
 
   public MessageManager(EjbManager ejbContainer,
                         AnnotatedType<X> rawAnnType,
-                        AnnotatedType<X> annotatedType)
+                        AnnotatedType<X> annotatedType,
+                        EjbLazyGenerator<X> lazyGenerator)
   {
     super(ejbContainer, rawAnnType, annotatedType);
 
     InjectManager webBeans = InjectManager.create();
     
     UserTransaction ut = webBeans.getReference(UserTransaction.class);
+    _lazyGenerator = lazyGenerator;
     
     // ejb/0fbl
     _context = new MessageDrivenContextImpl(this, ut);
@@ -110,6 +124,7 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
     _ra = ra;
   }
   
+  @Override
   public ArrayList<AnnotatedType<? super X>> getLocalApi()
   {
     return new ArrayList<AnnotatedType<? super X>>();
@@ -132,15 +147,15 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
 
       if (_activationSpec == null)
         throw error(L.l("ActivationSpec is missing from message-driven bean '{0}'.",
-			getEJBName()));
+                        getEJBName()));
 
 
       if (_ra == null)
         throw error(L.l("ResourceAdapter is missing from message-driven bean '{0}'.",
-			getEJBName()));
+                        getEJBName()));
 
       try {
-        Class<?> beanClass = _proxyClass;//getBeanSkelClass();
+        Class<?> beanClass = _proxyImplClass;//getBeanSkelClass();
 
         _ejbCreate = beanClass.getMethod("ejbCreate", new Class[0]);
 
@@ -151,6 +166,56 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
     } finally {
       thread.setContextClassLoader(oldLoader);
     }
+  }
+  
+  @Override
+  public void bind()
+  {
+    try {
+      boolean isAutoCompile = true;
+
+      if (_proxyImplClass == null) {
+        BeanGenerator<X> beanGen = createBeanGenerator();
+
+        String fullClassName = beanGen.getFullClassName();
+        
+        JavaClassGenerator javaGen = _lazyGenerator.getJavaClassGenerator();
+      
+        if (javaGen.preload(fullClassName) != null) {
+        }
+        else if (isAutoCompile) {
+          beanGen.introspect();
+          
+          javaGen.generate(beanGen);
+        }
+      
+        javaGen.compilePendingJava();
+      
+        _proxyImplClass = (Class<X>) javaGen.loadClass(fullClassName);
+        
+        InjectManager cdiManager = InjectManager.create();
+        
+        AnnotatedType annType = ReflectionAnnotatedFactory.introspectType(_proxyImplClass);
+        
+        _builder = new InjectionTargetBuilder(cdiManager, 
+                                              annType,
+                                              null);
+        
+        
+      }
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
+  /**
+   * Creates the bean generator for the session bean.
+   */
+  protected BeanGenerator<X> createBeanGenerator()
+  {
+    AnnotatedType<X> ejbClass = getAnnotatedType();
+    
+    return new MessageGenerator<X>(getEJBName(), ejbClass);
   }
 
   @Override
@@ -245,11 +310,10 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
     try {
       thread.setContextClassLoader(getClassLoader());
       
-      Class<X> beanClass = _proxyClass; // getBeanSkelClass();
-
-      Constructor<X> ctor = beanClass.getConstructor(new Class[] { MessageManager.class });
-    
-      X listener = ctor.newInstance(this);
+      OwnerCreationalContext<X> env = new OwnerCreationalContext<X>(null);
+      
+      X listener = _builder.produce(env);
+      _builder.inject(listener, env);
 
       //initInstance(listener);
 
@@ -300,13 +364,4 @@ public class MessageManager<X> extends AbstractEjbBeanManager<X>
     // TODO Auto-generated method stub
     return null;
   }
-
-  /**
-   * @param proxyImplClass
-   */
-  public void setProxyImplClass(Class<?> proxyImplClass)
-  {
-    _proxyClass = proxyImplClass;
-  }
-
 }

@@ -228,13 +228,6 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
           beanGen.introspect();
           
           javaGen.generate(beanGen);
-
-          /*
-        GenClass genClass = assembleGenerator(fullClassName);
-
-        if (genClass != null)
-          javaGen.generate(genClass);
-        */
         }
       
         javaGen.compilePendingJava();

@@ -391,8 +391,15 @@ public class ExtensionManager
     
     AnnotatedType<?> declaringType = producesMethod.getDeclaringType();
     
+    Type declaringClass;
+    
+    if (declaringType != null)
+      declaringClass = declaringType.getBaseType();
+    else
+      declaringClass = producesMethod.getJavaMember().getDeclaringClass(); 
+    
     BaseType eventType = cdi.createTargetBaseType(ProcessProducerImpl.class);
-    eventType = eventType.fill(cdi.createTargetBaseType(declaringType.getBaseType()),
+    eventType = eventType.fill(cdi.createTargetBaseType(declaringClass),
                                cdi.createTargetBaseType(producesMethod.getBaseType()));
 
     getEventManager().fireExtensionEvent(event, eventType);

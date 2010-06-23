@@ -48,7 +48,9 @@ import javax.enterprise.context.SessionScoped;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Scope;
+import javax.inject.Singleton;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
@@ -494,6 +496,8 @@ public class BeanConfig {
     InjectManager beanManager = InjectManager.create();
     BeanBuilder factory =  beanManager.createBeanFactory(_cl);
 
+    if (factory == null)
+      return;
     _annotatedType = factory.getAnnotatedType();
 
     if (_name != null) {
@@ -530,6 +534,10 @@ public class BeanConfig {
     if (_scope != null) {
       factory.scope(_scope);
       // comp.setScope(_beanManager.getScopeContext(_scope));
+    }
+    
+    if (Singleton.class == _scope) {
+      factory.annotation(new StartupLiteral());
     }
 
     /*
@@ -633,5 +641,9 @@ public class BeanConfig {
   public String toString()
   {
     return getClass().getSimpleName() + "[" + _cl + "]";
+  }
+  
+  static class StartupLiteral extends AnnotationLiteral<Startup> implements Startup {
+    
   }
 }

@@ -297,7 +297,8 @@ public class EjbManager implements ScanListener, EnvironmentListener {
     return _configManager.isConfiguredBean(beanType);
   }
 
-  public <T> void createBean(AnnotatedType<T> type, InjectionTarget<T> injectionTarget)
+  public <T> void createBean(AnnotatedType<T> type, 
+                             InjectionTarget<T> injectionTarget)
   {
     // XXX moduleName
     _configManager.addAnnotatedType(type, type, injectionTarget, "");

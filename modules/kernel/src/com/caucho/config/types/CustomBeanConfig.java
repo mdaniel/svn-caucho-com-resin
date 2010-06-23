@@ -42,6 +42,7 @@ import com.caucho.config.reflect.ReflectionAnnotated;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.type.*;
 import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.ejb.manager.EjbManager;
 import com.caucho.util.*;
 import com.caucho.xml.QName;
 
@@ -51,6 +52,9 @@ import java.lang.reflect.*;
 import java.lang.annotation.*;
 
 import javax.annotation.*;
+import javax.ejb.Singleton;
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.enterprise.context.spi.CreationalContext;
 import javax.enterprise.context.NormalScope;
 import javax.enterprise.inject.Produces;
@@ -469,8 +473,20 @@ public class CustomBeanConfig<T> {
     else
       injectProgram = new ConfigProgram[0];
 
-    _bean = new XmlBean(managedBean, javaCtor, newProgram, injectProgram);
+    XmlInjectionTarget injectionTarget
+      = new XmlInjectionTarget(managedBean, javaCtor, newProgram, injectProgram);
+    
+    _bean = new XmlBean(managedBean, injectionTarget);
 
+    if (_annotatedType.isAnnotationPresent(Stateful.class)
+        || _annotatedType.isAnnotationPresent(Stateless.class)
+        || _annotatedType.isAnnotationPresent(Singleton.class)) {
+      EjbManager ejbManager = EjbManager.create();
+      
+      ejbManager.createBean(_annotatedType, injectionTarget);
+      
+      return;
+    }
     beanManager.addBean(_bean);
 
     managedBean.introspectProduces();

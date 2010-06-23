@@ -29,17 +29,17 @@
 
 package com.caucho.server.e_app;
 
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
+import javax.servlet.jsp.el.ELException;
+
 import com.caucho.server.deploy.DeployControllerAdmin;
 import com.caucho.server.deploy.EnvironmentDeployController;
 import com.caucho.server.webapp.WebAppContainer;
 import com.caucho.server.webapp.WebAppController;
-import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-
-import javax.servlet.jsp.el.ELException;
-import java.util.ArrayList;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * A configuration entry for an Enterprise WebApp
@@ -160,6 +160,7 @@ public class EarDeployController
   /**
    * Creates the application.
    */
+  @Override
   protected EnterpriseApplication instantiateDeployInstance()
   {
     return new EnterpriseApplication(_container, this, getId());

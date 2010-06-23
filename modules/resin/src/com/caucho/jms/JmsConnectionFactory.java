@@ -28,9 +28,14 @@
 
 package com.caucho.jms;
 
+import javax.ejb.Startup;
+import javax.inject.Singleton;
+
 /**
  * Top-level JMS connection
  */
+@Singleton
+@Startup
 public class JmsConnectionFactory
   extends com.caucho.jms.connection.ConnectionFactoryImpl
 {

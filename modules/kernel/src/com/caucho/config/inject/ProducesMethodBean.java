@@ -440,8 +440,11 @@ public class ProducesMethodBean<X,T> extends AbstractIntrospectedBean<T>
       
       T instance = produce(factory, env);
       
-      if (env != null && _producerBean.getScope() == Dependent.class)
-        _producerBean.destroy(factory, factoryEnv);
+      if (env != null && _producerBean.getScope() == Dependent.class) {
+        factoryEnv.release();
+        // _producerBean.destroy(factory, factoryEnv);
+      }
+
       
       if (_isPassivating && ! (instance instanceof Serializable))
         throw new IllegalProductException(L.l("'{0}' is an invalid @{1} instance because it's not serializable for bean {2}",

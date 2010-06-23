@@ -799,7 +799,12 @@ public final class InjectManager
    */
   public <T> BeanBuilder<T> createBeanFactory(Class<T> type)
   {
-    return createBeanFactory(createManagedBean(type));
+    ManagedBeanImpl<T> managedBean = createManagedBean(type);
+    
+    if (managedBean != null)
+      return createBeanFactory(managedBean);
+    else
+      return null;
   }
 
   /**
@@ -1077,8 +1082,11 @@ public final class InjectManager
     AnnotatedType<T> type = createAnnotatedType(cl);
     
     type = getExtensionManager().processAnnotatedType(type);
-
-    return createManagedBean(type);
+    
+    if (type != null)
+      return createManagedBean(type);
+    else
+      return null; 
   }
 
   /**
@@ -3542,6 +3550,7 @@ public final class InjectManager
   /**
    * Handles the case where the environment is stopping
    */
+  @Override
   public void environmentStop(EnvironmentClassLoader loader)
   {
     destroy();
@@ -3549,6 +3558,8 @@ public final class InjectManager
 
   public void destroy()
   {
+    _singletonScope.closeContext();
+    
     _parent = null;
     _classLoader = null;
     _deploymentMap = null;

@@ -281,7 +281,7 @@ public class EjbProtocolManager {
         
         Jndi.bindDeep(jndiName, new ServerLocalProxy(server, localApi));
 
-        log.finer(server + " local binding to '" + jndiName + "' " + loader);
+        log.finest(server + " local binding to '" + jndiName + "' " + loader);
       }
 
       Object localHome = null;
@@ -291,7 +291,7 @@ public class EjbProtocolManager {
 
         Jndi.bindDeep(jndiName, localHome);
 
-        log.finer(server + " local-home binding to '" + jndiName + "' "
+        log.finest(server + " local-home binding to '" + jndiName + "' "
                    + loader);
       }
     } catch (Exception e) {
@@ -327,8 +327,8 @@ public class EjbProtocolManager {
         // application means across modules within an application
         jndiName = "java:app/" + moduleName + '/' + suffix;
         Jndi.bindDeep(jndiName, proxy);
-        log.finer(proxy + " application binding to '" + jndiName + "' "
-                  + _loader);
+        log.finest(proxy + " application binding to '" + jndiName + "' "
+                   + _loader);
 
         // XXX module binding - this is problematic because this will
         // expose a module-level binding to the application context
@@ -338,8 +338,8 @@ public class EjbProtocolManager {
         jndiName = "java:module/" + suffix;
         Jndi.bindDeep(jndiName, proxy);
         
-        log.finer(proxy + " module binding to '" + jndiName + "' "
-                  + _loader);
+        log.finest(proxy + " module binding to '" + jndiName + "' "
+                   + _loader);
       }
       finally {
         Thread.currentThread().setContextClassLoader(oldLoader);
@@ -414,7 +414,7 @@ public class EjbProtocolManager {
       Thread.currentThread().setContextClassLoader(_loader);
 
       if (log.isLoggable(Level.FINER))
-        log.finer(server + " binding to " + jndiName);
+        log.finest(server + " binding to " + jndiName);
 
       Jndi.bindDeep(jndiName, server.getLocalProxy(api));
     } finally {

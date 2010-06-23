@@ -28,6 +28,7 @@
  */
 package com.caucho.config.gen;
 
+import java.io.IOException;
 import java.util.HashMap;
 
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -92,7 +93,13 @@ public class MethodTailFactory<X> implements AspectFactory<X> {
   
   @Override
   public void generatePostConstruct(JavaWriter out, HashMap<String, Object> map)
+    throws IOException
   {
+    out.println("try {");
+    out.println("  __caucho_postConstructImpl();");
+    out.println("} catch (Exception e) {");
+    out.println("  com.caucho.config.ConfigException.create(e);");
+    out.println("}");
   }
   
   @Override

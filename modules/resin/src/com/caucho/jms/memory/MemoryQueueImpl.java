@@ -59,8 +59,8 @@ public class MemoryQueueImpl<E> extends AbstractMemoryQueue<E,MemoryQueueEntry<E
     
     MemoryQueueEntry<E> entry
       = new MemoryQueueEntry<E>(msgId,
-			        leaseTimeout, priority, expireTime,
-			        payload);
+                                leaseTimeout, priority, expireTime,
+                                payload);
 
     return entry;
   }

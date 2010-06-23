@@ -32,8 +32,12 @@ package com.caucho.config.scope;
 import java.lang.annotation.Annotation;
 
 import javax.enterprise.context.spi.Contextual;
+import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.PassivationCapable;
 import javax.inject.Singleton;
 
+import com.caucho.config.inject.HandleAware;
+import com.caucho.config.inject.SingletonHandle;
 import com.caucho.inject.Module;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentClassLoader;
@@ -83,6 +87,22 @@ public class SingletonScope extends AbstractScopeContext {
     return _context;
   }
 
+  @Override
+  protected <T> T create(Contextual<T> bean, 
+                         CreationalContext<T> env)
+  {
+    T instance = super.create(bean, env);
+
+    if ((instance instanceof HandleAware) 
+        && (bean instanceof PassivationCapable)) {
+      HandleAware handleAware = (HandleAware) instance;
+      PassivationCapable passiveBean = (PassivationCapable) bean;
+      
+      handleAware.setSerializationHandle(new SingletonHandle(passiveBean.getId()));
+    }
+    
+    return instance;
+  }
   public <T> void addDestructor(Contextual<T> comp, T value)
   {
     EnvironmentClassLoader loader = Environment.getEnvironmentClassLoader();

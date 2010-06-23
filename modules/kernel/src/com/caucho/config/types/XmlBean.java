@@ -55,25 +55,18 @@ import com.caucho.inject.Module;
 public class XmlBean<X> extends BeanWrapper<X>
   implements InjectionTarget<X>, ScopeAdapterBean<X>, PassivationCapable
 {
-  ManagedBeanImpl<X> _bean;
-  private Constructor<X> _ctor;
-  private Arg<X> []_newProgram;
-  private ConfigProgram []_injectProgram;
+  private ManagedBeanImpl<X> _bean;
+  private XmlInjectionTarget<X> _injectionTarget;
 
   private ClassLoader _loader = Thread.currentThread().getContextClassLoader();
 
   public XmlBean(ManagedBeanImpl<X> bean,
-                 Constructor<X> ctor,
-                 Arg<X> []newProgram,
-                 ConfigProgram []injectProgram)
+                 XmlInjectionTarget<X> injectionTarget)
   {
     super(bean.getBeanManager(), bean);
-
+    
     _bean = bean;
-    _ctor = ctor;
-    _newProgram = newProgram;
-
-    _injectProgram = injectProgram;
+    _injectionTarget = injectionTarget;
   }
 
   public ManagedBeanImpl<X> getBean()
@@ -134,48 +127,19 @@ public class XmlBean<X> extends BeanWrapper<X>
   @Override
   public X produce(CreationalContext<X> context)
   {
-    if (_ctor == null)
-      return (X) getBean().getInjectionTarget().produce(context);
-    else {
-      Object []args = new Object[_newProgram.length];
-
-      for (int i = 0; i < args.length; i++) {
-        args[i] = _newProgram[i].eval(context);
-      }
-
-      try {
-        return (X) _ctor.newInstance(args);
-      } catch (RuntimeException e) {
-        throw e;
-      } catch (Exception e) {
-        // XXX: clean up exception type
-        throw new RuntimeException(e);
-      }
-    }
+    return _injectionTarget.produce(context);
   }
 
+  @Override
   public void inject(X instance, CreationalContext<X> env)
   {
-    getBean().getInjectionTarget().inject(instance, env);
-
-    if (_injectProgram.length > 0) {
-      for (ConfigProgram program : _injectProgram) {
-        program.inject(instance, env);
-      }
-    }
+    _injectionTarget.inject(instance, env);
   }
 
+  @Override
   public void postConstruct(X instance)
   {
-    getBean().getInjectionTarget().postConstruct(instance);
-
-    /*
-    if (_initProgram.length > 0) {
-      for (ConfigProgram program : _initProgram) {
-        program.inject(instance, (ConfigContext) env);
-      }
-    }
-    */
+    _injectionTarget.postConstruct(instance);
   }
 
   /**
@@ -183,6 +147,7 @@ public class XmlBean<X> extends BeanWrapper<X>
    */
   public void preDestroy(X instance)
   {
+    _injectionTarget.preDestroy(instance);
   }
 
   /**
@@ -190,6 +155,7 @@ public class XmlBean<X> extends BeanWrapper<X>
    */
   public void dispose(X instance)
   {
+    _injectionTarget.dispose(instance);
   }
 
   /**

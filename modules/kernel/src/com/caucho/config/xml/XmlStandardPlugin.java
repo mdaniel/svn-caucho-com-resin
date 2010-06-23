@@ -46,6 +46,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.BeforeBeanDiscovery;
 import javax.enterprise.inject.spi.Extension;
+import javax.enterprise.inject.spi.PassivationCapable;
 import javax.enterprise.inject.spi.ProcessAnnotatedType;
 import javax.enterprise.inject.spi.ProcessBean;
 
@@ -55,9 +56,11 @@ import com.caucho.config.ServiceStartup;
 import com.caucho.config.bytecode.ScopeProxy;
 import com.caucho.config.cfg.BeansConfig;
 import com.caucho.config.extension.ProcessBeanImpl;
+import com.caucho.config.inject.HandleAware;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.ScheduleBean;
+import com.caucho.config.inject.SingletonHandle;
 import com.caucho.inject.LazyExtension;
 import com.caucho.inject.Module;
 import com.caucho.vfs.Path;
@@ -223,6 +226,12 @@ public class XmlStandardPlugin implements Extension
       
       if (bean instanceof ScheduleBean) {
         ((ScheduleBean) bean).scheduleTimers(value);
+      }
+      
+      if (value instanceof HandleAware && bean instanceof PassivationCapable) {
+        String id = ((PassivationCapable) bean).getId();
+
+        ((HandleAware) value).setSerializationHandle(new SingletonHandle(id));
       }
     }
   }

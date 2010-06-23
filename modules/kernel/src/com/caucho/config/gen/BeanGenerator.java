@@ -30,6 +30,7 @@
 package com.caucho.config.gen;
 
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,6 +38,7 @@ import java.util.Comparator;
 import java.util.HashMap;
 
 import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedType;
 
@@ -288,7 +290,8 @@ abstract public class BeanGenerator<X> extends GenClass
                                        HashMap<String,Object> map)
      throws IOException
   {
-    ArrayList<Method> postConstructMethods = getPostConstructMethods();
+    ArrayList<Method> postConstructMethods 
+      = getLifecycleMethods(PostConstruct.class);
     
     out.println();
     out.println("public void __caucho_postConstruct()");
@@ -304,7 +307,7 @@ abstract public class BeanGenerator<X> extends GenClass
     out.popDepth();
     out.println("}");
     
-    generatePostConstructMethodReflection(out, postConstructMethods);
+    generateLifecycleMethodReflection(out, postConstructMethods, "postConstruct");
     
     out.println();
     out.println("private void __caucho_postConstructImpl()");
@@ -312,14 +315,49 @@ abstract public class BeanGenerator<X> extends GenClass
     out.println("{");
     out.pushDepth();
     
-    generatePostConstructMethods(out, postConstructMethods);
+    generateLifecycleMethods(out, postConstructMethods, "postConstruct");
+    
+    out.popDepth();
+    out.println("}");
+  }
+
+  private void generatePreDestroy(JavaWriter out, 
+                                  HashMap<String,Object> map)
+     throws IOException
+  {
+    ArrayList<Method> preDestroyMethods = getLifecycleMethods(PreDestroy.class);
+    
+    out.println();
+    out.println("public void __caucho_preDestroy()");
+    out.println("{");
+    out.pushDepth();
+
+    for (AspectGenerator<X> method : getMethods()) {
+      method.generatePreDestroy(out, map);
+    }
+     
+    getAspectBeanFactory().generatePreDestroy(out, map);
+
+    out.popDepth();
+    out.println("}");
+    
+    generateLifecycleMethodReflection(out, preDestroyMethods, "preDestroy");
+    
+    out.println();
+    out.println("private void __caucho_preDestroyImplConstructImpl()");
+    out.println("  throws Exception");
+    out.println("{");
+    out.pushDepth();
+    
+    generateLifecycleMethods(out, preDestroyMethods, "preDestroy");
     
     out.popDepth();
     out.println("}");
   }
   
-  protected void generatePostConstructMethodReflection(JavaWriter out,
-                                                       ArrayList<Method> methods)
+  protected void generateLifecycleMethodReflection(JavaWriter out,
+                                                   ArrayList<Method> methods,
+                                                   String lifecycleType)
     throws IOException
   {
     for (int i = 0; i < methods.size(); i++) {
@@ -327,7 +365,7 @@ abstract public class BeanGenerator<X> extends GenClass
       
 
       out.println();
-      out.println("java.lang.reflect.Method __caucho_postConstruct_" + i + " = ");
+      out.println("java.lang.reflect.Method __caucho_" + lifecycleType + "_" + i + " = ");
       
       out.print("  ");
       
@@ -340,15 +378,16 @@ abstract public class BeanGenerator<X> extends GenClass
     }
   }
   
-  protected void generatePostConstructMethods(JavaWriter out,
-                                              ArrayList<Method> methods)
+  protected void generateLifecycleMethods(JavaWriter out,
+                                          ArrayList<Method> methods,
+                                          String lifecycleType)
     throws IOException
   {
     for (int i = 0; i < methods.size(); i++) {
       out.println("try {");
       out.pushDepth();
       
-      out.print("__caucho_postConstruct_" + i + ".invoke(");
+      out.print("__caucho_" + lifecycleType + "_" + i + ".invoke(");
       out.print(getAspectBeanFactory().getBeanInstance());
       out.println(");");
       
@@ -363,12 +402,13 @@ abstract public class BeanGenerator<X> extends GenClass
   }
 
   
-  protected ArrayList<Method> getPostConstructMethods()
+  protected ArrayList<Method> 
+  getLifecycleMethods(Class<? extends Annotation> annType)
   {
     ArrayList<Method> methods = new ArrayList<Method>();
     
     for (AnnotatedMethod<? super X> method : getBeanType().getMethods()) {
-      if (! method.isAnnotationPresent(PostConstruct.class))
+      if (! method.isAnnotationPresent(annType))
         continue;
       
       if (method.getParameters().size() != 0)
@@ -380,25 +420,6 @@ abstract public class BeanGenerator<X> extends GenClass
     Collections.sort(methods, new PostConstructComparator());
     
     return methods;
-  }
-
-  private void generatePreDestroy(JavaWriter out, 
-                                  HashMap<String,Object> map)
-     throws IOException
-  {
-    out.println();
-    out.println("public void __caucho_preDestroy()");
-    out.println("{");
-    out.pushDepth();
-
-    for (AspectGenerator<X> method : getMethods()) {
-      method.generatePreDestroy(out, map);
-    }
-     
-    getAspectBeanFactory().generatePreDestroy(out, map);
-
-    out.popDepth();
-    out.println("}");
   }
 
   protected void generateEpilogue(JavaWriter out, HashMap<String,Object> map)

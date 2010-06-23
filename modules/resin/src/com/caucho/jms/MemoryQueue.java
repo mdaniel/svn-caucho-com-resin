@@ -29,6 +29,10 @@
 
 package com.caucho.jms;
 
+import javax.ejb.Startup;
+import javax.enterprise.context.ApplicationScoped;
+import javax.inject.Singleton;
+
 import com.caucho.config.Service;
 import com.caucho.config.Configurable;
 import com.caucho.jms.memory.MemoryQueueImpl;
@@ -51,7 +55,8 @@ import com.caucho.jms.memory.MemoryQueueImpl;
  * </pre>
  */
 
-@Service
+@Startup
+@Singleton
 @Configurable  
 public class MemoryQueue extends MemoryQueueImpl<Object>
 {

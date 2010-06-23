@@ -29,28 +29,26 @@
 
 package com.caucho.server.deploy;
 
-import com.caucho.cloud.deploy.DeployNetworkService;
-import com.caucho.cloud.deploy.DeployTagItem;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.ConfigException;
-import com.caucho.config.types.PathBuilder;
-import com.caucho.jmx.Jmx;
-import com.caucho.loader.Environment;
-import com.caucho.loader.EnvironmentClassLoader;
-import com.caucho.loader.EnvironmentListener;
-import com.caucho.network.server.NetworkServer;
-import com.caucho.util.L10N;
-import com.caucho.vfs.Path;
-import com.caucho.vfs.Vfs;
-
-import javax.el.ELException;
-import javax.management.ObjectName;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.el.ELException;
+import javax.management.ObjectName;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.types.PathBuilder;
+import com.caucho.jmx.Jmx;
+import com.caucho.loader.Environment;
+import com.caucho.loader.EnvironmentClassLoader;
+import com.caucho.loader.EnvironmentListener;
+import com.caucho.util.L10N;
+import com.caucho.vfs.Path;
+import com.caucho.vfs.Vfs;
 
 /**
  * A deploy controller for an environment.
@@ -251,6 +249,9 @@ abstract public class
   public void setConfigException(Throwable e)
   {
     _configException = e;
+    
+    if (getDeployInstance() != null)
+      getDeployInstance().setConfigException(e);
   }
 
   /**

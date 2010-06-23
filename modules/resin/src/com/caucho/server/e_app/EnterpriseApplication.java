@@ -458,7 +458,11 @@ public class EnterpriseApplication
       log.log(Level.WARNING, e.toString(), e);
       
       _loader.setConfigException(_configException);
+      
+      _lifecycle.toError();
     }
+    
+    fillErrors();
   }
 
   private void fillDefaultModules()
@@ -535,6 +539,9 @@ public class EnterpriseApplication
   @Override
   public void start()
   {
+    if (_configException != null)
+      throw ConfigException.create(_configException);
+    
     if (! _lifecycle.toStarting())
       return;
 
@@ -544,13 +551,13 @@ public class EnterpriseApplication
     try {
       thread.setContextClassLoader(getClassLoader());
 
+      getClassLoader().start();
+
       for (int i = 0; i < _webConfigList.size(); i++) {
         WebModule web = _webConfigList.get(i);
 
         initWeb(web);
       }
-
-      getClassLoader().start();
 
       if (_webAppContainer != null) {
         for (WebAppController webApp : _webApps) {
@@ -565,15 +572,25 @@ public class EnterpriseApplication
       }
     } finally {
       if (_configException != null)
-        _lifecycle.toActive();
-      else
         _lifecycle.toError();
+      else
+        _lifecycle.toActive();
 
       thread.setContextClassLoader(oldLoader);
       
       if (_configException != null)
         throw ConfigException.create(_configException);
     }
+  }
+  
+  private void fillErrors()
+  {
+    if (_configException != null) {
+      for (WebAppController controller : _webApps) {
+        controller.setConfigException(_configException);
+      }
+    }
+
   }
 
   void initWeb(WebModule web)
@@ -637,7 +654,7 @@ public class EnterpriseApplication
                                         contextUrl,
                                         path,
                                         _webAppContainer);
-
+      
       _webApps.add(controller);
     }
 
