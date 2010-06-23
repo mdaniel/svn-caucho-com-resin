@@ -1179,6 +1179,7 @@ public class PageContextImpl extends PageContext
     response.setResponseStream(_responseStream);
     response.killCache();
     response.setNoCache(true);
+    response.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
 
     _hasException = true;
 
