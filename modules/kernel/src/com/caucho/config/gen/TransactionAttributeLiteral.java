@@ -29,54 +29,26 @@
 
 package com.caucho.config.gen;
 
-import java.lang.annotation.Annotation;
-
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
-import javax.ejb.TransactionManagement;
-import javax.ejb.TransactionManagementType;
+import javax.enterprise.util.AnnotationLiteral;
 
 /**
  * Utilities
  */
-public class XaAnnotation {
-  public static Annotation create(final TransactionAttributeType type)
-  {
-    return new TransactionAttribute() {
-      public Class annotationType()
-      {
-	return TransactionAttribute.class;
-      }
-
-      public TransactionAttributeType value()
-      {
-	return type;
-      }
-
-      public String toString()
-      {
-	return "@" + annotationType().getName() + "(" + value() + ")";
-      }
-    };
-  }
+public class TransactionAttributeLiteral 
+  extends AnnotationLiteral<TransactionAttribute>
+  implements TransactionAttribute
+{
+  private final TransactionAttributeType _type;
   
-  public static Annotation createBeanManaged()
+  public TransactionAttributeLiteral(TransactionAttributeType type)
   {
-    return new TransactionManagement() {
-      public Class annotationType()
-      {
-	return TransactionManagement.class;
-      }
+    _type = type;
+  }
 
-      public TransactionManagementType value()
-      {
-	return TransactionManagementType.BEAN;
-      }
-
-      public String toString()
-      {
-	return "@" + annotationType().getName() + "(" + value() + ")";
-      }
-    };
+  public TransactionAttributeType value()
+  {
+    return _type;
   }
 }
