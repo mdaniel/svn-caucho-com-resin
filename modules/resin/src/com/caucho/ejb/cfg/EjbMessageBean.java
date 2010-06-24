@@ -30,7 +30,7 @@
 package com.caucho.ejb.cfg;
 
 import static javax.ejb.TransactionAttributeType.REQUIRED;
-
+import static javax.ejb.TransactionManagementType.BEAN;
 
 import java.lang.reflect.Modifier;
 
@@ -55,7 +55,8 @@ import javax.resource.spi.ResourceAdapter;
 import com.caucho.config.Config;
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
-import com.caucho.config.gen.XaAnnotation;
+import com.caucho.config.gen.TransactionAttributeLiteral;
+import com.caucho.config.gen.TransactionManagementLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ContainerProgram;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
@@ -503,7 +504,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     AnnotatedTypeImpl<X> typeImpl = (AnnotatedTypeImpl<X>) type;
 
     if (! type.isAnnotationPresent(TransactionAttribute.class)) {
-      typeImpl.addAnnotation(XaAnnotation.create(TransactionAttributeType.REQUIRED));
+      typeImpl.addAnnotation(new TransactionAttributeLiteral(TransactionAttributeType.REQUIRED));
     }
 
     javax.ejb.MessageDriven messageDriven
@@ -650,7 +651,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
     AnnotatedTypeImpl<X> ejbClassImpl = AnnotatedTypeImpl.create(ejbClass);
     
     if (!_isContainerTransaction) {
-      ejbClassImpl.addAnnotation(XaAnnotation.createBeanManaged());
+      ejbClassImpl.addAnnotation(new TransactionManagementLiteral(BEAN));
     }
 
     TransactionAttribute ann
@@ -658,7 +659,7 @@ public class EjbMessageBean<X> extends EjbBean<X> {
 
     if (ann == null) {
       // ejb/1100
-      ejbClassImpl.addAnnotation(XaAnnotation.create(REQUIRED));
+      ejbClassImpl.addAnnotation(new TransactionAttributeLiteral(REQUIRED));
     }
     
     return ejbClassImpl;

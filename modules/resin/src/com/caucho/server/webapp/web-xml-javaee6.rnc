@@ -258,6 +258,8 @@ javaee6_web-app-Content =
   & javaee_session-config?
 
   & javaee_mime-mapping*
+  
+  & javaee_module-name?
 
   & javaee_welcome-file-list?
 

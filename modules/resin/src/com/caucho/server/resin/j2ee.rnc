@@ -199,6 +199,10 @@ j2ee_message-destination-usage = element message-destination-usage {
   | "ConsumesProduces"
 }
 
+j2ee_module-name = element module-name {
+  string
+}
+
 j2ee_param-name = element param-name {
   j2ee_string
 }

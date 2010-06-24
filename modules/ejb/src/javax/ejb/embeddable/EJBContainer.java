@@ -64,7 +64,7 @@ public abstract class EJBContainer {
   public static EJBContainer createEJBContainer(Map<?,?> properties)
     throws EJBException
   {
-    Class cl = null;
+    Class<?> cl = null;
 
     try {
       ClassLoader loader = Thread.currentThread().getContextClassLoader();
@@ -91,12 +91,12 @@ public abstract class EJBContainer {
           throw new EJBException(e);
         }
       }
-
-      return null;
     }
     catch (IOException e) {
       throw new EJBException(e);
     }
+
+    throw new UnsupportedOperationException("No EJBProvider Found");
   }
   
   private static Class loadProviderClass(URL url, ClassLoader loader)

@@ -50,7 +50,7 @@ import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.LineConfigException;
-import com.caucho.config.gen.XaAnnotation;
+import com.caucho.config.gen.TransactionAttributeLiteral;
 import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.session.AbstractSessionManager;
@@ -227,7 +227,7 @@ public class EjbSessionBean<X> extends EjbBean<X> {
 
       if (ann == null) {
         // ejb/1100
-        ejbClass.addAnnotation(XaAnnotation.create(REQUIRED));
+        ejbClass.addAnnotation(new TransactionAttributeLiteral(REQUIRED));
       }
     }
   }

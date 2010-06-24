@@ -578,7 +578,11 @@ public class EnvironmentClassLoader extends DynamicClassLoader
       URLClassLoader urlParent = (URLClassLoader) parent;
 
       for (URL url : urlParent.getURLs()) {
-        _pendingScanRoots.add(new ScanRoot(url, null));
+        String name = url.toString();
+        
+        if (name.endsWith(".jar")) {
+          _pendingScanRoots.add(new ScanRoot(url, null));
+        }
       }
 
       return;

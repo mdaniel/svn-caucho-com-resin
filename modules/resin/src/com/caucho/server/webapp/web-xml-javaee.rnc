@@ -255,6 +255,8 @@ javaee_web-app-Content =
 
   & javaee_message-destination*
 
+  & javaee_module-name?
+
   & javaee_locale-encoding-mapping-list?
 
 javaee_web-app = element web-app {

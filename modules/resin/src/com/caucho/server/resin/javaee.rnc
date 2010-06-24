@@ -232,6 +232,10 @@ javaee_message-destination-usage = element message-destination-usage {
   | "ConsumesProduces"
 }
 
+javaee_module-name = element modulename {
+  string
+}  
+
 javaee_param-name = element param-name {
   javaee_string
 }
