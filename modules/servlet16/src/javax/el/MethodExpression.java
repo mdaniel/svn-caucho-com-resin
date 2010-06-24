@@ -43,4 +43,9 @@ public abstract class MethodExpression extends Expression {
     throws PropertyNotFoundException,
            MethodNotFoundException,
            ELException;
+
+  public boolean isParmetersProvided()
+  {
+    return false;
+  }
 }

@@ -24,36 +24,29 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Alex Rojkov
  */
-
 package javax.el;
 
-/**
- * Represents an EL expression
- */
-public abstract class ValueExpression extends Expression {
-  public abstract Class<?> getExpectedType();
+import java.io.Serializable;
 
-  public abstract Class<?> getType(ELContext context)
-    throws PropertyNotFoundException,
-           ELException;
+public class ValueReference implements Serializable {
+  private Object base;
+  private Object property;
 
-  public abstract Object getValue(ELContext context)
-    throws PropertyNotFoundException,
-           ELException;
-
-  public ValueReference getValueReference(ELContext context)
+  public ValueReference(Object base, Object property)
   {
-    return null;
+    this.base = base;
+    this.property = property;
   }
 
-  public abstract boolean isReadOnly(ELContext context)
-    throws PropertyNotFoundException,
-           ELException;
+  public Object getBase()
+  {
+    return base;
+  }
 
-  public abstract void setValue(ELContext context, Object value)
-    throws PropertyNotFoundException,
-           PropertyNotWritableException,
-           ELException;
+  public Object getProperty()
+  {
+    return property;
+  }
 }

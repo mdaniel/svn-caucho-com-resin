@@ -61,6 +61,15 @@ public abstract class ELResolver {
     throws PropertyNotFoundException,
 	   ELException;
 
+  public java.lang.Object invoke(ELContext context,
+                                 java.lang.Object base,
+                                 java.lang.Object method,
+                                 java.lang.Class<?> []paramTypes,
+                                 java.lang.Object []params)
+  {
+    return null;
+  }
+
   public abstract boolean isReadOnly(ELContext context,
 				     Object base,
 				     Object property)

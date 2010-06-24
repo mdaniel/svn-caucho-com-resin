@@ -29,6 +29,8 @@
 
 package javax.el;
 
+import java.util.Properties;
+
 /**
  * Represents an EL expression factory
  */
@@ -54,4 +56,14 @@ public abstract class ExpressionFactory {
     createValueExpression(Object instance,
                           Class<?> expectedType)
     throws ELException;
+
+  public static ExpressionFactory newInstance()
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
+
+  public static ExpressionFactory newInstance(Properties properties)
+  {
+    throw new UnsupportedOperationException("not implemented");
+  }
 }
