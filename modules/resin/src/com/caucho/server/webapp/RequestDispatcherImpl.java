@@ -246,6 +246,10 @@ public class RequestDispatcherImpl implements RequestDispatcher {
         "expected instance of ServletResponse at `{0}'", topResponse));
     }
 
+    if ("error".equals(method))
+      if (parentRes.getStatus() < 500)
+        parentRes.setStatus(HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
+
     ForwardRequest subRequest;
 
     if (_isLogin)

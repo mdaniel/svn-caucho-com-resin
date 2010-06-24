@@ -43,6 +43,8 @@ import javax.servlet.RequestDispatcher;
 import javax.servlet.ServletContext;
 import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
+import javax.servlet.http.HttpServletResponseWrapper;
+import javax.servlet.http.HttpServletResponse;
 import javax.servlet.jsp.JspException;
 import javax.servlet.jsp.JspTagException;
 import javax.servlet.jsp.JspWriter;
@@ -375,28 +377,11 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
 
       RequestDispatcher disp = request.getRequestDispatcher(url);
 
-      disp.include(request, response);
+      JstlImportResponseWrapper wrapper = new JstlImportResponseWrapper(response);
+      disp.include(request, wrapper);
 
-/*
-      final Integer statusCode
-        = (Integer) request.getAttribute("com.caucho.dispatch.response.statusCode");
-
-
-      if (statusCode != null) {
-        final int status = statusCode.intValue();
-
-        if (status < 200 || status > 299) {
-          String message = L.l(
-            "c:import status code {0} recieved while serving {1}",
-            statusCode,
-            url);
-
-          throw new JspException(message);
-        }
-      }
-*/
       //jsp/1jie
-      int status = response.getStatus();
+      int status = wrapper.getStatus();
 
       if (status < 200 || status > 299) {
         String message = L.l(
@@ -405,6 +390,8 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
           url);
 
         throw new JspException(message);
+      } else {
+        response.setStatus(status);
       }
 
     }
@@ -469,4 +456,32 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
       is.close();
     }
   }
+
+  static class JstlImportResponseWrapper extends HttpServletResponseWrapper {
+    private int _status;
+
+    JstlImportResponseWrapper(HttpServletResponse response)
+    {
+      super(response);
+    }
+
+    @Override
+    public void setStatus(int sc)
+    {
+      _status = sc;
+    }
+
+    @Override
+    public int getStatus()
+    {
+      return _status;
+    }
+
+    @Override
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + getResponse() + "]";
+    }
+  }
 }
+
