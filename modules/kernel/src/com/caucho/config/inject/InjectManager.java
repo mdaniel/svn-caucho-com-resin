@@ -130,6 +130,8 @@ import com.caucho.config.scope.ApplicationContext;
 import com.caucho.config.scope.DependentContext;
 import com.caucho.config.scope.ErrorContext;
 import com.caucho.config.scope.SingletonScope;
+import com.caucho.config.xml.XmlCookie;
+import com.caucho.config.xml.XmlCookieLiteral;
 import com.caucho.config.xml.XmlStandardPlugin;
 import com.caucho.inject.Module;
 import com.caucho.inject.RequestContext;
@@ -139,6 +141,7 @@ import com.caucho.loader.EnvironmentApply;
 import com.caucho.loader.EnvironmentClassLoader;
 import com.caucho.loader.EnvironmentListener;
 import com.caucho.loader.EnvironmentLocal;
+import com.caucho.util.Alarm;
 import com.caucho.util.IoUtil;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
@@ -303,6 +306,9 @@ public final class InjectManager
 
   private boolean _isBeforeBeanDiscoveryComplete;
   private boolean _isAfterBeanDiscoveryComplete;
+  
+  private final AtomicLong _xmlCookieSequence
+    = new AtomicLong(Alarm.getCurrentTime());
 
   // XXX: needs to be a local resolver
   private ELResolver _elResolver = new CandiElResolver(this);
@@ -2748,6 +2754,11 @@ public final class InjectManager
   {
     _xmlExtension.addConfiguredBean(className);
 //    _configuredClasses.add(className);
+  }
+  
+  public XmlCookie generateXmlCookie()
+  {
+    return new XmlCookieLiteral(_xmlCookieSequence.incrementAndGet());
   }
 
   public void addLoader()

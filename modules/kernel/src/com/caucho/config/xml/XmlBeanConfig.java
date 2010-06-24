@@ -86,9 +86,6 @@ public class XmlBeanConfig<T> {
 
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
-  
-  private static final AtomicLong _xmlCookieSequence
-    = new AtomicLong(Alarm.getCurrentTime());
 
   private InjectManager _cdiManager;
 
@@ -453,9 +450,9 @@ public class XmlBeanConfig<T> {
     else
       injectProgram = new ConfigProgram[0];
 
-    long xmlCookie = _xmlCookieSequence.incrementAndGet();
-
-    _annotatedType.addAnnotation(new XmlCookieLiteral(xmlCookie));
+    XmlCookie xmlCookie = _cdiManager.generateXmlCookie();
+    
+    _annotatedType.addAnnotation(xmlCookie);
     
     ManagedBeanImpl<T> managedBean
       = new ManagedBeanImpl(beanManager,_annotatedType, false);
@@ -465,7 +462,7 @@ public class XmlBeanConfig<T> {
     XmlInjectionTarget injectionTarget
       = new XmlInjectionTarget(managedBean, javaCtor, newProgram, injectProgram);
     
-    _cdiManager.addXmlInjectionTarget(xmlCookie, injectionTarget);
+    _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
 
     beanManager.discoverBean(_annotatedType);
     
