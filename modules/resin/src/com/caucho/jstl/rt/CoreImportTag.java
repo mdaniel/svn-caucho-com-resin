@@ -463,6 +463,7 @@ public class CoreImportTag extends BodyTagSupport implements NameValueTag {
     JstlImportResponseWrapper(HttpServletResponse response)
     {
       super(response);
+      _status = response.getStatus();
     }
 
     @Override
