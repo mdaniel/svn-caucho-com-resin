@@ -162,15 +162,16 @@ public class ResinStandardPlugin implements Extension {
     Annotated annotated = event.getAnnotated();
     Bean<T> bean = event.getBean();
 
-    if (annotated == null || bean instanceof EjbGeneratedBean) {
+    if (annotated == null) {
       return;
     }
 
-    if (annotated.isAnnotationPresent(Stateful.class)
-        || annotated.isAnnotationPresent(Stateless.class)
-        || annotated.isAnnotationPresent(Singleton.class)
-        || annotated.isAnnotationPresent(MessageDriven.class)
-        || annotated.isAnnotationPresent(JmsMessageListener.class)) {
+    if (! (bean instanceof EjbGeneratedBean)
+        && (annotated.isAnnotationPresent(Stateful.class)
+            || annotated.isAnnotationPresent(Stateless.class)
+            || annotated.isAnnotationPresent(Singleton.class)
+            || annotated.isAnnotationPresent(MessageDriven.class)
+            || annotated.isAnnotationPresent(JmsMessageListener.class))) {
       EjbManager ejbContainer = EjbManager.create();
 
       if (bean instanceof ManagedBeanImpl<?>) {
@@ -191,7 +192,7 @@ public class ResinStandardPlugin implements Extension {
     if (annotated.isAnnotationPresent(Jndi.class)) {
       Jndi jndi = annotated.getAnnotation(Jndi.class);
       String jndiName = jndi.value();
-      
+
       if ("".equals(jndiName)) {
         jndiName = bean.getBeanClass().getSimpleName();
       }

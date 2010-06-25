@@ -2825,7 +2825,7 @@ public final class InjectManager
     
     ArrayList<AnnotatedType<?>> types = new ArrayList<AnnotatedType<?>>(_pendingAnnotatedTypes);
     _pendingAnnotatedTypes.clear();
-
+    
     for (AnnotatedType<?> type : types) {
       discoverBeanImpl(type);
     }

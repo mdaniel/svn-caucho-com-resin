@@ -310,6 +310,10 @@ public class ResinBeanContainer
       thread.setContextClassLoader(_classLoader);
 
       _classLoader.start();
+      
+      InjectManager cdiManager = InjectManager.create();
+      
+      cdiManager.update();
     } finally {
       thread.setContextClassLoader(oldLoader);
     }

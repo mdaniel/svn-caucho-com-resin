@@ -458,11 +458,12 @@ public class XmlBeanConfig<T> {
     XmlInjectionTarget injectionTarget
       = new XmlInjectionTarget(managedBean, javaCtor, newProgram, injectProgram);
     
+    _bean = new XmlBean(managedBean, injectionTarget);
+    
     _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
 
     _cdiManager.discoverBean(_annotatedType);
     
-    _bean = new XmlBean(managedBean, injectionTarget);
     //beanManager.addBean(_bean);
 
     //managedBean.introspectProduces();
