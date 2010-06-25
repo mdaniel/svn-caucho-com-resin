@@ -29,7 +29,6 @@
 
 package com.caucho.jsp.el;
 
-import com.caucho.el.*;
 import com.caucho.inject.Module;
 import com.caucho.server.webapp.WebApp;
 
@@ -38,136 +37,55 @@ import javax.el.ELException;
 import javax.el.ExpressionFactory;
 import javax.el.MethodExpression;
 import javax.el.ValueExpression;
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.HashMap;
 
 /**
  * Represents an EL expression factory
  */
-@Module
-public class JspExpressionFactoryImpl extends ExpressionFactory {
-  private static final HashMap<Class<?>,CoerceType> _coerceMap
-    = new HashMap<Class<?>,CoerceType>();
-  
+@Module class JspExpressionFactoryImpl extends ExpressionFactory {
+
   private final JspApplicationContextImpl _jspApplicationContext;
+  private final ExpressionFactory _factory;
 
   public JspExpressionFactoryImpl(JspApplicationContextImpl jspApplicationContext)
   {
     _jspApplicationContext = jspApplicationContext;
+    _factory = ExpressionFactory.newInstance();
   }
-  
+
   public Object coerceToType(Object obj, Class<?> targetType)
     throws ELException
   {
-    CoerceType type = _coerceMap.get(targetType);
-
-    if (type == null)
-      return obj;
-
-    switch (type) {
-    case BOOLEAN:
-      return Expr.toBoolean(obj, null) ? Boolean.TRUE : Boolean.FALSE;
-    case CHARACTER:
-      return Expr.toCharacter(obj, null);
-    case BYTE:
-      return new Byte((byte) Expr.toLong(obj, null));
-    case SHORT:
-      return new Short((short) Expr.toLong(obj, null));
-    case INTEGER:
-      return new Integer((int) Expr.toLong(obj, null));
-    case LONG:
-      return new Long(Expr.toLong(obj, null));
-    case FLOAT:
-      return new Float((float) Expr.toDouble(obj, null));
-    case DOUBLE:
-      return new Double(Expr.toDouble(obj, null));
-    case STRING:
-      if (obj == null)
-	return "";
-      else
-	return obj.toString();
-    case BIG_DECIMAL:
-      return Expr.toBigDecimal(obj, null);
-    case BIG_INTEGER:
-      return Expr.toBigInteger(obj, null);
-    }
-
-    return null;
+    return _factory.coerceToType(obj, targetType);
   }
 
   public MethodExpression
-    createMethodExpression(ELContext context,
-			   String expression,
-			   Class<?> expectedReturnType,
-			   Class<?>[] expectedParamTypes)
+  createMethodExpression(ELContext context,
+                         String expression,
+                         Class<?> expectedReturnType,
+                         Class<?>[] expectedParamTypes)
     throws ELException
   {
-    JspELParser parser = new JspELParser(context, expression);
-
-    Expr expr = parser.parse();
-
-    return new MethodExpressionImpl(expr, expression,
-				    expectedReturnType,
-				    expectedParamTypes);
+    return _factory.createMethodExpression(context,
+                                           expression,
+                                           expectedReturnType,
+                                           expectedParamTypes);
   }
 
   public ValueExpression
-    createValueExpression(ELContext context,
-			  String expression,
-			  Class<?> expectedType)
+  createValueExpression(ELContext context,
+                        String expression,
+                        Class<?> expectedType)
     throws ELException
   {
-    JspELParser parser = new JspELParser(context, expression);
-
-    Expr expr = parser.parse();
-
-    return createValueExpression(expr, expression, expectedType);
-  }
-
-  public ValueExpression createValueExpression(Expr expr,
-                                               String expression,
-                                               Class<?> expectedType)
-  {
-    CoerceType type = _coerceMap.get(expectedType);
-
-    if (type == null)
-      return new ObjectValueExpression(expr, expression, expectedType);
-
-    switch (type) {
-    case BOOLEAN:
-      return new BooleanValueExpression(expr, expression, expectedType);
-    case CHARACTER:
-      return new CharacterValueExpression(expr, expression, expectedType);
-    case BYTE:
-      return new ByteValueExpression(expr, expression, expectedType);
-    case SHORT:
-      return new ShortValueExpression(expr, expression, expectedType);
-    case INTEGER:
-      return new IntegerValueExpression(expr, expression, expectedType);
-    case LONG:
-      return new LongValueExpression(expr, expression, expectedType);
-    case FLOAT:
-      return new FloatValueExpression(expr, expression, expectedType);
-    case DOUBLE:
-      return new DoubleValueExpression(expr, expression, expectedType);
-    case STRING:
-      return new StringValueExpression(expr, expression, expectedType);
-    case BIG_DECIMAL:
-      return new BigDecimalValueExpression(expr, expression, expectedType);
-    case BIG_INTEGER:
-      return new BigIntegerValueExpression(expr, expression, expectedType);
-    }
-
-    return new ObjectValueExpression(expr, expression, expectedType);
+    return _factory.createValueExpression(context, expression, expectedType);
   }
 
   public ValueExpression
-    createValueExpression(Object instance,
-			  Class<?> expectedType)
+  createValueExpression(Object instance,
+                        Class<?> expectedType)
     throws ELException
   {
-    throw new UnsupportedOperationException();
+    return _factory.createValueExpression(instance, expectedType);
   }
 
   public String toString()
@@ -176,54 +94,10 @@ public class JspExpressionFactoryImpl extends ExpressionFactory {
     if (_jspApplicationContext != null)
       webApp = _jspApplicationContext.getWebApp();
 
-    return "JspExpressionFactoryImpl[" + webApp + "]";
-  }
-
-  private enum CoerceType {
-    BOOLEAN,
-    CHARACTER,
-    STRING,
-    INTEGER,
-    DOUBLE,
-    LONG,
-    FLOAT,
-    SHORT,
-    BYTE,
-    BIG_INTEGER,
-    BIG_DECIMAL,
-    VOID
-  };
-
-  static {
-    _coerceMap.put(boolean.class, CoerceType.BOOLEAN);
-    _coerceMap.put(Boolean.class, CoerceType.BOOLEAN);
-    
-    _coerceMap.put(byte.class, CoerceType.BYTE);
-    _coerceMap.put(Byte.class, CoerceType.BYTE);
-    
-    _coerceMap.put(short.class, CoerceType.SHORT);
-    _coerceMap.put(Short.class, CoerceType.SHORT);
-    
-    _coerceMap.put(int.class, CoerceType.INTEGER);
-    _coerceMap.put(Integer.class, CoerceType.INTEGER);
-    
-    _coerceMap.put(long.class, CoerceType.LONG);
-    _coerceMap.put(Long.class, CoerceType.LONG);
-    
-    _coerceMap.put(float.class, CoerceType.FLOAT);
-    _coerceMap.put(Float.class, CoerceType.FLOAT);
-    
-    _coerceMap.put(double.class, CoerceType.DOUBLE);
-    _coerceMap.put(Double.class, CoerceType.DOUBLE);
-    
-    _coerceMap.put(char.class, CoerceType.CHARACTER);
-    _coerceMap.put(Character.class, CoerceType.CHARACTER);
-    
-    _coerceMap.put(String.class, CoerceType.STRING);
-    
-    _coerceMap.put(BigDecimal.class, CoerceType.BIG_DECIMAL);
-    _coerceMap.put(BigInteger.class, CoerceType.BIG_INTEGER);
-    
-    _coerceMap.put(void.class, CoerceType.VOID);
+    return "JspExpressionFactoryImpl["
+      + webApp
+      + ", "
+      + _factory.getClass().getName()
+      + "]";
   }
 }

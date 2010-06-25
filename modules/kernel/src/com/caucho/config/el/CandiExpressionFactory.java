@@ -89,4 +89,10 @@ public class CandiExpressionFactory extends ExpressionFactory {
     
     return new CandiValueExpression(expr);
   }
+
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _factory + "]";
+  }
 }
