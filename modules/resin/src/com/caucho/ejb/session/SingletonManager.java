@@ -42,8 +42,10 @@ import javax.enterprise.inject.spi.SessionBeanType;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.SingletonGenerator;
 import com.caucho.ejb.gen.StatelessGenerator;
@@ -101,6 +103,31 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
      */
 
     throw new UnsupportedOperationException();
+  }
+  
+  @Override
+  public X newInstance(CreationalContextImpl<X> env)
+  {
+    return _instance;
+  }
+
+  @Override
+  protected void postStart()
+  {
+    CreationalContextImpl<X> env = new OwnerCreationalContext<X>(getBean());
+    
+    _instance = super.newInstance(env);
+  }
+  
+  public void destroy(Object instance, CreationalContextImpl env)
+  {
+  }
+  
+  /**
+   * Initialize an instance
+   */
+  public void destroyInstance(X instance)
+  {
   }
 
   @Override

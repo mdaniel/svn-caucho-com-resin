@@ -429,6 +429,11 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
     for (AnnotatedType<?> localApi : getLocalApi()) {
       registerLocalSession(moduleBeanManager, localApi.getJavaClass());
     }
+    
+    if (getLocalBean() != null) {
+      registerLocalSession(moduleBeanManager, getLocalBean().getJavaClass());
+
+    }
   }
   
   private AnnotatedType<X> 
@@ -498,8 +503,6 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
   private <T> void registerLocalSession(InjectManager beanManager, 
                                         Class<T> localApi)
   {
-    BaseType localBeanType = beanManager.createSourceBaseType(localApi);
-      
     AbstractSessionContext<X,T> context = getSessionContext(localApi);
       
     BeanName beanName = new BeanNameLiteral(getEJBName());

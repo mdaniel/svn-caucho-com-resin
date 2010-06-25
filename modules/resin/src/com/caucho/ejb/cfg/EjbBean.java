@@ -661,13 +661,19 @@ public class EjbBean<X> extends DescriptionGroupConfig
       AnnotatedType<? super X> oldLocal = _localList.get(i);
       
       Class<?> oldClass = oldLocal.getJavaClass();
+
+      // ioc/1235
+      if (localClass.isAssignableFrom(oldClass))
+        return;
       
+      /*
       if (oldClass.isAssignableFrom(localClass)) {
         _localList.set(i, local);
         return;
       }
       else if (localClass.isAssignableFrom(oldClass))
         return;
+        */
     }
 
     _localList.add(local);

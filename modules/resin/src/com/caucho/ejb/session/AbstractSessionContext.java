@@ -91,6 +91,12 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     return _api;
   }
   
+  @Override
+  public Class<?> getInvokedBusinessInterface()
+  {
+    return getApi();
+  }
+  
   void bind()
   {
     if (_proxyFactory == null)

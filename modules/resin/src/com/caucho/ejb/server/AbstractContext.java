@@ -178,9 +178,12 @@ abstract public class AbstractContext<X> implements EJBContext {
   @Override
   public UserTransaction getUserTransaction() throws IllegalStateException
   {
+    // TCK uses this method in CMT
+    /*
     if (getServer().isContainerTransaction())
       throw new IllegalStateException(
           "getUserTransaction() is not allowed with container-managed transaction");
+          */
 
     return getServer().getUserTransaction();
   }
@@ -239,13 +242,13 @@ abstract public class AbstractContext<X> implements EJBContext {
   public Class getInvokedBusinessInterface() throws IllegalStateException
   {
     if (_invokedBusinessInterface == null)
-      throw new IllegalStateException(
-          "SessionContext.getInvokedBusinessInterface() is only allowed through EJB 3.0 interfaces");
+      throw new IllegalStateException(L.l(
+          "SessionContext.getInvokedBusinessInterface() is only allowed through EJB 3.0 interfaces"));
 
     return _invokedBusinessInterface;
   }
 
-  public void __caucho_setInvokedBusinessInterface(Class invokedBusinessInterface)
+  public void __caucho_setInvokedBusinessInterface(Class<?> invokedBusinessInterface)
   {
     _invokedBusinessInterface = invokedBusinessInterface;
   }

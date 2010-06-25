@@ -30,6 +30,7 @@
 package com.caucho.config.j2ee;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -53,6 +54,7 @@ import com.caucho.config.inject.InjectionPointHandler;
 import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldGeneratorProgram;
+import com.caucho.config.program.MethodGeneratorProgram;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.util.L10N;
 
@@ -70,7 +72,7 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
   @Override
   public ConfigProgram introspectField(AnnotatedField<?> field)
   {
-    PersistenceUnit pContext = field.getAnnotation(PersistenceUnit.class);
+    PersistenceUnit pUnit = field.getAnnotation(PersistenceUnit.class);
     
     Field javaField = field.getJavaMember();
     
@@ -79,20 +81,67 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
                                     getLocation(javaField)));
     }
     
-    return generateContext(field, pContext);
+    return generateContext(field, pUnit);
   }
-  // InjectIntrospector.introspect(_injectProgramList, field);
+  
+  @Override
+  public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
+  {
+    PersistenceUnit pUnit = method.getAnnotation(PersistenceUnit.class);
+    
+    Method javaMethod = method.getJavaMember();
+    
+    Class<?> param = null;
+    
+    if (javaMethod.getParameterTypes().length == 1)
+      param = javaMethod.getParameterTypes()[0];
+    
+    if (param == null || ! param.isAssignableFrom(EntityManagerFactory.class)) {
+      throw new ConfigException(L.l("{0}: @PersistenceUnit method must be assignable from EntityManagerFactory.",
+                                    getLocation(javaMethod)));
+    }
+    
+    return generateContext(method, pUnit);
+  }
 
   private ConfigProgram generateContext(AnnotatedField<?> field,
-                                        PersistenceUnit pContext)
+                                        PersistenceUnit pUnit)
     throws ConfigException
   {
-    String name = pContext.name();
-    String unitName = pContext.unitName();
-
     Field javaField = field.getJavaMember();
     
     String location = getLocation(javaField);
+
+    /*
+    if (! "".equals(pContext.name()))
+      jndiName = pContext.name();
+      */
+    BeanValueGenerator gen = bind(location, pUnit);
+    
+    return new FieldGeneratorProgram(javaField, gen);
+  }
+
+  private ConfigProgram generateContext(AnnotatedMethod<?> method,
+                                        PersistenceUnit pUnit)
+    throws ConfigException
+  {
+    Method javaMethod = method.getJavaMember();
+    
+    String location = getLocation(javaMethod);
+
+    /*
+    if (! "".equals(pContext.name()))
+      jndiName = pContext.name();
+      */
+    BeanValueGenerator gen = bind(location, pUnit);
+    
+    return new MethodGeneratorProgram(javaMethod, gen);
+  }
+  
+  private BeanValueGenerator bind(String location, PersistenceUnit pUnit)
+  {
+    String name = pUnit.name();
+    String unitName = pUnit.unitName();
 
     /*
     if (! "".equals(pContext.name()))
@@ -140,7 +189,7 @@ public class PersistenceUnitHandler extends JavaeeInjectionHandler {
     
     BeanValueGenerator gen
       = new BeanValueGenerator(location, bean);
-    
-    return new FieldGeneratorProgram(javaField, gen);
+
+    return gen;
   }
 }

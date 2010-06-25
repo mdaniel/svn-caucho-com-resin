@@ -247,6 +247,11 @@ public abstract class AnnotationLiteral<T extends Annotation>
     {
       return value.hashCode();
     }
+    
+    public String toString()
+    {
+      return getClass().getSimpleName() + "[" + _method + "]";
+    }
   }
   
   private static class ArrayMethodMatch extends MethodMatch {

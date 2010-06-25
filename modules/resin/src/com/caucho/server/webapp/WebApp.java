@@ -437,6 +437,8 @@ public class WebApp extends ServletContextImpl
     
     if ("".equals(_moduleName))
       _moduleName = "ROOT";
+    else if (_moduleName.startsWith("/"))
+      _moduleName = _moduleName.substring(1);
 
     _controller = controller;
     _appDir = controller.getRootDirectory();
@@ -632,6 +634,12 @@ public class WebApp extends ServletContextImpl
   public String getModuleName()
   {
     return _moduleName;
+  }
+  
+  public void setModuleName(String moduleName)
+  {
+    _moduleName = moduleName;
+    EjbModule.replace(getModuleName(), _classLoader);
   }
 
   public InvocationDecoder getInvocationDecoder()

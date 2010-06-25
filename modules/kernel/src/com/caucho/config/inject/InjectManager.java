@@ -2122,8 +2122,8 @@ public final class InjectManager
     return new NormalInstanceReferenceFactory<T>(bean, context);
   }
 
-  RuntimeException unsatisfiedException(Type type,
-                                                Annotation []qualifiers)
+  public RuntimeException unsatisfiedException(Type type,
+                                               Annotation []qualifiers)
   {
     WebComponent component = getWebComponent(createTargetBaseType(type));
 
@@ -2825,7 +2825,7 @@ public final class InjectManager
     
     ArrayList<AnnotatedType<?>> types = new ArrayList<AnnotatedType<?>>(_pendingAnnotatedTypes);
     _pendingAnnotatedTypes.clear();
-    
+
     for (AnnotatedType<?> type : types) {
       discoverBeanImpl(type);
     }
@@ -2891,7 +2891,7 @@ public final class InjectManager
     Class<X> cl;
     
     AnnotatedType<X> type = getExtensionManager().processAnnotatedType(beanType);
-    
+
     if (type == null)
       return;
     
@@ -2964,11 +2964,21 @@ public final class InjectManager
       return false;
     }
     */
-
+    
     if (! isValidConstructor(type))
       return false;
 
     return true;
+  }
+
+  private boolean isValidSimpleBean(AnnotatedType<?> type)
+  {
+    if (type.isAnnotationPresent(XmlCookie.class)) {
+      // ioc/04d0
+      return true;
+    }
+      
+    return isValidSimpleBean(type.getJavaClass());
   }
 
   private boolean isValidConstructor(Class<?> type)
@@ -2996,7 +3006,7 @@ public final class InjectManager
     if (Throwable.class.isAssignableFrom(type.getJavaClass()))
       return;
     
-    if (! isValidSimpleBean(type.getJavaClass())) {
+    if (! isValidSimpleBean(type)) {
       return;
     }
     
@@ -3011,7 +3021,7 @@ public final class InjectManager
     }
 
     target = processInjectionTarget(target, type);
-    
+
     if (target == null)
       return;
 
@@ -3066,8 +3076,11 @@ public final class InjectManager
 
   private <X> void addDiscoveredBean(ManagedBeanImpl<X> managedBean)
   {
+    /*
+     // ioc/04d0
     if (! isValidSimpleBean(managedBean.getBeanClass()))
       return;
+      */
     
     // ioc/0680
     if (! managedBean.isAlternative() || isEnabled(managedBean)) {
@@ -3251,16 +3264,6 @@ public final class InjectManager
     _extensionManager.addExtension(extension);
   }
 
-  public void addXmlInjectionTarget(long cookie, InjectionTarget<?> target)
-  {
-    _xmlTargetMap.put(cookie, target);
-  }
-  
-  public InjectionTarget<?> getXmlInjectionTarget(long cookie)
-  {
-    return _xmlTargetMap.get(cookie);
-  }
-  
   /**
    * Starts the bind phase
    */
@@ -3546,6 +3549,16 @@ public final class InjectManager
     _xmlExtension.addConfiguredBean(className);
   }
 
+  public void addXmlInjectionTarget(long cookie, InjectionTarget<?> target)
+  {
+    _xmlTargetMap.put(cookie, target);
+  }
+  
+  public InjectionTarget<?> getXmlInjectionTarget(long cookie)
+  {
+    return _xmlTargetMap.get(cookie);
+  }
+  
   void addService(Bean<?> bean)
   {
     _pendingServiceList.add(bean);

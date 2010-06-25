@@ -53,6 +53,45 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
   private static final Logger log 
     = Logger.getLogger(EJBContainerProvider.class.getName());
 
+  @Override
+  public EJBContainer createEJBContainer(Map<?,?> properties)
+    throws EJBException
+  {
+    EJBContainerImpl container = null;
+
+
+    if (properties == null) {
+      container = new EJBContainerImpl();
+
+      addModulesFromClasspath(container, null);
+
+      setWorkDir();
+    }
+    else {
+      String provider = (String) properties.get(EJBContainer.PROVIDER);
+
+      // This is the EJBContainer implementation class and not the
+      // EJBContainerProvider implementation for some reason. The spec
+      // is ambiguous, but the TCK is not.
+      if (provider != null 
+          && ! EJBContainerImpl.class.getName().equals(provider))
+        return null;
+
+      String name = (String) properties.get(EJBContainer.APP_NAME);
+
+      container = new EJBContainerImpl(name);
+
+      // FYI: only a single module is required for web profile
+      addModules(container, properties.get(EJBContainer.MODULES));
+
+      setWorkDir(properties.get(WORK_DIR));
+    }
+
+    container.start();
+
+    return container;
+  }
+
   private String scanEjbJarXml(Path ejbJarXml)
   {
     // XXX use Config.configure once com.caucho.ejb.cfg allows configuration
@@ -112,6 +151,9 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
 
     for (String component : components) {
       String moduleName = getModuleName(component);
+      
+      if (moduleName.equals(""))
+        continue;
 
       if (modules == null || modules.contains(moduleName)) {
         container.addModule(Vfs.lookup(component));
@@ -185,43 +227,5 @@ public class EJBContainerProvider implements javax.ejb.spi.EJBContainerProvider
 
       WorkDir.setLocalWorkDir(workDir);
     }
-  }
-
-  public EJBContainer createEJBContainer(Map<?,?> properties)
-    throws EJBException
-  {
-    EJBContainerImpl container = null;
-
-
-    if (properties == null) {
-      container = new EJBContainerImpl();
-
-      addModulesFromClasspath(container, null);
-
-      setWorkDir();
-    }
-    else {
-      String provider = (String) properties.get(EJBContainer.PROVIDER);
-
-      // This is the EJBContainer implementation class and not the
-      // EJBContainerProvider implementation for some reason. The spec
-      // is ambiguous, but the TCK is not.
-      if (provider != null 
-          && ! EJBContainerImpl.class.getName().equals(provider))
-        return null;
-
-      String name = (String) properties.get(EJBContainer.APP_NAME);
-
-      container = new EJBContainerImpl(name);
-
-      // FYI: only a single module is required for web profile
-      addModules(container, properties.get(EJBContainer.MODULES));
-
-      setWorkDir(properties.get(WORK_DIR));
-    }
-
-    container.start();
-
-    return container;
   }
 }

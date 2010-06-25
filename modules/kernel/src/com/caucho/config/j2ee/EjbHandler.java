@@ -31,6 +31,7 @@ package com.caucho.config.j2ee;
 
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
+import java.util.logging.Logger;
 
 import javax.ejb.EJB;
 import javax.enterprise.inject.spi.AnnotatedField;
@@ -50,6 +51,9 @@ import com.caucho.util.L10N;
  * Handles the @EJB annotation for JavaEE
  */
 public class EjbHandler extends JavaeeInjectionHandler {
+  private static final Logger log
+    = Logger.getLogger(EjbHandler.class.getName());
+  
   private static final L10N L = new L10N(EjbHandler.class);
   
   public EjbHandler(InjectManager manager)

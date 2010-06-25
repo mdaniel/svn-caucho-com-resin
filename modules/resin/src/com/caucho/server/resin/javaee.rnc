@@ -232,7 +232,7 @@ javaee_message-destination-usage = element message-destination-usage {
   | "ConsumesProduces"
 }
 
-javaee_module-name = element modulename {
+javaee_module-name = element module-name {
   string
 }  
 

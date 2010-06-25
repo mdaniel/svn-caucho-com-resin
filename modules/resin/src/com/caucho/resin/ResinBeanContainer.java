@@ -143,11 +143,14 @@ public class ResinBeanContainer
       
       // ioc/0p62
       EjbManager.create(_classLoader);
+      EjbManager.setScanAll();
 
       Environment.init();
 
       Environment.addChildLoaderListener(new ListenerPersistenceEnvironment());
       Environment.addChildLoaderListener(new EjbEnvironmentListener());
+      
+      Environment.addCloseListener(this);
 
       _injectManager.addManagedBean(_injectManager.createManagedBean(ResinCdiProducer.class));
 

@@ -527,7 +527,6 @@ public class BeanConfig {
         });
     }
 
-    System.out.println("BUILD: " + _qualifierList + " " + this);
     for (Annotation qualifier : _qualifierList) {
       builder.binding(qualifier);
     }

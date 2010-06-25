@@ -113,15 +113,15 @@ public class XmlBeanConfig<T> {
     _class = cl;
 
     _cdiManager = InjectManager.create();
-
-    if (! Annotation.class.isAssignableFrom(cl)) {
-      // XXX:
-      // _component = new SimpleBean(cl);
-      // _component.setScopeClass(Dependent.class);
-      AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(cl); 
-      _annotatedType = new AnnotatedTypeImpl<T>(annType);
-    }
-
+    
+    // XXX:
+    // _component = new SimpleBean(cl);
+    // _component.setScopeClass(Dependent.class);
+    AnnotatedType<T> annType = ReflectionAnnotatedFactory.introspectType(cl); 
+    _annotatedType = new AnnotatedTypeImpl<T>(annType);
+      
+    _cdiManager.addConfiguredBean(cl.getName());
+    
     _configType = TypeFactory.getCustomBeanType(cl);
 
     // defaults to @Configured
@@ -395,10 +395,6 @@ public class XmlBeanConfig<T> {
       _component.setNewArgs(_args);
     */
 
-    InjectManager beanManager = InjectManager.create();
-
-    beanManager.addConfiguredClass(_annotatedType.getJavaClass().getName());
-
     Arg<?> []newProgram = null;
     Constructor<?> javaCtor = null;
 
@@ -455,7 +451,7 @@ public class XmlBeanConfig<T> {
     _annotatedType.addAnnotation(xmlCookie);
     
     ManagedBeanImpl<T> managedBean
-      = new ManagedBeanImpl(beanManager,_annotatedType, false);
+      = new ManagedBeanImpl(_cdiManager,_annotatedType, false);
     
     managedBean.introspect();
     
@@ -464,9 +460,9 @@ public class XmlBeanConfig<T> {
     
     _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
 
-    beanManager.discoverBean(_annotatedType);
+    _cdiManager.discoverBean(_annotatedType);
     
-    // _bean = new XmlBean(managedBean, injectionTarget);
+    _bean = new XmlBean(managedBean, injectionTarget);
     //beanManager.addBean(_bean);
 
     //managedBean.introspectProduces();
@@ -494,6 +490,9 @@ public class XmlBeanConfig<T> {
 
   public Object toObject()
   {
+    if (_bean == null)
+      init();
+    
     InjectManager beanManager = InjectManager.create();
 
     CreationalContext<?> env = beanManager.createCreationalContext(_bean);

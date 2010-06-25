@@ -40,7 +40,7 @@ import java.util.concurrent.TimeUnit;
 @Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface StatefulTimeout {
-	long value();
+  long value();
 
-	TimeUnit unit() default TimeUnit.MINUTES;
+  TimeUnit unit() default TimeUnit.MINUTES;
 }

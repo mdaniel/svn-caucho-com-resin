@@ -41,6 +41,7 @@ public class EjbEnvironmentListener implements AddLoaderListener
   {
   }
 
+  @Override
   public boolean isEnhancer()
   {
     return false;

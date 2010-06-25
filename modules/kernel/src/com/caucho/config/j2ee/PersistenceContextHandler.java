@@ -30,6 +30,7 @@
 package com.caucho.config.j2ee;
 
 import java.lang.reflect.Field;
+import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Set;
 
@@ -51,6 +52,7 @@ import com.caucho.config.inject.InjectionPointHandler;
 import com.caucho.config.program.BeanValueGenerator;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.FieldGeneratorProgram;
+import com.caucho.config.program.MethodGeneratorProgram;
 import com.caucho.config.program.NullProgram;
 import com.caucho.config.program.ValueGenerator;
 import com.caucho.util.L10N;
@@ -95,57 +97,76 @@ public class PersistenceContextHandler extends JavaeeInjectionHandler {
     PersistenceContext pContext = field.getAnnotation(PersistenceContext.class);
     
     PersistenceContextType type = pContext.type();
-    PersistenceProperty []properties = pContext.properties();
     
     Field javaField = field.getJavaMember();
+    String location = getLocation(javaField);
     
     if (! javaField.getType().isAssignableFrom(EntityManager.class)) {
       throw new ConfigException(L.l("{0}: @PersistenceContext field must be assignable from EntityManager.",
                                     getLocation(javaField)));
     }
     
+    ValueGenerator gen;
+    
+    if (PersistenceContextType.EXTENDED.equals(type))
+      gen = generateExtendedContext(location, pContext);
+    else
+      gen = generateTransactionContext(location, pContext);
+    
+    return new FieldGeneratorProgram(javaField, gen);
+  }
+  // InjectIntrospector.introspect(_injectProgramList, field);
+  
+  @Override
+  public ConfigProgram introspectMethod(AnnotatedMethod<?> method)
+  {
+    PersistenceContext pContext = method.getAnnotation(PersistenceContext.class);
+    
+    Method javaMethod= method.getJavaMember();
+    String location = getLocation(javaMethod);
+    
+    Class<?> param = javaMethod.getParameterTypes()[0];
+    
+    if (! param.isAssignableFrom(EntityManager.class)) {
+      throw new ConfigException(L.l("{0}: @PersistenceContext method must be assignable from EntityManager.",
+                                    getLocation(javaMethod)));
+    }
+    
+    BeanValueGenerator gen;
+    
+    /*
     if (PersistenceContextType.EXTENDED.equals(type))
       return generateExtendedContext(field, pContext);
     else
-      return generateTransactionContext(field, pContext);
+    */
+    
+    gen = generateTransactionContext(location, pContext);
+    
+    return new MethodGeneratorProgram(javaMethod, gen);
   }
   // InjectIntrospector.introspect(_injectProgramList, field);
 
-  private ConfigProgram generateTransactionContext(AnnotatedField<?> field,
-                                                   PersistenceContext pContext)
+  private BeanValueGenerator 
+  generateTransactionContext(String location,
+                             PersistenceContext pContext)
     throws ConfigException
   {
-    Field javaField = field.getJavaMember();
-    
-    String location = getLocation(javaField);
-
-    /*
-    if (! "".equals(pContext.name()))
-      jndiName = pContext.name();
-      */
-
     Bean<?> bean = bindEntityManager(location, pContext);
 
-    // bindJndi(location, jndiName, bean);
-
-    // return new ComponentValueGenerator(location, (AbstractBean) bean);
-    
     BeanValueGenerator gen
-    = new BeanValueGenerator(location, bean);
+      = new BeanValueGenerator(location, bean);
     
-    return new FieldGeneratorProgram(javaField, gen);
+    return gen;
   }
 
-  private ConfigProgram generateExtendedContext(AnnotatedField<?> field,
-                                                PersistenceContext pContext)
+  private ValueGenerator generateExtendedContext(String location,
+                                                 PersistenceContext pContext)
   {
-    Field javaField = field.getJavaMember();
-    
     PersistenceContextGenerator gen;
 
-    gen = new PersistenceContextGenerator(getLocation(javaField), pContext);
-
-    return new FieldGeneratorProgram(javaField, gen);
+    gen = new PersistenceContextGenerator(location, pContext);
+    
+    return gen;
   }
   
   private Bean<?> bindEntityManager(String location, 

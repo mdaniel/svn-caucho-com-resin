@@ -33,8 +33,12 @@ import java.lang.annotation.Annotation;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.util.Set;
+import java.util.logging.Logger;
 
+import javax.enterprise.inject.AmbiguousResolutionException;
 import javax.enterprise.inject.Any;
+import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.UnsatisfiedResolutionException;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.AnnotationLiteral;
 import javax.naming.NamingException;
@@ -53,6 +57,9 @@ import com.caucho.naming.Jndi;
  * Common JavaEE injection handler
  */
 abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
+  private static final Logger log
+    = Logger.getLogger(JavaeeInjectionHandler.class.getName());
+  
   private InjectManager _manager;
   
   protected JavaeeInjectionHandler(InjectManager manager)
@@ -67,48 +74,66 @@ abstract public class JavaeeInjectionHandler extends InjectionPointHandler {
   
   protected Bean<?> bind(String location, Class<?> type, String name)
   {
-    InjectManager injectManager = getManager();
+    try {
+      InjectManager injectManager = getManager();
 
-    Set<Bean<?>> beans = null;
-    
-    if ("".equals(name))
-      name = null;
+      Set<Bean<?>> beans = null;
 
-    if (name != null)
-      beans = injectManager.getBeans(type, Names.create(name));
-    else
-      beans = injectManager.getBeans(type, DefaultLiteral.DEFAULT);
+      if ("".equals(name))
+        name = null;
 
-    if (beans != null && beans.size() != 0)
-      return injectManager.resolve(beans);
+      if (name != null)
+        beans = injectManager.getBeans(type, Names.create(name));
+      else
+        beans = injectManager.getBeans(type, DefaultLiteral.DEFAULT);
 
-    beans = injectManager.getBeans(type, new AnnotationLiteral<Any>() {});
+      if (beans != null && beans.size() != 0)
+        return injectManager.resolve(beans);
 
-    if (beans == null || beans.size() == 0)
+      beans = injectManager.getBeans(type, new AnnotationLiteral<Any>() {});
+
+      if (beans == null || beans.size() == 0)
+        return null;
+
+      for (Bean<?> bean : beans) {
+        // XXX: dup
+
+        if (name == null || name.equals(bean.getName()))
+          return bean;
+      }
+
       return null;
-
-    for (Bean<?> bean : beans) {
-      // XXX: dup
-
-      if (name == null || name.equals(bean.getName()))
-        return bean;
+    } catch (AmbiguousResolutionException e) {
+      throw new AmbiguousResolutionException(location + e, e);
+    } catch (InjectionException e) {
+      throw new InjectionException(location + e, e);
     }
-
-    return null;
   }
   
-  protected Bean<?> bind(String location, Class<?> type, Annotation qualifier)
+  protected Bean<?> bind(String location,
+                         Class<?> type, 
+                         Annotation ...qualifiers)
   {
-    InjectManager injectManager = getManager();
+    try {
+      InjectManager injectManager = getManager();
 
-    Set<Bean<?>> beans = null;
+      Set<Bean<?>> beans = null;
 
-    beans = injectManager.getBeans(type, qualifier);
+      beans = injectManager.getBeans(type, qualifiers);
 
-    if (beans != null && beans.size() == 1)
-      return injectManager.resolve(beans);
+      if (beans != null) {
+        Bean<?> bean = injectManager.resolve(beans);
 
-    return null;
+        if (bean != null)
+          return bean;
+      }
+
+      throw injectManager.unsatisfiedException(type, qualifiers);
+    } catch (UnsatisfiedResolutionException e) {
+      throw new UnsatisfiedResolutionException(location + e, e);
+    } catch (InjectionException e) {
+      throw new InjectionException(location + e, e);
+    }
   }
   
   protected void bindJndi(String name, ValueGenerator gen, String fullJndiName)
