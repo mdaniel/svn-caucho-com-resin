@@ -27,27 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.xml;
 
 import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.type.ConfigType;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanValueArgAttribute extends Attribute {
-  public static final Attribute ATTRIBUTE = new CustomBeanValueArgAttribute();
+public class XmlBeanProgramAttribute extends Attribute {
+  private static final L10N L = new L10N(XmlBeanProgramAttribute.class);
 
-  private CustomBeanValueArgAttribute()
+  public static final XmlBeanProgramAttribute ATTRIBUTE
+    = new XmlBeanProgramAttribute();
+
+  private XmlBeanProgramAttribute()
   {
   }
 
   public ConfigType getConfigType()
   {
-    throw new UnsupportedOperationException();
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
   /**
@@ -64,9 +67,18 @@ public class CustomBeanValueArgAttribute extends Attribute {
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    XmlBeanConfig customBean = (XmlBeanConfig) bean;
+    try {
+      XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
-    customBean.addArg((ConfigProgram) value);
+      customBean.addInitProgram((ConfigProgram) value);
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+
+  public String toString()
+  {
+    return getClass().getSimpleName();
   }
   
   /**
@@ -79,7 +91,7 @@ public class CustomBeanValueArgAttribute extends Attribute {
     try {
       XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
-      customBean.addArg(new TextArgProgram(text));
+      customBean.addInitProgram(new TextArgProgram(text));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

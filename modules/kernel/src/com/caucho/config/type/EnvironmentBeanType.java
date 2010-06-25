@@ -35,6 +35,7 @@ import java.util.logging.*;
 
 import com.caucho.config.*;
 import com.caucho.config.attribute.*;
+import com.caucho.config.xml.XmlBeanAttribute;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.loader.*;
 import com.caucho.make.*;
@@ -47,7 +48,7 @@ import org.w3c.dom.Node;
 /**
  * Represents an introspected bean type for configuration.
  */
-public class EnvironmentBeanType extends BeanType
+public class EnvironmentBeanType extends InlineBeanType
 {
   private static final L10N L = new L10N(EnvironmentBeanType.class);
   private static final Logger log
@@ -57,7 +58,7 @@ public class EnvironmentBeanType extends BeanType
   {
     super(beanClass);
 
-    setAddCustomBean(CustomBeanAttribute.ATTRIBUTE);
+    setAddCustomBean(XmlBeanAttribute.ATTRIBUTE);
   }
 
   /**

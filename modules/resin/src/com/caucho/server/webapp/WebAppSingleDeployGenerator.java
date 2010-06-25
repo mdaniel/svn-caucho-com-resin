@@ -29,7 +29,11 @@
 
 package com.caucho.server.webapp;
 
-import com.caucho.config.ConfigException;
+import java.util.ArrayList;
+import java.util.Set;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.config.types.PathBuilder;
 import com.caucho.loader.Environment;
 import com.caucho.loader.EnvironmentListener;
@@ -37,11 +41,6 @@ import com.caucho.server.deploy.DeployContainer;
 import com.caucho.server.deploy.DeployGenerator;
 import com.caucho.util.L10N;
 import com.caucho.vfs.Path;
-
-import java.util.ArrayList;
-import java.util.Set;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  * The generator for the web-app deploy
@@ -82,8 +81,8 @@ public class WebAppSingleDeployGenerator
    * Creates the new web-app deploy.
    */
   public WebAppSingleDeployGenerator(DeployContainer<WebAppController> deployContainer,
-				     WebAppContainer container,
-				     WebAppConfig config)
+                                     WebAppContainer container,
+                                     WebAppConfig config)
   {
     super(deployContainer);
     
@@ -218,7 +217,7 @@ public class WebAppSingleDeployGenerator
     }
     
     _controller = new WebAppController(_urlPrefix, _urlPrefix,
-				       _rootDirectory, _container);
+                                       _rootDirectory, _container);
 
     _controller.setArchivePath(_archivePath);
 
@@ -260,7 +259,7 @@ public class WebAppSingleDeployGenerator
       WebAppController webApp;
       
       webApp = new WebAppController(_urlPrefix, _urlPrefix,
-				    _rootDirectory, _container);
+                                    _rootDirectory, _container);
 
       webApp.setArchivePath(_controller.getArchivePath());
 
@@ -274,7 +273,7 @@ public class WebAppSingleDeployGenerator
    * Merges the controllers.
    */
   public WebAppController mergeController(WebAppController controller,
-					  String name)
+                                          String name)
   {
     // if directory matches, merge the two controllers.  The
     // last controller has priority.

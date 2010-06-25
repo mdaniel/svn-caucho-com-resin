@@ -78,6 +78,15 @@ public class XmlInjectionTarget<X> implements InjectionTarget<X>
 
       try {
         return (X) _ctor.newInstance(args);
+      } catch (IllegalArgumentException e) {
+        StringBuilder sb = new StringBuilder(_ctor.getName() + ": " + e);
+        
+        for (Object arg : args) {
+          sb.append("\n  " + arg
+                    + " [" + (arg != null ? arg.getClass().getName() : "null") + "]");
+        }
+        
+        throw new IllegalArgumentException(sb.toString(), e);
       } catch (RuntimeException e) {
         throw e;
       } catch (Exception e) {

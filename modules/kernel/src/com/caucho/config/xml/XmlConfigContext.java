@@ -508,9 +508,9 @@ public class XmlConfigContext {
       text = text.trim();
 
     if (isEL() && attrType.isEL() && text.indexOf("${") >= 0) {
-      ConfigType<?> childType = attrStrategy.getConfigType();
-
-      Object value = childType.valueOf(evalObject(text));
+      System.out.println("ATTRXX: "+ attrType);
+      
+      Object value = attrType.valueOf(evalObject(text));
 
       attrStrategy.setValue(bean, qName, value);
     }
@@ -962,7 +962,7 @@ public class XmlConfigContext {
   /**
    * Returns the variable resolver.
    */
-  public ConfigELContext getELContext()
+  public static ConfigELContext getELContext()
   {
     return ConfigELContext.EL_CONTEXT;
   }
@@ -1038,7 +1038,7 @@ public class XmlConfigContext {
     Expr expr = parser.parse();
 
     Object value = type.valueOf(elContext, expr);
-
+    
     if (value != null)
       return value;
     else

@@ -121,23 +121,23 @@ public abstract class Attribute {
       Object childBean = create(bean, name);
 
       if (childBean != null) {
-	ConfigType type = TypeFactory.getType(childBean.getClass());
+        ConfigType type = TypeFactory.getType(childBean.getClass());
 
-	type.init(childBean);
+        type.init(childBean);
 
-	Object newBean = replaceObject(childBean);
+        Object newBean = replaceObject(childBean);
 
-	setValue(bean, name, newBean);
+        setValue(bean, name, newBean);
 
-	return;
+        return;
       }
       
     }
 
     throw new ConfigException(L.l("{0}: '{1}' does not allow text for attribute {2}.",
-				  this,
-				  getConfigType().getTypeName(),
-				  name));
+                                  this,
+                                  getConfigType().getTypeName(),
+                                  name));
   }
   
   /**

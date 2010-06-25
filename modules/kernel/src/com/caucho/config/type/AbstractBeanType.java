@@ -44,7 +44,7 @@ import javax.enterprise.inject.spi.Bean;
  * Represents an interface.  The interface will try to lookup the
  * value in webbeans.
  */
-public class AbstractBeanType extends BeanType
+public class AbstractBeanType extends InlineBeanType
 {
   private static final L10N L = new L10N(AbstractBeanType.class);
 

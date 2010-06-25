@@ -27,51 +27,72 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
+package com.caucho.config.type;
 
-import com.caucho.config.program.ConfigProgram;
-
-import java.util.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
+import com.caucho.config.ConfigELContext;
+import com.caucho.config.types.*;
+import com.caucho.el.ELParser;
+import com.caucho.el.Expr;
 
 /**
- * Custom bean configured by namespace
+ * Represents a String type.
  */
-public class CustomBeanFieldConfig {
-  private Field _field;
+public final class ExprType extends ConfigType<Expr>
+{
+  public static final ExprType TYPE = new ExprType();
   
-  private ArrayList<Annotation> _annotationList
-    = new ArrayList<Annotation>();
-
-  private ArrayList<ConfigProgram> _programList
-    = new ArrayList<ConfigProgram>();
-
-  public CustomBeanFieldConfig(Field field)
+  /**
+   * The StringType is a singleton
+   */
+  private ExprType()
   {
-    _field = field;
+  }
+  
+  /**
+   * Returns the Java type.
+   */
+  @Override
+  public Class<Expr> getType()
+  {
+    return Expr.class;
   }
 
-  public Field getField()
+  /**
+   * Return true for non-trim.
+   */
+  @Override
+  public boolean isNoTrim()
   {
-    return _field;
+    return true;
   }
 
-  public void addProgramBuilder(ConfigProgram program)
+  /**
+   * Return true for EL
+   */
+  @Override
+  public boolean isEL()
   {
-    _programList.add(program);
+    return false;
+  }
+  
+  /**
+   * Converts the string to a value of the type.
+   */
+  @Override
+  public Object valueOf(String text)
+  {
+    ELParser parser = new ELParser(getELContext(), text);
+    parser.setCheckEscape(true);
+    Expr expr = parser.parse();
+    
+    return expr;
   }
 
-  public void addAnnotation(Annotation ann)
+  /**
+   * Returns the variable resolver.
+   */
+  public ConfigELContext getELContext()
   {
-    _annotationList.add(ann);
-  }
-
-  public Annotation []getAnnotations()
-  {
-    Annotation []annotations = new Annotation[_annotationList.size()];
-    _annotationList.toArray(annotations);
-
-    return annotations;
+    return ConfigELContext.EL_CONTEXT;
   }
 }

@@ -69,8 +69,6 @@ import com.caucho.config.reflect.AnnotatedTypeImpl;
 import com.caucho.config.reflect.ReflectionAnnotatedFactory;
 import com.caucho.config.type.ConfigType;
 import com.caucho.config.type.TypeFactory;
-import com.caucho.config.types.CustomBeanFieldConfig;
-import com.caucho.config.types.CustomBeanMethodConfig;
 import com.caucho.util.Alarm;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
@@ -79,9 +77,6 @@ import com.caucho.xml.QName;
  * Custom bean configured by namespace
  */
 public class XmlBeanConfig<T> {
-  private static final Logger log
-    = Logger.getLogger(XmlBeanConfig.class.getName());
-
   private static final L10N L = new L10N(XmlBeanConfig.class);
 
   private static final String RESIN_NS
@@ -240,8 +235,6 @@ public class XmlBeanConfig<T> {
     }
 
     if (name.getNamespaceURI().equals(_name.getNamespaceURI())) {
-      Method method;
-
       if (_configType.getAttribute(name) != null)
         addInitProgram(program);
       else {
@@ -287,15 +280,15 @@ public class XmlBeanConfig<T> {
     _annotatedType.addAnnotation(ann);
   }
 
-  public void addMethod(CustomBeanMethodConfig methodConfig)
+  public void addMethod(XmlBeanMethodConfig methodConfig)
   {
     Method method = methodConfig.getMethod();
     Annotation []annList = methodConfig.getAnnotations();
 
     AnnotatedMethod<?> annMethod = _annotatedType.createMethod(method);
 
-    if (annMethod instanceof AnnotatedMethodImpl) {
-      AnnotatedMethodImpl methodImpl = (AnnotatedMethodImpl) annMethod;
+    if (annMethod instanceof AnnotatedMethodImpl<?>) {
+      AnnotatedMethodImpl<?> methodImpl = (AnnotatedMethodImpl<?>) annMethod;
 
       // ioc/0c64
       methodImpl.clearAnnotations();
@@ -314,7 +307,7 @@ public class XmlBeanConfig<T> {
     }
   }
 
-  public void addField(CustomBeanFieldConfig fieldConfig)
+  public void addField(XmlBeanFieldConfig fieldConfig)
   {
     Field field = fieldConfig.getField();
     Annotation []annList = fieldConfig.getAnnotations();

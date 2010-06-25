@@ -122,7 +122,7 @@ public class SetterAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      ConfigType configType = getConfigType();
+      ConfigType<?> configType = getConfigType();
 
       _setter.invoke(bean, configType.valueOf(value));
     } catch (Exception e) {

@@ -40,5 +40,5 @@ import java.lang.annotation.*;
 @Target({ANNOTATION_TYPE})
 @Retention(RUNTIME)
 public @interface DefaultScopeContext {
-  Class value();
+  Class<?> value();
 }

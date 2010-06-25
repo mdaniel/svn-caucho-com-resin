@@ -27,36 +27,45 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.xml;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
 
-import com.caucho.config.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.type.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.types.CustomBeanFieldConfig;
-import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanFieldAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanFieldAttribute.class);
+/**
+ * Attribute for configuring an XML annotation's value.
+ * 
+ * The XML equivalent for an attribute @mypkg.MyAttribute(myfield="my-value")
+ * is the following:
+ * 
+ * <code><pre>
+ * &lt;mypkg:MyAttribute>
+ *   &lt;myfield>my-value&lt;/myfield>
+ * &lt;/mypkg:MyAttribute>
+ * </pre></code>
+ * 
+ */
+public class XmlBeanAnnotationAttribute<T> extends Attribute {
+  private static final L10N L = new L10N(XmlBeanAnnotationAttribute.class);
 
   private static final QName VALUE = new QName("value");
 
-  private final Field _field;
-  private final ConfigType _configType;
+  private final ConfigType<T> _configType;
 
-  public CustomBeanFieldAttribute(Class cl, Field field)
+  public XmlBeanAnnotationAttribute(Class<T> cl)
   {
-    _field = field;
-    _configType = TypeFactory.getType(CustomBeanFieldConfig.class);
+    _configType = TypeFactory.getType(cl);
   }
 
-  public ConfigType getConfigType()
+  @Override
+  public ConfigType<T> getConfigType()
   {
     return _configType;
   }
@@ -68,20 +77,27 @@ public class CustomBeanFieldAttribute extends Attribute {
   public Object create(Object parent, QName qName)
     throws ConfigException
   {
-    return new CustomBeanFieldConfig(_field);
+    return _configType.create(parent, qName);
   }
-  
+
   /**
    * Sets the value of the attribute
    */
+  @Override
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
-    XmlBeanConfig customBean = (XmlBeanConfig) bean;
+    XmlBeanConfig<T> customBean = (XmlBeanConfig<T>) bean;
 
-    customBean.addField((CustomBeanFieldConfig) value);
+    if (value instanceof Annotation) {
+      customBean.addAnnotation((Annotation) value);
+    }
+    else {
+      AnnotationConfig annConfig = (AnnotationConfig) value;
+      customBean.addAnnotation(annConfig.replace());
+    }
   }
-  
+
   /**
    * Sets the value of the attribute
    */
@@ -89,8 +105,22 @@ public class CustomBeanFieldAttribute extends Attribute {
   public void setText(Object parent, QName name, String text)
     throws ConfigException
   {
-    XmlBeanConfig customBean = (XmlBeanConfig) parent;
+    Object bean = create(parent, name);
 
-    customBean.addBuilderProgram(new PropertyStringProgram(name, text));
+    Attribute attr = _configType.getAttribute(VALUE);
+
+    if (attr != null) {
+      attr.setText(bean, VALUE, text);
+
+      setValue(parent, name, bean);
+    }
+    else if (text == null || "".equals(text)) {
+      // server/2pad
+      setValue(parent, name, bean);
+    }
+    else {
+      throw new ConfigException(L.l("'{0}' does not have a 'value' attribute, so it cannot have a text value.",
+                                    name));
+    }
   }
 }

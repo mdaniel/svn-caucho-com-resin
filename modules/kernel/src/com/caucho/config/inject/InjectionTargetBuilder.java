@@ -747,67 +747,6 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     }
   }
   
-  private void validateNormal(Bean<?> bean)
-  {
-    Type baseType = _annotatedType.getBaseType();
-    
-    Class<?> cl = getBeanManager().createTargetBaseType(baseType).getRawClass();
-    
-    int modifiers = cl.getModifiers();
-    
-    if (Modifier.isFinal(modifiers)) {
-      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it's a final class, for {2}.",
-                                    cl.getSimpleName(), bean.getScope().getSimpleName(),
-                                    bean));
-    }
-    
-    Constructor<?> ctor = null;
-    
-    for (Constructor<?> ctorPtr : cl.getDeclaredConstructors()) {
-      if (ctorPtr.getParameterTypes().length > 0)
-        continue;
-      
-      if (Modifier.isPrivate(ctorPtr.getModifiers())) {
-        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because its constructor is private for {2}.",
-                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
-                                      bean));
-
-      }
-      
-      ctor = ctorPtr;
-    }
-    
-    if (ctor == null) {
-      throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because it doesn't have a zero-arg constructor for {2}.",
-                                    cl.getName(), bean.getScope().getSimpleName(),
-                                    bean));
-
-    }
-    
-    
-    for (Method method : cl.getMethods()) {
-      if (method.getDeclaringClass() == Object.class)
-        continue;
-      
-      if (Modifier.isFinal(method.getModifiers())) {
-        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because {2} is a final method for {3}.",
-                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
-                                      method.getName(),
-                                      bean));
-      
-      }
-    }
-    
-    for (InjectionPoint ip : bean.getInjectionPoints()) {
-      if (ip.getType().equals(InjectionPoint.class))
-        throw new ConfigException(L.l("'{0}' is an invalid @{1} bean because '{2}' injects an InjectionPoint for {3}.",
-                                      cl.getSimpleName(), bean.getScope().getSimpleName(),
-                                      ip.getMember().getName(),
-                                      bean));
-      
-    }
-  }
-  
   private void validatePassivating(Bean<?> bean)
   {
     Type baseType = _annotatedType.getBaseType();

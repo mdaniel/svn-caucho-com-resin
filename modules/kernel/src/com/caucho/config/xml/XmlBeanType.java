@@ -27,37 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.type;
+package com.caucho.config.xml;
 
-import java.beans.*;
-import java.lang.annotation.*;
-import java.lang.reflect.*;
-import java.util.*;
-import java.util.logging.*;
+import java.lang.annotation.Annotation;
+import java.lang.reflect.Field;
+import java.lang.reflect.Method;
+import java.util.HashMap;
+import java.util.logging.Logger;
 
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.PropertyStringProgram;
-import com.caucho.config.*;
-import com.caucho.config.attribute.*;
-import com.caucho.config.j2ee.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.types.*;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-import com.caucho.vfs.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.AddAttribute;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.attribute.FlowAttribute;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
+import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-import org.w3c.dom.*;
-
 /**
- * Represents an webbeans-style introspected bean type for configuration.
+ * Represents a CanDI-style introspected bean type for configuration.
  */
-public class CustomBeanType<T> extends ConfigType
+public class XmlBeanType<T> extends ConfigType<T>
 {
-  private static final L10N L = new L10N(CustomBeanType.class);
+  private static final L10N L = new L10N(XmlBeanType.class);
   private static final Logger log
-    = Logger.getLogger(CustomBeanType.class.getName());
+    = Logger.getLogger(XmlBeanType.class.getName());
 
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
@@ -74,25 +68,16 @@ public class CustomBeanType<T> extends ConfigType
   private static final QName R_NEW = new QName("", "new", RESIN_NS);
   private static final QName A_NEW = new QName("new", null);
 
-  private static final Object _introspectLock = new Object();
-
   private final Class<T> _beanClass;
 
-  private final ConfigType _beanType;
+  private final ConfigType<T> _beanType;
 
   private String _namespaceURI;
-
-  private boolean _hasZeroArg;
 
   private HashMap<QName,Attribute> _nsAttributeMap
     = new HashMap<QName,Attribute>();
 
-  private HashMap<String,Attribute> _attributeMap
-    = new HashMap<String,Attribute>();
-
-  private Attribute _addAttribute;
-
-  public CustomBeanType(Class<T> beanClass)
+  public XmlBeanType(Class<T> beanClass)
   {
     _beanClass = beanClass;
 
@@ -101,15 +86,16 @@ public class CustomBeanType<T> extends ConfigType
     int p = beanClass.getName().lastIndexOf('.');
     _namespaceURI = "urn:java:" + beanClass.getName().substring(0, p);
 
-    _nsAttributeMap.put(W_NEW, CustomBeanNewAttribute.ATTRIBUTE);
-    _nsAttributeMap.put(R_NEW, CustomBeanNewAttribute.ATTRIBUTE);
-    _nsAttributeMap.put(A_NEW, CustomBeanNewAttribute.ATTRIBUTE);
+    _nsAttributeMap.put(W_NEW, XmlBeanNewAttribute.ATTRIBUTE);
+    _nsAttributeMap.put(R_NEW, XmlBeanNewAttribute.ATTRIBUTE);
+    _nsAttributeMap.put(A_NEW, XmlBeanNewAttribute.ATTRIBUTE);
   }
 
   /**
    * Returns the given type.
    */
-  public Class<?> getType()
+  @Override
+  public Class<T> getType()
   {
     return _beanClass;
   }
@@ -120,7 +106,7 @@ public class CustomBeanType<T> extends ConfigType
   @Override
   public Object create(Object parent, QName name)
   {
-    return new XmlBeanConfig(name, _beanClass);
+    return new XmlBeanConfig<T>(name, _beanClass);
   }
 
   /**
@@ -145,7 +131,7 @@ public class CustomBeanType<T> extends ConfigType
     Attribute attr = _beanType.getAttribute(qName);
 
     if (attr != null) {
-      return CustomBeanProgramAttribute.ATTRIBUTE;
+      return XmlBeanProgramAttribute.ATTRIBUTE;
     }
 
     String uri = qName.getNamespaceURI();
@@ -158,13 +144,13 @@ public class CustomBeanType<T> extends ConfigType
     Method method = null;
     if (uri.equals(_namespaceURI)
         && (method = findMethod(qName.getLocalName())) != null) {
-      return new CustomBeanMethodAttribute(_beanClass, method);
+      return new XmlBeanMethodAttribute(_beanClass, method);
     }
 
     Field field = null;
     if (uri.equals(_namespaceURI)
         && (field = findField(qName.getLocalName())) != null) {
-      return new CustomBeanFieldAttribute(_beanClass, field);
+      return new XmlBeanFieldAttribute(_beanClass, field);
     }
 
     /*
@@ -176,7 +162,7 @@ public class CustomBeanType<T> extends ConfigType
     */
 
     if ("new".equals(qName.getLocalName())) {
-      return CustomBeanNewAttribute.ATTRIBUTE;
+      return XmlBeanNewAttribute.ATTRIBUTE;
     }
 
     Attribute envAttr
@@ -188,7 +174,7 @@ public class CustomBeanType<T> extends ConfigType
       return envAttr;
     }
 
-    ConfigType type = TypeFactory.getFactory().getEnvironmentType(qName);
+    ConfigType<?> type = TypeFactory.getFactory().getEnvironmentType(qName);
 
     if (type == null) {
       if (Character.isLowerCase(qName.getLocalName().charAt(0))) {
@@ -205,13 +191,13 @@ public class CustomBeanType<T> extends ConfigType
     Class<?> cl = type.getType();
 
     if (Annotation.class.isAssignableFrom(cl)) {
-      return new CustomBeanAnnotationAttribute(cl);
+      return new XmlBeanAnnotationAttribute(cl);
     }
 
     AddAttribute addAttribute = (AddAttribute) _beanType.getAddAttribute(cl);
 
     if (addAttribute != null)
-      return new CustomBeanAddAttribute(cl);
+      return new XmlBeanAddAttribute(cl);
 
     throw new ConfigException(L.l("'{0}' is an unknown field or annotation",
                                   qName));
@@ -227,7 +213,7 @@ public class CustomBeanType<T> extends ConfigType
       return null;
 
     // server/1kl5
-    return CustomBeanProgramAttribute.ATTRIBUTE;
+    return XmlBeanProgramAttribute.ATTRIBUTE;
   }
 
   private Method findMethod(String name)

@@ -40,7 +40,7 @@ import com.caucho.vfs.Vfs;
 import javax.el.ELContext;
 import javax.el.ELException;
 
-public class PathType extends ConfigType
+public class PathType extends ConfigType<Path>
 {
   private static final L10N L = new L10N(PathType.class);
 
@@ -54,8 +54,8 @@ public class PathType extends ConfigType
   /**
    * Returns the path class.
    */
-  
-  public Class getType()
+  @Override
+  public Class<Path> getType()
   {
     return Path.class;
   }
@@ -93,8 +93,8 @@ public class PathType extends ConfigType
     throws ELException
   {
     return lookupPath(string,
-		      Config.getEnvironment(),
-		      Vfs.lookup());
+                      Config.getEnvironment(),
+                      Vfs.lookup());
   }
 
   public static Path lookupPath(String string, ELContext env)
@@ -117,7 +117,7 @@ public class PathType extends ConfigType
 
     if (obj == null)
       throw new NullPointerException(L.l("Path '{0}' evaluated to null.",
-					 string));
+                                         string));
     if (obj instanceof Path)
       return (Path) obj;
 

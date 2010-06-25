@@ -2109,10 +2109,13 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
      */
     public Path getRoot()
     {
+      /*
       if (Alarm.isTest())
         return Vfs.lookup("file:/var/www");
       else
         return Resin.this.getRootDirectory();
+        */
+      return Resin.this.getRootDirectory();
     }
 
     public String getUserName()

@@ -55,7 +55,7 @@ public class ServletMapper {
   private static final HashSet<String> _welcomeFileResourceMap
     = new HashSet<String>();
 
-  private ServletContext _servletContext;
+  private WebApp _webApp;
 
   private ServletManager _servletManager;
 
@@ -79,20 +79,17 @@ public class ServletMapper {
   private Map<String, String> _servletNamesMap
     = new HashMap<String, String>();
 
-  /**
-   * Sets the servlet context.
-   */
-  public void setServletContext(ServletContext servletContext)
+  public ServletMapper(WebApp webApp)
   {
-    _servletContext = servletContext;
+    _webApp = webApp;
   }
-
+  
   /**
    * Gets the servlet context.
    */
-  public ServletContext getServletContext()
+  public WebApp getWebApp()
   {
-    return _servletContext;
+    return _webApp;
   }
 
   /**
@@ -249,7 +246,7 @@ public class ServletMapper {
       ServletMapping servletRegexp = _regexpMap.get(servletName);
 
       if (servletRegexp != null) {
-        servletName = servletRegexp.initRegexp(_servletContext,
+        servletName = servletRegexp.initRegexp(_webApp,
                                                _servletManager,
                                                vars);
       }
@@ -261,7 +258,7 @@ public class ServletMapper {
     if (servletName == null) {
       try {
         InputStream is;
-        is = _servletContext.getResourceAsStream(contextURI);
+        is = _webApp.getResourceAsStream(contextURI);
 
         if (is != null) {
           is.close();
@@ -284,7 +281,8 @@ public class ServletMapper {
       if (matchResult != null)
         servletName = matchResult.getServletName();
 
-      if (matchResult != null && ! contextURI.endsWith("/")
+      if (matchResult != null 
+          && ! contextURI.endsWith("/")
           && ! (invocation instanceof SubInvocation)) {
         String contextPath = invocation.getContextPath();
 
@@ -347,7 +345,7 @@ public class ServletMapper {
 
     ServletMapping regexp = _regexpMap.get(servletName);
     if (regexp != null) {
-      servletName = regexp.initRegexp(_servletContext, _servletManager, vars);
+      servletName = regexp.initRegexp(_webApp, _servletManager, vars);
 
       if (servletName == null) {
         log.fine(L.l("'{0}' has no matching servlet", contextURI));
@@ -365,7 +363,7 @@ public class ServletMapper {
     invocation.setServletName(servletName);
 
     if (log.isLoggable(Level.FINER)) {
-      log.finer(_servletContext + " map (uri:"
+      log.finer(_webApp + " map (uri:"
                 + contextURI + " -> " + servletName + ")");
     }
 
@@ -400,15 +398,15 @@ public class ServletMapper {
     String contextURI = invocation.getContextURI();
 
     try {
-      URL url = _servletContext.getResource(contextURI);
+      Path path = _webApp.getCauchoPath(contextURI);
 
-      if (url == null)
+      if (! path.exists())
         return null;
     } catch (Exception e) {
       if (log.isLoggable(Level.FINER))
         log.log(Level.FINER, L.l(
-          "can't match a welcome file path {0}",
-          contextURI), e);
+                                 "can't match a welcome file path {0}",
+                                 contextURI), e);
 
       return null;
     }
@@ -459,7 +457,7 @@ public class ServletMapper {
         if (servletClass != null && isWelcomeFileResource(servletClass)
             || servletName == null) {
           InputStream is;
-          is = _servletContext.getResourceAsStream(welcomeURI);
+          is = _webApp.getResourceAsStream(welcomeURI);
 
           if (is != null)
             is.close();
@@ -540,7 +538,7 @@ public class ServletMapper {
 
     DependencyContainer dependencyList = new DependencyContainer();
 
-    WebApp app = (WebApp) _servletContext;
+    WebApp app = (WebApp) _webApp;
 
     Path contextPath = app.getAppDir().lookup(app.getRealPath(contextURI));
 
@@ -666,7 +664,7 @@ public class ServletMapper {
       return;
 
     ServletConfigImpl config = new ServletConfigImpl();
-    config.setServletContext(_servletContext);
+    config.setServletContext(_webApp);
     config.setServletName(servletName);
 
     try {

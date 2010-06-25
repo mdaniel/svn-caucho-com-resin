@@ -29,14 +29,15 @@
 
 package com.caucho.config.program;
 
-import com.caucho.config.*;
-import com.caucho.config.type.*;
-import com.caucho.config.xml.XmlConfigContext;
-import com.caucho.config.attribute.*;
-import com.caucho.util.*;
-import com.caucho.xml.*;
-
 import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.InlineBeanType;
+import com.caucho.config.type.TypeFactory;
+import com.caucho.util.L10N;
+import com.caucho.xml.QName;
 
 /**
  * A saved program for configuring an object.
@@ -94,13 +95,13 @@ public class PropertyStringProgram extends ConfigProgram {
       Attribute attr = type.getAttribute(_qName);
 
       if (attr != null)
-	attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
-      else if (_qName.equals(BeanType.TEXT) && "".equals(_value.trim())) {
-	// server/3000
+        attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
+      else if (_qName.equals(InlineBeanType.TEXT) && "".equals(_value.trim())) {
+        // server/3000
       }
       else if (! _isOptional)
-	throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'",
-				      _qName, bean.getClass().getName()));
+        throw new ConfigException(L.l("'{0}' is an unknown property of '{1}'",
+                                      _qName, bean.getClass().getName()));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

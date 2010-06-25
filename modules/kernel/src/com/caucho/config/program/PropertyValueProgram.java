@@ -55,14 +55,14 @@ public class PropertyValueProgram extends ConfigProgram {
     this(null, name, value);
   }
 
-  public PropertyValueProgram(Class type, String name, Object value)
+  public PropertyValueProgram(Class<?> type, String name, Object value)
   {
     _name = name;
     _qName = new QName(name);
     _value = value;
 
     if (type != null) {
-      ConfigType configType = TypeFactory.getType(type);
+      ConfigType<?> configType = TypeFactory.getType(type);
 
       _attr = configType.getAttribute(_qName);
     }
@@ -90,16 +90,16 @@ public class PropertyValueProgram extends ConfigProgram {
       Attribute attr = _attr;
 
       if (attr == null) {
-	ConfigType<?> type = TypeFactory.getType(bean.getClass());
+        ConfigType<?> type = TypeFactory.getType(bean.getClass());
 
-	attr = type.getAttribute(_qName);
+        attr = type.getAttribute(_qName);
       }
 
       if (attr != null)
-	attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
+        attr.setValue(bean, _qName, attr.getConfigType().valueOf(_value));
       else
-	throw new ConfigException(L.l("'{0}' is an unknown attribute of '{1}'",
-				      _qName.getName(), bean.getClass().getName()));
+        throw new ConfigException(L.l("'{0}' is an unknown attribute of '{1}'",
+                                      _qName.getName(), bean.getClass().getName()));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
@@ -112,5 +112,10 @@ public class PropertyValueProgram extends ConfigProgram {
     // ioc/04d7
     
     return (T) type.valueOf(_value);
+  }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _name + "," + _value + "]";
   }
 }

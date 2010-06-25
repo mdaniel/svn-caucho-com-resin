@@ -34,7 +34,7 @@ import com.caucho.config.types.*;
 /**
  * Represents a String type.
  */
-public final class RawStringType extends ConfigType
+public final class RawStringType extends ConfigType<RawString>
 {
   public static final RawStringType TYPE = new RawStringType();
   
@@ -48,9 +48,10 @@ public final class RawStringType extends ConfigType
   /**
    * Returns the Java type.
    */
-  public Class getType()
+  @Override
+  public Class<RawString> getType()
   {
-    return String.class;
+    return RawString.class;
   }
 
   /**

@@ -38,6 +38,6 @@ import java.lang.annotation.Target;
  * The @NonEL annotation for annotations not evaluating el
  */
 @Retention(RUNTIME)
-@Target(METHOD)
+@Target({METHOD, TYPE})
 public @interface NonEL {
 }

@@ -27,25 +27,51 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.types;
-
-import java.util.ArrayList;
+package com.caucho.config.xml;
 
 import com.caucho.config.program.ConfigProgram;
+
+import java.util.*;
+import java.lang.reflect.*;
+import java.lang.annotation.*;
 
 /**
  * Custom bean configured by namespace
  */
-public class ConfigProgramArray {
-  private ArrayList<ConfigProgram> _args = new ArrayList<ConfigProgram>();
+public class XmlBeanFieldConfig {
+  private Field _field;
+  
+  private ArrayList<Annotation> _annotationList
+    = new ArrayList<Annotation>();
 
-  public void addBuilderProgram(ConfigProgram program)
+  private ArrayList<ConfigProgram> _programList
+    = new ArrayList<ConfigProgram>();
+
+  public XmlBeanFieldConfig(Field field)
   {
-    _args.add(program);
+    _field = field;
   }
 
-  public ArrayList<ConfigProgram> getArgs()
+  public Field getField()
   {
-    return _args;
+    return _field;
+  }
+
+  public void addProgramBuilder(ConfigProgram program)
+  {
+    _programList.add(program);
+  }
+
+  public void addAnnotation(Annotation ann)
+  {
+    _annotationList.add(ann);
+  }
+
+  public Annotation []getAnnotations()
+  {
+    Annotation []annotations = new Annotation[_annotationList.size()];
+    _annotationList.toArray(annotations);
+
+    return annotations;
   }
 }

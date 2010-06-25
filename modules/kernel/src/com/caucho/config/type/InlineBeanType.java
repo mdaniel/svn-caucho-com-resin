@@ -40,6 +40,7 @@ import java.util.Map;
 import java.util.logging.Logger;
 
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.InjectionTarget;
 
 import org.w3c.dom.Node;
@@ -49,10 +50,10 @@ import com.caucho.config.Configurable;
 import com.caucho.config.DependencyBean;
 import com.caucho.config.TagName;
 import com.caucho.config.annotation.DisableConfig;
+import com.caucho.config.annotation.NonEL;
 import com.caucho.config.attribute.AddAttribute;
 import com.caucho.config.attribute.Attribute;
 import com.caucho.config.attribute.CreateAttribute;
-import com.caucho.config.attribute.CustomBeanAttribute;
 import com.caucho.config.attribute.ProgramAttribute;
 import com.caucho.config.attribute.PropertyAttribute;
 import com.caucho.config.attribute.SetterAttribute;
@@ -60,9 +61,11 @@ import com.caucho.config.attribute.TextAttribute;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.InjectionTargetBuilder;
 import com.caucho.config.inject.ManagedBeanImpl;
+import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.PropertyStringProgram;
 import com.caucho.config.types.RawString;
+import com.caucho.config.xml.XmlBeanAttribute;
 import com.caucho.config.xml.XmlBeanConfig;
 import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
@@ -72,13 +75,13 @@ import com.caucho.xml.QName;
 import com.caucho.xml.QNode;
 
 /**
- * Represents an introspected bean type for configuration.
+ * Represents an inline bean type for configuration.
  */
-public class BeanType<T> extends ConfigType<T>
+public class InlineBeanType<T> extends ConfigType<T>
 {
-  private static final L10N L = new L10N(BeanType.class);
+  private static final L10N L = new L10N(InlineBeanType.class);
   private static final Logger log
-    = Logger.getLogger(BeanType.class.getName());
+    = Logger.getLogger(InlineBeanType.class.getName());
   
   private static final String RESIN_NS
     = "http://caucho.com/ns/resin";
@@ -96,11 +99,6 @@ public class BeanType<T> extends ConfigType<T>
   private HashMap<String,Attribute> _attributeMap
     = new HashMap<String,Attribute>();
 
-  /*
-  private HashMap<String,Method> _createMap
-    = new HashMap<String,Method>();
-  */
-
   private Constructor<T> _stringConstructor;
   
   private Method _valueOf;
@@ -114,22 +112,25 @@ public class BeanType<T> extends ConfigType<T>
   private Attribute _addContentProgram;
   private Attribute _addBean; // add(Object)
   private Attribute _setProperty;
+  
+  private boolean _isEL;
 
   private HashMap<Class<?>,Attribute> _addMethodMap
     = new HashMap<Class<?>,Attribute>();
 
   private Attribute _addCustomBean;
   private ManagedBeanImpl<T> _bean;
+  private InjectionTarget<T> _injectionTarget;
 
   private ArrayList<ConfigProgram> _injectList;
   private ArrayList<ConfigProgram> _initList;
 
   private boolean _isIntrospecting;
   private boolean _isIntrospected;
-  private ArrayList<BeanType<?>> _pendingChildList
-    = new ArrayList<BeanType<?>>();
+  private ArrayList<InlineBeanType<?>> _pendingChildList
+    = new ArrayList<InlineBeanType<?>>();
 
-  public BeanType(Class<T> beanClass)
+  public InlineBeanType(Class<T> beanClass)
   {
     _beanClass = beanClass;
   }
@@ -141,6 +142,12 @@ public class BeanType<T> extends ConfigType<T>
   public Class<T> getType()
   {
     return _beanClass;
+  }
+  
+  @Override
+  public boolean isEL()
+  {
+    return _isEL;
   }
 
   protected void setAddCustomBean(Attribute addCustomBean)
@@ -159,38 +166,45 @@ public class BeanType<T> extends ConfigType<T>
   public Object create(Object parent, QName name)
   {
     try {
-      InjectManager webBeans
+      InjectManager cdiManager
         = InjectManager.create(_beanClass.getClassLoader());
       
-      if (_bean == null) {
-	if (_beanClass.isInterface())
-	  throw new ConfigException(L.l("{0} cannot be instantiated because it is an interface",
-					_beanClass.getName()));
+      if (_injectionTarget == null) {
+        if (_beanClass.isInterface())
+          throw new ConfigException(L.l("{0} cannot be instantiated because it is an interface",
+                                        _beanClass.getName()));
 
-	_bean = webBeans.createManagedBean(_beanClass);
-	
-	_bean.getInjectionPoints();
+        AnnotatedType<T> type = cdiManager.createAnnotatedType(_beanClass);
+        
+        InjectionTargetBuilder<T> builder
+          = new InjectionTargetBuilder<T>(cdiManager, type);
+        
+        builder.setGenerateInterception(false);
+        
+        _injectionTarget = builder;
+
+        // _bean.getInjectionPoints();
       }
 
-      InjectionTarget<T> injection = _bean.getInjectionTarget();
-      CreationalContext<T> env = webBeans.createCreationalContext(_bean);
+      InjectionTarget<T> injection = _injectionTarget;
+      CreationalContext<T> env = new OwnerCreationalContext<T>(_bean);
 
       T bean = injection.produce(env);
       injection.inject(bean, env);
 
       if (_setParent != null
-	  && parent != null
-	  && _setParent.getParameterTypes()[0].isAssignableFrom(parent.getClass())) {
-	try {
-	  _setParent.invoke(bean, parent);
-	} catch (IllegalArgumentException e) {
-	  throw ConfigException.create(_setParent,
-				       L.l("{0}: setParent value of '{1}' is not valid",
-					   bean, parent),
-				       e);
-	} catch (Exception e) {
-	  throw ConfigException.create(_setParent, e);
-	}
+          && parent != null
+          && _setParent.getParameterTypes()[0].isAssignableFrom(parent.getClass())) {
+        try {
+          _setParent.invoke(bean, parent);
+        } catch (IllegalArgumentException e) {
+          throw ConfigException.create(_setParent,
+                                       L.l("{0}: setParent value of '{1}' is not valid",
+                                           bean, parent),
+                                           e);
+        } catch (Exception e) {
+          throw ConfigException.create(_setParent, e);
+        }
       }
 
       return bean;
@@ -207,11 +221,11 @@ public class BeanType<T> extends ConfigType<T>
   {
     for (Constructor<?> ctor : _beanClass.getConstructors()) {
       if (ctor.getParameterTypes().length == count)
-	return (Constructor<T>) ctor;
+        return (Constructor<T>) ctor;
     }
     
     throw new ConfigException(L.l("{0} does not have any constructor with {1} arguments",
-				  this, count));
+                                  this, count));
   }
 
   /**
@@ -224,9 +238,9 @@ public class BeanType<T> extends ConfigType<T>
 
     if (_setConfigNode != null) {
       try {
-	_setConfigNode.invoke(bean, node);
+        _setConfigNode.invoke(bean, node);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 
@@ -235,9 +249,9 @@ public class BeanType<T> extends ConfigType<T>
       int line = ((QNode) node).getLine();
 
       try {
-	_setConfigLocation.invoke(bean, filename, line);
+        _setConfigLocation.invoke(bean, filename, line);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
 
@@ -246,9 +260,9 @@ public class BeanType<T> extends ConfigType<T>
       
       ArrayList<Dependency> dependencyList = env.getDependencyList();
       if (dependencyList != null) {
-	for (Dependency depend : dependencyList) {
-	  dependencyBean.addDependency((PersistentDependency) depend);
-	}
+        for (Dependency depend : dependencyList) {
+          dependencyBean.addDependency((PersistentDependency) depend);
+        }
       }
     }
   }
@@ -263,10 +277,10 @@ public class BeanType<T> extends ConfigType<T>
       Attribute attr = _nsAttributeMap.get(name);
 
       if (attr == null) {
-	attr = getAttributeImpl(name);
+        attr = getAttributeImpl(name);
 
-	if (attr != null)
-	  _nsAttributeMap.put(name, attr);
+        if (attr != null)
+          _nsAttributeMap.put(name, attr);
       }
 
       return attr;
@@ -294,7 +308,7 @@ public class BeanType<T> extends ConfigType<T>
       attr = getAddAttribute(cl);
 
       if (attr != null)
-	return attr;
+        return attr;
     }
 
     if (_addCustomBean != null) {
@@ -332,7 +346,7 @@ public class BeanType<T> extends ConfigType<T>
       attr = getAddAttribute(iface);
 
       if (attr != null)
-	return attr;
+        return attr;
     }
 
     return getAddAttribute(cl.getSuperclass());
@@ -423,7 +437,7 @@ public class BeanType<T> extends ConfigType<T>
   {
     if (_replaceObject != null) {
       try {
-	return _replaceObject.invoke(bean);
+        return _replaceObject.invoke(bean);
       } catch (Exception e) {
 	throw ConfigException.create(_replaceObject, e);
       }
@@ -439,16 +453,16 @@ public class BeanType<T> extends ConfigType<T>
   {
     if (_valueOf != null) {
       try {
-	return _valueOf.invoke(null, text);
+        return _valueOf.invoke(null, text);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
     else if (_stringConstructor != null) {
       try {
-	return _stringConstructor.newInstance(text);
+        return _stringConstructor.newInstance(text);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
     }
     else if (_addText != null) {
@@ -466,14 +480,14 @@ public class BeanType<T> extends ConfigType<T>
       inject(bean);
       
       try {
-	ConfigProgram program = new PropertyStringProgram(TEXT, text);
-
-	if (_addProgram != null)
-	  _addProgram.setValue(bean, TEXT, program);
-	else
-	  _addContentProgram.setValue(bean, TEXT, program);
+        ConfigProgram program = new PropertyStringProgram(TEXT, text);
+        
+        if (_addProgram != null)
+          _addProgram.setValue(bean, TEXT, program);
+        else
+          _addContentProgram.setValue(bean, TEXT, program);
       } catch (Exception e) {
-	throw ConfigException.create(e);
+        throw ConfigException.create(e);
       }
 
       init(bean);
@@ -490,7 +504,7 @@ public class BeanType<T> extends ConfigType<T>
     }
 
     throw new ConfigException(L.l("Can't convert to '{0}' from '{1}'.",
-				  _beanClass.getName(), text));
+                                  _beanClass.getName(), text));
   }
 
   public boolean isConstructableFromString()
@@ -530,7 +544,7 @@ public class BeanType<T> extends ConfigType<T>
   @Override
   public void introspect()
   {
-    long startTime = System.currentTimeMillis();
+    // long startTime = System.currentTimeMillis();
     synchronized (_introspectLock) {
       if (_isIntrospecting)
         return;
@@ -545,6 +559,8 @@ public class BeanType<T> extends ConfigType<T>
         if (! _isIntrospected) {
           _isIntrospected = true;
 
+          _isEL = ! _beanClass.isAnnotationPresent(NonEL.class);
+          
           try {
             Method []methods = _beanClass.getDeclaredMethods();
 
@@ -559,15 +575,15 @@ public class BeanType<T> extends ConfigType<T>
     }
 
     introspectComplete();
-    long endTime = System.currentTimeMillis();
+    //long endTime = System.currentTimeMillis();
   }
 
   private void introspectComplete()
   {
-    ArrayList<BeanType> childList = new ArrayList<BeanType>(_pendingChildList);
+    ArrayList<InlineBeanType> childList = new ArrayList<InlineBeanType>(_pendingChildList);
 
     // ioc/20h4
-    for (BeanType child : childList) {
+    for (InlineBeanType child : childList) {
       child.introspectParent();
       child.introspectComplete();
     }
@@ -583,8 +599,8 @@ public class BeanType<T> extends ConfigType<T>
     if (parentClass != null) {
       ConfigType parentType = TypeFactory.getType(parentClass);
 
-      if (parentType instanceof BeanType) {
-	BeanType parentBean = (BeanType) parentType;
+      if (parentType instanceof InlineBeanType) {
+	InlineBeanType parentBean = (InlineBeanType) parentType;
 
 	return parentBean.isIntrospecting();
       }
@@ -600,57 +616,57 @@ public class BeanType<T> extends ConfigType<T>
     if (parentClass != null) {
       ConfigType parentType = TypeFactory.getType(parentClass);
 
-      if (parentType instanceof BeanType<?>) {
-	BeanType<?> parentBean = (BeanType<?>) parentType;
+      if (parentType instanceof InlineBeanType<?>) {
+        InlineBeanType<?> parentBean = (InlineBeanType<?>) parentType;
 
-	if (! parentBean._isIntrospected)
-	  parentBean.introspect();
+        if (! parentBean._isIntrospected)
+          parentBean.introspect();
 
-	// ioc/20h4
-	if (parentBean.isIntrospecting()) {
-	  if (! parentBean._pendingChildList.contains(this))
-	    parentBean._pendingChildList.add(this);
-	  return;
-	}
+        // ioc/20h4
+        if (parentBean.isIntrospecting()) {
+          if (! parentBean._pendingChildList.contains(this))
+            parentBean._pendingChildList.add(this);
+          return;
+        }
 
-	if (_setParent == null)
-	  _setParent = parentBean._setParent;
-	
-	if (_replaceObject == null)
-	  _replaceObject = parentBean._replaceObject;
-	
-	if (_setConfigLocation == null)
-	  _setConfigLocation = parentBean._setConfigLocation;
-	
-	if (_setConfigNode == null)
-	  _setConfigNode = parentBean._setConfigNode;
+        if (_setParent == null)
+          _setParent = parentBean._setParent;
 
-	if (_addText == null)
-	  _addText = parentBean._addText;
+        if (_replaceObject == null)
+          _replaceObject = parentBean._replaceObject;
 
-	if (_addProgram == null)
-	  _addProgram = parentBean._addProgram;
-	
-	if (_addContentProgram == null)
-	  _addContentProgram = parentBean._addContentProgram;
+        if (_setConfigLocation == null)
+          _setConfigLocation = parentBean._setConfigLocation;
 
-	if (_setProperty == null)
-	  _setProperty = parentBean._setProperty;
+        if (_setConfigNode == null)
+          _setConfigNode = parentBean._setConfigNode;
 
-	if (_addCustomBean == null)
-	  _addCustomBean = parentBean._addCustomBean;
+        if (_addText == null)
+          _addText = parentBean._addText;
 
-	for (Map.Entry<QName,Attribute> entry : parentBean._nsAttributeMap.entrySet()) {
-	  if (_nsAttributeMap.get(entry.getKey()) == null)
-	    _nsAttributeMap.put(entry.getKey(), entry.getValue());
-	}
+        if (_addProgram == null)
+          _addProgram = parentBean._addProgram;
 
-	for (Map.Entry<String,Attribute> entry : parentBean._attributeMap.entrySet()) {
-	  if (_attributeMap.get(entry.getKey()) == null)
-	    _attributeMap.put(entry.getKey(), entry.getValue());
-	}
+        if (_addContentProgram == null)
+          _addContentProgram = parentBean._addContentProgram;
 
-	_addMethodMap.putAll(parentBean._addMethodMap);
+        if (_setProperty == null)
+          _setProperty = parentBean._setProperty;
+
+        if (_addCustomBean == null)
+          _addCustomBean = parentBean._addCustomBean;
+
+        for (Map.Entry<QName,Attribute> entry : parentBean._nsAttributeMap.entrySet()) {
+          if (_nsAttributeMap.get(entry.getKey()) == null)
+            _nsAttributeMap.put(entry.getKey(), entry.getValue());
+        }
+
+        for (Map.Entry<String,Attribute> entry : parentBean._attributeMap.entrySet()) {
+          if (_attributeMap.get(entry.getKey()) == null)
+            _attributeMap.put(entry.getKey(), entry.getValue());
+        }
+
+        _addMethodMap.putAll(parentBean._addMethodMap);
       }
     }
   }
@@ -679,98 +695,98 @@ public class BeanType<T> extends ConfigType<T>
       String name = method.getName();
 
       if ("replaceObject".equals(name) && paramTypes.length == 0) {
-	_replaceObject = method;
-	_replaceObject.setAccessible(true);
-	continue;
+        _replaceObject = method;
+        _replaceObject.setAccessible(true);
+        continue;
       }
 
       if ("valueOf".equals(name)
-	  && paramTypes.length == 1
-	  && String.class.equals(paramTypes[0])
-	  && Modifier.isStatic(method.getModifiers())) {
-	_valueOf = method;
-	_valueOf.setAccessible(true);
-	continue;
+          && paramTypes.length == 1
+          && String.class.equals(paramTypes[0])
+          && Modifier.isStatic(method.getModifiers())) {
+        _valueOf = method;
+        _valueOf.setAccessible(true);
+        continue;
       }
-      
+
       if (Modifier.isStatic(method.getModifiers()))
-	continue;
-      
+        continue;
+
       if (! Modifier.isPublic(method.getModifiers()))
-	continue;
+        continue;
 
       if ((name.equals("addBuilderProgram") || name.equals("addProgram"))
-	  && paramTypes.length == 1
-	  && paramTypes[0].equals(ConfigProgram.class)) {
-	ConfigType type = TypeFactory.getType(paramTypes[0]);
-	
-	_addProgram = new ProgramAttribute(method, type);
+          && paramTypes.length == 1
+          && paramTypes[0].equals(ConfigProgram.class)) {
+        ConfigType type = TypeFactory.getType(paramTypes[0]);
+
+        _addProgram = new ProgramAttribute(method, type);
       }
       else if (name.equals("addContentProgram")
-	       && paramTypes.length == 1
-	       && paramTypes[0].equals(ConfigProgram.class)) {
-	ConfigType type = TypeFactory.getType(paramTypes[0]);
-	
-	_addContentProgram = new ProgramAttribute(method, type);
+          && paramTypes.length == 1
+          && paramTypes[0].equals(ConfigProgram.class)) {
+        ConfigType type = TypeFactory.getType(paramTypes[0]);
+
+        _addContentProgram = new ProgramAttribute(method, type);
       }
       else if ((name.equals("setConfigLocation")
-		&& paramTypes.length == 2
-		&& paramTypes[0].equals(String.class)
-		&& paramTypes[1].equals(int.class))) {
-	_setConfigLocation = method;
+          && paramTypes.length == 2
+          && paramTypes[0].equals(String.class)
+          && paramTypes[1].equals(int.class))) {
+        _setConfigLocation = method;
       }
       else if ((name.equals("setConfigNode")
-		&& paramTypes.length == 1
-		&& paramTypes[0].equals(Node.class))) {
-	_setConfigNode = method;
+          && paramTypes.length == 1
+          && paramTypes[0].equals(Node.class))) {
+        _setConfigNode = method;
       }
       else if ((name.equals("addCustomBean")
-		&& paramTypes.length == 1
-		&& paramTypes[0].equals(XmlBeanConfig.class))) {
-	ConfigType customBeanType
-	  = TypeFactory.getType(XmlBeanConfig.class);
+          && paramTypes.length == 1
+          && paramTypes[0].equals(XmlBeanConfig.class))) {
+        ConfigType customBeanType
+        = TypeFactory.getType(XmlBeanConfig.class);
 
-	_addCustomBean = new CustomBeanAttribute(method, customBeanType);
+        _addCustomBean = new XmlBeanAttribute(method, customBeanType);
       }
       else if ((name.equals("addAnnotation")
-		&& paramTypes.length == 1
-		&& paramTypes[0].equals(Annotation.class))) {
-	ConfigType customBeanType
-	  = TypeFactory.getType(XmlBeanConfig.class);
+          && paramTypes.length == 1
+          && paramTypes[0].equals(Annotation.class))) {
+        ConfigType customBeanType
+        = TypeFactory.getType(XmlBeanConfig.class);
 
-	_addCustomBean = new CustomBeanAttribute(method, customBeanType);
+        _addCustomBean = new XmlBeanAttribute(method, customBeanType);
       }
       else if (name.equals("setProperty")
-	       && paramTypes.length == 2
-	       && paramTypes[0].equals(String.class)) {
-	ConfigType type = TypeFactory.getType(paramTypes[1]);
+          && paramTypes.length == 2
+          && paramTypes[0].equals(String.class)) {
+        ConfigType type = TypeFactory.getType(paramTypes[1]);
 
-	PropertyAttribute attr = new PropertyAttribute(method, type);
+        PropertyAttribute attr = new PropertyAttribute(method, type);
 
-	_setProperty = attr;
+        _setProperty = attr;
       }
       else if (name.equals("setParent")
-	       && paramTypes.length == 1) {
-	// XXX: use annotation
-	_setParent = method;
+          && paramTypes.length == 1) {
+        // XXX: use annotation
+        _setParent = method;
       }
       else if (name.equals("add")
-	       && paramTypes.length == 1) {
-	ConfigType type = TypeFactory.getType(paramTypes[0]);
+          && paramTypes.length == 1) {
+        ConfigType type = TypeFactory.getType(paramTypes[0]);
 
-	Attribute addAttr = new AddAttribute(method, type);
+        Attribute addAttr = new AddAttribute(method, type);
 
-	_addMethodMap.put(paramTypes[0], addAttr);
+        _addMethodMap.put(paramTypes[0], addAttr);
 
-	// _addBean = addAttr;
+        // _addBean = addAttr;
       }
       else if ((name.startsWith("set") || name.startsWith("add"))
-	       && paramTypes.length == 1
-	       && createMap.get(name.substring(3)) == null) {
-	Class<?> type = paramTypes[0];
+          && paramTypes.length == 1
+          && createMap.get(name.substring(3)) == null) {
+        Class<?> type = paramTypes[0];
 
-	String className = name.substring(3);
-	String xmlName = toXmlName(name.substring(3));
+        String className = name.substring(3);
+        String xmlName = toXmlName(name.substring(3));
 
         TagName tagName = method.getAnnotation(TagName.class);
 
@@ -782,18 +798,18 @@ public class BeanType<T> extends ConfigType<T>
         else
           addProp(xmlName, method);
 
-	addProp(toCamelName(className), method);
+        addProp(toCamelName(className), method);
       }
       else if ((name.startsWith("create")
-		&& paramTypes.length == 0
-		&& ! void.class.equals(method.getReturnType()))) {
-	Class type = method.getReturnType();
+          && paramTypes.length == 0
+          && ! void.class.equals(method.getReturnType()))) {
+        Class type = method.getReturnType();
 
-	Method setter = setterMap.get(name.substring(6));
+        Method setter = setterMap.get(name.substring(6));
 
-	CreateAttribute attr = new CreateAttribute(method, type, setter);
+        CreateAttribute attr = new CreateAttribute(method, type, setter);
 
-	String xmlName = toXmlName(name.substring(6));
+        String xmlName = toXmlName(name.substring(6));
 
         TagName tagName = method.getAnnotation(TagName.class);
 
@@ -874,7 +890,7 @@ public class BeanType<T> extends ConfigType<T>
   {
     synchronized (_introspectLock) {
       if (_injectList != null)
-	return;
+        return;
 
       _injectList = new ArrayList<ConfigProgram>();
       _initList = new ArrayList<ConfigProgram>();
@@ -884,13 +900,13 @@ public class BeanType<T> extends ConfigType<T>
   }
 
   private static Constructor findConstructor(Constructor []constructors,
-					     Class<?> ...types)
+                                             Class<?> ...types)
   {
     for (Constructor ctor : constructors) {
       Class<?> []paramTypes = ctor.getParameterTypes();
 
       if (isMatch(paramTypes, types))
-	return ctor;
+        return ctor;
     }
 
     return null;
@@ -903,7 +919,7 @@ public class BeanType<T> extends ConfigType<T>
 
     for (int i = aTypes.length - 1; i >= 0; i--) {
       if (! aTypes[i].equals(bTypes[i]))
-	return false;
+        return false;
     }
 
     return true;
@@ -911,15 +927,15 @@ public class BeanType<T> extends ConfigType<T>
 
 
   private void fillCreateMap(HashMap<String,Method> createMap,
-			     Method []methods)
+                             Method []methods)
   {
     for (Method method : methods) {
       String name = method.getName();
 
       if (name.startsWith("create")
-	  && ! name.equals("create")
-	  && method.getParameterTypes().length == 0) {
-	createMap.put(name.substring("create".length()), method);
+          && ! name.equals("create")
+          && method.getParameterTypes().length == 0) {
+        createMap.put(name.substring("create".length()), method);
       }
     }
   }
@@ -931,9 +947,9 @@ public class BeanType<T> extends ConfigType<T>
       String name = method.getName();
 
       if (name.length() > 3
-	  && (name.startsWith("add") || name.startsWith("set"))
-	  && method.getParameterTypes().length == 1) {
-	setterMap.put(name.substring("set".length()), method);
+          && (name.startsWith("add") || name.startsWith("set"))
+          && method.getParameterTypes().length == 1) {
+        setterMap.put(name.substring("set".length()), method);
       }
     }
   }
@@ -946,11 +962,11 @@ public class BeanType<T> extends ConfigType<T>
       char ch = name.charAt(i);
 
       if (Character.isUpperCase(ch)
-	  && i > 0
-	  && (Character.isLowerCase(name.charAt(i - 1))
-	      || (i + 1 < name.length()
-		  && Character.isLowerCase(name.charAt(i + 1))))) {
-	sb.append('-');
+          && i > 0
+          && (Character.isLowerCase(name.charAt(i - 1))
+              || (i + 1 < name.length()
+                  && Character.isLowerCase(name.charAt(i + 1))))) {
+        sb.append('-');
       }
 
       sb.append(Character.toLowerCase(ch));

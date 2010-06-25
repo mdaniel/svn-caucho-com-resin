@@ -78,12 +78,17 @@ public class ArtifactRepository
       ArtifactRepository repository = _local.getLevel(loader);
 
       if (repository == null) {
-	EnvironmentClassLoader envLoader
-	  = Environment.getEnvironmentClassLoader(loader.getParent());
+        ClassLoader parentLoader = null;
+        
+        if (loader != null)
+          parentLoader = loader.getParent();
+        
+        EnvironmentClassLoader envLoader
+          = Environment.getEnvironmentClassLoader(parentLoader);
 
-	repository = new ArtifactRepository(envLoader);
+        repository = new ArtifactRepository(envLoader);
 
-	_local.set(repository);
+        _local.set(repository);
       }
 
       return repository;

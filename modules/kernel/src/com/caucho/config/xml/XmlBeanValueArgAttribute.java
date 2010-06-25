@@ -27,47 +27,34 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.xml;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
-import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.types.CustomBeanMethodConfig;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.util.L10N;
+import com.caucho.config.type.ConfigType;
 import com.caucho.xml.QName;
 
-public class CustomBeanMethodAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanMethodAttribute.class);
+public class XmlBeanValueArgAttribute extends Attribute {
+  public static final Attribute ATTRIBUTE = new XmlBeanValueArgAttribute();
 
-  private static final QName VALUE = new QName("value");
-
-  private final Method _method;
-  private final ConfigType _configType;
-
-  public CustomBeanMethodAttribute(Class cl, Method method)
+  private XmlBeanValueArgAttribute()
   {
-    _method = method;
-    _configType = TypeFactory.getType(CustomBeanMethodConfig.class);
   }
 
   public ConfigType getConfigType()
   {
-    return _configType;
+    throw new UnsupportedOperationException();
   }
 
   /**
-   * Creates the child bean.
+   * Returns true for a program-style attribute.
    */
-  @Override
-  public Object create(Object parent, QName qName)
-    throws ConfigException
+  public boolean isProgram()
   {
-    return new CustomBeanMethodConfig(_method);
+    return true;
   }
   
   /**
@@ -78,16 +65,43 @@ public class CustomBeanMethodAttribute extends Attribute {
   {
     XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
-    customBean.addMethod((CustomBeanMethodConfig) value);
+    customBean.addArg((ConfigProgram) value);
   }
   
   /**
    * Sets the value of the attribute
    */
   @Override
-  public void setText(Object parent, QName name, String text)
+  public void setText(Object bean, QName name, String text)
     throws ConfigException
   {
-    super.setText(parent, name, text);
+    try {
+      XmlBeanConfig customBean = (XmlBeanConfig) bean;
+
+      customBean.addArg(new TextArgProgram(text));
+    } catch (Exception e) {
+      throw ConfigException.create(e);
+    }
+  }
+  
+  static class TextArgProgram extends ConfigProgram {
+    private String _arg;
+
+    TextArgProgram(String arg)
+    {
+      _arg = arg;
+    }
+    
+    @Override
+    public <T> void inject(T bean, CreationalContext<T> env)
+    {
+      throw new UnsupportedOperationException(getClass().getName());
+    }
+
+    public Object configure(ConfigType type, XmlConfigContext env)
+      throws ConfigException
+    {
+      return type.valueOf(_arg);
+    }
   }
 }

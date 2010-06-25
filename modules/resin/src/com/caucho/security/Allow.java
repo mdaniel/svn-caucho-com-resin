@@ -87,6 +87,11 @@ public class Allow extends com.caucho.server.security.SecurityConstraint
   private ArrayList<RequestPredicate> _predicateList
     = new ArrayList<RequestPredicate>();
 
+  protected ArrayList<RequestPredicate> getPredicateList()
+  {
+    return _predicateList;
+  }
+  
   /**
    * Sets the url-pattern
    */

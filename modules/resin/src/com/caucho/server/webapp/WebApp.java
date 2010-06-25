@@ -53,6 +53,7 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.enterprise.inject.InjectionException;
+import javax.enterprise.inject.spi.Bean;
 import javax.management.ObjectName;
 import javax.naming.NamingException;
 import javax.servlet.*;
@@ -476,8 +477,7 @@ public class WebApp extends ServletContextImpl
       // map.put("app", _appVar);
 
       _servletManager = new ServletManager();
-      _servletMapper = new ServletMapper();
-      _servletMapper.setServletContext(this);
+      _servletMapper = new ServletMapper(this);
       _servletMapper.setServletManager(_servletManager);
 
       _filterManager = new FilterManager();
@@ -2630,6 +2630,7 @@ public class WebApp extends ServletContextImpl
       _classLoader.setId("web-app:" + getId());
 
       _cdiManager = InjectManager.getCurrent();
+      _cdiManager.update();
       
       SingleSignon singleSignon = AbstractSingleSignon.getCurrent();
       
@@ -2663,7 +2664,9 @@ public class WebApp extends ServletContextImpl
         }
 
         if (_login == null) {
-          _cdiManager.addBean(_cdiManager.createManagedBean(BasicLogin.class));
+          Bean<?> loginBean = _cdiManager.createManagedBean(BasicLogin.class);
+          
+          _cdiManager.addBean(loginBean);
           // server/1aj0
           _defaultLogin = _cdiManager.getReference(Login.class);
 
@@ -2672,8 +2675,6 @@ public class WebApp extends ServletContextImpl
 
         setAttribute("caucho.login", _login);
       } catch (Exception e) {
-        e.printStackTrace();
-
         log.log(Level.FINEST, e.toString(), e);
       }
 

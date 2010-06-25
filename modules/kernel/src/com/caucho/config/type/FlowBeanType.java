@@ -47,7 +47,7 @@ import org.w3c.dom.Node;
  * Represents an introspected bean type for configuration which implements
  * control flow like if/choose.
  */
-public class FlowBeanType extends BeanType
+public class FlowBeanType extends InlineBeanType
 {
   public FlowBeanType(Class beanClass)
   {

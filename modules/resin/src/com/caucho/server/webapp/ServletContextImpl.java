@@ -308,6 +308,16 @@ public class ServletContextImpl extends ServletContextCompat
 
     return null;
   }
+  
+  public Path getCauchoPath(String name)
+  {
+    String realPath = getRealPath(name);
+
+    Path rootDirectory = getRootDirectory();
+    Path path = rootDirectory.lookupNative(realPath);
+
+    return path;
+  }
 
   /**
    * Returns the resource for a uripath as an input stream.

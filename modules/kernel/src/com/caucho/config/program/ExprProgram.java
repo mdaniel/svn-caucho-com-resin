@@ -24,44 +24,44 @@
  *   59 Temple Place, Suite 330
  *   Boston, MA 02111-1307  USA
  *
- * @author Scott Ferguson
+ * @author Scott Ferguson;
  */
 
-package com.caucho.config.types;
+package com.caucho.config.program;
 
-import java.util.*;
-import java.lang.reflect.*;
-import java.lang.annotation.*;
+import javax.enterprise.context.spi.CreationalContext;
+
+import com.caucho.config.ConfigException;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.el.Expr;
 
 /**
- * Custom bean configured by namespace
+ * A saved program for configuring an object.
  */
-public class CustomBeanMethodConfig {
-  private Method _method;
-  
-  private ArrayList<Annotation> _annotationList
-    = new ArrayList<Annotation>();
+public class ExprProgram extends ConfigProgram {
+  private final Expr _expr;
 
-  public CustomBeanMethodConfig(Method method)
+  public ExprProgram(Expr expr)
   {
-    _method = method;
+    _expr = expr;
   }
 
-  public Method getMethod()
+  @Override
+  public <T> T create(ConfigType<T> type, CreationalContext<T> env)
+    throws ConfigException
   {
-    return _method;
+    return (T) type.valueOf(_expr.evalObject(XmlConfigContext.getELContext()));
   }
 
-  public void addAnnotation(Annotation ann)
+  @Override
+  public <T> void inject(T bean, CreationalContext<T> createContext)
   {
-    _annotationList.add(ann);
+    throw new UnsupportedOperationException(getClass().getName());
   }
 
-  public Annotation []getAnnotations()
+  public String toString()
   {
-    Annotation []annotations = new Annotation[_annotationList.size()];
-    _annotationList.toArray(annotations);
-
-    return annotations;
+    return getClass().getSimpleName() + "[" + _expr + "]";
   }
 }

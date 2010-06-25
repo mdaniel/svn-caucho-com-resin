@@ -236,7 +236,7 @@
     
   <mime-mapping extension=".zip" mime-type="application/zip"/>
   <mime-mapping extension=".z" mime-type="application/octet-stream"/>
-  
+
   <resin:import path="WEB-INF/resin-web-pre.xml" optional="true"/>
   <resin:import path="WEB-INF/web.xml" optional="true"/>
   <resin:import path="WEB-INF/resin-web.xml" optional="true"/>

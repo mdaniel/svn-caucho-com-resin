@@ -1103,6 +1103,9 @@ public final class InjectManager
    */
   public <T> void addBean(Bean<T> bean)
   {
+    if (bean == null)
+      throw new NullPointerException(L.l("null bean passed to addBean"));
+    
     addBean(bean, (Annotated) null);
   }
   

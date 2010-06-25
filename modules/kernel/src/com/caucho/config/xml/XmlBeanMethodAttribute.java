@@ -27,30 +27,31 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.xml;
 
+import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
 
-import javax.enterprise.context.spi.CreationalContext;
-
 import com.caucho.config.*;
-import com.caucho.config.type.*;
+import com.caucho.config.attribute.Attribute;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.program.PropertyValueProgram;
-import com.caucho.config.types.ConfigProgramArray;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.config.type.*;
+import com.caucho.config.types.AnnotationConfig;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanNewAttribute extends Attribute {
-  public static final Attribute ATTRIBUTE = new CustomBeanNewAttribute();
+public class XmlBeanMethodAttribute extends Attribute {
+  private static final L10N L = new L10N(XmlBeanMethodAttribute.class);
 
-  private ConfigType _configType;
+  private static final QName VALUE = new QName("value");
 
-  private CustomBeanNewAttribute()
+  private final Method _method;
+  private final ConfigType _configType;
+
+  public XmlBeanMethodAttribute(Class cl, Method method)
   {
-    _configType = TypeFactory.getType(ConfigProgramArray.class);
+    _method = method;
+    _configType = TypeFactory.getType(XmlBeanMethodConfig.class);
   }
 
   public ConfigType getConfigType()
@@ -62,10 +63,10 @@ public class CustomBeanNewAttribute extends Attribute {
    * Creates the child bean.
    */
   @Override
-  public Object create(Object parent, QName name)
+  public Object create(Object parent, QName qName)
     throws ConfigException
   {
-    return _configType.create(parent, name);
+    return new XmlBeanMethodConfig(_method);
   }
   
   /**
@@ -76,50 +77,16 @@ public class CustomBeanNewAttribute extends Attribute {
   {
     XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
-    if (value instanceof ConfigProgramArray) {
-      ConfigProgramArray args = (ConfigProgramArray) value;
-
-      customBean.addArgs(args.getArgs());
-    }
-    else
-      customBean.addArg(new PropertyValueProgram("value", value));
+    customBean.addMethod((XmlBeanMethodConfig) value);
   }
   
   /**
    * Sets the value of the attribute
    */
   @Override
-  public void setText(Object bean, QName name, String text)
+  public void setText(Object parent, QName name, String text)
     throws ConfigException
   {
-    try {
-      XmlBeanConfig customBean = (XmlBeanConfig) bean;
-
-      customBean.addArg(new TextArgProgram(text));
-    } catch (Exception e) {
-      throw ConfigException.create(e);
-    }
-  }
-  
-  static class TextArgProgram extends ConfigProgram {
-    private String _arg;
-
-    TextArgProgram(String arg)
-    {
-      _arg = arg;
-    }
-    
-    @Override
-    public <T> void inject(T bean, CreationalContext<T> env)
-    {
-      throw new UnsupportedOperationException(getClass().getName());
-    }
-
-    @Override
-    public <T> T create(ConfigType<T> type, CreationalContext<T> env)
-      throws ConfigException
-    {
-      return (T) type.valueOf(_arg);
-    }
+    super.setText(parent, name, text);
   }
 }

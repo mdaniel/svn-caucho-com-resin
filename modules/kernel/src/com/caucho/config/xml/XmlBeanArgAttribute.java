@@ -27,31 +27,32 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.xml;
+
+import java.lang.reflect.*;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.ConfigException;
+import com.caucho.config.*;
+import com.caucho.config.attribute.Attribute;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.ConfigType;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.config.type.*;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanProgramAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanProgramAttribute.class);
+public class XmlBeanArgAttribute extends Attribute {
+  private static final L10N L = new L10N(XmlBeanArgAttribute.class);
 
-  public static final CustomBeanProgramAttribute ATTRIBUTE
-    = new CustomBeanProgramAttribute();
+  private final ConfigType _configType;
 
-  private CustomBeanProgramAttribute()
+  public XmlBeanArgAttribute(Class cl)
   {
+    _configType = TypeFactory.getType(cl);
   }
 
   public ConfigType getConfigType()
   {
-    throw new UnsupportedOperationException(getClass().getName());
+    return _configType;
   }
 
   /**
@@ -60,6 +61,16 @@ public class CustomBeanProgramAttribute extends Attribute {
   public boolean isProgram()
   {
     return true;
+  }
+
+  /**
+   * Creates the child bean.
+   */
+  @Override
+  public Object create(Object parent, QName qName)
+    throws ConfigException
+  {
+    return _configType.create(parent, qName);
   }
   
   /**
@@ -71,15 +82,10 @@ public class CustomBeanProgramAttribute extends Attribute {
     try {
       XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
-      customBean.addInitProgram((ConfigProgram) value);
+      customBean.addArg((ConfigProgram) value);
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
-  }
-
-  public String toString()
-  {
-    return getClass().getSimpleName();
   }
   
   /**
@@ -92,7 +98,7 @@ public class CustomBeanProgramAttribute extends Attribute {
     try {
       XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
-      customBean.addInitProgram(new TextArgProgram(text));
+      customBean.addArg(new TextArgProgram(text));
     } catch (Exception e) {
       throw ConfigException.create(e);
     }

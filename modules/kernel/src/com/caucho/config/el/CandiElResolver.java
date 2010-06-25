@@ -120,7 +120,7 @@ public class CandiElResolver extends ELResolver {
     InjectManager manager = getInjectManager();
     
     if (manager == null)
-      return manager;
+      return null;
     
     ReferenceFactory<?> factory = manager.getReferenceFactory(name);
     

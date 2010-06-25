@@ -27,7 +27,7 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.xml;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.*;
@@ -36,29 +36,28 @@ import javax.enterprise.context.spi.CreationalContext;
 
 import com.caucho.config.*;
 import com.caucho.config.program.ConfigProgram;
+import com.caucho.config.attribute.Attribute;
 import com.caucho.config.cfg.BeanConfig;
 import com.caucho.config.type.*;
 import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.config.xml.XmlConfigContext;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanAttribute.class);
+public class XmlBeanAttribute extends Attribute {
+  private static final L10N L = new L10N(XmlBeanAttribute.class);
 
-  public static final CustomBeanAttribute ATTRIBUTE
-    = new CustomBeanAttribute();
+  public static final XmlBeanAttribute ATTRIBUTE
+    = new XmlBeanAttribute();
 
   private final ConfigType _configType;
   private final Method _setMethod;
 
-  private CustomBeanAttribute()
+  private XmlBeanAttribute()
   {
     this(null, TypeFactory.getType(XmlBeanConfig.class));
   }
 
-  public CustomBeanAttribute(Method setMethod, ConfigType configType)
+  public XmlBeanAttribute(Method setMethod, ConfigType configType)
   {
     _configType = configType;
     _setMethod = setMethod;

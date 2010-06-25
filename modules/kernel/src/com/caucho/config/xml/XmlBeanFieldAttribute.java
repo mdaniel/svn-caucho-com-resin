@@ -27,29 +27,41 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
+package com.caucho.config.xml;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.*;
+import java.lang.reflect.Field;
 
-import com.caucho.config.*;
-import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
-import com.caucho.config.types.AnnotationConfig;
-import com.caucho.config.xml.XmlBeanConfig;
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
+import com.caucho.config.program.PropertyStringProgram;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanAnnotationAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanAnnotationAttribute.class);
+/**
+ * Attribute for configuring an XML CanDI bean's field. The equivalent of
+ * mybean.setFoo("stuff") is
+ * 
+ * <code><pre>
+ * &lt;mypkg:MyBean>
+ *   &lt;foo>stuff&lt;/foo>
+ * &lt;/mypkg:MyBean>
+ * </pre></code>
+ *
+ */
+public class XmlBeanFieldAttribute extends Attribute {
+  private static final L10N L = new L10N(XmlBeanFieldAttribute.class);
 
   private static final QName VALUE = new QName("value");
 
-  private final ConfigType _configType;
+  private final Field _field;
+  private final ConfigType<XmlBeanFieldConfig> _configType;
 
-  public CustomBeanAnnotationAttribute(Class cl)
+  public XmlBeanFieldAttribute(Class cl, Field field)
   {
-    _configType = TypeFactory.getType(cl);
+    _field = field;
+    _configType = TypeFactory.getType(XmlBeanFieldConfig.class);
   }
 
   public ConfigType getConfigType()
@@ -64,9 +76,9 @@ public class CustomBeanAnnotationAttribute extends Attribute {
   public Object create(Object parent, QName qName)
     throws ConfigException
   {
-    return _configType.create(parent, qName);
+    return new XmlBeanFieldConfig(_field);
   }
-
+  
   /**
    * Sets the value of the attribute
    */
@@ -75,15 +87,9 @@ public class CustomBeanAnnotationAttribute extends Attribute {
   {
     XmlBeanConfig customBean = (XmlBeanConfig) bean;
 
-    if (value instanceof Annotation) {
-      customBean.addAnnotation((Annotation) value);
-    }
-    else {
-      AnnotationConfig annConfig = (AnnotationConfig) value;
-      customBean.addAnnotation(annConfig.replace());
-    }
+    customBean.addField((XmlBeanFieldConfig) value);
   }
-
+  
   /**
    * Sets the value of the attribute
    */
@@ -91,22 +97,8 @@ public class CustomBeanAnnotationAttribute extends Attribute {
   public void setText(Object parent, QName name, String text)
     throws ConfigException
   {
-    Object bean = create(parent, name);
+    XmlBeanConfig customBean = (XmlBeanConfig) parent;
 
-    Attribute attr = _configType.getAttribute(VALUE);
-
-    if (attr != null) {
-      attr.setText(bean, VALUE, text);
-
-      setValue(parent, name, bean);
-    }
-    else if (text == null || "".equals(text)) {
-      // server/2pad
-      setValue(parent, name, bean);
-    }
-    else {
-      throw new ConfigException(L.l("'{0}' does not have a 'value' attribute, so it cannot have a text value.",
-                                    name));
-    }
+    customBean.addBuilderProgram(new PropertyStringProgram(name, text));
   }
 }

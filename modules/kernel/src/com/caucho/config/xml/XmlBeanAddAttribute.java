@@ -27,31 +27,30 @@
  * @author Scott Ferguson
  */
 
-package com.caucho.config.attribute;
-
-import java.lang.reflect.*;
+package com.caucho.config.xml;
 
 import javax.enterprise.context.spi.CreationalContext;
 
-import com.caucho.config.*;
+import com.caucho.config.ConfigException;
+import com.caucho.config.attribute.Attribute;
 import com.caucho.config.program.ConfigProgram;
-import com.caucho.config.type.*;
-import com.caucho.config.xml.XmlBeanConfig;
-import com.caucho.config.xml.XmlConfigContext;
+import com.caucho.config.type.ConfigType;
+import com.caucho.config.type.TypeFactory;
 import com.caucho.util.L10N;
 import com.caucho.xml.QName;
 
-public class CustomBeanAddAttribute extends Attribute {
-  private static final L10N L = new L10N(CustomBeanAddAttribute.class);
+public class XmlBeanAddAttribute<T> extends Attribute {
+  private static final L10N L = new L10N(XmlBeanAddAttribute.class);
 
-  private final ConfigType _configType;
+  private final ConfigType<T> _configType;
 
-  public CustomBeanAddAttribute(Class cl)
+  public XmlBeanAddAttribute(Class<T> cl)
   {
     _configType = TypeFactory.getType(cl);
   }
 
-  public ConfigType getConfigType()
+  @Override
+  public ConfigType<T> getConfigType()
   {
     return _configType;
   }
@@ -77,11 +76,12 @@ public class CustomBeanAddAttribute extends Attribute {
   /**
    * Sets the value of the attribute
    */
+  @Override
   public void setValue(Object bean, QName name, Object value)
     throws ConfigException
   {
     try {
-      XmlBeanConfig customBean = (XmlBeanConfig) bean;
+      XmlBeanConfig<T> customBean = (XmlBeanConfig<T>) bean;
 
       customBean.addAdd((ConfigProgram) value);
     } catch (Exception e) {
@@ -97,7 +97,7 @@ public class CustomBeanAddAttribute extends Attribute {
     throws ConfigException
   {
     try {
-      XmlBeanConfig customBean = (XmlBeanConfig) bean;
+      XmlBeanConfig<T> customBean = (XmlBeanConfig<T>) bean;
 
       customBean.addAdd(new TextAddProgram(text));
     } catch (Exception e) {

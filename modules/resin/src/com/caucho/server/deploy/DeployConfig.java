@@ -106,7 +106,7 @@ public class DeployConfig {
   }
 
   /**
-   * Gets the app-dir.
+   * Gets the root-directory.
    */
   public String getRootDirectory()
   {
@@ -278,10 +278,10 @@ public class DeployConfig {
       Path rootDir = null;
 
       if (rawPath != null)
-	rootDir = PathBuilder.lookupPath(rawPath, varMap);
-
+        rootDir = PathBuilder.lookupPath(rawPath, varMap);
+      
       if (rootDir != null)
-	return rootDir;
+        return rootDir;
 
       return Vfs.lookup();
     } catch (Exception e) {
