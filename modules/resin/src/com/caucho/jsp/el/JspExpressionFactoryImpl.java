@@ -31,6 +31,7 @@ package com.caucho.jsp.el;
 
 import com.caucho.el.*;
 import com.caucho.inject.Module;
+import com.caucho.server.webapp.WebApp;
 
 import javax.el.ELContext;
 import javax.el.ELException;
@@ -51,7 +52,7 @@ public class JspExpressionFactoryImpl extends ExpressionFactory {
   
   private final JspApplicationContextImpl _jspApplicationContext;
 
-  JspExpressionFactoryImpl(JspApplicationContextImpl jspApplicationContext)
+  public JspExpressionFactoryImpl(JspApplicationContextImpl jspApplicationContext)
   {
     _jspApplicationContext = jspApplicationContext;
   }
@@ -171,7 +172,11 @@ public class JspExpressionFactoryImpl extends ExpressionFactory {
 
   public String toString()
   {
-    return "JspExpressionFactoryImpl[" + _jspApplicationContext.getWebApp() + "]";
+    WebApp webApp = null;
+    if (_jspApplicationContext != null)
+      webApp = _jspApplicationContext.getWebApp();
+
+    return "JspExpressionFactoryImpl[" + webApp + "]";
   }
 
   private enum CoerceType {
