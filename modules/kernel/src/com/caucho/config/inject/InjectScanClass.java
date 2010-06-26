@@ -85,6 +85,8 @@ class InjectScanClass implements ScanClass
   private boolean _isRegisterRequired;
   private boolean _isRegistered;
   
+  private boolean _isObserves;
+  
   private boolean _isVeto;
   
   InjectScanClass(String className, InjectScanManager manager)
@@ -124,6 +126,11 @@ class InjectScanClass implements ScanClass
     return _isRegistered;
   }
   
+  public boolean _isObserves()
+  {
+    return _isObserves;
+  }
+  
   @Override
   public void addInterface(char[] buffer, int offset, int length)
   {
@@ -150,6 +157,9 @@ class InjectScanClass implements ScanClass
         return;
       
       if (_registerAnnotationSet.contains(annType.getType())) {
+        if (annType.getType() == Observes.class)
+          _isObserves = true;
+        
         _isRegisterRequired = true;
         return;
       }

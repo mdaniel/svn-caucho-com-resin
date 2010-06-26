@@ -301,7 +301,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       ConfigProgram []initProgram = introspectPostConstruct(_annotatedType);
 
       ArrayList<ConfigProgram> destroyList = new ArrayList<ConfigProgram>();
-      introspectDestroy(destroyList, cl);
+      introspectDestroy(destroyList, _annotatedType);
       ConfigProgram []destroyProgram = new ConfigProgram[destroyList.size()];
       destroyList.toArray(destroyProgram);
       
@@ -400,7 +400,8 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
   }
 
   private void
-    introspectDestroy(ArrayList<ConfigProgram> destroyList, Class<?> type)
+    introspectDestroy(ArrayList<ConfigProgram> destroyList, 
+                      AnnotatedType<?> type)
     throws ConfigException
   {
     if (type == null || type.equals(Object.class))
@@ -410,11 +411,11 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
       return;
     }
 
-    introspectDestroy(destroyList, type.getSuperclass());
-
-    for (Method method : type.getDeclaredMethods()) {
+    for (AnnotatedMethod<?> method : type.getMethods()) {
       if (method.isAnnotationPresent(PreDestroy.class)) {
-        Class<?> []types = method.getParameterTypes();
+        Method javaMethod = method.getJavaMember();
+        
+        Class<?> []types = javaMethod.getParameterTypes();
 
         if (types.length == 0) {
         }
@@ -423,11 +424,11 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
           continue;
         }
         else
-          throw new ConfigException(location(method)
+          throw new ConfigException(location(javaMethod)
                                     + L.l("@PreDestroy is requires zero arguments"));
 
         PreDestroyInject destroyProgram
-          = new PreDestroyInject(method);
+          = new PreDestroyInject(javaMethod);
 
         if (! destroyList.contains(destroyProgram))
           destroyList.add(destroyProgram);
