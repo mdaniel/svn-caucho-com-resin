@@ -126,7 +126,7 @@ class InjectScanClass implements ScanClass
     return _isRegistered;
   }
   
-  public boolean _isObserves()
+  public boolean isObserves()
   {
     return _isObserves;
   }

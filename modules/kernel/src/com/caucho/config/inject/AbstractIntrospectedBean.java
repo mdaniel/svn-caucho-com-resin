@@ -127,11 +127,7 @@ public class AbstractIntrospectedBean<T> extends AbstractBean<T>
     
     _baseType = manager.createSourceBaseType(type);
     
-    LinkedHashSet<Type> baseTypes = new LinkedHashSet<Type>();
-    
-    for (Type closureType : annotated.getTypeClosure()) {
-      baseTypes.add(manager.createSourceBaseType(closureType).toType());
-    }
+    Set<Type> baseTypes = _baseType.getTypeClosure(manager);
     
     Typed typed = annotated.getAnnotation(Typed.class);
     

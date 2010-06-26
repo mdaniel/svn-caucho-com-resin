@@ -198,4 +198,9 @@ public class CandiAspectBeanFactory<X> implements AspectBeanFactory<X> {
     if (_factory != null)
       _factory.generateEpilogue(out, map);
   }
+  
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + _beanType + "]"; 
+  }
 }

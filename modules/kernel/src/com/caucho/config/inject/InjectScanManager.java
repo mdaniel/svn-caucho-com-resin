@@ -136,7 +136,7 @@ class InjectScanManager
     _pendingScanClassList.clear();
     
     for (InjectScanClass scanClass : pendingScanClassList) {
-      getInjectManager().discoverBean(scanClass.getClassName());
+      getInjectManager().discoverBean(scanClass);
     }
   }
   

@@ -2841,7 +2841,23 @@ public final class InjectManager
     // processPendingAnnotatedTypes();
   }
   
+  void discoverBean(InjectScanClass scanClass)
+  {
+    AnnotatedType<?> type = createDiscoveredType(scanClass.getClassName());
+    
+    if (type != null)
+      discoverBean(type);
+  }
+  
   void discoverBean(String className)
+  {
+    AnnotatedType<?> type = createDiscoveredType(className);
+    
+    if (type != null)
+      discoverBean(type);
+  }
+  
+  private AnnotatedType<?> createDiscoveredType(String className)
   {
     try {
       Class<?> cl;
@@ -2855,16 +2871,16 @@ public final class InjectManager
 
       if (cl.getDeclaringClass() != null
           && ! Modifier.isStatic(cl.getModifiers()))
-        return;
+        return null;
 
       for (Class<? extends Annotation> forbiddenAnnotation : _forbiddenAnnotations) {
         if (cl.isAnnotationPresent(forbiddenAnnotation))
-          return;
+          return null;
       }
 
       for (Class<?> forbiddenClass : _forbiddenClasses) {
         if (forbiddenClass.isAssignableFrom(cl))
-          return;
+          return null;
       }
 
       // ioc/0619
@@ -2881,12 +2897,12 @@ public final class InjectManager
         }
       }
 
-      AnnotatedType<?> type = createAnnotatedType(cl);
-
-      discoverBean(type);
+      return createAnnotatedType(cl);
     } catch (ClassNotFoundException e) {
       log.log(Level.FINER, e.toString(), e);
     }
+    
+    return null;
   }
   
   public <X> void discoverBean(AnnotatedType<X> beanType)
@@ -2945,6 +2961,18 @@ public final class InjectManager
     return false;
   }
 
+  boolean isIntrospectObservers(AnnotatedType<?> type)
+  {
+    String javaClassName = type.getJavaClass().getName();
+    
+    InjectScanClass scanClass = getScanManager().getScanClass(javaClassName);
+    
+    if (scanClass == null)
+      return true;
+    else
+      return scanClass.isObserves();
+  }
+  
   private boolean isValidSimpleBean(Class<?> type)
   {
     if (type.isInterface())

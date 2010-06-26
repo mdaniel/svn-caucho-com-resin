@@ -38,6 +38,7 @@ import java.lang.reflect.Modifier;
 import java.lang.reflect.Type;
 import java.util.LinkedHashSet;
 import java.util.Set;
+import java.util.concurrent.CopyOnWriteArraySet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -61,13 +62,13 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
   private Class<X> _javaClass;
 
   private Set<AnnotatedConstructor<X>> _constructorSet
-    = new LinkedHashSet<AnnotatedConstructor<X>>();
+    = new CopyOnWriteArraySet<AnnotatedConstructor<X>>();
 
   private Set<AnnotatedField<? super X>> _fieldSet
-    = new LinkedHashSet<AnnotatedField<? super X>>();
+    = new CopyOnWriteArraySet<AnnotatedField<? super X>>();
 
   private Set<AnnotatedMethod<? super X>> _methodSet
-    = new LinkedHashSet<AnnotatedMethod<? super X>>();
+    = new CopyOnWriteArraySet<AnnotatedMethod<? super X>>();
 
   public AnnotatedTypeImpl(Class<X> javaClass)
   {
@@ -231,67 +232,6 @@ public class AnnotatedTypeImpl<X> extends AnnotatedElementImpl
     }
 
     introspectInheritedAnnotations(cl.getSuperclass(), isScope);
-  }
-
-  private boolean hasBeanAnnotation(Method method)
-  {
-    if (Modifier.isPublic(method.getModifiers()))
-      return true;
-    
-    if (hasBeanAnnotation(method.getAnnotations()))
-      return true;
-
-    Annotation [][]paramAnn = method.getParameterAnnotations();
-    if (paramAnn != null) {
-      for (int i = 0; i < paramAnn.length; i++) {
-        if (hasBeanAnnotation(paramAnn[i]))
-          return true;
-      }
-    }
-
-    return false;
-  }
-
-  private boolean hasBeanAnnotation(Annotation []annotations)
-  {
-    if (annotations == null)
-      return false;
-
-    for (Annotation ann : annotations) {
-      if (isBeanAnnotation(ann.annotationType()))
-        return true;
-
-      for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-        if (isBeanAnnotation(metaAnn.annotationType()))
-          return true;
-      }
-    }
-
-    return false;
-  }
-
-  private boolean hasMetaAnnotation(Set<Annotation> annotations,
-                                    Class<?> metaAnnType)
-  {
-    if (annotations == null)
-      return false;
-
-    for (Annotation ann : annotations) {
-      for (Annotation metaAnn : ann.annotationType().getAnnotations()) {
-        if (metaAnnType.equals(metaAnn.annotationType())) {
-          return true;
-        }
-      }
-    }
-
-    return false;
-  }
-
-  private boolean isBeanAnnotation(Class<?> annType)
-  {
-    String name = annType.getName();
-
-    return name.startsWith("javax.");
   }
 
   @Override

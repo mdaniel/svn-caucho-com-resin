@@ -34,7 +34,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
-import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -42,17 +41,12 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.logging.Logger;
 
-import javax.enterprise.context.Dependent;
-import javax.enterprise.context.spi.CreationalContext;
-import javax.enterprise.event.Event;
 import javax.enterprise.event.Observes;
 import javax.enterprise.inject.Disposes;
 import javax.enterprise.inject.Produces;
-import javax.enterprise.inject.Specializes;
 import javax.enterprise.inject.spi.AnnotatedMethod;
 import javax.enterprise.inject.spi.AnnotatedParameter;
 import javax.enterprise.inject.spi.Bean;
-import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.inject.spi.ObserverMethod;
 import javax.inject.Inject;
 import javax.inject.Qualifier;
@@ -183,13 +177,11 @@ public class EventManager
     for (int i = 0; i < size; i++) {
       AnnotatedParameter<?> param = params.get(i);
 
-      for (Annotation ann : param.getAnnotations()) {
-        if (ann.annotationType() == Observes.class) {
-          if (observer >= 0 && observer != i)
-            throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
+      if (param.isAnnotationPresent(Observes.class)) {
+        if (observer >= 0 && observer != i)
+          throw InjectManager.error(method.getJavaMember(), L.l("Only one param may have an @Observer"));
 
-          observer = i;
-        }
+        observer = i;
       }
     }
 

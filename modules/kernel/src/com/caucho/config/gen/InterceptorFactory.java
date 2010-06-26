@@ -104,7 +104,7 @@ public class InterceptorFactory<X>
     super(beanFactory, next);
     
     _manager = manager;
-    
+
     introspectType();
   }
   

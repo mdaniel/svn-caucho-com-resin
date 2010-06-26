@@ -356,7 +356,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     }
     
     ArrayList<ConfigProgram> initList = new ArrayList<ConfigProgram>();
-    introspectInit(initList, annType.getJavaClass());
+    introspectInit(initList, annType);
     ConfigProgram []initProgram = new ConfigProgram[initList.size()];
     initList.toArray(initProgram);
     
@@ -367,15 +367,12 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
 
   public static void
     introspectInit(ArrayList<ConfigProgram> initList,
-                   Class<?> type)
+                   AnnotatedType<?> type)
     throws ConfigException
   {
-    if (type == null || type.equals(Object.class))
-      return;
-
-    introspectInit(initList, type.getSuperclass());
-
-    for (Method method : type.getDeclaredMethods()) {
+    for (AnnotatedMethod<?> annMethod : type.getMethods()) {
+      Method method = annMethod.getJavaMember();
+      
       if (! method.isAnnotationPresent(PostConstruct.class)) {
         // && ! isAnnotationPresent(annList, Inject.class)) {
         continue;

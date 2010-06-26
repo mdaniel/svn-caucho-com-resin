@@ -119,6 +119,7 @@ public class InlineBeanType<T> extends ConfigType<T>
     = new HashMap<Class<?>,Attribute>();
 
   private Attribute _addCustomBean;
+  private AnnotatedType<T> _annotatedType;
   private ManagedBeanImpl<T> _bean;
   private InjectionTarget<T> _injectionTarget;
 
@@ -167,20 +168,20 @@ public class InlineBeanType<T> extends ConfigType<T>
   {
     try {
       InjectManager cdiManager
-        = InjectManager.create(_beanClass.getClassLoader());
-      
+      = InjectManager.create(_beanClass.getClassLoader());
+
       if (_injectionTarget == null) {
         if (_beanClass.isInterface())
           throw new ConfigException(L.l("{0} cannot be instantiated because it is an interface",
                                         _beanClass.getName()));
 
-        AnnotatedType<T> type = cdiManager.createAnnotatedType(_beanClass);
-        
+        AnnotatedType<T> type = getAnnotatedType();
+
         InjectionTargetBuilder<T> builder
-          = new InjectionTargetBuilder<T>(cdiManager, type);
-        
+        = new InjectionTargetBuilder<T>(cdiManager, type);
+
         builder.setGenerateInterception(false);
-        
+
         _injectionTarget = builder;
 
         // _bean.getInjectionPoints();
@@ -211,6 +212,18 @@ public class InlineBeanType<T> extends ConfigType<T>
     } catch (Exception e) {
       throw ConfigException.create(e);
     }
+  }
+  
+  private AnnotatedType<T> getAnnotatedType()
+  {
+    if (_annotatedType == null) {
+      InjectManager cdiManager
+        = InjectManager.create(_beanClass.getClassLoader());
+  
+      _annotatedType = cdiManager.createAnnotatedType(_beanClass);
+    }
+    
+    return _annotatedType;
   }
 
   /**
@@ -895,7 +908,7 @@ public class InlineBeanType<T> extends ConfigType<T>
       _injectList = new ArrayList<ConfigProgram>();
       _initList = new ArrayList<ConfigProgram>();
     
-      InjectionTargetBuilder.introspectInit(_initList, _beanClass);
+      InjectionTargetBuilder.introspectInit(_initList, getAnnotatedType());
     }
   }
 
