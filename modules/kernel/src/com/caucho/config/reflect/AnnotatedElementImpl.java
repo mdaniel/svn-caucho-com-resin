@@ -133,7 +133,8 @@ public class AnnotatedElementImpl implements Annotated
 
   public void clearAnnotations()
   {
-    _annSet.clear();
+    if (_annSet != null)
+      _annSet.clear();
   }
 
   /**

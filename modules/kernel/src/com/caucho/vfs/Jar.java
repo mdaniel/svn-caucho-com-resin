@@ -37,6 +37,7 @@ import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
@@ -79,6 +80,8 @@ public class Jar implements CacheListener {
   private Path _backing;
   private boolean _backingIsFile;
 
+  private AtomicInteger _changeSequence = new AtomicInteger();
+  
   private JarDepend _depend;
   
   // saved last modified time
@@ -202,6 +205,11 @@ public class Jar implements CacheListener {
       _depend = new JarDepend(new Depend(getBacking()));
 
     return _depend;
+  }
+  
+  public int getChangeSequence()
+  {
+    return _changeSequence.get();
   }
 
   private boolean isSigned()
@@ -645,6 +653,8 @@ public class Jar implements CacheListener {
       return true;
     }
     else {
+      _changeSequence.incrementAndGet();
+      
       // If the file has changed, close the old file
       SoftReference<JarFile> oldFileRef = _jarFileRef;
       
@@ -847,7 +857,7 @@ public class Jar implements CacheListener {
     }
   }
 
-  static class JarDepend extends CachedDependency
+  class JarDepend extends CachedDependency
     implements PersistentDependency {
     private Depend _depend;
     private boolean _isDigestModified;
@@ -885,14 +895,21 @@ public class Jar implements CacheListener {
     /**
      * Returns true if the dependency is modified.
      */
+    @Override
     public boolean isModifiedImpl()
     {
-      return _isDigestModified || _depend.isModified();
+      if (_isDigestModified || _depend.isModified()) {
+        _changeSequence.incrementAndGet();
+        return true;
+      }
+      else
+        return false;
     }
 
     /**
      * Returns true if the dependency is modified.
      */
+    @Override
     public boolean logModified(Logger log)
     {
       return _depend.logModified(log);
@@ -901,14 +918,15 @@ public class Jar implements CacheListener {
     /**
      * Returns the string to recreate the Dependency.
      */
+    @Override
     public String getJavaCreateString()
     {
       String sourcePath = _depend.getPath().getPath();
       long digest = _depend.getDigest();
       
       return ("new com.caucho.vfs.Jar.createDepend(" +
-	      "com.caucho.vfs.Vfs.lookup(\"" + sourcePath + "\"), " +
-	      digest + "L)");
+          "com.caucho.vfs.Vfs.lookup(\"" + sourcePath + "\"), " +
+          digest + "L)");
     }
 
     public String toString()

@@ -194,6 +194,7 @@ class InjectScanClass implements ScanClass
     }
     else if (isMatch(buffer, offset, length, OBSERVES)) {
       _isRegisterRequired = true;
+      _isObserves = true;
     }
   }
 

@@ -95,10 +95,13 @@ public class ScanManager {
       packagePath = packageRoot.replace('.', '/');
 
     if (root instanceof JarPath) {
+      JarPath jarRoot = (JarPath) root;
+      Path jar = jarRoot.getContainer();
+      
       JarByteCodeMatcher matcher
         = new JarByteCodeMatcher(loader, root, packageRoot, listeners);
     
-      scanForJarClasses(((JarPath) root).getContainer(), packageRoot,
+      scanForJarClasses(jar, packageRoot,
                         scanner, matcher);
     }
     else {

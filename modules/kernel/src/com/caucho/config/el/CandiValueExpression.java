@@ -121,4 +121,10 @@ public class CandiValueExpression extends ValueExpression {
   {
     return _expr.isLiteralText();
   }
+  
+  @Override
+  public String toString()
+  {
+    return getClass().getSimpleName() + "[" + getExpressionString() + "]";
+  }
 }

@@ -143,7 +143,9 @@ public class ResinBeanContainer
       
       // ioc/0p62
       EjbManager.create(_classLoader);
-      EjbManager.setScanAll();
+      // XXX: currently this would cause a scanning of the classpath even
+      // if there's no ejb-jar.xml
+      // EjbManager.setScanAll();
 
       Environment.init();
 

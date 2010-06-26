@@ -8,21 +8,6 @@
        xmlns:resin="urn:java:com.caucho.resin">
 
   <!--
-     - Logging configuration for the JDK logging API.
-    -->
-  <log-handler name="" level="all" path="stdout:"
-               timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
-
-  <!--
-     - level='info' for production
-     - 'fine' or 'finer' for development and troubleshooting
-    -->
-  <logger name="com.caucho" level="info"/>
-
-  <logger name="com.caucho.java" level="config"/>
-  <logger name="com.caucho.loader" level="config"/>
-
-  <!--
      - driver .jar files can be placed in ${resin.root}/ext-lib
      -->
   <class-loader>
@@ -42,6 +27,21 @@
   <resin:AdminAuthenticator>
     <resin:import path="${__DIR__}/admin-users.xml" optional="true"/>
   </resin:AdminAuthenticator>
+
+  <!--
+     - Logging configuration for the JDK logging API.
+    -->
+  <log-handler name="" level="all" path="stdout:"
+               timestamp="[%y-%m-%d %H:%M:%S.%s] {%{thread}} "/>
+
+  <!--
+     - level='info' for production
+     - 'fine' or 'finer' for development and troubleshooting
+    -->
+  <logger name="com.caucho" level="info"/>
+
+  <logger name="com.caucho.java" level="config"/>
+  <logger name="com.caucho.loader" level="config"/>
 
   <!--
      - For production sites, change dependency-check-interval to something
@@ -145,8 +145,8 @@
         <jsse-ssl self-signed-certificate-name="resin@localhost"/>
       </http>
 
+      <jvm-arg>-Xmx512m</jvm-arg>
       <!--
-         - <jvm-arg>-Xmx512m</jvm-arg>
          - <jvm-arg>-agentlib:resin</jvm-arg>
         -->
 
