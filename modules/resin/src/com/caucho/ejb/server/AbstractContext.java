@@ -40,12 +40,14 @@ import javax.ejb.EJBHome;
 import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBMetaData;
 import javax.ejb.TimerService;
+import javax.transaction.Status;
 import javax.transaction.UserTransaction;
 
 import com.caucho.security.SecurityContext;
 import com.caucho.security.SecurityContextException;
 import com.caucho.transaction.TransactionImpl;
 import com.caucho.transaction.TransactionManagerImpl;
+import com.caucho.transaction.UserTransactionImpl;
 import com.caucho.util.L10N;
 
 /**
@@ -201,14 +203,22 @@ abstract public class AbstractContext<X> implements EJBContext {
    * Forces a rollback of the current transaction.
    */
   @Override
-  public void setRollbackOnly() throws IllegalStateException
+  public void setRollbackOnly() 
+    throws IllegalStateException
   {
     if (! getServer().isContainerTransaction()) {
       throw new IllegalStateException(L.l("setRollbackOnly() is only allowed with container-managed transaction"));
     }
 
     try {
-      getServer().getUserTransaction().setRollbackOnly();
+      TransactionImpl xa = TransactionManagerImpl.getLocal().getCurrent();
+
+      if (xa != null && xa.getStatus() != Status.STATUS_NO_TRANSACTION)
+        xa.setRollbackOnly();
+      else
+        throw new IllegalStateException(L.l("setRollbackOnly() called with no active transaction."));
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new IllegalStateException(e);
     }
@@ -218,14 +228,15 @@ abstract public class AbstractContext<X> implements EJBContext {
    * Returns true if the current transaction will rollback.
    */
   @Override
-  public boolean getRollbackOnly() throws IllegalStateException
+  public boolean getRollbackOnly() 
+    throws IllegalStateException
   {
     if (! getServer().isContainerTransaction())
-      throw new IllegalStateException("getRollbackOnly() is only allowed with container-managed transaction");
+      throw new IllegalStateException(L.l("getRollbackOnly() is only allowed with container-managed transaction"));
 
     TransactionImpl xa = TransactionManagerImpl.getLocal().getCurrent();
 
-    if (xa != null)
+    if (xa != null && xa.getStatus() != Status.STATUS_NO_TRANSACTION)
       return xa.isRollbackOnly();
     else
       throw new IllegalStateException(L.l("getRollbackOnly() called with no active transaction."));
@@ -239,7 +250,8 @@ abstract public class AbstractContext<X> implements EJBContext {
     _isDead = true;
   }
 
-  public Class getInvokedBusinessInterface() throws IllegalStateException
+  public Class getInvokedBusinessInterface() 
+    throws IllegalStateException
   {
     if (_invokedBusinessInterface == null)
       throw new IllegalStateException(L.l(

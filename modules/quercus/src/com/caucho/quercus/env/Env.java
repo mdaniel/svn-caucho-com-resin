@@ -4453,6 +4453,11 @@ public class Env
     value.putField(this, "file", createString(elt.getFileName()));
     value.putField(this, "line", LongValue.create(elt.getLineNumber()));
     value.putField(this, "trace", ErrorModule.debug_backtrace(this));
+    
+    if ((e instanceof QuercusException) && e.getCause() != null)
+      e = e.getCause();
+    
+    value.putField(this, "__javaException", wrapJava(e));
 
     return value;
   }

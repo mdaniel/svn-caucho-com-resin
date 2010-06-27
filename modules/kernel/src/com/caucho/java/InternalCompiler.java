@@ -70,7 +70,7 @@ public class InternalCompiler extends AbstractJavaCompiler {
     if (! _hasCompiler) {
       JavaCompileException exn = null;
       try {
-	ClassLoader loader = ClassLoader.getSystemClassLoader();
+        ClassLoader loader = ClassLoader.getSystemClassLoader();
         Class.forName("com.sun.tools.javac.Main", false, loader);
 
         _hasCompiler = true;
@@ -78,20 +78,22 @@ public class InternalCompiler extends AbstractJavaCompiler {
       }
 
       try {
-	DynamicClassLoader env;
-	env = new NonScanDynamicClassLoader(ClassLoader.getSystemClassLoader());
+        DynamicClassLoader env;
+        env = new NonScanDynamicClassLoader(ClassLoader.getSystemClassLoader());
 
-	Path javaHome = Vfs.lookup(System.getProperty("java.home"));
-	Path jar = javaHome.lookup("./lib/tools.jar");
-	env.addJar(jar);
-	jar = javaHome.lookup("../lib/tools.jar");
-	env.addJar(jar);
-	  
-	Class.forName("com.sun.tools.javac.Main", false, env);
+        Path javaHome = Vfs.lookup(System.getProperty("java.home"));
+        Path jar = javaHome.lookup("./lib/tools.jar");
+        if (jar.canRead())
+          env.addJar(jar);
+        jar = javaHome.lookup("../lib/tools.jar");
+        if (jar.canRead())
+          env.addJar(jar);
 
-	_hasCompiler = true;
+        Class.forName("com.sun.tools.javac.Main", false, env);
+
+        _hasCompiler = true;
       } catch (ClassNotFoundException e) {
-	throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)), e);
+        throw new JavaCompileException(L.l("Resin can't load com.sun.tools.javac.Main.  Usually this means that the JDK tools.jar is missing from the classpath, possibly because of using a JRE instead of the JDK.  You can either add tools.jar to the classpath or change the compiler to an external one with <java compiler='javac'/> or jikes.\n\n{0}", String.valueOf(e)), e);
       }
     }
 
@@ -123,29 +125,29 @@ public class InternalCompiler extends AbstractJavaCompiler {
 
       argList.add("-classpath");
       argList.add(_compiler.getClassPath());
-      
+
       ArrayList<String> args = _compiler.getArgs();
       if (args != null)
-	argList.addAll(args);
+        argList.addAll(args);
 
       for (int i = 0; i < path.length; i++) {
-	Path javaPath = _compiler.getSourceDir().lookup(path[i]);
-	argList.add(javaPath.getNativePath());
+        Path javaPath = _compiler.getSourceDir().lookup(path[i]);
+        argList.add(javaPath.getNativePath());
       }
-      
+
       if (log.isLoggable(Level.FINER)) {
         CharBuffer msg = new CharBuffer();
-	msg.append("javac(int)");
-	for (int i = 0; i < argList.size(); i++) {
-	  if (argList.get(i).equals("-classpath")
-	      && ! log.isLoggable(Level.FINEST)) {
-	    i++;
-	    continue;
-	  }
-	  
-	  msg.append(" ");
-	  msg.append(argList.get(i));
-	}
+        msg.append("javac(int)");
+        for (int i = 0; i < argList.size(); i++) {
+          if (argList.get(i).equals("-classpath")
+              && ! log.isLoggable(Level.FINEST)) {
+            i++;
+            continue;
+          }
+
+          msg.append(" ");
+          msg.append(argList.get(i));
+        }
 
         log.finer(msg.toString());
       }
@@ -163,13 +165,15 @@ public class InternalCompiler extends AbstractJavaCompiler {
       
       Path javaHome = Vfs.lookup(System.getProperty("java.home"));
       Path jar = javaHome.lookup("./lib/tools.jar");
-      env.addJar(jar);
+      if (jar.canRead())
+        env.addJar(jar);
       jar = javaHome.lookup("../lib/tools.jar");
-      env.addJar(jar);
+      if (jar.canRead())
+        env.addJar(jar);
 
       // env = _internalLoader;
 
-	  
+
       try {
         thread.setContextClassLoader(env);
 
@@ -178,21 +182,21 @@ public class InternalCompiler extends AbstractJavaCompiler {
           Object compiler = cl.newInstance();
           Method compile = null;
 
-	  Object value = null;
-	  
-	  try {
-	    compile = cl.getMethod("compile", new Class[] { String[].class , PrintWriter.class });
-	    value = compile.invoke(compiler, new Object[] { argArray, error.getPrintWriter() });
+          Object value = null;
 
-	  } catch (Throwable e) {
-	    log.log(Level.FINER, e.toString(), e);
-	  }
+          try {
+            compile = cl.getMethod("compile", new Class[] { String[].class , PrintWriter.class });
+            value = compile.invoke(compiler, new Object[] { argArray, error.getPrintWriter() });
 
-	  if (compile == null) {
-	    compile = cl.getMethod("compile", new Class[] { String[].class });
-	    value = compile.invoke(compiler, new Object[] { argArray });
-	  }
-	  
+          } catch (Throwable e) {
+            log.log(Level.FINER, e.toString(), e);
+          }
+
+          if (compile == null) {
+            compile = cl.getMethod("compile", new Class[] { String[].class });
+            value = compile.invoke(compiler, new Object[] { argArray });
+          }
+
           if (value instanceof Integer)
             status = ((Integer) value).intValue();
         } catch (ClassNotFoundException e) {
@@ -220,32 +224,32 @@ public class InternalCompiler extends AbstractJavaCompiler {
       read.close();
 
       if (errors != null)
-	errors = errors.trim();
+        errors = errors.trim();
 
       if (log.isLoggable(Level.FINE)) {
-	read = tempStream.openReadAndSaveBuffer();
-	CharBuffer cb = new CharBuffer();
-	int ch;
-	while ((ch = read.read()) >= 0) {
-	  cb.append((char) ch);
-	}
-	read.close();
+        read = tempStream.openReadAndSaveBuffer();
+        CharBuffer cb = new CharBuffer();
+        int ch;
+        while ((ch = read.read()) >= 0) {
+          cb.append((char) ch);
+        }
+        read.close();
 
-	log.fine(cb.toString());
+        log.fine(cb.toString());
       }
       else if (status == 0 && errors != null && ! errors.equals("")) {
-	final String msg = errors;
-	
-	new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
-	  public void run()
-	  {
-	    log.warning(msg);
-	  }
-	};
+        final String msg = errors;
+
+        new com.caucho.loader.ClassLoaderContext(_compiler.getClassLoader()) {
+          public void run()
+          {
+            log.warning(msg);
+          }
+        };
       }
 
       if (status != 0)
-	throw new JavaCompileException(errors);
+        throw new JavaCompileException(errors);
     } finally {
       tempStream.destroy();
     }

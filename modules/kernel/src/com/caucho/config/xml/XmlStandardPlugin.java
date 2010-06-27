@@ -73,7 +73,7 @@ import com.caucho.vfs.Path;
 @Module
 public class XmlStandardPlugin implements Extension
 {
-  private static final String SCHEMA = "com/caucho/config/cfg/webbeans.rnc";
+  private static final String SCHEMA = "com/caucho/config/cfg/resin-beans.rnc";
 
   private InjectManager _cdiManager;
   private HashSet<String> _configuredBeans = new HashSet<String>();

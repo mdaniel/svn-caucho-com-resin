@@ -51,6 +51,8 @@ public class ExceptionClass
   private static final StringValue LINE = new ConstStringValue("line");
   private static final StringValue CODE = new ConstStringValue("code");
   private static final StringValue TRACE = new ConstStringValue("trace");
+  private static final StringValue JAVA_EXCEPTION
+    = new ConstStringValue("__javaException");
   
   /**
    * Create a new exception API object.
@@ -137,6 +139,14 @@ public class ExceptionClass
   public static Value getTrace(Env env, @This Value obj)
   {
     return obj.getField(env, TRACE);
+  }
+
+  /**
+   * Returns the trace.
+   */
+  public static Value getJavaException(Env env, @This Value obj)
+  {
+    return obj.getField(env, JAVA_EXCEPTION);
   }
 
   /**

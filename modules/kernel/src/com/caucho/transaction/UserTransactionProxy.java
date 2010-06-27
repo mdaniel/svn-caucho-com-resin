@@ -41,7 +41,7 @@ import java.util.logging.Logger;
  */
 public class UserTransactionProxy
   implements UserTransaction, TransactionManager,
-	     java.io.Serializable
+             java.io.Serializable
 {
   private static final Logger log
     = Logger.getLogger(UserTransactionProxy.class.getName());
