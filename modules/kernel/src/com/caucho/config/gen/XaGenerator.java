@@ -38,6 +38,9 @@ import java.util.HashMap;
 
 import javax.ejb.ApplicationException;
 import javax.ejb.SessionSynchronization;
+import javax.ejb.Singleton;
+import javax.ejb.Stateful;
+import javax.ejb.Stateless;
 import javax.ejb.TransactionAttribute;
 import javax.ejb.TransactionAttributeType;
 import javax.ejb.TransactionManagement;
@@ -60,13 +63,14 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   public XaGenerator(XaFactory<X> factory,
                      AnnotatedMethod<? super X> method,
                      AspectGenerator<X> next,
-                     TransactionAttributeType xa)
+                     TransactionAttributeType xa,
+                     boolean isBeanManaged)
   {
     super(factory, method, next);
     
     _transactionType = xa;
 
-    // _isContainerManaged = bizMethod.isXaContainerManaged();
+    _isContainerManaged = ! isBeanManaged;
   }
 
   /**
@@ -76,57 +80,6 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     return _transactionType;
   }
-
-  /**
-   * Introspects the method for the default values
-   */
-  /*
-  @Override
-  public void introspect(AnnotatedMethod<? super T> apiMethod,
-                         AnnotatedMethod<? super X> implMethod)
-  {
-    AnnotatedType<T> apiClass = getApiType();
-    AnnotatedType<X> beanClass = getImplType();
-
-    TransactionManagement xaManagement
-      = beanClass.getAnnotation(TransactionManagement.class);
-
-    if (xaManagement == null)
-      xaManagement = apiClass.getAnnotation(TransactionManagement.class);
-
-    if (xaManagement != null
-        && xaManagement.value() != TransactionManagementType.CONTAINER) {
-      _isContainerManaged = false;
-      return;
-    }
-
-    Class<?> javaClass = beanClass.getJavaClass();
-
-    if (javaClass != null
-        && SessionSynchronization.class.isAssignableFrom(javaClass)) {
-      _isSessionSynchronization = true;
-    }
-
-    TransactionAttribute xaAttr;
-
-    xaAttr = apiMethod.getAnnotation(TransactionAttribute.class);
-
-    if (xaAttr == null) {
-      xaAttr = apiClass.getAnnotation(TransactionAttribute.class);
-    }
-
-    if (xaAttr == null && implMethod != null) {
-      xaAttr = implMethod.getAnnotation(TransactionAttribute.class);
-    }
-
-    if (xaAttr == null && beanClass != null) {
-      xaAttr = beanClass.getAnnotation(TransactionAttribute.class);
-    }
-
-    if (xaAttr != null)
-      _transactionType = xaAttr.value();
-  }
-  */
 
   //
   // bean prologue generation
@@ -150,6 +103,12 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     super.generateMethodPrologue(out, map);
   }
 
+  boolean isEjb()
+  {
+    return (getBeanType().isAnnotationPresent(Stateless.class)
+            || getBeanType().isAnnotationPresent(Stateful.class)
+            || getBeanType().isAnnotationPresent(Singleton.class));
+  }
   //
   // method generation code
   //
@@ -186,6 +145,18 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
         out.println("Transaction xa = null;");
         break;
       }
+      
+      case MANDATORY: {
+        out.println();
+        out.println("_xa.beginMandatory();");
+        break;
+      }
+
+      case NEVER: {
+        out.println();
+        out.println("_xa.beginNever();");
+        break;
+      }
       }
     }
 
@@ -211,18 +182,6 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
       out.println("xa = _xa.beginNotSupported();");
     } else if (_transactionType != null) {
       switch (_transactionType) {
-      case MANDATORY: {
-        out.println();
-        out.println("_xa.beginMandatory();");
-        break;
-      }
-
-      case NEVER: {
-        out.println();
-        out.println("_xa.beginNever();");
-        break;
-      }
-
       case NOT_SUPPORTED: {
         out.println();
         out.println("xa = _xa.beginNotSupported();");
@@ -313,6 +272,40 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
       out.println("  _xa.markRollback(e);");
       //out.println("  isXAValid = true;");
       out.println("}");
+      
+      
+      if (isEjb()) {
+        switch (_transactionType) {
+        case SUPPORTS:
+          out.println("  _xa.rethrowEjbException(e, _xa.getTransaction() != null);");
+          break;
+          
+        case REQUIRES_NEW:
+        case NOT_SUPPORTED:
+        case NEVER:
+        case MANDATORY:
+          out.println("_xa.rethrowEjbException(e, false);");
+          break;
+          
+        case REQUIRED:
+          out.println("_xa.rethrowEjbException(e, xa != null);");
+          break;
+
+        default:
+          out.println("_xa.rethrowEjbException(e, xa != null);");
+          break;
+        }
+      }
+    }
+    else {
+      if (isEjb()) {
+        out.println("if (_xa.getTransaction() != null) {");
+        out.println("  _xa.markRollback(e);");
+        //out.println("  isXAValid = true;");
+        out.println("}");
+        
+        out.println("_xa.rethrowEjbException(e, false);");
+      }
     }
   }
 
@@ -335,7 +328,10 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super.generateFinally(out);
 
-    if (!_isContainerManaged) {
+    if (! _isContainerManaged) {
+      out.println("if (_xa.getTransaction() != null)");
+      out.println("  _xa.commit();");
+      
       out.println("if (xa != null)");
       out.println("  _xa.resume(xa);");
     } 

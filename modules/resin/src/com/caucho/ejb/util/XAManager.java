@@ -30,6 +30,7 @@ package com.caucho.ejb.util;
 
 import javax.ejb.EJBException;
 import javax.ejb.EJBTransactionRequiredException;
+import javax.ejb.EJBTransactionRolledbackException;
 import javax.ejb.SessionSynchronization;
 import javax.ejb.TransactionRolledbackLocalException;
 import javax.transaction.HeuristicMixedException;
@@ -262,6 +263,15 @@ public class XAManager {
   {
     _ut.setRollbackOnly(e);
   }
+  
+  public void rethrowEjbException(Exception e, boolean isClientXa)
+  {
+    if (isClientXa) {
+      throw new EJBTransactionRolledbackException(e.getMessage(), e);
+    }
+    else
+      throw new EJBException(e);
+  }
 
   /**
    * Commits transaction.
@@ -283,6 +293,23 @@ public class XAManager {
       throw new TransactionRolledbackLocalException(e.getMessage(), e);
     } catch (HeuristicRollbackException e) {
       throw new TransactionRolledbackLocalException(e.getMessage(), e);
+    } catch (Exception e) {
+      throw new EJBException(e);
+    }
+  }
+
+  /**
+   * Commits transaction.
+   */
+  public void rollback()
+  {
+    try {
+      TransactionImpl xa = getTransaction();
+      
+      if (xa != null)
+        _ut.rollback();
+    } catch (RuntimeException e) {
+      throw e;
     } catch (Exception e) {
       throw new EJBException(e);
     }
