@@ -2,7 +2,7 @@ default namespace r = "http://caucho.com/ns/j2ee"
 
 namespace local = ""
 
-include "../server/resin/resin-j2ee.rnc"
+include "classpath:com/caucho/config/cfg/resin-j2ee.rnc"
 
 start = r_connector
 
