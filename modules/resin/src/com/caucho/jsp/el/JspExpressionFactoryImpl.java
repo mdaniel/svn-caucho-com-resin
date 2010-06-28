@@ -29,6 +29,7 @@
 
 package com.caucho.jsp.el;
 
+import com.caucho.el.ExpressionFactoryImpl;
 import com.caucho.inject.Module;
 import com.caucho.server.webapp.WebApp;
 
@@ -49,7 +50,8 @@ import javax.el.ValueExpression;
   public JspExpressionFactoryImpl(JspApplicationContextImpl jspApplicationContext)
   {
     _jspApplicationContext = jspApplicationContext;
-    _factory = ExpressionFactory.newInstance();
+    // _factory = ExpressionFactory.newInstance();
+    _factory = new ExpressionFactoryImpl();
   }
 
   public Object coerceToType(Object obj, Class<?> targetType)
