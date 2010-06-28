@@ -108,6 +108,10 @@ public class MethodExpressionImpl extends MethodExpression
 					     (params != null ? params.length : 0)));
     }
 
+    if (void.class.equals(_expectedType ) && _expr.isLiteralText()) {
+      throw new ELException("String literal can not be coerced to void");
+    }
+    
     Object value = _expr.invoke(context, _expectedArgs, params);
       
     return Expr.coerceToType(value, _expectedType);

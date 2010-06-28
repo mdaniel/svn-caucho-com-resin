@@ -213,8 +213,10 @@ public class ArrayResolverExpr extends Expr
     Object base = _left.getValue(env);
 
     if (base == null)
-      throw new ELException(L.l("'{0}' is an illegal method expression.",
-				toString()));
+      throw new PropertyNotFoundException(L.l(
+        "'{0}' not found in context '{1}'.",
+        _left.getExpressionString(),
+        env));
 
     String name = _right.evalString(env);
 
@@ -243,8 +245,10 @@ public class ArrayResolverExpr extends Expr
     Object base = _left.getValue(env);
 
     if (base == null)
-      throw new javax.el.MethodNotFoundException(L.l("'{0}' is an illegal method expression.",
-				toString()));
+      throw new PropertyNotFoundException(L.l(
+        "'{0}' not found in context '{1}'.",
+        _left.getExpressionString(),
+        env));
 
     String name = _right.evalString(env);
 

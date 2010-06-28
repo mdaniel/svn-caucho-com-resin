@@ -665,39 +665,43 @@ public abstract class Expr extends ValueExpression {
   public static double toDouble(Object value, ELContext env)
     throws ELException
   {
-    if (value == null)
-      return 0;
-    else if (value instanceof Number) {
-      double dValue = ((Number) value).doubleValue();
-
-      if (Double.isNaN(dValue))
+    try {
+      if (value == null)
         return 0;
-      else
-        return dValue;
-    }
-    else if (value.equals(""))
-      return 0;
-    else if (value instanceof String) {
-      double dValue = Double.parseDouble((String) value);
+      else if (value instanceof Number) {
+        double dValue = ((Number) value).doubleValue();
 
-      if (Double.isNaN(dValue))
+        if (Double.isNaN(dValue))
+          return 0;
+        else
+          return dValue;
+      }
+      else if (value.equals(""))
         return 0;
-      else
-        return dValue;
-    }
-    else if (value instanceof Character) {
-      // jsp/18s7
-      return ((Character) value).charValue();
-    }
-    else {
-      ELException e = new ELException(L.l("can't convert {0} to double.",
-                                          value.getClass().getName()));
-      
-      // error(e, env);
+      else if (value instanceof String) {
+        double dValue = Double.parseDouble((String) value);
 
-      // return 0;
+        if (Double.isNaN(dValue))
+          return 0;
+        else
+          return dValue;
+      }
+      else if (value instanceof Character) {
+        // jsp/18s7
+        return ((Character) value).charValue();
+      }
+      else {
+        ELException e = new ELException(L.l("can't convert {0} to double.",
+                                            value.getClass().getName()));
 
-      throw e;
+        // error(e, env);
+
+        // return 0;
+
+        throw e;
+      }
+    } catch (NumberFormatException e) {
+      throw new ELException(L.l("can't convert '{0}' to double.", value));
     }
   }
 
