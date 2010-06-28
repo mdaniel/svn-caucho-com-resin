@@ -51,7 +51,7 @@ public class MessageXaCallChain<X> extends XaGenerator<X>
                             AnnotatedMethod<? super X> method,
                             AspectGenerator<X> next)
   {
-    super(factory, method, next, null);
+    super(factory, method, next, null, false);
   }
 
   @Override
