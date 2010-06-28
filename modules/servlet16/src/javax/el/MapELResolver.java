@@ -157,12 +157,22 @@ public class MapELResolver extends ELResolver {
 		       Object property,
 		       Object value)
   {
+    if (_isReadOnly)
+      throw new PropertyNotWritableException("resolver is readonly");
+
     if (base instanceof Map && property != null) {
       Map map = (Map) base;
       
       context.setPropertyResolved(true);
-
-      map.put(property, value);
+      try {
+        map.put(property, value);
+      } catch (UnsupportedOperationException e) {
+        throw new PropertyNotWritableException("map "
+          + base
+          + " of type "
+          + map.getClass().getName()
+          + " is umodifiable");
+      }
     }
   }
 }
