@@ -3,7 +3,7 @@ default namespace r = "http://caucho.com/ns/resin"
 namespace w = "http://java.sun.com/xml/ns/javaee"
 namespace xsi="http://www.w3.org/2001/XMLSchema-instance"
 
-include "../server/resin/env.rnc"
+include "classpath:com/caucho/config/cfg/env.rnc"
 
 start = r_beans | w_beans
 

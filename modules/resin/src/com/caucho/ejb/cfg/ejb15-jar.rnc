@@ -2,7 +2,7 @@ default namespace javaee = "http://java.sun.com/xml/ns/javaee"
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 namespace l = ""
 
-include "../../server/resin/javaee.rnc"
+include "classpath:com/caucho/config/cfg/javaee.rnc"
 
 ## javaee_boolean = string
 ## javaee_string = string

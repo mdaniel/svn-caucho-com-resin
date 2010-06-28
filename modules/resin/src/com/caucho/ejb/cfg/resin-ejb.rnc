@@ -2,7 +2,7 @@ default namespace r = "http://caucho.com/ns/resin"
 namespace l = ""
 
 include "ejb-jar.rnc"
-include "../../server/resin/env.rnc"
+include "classpath:com/caucho/config/cfg/env.rnc"
 
 start = ejb14_ejb-jar | ejb15_ejb-jar | ejb16_ejb-jar | r_ejb-jar | l_ejb-jar | l_resin-ejb
 

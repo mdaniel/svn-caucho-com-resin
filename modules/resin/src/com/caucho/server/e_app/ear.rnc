@@ -3,7 +3,7 @@ namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
-include "../resin/j2ee.rnc"
+include "classpath:com/caucho/config/cfg/j2ee.rnc"
 include "ear_13.rnc"
 include "ear-14.rnc"
 include "ear-15.rnc"

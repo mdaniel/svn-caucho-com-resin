@@ -4,7 +4,7 @@ namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
-include "../../server/resin/javaee.rnc"
+include "classpath:com/caucho/config/cfg/javaee.rnc"
 
 javaee_generic-boolean = string
 javaee_variable = string

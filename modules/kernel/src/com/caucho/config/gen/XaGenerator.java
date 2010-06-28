@@ -283,8 +283,11 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
         case REQUIRES_NEW:
         case NOT_SUPPORTED:
         case NEVER:
-        case MANDATORY:
           out.println("_xa.rethrowEjbException(e, false);");
+          break;
+          
+        case MANDATORY:
+          out.println("_xa.rethrowEjbException(e, true);");
           break;
           
         case REQUIRED:

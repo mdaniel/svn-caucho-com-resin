@@ -1,7 +1,7 @@
 default namespace jsf20 = "http://java.sun.com/xml/ns/javaee"
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
-include "../../server/resin/javaee.rnc"
+include "classpath:com/caucho/config/cfg/javaee.rnc"
 
 start = jsf20_faces-config
 

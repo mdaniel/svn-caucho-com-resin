@@ -1,8 +1,8 @@
 default namespace r = "http://caucho.com/ns/resin"
 namespace l = ""
 
-include "../resin/env.rnc"
-include "../resin/resin-j2ee.rnc"
+include "classpath:com/caucho/config/cfg/env.rnc"
+include "classpath:com/caucho/config/cfg/resin-j2ee.rnc"
 include "../webapp/resin-web-xml-content.rnc"
 
 resin_application-client = element application-client {

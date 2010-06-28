@@ -3,7 +3,7 @@ namespace local = ""
 
 namespace xsi = "http://www.w3.org/2001/XMLSchema-instance"
 
-include "../resin/javaee.rnc"
+include "classpath:com/caucho/config/cfg/javaee.rnc"
 
 javaee_alt-dd = element alt-dd { string }
 

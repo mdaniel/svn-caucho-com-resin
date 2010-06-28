@@ -1,7 +1,7 @@
 default namespace j2ee13 = ""
 namespace local = ""
 
-include "../resin/j2ee13.rnc"
+include "classpath:com/caucho/config/cfg/j2ee13.rnc"
 
 start = j2ee13_application-client
 
