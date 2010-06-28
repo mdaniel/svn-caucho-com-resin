@@ -165,7 +165,15 @@ public class ArrayELResolver extends ELResolver {
 
       int index = getIndex(property);
 
-      if (0 <= index && index < Array.getLength(base))
+      Class componentType
+        = base.getClass().getComponentType();
+
+      if (value != null &&
+        ! componentType.isAssignableFrom(value.getClass())) {
+        throw new ClassCastException(value.getClass().getName()
+          + " cannot be cast to "
+          + componentType.getName());
+      } else if (0 <= index && index < Array.getLength(base))
 	Array.set(base, index, value);
       else
 	throw new PropertyNotFoundException("array index '" + index + "' is invalid");
