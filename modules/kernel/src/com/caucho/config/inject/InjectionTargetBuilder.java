@@ -373,7 +373,7 @@ public class InjectionTargetBuilder<X> implements InjectionTarget<X>
     for (AnnotatedMethod<?> annMethod : type.getMethods()) {
       Method method = annMethod.getJavaMember();
       
-      if (! method.isAnnotationPresent(PostConstruct.class)) {
+      if (! annMethod.isAnnotationPresent(PostConstruct.class)) {
         // && ! isAnnotationPresent(annList, Inject.class)) {
         continue;
       }

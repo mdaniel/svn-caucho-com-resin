@@ -213,8 +213,10 @@ public class BeanConfig {
    */
   public void setScope(String scope)
   {
-    if ("singleton".equals(scope))
+    if ("singleton".equals(scope)) {
       _scope = javax.inject.Singleton.class;
+     //  addAnnotation(new AnnotationLiteral<Startup>() {});
+    }
     else if ("dependent".equals(scope))
       _scope = Dependent.class;
     else if ("request".equals(scope))
@@ -522,9 +524,7 @@ public class BeanConfig {
         && ! _annotatedType.isAnnotationPresent(Stateful.class)
         && ! _annotatedType.isAnnotationPresent(Stateless.class)
         && ! _annotatedType.isAnnotationPresent(MessageDriven.class)) {
-      builder.annotation(new Startup() {
-          public Class annotationType() { return Startup.class; }
-        });
+      builder.annotation(new StartupLiteral());
     }
 
     for (Annotation qualifier : _qualifierList) {
@@ -559,7 +559,7 @@ public class BeanConfig {
       builder.init(_init);
 
     _bean = builder.bean();
-
+    
     introspectPostInit();
 
     deploy();

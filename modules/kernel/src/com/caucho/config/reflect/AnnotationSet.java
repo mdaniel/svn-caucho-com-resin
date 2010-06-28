@@ -150,7 +150,7 @@ public class AnnotationSet extends AbstractSet<Annotation>
   private void addImpl(Annotation newAnn)
   {
     if (_annSet.length <= _size + 1) {
-      int newSize = _size + 1;
+      int newSize = 2 * (_size + 1);
       
       if (newSize < 16)
         newSize = 16;

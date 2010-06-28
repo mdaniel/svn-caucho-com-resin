@@ -37,8 +37,8 @@ import java.security.*;
 public interface Authenticator
 {
   public Principal authenticate(Principal user,
-				Credentials credentials,
-				Object details);
+                                Credentials credentials,
+                                Object details);
 
   public boolean isUserInRole(Principal user, String role);
 

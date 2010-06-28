@@ -35,7 +35,7 @@ import java.io.Serializable;
 /**
  * Security exception for finding the current security context.
  */
-public class SecurityContextException extends Exception
+public class SecurityContextException extends RuntimeException
   implements ExceptionWrapper, Serializable {
   private Throwable rootCause;
 

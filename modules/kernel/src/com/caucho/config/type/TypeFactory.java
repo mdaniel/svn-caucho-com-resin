@@ -214,9 +214,9 @@ public class TypeFactory implements AddLoaderListener
   /**
    * Returns an environment type.
    */
-  public ConfigType getEnvironmentType(QName name)
+  public ConfigType<?> getEnvironmentType(QName name)
   {
-    ConfigType type = _attrMap.get(name);
+    ConfigType<?> type = _attrMap.get(name);
 
     if (type != null)
       return type == NotFoundConfigType.NULL ? null : type;

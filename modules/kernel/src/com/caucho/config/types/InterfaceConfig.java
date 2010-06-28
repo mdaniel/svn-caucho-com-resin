@@ -39,6 +39,8 @@ import com.caucho.util.L10N;
 
 import java.util.logging.*;
 import java.util.Set;
+
+import javax.annotation.PostConstruct;
 import javax.enterprise.inject.spi.Bean;
 
 /**
@@ -97,7 +99,7 @@ public class InterfaceConfig extends BeanConfig {
 
     if (! getBeanConfigClass().isAssignableFrom(cl))
       throw new ConfigException(L.l("instance class '{0}' must implement '{1}'",
-				    cl.getName(), getBeanConfigClass().getName()));
+                                    cl.getName(), getBeanConfigClass().getName()));
   }
 
   /**
@@ -180,16 +182,16 @@ public class InterfaceConfig extends BeanConfig {
       Set<Bean<?>> beans = webBeans.getBeans(_valueName);
 
       if (beans.size() > 0) {
-	_bean = beans.iterator().next();
+        _bean = beans.iterator().next();
       }
 
       if (_bean == null) {
-	_value = Jndi.lookup(_valueName);
+        _value = Jndi.lookup(_valueName);
       }
 
       if (_bean == null && _value == null)
-	throw new ConfigException(L.l("'{0}' is an unknown bean",
-				      _valueName));
+        throw new ConfigException(L.l("'{0}' is an unknown bean",
+                                      _valueName));
     }
     else if (getClassType() != null)
       super.init();

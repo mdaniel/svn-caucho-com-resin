@@ -168,7 +168,7 @@ public class InlineBeanType<T> extends ConfigType<T>
   {
     try {
       InjectManager cdiManager
-      = InjectManager.create(_beanClass.getClassLoader());
+        = InjectManager.create(_beanClass.getClassLoader());
 
       if (_injectionTarget == null) {
         if (_beanClass.isInterface())
@@ -178,7 +178,7 @@ public class InlineBeanType<T> extends ConfigType<T>
         AnnotatedType<T> type = getAnnotatedType();
 
         InjectionTargetBuilder<T> builder
-        = new InjectionTargetBuilder<T>(cdiManager, type);
+          = new InjectionTargetBuilder<T>(cdiManager, type);
 
         builder.setGenerateInterception(false);
 

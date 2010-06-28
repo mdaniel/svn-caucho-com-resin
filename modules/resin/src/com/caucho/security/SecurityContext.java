@@ -36,6 +36,8 @@ import com.caucho.util.L10N;
 import java.security.*;
 import java.util.logging.Logger;
 
+import javax.ejb.EJBAccessException;
+
 /**
  * Defines a proxy for the current security context.
  */
@@ -93,8 +95,8 @@ public class SecurityContext {
 
     if (provider != null && roleSet != null) {
       for (int i = 0; i < roleSet.length; i++) {
-	if (provider.isUserInRole(roleSet[i]))
-	  return true;
+        if (provider.isUserInRole(roleSet[i]))
+          return true;
       }
     }
 
@@ -116,7 +118,8 @@ public class SecurityContext {
           return;
       }
 
-      throw new AccessControlException(L.l("permission denied"));
+      throw new EJBAccessException(L.l("permission denied for user {0}",
+                                       provider.getUserPrincipal()));
     }
   }
 
