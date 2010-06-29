@@ -221,8 +221,9 @@ public class BeanELResolver extends ELResolver {
 	return true;
 
       BeanProperty prop = props.getBeanProperty((String) property);
-      
-      return prop != null && prop.isReadOnly();
+
+      if (prop != null)
+        return prop.isReadOnly();
     }
 
     throw new PropertyNotFoundException("'" + property + "' is an unknown bean property of '" + base.getClass().getName() + "'");
@@ -262,7 +263,7 @@ public class BeanELResolver extends ELResolver {
 
     if (prop == null)
       throw new PropertyNotFoundException(fieldName);
-    else if (prop.getWriteMethod() == null)
+    else if (_isReadOnly || prop.getWriteMethod() == null)
       throw new PropertyNotWritableException(fieldName);
 
     try {
@@ -271,6 +272,47 @@ public class BeanELResolver extends ELResolver {
       throw new ELException(e);
     } catch (InvocationTargetException e) {
       throw new ELException(e.getCause());
+    }
+  }
+
+  @Override
+  public Object invoke(ELContext context,
+                       Object base,
+                       Object methodObj,
+                       Class<?>[] paramTypes,
+                       Object[] params)
+  {
+    if (base == null)
+      throw new ELException("base object is null");
+
+    String methodName;
+
+    if (methodObj instanceof String)
+      methodName = (String) methodObj;
+    else if (methodObj instanceof Enum)
+      methodName = ((Enum) methodObj).name();
+    else
+      methodName = methodObj.toString();
+
+    if (paramTypes == null)
+      paramTypes = new Class[]{};
+
+    Method method = null;
+    try {
+      method = base.getClass().getDeclaredMethod(methodName, paramTypes);
+      try {
+        Object result = method.invoke(base, params);
+        context.setPropertyResolved(true);
+        return result;
+      } catch (InvocationTargetException e) {
+        Throwable cause = e.getCause();
+        throw new ELException(cause);
+      }
+    } catch (NoSuchMethodException e) {
+      throw new MethodNotFoundException("method '" + e.getMessage() + "' not found",
+                                        e);
+    } catch (Exception e) {
+      throw new ELException("failed to invoke method '" + method + "'", e);
     }
   }
 
