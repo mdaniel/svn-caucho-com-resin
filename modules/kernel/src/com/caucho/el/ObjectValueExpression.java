@@ -111,7 +111,9 @@ public class ObjectValueExpression extends ValueExpression
     throws PropertyNotFoundException,
 	   ELException
   {
-    Object value = _expr.getValue(context);
+    Object rawValue = _expr.getValue(context);
+
+    Object value = Expr.coerceToType(rawValue, _expectedType);
 
     return value;
   }

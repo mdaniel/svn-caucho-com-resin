@@ -1040,13 +1040,35 @@ public abstract class Expr extends ValueExpression {
       }
     }
   }
+
+  public static Object toEnum(Object obj, Class<? extends Enum> enumType)
+  {
+    if (obj == null)
+      return null;
+
+    Class objClass = obj.getClass();
+
+    if (objClass.equals(enumType))
+      return obj;
+
+    if (obj.getClass().equals(String.class) && "".equals(obj))
+      return null;
+
+    try {
+      return Enum.valueOf(enumType, obj.toString());
+    } catch (IllegalArgumentException e) {
+      throw new ELException(L.l("Unable convert'{0}' to '{1}'",
+                                obj.toString(),
+                                enumType.getName()));
+    }
+  }
   
   /**
    * Write to the *.java stream escaping Java reserved characters.
    *
-   * @param out the output stream to the *.java code.
+   * @param os the output stream to the *.java code.
    *
-   * @param value the value to be converted.
+   * @param is the value to be converted.
    */
   public static void printEscaped(WriteStream os, ReadStream is)
     throws IOException
@@ -1210,6 +1232,9 @@ public abstract class Expr extends ValueExpression {
     throws ELException
   {
     CoerceType type = _coerceMap.get(targetType);
+
+    if (targetType.isEnum())
+      return Expr.toEnum(obj, (Class<? extends Enum>) targetType);
 
     if (type == null)
       return obj;
