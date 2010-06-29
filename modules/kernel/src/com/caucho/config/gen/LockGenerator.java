@@ -28,18 +28,12 @@
  */
 package com.caucho.config.gen;
 
-import static javax.ejb.ConcurrencyManagementType.CONTAINER;
-
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
-import javax.ejb.AccessTimeout;
-import javax.ejb.ConcurrencyManagement;
-import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
-import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.types.Period;
 import com.caucho.inject.Module;
@@ -77,6 +71,9 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
    * @param timeout
    *          The timeout period.
    */
+  // XXX: The problem is that the timeout is not being set, neither is the timeout 
+  // unit. Was there an intended way this method was supposed to be invoked? Is this 
+  // simply a partial re-factor?
   public void setTimeout(Period timeout)
   {
     _lockTimeout = timeout.getPeriod();
@@ -158,7 +155,9 @@ public class LockGenerator<X> extends AbstractAspectGenerator<X> {
                       + _lockTimeoutUnit.toMillis(_lockTimeout)
                       + ");");
         } else {
-          out.println("_readWriteLock.readLock().lock();");
+            // XXX: This should probably be put behind the lock utility as well,
+        	// mostly to maintain code symmetry.
+        	out.println("_readWriteLock.readLock().lock();");
         }
         break;
 
