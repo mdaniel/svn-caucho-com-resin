@@ -37,6 +37,7 @@ import javax.ejb.Singleton;
 import javax.enterprise.inject.spi.AnnotatedType;
 
 import com.caucho.config.gen.AspectBeanFactory;
+import com.caucho.config.gen.CandiEnhancedBean;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.inject.Module;
 import com.caucho.java.JavaWriter;
@@ -141,8 +142,6 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
 
     generateClassStaticFields(out);
     
-    generateConstructor(out);
-
     generateClassContent(out);
 
     generateDependency(out);
@@ -161,6 +160,7 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
       out.println("  extends " + getBeanType().getJavaClass().getName());
     
     out.print("  implements SessionProxyFactory<T>");
+    out.print(", " + CandiEnhancedBean.class.getName());
 
     for (AnnotatedType<? super X> apiType : getLocalApi()) {
       out.print(", " + apiType.getJavaClass().getName());
@@ -184,10 +184,13 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     
     HashMap<String,Object> map = new HashMap<String,Object>();
     
+    generateConstructor(out);
+    
     generateProxyFactory(out);
-
-    generateBusinessMethods(out, map);
-    generateDestroy(out, map);
+    
+    generateContentImpl(out, map);
+    
+    // generateSerialization(out);
   }
   
   private void generateConstructor(JavaWriter out)
@@ -218,6 +221,8 @@ public class SingletonGenerator<X> extends SessionGenerator<X> {
     out.println("_isValid = true;");
 
     out.println("_bean = (" + beanClassName + ") manager.newInstance(env);");
+    
+    generateContextObjectConstructor(out);
 
     out.popDepth();
     out.println("}");

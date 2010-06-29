@@ -30,6 +30,8 @@
 package com.caucho.ejb.server;
 
 import java.lang.reflect.Method;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.ejb.TimedObject;
 import javax.ejb.Timeout;
@@ -49,11 +51,15 @@ import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.ejb.cfg.PostConstructConfig;
 import com.caucho.ejb.cfg.PreDestroyConfig;
 import com.caucho.ejb.timer.EjbTimerService;
+import com.caucho.naming.Jndi;
 
 /**
  * Creates an configures an ejb instance
  */
 public class EjbInjectionTarget<T> {
+  private static final Logger log 
+    = Logger.getLogger(EjbInjectionTarget.class.getName());
+  
   private AbstractEjbBeanManager<T> _server;
   
   private Class<T> _ejbClass;
@@ -220,16 +226,6 @@ public class EjbInjectionTarget<T> {
       = new DependentCreationalContext<T>(_bean, parentEnv, null);
     
     T instance = _bean.create(env);
-    // Producer.__caucho_new();
-
-    /* XXX for stateful proxy
-    if (env != null && bean != null) {
-      // server/4762
-      // env.put((AbstractBean) bean, proxy);
-      env.push(proxy);
-    }*/
-    
-    // _beanProducer.__caucho_postConstruct(instance);
     
     return instance;
   }

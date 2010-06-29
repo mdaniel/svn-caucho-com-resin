@@ -29,8 +29,13 @@
 
 package com.caucho.ejb.session;
 
+import java.lang.annotation.Annotation;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.util.List;
 import java.util.Set;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import javax.ejb.FinderException;
@@ -38,17 +43,19 @@ import javax.ejb.NoSuchEJBException;
 import javax.enterprise.context.ApplicationScoped;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
+import javax.enterprise.inject.spi.Decorator;
 import javax.enterprise.inject.spi.SessionBeanType;
 
 import com.caucho.config.ConfigException;
 import com.caucho.config.gen.BeanGenerator;
+import com.caucho.config.gen.CandiEnhancedBean;
+import com.caucho.config.gen.CandiUtil;
 import com.caucho.config.inject.CreationalContextImpl;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.inject.ManagedBeanImpl;
 import com.caucho.config.inject.OwnerCreationalContext;
 import com.caucho.ejb.cfg.EjbLazyGenerator;
 import com.caucho.ejb.gen.SingletonGenerator;
-import com.caucho.ejb.gen.StatelessGenerator;
 import com.caucho.ejb.inject.SessionBeanImpl;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractContext;
@@ -63,6 +70,10 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
     Logger.getLogger(SingletonManager.class.getName());
 
   private X _instance;
+  
+  private Object _decoratorClass;
+  private List<Decorator<?>> _decoratorBeans;
+
 
   public SingletonManager(EjbManager ejbContainer,
                           AnnotatedType<X> rawAnnType,
@@ -106,6 +117,40 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
   }
   
   @Override
+  public void bind()
+  {
+    super.bind();
+    
+    Class<?> instanceClass = getProxyImplClass();
+
+    if (instanceClass != null
+        && CandiEnhancedBean.class.isAssignableFrom(instanceClass)) {
+      try {
+        Method method = instanceClass.getMethod("__caucho_decorator_init");
+
+        _decoratorClass = method.invoke(null);
+      
+        Annotation []qualifiers = new Annotation[getBean().getQualifiers().size()];
+        getBean().getQualifiers().toArray(qualifiers);
+        
+        InjectManager moduleBeanManager = InjectManager.create();
+
+        _decoratorBeans = moduleBeanManager.resolveDecorators(getBean().getTypes(), qualifiers);
+      
+        method = instanceClass.getMethod("__caucho_init_decorators",
+                                         List.class);
+        
+      
+        method.invoke(null, _decoratorBeans);
+      } catch (InvocationTargetException e) {
+        throw ConfigException.create(e.getCause());
+      } catch (Exception e) {
+        log.log(Level.FINEST, e.toString(), e);
+      }
+    }
+  }
+  
+  @Override
   public X newInstance(CreationalContextImpl<X> env)
   {
     return _instance;
@@ -117,6 +162,41 @@ public class SingletonManager<X> extends AbstractSessionManager<X> {
     CreationalContextImpl<X> env = new OwnerCreationalContext<X>(getBean());
     
     _instance = super.newInstance(env);
+  }
+  
+  public <T> T initProxy(T proxy, CreationalContextImpl<T> env)
+  {
+    System.out.println("PROXY: " + proxy);
+    if (proxy instanceof CandiEnhancedBean) {
+      try {
+        CandiEnhancedBean bean = (CandiEnhancedBean) proxy;
+      
+        Object []delegates = createDelegates((CreationalContextImpl) env);
+      
+        bean.__caucho_inject(delegates, env);
+        System.out.println("INJECT: " + delegates);
+      } catch (Exception e) {
+        System.out.println("INJECT: " + e);
+
+      }
+    }
+    
+    return proxy;
+  }
+  
+  private Object []createDelegates(CreationalContextImpl<?> env)
+  {
+    if (_decoratorBeans != null) {
+      // if (env != null)
+      //   env.setInjectionPoint(oldPoint);
+      
+      return CandiUtil.generateProxyDelegate(getInjectManager(),
+                                             _decoratorBeans,
+                                             _decoratorClass,
+                                             env);
+    }
+    else
+      return null;
   }
   
   public void destroy(Object instance, CreationalContextImpl env)

@@ -126,12 +126,8 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   @Override
   public void generatePreTry(JavaWriter out) throws IOException
   {
-/*
-    if (_isContainerManaged) {
-      out.println();
-      out.println("boolean isXAValid = false;");
-    }
-    */
+    out.println();
+    out.println("boolean isXAValid = false;");
 
     if (!_isContainerManaged) {
       out.println();
@@ -232,11 +228,7 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   {
     super.generatePostCall(out);
 
-    /*
-    if (_isContainerManaged
-        && (_transactionType == REQUIRED || _transactionType == REQUIRES_NEW)) {
-      out.println("isXAValid = true;");
-    }*/
+    out.println("isXAValid = true;");
   }
 
   /**
@@ -252,6 +244,8 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
     ApplicationException applicationException = exception
         .getAnnotation(ApplicationException.class);
 
+    out.println("isXAValid = true;");
+    
     if ((applicationException != null) && (applicationException.rollback())) {
       if (_isContainerManaged && (_transactionType != NOT_SUPPORTED)) {
         out.println("if (_xa.getTransaction() != null)");
@@ -330,7 +324,10 @@ public class XaGenerator<X> extends AbstractAspectGenerator<X> {
   public void generateFinally(JavaWriter out) throws IOException
   {
     super.generateFinally(out);
-
+    
+    out.println("if (! isXAValid)");
+    out.println("  _xa.markRollback();");
+    
     if (! _isContainerManaged) {
       out.println("if (_xa.getTransaction() != null)");
       out.println("  _xa.commit();");

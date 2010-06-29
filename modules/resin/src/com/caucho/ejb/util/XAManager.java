@@ -38,6 +38,7 @@ import javax.transaction.HeuristicRollbackException;
 import javax.transaction.RollbackException;
 import javax.transaction.Status;
 import javax.transaction.Synchronization;
+import javax.transaction.SystemException;
 import javax.transaction.Transaction;
 import javax.transaction.xa.XAResource;
 
@@ -262,6 +263,19 @@ public class XAManager {
   public void markRollback(Exception e)
   {
     _ut.setRollbackOnly(e);
+  }
+
+  /**
+   * Mark the transaction for rollback
+   */
+  public void markRollback()
+  {
+    try {
+      if (_ut.getStatus() == Status.STATUS_ACTIVE)
+        _ut.setRollbackOnly();
+    } catch (SystemException e) {
+      throw new IllegalStateException(e);
+    }
   }
   
   public void rethrowEjbException(Exception e, boolean isClientXa)

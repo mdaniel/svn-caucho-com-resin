@@ -697,6 +697,7 @@ public class TransactionImpl implements Transaction, AlarmListener {
   /**
    * Force any completion to be a roll-back.
    */
+  @Override
   public void setRollbackOnly() throws SystemException
   {
     if (_status != Status.STATUS_ACTIVE

@@ -369,7 +369,7 @@ public class InterceptorGenerator<X>
     map.put("interceptor_object_init", true);
 
     out.println("int size = __caucho_interceptor_beans.size();");
-    out.println("__caucho_interceptor_objects = new Object[size];");
+    out.println("Object []objects = new Object[size];");
 
     out.println();
     // XXX: should be parent bean
@@ -384,11 +384,15 @@ public class InterceptorGenerator<X>
     out.println("javax.enterprise.context.spi.CreationalContext env");
     out.println("  = new " + DependentCreationalContext.class.getName() + "(bean, parentEnv, null);");
     
-    out.print("__caucho_interceptor_objects[i] = ");
+    out.print("objects[i] = ");
     out.println("__caucho_manager.getReference(bean, bean.getBeanClass(), env);");
 
+    out.println("if (objects[i] == null)");
+    out.println("  throw new NullPointerException(String.valueOf(bean));");
     out.popDepth();
     out.println("}");
+    
+    out.println("__caucho_interceptor_objects = objects;");
 
     for (Class<?> iClass : _ownInterceptors) {
       String var = _interceptorVarMap.get(iClass);
@@ -605,8 +609,11 @@ public class InterceptorGenerator<X>
       className = InterceptorGenerator.class.getName();
       superMethodName = javaMethod.getName();
     }
-    else
+    else {
       className = getBeanFactory().getInstanceClassName();
+      // ejb/6030 vs ioc/0c00
+      // superMethodName = javaMethod.getName();
+    }
       
     
     generateGetMethod(out,
@@ -1127,8 +1134,6 @@ public class InterceptorGenerator<X>
     out.println("  _delegates = delegates;");
     out.println("}");
 
-    String generatedClassName = _factory.getGeneratedClassName();
-    
     out.println();
     out.println("final " + beanClassName + " __caucho_getBean()");
     out.println("{");

@@ -662,11 +662,14 @@ public class EjbBean<X> extends DescriptionGroupConfig
       
       Class<?> oldClass = oldLocal.getJavaClass();
 
-      // ioc/1235
-      if (localClass.isAssignableFrom(oldClass))
+      // ioc/1235 vs ejb/4040
+      if (localClass.equals(oldClass))
         return;
       
       /*
+      if (localClass.isAssignableFrom(oldClass))
+        return;
+      
       if (oldClass.isAssignableFrom(localClass)) {
         _localList.set(i, local);
         return;

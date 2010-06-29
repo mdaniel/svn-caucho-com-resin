@@ -45,8 +45,6 @@ import com.caucho.java.JavaWriter;
 @Module
 public class SingletonMethodHeadGenerator<X> extends MethodHeadGenerator<X>
 {
-  private boolean _isRemoveRetainIfException;
-  
   public SingletonMethodHeadGenerator(SingletonMethodHeadFactory<X> factory,
                                       AnnotatedMethod<? super X> method,
                                       AspectGenerator<X> next)
@@ -69,8 +67,6 @@ public class SingletonMethodHeadGenerator<X> extends MethodHeadGenerator<X>
     out.println("  throw new javax.ejb.NoSuchEJBException(\"singleton instance "
                 + getJavaClass().getSimpleName() + " is no longer valid\");");
 
-    out.println("boolean isValid = false;");
-    
     out.println("Thread thread = Thread.currentThread();");
     out.println("ClassLoader oldLoader = thread.getContextClassLoader();");
   }
@@ -92,7 +88,6 @@ public class SingletonMethodHeadGenerator<X> extends MethodHeadGenerator<X>
   public void generatePostCall(JavaWriter out)
     throws IOException
   {
-    out.println("isValid = true;");
   }
 
   /**
@@ -103,33 +98,12 @@ public class SingletonMethodHeadGenerator<X> extends MethodHeadGenerator<X>
                                            Class<?> exn)
     throws IOException
   {
-    out.println("isValid = true;");
   }
 
   @Override
   public void generateFinally(JavaWriter out)
     throws IOException
   {
-    out.println();
-    out.println("_isActive = false;");
-    out.println();
-    
-    if (! _isRemoveRetainIfException) {
-      out.println("if (! isValid) {");
-      out.pushDepth();
-    
-      out.println("boolean isOldValid = _isValid;");
-      out.println("_isValid = false;");
-      out.println();
-      out.println("if (isOldValid)");
-      out.print("  _manager.destroyInstance(");
-      out.print(getBeanFactory().getBeanProxy());
-      out.println(");");
-    
-      out.popDepth();
-      out.println("}");
-    }
-    
     out.println("thread.setContextClassLoader(oldLoader);");
     
     super.generateFinally(out);

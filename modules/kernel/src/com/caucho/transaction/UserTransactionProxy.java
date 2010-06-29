@@ -141,6 +141,7 @@ public class UserTransactionProxy
   /**
    * Marks the transaction as rollback only.
    */
+  @Override
   public void setRollbackOnly()
     throws IllegalStateException, SystemException
   {
@@ -161,7 +162,7 @@ public class UserTransactionProxy
    */
   public void commit()
     throws IllegalStateException, RollbackException, HeuristicMixedException,
-	   HeuristicRollbackException, SecurityException, SystemException
+           HeuristicRollbackException, SecurityException, SystemException
   {
     getUserTransaction().commit();
   }

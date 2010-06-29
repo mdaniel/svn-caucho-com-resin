@@ -71,6 +71,7 @@ import com.caucho.ejb.inject.SessionRegistrationBean;
 import com.caucho.ejb.manager.EjbManager;
 import com.caucho.ejb.server.AbstractEjbBeanManager;
 import com.caucho.java.gen.JavaClassGenerator;
+import com.caucho.naming.Jndi;
 import com.caucho.util.L10N;
 
 /**
@@ -270,6 +271,16 @@ abstract public class AbstractSessionManager<X> extends AbstractEjbBeanManager<X
       injectManager.addBean(factory.singleton(context));
    
     _contextMap.put(context.getApi(), context);
+    
+    try {
+      String beanName = getAnnotatedType().getJavaClass().getName();
+      
+      Jndi.bindDeep("java:comp/EJBContext", context);
+      Jndi.bindDeep("java:comp/" + beanName + "/ejbContext", context);
+      Jndi.bindDeep("java:comp/" + beanName + "/sessionContext", context);
+    } catch (Exception e) {
+      log.log(Level.FINER, e.toString(), e);
+    }
     
     /*
     if (_sessionContext == null) {

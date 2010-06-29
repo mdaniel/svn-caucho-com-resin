@@ -125,13 +125,15 @@ public class CandiInvocationContext implements InvocationContext {
       // ioc/0c57
       if (_chainObjects != null && _index < _chainIndex.length) {
         int i = _index++;
+        
+        if (_chainObjects[_chainIndex[i]] == null)
+          throw new NullPointerException(i + " index[i]=" + _chainIndex[i] + " " + _type + " " + _chainMethods[i]);
 
         return _chainMethods[i].intercept(_type,
                                           _chainObjects[_chainIndex[i]], 
                                           this);
       }
       else {
-        log.warning("INVOKE: " + _target.getClass() + " " + _implMethod);
         return _implMethod.invoke(_target, _param);
       }
     } catch (InterceptorException e) {

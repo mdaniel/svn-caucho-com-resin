@@ -85,6 +85,9 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     if (parentClass != null) {
       _parent = new InterceptorRuntimeBean(this, parentClass);
     }
+    
+    if (_child != null)
+      _aroundInvoke = _child._aroundInvoke;
   }
   
   //
@@ -353,6 +356,11 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     try {
       switch (type) {
       case AROUND_INVOKE:
+        if (_aroundInvoke == null)
+          throw new NullPointerException(this + " null AROUND_INVOKE");
+        else if (instance == null)
+          throw new NullPointerException(this + " NULL instance " + _aroundInvoke);
+        
         return _aroundInvoke.invoke(instance, ctx);
 
       case POST_CONSTRUCT:

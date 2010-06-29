@@ -30,6 +30,8 @@ package com.caucho.ejb.session;
 
 import javax.ejb.TimerService;
 
+import com.caucho.config.inject.CreationalContextImpl;
+
 /**
  * Abstract base class for an session context
  */
@@ -47,6 +49,16 @@ public class SingletonContext<X,T> extends AbstractSessionContext<X,T> {
   public SingletonManager<X> getServer()
   {
     return (SingletonManager<X>) super.getServer();
+  }
+  
+  @Override
+  public T createProxy(CreationalContextImpl<T> env)
+  {
+    T proxy = super.createProxy(env);
+    
+    getServer().initProxy(proxy, env);
+    
+    return proxy;
   }
 
   /**

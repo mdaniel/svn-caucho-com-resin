@@ -193,6 +193,16 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     
     HashMap<String,Object> map = new HashMap<String,Object>();
     
+    generateContentImpl(out, map);
+    
+    generateSerialization(out);
+  }
+  
+  protected void generateContentImpl(JavaWriter out,
+                                     HashMap<String,Object> map)
+    throws IOException
+  {
+    
     generateConstructor(out, map);
     
     generateProxyFactory(out);
@@ -205,8 +215,6 @@ public class StatefulGenerator<X> extends SessionGenerator<X>
     generateInject(out, map);
     generatePostConstruct(out, map);
     generateDestroy(out, map);
-    
-    generateSerialization(out);
   }
 
   private void generateConstructor(JavaWriter out,

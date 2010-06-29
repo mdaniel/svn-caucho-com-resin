@@ -138,7 +138,7 @@ public class UserTransactionImpl
     // XXX: new
     if (_poolItems.contains(poolItem))
       return;
-	
+    
     poolItem.setTransaction(this);
 
     if (xa instanceof TransactionImpl) {
@@ -146,7 +146,7 @@ public class UserTransactionImpl
       
       // server/164l
       if (xaImpl.allowLocalTransactionOptimization())
-	poolItem.enableLocalTransactionOptimization(true);
+        poolItem.enableLocalTransactionOptimization(true);
     }
 
     if (poolItem.getXid() == null)
@@ -165,7 +165,7 @@ public class UserTransactionImpl
 
     try {
       if (xa != null)
-	xa.delistResource(poolItem, flags);
+        xa.delistResource(poolItem, flags);
     } finally {
       _poolItems.remove(poolItem);
     }
@@ -208,8 +208,8 @@ public class UserTransactionImpl
    * return null.
    */
   UserPoolItem allocate(ManagedConnectionFactory mcf,
-			Subject subject,
-			ConnectionRequestInfo info)
+                        Subject subject,
+                        ConnectionRequestInfo info)
   {
     if (! _isTransactionActive)
       return null;
@@ -245,7 +245,7 @@ public class UserTransactionImpl
       ManagedPoolItem poolItem = poolItems.get(i);
 
       if (poolItem.isJoin(item))
-	return poolItem;
+        return poolItem;
     }
 
     return null;
@@ -282,11 +282,12 @@ public class UserTransactionImpl
   /**
    * Start the transaction.
    */
+  @Override
   public void begin()
     throws NotSupportedException, SystemException
   {
     if (_isTransactionActive)
-      throw new IllegalStateException(L.l("UserTransaction.begin() is not allowed because an active transaction already exists.  This may be caused by either a missing commit/rollback or a nested begin().  Nested transactions are not supported."));
+      throw new NotSupportedException(L.l("UserTransaction.begin() is not allowed because an active transaction already exists.  This may be caused by either a missing commit/rollback or a nested begin().  Nested transactions are not supported."));
     
     _transactionManager.begin();
     _isTransactionActive = true;
@@ -302,74 +303,74 @@ public class UserTransactionImpl
       int length = _resources.size();
 
       for (int i = 0; i < length; i++) {
-	UserPoolItem userPoolItem = _resources.get(i);
+        UserPoolItem userPoolItem = _resources.get(i);
 
-	for (int j = _poolItems.size() - 1; j >= 0; j--) {
-	  ManagedPoolItem poolItem = _poolItems.get(j);
+        for (int j = _poolItems.size() - 1; j >= 0; j--) {
+          ManagedPoolItem poolItem = _poolItems.get(j);
 
-	  if (poolItem.share(userPoolItem)) {
-	    break;
-	  }
-	}
+          if (poolItem.share(userPoolItem)) {
+            break;
+          }
+        }
 
-	ManagedPoolItem xaPoolItem = userPoolItem.getXAPoolItem();
-	if (! _poolItems.contains(xaPoolItem))
-	  _poolItems.add(xaPoolItem);
+        ManagedPoolItem xaPoolItem = userPoolItem.getXAPoolItem();
+        if (! _poolItems.contains(xaPoolItem))
+          _poolItems.add(xaPoolItem);
       }
 
       for (int i = 0; i < _poolItems.size(); i++) {
-	ManagedPoolItem poolItem = _poolItems.get(i);
+        ManagedPoolItem poolItem = _poolItems.get(i);
 
-	poolItem.enableLocalTransactionOptimization(_poolItems.size() == 1);
+        poolItem.enableLocalTransactionOptimization(_poolItems.size() == 1);
 
-	try {
-	  xa.enlistResource(poolItem);
-	} catch (Exception e) {
+        try {
+          xa.enlistResource(poolItem);
+        } catch (Exception e) {
           String message = L.l("Failed to begin UserTransaction due to: {0}", e);
           log.log(Level.SEVERE, message, e);
 
-	  throw new SystemException(message);
-	}
+          throw new SystemException(message);
+        }
       }
 
       // enlist begin resources
       for (int i = 0; i < _beginResources.size(); i++) {
-	try {
-	  BeginResource resource = _beginResources.get(i);
+        try {
+          BeginResource resource = _beginResources.get(i);
 
-	  resource.begin(xa);
-	} catch (Throwable e) {
-	  log.log(Level.WARNING, e.toString(), e);
-	}
+          resource.begin(xa);
+        } catch (Throwable e) {
+          log.log(Level.WARNING, e.toString(), e);
+        }
       }
 
       isOkay = true;
     } finally {
       if (! isOkay) {
-	Exception e1 = new IllegalStateException(L.l("Rolling back transaction from failed begin."));
-	e1.fillInStackTrace();
-	log.log(Level.WARNING, e1.toString(), e1);
-	
-	// something has gone very wrong
-	_isTransactionActive = false;
+        Exception e1 = new IllegalStateException(L.l("Rolling back transaction from failed begin."));
+        e1.fillInStackTrace();
+        log.log(Level.WARNING, e1.toString(), e1);
 
-	ArrayList<ManagedPoolItem> recoveryList = new ArrayList<ManagedPoolItem>(_poolItems);
-	_poolItems.clear();
-	_resources.clear();
+        // something has gone very wrong
+        _isTransactionActive = false;
 
-	for (int i = 0; i < recoveryList.size(); i++) {
-	  try {
-	    ManagedPoolItem item = recoveryList.get(i);
+        ArrayList<ManagedPoolItem> recoveryList = new ArrayList<ManagedPoolItem>(_poolItems);
+        _poolItems.clear();
+        _resources.clear();
 
-	    item.abortConnection();
-	    
-	    item.destroy();
-	  } catch (Throwable e) {
-	    log.log(Level.FINE, e.toString(), e);
-	  }
-	}
-	
-	_transactionManager.rollback();
+        for (int i = 0; i < recoveryList.size(); i++) {
+          try {
+            ManagedPoolItem item = recoveryList.get(i);
+
+            item.abortConnection();
+
+            item.destroy();
+          } catch (Throwable e) {
+            log.log(Level.FINE, e.toString(), e);
+          }
+        }
+
+        _transactionManager.rollback();
       }
     }
   }
@@ -427,12 +428,12 @@ public class UserTransactionImpl
    */
   public void commit()
     throws IllegalStateException, RollbackException, HeuristicMixedException,
-	   HeuristicRollbackException, SecurityException, SystemException
+    HeuristicRollbackException, SecurityException, SystemException
   {
     try {
       // XXX: interaction with hessian XA
       if (! _isTransactionActive)
-	throw new IllegalStateException("UserTransaction.commit() requires an active transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back.");
+        throw new IllegalStateException("UserTransaction.commit() requires an active transaction.  Either the UserTransaction.begin() is missing or the transaction has already been committed or rolled back.");
 
       _transactionManager.commit();
     } finally {
@@ -479,63 +480,63 @@ public class UserTransactionImpl
 
     if (isTransactionActive) {
       try {
-	TransactionImpl xa = (TransactionImpl) _transactionManager.getTransaction();
+        TransactionImpl xa = (TransactionImpl) _transactionManager.getTransaction();
 
-	exn = new IllegalStateException(L.l("Transactions must have a commit() or rollback() in a finally block."));
-      
-	log.warning("Rolling back dangling transaction.  All transactions must have a commit() or rollback() in a finally block.");
-      
-	_transactionManager.rollback();
+        exn = new IllegalStateException(L.l("Transactions must have a commit() or rollback() in a finally block."));
+
+        log.warning("Rolling back dangling transaction.  All transactions must have a commit() or rollback() in a finally block.");
+
+        _transactionManager.rollback();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString());
+        log.log(Level.WARNING, e.toString());
       }
 
     }
 
     _beginResources.clear();
-    
+
     while (_closeResources.size() > 0) {
       try {
-	CloseResource resource;
+        CloseResource resource;
 
-	resource = _closeResources.remove(_closeResources.size() - 1);
-	resource.close();
+        resource = _closeResources.remove(_closeResources.size() - 1);
+        resource.close();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 
     boolean hasWarning = false;
-    
+
     while (_resources.size() > 0) {
       UserPoolItem userPoolItem = _resources.remove(_resources.size() - 1);
 
       if (! userPoolItem.isCloseDanglingConnections())
-	continue;
-      
+        continue;
+
       if (! hasWarning) {
-	hasWarning = true;
+        hasWarning = true;
 
-	log.warning("Closing dangling connections.  All connections must have a close() in a finally block.");
+        log.warning("Closing dangling connections.  All connections must have a close() in a finally block.");
       }
-      
+
       try {
-	IllegalStateException stackTrace = userPoolItem.getAllocationStackTrace();
+        IllegalStateException stackTrace = userPoolItem.getAllocationStackTrace();
 
-	if (stackTrace != null)
-	  log.log(Level.WARNING, stackTrace.getMessage(), stackTrace);
-	else {
-	  // start saving the allocation stack trace.
-	  userPoolItem.setSaveAllocationStackTrace(true);
-	}
-      
-	if (exn == null)
-	  exn = new IllegalStateException(L.l("Connection {0} was not closed. Connections must have a close() in a finally block.",
-					      userPoolItem.getUserConnection()));
+        if (stackTrace != null)
+          log.log(Level.WARNING, stackTrace.getMessage(), stackTrace);
+        else {
+          // start saving the allocation stack trace.
+          userPoolItem.setSaveAllocationStackTrace(true);
+        }
 
-	userPoolItem.abortConnection();
+        if (exn == null)
+          exn = new IllegalStateException(L.l("Connection {0} was not closed. Connections must have a close() in a finally block.",
+                                              userPoolItem.getUserConnection()));
+
+        userPoolItem.abortConnection();
       } catch (Throwable e) {
-	log.log(Level.WARNING, e.toString(), e);
+        log.log(Level.WARNING, e.toString(), e);
       }
     }
 

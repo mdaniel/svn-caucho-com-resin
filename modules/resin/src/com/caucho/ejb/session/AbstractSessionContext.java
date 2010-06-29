@@ -34,7 +34,6 @@ import javax.ejb.EJBLocalHome;
 import javax.ejb.EJBLocalObject;
 import javax.ejb.EJBObject;
 import javax.ejb.SessionContext;
-import javax.enterprise.context.spi.CreationalContext;
 import javax.xml.rpc.handler.MessageContext;
 
 import com.caucho.config.gen.CandiEnhancedBean;
@@ -53,6 +52,7 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
 
   private transient AbstractSessionManager<X> _manager;
   private transient InjectManager _injectManager;
+  private transient ClassLoader _classLoader;
   private Class<T> _api;
   private SessionProxyFactory<T> _proxyFactory;
 
@@ -61,6 +61,8 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
   {
     assert(manager != null);
 
+    _classLoader = Thread.currentThread().getContextClassLoader();
+    
     _manager = manager;
     _api = api;
     
@@ -126,6 +128,8 @@ abstract public class AbstractSessionContext<X,T> extends AbstractContext<X>
     ClassLoader oldLoader = thread.getContextClassLoader();
     
     try {
+      thread.setContextClassLoader(_classLoader);
+      
       return _manager.newInstance(env);
     } finally {
       thread.setContextClassLoader(oldLoader);
