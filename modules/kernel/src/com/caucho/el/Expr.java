@@ -1057,7 +1057,7 @@ public abstract class Expr extends ValueExpression {
     try {
       return Enum.valueOf(enumType, obj.toString());
     } catch (IllegalArgumentException e) {
-      throw new ELException(L.l("Unable convert'{0}' to '{1}'",
+      throw new ELException(L.l("Unable convert '{0}' to '{1}'",
                                 obj.toString(),
                                 enumType.getName()));
     }
