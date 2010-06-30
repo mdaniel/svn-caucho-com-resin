@@ -29,6 +29,7 @@
 
 package com.caucho.config.gen;
 
+import javax.ejb.AccessTimeout;
 import javax.ejb.Lock;
 import javax.ejb.LockType;
 import javax.enterprise.inject.spi.AnnotatedMethod;
@@ -43,6 +44,7 @@ public class LockFactory<X>
   extends AbstractAspectFactory<X>
 {
   private LockType _classLockType;
+  private AccessTimeout _classAccessTimeout; 
   
   public LockFactory(AspectBeanFactory<X> beanFactory,
                      AspectFactory<X> next)
@@ -53,12 +55,16 @@ public class LockFactory<X>
     
     if (lock != null)
       _classLockType = lock.value();
+    
+    _classAccessTimeout = beanFactory.getBeanType().getAnnotation(
+    		AccessTimeout.class);    
   }
   
   /**
    * Creates an aspect for interception if the method should be intercepted.
    */
-  @Override
+  @SuppressWarnings("unchecked")
+@Override
   public AspectGenerator<X> create(AnnotatedMethod<? super X> method,
                                    boolean isEnhanced)
   {
@@ -69,12 +75,22 @@ public class LockFactory<X>
     if (lock != null)
       lockType = lock.value();
     
+    AccessTimeout accessTimeout = method.getAnnotation(AccessTimeout.class);
+    
+    if (accessTimeout == null) {
+    	accessTimeout = _classAccessTimeout;
+    }
+    
     if (lockType == null)
       return super.create(method, isEnhanced);
     else {
       AspectGenerator<X> next = super.create(method, true);
     
-      return new LockGenerator(this, method, next, lockType);
+      if (accessTimeout != null) {
+        return new LockGenerator(this, method, next, lockType, accessTimeout.value(), accessTimeout.unit());
+      } else {
+    	  return new LockGenerator(this, method, next, lockType, -1, null);
+      }
     }
   }
 }
