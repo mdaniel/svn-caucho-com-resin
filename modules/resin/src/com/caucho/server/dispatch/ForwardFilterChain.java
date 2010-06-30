@@ -35,12 +35,20 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * Does an internal forward of the request.
  */
 public class ForwardFilterChain implements FilterChain {
+  private static final Logger log
+    = Logger.getLogger(ForwardFilterChain.class.getName());
+  
   // servlet
   private String _url;
   private RequestDispatcher _disp;
@@ -75,14 +83,22 @@ public class ForwardFilterChain implements FilterChain {
                        ServletResponse response)
     throws ServletException, IOException
   {
-    if (_disp != null)
-      _disp.forward(request, response);
-    else {
-      HttpServletRequest req = (HttpServletRequest) request;
+    try {
+      if (_disp != null)
+        _disp.forward(request, response);
+      else {
+        HttpServletRequest req = (HttpServletRequest) request;
 
-      RequestDispatcher disp = req.getRequestDispatcher(_url);
+        RequestDispatcher disp = req.getRequestDispatcher(_url);
 
-      disp.forward(request, response);
+        disp.forward(request, response);
+      }
+    } catch (FileNotFoundException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      HttpServletResponse res = (HttpServletResponse) response;
+      
+      res.sendError(404);
     }
   }
 

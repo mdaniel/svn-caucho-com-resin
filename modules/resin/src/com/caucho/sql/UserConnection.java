@@ -763,6 +763,115 @@ public class UserConnection implements java.sql.Connection {
     getDriverConnection().rollback(savepoint);
   }
 
+  @Override
+  public Clob createClob()
+    throws SQLException
+  {
+    return getDriverConnection().createClob();
+  }
+
+  @Override
+  public Blob createBlob()
+    throws SQLException
+  {
+    return getDriverConnection().createBlob();
+  }
+
+  @Override
+  public NClob createNClob()
+    throws SQLException
+  {
+    return getDriverConnection().createNClob();
+  }
+
+  @Override
+  public SQLXML createSQLXML()
+    throws SQLException
+  {
+    return getDriverConnection().createSQLXML();
+  }
+
+  @Override
+  public boolean isValid(int timeout)
+    throws SQLException
+  {
+    return getDriverConnection().isValid(timeout);
+  }
+
+  @Override
+  public void setClientInfo(String name, String value)
+    throws SQLClientInfoException
+  {
+      try {
+        getDriverConnection().setClientInfo(name, value);
+      } catch (SQLClientInfoException e) {
+        throw e;
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
+  }
+
+  @Override
+  public void setClientInfo(Properties properties)
+    throws SQLClientInfoException
+  {
+      try {
+        getDriverConnection().setClientInfo(properties);
+      } catch (SQLClientInfoException e) {
+        throw e;
+      } catch (SQLException e) {
+        throw new RuntimeException(e);
+      }
+  }
+
+  @Override
+  public String getClientInfo(String name)
+    throws SQLException
+  {
+    try {
+      return getDriverConnection().getClientInfo(name);
+    } catch (SQLClientInfoException e) {
+      throw e;
+    } catch (SQLException e) {
+      throw new RuntimeException(e);
+    }
+  }
+
+  @Override
+  public Properties getClientInfo()
+    throws SQLException
+  {
+      return getDriverConnection().getClientInfo();
+  }
+
+  @Override
+  public Array createArrayOf(String typeName, Object[] elements)
+    throws SQLException
+  {
+      return getDriverConnection().createArrayOf(typeName, elements);
+  }
+
+  @Override
+  public Struct createStruct(String typeName, Object[] attributes)
+    throws SQLException
+  {
+    return getDriverConnection().createStruct(typeName, attributes);
+  }
+
+  @Override
+  public <T> T unwrap(Class<T> iface)
+    throws SQLException
+  {
+    return (T) getConnection();
+  }
+
+  @Override
+  public boolean isWrapperFor(Class<?> iface)
+    throws SQLException
+  {
+    return iface.isAssignableFrom(getConnection().getClass());
+  }
+
   /**
    * Resets the underlying connection to its initial state and closes
    * any open statements.
@@ -900,83 +1009,5 @@ public class UserConnection implements java.sql.Connection {
   public String toString()
   {
     return "UserConnection[" + _mConn + "]";
-  }
-
-  public Clob createClob()
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public Blob createBlob()
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public NClob createNClob()
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public SQLXML createSQLXML()
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public boolean isValid(int timeout)
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public void setClientInfo(String name, String value)
-    throws SQLClientInfoException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public void setClientInfo(Properties properties)
-    throws SQLClientInfoException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public String getClientInfo(String name)
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public Properties getClientInfo()
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public Array createArrayOf(String typeName, Object[] elements)
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public Struct createStruct(String typeName, Object[] attributes)
-    throws SQLException
-  {
-    throw new UnsupportedOperationException("Not supported yet.");
-  }
-
-  public <T> T unwrap(Class<T> iface)
-    throws SQLException
-  {
-    return (T) getConnection();
-  }
-
-  public boolean isWrapperFor(Class<?> iface)
-    throws SQLException
-  {
-    return iface.isAssignableFrom(getConnection().getClass());
   }
 }

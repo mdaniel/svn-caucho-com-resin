@@ -48,8 +48,8 @@ class BindPath extends FilesystemPath {
    * @param path canonical path
    */
   private BindPath(BindPath root,
-		   String userPath, Map<String,Object> attributes,
-		   String path, Node node, Path backing)
+                   String userPath, Map<String,Object> attributes,
+                   String path, Node node, Path backing)
   {
     super(root, userPath, path);
 
@@ -69,9 +69,10 @@ class BindPath extends FilesystemPath {
       _separatorChar = ((FilesystemPath) backing)._separatorChar;
   }
 
+  @Override
   public Path fsWalk(String userPath,
-			Map<String,Object> attributes,
-			String path)
+                     Map<String,Object> attributes,
+                     String path)
   {
     Node ptr = _node;
 

@@ -85,9 +85,6 @@ public class InterceptorRuntimeBean<X> extends AbstractInterceptorBean<X>
     if (parentClass != null) {
       _parent = new InterceptorRuntimeBean(this, parentClass);
     }
-    
-    if (_child != null)
-      _aroundInvoke = _child._aroundInvoke;
   }
   
   //

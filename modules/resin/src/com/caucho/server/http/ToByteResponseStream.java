@@ -93,6 +93,7 @@ public abstract class ToByteResponseStream extends AbstractResponseStream {
   /**
    * Returns true for a caucho response stream.
    */
+  @Override
   public boolean isCauchoResponseStream()
   {
     return true;

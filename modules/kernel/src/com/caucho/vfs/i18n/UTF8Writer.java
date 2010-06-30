@@ -117,9 +117,9 @@ public class UTF8Writer extends EncodingWriter {
     int capacity = buffer.length;
 
     while (len > 0) {
-      int sublen = capacity - length;
+      int sublen = capacity - length - 2;
       
-      if (sublen <= 2) {
+      if (sublen < 1) {
         buffer = os.nextBuffer(length);
         length = os.getBufferOffset();
         
@@ -158,6 +158,7 @@ public class UTF8Writer extends EncodingWriter {
       }
       
       len -= sublen;
+      off += sublen;
     }
 
     os.setBufferOffset(length);

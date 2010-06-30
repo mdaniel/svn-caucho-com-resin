@@ -2909,13 +2909,8 @@ public final class InjectManager
   {
     Class<X> cl;
     
-    AnnotatedType<X> type = getExtensionManager().processAnnotatedType(beanType);
-
-    if (type == null)
-      return;
-    
     // ioc/07fb
-    cl = type.getJavaClass();
+    cl = beanType.getJavaClass();
     
     if (cl.isAnnotationPresent(Specializes.class)) {
       Class<?> parent = cl.getSuperclass();
@@ -2924,6 +2919,11 @@ public final class InjectManager
         addSpecialize(cl, parent);
       }
     }
+    
+    AnnotatedType<X> type = getExtensionManager().processAnnotatedType(beanType);
+
+    if (type == null)
+      return;
 
     _pendingAnnotatedTypes.add(type);
   }
@@ -2963,6 +2963,9 @@ public final class InjectManager
 
   boolean isIntrospectObservers(AnnotatedType<?> type)
   {
+    if (type.isAnnotationPresent(Specializes.class))
+      return true;
+    
     String javaClassName = type.getJavaClass().getName();
     
     InjectScanClass scanClass = getScanManager().getScanClass(javaClassName);

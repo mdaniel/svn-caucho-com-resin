@@ -35,13 +35,21 @@ import javax.servlet.ServletException;
 import javax.servlet.ServletRequest;
 import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+
 import com.caucho.server.webapp.RequestDispatcherImpl;
 
 /**
  * Does an internal dispatch of the request.
  */
 public class RewriteDispatchFilterChain implements FilterChain {
+  private static final Logger log 
+    = Logger.getLogger(RewriteDispatchFilterChain.class.getName());
   // servlet
   private String _url;
 
@@ -66,11 +74,18 @@ public class RewriteDispatchFilterChain implements FilterChain {
     throws ServletException, IOException
   {
     HttpServletRequest req = (HttpServletRequest) request;
+    HttpServletResponse res = (HttpServletResponse) response;
 
-    RequestDispatcherImpl disp
-      = (RequestDispatcherImpl) req.getRequestDispatcher(_url);
+    try {
+      RequestDispatcherImpl disp
+        = (RequestDispatcherImpl) req.getRequestDispatcher(_url);
 
-    disp.dispatch(request, response);
+      disp.dispatch(request, response);
+    } catch (FileNotFoundException e) {
+      log.log(Level.FINE, e.toString(), e);
+      
+      res.sendError(404);
+    }
   }
 
   public String toString()

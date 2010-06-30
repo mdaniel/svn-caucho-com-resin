@@ -226,7 +226,7 @@ public class HttpResponseStream extends ResponseStream {
     if (bufferStart > 0) {
       byte []buffer = _next.getBuffer();
       int len = bufferOffset - bufferStart;
-
+      
       if (len > 0)
         writeChunkHeader(buffer, bufferStart, len);
       else

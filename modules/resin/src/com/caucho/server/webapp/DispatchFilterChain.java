@@ -36,7 +36,11 @@ import javax.servlet.ServletRequest;
 import javax.servlet.ServletRequestEvent;
 import javax.servlet.ServletRequestListener;
 import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import com.caucho.server.dispatch.Invocation;
@@ -69,7 +73,7 @@ public class DispatchFilterChain implements FilterChain {
    * @param webApp the webApp
    */
   public DispatchFilterChain(FilterChain next,
-			     WebApp webApp)
+                             WebApp webApp)
   {
     _next = next;
     _webApp = webApp;
@@ -110,18 +114,24 @@ public class DispatchFilterChain implements FilterChain {
         for (int i = 0; i < _requestListeners.length; i++) {
           ServletRequestEvent event
             = new ServletRequestEvent(_webApp, request);
-	
+          
           _requestListeners[i].requestInitialized(event);
         }
       }
       
       _next.doFilter(request, response);
+    } catch (FileNotFoundException e) {
+      log.log(Level.FINER, e.toString(), e);
+      
+      HttpServletResponse res = (HttpServletResponse) response;
+      
+      res.sendError(404);
     } finally {
       if (webApp != _webApp) {
         for (int i = _requestListeners.length - 1; i >= 0; i--) {
           ServletRequestEvent event
             = new ServletRequestEvent(_webApp, request);
-	
+          
           _requestListeners[i].requestDestroyed(event);
         }
       }
