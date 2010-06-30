@@ -36,6 +36,7 @@ import javax.servlet.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -80,46 +81,52 @@ public class RewriteFilter implements Filter
     HttpServletRequest req = (HttpServletRequest) request;
     HttpServletResponse res = (HttpServletResponse) response;
 
-    String url = req.getRequestURI();
+    try {
+      String url = req.getRequestURI();
 
-    for (int i = 0; i < _entries.size(); i++) {
-      RewriteEntry entry = _entries.get(i);
+      for (int i = 0; i < _entries.size(); i++) {
+        RewriteEntry entry = _entries.get(i);
 
-      Pattern pattern = entry.getRegexp();
-      Matcher matcher = pattern.matcher(url);
+        Pattern pattern = entry.getRegexp();
+        Matcher matcher = pattern.matcher(url);
 
-      if (! matcher.find(0))
-        continue;
+        if (! matcher.find(0))
+          continue;
 
-      String replacement = replace(matcher, entry.getTarget());
+        String replacement = replace(matcher, entry.getTarget());
 
-      String query = req.getQueryString();
+        String query = req.getQueryString();
 
-      if (query != null) {
-        if (replacement.indexOf('?') > 0)
-          replacement = replacement + '&' + query;
-        else
-          replacement = replacement + '?' + query;
-      }
-
-      if (log.isLoggable(Level.FINER))
-        log.finer(L.l("forwarding `{0}' to `{1}'",
-                      url, replacement));
-
-      if (replacement.startsWith("/")) {
-        RequestDispatcher disp = _app.getRequestDispatcher(replacement);
-
-        if (disp != null) {
-          disp.forward(request, response);
-          return;
+        if (query != null) {
+          if (replacement.indexOf('?') > 0)
+            replacement = replacement + '&' + query;
+          else
+            replacement = replacement + '?' + query;
         }
+
+        if (log.isLoggable(Level.FINER))
+          log.finer(L.l("forwarding `{0}' to `{1}'",
+                        url, replacement));
+
+        if (replacement.startsWith("/")) {
+          RequestDispatcher disp = _app.getRequestDispatcher(replacement);
+
+          if (disp != null) {
+            disp.forward(request, response);
+            return;
+          }
+        }
+
+        res.sendRedirect(res.encodeRedirectURL(replacement));
+        return;
       }
 
-      res.sendRedirect(res.encodeRedirectURL(replacement));
-      return;
-    }
+      nextFilter.doFilter(request, response);
+    } catch (FileNotFoundException e) {
+      log.log(Level.FINER, e.toString(), e);
 
-    nextFilter.doFilter(request, response);
+      res.sendError(404);
+    }
   }
 
   private String replace(Matcher matcher, String target)
