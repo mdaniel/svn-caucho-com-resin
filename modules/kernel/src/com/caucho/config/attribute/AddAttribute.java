@@ -97,6 +97,7 @@ public class AddAttribute extends Attribute {
     }
     else {
       XmlBeanConfig config = new XmlBeanConfig(qName, cl);
+      config.setInlineBean(true);
 
       // config.setScope("singleton");
 
@@ -134,24 +135,24 @@ public class AddAttribute extends Attribute {
   {
     try {
       if (value instanceof XmlBeanConfig) {
-	XmlBeanConfig config = (XmlBeanConfig) value;
+        XmlBeanConfig config = (XmlBeanConfig) value;
 
-	value = config.toObject();
+        value = config.toObject();
       }
       else if (value instanceof AnnotationConfig) {
-	AnnotationConfig config = (AnnotationConfig) value;
+        AnnotationConfig config = (AnnotationConfig) value;
 
-	value = config.replace();
+        value = config.replace();
       }
 
       if (_setMethod != null && value != null) {
-	if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))
-	  throw new ConfigException(L.l("'{0}.{1}' is not assignable from {2}",
-					_setMethod.getDeclaringClass().getSimpleName(),
-					_setMethod.getName(),
-					value));
+        if (! _setMethod.getParameterTypes()[0].isAssignableFrom(value.getClass()))
+          throw new ConfigException(L.l("'{0}.{1}' is not assignable from {2}",
+                                        _setMethod.getDeclaringClass().getSimpleName(),
+                                        _setMethod.getName(),
+                                        value));
 
-	_setMethod.invoke(bean, value);
+        _setMethod.invoke(bean, value);
       }
     } catch (Exception e) {
       throw ConfigException.create(e);

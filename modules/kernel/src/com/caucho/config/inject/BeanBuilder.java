@@ -35,6 +35,7 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionTarget;
@@ -75,6 +76,11 @@ public class BeanBuilder<T>
   public AnnotatedType<T> getAnnotatedType()
   {
     return _managedBean.getAnnotatedType();
+  }
+
+  public Annotated getExtendedAnnotated()
+  {
+    return _annotated;
   }
 
   public BeanBuilder<T> name(String name)

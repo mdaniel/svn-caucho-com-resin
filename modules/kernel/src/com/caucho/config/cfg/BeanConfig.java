@@ -46,6 +46,7 @@ import javax.enterprise.context.NormalScope;
 import javax.enterprise.context.RequestScoped;
 import javax.enterprise.context.SessionScoped;
 import javax.enterprise.context.spi.CreationalContext;
+import javax.enterprise.inject.spi.Annotated;
 import javax.enterprise.inject.spi.AnnotatedType;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.util.AnnotationLiteral;
@@ -56,6 +57,7 @@ import com.caucho.config.ConfigException;
 import com.caucho.config.Names;
 import com.caucho.config.inject.AbstractBean;
 import com.caucho.config.inject.BeanBuilder;
+import com.caucho.config.inject.DefaultLiteral;
 import com.caucho.config.inject.InjectManager;
 import com.caucho.config.program.ConfigProgram;
 import com.caucho.config.program.ContainerProgram;
@@ -104,6 +106,7 @@ public class BeanConfig {
   private ContainerProgram _init;
 
   private AnnotatedType<?> _annotatedType;
+  private Annotated _extAnnotated;
   protected Bean<?> _bean;
 
   // XXX: temp for osgi
@@ -140,8 +143,6 @@ public class BeanConfig {
   public void setName(String name)
   {
     _name = name;
-
-    _qualifierList.add(Names.create(name));
   }
 
   /**
@@ -530,6 +531,12 @@ public class BeanConfig {
     for (Annotation qualifier : _qualifierList) {
       builder.binding(qualifier);
     }
+    
+    if (_name != null)
+      builder.binding(Names.create(_name));
+    
+    if (_qualifierList.size() == 0)
+      builder.binding(DefaultLiteral.DEFAULT);
 
     for (Annotation stereotype : _stereotypeList) {
       builder.stereotype(stereotype.annotationType());
@@ -559,6 +566,7 @@ public class BeanConfig {
       builder.init(_init);
 
     _bean = builder.bean();
+    _extAnnotated = builder.getExtendedAnnotated();
     
     introspectPostInit();
 
@@ -594,7 +602,7 @@ public class BeanConfig {
   {
     if (_bean != null) {
       // ejb/1030
-      getBeanManager().addBean(_bean);
+      getBeanManager().addBean(_bean,  _extAnnotated);
     }
   }
 

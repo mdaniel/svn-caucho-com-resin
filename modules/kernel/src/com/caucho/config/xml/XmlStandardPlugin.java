@@ -225,7 +225,7 @@ public class XmlStandardPlugin implements Extension
 
     Annotated annotated = event.getAnnotated();
     Bean<?> bean = event.getBean();
-
+    
     if (isStartup(annotated)) {
       _pendingService.add(bean);
     }

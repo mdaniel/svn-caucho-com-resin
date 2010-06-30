@@ -137,7 +137,7 @@ public class BasicLogin extends AbstractLogin {
    */
   @Override
   protected boolean isSavedUserValid(HttpServletRequest request,
-				     Principal savedUser)
+                                     Principal savedUser)
   {
     String value = request.getHeader("authorization");
     if (value == null)

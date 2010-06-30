@@ -1477,8 +1477,9 @@ public final class InjectManager
       _beanMap.put(rawClass, beanSet);
       
       for (TypedBean typedBean : typedBeans) {
-        if (getDeploymentPriority(typedBean.getBean()) < 0)
+        if (getDeploymentPriority(typedBean.getBean()) < 0) {
           continue;
+        }
         
         _pendingValidationBeans.add(typedBean.getBean());
         

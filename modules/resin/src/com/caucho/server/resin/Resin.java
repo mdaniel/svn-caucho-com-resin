@@ -1085,6 +1085,8 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       }
       */
 
+      Environment.start(getClassLoader());
+
       _server = createServer();
 
       for (int i = 0; i < _boundPortList.size(); i++) {
@@ -1096,8 +1098,6 @@ public class Resin extends Shutdown implements EnvironmentBean, SchemaBean
       }
 
       _server.start();
-
-      Environment.start(getClassLoader());
 
       /*
         if (! hasListeningPort()) {

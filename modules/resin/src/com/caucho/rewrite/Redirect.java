@@ -57,11 +57,15 @@ public class Redirect extends AbstractTargetDispatchRule
 {
   private static final L10N L = new L10N(Redirect.class);
 
+  public Redirect()
+  {
+  }
+  
   @Override
   public FilterChain createDispatch(String uri,
-				    String queryString,
-				    String target,
-				    FilterChain next)
+                                    String queryString,
+                                    String target,
+                                    FilterChain next)
   {
     return new RedirectFilterChain(target);
   }

@@ -100,6 +100,7 @@ public class XmlBeanConfig<T> {
   private boolean _hasBindings;
   private boolean _hasInterceptorBindings;
   private boolean _hasDeployment;
+  private boolean _isInlineBean;
 
   public XmlBeanConfig(QName name, Class<T> cl)
   {
@@ -159,6 +160,11 @@ public class XmlBeanConfig<T> {
     return _line;
   }
 
+  public void setInlineBean(boolean isInline)
+  {
+    _isInlineBean = isInline;
+  }
+  
   public void addArg(ConfigProgram arg)
   {
     if (_args == null)
@@ -455,7 +461,8 @@ public class XmlBeanConfig<T> {
     
     _cdiManager.addXmlInjectionTarget(xmlCookie.value(), injectionTarget);
 
-    _cdiManager.discoverBean(_annotatedType);
+    if (! _isInlineBean)
+      _cdiManager.discoverBean(_annotatedType);
     
     //beanManager.addBean(_bean);
 

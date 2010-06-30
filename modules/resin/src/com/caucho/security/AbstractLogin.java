@@ -623,6 +623,7 @@ public abstract class AbstractLogin implements Login {
     }
   }
 
+  @SuppressWarnings("serial")
   static class LoginPrincipal implements java.io.Serializable {
     // server/12ci - XXX: this was transient before.
     private Principal _user;
