@@ -29,13 +29,13 @@
 
 package com.caucho.server.http;
 
-import com.caucho.server.cache.AbstractCacheFilterChain;
-import com.caucho.server.cache.AbstractCacheEntry;
-import com.caucho.vfs.FlushBuffer;
-
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.ServletResponse;
 import java.io.IOException;
+
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletResponse;
+
+import com.caucho.server.cache.AbstractCacheEntry;
+import com.caucho.server.cache.AbstractCacheFilterChain;
 
 public interface CauchoResponse extends HttpServletResponse {
   /* caucho methods */

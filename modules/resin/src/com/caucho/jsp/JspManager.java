@@ -161,6 +161,7 @@ public class JspManager extends PageManager {
    *
    * @return the compiled JSP page
    */
+  @Override
   Page createPage(Path path, String uri, String className,
                   ServletConfig config,
                   ArrayList<PersistentDependency> dependList)
@@ -185,8 +186,6 @@ public class JspManager extends PageManager {
                           boolean isGenerated)
     throws Exception
   {
-    Class jspClass = null;
-
     Page page = compile(path, uri, className, config, dependList, isGenerated);
 
     if (page == null)

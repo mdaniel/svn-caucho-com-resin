@@ -517,6 +517,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    *
    * @param code the HTTP status code
    */
+  @Override
   public void setStatus(int code)
   {
     setStatus(code, null);
@@ -528,11 +529,12 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
    * @param code the HTTP status code
    * @param message the HTTP status message
    */
+  @Override
   public void setStatus(int code, String message)
   {
     if (code < 0)
       code = 500;
-
+    
     if (message != null) {
     }
     else if (code == SC_OK)
@@ -1451,11 +1453,13 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
     return _forbidForward;
   }
 
+  @Override
   public boolean hasError()
   {
     return _hasError;
   }
 
+  @Override
   public void setHasError(boolean error)
   {
     _hasError = error;
@@ -1465,6 +1469,7 @@ public final class HttpServletResponseImpl extends AbstractCauchoResponse
   // HttpServletRequestImpl methods
   //
 
+  @Override
   public ServletResponse getResponse()
   {
     return null;

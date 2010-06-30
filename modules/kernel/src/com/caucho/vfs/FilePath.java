@@ -488,6 +488,7 @@ public class FilePath extends FilesystemPath {
     return value;
   }
 
+  @Override
   public boolean remove()
   {
     if (getFile().delete()) {
