@@ -567,12 +567,12 @@ public class XmlReader
    *
    */
   private void updateDepth(Env env) {
-    if (_lastNodeType == XMLStreamConstants.START_ELEMENT &&
-        ! _streamReader.isEndElement())
+    if (_lastNodeType == XMLStreamConstants.START_ELEMENT
+        && ! _streamReader.isEndElement())
       _depth++;
-    else if ((_lastNodeType == XMLStreamConstants.CHARACTERS ||
-              _lastNodeType == XMLStreamConstants.COMMENT) &&
-                                                           _currentNodeType == XMLStreamConstants.END_ELEMENT)
+    else if ((_lastNodeType == XMLStreamConstants.CHARACTERS
+        || _lastNodeType == XMLStreamConstants.COMMENT)
+        && _currentNodeType == XMLStreamConstants.END_ELEMENT)
       _depth--;
   }
 
@@ -585,15 +585,15 @@ public class XmlReader
 
     String key = getName(env).toString() + _depth;
 
-    if (_currentNodeType == XMLStreamConstants.START_ELEMENT &&
-        _streamReader.getAttributeCount() > 0) {
+    if (_currentNodeType == XMLStreamConstants.START_ELEMENT
+        && _streamReader.getAttributeCount() > 0) {
       _startElements.put(key, _depth);
 
       _hasAttribute = true;
     }
 
-    if (_currentNodeType == XMLStreamConstants.END_ELEMENT &&
-        _startElements.containsKey(key))  {
+    if (_currentNodeType == XMLStreamConstants.END_ELEMENT
+        && _startElements.containsKey(key))  {
       _hasAttribute = true;
 
       _startElements.remove(key);

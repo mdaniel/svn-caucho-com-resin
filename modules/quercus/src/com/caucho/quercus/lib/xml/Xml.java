@@ -617,7 +617,7 @@ public class Xml {
     public void endDocument()
       throws SAXException
     {
-      for(StringValue sv : _indexArrayKeys) {
+      for (StringValue sv : _indexArrayKeys) {
         _indexArray.put(sv, _indexArrayHashMap.get(sv));
       }
     }
