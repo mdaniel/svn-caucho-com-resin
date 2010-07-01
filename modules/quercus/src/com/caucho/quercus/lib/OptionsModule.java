@@ -99,7 +99,7 @@ public class OptionsModule extends AbstractQuercusModule {
   /**
    * Checks the assertion
    */
-  @UsesSymbolTable(replace=false)
+  @UsesSymbolTable(replace = false)
   @Name("assert")
   public static Value q_assert(Env env, String code)
   {
