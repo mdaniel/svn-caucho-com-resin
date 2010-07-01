@@ -60,7 +60,7 @@ class RegexpSet {
   
   static HashMap<String,RegexpSet> CLASS_MAP = null;
   
-  boolean _bitset[] = new boolean[BITSET_CHARS];
+  boolean []_bitset = new boolean[BITSET_CHARS];
   IntSet _range;
 
   /**

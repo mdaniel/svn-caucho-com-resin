@@ -900,8 +900,8 @@ class Regcomp {
       // c1-c2
       else if (isChar && lastdash != -1) {
         if (lastdash > ch)
-          throw new IllegalRegexpException("expected increasing range at " +
-                                           badChar(ch));
+          throw new IllegalRegexpException("expected increasing range at "
+              + badChar(ch));
 
         setRange(set, lastdash, ch);
 
@@ -1092,8 +1092,8 @@ class Regcomp {
 
     default:
       if ((_flags & STRICT) != 0)
-        throw new IllegalRegexpException("unrecognized escape at " +
-                                         badChar(ch));
+        throw new IllegalRegexpException("unrecognized escape at "
+            + badChar(ch));
       return parseString(ch, pattern);
     }
   }
@@ -1124,8 +1124,8 @@ class Regcomp {
     RegexpSet set = RegexpSet.CLASS_MAP.get(name);
     
     if (set == null) {
-      throw new IllegalRegexpException("unrecognized POSIX character class " +
-                                       name);
+      throw new IllegalRegexpException("unrecognized POSIX character class "
+          + name);
     }
  
     return set;
@@ -1150,15 +1150,15 @@ class Regcomp {
     }
     else {
       if (ch < 0)
-        throw new IllegalRegexpException("expected hex digit at " +
-                badChar(ch));
+        throw new IllegalRegexpException("expected hex digit at "
+            + badChar(ch));
       
       sb.append((char)ch);
       ch = pattern.read();
       
       if (ch < 0) {
-        throw new IllegalRegexpException("expected hex digit at " +
-                                         badChar(ch));
+        throw new IllegalRegexpException("expected hex digit at "
+            + badChar(ch));
       }
 
       sb.append((char)ch);
@@ -1176,8 +1176,8 @@ class Regcomp {
       else if ('A' <= ch && ch <= 'F')
         hex = hex * 16 + ch - 'A' + 10;
       else
-        throw new IllegalRegexpException("expected hex digit at " +
-                                         badChar(ch));
+        throw new IllegalRegexpException("expected hex digit at "
+            + badChar(ch));
     }
     
     return hex;
@@ -1201,8 +1201,8 @@ class Regcomp {
     }
     else if (! ('0' <= ch2 && ch2 <= '7')
              && ! ('0' <= ch3 && ch3 <= '7'))
-      throw new IllegalRegexpException("back referencing to a non-existent group: " +
-                                       value);
+      throw new IllegalRegexpException(
+          "back referencing to a non-existent group: " + value);
     
     if (value > 10)
       pattern.ungetc(ch2);
@@ -1407,8 +1407,8 @@ class Regcomp {
     throws IllegalRegexpException
   {
     if ('0' > ch || ch > '7')
-      throw new IllegalRegexpException("expected octal digit at " +
-                                       badChar(ch));
+      throw new IllegalRegexpException("expected octal digit at "
+          + badChar(ch));
     
     int oct = ch - '0';
     
@@ -1618,8 +1618,8 @@ class Regcomp {
         return isNegated ? RegexpNode.PROP_NOT_Z : RegexpNode.PROP_Z;
 
       default:
-        throw new IllegalRegexpException("invalid Unicode property " +
-                badChar(ch));
+        throw new IllegalRegexpException("invalid Unicode property "
+            + badChar(ch));
     }
   }
   

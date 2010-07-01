@@ -418,8 +418,8 @@ class RegexpNode {
     @Override
     int match(StringValue string, int strlen, int offset, RegexpState state)
     {
-      if (offset == strlen ||
-          offset + 1 == strlen && string.charAt(offset) == '\n')
+      if (offset == strlen
+          || offset + 1 == strlen && string.charAt(offset) == '\n')
         return offset;
       else
         return -1;

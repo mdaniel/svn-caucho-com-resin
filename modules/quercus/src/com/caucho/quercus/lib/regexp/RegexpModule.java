@@ -1991,7 +1991,8 @@ public class RegexpModule
           }
 
           if (digit != '}') {
-            // env.warning(L.l("expected '}' to close replacement at '{1}' replacement {0}", (char) digit, replacement));
+//             env.warning(L.l("expected '}' to close replacement at '{1}' " +
+//                 "replacement {0}", (char) digit, replacement));
             text.append("${");
             text.append(group);
             continue;
@@ -2048,8 +2049,13 @@ public class RegexpModule
 
           ch = regexp.charAt(i);
 
-          if (ch == '0' ||
-                  '1' <= ch && ch <= '3' && i + 1 < len && '0' <= regexp.charAt(i + 1) && ch <= '7') {
+          if (
+              ch == '0'
+              || '1' <= ch && ch <= '3'
+              && i + 1 < len
+              && '0' <= regexp.charAt(i + 1)
+              && ch <= '7'
+              ) {
             // Java's regexp requires \0 for octal
 
             sb = sb.appendByte('\\');
@@ -2191,12 +2197,17 @@ public class RegexpModule
         break;
 
       case '{':
-        if (i + 1 < len &&
-                ('0' <= (ch = regexp.charAt(i + 1)) && ch <= '9' || ch == ',')) {
+        if (i + 1 < len
+            && (
+              '0' <= (ch = regexp.charAt(i + 1))
+              && ch <= '9'
+              || ch == ','
+              )
+            ) {
           sb = sb.appendByte('{');
           for (i++;
-          i < len &&
-          ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
+          i < len
+              && ('0' <= (ch = regexp.charAt(i)) && ch <= '9' || ch == ',');
           i++) {
             sb = sb.appendByte(ch);
           }
