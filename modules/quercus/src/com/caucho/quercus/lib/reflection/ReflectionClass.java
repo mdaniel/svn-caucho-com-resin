@@ -183,7 +183,10 @@ public class ReflectionClass
     if (fun == null)
       throw new QuercusLanguageException(
         env.createException("ReflectionException",
-                            L.l("method {0}::{1}() does not exist", _name, name)));
+                            L.l(
+                                "method {0}::{1}() does not exist",
+                                _name,
+                                name)));
     
     return new ReflectionMethod(_name, _cls.getFunction(name));
     
@@ -420,8 +423,12 @@ public class ReflectionClass
         return defaultV;
       else
         throw new QuercusLanguageException(
-            env.createException("ReflectionException",
-                                L.l("Class '{0}' does not have a property named '{1}'", _name, name)));
+            env.createException(
+                "ReflectionException",
+                L.l(
+                    "Class '{0}' does not have a property named '{1}'",
+                    _name, 
+                    name)));
     }
 
     return field;

@@ -146,10 +146,10 @@ public class ArrayModule
   /**
    * Changes the key case
    */
-  public static Value array_change_key_case(Env env,
-                                                            ArrayValue array,
-                                                            @Optional("CASE_LOWER") int toCase)
-  {
+  public static Value array_change_key_case(
+      Env env,
+      ArrayValue array,
+      @Optional("CASE_LOWER") int toCase) {
     if (array == null)
       return BooleanValue.FALSE;
 
@@ -404,12 +404,18 @@ public class ArrayModule
     }
 
     if (! (searchArray.isArray() || searchArray.isObject())) {
-      env.warning(L.l("'" + searchArray.toString() + "' is an unexpected argument, expected ArrayValue or ObjectValue"));
+      env.warning(
+          L.l("'" + searchArray.toString()
+              + "' is an unexpected argument, expected "
+              + "ArrayValue or ObjectValue"));
       return false;
     }
 
     if (! (key.isString() || key.isLongConvertible())) {
-      env.warning(L.l("The first argument (a '{0}') should be either a string or an integer",
+      env.warning(
+          L.l(
+              "The first argument (a '{0}') should be "
+                  + "either a string or an integer",
                       key.getType()));
       return false;
     }
@@ -696,8 +702,8 @@ public class ArrayModule
       return NullValue.NULL;
 
     if (num < 1 || array.getSize() < num) {
-      env.warning("Second argument has to be between 1 and the number of " +
-                  "elements in the array");
+      env.warning("Second argument has to be between 1 and the number of "
+          + "elements in the array");
 
       return NullValue.NULL;
     }
@@ -1213,7 +1219,8 @@ public class ArrayModule
                                              @Optional("NULL") Value extra)
   {
     if (callback == null || ! callback.isValid(env)) {
-      env.error(L.l("'{0}' is an unknown function.", callback.getCallbackName()));
+      env.error(
+          L.l("'{0}' is an unknown function.", callback.getCallbackName()));
       return false;
     }
     
@@ -1723,8 +1730,8 @@ public class ArrayModule
 
       return BooleanValue.FALSE;
     }
-    else if (start instanceof LongValue &&
-             (Math.abs(end.toLong() - start.toLong()) < step)) {
+    else if (start instanceof LongValue
+        && (Math.abs(end.toLong() - start.toLong()) < step)) {
       env.warning("steps exceeds the specified range");
 
       return BooleanValue.FALSE;
@@ -1743,8 +1750,8 @@ public class ArrayModule
       array.put(start);
 
       start = rangeIncrement(start, step);
-    } while ((increment && start.leq(end)) ||
-             (!increment && start.geq(end)));
+    } while ((increment && start.leq(end))
+        || (!increment && start.geq(end)));
 
     return array;
   }
@@ -1773,7 +1780,7 @@ public class ArrayModule
    * @return the number of new variables added from the array to the symbol
    *         table
    */
-  @UsesSymbolTable(replace=true)
+  @UsesSymbolTable(replace = true)
   public static Value extract(Env env,
                               ArrayValue array)
   {
@@ -2149,8 +2156,8 @@ public class ArrayModule
         Value searchKey = ((ArrayValue) arrays[k]).contains(entryValue);
 
         if (! searchKey.isNull())
-          ValueFound = ((int) func.call(env, searchKey, entryKey).toLong()) ==
-                       0;
+          ValueFound = ((int) func.call(env, searchKey, entryKey).toLong())
+              == 0;
       }
 
       if (! ValueFound)
@@ -3047,8 +3054,8 @@ public class ArrayModule
             boolean keyFound = false;
 
             if (valueFound)
-              keyFound = cmpKey.call(env, entryKey, entry.getKey()).toLong() ==
-                         0;
+              keyFound = cmpKey.call(env, entryKey, entry.getKey()).toLong()
+                  == 0;
 
             isFound = valueFound && keyFound;
           }
@@ -3297,8 +3304,8 @@ public class ArrayModule
             boolean keyFound = false;
 
             if (valueFound)
-              keyFound = cmpKey.call(env, entryKey, entry.getKey()).toLong() ==
-                         0;
+              keyFound = cmpKey.call(env, entryKey, entry.getKey()).toLong()
+                  == 0;
 
             isFound = valueFound && keyFound;
           }
@@ -3614,7 +3621,8 @@ public class ArrayModule
         ArrayValue av = (ArrayValue) _arrays[i];
 
         // process all flags appearing *after* an array but before the next one
-        while((i + 1) < _arrays.length && _arrays[i + 1] instanceof LongValue) {
+        while ((i + 1) < _arrays.length
+            && _arrays[i + 1] instanceof LongValue) {
           i++;
 
           int flag = _arrays[i].toInt();
@@ -3717,8 +3725,8 @@ public class ArrayModule
           else if (type == DIGIT && Character.isDigit(_string.charAt(_current)))
           {
           }
-          else if (type == SYMBOL &&
-                   !Character.isLetterOrDigit(_string.charAt(_current))) {
+          else if (type == SYMBOL
+              && !Character.isLetterOrDigit(_string.charAt(_current))) {
           }
           else
             break;

@@ -39,7 +39,7 @@ import java.lang.annotation.Target;
  * Used to tell PHP introspection which constructor to use
  * when $bar = new Foo(...); is called
  */
-@Target({ElementType.CONSTRUCTOR})
+@Target({ElementType.CONSTRUCTOR })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Construct {
 }

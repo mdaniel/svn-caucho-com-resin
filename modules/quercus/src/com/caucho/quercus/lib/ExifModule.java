@@ -109,8 +109,8 @@ public class ExifModule extends AbstractQuercusModule {
         return BooleanValue.FALSE;
       ImageReader imageReader = (ImageReader)it.next();
       if (it.hasNext())
-        throw new QuercusException("ImageIO returned two ImageReaders:\n  "+
-                                   imageReader+"\n  "+it.next());
+        throw new QuercusException("ImageIO returned two ImageReaders:\n  "
+            + imageReader + "\n  " + it.next());
       String formatName = imageReader.getFormatName();
       if (formatName.equals("jpeg") || formatName.equals("jpg"))
         return LongValue.create(ImageModule.IMAGETYPE_JPG);

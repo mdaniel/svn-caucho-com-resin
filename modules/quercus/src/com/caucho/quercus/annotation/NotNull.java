@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @NotNull annotation.
  */
-@Target({ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface NotNull {
 }

@@ -112,7 +112,8 @@ public class QuercusServlet
 
     if (isResin) {
       try {
-        Class cl = Class.forName("com.caucho.quercus.servlet.ProResinQuercusServlet");
+        Class cl = Class.forName(
+            "com.caucho.quercus.servlet.ProResinQuercusServlet");
 
         Constructor cons = cl.getConstructor(File.class);
 
@@ -121,7 +122,8 @@ public class QuercusServlet
         //impl = (QuercusServletImpl) cl.newInstance();
       } catch (ConfigException e) {
         log.log(Level.FINEST, e.toString(), e);
-        log.info("Quercus compiled mode requires Resin personal or professional licenses");
+        log.info("Quercus compiled mode requires Resin "
+            + "personal or professional licenses");
         log.info(e.getMessage());
 
       } catch (Exception e) {
@@ -130,7 +132,8 @@ public class QuercusServlet
 
       if (impl == null) {
         try {
-          Class cl = Class.forName("com.caucho.quercus.servlet.ResinQuercusServlet");
+          Class cl = Class.forName(
+              "com.caucho.quercus.servlet.ResinQuercusServlet");
           impl = (QuercusServletImpl) cl.newInstance();
         } catch (Exception e) {
           log.log(Level.FINEST, e.toString(), e);
@@ -140,7 +143,8 @@ public class QuercusServlet
 
     if (impl == null) {
       try {
-        Class cl = Class.forName("com.caucho.quercus.servlet.ProQuercusServlet");
+        Class cl = Class.forName(
+            "com.caucho.quercus.servlet.ProQuercusServlet");
 
         Constructor cons = cl.getConstructor(java.io.File.class);
 
@@ -149,7 +153,8 @@ public class QuercusServlet
         //impl = (QuercusServletImpl) cl.newInstance();
       } catch (ConfigException e) {
         log.log(Level.FINEST, e.toString(), e);
-        log.info("Quercus compiled mode requires valid Quercus professional licenses");
+        log.info("Quercus compiled mode requires "
+            + "valid Quercus professional licenses");
         log.info(e.getMessage());
 
       } catch (Exception e) {
@@ -171,7 +176,8 @@ public class QuercusServlet
     String version = System.getProperty("java.version");
 
     if (version.startsWith("1.3.") || version.startsWith("1.4."))
-      throw new QuercusRuntimeException(L.l("Quercus requires JDK 1.5 or higher."));
+      throw new QuercusRuntimeException(L.l(
+          "Quercus requires JDK 1.5 or higher."));
   }
 
   /**
@@ -190,7 +196,8 @@ public class QuercusServlet
       _isLazyCompile = true;
     } else
       throw new ConfigException(L.l(
-        "'{0}' is an unknown compile value.  Values are 'true', 'false', or 'lazy'.",
+        "'{0}' is an unknown compile value. "
+            + "Values are 'true', 'false', or 'lazy'.",
         isCompile));
   }
 
@@ -206,7 +213,8 @@ public class QuercusServlet
       _isCompileFailover = false;
     } else
       throw new ConfigException(L.l(
-        "'{0}' is an unknown compile-failover value.  Values are 'true' or 'false'.",
+        "'{0}' is an unknown compile-failover value. "
+            + " Values are 'true' or 'false'.",
         isCompileFailover));
   }
 
@@ -461,7 +469,8 @@ public class QuercusServlet
         }
 
         if (ds == null)
-          throw new ServletException(L.l("database '{0}' is not valid", paramValue));
+          throw new ServletException(L.l(
+              "database '{0}' is not valid", paramValue));
 
         setDatabase(ds);
       } catch (Exception e) {
@@ -503,7 +512,8 @@ public class QuercusServlet
       setLicenseDirectory(paramValue);
     }
     else
-      throw new ServletException(L.l("'{0}' is not a recognized init-param", paramName));
+      throw new ServletException(
+          L.l("'{0}' is not a recognized init-param", paramName));
   }
 
   private void initImpl(ServletConfig config)

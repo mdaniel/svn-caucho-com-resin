@@ -126,7 +126,8 @@ public class StringModule extends AbstractQuercusModule {
    * @param characters the set of characters to convert
    * @return the escaped string
    */
-  public static StringValue addcslashes(Env env, StringValue source, String characters)
+  public static StringValue addcslashes(
+      Env env, StringValue source, String characters)
   {
     if (characters == null)
       characters = "";
@@ -575,8 +576,8 @@ public class StringModule extends AbstractQuercusModule {
       string = "";
 
     if (salt == null || salt.equals("")) {
-      salt = ("" + Crypt.resultToChar(RandomUtil.nextInt(0x40)) +
-              Crypt.resultToChar(RandomUtil.nextInt(0x40)));
+      salt = ("" + Crypt.resultToChar(RandomUtil.nextInt(0x40))
+          + Crypt.resultToChar(RandomUtil.nextInt(0x40)));
     }
 
     return Crypt.crypt(string, salt);
@@ -903,7 +904,8 @@ public class StringModule extends AbstractQuercusModule {
 
   /**
    * Returns the metaphone of a string.
-   * This implentation produces identical results to the php version, which does contain some bugs.
+   * This implementation produces identical results to the php version,
+   * which does contain some bugs.
    */
   public static String metaphone(String string)
   {
@@ -1464,8 +1466,8 @@ public class StringModule extends AbstractQuercusModule {
       else if (62 <= ch && ch <= 126)
         sb.append(ch);
       else if (ch == ' ' || ch == '\t') {
-        if (i + 1 < str.length() &&
-            (str.charAt(i + 1) == '\r' || str.charAt(i + 1) == '\n')) {
+        if (i + 1 < str.length()
+            && (str.charAt(i + 1) == '\r' || str.charAt(i + 1) == '\n')) {
           sb.append('=');
           sb.append(toUpperHexChar(ch >> 4));
           sb.append(toUpperHexChar(ch));
@@ -1834,7 +1836,8 @@ public class StringModule extends AbstractQuercusModule {
 
   // XXX: similar_text
 
-  private static final char[] SOUNDEX_VALUES = "01230120022455012623010202".toCharArray();
+  private static final char []SOUNDEX_VALUES = "01230120022455012623010202"
+      .toCharArray();
 
   public static Value soundex(StringValue string)
   {
@@ -2058,15 +2061,16 @@ public class StringModule extends AbstractQuercusModule {
               width = leftPadLength;
             
             index++;
-            
-            segments.add(new StringPrintfSegment(sb,
-                                                 isLeft || isAlt,
-                                                 padChar,
-                                                 ch == 'S',
-                                                 width,
-                                                 format.substring(head, j).toString(),
-                                                 argIndex));
-            sb.setLength(0);
+
+              segments.add(new StringPrintfSegment(
+                  sb,
+                  isLeft || isAlt,
+                  padChar,
+                  ch == 'S',
+                  width,
+                  format.substring(head, j).toString(),
+                  argIndex));
+              sb.setLength(0);
             i = j;
             break loop;
 
@@ -2077,15 +2081,16 @@ public class StringModule extends AbstractQuercusModule {
               width = leftPadLength;
             
             index++;
-            
-            segments.add(new CharPrintfSegment(sb,
-                                               isLeft || isAlt,
-                                               padChar,
-                                               ch == 'C',
-                                               width,
-                                               format.substring(head, j).toString(),
-                                               argIndex));
-            sb.setLength(0);
+
+              segments.add(new CharPrintfSegment(
+                  sb,
+                  isLeft || isAlt,
+                  padChar,
+                  ch == 'C',
+                  width,
+                  format.substring(head, j).toString(),
+                  argIndex));
+              sb.setLength(0);
             i = j;
             break loop;
 
@@ -2106,7 +2111,8 @@ public class StringModule extends AbstractQuercusModule {
 
             sb.append(ch);
 
-            //segments.add(UnsignedLongPrintfSegment.create(env, sb.toString(), index++));
+            //segments.add(UnsignedLongPrintfSegment.create(
+            env, sb.toString(), index++));
             sb.setLength(0);
             i = j;
             break loop;
@@ -2143,7 +2149,8 @@ public class StringModule extends AbstractQuercusModule {
             
             index++;
             
-            segments.add(LongPrintfSegment.create(env, sb.toString(), argIndex));
+            segments.add(
+                LongPrintfSegment.create(env, sb.toString(), argIndex));
             sb.setLength(0);
             i = j;
             break loop;
@@ -2295,7 +2302,8 @@ public class StringModule extends AbstractQuercusModule {
     return sscanfReturn(env, array, args, argIndex, isReturnArray, false);
   }
 
-  private static Value sscanfFillNull(ArrayValue array, ScanfSegment[] formatArray, int fIndex)
+  private static Value sscanfFillNull(
+      ArrayValue array, ScanfSegment[] formatArray, int fIndex)
   {
     for (; fIndex < formatArray.length; fIndex++) {
       ScanfSegment segment = formatArray[fIndex];
@@ -2367,7 +2375,7 @@ public class StringModule extends AbstractQuercusModule {
 
           case 'c':
           {
-            if ( maxLen < 0)
+            if (maxLen < 0)
               maxLen = 1;
 
             scanfAddConstant(segmentList, sb);
@@ -2477,7 +2485,8 @@ public class StringModule extends AbstractQuercusModule {
     return segmentList.toArray(segmentArray);
   }
 
-  private static void scanfAddConstant(ArrayList<ScanfSegment> segmentList, StringBuilder sb)
+  private static void scanfAddConstant(
+      ArrayList<ScanfSegment> segmentList, StringBuilder sb)
   {
     if (sb.length() == 0)
       return;
@@ -2521,8 +2530,8 @@ public class StringModule extends AbstractQuercusModule {
 
       if (isWhitespace(ch)) {
         for (;
-             (fIndex < fmtLen &&
-              isWhitespace(ch = format.charAt(fIndex)));
+             (fIndex < fmtLen
+                 && isWhitespace(ch = format.charAt(fIndex)));
              fIndex++) {
         }
 
@@ -2587,7 +2596,7 @@ public class StringModule extends AbstractQuercusModule {
 
           case 'c':
           {
-            if ( maxLen < 0)
+            if (maxLen < 0)
               maxLen = 1;
 
             ScanfSegment seg = new ScanfString(maxLen);
@@ -2672,7 +2681,9 @@ public class StringModule extends AbstractQuercusModule {
       return array;
     else {
       if (isWarn && argIndex != args.length)
-        env.warning(L.l("{0} vars passed in but saw only {1} '%' args", args.length, argIndex));
+        env.warning(
+            L.l("{0} vars passed in but saw only {1} '%' args",
+                args.length, argIndex));
 
       return LongValue.create(argIndex);
     }
@@ -3226,8 +3237,8 @@ public class StringModule extends AbstractQuercusModule {
       for (; head + matchLen <= length; head++) {
         if (ch == Character.toLowerCase(subject.charAt(head))) {
           for (int i = 1; i < matchLen; i++) {
-            if (Character.toLowerCase(subject.charAt(head + i)) !=
-                Character.toLowerCase(match.charAt(i)))
+            if (Character.toLowerCase(subject.charAt(head + i))
+                != Character.toLowerCase(match.charAt(i)))
               continue loop;
           }
 
@@ -3519,7 +3530,8 @@ public class StringModule extends AbstractQuercusModule {
    * @param offset the starting offset
    * @param length the length
    *
-   * @return the length of the match or FALSE if the offset or length are invalid
+   * @return the length of the match or FALSE if
+   * the offset or length are invalid
    */
   public static Value strcspn(StringValue string,
                               StringValue characters,
@@ -3990,7 +4002,8 @@ public class StringModule extends AbstractQuercusModule {
    * @param b right value
    * @return -1, 0, or 1
    */
-  public static Value strncasecmp(Env env, StringValue a, StringValue b, int length)
+  public static Value strncasecmp(
+      Env env, StringValue a, StringValue b, int length)
   {
     if (length < 0) {
       env.warning(L.l("strncasecmp() length '{0}' must be non-negative",
@@ -4229,7 +4242,8 @@ public class StringModule extends AbstractQuercusModule {
    * @param offset the starting offset
    * @param length the length
    *
-   * @return the length of the match or FALSE if the offset or length are invalid
+   * @return the length of the match or FALSE
+   * if the offset or length are invalid
    */
   public static Value strspn(StringValue string,
                              StringValue characters,
@@ -4290,11 +4304,13 @@ public class StringModule extends AbstractQuercusModule {
 
   /**
    * Finds the first instance of a needle in haystack and returns
-   * the portion of haystack from the beginning of needle to the end of haystack.
+   * the portion of haystack from the beginning of
+   * needle to the end of haystack.
    *
    * @param env the calling environment
-   * @param haystack the string to search in
-   * @param needleV the string to search for, or the oridinal value of a character
+   * @param haystackV the string to search in
+   * @param needleV the string to search for, or the
+   * original value of a character
    * @return the trailing match or FALSE if needle is not found
    */
   public static Value strstr(Env env,
@@ -4327,16 +4343,19 @@ public class StringModule extends AbstractQuercusModule {
   }
 
   /**
-   * Split a string into tokens using any character in another string as a delimiter.
+   * Split a string into tokens using any character
+   * in another string as a delimiter.
    *
-   * The first call establishes the string to search and the characters to use as tokens,
+   * The first call establishes the string to
+   * search and the characters to use as tokens,
    * the first token is returned:
    * <pre>
    *   strtok("hello, world", ", ")
    *     => "hello"
    * </pre>
    *
-   * Subsequent calls pass only the token characters, the next token is returned:
+   * Subsequent calls pass only the token
+   * characters, the next token is returned:
    * <pre>
    *   strtok("hello, world", ", ")
    *     => "hello"
@@ -4376,8 +4395,10 @@ public class StringModule extends AbstractQuercusModule {
     //StringValue savedToken = null;
 
     if (string2.isNull()) {
-      StringValue savedString = (StringValue) env.getSpecialValue("caucho.strtok_string");
-      Integer savedOffset = (Integer) env.getSpecialValue("caucho.strtok_offset");
+      StringValue savedString = (StringValue) env
+          .getSpecialValue("caucho.strtok_string");
+      Integer savedOffset = (Integer) env
+          .getSpecialValue("caucho.strtok_offset");
       //savedToken = (StringValue) env.getSpecialValue("caucho.strtok_token");
 
       string = savedString == null ? env.getEmptyString() : savedString;
@@ -4732,10 +4753,10 @@ public class StringModule extends AbstractQuercusModule {
     int start = 0;
     int length = Integer.MAX_VALUE / 2;
 
-    if ( !(lengthV.isNull() || lengthV.isArray()) )
+    if (!(lengthV.isNull() || lengthV.isArray()))
       length = lengthV.toInt();
 
-    if ( !(startV.isNull() || startV.isArray()) )
+    if (!(startV.isNull() || startV.isArray()))
       start = startV.toInt();
 
     Iterator<Value> startIterator =
@@ -4761,7 +4782,8 @@ public class StringModule extends AbstractQuercusModule {
         if (startIterator != null && startIterator.hasNext())
           start = startIterator.next().toInt();
 
-        Value result = substrReplaceImpl(value.toStringValue(), replacement, start, length);
+        Value result = substrReplaceImpl(
+            value.toStringValue(), replacement, start, length);
 
         resultArray.append(result);
       }
@@ -4775,7 +4797,8 @@ public class StringModule extends AbstractQuercusModule {
       if (startIterator != null && startIterator.hasNext())
         start = startIterator.next().toInt();
 
-      return substrReplaceImpl(subjectV.toStringValue(), replacement, start, length);
+      return substrReplaceImpl(
+          subjectV.toStringValue(), replacement, start, length);
     }
   }
 
@@ -4967,10 +4990,10 @@ public class StringModule extends AbstractQuercusModule {
    * @param cut if true, break on exact match
    */
   public static Value wordwrap(Env env,
-      @Expect(type=Expect.Type.STRING) Value value,
-      @Optional @Expect(type=Expect.Type.NUMERIC) Value widthV,
-      @Optional @Expect(type=Expect.Type.STRING) Value breakV,
-      @Optional @Expect(type=Expect.Type.BOOLEAN) Value cutV)
+      @Expect(type = Expect.Type.STRING) Value value,
+      @Optional @Expect(type = Expect.Type.NUMERIC) Value widthV,
+      @Optional @Expect(type = Expect.Type.STRING) Value breakV,
+      @Optional @Expect(type = Expect.Type.BOOLEAN) Value cutV)
   {
     if (value instanceof UnexpectedValue) {
       env.warning(L.l("word must be a string, but {0} given",
@@ -5040,7 +5063,8 @@ public class StringModule extends AbstractQuercusModule {
     for (int i = 0; i < len; i++) {
       char ch = string.charAt(i);
       
-      if (ch == breakChar && string.regionMatches(i, breakString, 0, breakLen)) {
+      if (ch == breakChar && string.regionMatches(
+          i, breakString, 0, breakLen)) {
         sb.append(string, head, i + breakLen);
         head = i + breakLen;
       } else if (width <= i - head) {
@@ -6246,7 +6270,8 @@ public class StringModule extends AbstractQuercusModule {
 
       if (_isUnsigned) {
         if (sign == -1 && val != 0)
-          sscanfPut(var, StringValue.create(0xffffffffL - val + 1), isReturnArray);
+          sscanfPut(
+              var, StringValue.create(0xffffffffL - val + 1), isReturnArray);
         else
           sscanfPut(var, LongValue.create(val), isReturnArray);
       }

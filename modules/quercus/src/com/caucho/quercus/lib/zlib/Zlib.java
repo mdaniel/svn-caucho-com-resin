@@ -347,7 +347,7 @@ public class Zlib {
 
       UnicodeBuilderValue sbv = new UnicodeBuilderValue();
       int readChar;
-      for (int i=0; i < length; i++) {
+      for (int i = 0; i < length; i++) {
         readChar = _in.read();
         if (readChar >= 0) {
           sbv.append((char)readChar);
@@ -374,7 +374,7 @@ public class Zlib {
   public boolean gzrewind()
   {
     try {
-      if (_in != null )
+      if (_in != null)
         _in.close();
 
       _in = getGZIPInputStream();
@@ -411,7 +411,8 @@ public class Zlib {
    * Helper function to retrieve the filemode closest to the end
    * Note: PHP5 unexpectedly fails when 'x' is the mode.
    *
-   * XXX todo: toss a warning if '+' is found (gzip cannot be open for both reading and writing at the same time)
+   * XXX todo: toss a warning if '+' is found (gzip cannot be open for
+   *  both reading and writing at the same time)
    *
    */
   private String getFileMode(String input)
@@ -419,7 +420,7 @@ public class Zlib {
     String modifier = "";
     String filemode = input.substring(0, 1);
 
-    for (int i = 1; i < input.length(); i++ )
+    for (int i = 1; i < input.length(); i++)
     {
       char ch = input.charAt(i);
       switch (ch) {
@@ -449,10 +450,10 @@ public class Zlib {
    */
   private int getCompressionLevel(String input)
   {
-    for (int i = input.length() - 1; i >= 0; i-- )
+    for (int i = input.length() - 1; i >= 0; i--)
     {
       char ch = input.charAt(i);
-      if( ch >= '0' && ch <= '9' )
+      if (ch >= '0' && ch <= '9')
         return ch - '0';
     }
     return Deflater.DEFAULT_COMPRESSION;
@@ -460,11 +461,11 @@ public class Zlib {
 
   /**
    * Helper function to retrieve the compression strategy like how PHP5 does it.
-   *         1. finds the compression strategy nearest to the end and returns that
+   *     1. finds the compression strategy nearest to the end and returns that
    */
   private int getCompressionStrategy(String input)
   {
-    for (int i = input.length() - 1; i >= 0; i-- )
+    for (int i = input.length() - 1; i >= 0; i--)
     {
       char ch = input.charAt(i);
       switch (ch) {

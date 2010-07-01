@@ -231,7 +231,8 @@ public class Mcrypt {
       else if (len <= 32)
         keySize = 32;
       else
-        throw new QuercusRuntimeException(L.l("Key too large for algorithm ({0} > 32)", len));
+        throw new QuercusRuntimeException(
+            L.l("Key too large for algorithm ({0} > 32)", len));
     }
 
     if (len == keySize)

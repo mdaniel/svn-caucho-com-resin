@@ -79,7 +79,8 @@ public class ReflectionParameter
         return new ReflectionParameter(fun, args[i]);
     }
     
-    throw new ReflectionException(L.l("cannot find parameter '{0}'", paramName));
+    throw new ReflectionException(
+        L.l("cannot find parameter '{0}'", paramName));
   }
   
   public static String export(Env env,
@@ -159,13 +160,15 @@ public class ReflectionParameter
   {
     //XXX: more specific exception
     if (! isOptional())
-      throw new ReflectionException(L.l("parameter '{0}' is not optional", _arg.getName()));
+      throw new ReflectionException(
+          L.l("parameter '{0}' is not optional", _arg.getName()));
     
     return _arg.getDefault().eval(env);
   }
   
   public String toString()
   {
-    return "ReflectionParameter[" + _fun.getName() + "(" + _arg.getName() + ")]";
+    return "ReflectionParameter["
+        + _fun.getName() + "(" + _arg.getName() + ")]";
   }
 }

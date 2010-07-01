@@ -119,7 +119,8 @@ public class QuercusServletImpl extends HttpServlet
     int minor = _servletContext.getMinorVersion();
 
     if (major < 2 || major == 2 && minor < 4)
-      throw new QuercusRuntimeException(L.l("Quercus requires Servlet API 2.4+."));
+      throw new QuercusRuntimeException(
+          L.l("Quercus requires Servlet API 2.4+."));
   }
 
   /**

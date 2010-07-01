@@ -262,12 +262,14 @@ public final class UnserializeReader {
                 visibility = FieldVisibility.PROTECTED;
                 break;
               default:
-                throw new IOException(L.l("field visibility modifier is not valid: 0x{0}",
+                throw new IOException(
+                    L.l("field visibility modifier is not valid: 0x{0}",
                                           Integer.toHexString(key.charAt(2))));
             }
             
             if (key.charAt(2) != 0) {
-              throw new IOException(L.l("end of field visibility modifier is not valid: 0x{0}",
+              throw new IOException(
+                  L.l("end of field visibility modifier is not valid: 0x{0}",
                                         Integer.toHexString(key.charAt(2))));
             }
             
@@ -307,7 +309,8 @@ public final class UnserializeReader {
         expect(';');
         
         if (index - 1 >= _valueList.size()) {
-          throw new IOException(L.l("reference out of range: {0}, size {1}, index {2}",
+          throw new IOException(
+              L.l("reference out of range: {0}, size {1}, index {2}",
                                     index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
@@ -325,7 +328,8 @@ public final class UnserializeReader {
         expect(';');
         
         if (index - 1 >= _valueList.size()) {
-          throw new IOException(L.l("reference out of range: {0}, size {1}, index {2}",
+          throw new IOException(
+              L.l("reference out of range: {0}, size {1}, index {2}",
                                     index - 1, _valueList.size(), _index));
           //return BooleanValue.FALSE;
         }
@@ -340,7 +344,8 @@ public final class UnserializeReader {
       }
 
     default:
-      throw new IOException(L.l("option not recognized '{0}' (0x{1}) at index {2}",
+      throw new IOException(
+          L.l("option not recognized '{0}' (0x{1}) at index {2}",
                                 String.valueOf((char) ch),
                                 Integer.toHexString(ch),
                                 _index));
@@ -691,7 +696,8 @@ public final class UnserializeReader {
       if (_index < _buffer.length)
         context += _buffer[_index];
       
-      throw new IOException(L.l("expected '{0}' at '{1}' (0x{2}) (context '{3}', index {4})",
+      throw new IOException(
+          L.l("expected '{0}' at '{1}' (0x{2}) (context '{3}', index {4})",
                                 String.valueOf((char) expectCh),
                                 String.valueOf((char) ch),
                                 Integer.toHexString(ch),

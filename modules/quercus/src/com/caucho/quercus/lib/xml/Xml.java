@@ -234,8 +234,9 @@ public class Xml {
    * @param processingInstructionHandler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_processing_instruction_handler(Env env,
-                                                        Value processingInstructionHandler)
+  public boolean xml_set_processing_instruction_handler(
+      Env env,
+      Value processingInstructionHandler)
   {
     if (_obj == null) {
       _processingInstructionHandler
@@ -255,8 +256,9 @@ public class Xml {
    * @param startNamespaceDeclHandler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_start_namespace_decl_handler(Env env,
-                                                      Value startNamespaceDeclHandler)
+  public boolean xml_set_start_namespace_decl_handler(
+      Env env,
+      Value startNamespaceDeclHandler)
   {
     if (_obj == null) {
       _startNamespaceDeclHandler = startNamespaceDeclHandler.toCallable(env);
@@ -294,8 +296,9 @@ public class Xml {
    * @param endNamespaceDeclHandler
    * @return true always even if handler is disabled
    */
-  public boolean xml_set_end_namespace_decl_handler(Env env,
-                                                    Value endNamespaceDeclHandler)
+  public boolean xml_set_end_namespace_decl_handler(
+      Env env,
+      Value endNamespaceDeclHandler)
   {
     if (_obj == null) {
       _endNamespaceDeclHandler = endNamespaceDeclHandler.toCallable(env);
@@ -549,9 +552,12 @@ public class Xml {
     //startElement increments, endElement decrements
     private int _level = 1;
 
-    private HashMap<Integer, String> _paramHashMap = new HashMap<Integer, String> ();
-    private HashMap<StringValue, ArrayValueImpl> _indexArrayHashMap = new HashMap<StringValue, ArrayValueImpl>();
-    private ArrayList<StringValue> _indexArrayKeys = new ArrayList<StringValue>();
+    private HashMap<Integer, String> _paramHashMap =
+        new HashMap<Integer, String> ();
+    private HashMap<StringValue, ArrayValueImpl> _indexArrayHashMap =
+        new HashMap<StringValue, ArrayValueImpl>();
+    private ArrayList<StringValue> _indexArrayKeys =
+        new ArrayList<StringValue>();
 
     // Used to determine whether a given element has sub elements
     private boolean _isComplete = true;
@@ -608,7 +614,8 @@ public class Xml {
         String aName = attrs.getLocalName(i); // Attr name
         if ("".equals(aName)) aName = attrs.getQName(i);
         if (_xmlOptionCaseFolding) aName = aName.toUpperCase();
-        result.put(env.createString(aName), env.createString(attrs.getValue(i)));
+        result.put(
+            env.createString(aName), env.createString(attrs.getValue(i)));
       }
 
       return result;
@@ -665,7 +672,8 @@ public class Xml {
 
       if (_isComplete) {
         elementArray = _valueArray.get(LongValue.create(_valueArrayIndex - 1));
-        elementArray.put(_env.createString("type"), _env.createString("complete"));
+        elementArray.put(
+            _env.createString("type"), _env.createString("complete"));
       } else {
         elementArray = new ArrayValueImpl();
         String eName = sName; // element name
@@ -707,18 +715,25 @@ public class Xml {
 
       if (_isOutside) {
         Value elementArray = new ArrayValueImpl();
-        elementArray.put(_env.createString("tag"), _env.createString(_paramHashMap.get(_level - 1)));
-        elementArray.put(_env.createString("value"), _env.createString(s));
-        elementArray.put(_env.createString("type"), _env.createString("cdata"));
-        elementArray.put(_env.createString("level"), LongValue.create(_level - 1));
+        elementArray.put(
+            _env.createString("tag"),
+            _env.createString(_paramHashMap.get(_level - 1)));
+        elementArray.put(
+            _env.createString("value"), _env.createString(s));
+        elementArray.put(
+            _env.createString("type"), _env.createString("cdata"));
+        elementArray.put(
+            _env.createString("level"), LongValue.create(_level - 1));
         _valueArray.put(LongValue.create(_valueArrayIndex), elementArray);
 
-        Value indexArray = _indexArray.get(_env.createString(_paramHashMap.get(_level - 1)));
+        Value indexArray = _indexArray.get(
+            _env.createString(_paramHashMap.get(_level - 1)));
         indexArray.put(LongValue.create(_valueArrayIndex));
 
         _valueArrayIndex++;
       } else {
-        Value elementArray = _valueArray.get(LongValue.create(_valueArrayIndex - 1));
+        Value elementArray = _valueArray.get(
+            LongValue.create(_valueArrayIndex - 1));
         elementArray.put(_env.createString("value"), _env.createString(s));
       }
     }
@@ -803,7 +818,9 @@ public class Xml {
         if (_xmlOptionCaseFolding)
           aName = aName.toUpperCase();
 
-        args[2].put(_env.createString(aName), _env.createString(attrs.getValue(i)));
+        args[2].put(
+            _env.createString(aName),
+            _env.createString(attrs.getValue(i)));
       }
 
       try {
@@ -941,7 +958,10 @@ public class Xml {
     {
       try {
         if (_startNamespaceDeclHandler != null)
-          _startNamespaceDeclHandler.call(_env, _env.createString(prefix), _env.createString(uri));
+          _startNamespaceDeclHandler.call(
+              _env,
+              _env.createString(prefix),
+              _env.createString(uri));
         else {
           if (log.isLoggable(Level.FINER))
             log.finer(this + " startPrefixMapping " + prefix + " " + uri);

@@ -108,8 +108,8 @@ public class IconvUtility {
 
       int sublen;
 
-      while (length > 0 &&
-             (sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
+      while (length > 0
+          && (sublen = in.read(charBuf, 0, charBuf.length)) >= 0) {
 
         sublen = Math.min(length, sublen);
 

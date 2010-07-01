@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @Optional annotation.
  */
-@Target({ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Optional {
   public static final String NOT_SET = "caucho-not-set";

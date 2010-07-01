@@ -411,7 +411,9 @@ public class SimpleXMLElement implements Map.Entry<String,Object>
       
       // php/1x42
       if (colonIndex <= 0 || colonIndex >= name.length()) {
-        env.warning(L.l("Adding attributes with namespaces requires attribute name with a prefix"));
+        env.warning(
+            L.l("Adding attributes with namespaces requires "
+                + "attribute name with a prefix"));
         return;
       }
     }

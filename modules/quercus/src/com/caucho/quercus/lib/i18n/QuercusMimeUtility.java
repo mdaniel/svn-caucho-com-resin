@@ -48,7 +48,8 @@ import com.caucho.quercus.env.Value;
 
 public class QuercusMimeUtility
 {
-  private static final Logger log = Logger.getLogger(QuercusMimeUtility.class.getName());
+  private static final Logger log = Logger.getLogger(
+      QuercusMimeUtility.class.getName());
   
   /*
    * Returns an array of decoded Mime headers/fields.

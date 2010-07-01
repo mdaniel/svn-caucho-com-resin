@@ -392,7 +392,8 @@ public class ApcModule extends AbstractQuercusModule
   static final IniDefinition INI_APC_NUM_FILES_HINT
     = _iniDefinitions.add("apc.num_files_hint", 1000, PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_USER_ENTRIES_HINT
-    = _iniDefinitions.add("apc.user_entries_hint", _defaultSize, PHP_INI_SYSTEM);
+    = _iniDefinitions.add(
+      "apc.user_entries_hint", _defaultSize, PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_TTL
     = _iniDefinitions.add("apc.ttl", 0, PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_USER_TTL
@@ -420,5 +421,6 @@ public class ApcModule extends AbstractQuercusModule
   static final IniDefinition INI_APC_LOCALCACHE
     = _iniDefinitions.add("apc.localcache", "0", PHP_INI_SYSTEM);
   static final IniDefinition INI_APC_LOCALCACHE_SIZE
-    = _iniDefinitions.add("apc.localcache.size", "" + _defaultSize, PHP_INI_SYSTEM);
+    = _iniDefinitions.add(
+      "apc.localcache.size", "" + _defaultSize, PHP_INI_SYSTEM);
 }

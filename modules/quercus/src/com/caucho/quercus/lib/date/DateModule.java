@@ -123,8 +123,13 @@ public class DateModule extends AbstractQuercusModule {
                      @Optional("time()") long time)
   {
     if (format.length() != 1) {
-      log.log(Level.FINE, L.l("idate format '{0}' needs to be of length one and only one", format));
-      env.warning(L.l("idate format '{0}' needs to be of length one and only one", format));
+      log.log(Level.FINE,
+          L.l(
+              "idate format '{0}' needs to be of length one and only one",
+              format));
+      env.warning(L.l(
+          "idate format '{0}' needs to be of length one and only one",
+          format));
 
       return BooleanValue.FALSE;
     }
@@ -160,7 +165,8 @@ public class DateModule extends AbstractQuercusModule {
         else if (ch == '-' && i == 0)
           sign = -1;
         else {
-          log.log(Level.FINEST, L.l("error parsing idate string '{0}'", dateString));
+          log.log(Level.FINEST, L.l(
+              "error parsing idate string '{0}'", dateString));
           break;
         }
       }
@@ -197,11 +203,11 @@ public class DateModule extends AbstractQuercusModule {
     int c = y / 100;
     int n = y - 19 * (y / 19);
     int k = (c - 17) / 25;
-    int i = c - c /4 - (c - k) / 3 + 19 * n + 15;
+    int i = c - c / 4 - (c - k) / 3 + 19 * n + 15;
     i = i - 30 * (i / 30);
-    i = i - (i / 28) * (1 - ((i / 28) *
-                             (29 / (i + 1)) *
-                             ((21 - n) / 11)));
+    i = i - (i / 28) * (1 - ((i / 28)
+        * (29 / (i + 1))
+        * ((21 - n) / 11)));
 
     int j = y + y / 4 + i + 2 - c + c / 4;
     j = j - 7 * (j / 7);
@@ -1693,11 +1699,13 @@ public class DateModule extends AbstractQuercusModule {
         int value = sign * (hours * 60 + minutes);
         _value = NULL_VALUE;
 
-        // php/191g - php ignores any explicit offset if the date specifies UTC/z/GMT
+        // php/191g - php ignores any explicit
+        // offset if the date specifies UTC/z/GMT
         if (hasUTC) 
           _date.setGMTTime(_date.getGMTTime() + _date.getZoneOffset());
         else 
-          _date.setGMTTime(_date.getGMTTime() - value * 60000L + _date.getZoneOffset());
+          _date.setGMTTime(
+              _date.getGMTTime() - value * 60000L + _date.getZoneOffset());
         return;
       }
       else if (_digits == 2) {
@@ -1716,7 +1724,8 @@ public class DateModule extends AbstractQuercusModule {
 
         value = sign * (100 * value + _value);
 
-        _date.setGMTTime(_date.getGMTTime() - value * 60000L + _date.getZoneOffset());
+        _date.setGMTTime(
+            _date.getGMTTime() - value * 60000L + _date.getZoneOffset());
         return;
       }
       else {
@@ -1772,9 +1781,9 @@ public class DateModule extends AbstractQuercusModule {
       else if (value == -NULL_VALUE)
         value = -1;
 
-      _date.setDayOfMonth(_date.getDayOfMonth() +
-          (8 + weekday - _date.getDayOfWeek()) % 7 +
-          7 * value);
+      _date.setDayOfMonth(_date.getDayOfMonth()
+          + (8 + weekday - _date.getDayOfWeek()) % 7
+          + 7 * value);
     }
 
     private void parseBareInt(int value, int digits)
@@ -1892,8 +1901,8 @@ public class DateModule extends AbstractQuercusModule {
       if (s.endsWith("."))
         s = s.substring(0, s.length() - 1);
 
-      if ("now".equals(s) ||
-          "today".equals(s)) {
+      if ("now".equals(s)
+          || "today".equals(s)) {
         _value = 0;
         _unit = UNIT_NOW;
         return PERIOD;
@@ -2087,8 +2096,8 @@ public class DateModule extends AbstractQuercusModule {
         _weekday = 3;
         return WEEKDAY;
       }
-      else if ("thursday".equals(s) || "thu".equals(s) ||
-               "thur".equals(s) || "thurs".equals(s)) {
+      else if ("thursday".equals(s) || "thu".equals(s)
+          || "thur".equals(s) || "thurs".equals(s)) {
         _weekday = 4;
         return WEEKDAY;
       }

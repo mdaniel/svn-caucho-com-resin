@@ -71,7 +71,8 @@ public class FunctionModule extends AbstractQuercusModule {
                                            Value arg)
   {
     if (function == null) {
-      env.warning("call_user_func_array: first argument is not a valid function");
+      env.warning(
+          "call_user_func_array: first argument is not a valid function");
       return NullValue.NULL;
     }
 

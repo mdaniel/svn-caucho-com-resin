@@ -158,8 +158,8 @@ public class UrlRewriterCallback extends CallbackFunction {
 
     public Value parse()
     {
-      if (_env.getSession() != null && _env.getJavaSession() != null &&
-          _env.getIni("session.use_trans_sid").toBoolean()) {
+      if (_env.getSession() != null && _env.getJavaSession() != null
+          && _env.getIni("session.use_trans_sid").toBoolean()) {
         _includeSessionInfo = true;
 
         _sessionName = _env.getIni("session.name").toString();
@@ -203,16 +203,16 @@ public class UrlRewriterCallback extends CallbackFunction {
             
             if (_includeSessionInfo) {
               String phpSessionInputTag = 
-                "<input type=\"hidden\" name=\"" + _sessionName + "\"" +
-                " value=\"" + _sessionId + "\" />";
+                "<input type=\"hidden\" name=\"" + _sessionName + "\""
+                    + " value=\"" + _sessionId + "\" />";
 
-              _output.append(phpSessionInputTag );
+              _output.append(phpSessionInputTag);
             }
 
             for (String[] entry : _rewriterVars) {
               String inputTag = 
-                "<input type=\"hidden\" name=\"" + entry[0] + "\"" +
-                " value=\"" + entry[1] + "\" />";
+                "<input type=\"hidden\" name=\"" + entry[0] + "\""
+                    + " value=\"" + entry[1] + "\" />";
               _output.append(inputTag);
             }
           } else {
@@ -221,7 +221,10 @@ public class UrlRewriterCallback extends CallbackFunction {
             for (valueEnd = getNextAttribute(attribute);
                  valueEnd == 0;
                  valueEnd = getNextAttribute(attribute))
-            {}
+            {
+              // intentionally empty
+              // TODO: thats a bad smell! refactor
+            }
 
             if (valueEnd > 0) {
               _output.append(rewriteUrl(_value));
@@ -275,8 +278,8 @@ public class UrlRewriterCallback extends CallbackFunction {
 
       int attributeStart = _index;
 
-      while (_index < _input.length() &&
-             isValidAttributeCharacter(_input.charAt(_index)))
+      while (_index < _input.length()
+          && isValidAttributeCharacter(_input.charAt(_index)))
         consumeOneCharacter();
         
       // no valid attribute was found (we're probably at the end of the tag)
@@ -322,11 +325,13 @@ public class UrlRewriterCallback extends CallbackFunction {
       } else {
         // skip to the end of the value
         for (valueEnd = _index; 
-             valueEnd < _input.length() &&
-             _input.charAt(valueEnd) != '/' &&
-             _input.charAt(valueEnd) != '>' &&
-             _input.charAt(valueEnd) != ' ';
-             valueEnd++) {}
+             valueEnd < _input.length()
+                 && _input.charAt(valueEnd) != '/'
+                 && _input.charAt(valueEnd) != '>'
+                 && _input.charAt(valueEnd) != ' ';
+             valueEnd++) {
+          // intentionally left empty
+        }
       }
 
       if (foundAttribute.equals(attribute)) {
@@ -359,15 +364,15 @@ public class UrlRewriterCallback extends CallbackFunction {
 
     private void consumeWhiteSpace()
     {
-      while (_index < _input.length() && 
-             Character.isWhitespace(_input.charAt(_index)))
+      while (_index < _input.length()
+          && Character.isWhitespace(_input.charAt(_index)))
         consumeOneCharacter();
     }
 
     private void consumeNonWhiteSpace()
     {
-      while (_index < _input.length() && 
-             !Character.isWhitespace(_input.charAt(_index)))
+      while (_index < _input.length()
+          && !Character.isWhitespace(_input.charAt(_index)))
         consumeOneCharacter();
     }
 
@@ -382,8 +387,8 @@ public class UrlRewriterCallback extends CallbackFunction {
 
     private boolean isValidAttributeCharacter(char ch)
     {
-      return Character.isLetterOrDigit(ch) || 
-             (ch == '-') || (ch == '.') || (ch == '_') || (ch == ':');
+      return Character.isLetterOrDigit(ch)
+          || (ch == '-') || (ch == '.') || (ch == '_') || (ch == ':');
     }
 
     private String rewriteUrl(String urlString)

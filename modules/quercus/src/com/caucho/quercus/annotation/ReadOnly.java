@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @ReadOnly annotation marks the argument as unmodified..
  */
-@Target({ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ReadOnly {
 }

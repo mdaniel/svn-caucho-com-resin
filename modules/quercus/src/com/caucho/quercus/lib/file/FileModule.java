@@ -71,7 +71,8 @@ public class FileModule extends AbstractQuercusModule {
   private static final Logger log
     = Logger.getLogger(FileModule.class.getName());
 
-  public static final String DIRECTORY_SEPARATOR = "" + Path.getFileSeparatorChar();
+  public static final String DIRECTORY_SEPARATOR = ""
+      + Path.getFileSeparatorChar();
   public static final String PATH_SEPARATOR = "" + Path.getPathSeparatorChar();
 
   public static final int UPLOAD_ERR_OK = 0;
@@ -1039,8 +1040,8 @@ public class FileModule extends AbstractQuercusModule {
     } catch (IOException e) {
       throw new QuercusModuleException(e);
     } finally {
-      if (s != null && (s instanceof LockableStream) &&
-          ((flags & LOCK_EX) != 0))
+      if (s != null && (s instanceof LockableStream)
+          && ((flags & LOCK_EX) != 0))
         flock(env, (LockableStream) s, LOCK_UN, null);
     }
   }
@@ -1165,8 +1166,8 @@ public class FileModule extends AbstractQuercusModule {
           break;
 
         case '/':
-          if (! ((inSquareBrackets || inCurlyBrackets) &&
-                 ((flags & FNM_PATHNAME) != 0))) {
+          if (! ((inSquareBrackets || inCurlyBrackets)
+              && ((flags & FNM_PATHNAME) != 0))) {
             globRegex.append(ch);
 
             if (inSquareBrackets)
@@ -1292,7 +1293,7 @@ public class FileModule extends AbstractQuercusModule {
 
     // match "leading" periods exactly (i.e. no wildcards)
     if ((flags & FNM_PERIOD) != 0) {
-      if (string.length() > 0 && string.charAt(0) == '.'){
+      if (string.length() > 0 && string.charAt(0) == '.') {
         if (! (pattern.length() > 0 && pattern.charAt(0) == '.'))
           return false;
 
@@ -1301,10 +1302,10 @@ public class FileModule extends AbstractQuercusModule {
       } else if ((flags & FNM_PATHNAME) != 0) {
         // special case: if the string starts with '/.', then the pattern
         // must also start with exactly that.
-        if ((string.length() >= 2) &&
-           (string.charAt(0) == '/') && (string.charAt(1) == '.')) {
-          if (! ((pattern.length() >= 2) &&
-                 (pattern.charAt(0) == '/') && (pattern.charAt(1) == '.')))
+        if ((string.length() >= 2)
+            && (string.charAt(0) == '/') && (string.charAt(1) == '.')) {
+          if (! ((pattern.length() >= 2)
+              && (pattern.charAt(0) == '/') && (pattern.charAt(1) == '.')))
             return false;
 
           string = string.substring(2);
@@ -1833,10 +1834,10 @@ public class FileModule extends AbstractQuercusModule {
           }
         }
 
-        if ((firstSlash < 0 || subPattern.length() == 0) &&
-            (((flags & GLOB_ONLYDIR) == 0) ||
-             (((flags & GLOB_ONLYDIR) != 0) &&
-              (entryPath != null && entryPath.isDirectory())))) {
+        if ((firstSlash < 0 || subPattern.length() == 0)
+            && (((flags & GLOB_ONLYDIR) == 0)
+            || (((flags & GLOB_ONLYDIR) != 0)
+            && (entryPath != null && entryPath.isDirectory())))) {
             result.put(sb);
         }
       }
@@ -2710,7 +2711,7 @@ public class FileModule extends AbstractQuercusModule {
 
     // php/164c
     if (pathStr.endsWith("/"))
-      return sb.append(pathStr, 0, pathStr.length()- 1);
+      return sb.append(pathStr, 0, pathStr.length() - 1);
     else
       return sb.append(pathStr, 0, pathStr.length());
   }

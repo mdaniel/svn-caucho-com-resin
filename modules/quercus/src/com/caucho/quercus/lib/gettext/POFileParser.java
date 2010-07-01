@@ -155,8 +155,8 @@ class POFileParser extends GettextParser
         return readToken();
 
       case 'm':
-        if (read() == 's' &&
-            read() == 'g') {
+        if (read() == 's'
+            && read() == 'g') {
           return readMsgToken();
         }
         else
@@ -183,8 +183,8 @@ class POFileParser extends GettextParser
           return UNKNOWN;
 
       case 's':
-        if (read() == 't' &&
-            read() == 'r')
+        if (read() == 't'
+            && read() == 'r')
           return readMsgstrToken();
         else
           return UNKNOWN;
@@ -201,12 +201,12 @@ class POFileParser extends GettextParser
     int ch = skipWhitespace();
 
     if (ch == '_') {
-      if (read() == 'p' &&
-          read() == 'l' &&
-          read() == 'u' &&
-          read() == 'r' &&
-          read() == 'a' &&
-          read() == 'l') {
+      if (read() == 'p'
+          && read() == 'l'
+          && read() == 'u'
+          && read() == 'r'
+          && read() == 'a' 
+          && read() == 'l') {
         token = MSGID_PLURAL;
 
         ch = skipWhitespace();

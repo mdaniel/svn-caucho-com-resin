@@ -167,7 +167,8 @@ public class UdpInputOutput
   public String toString()
   {
     if (_socket != null)
-      return "UdpInputOutput[" + _socket.getInetAddress() + "," + _socket.getPort() + "]";
+      return "UdpInputOutput["
+          + _socket.getInetAddress() + "," + _socket.getPort() + "]";
     else
       return "UdpInputOutput[closed]";
   }

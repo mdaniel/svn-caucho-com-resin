@@ -599,7 +599,7 @@ public class CurlResource
   {
     StringValue bb = env.createBinaryBuilder();
 
-    for (Map.Entry<String,String> entry: _requestProperties.entrySet()) {
+    for (Map.Entry<String,String> entry : _requestProperties.entrySet()) {
       bb.append(entry.getKey());
       bb.append(": ");
       bb.append(entry.getValue());
@@ -771,9 +771,9 @@ public class CurlResource
   {
     StringValue data;
 
-    if (_responseCode == HttpURLConnection.HTTP_NOT_MODIFIED ||
-        _responseCode == HttpURLConnection.HTTP_PRECON_FAILED ||
-        (_failOnError && _responseCode >= 400)) {
+    if (_responseCode == HttpURLConnection.HTTP_NOT_MODIFIED
+        || _responseCode == HttpURLConnection.HTTP_PRECON_FAILED
+        || (_failOnError && _responseCode >= 400)) {
       if (_isReturningHeader)
         data = _header;
       else
@@ -841,7 +841,9 @@ public class CurlResource
         if (out != null)
           out.close();
       }
-      catch (IOException e) {}
+      catch (IOException e) {
+        // intentionally don't do anything
+      }
     }
   }
 
@@ -901,7 +903,7 @@ public class CurlResource
     curl.setReadTimeout(_readTimeout);
     curl.setRequestMethod(_requestMethod);
 
-    for (Map.Entry<String,String> entry: _requestProperties.entrySet()) {
+    for (Map.Entry<String,String> entry : _requestProperties.entrySet()) {
       curl.setRequestProperty(entry.getKey(), entry.getValue());
     }
 

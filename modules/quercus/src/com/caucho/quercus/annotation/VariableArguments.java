@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @VariableArguments annotation.
  */
-@Target({ElementType.METHOD})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface VariableArguments {
 }

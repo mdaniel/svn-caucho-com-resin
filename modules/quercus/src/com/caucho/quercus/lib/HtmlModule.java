@@ -70,7 +70,8 @@ public class HtmlModule extends AbstractQuercusModule {
   public static final int ENT_HTML_QUOTE_DOUBLE = 2;
 
   public static final int ENT_COMPAT = ENT_HTML_QUOTE_DOUBLE;
-  public static final int ENT_QUOTES = ENT_HTML_QUOTE_SINGLE | ENT_HTML_QUOTE_DOUBLE;
+  public static final int ENT_QUOTES =
+      ENT_HTML_QUOTE_SINGLE | ENT_HTML_QUOTE_DOUBLE;
   public static final int ENT_NOQUOTES = ENT_HTML_QUOTE_NONE;
 
   private static StringValue []HTML_SPECIALCHARS_MAP;
@@ -114,10 +115,10 @@ public class HtmlModule extends AbstractQuercusModule {
   /**
    * Returns HTML translation tables.
    */
-  public Value get_html_translation_table(Env env,
-                                          @Optional("HTML_SPECIALCHARS") int table,
-                                          @Optional("ENT_COMPAT") int quoteStyle)
-  {
+  public Value get_html_translation_table(
+      Env env,
+      @Optional("HTML_SPECIALCHARS") int table,
+      @Optional("ENT_COMPAT") int quoteStyle) {
     Value result;
 
     if (! env.isUnicodeSemantics()) {
@@ -128,14 +129,18 @@ public class HtmlModule extends AbstractQuercusModule {
     }
     else {
       if (table == HTML_ENTITIES) {
-        if (HTML_ENTITIES_ARRAY_UNICODE == null)
-          HTML_ENTITIES_ARRAY_UNICODE = toUnicodeArray(env, HTML_ENTITIES_ARRAY);
+        if (HTML_ENTITIES_ARRAY_UNICODE == null) {
+          HTML_ENTITIES_ARRAY_UNICODE = toUnicodeArray(
+              env, HTML_ENTITIES_ARRAY);
+        }
 
         result = HTML_ENTITIES_ARRAY_UNICODE.copy();
       }
       else {
-        if (HTML_SPECIALCHARS_ARRAY_UNICODE == null)
-          HTML_SPECIALCHARS_ARRAY_UNICODE = toUnicodeArray(env, HTML_SPECIALCHARS_ARRAY);
+        if (HTML_SPECIALCHARS_ARRAY_UNICODE == null) {
+          HTML_SPECIALCHARS_ARRAY_UNICODE = toUnicodeArray(
+              env, HTML_SPECIALCHARS_ARRAY);
+        }
 
         result = HTML_SPECIALCHARS_ARRAY_UNICODE.copy();
       }
@@ -395,8 +400,10 @@ public class HtmlModule extends AbstractQuercusModule {
     boolean isUnicode = env.isUnicodeSemantics();
 
     if (isUnicode) {
-      if (HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY == null)
-        HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY = toUnicodeArray(env, HTML_ENTITIES_ARRAY_ENTITY_KEY);
+      if (HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY == null) {
+        HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY = toUnicodeArray(
+            env, HTML_ENTITIES_ARRAY_ENTITY_KEY);
+      }
       
       htmlEntities = HTML_ENTITIES_ARRAY_UNICODE_ENTITY_KEY;
     }
@@ -421,7 +428,8 @@ public class HtmlModule extends AbstractQuercusModule {
       for (int i = 0; i < len; i++) {      
         char ch = string.charAt(i);
         
-        // Check whether it's a html entity i.e. starts with '&' and ends with ';'
+        // Check whether it's a html entity
+        // i.e. starts with '&' and ends with ';'
         if (ch == '&' && htmlEntityStart < 0) {                    
           htmlEntityStart = i;
         } 
@@ -445,8 +453,7 @@ public class HtmlModule extends AbstractQuercusModule {
           }
           
           htmlEntityStart = -1; 
-        } 
-        else if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z')) {          
+        } else if (('a' <= ch && ch <= 'z') || ('A' <= ch && ch <= 'Z')) {
         } 
         else {
           result.append('&');

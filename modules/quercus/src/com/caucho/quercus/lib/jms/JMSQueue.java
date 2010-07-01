@@ -212,7 +212,9 @@ public class JMSQueue
   {
     try {
       _connection.close();
-    } catch (JMSException e) {}
+    } catch (JMSException e) {
+      // intentionally left empty
+    }
   }
 }
 

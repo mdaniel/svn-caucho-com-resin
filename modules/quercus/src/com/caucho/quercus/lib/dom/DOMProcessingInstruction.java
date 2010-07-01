@@ -37,9 +37,11 @@ import org.w3c.dom.ProcessingInstruction;
 public class DOMProcessingInstruction
   extends DOMNode<ProcessingInstruction>
 {
-  public static DOMProcessingInstruction __construct(Env env, String name, @Optional String data)
+  public static DOMProcessingInstruction __construct(
+      Env env, String name, @Optional String data)
   {
-    DOMProcessingInstruction pi = getImpl(env).createProcessingInstruction(name);
+    DOMProcessingInstruction pi = getImpl(env)
+        .createProcessingInstruction(name);
 
     if (data != null && data.length() > 0)
       pi.setData(data);
@@ -47,7 +49,8 @@ public class DOMProcessingInstruction
     return pi;
   }
 
-  DOMProcessingInstruction(DOMImplementation impl, ProcessingInstruction delegate)
+  DOMProcessingInstruction(
+      DOMImplementation impl, ProcessingInstruction delegate)
   {
     super(impl, delegate);
   }

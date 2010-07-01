@@ -115,7 +115,7 @@ public class GettextModule
                               String domainName,
                               StringValue message,
                               int category,
-                              Value args[])
+                              Value []args)
   {
     return translate(env,
                      getDomain(env, domainName),
@@ -140,7 +140,7 @@ public class GettextModule
                                 StringValue msgid2,
                                 int n,
                                 int category,
-                                Value args[])
+                                Value []args)
   {
     return translate(env,
                      getDomain(env, domainName),
@@ -161,7 +161,7 @@ public class GettextModule
   public StringValue dgettext(Env env,
                               String domainName,
                               StringValue message,
-                              Value args[])
+                              Value []args)
   {
     return translate(env,
                      getDomain(env, domainName),
@@ -184,7 +184,7 @@ public class GettextModule
                                StringValue msgid1,
                                StringValue msgid2,
                                int n,
-                               Value args[])
+                               Value []args)
   {
     return translate(env,
                      getDomain(env, domainName),
@@ -236,7 +236,7 @@ public class GettextModule
                               StringValue msgid1,
                               StringValue msgid2,
                               int n,
-                              Value args[])
+                              Value []args)
   {
     return translate(env,
                      getCurrentDomain(env),
@@ -336,7 +336,8 @@ public class GettextModule
     if (unicodeTranslation == null)
       unicodeTranslation = errorReturn(msgid1, msgid2, quantity);
 
-    StringValue translation = msgid1.create(env, unicodeTranslation, domain.getCharset());
+    StringValue translation = msgid1.create(
+        env, unicodeTranslation, domain.getCharset());
     
     return format(env, translation, args);
   }

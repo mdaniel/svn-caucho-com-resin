@@ -294,8 +294,8 @@ public class MiscModule extends AbstractQuercusModule {
                        @Optional() String user_agent,
                        @Optional() boolean return_array)
   {
-    if (user_agent == null ||
-        user_agent.length() == 0)
+    if (user_agent == null
+        || user_agent.length() == 0)
       user_agent = env.getRequest().getHeader("User-Agent");
 
     if (user_agent == null) {
@@ -774,7 +774,8 @@ public class MiscModule extends AbstractQuercusModule {
           else if (type.equals("file")) {
             OutputStream processOut = process.getOutputStream();
 
-            BinaryStream stream = FileModule.fopen(env, name, mode, false, null);
+            BinaryStream stream = FileModule.fopen(
+                env, name, mode, false, null);
 
             if (stream instanceof FileInput) {
               FileInput file = (FileInput) stream;
@@ -797,7 +798,8 @@ public class MiscModule extends AbstractQuercusModule {
             array.put(LongValue.ONE, env.wrapJava(out));
           }
           else if (type.equals("file")) {
-            BinaryStream stream = FileModule.fopen(env, name, mode, false, null);
+            BinaryStream stream = FileModule.fopen(
+                env, name, mode, false, null);
 
             if (stream instanceof FileOutput) {
               FileOutput file = (FileOutput) stream;
@@ -816,7 +818,8 @@ public class MiscModule extends AbstractQuercusModule {
             array.put(LongValue.create(2), env.wrapJava(es));
           }
           else if (type.equals("file")) {
-            BinaryStream stream = FileModule.fopen(env, name, mode, false, null);
+            BinaryStream stream = FileModule.fopen(
+                env, name, mode, false, null);
 
             if (stream instanceof FileOutput) {
               FileOutput file = (FileOutput) stream;
@@ -967,7 +970,8 @@ public class MiscModule extends AbstractQuercusModule {
     return exec(env, command, null, result);
   }
 
-  private static ArrayList<PackSegment> parsePackFormat123(Env env, String format)
+  private static ArrayList<PackSegment> parsePackFormat123(
+      Env env, String format)
   {
     ArrayList<PackSegment> segments = new ArrayList<PackSegment>();
 
@@ -1418,7 +1422,7 @@ public class MiscModule extends AbstractQuercusModule {
     public int unpack(Env env, ArrayValue result,
                       StringValue s, int offset, int strLen)
     {
-      if ( offset + (long) (_length / 2 - 1) >= strLen)
+      if (offset + (long) (_length / 2 - 1) >= strLen)
         return offset;
 
       StringValue sb = env.createStringBuilder();
@@ -1508,7 +1512,7 @@ public class MiscModule extends AbstractQuercusModule {
     public int unpack(Env env, ArrayValue result,
                       StringValue s, int offset, int strLen)
     {
-      if (offset + (long) (_length / 2 -1) >= strLen)
+      if (offset + (long) (_length / 2 - 1) >= strLen)
         return offset;
 
       StringValue sb = env.createStringBuilder();

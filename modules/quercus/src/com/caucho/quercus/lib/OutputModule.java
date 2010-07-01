@@ -53,7 +53,8 @@ import java.util.zip.GZIPOutputStream;
 public class OutputModule extends AbstractQuercusModule 
   implements ModuleStartupListener {
   private static final L10N L = new L10N(OutputModule.class);
-  private static final Logger log = Logger.getLogger(OutputModule.class.getName());
+  private static final Logger log = Logger.getLogger(
+      OutputModule.class.getName());
 
   private static final StringValue HTTP_ACCEPT_ENCODING
     = new ConstStringValue("HTTP_ACCEPT_ENCODING");
@@ -61,7 +62,7 @@ public class OutputModule extends AbstractQuercusModule
   private static final IniDefinitions _iniDefinitions = new IniDefinitions();
 
   // ob_gzhandler related variables/types
-  private enum Encoding {NONE, GZIP, DEFLATE};
+  private enum Encoding { NONE, GZIP, DEFLATE };
 
   private static class GZOutputPair {
     public StringBuilderOutputStream _tempStream;
@@ -321,8 +322,8 @@ public class OutputModule extends AbstractQuercusModule
     // but only when called with full status.  It appears always 
     // to be 0 and there is no interface to change this buffer_size
     // and no indication of its meaning.
-    if (fullStatus && callback != null &&
-        callback == UrlRewriterCallback.getInstance(env))
+    if (fullStatus && callback != null
+        && callback == UrlRewriterCallback.getInstance(env))
       element.put(env.createString("buffer_size"), LongValue.ZERO);
 
     // Technically, there are supposed to be three possible values
@@ -341,8 +342,8 @@ public class OutputModule extends AbstractQuercusModule
 
     element.put(env.createString("name".intern()), nameV);
 
-    Value del = ob.getEraseFlag() ? BooleanValue.TRUE : 
-                                    BooleanValue.FALSE;
+    Value del = ob.getEraseFlag() ? BooleanValue.TRUE
+        : BooleanValue.FALSE;
     
     element.put(env.createString("del"), del);
   }
@@ -429,7 +430,8 @@ public class OutputModule extends AbstractQuercusModule
         Callable cb = ob.getCallback();
 
         if (cb.getCallbackName().equals("ob_gzhandler")) {
-          env.warning(L.l("output handler 'ob_gzhandler' cannot be used twice"));
+          env.warning(
+              L.l("output handler 'ob_gzhandler' cannot be used twice"));
           return false;
         }
       }
@@ -524,7 +526,8 @@ public class OutputModule extends AbstractQuercusModule
     StringValue result = env.createBinaryBuilder();
     
     if ((state & (PHP_OUTPUT_HANDLER_START)) != 0) {
-      HttpModule.header(env, env.createString("Vary: Accept-Encoding"), true, 0);
+      HttpModule.header(
+          env, env.createString("Vary: Accept-Encoding"), true, 0);
 
       int encodingFlag = 0;
 
@@ -534,11 +537,13 @@ public class OutputModule extends AbstractQuercusModule
 
       try {
         if (encoding == Encoding.GZIP) {
-          HttpModule.header(env, env.createString("Content-Encoding: gzip"), true, 0);
+          HttpModule.header(
+              env, env.createString("Content-Encoding: gzip"), true, 0);
 
           pair._outputStream = new GZIPOutputStream(pair._tempStream);
         } else if (encoding == Encoding.DEFLATE) {
-          HttpModule.header(env, env.createString("Content-Encoding: deflate"), true, 0);
+          HttpModule.header(
+              env, env.createString("Content-Encoding: deflate"), true, 0);
 
           pair._outputStream = new DeflaterOutputStream(pair._tempStream);
         }

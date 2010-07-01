@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  * Note that the return value is not modified if
  * the method returns {@link com.caucho.quercus.env.NullValue.NULL}.
  */
-@Target({ElementType.METHOD})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ReturnNullAsFalse {
 }

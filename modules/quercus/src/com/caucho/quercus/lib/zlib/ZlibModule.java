@@ -148,8 +148,8 @@ public class ZlibModule extends AbstractQuercusModule {
       ArrayValue result = new ArrayValueImpl();
 
       StringValue line;
-      while ((line = is.readLine(Integer.MAX_VALUE)) != null &&
-             line.length() > 0)
+      while ((line = is.readLine(Integer.MAX_VALUE)) != null
+          && line.length() > 0)
         result.put(line);
 
       return result;
@@ -417,7 +417,7 @@ public class ZlibModule extends AbstractQuercusModule {
     String s = val.toString();
     if (s.contains("gzip"))
       return env.createString("gzip");
-    else if(s.contains("deflate"))
+    else if (s.contains("deflate"))
       return env.createString("deflate");
     else
       return BooleanValue.FALSE;
@@ -683,7 +683,7 @@ public class ZlibModule extends AbstractQuercusModule {
         sb.append(ptr.getBuffer(), 0, ptr.getLength());
 
       return sb;
-    } catch(IOException e) {
+    } catch (IOException e) {
       throw QuercusModuleException.create(e);
     } finally {
       TempBuffer.free(tempBuf);
@@ -708,7 +708,7 @@ public class ZlibModule extends AbstractQuercusModule {
     String modifier = "";
     String filemode = input.substring(0, 1);
 
-    for (int i = 1; i < input.length(); i++ )
+    for (int i = 1; i < input.length(); i++)
     {
       char ch = input.charAt(i);
       switch (ch) {

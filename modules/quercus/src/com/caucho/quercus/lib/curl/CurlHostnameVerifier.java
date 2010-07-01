@@ -98,8 +98,8 @@ public final class CurlHostnameVerifier
     }
     
     if (_isVerifySSLHostname) {
-      if (session.getPeerHost() == null ||
-          ! session.getPeerHost().equals(hostname))
+      if (session.getPeerHost() == null
+          || ! session.getPeerHost().equals(hostname))
         return false;
     }
     

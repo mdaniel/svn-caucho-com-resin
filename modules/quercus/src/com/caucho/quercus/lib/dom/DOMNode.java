@@ -187,7 +187,8 @@ public class DOMNode<T extends Node>
     throws DOMException
   {
     try {
-      return wrap(_delegate.insertBefore(newChild.getDelegate(), refChild.getDelegate()));
+      return wrap(_delegate.insertBefore(
+          newChild.getDelegate(), refChild.getDelegate()));
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);
@@ -244,7 +245,8 @@ public class DOMNode<T extends Node>
     throws DOMException
   {
     try {
-      return wrap(_delegate.replaceChild(newChild.getDelegate(), oldChild.getDelegate()));
+      return wrap(_delegate.replaceChild(
+          newChild.getDelegate(), oldChild.getDelegate()));
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);

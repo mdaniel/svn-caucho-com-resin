@@ -64,7 +64,8 @@ public class ZipEntryInputStream extends ReadStreamInput
     ZipEntry curEntry = zipInputStream.getNextEntry();
 
     if (curEntry == null)
-      throw new IOException(L.l("ZipEntry at position {0} not found", _position));
+      throw new IOException(
+          L.l("ZipEntry at position {0} not found", _position));
 
     init(new ReadStream(new VfsStream(zipInputStream, null)));
   }

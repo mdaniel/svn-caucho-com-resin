@@ -310,12 +310,12 @@ public class XMLWriterModule extends AbstractQuercusModule {
   /**
    * Starts the document
    */
-  public static boolean xmlwriter_start_document(Env env,
-                                                 @NotNull XMLWriter w,
-                                                 @Optional StringValue version,
-                                                 @Optional StringValue encoding,
-                                                 @Optional StringValue standalone)
-  {
+  public static boolean xmlwriter_start_document(
+      Env env,
+      @NotNull XMLWriter w,
+      @Optional StringValue version,
+      @Optional StringValue encoding,
+      @Optional StringValue standalone) {
     if (w == null)
       return false;
 
@@ -557,13 +557,13 @@ public class XMLWriterModule extends AbstractQuercusModule {
   /**
    * Writes a complete element
    */
-  public static boolean xmlwriter_write_element_ns(Env env,
-                                                   @NotNull XMLWriter w,
-                                                   StringValue prefix,
-                                                   StringValue name,
-                                                   StringValue uri,
-                                                   @Optional StringValue content)
-  {
+  public static boolean xmlwriter_write_element_ns(
+      Env env,
+      @NotNull XMLWriter w,
+      StringValue prefix,
+      StringValue name,
+      StringValue uri,
+      @Optional StringValue content) {
     if (w == null)
       return false;
 

@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * The @EntrySet annotation tells Quercus introspection a method
  * to use for map operations like serializability.
  */
-@Target({ElementType.METHOD})
+@Target({ElementType.METHOD })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface EntrySet {
 }

@@ -37,8 +37,10 @@ public class UnimplementedException
 
   private static final String MESSAGE
     = "{0} has not been implemented. "
-      + "A more recent version of Quercus may be available at http://www.caucho.com/download "
-      + "Requests for unimplemented features can be entered in the bugtrack http://bugs.caucho.com";
+      + "A more recent version of Quercus may be available "
+      + "at http://www.caucho.com/download "
+      + "Requests for unimplemented features can be "
+      + "entered in the bugtracking system at http://bugs.caucho.com";
 
   public UnimplementedException()
   {

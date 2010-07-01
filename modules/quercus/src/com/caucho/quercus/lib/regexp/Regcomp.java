@@ -157,7 +157,8 @@ class Regcomp {
         RegexpNode.Concat topConcat = (RegexpNode.Concat) top;
 
         if (topConcat.getConcatHead() instanceof RegexpNode.AnchorBegin
-            || topConcat.getConcatHead() instanceof RegexpNode.AnchorBeginRelative) {
+            || topConcat.getConcatHead() instanceof RegexpNode
+            .AnchorBeginRelative) {
           top = topConcat.getConcatNext();
         }
       }
@@ -386,7 +387,9 @@ class Regcomp {
                     return parseGroup(pattern, tail, 0, flags);
                   }
                 default:
-                  throw error(L.l("'{0}' is an unknown (? code", String.valueOf((char) ch)));
+                  throw error(
+                      L.l("'{0}' is an unknown (? code",
+                          String.valueOf((char) ch)));
                 }
               }
 
@@ -402,7 +405,8 @@ class Regcomp {
             }
 
           default:
-            throw error(L.l("'{0}' is an unknown (? code", String.valueOf((char) pattern.peek())));
+            throw error(L.l("'{0}' is an unknown (? code",
+                String.valueOf((char) pattern.peek())));
           }
 
         default:
@@ -984,8 +988,8 @@ class Regcomp {
       Character.UnicodeBlock block = Character.UnicodeBlock.forName(name);
 
       if (block == null)
-        throw new IllegalRegexpException(L.l("'{0}' is an unknown unicode block",
-                         name));
+        throw new IllegalRegexpException(
+            L.l("'{0}' is an unknown unicode block", name));
 
       set = new RegexpSet();
 
@@ -1112,11 +1116,13 @@ class Regcomp {
     }
     
     if (ch != ':') {
-      throw new IllegalRegexpException("expected character class closing colon ':' at " + badChar(ch));
+      throw new IllegalRegexpException(
+          "expected character class closing colon ':' at " + badChar(ch));
     }  
      
     if ((ch = pattern.read()) != ']') {
-      throw new IllegalRegexpException("expected character class closing bracket ']' at " + badChar(ch));
+      throw new IllegalRegexpException(
+          "expected character class closing bracket ']' at " + badChar(ch));
     }
 
     String name = sb.toString();

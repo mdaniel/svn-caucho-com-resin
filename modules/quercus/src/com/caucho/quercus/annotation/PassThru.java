@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * The @PassThru annotation.  Used when Java functions want the actual
  * <code>Value</code> passed in (not a <code>Value.toValue()</code>).
  */
-@Target({ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface PassThru {
 }

@@ -51,7 +51,8 @@ public class GoogleQuercusServlet extends QuercusServlet
     QuercusServletImpl impl = null;
 
     try {
-      Class cl = Class.forName("com.caucho.quercus.servlet.ProGoogleQuercusServlet");
+      Class cl = Class.forName(
+          "com.caucho.quercus.servlet.ProGoogleQuercusServlet");
       
       Constructor cons = cl.getConstructor(java.io.File.class);
       
@@ -60,7 +61,8 @@ public class GoogleQuercusServlet extends QuercusServlet
       //impl = (QuercusServletImpl) cl.newInstance();
     } catch (ConfigException e) {
       log.log(Level.FINEST, e.toString(), e);
-      log.info("Quercus compiled mode requires valid Quercus professional licenses");
+      log.info(
+          "Quercus compiled mode requires valid Quercus professional licenses");
       log.info(e.getMessage());
       
     } catch (Exception e) {

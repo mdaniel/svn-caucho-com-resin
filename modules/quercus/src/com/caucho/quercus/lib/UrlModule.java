@@ -182,8 +182,8 @@ public class UrlModule
     try {
       URL url = new URL(urlString);
 
-      if (! url.getProtocol().equals("http") &&
-          ! url.getProtocol().equals("https")) {
+      if (! url.getProtocol().equals("http")
+          && ! url.getProtocol().equals("https")) {
         env.warning(L.l("Not an HTTP URL"));
         return null;
       }
@@ -365,12 +365,12 @@ public class UrlModule
 
     return result;
   }
-  
-  public static Value http_build_query(Env env,
-                                       Value formdata, 
-                                               @Optional StringValue numeric_prefix,
-                                               @Optional("'&'") StringValue separator)
-  {
+
+  public static Value http_build_query(
+      Env env,
+      Value formdata,
+      @Optional StringValue numeric_prefix,
+      @Optional("'&'") StringValue separator) {
     StringValue result = env.createUnicodeBuilder();
 
     httpBuildQueryImpl(env,
@@ -829,10 +829,10 @@ public class UrlModule
     for (int i = 0; i < str.length(); i++) {
       char ch = str.charAt(i);
 
-      if ('a' <= ch && ch <= 'z' ||
-          'A' <= ch && ch <= 'Z' ||
-          '0' <= ch && ch <= '9' ||
-          ch == '-' || ch == '_' || ch == '.' || ch == '~') {
+      if ('a' <= ch && ch <= 'z'
+          || 'A' <= ch && ch <= 'Z'
+          || '0' <= ch && ch <= '9'
+          || ch == '-' || ch == '_' || ch == '.' || ch == '~') {
         sb.append(ch);
       }
       else {
@@ -948,7 +948,9 @@ public class UrlModule
   {
     StringBuilder tag = new StringBuilder();
 
-    for (int ch = 0; ! input.isEOF() && ch != '<'; ch = input.read()) {}
+    for (int ch = 0; ! input.isEOF() && ch != '<'; ch = input.read()) {
+      // intentionally left empty
+    }
 
     while (! input.isEOF()) {
       int ch = input.read();
@@ -1024,8 +1026,8 @@ public class UrlModule
       ch = input.read();
 
       // mimics PHP behavior
-      if ((quoted && ch == quote) ||
-          (! quoted && Character.isWhitespace(ch)) || ch == '>')
+      if ((quoted && ch == quote)
+          || (! quoted && Character.isWhitespace(ch)) || ch == '>')
         break;
 
       value.append((char) ch);
@@ -1039,7 +1041,9 @@ public class UrlModule
   {
     int ch = 0;
 
-    while (! input.isEOF() && Character.isWhitespace(ch = input.read())) {}
+    while (! input.isEOF() && Character.isWhitespace(ch = input.read())) {
+      // intentionally left empty
+    }
 
     if (! Character.isWhitespace(ch))
       input.unread();
@@ -1047,8 +1051,8 @@ public class UrlModule
 
   private static boolean isValidAttributeCharacter(int ch)
   {
-    return Character.isLetterOrDigit(ch) ||
-           (ch == '-') || (ch == '.') || (ch == '_') || (ch == ':');
+    return Character.isLetterOrDigit(ch)
+        || (ch == '-') || (ch == '.') || (ch == '_') || (ch == ':');
   }
 
   private static char toHexDigit(int d)

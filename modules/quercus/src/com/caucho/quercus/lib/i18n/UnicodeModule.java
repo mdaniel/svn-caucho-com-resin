@@ -48,7 +48,8 @@ import java.util.logging.Logger;
  * Unicode handling.  Also includes iconv, etc.
  */
 public class UnicodeModule extends AbstractQuercusModule {
-  private static final Logger log = Logger.getLogger(UnicodeModule.class.getName());
+  private static final Logger log = Logger.getLogger(
+      UnicodeModule.class.getName());
   private static final L10N L = new L10N(UnicodeModule.class);
 
   public static final int U_INVALID_STOP = 0;
@@ -427,7 +428,7 @@ public class UnicodeModule extends AbstractQuercusModule {
                        StringValue str,
                        @Optional("") String charset)
   {
-    if (charset.length() == 0 )
+    if (charset.length() == 0)
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
@@ -533,7 +534,8 @@ public class UnicodeModule extends AbstractQuercusModule {
       charset = env.getIniString("iconv.internal_encoding");
 
     try {
-      return QuercusMimeUtility.decodeMimeHeaders(env, encoded_headers, charset);
+      return QuercusMimeUtility.decodeMimeHeaders(
+          env, encoded_headers, charset);
     }
     catch (UnsupportedEncodingException e) {
       log.log(Level.FINE, e.getMessage(), e);

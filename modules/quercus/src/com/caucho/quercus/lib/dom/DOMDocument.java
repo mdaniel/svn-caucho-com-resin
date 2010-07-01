@@ -502,11 +502,13 @@ public class DOMDocument
     throw new UnimplementedException();
   }
 
-  public DOMNode renameNode(DOMNode node, String namespaceURI, String qualifiedName)
+  public DOMNode renameNode(
+      DOMNode node, String namespaceURI, String qualifiedName)
     throws DOMException
   {
     try {
-      return wrap(_delegate.renameNode(node.getDelegate(), namespaceURI, qualifiedName));
+      return wrap(_delegate.renameNode(
+          node.getDelegate(), namespaceURI, qualifiedName));
     }
     catch (org.w3c.dom.DOMException ex) {
       throw wrap(ex);

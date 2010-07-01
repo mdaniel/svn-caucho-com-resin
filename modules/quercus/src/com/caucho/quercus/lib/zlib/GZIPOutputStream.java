@@ -75,7 +75,9 @@ public class GZIPOutputStream extends DeflaterOutputStream {
    * @param out
    * @param compressionLevel
    * @param strategy Deflate compression strategy
-   * @param encodingMode FORCE_GZIP to write gzwrite compatible output; FORCE_DEFLATE to write gzip header and zlib header, but do not write crc32 trailer
+   * @param encodingMode FORCE_GZIP to write gzwrite compatible output;
+   *    FORCE_DEFLATE to write gzip header and zlib header,
+   *    but do not write crc32 trailer
    */
   public GZIPOutputStream(OutputStream out,
                           int compressionLevel,

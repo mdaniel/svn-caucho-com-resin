@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * Expected type for a function argument.
  */
-@Target({ElementType.PARAMETER})
+@Target({ElementType.PARAMETER })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Expect {
   public enum Type {STRING, NUMERIC, BOOLEAN}

@@ -19,8 +19,8 @@ public class Crypt {
     int swap0 = toSalt(salt.charAt(0)) << 2;
     int swap1 = toSalt(salt.charAt(1)) << 6;
 
-    char result[] = new char[12];
-    byte key[] = new byte[8];
+    char []result = new char[12];
+    byte []key = new byte[8];
 
     int i;
     for (i = 0; i < len; i++) {
@@ -54,15 +54,15 @@ public class Crypt {
 
   private static void setKeySchedule(byte []key, int []schedule)
   {
-    int c = ((key[0] & 0xff) |
-             ((key[1] & 0xff) << 8) |
-             ((key[2] & 0xff) << 16) |
-             ((key[3] & 0xff) << 24));
+    int c = ((key[0] & 0xff)
+        | ((key[1] & 0xff) << 8)
+        | ((key[2] & 0xff) << 16)
+        | ((key[3] & 0xff) << 24));
 
-    int d = ((key[4] & 0xff) |
-             ((key[5] & 0xff) << 8) |
-             ((key[6] & 0xff) << 16) |
-             ((key[7] & 0xff) << 24));
+    int d = ((key[4] & 0xff)
+        | ((key[5] & 0xff) << 8)
+        | ((key[6] & 0xff) << 16)
+        | ((key[7] & 0xff) << 24));
 
 
     // PERM_OP (d,c,t,4,0x0f0f0f0fL);
@@ -93,10 +93,10 @@ public class Crypt {
     c ^= temp;
     d ^= temp << 1;
 
-    d =        (((d & 0x000000ff) << 16) |
-         (d & 0x0000ff00) |
-         ((d & 0x00ff0000) >>> 16) |
-         ((c & 0xf0000000) >>> 4));
+    d =        (((d & 0x000000ff) << 16)
+        | (d & 0x0000ff00)
+        | ((d & 0x00ff0000) >>> 16)
+        | ((c & 0xf0000000) >>> 4));
 
     c &= 0x0fffffffL;
 
@@ -114,21 +114,21 @@ public class Crypt {
       c &= 0x0fffffff;
       d &= 0x0fffffff;
 
-      int s = (skb_0[ (c      ) & 0x3f] |
-               skb_1[((c >> 6) & 0x03) |
-                     ((c >> 7) & 0x3c)] |
-               skb_2[((c >> 13) & 0x0f) |
-                     ((c >> 14) & 0x30)] |
-               skb_3[((c >> 20) & 0x01) |
-                     ((c >> 21) & 0x06) |
-                     ((c >> 22) & 0x38)]);
+      int s = (skb_0[ (c) & 0x3f]
+          | skb_1[((c >> 6) & 0x03)
+          | ((c >> 7) & 0x3c)]
+          | skb_2[((c >> 13) & 0x0f)
+          | ((c >> 14) & 0x30)]
+          | skb_3[((c >> 20) & 0x01)
+          | ((c >> 21) & 0x06)
+          | ((c >> 22) & 0x38)]);
 
-      int t = (skb_4[ (d    ) & 0x3f] |
-               skb_5[((d >> 7) & 0x03) |
-                     ((d >> 8) & 0x3c)] |
-               skb_6[ (d >> 15) & 0x3f] |
-               skb_7[((d >> 21) & 0x0f) |
-                     ((d >> 22) & 0x30)]);
+      int t = (skb_4[ (d) & 0x3f]
+          | skb_5[((d >> 7) & 0x03)
+          | ((d >> 8) & 0x3c)]
+          | skb_6[ (d >> 15) & 0x3f]
+          | skb_7[((d >> 21) & 0x0f) 
+          | ((d >> 22) & 0x30)]);
 
       int t2 = (t << 16) | (s & 0x0000ffff);
 
@@ -205,14 +205,14 @@ public class Crypt {
 
     y = rotate(y, 4);
 
-    l ^= (des_0[(x >>  2) & 0x3f] ^
-          des_2[(x >> 10) & 0x3f] ^
-          des_4[(x >> 18) & 0x3f] ^
-          des_6[(x >> 26) & 0x3f] ^
-          des_1[(y >>  2) & 0x3f] ^
-          des_3[(y >> 10) & 0x3f] ^
-          des_5[(y >> 18) & 0x3f] ^
-          des_7[(y >> 26) & 0x3f]);
+    l ^= (des_0[(x >>  2) & 0x3f]
+        ^ des_2[(x >> 10) & 0x3f]
+        ^ des_4[(x >> 18) & 0x3f]
+        ^ des_6[(x >> 26) & 0x3f]
+        ^ des_1[(y >>  2) & 0x3f]
+        ^ des_3[(y >> 10) & 0x3f]
+        ^ des_5[(y >> 18) & 0x3f]
+        ^ des_7[(y >> 26) & 0x3f]);
 
     return l;
   }
@@ -231,14 +231,14 @@ public class Crypt {
     else
       sb.append(salt);
 
-    v = (((v & 0x00000000000000ffL) << 56) |
-         ((v & 0x000000000000ff00L) << 40) |
-         ((v & 0x0000000000ff0000L) << 24) |
-         ((v & 0x00000000ff000000L) << 8) |
-         ((v & 0x000000ff00000000L) >>> 8) |
-         ((v & 0x0000ff0000000000L) >>> 24) |
-         ((v & 0x00ff000000000000L) >>> 40) |
-         ((v & 0xff00000000000000L) >>> 56));
+    v = (((v & 0x00000000000000ffL) << 56)
+        | ((v & 0x000000000000ff00L) << 40)
+        | ((v & 0x0000000000ff0000L) << 24)
+        | ((v & 0x00000000ff000000L) << 8)
+        | ((v & 0x000000ff00000000L) >>> 8)
+        | ((v & 0x0000ff0000000000L) >>> 24)
+        | ((v & 0x00ff000000000000L) >>> 40)
+        | ((v & 0xff00000000000000L) >>> 56));
 
     sb.append(resultToChar(v >> 58));
     sb.append(resultToChar(v >> 52));

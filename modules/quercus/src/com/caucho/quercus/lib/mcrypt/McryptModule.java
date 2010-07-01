@@ -549,10 +549,10 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Returns the key size for an algorithm.
    */
-  public static Value mcrypt_module_get_supported_key_sizes(Env env,
-                                                            String cipher,
-                                                            @Optional String libDir)
-  {
+  public static Value mcrypt_module_get_supported_key_sizes(
+      Env env,
+      String cipher,
+      @Optional String libDir) {
     try {
       // use ofb because it exists for most ciphers
       Mcrypt mcrypt = new Mcrypt(env, cipher, "ofb");
@@ -568,10 +568,10 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Returns true for block algorithms
    */
-  public static boolean mcrypt_module_is_block_algorithm(Env env,
-                                                         String cipher,
-                                                         @Optional String libDir)
-  {
+  public static boolean mcrypt_module_is_block_algorithm(
+      Env env,
+      String cipher,
+      @Optional String libDir) {
     try {
       // use ofb because it exists for most ciphers
       Mcrypt mcrypt = new Mcrypt(env, cipher, "ofb");
@@ -587,10 +587,10 @@ public class McryptModule extends AbstractQuercusModule {
   /**
    * Returns true for block modes
    */
-  public static boolean mcrypt_module_is_block_algorithm_mode(Env env,
-                                                              String mode,
-                                                              @Optional String libDir)
-  {
+  public static boolean mcrypt_module_is_block_algorithm_mode(
+      Env env,
+      String mode,
+      @Optional String libDir) {
     try {
       Mcrypt mcrypt = new Mcrypt(env, "des", mode);
 

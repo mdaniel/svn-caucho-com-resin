@@ -55,7 +55,7 @@ class JsonDecoder {
 
     // Should now be at end of string or have only white spaces left.
     skipWhitespace();
-    
+
     if (_offset < _len)
       return errorReturn(env, "expected no more input");
 
@@ -65,15 +65,15 @@ class JsonDecoder {
   /**
    * Entry point to decode a JSON value.
    *
-   * @return decoded PHP value 
+   * @return decoded PHP value
    */
   private Value jsonDecodeImpl(Env env, boolean isTop)
   {
     skipWhitespace();
-    
+
     if (_len <= _offset)
       return errorReturn(env);
-    
+
     char ch = _str.charAt(_offset);
 
     switch (ch) {
@@ -90,7 +90,7 @@ class JsonDecoder {
         char ch2 = _str.charAt(_offset + 1);
         char ch3 = _str.charAt(_offset + 2);
         char ch4 = _str.charAt(_offset + 3);
-        
+
         if ((ch2 == 'r' || ch2 == 'R')
             && (ch3 == 'u' || ch3 == 'U')
             && (ch4 == 'e' || ch4 == 'E')) {
@@ -106,7 +106,7 @@ class JsonDecoder {
           }
         }
       }
-      
+
       if (isTop)
         return decodeString(env, false);
       else
@@ -122,7 +122,7 @@ class JsonDecoder {
         char ch3 = _str.charAt(_offset + 2);
         char ch4 = _str.charAt(_offset + 3);
         char ch5 = _str.charAt(_offset + 4);
-        
+
         if ((ch2 == 'a' || ch2 == 'A')
             && (ch3 == 'l' || ch3 == 'L')
             && (ch4 == 's' || ch4 == 'S')
@@ -139,13 +139,13 @@ class JsonDecoder {
           }
         }
       }
-      
+
       if (isTop)
         return decodeString(env, false);
       else
         return errorReturn(env, "expected 'false'");
     }
-    
+
     case 'N':
     case 'n': {
       if (isTop && _offset + 4 < _len)
@@ -154,7 +154,7 @@ class JsonDecoder {
         char ch2 = _str.charAt(_offset + 1);
         char ch3 = _str.charAt(_offset + 2);
         char ch4 = _str.charAt(_offset + 3);
-        
+
         if ((ch2 == 'u' || ch2 == 'U')
             && (ch3 == 'l' || ch3 == 'L')
             && (ch4 == 'l' || ch4 == 'L')) {
@@ -170,7 +170,7 @@ class JsonDecoder {
           }
         }
       }
-      
+
       if (isTop)
         return decodeString(env, false);
       else
@@ -180,7 +180,7 @@ class JsonDecoder {
     case '[': { // ["foo", "bar", "baz"]
       return decodeArray(env);
     }
-      
+
     case  '{': {
       return decodeObject(env);
     }
@@ -189,7 +189,7 @@ class JsonDecoder {
     case '0': case '1': case '2': case '3': case '4':
     case '5': case '6': case '7': case '8': case '9':
       return decodeNumber(env);
-      
+
     default:
       if (isTop)
         return decodeString(env, false);
@@ -204,16 +204,16 @@ class JsonDecoder {
   private Value decodeNumber(Env env)
   {
     int startOffset = _offset;
-    
+
     long value = 0;
     int sign = 1;
-    
+
     char ch;
-    
+
     // (-)?
     if ((ch = _str.charAt(_offset)) == '-') {
       sign = -1;
-      
+
       _offset++;
     }
 
@@ -221,7 +221,7 @@ class JsonDecoder {
       return errorReturn(env, "expected 1-9");
 
     ch = _str.charAt(_offset++);
-    
+
     // (0) | ([1-9] [0-9]*)
     if (ch == '0') {
     }
@@ -231,7 +231,7 @@ class JsonDecoder {
       while (_offset < _len
              && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
         _offset++;
-          
+
         value = 10 * value + ch - '0';
       }
     }
@@ -243,7 +243,7 @@ class JsonDecoder {
       _offset++;
 
       isDouble = true;
-      
+
       while (_offset < _len
              && '0' <= (ch = _str.charAt(_offset)) && ch <= '9') {
         _offset++;
@@ -275,7 +275,7 @@ class JsonDecoder {
     if (isDouble) {
       String strValue
         = _str.stringSubstring(startOffset, _offset);
-      
+
       return DoubleValue.create(Double.parseDouble(strValue));
     }
     else
@@ -290,13 +290,13 @@ class JsonDecoder {
     ArrayValueImpl array = new ArrayValueImpl();
 
     _offset++;
-    
+
     while (true) {
       skipWhitespace();
-      
+
       if (_offset >= _len)
         return errorReturn(env, "expected either ',' or ']'");
-      
+
       if (_str.charAt(_offset) == ']') {
         _offset++;
         break;
@@ -308,9 +308,9 @@ class JsonDecoder {
 
       if (_offset >= _len)
         return errorReturn(env, "expected either ',' or ']'");
-      
+
       char ch = _str.charAt(_offset++);
-      
+
       if (ch == ',') {
       }
       else if (ch == ']')
@@ -338,7 +338,7 @@ class JsonDecoder {
     ArrayValue array = new ArrayValueImpl();
 
     _offset++;
-    
+
     while (true) {
       skipWhitespace();
 
@@ -359,7 +359,7 @@ class JsonDecoder {
       skipWhitespace();
 
       char ch;
-      
+
       if (_offset >= _len)
         return errorReturn(env, "expected either ',' or '}'");
       else if ((ch = _str.charAt(_offset++)) == ',') {
@@ -381,7 +381,7 @@ class JsonDecoder {
     ObjectValue object = env.createObject();
 
     _offset++;
-    
+
     while (true) {
       skipWhitespace();
 
@@ -389,7 +389,7 @@ class JsonDecoder {
         _offset++;
         break;
       }
-      
+
       Value name = jsonDecodeImpl(env, false);
 
       skipWhitespace();
@@ -402,7 +402,7 @@ class JsonDecoder {
       skipWhitespace();
 
       char ch;
-      
+
       if (_offset >= _len)
         return errorReturn(env, "expected either ',' or '}'");
       else if ((ch = _str.charAt(_offset++)) == ',') {
@@ -422,19 +422,19 @@ class JsonDecoder {
   private Value decodeString(Env env, boolean isQuoted)
   {
     StringValue sb = env.createUnicodeBuilder();
-    
+
     while (_offset < _len) {
       char ch = _str.charAt(_offset++);
-      
+
       switch (ch) {
 
         // Escaped Characters
       case '\\':
         if (_offset >= _len)
           return errorReturn(env, "invalid escape character");
-        
+
         ch = _str.charAt(_offset++);
-          
+
         switch (ch) {
           case '"':
             sb.append('"');
@@ -490,7 +490,7 @@ class JsonDecoder {
               sb.append((char) (0x80 + (hex & 0x3f)));
             }
           }
-        
+
         break;
 
         case '"':
@@ -515,7 +515,7 @@ class JsonDecoder {
   private Value errorReturn(Env env, String message)
   {
     int end = Math.min(_len, _offset + 1);
-    
+
     String token = _str.substring(_offset, end).toString();
 
     if (message != null)
@@ -530,14 +530,15 @@ class JsonDecoder {
   {
     while (_offset < _len) {
       char ch = _str.charAt(_offset);
-      
-      if (ch == ' ' ||
-          ch == '\n' ||
-          ch == '\r' ||
-          ch == '\t')
+
+      if (ch == ' '
+          || ch == '\n'
+          || ch == '\r'
+          || ch == '\t') {
         _offset++;
-      else
+      } else {
         break;
+      }
     }
   }
 }

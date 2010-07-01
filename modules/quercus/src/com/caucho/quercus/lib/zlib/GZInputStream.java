@@ -157,7 +157,7 @@ public class GZInputStream extends InputStream
     try {
       int sublen;
       int length = 0;
-      while(length < len) {
+      while (length < len) {
         if (_inflater.needsInput()) {
           _readBufferSize = _in.read(_readBuffer, 0, _readBuffer.length);
           if (_readBufferSize < 0)

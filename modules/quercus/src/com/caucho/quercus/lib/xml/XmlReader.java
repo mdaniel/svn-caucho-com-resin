@@ -193,7 +193,8 @@ public class XmlReader
       if (_currentNodeType == XMLStreamConstants.CHARACTERS)
         return BooleanValue.FALSE;
 
-      return BooleanValue.create(_hasAttribute ||  _streamReader.getAttributeCount() > 0);
+      return BooleanValue.create(
+          _hasAttribute ||  _streamReader.getAttributeCount() > 0);
     }
     catch (IllegalStateException ex) {
       log.log(Level.WARNING, ex.toString(), ex);
@@ -541,7 +542,8 @@ public class XmlReader
     try {
       XMLInputFactory factory = XMLInputFactory.newInstance();
 
-      _streamReader = factory.createXMLStreamReader(path.getNativePath(), path.openRead());
+      _streamReader = factory.createXMLStreamReader(
+          path.getNativePath(), path.openRead());
     }
     catch (XMLStreamException ex) {
       log.log(Level.WARNING, ex.toString(), ex);

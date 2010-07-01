@@ -103,8 +103,8 @@ public class DOMElement extends DOMNode<Element>
     return wrap(_delegate.getElementsByTagName(name));
   }
 
-  public DOMNodeList getElementsByTagNameNS(String namespaceURI, String localName)
-    throws DOMException
+  public DOMNodeList getElementsByTagNameNS(
+      String namespaceURI, String localName) throws DOMException
   {
     try {
       return wrap(_delegate.getElementsByTagNameNS(namespaceURI, localName));

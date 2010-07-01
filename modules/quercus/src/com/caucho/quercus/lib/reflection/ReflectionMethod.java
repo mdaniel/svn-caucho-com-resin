@@ -71,7 +71,8 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     _clsName = clsName;
   }
   
-  public static ReflectionMethod __construct(Env env, Value obj, StringValue name)
+  public static ReflectionMethod __construct(
+      Env env, Value obj, StringValue name)
   {
     String clsName;
     
@@ -80,7 +81,8 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     else
       clsName = obj.toString();
     
-    return new ReflectionMethod(clsName, env.getClass(clsName).getFunction(name));
+    return new ReflectionMethod(
+        clsName, env.getClass(clsName).getFunction(name));
   }
   
   public static String export(Env env,
@@ -93,7 +95,8 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
   
   public Value invoke(Env env, ObjectValue object, Value []args)
   {
-    return getFunction().callMethod(env, object.getQuercusClass(), object, args);
+    return getFunction().callMethod(
+        env, object.getQuercusClass(), object, args);
   }
   
   public Value invokeArgs(Env env, ObjectValue object, ArrayValue args)
@@ -168,7 +171,9 @@ public class ReflectionMethod extends ReflectionFunctionAbstract
     String clsName = getFunction().getDeclaringClassName();
     
     if (clsName == null)
-      throw new QuercusException(L.l("class name is null {0}: {1}", getFunction(), getFunction().getClass()));
+      throw new QuercusException(
+          L.l("class name is null {0}: {1}",
+              getFunction(), getFunction().getClass()));
 
     return new ReflectionClass(env, clsName);
   }

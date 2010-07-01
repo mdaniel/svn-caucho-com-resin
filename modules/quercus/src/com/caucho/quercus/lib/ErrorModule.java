@@ -121,7 +121,8 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.startsWith("_quercus._")
                && name.equals("call")) {
         String path = unmangleFile(className);
-        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
+        String fileName = env
+            .getQuercus().getPwd().lookup("./" + path).getNativePath();
         
         String fun = findFunction(stack, i);
 
@@ -132,7 +133,8 @@ public class ErrorModule extends AbstractQuercusModule {
         result.put(call);
 
         call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
+        call.put(LINE, LongValue.create(
+            env.getSourceLine(className, elt.getLineNumber())));
 
         call.put(FUNCTION, env.createString(fun));
 
@@ -141,13 +143,15 @@ public class ErrorModule extends AbstractQuercusModule {
       else if (className.startsWith("_quercus._")
                && name.equals("callMethod")) {
         String path = unmangleFile(className);
-        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
+        String fileName = env
+            .getQuercus().getPwd().lookup("./" + path).getNativePath();
         
         ArrayValue call = new ArrayValueImpl();
         result.put(call);
 
         call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
+        call.put(LINE, LongValue.create(
+            env.getSourceLine(className, elt.getLineNumber())));
         
         call.put(FUNCTION, env.createString(unmangleFunction(className)));
         call.put(CLASS, env.createString(unmangleClass(className)));
@@ -161,12 +165,14 @@ public class ErrorModule extends AbstractQuercusModule {
 
         String path = unmangleFile(className);
 
-        String fileName = env.getQuercus().getPwd().lookup("./" + path).getNativePath();
+        String fileName = env
+            .getQuercus().getPwd().lookup("./" + path).getNativePath();
 
         ArrayValue call = new ArrayValueImpl();
         
         call.put(FILE, env.createString(fileName));
-        call.put(LINE, LongValue.create(env.getSourceLine(className, elt.getLineNumber())));
+        call.put(LINE, LongValue.create(
+            env.getSourceLine(className, elt.getLineNumber())));
 
         if (methodName.equals("includeOnce")) {
           call.put(FUNCTION, env.createString("include_once"));
@@ -373,7 +379,7 @@ public class ErrorModule extends AbstractQuercusModule {
     Value []argsValues = callExpr.evalArguments(env);
 
     if (argsValues != null) {
-      for (int index=0; index < argsValues.length; index++) {
+      for (int index = 0; index < argsValues.length; index++) {
         Value ref = argsValues[index].toLocalVarDeclAsRef();
         args.put(ref);
       }
@@ -407,7 +413,8 @@ public class ErrorModule extends AbstractQuercusModule {
         i++;
       }
       else {
-        //System.out.println("UNKNOWN:" + className.charAt(i + 1) + " " + className);
+//        System.out.println(
+//            "UNKNOWN:" + className.charAt(i + 1) + " " + className);
       }
     }
 

@@ -116,30 +116,31 @@ public class ImageModule extends AbstractQuercusModule {
   public static Value gd_info()
   {
     return (new ArrayValueImpl()
-            .append(StringValue.create("GD Version"), // ] => 2.0 or higher
-                    StringValue.create("2.0 or higher"))
-            .append(StringValue.create("FreeType Support"), // ] => 1
-                    BooleanValue.TRUE)
-            .append(StringValue.create("FreeType Linkage"), // ] => with freetype
-                    StringValue.create("with freetype"))
-            .append(StringValue.create("T1Lib Support"), // ] => 1
-                    BooleanValue.TRUE)
-            .append(StringValue.create("GIF Read Support"), // ] => 1
-                    BooleanValue.TRUE)
-            .append(StringValue.create("GIF Create Support"), // ] => 1
-                    BooleanValue.TRUE)
-            .append(StringValue.create("JPG Support"), // ] => 1
-                    BooleanValue.TRUE)
-            .append(StringValue.create("PNG Support"), // ] => 1
-                    BooleanValue.TRUE)
-            .append(StringValue.create("WBMP Support"), // ] => 1
-                    BooleanValue.TRUE)
-            .append(StringValue.create("XPM Support"), // ] =>
-                    BooleanValue.FALSE)
-            .append(StringValue.create("XBM Support"), // ] =>
-                    BooleanValue.FALSE)
-            .append(StringValue.create("JIS-mapped Japanese Font Support"), // ] =>
-                    BooleanValue.FALSE));
+        .append(StringValue.create("GD Version"), // ] => 2.0 or higher
+            StringValue.create("2.0 or higher"))
+        .append(StringValue.create("FreeType Support"), // ] => 1
+            BooleanValue.TRUE)
+        .append(
+            StringValue.create("FreeType Linkage"), // ] => with freetype
+            StringValue.create("with freetype"))
+        .append(StringValue.create("T1Lib Support"), // ] => 1
+            BooleanValue.TRUE)
+        .append(StringValue.create("GIF Read Support"), // ] => 1
+            BooleanValue.TRUE)
+        .append(StringValue.create("GIF Create Support"), // ] => 1
+            BooleanValue.TRUE)
+        .append(StringValue.create("JPG Support"), // ] => 1
+            BooleanValue.TRUE)
+        .append(StringValue.create("PNG Support"), // ] => 1
+            BooleanValue.TRUE)
+        .append(StringValue.create("WBMP Support"), // ] => 1
+            BooleanValue.TRUE)
+        .append(StringValue.create("XPM Support"), // ] =>
+            BooleanValue.FALSE)
+        .append(StringValue.create("XBM Support"), // ] =>
+            BooleanValue.FALSE)
+        .append(StringValue.create("JIS-mapped Japanese Font Support"), // ] =>
+        BooleanValue.FALSE));
   }
 
   /**
@@ -175,8 +176,8 @@ public class ImageModule extends AbstractQuercusModule {
     imageArray.put(LongValue.create(info._width));
     imageArray.put(LongValue.create(info._height));
     imageArray.put(LongValue.create(info._type));
-    imageArray.put(env.createString("width=\"" + info._width +
-                                   "\" height=\"" + info._height + "\""));
+    imageArray.put(env.createString("width=\"" + info._width
+        + "\" height=\"" + info._height + "\""));
 
     if (info._bits >= 0)
       imageArray.put(env.createString("bits"), LongValue.create(info._bits));
@@ -320,8 +321,8 @@ public class ImageModule extends AbstractQuercusModule {
                                  double start, double end,
                                  int color)
   {
-    Arc2D arc = new Arc2D.Double(cx-width / 2, cy-height / 2,
-                                 width, height, -1 * start, -1 * (end-start),
+    Arc2D arc = new Arc2D.Double(cx - width / 2, cy - height / 2,
+                                 width, height, -1 * start, -1 * (end - start),
                                  Arc2D.OPEN);
     image.stroke(arc, color);
     return true;
@@ -338,7 +339,7 @@ public class ImageModule extends AbstractQuercusModule {
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
-    g.drawString(c.substring(0, 1), x, y+height);
+    g.drawString(c.substring(0, 1), x, y + height);
     return true;
   }
 
@@ -354,7 +355,7 @@ public class ImageModule extends AbstractQuercusModule {
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
-    g.drawString(c.substring(0, 1), -1 * y, x+height);
+    g.drawString(c.substring(0, 1), -1 * y, x + height);
     return true;
   }
 
@@ -378,10 +379,10 @@ public class ImageModule extends AbstractQuercusModule {
   {
     // PHP's alpha values are inverted and only 7 bits.
     int alpha = 0x7f - (a & 0xff);
-    return ((alpha      << 24) |
-            ((r & 0xff) << 16) |
-            ((g & 0xff) <<  8) |
-            ((b & 0xff) <<  0) );
+    return ((alpha      << 24)
+        | ((r & 0xff) << 16)
+        | ((g & 0xff) <<  8)
+        | ((b & 0xff) <<  0));
   }
 
   /**
@@ -528,8 +529,8 @@ public class ImageModule extends AbstractQuercusModule {
     // XXX: implement div and offset
     float[] kernelValues = new float[9];
 
-    for(int y = 0; y < 3; y++) {
-      for(int x = 0; x < 3; x++) {
+    for (int y = 0; y < 3; y++) {
+      for (int x = 0; x < 3; x++) {
             kernelValues[x + y * 3] =
               (float) matrix.get(LongValue.create(y))
                             .get(LongValue.create(x)).toDouble();
@@ -555,8 +556,8 @@ public class ImageModule extends AbstractQuercusModule {
                                   int dx, int dy, int sx, int sy, int w, int h)
   {
     dest.getGraphics().drawImage(src._bufferedImage,
-                                 dx, dy, dx+w, dy+h,
-                                 sx, sy, sx+w, sy+h, null);
+                                 dx, dy, dx + w, dy + h,
+                                 sx, sy, sx + w, sy + h, null);
     return true;
   }
 
@@ -572,7 +573,7 @@ public class ImageModule extends AbstractQuercusModule {
                         BufferedImage.TYPE_INT_ARGB);
     rgba.getGraphics().drawImage(src._bufferedImage, 0, 0, null);
     BufferedImageOp rescaleOp =
-      new RescaleOp(new float[] { 1, 1, 1, ((float)pct)/100 },
+      new RescaleOp(new float[] { 1, 1, 1, ((float)pct) / 100 },
                     new float[] { 0, 0, 0, 0 },
                     null);
     BufferedImage rescaledImage =
@@ -580,8 +581,8 @@ public class ImageModule extends AbstractQuercusModule {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
     g.setComposite(AlphaComposite.SrcOver);
     g.drawImage(rescaledImage,
-                dx, dy, dx+w, dy+h,
-                sx, sy, sx+w, sy+h, null);
+                dx, dy, dx + w, dy + h,
+                sx, sy, sx + w, sy + h, null);
     return true;
   }
 
@@ -597,7 +598,7 @@ public class ImageModule extends AbstractQuercusModule {
                         BufferedImage.TYPE_INT_ARGB);
     rgba.getGraphics().drawImage(src._bufferedImage, 0, 0, null);
     BufferedImageOp rescaleOp =
-      new RescaleOp(new float[] { 1, 1, 1, ((float)pct)/100 },
+      new RescaleOp(new float[] { 1, 1, 1, ((float)pct) / 100 },
                     new float[] { 0, 0, 0, 0 },
                     null);
     BufferedImage rescaledImage =
@@ -610,8 +611,8 @@ public class ImageModule extends AbstractQuercusModule {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
     g.setComposite(AlphaComposite.SrcOver);
     g.drawImage(rescaledImage,
-                dx, dy, dx+w, dy+h,
-                sx, sy, sx+w, sy+h, null);
+                dx, dy, dx + w, dy + h,
+                sx, sy, sx + w, sy + h, null);
     return true;
   }
 
@@ -626,8 +627,8 @@ public class ImageModule extends AbstractQuercusModule {
     g.setRenderingHint(RenderingHints.KEY_RENDERING,
                        RenderingHints.VALUE_RENDER_QUALITY);
     g.drawImage(src._bufferedImage,
-                dx, dy, dx+dw, dy+dh,
-                sx, sy, sx+sw, sy+sh, null);
+                dx, dy, dx + dw, dy + dh,
+                sx, sy, sx + sw, sy + sh, null);
     g.setRenderingHint(RenderingHints.KEY_RENDERING,
                        RenderingHints.VALUE_RENDER_DEFAULT);
     return true;
@@ -642,8 +643,8 @@ public class ImageModule extends AbstractQuercusModule {
   {
     Graphics2D g = (Graphics2D)dest.getGraphics().create();
     g.drawImage(src._bufferedImage,
-                dx, dy, dx+dw, dy+dh,
-                sx, sy, sx+sw, sy+sh, null);
+                dx, dy, dx + dw, dy + dh,
+                sx, sy, sx + sw, sy + sh, null);
     return true;
   }
 
@@ -797,7 +798,8 @@ public class ImageModule extends AbstractQuercusModule {
                                      double width, double height,
                                      int color)
   {
-    Shape shape = new Ellipse2D.Double(cx-width/2, cy-height/2, width, height);
+    Shape shape = new Ellipse2D.Double(
+        cx - width / 2, cy - height / 2, width, height);
     image.stroke(shape, color);
     return true;
   }
@@ -827,9 +829,9 @@ public class ImageModule extends AbstractQuercusModule {
       type = Arc2D.CHORD;
 
     Arc2D arc =
-      new Arc2D.Double(cx-width/2, cy-height/2,
-                       width, height, -1 * start,
-                       -1 * (end-start), type);
+        new Arc2D.Double(cx - width / 2, cy - height / 2,
+            width, height, -1 * start,
+            -1 * (end - start), type);
     if ((style & IMG_ARC_NOFILL) == 0) image.fill(arc, color);
     if ((style & IMG_ARC_EDGED) != 0)  image.stroke(arc, color);
 
@@ -845,7 +847,7 @@ public class ImageModule extends AbstractQuercusModule {
                                            int color)
   {
     Ellipse2D ellipse =
-      new Ellipse2D.Double(cx-width/2, cy-height/2, width, height);
+        new Ellipse2D.Double(cx - width / 2, cy - height / 2, width, height);
     image.fill(ellipse, color);
     return true;
   }
@@ -868,7 +870,7 @@ public class ImageModule extends AbstractQuercusModule {
   public static boolean imagefilledrectangle(QuercusImage image, int x1, int y1,
                                              int x2, int y2, int color)
   {
-    image.fill(new Rectangle2D.Float(x1, y1, x2-x1+1, y2-y1+1), color);
+    image.fill(new Rectangle2D.Float(x1, y1, x2 - x1 + 1, y2 - y1 + 1), color);
     return true;
   }
 
@@ -934,20 +936,20 @@ public class ImageModule extends AbstractQuercusModule {
 
         case IMG_FILTER_GAUSSIAN_BLUR:
           // Blurs the image using the Gaussian method.
-          env.warning(L.l("imagefilter(IMG_FILTER_GAUSSIAN_BLUR) "+
-                          "unimplemented"));
+          env.warning(L.l("imagefilter(IMG_FILTER_GAUSSIAN_BLUR) "
+              + "unimplemented"));
           return false;
 
         case IMG_FILTER_SELECTIVE_BLUR:
           // Blurs the image.
-          env.warning(L.l("imagefilter(IMG_FILTER_SELECTIVE_BLUR) "+
-                          "unimplemented"));
+          env.warning(L.l("imagefilter(IMG_FILTER_SELECTIVE_BLUR) "
+              + "unimplemented"));
           return false;
 
         case IMG_FILTER_MEAN_REMOVAL:
           // Uses mean removal to achieve a "sketchy" effect.
-          env.warning(L.l("imagefilter(IMG_FILTER_MEAN_REMOVAL) "+
-                          "unimplemented"));
+          env.warning(L.l("imagefilter(IMG_FILTER_MEAN_REMOVAL) "
+              + "unimplemented"));
           return false;
 
         case IMG_FILTER_SMOOTH:
@@ -1403,7 +1405,7 @@ public class ImageModule extends AbstractQuercusModule {
   {
     if (x2 < x1) { int tmp = x1; x1 = x2; x2 = tmp; }
     if (y2 < y1) { int tmp = y1; y1 = y2; y2 = tmp; }
-    image.stroke(new Rectangle2D.Float(x1, y1, x2-x1, y2-y1), color);
+    image.stroke(new Rectangle2D.Float(x1, y1, x2 - x1, y2 - y1), color);
     return true;
   }
 
@@ -1482,7 +1484,7 @@ public class ImageModule extends AbstractQuercusModule {
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
-    g.drawString(s, x, y+height);
+    g.drawString(s, x, y + height);
 
     return true;
   }
@@ -1504,7 +1506,7 @@ public class ImageModule extends AbstractQuercusModule {
     Font awtfont = image.getFont(font);
     int height = image.getGraphics().getFontMetrics(awtfont).getAscent();
     g.setFont(awtfont);
-    g.drawString(s, 0, 0+height);
+    g.drawString(s, 0, 0 + height);
 
     g.setTransform(oldTransform);
 
@@ -1686,7 +1688,7 @@ public class ImageModule extends AbstractQuercusModule {
 
     Iterator<Value> iter = points.getValueIterator(env);
 
-    for(int i = 0; i < numPoints; i++) {
+    for (int i = 0; i < numPoints; i++) {
       int x = iter.next().toInt();
       int y = iter.next().toInt();
       polygon.addPoint(x, y);
@@ -1719,24 +1721,24 @@ public class ImageModule extends AbstractQuercusModule {
 
     if (ch == 137) {
       // PNG - http://www.libpng.org/pub/png/spec/iso/index-object.html
-      if (is.read() != 'P' ||
-          is.read() != 'N' ||
-          is.read() != 'G' ||
-          is.read() != '\r' ||
-          is.read() != '\n' ||
-          is.read() != 26 ||
-          is.read() != '\n')
+      if (is.read() != 'P'
+          || is.read() != 'N'
+          || is.read() != 'G'
+          || is.read() != '\r'
+          || is.read() != '\n'
+          || is.read() != 26
+          || is.read() != '\n')
         return false;
 
       return parsePNGImageSize(is, info);
     }
     else if (ch == 'G') {
       // GIF
-      if (is.read() != 'I' ||
-          is.read() != 'F' ||
-          is.read() != '8' ||
-          ((ch = is.read()) != '7' && ch != '9') ||
-          is.read() != 'a')
+      if (is.read() != 'I'
+          || is.read() != 'F'
+          || is.read() != '8'
+          || ((ch = is.read()) != '7' && ch != '9')
+          || is.read() != 'a')
         return false;
 
       return parseGIFImageSize(is, info);
@@ -1869,19 +1871,19 @@ public class ImageModule extends AbstractQuercusModule {
 
   private static int pngCode(String code)
   {
-    return ((code.charAt(0) << 24) |
-            (code.charAt(1) << 16) |
-            (code.charAt(2) << 8) |
-            (code.charAt(3)));
+    return ((code.charAt(0) << 24)
+        | (code.charAt(1) << 16)
+        | (code.charAt(2) << 8)
+        | (code.charAt(3)));
   }
 
   private static int readInt(ReadStream is)
     throws IOException
   {
-    return (((is.read() & 0xff) << 24) |
-            ((is.read() & 0xff) << 16) |
-            ((is.read() & 0xff) << 8) |
-            ((is.read() & 0xff)));
+    return (((is.read() & 0xff) << 24)
+        | ((is.read() & 0xff) << 16)
+        | ((is.read() & 0xff) << 8)
+        | ((is.read() & 0xff)));
   }
 
   // Inner Classes ////////////////////////////////////////////////////////
@@ -2121,13 +2123,12 @@ public class ImageModule extends AbstractQuercusModule {
 
     private void strokeStyled(Shape shape)
     {
-      for(int i=0; i<_style.length; i++)
-        {
+      for (int i = 0; i < _style.length; i++) {
           _graphics.setColor(intToColor(_style[i]));
           Stroke stroke =
             new BasicStroke(_thickness,
                             BasicStroke.JOIN_ROUND, BasicStroke.CAP_ROUND, 1,
-                            new float[] { 1, _style.length-1 },
+                new float[]{1, _style.length - 1},
                             i);
           _graphics.setStroke(stroke);
           _graphics.draw(shape);
@@ -2144,17 +2145,20 @@ public class ImageModule extends AbstractQuercusModule {
       fpi.currentSegment(floats);
       float last_x = floats[0];
       float last_y = floats[1];
-      while(! fpi.isDone())
+      while (! fpi.isDone())
         {
           fpi.currentSegment(floats);
-          int distance = (int)Math.sqrt((floats[0]-last_x)*(floats[0]-last_x)+
-                                        (floats[1]-last_y)*(floats[1]-last_y));
+          int distance = (int) Math.sqrt(
+              (floats[0] - last_x) * (floats[0] - last_x)
+                  + (floats[1] - last_y) * (floats[1] - last_y));
           if (distance <= 1) distance = 1;
-          for(int i=1; i<=distance; i++)
+          for (int i = 1; i <= distance; i++)
             {
-              int x = (int)(floats[0]*i+last_x*(distance-i))/distance;
+              int x = (int)
+                  (floats[0] * i + last_x * (distance - i)) / distance;
               x -= _brush.getWidth() / 2;
-              int y = (int)(floats[1]*i+last_y*(distance-i))/distance;
+              int y = (int)
+                  (floats[1] * i + last_y * (distance - i)) / distance;
               y -= _brush.getHeight() / 2;
               g.drawImage(_brush, x, y, null);
             }
@@ -2176,7 +2180,7 @@ public class ImageModule extends AbstractQuercusModule {
 
       Iterator<Value> iter = colors.getValueIterator(env);
 
-      for(int i = 0; i < _style.length; i++) {
+      for (int i = 0; i < _style.length; i++) {
             _style[i] = iter.next().toInt();
           }
     }
@@ -2198,10 +2202,10 @@ public class ImageModule extends AbstractQuercusModule {
 
     public long allocateColor(int r, int g, int b)
     {
-      int color = (( 0x7f      << 24) |
-          ((r & 0xff) << 16) |
-          ((g & 0xff) <<  8) |
-          ((b & 0xff) <<  0));
+      int color = ((0x7f << 24)
+          | ((r & 0xff) << 16)
+          | ((g & 0xff) <<  8)
+          | ((b & 0xff) <<  0));
 
       if (_isToFill) {
         _isToFill = false;
@@ -2221,7 +2225,8 @@ public class ImageModule extends AbstractQuercusModule {
       flood(x, y, color, border, true);
     }
 
-    private void flood(int startx, int starty, int color, int border, boolean useBorder)
+    private void flood(
+        int startx, int starty, int color, int border, boolean useBorder)
     {
       java.util.Queue<Integer> xq = new LinkedList<Integer>();
       java.util.Queue<Integer> yq = new LinkedList<Integer>();
@@ -2232,56 +2237,56 @@ public class ImageModule extends AbstractQuercusModule {
 
       int height = getHeight();
 
-      while(xq.size() > 0)
+      while (xq.size() > 0)
       {
         int x = xq.poll();
         int y = yq.poll();
         int p = (getPixel(x, y) & 0x00ffffff);
-        if (useBorder ? (p==border||p==color) : (p != 0)) continue;
+        if (useBorder ? (p == border || p == color) : (p != 0)) continue;
         setPixel(x, y, color);
 
-        for(int i = x - 1; i >= 0; i--)
+        for (int i = x - 1; i >= 0; i--)
         {
           p = (getPixel(i, y) & 0x00ffffff);
-          if (useBorder ? (p==border||p==color) : (p!= 0)) break;
+          if (useBorder ? (p == border || p == color) : (p != 0)) break;
           setPixel(i, y, color);
 
           if (y + 1 < height) {
             xq.add(i);
-            yq.add(y+1);
+            yq.add(y + 1);
           }
 
           if (y - 1 >= 0) {
             xq.add(i);
-            yq.add(y-1);
+            yq.add(y - 1);
           }
         }
 
-        for(int i = x + 1; i < getWidth(); i++)
+        for (int i = x + 1; i < getWidth(); i++)
         {
           p = (getPixel(i, y) & 0x00ffffff);
-          if (useBorder ? (p==border||p==color) : (p != 0)) break;
+          if (useBorder ? (p == border || p == color) : (p != 0)) break;
           setPixel(i, y, color);
 
           if (y + 1 < height) {
             xq.add(i);
-            yq.add(y+1);
+            yq.add(y + 1);
           }
 
           if (y - 1 >= 0) {
             xq.add(i);
-            yq.add(y-1);
+            yq.add(y - 1);
           }
         }
 
         if (y + 1 < height) {
           xq.add(x);
-          yq.add(y+1);
+          yq.add(y + 1);
         }
 
         if (y - 1 >= 0) {
           xq.add(x);
-          yq.add(y-1);
+          yq.add(y - 1);
         }
       }
     }

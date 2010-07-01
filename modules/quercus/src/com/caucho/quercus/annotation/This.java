@@ -38,7 +38,7 @@ import java.lang.annotation.Target;
  * The @This annotation marks a parameter as the Quercus "this" value.
  * The @This must be the first value after the optional Env.
  */
-@Target({ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface This {
 }

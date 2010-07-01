@@ -167,7 +167,9 @@ public class QuercusSessionManager
    */
   public void setSaveOnShutdown(boolean save)
   {
-    log.warning("<save-on-shutdown> is deprecated.  Use <save-only-on-shutdown> instead");
+    log.warning
+        ("<save-on-shutdown> is deprecated.  "
+            + "Use <save-only-on-shutdown> instead");
 
     setSaveOnlyOnShutdown(save);
   }
@@ -242,7 +244,9 @@ public class QuercusSessionManager
     else if (reuse.equalsIgnoreCase("all"))
       _reuseSessionId = TRUE;
     else
-      throw new ConfigException(L.l("'{0}' is an invalid value for reuse-session-id.  'true' or 'false' are the allowed values.",
+      throw new ConfigException(
+          L.l("'{0}' is an invalid value for reuse-session-id.  "
+              + "'true' or 'false' are the allowed values.",
                                     reuse));
   }
 

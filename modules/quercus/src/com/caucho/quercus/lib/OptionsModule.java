@@ -990,7 +990,8 @@ public class OptionsModule extends AbstractQuercusModule {
 
   // unsupported
   static final IniDefinition MAGIC_QUOTES_RUNTIME
-    = _iniDefinitions.addUnsupported("magic_quotes_runtime", false, PHP_INI_ALL);
+    = _iniDefinitions.addUnsupported(
+      "magic_quotes_runtime", false, PHP_INI_ALL);
   static final IniDefinition MAGIC_QUOTES_SYBASE
     = _iniDefinitions.addUnsupported("magic_quotes_sybase", false, PHP_INI_ALL);
   static final IniDefinition INI_REGISTER_GLOBALS

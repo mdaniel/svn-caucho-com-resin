@@ -109,11 +109,13 @@ public class TcpInputOutput
           getAcceptedIssuers() {
           return null;
         }
+
         public void checkClientTrusted(
-                                       java.security.cert.X509Certificate[] cert, String foo) {
+            java.security.cert.X509Certificate[] cert, String foo) {
         }
+
         public void checkServerTrusted(
-                                       java.security.cert.X509Certificate[] cert, String foo) {
+            java.security.cert.X509Certificate[] cert, String foo) {
         }
       };
 
@@ -218,7 +220,8 @@ public class TcpInputOutput
   public String toString()
   {
     if (_socket != null)
-      return "TcpInputOutput[" + _socket.getInetAddress() + "," + _socket.getPort() + "]";
+      return "TcpInputOutput[" + _socket.getInetAddress()
+          + "," + _socket.getPort() + "]";
     else
       return "TcpInputOutput[closed]";
   }

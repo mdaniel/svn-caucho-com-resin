@@ -103,7 +103,7 @@ public class Authentication
     String algorithm = null;
 
     String key;
-    while ((key = scanner.readKey())!= null) {
+    while ((key = scanner.readKey()) != null) {
       String value = scanner.readValue();
 
       if (key.equals("realm"))
@@ -348,11 +348,11 @@ public class Authentication
       int ch;
 
       while ((ch = read()) >= 0) {
-        if (ch != ' ' &&
-            ch != '\t' &&
-            ch != '\r' &&
-            ch != '\n' &&
-            ch != '\f')
+        if (ch != ' '
+            && ch != '\t'
+            && ch != '\r'
+            && ch != '\n'
+            && ch != '\f')
           break;
       }
 

@@ -102,7 +102,8 @@ public class ZipDirectory
     int compressionMethod = (_tmpBuf[8] & 0xff) | ((_tmpBuf[9] & 0xff) << 8);
 
     //if (compressionMethod != 0 && compressionMethod != 8)
-    //  throw new IOException("Unsupported zip compression method (" + compressionMethod + ").");
+//      throw new IOException(
+//          "Unsupported zip compression method (" + compressionMethod + ").");
 
     long crc32 = _tmpBuf[14] & 0xff;
     crc32 |= (_tmpBuf[15] & 0xff) << 8;

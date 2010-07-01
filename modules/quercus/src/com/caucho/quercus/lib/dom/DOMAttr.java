@@ -38,7 +38,8 @@ import org.w3c.dom.Element;
 public class DOMAttr
   extends DOMNode<Attr>
 {
-  public static DOMAttr __construct(Env env, String name, @Optional String value)
+  public static DOMAttr __construct(
+      Env env, String name, @Optional String value)
   {
     DOMAttr attr = getImpl(env).createAttr(name);
 

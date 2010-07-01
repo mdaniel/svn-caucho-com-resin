@@ -324,10 +324,10 @@ public class Utf8Decoder
           return ERROR_CHARACTER;
         }
         
-        int ch = (((ch1 & 0xf) << 18) +
-                 ((ch2 & 0x3f) << 12) +
-                 ((ch3 & 0x3f) << 6) +
-                 ((ch4 & 0x3f)));
+        int ch = (((ch1 & 0xf) << 18)
+            + ((ch2 & 0x3f) << 12)
+            + ((ch3 & 0x3f) << 6)
+            + ((ch4 & 0x3f)));
 
         _peek = 0xdc00 + (ch & 0x3ff);
         

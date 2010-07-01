@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * Sets the PHP resource type name of this class.
  */
-@Target({ElementType.TYPE})
+@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ResourceType {
   public String value() default "Unknown";

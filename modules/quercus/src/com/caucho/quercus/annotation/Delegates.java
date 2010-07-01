@@ -42,7 +42,7 @@ import java.lang.annotation.Target;
  * @see com.caucho.quercus.env.PrintDelegate
  * @see com.caucho.quercus.env.FieldDelegate
  */
-@Target({ElementType.TYPE})
+@Target({ElementType.TYPE })
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Delegates {
   public Class<?>[] value();

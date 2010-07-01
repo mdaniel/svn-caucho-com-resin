@@ -119,7 +119,8 @@ public class Regexp {
       delim = '>';
     else if (delim == '\\' || Character.isLetterOrDigit(delim)) {
       throw new QuercusException(L.l(
-          "Delimiter {0} in regexp '{1}' must not be backslash or alphanumeric.",
+          "Delimiter {0} in regexp '{1}' must "
+              + "not be backslash or alphanumeric.",
           String.valueOf(delim),
           rawRegexp));
     }
@@ -170,7 +171,8 @@ public class Regexp {
       _pattern = fromUtf8(pattern);
       
       if (pattern == null)
-        throw new QuercusException(L.l("Regexp: error converting subject to utf8"));
+        throw new QuercusException(
+            L.l("Regexp: error converting subject to utf8"));
     }
   }
   

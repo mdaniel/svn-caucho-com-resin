@@ -37,7 +37,7 @@ import java.lang.annotation.Target;
 /**
  * The @UsesSymbolTable annotation.
  */
-@Target({ElementType.METHOD})
+@Target(ElementType.METHOD)
 @Retention(RetentionPolicy.RUNTIME)
 public @interface UsesSymbolTable {
   /**

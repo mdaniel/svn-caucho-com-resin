@@ -191,7 +191,8 @@ public class MhashModule extends AbstractQuercusModule {
       return env.createString(algorithm.getName());
   }
 
-  // XXX: public String mhash_keygen_s2k(int hash, String password, String salt, int bytes)
+  // XXX: public String mhash_keygen_s2k(
+  // int hash, String password, String salt, int bytes)
 
   public static class MhashAlgorithm
   {
@@ -265,7 +266,8 @@ public class MhashModule extends AbstractQuercusModule {
     }
 
     /**
-     * Create a MessageDigest using the javaName (and javaProvider, if not null).
+     * Create a MessageDigest using
+     * the javaName (and javaProvider, if not null).
      */
     public MessageDigest createMessageDigest()
     {
@@ -292,10 +294,10 @@ public class MhashModule extends AbstractQuercusModule {
     public String toString()
     {
       return
-        "MhashAlgorithm[name=" + _name +
-        " java-name=" + _javaName +
-        " java-provider=" + _javaProvider +
-        "]";
+        "MhashAlgorithm[name=" + _name
+            + " java-name=" + _javaName 
+            + " java-provider=" + _javaProvider
+            + "]";
     }
   }
 }

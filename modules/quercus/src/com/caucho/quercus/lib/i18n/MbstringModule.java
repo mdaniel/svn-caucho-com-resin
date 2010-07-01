@@ -156,7 +156,8 @@ public class MbstringModule
     }
     
     if (unicodeStr == null) {
-      log.log(Level.FINE, L.l("unsupported character encoding {0}", fromEncodings));
+      log.log(Level.FINE,
+          L.l("unsupported character encoding {0}", fromEncodings));
       env.warning(L.l("unsupported character encoding {0}", fromEncodings));
       return str;
     }

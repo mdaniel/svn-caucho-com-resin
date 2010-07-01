@@ -112,7 +112,9 @@ public class BcmathModule extends AbstractQuercusModule {
    * the result, the default is the value of a previous call to {@link #bcscale}
    * or the value of the ini variable "bcmath.scale".
    */
-  public static String bcadd(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  public static String bcadd(Env env,
+                             Value value1,
+                             Value value2, @Optional("-1") int scale)
   {
     scale = getScale(env, scale);
 
@@ -134,7 +136,9 @@ public class BcmathModule extends AbstractQuercusModule {
    * comparing the values, the default is the value of a previous call to
    * {@link #bcscale} or the value of the ini variable "bcmath.scale".
    */
-  public static int bccomp(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  public static int bccomp(Env env,
+                           Value value1,
+                           Value value2, @Optional("-1") int scale)
   {
     scale = getScale(env, scale);
 
@@ -156,7 +160,8 @@ public class BcmathModule extends AbstractQuercusModule {
    * the result, the default is the value of a previous call to {@link #bcscale}
    * or the value of the ini variable "bcmath.scale".
    */
-  public static String bcdiv(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  public static String bcdiv(Env env, Value value1,
+                             Value value2, @Optional("-1") int scale)
   {
     scale = getScale(env, scale);
 
@@ -217,7 +222,8 @@ public class BcmathModule extends AbstractQuercusModule {
    * the result, the default is the value of a previous call to {@link #bcscale}
    * or the value of the ini variable "bcmath.scale".
    */
-  public static String bcmul(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  public static String bcmul(Env env, Value value1,
+                             Value value2, @Optional("-1") int scale)
   {
     scale = getScale(env, scale);
 
@@ -310,8 +316,9 @@ public class BcmathModule extends AbstractQuercusModule {
    *
    * exp must be a whole number. Negative exp is supported.
    *
-   * The optional scale indicates the number of decimal digits to include in
-   * the pow calculation, the default is the value of a previous call to {@link #bcscale}
+   * The optional scale indicates the number of decimal digits
+   * to include in the pow calculation, the default is the value
+   * of a previous call to {@link #bcscale}
    * or the value of the ini variable "bcmath.scale".
    */
   public static String bcpowmod(Env env,
@@ -446,7 +453,8 @@ public class BcmathModule extends AbstractQuercusModule {
    * the result, the default is the value of a previous call to {@link #bcscale}
    * or the value of the ini variable "bcmath.scale".
    */
-  public static String bcsub(Env env, Value value1, Value value2, @Optional("-1") int scale)
+  public static String bcsub(Env env, Value value1,
+                             Value value2, @Optional("-1") int scale)
   {
     scale = getScale(env, scale);
 
@@ -460,5 +468,6 @@ public class BcmathModule extends AbstractQuercusModule {
     return bd.toPlainString();
   }
 
-  public static final IniDefinition INI_BCMATH_SCALE = _iniDefinitions.add("bcmath.scale", 0, PHP_INI_ALL);
+  public static final IniDefinition INI_BCMATH_SCALE = _iniDefinitions.add(
+      "bcmath.scale", 0, PHP_INI_ALL);
 }

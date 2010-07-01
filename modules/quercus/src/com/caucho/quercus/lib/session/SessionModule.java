@@ -78,12 +78,14 @@ public class SessionModule extends AbstractQuercusModule
    * cache related headers that are sent as a result of a call to
    * {@link #session_start(Env)}.
    *
-   * If the optional parameter is not supplied, this function simply returns the existing value.
+   * If the optional parameter is not supplied, this function
+   * simply returns the existing value.
    * If the optional parameter is supplied, the returned value
    * is the old value that was set before the new value is applied.
    *
    * Valid values are "nocache" (the default), "private", "private_no_expire",
-   * and "public". If a value other than these values is supplied, then a warning is produced
+   * and "public". If a value other than these values is supplied,
+   * then a warning is produced
    * and no cache related headers will be sent to the client.
    */
   public Value session_cache_limiter(Env env, @Optional Value newValue)
@@ -238,9 +240,10 @@ public class SessionModule extends AbstractQuercusModule
   /**
    * Regenerates the session id.
    * 
-   * This function first creates a new session id.  The old session values are
-   * migrated to this new session.  Then a new session cookie is sent (XXX: send
-   * only if URL rewriting is off?).  Changing the session ID should be transparent.
+   * This function first creates a new session id.  The old session
+   * values are migrated to this new session.  Then a new session cookie
+   * is sent (XXX: send only if URL rewriting is off?).  Changing the
+   * session ID should be transparent. 
    * Therefore, session callbacks should not be called.
    */
   public static boolean session_regenerate_id(Env env,
@@ -468,7 +471,9 @@ public class SessionModule extends AbstractQuercusModule
     if (response == null) {
     }
     else if (response.isCommitted())
-      env.warning(L.l("cannot send session cache limiter headers because response is committed"));
+      env.warning(
+          L.l("cannot send session cache limiter headers "
+              + "because response is committed"));
     else {
       Value cacheLimiterValue = env.getIni("session.cache_limiter");
       String cacheLimiter = String.valueOf(cacheLimiterValue);
@@ -482,23 +487,31 @@ public class SessionModule extends AbstractQuercusModule
 
       if ("nocache".equals(cacheLimiter)) {
         response.setHeader("Expires", "Thu, 19 Nov 1981 08:52:00 GMT");
-        response.setHeader("Cache-Control", "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
+        response.setHeader(
+            "Cache-Control",
+            "no-store, no-cache, must-revalidate, post-check=0, pre-check=0");
         response.setHeader("Pragma", "no-cache");
       }
       else if ("private".equals(cacheLimiter)) {
-        response.setHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setHeader("Cache-Control", "private, max-age="
+            + cacheExpire + ", pre-check=" + cacheExpire);
       }
       else if ("private_no_expire".equals(cacheLimiter)) {
-        response.setHeader("Cache-Control", "private, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setHeader("Cache-Control", "private, max-age="
+            + cacheExpire + ", pre-check=" + cacheExpire);
       }
       else if ("public".equals(cacheLimiter)) {
-        response.setHeader("Cache-Control", "public, max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        response.setHeader(
+            "Cache-Control", "public, max-age=" + cacheExpire
+                + ", pre-check=" + cacheExpire);
       }
       else if ("none".equals(cacheLimiter)) {
       }
       else {
         // php/1k16
-        //response.setHeader("Cache-Control", cacheLimiter + ", max-age=" + cacheExpire + ", pre-check=" + cacheExpire);
+        //response.setHeader(
+        // "Cache-Control", cacheLimiter + ", max-age=" + cacheExpire
+        // + ", pre-check=" + cacheExpire);
       }
     }
 
@@ -536,7 +549,8 @@ public class SessionModule extends AbstractQuercusModule
       cookie.setVersion(1);
 
     if (response.isCommitted()) {
-      env.warning(L.l("cannot send session cookie because response is committed"));
+      env.warning(
+          L.l("cannot send session cookie because response is committed"));
     }
     else {
       Value path = env.getIni("session.cookie_path");
@@ -671,5 +685,7 @@ public class SessionModule extends AbstractQuercusModule
   static final IniDefinition INI_SESSION_HASH_BITS_PER_CHARACTER
     = _iniDefinitions.add("session.hash_bits_per_character", 4, PHP_INI_ALL);
   static final IniDefinition INI_URL_REWRITER_TAGS
-    = _iniDefinitions.add("url_rewriter.tags", "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL);
+    = _iniDefinitions.add(
+      "url_rewriter.tags",
+      "a=href,area=href,frame=src,form=,fieldset=", PHP_INI_ALL);
 }

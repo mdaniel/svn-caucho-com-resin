@@ -325,7 +325,8 @@ public class XmlModule extends AbstractQuercusModule {
     if (parser == null)
       return false;
 
-    return parser.xml_set_element_handler(env, startElementHandler, endElementHandler);
+    return parser.xml_set_element_handler(env,
+        startElementHandler, endElementHandler);
   }
 
   /**
@@ -353,14 +354,15 @@ public class XmlModule extends AbstractQuercusModule {
    * @param startNamespaceDeclHandler
    * @return false if parser == null
    */
-  public boolean xml_set_start_namespace_decl_handler(Env env,
-                                                      @NotNull Xml parser,
-                                                      @NotNull Value startNamespaceDeclHandler)
-  {
+  public boolean xml_set_start_namespace_decl_handler(
+      Env env,
+      @NotNull Xml parser,
+      @NotNull Value startNamespaceDeclHandler) {
     if (parser == null)
       return false;
 
-    return parser.xml_set_start_namespace_decl_handler(env, startNamespaceDeclHandler);
+    return parser.xml_set_start_namespace_decl_handler(
+        env, startNamespaceDeclHandler);
   }
 
   /**

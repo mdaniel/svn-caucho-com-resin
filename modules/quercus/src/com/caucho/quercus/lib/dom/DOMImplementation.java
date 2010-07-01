@@ -47,7 +47,8 @@ public class DOMImplementation
 {
   private static L10N L = new L10N(DOMImplementation.class);
 
-  private final IdentityHashMap<Object, Object> _wrapperMap = new IdentityHashMap<Object, Object>();
+  private final IdentityHashMap<Object, Object> _wrapperMap =
+      new IdentityHashMap<Object, Object>();
   private final DOMFactory _factory;
 
   final org.w3c.dom.DOMImplementation _delegate;
@@ -103,11 +104,11 @@ public class DOMImplementation
   }
 
   @ReturnNullAsFalse
-  static public DOMDocumentType createDocumentType(Env env,
-                                                   @NotNull String qualifiedName,
-                                                   @Optional String publicId,
-                                                   @Optional String systemId)
-  {
+  static public DOMDocumentType createDocumentType(
+      Env env,
+      @NotNull String qualifiedName,
+      @Optional String publicId,
+      @Optional String systemId) {
     if (qualifiedName == null)
       return null;
 
@@ -301,7 +302,8 @@ public class DOMImplementation
         else if (obj instanceof TypeInfo)
           wrapper = createWrapper((TypeInfo) obj);
         else
-          throw new UnimplementedException(L.l("cannot wrap element of type {0}", obj.getClass().getName()));
+          throw new UnimplementedException(
+              L.l("cannot wrap element of type {0}", obj.getClass().getName()));
 
         _wrapperMap.put(obj, wrapper);
       }

@@ -278,7 +278,8 @@ public class RegexpModule
     throws IllegalRegexpException
   {
     if (regexpValue.length() < 2) {
-      throw new QuercusException(L.l("Regexp pattern must have opening and closing delimiters"));
+      throw new QuercusException(
+          L.l("Regexp pattern must have opening and closing delimiters"));
     }
 
     RegexpCacheItem cacheItem = _regexpCache.get(regexpValue);
@@ -663,7 +664,8 @@ public class RegexpModule
     }
     else {
       if ((flags & PREG_SET_ORDER) != 0) {
-        env.warning((L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
+        env.warning((
+            L.l("Cannot combine PREG_PATTER_ORDER and PREG_SET_ORDER")));
         return BooleanValue.FALSE;
       }
     }
@@ -1452,7 +1454,8 @@ public class RegexpModule
                                             @Optional @Reference Value count)
   {
     if (fun == null) {
-      env.warning(L.l("callable argument can't be null in preg_replace_callback"));
+      env.warning(
+          L.l("callable argument can't be null in preg_replace_callback"));
       return subject;
     }
 

@@ -767,7 +767,8 @@ class RegexpNode {
     @Override
     public String toString()
     {
-      return "CharUngreedyLoop[" + _min + ", " + _max + ", " + _node + ", " + _next + "]";
+      return "CharUngreedyLoop[" + _min + ", "
+          + _max + ", " + _node + ", " + _next + "]";
     }
   }
 
@@ -1980,7 +1981,8 @@ class RegexpNode {
     @Override
     public String toString()
     {
-      return "PossessiveLoop[" + _min + ", " + _max + ", " + _node + ", " + _next + "]";
+      return "PossessiveLoop[" + _min + ", "
+          + _max + ", " + _node + ", " + _next + "]";
     }
   }
 
@@ -2580,7 +2582,8 @@ class RegexpNode {
 
         RegexpNode head = new StringNode(_buffer, _length - 1);
 
-        return head.concat(new CharNode(ch).createLoopUngreedy(parser, min, max));
+        return head.concat(
+            new CharNode(ch).createLoopUngreedy(parser, min, max));
       }
     }
 

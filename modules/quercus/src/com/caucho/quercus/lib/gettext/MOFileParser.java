@@ -221,16 +221,16 @@ class MOFileParser extends GettextParser
       return -1;
 
     if (_isLittleEndian) {
-      return (_tmpBuf[0] & 0xff) |
-              (_tmpBuf[1] & 0xff) << 8 |
-              (_tmpBuf[2] & 0xff) << 16 |
-              _tmpBuf[3] << 24;
+      return (_tmpBuf[0] & 0xff)
+          | (_tmpBuf[1] & 0xff) << 8
+          | (_tmpBuf[2] & 0xff) << 16
+          | _tmpBuf[3] << 24;
     }
     else {
-      return _tmpBuf[0] << 24 |
-              (_tmpBuf[1] & 0xff) << 16 |
-              (_tmpBuf[2] & 0xff) << 8 |
-              (_tmpBuf[3] & 0xff);
+      return _tmpBuf[0] << 24
+          | (_tmpBuf[1] & 0xff) << 16
+          | (_tmpBuf[2] & 0xff) << 8
+          | (_tmpBuf[3] & 0xff);
     }
   }
 
